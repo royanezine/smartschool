@@ -1,6 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useSyncExternalStore,
+} from "react";
 
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
@@ -10,13 +16,23 @@ import {
   Pencil,
   Trash2,
   ChevronRight,
+  Link2,
   X,
   Search,
   RefreshCw,
+  CheckCircle2,
 } from "lucide-react";
+
+import TautanPendaftaranModal from "@/app/components/spmb/TautanPendaftaranModal";
+
+import {
+  hasPermission,
+  subscribeAuth,
+} from "@/lib/auth";
 
 import {
   getJalurPpdb,
+  getJalurPpdbById,
   createJalurPpdb,
   updateJalurPpdb,
   deleteJalurPpdb,
@@ -82,6 +98,10 @@ function formatNumber(n) {
   return Number(n || 0).toLocaleString("id-ID");
 }
 
+const NAMA_MIN = 2;
+const NAMA_MAX = 50;
+const DESKRIPSI_MAX = 500;
+
 function emptyForm() {
   return {
     id: null,
@@ -92,6 +112,78 @@ function emptyForm() {
     tanggalMulai: "",
     tanggalSelesai: "",
   };
+}
+
+/**
+ * Memvalidasi form sesuai kontrak Backend
+ * (Backend/src/validations/jalurPpdb.validation.ts dan controller jalur PPDB).
+ */
+function validateJalurForm(form) {
+  const nama = String(form.nama || "").trim();
+
+  if (nama.length < NAMA_MIN) {
+    return `Nama jalur minimal ${NAMA_MIN} karakter.`;
+  }
+
+  if (nama.length > NAMA_MAX) {
+    return `Nama jalur maksimal ${NAMA_MAX} karakter.`;
+  }
+
+  if (String(form.deskripsi || "").trim().length > DESKRIPSI_MAX) {
+    return `Deskripsi maksimal ${DESKRIPSI_MAX} karakter.`;
+  }
+
+  if (form.kuota === "" || form.kuota === null) {
+    return "Kuota wajib diisi.";
+  }
+
+  const kuota = Number(form.kuota);
+
+  if (!Number.isFinite(kuota) || !Number.isInteger(kuota) || kuota <= 0) {
+    return "Kuota harus berupa bilangan bulat lebih dari 0.";
+  }
+
+  if (form.tanggalMulai && Number.isNaN(new Date(form.tanggalMulai).getTime())) {
+    return "Tanggal mulai tidak valid.";
+  }
+
+  if (
+    form.tanggalSelesai &&
+    Number.isNaN(new Date(form.tanggalSelesai).getTime())
+  ) {
+    return "Tanggal selesai tidak valid.";
+  }
+
+  if (
+    form.tanggalMulai &&
+    form.tanggalSelesai &&
+    new Date(form.tanggalSelesai) < new Date(form.tanggalMulai)
+  ) {
+    return "Tanggal selesai tidak boleh sebelum tanggal mulai.";
+  }
+
+  return "";
+}
+
+const AKSES_DITOLAK_VIEW =
+  "Akses ditolak: akun ini tidak memiliki izin ppdb.view untuk melihat jalur PPDB.";
+
+/**
+ * Snapshot permission dari token sesi. Dipakai dengan useSyncExternalStore
+ * agar perubahan sesi (login/logout/akun lain) langsung tercermin tanpa
+ * memanggil setState di dalam effect.
+ */
+function getPermissionSnapshot() {
+  return JSON.stringify({
+    view: hasPermission("ppdb.view"),
+    create: hasPermission("ppdb.create"),
+    update: hasPermission("ppdb.update"),
+    delete: hasPermission("ppdb.delete"),
+  });
+}
+
+function getServerPermissionSnapshot() {
+  return "null";
 }
 
 function normalizeStatus(status) {
@@ -170,6 +262,9 @@ export default function JalurPPDBPage() {
   const [deleteTarget, setDeleteTarget] =
     useState(null);
 
+  const [linkTarget, setLinkTarget] =
+    useState(null);
+
   const [loading, setLoading] =
     useState(true);
 
@@ -181,6 +276,38 @@ export default function JalurPPDBPage() {
 
   const [error, setError] =
     useState("");
+
+  const [successMessage, setSuccessMessage] =
+    useState("");
+
+  /*
+   * Permission dibaca dari klaim token sesi melalui mekanisme Frontend
+   * yang sudah ada (lib/auth). Backend tetap menjadi penentu akhir.
+   * Snapshot server bernilai "null" sehingga render awal menampilkan
+   * status pemeriksaan, bukan pesan akses ditolak.
+   */
+  const permissionSnapshot = useSyncExternalStore(
+    subscribeAuth,
+    getPermissionSnapshot,
+    getServerPermissionSnapshot
+  );
+
+  const izin = useMemo(() => {
+    try {
+      const parsed = JSON.parse(permissionSnapshot);
+
+      return parsed && typeof parsed === "object" ? parsed : null;
+    } catch {
+      return null;
+    }
+  }, [permissionSnapshot]);
+
+  const checkingAccess = izin === null;
+  const canView = Boolean(izin?.view);
+  const displayedError =
+    error || (izin && !izin.view ? AKSES_DITOLAK_VIEW : "");
+  const summaryLoading =
+    checkingAccess || (loading && canView);
 
   // =========================================================
   // LOAD DATA
@@ -195,16 +322,24 @@ export default function JalurPPDBPage() {
         const response =
           await getJalurPpdb();
 
+        if (response?.success === false) {
+          throw new Error(
+            response?.message ||
+              "Gagal mengambil data jalur PPDB"
+          );
+        }
+
         const data =
           response?.data ??
           response?.result ??
           [];
 
-        setJalurList(
-          Array.isArray(data)
-            ? data
-            : []
-        );
+        const rows =
+          Array.isArray(data) ? data : [];
+
+        setJalurList(rows);
+
+        return rows;
       } catch (err) {
         console.error(
           "Error fetch jalur PPDB:",
@@ -217,6 +352,8 @@ export default function JalurPPDBPage() {
         );
 
         setJalurList([]);
+
+        return [];
       } finally {
         setLoading(false);
       }
@@ -225,8 +362,16 @@ export default function JalurPPDBPage() {
   );
 
   useEffect(() => {
-    fetchJalur();
-  }, [fetchJalur]);
+    if (!canView) {
+      return;
+    }
+
+    // Dijalankan asinkron agar tidak memicu setState langsung di dalam
+    // badan effect (mengikuti aturan react-hooks).
+    Promise.resolve().then(() => {
+      fetchJalur();
+    });
+  }, [canView, fetchJalur]);
 
   // =========================================================
   // FILTER
@@ -286,14 +431,21 @@ export default function JalurPPDBPage() {
    * Backend getJalurPpdb saat ini belum
    * mengirim jumlah pendaftar per jalur.
    */
-  const totalPendaftar = 0;
 
   // =========================================================
   // TAMBAH
   // =========================================================
 
   const openTambah = () => {
+    if (!izin?.create) {
+      setError(
+        "Akses ditolak: akun ini tidak memiliki izin ppdb.create untuk menambah jalur PPDB."
+      );
+      return;
+    }
+
     setError("");
+    setSuccessMessage("");
     setForm(emptyForm());
     setShowModal(true);
   };
@@ -303,7 +455,15 @@ export default function JalurPPDBPage() {
   // =========================================================
 
   const openEdit = (j) => {
+    if (!izin?.update) {
+      setError(
+        "Akses ditolak: akun ini tidak memiliki izin ppdb.update untuk mengubah jalur PPDB."
+      );
+      return;
+    }
+
     setError("");
+    setSuccessMessage("");
 
     setForm({
       id: j.id,
@@ -331,49 +491,111 @@ export default function JalurPPDBPage() {
   };
 
   // =========================================================
+  // TAUTAN PENDAFTARAN
+  // =========================================================
+
+  /*
+   * Tautan dibangun dari data jalur yang benar-benar dikembalikan
+   * Backend. Daftar jalur sudah memuat sekolahId, tetapi detail jalur
+   * dimuat ulang saat modal dibuka agar tautan tidak memakai data
+   * lama/terpotong dan sekolahId selalu berasal dari server.
+   */
+  const openTautan = (jalur) => {
+    if (!jalur?.id) {
+      setError(
+        "Jalur tidak memiliki ID dari Backend sehingga tautan tidak dapat dibuat."
+      );
+
+      return;
+    }
+
+    setError("");
+    setSuccessMessage("");
+    setLinkTarget(jalur);
+
+    getJalurPpdbById(jalur.id)
+      .then((response) => {
+        const detail = response?.data;
+
+        if (!detail?.id) {
+          return;
+        }
+
+        setLinkTarget((current) => {
+          if (
+            !current ||
+            String(current.id) !==
+              String(detail.id)
+          ) {
+            return current;
+          }
+
+          return {
+            ...current,
+            ...detail,
+            sekolahId:
+              detail.sekolahId ||
+              current.sekolahId,
+          };
+        });
+      })
+      .catch((err) => {
+        console.error(
+          "Error memuat detail jalur PPDB:",
+          err
+        );
+
+        if (!jalur.sekolahId) {
+          setError(
+            err?.message ||
+              "Detail jalur tidak dapat dimuat sehingga sekolahId tidak tersedia."
+          );
+        }
+      });
+  };
+
+  // =========================================================
   // SUBMIT
   // =========================================================
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!form.nama.trim()) {
+    if (!izin?.view) {
       setError(
-        "Nama jalur wajib diisi."
+        "Akses ditolak: akun ini tidak memiliki izin ppdb.view."
       );
       return;
     }
 
     if (
-      form.kuota === "" ||
-      Number(form.kuota) <= 0
+      (form.id && !izin.update) ||
+      (!form.id && !izin.create)
     ) {
       setError(
-        "Kuota harus lebih dari 0."
+        form.id
+          ? "Akses ditolak: akun ini tidak memiliki izin ppdb.update untuk mengubah jalur PPDB."
+          : "Akses ditolak: akun ini tidak memiliki izin ppdb.create untuk menambah jalur PPDB."
       );
       return;
     }
 
-    if (
-      form.tanggalMulai &&
-      form.tanggalSelesai &&
-      new Date(
-        form.tanggalSelesai
-      ) <
-        new Date(
-          form.tanggalMulai
-        )
-    ) {
-      setError(
-        "Tanggal selesai tidak boleh sebelum tanggal mulai."
-      );
+    const validationError = validateJalurForm(form);
+
+    if (validationError) {
+      setError(validationError);
       return;
     }
 
     try {
       setSaving(true);
       setError("");
+      setSuccessMessage("");
 
+      // Payload mengikuti kontrak controller Backend:
+      // nama, deskripsi, kuota, tanggalMulai, tanggalSelesai, status.
+      // sekolahId TIDAK dikirim karena Backend mengambilnya dari token
+      // (tenant aktif), bukan dari body.
       const payload = {
         nama: form.nama.trim(),
         deskripsi:
@@ -391,21 +613,50 @@ export default function JalurPPDBPage() {
         status: form.status,
       };
 
-      if (form.id) {
-        await updateJalurPpdb(
-          form.id,
-          payload
-        );
-      } else {
-        await createJalurPpdb(
-          payload
+      const isEdit = Boolean(form.id);
+
+      const response = isEdit
+        ? await updateJalurPpdb(
+            form.id,
+            payload
+          )
+        : await createJalurPpdb(
+            payload
+          );
+
+      if (response?.success === false) {
+        throw new Error(
+          response?.message ||
+            "Gagal menyimpan jalur PPDB"
         );
       }
+
+      const savedId = response?.data?.id || form.id;
 
       setShowModal(false);
       setForm(emptyForm());
 
-      await fetchJalur();
+      // Pastikan data yang baru disimpan benar-benar muncul kembali
+      // dari GET /api/jalur-ppdb, bukan hanya dari respons POST/PUT.
+      const rows = await fetchJalur();
+
+      if (
+        savedId &&
+        !rows.some(
+          (row) => String(row.id) === String(savedId)
+        )
+      ) {
+        setError(
+          "Jalur tersimpan, tetapi tidak muncul pada daftar hasil GET /api/jalur-ppdb. Muat ulang halaman untuk memeriksa data."
+        );
+        return;
+      }
+
+      setSuccessMessage(
+        isEdit
+          ? `Jalur "${payload.nama}" berhasil diperbarui.`
+          : `Jalur "${payload.nama}" berhasil dibuat dan sudah muncul pada daftar jalur.`
+      );
     } catch (err) {
       console.error(
         "Error simpan jalur PPDB:",
@@ -430,17 +681,39 @@ export default function JalurPPDBPage() {
       if (!deleteTarget?.id)
         return;
 
+      if (!izin?.delete) {
+        setDeleteTarget(null);
+        setError(
+          "Akses ditolak: akun ini tidak memiliki izin ppdb.delete untuk menghapus jalur PPDB."
+        );
+        return;
+      }
+
+      const nama = deleteTarget.nama || "Jalur PPDB";
+
       try {
         setDeleting(true);
         setError("");
+        setSuccessMessage("");
 
-        await deleteJalurPpdb(
+        const response = await deleteJalurPpdb(
           deleteTarget.id
         );
+
+        if (response?.success === false) {
+          throw new Error(
+            response?.message ||
+              "Gagal menghapus jalur PPDB"
+          );
+        }
 
         setDeleteTarget(null);
 
         await fetchJalur();
+
+        setSuccessMessage(
+          `${nama} berhasil dihapus dari daftar jalur.`
+        );
       } catch (err) {
         console.error(
           "Error hapus jalur PPDB:",
@@ -473,8 +746,8 @@ export default function JalurPPDBPage() {
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
       <Sidebar
-        role="adminPPDB"
-        active="jalur"
+        role="admin"
+        active="spmb"
         setActive={() => {}}
         collapsed={isCollapsed}
         setCollapsed={
@@ -517,16 +790,40 @@ export default function JalurPPDBPage() {
                 ERROR
             ================================================= */}
 
-            {error && (
+            {displayedError && (
               <div className="flex items-center justify-between gap-3 rounded-lg border border-[color-mix(in_srgb,var(--color-danger)_22%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_8%,transparent)] px-4 py-3 text-xs text-[var(--color-danger)]">
                 <span>
-                  {error}
+                  {displayedError}
+                </span>
+
+                {error && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setError("")
+                    }
+                    className="opacity-70 transition hover:opacity-100"
+                  >
+                    <X size={14} />
+                  </button>
+                )}
+              </div>
+            )}
+
+            {successMessage && (
+              <div className="flex items-center justify-between gap-3 rounded-lg border border-[color-mix(in_srgb,var(--color-success)_24%,transparent)] bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)] px-4 py-3 text-xs text-[var(--color-success)]">
+                <span className="flex items-center gap-2">
+                  <CheckCircle2
+                    size={14}
+                    className="shrink-0"
+                  />
+                  {successMessage}
                 </span>
 
                 <button
                   type="button"
                   onClick={() =>
-                    setError("")
+                    setSuccessMessage("")
                   }
                   className="opacity-70 transition hover:opacity-100"
                 >
@@ -543,7 +840,7 @@ export default function JalurPPDBPage() {
               <SummaryCard
                 title="Total Jalur"
                 value={
-                  loading
+                  summaryLoading
                     ? "..."
                     : jalurList.length
                 }
@@ -552,7 +849,7 @@ export default function JalurPPDBPage() {
               <SummaryCard
                 title="Jalur Aktif"
                 value={
-                  loading
+                  summaryLoading
                     ? "..."
                     : aktifCount
                 }
@@ -562,7 +859,7 @@ export default function JalurPPDBPage() {
               <SummaryCard
                 title="Total Kuota"
                 value={
-                  loading
+                  summaryLoading
                     ? "..."
                     : formatNumber(
                         totalKuota
@@ -571,16 +868,10 @@ export default function JalurPPDBPage() {
               />
 
               <SummaryCard
-                title="Kuota Terisi"
-                value={`${totalKuota > 0
-                  ? Math.round(
-                      (totalPendaftar /
-                        totalKuota) *
-                        100
-                    )
-                  : 0}%`}
+                title="Pendaftar"
+                value="-"
                 soft
-                description="Menunggu data pendaftar"
+                description="Data pendaftar belum tersedia dari Backend"
               />
             </section>
 
@@ -630,17 +921,18 @@ export default function JalurPPDBPage() {
                 <div className="flex items-center gap-3">
                   <button
                     type="button"
-                    onClick={
-                      fetchJalur
-                    }
-                    disabled={loading}
+                    onClick={() => {
+                      setSuccessMessage("");
+                      fetchJalur();
+                    }}
+                    disabled={loading || !izin?.view}
                     className={`flex items-center justify-center rounded-md border ${themeNeutralBorder} theme-text-muted p-2 transition-colors ${themeNeutralHover} disabled:opacity-50`}
                     title="Refresh"
                   >
                     <RefreshCw
                       size={14}
                       className={
-                        loading
+                        loading && canView
                           ? "animate-spin"
                           : ""
                       }
@@ -672,7 +964,13 @@ export default function JalurPPDBPage() {
                     onClick={
                       openTambah
                     }
-                    className={`${themePrimaryGradient} flex items-center gap-1.5 rounded-md px-3.5 py-2 text-xs font-medium text-[var(--color-card)] transition hover:brightness-95`}
+                    disabled={!izin?.create}
+                    title={
+                      izin?.create
+                        ? "Tambah jalur PPDB"
+                        : "Butuh izin ppdb.create"
+                    }
+                    className={`${themePrimaryGradient} flex items-center gap-1.5 rounded-md px-3.5 py-2 text-xs font-medium text-[var(--color-card)] transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50`}
                   >
                     <Plus size={14} />
                     Tambah Jalur
@@ -688,7 +986,7 @@ export default function JalurPPDBPage() {
 
                 {/* LOADING */}
 
-                {loading && (
+                {(checkingAccess || (loading && canView)) && (
                   <>
                     {[1, 2, 3, 4].map(
                       (item) => (
@@ -719,7 +1017,9 @@ export default function JalurPPDBPage() {
 
                 {/* EMPTY */}
 
-                {!loading &&
+                {!checkingAccess &&
+                  canView &&
+                  !loading &&
                   filtered.length ===
                     0 && (
                     <p className="theme-text-muted col-span-2 py-10 text-center text-sm">
@@ -733,36 +1033,15 @@ export default function JalurPPDBPage() {
 
                 {/* DATA */}
 
-                {!loading &&
+                {!checkingAccess &&
+                  canView &&
+                  !loading &&
                   filtered.map(
                     (j, index) => {
                       const color =
                         getColor(
                           index
                         );
-
-                      /*
-                       * Backend saat ini belum
-                       * mengirim jumlah pendaftar.
-                       */
-                      const pendaftar =
-                        0;
-
-                      const persen =
-                        Number(
-                          j.kuota
-                        ) > 0
-                          ? Math.min(
-                              100,
-                              Math.round(
-                                (pendaftar /
-                                  Number(
-                                    j.kuota
-                                  )) *
-                                  100
-                              )
-                            )
-                          : 0;
 
                       const status =
                         normalizeStatus(
@@ -833,28 +1112,18 @@ export default function JalurPPDBPage() {
 
                           {/* QUOTA */}
 
-                          <div className="mt-4 flex items-center gap-2">
-                            <div
-                              className={`h-1.5 flex-1 overflow-hidden rounded-full ${themeNeutralSurface}`}
-                            >
-                              <div
-                                className="h-full rounded-full transition-all"
-                                style={{
-                                  width: `${persen}%`,
-                                  backgroundColor:
-                                    color,
-                                }}
-                              />
-                            </div>
+                          <div
+                            className={`mt-4 flex items-center justify-between gap-2 border-t ${themeDivider} pt-3`}
+                          >
+                            <span className="theme-text-muted text-xs">
+                              Kuota
+                            </span>
 
                             <span className="theme-text-secondary whitespace-nowrap font-mono text-xs tabular-nums">
                               {formatNumber(
-                                pendaftar
-                              )}
-                              /
-                              {formatNumber(
                                 j.kuota
-                              )}
+                              )}{" "}
+                              siswa
                             </span>
                           </div>
 
@@ -866,11 +1135,28 @@ export default function JalurPPDBPage() {
                             <button
                               type="button"
                               onClick={() =>
+                                openTautan(j)
+                              }
+                              className={`theme-text-muted flex items-center gap-1 rounded-md px-2 py-1 text-xs transition-colors hover:bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)] hover:text-[var(--color-primary)]`}
+                            >
+                              <Link2 size={12} />
+                              Tautan
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() =>
                                 openEdit(
                                   j
                                 )
                               }
-                              className={`theme-text-muted flex items-center gap-1 rounded-md px-2 py-1 text-xs transition-colors hover:bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)] hover:text-[var(--color-primary)]`}
+                              disabled={!izin?.update}
+                              title={
+                                izin?.update
+                                  ? "Edit jalur"
+                                  : "Butuh izin ppdb.update"
+                              }
+                              className={`theme-text-muted flex items-center gap-1 rounded-md px-2 py-1 text-xs transition-colors hover:bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)] hover:text-[var(--color-primary)] disabled:cursor-not-allowed disabled:opacity-40`}
                             >
                               <Pencil
                                 size={12}
@@ -880,12 +1166,24 @@ export default function JalurPPDBPage() {
 
                             <button
                               type="button"
-                              onClick={() =>
-                                setDeleteTarget(
-                                  j
-                                )
+                              onClick={() => {
+                                if (!izin?.delete) {
+                                  setError(
+                                    "Akses ditolak: akun ini tidak memiliki izin ppdb.delete untuk menghapus jalur PPDB."
+                                  );
+                                  return;
+                                }
+
+                                setSuccessMessage("");
+                                setDeleteTarget(j);
+                              }}
+                              disabled={!izin?.delete}
+                              title={
+                                izin?.delete
+                                  ? "Hapus jalur"
+                                  : "Butuh izin ppdb.delete"
                               }
-                              className="theme-text-muted flex items-center gap-1 rounded-md px-2 py-1 text-xs transition-colors hover:bg-[color-mix(in_srgb,var(--color-danger)_9%,transparent)] hover:text-[var(--color-danger)]"
+                              className="theme-text-muted flex items-center gap-1 rounded-md px-2 py-1 text-xs transition-colors hover:bg-[color-mix(in_srgb,var(--color-danger)_9%,transparent)] hover:text-[var(--color-danger)] disabled:cursor-not-allowed disabled:opacity-40"
                             >
                               <Trash2
                                 size={12}
@@ -975,10 +1273,16 @@ export default function JalurPPDBPage() {
                       })
                     }
                     placeholder="Contoh: Jalur Zonasi"
+                    maxLength={NAMA_MAX}
                     className={`theme-input theme-text w-full rounded-md border px-3 py-2 text-sm outline-none placeholder:text-[var(--color-text-placeholder)] ${themeFocus}`}
                     required
                     disabled={saving}
                   />
+
+                  <p className="theme-text-muted mt-1 text-[10px]">
+                    {form.nama.trim().length}/{NAMA_MAX} karakter
+                    (minimal {NAMA_MIN})
+                  </p>
                 </div>
 
                 {/* DESKRIPSI */}
@@ -1001,9 +1305,14 @@ export default function JalurPPDBPage() {
                     }
                     placeholder="Penjelasan singkat mengenai jalur ini"
                     rows={2}
+                    maxLength={DESKRIPSI_MAX}
                     className={`theme-input theme-text w-full resize-none rounded-md border px-3 py-2 text-sm outline-none placeholder:text-[var(--color-text-placeholder)] ${themeFocus}`}
                     disabled={saving}
                   />
+
+                  <p className="theme-text-muted mt-1 text-[10px]">
+                    {form.deskripsi.length}/{DESKRIPSI_MAX} karakter
+                  </p>
                 </div>
 
                 {/* KUOTA */}
@@ -1016,6 +1325,7 @@ export default function JalurPPDBPage() {
                   <input
                     type="number"
                     min="1"
+                    step="1"
                     value={form.kuota}
                     onChange={(e) =>
                       setForm({
@@ -1201,13 +1511,15 @@ export default function JalurPPDBPage() {
           </div>
         </div>
       )}
+
+      <TautanPendaftaranModal
+        open={Boolean(linkTarget)}
+        jalur={linkTarget}
+        onClose={() => setLinkTarget(null)}
+      />
     </div>
   );
 }
-
-// =========================================================
-// SUMMARY CARD
-// =========================================================
 
 function SummaryCard({
   title,

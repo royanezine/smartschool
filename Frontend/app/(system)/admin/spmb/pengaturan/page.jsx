@@ -1,95 +1,137 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
-
 import {
-  Settings2,
-  CalendarDays,
-  Users,
-  FileText,
-  GraduationCap,
-  ClipboardCheck,
-  Save,
+  AlertCircle,
+  ArrowLeft,
   CheckCircle2,
-  ChevronRight,
-  ToggleLeft,
-  ToggleRight,
+  FileCheck2,
+  Hash,
+  Loader2,
+  Save,
+  Settings2,
+  ShieldCheck,
 } from "lucide-react";
 
-// =========================================================
-// THEME HELPERS
-// =========================================================
+import {
+  getPengaturanSpmb,
+  updatePengaturanSpmb,
+} from "@/services/ppdb.service";
 
-const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
-
+const themePrimaryText = "text-[var(--color-primary)]";
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
-
-const themePrimarySoftBorder =
-  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
-
-const themePrimaryText =
-  "text-[var(--color-primary)]";
-
-const themePrimaryShadow =
-  "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
-
-const themeCardShadow =
-  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
-
-const themeNeutralSurface =
-  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
-
-const themeNeutralHover =
-  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
-
+const themePrimaryGradient =
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
 const themeNeutralBorder =
   "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
-
-const themeDivider =
-  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
-
-const themeSuccessSurface =
-  "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
-
-const themeSuccessBorder =
-  "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
-
-const themeWarningSurface =
-  "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]";
-
-const themeWarningBorder =
-  "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
-
+const themeNeutralSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+const themeCardShadow =
+  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-// =========================================================
-// PAGE
-// =========================================================
+const DEFAULT_FORM = {
+  statusPenerimaan: "buka",
+  prefixNomorPendaftaran: "PPDB",
+  verifikasiBerkasWajib: false,
+};
 
-export default function PengaturanSPMBPage() {
+export default function PengaturanSpmbPage() {
+  const router = useRouter();
+
   const [collapsed, setCollapsed] = useState(false);
+  const [form, setForm] = useState(DEFAULT_FORM);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
-  const [settings, setSettings] = useState({
-    pendaftaran: true,
-    verifikasi: true,
-    pembayaran: true,
-    autoNumber: true,
-    emailNotification: true,
-    whatsappNotification: false,
-  });
+  const loadPengaturan = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError("");
+      setSuccess("");
 
-  const toggle = (key) => {
-    setSettings((prev) => ({
-      ...prev,
-      [key]: !prev[key],
-    }));
-  };
+      const response = await getPengaturanSpmb();
+
+      setForm({
+        statusPenerimaan:
+          response?.data?.statusPenerimaan === "tutup"
+            ? "tutup"
+            : "buka",
+        prefixNomorPendaftaran:
+          response?.data?.prefixNomorPendaftaran || "PPDB",
+        verifikasiBerkasWajib:
+          Boolean(
+            response?.data?.verifikasiBerkasWajib
+          ),
+      });
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Gagal memuat pengaturan SPMB."
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    // Memuat pengaturan dari API saat halaman dibuka.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadPengaturan();
+  }, [loadPengaturan]);
+
+  async function simpan(event) {
+    event.preventDefault();
+
+    try {
+      setSaving(true);
+      setError("");
+      setSuccess("");
+
+      const response = await updatePengaturanSpmb({
+        statusPenerimaan: form.statusPenerimaan,
+        prefixNomorPendaftaran:
+          form.prefixNomorPendaftaran,
+        verifikasiBerkasWajib:
+          form.verifikasiBerkasWajib,
+      });
+
+      setForm({
+        statusPenerimaan:
+          response?.data?.statusPenerimaan === "tutup"
+            ? "tutup"
+            : "buka",
+        prefixNomorPendaftaran:
+          response?.data?.prefixNomorPendaftaran || "PPDB",
+        verifikasiBerkasWajib:
+          Boolean(
+            response?.data?.verifikasiBerkasWajib
+          ),
+      });
+
+      setSuccess(
+        response?.message ||
+          "Pengaturan SPMB berhasil disimpan."
+      );
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Gagal menyimpan pengaturan SPMB."
+      );
+    } finally {
+      setSaving(false);
+    }
+  }
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
@@ -104,7 +146,7 @@ export default function PengaturanSPMBPage() {
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <Header
           toggleSidebar={() =>
-            setCollapsed((v) => !v)
+            setCollapsed((value) => !value)
           }
           notifications={[]}
           user={{
@@ -114,531 +156,303 @@ export default function PengaturanSPMBPage() {
           }}
         />
 
-        <main className="min-h-0 flex-1 overflow-hidden">
-          <div className="flex h-full min-h-0 flex-col p-4 sm:p-5 lg:p-6">
-            {/* ================================================= */}
-            {/* HEADER */}
-            {/* ================================================= */}
+        <main className="min-h-0 flex-1 overflow-y-auto">
+          <div className="mx-auto w-full max-w-3xl p-4 sm:p-6 lg:p-8">
+            <button
+              type="button"
+              onClick={() =>
+                router.push("/admin/spmb")
+              }
+              className="mb-4 inline-flex items-center gap-2 text-xs font-semibold theme-text-secondary transition hover:text-[var(--color-primary)]"
+            >
+              <ArrowLeft size={15} />
+              Kembali ke SPMB
+            </button>
 
-            <div className="mb-5 flex shrink-0 items-center gap-3">
+            <div className="mb-6 flex items-start gap-3">
               <div
-                className={`flex h-10 w-10 items-center justify-center rounded-xl ${themePrimarySoft}`}
+                className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${themePrimarySoft} ${themePrimaryText}`}
               >
-                <Settings2
-                  size={20}
-                  className={themePrimaryText}
-                />
+                <Settings2 size={21} />
               </div>
 
               <div>
-                <h1 className="theme-text text-xl font-bold">
+                <h1 className="theme-text text-xl font-bold sm:text-2xl">
                   Pengaturan SPMB
                 </h1>
 
-                <p className="theme-text-muted text-xs">
-                  Kelola konfigurasi sistem penerimaan siswa baru
+                <p className="theme-text-secondary mt-1 text-sm leading-6">
+                  Konfigurasi disimpan ke tabel{" "}
+                  <code>pengaturan_sistem</code> milik
+                  sekolah Anda melalui{" "}
+                  <code>GET/POST /api/pengaturan</code>.
+                  Status integrasi: penyimpanan tersedia,
+                  tetapi alur PPDB/SPMB di Backend belum
+                  membaca kunci-kunci ini.
                 </p>
               </div>
             </div>
 
-            <div className="min-h-0 flex-1 overflow-auto">
-              <div className="grid gap-4 xl:grid-cols-3">
-                {/* ================================================= */}
-                {/* LEFT */}
-                {/* ================================================= */}
+            <div className="mb-4 flex items-start gap-3 rounded-xl border border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)] bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)] px-4 py-3">
+              <AlertCircle
+                size={18}
+                className="mt-0.5 shrink-0 text-[var(--color-warning)]"
+              />
 
-                <div className="space-y-4 xl:col-span-2">
-                  {/* PERIODE */}
+              <div>
+                <p className="text-xs font-semibold theme-text">
+                  Pengaturan belum diterapkan oleh alur PPDB
+                </p>
 
-                  <SettingSection
-                    icon={CalendarDays}
-                    title="Periode Pendaftaran"
-                    description="Tentukan periode utama penerimaan siswa baru."
-                  >
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      <Input
-                        label="Tanggal Mulai"
-                        type="date"
-                        value="2026-08-01"
-                      />
+                <p className="mt-0.5 text-xs leading-5 theme-text-secondary">
+                  Kunci <code>spmb_status_penerimaan</code>,{" "}
+                  <code>spmb_prefix_nomor_pendaftaran</code>, dan{" "}
+                  <code>spmb_verifikasi_berkas_wajib</code>{" "}
+                  tersimpan, tetapi controller PPDB di Backend
+                  saat ini belum membacanya. Perubahan di
+                  halaman ini tidak menutup pendaftaran,
+                  tidak mengubah prefix nomor, dan tidak
+                  memblokir kelulusan secara otomatis.
+                </p>
+              </div>
+            </div>
 
-                      <Input
-                        label="Tanggal Selesai"
-                        type="date"
-                        value="2026-10-31"
-                      />
-                    </div>
-                  </SettingSection>
+            {error && (
+              <div className="mb-4 flex items-start gap-3 rounded-xl border border-[color-mix(in_srgb,var(--color-danger)_24%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_9%,transparent)] px-4 py-3">
+                <AlertCircle
+                  size={18}
+                  className="mt-0.5 shrink-0 theme-danger"
+                />
 
-                  {/* KUOTA */}
+                <p className="text-xs theme-danger">
+                  {error}
+                </p>
+              </div>
+            )}
 
-                  <SettingSection
-                    icon={Users}
-                    title="Kuota Penerimaan"
-                    description="Atur kapasitas penerimaan siswa berdasarkan program."
-                  >
-                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                      <Input
-                        label="Total Kuota"
-                        value="400"
-                        suffix="siswa"
-                      />
+            {success && (
+              <div className="mb-4 flex items-start gap-3 rounded-xl border border-[color-mix(in_srgb,var(--color-success)_24%,transparent)] bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)] px-4 py-3">
+                <CheckCircle2
+                  size={18}
+                  className="mt-0.5 shrink-0 text-[var(--color-success)]"
+                />
 
-                      <Input
-                        label="IPA"
-                        value="150"
-                        suffix="siswa"
-                      />
+                <p className="text-xs text-[var(--color-success)]">
+                  {success}
+                </p>
+              </div>
+            )}
 
-                      <Input
-                        label="IPS"
-                        value="100"
-                        suffix="siswa"
-                      />
+            <form
+              onSubmit={simpan}
+              className={`theme-card ${themeNeutralBorder} overflow-hidden rounded-2xl border ${themeCardShadow}`}
+            >
+              {loading ? (
+                <div className="flex min-h-[320px] items-center justify-center">
+                  <div className="text-center">
+                    <Loader2
+                      size={26}
+                      className={`${themePrimaryText} mx-auto animate-spin`}
+                    />
 
-                      <Input
-                        label="Teknik"
-                        value="100"
-                        suffix="siswa"
-                      />
-
-                      <Input
-                        label="Lainnya"
-                        value="50"
-                        suffix="siswa"
-                      />
-                    </div>
-                  </SettingSection>
-
-                  {/* PERSYARATAN */}
-
-                  <SettingSection
-                    icon={FileText}
-                    title="Persyaratan Pendaftaran"
-                    description="Dokumen yang wajib dilengkapi oleh calon siswa."
-                  >
-                    <div className="space-y-2">
-                      {[
-                        "Kartu Keluarga",
-                        "Akta Kelahiran",
-                        "Ijazah / Surat Keterangan Lulus",
-                        "Kartu Indonesia Pintar",
-                        "Pas Foto",
-                        "Dokumen Pendukung Lainnya",
-                      ].map((item, index) => (
-                        <div
-                          key={item}
-                          className={`flex items-center justify-between rounded-lg border ${themeNeutralBorder} px-3 py-3 transition-colors ${themeNeutralHover}`}
-                        >
-                          <div className="flex items-center gap-3">
-                            <span
-                              className={`flex h-7 w-7 items-center justify-center rounded-md ${themePrimarySoft} text-[10px] font-bold ${themePrimaryText}`}
-                            >
-                              {index + 1}
-                            </span>
-
-                            <span className="theme-text text-xs font-medium">
-                              {item}
-                            </span>
-                          </div>
-
-                          <CheckCircle2
-                            size={16}
-                            className="text-[var(--color-success)]"
-                          />
-                        </div>
-                      ))}
-                    </div>
-
-                    <button
-                      type="button"
-                      className={`mt-3 inline-flex items-center gap-1 text-xs font-semibold ${themePrimaryText} transition-opacity hover:opacity-80`}
-                    >
-                      Kelola Persyaratan
-                      <ChevronRight size={14} />
-                    </button>
-                  </SettingSection>
-
-                  {/* JURUSAN */}
-
-                  <SettingSection
-                    icon={GraduationCap}
-                    title="Program / Jurusan"
-                    description="Program pendidikan yang dapat dipilih calon siswa."
-                  >
-                    <div className="space-y-2">
-                      <Program
-                        name="IPA"
-                        quota="150 siswa"
-                        active
-                      />
-
-                      <Program
-                        name="IPS"
-                        quota="100 siswa"
-                        active
-                      />
-
-                      <Program
-                        name="Teknik"
-                        quota="100 siswa"
-                        active
-                      />
-                    </div>
-
-                    <button
-                      type="button"
-                      className={`mt-3 inline-flex items-center gap-1 text-xs font-semibold ${themePrimaryText} transition-opacity hover:opacity-80`}
-                    >
-                      Kelola Program
-                      <ChevronRight size={14} />
-                    </button>
-                  </SettingSection>
+                    <p className="theme-text-muted mt-3 text-xs font-medium">
+                      Memuat pengaturan SPMB...
+                    </p>
+                  </div>
                 </div>
-
-                {/* ================================================= */}
-                {/* RIGHT */}
-                {/* ================================================= */}
-
-                <div className="space-y-4">
-                  {/* STATUS */}
-
-                  <div
-                    className={`theme-card rounded-xl border ${themePrimarySoftBorder} p-5 ${themeCardShadow}`}
-                  >
-                    <div className="flex items-center gap-3">
+              ) : (
+                <div className="divide-y divide-[color-mix(in_srgb,var(--color-text)_8%,transparent)]">
+                  {/* STATUS PENERIMAAN */}
+                  <div className="p-5 sm:p-6">
+                    <div className="flex items-start gap-3">
                       <div
-                        className={`flex h-10 w-10 items-center justify-center rounded-lg ${themePrimarySoft}`}
+                        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${themePrimarySoft} ${themePrimaryText}`}
                       >
-                        <ClipboardCheck
-                          size={18}
-                          className={themePrimaryText}
-                        />
+                        <ShieldCheck size={17} />
                       </div>
 
-                      <div>
-                        <h2 className="theme-text text-sm font-bold">
-                          Status SPMB
-                        </h2>
-
-                        <p className="theme-text-muted text-[10px]">
-                          Status sistem saat ini
+                      <div className="min-w-0 flex-1">
+                        <p className="theme-text text-sm font-bold">
+                          Status Penerimaan
                         </p>
+
+                        <p className="theme-text-secondary mt-1 text-xs leading-5">
+                          Nilai ini hanya tersimpan sebagai
+                          konfigurasi. Backend PPDB saat ini
+                          belum membaca kunci ini, sehingga{" "}
+                          <code>POST /api/ppdb/daftar</code>{" "}
+                          tidak otomatis menolak pendaftaran
+                          ketika dipilih &quot;Tutup&quot;.
+                        </p>
+
+                        <select
+                          value={form.statusPenerimaan}
+                          onChange={(event) =>
+                            setForm((value) => ({
+                              ...value,
+                              statusPenerimaan:
+                                event.target.value,
+                            }))
+                          }
+                          className={`theme-input theme-text theme-neutral-border mt-3 h-10 w-full rounded-lg border ${themeNeutralSurface} px-3 text-xs outline-none transition ${themeFocus}`}
+                        >
+                          <option value="buka">
+                            Buka — pendaftaran diterima
+                          </option>
+                          <option value="tutup">
+                            Tutup — pendaftaran ditolak
+                          </option>
+                        </select>
                       </div>
                     </div>
+                  </div>
 
-                    <div
-                      className={`mt-5 rounded-lg ${themeSuccessSurface} ${themeSuccessBorder} border p-3`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <span
-                          className="h-2 w-2 rounded-full"
-                          style={{
-                            backgroundColor:
-                              "var(--color-success)",
-                          }}
+                  {/* PREFIX NOMOR */}
+                  <div className="p-5 sm:p-6">
+                    <div className="flex items-start gap-3">
+                      <div
+                        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${themePrimarySoft} ${themePrimaryText}`}
+                      >
+                        <Hash size={17} />
+                      </div>
+
+                      <div className="min-w-0 flex-1">
+                        <p className="theme-text text-sm font-bold">
+                          Prefix Nomor Pendaftaran
+                        </p>
+
+                        <p className="theme-text-secondary mt-1 text-xs leading-5">
+                          Nilai ini belum dipakai generator
+                          nomor pendaftaran Backend. Saat ini
+                          nomor selalu dibuat dengan format{" "}
+                          <code>PPDB-TAHUN-NOMOR</code>.
+                          Maksimal 5 karakter.
+                        </p>
+
+                        <input
+                          value={
+                            form.prefixNomorPendaftaran
+                          }
+                          onChange={(event) =>
+                            setForm((value) => ({
+                              ...value,
+                              prefixNomorPendaftaran:
+                                event.target.value
+                                  .toUpperCase()
+                                  .replace(
+                                    /[^A-Z0-9-]/g,
+                                    ""
+                                  )
+                                  .slice(0, 5),
+                            }))
+                          }
+                          maxLength={5}
+                          required
+                          placeholder="PPDB"
+                          className={`theme-input theme-text theme-neutral-border mt-3 h-10 w-full rounded-lg border ${themeNeutralSurface} px-3 text-xs uppercase outline-none transition ${themeFocus}`}
                         />
+                      </div>
+                    </div>
+                  </div>
 
-                        <span className="text-[var(--color-success)] text-xs font-semibold">
-                          Pendaftaran Aktif
-                        </span>
+                  {/* VERIFIKASI BERKAS */}
+                  <div className="p-5 sm:p-6">
+                    <div className="flex items-start gap-3">
+                      <div
+                        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${themePrimarySoft} ${themePrimaryText}`}
+                      >
+                        <FileCheck2 size={17} />
                       </div>
 
-                      <p className="mt-1 text-[var(--color-success)] text-[10px]">
-                        Sistem menerima pendaftaran siswa baru.
-                      </p>
+                      <div className="min-w-0 flex-1">
+                        <p className="theme-text text-sm font-bold">
+                          Verifikasi Berkas Wajib
+                        </p>
+
+                        <p className="theme-text-secondary mt-1 text-xs leading-5">
+                          Nilai ini belum ditegakkan oleh
+                          endpoint verifikasi Backend.{" "}
+                          <code>PATCH /api/ppdb/:id/verifikasi</code>{" "}
+                          saat ini tidak memeriksa KK, AKTE,
+                          atau IJAZAH sebelum meluluskan
+                          pendaftar.
+                        </p>
+
+                        <label className="mt-3 flex cursor-pointer items-center gap-3">
+                          <input
+                            type="checkbox"
+                            checked={
+                              form.verifikasiBerkasWajib
+                            }
+                            onChange={(event) =>
+                              setForm((value) => ({
+                                ...value,
+                                verifikasiBerkasWajib:
+                                  event.target.checked,
+                              }))
+                            }
+                            className="h-4 w-4 accent-[var(--color-primary)]"
+                          />
+
+                          <span className="theme-text-secondary text-xs">
+                            Wajibkan tiga berkas sebelum
+                            kelulusan
+                          </span>
+                        </label>
+                      </div>
                     </div>
                   </div>
 
-                  {/* SYSTEM */}
-
                   <div
-                    className={`theme-card rounded-xl border ${themeNeutralBorder} p-5 ${themeCardShadow}`}
+                    className={`${themeNeutralSurface} flex flex-col gap-2 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6`}
                   >
-                    <div className="mb-4">
-                      <h2 className="theme-text text-sm font-bold">
-                        Konfigurasi Sistem
-                      </h2>
+                    <p className="theme-text-muted text-[11px] leading-4">
+                      Tidak ada penyimpanan di localStorage.
+                      Perubahan baru berlaku setelah tombol
+                      simpan ditekan.
+                    </p>
 
-                      <p className="theme-text-muted mt-0.5 text-[10px]">
-                        Atur perilaku sistem SPMB
-                      </p>
-                    </div>
+                    <button
+                      type="submit"
+                      disabled={saving}
+                      className={`${themePrimaryGradient} inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-xs font-semibold text-[var(--color-card)] transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50`}
+                    >
+                      {saving ? (
+                        <Loader2
+                          size={15}
+                          className="animate-spin"
+                        />
+                      ) : (
+                        <Save size={15} />
+                      )}
 
-                    <div className="space-y-1">
-                      <Toggle
-                        label="Pendaftaran Online"
-                        description="Calon siswa dapat melakukan pendaftaran"
-                        active={settings.pendaftaran}
-                        onClick={() =>
-                          toggle("pendaftaran")
-                        }
-                      />
-
-                      <Toggle
-                        label="Verifikasi Berkas"
-                        description="Aktifkan pemeriksaan berkas"
-                        active={settings.verifikasi}
-                        onClick={() =>
-                          toggle("verifikasi")
-                        }
-                      />
-
-                      <Toggle
-                        label="Pembayaran"
-                        description="Aktifkan proses pembayaran"
-                        active={settings.pembayaran}
-                        onClick={() =>
-                          toggle("pembayaran")
-                        }
-                      />
-
-                      <Toggle
-                        label="Nomor Otomatis"
-                        description="Generate nomor pendaftaran otomatis"
-                        active={settings.autoNumber}
-                        onClick={() =>
-                          toggle("autoNumber")
-                        }
-                      />
-
-                      <Toggle
-                        label="Notifikasi Email"
-                        description="Kirim pemberitahuan melalui email"
-                        active={
-                          settings.emailNotification
-                        }
-                        onClick={() =>
-                          toggle(
-                            "emailNotification"
-                          )
-                        }
-                      />
-
-                      <Toggle
-                        label="Notifikasi WhatsApp"
-                        description="Kirim pemberitahuan melalui WhatsApp"
-                        active={
-                          settings.whatsappNotification
-                        }
-                        onClick={() =>
-                          toggle(
-                            "whatsappNotification"
-                          )
-                        }
-                      />
-                    </div>
-                  </div>
-
-                  {/* GENERAL */}
-
-                  <div
-                    className={`theme-card rounded-xl border ${themeNeutralBorder} p-5 ${themeCardShadow}`}
-                  >
-                    <h2 className="theme-text text-sm font-bold">
-                      Informasi Pendaftaran
-                    </h2>
-
-                    <div className="mt-4 space-y-3">
-                      <Input
-                        label="Tahun Ajaran"
-                        value="2026/2027"
-                      />
-
-                      <Input
-                        label="Nama Penerimaan"
-                        value="SPMB Tahun Ajaran 2026/2027"
-                      />
-
-                      <Input
-                        label="Kontak Panitia"
-                        value="021-12345678"
-                      />
-                    </div>
+                      {saving
+                        ? "Menyimpan..."
+                        : "Simpan Pengaturan"}
+                    </button>
                   </div>
                 </div>
-              </div>
+              )}
+            </form>
 
-              {/* ================================================= */}
-              {/* SAVE */}
-              {/* ================================================= */}
-
-              <div className="mt-5 flex justify-end">
-                <button
-                  type="button"
-                  className={`inline-flex items-center gap-2 rounded-lg ${themePrimaryGradient} px-5 py-2.5 text-xs font-semibold text-[var(--color-card)] ${themePrimaryShadow} transition-all hover:opacity-90 active:scale-[0.98]`}
-                >
-                  <Save size={15} />
-                  Simpan Pengaturan
-                </button>
-              </div>
+            <div
+              className={`${themeNeutralBorder} mt-5 rounded-xl border ${themeNeutralSurface} p-4`}
+            >
+              <p className="theme-text-secondary text-xs leading-5">
+                Endpoint:{" "}
+                <code>GET /api/pengaturan</code> dan{" "}
+                <code>POST /api/pengaturan</code> (bukan
+                <code> /api/ppdb/pengaturan</code>). Nilai
+                disimpan per <code>sekolahId</code> dari
+                sesi admin, sehingga tidak dapat menimpa
+                pengaturan sekolah lain. Penyimpanan
+                berhasil tidak berarti alur PPDB sudah
+                memakai nilai tersebut.
+              </p>
             </div>
           </div>
         </main>
       </div>
     </div>
-  );
-}
-
-// =========================================================
-// SETTING SECTION
-// =========================================================
-
-function SettingSection({
-  icon: Icon,
-  title,
-  description,
-  children,
-}) {
-  return (
-    <section
-      className={`theme-card rounded-xl border ${themeNeutralBorder} p-5 ${themeCardShadow}`}
-    >
-      <div className="mb-4 flex items-center gap-3">
-        <div
-          className={`flex h-9 w-9 items-center justify-center rounded-lg ${themePrimarySoft}`}
-        >
-          <Icon
-            size={17}
-            className={themePrimaryText}
-          />
-        </div>
-
-        <div>
-          <h2 className="theme-text text-sm font-bold">
-            {title}
-          </h2>
-
-          <p className="theme-text-muted text-[10px]">
-            {description}
-          </p>
-        </div>
-      </div>
-
-      {children}
-    </section>
-  );
-}
-
-// =========================================================
-// INPUT
-// =========================================================
-
-function Input({
-  label,
-  type = "text",
-  value,
-  suffix,
-}) {
-  return (
-    <div>
-      <label className="theme-text-secondary mb-1.5 block text-[10px] font-semibold">
-        {label}
-      </label>
-
-      <div className="relative">
-        <input
-          type={type}
-          defaultValue={value}
-          className={`theme-input h-10 w-full rounded-lg border px-3 text-xs font-medium outline-none transition-colors ${themeFocus} ${
-            suffix ? "pr-14" : ""
-          }`}
-        />
-
-        {suffix && (
-          <span className="theme-text-muted absolute right-3 top-1/2 -translate-y-1/2 text-[10px]">
-            {suffix}
-          </span>
-        )}
-      </div>
-    </div>
-  );
-}
-
-// =========================================================
-// PROGRAM
-// =========================================================
-
-function Program({
-  name,
-  quota,
-  active,
-}) {
-  return (
-    <div
-      className={`flex items-center justify-between rounded-lg border ${themeNeutralBorder} p-3 transition-colors ${themeNeutralHover}`}
-    >
-      <div className="flex items-center gap-3">
-        <div
-          className={`flex h-8 w-8 items-center justify-center rounded-lg ${themePrimarySoft}`}
-        >
-          <GraduationCap
-            size={15}
-            className={themePrimaryText}
-          />
-        </div>
-
-        <div>
-          <p className="theme-text text-xs font-semibold">
-            {name}
-          </p>
-
-          <p className="theme-text-muted text-[10px]">
-            {quota}
-          </p>
-        </div>
-      </div>
-
-      <span
-        className={`rounded-md border px-2 py-1 text-[9px] font-semibold ${
-          active
-            ? `${themeSuccessSurface} ${themeSuccessBorder} text-[var(--color-success)]`
-            : `${themeNeutralSurface} ${themeNeutralBorder} theme-text-secondary`
-        }`}
-      >
-        {active ? "Aktif" : "Nonaktif"}
-      </span>
-    </div>
-  );
-}
-
-// =========================================================
-// TOGGLE
-// =========================================================
-
-function Toggle({
-  label,
-  description,
-  active,
-  onClick,
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`flex w-full items-center justify-between rounded-lg p-3 text-left transition-colors ${themeNeutralHover}`}
-    >
-      <div className="min-w-0 pr-3">
-        <p className="theme-text text-xs font-semibold">
-          {label}
-        </p>
-
-        <p className="theme-text-muted mt-0.5 text-[10px]">
-          {description}
-        </p>
-      </div>
-
-      {active ? (
-        <ToggleRight
-          size={25}
-          className={`shrink-0 ${themePrimaryText}`}
-        />
-      ) : (
-        <ToggleLeft
-          size={25}
-          className="theme-text-placeholder shrink-0"
-        />
-      )}
-    </button>
   );
 }

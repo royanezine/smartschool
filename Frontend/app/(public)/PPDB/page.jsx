@@ -1,18 +1,14 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
-  CalendarClock,
   FileCheck2,
   ClipboardList,
-  Search,
   Megaphone,
   ChevronRight,
   CheckCircle2,
   Users,
   MapPin,
-  Phone,
-  Mail,
   Sparkles,
 } from "lucide-react";
 
@@ -23,14 +19,14 @@ import PpdbNavbar from "@/app/components/ppdb/PpdbNavbar";
 |--------------------------------------------------------------------------
 | Catatan:
 | - Halaman ini bersifat publik.
-| - BE saat ini belum menyediakan GET daftar jalur PPDB untuk publik.
-| - Endpoint GET jalur PPDB yang tersedia di BE membutuhkan:
-|     authenticate
-|     requireTenant
-|     authorizeRoles("admin_sekolah")
-| - Karena itu halaman ini TIDAK melakukan fetch jalur PPDB.
-| - Data di bawah hanya digunakan sebagai informasi/preview UI.
-| - ID seperti "zonasi" bukan ID database dan TIDAK dikirim ke BE.
+| - Backend belum menyediakan GET daftar jalur PPDB untuk publik.
+| - Endpoint GET jalur PPDB yang tersedia membutuhkan autentikasi
+|   admin sekolah dan izin ppdb.view.
+| - Karena itu halaman ini TIDAK menampilkan daftar jalur milik sekolah
+|   dan TIDAK mengirim ID jalur buatan ke Backend.
+| - Konten jalur di bawah adalah penjelasan jenis jalur secara umum.
+| - Ketersediaan, kuota, dan jadwal jalur hanya dapat diketahui dari
+|   sekolah tujuan atau tautan pendaftaran resmi yang dibagikan sekolah.
 |--------------------------------------------------------------------------
 */
 
@@ -39,7 +35,6 @@ const jalurPendaftaran = [
     id: "zonasi",
     title: "Jalur Zonasi",
     desc: "Untuk calon siswa yang berdomisili dalam radius zona sekolah sesuai KK.",
-    kuota: "50% kuota",
     icon: MapPin,
     color: "blue",
   },
@@ -47,7 +42,6 @@ const jalurPendaftaran = [
     id: "prestasi",
     title: "Jalur Prestasi",
     desc: "Untuk calon siswa dengan prestasi akademik atau non-akademik yang dibuktikan sertifikat.",
-    kuota: "30% kuota",
     icon: Sparkles,
     color: "amber",
   },
@@ -55,7 +49,6 @@ const jalurPendaftaran = [
     id: "afirmasi",
     title: "Jalur Afirmasi",
     desc: "Untuk calon siswa dari keluarga kurang mampu atau penyandang disabilitas.",
-    kuota: "15% kuota",
     icon: Users,
     color: "emerald",
   },
@@ -63,7 +56,6 @@ const jalurPendaftaran = [
     id: "pindahan",
     title: "Jalur Perpindahan Tugas",
     desc: "Untuk calon siswa yang mengikuti perpindahan tugas orang tua/wali.",
-    kuota: "5% kuota",
     icon: FileCheck2,
     color: "rose",
   },
@@ -72,51 +64,37 @@ const jalurPendaftaran = [
 const alurPendaftaran = [
   {
     id: 1,
-    title: "Buat Akun",
-    desc: "Daftar menggunakan data calon siswa dan orang tua/wali yang valid.",
+    title: "Buka tautan resmi sekolah",
+    desc: "Tautan dari panitia PPDB memuat sekolah dan jalur yang dibuka, sehingga tidak perlu mengetik ID.",
   },
   {
     id: 2,
-    title: "Lengkapi Berkas",
-    desc: "Unggah KK, akta kelahiran, ijazah, dan dokumen pendukung yang diperlukan.",
+    title: "Isi data calon siswa",
+    desc: "Lengkapi data diri, orang tua/wali, dan kontak yang valid sesuai dokumen resmi.",
   },
   {
     id: 3,
-    title: "Pilih Jalur & Sekolah",
-    desc: "Tentukan jalur pendaftaran dan sekolah tujuan sesuai data PPDB yang tersedia.",
+    title: "Unggah dokumen",
+    desc: "Unggah KK, akta kelahiran, dan ijazah/SKL. Format JPG, PNG, atau PDF maksimal 5MB per file.",
   },
   {
     id: 4,
-    title: "Cek Hasil Seleksi",
-    desc: "Pantau status pendaftaran dan hasil seleksi melalui halaman Cek Pendaftaran.",
+    title: "Simpan nomor pendaftaran",
+    desc: "Nomor ditampilkan bila dikembalikan server. Sekolah akan memverifikasi data dan dokumen Anda.",
   },
 ];
 
 const persyaratan = [
   "Kartu Keluarga (KK) yang masih berlaku",
   "Akta kelahiran calon siswa",
-  "Fotokopi rapor kelas terakhir",
-  "Pas foto terbaru ukuran 3x4",
-  "Dokumen pendukung sesuai jalur yang dipilih",
+  "Ijazah atau Surat Keterangan Lulus",
+  "Dokumen tambahan mengikuti ketentuan sekolah",
 ];
 
-const pengumumanTerbaru = [
-  {
-    id: 1,
-    title: "Perpanjangan Waktu Pendaftaran Jalur Afirmasi",
-    tanggal: "18 Agustus 2026",
-  },
-  {
-    id: 2,
-    title: "Jadwal Verifikasi Berkas Jalur Prestasi",
-    tanggal: "15 Agustus 2026",
-  },
-  {
-    id: 3,
-    title: "Panduan Pengisian Formulir Online",
-    tanggal: "10 Agustus 2026",
-  },
-];
+/*
+ * Pengumuman belum tersedia di Backend. Landing page tidak menampilkan
+ * pengumuman contoh; bagian ini memakai empty state.
+ */
 
 const colorMap = {
   blue: {
@@ -143,6 +121,14 @@ const colorMap = {
 
 export default function PPDBLandingPage() {
   const router = useRouter();
+  const pathname = usePathname();
+
+  const ppdbIndex = pathname
+    ? pathname.indexOf("/PPDB")
+    : -1;
+
+  const basePath =
+    ppdbIndex > 0 ? pathname.slice(0, ppdbIndex) : "";
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -162,32 +148,32 @@ export default function PPDBLandingPage() {
 
           <div className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm sm:p-8 lg:col-span-2">
             <div className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-600">
-              <CalendarClock size={13} />
+              <ClipboardList size={13} />
 
-              Pendaftaran berlangsung sampai 20 Juni 2026
+              Pendaftaran dibuka oleh masing-masing sekolah
             </div>
 
             <h1 className="mt-4 text-2xl font-semibold leading-snug text-slate-800 sm:text-3xl">
               Penerimaan Peserta Didik Baru
               <br className="hidden sm:block" />
-              Tahun Ajaran 2026/2027
+              Secara Online
             </h1>
 
             <p className="mt-3 max-w-xl text-sm leading-relaxed text-slate-500 sm:text-base">
-              Informasi lengkap seputar jadwal, jalur, syarat, dan tahapan
-              pendaftaran siswa baru. Daftar secara online dan pantau status
-              pendaftaran melalui halaman Cek Pendaftaran.
+              Informasi umum seputar alur, dokumen, dan tata cara
+              pendaftaran siswa baru. Untuk mendaftar, gunakan tautan
+              resmi yang dibagikan oleh panitia PPDB sekolah tujuan.
             </p>
 
             <div className="mt-6 flex flex-col gap-3 sm:flex-row">
               <button
               type="button"
               onClick={() =>
-                router.push("/PPDB/jalurPendaftaran")
+                router.push(`${basePath}/PPDB/jalurPendaftaran`)
               }
               className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700"
             >
-              Mulai Pendaftaran
+              Lihat Panduan Pendaftaran
 
               <ChevronRight size={15} />
             </button>
@@ -195,27 +181,33 @@ export default function PPDBLandingPage() {
               <button
                 type="button"
                 onClick={() =>
-                  router.push("/PPDB/cek-pendaftaran")
+                  router.push(`${basePath}/PPDB/alurPendaftaran`)
                 }
                 className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-slate-200 px-5 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:border-slate-300 hover:bg-slate-50"
               >
-                <Search size={15} />
+                <ClipboardList size={15} />
 
-                Cek Status Pendaftaran
+                Baca Alur Pendaftaran
               </button>
             </div>
           </div>
 
-          {/* KUOTA */}
+          {/* PANDUAN SINGKAT */}
 
           <div className="flex flex-col justify-between rounded-2xl bg-blue-600 p-6 text-white shadow-sm sm:p-8">
             <div>
               <p className="text-sm text-blue-100">
-                Total Kuota Siswa Baru
+                Sebelum mendaftar
               </p>
 
-              <p className="mt-1 text-3xl font-semibold">
-                360 Siswa
+              <p className="mt-1 text-xl font-semibold">
+                Siapkan tautan resmi sekolah
+              </p>
+
+              <p className="mt-2 text-sm leading-6 text-blue-100">
+                Panitia PPDB sekolah membagikan tautan
+                pendaftaran yang sudah memuat sekolah dan
+                jalur yang dibuka.
               </p>
             </div>
 
@@ -225,7 +217,7 @@ export default function PPDBLandingPage() {
                   size={15}
                   className="shrink-0"
                 />
-                4 jalur pendaftaran tersedia
+                Sekolah dan jalur terisi otomatis
               </div>
 
               <div className="flex items-center gap-2">
@@ -233,7 +225,7 @@ export default function PPDBLandingPage() {
                   size={15}
                   className="shrink-0"
                 />
-                Pendaftaran online
+                Data dikirim langsung ke server
               </div>
 
               <div className="flex items-center gap-2">
@@ -241,7 +233,7 @@ export default function PPDBLandingPage() {
                   size={15}
                   className="shrink-0"
                 />
-                Status dapat dipantau
+                Simpan nomor pendaftaran
               </div>
             </div>
           </div>
@@ -256,23 +248,31 @@ export default function PPDBLandingPage() {
         id="jalur"
         className="mx-auto max-w-6xl px-4 py-8 sm:px-6"
       >
-        <div className="mb-4 flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2.5">
+        <div className="mb-4 flex items-start justify-between gap-2">
+          <div className="flex items-start gap-2.5">
             <div className="rounded-lg bg-amber-50 p-1.5 text-amber-600">
               <ClipboardList size={16} />
             </div>
 
-            <h2 className="text-base font-semibold text-slate-800 sm:text-lg">
-              Jalur Pendaftaran
-            </h2>
+            <div>
+              <h2 className="text-base font-semibold text-slate-800 sm:text-lg">
+                Jenis Jalur Pendaftaran
+              </h2>
+
+              <p className="mt-1 max-w-2xl text-xs leading-5 text-slate-500">
+                Penjelasan umum jenis jalur. Ketersediaan dan
+                kuota jalur ditentukan oleh sekolah tujuan,
+                bukan oleh halaman ini.
+              </p>
+            </div>
           </div>
 
           <button
             type="button"
             onClick={() =>
-              router.push("/PPDB/jalurPendaftaran")
+              router.push(`${basePath}/PPDB/jalurPendaftaran`)
             }
-            className="inline-flex shrink-0 items-center gap-0.5 text-xs font-medium text-blue-600 transition-colors hover:text-blue-700"
+            className="inline-flex shrink-0 items-center gap-0.5 pt-1 text-xs font-medium text-blue-600 transition-colors hover:text-blue-700"
           >
             Lihat detail
 
@@ -291,7 +291,7 @@ export default function PPDBLandingPage() {
                 type="button"
                 onClick={() =>
                   router.push(
-                    "/PPDB/jalurPendaftaran"
+                    `${basePath}/PPDB/jalurPendaftaran`
                   )
                 }
                 className={`rounded-2xl border bg-white p-5 text-left shadow-sm transition-shadow hover:shadow-md ${c.border}`}
@@ -313,7 +313,7 @@ export default function PPDBLandingPage() {
                 <div
                   className={`mt-3 inline-block rounded-full px-2.5 py-1 text-[11px] font-medium ${c.bg} ${c.text}`}
                 >
-                  {j.kuota}
+                  Informasi umum
                 </div>
               </button>
             );
@@ -341,7 +341,7 @@ export default function PPDBLandingPage() {
               <button
                 type="button"
                 onClick={() =>
-                  router.push("/PPDB/alurPendaftaran")
+                  router.push(`${basePath}/PPDB/alurPendaftaran`)
                 }
                 className="inline-flex shrink-0 items-center gap-0.5 text-xs font-medium text-blue-600 transition-colors hover:text-blue-700"
               >
@@ -431,7 +431,7 @@ export default function PPDBLandingPage() {
             <button
               type="button"
               onClick={() =>
-                router.push("/PPDB/pengumuman")
+                router.push(`${basePath}/PPDB/pengumuman`)
               }
               className="inline-flex shrink-0 items-center gap-0.5 text-xs font-medium text-blue-600 transition-colors hover:text-blue-700"
             >
@@ -442,24 +442,16 @@ export default function PPDBLandingPage() {
           </div>
 
           <div className="divide-y divide-slate-50">
-            {pengumumanTerbaru.map((p) => (
-              <button
-                key={p.id}
-                type="button"
-                onClick={() =>
-                  router.push("/PPDB/pengumuman")
-                }
-                className="flex w-full items-center justify-between gap-3 p-4 text-left transition-colors hover:bg-slate-50/60 sm:p-5"
-              >
-                <span className="truncate text-sm font-medium text-slate-800">
-                  {p.title}
-                </span>
+            <div className="px-4 py-8 text-center sm:px-5">
+              <p className="text-sm font-medium text-slate-700">
+                Belum ada pengumuman
+              </p>
 
-                <span className="shrink-0 text-xs text-slate-400">
-                  {p.tanggal}
-                </span>
-              </button>
-            ))}
+              <p className="mt-1 text-xs text-slate-500">
+                Pengumuman resmi akan tampil di sini
+                setelah tersedia di sistem.
+              </p>
+            </div>
           </div>
         </div>
       </section>
@@ -509,14 +501,9 @@ export default function PPDBLandingPage() {
           </div>
 
           <div className="flex flex-col gap-2 text-xs text-slate-500 sm:flex-row sm:gap-6">
-            <span className="flex items-center gap-1.5">
-              <Phone size={13} />
-              (021) 555-0199
-            </span>
-
-            <span className="flex items-center gap-1.5">
-              <Mail size={13} />
-              ppdb@smartschool.sch.id
+            <span className="max-w-md leading-5">
+              Informasi dan bantuan pendaftaran disediakan oleh
+              panitia PPDB sekolah tujuan.
             </span>
           </div>
         </div>

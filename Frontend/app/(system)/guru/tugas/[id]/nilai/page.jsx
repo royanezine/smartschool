@@ -6,8 +6,11 @@ import { useParams, useRouter } from "next/navigation";
 
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
-import { getDetailTugas } from "@/services/tugas.service";
-import { apiFetch } from "@/lib/api";
+import {
+  getDetailTugas,
+  getPengumpulanByTugas,
+  beriNilaiTugas,
+} from "@/services/tugas.service";
 
 import {
   ArrowLeft,
@@ -168,14 +171,23 @@ export default function NilaiTugasPage() {
       setLoading(true);
       setError("");
 
-      const response = await getDetailTugas(tugasId);
-      const data = unwrapResponse(response);
+      const [detailResult, submissionResult] =
+        await Promise.allSettled([
+          getDetailTugas(tugasId),
+          getPengumpulanByTugas(tugasId),
+        ]);
+
+      if (detailResult.status === "rejected") {
+        throw detailResult.reason;
+      }
+
+      const data = unwrapResponse(detailResult.value);
 
       if (!data?.id) {
         throw new Error("Data tugas tidak ditemukan.");
       }
 
-      const submissions = Array.isArray(
+      const fallbackSubmissions = Array.isArray(
         data.pengumpulanTugasSiswa
       )
         ? data.pengumpulanTugasSiswa
@@ -185,8 +197,22 @@ export default function NilaiTugasPage() {
             ? data.pengumpulanTugas
             : [];
 
+      const submissions =
+        submissionResult.status === "fulfilled"
+          ? submissionResult.value
+          : fallbackSubmissions;
+
+      if (submissionResult.status === "rejected") {
+        console.error(
+          "GAGAL MEMUAT DAFTAR PENGUMPULAN:",
+          submissionResult.reason
+        );
+      }
+
       setTugas(data);
-      setPengumpulan(submissions);
+      setPengumpulan(
+        Array.isArray(submissions) ? submissions : []
+      );
 
       const initialForm = {};
 
@@ -316,20 +342,10 @@ export default function NilaiTugasPage() {
       setError("");
       setSuccess("");
 
-      // Sesuaikan URL ini dengan route backend yang sebenarnya.
-      await apiFetch(
-        `/api/tugas/pengumpulan/${item.id}/nilai`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            nilai,
-            keterangan: form.keterangan,
-          }),
-        }
-      );
+      await beriNilaiTugas(item.id, {
+        nilai,
+        keterangan: form.keterangan,
+      });
 
       setSuccess(
         `Nilai ${getStudentName(item)} berhasil disimpan.`

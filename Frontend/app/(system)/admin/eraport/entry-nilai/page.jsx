@@ -613,10 +613,12 @@ export default function EntryNilaiPage() {
                 String(kelasMapelId)
               );
 
-            nilaiUjian =
-              Array.isArray(response)
-                ? response
-                : [];
+            if (response?.tersedia) {
+              nilaiUjian =
+                Array.isArray(response.data)
+                  ? response.data
+                  : [];
+            }
 
             console.log(
               "[ENTRY NILAI] NILAI UJIAN:",

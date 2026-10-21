@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getStoredUser } from "@/lib/auth";
+import { getSessionUser } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
@@ -120,14 +120,9 @@ export default function TambahTugasPage() {
       setLoading(true);
       setError("");
 
-      const storedUser = getStoredUser();
-      let currentUser = null;
-
-      try {
-        currentUser = storedUser ? JSON.parse(storedUser) : null;
-      } catch {
-        currentUser = null;
-      }
+      // Identitas berasal dari sesi aktif (lib/auth) dan sudah berupa
+      // objek. Tidak perlu di-JSON.parse ulang.
+      const currentUser = getSessionUser();
 
       console.log("USER LOGIN:", {
         userId: currentUser?.userId,
@@ -135,7 +130,8 @@ export default function TambahTugasPage() {
         role: currentUser?.role,
       });
 
-      const currentUserId = currentUser?.userId;
+      const currentUserId =
+        currentUser?.userId ?? currentUser?.id;
 
       if (!currentUserId) {
         throw new Error(
@@ -265,18 +261,8 @@ export default function TambahTugasPage() {
         batasWaktu,
       };
 
-      const storedUser =
-        localStorage.getItem("user");
-
-      let currentUser = null;
-
-      try {
-        currentUser = storedUser
-          ? JSON.parse(storedUser)
-          : null;
-      } catch {
-        currentUser = null;
-      }
+      const currentUser =
+        getSessionUser();
 
       console.log(
         "========== DEBUG CREATE TUGAS =========="

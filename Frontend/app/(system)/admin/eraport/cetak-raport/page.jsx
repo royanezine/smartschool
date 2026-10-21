@@ -4,6 +4,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import { useRouter } from "next/navigation";
@@ -598,6 +599,11 @@ export default function CetakRaportPage() {
   const [currentPage, setCurrentPage] =
     useState(1);
 
+  // Menyimpan id permintaan terbaru agar hasil dari permintaan lama
+  // tidak menimpa state (menghindari race condition saat filter
+  // diganti dengan cepat).
+  const examRequestIdRef = useRef(0);
+
   /* =======================================================
      LOAD TAHUN AJARAN
   ======================================================= */
@@ -934,6 +940,13 @@ export default function CetakRaportPage() {
           return;
         }
 
+        const requestId =
+          examRequestIdRef.current +
+          1;
+
+        examRequestIdRef.current =
+          requestId;
+
         try {
           setLoadingExamScores(
             true
@@ -968,28 +981,26 @@ export default function CetakRaportPage() {
                 async (
                   kelasMapelId
                 ) => {
-                  try {
-                    const result =
-                      await getNilaiUjianUntukKelas(
-                        kelasMapelId
-                      );
-
-                    return {
-                      result,
-                    };
-                  } catch (err) {
-                    console.error(
-                      `Gagal mengambil nilai kelas-mapel ${kelasMapelId}:`,
-                      err
+                  const result =
+                    await getNilaiUjianUntukKelas(
+                      kelasMapelId
                     );
 
-                    return {
-                      result: null,
-                    };
-                  }
+                  return {
+                    result,
+                  };
                 }
               )
             );
+
+          // Abaikan hasil permintaan lama jika
+          // sudah ada permintaan yang lebih baru.
+          if (
+            requestId !==
+            examRequestIdRef.current
+          ) {
+            return;
+          }
 
           results.forEach(
             (result) => {
@@ -997,15 +1008,24 @@ export default function CetakRaportPage() {
                 result.status !==
                 "fulfilled"
               ) {
+                console.error(
+                  "Gagal mengambil nilai ujian:",
+                  result.reason
+                );
+
                 return;
               }
 
               const rawResult =
                 result.value?.result;
 
+              if (!rawResult?.tersedia) {
+                return;
+              }
+
               const rows =
                 getExamRows(
-                  rawResult
+                  rawResult.data
                 );
 
               const directData =
@@ -1087,6 +1107,13 @@ export default function CetakRaportPage() {
             cache
           );
         } catch (err) {
+          if (
+            requestId !==
+            examRequestIdRef.current
+          ) {
+            return;
+          }
+
           console.error(
             "Gagal mengambil nilai ujian:",
             err
@@ -1094,9 +1121,14 @@ export default function CetakRaportPage() {
 
           setExamScoreCache({});
         } finally {
-          setLoadingExamScores(
-            false
-          );
+          if (
+            requestId ===
+            examRequestIdRef.current
+          ) {
+            setLoadingExamScores(
+              false
+            );
+          }
         }
       },
       []
@@ -1560,29 +1592,34 @@ export default function CetakRaportPage() {
     loadingStudents ||
     loadingYears;
 
-  const isProcessing =
-    loadingReports ||
-    loadingExamScores;
+  // Nilai ujian online bersifat OPSIONAL: ketidaktersediaannya tidak
+  // boleh memblokir tampilan data raport maupun proses cetak. Karena
+  // itu nilai ujian tidak ikut menentukan status loading tabel utama.
+  const isProcessing = loadingReports;
 
   /* =======================================================
      RENDER
   ======================================================= */
 
   return (
-    <div className="theme-page flex min-h-screen w-full">
-      <Sidebar />
+    <div className="theme-page flex min-h-screen w-full print:block print:min-h-0 print:overflow-visible print:bg-white">
+      <div className="print:hidden shrink-0">
+        <Sidebar />
+      </div>
 
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <Header />
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden print:block print:overflow-visible">
+        <div className="print:hidden">
+          <Header />
+        </div>
 
-        <main className="flex-1 overflow-y-auto">
-          <div className="mx-auto w-full max-w-[1400px] space-y-6 p-4 sm:p-6 lg:p-8">
+        <main className="flex-1 overflow-y-auto print:overflow-visible">
+          <div className="mx-auto w-full max-w-[1400px] space-y-6 p-4 sm:p-6 lg:p-8 print:max-w-full print:p-0">
 
             {/* =================================================
                 HEADER
             ================================================= */}
 
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="print:hidden flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex items-start gap-3">
                 <button
                   type="button"
@@ -1628,7 +1665,8 @@ export default function CetakRaportPage() {
                   }
                   disabled={
                     isLoading ||
-                    isProcessing
+                    isProcessing ||
+                    loadingExamScores
                   }
                   className="theme-card theme-text-secondary inline-flex h-10 items-center gap-2 rounded-lg border px-4 text-sm font-semibold transition hover:opacity-75 disabled:cursor-not-allowed disabled:opacity-50"
                 >
@@ -1673,7 +1711,7 @@ export default function CetakRaportPage() {
             ================================================= */}
 
             {error ? (
-              <div className="theme-danger flex items-start justify-between gap-4 rounded-lg border px-4 py-3 text-sm">
+              <div className="print:hidden theme-danger flex items-start justify-between gap-4 rounded-lg border px-4 py-3 text-sm">
                 <div>
                   <p className="font-semibold">
                     Terjadi kesalahan
@@ -1700,7 +1738,7 @@ export default function CetakRaportPage() {
                 INFO
             ================================================= */}
 
-            <div className="theme-info rounded-xl border px-4 py-4">
+            <div className="print:hidden theme-info rounded-xl border px-4 py-4">
               <div className="flex items-start gap-3">
                 <FileText
                   size={18}
@@ -1729,7 +1767,7 @@ export default function CetakRaportPage() {
                 STATISTICS
             ================================================= */}
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="print:hidden grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
               <StatCard
                 icon={Users}
                 label="Total Siswa"
@@ -1778,7 +1816,7 @@ export default function CetakRaportPage() {
                 FILTER
             ================================================= */}
 
-            <div className="theme-card rounded-xl border p-4 shadow-sm sm:p-5">
+            <div className="print:hidden theme-card rounded-xl border p-4 shadow-sm sm:p-5">
               <div className="mb-4 flex items-center gap-2">
                 <Filter
                   size={18}
@@ -1968,8 +2006,8 @@ export default function CetakRaportPage() {
                 TABLE
             ================================================= */}
 
-            <div className="theme-card overflow-hidden rounded-xl border shadow-sm">
-              <div className="theme-card-soft flex flex-col gap-2 border-b px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="theme-card overflow-hidden rounded-xl border shadow-sm print:overflow-visible print:border-0 print:shadow-none">
+              <div className="print:hidden theme-card-soft flex flex-col gap-2 border-b px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <h2 className="theme-text font-semibold">
                     Data Raport Siswa
@@ -1996,7 +2034,7 @@ export default function CetakRaportPage() {
 
               {isLoading ||
               isProcessing ? (
-                <div className="flex min-h-[320px] flex-col items-center justify-center">
+                <div className="print:hidden flex min-h-[320px] flex-col items-center justify-center">
                   <Loader2
                     size={32}
                     className="theme-text-secondary animate-spin"
@@ -2007,7 +2045,7 @@ export default function CetakRaportPage() {
                       ? "Mengambil data siswa..."
                       : loadingReports
                         ? "Mengambil data raport..."
-                        : "Mengambil nilai ujian online..."}
+                        : "Mengambil data..."}
                   </p>
 
                   <p className="theme-text-muted mt-1 text-xs">
@@ -2038,11 +2076,11 @@ export default function CetakRaportPage() {
                 </div>
               ) : (
                 <>
-                  <div className="overflow-x-auto">
-                    <table className="w-full min-w-[1150px]">
+                  <div className="overflow-x-auto print:overflow-visible">
+                    <table className="w-full min-w-[1150px] print:min-w-0">
                       <thead className="theme-table-header">
                         <tr>
-                          <th className="w-12 px-4 py-3 text-center">
+                          <th className="print:hidden w-12 px-4 py-3 text-center">
                             <input
                               type="checkbox"
                               checked={
@@ -2092,7 +2130,7 @@ export default function CetakRaportPage() {
                             Status
                           </th>
 
-                          <th className="px-5 py-3 text-right text-xs font-semibold">
+                          <th className="print:hidden px-5 py-3 text-right text-xs font-semibold">
                             Aksi
                           </th>
                         </tr>
@@ -2143,7 +2181,7 @@ export default function CetakRaportPage() {
                                 }`}
                               >
                                 {/* CHECKBOX */}
-                                <td className="px-4 py-4 text-center">
+                                <td className="print:hidden px-4 py-4 text-center">
                                   <input
                                     type="checkbox"
                                     checked={
@@ -2241,7 +2279,7 @@ export default function CetakRaportPage() {
                                     </div>
                                   ) : (
                                     <span className="theme-text-muted text-xs">
-                                      Belum ada
+                                      -
                                     </span>
                                   )}
                                 </td>
@@ -2268,7 +2306,7 @@ export default function CetakRaportPage() {
                                 </td>
 
                                 {/* AKSI */}
-                                <td className="px-5 py-4">
+                                <td className="print:hidden px-5 py-4">
                                   <div className="flex justify-end gap-2">
                                     <button
                                       type="button"
@@ -2322,7 +2360,7 @@ export default function CetakRaportPage() {
                       PAGINATION
                   ================================================= */}
 
-                  <div className="theme-card-soft flex flex-col gap-3 border-t px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="print:hidden theme-card-soft flex flex-col gap-3 border-t px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
                     <p className="theme-text-muted text-sm">
                       Menampilkan{" "}
                       <span className="theme-text font-semibold">
@@ -2411,7 +2449,7 @@ export default function CetakRaportPage() {
                 FOOTER INFO
             ================================================= */}
 
-            <div className="theme-card-soft rounded-xl border p-4">
+            <div className="print:hidden theme-card-soft rounded-xl border p-4">
               <div className="flex gap-3">
                 <FileText
                   size={18}

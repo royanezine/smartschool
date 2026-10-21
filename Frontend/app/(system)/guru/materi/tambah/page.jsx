@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { getStoredUser } from "@/lib/auth";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { getSessionUser } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 
 import Sidebar from "@/app/components/Sidebar";
@@ -162,37 +162,34 @@ export default function UploadMateriPage() {
   // LOAD USER
   // ============================================================
 
-  useEffect(() => {
-    loadCurrentUser();
-  }, []);
-
-  const loadCurrentUser = () => {
+  const loadCurrentUser = useCallback(() => {
     try {
       if (typeof window === "undefined") {
         return;
       }
 
-      const rawUser =
-        getStoredUser();
+      const user =
+        getSessionUser();
 
-      if (!rawUser) {
+      if (
+        !user ||
+        typeof user !== "object" ||
+        Array.isArray(user)
+      ) {
         console.warn(
-          "[UPLOAD MATERI] localStorage.user tidak ditemukan"
+          "[UPLOAD MATERI] Sesi pengguna tidak ditemukan."
         );
 
         setCurrentUser(null);
         return;
       }
 
-      const parsedUser =
-        JSON.parse(rawUser);
-
       console.log(
         "[UPLOAD MATERI] CURRENT USER:",
-        parsedUser
+        user
       );
 
-      setCurrentUser(parsedUser);
+      setCurrentUser(user);
     } catch (err) {
       console.error(
         "[UPLOAD MATERI] GAGAL MEMBACA USER:",
@@ -201,7 +198,13 @@ export default function UploadMateriPage() {
 
       setCurrentUser(null);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    Promise.resolve().then(() => {
+      loadCurrentUser();
+    });
+  }, [loadCurrentUser]);
 
   // ============================================================
   // CURRENT USER ID
@@ -269,13 +272,7 @@ export default function UploadMateriPage() {
   // LOAD KELAS MAPEL
   // ============================================================
 
-  useEffect(() => {
-    if (currentUser) {
-      loadKelasMapel();
-    }
-  }, [currentUser]);
-
-  const loadKelasMapel = async () => {
+  const loadKelasMapel = useCallback(async () => {
     try {
       setLoadingData(true);
       setError("");
@@ -380,7 +377,15 @@ export default function UploadMateriPage() {
     } finally {
       setLoadingData(false);
     }
-  };
+  }, [currentUserId]);
+
+  useEffect(() => {
+    if (currentUser) {
+      Promise.resolve().then(() => {
+        loadKelasMapel();
+      });
+    }
+  }, [currentUser, loadKelasMapel]);
 
   // ============================================================
   // HANDLE INPUT

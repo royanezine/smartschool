@@ -1,22 +1,26 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
 import {
-  HelpCircle,
+  AlertTriangle,
+  BarChart3,
   ChevronDown,
+  Download,
+  HelpCircle,
+  Info,
+  Loader2,
+  RefreshCw,
   Sparkles,
   Users,
-  BarChart3,
-  TrendingUp,
-  TrendingDown,
-  AlertTriangle,
-  History,
-  Pencil,
-  Save,
-  PlusCircle,
 } from "lucide-react";
+import {
+  getKomponenNilai,
+  getNilaiKelasSaya,
+  tarikSumberNilai,
+} from "@/services/nilai.service";
+import { getUjianByKelasMapel } from "@/services/ujian.service";
 
 // ============================================================
 // THEME HELPERS
@@ -31,17 +35,13 @@ const themePrimarySoft =
 const themePrimarySoftBorder =
   "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
 
-const themePrimaryText =
-  "text-[var(--color-primary)]";
+const themePrimaryText = "text-[var(--color-primary)]";
 
 const themePrimaryShadow =
   "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
 
 const themeCardShadow =
   "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
-
-const themeSmallShadow =
-  "shadow-[0_2px_8px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
 
 const themeNeutralSurface =
   "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
@@ -82,214 +82,50 @@ const themeDangerBorder =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-// ============================================================
-// DUMMY DATA
-// ============================================================
-
-const MATA_PELAJARAN = "Matematika";
-
-const KELAS_OPTIONS = ["9A", "9B", "8A", "8B"];
-
-const KKM = 75;
-
-const siswaPerKelas = {
-  "9A": [
-    { id: "9a-01", nis: "2409001", nama: "Ahmad Fauzi" },
-    { id: "9a-02", nis: "2409002", nama: "Bunga Citra Lestari" },
-    { id: "9a-03", nis: "2409003", nama: "Dewi Anggraini" },
-    { id: "9a-04", nis: "2409004", nama: "Farhan Maulana" },
-    { id: "9a-05", nis: "2409005", nama: "Gita Permatasari" },
-    { id: "9a-06", nis: "2409006", nama: "Hendra Saputra" },
-    { id: "9a-07", nis: "2409007", nama: "Indah Wulandari" },
-    { id: "9a-08", nis: "2409008", nama: "Joko Prasetyo" },
-    { id: "9a-09", nis: "2409009", nama: "Kirana Salsabila" },
-    { id: "9a-10", nis: "2409010", nama: "Lukman Hakim" },
-  ],
-
-  "9B": [
-    { id: "9b-01", nis: "2409011", nama: "Muhammad Rizki" },
-    { id: "9b-02", nis: "2409012", nama: "Nadia Ramadhani" },
-    { id: "9b-03", nis: "2409013", nama: "Oscar Pratama" },
-    { id: "9b-04", nis: "2409014", nama: "Putri Ayu Ningsih" },
-    { id: "9b-05", nis: "2409015", nama: "Qori Ramadhan" },
-    { id: "9b-06", nis: "2409016", nama: "Rina Amelia" },
-    { id: "9b-07", nis: "2409017", nama: "Satria Nugraha" },
-    { id: "9b-08", nis: "2409018", nama: "Tania Putri" },
-  ],
-
-  "8A": [
-    { id: "8a-01", nis: "2408001", nama: "Umar Abdullah" },
-    { id: "8a-02", nis: "2408002", nama: "Vina Anggreini" },
-    { id: "8a-03", nis: "2408003", nama: "Wahyu Setiawan" },
-    { id: "8a-04", nis: "2408004", nama: "Xena Meilani" },
-    { id: "8a-05", nis: "2408005", nama: "Yusuf Ibrahim" },
-    { id: "8a-06", nis: "2408006", nama: "Zahra Amalia" },
-    { id: "8a-07", nis: "2408007", nama: "Agus Setiadi" },
-    { id: "8a-08", nis: "2408008", nama: "Bella Safitri" },
-  ],
-
-  "8B": [
-    { id: "8b-01", nis: "2408011", nama: "Chandra Wijaya" },
-    { id: "8b-02", nis: "2408012", nama: "Dinda Puspita" },
-    { id: "8b-03", nis: "2408013", nama: "Eko Firmansyah" },
-    { id: "8b-04", nis: "2408014", nama: "Fitri Handayani" },
-    { id: "8b-05", nis: "2408015", nama: "Galih Pratama" },
-    { id: "8b-06", nis: "2408016", nama: "Hana Nuraini" },
-  ],
-};
-
-// ============================================================
-// HELPERS
-// ============================================================
-
-function getPredikat(nilai) {
-  if (nilai === null || nilai === undefined || nilai === "") {
-    return null;
-  }
-
-  const n = Number(nilai);
-
-  if (n >= 90) {
-    return {
-      label: "A",
-      type: "success",
-    };
-  }
-
-  if (n >= KKM) {
-    return {
-      label: "B",
-      type: "primary",
-    };
-  }
-
-  if (n >= 60) {
-    return {
-      label: "C",
-      type: "warning",
-    };
-  }
-
-  return {
-    label: "D",
-    type: "danger",
-  };
+function isQuiz(ujian) {
+  const jenis = String(ujian?.tipe || ujian?.jenis || "").toLowerCase();
+  return jenis === "kuis";
 }
 
-const predicateClasses = {
-  success: `${themeSuccessSurface} text-[var(--color-success)] ${themeSuccessBorder}`,
+function formatDate(value) {
+  if (!value) return "—";
 
-  primary: `${themePrimarySoft} ${themePrimaryText} ${themePrimarySoftBorder}`,
+  const date = new Date(value);
 
-  warning: `${themeWarningSurface} text-[var(--color-warning)] ${themeWarningBorder}`,
-
-  danger: `${themeDangerSurface} theme-danger ${themeDangerBorder}`,
-
-  neutral: `${themeNeutralSurface} theme-text-muted ${themeNeutralBorder}`,
-};
-
-function hitungNilai(benar, jumlahSoal) {
-  if (
-    benar === "" ||
-    benar === null ||
-    benar === undefined ||
-    !jumlahSoal
-  ) {
-    return "";
+  if (Number.isNaN(date.getTime())) {
+    return "—";
   }
 
-  return (
-    Math.round(
-      (Number(benar) / Number(jumlahSoal)) * 100 * 10
-    ) / 10
-  );
-}
-
-function buatJawabanKosong(daftarSiswa) {
-  const obj = {};
-
-  daftarSiswa.forEach((s) => {
-    obj[s.id] = {
-      benar: "",
-    };
+  return date.toLocaleDateString("id-ID", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
   });
-
-  return obj;
 }
-
-// ============================================================
-// RIWAYAT QUIZ DUMMY
-// ============================================================
-
-const initialQuiz = [
-  {
-    id: "q1",
-    kelas: "9A",
-    judul: "Quiz Bab 3 - Persamaan Linear",
-    tanggal: "11 Agustus 2026",
-    jumlahSoal: 10,
-    jawaban: {
-      "9a-01": { benar: 9 },
-      "9a-02": { benar: 10 },
-      "9a-03": { benar: 6 },
-      "9a-04": { benar: 8 },
-      "9a-05": { benar: 9 },
-      "9a-06": { benar: 7 },
-      "9a-07": { benar: 8 },
-      "9a-08": { benar: 5 },
-      "9a-09": { benar: 10 },
-      "9a-10": { benar: 7 },
-    },
-  },
-
-  {
-    id: "q2",
-    kelas: "9B",
-    judul: "Quiz Bab 3 - Persamaan Linear",
-    tanggal: "12 Agustus 2026",
-    jumlahSoal: 10,
-    jawaban: {
-      "9b-01": { benar: 8 },
-      "9b-02": { benar: 6 },
-      "9b-03": { benar: 5 },
-      "9b-04": { benar: 9 },
-      "9b-05": { benar: 10 },
-      "9b-06": { benar: 7 },
-      "9b-07": { benar: 6 },
-      "9b-08": { benar: 9 },
-    },
-  },
-];
-
-const TANGGAL_HARI_INI = "17 Agustus 2026";
-
-// ============================================================
-// PAGE
-// ============================================================
 
 export default function GuruNilaiQuizPage() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  const [kelas, setKelas] = useState(KELAS_OPTIONS[0]);
+  const [classes, setClasses] = useState([]);
+  const [selectedClassId, setSelectedClassId] = useState("");
 
-  const [daftarQuiz, setDaftarQuiz] =
-    useState(initialQuiz);
+  const [komponenData, setKomponenData] = useState({
+    komponen: [],
+    totalBobot: 0,
+    sisaBobot: 100,
+    status: "draft",
+  });
 
-  const [selectedId, setSelectedId] = useState(null);
+  const [selectedKomponenId, setSelectedKomponenId] = useState("");
 
-  const [judul, setJudul] = useState("");
+  const [quizzes, setQuizzes] = useState([]);
 
-  const [tanggal, setTanggal] =
-    useState(TANGGAL_HARI_INI);
+  const [loadingClasses, setLoadingClasses] = useState(true);
+  const [loadingData, setLoadingData] = useState(false);
+  const [syncingId, setSyncingId] = useState(null);
 
-  const [jumlahSoal, setJumlahSoal] =
-    useState(10);
-
-  const [jawaban, setJawaban] =
-    useState({});
-
-  const [savedFlash, setSavedFlash] =
-    useState(false);
+  const [error, setError] = useState("");
+  const [feedback, setFeedback] = useState(null);
 
   const notifications = [
     {
@@ -306,268 +142,199 @@ export default function GuruNilaiQuizPage() {
     },
   ];
 
-  const daftarSiswa =
-    siswaPerKelas[kelas] || [];
+  const loadClasses = useCallback(async () => {
+    setLoadingClasses(true);
+    setError("");
 
-  const quizKelasIni = useMemo(() => {
-    return daftarQuiz
-      .filter((q) => q.kelas === kelas)
-      .sort((a, b) =>
-        a.tanggal < b.tanggal ? 1 : -1
+    try {
+      const data = await getNilaiKelasSaya();
+
+      setClasses(data);
+
+      setSelectedClassId((current) => {
+        if (current && data.some((item) => item.kelasMapelId === current)) {
+          return current;
+        }
+
+        return data[0]?.kelasMapelId || "";
+      });
+    } catch (err) {
+      console.error("Gagal mengambil kelas nilai:", err);
+      setClasses([]);
+      setSelectedClassId("");
+      setError(
+        err?.message ||
+          "Gagal mengambil daftar kelas yang diampu. Pastikan backend berjalan dan akun memiliki akses guru."
       );
-  }, [daftarQuiz, kelas]);
+    } finally {
+      setLoadingClasses(false);
+    }
+  }, []);
 
   useEffect(() => {
-    const daftar = daftarQuiz.filter(
-      (q) => q.kelas === kelas
-    );
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadClasses();
+  }, [loadClasses]);
 
-    if (daftar.length > 0) {
-      bukaQuiz(daftar[0]);
-    } else {
-      quizBaru();
-    }
-
-    setSavedFlash(false);
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [kelas]);
-
-  const bukaQuiz = (q) => {
-    setSelectedId(q.id);
-    setJudul(q.judul);
-    setTanggal(q.tanggal);
-    setJumlahSoal(q.jumlahSoal);
-
-    const isi = {};
-
-    (siswaPerKelas[q.kelas] || []).forEach((s) => {
-      isi[s.id] =
-        q.jawaban[s.id] || {
-          benar: "",
-        };
-    });
-
-    setJawaban(isi);
-    setSavedFlash(false);
-  };
-
-  const quizBaru = () => {
-    setSelectedId(null);
-    setJudul("");
-    setTanggal(TANGGAL_HARI_INI);
-    setJumlahSoal(10);
-
-    setJawaban(
-      buatJawabanKosong(
-        siswaPerKelas[kelas] || []
-      )
-    );
-
-    setSavedFlash(false);
-  };
-
-  const setBenarSiswa = (
-    siswaId,
-    value
-  ) => {
-    if (
-      value !== "" &&
-      (
-        Number.isNaN(Number(value)) ||
-        Number(value) < 0 ||
-        Number(value) > jumlahSoal
-      )
-    ) {
+  const loadData = useCallback(async (kelasMapelId) => {
+    if (!kelasMapelId) {
+      setKomponenData({
+        komponen: [],
+        totalBobot: 0,
+        sisaBobot: 100,
+        status: "draft",
+      });
+      setQuizzes([]);
+      setSelectedKomponenId("");
       return;
     }
 
-    setJawaban((prev) => ({
-      ...prev,
-      [siswaId]: {
-        benar: value,
-      },
-    }));
-  };
+    setLoadingData(true);
+    setError("");
 
-  const rekap = useMemo(() => {
-    const nilaiSemua = Object.values(jawaban)
-      .map((j) =>
-        hitungNilai(
-          j.benar,
-          jumlahSoal
-        )
-      )
-      .filter((n) => n !== "");
+    try {
+      const [komponenResult, ujianResult] = await Promise.all([
+        getKomponenNilai(kelasMapelId),
+        getUjianByKelasMapel(kelasMapelId),
+      ]);
 
-    const dikerjakan =
-      nilaiSemua.length;
+      setKomponenData(komponenResult);
 
-    const rataRata = dikerjakan
-      ? Math.round(
-          (
-            nilaiSemua.reduce(
-              (a, b) => a + b,
-              0
-            ) / dikerjakan
-          ) * 10
-        ) / 10
-      : 0;
+      const daftarUjian = Array.isArray(ujianResult) ? ujianResult : [];
+      const daftarQuiz = daftarUjian.filter(isQuiz);
 
-    const tertinggi = dikerjakan
-      ? Math.max(...nilaiSemua)
-      : 0;
+      setQuizzes(daftarQuiz);
 
-    const terendah = dikerjakan
-      ? Math.min(...nilaiSemua)
-      : 0;
+      setSelectedKomponenId((current) => {
+        if (
+          current &&
+          komponenResult.komponen.some((item) => item.id === current)
+        ) {
+          return current;
+        }
+
+        return komponenResult.komponen[0]?.id || "";
+      });
+    } catch (err) {
+      console.error("Gagal mengambil data nilai quiz:", err);
+      setKomponenData({
+        komponen: [],
+        totalBobot: 0,
+        sisaBobot: 100,
+        status: "draft",
+      });
+      setQuizzes([]);
+      setError(
+        err?.message ||
+          "Gagal mengambil komponen nilai atau daftar kuis. Pastikan kelas ini masih diampu oleh akun Anda."
+      );
+    } finally {
+      setLoadingData(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadData(selectedClassId);
+  }, [selectedClassId, loadData]);
+
+  const selectedClass = classes.find(
+    (item) => item.kelasMapelId === selectedClassId
+  );
+
+  const komponen = komponenData.komponen;
+
+  const isFinalized =
+    komponenData.status === "final" || selectedClass?.status === "final";
+
+  const selectedKomponen = komponen.find(
+    (item) => item.id === selectedKomponenId
+  );
+
+  const statistik = useMemo(() => {
+    const totalPercobaan = quizzes.reduce(
+      (total, item) => total + Number(item._count?.percobaanAsesmen || 0),
+      0
+    );
+
+    const dipublikasikan = quizzes.filter(
+      (item) => item.dipublikasikan
+    ).length;
 
     return {
-      dikerjakan,
-      rataRata,
-      tertinggi,
-      terendah,
+      totalQuiz: quizzes.length,
+      dipublikasikan,
+      totalPercobaan,
     };
-  }, [jawaban, jumlahSoal]);
+  }, [quizzes]);
 
-  const totalSiswa =
-    daftarSiswa.length;
-
-  const statistikKelas = useMemo(() => {
-    if (quizKelasIni.length === 0) {
-      return {
-        rataRata: null,
-        perluPerhatian: [],
-      };
+  const handleTarik = async (quiz) => {
+    if (!selectedClassId) {
+      setFeedback({
+        type: "error",
+        message: "Pilih kelas dan mata pelajaran terlebih dahulu.",
+      });
+      return;
     }
 
-    let totalRata = 0;
-    let jumlahRata = 0;
+    if (!selectedKomponenId) {
+      setFeedback({
+        type: "error",
+        message:
+          "Pilih komponen nilai tujuan sebelum menarik nilai quiz.",
+      });
+      return;
+    }
 
-    const rekapSiswa = {};
+    if (isFinalized) {
+      setFeedback({
+        type: "error",
+        message:
+          "Nilai kelas ini sudah difinalisasi sehingga tidak dapat diubah.",
+      });
+      return;
+    }
 
-    quizKelasIni.forEach((q) => {
-      const nilaiValid = Object.entries(
-        q.jawaban
-      )
-        .map(([sid, j]) => [
-          sid,
-          hitungNilai(
-            j.benar,
-            q.jumlahSoal
-          ),
-        ])
-        .filter(([, n]) => n !== "");
+    setSyncingId(quiz.id);
+    setFeedback(null);
 
-      if (nilaiValid.length) {
-        totalRata +=
-          nilaiValid.reduce(
-            (a, [, n]) => a + n,
-            0
-          ) / nilaiValid.length;
+    try {
+      const result = await tarikSumberNilai({
+        kelasMapelId: selectedClassId,
+        komponenNilaiId: selectedKomponenId,
+        jenisSumber: "asesmen",
+        sumberId: quiz.id,
+      });
 
-        jumlahRata += 1;
-      }
-
-      nilaiValid.forEach(
-        ([sid, n]) => {
-          if (!rekapSiswa[sid]) {
-            rekapSiswa[sid] = [];
-          }
-
-          rekapSiswa[sid].push(n);
-        }
-      );
-    });
-
-    const rataRata = jumlahRata
-      ? Math.round(
-          (totalRata / jumlahRata) * 10
-        ) / 10
-      : null;
-
-    const perluPerhatian =
-      Object.entries(rekapSiswa)
-        .map(([sid, arr]) => ({
-          sid,
-          rata:
-            arr.reduce(
-              (a, b) => a + b,
-              0
-            ) / arr.length,
-        }))
-        .filter((x) => x.rata < KKM)
-        .sort(
-          (a, b) => a.rata - b.rata
-        )
-        .slice(0, 3)
-        .map((x) => {
-          const siswa =
-            daftarSiswa.find(
-              (s) => s.id === x.sid
-            );
-
-          return {
-            nama: siswa
-              ? siswa.nama
-              : x.sid,
-            rata:
-              Math.round(
-                x.rata * 10
-              ) / 10,
-          };
+      if (result.jumlahDisimpan === 0) {
+        setFeedback({
+          type: "error",
+          message:
+            result.jumlahDilewati > 0
+              ? `Tidak ada nilai valid yang dapat disinkronkan dari "${quiz.judul}". Pastikan siswa sudah mengerjakan kuis ini.`
+              : `Tidak ada nilai yang dapat disinkronkan dari "${quiz.judul}".`,
         });
-
-    return {
-      rataRata,
-      perluPerhatian,
-    };
-  }, [
-    quizKelasIni,
-    daftarSiswa,
-  ]);
-
-  const simpanQuiz = () => {
-    setDaftarQuiz((prev) => {
-      const idx = selectedId
-        ? prev.findIndex(
-            (q) => q.id === selectedId
-          )
-        : -1;
-
-      const entry = {
-        id:
-          selectedId ||
-          `q-${Date.now()}`,
-        kelas,
-        judul:
-          judul.trim() ||
-          "Quiz Tanpa Judul",
-        tanggal,
-        jumlahSoal:
-          Number(jumlahSoal) || 10,
-        jawaban,
-      };
-
-      if (idx >= 0) {
-        const copy = [...prev];
-
-        copy[idx] = entry;
-
-        return copy;
+      } else {
+        setFeedback({
+          type: "success",
+          message: `Berhasil menyinkronkan ${result.jumlahDisimpan} nilai dari "${quiz.judul}" ke komponen "${selectedKomponen?.nama}". ${
+            result.jumlahDilewati > 0
+              ? `${result.jumlahDilewati} siswa tidak memiliki nilai valid.`
+              : ""
+          }`,
+        });
       }
-
-      setSelectedId(entry.id);
-
-      return [entry, ...prev];
-    });
-
-    setSavedFlash(true);
-
-    setTimeout(
-      () => setSavedFlash(false),
-      2500
-    );
+    } catch (err) {
+      console.error("Gagal menarik nilai quiz:", err);
+      setFeedback({
+        type: "error",
+        message:
+          err?.message ||
+          "Gagal menarik nilai quiz. Periksa kembali kelas, komponen, dan kuis yang dipilih.",
+      });
+    } finally {
+      setSyncingId(null);
+    }
   };
 
   return (
@@ -580,9 +347,7 @@ export default function GuruNilaiQuizPage() {
         active="nilaiQuiz"
         setActive={() => {}}
         collapsed={!sidebarOpen}
-        setCollapsed={() =>
-          setSidebarOpen(!sidebarOpen)
-        }
+        setCollapsed={() => setSidebarOpen(!sidebarOpen)}
       />
 
       <div className="flex min-w-0 flex-1 flex-col">
@@ -591,14 +356,12 @@ export default function GuruNilaiQuizPage() {
         =================================================== */}
 
         <Header
-          toggleSidebar={() =>
-            setSidebarOpen(!sidebarOpen)
-          }
+          toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
           notifications={notifications}
           user={{
-            name: "Bu Sari",
+            name: "Guru",
             email: "guru@smartschool.com",
-            avatar: "AS",
+            avatar: "GR",
           }}
         />
 
@@ -608,7 +371,6 @@ export default function GuruNilaiQuizPage() {
 
         <main className="theme-page flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           <div className="w-full space-y-6">
-
             {/* =================================================
                 PAGE HEADER
             ================================================= */}
@@ -634,14 +396,75 @@ export default function GuruNilaiQuizPage() {
                   />
 
                   <span className="truncate">
-                    Rekap hasil quiz mata
-                    pelajaran{" "}
-                    {MATA_PELAJARAN} berdasarkan
-                    jumlah jawaban benar.
+                    Sinkronkan hasil kuis ke komponen nilai kelas-mapel.
                   </span>
                 </p>
               </div>
             </div>
+
+            {/* =================================================
+                API ERROR
+            ================================================= */}
+
+            {error && (
+              <div
+                className={`flex flex-col gap-3 rounded-xl border p-4 sm:flex-row sm:items-center sm:justify-between ${themeDangerBorder} ${themeDangerSurface}`}
+              >
+                <div className="flex items-start gap-3">
+                  <AlertTriangle
+                    size={18}
+                    className="mt-0.5 shrink-0 theme-danger"
+                  />
+                  <p className="text-sm leading-6 theme-danger">{error}</p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={loadClasses}
+                  className={`inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border px-3 py-2 text-xs font-semibold theme-danger ${themeDangerBorder} transition hover:bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]`}
+                >
+                  <RefreshCw size={14} />
+                  Muat ulang
+                </button>
+              </div>
+            )}
+
+            {/* =================================================
+                FEEDBACK
+            ================================================= */}
+
+            {feedback && (
+              <div
+                role="status"
+                className={`flex items-start gap-3 rounded-xl border p-4 ${
+                  feedback.type === "success"
+                    ? `${themeSuccessBorder} ${themeSuccessSurface}`
+                    : `${themeDangerBorder} ${themeDangerSurface}`
+                }`}
+              >
+                {feedback.type === "success" ? (
+                  <Info
+                    size={18}
+                    className="mt-0.5 shrink-0 text-[var(--color-success)]"
+                  />
+                ) : (
+                  <AlertTriangle
+                    size={18}
+                    className="mt-0.5 shrink-0 theme-danger"
+                  />
+                )}
+
+                <p
+                  className={`text-sm leading-6 ${
+                    feedback.type === "success"
+                      ? "text-[var(--color-success)]"
+                      : "theme-danger"
+                  }`}
+                >
+                  {feedback.message}
+                </p>
+              </div>
+            )}
 
             {/* =================================================
                 SELECTOR
@@ -650,107 +473,107 @@ export default function GuruNilaiQuizPage() {
             <div
               className={`theme-card rounded-xl border p-4 ${themeNeutralBorder} ${themeCardShadow}`}
             >
-              <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-
+              <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:flex-wrap sm:items-end">
                 {/* KELAS */}
 
-                <div className="relative w-full sm:w-40">
-                  <select
-                    value={kelas}
-                    onChange={(e) =>
-                      setKelas(e.target.value)
-                    }
-                    className={`theme-input ${themeFocus} theme-text w-full cursor-pointer appearance-none rounded-lg border px-3 py-2.5 pr-9 text-sm font-medium transition-colors`}
+                <div className="w-full sm:w-56">
+                  <label
+                    htmlFor="kelas-mapel"
+                    className="theme-text-muted mb-1.5 block text-[11px] font-medium uppercase tracking-wider"
                   >
-                    {KELAS_OPTIONS.map(
-                      (k) => (
-                        <option
-                          key={k}
-                          value={k}
-                        >
-                          Kelas {k}
+                    Kelas & mapel
+                  </label>
+
+                  <div className="relative">
+                    <select
+                      id="kelas-mapel"
+                      value={selectedClassId}
+                      onChange={(event) => {
+                        setSelectedClassId(event.target.value);
+                        setFeedback(null);
+                      }}
+                      disabled={loadingClasses || classes.length === 0}
+                      className={`theme-input ${themeFocus} theme-text w-full cursor-pointer appearance-none rounded-lg border px-3 py-2.5 pr-9 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60`}
+                    >
+                      {classes.length === 0 && (
+                        <option value="">
+                          {loadingClasses
+                            ? "Memuat kelas..."
+                            : "Belum ada kelas yang diampu"}
                         </option>
-                      )
-                    )}
-                  </select>
+                      )}
 
-                  <ChevronDown
-                    size={14}
-                    className="theme-text-muted pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
-                  />
+                      {classes.map((item) => (
+                        <option
+                          key={item.kelasMapelId}
+                          value={item.kelasMapelId}
+                        >
+                          {item.kelas?.nama || "-"} —{" "}
+                          {item.mataPelajaran?.nama || "-"}
+                        </option>
+                      ))}
+                    </select>
+
+                    <ChevronDown
+                      size={14}
+                      className="theme-text-muted pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
+                    />
+                  </div>
                 </div>
 
-                {/* JUDUL */}
+                {/* KOMPONEN */}
 
-                <input
-                  type="text"
-                  value={judul}
-                  onChange={(e) =>
-                    setJudul(
-                      e.target.value
-                    )
-                  }
-                  placeholder="Judul quiz (mis. Quiz Bab 3)"
-                  className={`theme-input ${themeFocus} theme-text placeholder:text-[var(--color-text-placeholder)] min-w-[200px] flex-1 rounded-lg border px-3 py-2.5 text-sm transition-colors`}
-                />
+                <div className="w-full sm:w-56">
+                  <label
+                    htmlFor="komponen"
+                    className="theme-text-muted mb-1.5 block text-[11px] font-medium uppercase tracking-wider"
+                  >
+                    Komponen tujuan
+                  </label>
 
-                {/* TANGGAL */}
+                  <div className="relative">
+                    <select
+                      id="komponen"
+                      value={selectedKomponenId}
+                      onChange={(event) => {
+                        setSelectedKomponenId(event.target.value);
+                        setFeedback(null);
+                      }}
+                      disabled={komponen.length === 0}
+                      className={`theme-input ${themeFocus} theme-text w-full cursor-pointer appearance-none rounded-lg border px-3 py-2.5 pr-9 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60`}
+                    >
+                      {komponen.length === 0 && (
+                        <option value="">
+                          Belum ada komponen nilai
+                        </option>
+                      )}
 
-                <input
-                  type="text"
-                  value={tanggal}
-                  onChange={(e) =>
-                    setTanggal(
-                      e.target.value
-                    )
-                  }
-                  placeholder="Tanggal"
-                  className={`theme-input ${themeFocus} theme-text placeholder:text-[var(--color-text-placeholder)] w-full rounded-lg border px-3 py-2.5 text-sm transition-colors sm:w-40`}
-                />
+                      {komponen.map((item) => (
+                        <option key={item.id} value={item.id}>
+                          {item.nama} ({Number(item.bobot)}%)
+                        </option>
+                      ))}
+                    </select>
 
-                {/* JUMLAH SOAL */}
-
-                <div className="flex items-center gap-1.5">
-                  <span className="theme-text-muted whitespace-nowrap text-xs">
-                    Jumlah soal
-                  </span>
-
-                  <input
-                    type="number"
-                    min={1}
-                    value={jumlahSoal}
-                    onChange={(e) =>
-                      setJumlahSoal(
-                        e.target.value
-                      )
-                    }
-                    className={`theme-input ${themeFocus} theme-text w-16 rounded-lg border px-3 py-2.5 text-sm transition-colors`}
-                  />
+                    <ChevronDown
+                      size={14}
+                      className="theme-text-muted pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
+                    />
+                  </div>
                 </div>
-
-                {/* QUIZ BARU */}
-
-                <button
-                  onClick={quizBaru}
-                  className={`flex flex-shrink-0 items-center justify-center gap-1.5 rounded-lg border px-3 py-2.5 text-xs font-medium transition-colors ${themePrimarySoft} ${themePrimarySoftBorder} ${themePrimaryText} hover:bg-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]`}
-                >
-                  <PlusCircle size={14} />
-
-                  Quiz Baru
-                </button>
 
                 {/* STATUS */}
 
                 <span
-                  className={`flex flex-shrink-0 items-center rounded-full border px-2.5 py-1.5 text-[11px] font-medium ${
-                    selectedId
+                  className={`flex flex-shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-2 text-[11px] font-medium ${
+                    isFinalized
                       ? `${themeSuccessSurface} text-[var(--color-success)] ${themeSuccessBorder}`
                       : `${themeNeutralSurface} theme-text-muted ${themeNeutralBorder}`
                   }`}
                 >
-                  {selectedId
-                    ? "Sudah tersimpan · bisa diedit"
-                    : "Belum disimpan"}
+                  {isFinalized
+                    ? "Nilai sudah difinalisasi"
+                    : "Nilai masih dapat diubah"}
                 </span>
               </div>
             </div>
@@ -759,32 +582,7 @@ export default function GuruNilaiQuizPage() {
                 SUMMARY CARDS
             ================================================= */}
 
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
-
-              {/* TOTAL SISWA */}
-
-              <div
-                className={`theme-card flex min-w-0 items-center gap-3 rounded-xl border p-3.5 ${themeNeutralBorder} ${themeCardShadow}`}
-              >
-                <div
-                  className={`flex flex-shrink-0 items-center justify-center rounded-lg border p-2 ${themeNeutralSurface} theme-text-secondary ${themeNeutralBorder}`}
-                >
-                  <Users size={16} />
-                </div>
-
-                <div className="min-w-0">
-                  <p className="theme-text-muted truncate text-[11px] font-medium uppercase tracking-wider">
-                    Total Siswa
-                  </p>
-
-                  <p className="theme-text text-lg font-bold">
-                    {totalSiswa}
-                  </p>
-                </div>
-              </div>
-
-              {/* SUDAH KERJAKAN */}
-
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               <div
                 className={`theme-card flex min-w-0 items-center gap-3 rounded-xl border p-3.5 ${themeNeutralBorder} ${themeCardShadow}`}
               >
@@ -796,16 +594,13 @@ export default function GuruNilaiQuizPage() {
 
                 <div className="min-w-0">
                   <p className="theme-text-muted truncate text-[11px] font-medium uppercase tracking-wider">
-                    Sudah Kerjakan
+                    Total Kuis
                   </p>
-
                   <p className="theme-text text-lg font-bold">
-                    {rekap.dikerjakan}
+                    {loadingData ? "—" : statistik.totalQuiz}
                   </p>
                 </div>
               </div>
-
-              {/* TERTINGGI */}
 
               <div
                 className={`theme-card flex min-w-0 items-center gap-3 rounded-xl border p-3.5 ${themeNeutralBorder} ${themeCardShadow}`}
@@ -813,43 +608,37 @@ export default function GuruNilaiQuizPage() {
                 <div
                   className={`flex flex-shrink-0 items-center justify-center rounded-lg border p-2 ${themeSuccessSurface} text-[var(--color-success)] ${themeSuccessBorder}`}
                 >
-                  <TrendingUp size={16} />
+                  <Users size={16} />
                 </div>
 
                 <div className="min-w-0">
                   <p className="theme-text-muted truncate text-[11px] font-medium uppercase tracking-wider">
-                    Tertinggi
+                    Dipublikasikan
                   </p>
-
                   <p className="theme-text text-lg font-bold">
-                    {rekap.tertinggi || "-"}
+                    {loadingData ? "—" : statistik.dipublikasikan}
                   </p>
                 </div>
               </div>
-
-              {/* TERENDAH */}
 
               <div
                 className={`theme-card flex min-w-0 items-center gap-3 rounded-xl border p-3.5 ${themeNeutralBorder} ${themeCardShadow}`}
               >
                 <div
-                  className={`flex flex-shrink-0 items-center justify-center rounded-lg border p-2 ${themeDangerSurface} theme-danger ${themeDangerBorder}`}
+                  className={`flex flex-shrink-0 items-center justify-center rounded-lg border p-2 ${themeInfoSurface} text-[var(--color-info)] ${themeInfoBorder}`}
                 >
-                  <TrendingDown size={16} />
+                  <BarChart3 size={16} />
                 </div>
 
                 <div className="min-w-0">
                   <p className="theme-text-muted truncate text-[11px] font-medium uppercase tracking-wider">
-                    Terendah
+                    Percobaan
                   </p>
-
                   <p className="theme-text text-lg font-bold">
-                    {rekap.terendah || "-"}
+                    {loadingData ? "—" : statistik.totalPercobaan}
                   </p>
                 </div>
               </div>
-
-              {/* RATA-RATA */}
 
               <div
                 className={`theme-card flex min-w-0 items-center gap-3 rounded-xl border p-3.5 ${themeNeutralBorder} ${themeCardShadow}`}
@@ -857,16 +646,17 @@ export default function GuruNilaiQuizPage() {
                 <div
                   className={`flex flex-shrink-0 items-center justify-center rounded-lg border p-2 ${themeWarningSurface} text-[var(--color-warning)] ${themeWarningBorder}`}
                 >
-                  <BarChart3 size={16} />
+                  <Download size={16} />
                 </div>
 
                 <div className="min-w-0">
                   <p className="theme-text-muted truncate text-[11px] font-medium uppercase tracking-wider">
-                    Rata-rata
+                    Bobot komponen
                   </p>
-
                   <p className="theme-text text-lg font-bold">
-                    {rekap.rataRata || "-"}
+                    {selectedKomponen
+                      ? `${Number(selectedKomponen.bobot)}%`
+                      : "—"}
                   </p>
                 </div>
               </div>
@@ -877,411 +667,220 @@ export default function GuruNilaiQuizPage() {
             ================================================= */}
 
             <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
-
-              {/* =================================================
-                  FORM NILAI QUIZ
-              ================================================= */}
+              {/* DAFTAR KUIS */}
 
               <div
                 className={`theme-card overflow-hidden rounded-xl border lg:col-span-2 ${themeNeutralBorder} ${themeCardShadow}`}
               >
-                {/* HEADER */}
-
                 <div
                   className={`flex flex-col gap-3 border-b p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5 ${themeDivider}`}
                 >
                   <div className="min-w-0">
                     <h2 className="theme-text truncate text-sm font-semibold">
-                      {judul.trim() ||
-                        "Quiz Baru"}{" "}
-                      · Kelas {kelas}
+                      Daftar Kuis
                     </h2>
 
                     <p className="theme-text-muted mt-0.5 text-xs">
-                      {rekap.dikerjakan} dari{" "}
-                      {totalSiswa} siswa sudah
-                      mengerjakan ·{" "}
-                      {jumlahSoal} soal
+                      {selectedClass
+                        ? `${selectedClass.mataPelajaran?.nama || "-"} · ${
+                            selectedClass.kelas?.nama || "-"
+                          }`
+                        : "Pilih kelas terlebih dahulu"}
                     </p>
                   </div>
                 </div>
 
-                {/* DAFTAR SISWA */}
+                {loadingData && (
+                  <div className="flex flex-col items-center justify-center p-12">
+                    <Loader2
+                      size={24}
+                      className="theme-text-muted animate-spin"
+                    />
+                    <p className="theme-text-muted mt-3 text-sm">
+                      Memuat daftar kuis...
+                    </p>
+                  </div>
+                )}
 
-                <div>
-                  {daftarSiswa.map(
-                    (siswa, idx) => {
-                      const benar =
-                        jawaban[siswa.id]
-                          ?.benar ?? "";
+                {!loadingData && quizzes.length === 0 && (
+                  <div className="p-10 text-center">
+                    <Info size={24} className="theme-text-muted mx-auto" />
+                    <p className="theme-text mt-3 text-sm font-semibold">
+                      Belum ada kuis
+                    </p>
+                    <p className="theme-text-muted mt-1 text-xs leading-5">
+                      Kuis adalah ujian dengan jenis &quot;Kuis&quot;. Buat
+                      kuis melalui halaman Ujian terlebih dahulu.
+                    </p>
+                  </div>
+                )}
 
-                      const nilai =
-                        hitungNilai(
-                          benar,
-                          jumlahSoal
-                        );
+                {!loadingData && quizzes.length > 0 && (
+                  <div>
+                    {quizzes.map((quiz) => {
+                      const jumlahSoal = Number(
+                        quiz._count?.soalAsesmen || 0
+                      );
+                      const jumlahPercobaan = Number(
+                        quiz._count?.percobaanAsesmen || 0
+                      );
 
-                      const predikat =
-                        getPredikat(
-                          nilai
-                        );
+                      const isSyncing = syncingId === quiz.id;
 
                       return (
                         <div
-                          key={siswa.id}
-                          className={`flex flex-col gap-3 border-b p-4 transition-colors sm:px-5 sm:py-3.5 ${themeDivider} ${themeNeutralHover}`}
+                          key={quiz.id}
+                          className={`flex flex-col gap-3 border-b p-4 transition-colors last:border-b-0 sm:flex-row sm:items-center sm:justify-between sm:px-5 sm:py-4 ${themeDivider} ${themeNeutralHover}`}
                         >
-                          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                          <div className="min-w-0">
+                            <p className="theme-text truncate text-sm font-medium">
+                              {quiz.judul || "Kuis tanpa judul"}
+                            </p>
 
-                            {/* SISWA */}
+                            <p className="theme-text-muted mt-1 text-[11px]">
+                              {formatDate(quiz.waktuMulai)} · {jumlahSoal} soal
+                              · {jumlahPercobaan} percobaan
+                            </p>
 
-                            <div className="flex min-w-0 flex-shrink-0 items-center gap-3 sm:w-56">
-                              <span className="theme-text-muted w-6 flex-shrink-0 text-xs font-medium">
-                                {idx + 1}.
-                              </span>
-
-                              <div className="min-w-0">
-                                <p className="theme-text truncate text-sm font-medium">
-                                  {siswa.nama}
-                                </p>
-
-                                <p className="theme-text-muted text-[11px]">
-                                  NIS{" "}
-                                  {siswa.nis}
-                                </p>
-                              </div>
-                            </div>
-
-                            {/* JAWABAN BENAR */}
-
-                            <div className="flex flex-shrink-0 items-center gap-2">
-                              <input
-                                type="number"
-                                min={0}
-                                max={
-                                  jumlahSoal
-                                }
-                                value={benar}
-                                onChange={(
-                                  e
-                                ) =>
-                                  setBenarSiswa(
-                                    siswa.id,
-                                    e.target
-                                      .value
-                                  )
-                                }
-                                placeholder="Benar"
-                                className={`theme-input ${themeFocus} theme-text placeholder:text-[var(--color-text-placeholder)] w-20 rounded-lg border px-3 py-1.5 text-sm transition-colors`}
-                              />
-
-                              <span className="theme-text-muted whitespace-nowrap text-xs">
-                                /{" "}
-                                {jumlahSoal}{" "}
-                                soal
-                              </span>
-                            </div>
-
-                            {/* NILAI + PREDIKAT */}
-
-                            <div className="flex flex-shrink-0 items-center gap-2 sm:ml-auto">
-                              <span className="theme-text w-12 text-right text-sm font-semibold">
-                                {nilai === ""
-                                  ? "-"
-                                  : nilai}
-                              </span>
-
+                            <div className="mt-2 flex flex-wrap items-center gap-1.5">
                               <span
-                                className={`inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg border text-xs font-semibold ${
-                                  predikat
-                                    ? predicateClasses[
-                                        predikat
-                                          .type
-                                      ]
-                                    : predicateClasses.neutral
+                                className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${
+                                  quiz.dipublikasikan
+                                    ? `${themeSuccessSurface} text-[var(--color-success)] ${themeSuccessBorder}`
+                                    : `${themeNeutralSurface} theme-text-muted ${themeNeutralBorder}`
                                 }`}
                               >
-                                {predikat
-                                  ? predikat.label
-                                  : "-"}
+                                {quiz.dipublikasikan
+                                  ? "Dipublikasikan"
+                                  : "Draf"}
                               </span>
+
+                              {quiz.tipe && (
+                                <span
+                                  className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${themeInfoSurface} text-[var(--color-info)] ${themeInfoBorder}`}
+                                >
+                                  {quiz.tipe}
+                                </span>
+                              )}
                             </div>
                           </div>
+
+                          <button
+                            type="button"
+                            onClick={() => handleTarik(quiz)}
+                            disabled={
+                              isSyncing ||
+                              isFinalized ||
+                              !selectedKomponenId
+                            }
+                            className={`flex flex-shrink-0 items-center justify-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium transition-colors ${themePrimarySoft} ${themePrimarySoftBorder} ${themePrimaryText} hover:bg-[color-mix(in_srgb,var(--color-primary)_14%,transparent)] disabled:cursor-not-allowed disabled:opacity-50`}
+                          >
+                            {isSyncing ? (
+                              <Loader2 size={13} className="animate-spin" />
+                            ) : (
+                              <Download size={13} />
+                            )}
+                            {isSyncing ? "Menyinkronkan..." : "Tarik nilai"}
+                          </button>
                         </div>
                       );
-                    }
-                  )}
-                </div>
-
-                {/* FOOTER */}
-
-                <div
-                  className={`flex flex-col items-center justify-end gap-3 border-t p-4 sm:flex-row sm:p-5 ${themeDivider} ${themeNeutralSurface}`}
-                >
-                  {savedFlash && (
-                    <span className="text-xs font-medium text-[var(--color-success)]">
-                      Nilai quiz
-                      tersimpan.
-                    </span>
-                  )}
-
-                  <button
-                    onClick={simpanQuiz}
-                    className={`flex w-full items-center justify-center gap-2 rounded-lg px-5 py-2.5 text-sm font-medium transition-all sm:w-auto ${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow} hover:opacity-90`}
-                  >
-                    <Save size={15} />
-
-                    {selectedId
-                      ? "Simpan Perubahan"
-                      : "Simpan Quiz"}
-                  </button>
-                </div>
+                    })}
+                  </div>
+                )}
               </div>
 
-              {/* =================================================
-                  PANEL KANAN
-              ================================================= */}
+              {/* PANEL KANAN */}
 
               <div className="space-y-6 lg:col-span-1">
-
-                {/* =================================================
-                    STATISTIK KELAS
-                ================================================= */}
-
                 <div
                   className={`theme-card rounded-xl border p-4 sm:p-5 ${themeNeutralBorder} ${themeCardShadow}`}
                 >
                   <div className="mb-4 flex items-center gap-2">
-                    <BarChart3
-                      size={16}
-                      className="theme-text-muted"
-                    />
+                    <Info size={16} className="theme-text-muted" />
 
                     <h2 className="theme-text text-sm font-semibold">
-                      Statistik Kelas{" "}
-                      {kelas}
+                      Cara kerja nilai quiz
                     </h2>
                   </div>
 
-                  {statistikKelas.rataRata ===
-                  null ? (
-                    <p className="theme-text-muted text-xs">
-                      Belum ada data cukup
-                      untuk statistik.
+                  <ul className="theme-text-secondary space-y-3 text-xs leading-5">
+                    <li className="flex gap-2">
+                      <span className="theme-primary-text mt-0.5 font-bold">
+                        1.
+                      </span>
+                      Pilih kelas-mapel dan komponen nilai tujuan.
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="theme-primary-text mt-0.5 font-bold">
+                        2.
+                      </span>
+                      Klik &quot;Tarik nilai&quot; pada kuis untuk menyinkronkan
+                      nilai hasil asesmen ke komponen.
+                    </li>
+                    <li className="flex gap-2">
+                      <span className="theme-primary-text mt-0.5 font-bold">
+                        3.
+                      </span>
+                      Backend memilih nilai terbaik setiap siswa dan
+                      menyimpannya sebagai sumber &quot;otomatis&quot;.
+                    </li>
+                  </ul>
+
+                  <div
+                    className={`mt-4 rounded-lg border p-3 ${themeWarningBorder} ${themeWarningSurface}`}
+                  >
+                    <p className="text-[11px] leading-5 text-[var(--color-warning)]">
+                      Rincian nilai per siswa untuk kuis tidak tersedia melalui
+                      endpoint backend saat ini (detail ujian hanya
+                      mengembalikan soal). Buka komponen pada halaman Nilai
+                      Tugas/Finalisasi untuk melihat nilai yang sudah
+                      tersinkron.
                     </p>
-                  ) : (
-                    <>
-                      <div className="mb-4">
-                        <div className="mb-1.5 flex items-baseline justify-between">
-                          <span className="theme-text-muted text-xs">
-                            Rata-rata seluruh
-                            quiz
-                          </span>
+                  </div>
+                </div>
 
-                          <span className="theme-text text-lg font-bold">
-                            {
-                              statistikKelas.rataRata
-                            }
-                          </span>
-                        </div>
+                {selectedKomponen && (
+                  <div
+                    className={`theme-card overflow-hidden rounded-xl border ${themeNeutralBorder} ${themeCardShadow}`}
+                  >
+                    <div
+                      className={`flex items-center gap-2 border-b p-4 sm:p-5 ${themeDivider}`}
+                    >
+                      <Download size={16} className="theme-text-muted" />
 
-                        {/* PROGRESS */}
+                      <h2 className="theme-text text-sm font-semibold">
+                        Komponen tujuan
+                      </h2>
+                    </div>
 
-                        <div
-                          className={`h-2 w-full overflow-hidden rounded-full ${themeNeutralSurface}`}
+                    <div className="p-4 sm:p-5">
+                      <p className="theme-text text-sm font-semibold">
+                        {selectedKomponen.nama}
+                      </p>
+
+                      <div className="mt-3 flex flex-wrap items-center gap-1.5">
+                        <span
+                          className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${themeInfoSurface} text-[var(--color-info)] ${themeInfoBorder}`}
                         >
-                          <div
-                            className={`h-full rounded-full ${themePrimaryGradient}`}
-                            style={{
-                              width: `${Math.min(
-                                statistikKelas.rataRata,
-                                100
-                              )}%`,
-                            }}
-                          />
-                        </div>
+                          {selectedKomponen.jenis || "lainnya"}
+                        </span>
 
-                        <p className="theme-text-muted mt-1.5 text-[11px]">
-                          dari{" "}
-                          {
-                            quizKelasIni.length
-                          }{" "}
-                          quiz tercatat
-                        </p>
+                        <span
+                          className={`rounded-full border px-2 py-0.5 text-[10px] font-medium ${themePrimarySoft} ${themePrimaryText} ${themePrimarySoftBorder}`}
+                        >
+                          Bobot {Number(selectedKomponen.bobot)}%
+                        </span>
                       </div>
 
-                      {/* PERLU PERHATIAN */}
-
-                      {statistikKelas
-                        .perluPerhatian
-                        .length > 0 && (
-                        <div>
-                          <div className="mb-2 flex items-center gap-1.5">
-                            <AlertTriangle
-                              size={13}
-                              className="text-[var(--color-warning)]"
-                            />
-
-                            <span className="theme-text-secondary text-xs font-medium">
-                              Perlu perhatian
-                              (di bawah
-                              KKM)
-                            </span>
-                          </div>
-
-                          <div className="space-y-1.5">
-                            {statistikKelas.perluPerhatian.map(
-                              (p) => (
-                                <div
-                                  key={p.nama}
-                                  className="flex items-center justify-between text-xs"
-                                >
-                                  <span className="theme-text-secondary truncate pr-2">
-                                    {p.nama}
-                                  </span>
-
-                                  <span className="flex-shrink-0 font-medium text-[var(--color-warning)]">
-                                    rata-rata{" "}
-                                    {p.rata}
-                                  </span>
-                                </div>
-                              )
-                            )}
-                          </div>
-                        </div>
-                      )}
-                    </>
-                  )}
-                </div>
-
-                {/* =================================================
-                    DAFTAR QUIZ
-                ================================================= */}
-
-                <div
-                  className={`theme-card overflow-hidden rounded-xl border ${themeNeutralBorder} ${themeCardShadow}`}
-                >
-                  <div
-                    className={`flex items-center gap-2 border-b p-4 sm:p-5 ${themeDivider}`}
-                  >
-                    <History
-                      size={16}
-                      className="theme-text-muted"
-                    />
-
-                    <h2 className="theme-text text-sm font-semibold">
-                      Daftar Quiz
-                    </h2>
-                  </div>
-
-                  {quizKelasIni.length ===
-                  0 ? (
-                    <div className="p-6 text-center">
-                      <p className="theme-text-muted text-xs">
-                        Belum ada quiz untuk
-                        kelas ini.
+                      <p className="theme-text-muted mt-3 text-[11px] leading-5">
+                        Total bobot kelas ini: {komponenData.totalBobot}%
+                        {komponenData.totalBobot !== 100
+                          ? ` · sisa ${komponenData.sisaBobot}%`
+                          : ""}
                       </p>
                     </div>
-                  ) : (
-                    <div>
-                      {quizKelasIni.map(
-                        (q) => {
-                          const nilaiValid =
-                            Object.values(
-                              q.jawaban
-                            )
-                              .map((j) =>
-                                hitungNilai(
-                                  j.benar,
-                                  q.jumlahSoal
-                                )
-                              )
-                              .filter(
-                                (n) =>
-                                  n !== ""
-                              );
-
-                          const rataItem =
-                            nilaiValid.length
-                              ? Math.round(
-                                  (nilaiValid.reduce(
-                                    (a, b) =>
-                                      a + b,
-                                    0
-                                  ) /
-                                    nilaiValid.length) *
-                                    10
-                                ) / 10
-                              : 0;
-
-                          return (
-                            <div
-                              key={q.id}
-                              className={`border-b p-4 sm:p-5 ${themeDivider}`}
-                            >
-                              <div className="mb-1.5 flex items-start justify-between gap-2">
-                                <div className="min-w-0">
-                                  <p className="theme-text-secondary truncate text-xs font-medium">
-                                    {q.judul}
-                                  </p>
-
-                                  <p className="theme-text-muted mt-0.5 text-[11px]">
-                                    {q.tanggal}{" "}
-                                    ·{" "}
-                                    {
-                                      q.jumlahSoal
-                                    }{" "}
-                                    soal
-                                  </p>
-                                </div>
-
-                                {q.id ===
-                                  selectedId && (
-                                  <span
-                                    className={`flex-shrink-0 rounded-full border px-1.5 py-0.5 text-[10px] font-semibold ${themePrimarySoft} ${themePrimarySoftBorder} ${themePrimaryText}`}
-                                  >
-                                    Dibuka
-                                  </span>
-                                )}
-                              </div>
-
-                              <div className="mt-2 flex flex-wrap items-center gap-1.5">
-
-                                {/* RATA-RATA */}
-
-                                <span
-                                  className={`rounded-full border px-1.5 py-0.5 text-[10px] font-medium ${themeInfoSurface} ${themeInfoBorder} text-[var(--color-info)]`}
-                                >
-                                  Rata-rata{" "}
-                                  {rataItem}
-                                </span>
-
-                                {/* EDIT */}
-
-                                <button
-                                  onClick={() =>
-                                    bukaQuiz(
-                                      q
-                                    )
-                                  }
-                                  className={`ml-auto flex items-center justify-center gap-1 rounded-lg border px-2.5 py-1 text-[11px] font-medium transition-colors ${themePrimarySoft} ${themePrimarySoftBorder} ${themePrimaryText} hover:bg-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]`}
-                                >
-                                  <Pencil
-                                    size={
-                                      11
-                                    }
-                                  />
-
-                                  Edit
-                                </button>
-                              </div>
-                            </div>
-                          );
-                        }
-                      )}
-                    </div>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>

@@ -16,7 +16,10 @@ import {
 
 import { getRaportSiswa } from "@/services/raport.service";
 
-import { getNilaiUjianUntukKelas } from "@/services/ujian.service";
+import {
+  getNilaiUjianUntukKelas,
+  PESAN_NILAI_UJIAN_TIDAK_TERSEDIA,
+} from "@/services/ujian.service";
 
 import {
   FileCheck2,
@@ -548,6 +551,7 @@ export default function GuruRaporPage() {
   const [loading, setLoading] = useState(true);
   const [loadingNilai, setLoadingNilai] = useState(false);
   const [error, setError] = useState("");
+  const [nilaiUjianError, setNilaiUjianError] = useState("");
 
   const notifications = [
     {
@@ -901,8 +905,17 @@ export default function GuruRaporPage() {
                 kelasMapelId
               );
 
+            if (!response?.tersedia) {
+              setNilaiUjianError(
+                response?.pesan ||
+                  PESAN_NILAI_UJIAN_TIDAK_TERSEDIA
+              );
+
+              continue;
+            }
+
             const rows =
-              extractNilaiUjian(response);
+              extractNilaiUjian(response.data);
 
             if (!Array.isArray(rows)) {
               continue;
@@ -941,6 +954,11 @@ export default function GuruRaporPage() {
             console.warn(
               `Gagal mengambil nilai ujian kelasMapel ${kelasMapelId}:`,
               err
+            );
+
+            setNilaiUjianError(
+              err?.message ||
+                "Gagal mengambil nilai ujian dari backend."
             );
           }
         }
@@ -1071,6 +1089,7 @@ export default function GuruRaporPage() {
     const load = async () => {
       try {
         setLoadingNilai(true);
+        setNilaiUjianError("");
 
         const detail =
           await loadDetailKelas(
@@ -1771,6 +1790,25 @@ export default function GuruRaporPage() {
                 Cetak Rapor
               </button>
             </div>
+
+            {nilaiUjianError && (
+              <div className="flex items-start gap-3 rounded-xl border border-[color-mix(in_srgb,var(--color-warning)_25%,transparent)] bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)] px-4 py-3 text-sm text-[var(--color-warning)]">
+                <AlertTriangle
+                  size={18}
+                  className="mt-0.5 shrink-0"
+                />
+
+                <div>
+                  <p className="font-semibold">
+                    Nilai ujian online belum tersedia
+                  </p>
+
+                  <p className="mt-0.5 text-xs opacity-80">
+                    {nilaiUjianError}
+                  </p>
+                </div>
+              </div>
+            )}
 
             {/* =================================================
                 FILTER

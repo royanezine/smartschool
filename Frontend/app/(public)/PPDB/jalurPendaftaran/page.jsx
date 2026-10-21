@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   ArrowLeft,
   ArrowRight,
@@ -14,20 +14,25 @@ import {
 } from "lucide-react";
 
 import PpdbNavbar from "@/app/components/ppdb/PpdbNavbar";
+import { urlFormulirPendaftaran } from "@/app/components/ppdb/rutePpdb";
 
-const SEKOLAH_ID =
-  "703e2791-49b4-419c-abbe-3f665c0bb87d";
-
+/*
+ * Backend belum menyediakan endpoint publik untuk mengambil daftar jalur
+ * PPDB (GET /api/jalur-ppdb mewajibkan autentikasi admin sekolah + izin
+ * ppdb.view). Karena itu halaman ini TIDAK mengirim ID jalur buatan ke
+ * Backend dan TIDAK mengklaim jalur tertentu sedang dibuka.
+ *
+ * Konten di bawah hanya penjelasan jenis jalur secara umum. Pendaftaran
+ * sebenarnya dilakukan melalui tautan resmi yang dibagikan sekolah.
+ */
 const jalurPendaftaran = [
   {
-    id: "ppdb-jalur-zonasi-001",
     key: "zonasi",
     nama: "Zonasi",
     icon: MapPin,
     color: "blue",
     deskripsi:
       "Jalur penerimaan berdasarkan jarak atau wilayah domisili calon peserta didik terhadap sekolah tujuan.",
-    kuota: 100,
     persyaratan: [
       "Kartu Keluarga",
       "Akta Kelahiran",
@@ -35,14 +40,12 @@ const jalurPendaftaran = [
     ],
   },
   {
-    id: "ppdb-jalur-prestasi-001",
     key: "prestasi",
     nama: "Prestasi",
     icon: Trophy,
     color: "amber",
     deskripsi:
       "Jalur penerimaan berdasarkan prestasi akademik maupun nonakademik yang dimiliki calon peserta didik.",
-    kuota: 50,
     persyaratan: [
       "Kartu Keluarga",
       "Akta Kelahiran",
@@ -50,14 +53,12 @@ const jalurPendaftaran = [
     ],
   },
   {
-    id: "ppdb-jalur-afirmasi-001",
     key: "afirmasi",
     nama: "Afirmasi",
     icon: HeartHandshake,
     color: "emerald",
     deskripsi:
       "Jalur penerimaan bagi calon peserta didik yang memenuhi ketentuan program afirmasi.",
-    kuota: 30,
     persyaratan: [
       "Kartu Keluarga",
       "Akta Kelahiran",
@@ -65,14 +66,12 @@ const jalurPendaftaran = [
     ],
   },
   {
-    id: "ppdb-jalur-pindahan-001",
     key: "pindahan",
     nama: "Pindahan",
     icon: ArrowLeftRight,
     color: "violet",
     deskripsi:
       "Jalur penerimaan bagi calon peserta didik yang melakukan perpindahan sekolah sesuai ketentuan.",
-    kuota: 20,
     persyaratan: [
       "Kartu Keluarga",
       "Akta Kelahiran",
@@ -83,40 +82,30 @@ const jalurPendaftaran = [
 
 export default function JalurPendaftaranPage() {
   const router = useRouter();
+  const pathname = usePathname();
 
-  const [openId, setOpenId] = useState(
-    "ppdb-jalur-zonasi-001"
-  );
+  const ppdbIndex = pathname
+    ? pathname.indexOf("/PPDB")
+    : -1;
 
-  const handleDaftar = (jalur) => {
-    const sekolahId = SEKOLAH_ID;
-    const jalurPpdbId = jalur.id;
+  const basePath =
+    ppdbIndex > 0 ? pathname.slice(0, ppdbIndex) : "";
 
+  const [openId, setOpenId] = useState("zonasi");
+
+  /*
+   * Backend belum menyediakan endpoint publik untuk mengambil daftar jalur,
+   * sehingga halaman ini tidak dapat mengirim jalurPpdbId yang valid.
+   * Tombol formulir hanya membuka formulir; sekolah dan jalur akan terisi
+   * otomatis jika pengguna datang dari tautan resmi sekolah.
+   */
+  const handleDaftar = () => {
     /*
-      Simpan ID ke sessionStorage.
-      Ini berguna untuk navigasi lanjutan pada
-      halaman PPDB.
-    */
-    sessionStorage.setItem(
-      "ppdb_sekolah_id",
-      sekolahId
-    );
-
-    sessionStorage.setItem(
-      "ppdb_jalur_id",
-      jalurPpdbId
-    );
-
-    /*
-      ID sekolah dan ID jalur dikirim melalui URL.
-    */
-    router.push(
-      `/PPDB/daftar?sekolahId=${encodeURIComponent(
-        sekolahId
-      )}&jalurPpdbId=${encodeURIComponent(
-        jalurPpdbId
-      )}`
-    );
+     * Pertahankan sekolahId/jalurPpdbId bila pengguna membuka panduan
+     * dari tautan resmi sekolah. Tanpa ini, parameter hilang saat
+     * berpindah ke formulir.
+     */
+    router.push(urlFormulirPendaftaran(basePath));
   };
 
   const getColorClasses = (color) => {
@@ -173,7 +162,7 @@ export default function JalurPendaftaranPage() {
           <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:px-8">
             <button
               type="button"
-              onClick={() => router.push("/PPDB")}
+              onClick={() => router.push(`${basePath}/PPDB`)}
               className="mb-7 inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-600 transition hover:border-slate-300 hover:bg-slate-50"
             >
               <ArrowLeft size={16} />
@@ -182,19 +171,58 @@ export default function JalurPendaftaranPage() {
 
             <div className="max-w-3xl">
               <span className="inline-flex rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
-                PPDB Online
+                Panduan Pendaftaran
               </span>
 
               <h1 className="mt-4 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
-                Jalur Pendaftaran
+                Jenis Jalur Pendaftaran
               </h1>
 
               <p className="mt-4 text-sm leading-7 text-slate-500 sm:text-base">
-                Pilih jalur pendaftaran yang sesuai
-                dengan kondisi dan persyaratan calon
-                peserta didik.
+                Penjelasan umum jenis jalur yang umum digunakan.
+                Ketersediaan jalur, kuota, dan jadwal ditentukan
+                oleh sekolah tujuan.
               </p>
             </div>
+          </div>
+        </section>
+
+        {/* =====================================================
+            CARA MENDAFTAR
+        ===================================================== */}
+
+        <section className="mx-auto max-w-6xl px-4 pt-8 sm:px-6 lg:px-8">
+          <div className="rounded-2xl border border-blue-100 bg-blue-50/70 p-5 sm:p-6">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="max-w-2xl">
+                <p className="text-sm font-semibold text-blue-900">
+                  Bagaimana cara mendaftar?
+                </p>
+
+                <p className="mt-1.5 text-sm leading-6 text-blue-800/80">
+                  Gunakan tautan pendaftaran resmi yang dibagikan
+                  panitia PPDB sekolah. Tautan tersebut sudah
+                  memuat sekolah dan jalur yang dibuka, sehingga
+                  Anda tidak perlu memilih atau mengetik ID apa
+                  pun.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleDaftar}
+                className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
+              >
+                Buka Formulir Pendaftaran
+                <ArrowRight size={15} />
+              </button>
+            </div>
+
+            <p className="mt-3 text-xs leading-5 text-blue-700">
+              Halaman ini tidak dapat menampilkan daftar jalur milik
+              sekolah karena Backend belum menyediakan endpoint
+              publik untuk itu.
+            </p>
           </div>
         </section>
 
@@ -207,14 +235,14 @@ export default function JalurPendaftaranPage() {
               const Icon = jalur.icon;
 
               const isOpen =
-                openId === jalur.id;
+                openId === jalur.key;
 
               const colors =
                 getColorClasses(jalur.color);
 
               return (
                 <div
-                  key={jalur.id}
+                  key={jalur.key}
                   className={`group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:shadow-md ${colors.border}`}
                 >
                   {/* =================================================
@@ -226,7 +254,7 @@ export default function JalurPendaftaranPage() {
                       setOpenId(
                         isOpen
                           ? null
-                          : jalur.id
+                          : jalur.key
                       )
                     }
                     className="flex w-full items-center justify-between gap-4 p-5 text-left sm:p-6"
@@ -243,12 +271,6 @@ export default function JalurPendaftaranPage() {
                           <h2 className="text-base font-bold text-slate-900 sm:text-lg">
                             {jalur.nama}
                           </h2>
-
-                          <span
-                            className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${colors.badge}`}
-                          >
-                            Kuota {jalur.kuota}
-                          </span>
                         </div>
 
                         <p className="mt-1 text-sm text-slate-500">
@@ -300,25 +322,14 @@ export default function JalurPendaftaranPage() {
                         </div>
 
                         {/* =================================================
-                            DAFTAR
+                            KETERANGAN
                         ================================================= */}
                         <div className="flex items-end">
-                          <button
-                            type="button"
-                            onClick={() =>
-                              handleDaftar(
-                                jalur
-                              )
-                            }
-                            className={`inline-flex w-full items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold text-white shadow-sm transition focus:outline-none focus:ring-4 sm:w-auto ${colors.button}`}
-                          >
-                            Daftar melalui{" "}
-                            {jalur.nama}
-
-                            <ArrowRight
-                              size={16}
-                            />
-                          </button>
+                          <p className="max-w-[220px] text-xs leading-5 text-slate-500">
+                            Ketersediaan jalur dan
+                            persyaratan resmi ditentukan
+                            oleh sekolah tujuan.
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -331,18 +342,29 @@ export default function JalurPendaftaranPage() {
           {/* =====================================================
               INFO
           ===================================================== */}
-          <div className="mt-8 rounded-2xl border border-blue-100 bg-blue-50/70 p-5">
-            <p className="text-sm font-semibold text-blue-900">
-              Informasi pendaftaran
-            </p>
+          <div className="mt-8 flex flex-col gap-4 rounded-2xl border border-blue-100 bg-blue-50/70 p-5 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm font-semibold text-blue-900">
+                Informasi pendaftaran
+              </p>
 
-            <p className="mt-1.5 text-sm leading-6 text-blue-800/80">
-              Pilih jalur terlebih dahulu, kemudian
-              klik tombol daftar untuk melanjutkan ke
-              formulir pendaftaran. Jalur yang dipilih
-              akan otomatis diteruskan ke proses
-              pendaftaran.
-            </p>
+              <p className="mt-1.5 max-w-2xl text-sm leading-6 text-blue-800/80">
+                Jenis jalur di atas bersifat umum dan bukan
+                daftar jalur yang sedang dibuka. Untuk
+                mendaftar, gunakan tautan resmi dari sekolah;
+                formulir akan menampilkan sekolah dan jalur
+                yang terhubung dengan tautan tersebut.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleDaftar}
+              className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
+            >
+              Buka Formulir
+              <ArrowRight size={15} />
+            </button>
           </div>
         </section>
       </main>

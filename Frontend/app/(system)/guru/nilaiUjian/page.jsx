@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
 
-import { getKelasMapel } from "@/services/kelasMapel.service";
+import { getKelasMapelDiampu } from "@/services/kelasMapel.service";
 import { getKelasById } from "@/services/kelas.service";
 import {
   getUjianByKelasMapel,
@@ -130,35 +130,6 @@ function parseObject(response) {
   }
 
   return response;
-}
-
-function getCurrentUser() {
-  if (typeof window === "undefined") return null;
-
-  const keys = ["user", "currentUser", "pengguna", "profile"];
-
-  for (const key of keys) {
-    try {
-      const raw = localStorage.getItem(key);
-      if (!raw) continue;
-
-      const parsed = JSON.parse(raw);
-
-      if (parsed) return parsed?.data || parsed;
-    } catch {}
-  }
-
-  return null;
-}
-
-function getCurrentUserId() {
-  const user = getCurrentUser();
-
-  if (!user) return null;
-
-  return (
-    user.id || user.userId || user.penggunaId || user.guruId || null
-  );
 }
 
 function normalizeId(value) {
@@ -430,6 +401,8 @@ function getStatusLabel(status) {
       return "Berlangsung";
     case "dibatalkan":
       return "Dibatalkan";
+    case "tidak_tersedia":
+      return "Hasil Belum Tersedia";
     default:
       return "Belum Mengerjakan";
   }
@@ -445,6 +418,9 @@ function getStatusClasses(status) {
 
     case "dibatalkan":
       return `${themeDangerSurface} ${themeDangerBorder} theme-danger`;
+
+    case "tidak_tersedia":
+      return `${themeWarningSurface} ${themeWarningBorder} text-[var(--color-warning)]`;
 
     default:
       return `${themeNeutralSurface} ${themeNeutralBorder} theme-text-secondary`;
@@ -563,28 +539,12 @@ export default function NilaiUjianGuruPage() {
       setLoadingKelasMapel(true);
       setError("");
 
-      const currentUserId = getCurrentUserId();
-      const response = await getKelasMapel();
-      const list = parseData(response);
+      const data = await getKelasMapelDiampu();
 
-      const filtered = currentUserId
-        ? list.filter((item) => {
-            const guruId =
-              item.guruPengajarId ||
-              item.guruPengajar?.id ||
-              item.guru?.id ||
-              item.penggunaId;
+      setKelasMapel(data);
 
-            return (
-              normalizeId(guruId) === normalizeId(currentUserId)
-            );
-          })
-        : list;
-
-      setKelasMapel(filtered);
-
-      if (filtered.length > 0) {
-        setSelectedKelasMapel(filtered[0]);
+      if (data.length > 0) {
+        setSelectedKelasMapel(data[0]);
       } else {
         setSelectedKelasMapel(null);
         setKelas(null);
@@ -743,6 +703,26 @@ export default function NilaiUjianGuruPage() {
       detailUjian?.data?.percobaanAsesmen ??
       []
     );
+  }, [detailUjian]);
+
+  /**
+   * GET /api/ujian/:id saat ini hanya mengembalikan data ujian + soal,
+   * TANPA percobaan/hasil siswa. Jika field hasil tidak ada, jangan
+   * tampilkan nilai 0 atau "belum mengerjakan" karena menyesatkan.
+   */
+  const hasilTersedia = useMemo(() => {
+    if (!detailUjian) return false;
+
+    const sumber = [
+      detailUjian.nilaiSiswa,
+      detailUjian.percobaanUjian,
+      detailUjian.percobaanAsesmen,
+      detailUjian.data?.nilaiSiswa,
+      detailUjian.data?.percobaanUjian,
+      detailUjian.data?.percobaanAsesmen,
+    ];
+
+    return sumber.some((value) => Array.isArray(value));
   }, [detailUjian]);
 
   const anggotaKelas = useMemo(() => {
@@ -945,8 +925,10 @@ export default function NilaiUjianGuruPage() {
           namaLengkap,
           nis,
           nisn,
-          nilai: 0,
-          status: "belum_mengerjakan",
+          nilai: hasilTersedia ? 0 : null,
+          status: hasilTersedia
+            ? "belum_mengerjakan"
+            : "tidak_tersedia",
           hasil: null,
           waktuMulai: null,
           waktuSelesai: null,
@@ -956,7 +938,7 @@ export default function NilaiUjianGuruPage() {
     }
 
     return normalizedNilaiSource;
-  }, [anggotaKelas, nilaiBySiswaId, normalizedNilaiSource]);
+  }, [anggotaKelas, nilaiBySiswaId, normalizedNilaiSource, hasilTersedia]);
 
   const filteredNilaiSiswa = useMemo(() => {
     let result = [...nilaiSiswa];
@@ -1020,14 +1002,25 @@ export default function NilaiUjianGuruPage() {
       (item) => getStatus(item) === "belum_mengerjakan"
     ).length;
 
+    const tidakTersedia = nilaiSiswa.filter(
+      (item) => getStatus(item) === "tidak_tersedia"
+    ).length;
+
     const dikerjakan = nilaiSiswa.filter((item) => {
       const status = getStatus(item);
       return status === "selesai" || status === "berlangsung";
     });
 
     const scores = dikerjakan
-      .map((item) => getNilai(item))
-      .filter((score) => !Number.isNaN(Number(score)));
+      .map((item) => item.nilai)
+      .filter(
+        (score) =>
+          score !== null &&
+          score !== undefined &&
+          score !== "" &&
+          !Number.isNaN(Number(score))
+      )
+      .map((score) => Number(score));
 
     const totalNilai = scores.reduce(
       (sum, value) => sum + Number(value),
@@ -1048,6 +1041,7 @@ export default function NilaiUjianGuruPage() {
       selesai,
       berlangsung,
       belum,
+      tidakTersedia,
       rataRata,
       nilaiTertinggi,
       nilaiTerendah,
@@ -1076,14 +1070,19 @@ export default function NilaiUjianGuruPage() {
     "Ujian";
 
   const jenisUjian =
+    detailUjian?.tipe ||
     detailUjian?.jenis ||
     detailUjian?.jenisUjian ||
+    currentUjian?.tipe ||
     currentUjian?.jenis ||
     "ujian";
 
   const jumlahSoal = Number(
-    detailUjian?._count?.soalUjian ??
+    detailUjian?._count?.soalAsesmen ??
+      detailUjian?.soalAsesmen?.length ??
+      detailUjian?._count?.soalUjian ??
       detailUjian?.soalUjian?.length ??
+      currentUjian?._count?.soalAsesmen ??
       currentUjian?._count?.soalUjian ??
       0
   );
@@ -1140,7 +1139,7 @@ export default function NilaiUjianGuruPage() {
       const uid = selectedUjianId || "";
 
       router.push(
-        `/guru/nilai-ujian/detail?siswaId=${encodeURIComponent(
+        `/guru/nilaiUjian/detail?siswaId=${encodeURIComponent(
           sid
         )}&ujianId=${encodeURIComponent(uid)}`
       );
@@ -1644,6 +1643,29 @@ export default function NilaiUjianGuruPage() {
                   )}
                 </section>
 
+                {detailUjian && !hasilTersedia && (
+                  <div
+                    role="status"
+                    className={`mb-6 flex items-start gap-3 rounded-2xl border ${themeWarningBorder} ${themeWarningSurface} p-4`}
+                  >
+                    <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-[var(--color-warning)]" />
+
+                    <div>
+                      <p className="text-sm font-bold text-[var(--color-warning)]">
+                        Hasil pengerjaan siswa belum tersedia
+                      </p>
+
+                      <p className="theme-text-secondary mt-1 text-sm leading-6">
+                        Endpoint detail ujian belum mengirimkan data
+                        percobaan atau hasil ujian siswa. Nilai dan status
+                        di bawah tidak dapat ditampilkan agar tidak
+                        menyesatkan. Daftar siswa tetap ditampilkan
+                        berdasarkan anggota kelas.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
                 {/* =================================================
                     STATISTICS
                 ================================================== */}
@@ -1667,9 +1689,21 @@ export default function NilaiUjianGuruPage() {
                   />
 
                   <StatCard
-                    label="Belum Mengerjakan"
-                    value={statistics.belum}
-                    description="Menunggu pengerjaan"
+                    label={
+                      hasilTersedia
+                        ? "Belum Mengerjakan"
+                        : "Hasil Belum Tersedia"
+                    }
+                    value={
+                      hasilTersedia
+                        ? statistics.belum
+                        : statistics.tidakTersedia
+                    }
+                    description={
+                      hasilTersedia
+                        ? "Menunggu pengerjaan"
+                        : "Belum dikirim oleh backend"
+                    }
                     icon={Clock3}
                     iconClass={`${themeNeutralSurface} theme-text-secondary`}
                     valueClass="theme-text-secondary"
@@ -1677,11 +1711,19 @@ export default function NilaiUjianGuruPage() {
 
                   <StatCard
                     label="Nilai Rata-rata"
-                    value={statistics.rataRata.toFixed(2)}
+                    value={
+                      hasilTersedia
+                        ? statistics.rataRata.toFixed(2)
+                        : "-"
+                    }
                     description="Dari siswa yang mengerjakan"
                     icon={BarChart3}
                     iconClass={`${themeInfoSurface} text-[var(--color-info)]`}
-                    valueClass={getScoreClasses(statistics.rataRata)}
+                    valueClass={
+                      hasilTersedia
+                        ? getScoreClasses(statistics.rataRata)
+                        : "theme-text-secondary"
+                    }
                   />
                 </section>
 
@@ -1704,7 +1746,9 @@ export default function NilaiUjianGuruPage() {
                             statistics.nilaiTertinggi
                           )}`}
                         >
-                          {statistics.nilaiTertinggi.toFixed(0)}
+                          {hasilTersedia
+                            ? statistics.nilaiTertinggi.toFixed(0)
+                            : "-"}
                         </p>
                       </div>
 
@@ -1730,7 +1774,9 @@ export default function NilaiUjianGuruPage() {
                             statistics.nilaiTerendah
                           )}`}
                         >
-                          {statistics.nilaiTerendah.toFixed(0)}
+                          {hasilTersedia
+                            ? statistics.nilaiTerendah.toFixed(0)
+                            : "-"}
                         </p>
                       </div>
 
@@ -1754,15 +1800,18 @@ export default function NilaiUjianGuruPage() {
                         <p
                           className={`mt-2 text-3xl font-bold ${themePrimaryText}`}
                         >
-                          {statistics.total > 0
-                            ? Math.round(
-                                ((statistics.selesai +
-                                  statistics.berlangsung) /
-                                  statistics.total) *
-                                  100
-                              )
-                            : 0}
-                          %
+                          {hasilTersedia
+                            ? `${
+                                statistics.total > 0
+                                  ? Math.round(
+                                      ((statistics.selesai +
+                                        statistics.berlangsung) /
+                                        statistics.total) *
+                                        100
+                                    )
+                                  : 0
+                              }%`
+                            : "-"}
                         </p>
                       </div>
 
@@ -1780,7 +1829,7 @@ export default function NilaiUjianGuruPage() {
                         className={`h-full rounded-full ${themePrimaryGradient} transition-all duration-500`}
                         style={{
                           width: `${
-                            statistics.total > 0
+                            hasilTersedia && statistics.total > 0
                               ? Math.min(
                                   100,
                                   ((statistics.selesai +
@@ -1863,6 +1912,11 @@ export default function NilaiUjianGuruPage() {
                           <option value="belum_mengerjakan">
                             Belum Mengerjakan
                           </option>
+                          {!hasilTersedia && (
+                            <option value="tidak_tersedia">
+                              Hasil Belum Tersedia
+                            </option>
+                          )}
                           <option value="dibatalkan">
                             Dibatalkan
                           </option>
@@ -2033,8 +2087,8 @@ export default function NilaiUjianGuruPage() {
                                   </td>
 
                                   <td className="px-6 py-4 text-center">
-                                    {status ===
-                                    "belum_mengerjakan" ? (
+                                    {status === "belum_mengerjakan" ||
+                                    status === "tidak_tersedia" ? (
                                       <span className="theme-text-muted text-lg font-semibold">
                                         —
                                       </span>
@@ -2106,7 +2160,9 @@ export default function NilaiUjianGuruPage() {
                                       </div>
                                     ) : (
                                       <span className="theme-text-muted text-xs">
-                                        Belum ada percobaan
+                                        {status === "tidak_tersedia"
+                                          ? "Hasil belum tersedia"
+                                          : "Belum ada percobaan"}
                                       </span>
                                     )}
                                   </td>
@@ -2140,8 +2196,9 @@ export default function NilaiUjianGuruPage() {
                         </p>
 
                         <p className="theme-text-muted text-xs">
-                          Data nilai berasal dari hasil pengerjaan
-                          ujian
+                          {hasilTersedia
+                            ? "Data nilai berasal dari hasil pengerjaan ujian"
+                            : "Data hasil pengerjaan belum dikirim oleh backend"}
                         </p>
                       </div>
                     </div>
@@ -2207,11 +2264,15 @@ export default function NilaiUjianGuruPage() {
                                   </p>
 
                                   <p
-                                    className={`mt-1 text-3xl font-bold ${getScoreClasses(
-                                      score
-                                    )}`}
+                                    className={`mt-1 text-3xl font-bold ${
+                                      status === "belum_mengerjakan" ||
+                                      status === "tidak_tersedia"
+                                        ? "theme-text-muted"
+                                        : getScoreClasses(score)
+                                    }`}
                                   >
-                                    {status === "belum_mengerjakan"
+                                    {status === "belum_mengerjakan" ||
+                                    status === "tidak_tersedia"
                                       ? "-"
                                       : score.toFixed(0)}
                                   </p>
@@ -2273,7 +2334,9 @@ export default function NilaiUjianGuruPage() {
                                   </div>
                                 ) : (
                                   <p className="theme-text-muted mt-2 text-xs">
-                                    Belum ada percobaan
+                                    {status === "tidak_tersedia"
+                                      ? "Hasil belum tersedia"
+                                      : "Belum ada percobaan"}
                                   </p>
                                 )}
                               </div>

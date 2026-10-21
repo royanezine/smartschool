@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
-import { uploadBerkasPpdb } from "@/services/ppdb.services";
+import { uploadBerkasPpdb } from "@/services/ppdb.service";
 
 const jenisBerkas = [
   {
@@ -28,6 +28,7 @@ const jenisBerkas = [
 
 export default function PpdbBerkasUpload({
   pendaftaranId,
+  tokenPendaftaran,
   onSuccess,
 }) {
   const [files, setFiles] =
@@ -59,7 +60,8 @@ export default function PpdbBerkasUpload({
       await uploadBerkasPpdb(
         pendaftaranId,
         file,
-        jenis
+        jenis,
+        tokenPendaftaran
       );
 
       setFiles((prev) => ({
@@ -76,11 +78,6 @@ export default function PpdbBerkasUpload({
         onSuccess(jenis);
       }
     } catch (err) {
-      console.error(
-        "Upload berkas PPDB:",
-        err
-      );
-
       setError(
         err?.message ||
           `Gagal mengupload ${jenis}.`

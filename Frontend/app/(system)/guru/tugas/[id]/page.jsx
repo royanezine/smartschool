@@ -6,7 +6,10 @@ import { useParams, useRouter } from "next/navigation";
 
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
-import { getDetailTugas } from "@/services/tugas.service";
+import {
+  getDetailTugas,
+  getPengumpulanByTugas,
+} from "@/services/tugas.service";
 
 import {
   CalendarDays,
@@ -200,11 +203,19 @@ export default function DetailTugasPage() {
         setLoading(true);
         setError("");
 
-        const response = await getDetailTugas(tugasId);
+        const [detailResult, submissionResult] =
+          await Promise.allSettled([
+            getDetailTugas(tugasId),
+            getPengumpulanByTugas(tugasId),
+          ]);
 
         if (!active) return;
 
-        const data = unwrapResponse(response);
+        if (detailResult.status === "rejected") {
+          throw detailResult.reason;
+        }
+
+        const data = unwrapResponse(detailResult.value);
 
         if (
           !data ||
@@ -216,7 +227,30 @@ export default function DetailTugasPage() {
           );
         }
 
-        setTugas(data);
+        const submissions =
+          submissionResult.status === "fulfilled"
+            ? submissionResult.value
+            : null;
+
+        if (submissionResult.status === "rejected") {
+          console.error(
+            "GAGAL MEMUAT DAFTAR PENGUMPULAN TUGAS:",
+            submissionResult.reason
+          );
+        }
+
+        setTugas(
+          Array.isArray(submissions)
+            ? {
+                ...data,
+                pengumpulanTugasSiswa: submissions,
+                _count: {
+                  ...(data._count || {}),
+                  pengumpulanTugasSiswa: submissions.length,
+                },
+              }
+            : data
+        );
       } catch (err) {
         if (!active) return;
 

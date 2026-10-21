@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { getStoredUser } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 
 import {
@@ -27,7 +26,7 @@ import {
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
 
-import { getKelasMapel } from "@/services/kelasMapel.service";
+import { getKelasMapelDiampu } from "@/services/kelasMapel.service";
 
 import {
   getUjianByKelasMapel,
@@ -109,20 +108,6 @@ function parseData(response) {
   return [];
 }
 
-function getCurrentUser() {
-  if (typeof window === "undefined") return null;
-  try {
-    return getStoredUser();
-  } catch {
-    return null;
-  }
-}
-
-function getCurrentUserId() {
-  const user = getCurrentUser();
-  return user?.id || user?.userId || user?.penggunaId || null;
-}
-
 function formatTanggal(value) {
   if (!value) return "-";
   const date = new Date(value);
@@ -165,7 +150,43 @@ function getJenisLabel(jenis) {
    PAGE
 ========================================================= */
 
-export default function UjianGuruPage() {
+// =========================================================
+// STAT CARD (COMPONENT LUAR RENDER)
+// =========================================================
+
+function StatCard({
+  icon: Icon,
+  label,
+  value,
+  description,
+  iconClass,
+  bgClass,
+}) {
+  return (
+    <div
+      className={`theme-card group rounded-2xl border ${themeNeutralBorder} p-4 ${themeCardShadow} transition duration-200 hover:-translate-y-0.5 sm:p-5`}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="theme-text-muted text-xs font-semibold">{label}</p>
+          <p className="theme-text mt-2 text-2xl font-bold tracking-tight">
+            {value}
+          </p>
+          <p className="theme-text-muted mt-1 text-[11px] leading-5">
+            {description}
+          </p>
+        </div>
+        <div
+          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${bgClass}`}
+        >
+          <Icon size={18} className={iconClass} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function GuruUjianPage() {
   const router = useRouter();
 
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -194,22 +215,12 @@ export default function UjianGuruPage() {
       setSelectedKelasMapel("");
       setUjian([]);
 
-      const response = await getKelasMapel();
-      const data = parseData(response);
-      const userId = getCurrentUserId();
+      const data = await getKelasMapelDiampu();
 
-      const filtered = userId
-        ? data.filter((item) => {
-            const guruId =
-              item?.guruPengajarId || item?.guruPengajar?.id || "";
-            return String(guruId) === String(userId);
-          })
-        : [];
+      setKelasMapel(data);
 
-      setKelasMapel(filtered);
-
-      if (filtered.length > 0) {
-        setSelectedKelasMapel(String(filtered[0].id));
+      if (data.length > 0) {
+        setSelectedKelasMapel(String(data[0].id));
       }
     } catch (err) {
       console.error("LOAD KELAS MAPEL ERROR:", err);
@@ -229,11 +240,13 @@ export default function UjianGuruPage() {
   ======================================================= */
 
   useEffect(() => {
-    if (!selectedKelasMapel) {
-      setUjian([]);
-      return;
-    }
-    loadUjian(selectedKelasMapel);
+    Promise.resolve().then(() => {
+      if (!selectedKelasMapel) {
+        setUjian([]);
+        return;
+      }
+      loadUjian(selectedKelasMapel);
+    });
   }, [selectedKelasMapel]);
 
   async function loadUjian(kelasMapelId) {
@@ -278,7 +291,7 @@ export default function UjianGuruPage() {
 
     return ujian.filter((item) => {
       const judul = String(item?.judul || "").toLowerCase();
-      const jenis = String(item?.jenis || "").toLowerCase();
+      const jenis = String(item?.tipe || item?.jenis || "").toLowerCase();
       const deskripsi = String(item?.deskripsi || "").toLowerCase();
       return (
         judul.includes(keyword) ||
@@ -379,41 +392,7 @@ export default function UjianGuruPage() {
     await loadKelasMapel();
   }
 
-  /* =======================================================
-     STAT CARD
-  ======================================================= */
-
-  function StatCard({
-    icon: Icon,
-    label,
-    value,
-    description,
-    iconClass,
-    bgClass,
-  }) {
-    return (
-      <div
-        className={`theme-card group rounded-2xl border ${themeNeutralBorder} p-4 ${themeCardShadow} transition duration-200 hover:-translate-y-0.5 sm:p-5`}
-      >
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <p className="theme-text-muted text-xs font-semibold">{label}</p>
-            <p className="theme-text mt-2 text-2xl font-bold tracking-tight">
-              {value}
-            </p>
-            <p className="theme-text-muted mt-1 text-[11px] leading-5">
-              {description}
-            </p>
-          </div>
-          <div
-            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${bgClass}`}
-          >
-            <Icon size={18} className={iconClass} />
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // StatCard sudah dipindah ke luar fungsi GuruUjianPage (komponen statis)
 
   /* =======================================================
      RENDER
@@ -846,6 +825,8 @@ export default function UjianGuruPage() {
                           item?._count?.soalAsesmen || 0
                         );
                         const isPublished = item?.dipublikasikan === true;
+                        const modeUjian =
+                          item?.modeAsesmen || item?.modeUjian;
 
                         return (
                           <tr
@@ -894,7 +875,7 @@ export default function UjianGuruPage() {
                                       {item.deskripsi}
                                     </p>
                                   )}
-                                  {item?.modeUjian && (
+                                  {modeUjian && (
                                     <div className="mt-2">
                                       <span
                                         className={`inline-flex items-center rounded-md ${themeNeutralSurface} ${themeNeutralBorder} border px-2 py-1 text-[10px] font-semibold uppercase tracking-wide theme-text-muted`}
@@ -903,7 +884,7 @@ export default function UjianGuruPage() {
                                         <span className="mx-1 theme-text-placeholder">
                                           ·
                                         </span>
-                                        {item.modeUjian}
+                                        {modeUjian}
                                       </span>
                                     </div>
                                   )}
@@ -916,7 +897,7 @@ export default function UjianGuruPage() {
                               <span
                                 className={`inline-flex items-center rounded-lg border ${themeNeutralBorder} ${themeNeutralSurface} px-2.5 py-1.5 text-xs font-semibold theme-text-secondary`}
                               >
-                                {getJenisLabel(item?.jenis)}
+                                {getJenisLabel(item?.tipe || item?.jenis)}
                               </span>
                             </td>
 

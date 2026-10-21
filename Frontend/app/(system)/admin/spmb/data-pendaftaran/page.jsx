@@ -1,6 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { useRouter } from "next/navigation";
 
 import Sidebar from "@/app/components/Sidebar";
@@ -23,6 +28,27 @@ import {
 } from "lucide-react";
 
 import { getPendaftarPpdb } from "@/services/ppdb.service";
+import { getJalurPpdb } from "@/services/jalurPpdb.service";
+
+const LIMIT_PENDAFTAR = 10;
+
+function keStatusApi(label) {
+  const value = String(label || "").toLowerCase();
+
+  if (value === "terverifikasi") {
+    return "lulus";
+  }
+
+  if (value === "ditolak") {
+    return "ditolak";
+  }
+
+  if (value === "menunggu verifikasi") {
+    return "menunggu";
+  }
+
+  return undefined;
+}
 
 // ============================================================
 // THEME HELPERS
@@ -140,6 +166,23 @@ export default function PendaftaranPage() {
   const [jalur, setJalur] = useState("Semua");
 
   const [data, setData] = useState([]);
+  const [meta, setMeta] = useState({
+    page: 1,
+    limit: LIMIT_PENDAFTAR,
+    total: 0,
+    totalData: 0,
+    totalPages: 0,
+    hasNext: false,
+    hasPrev: false,
+  });
+  const [statistik, setStatistik] = useState({
+    total: 0,
+    menunggu: 0,
+    lulus: 0,
+    ditolak: 0,
+  });
+  const [page, setPage] = useState(1);
+  const [jalurList, setJalurList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
@@ -148,50 +191,116 @@ export default function PendaftaranPage() {
   // LOAD DATA
   // ============================================================
 
-  async function loadData(isRefresh = false) {
-    try {
-      setError("");
+  const loadData = useCallback(
+    async (isRefresh = false) => {
+      try {
+        setError("");
 
-      if (isRefresh) {
-        setRefreshing(true);
-      } else {
-        setLoading(true);
-      }
+        if (isRefresh) {
+          setRefreshing(true);
+        } else {
+          setLoading(true);
+        }
 
-      const response = await getPendaftarPpdb();
+        const response = await getPendaftarPpdb({
+          search: search.trim() || undefined,
+          jalurPpdbId:
+            jalur === "Semua" ? undefined : jalur,
+          status:
+            status === "Semua"
+              ? undefined
+              : keStatusApi(status),
+          page,
+          limit: LIMIT_PENDAFTAR,
+        });
 
-      if (!response?.success) {
-        throw new Error(
-          response?.message ||
-            "Gagal mengambil data pendaftar PPDB."
+        setData(
+          Array.isArray(response?.data)
+            ? response.data
+            : []
         );
+
+        setMeta(
+          response?.meta || {
+            page,
+            limit: LIMIT_PENDAFTAR,
+            total: 0,
+            totalData: 0,
+            totalPages: 0,
+            hasNext: false,
+            hasPrev: false,
+          }
+        );
+
+        setStatistik(
+          response?.statistik || {
+            total: 0,
+            menunggu: 0,
+            lulus: 0,
+            ditolak: 0,
+          }
+        );
+      } catch (err) {
+        setData([]);
+        setMeta({
+          page,
+          limit: LIMIT_PENDAFTAR,
+          total: 0,
+          totalData: 0,
+          totalPages: 0,
+          hasNext: false,
+          hasPrev: false,
+        });
+
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Gagal memuat data pendaftar PPDB."
+        );
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
       }
-
-      const pendaftar = Array.isArray(response?.data)
-        ? response.data
-        : [];
-
-      setData(pendaftar);
-    } catch (err) {
-      console.error(
-        "GET PENDAFTAR PPDB ERROR:",
-        err
-      );
-
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Gagal mengambil data pendaftar PPDB."
-      );
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }
+    },
+    [search, status, jalur, page]
+  );
 
   useEffect(() => {
-    loadData();
+    const timer = setTimeout(() => {
+      loadData(false);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [loadData]);
+
+  useEffect(() => {
+    let aktif = true;
+
+    getJalurPpdb()
+      .then((response) => {
+        if (aktif) {
+          setJalurList(
+            Array.isArray(response?.data)
+              ? response.data
+              : []
+          );
+        }
+      })
+      .catch(() => {
+        if (aktif) {
+          setJalurList([]);
+        }
+      });
+
+    return () => {
+      aktif = false;
+    };
   }, []);
+
+  function ubahFilter(setter, value) {
+    setter(value);
+    setPage(1);
+  }
 
   // ============================================================
   // NORMALIZE DATA
@@ -218,83 +327,39 @@ export default function PendaftaranPage() {
   // ============================================================
 
   const daftarJalur = useMemo(() => {
-    const values = normalizedData
-      .map((item) => item.jalurNama)
-      .filter(
-        (item) => item && item !== "-"
-      );
+    return [...jalurList].sort((a, b) =>
+      String(a?.nama || "").localeCompare(
+        String(b?.nama || ""),
+        "id"
+      )
+    );
+  }, [jalurList]);
 
-    return [...new Set(values)];
-  }, [normalizedData]);
-
-  // ============================================================
-  // FILTER
-  // ============================================================
-
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-
-    return normalizedData.filter((item) => {
-      const cocokSearch =
-        !q ||
-        String(item.nama || "")
-          .toLowerCase()
-          .includes(q) ||
-        String(item.nisn || "")
-          .toLowerCase()
-          .includes(q) ||
-        String(item.nomor || "")
-          .toLowerCase()
-          .includes(q) ||
-        String(item.asalSekolah || "")
-          .toLowerCase()
-          .includes(q);
-
-      const cocokStatus =
-        status === "Semua" ||
-        item.statusLabel === status;
-
-      const cocokJalur =
-        jalur === "Semua" ||
-        item.jalurNama === jalur;
-
-      return (
-        cocokSearch &&
-        cocokStatus &&
-        cocokJalur
-      );
-    });
-  }, [
-    normalizedData,
-    search,
-    status,
-    jalur,
-  ]);
+  /*
+   * Pencarian, filter, dan pagination dikerjakan oleh Backend
+   * (GET /api/ppdb/pendaftar), sehingga data yang ditampilkan sudah
+   * merupakan halaman yang diminta. Tidak ada filter ganda di client.
+   */
+  const filtered = normalizedData;
 
   // ============================================================
   // STATISTICS
   // ============================================================
 
-  const totalPendaftar = data.length;
+  const isEndpointUnavailable = Boolean(
+    error &&
+      (error.toLowerCase().includes("belum tersedia") ||
+        error.toLowerCase().includes("cannot get") ||
+        error.toLowerCase().includes("404"))
+  );
 
-  const totalTerverifikasi = data.filter(
-    (item) =>
-      String(item?.status || "")
-        .toLowerCase() === "lulus"
-  ).length;
+  const totalPendaftar = isEndpointUnavailable || error ? "-" : statistik.total;
 
-  const totalMenunggu = data.filter(
-    (item) =>
-      !item?.status ||
-      String(item?.status || "")
-        .toLowerCase() === "menunggu"
-  ).length;
+  const totalTerverifikasi = isEndpointUnavailable || error ? "-" : statistik.lulus;
 
-  const totalDitolak = data.filter(
-    (item) =>
-      String(item?.status || "")
-        .toLowerCase() === "ditolak"
-  ).length;
+  const totalMenunggu = isEndpointUnavailable || error ? "-" : statistik.menunggu;
+
+  const totalDitolak = isEndpointUnavailable || error ? "-" : statistik.ditolak;
 
   // ============================================================
   // EXPORT CSV
@@ -441,7 +506,12 @@ export default function PendaftaranPage() {
                 <button
                   type="button"
                   onClick={exportData}
-                  disabled={!filtered.length}
+                  disabled={isEndpointUnavailable || !filtered.length}
+                  title={
+                    isEndpointUnavailable
+                      ? "Fitur Export dinonaktifkan karena endpoint pendaftar belum tersedia di backend"
+                      : undefined
+                  }
                   className={`theme-neutral-border theme-card theme-text-secondary inline-flex items-center justify-center gap-2 rounded-lg border px-3 py-2.5 text-xs font-semibold transition ${themeNeutralHover} disabled:cursor-not-allowed disabled:opacity-50`}
                 >
                   <Download size={15} />
@@ -450,11 +520,9 @@ export default function PendaftaranPage() {
 
                 <button
                   type="button"
-                  onClick={() =>
-                    router.push(
-                      "/admin/spmb/data-pendaftaran/tambah"
-                    )
-                  }
+                  onClick={() => {
+                    router.push("/admin/spmb/data-pendaftaran/tambah");
+                  }}
                   className={`${themePrimaryGradient} inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-xs font-semibold text-[var(--color-card)] ${themeSmallShadow} transition hover:brightness-95`}
                 >
                   <Plus size={16} />
@@ -476,12 +544,20 @@ export default function PendaftaranPage() {
 
                 <div>
                   <p className="theme-danger font-semibold">
-                    Gagal memuat data
+                    {isEndpointUnavailable
+                      ? "Layanan Data Pendaftar Belum Tersedia"
+                      : "Gagal memuat data"}
                   </p>
 
                   <p className="theme-text-secondary mt-0.5 text-xs">
                     {error}
                   </p>
+
+                  {isEndpointUnavailable && (
+                    <p className="mt-1 text-[11px] theme-text-muted">
+                      Backend saat ini belum menyediakan endpoint untuk memuat daftar pendaftar (GET /api/ppdb/pendaftar). Penambahan calon siswa baru tetap dapat dilakukan melalui tombol Tambah Pendaftar.
+                    </p>
+                  )}
                 </div>
               </div>
             )}
@@ -543,19 +619,31 @@ export default function PendaftaranPage() {
                   <input
                     value={search}
                     onChange={(e) =>
-                      setSearch(e.target.value)
+                      ubahFilter(
+                        setSearch,
+                        e.target.value
+                      )
                     }
-                    placeholder="Cari nama, NISN, nomor pendaftaran..."
-                    className={`theme-input theme-text theme-neutral-border h-10 w-full rounded-lg border ${themeNeutralSurface} pl-9 pr-3 text-xs outline-none transition ${themeFocus}`}
+                    disabled={isEndpointUnavailable || loading}
+                    placeholder={
+                      isEndpointUnavailable
+                        ? "Pencarian dinonaktifkan (endpoint pendaftar belum tersedia)"
+                        : "Cari nama, NISN, nomor pendaftaran..."
+                    }
+                    className={`theme-input theme-text theme-neutral-border h-10 w-full rounded-lg border ${themeNeutralSurface} pl-9 pr-3 text-xs outline-none transition ${themeFocus} disabled:cursor-not-allowed disabled:opacity-60`}
                   />
                 </div>
 
                 <select
                   value={jalur}
                   onChange={(e) =>
-                    setJalur(e.target.value)
+                    ubahFilter(
+                      setJalur,
+                      e.target.value
+                    )
                   }
-                  className={`theme-input theme-text theme-neutral-border h-10 rounded-lg border ${themeNeutralSurface} px-3 text-xs outline-none transition ${themeFocus}`}
+                  disabled={isEndpointUnavailable || loading}
+                  className={`theme-input theme-text theme-neutral-border h-10 rounded-lg border ${themeNeutralSurface} px-3 text-xs outline-none transition ${themeFocus} disabled:cursor-not-allowed disabled:opacity-60`}
                 >
                   <option value="Semua">
                     Semua Jalur
@@ -564,10 +652,10 @@ export default function PendaftaranPage() {
                   {daftarJalur.map(
                     (item) => (
                       <option
-                        key={item}
-                        value={item}
+                        key={item.id}
+                        value={item.id}
                       >
-                        {item}
+                        {item.nama}
                       </option>
                     )
                   )}
@@ -576,9 +664,13 @@ export default function PendaftaranPage() {
                 <select
                   value={status}
                   onChange={(e) =>
-                    setStatus(e.target.value)
+                    ubahFilter(
+                      setStatus,
+                      e.target.value
+                    )
                   }
-                  className={`theme-input theme-text theme-neutral-border h-10 rounded-lg border ${themeNeutralSurface} px-3 text-xs outline-none transition ${themeFocus}`}
+                  disabled={isEndpointUnavailable || loading}
+                  className={`theme-input theme-text theme-neutral-border h-10 rounded-lg border ${themeNeutralSurface} px-3 text-xs outline-none transition ${themeFocus} disabled:cursor-not-allowed disabled:opacity-60`}
                 >
                   <option value="Semua">
                     Semua Status
@@ -599,12 +691,14 @@ export default function PendaftaranPage() {
 
                 <button
                   type="button"
+                  disabled={isEndpointUnavailable || loading}
                   onClick={() => {
                     setSearch("");
                     setStatus("Semua");
                     setJalur("Semua");
+                    setPage(1);
                   }}
-                  className={`theme-neutral-border theme-text-secondary inline-flex h-10 items-center justify-center gap-2 rounded-lg border px-3 text-xs transition ${themeNeutralHover}`}
+                  className={`theme-neutral-border theme-text-secondary inline-flex h-10 items-center justify-center gap-2 rounded-lg border px-3 text-xs transition ${themeNeutralHover} disabled:cursor-not-allowed disabled:opacity-50`}
                 >
                   <RefreshCw size={14} />
                   Reset
@@ -647,37 +741,88 @@ export default function PendaftaranPage() {
                       </p>
                     </div>
                   </div>
+                ) : isEndpointUnavailable ? (
+                  <div className="flex min-h-[400px] items-center justify-center px-6">
+                    <div className="max-w-md text-center">
+                      <div
+                        className={`theme-text-muted mx-auto flex h-14 w-14 items-center justify-center rounded-2xl ${themeNeutralSurface} text-amber-600`}
+                      >
+                        <AlertCircle size={28} />
+                      </div>
+
+                      <h3 className="theme-text mt-4 text-sm font-bold">
+                        Layanan Data Pendaftaran Belum Tersedia di Backend
+                      </h3>
+
+                      <p className="theme-text-secondary mt-1 text-xs leading-5">
+                        {error}
+                      </p>
+
+                      <p className="theme-text-muted mt-2 text-[11px] leading-4">
+                        Fitur pengelolaan data pendaftar memerlukan rute API <code>GET /api/ppdb/pendaftar</code>. Seluruh kontrol data pendaftar dinonaktifkan sementara hingga endpoint backend disediakan.
+                      </p>
+
+                      <button
+                        type="button"
+                        onClick={() => loadData(true)}
+                        className={`${themePrimaryGradient} mt-5 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-semibold text-[var(--color-card)] transition hover:brightness-95`}
+                      >
+                        <RefreshCw size={14} />
+                        Coba Muat Ulang
+                      </button>
+                    </div>
+                  </div>
+                ) : error ? (
+                  <div className="flex min-h-[400px] items-center justify-center px-6">
+                    <div className="max-w-md text-center">
+                      <div
+                        className={`theme-text-muted mx-auto flex h-14 w-14 items-center justify-center rounded-2xl ${themeNeutralSurface} text-rose-600`}
+                      >
+                        <AlertCircle size={28} />
+                      </div>
+
+                      <h3 className="theme-text mt-4 text-sm font-bold">
+                        Gagal Memuat Data Pendaftar
+                      </h3>
+
+                      <p className="theme-text-secondary mt-1 text-xs">
+                        {error}
+                      </p>
+
+                      <button
+                        type="button"
+                        onClick={() => loadData(true)}
+                        className={`${themePrimaryGradient} mt-4 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-semibold text-[var(--color-card)] transition hover:brightness-95`}
+                      >
+                        <RefreshCw size={14} />
+                        Muat Ulang
+                      </button>
+                    </div>
+                  </div>
                 ) : filtered.length === 0 ? (
                   <div className="flex min-h-[400px] items-center justify-center px-6">
                     <div className="text-center">
                       <div
                         className={`theme-text-muted mx-auto flex h-14 w-14 items-center justify-center rounded-2xl ${themeNeutralSurface}`}
                       >
-                        <Users size={25} />
+                        {isEndpointUnavailable ? (
+                          <AlertCircle size={25} className="theme-danger" />
+                        ) : (
+                          <Users size={25} />
+                        )}
                       </div>
 
                       <h3 className="theme-text mt-4 text-sm font-bold">
-                        Data pendaftar tidak ditemukan
+                        {isEndpointUnavailable
+                          ? "Layanan Data Pendaftar Belum Tersedia"
+                          : "Belum Ada Pendaftar"}
                       </h3>
 
-                      <p className="theme-text-muted mt-1 text-xs">
-                        Belum ada pendaftar atau
-                        tidak ada data yang sesuai
-                        dengan filter.
+                      <p className="theme-text-muted mt-1 text-xs max-w-md mx-auto">
+                        {isEndpointUnavailable
+                          ? "Server backend saat ini belum menyediakan endpoint daftar pendaftar (GET /api/ppdb/pendaftar). Pendaftaran baru tetap dapat diproses melalui formulir Tambah Pendaftar."
+                          : "Belum ada calon siswa yang mendaftar atau tidak ada data yang sesuai dengan filter."}
                       </p>
-
-                      {data.length === 0 && (
-                        <button
-                          type="button"
-                          onClick={() =>
-                            loadData(true)
-                          }
-                          className={`${themePrimaryGradient} mt-4 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-semibold text-[var(--color-card)] transition hover:brightness-95`}
-                        >
-                          <RefreshCw size={14} />
-                          Muat Ulang
-                        </button>
-                      )}
                     </div>
                   </div>
                 ) : (
@@ -805,29 +950,43 @@ export default function PendaftaranPage() {
                 <p className="theme-text-muted text-xs">
                   Menampilkan{" "}
                   {filtered.length} dari{" "}
-                  {totalPendaftar} data
+                  {meta.total} data
+                  {meta.totalPages > 0 && (
+                    <>
+                      {" "}
+                      • Halaman {meta.page}/
+                      {meta.totalPages}
+                    </>
+                  )}
                 </p>
 
                 <div className="flex gap-1">
                   <button
                     type="button"
-                    disabled
-                    className={`theme-neutral-border theme-text-muted flex h-8 w-8 items-center justify-center rounded-lg border opacity-50`}
+                    onClick={() =>
+                      setPage((value) =>
+                        Math.max(1, value - 1)
+                      )
+                    }
+                    disabled={!meta.hasPrev || loading || isEndpointUnavailable}
+                    className={`theme-neutral-border theme-text-secondary flex h-8 w-8 items-center justify-center rounded-lg border transition ${themeNeutralHover} disabled:cursor-not-allowed disabled:opacity-50`}
                   >
                     <ChevronLeft size={15} />
                   </button>
 
-                  <button
-                    type="button"
-                    className={`${themePrimaryGradient} h-8 min-w-8 rounded-lg px-2 text-xs font-semibold text-[var(--color-card)]`}
+                  <span
+                    className={`${themePrimaryGradient} inline-flex h-8 min-w-8 items-center justify-center rounded-lg px-2 text-xs font-semibold text-[var(--color-card)]`}
                   >
-                    1
-                  </button>
+                    {isEndpointUnavailable ? "-" : meta.page}
+                  </span>
 
                   <button
                     type="button"
-                    disabled
-                    className={`theme-neutral-border theme-text-muted flex h-8 w-8 items-center justify-center rounded-lg border opacity-50`}
+                    onClick={() =>
+                      setPage((value) => value + 1)
+                    }
+                    disabled={!meta.hasNext || loading || isEndpointUnavailable}
+                    className={`theme-neutral-border theme-text-secondary flex h-8 w-8 items-center justify-center rounded-lg border transition ${themeNeutralHover} disabled:cursor-not-allowed disabled:opacity-50`}
                   >
                     <ChevronRight size={15} />
                   </button>
@@ -896,9 +1055,9 @@ function Stat({
           </p>
 
           <p className="theme-text mt-1 text-2xl font-bold">
-            {Number(
-              value || 0
-            ).toLocaleString("id-ID")}
+            {value === "-" || value === null || value === undefined
+              ? "-"
+              : Number(value || 0).toLocaleString("id-ID")}
           </p>
         </div>
 

@@ -4,6 +4,16 @@ import { apiFetch } from "../lib/api";
  * Ambil kelas-mapel yang diampu guru login
  */
 export async function getKelasMapelGuru() {
+  try {
+    const res = await apiFetch("/api/kelas-mapel/diampu");
+    const data = res?.data ?? res;
+    if (Array.isArray(data) && data.length > 0) {
+      return res;
+    }
+    if (res) return res;
+  } catch {
+    // Fallback ke /api/kelas-mapel jika role adalah admin_sekolah
+  }
   return apiFetch("/api/kelas-mapel");
 }
 
@@ -261,4 +271,39 @@ export async function getTugasGuru() {
   );
 
   return hasil.flat();
+}
+
+/**
+ * Ambil tugas untuk siswa (berdasarkan kelas-mapel yang diikuti)
+ */
+export async function getTugasSiswa(kelasMapelId?: string) {
+  let kelasMapelIds: string[] = [];
+
+  if (kelasMapelId) {
+    kelasMapelIds = [kelasMapelId];
+  } else {
+    try {
+      const res = await apiFetch("/api/kelas-mapel/siswa");
+      const list = Array.isArray(res?.data) ? res.data : Array.isArray(res) ? res : [];
+      kelasMapelIds = list.map((item: any) => item.id).filter(Boolean);
+    } catch {
+      kelasMapelIds = [];
+    }
+  }
+
+  if (kelasMapelIds.length === 0) return [];
+
+  const taskResponses = await Promise.all(
+    kelasMapelIds.map(async (kmId) => {
+      try {
+        const res = await apiFetch(`/api/tugas/kelas-mapel/${kmId}`);
+        const data = res?.data ?? res;
+        return Array.isArray(data) ? data : [];
+      } catch {
+        return [];
+      }
+    })
+  );
+
+  return taskResponses.flat();
 }

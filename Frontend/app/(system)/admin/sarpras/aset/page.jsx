@@ -15,226 +15,14 @@ import {
   XCircle,
   AlertTriangle,
   Filter,
+  Loader2,
+  AlertCircle,
 } from "lucide-react";
+import { getAset, deleteAset } from "@/services/sarpras.service";
 
 // =========================================================
 // HELPERS
 // =========================================================
-const STORAGE_KEY = "sarpras_aset_data";
-
-const getDefaultAset = () => [
-  // ===== KATEGORI: ELEKTRONIK =====
-  {
-    id: 1,
-    nama: "Proyektor Epson EB-X500",
-    kategori: "Elektronik",
-    kode_aset: "SPR-ELK-001",
-    lokasi: "R. 101",
-    jumlah: 1,
-    kondisi: "baik",
-    penanggung_jawab: "Budi Santoso, S.Si.",
-    tanggal_pengadaan: "2024-07-12",
-    status: "tersedia",
-  },
-  {
-    id: 2,
-    nama: "AC Split Daikin 1 PK",
-    kategori: "Elektronik",
-    kode_aset: "SPR-ELK-002",
-    lokasi: "R. 102",
-    jumlah: 2,
-    kondisi: "baik",
-    penanggung_jawab: "Siti Rahma, S.Pd.",
-    tanggal_pengadaan: "2023-03-05",
-    status: "tersedia",
-  },
-  {
-    id: 3,
-    nama: "Komputer PC Rakitan i5",
-    kategori: "Elektronik",
-    kode_aset: "SPR-ELK-003",
-    lokasi: "Lab. Komputer 1",
-    jumlah: 30,
-    kondisi: "rusak_ringan",
-    penanggung_jawab: "Eko Prasetyo, S.Pd.",
-    tanggal_pengadaan: "2022-01-18",
-    status: "dipinjam",
-  },
-  {
-    id: 4,
-    nama: "Printer Canon MP287",
-    kategori: "Elektronik",
-    kode_aset: "SPR-ELK-004",
-    lokasi: "R. Tata Usaha",
-    jumlah: 3,
-    kondisi: "rusak_berat",
-    penanggung_jawab: "Maya Sari, S.Pd.",
-    tanggal_pengadaan: "2021-09-09",
-    status: "perbaikan",
-  },
-
-  // ===== KATEGORI: FURNITURE =====
-  {
-    id: 5,
-    nama: "Meja Siswa Kayu",
-    kategori: "Furniture",
-    kode_aset: "SPR-FUR-001",
-    lokasi: "R. 103",
-    jumlah: 32,
-    kondisi: "baik",
-    penanggung_jawab: "Dewi Lestari, S.Pd.",
-    tanggal_pengadaan: "2023-06-20",
-    status: "tersedia",
-  },
-  {
-    id: 6,
-    nama: "Kursi Siswa Plastik",
-    kategori: "Furniture",
-    kode_aset: "SPR-FUR-002",
-    lokasi: "R. 104",
-    jumlah: 32,
-    kondisi: "baik",
-    penanggung_jawab: "Agus Setiawan, S.Pd.",
-    tanggal_pengadaan: "2023-06-20",
-    status: "tersedia",
-  },
-  {
-    id: 7,
-    nama: "Lemari Arsip Besi",
-    kategori: "Furniture",
-    kode_aset: "SPR-FUR-003",
-    lokasi: "R. Perpustakaan",
-    jumlah: 5,
-    kondisi: "rusak_ringan",
-    penanggung_jawab: "Rina Sari, S.Pd.",
-    tanggal_pengadaan: "2020-11-02",
-    status: "tersedia",
-  },
-
-  // ===== KATEGORI: ALAT PRAKTIK =====
-  {
-    id: 8,
-    nama: "Router Cisco 2911",
-    kategori: "Alat Praktik",
-    kode_aset: "SPR-PRK-001",
-    lokasi: "Lab. TKJ",
-    jumlah: 10,
-    kondisi: "baik",
-    penanggung_jawab: "Hendra Gunawan, S.Pd.",
-    tanggal_pengadaan: "2024-02-14",
-    status: "tersedia",
-  },
-  {
-    id: 9,
-    nama: "Mesin Jahit Portable",
-    kategori: "Alat Praktik",
-    kode_aset: "SPR-PRK-002",
-    lokasi: "R. Praktik Tata Busana",
-    jumlah: 15,
-    kondisi: "rusak_ringan",
-    penanggung_jawab: "Sri Wahyuni, S.Pd.",
-    tanggal_pengadaan: "2022-08-30",
-    status: "tersedia",
-  },
-  {
-    id: 10,
-    nama: "Kalkulator Akuntansi",
-    kategori: "Alat Praktik",
-    kode_aset: "SPR-PRK-003",
-    lokasi: "R. 105",
-    jumlah: 25,
-    kondisi: "baik",
-    penanggung_jawab: "Eko Prasetyo, S.Pd.",
-    tanggal_pengadaan: "2024-01-10",
-    status: "dipinjam",
-  },
-
-  // ===== KATEGORI: BANGUNAN & FASILITAS =====
-  {
-    id: 11,
-    nama: "Lapangan Basket",
-    kategori: "Bangunan",
-    kode_aset: "SPR-BGN-001",
-    lokasi: "Area Olahraga",
-    jumlah: 1,
-    kondisi: "baik",
-    penanggung_jawab: "Agus Setiawan, S.Pd.",
-    tanggal_pengadaan: "2019-05-01",
-    status: "tersedia",
-  },
-  {
-    id: 12,
-    nama: "Toilet Siswa Lantai 2",
-    kategori: "Bangunan",
-    kode_aset: "SPR-BGN-002",
-    lokasi: "Lantai 2",
-    jumlah: 4,
-    kondisi: "rusak_berat",
-    penanggung_jawab: "Hendra Gunawan, S.Pd.",
-    tanggal_pengadaan: "2018-03-15",
-    status: "perbaikan",
-  },
-  {
-    id: 13,
-    nama: "Musala Sekolah",
-    kategori: "Bangunan",
-    kode_aset: "SPR-BGN-003",
-    lokasi: "Gedung Utama",
-    jumlah: 1,
-    kondisi: "baik",
-    penanggung_jawab: "Dr. Ahmad Fauzi, M.Pd.",
-    tanggal_pengadaan: "2017-08-17",
-    status: "tersedia",
-  },
-
-  // ===== KATEGORI: KENDARAAN =====
-  {
-    id: 14,
-    nama: "Bus Sekolah Isuzu Elf",
-    kategori: "Kendaraan",
-    kode_aset: "SPR-KND-001",
-    lokasi: "Garasi Sekolah",
-    jumlah: 2,
-    kondisi: "baik",
-    penanggung_jawab: "Dr. Ahmad Fauzi, M.Pd.",
-    tanggal_pengadaan: "2021-04-22",
-    status: "tersedia",
-  },
-  {
-    id: 15,
-    nama: "Motor Dinas Operasional",
-    kategori: "Kendaraan",
-    kode_aset: "SPR-KND-002",
-    lokasi: "Garasi Sekolah",
-    jumlah: 3,
-    kondisi: "rusak_ringan",
-    penanggung_jawab: "Budi Santoso, S.Si.",
-    tanggal_pengadaan: "2020-10-11",
-    status: "dipinjam",
-  },
-];
-
-const loadAset = () => {
-  if (typeof window === "undefined") return getDefaultAset();
-
-  const stored = localStorage.getItem(STORAGE_KEY);
-
-  if (!stored) {
-    localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify(getDefaultAset())
-    );
-
-    return getDefaultAset();
-  }
-
-  return JSON.parse(stored);
-};
-
-const saveAset = (data) => {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-};
-
 const kondisiConfig = {
   baik: {
     label: "Baik",
@@ -258,6 +46,10 @@ const statusConfig = {
     label: "Tersedia",
     textClassName: "theme-info",
   },
+  aktif: {
+    label: "Aktif",
+    textClassName: "theme-info",
+  },
   dipinjam: {
     label: "Dipinjam",
     textClassName: "theme-primary",
@@ -266,15 +58,26 @@ const statusConfig = {
     label: "Perbaikan",
     textClassName: "theme-text-muted",
   },
+  nonaktif: {
+    label: "Nonaktif",
+    textClassName: "theme-text-muted",
+  },
 };
 
-const kategoriKeys = [
-  "Elektronik",
-  "Furniture",
-  "Alat Praktik",
-  "Bangunan",
-  "Kendaraan",
-];
+function formatTanggal(raw) {
+  if (!raw) return "-";
+  try {
+    const d = new Date(raw);
+    if (Number.isNaN(d.getTime())) return String(raw);
+    return d.toLocaleDateString("id-ID", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  } catch {
+    return String(raw);
+  }
+}
 
 // =========================================================
 // THEME HELPERS
@@ -323,66 +126,118 @@ export default function AdminSarprasAsetPage() {
 
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [aset, setAset] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
+  const [error, setError] = useState("");
   const [search, setSearch] = useState("");
   const [kategoriFilter, setKategoriFilter] = useState("Semua");
   const [kondisiFilter, setKondisiFilter] = useState("Semua");
 
   const toggleSidebar = () => setIsCollapsed(!isCollapsed);
 
+  const loadData = async (isRefresh = false) => {
+    try {
+      if (isRefresh) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
+      }
+      setError("");
+
+      const response = await getAset();
+      const rawList =
+        response?.data && Array.isArray(response.data)
+          ? response.data
+          : Array.isArray(response)
+          ? response
+          : [];
+
+      setAset(rawList);
+    } catch (err) {
+      console.error("Gagal memuat data aset dari server:", err);
+      setError(
+        err?.message || "Gagal memuat data aset. Pastikan server backend berjalan."
+      );
+      setAset([]);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
   useEffect(() => {
-    setAset(loadAset());
+    Promise.resolve().then(() => {
+      loadData();
+    });
   }, []);
 
-  const handleDelete = (id, nama) => {
+  const handleDelete = async (id, nama) => {
     if (!window.confirm(`Yakin ingin menghapus aset "${nama}"?`)) {
       return;
     }
 
-    const updated = aset.filter((item) => item.id !== id);
-
-    setAset(updated);
-    saveAset(updated);
-
-    alert(`Aset "${nama}" berhasil dihapus!`);
+    try {
+      setDeletingId(id);
+      await deleteAset(id);
+      setAset((prev) => prev.filter((item) => item.id !== id));
+      alert(`Aset "${nama}" berhasil dihapus dari server!`);
+    } catch (err) {
+      console.error("Gagal menghapus aset:", err);
+      alert(err?.message || `Gagal menghapus aset "${nama}".`);
+    } finally {
+      setDeletingId(null);
+    }
   };
 
+  const kategoriKeys = useMemo(() => {
+    const setKat = new Set();
+    for (const item of aset) {
+      const katName =
+        item?.kategoriAset?.nama ||
+        item?.kategori ||
+        "";
+      if (katName) setKat.add(katName);
+    }
+    return Array.from(setKat).sort();
+  }, [aset]);
+
   const filtered = useMemo(() => {
+    const keyword = search.trim().toLowerCase();
+
     return aset
       .filter((item) => {
+        const nama = String(item?.nama || "").toLowerCase();
+        const kode = String(item?.kode || item?.kode_aset || "").toLowerCase();
+        const lokasi = String(item?.lokasi || item?.gudang?.nama || "").toLowerCase();
+        const kategori = String(
+          item?.kategoriAset?.nama || item?.kategori || ""
+        );
+        const kondisi = String(item?.kondisi || "").toLowerCase();
+
         const matchSearch =
-          item.nama.toLowerCase().includes(search.toLowerCase()) ||
-          item.kode_aset
-            .toLowerCase()
-            .includes(search.toLowerCase()) ||
-          item.lokasi
-            .toLowerCase()
-            .includes(search.toLowerCase());
+          !keyword ||
+          nama.includes(keyword) ||
+          kode.includes(keyword) ||
+          lokasi.includes(keyword) ||
+          kategori.toLowerCase().includes(keyword);
 
         const matchKategori =
-          kategoriFilter === "Semua" ||
-          item.kategori === kategoriFilter;
+          kategoriFilter === "Semua" || kategori === kategoriFilter;
 
         const matchKondisi =
-          kondisiFilter === "Semua" ||
-          item.kondisi === kondisiFilter;
+          kondisiFilter === "Semua" || kondisi === kondisiFilter;
 
-        return (
-          matchSearch &&
-          matchKategori &&
-          matchKondisi
-        );
+        return matchSearch && matchKategori && matchKondisi;
       })
-      .sort(
-        (a, b) =>
-          a.kategori.localeCompare(b.kategori) ||
-          a.nama.localeCompare(b.nama)
-      );
-  }, [
-    aset,
-    search,
-    kategoriFilter,
-    kondisiFilter,
-  ]);
+      .sort((a, b) => {
+        const katA = String(a?.kategoriAset?.nama || a?.kategori || "");
+        const katB = String(b?.kategoriAset?.nama || b?.kategori || "");
+        const namaA = String(a?.nama || "");
+        const namaB = String(b?.nama || "");
+        return katA.localeCompare(katB) || namaA.localeCompare(namaB);
+      });
+  }, [aset, search, kategoriFilter, kondisiFilter]);
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
@@ -435,16 +290,14 @@ export default function AdminSarprasAsetPage() {
 
                   {/* REFRESH */}
                   <button
-                    onClick={() => {
-                      setAset(loadAset());
-                      window.location.reload();
-                    }}
-                    className={`theme-card theme-border ${themeNeutralHover} rounded-xl border p-2.5 transition-all ${themeCardShadow} ${themeCardHoverShadow}`}
-                    title="Refresh"
+                    onClick={() => loadData(true)}
+                    disabled={loading || refreshing}
+                    className={`theme-card theme-border ${themeNeutralHover} rounded-xl border p-2.5 transition-all ${themeCardShadow} ${themeCardHoverShadow} disabled:opacity-50`}
+                    title="Refresh Data dari Server"
                   >
                     <RefreshCw
                       size={17}
-                      className="theme-text-secondary"
+                      className={`theme-text-secondary ${refreshing ? "animate-spin" : ""}`}
                     />
                   </button>
 
@@ -452,7 +305,7 @@ export default function AdminSarprasAsetPage() {
                   <button
                     onClick={() =>
                       router.push(
-                        "/admin/sarpras/aset/tambah"
+                        "/admin/sarpras/gudang/tambah"
                       )
                     }
                     className={`flex items-center gap-2 rounded-xl px-5 py-2.5 font-semibold transition-all ${themePrimaryGradient} ${themePrimaryGradientHover} ${themePrimaryShadow}`}
@@ -468,6 +321,23 @@ export default function AdminSarprasAsetPage() {
                   </button>
                 </div>
               </div>
+
+              {/* ERROR ALERT */}
+              {error && (
+                <div className="flex items-center gap-3 rounded-xl border border-rose-200 bg-rose-50 p-4 text-xs text-rose-700">
+                  <AlertCircle size={18} className="shrink-0 text-rose-500" />
+                  <div className="flex-1">
+                    <p className="font-semibold">Gagal memuat data aset</p>
+                    <p className="mt-0.5 text-rose-600">{error}</p>
+                  </div>
+                  <button
+                    onClick={() => loadData(true)}
+                    className="rounded-lg bg-rose-100 px-3 py-1 font-semibold text-rose-700 hover:bg-rose-200"
+                  >
+                    Coba Lagi
+                  </button>
+                </div>
+              )}
 
               {/* SEARCH & FILTER */}
               <div
@@ -614,112 +484,172 @@ export default function AdminSarprasAsetPage() {
                     </thead>
 
                     <tbody>
-                      {filtered.map((item, idx) => {
-                        const kondisi =
-                          kondisiConfig[item.kondisi];
+                      {loading ? (
+                        <tr>
+                          <td colSpan={11} className="px-4 py-16 text-center">
+                            <div className="flex flex-col items-center justify-center">
+                              <Loader2
+                                size={28}
+                                className="animate-spin text-[var(--color-primary)]"
+                              />
+                              <p className="theme-text mt-3 text-sm font-semibold">
+                                Memuat data aset dari server...
+                              </p>
+                              <p className="theme-text-muted mt-1 text-xs">
+                                Mengambil data sarana & prasarana terkini
+                              </p>
+                            </div>
+                          </td>
+                        </tr>
+                      ) : (
+                        filtered.map((item, idx) => {
+                          const rawKondisi = String(item?.kondisi || "baik").toLowerCase();
+                          const kondisi =
+                            kondisiConfig[rawKondisi] || kondisiConfig.baik;
 
-                        const status =
-                          statusConfig[item.status];
+                          const rawStatus = String(item?.status || "tersedia").toLowerCase();
+                          const status =
+                            statusConfig[rawStatus] || {
+                              label: item?.status || "Tersedia",
+                              textClassName: "theme-info",
+                            };
 
-                        const KondisiIcon =
-                          kondisi.icon;
+                          const KondisiIcon =
+                            kondisi.icon || CheckCircle;
 
-                        return (
-                          <tr
-                            key={item.id}
-                            className={`theme-border border-b last:border-0 transition-colors ${themePrimarySoftHover} ${
-                              idx % 2 === 0
-                                ? themeRowSoft
-                                : ""
-                            }`}
-                          >
-                            <td className="theme-text-secondary px-4 py-2.5 font-medium">
-                              {idx + 1}
-                            </td>
+                          const kategoriName =
+                            item?.kategoriAset?.nama ||
+                            item?.kategori ||
+                            "-";
 
-                            <td className="theme-text px-4 py-2.5 font-semibold">
-                              {item.nama}
-                            </td>
+                          const kodeAset =
+                            item?.kode ||
+                            item?.kode_aset ||
+                            "-";
 
-                            <td className="theme-text-secondary whitespace-nowrap px-4 py-2.5">
-                              {item.kategori}
-                            </td>
+                          const lokasiAset =
+                            item?.lokasi ||
+                            item?.gudang?.nama ||
+                            "-";
 
-                            <td className="theme-text-secondary whitespace-nowrap px-4 py-2.5">
-                              {item.kode_aset}
-                            </td>
+                          const jumlahAset =
+                            item?.jumlahStok !== undefined && item?.jumlahStok !== null
+                              ? item.jumlahStok
+                              : item?.jumlah ?? 0;
 
-                            <td className="theme-text-secondary whitespace-nowrap px-4 py-2.5">
-                              {item.lokasi}
-                            </td>
+                          const tglPengadaan = formatTanggal(
+                            item?.tanggalPembelian || item?.tanggal_pengadaan
+                          );
 
-                            <td className="theme-text whitespace-nowrap px-4 py-2.5 text-center font-medium">
-                              {item.jumlah} unit
-                            </td>
+                          const penanggungJawab =
+                            item?.penanggung_jawab ||
+                            item?.gudang?.nama ||
+                            "-";
 
-                            <td className="whitespace-nowrap px-4 py-2.5">
-                              <span
-                                className={`inline-flex items-center gap-1.5 text-sm font-medium ${kondisi.textClassName}`}
-                              >
-                                <KondisiIcon size={14} />
-                                {kondisi.label}
-                              </span>
-                            </td>
+                          const isDeleting = deletingId === item.id;
 
-                            <td className="whitespace-nowrap px-4 py-2.5">
-                              <span
-                                className={`text-sm font-medium ${status.textClassName}`}
-                              >
-                                {status.label}
-                              </span>
-                            </td>
+                          return (
+                            <tr
+                              key={item.id}
+                              className={`theme-border border-b last:border-0 transition-colors ${themePrimarySoftHover} ${
+                                idx % 2 === 0
+                                  ? themeRowSoft
+                                  : ""
+                              } ${isDeleting ? "opacity-50" : ""}`}
+                            >
+                              <td className="theme-text-secondary px-4 py-2.5 font-medium">
+                                {idx + 1}
+                              </td>
 
-                            <td className="theme-text-secondary whitespace-nowrap px-4 py-2.5">
-                              {item.penanggung_jawab}
-                            </td>
+                              <td className="theme-text px-4 py-2.5 font-semibold">
+                                {item.nama}
+                              </td>
 
-                            <td className="theme-text-secondary whitespace-nowrap px-4 py-2.5">
-                              {item.tanggal_pengadaan}
-                            </td>
+                              <td className="theme-text-secondary whitespace-nowrap px-4 py-2.5">
+                                {kategoriName}
+                              </td>
 
-                            <td className="px-4 py-2.5">
-                              <div className="flex items-center justify-center gap-1.5">
+                              <td className="theme-text-secondary whitespace-nowrap px-4 py-2.5">
+                                {kodeAset}
+                              </td>
 
-                                {/* EDIT */}
-                                <button
-                                  onClick={() =>
-                                    router.push(
-                                      `/admin/sarpras/aset/edit/${item.id}`
-                                    )
-                                  }
-                                  className={`theme-text-muted rounded-lg p-2 transition-all ${themeWarningHover}`}
-                                  title="Edit Aset"
+                              <td className="theme-text-secondary whitespace-nowrap px-4 py-2.5">
+                                {lokasiAset}
+                              </td>
+
+                              <td className="theme-text whitespace-nowrap px-4 py-2.5 text-center font-medium">
+                                {jumlahAset} unit
+                              </td>
+
+                              <td className="whitespace-nowrap px-4 py-2.5">
+                                <span
+                                  className={`inline-flex items-center gap-1.5 text-sm font-medium ${kondisi.textClassName}`}
                                 >
-                                  <Edit size={16} />
-                                </button>
+                                  <KondisiIcon size={14} />
+                                  {kondisi.label}
+                                </span>
+                              </td>
 
-                                {/* DELETE */}
-                                <button
-                                  onClick={() =>
-                                    handleDelete(
-                                      item.id,
-                                      item.nama
-                                    )
-                                  }
-                                  className={`theme-text-muted rounded-lg p-2 transition-all ${themeDangerHover}`}
-                                  title="Hapus Aset"
+                              <td className="whitespace-nowrap px-4 py-2.5">
+                                <span
+                                  className={`text-sm font-medium ${status.textClassName}`}
                                 >
-                                  <Trash2 size={16} />
-                                </button>
+                                  {status.label}
+                                </span>
+                              </td>
 
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })}
+                              <td className="theme-text-secondary whitespace-nowrap px-4 py-2.5">
+                                {penanggungJawab}
+                              </td>
+
+                              <td className="theme-text-secondary whitespace-nowrap px-4 py-2.5">
+                                {tglPengadaan}
+                              </td>
+
+                              <td className="px-4 py-2.5">
+                                <div className="flex items-center justify-center gap-1.5">
+
+                                  {/* EDIT */}
+                                  <button
+                                    onClick={() =>
+                                      router.push(
+                                        `/admin/sarpras/gudang/edit/${item.id}`
+                                      )
+                                    }
+                                    className={`theme-text-muted rounded-lg p-2 transition-all ${themeWarningHover}`}
+                                    title="Edit Aset"
+                                  >
+                                    <Edit size={16} />
+                                  </button>
+
+                                  {/* DELETE */}
+                                  <button
+                                    onClick={() =>
+                                      handleDelete(
+                                        item.id,
+                                        item.nama
+                                      )
+                                    }
+                                    disabled={isDeleting}
+                                    className={`theme-text-muted rounded-lg p-2 transition-all ${themeDangerHover} disabled:opacity-40`}
+                                    title="Hapus Aset"
+                                  >
+                                    {isDeleting ? (
+                                      <Loader2 size={16} className="animate-spin" />
+                                    ) : (
+                                      <Trash2 size={16} />
+                                    )}
+                                  </button>
+
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })
+                      )}
 
                       {/* EMPTY STATE */}
-                      {filtered.length === 0 && (
+                      {!loading && filtered.length === 0 && (
                         <tr>
                           <td
                             colSpan={11}

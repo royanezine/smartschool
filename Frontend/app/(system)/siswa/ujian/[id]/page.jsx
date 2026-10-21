@@ -255,7 +255,7 @@ function saveHasilUjian(
       ? {
           id: ujianData?.id ?? null,
           judul: ujianData?.judul ?? null,
-          jenis: ujianData?.jenis ?? null,
+          jenis: ujianData?.tipe ?? ujianData?.jenis ?? null,
           durasi: ujianData?.durasi ?? null,
 
           kelasMapel: ujianData?.kelasMapel

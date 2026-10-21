@@ -23,7 +23,7 @@ import {
 
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
-import { getPendaftarPpdb } from "@/services/ppdb.service";
+import { getJalurPpdb } from "@/services/jalurPpdb.service";
 
 // ============================================================
 // THEME HELPERS
@@ -275,7 +275,7 @@ export default function JalurPendaftaranPage() {
           setLoading(true);
         }
 
-        const response = await getPendaftarPpdb();
+        const response = await getJalurPpdb();
 
         if (!response?.success) {
           throw new Error(
@@ -284,34 +284,9 @@ export default function JalurPendaftaranPage() {
           );
         }
 
-        const pendaftar = Array.isArray(response?.data)
+        const jalur = Array.isArray(response?.data)
           ? response.data
           : [];
-
-        const uniqueMap = new Map();
-
-        pendaftar.forEach((item) => {
-          const jalur = item?.jalurPpdb;
-
-          if (!jalur?.id) {
-            return;
-          }
-
-          if (!uniqueMap.has(jalur.id)) {
-            uniqueMap.set(jalur.id, {
-              id: jalur.id,
-              sekolahId: item?.sekolahId || "",
-              nama: jalur?.nama || "-",
-              deskripsi: jalur?.deskripsi || "",
-              kuota: Number(jalur?.kuota || 0),
-              tanggalMulai: jalur?.tanggalMulai || null,
-              tanggalSelesai: jalur?.tanggalSelesai || null,
-              status: jalur?.status || "",
-            });
-          }
-        });
-
-        const jalur = Array.from(uniqueMap.values());
 
         setData(jalur);
 
@@ -346,7 +321,9 @@ export default function JalurPendaftaranPage() {
   );
 
   useEffect(() => {
-    loadData();
+    Promise.resolve().then(() => {
+      loadData();
+    });
   }, [loadData]);
 
   // ============================================================
@@ -859,7 +836,7 @@ export default function JalurPendaftaranPage() {
                               type="button"
                               onClick={() =>
                                 router.push(
-                                  `/admin/spmb/jalur-pendaftaran/detail/${encodeURIComponent(
+                                  `/admin/spmb/jalur-pendaftaran/${encodeURIComponent(
                                     String(
                                       item?.id || ""
                                     )

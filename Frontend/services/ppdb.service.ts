@@ -47,6 +47,7 @@ export interface PendaftaranPpdb {
   dibuatPada?: string;
   diperbaruiPada?: string;
   dihapusPada?: string | null;
+  tokenPendaftaran?: string;
 }
 
 export interface DaftarPpdbResponse {
@@ -150,24 +151,184 @@ export async function daftarPpdb(
 }
 
 export async function getPendaftarPpdb(
-  jalurPpdbId?: string
-): Promise<GetPendaftarPpdbResponse> {
-  const query = jalurPpdbId
-    ? `?jalurPpdbId=${encodeURIComponent(jalurPpdbId)}`
-    : "";
+  filterOrJalurId?:
+    | string
+    | {
+        search?: string;
+        jalurPpdbId?: string;
+        status?: string;
+        page?: number;
+        limit?: number;
+      }
+): Promise<any> {
+  const query = new URLSearchParams();
 
-  return apiFetch(
-    `${ENDPOINT}/pendaftar${query}`,
-    {
+  if (typeof filterOrJalurId === "string") {
+    if (filterOrJalurId) query.set("jalurPpdbId", filterOrJalurId);
+  } else if (filterOrJalurId && typeof filterOrJalurId === "object") {
+    if (filterOrJalurId.search) query.set("search", filterOrJalurId.search);
+    if (filterOrJalurId.jalurPpdbId) query.set("jalurPpdbId", filterOrJalurId.jalurPpdbId);
+    if (filterOrJalurId.status) query.set("status", filterOrJalurId.status);
+    if (filterOrJalurId.page) query.set("page", String(filterOrJalurId.page));
+    if (filterOrJalurId.limit) query.set("limit", String(filterOrJalurId.limit));
+  }
+
+  const qs = query.toString();
+  const endpoint = `${ENDPOINT}/pendaftar${qs ? `?${qs}` : ""}`;
+
+  try {
+    return await apiFetch(endpoint, {
       method: "GET",
+    });
+  } catch (err: any) {
+    if (err?.status === 404) {
+      throw new Error("Endpoint daftar pendaftar PPDB belum tersedia di backend.");
     }
+    throw err;
+  }
+}
+
+export async function getPendaftarPpdbById(id: string): Promise<any> {
+  if (!id) {
+    throw new Error("ID pendaftaran tidak ditemukan.");
+  }
+
+  /*
+   * Kontrak admin PPDB memakai namespace /pendaftar (sama dengan daftar
+   * pendaftar pada getPendaftarPpdb). Backend/src belum menyediakan route
+   * GET /api/ppdb/pendaftar/:id sehingga, selama endpoint itu belum ada,
+   * panggilan ini akan berakhir 404 dan halaman menampilkan status tidak
+   * tersedia.
+   */
+  try {
+    return await apiFetch(`${ENDPOINT}/pendaftar/${encodeURIComponent(id)}`, {
+      method: "GET",
+    });
+  } catch (err: any) {
+    if (err?.status === 404) {
+      throw new Error("Endpoint detail pendaftar PPDB belum tersedia di backend.");
+    }
+    throw err;
+  }
+}
+
+export async function getProfilSekolahPublik(subdomain: string): Promise<any> {
+  if (!subdomain) {
+    throw new Error("Subdomain sekolah tidak ditemukan.");
+  }
+
+  return apiFetch(`/api/publik/${encodeURIComponent(subdomain)}/profil`, {
+    method: "GET",
+  });
+}
+
+export async function getPengaturanSpmb(): Promise<{
+  success: boolean;
+  message?: string;
+  data: {
+    statusPenerimaan: "buka" | "tutup";
+    prefixNomorPendaftaran: string;
+    verifikasiBerkasWajib: boolean;
+  };
+}> {
+  /*
+   * Jangan mengembalikan nilai default saat request gagal. Nilai default
+   * akan membuat halaman tampak berhasil terhubung padahal sesi/endpoint
+   * bermasalah. Error diteruskan agar halaman menampilkan kegagalan nyata.
+   */
+  const response = await apiFetch("/api/pengaturan", { method: "GET" });
+
+  const list = Array.isArray(response?.data) ? response.data : null;
+
+  if (!list) {
+    throw new Error(
+      "Format respons GET /api/pengaturan tidak dikenali."
+    );
+  }
+
+  const map = new Map<string, string>();
+  list.forEach((item: any) => {
+    if (item?.kunci) map.set(item.kunci, String(item.nilai ?? ""));
+  });
+
+  const statusPenerimaan =
+    map.get("spmb_status_penerimaan") === "tutup" ? "tutup" : "buka";
+  const prefixNomorPendaftaran =
+    map.get("spmb_prefix_nomor_pendaftaran") || "PPDB";
+  const verifikasiBerkasWajib =
+    map.get("spmb_verifikasi_berkas_wajib") === "true";
+
+  return {
+    success: true,
+    data: {
+      statusPenerimaan,
+      prefixNomorPendaftaran,
+      verifikasiBerkasWajib,
+    },
+  };
+}
+
+export async function updatePengaturanSpmb(payload: {
+  statusPenerimaan: "buka" | "tutup";
+  prefixNomorPendaftaran: string;
+  verifikasiBerkasWajib: boolean;
+}): Promise<any> {
+  await Promise.all([
+    apiFetch("/api/pengaturan", {
+      method: "POST",
+      body: JSON.stringify({
+        kunci: "spmb_status_penerimaan",
+        nilai: payload.statusPenerimaan,
+        tipeData: "string",
+        kelompok: "spmb",
+        keterangan: "Status penerimaan PPDB/SPMB (buka/tutup)",
+      }),
+    }),
+    apiFetch("/api/pengaturan", {
+      method: "POST",
+      body: JSON.stringify({
+        kunci: "spmb_prefix_nomor_pendaftaran",
+        nilai: payload.prefixNomorPendaftaran,
+        tipeData: "string",
+        kelompok: "spmb",
+        keterangan: "Prefix nomor pendaftaran PPDB/SPMB",
+      }),
+    }),
+    apiFetch("/api/pengaturan", {
+      method: "POST",
+      body: JSON.stringify({
+        kunci: "spmb_verifikasi_berkas_wajib",
+        nilai: String(Boolean(payload.verifikasiBerkasWajib)),
+        tipeData: "boolean",
+        kelompok: "spmb",
+        keterangan: "Wajib verifikasi berkas PPDB",
+      }),
+    }),
+  ]);
+
+  return {
+    success: true,
+    message: "Pengaturan SPMB berhasil disimpan.",
+    data: payload,
+  };
+}
+
+function sanitizeErrorMessage(rawMessage: any, fallback = "Terjadi kesalahan."): string {
+  if (!rawMessage || typeof rawMessage !== "string") return fallback;
+  return (
+    rawMessage
+      .replace(/Bearer\s+[A-Za-z0-9._-]+/gi, "Bearer [REDACTED]")
+      .replace(/(?:token|tokenPendaftaran)\s*[:=]\s*[^\s,]+/gi, "token: [REDACTED]")
+      .replace(/ey[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]+/g, "[REDACTED]")
+      .trim() || fallback
   );
 }
 
 export async function uploadBerkasPpdb(
   id: string,
   file: File,
-  namaBerkas: NamaBerkasPpdb
+  namaBerkas: NamaBerkasPpdb,
+  tokenPendaftaran?: string
 ): Promise<UploadBerkasPpdbResponse> {
   if (!id) {
     throw new Error(
@@ -199,7 +360,15 @@ export async function uploadBerkasPpdb(
     process.env.NEXT_PUBLIC_API_URL ||
     "http://localhost:5000";
 
-  const baseUrl = API_URL.replace(/\/+$/, "");
+  /*
+   * ENDPOINT sudah memuat "/api". Buang suffix /api atau /api/v1 dari
+   * NEXT_PUBLIC_API_URL agar URL akhir tidak menjadi /api/api atau
+   * /api/v1/api.
+   */
+  const baseUrl = API_URL.replace(/\/+$/, "").replace(
+    /\/api(?:\/v\d+)?$/,
+    ""
+  );
 
   const formData = new FormData();
 
@@ -223,6 +392,32 @@ export async function uploadBerkasPpdb(
       "Authorization",
       `Bearer ${token}`
     );
+  }
+
+  let uploadToken = tokenPendaftaran ? String(tokenPendaftaran).trim() : "";
+  if (!uploadToken && typeof window !== "undefined") {
+    try {
+      uploadToken = String(sessionStorage.getItem("ppdb_token_pendaftaran") || "").trim();
+      if (!uploadToken) {
+        const sub = sessionStorage.getItem("ppdb_last_submission");
+        if (sub) {
+          const parsed = JSON.parse(sub);
+          uploadToken = String(parsed?.tokenPendaftaran || "").trim();
+        }
+      }
+      if (!uploadToken && window.location?.search) {
+        const sp = new URLSearchParams(window.location.search);
+        uploadToken = String(sp.get("token") || sp.get("tokenPendaftaran") || "").trim();
+      }
+    } catch {
+      // storage error ignored
+    }
+  }
+
+  if (uploadToken) {
+    headers.set("x-ppdb-token", uploadToken);
+    formData.append("tokenPendaftaran", uploadToken);
+    formData.append("token", uploadToken);
   }
 
   const response = await fetch(
@@ -256,19 +451,26 @@ export async function uploadBerkasPpdb(
   }
 
   if (response.status === 401) {
-    // Hapus sesi aktif secara lengkap (token + user + key lama).
-    clearSession();
+    if (!uploadToken) {
+      clearSession();
+    }
 
     throw new Error(
-      data?.message ||
-        "Sesi login telah berakhir. Silakan login kembali."
+      sanitizeErrorMessage(
+        data?.message ||
+          (uploadToken
+            ? "Akses ditolak: Token pendaftaran tidak valid atau telah kedaluwarsa."
+            : "Sesi login telah berakhir. Silakan login kembali.")
+      )
     );
   }
 
   if (!response.ok) {
     throw new Error(
-      data?.message ||
-        `Gagal mengupload berkas. Status: ${response.status}`
+      sanitizeErrorMessage(
+        data?.message ||
+          `Gagal mengupload berkas. Status: ${response.status}`
+      )
     );
   }
 
@@ -329,8 +531,12 @@ export async function verifikasiPpdb(
 const ppdbService = {
   daftarPpdb,
   getPendaftarPpdb,
+  getPendaftarPpdbById,
   uploadBerkasPpdb,
   verifikasiPpdb,
+  getPengaturanSpmb,
+  updatePengaturanSpmb,
+  getProfilSekolahPublik,
 };
 
 export default ppdbService;

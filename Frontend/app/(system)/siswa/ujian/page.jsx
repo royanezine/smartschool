@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { getStoredUser } from "@/lib/auth";
+import { getSessionUser, getStoredUser } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 
 import {
@@ -25,7 +25,10 @@ import {
 } from "lucide-react";
 
 import { getKelas, getKelasById } from "@/services/kelas.service";
-import { getKelasMapel } from "@/services/kelasMapel.service";
+import {
+  getKelasMapel,
+  getKelasMapelSiswa,
+} from "@/services/kelasMapel.service";
 import { getUjianByKelasMapel } from "@/services/ujian.service";
 
 // =========================================================
@@ -314,32 +317,95 @@ function normalizeObjectResponse(response) {
 // GET USER ID
 // =========================================================
 
-function getLoggedInUserId() {
-  try {
-    const rawUser = getStoredUser();
-
-    if (!rawUser) return null;
-
-    const user = JSON.parse(rawUser);
-
-    const userId =
-      user?.userId ||
-      user?.id ||
-      user?.penggunaId ||
-      user?.siswaId ||
-      user?.siswa?.id ||
-      user?.data?.userId ||
-      user?.data?.id ||
-      user?.data?.penggunaId ||
-      user?.data?.siswaId ||
-      user?.data?.siswa?.id ||
-      null;
-
-    return userId ? String(userId) : null;
-  } catch (error) {
-    console.error("Gagal membaca data user:", error);
-    return null;
+function parseUserSafely(input) {
+  if (!input) return null;
+  if (typeof input === "object" && !Array.isArray(input)) {
+    return input;
   }
+  if (typeof input === "string") {
+    const trimmed = input.trim();
+    if (
+      !trimmed ||
+      trimmed === "[object Object]" ||
+      trimmed === "undefined" ||
+      trimmed === "null"
+    ) {
+      return null;
+    }
+    try {
+      const parsed = JSON.parse(trimmed);
+      if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+        return parsed;
+      }
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}
+
+function getLoggedInUser() {
+  try {
+    // 1. Sumber utama: getSessionUser() dari lib/auth (mendecode klaim token JWT aktif)
+    const sessionUser = getSessionUser();
+    const parsedSession = parseUserSafely(sessionUser);
+    if (parsedSession) {
+      // Perbaiki storage jika pernah tersimpan literal string "[object Object]"
+      if (
+        typeof window !== "undefined" &&
+        window.localStorage?.getItem("user") === "[object Object]"
+      ) {
+        try {
+          window.localStorage.setItem("user", JSON.stringify(parsedSession));
+        } catch {
+          /* ignore */
+        }
+      }
+      return parsedSession;
+    }
+
+    // 2. Fallback: getStoredUser() dari storage
+    const storedUser = getStoredUser();
+    const parsedStored = parseUserSafely(storedUser);
+    if (parsedStored) {
+      return parsedStored;
+    }
+
+    // 3. Fallback: membaca langsung storage secara aman tanpa crash
+    if (typeof window !== "undefined") {
+      const rawLocal = window.localStorage?.getItem("user");
+      const parsedLocal = parseUserSafely(rawLocal);
+      if (parsedLocal) return parsedLocal;
+
+      const rawSession = window.sessionStorage?.getItem("user");
+      const parsedSessionStorage = parseUserSafely(rawSession);
+      if (parsedSessionStorage) return parsedSessionStorage;
+    }
+  } catch (error) {
+    console.warn("Gagal membaca identitas pengguna:", error);
+  }
+  return null;
+}
+
+function getLoggedInUserId() {
+  const user = getLoggedInUser();
+
+  if (!user) return null;
+
+  const userId =
+    user?.userId ||
+    user?.id ||
+    user?.penggunaId ||
+    user?.siswaId ||
+    user?.siswa?.id ||
+    user?.data?.userId ||
+    user?.data?.id ||
+    user?.data?.penggunaId ||
+    user?.data?.siswaId ||
+    user?.data?.siswa?.id ||
+    null;
+
+  return userId ? String(userId) : null;
 }
 
 // =========================================================
@@ -376,56 +442,77 @@ async function findStudentClass() {
     );
   }
 
-  const kelasResponse = await getKelas({
-    page: 1,
-    limit: 100,
-  });
+  // 1. Sumber data utama: API resmi siswa (GET /api/kelas-mapel/siswa)
+  // Backend memfilter keanggotaan kelas siswa terdaftar secara otomatis
+  try {
+    const mapelSiswaResponse = await getKelasMapelSiswa();
+    const listMapel = normalizeArrayResponse(mapelSiswaResponse);
 
-  const daftarKelas = normalizeArrayResponse(kelasResponse);
-
-  if (daftarKelas.length === 0) {
-    throw new Error(
-      "Belum ada data kelas pada sekolah akun siswa."
-    );
+    if (listMapel.length > 0) {
+      const kelasItem = listMapel[0]?.kelas;
+      if (kelasItem?.id) {
+        return {
+          ...kelasItem,
+          kelasMapel: listMapel,
+        };
+      }
+    }
+  } catch (err) {
+    console.warn("Gagal mengambil kelas melalui getKelasMapelSiswa:", err);
   }
 
-  const hasilPencarian = await Promise.allSettled(
-    daftarKelas.map(async (kelas) => {
-      if (!kelas?.id) return null;
+  // 2. Fallback: jika siswa terdaftar di kelas namun belum memiliki mata pelajaran
+  // atau saat pengujian berbasis akun administratif
+  try {
+    const kelasResponse = await getKelas({
+      page: 1,
+      limit: 100,
+    });
 
-      try {
-        const response = await getKelasById(String(kelas.id));
-        const detail = normalizeObjectResponse(response);
+    const daftarKelas = normalizeArrayResponse(kelasResponse);
 
-        if (!detail?.id) return null;
+    if (daftarKelas.length > 0) {
+      const hasilPencarian = await Promise.allSettled(
+        daftarKelas.map(async (kelas) => {
+          if (!kelas?.id) return null;
 
-        const anggota = Array.isArray(detail.anggota)
-          ? detail.anggota
-          : [];
+          try {
+            const response = await getKelasById(String(kelas.id));
+            const detail = normalizeObjectResponse(response);
 
-        return anggota.some((item) =>
-          isStudentMemberOfClass(item, userId)
-        )
-          ? detail
-          : null;
-      } catch (error) {
-        console.warn(
-          `Gagal mengambil detail kelas ${kelas.id}:`,
-          error
-        );
+            if (!detail?.id) return null;
 
-        return null;
+            const anggota = Array.isArray(detail.anggota)
+              ? detail.anggota
+              : [];
+
+            return anggota.some((item) =>
+              isStudentMemberOfClass(item, userId)
+            )
+              ? detail
+              : null;
+          } catch (error) {
+            console.warn(
+              `Gagal mengambil detail kelas ${kelas.id}:`,
+              error
+            );
+
+            return null;
+          }
+        })
+      );
+
+      for (const result of hasilPencarian) {
+        if (
+          result.status === "fulfilled" &&
+          result.value?.id
+        ) {
+          return result.value;
+        }
       }
-    })
-  );
-
-  for (const result of hasilPencarian) {
-    if (
-      result.status === "fulfilled" &&
-      result.value?.id
-    ) {
-      return result.value;
     }
+  } catch (err) {
+    console.warn("Gagal mengambil data kelas melalui getKelas:", err);
   }
 
   throw new Error(
@@ -489,34 +576,37 @@ export default function DaftarUjianPage() {
 
       const kelasSiswaId = String(kelasSiswa.id);
 
-      const kelasMapelResponse = await getKelasMapel();
+      let kelasMapelData = Array.isArray(kelasSiswa?.kelasMapel)
+        ? kelasSiswa.kelasMapel
+        : [];
 
-      const semuaKelasMapel =
-        normalizeArrayResponse(kelasMapelResponse);
+      if (kelasMapelData.length === 0) {
+        try {
+          const mapelSiswaRes = await getKelasMapelSiswa();
+          kelasMapelData = normalizeArrayResponse(mapelSiswaRes);
+        } catch {
+          /* ignore */
+        }
+      }
 
-      let kelasMapelData = semuaKelasMapel.filter((km) => {
-        const kmKelasId =
-          km?.kelasId || km?.kelas?.id || null;
+      if (kelasMapelData.length === 0) {
+        try {
+          const kelasMapelResponse = await getKelasMapel();
+          const semuaKelasMapel =
+            normalizeArrayResponse(kelasMapelResponse);
 
-        return (
-          kmKelasId &&
-          String(kmKelasId) === kelasSiswaId
-        );
-      });
+          kelasMapelData = semuaKelasMapel.filter((km) => {
+            const kmKelasId =
+              km?.kelasId || km?.kelas?.id || null;
 
-      if (
-        kelasMapelData.length === 0 &&
-        Array.isArray(kelasSiswa?.kelasMapel)
-      ) {
-        kelasMapelData = kelasSiswa.kelasMapel.filter((km) => {
-          const kmKelasId =
-            km?.kelasId || km?.kelas?.id || null;
-
-          return (
-            kmKelasId &&
-            String(kmKelasId) === kelasSiswaId
-          );
-        });
+            return (
+              kmKelasId &&
+              String(kmKelasId) === kelasSiswaId
+            );
+          });
+        } catch {
+          /* ignore */
+        }
       }
 
       if (kelasMapelData.length === 0) {

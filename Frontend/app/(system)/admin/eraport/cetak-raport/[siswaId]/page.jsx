@@ -595,9 +595,13 @@ export default function DetailRaportPage() {
                     kelasMapelId
                   );
 
+                if (!result?.tersedia) {
+                  continue;
+                }
+
                 const rows =
                   extractNilaiUjian(
-                    result
+                    result.data
                   );
 
                 rows.forEach((item) => {
@@ -714,8 +718,7 @@ export default function DetailRaportPage() {
     if (
       !shouldPrint ||
       loading ||
-      !report ||
-      loadingNilaiUjian
+      !report
     ) {
       return;
     }
@@ -738,7 +741,6 @@ export default function DetailRaportPage() {
     shouldPrint,
     loading,
     report,
-    loadingNilaiUjian,
   ]);
 
   /* =======================================================
@@ -952,7 +954,7 @@ export default function DetailRaportPage() {
 
   if (loading) {
     return (
-      <div className="theme-page flex h-screen w-full overflow-hidden">
+      <div className="theme-page flex h-screen w-full overflow-hidden print:hidden">
         <Sidebar />
 
         <div className="flex h-full min-w-0 flex-1 flex-col overflow-hidden">
@@ -985,7 +987,7 @@ export default function DetailRaportPage() {
 
   if (error || !report) {
     return (
-      <div className="theme-page flex h-screen w-full overflow-hidden">
+      <div className="theme-page flex h-screen w-full overflow-hidden print:hidden">
         <Sidebar />
 
         <div className="flex h-full min-w-0 flex-1 flex-col overflow-hidden">
@@ -1036,7 +1038,9 @@ export default function DetailRaportPage() {
 
           html,
           body {
-            background: white !important;
+            background: #ffffff !important;
+            height: auto !important;
+            overflow: visible !important;
           }
 
           body {
@@ -1046,6 +1050,22 @@ export default function DetailRaportPage() {
 
           .no-print {
             display: none !important;
+          }
+
+          /* Lepaskan batas tinggi/scroll layar agar seluruh isi
+             dokumen rapor benar-benar tercetak. */
+          .theme-page {
+            display: block !important;
+            height: auto !important;
+            min-height: 0 !important;
+            width: 100% !important;
+            overflow: visible !important;
+            background: #ffffff !important;
+          }
+
+          main {
+            height: auto !important;
+            overflow: visible !important;
           }
 
           .print-page {
@@ -1058,7 +1078,7 @@ export default function DetailRaportPage() {
           .print-card {
             border: 1px solid #cbd5e1 !important;
             box-shadow: none !important;
-            background: white !important;
+            background: #ffffff !important;
             color: #0f172a !important;
           }
 
@@ -1068,6 +1088,21 @@ export default function DetailRaportPage() {
 
           .print-section {
             break-inside: avoid;
+          }
+
+          .print-card .theme-card,
+          .print-card .theme-card-soft {
+            background: #ffffff !important;
+            border-color: #cbd5e1 !important;
+          }
+
+          .print-card .theme-table-header {
+            background: #f1f5f9 !important;
+            color: #334155 !important;
+          }
+
+          .print-card .theme-border {
+            border-color: #cbd5e1 !important;
           }
 
           .print-card .theme-text {
@@ -1081,26 +1116,30 @@ export default function DetailRaportPage() {
           .print-card .theme-text-muted {
             color: #64748b !important;
           }
+
+          .print-card .theme-sidebar-text-active {
+            color: #1d4ed8 !important;
+          }
         }
       `}</style>
 
-      <div className="theme-page flex h-screen w-full overflow-hidden">
+      <div className="theme-page flex h-screen w-full overflow-hidden print:block print:h-auto print:overflow-visible">
         {/* SIDEBAR */}
-        <div className="no-print">
+        <div className="no-print print:hidden">
           <Sidebar />
         </div>
 
-        <div className="flex h-full min-w-0 flex-1 flex-col overflow-hidden">
+        <div className="flex h-full min-w-0 flex-1 flex-col overflow-hidden print:block print:h-auto print:overflow-visible">
           {/* HEADER */}
-          <div className="no-print">
+          <div className="no-print print:hidden">
             <Header />
           </div>
 
-          <main className="flex-1 overflow-y-auto">
-            <div className="print-page mx-auto w-full max-w-[1100px] space-y-6 p-4 sm:p-6 lg:p-8">
+          <main className="flex-1 overflow-y-auto print:overflow-visible">
+            <div className="print-page mx-auto w-full max-w-[1100px] space-y-6 p-4 sm:p-6 lg:p-8 print:max-w-full print:p-0">
 
               {/* PAGE HEADER */}
-              <div className="no-print flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="no-print print:hidden flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-start gap-3">
                   <button
                     type="button"
@@ -1124,10 +1163,7 @@ export default function DetailRaportPage() {
                 <button
                   type="button"
                   onClick={handlePrint}
-                  disabled={
-                    printing ||
-                    loadingNilaiUjian
-                  }
+                  disabled={printing}
                   className="theme-primary inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {printing ? (
@@ -1358,7 +1394,13 @@ export default function DetailRaportPage() {
                 </div>
 
                 {/* NILAI UJIAN ONLINE */}
-                <div className="print-section mt-8">
+                <div
+                  className={`print-section mt-8 ${
+                    nilaiUjianSiswa.length === 0
+                      ? "no-print print:hidden"
+                      : ""
+                  }`}
+                >
                   <div className="mb-3 flex items-center gap-2">
                     <ClipboardCheck
                       size={18}

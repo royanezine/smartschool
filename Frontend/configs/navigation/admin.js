@@ -53,6 +53,7 @@ import {
   DollarSign,
   Clock,
   Activity,
+  Route,
 } from "lucide-react";
 
 export const adminSidebarConfig = {
@@ -530,6 +531,12 @@ export const adminSidebarConfig = {
           icon: FileInput,
           label: "Data Pendaftaran",
           path: "/admin/spmb/data-pendaftaran",
+        },
+        {
+          key: "jalur",
+          icon: Route,
+          label: "Jalur Pendaftaran",
+          path: "/admin/spmb/jalur",
         },
         {
           key: "gelombang",

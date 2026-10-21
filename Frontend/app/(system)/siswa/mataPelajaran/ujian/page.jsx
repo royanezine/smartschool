@@ -1,79 +1,22 @@
 ﻿"use client";
 
-import { Suspense, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
   GraduationCap,
-  Calculator,
-  FlaskConical,
-  Globe2,
-  Languages,
-  BookOpen,
-  Palette,
-  Music,
-  Dumbbell,
   CalendarClock,
   CheckCircle2,
   PlayCircle,
   ChevronRight,
   Award,
+  Loader2,
+  AlertCircle,
+  RefreshCw,
 } from "lucide-react";
 
-/* =========================================================
-   DATA MATA PELAJARAN
-========================================================= */
-
-const mataPelajaranList = [
-  {
-    id: "matematika",
-    nama: "Matematika",
-    guru: "Bu Sari",
-    icon: Calculator,
-  },
-  {
-    id: "bindo",
-    nama: "Bahasa Indonesia",
-    guru: "Pak Budi",
-    icon: Languages,
-  },
-  {
-    id: "ipa",
-    nama: "IPA",
-    guru: "Bu Dewi",
-    icon: FlaskConical,
-  },
-  {
-    id: "ips",
-    nama: "IPS",
-    guru: "Pak Anwar",
-    icon: Globe2,
-  },
-  {
-    id: "binggris",
-    nama: "Bahasa Inggris",
-    guru: "Bu Rina",
-    icon: BookOpen,
-  },
-  {
-    id: "seni",
-    nama: "Seni Budaya",
-    guru: "Bu Wulan",
-    icon: Palette,
-  },
-  {
-    id: "musik",
-    nama: "Seni Musik",
-    guru: "Pak Doni",
-    icon: Music,
-  },
-  {
-    id: "penjas",
-    nama: "Penjaskes",
-    guru: "Pak Rudi",
-    icon: Dumbbell,
-  },
-];
+import { getKelasMapelSiswa } from "@/services/kelasMapel.service";
+import { getUjianByKelasMapel } from "@/services/ujian.service";
 
 /* =========================================================
    THEME HELPERS
@@ -112,9 +55,6 @@ const themeNeutralSurfaceStrong =
 
 const themeNeutralBorder =
   "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
-
-const themeDivider =
-  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
 
 const themeInfoSurface =
   "bg-[color-mix(in_srgb,var(--color-info)_9%,transparent)]";
@@ -189,77 +129,59 @@ const STATUS_STYLE = {
 };
 
 /* =========================================================
-   DATA UJIAN
+   HELPERS
 ========================================================= */
 
-const ujianList = [
-  {
-    id: 1,
-    mapelId: "matematika",
-    judul: "Ulangan Harian Bab 4 - Operasi Pecahan",
-    tipe: "Ulangan Harian",
-    guru: "Bu Sari",
-    tanggal: "25 Agu 2026, 08:00",
-    durasi: "60 menit",
-    status: "mendatang",
-    nilai: null,
-  },
-  {
-    id: 2,
-    mapelId: "bindo",
-    judul: "Ujian Tengah Semester",
-    tipe: "UTS",
-    guru: "Pak Budi",
-    tanggal: "28 Agu 2026, 09:00",
-    durasi: "90 menit",
-    status: "mendatang",
-    nilai: null,
-  },
-  {
-    id: 3,
-    mapelId: "binggris",
-    judul: "Quiz Grammar Unit 4",
-    tipe: "Kuis",
-    guru: "Bu Rina",
-    tanggal: "20 Agu 2026, 07:30",
-    durasi: "30 menit",
-    status: "berlangsung",
-    nilai: null,
-  },
-  {
-    id: 4,
-    mapelId: "ipa",
-    judul: "Ulangan Harian Bab 3 - Ekosistem",
-    tipe: "Ulangan Harian",
-    guru: "Bu Dewi",
-    tanggal: "10 Agu 2026, 08:00",
-    durasi: "45 menit",
-    status: "selesai",
-    nilai: 88,
-  },
-  {
-    id: 5,
-    mapelId: "matematika",
-    judul: "Ulangan Harian Bab 3 - Aljabar",
-    tipe: "Ulangan Harian",
-    guru: "Bu Sari",
-    tanggal: "5 Agu 2026, 08:00",
-    durasi: "60 menit",
-    status: "selesai",
-    nilai: 76,
-  },
-  {
-    id: 6,
-    mapelId: "ips",
-    judul: "Kuis Sumber Daya Alam",
-    tipe: "Kuis",
-    guru: "Pak Anwar",
-    tanggal: "2 Agu 2026, 10:00",
-    durasi: "20 menit",
-    status: "selesai",
-    nilai: 95,
-  },
-];
+function parseList(response) {
+  if (Array.isArray(response)) return response;
+  if (Array.isArray(response?.data)) return response.data;
+  if (Array.isArray(response?.data?.data)) return response.data.data;
+  return [];
+}
+
+function getStatusUjian(ujian) {
+  const now = new Date();
+
+  const mulai = ujian?.waktuMulai
+    ? new Date(ujian.waktuMulai)
+    : null;
+
+  const selesai = ujian?.waktuSelesai
+    ? new Date(ujian.waktuSelesai)
+    : null;
+
+  if (mulai && !Number.isNaN(mulai.getTime()) && now < mulai) {
+    return "mendatang";
+  }
+
+  if (
+    selesai &&
+    !Number.isNaN(selesai.getTime()) &&
+    now > selesai
+  ) {
+    return "selesai";
+  }
+
+  return "berlangsung";
+}
+
+function formatTanggal(value) {
+  if (!value) return "Jadwal belum ditentukan";
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "Jadwal belum ditentukan";
+  }
+
+  return date.toLocaleString("id-ID", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
 
 /* =========================================================
    HALAMAN UJIAN
@@ -275,14 +197,124 @@ function UjianPageInner() {
     mapelParam || "semua"
   );
 
-  const [activeFilter, setActiveFilter] =
-    useState("semua");
+  const [activeFilter, setActiveFilter] = useState("semua");
+  const [kelasMapelList, setKelasMapelList] = useState([]);
+  const [ujianList, setUjianList] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   /* =======================================================
-     MAPEL TERPILIH
+     LOAD DATA
   ======================================================= */
 
-  const selectedMapel = mataPelajaranList.find(
+  async function loadData() {
+    try {
+      setLoading(true);
+      setError("");
+
+      // Kelas-mapel milik siswa.
+      const kelasMapel = await getKelasMapelSiswa();
+
+      setKelasMapelList(kelasMapel);
+
+      if (kelasMapel.length === 0) {
+        setUjianList([]);
+        return;
+      }
+
+      // Ujian per kelas-mapel. Backend hanya mengembalikan ujian
+      // yang sudah dipublikasikan untuk role siswa.
+      const hasil = await Promise.allSettled(
+        kelasMapel.map(async (km) => {
+          const response = await getUjianByKelasMapel(
+            String(km.id)
+          );
+
+          return parseList(response)
+            .filter((ujian) => ujian?.id)
+            .map((ujian) => ({
+              id: ujian.id,
+              mapelId: String(km.id),
+              mapelNama:
+                km?.mataPelajaran?.nama ||
+                "Mata pelajaran",
+              judul:
+                ujian?.judul || "Ujian tanpa judul",
+              tipe:
+                ujian?.tipe ||
+                ujian?.jenis ||
+                "Ujian",
+              guru:
+                km?.guruPengajar?.namaLengkap || "-",
+              tanggal: formatTanggal(
+                ujian?.waktuMulai || ujian?.dibuatPada
+              ),
+              waktuMulai: ujian?.waktuMulai || null,
+              waktuSelesai: ujian?.waktuSelesai || null,
+              durasi: ujian?.durasi
+                ? `${ujian.durasi} menit`
+                : "-",
+              status: getStatusUjian(ujian),
+
+              /*
+               * Endpoint daftar ujian tidak menyertakan hasil
+               * siswa, jadi jangan menampilkan nilai palsu.
+               */
+              nilai: null,
+            }));
+        })
+      );
+
+      const gabungan = [];
+
+      hasil.forEach((result) => {
+        if (
+          result.status === "fulfilled" &&
+          Array.isArray(result.value)
+        ) {
+          gabungan.push(...result.value);
+        }
+      });
+
+      const unik = Array.from(
+        new Map(
+          gabungan.map((item) => [String(item.id), item])
+        ).values()
+      );
+
+      setUjianList(unik);
+    } catch (err) {
+      console.error("Gagal memuat ujian siswa:", err);
+      setUjianList([]);
+      setError(
+        err?.message ||
+          "Gagal mengambil data ujian. Silakan coba lagi."
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  /* =======================================================
+     DAFTAR MAPEL UNTUK FILTER
+  ======================================================= */
+
+  const daftarMapel = useMemo(() => {
+    return kelasMapelList
+      .filter((km) => km?.id)
+      .map((km) => ({
+        id: String(km.id),
+        nama:
+          km?.mataPelajaran?.nama ||
+          "Mata pelajaran",
+      }));
+  }, [kelasMapelList]);
+
+  const selectedMapel = daftarMapel.find(
     (m) => m.id === activeMapel
   );
 
@@ -302,33 +334,30 @@ function UjianPageInner() {
           ? true
           : u.status === activeFilter
       );
-  }, [activeMapel, activeFilter]);
+  }, [ujianList, activeMapel, activeFilter]);
 
   /* =======================================================
      STATISTIK
   ======================================================= */
-
-  const ujianSelesai = ujianList.filter(
-    (u) =>
-      u.status === "selesai" &&
-      u.nilai !== null
-  );
-
-  const rataRata =
-    ujianSelesai.length > 0
-      ? Math.round(
-          ujianSelesai.reduce(
-            (sum, u) => sum + u.nilai,
-            0
-          ) / ujianSelesai.length
-        )
-      : null;
 
   const jumlahMendatang = ujianList.filter(
     (u) =>
       u.status === "mendatang" ||
       u.status === "berlangsung"
   ).length;
+
+  const jumlahSelesai = ujianList.filter(
+    (u) => u.status === "selesai"
+  ).length;
+
+  /* =======================================================
+     AKSI
+  ======================================================= */
+
+  function bukaUjian(ujianId) {
+    if (!ujianId) return;
+    router.push(`/siswa/ujian/${encodeURIComponent(ujianId)}`);
+  }
 
   /* =======================================================
      RENDER
@@ -338,9 +367,7 @@ function UjianPageInner() {
     <div className={`${themeText} theme-page min-h-full`}>
       <div className="mx-auto w-full max-w-5xl space-y-6 px-4 py-6 sm:px-6 lg:px-8">
 
-        {/* =================================================
-            HEADER
-        ================================================= */}
+        {/* HEADER */}
 
         <div className="flex items-center gap-3">
           <button
@@ -366,7 +393,7 @@ function UjianPageInner() {
             <h1
               className={`mt-1 text-2xl font-bold tracking-tight ${themeText} sm:text-[28px]`}
             >
-              Quiz
+              Ujian & Kuis
             </h1>
 
             <p
@@ -378,13 +405,9 @@ function UjianPageInner() {
           </div>
         </div>
 
-        {/* =================================================
-            STATISTIK
-        ================================================= */}
+        {/* STATISTIK */}
 
         <div className="grid grid-cols-2 gap-4">
-          {/* UJIAN MENDATANG */}
-
           <div
             className={`flex items-center gap-3.5 rounded-2xl border ${themeNeutralBorder} ${themeCard} ${themeCardShadow} p-4`}
           >
@@ -409,8 +432,6 @@ function UjianPageInner() {
             </div>
           </div>
 
-          {/* RATA-RATA */}
-
           <div
             className={`flex items-center gap-3.5 rounded-2xl border ${themeNeutralBorder} ${themeCard} ${themeCardShadow} p-4`}
           >
@@ -424,27 +445,21 @@ function UjianPageInner() {
               <p
                 className={`text-xl font-bold leading-none ${themeText}`}
               >
-                {rataRata !== null
-                  ? rataRata
-                  : "-"}
+                {jumlahSelesai}
               </p>
 
               <p
                 className={`mt-1 text-xs ${themeTextMuted}`}
               >
-                Rata-rata nilai
+                Ujian selesai
               </p>
             </div>
           </div>
         </div>
 
-        {/* =================================================
-            FILTER MAPEL
-        ================================================= */}
+        {/* FILTER MAPEL */}
 
         <div className="flex gap-2 overflow-x-auto pb-1">
-          {/* SEMUA MAPEL */}
-
           <button
             type="button"
             onClick={() =>
@@ -459,7 +474,7 @@ function UjianPageInner() {
             Semua Mapel
           </button>
 
-          {mataPelajaranList.map((mapel) => {
+          {daftarMapel.map((mapel) => {
             const isActive =
               activeMapel === mapel.id;
 
@@ -482,9 +497,7 @@ function UjianPageInner() {
           })}
         </div>
 
-        {/* =================================================
-            FILTER STATUS
-        ================================================= */}
+        {/* FILTER STATUS */}
 
         <div className="flex gap-2 overflow-x-auto pb-1">
           {[
@@ -524,18 +537,70 @@ function UjianPageInner() {
           })}
         </div>
 
-        {/* =================================================
-            LIST UJIAN
-        ================================================= */}
+        {/* ERROR */}
+
+        {error && (
+          <div
+            role="alert"
+            className={`flex items-start gap-3 rounded-2xl border ${themeWarningBorder} ${themeWarningSurface} p-4`}
+          >
+            <AlertCircle
+              size={18}
+              className={`mt-0.5 shrink-0 ${themeWarningText}`}
+            />
+
+            <div className="min-w-0 flex-1">
+              <p
+                className={`text-sm font-bold ${themeWarningText}`}
+              >
+                Data ujian belum dapat dimuat
+              </p>
+
+              <p
+                className={`mt-1 text-xs leading-5 ${themeTextSecondary}`}
+              >
+                {error}
+              </p>
+
+              <button
+                type="button"
+                onClick={loadData}
+                disabled={loading}
+                className={`mt-3 inline-flex items-center gap-2 rounded-lg border ${themeWarningBorder} px-3 py-2 text-xs font-semibold ${themeWarningText} transition disabled:opacity-60`}
+              >
+                <RefreshCw
+                  size={13}
+                  className={loading ? "animate-spin" : ""}
+                />
+                Coba lagi
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* LIST UJIAN */}
 
         <div className="space-y-3">
-          {filteredUjian.length > 0 ? (
+          {loading ? (
+            <div
+              className={`flex items-center justify-center gap-2 rounded-2xl border ${themeNeutralBorder} ${themeCard} ${themeCardShadow} px-5 py-14`}
+            >
+              <Loader2
+                size={18}
+                className={`animate-spin ${themePrimaryText}`}
+              />
+
+              <p
+                className={`text-sm ${themeTextSecondary}`}
+              >
+                Memuat ujian...
+              </p>
+            </div>
+          ) : filteredUjian.length > 0 ? (
             filteredUjian.map((ujian) => {
-              const mapel =
-                mataPelajaranList.find(
-                  (m) =>
-                    m.id === ujian.mapelId
-                );
+              const mapel = daftarMapel.find(
+                (m) => m.id === ujian.mapelId
+              );
 
               const status =
                 STATUS_STYLE[ujian.status];
@@ -555,18 +620,13 @@ function UjianPageInner() {
                     <div
                       className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${status.surface} ${status.text}`}
                     >
-                      <GraduationCap
-                        size={19}
-                      />
+                      <GraduationCap size={19} />
                     </div>
 
                     {/* INFORMASI */}
 
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-1.5">
-
-                        {/* STATUS */}
-
                         <span
                           className={`inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-[10px] font-semibold ${status.surface} ${status.border} ${status.text}`}
                         >
@@ -574,15 +634,11 @@ function UjianPageInner() {
                           {status.label}
                         </span>
 
-                        {/* TIPE */}
-
                         <span
                           className={`rounded border ${themeNeutralBorder} ${themeNeutralSurface} px-1.5 py-0.5 text-[10px] font-medium ${themeTextMuted}`}
                         >
                           {ujian.tipe}
                         </span>
-
-                        {/* MAPEL */}
 
                         {activeMapel === "semua" &&
                         mapel ? (
@@ -617,9 +673,10 @@ function UjianPageInner() {
                     "selesai" ? (
                       <div className="shrink-0 text-right">
                         <p
-                          className={`text-2xl font-bold ${themeSuccessText}`}
+                          className={`text-sm font-bold ${themeTextMuted}`}
+                          title="Nilai per siswa belum tersedia dari endpoint daftar ujian"
                         >
-                          {ujian.nilai}
+                          -
                         </p>
 
                         <p
@@ -632,40 +689,39 @@ function UjianPageInner() {
                       "berlangsung" ? (
                       <button
                         type="button"
+                        onClick={() =>
+                          bukaUjian(ujian.id)
+                        }
                         className={`flex shrink-0 items-center gap-1 rounded-lg border ${themeWarningBorder} ${themeWarningSurface} ${themeWarningText} px-3 py-2 text-xs font-semibold transition hover:brightness-95`}
                       >
                         Kerjakan
 
-                        <ChevronRight
-                          size={13}
-                        />
+                        <ChevronRight size={13} />
                       </button>
                     ) : (
-                      <div className="mt-1 flex shrink-0 items-center justify-center">
-                        <ChevronRight
-                          size={16}
-                          className={themeTextMuted}
-                        />
-                      </div>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          bukaUjian(ujian.id)
+                        }
+                        className={`mt-1 flex shrink-0 items-center justify-center rounded-lg p-1 ${themeTextMuted} transition hover:${themePrimaryText}`}
+                        aria-label="Lihat detail ujian"
+                      >
+                        <ChevronRight size={16} />
+                      </button>
                     )}
                   </div>
                 </div>
               );
             })
           ) : (
-            /* =================================================
-               EMPTY STATE
-            ================================================= */
-
             <div
               className={`rounded-2xl border ${themeNeutralBorder} ${themeCard} ${themeCardShadow} px-5 py-14 text-center`}
             >
               <div
                 className={`mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl ${themeNeutralSurfaceStrong} ${themeTextMuted}`}
               >
-                <GraduationCap
-                  size={22}
-                />
+                <GraduationCap size={22} />
               </div>
 
               <p

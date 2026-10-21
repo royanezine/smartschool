@@ -15,17 +15,16 @@ import {
   AlertCircle,
   Loader2,
   RefreshCw,
-  Search,
-  ChevronRight,
+  Link2,
   FileText,
-  UserRound,
   ClipboardList,
   ShieldCheck,
 } from "lucide-react";
 
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
-import { getJalurPpdb } from "@/services/jalurPpdb.service";
+import TautanPendaftaranModal from "@/app/components/spmb/TautanPendaftaranModal";
+import { getJalurPpdbById } from "@/services/jalurPpdb.service";
 
 // =========================================================
 // THEME HELPERS
@@ -237,7 +236,7 @@ export default function DetailJalurPendaftaranPage() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
-  const [search, setSearch] = useState("");
+  const [linkOpen, setLinkOpen] = useState(false);
 
   const toggleSidebar = () => {
     setCollapsed((value) => !value);
@@ -257,30 +256,16 @@ export default function DetailJalurPendaftaranPage() {
         setLoading(true);
       }
 
-      const response = await getJalurPpdb();
+      const response = await getJalurPpdbById(id);
 
-      if (!response?.success) {
+      if (!response?.success || !response?.data) {
         throw new Error(
           response?.message ||
-            "Gagal mengambil data jalur pendaftaran."
+            "Gagal mengambil detail jalur pendaftaran."
         );
       }
 
-      const jalurList = Array.isArray(response?.data)
-        ? response.data
-        : [];
-
-      const selected = jalurList.find(
-        (item) => String(item?.id) === String(id)
-      );
-
-      if (!selected) {
-        throw new Error(
-          "Jalur pendaftaran tidak ditemukan."
-        );
-      }
-
-      setJalur(selected);
+      setJalur(response.data);
     } catch (err) {
       console.error(
         "GET DETAIL JALUR PPDB ERROR:",
@@ -300,9 +285,11 @@ export default function DetailJalurPendaftaranPage() {
 
   useEffect(() => {
     if (id) {
-      loadData();
+      Promise.resolve().then(() => {
+        loadData();
+      });
     }
-  }, [id]);
+  }, [id, loadData]);
 
   // =========================================================
   // DERIVED DATA
@@ -320,16 +307,6 @@ export default function DetailJalurPendaftaranPage() {
     isPeriodeAktif(jalur) &&
     String(jalur?.status || "").toLowerCase() ===
       "aktif";
-
-  const filteredPendaftar = useMemo(() => {
-    const keyword = search.trim().toLowerCase();
-
-    if (!keyword) {
-      return [];
-    }
-
-    return [];
-  }, [search]);
 
   // =========================================================
   // LOADING
@@ -453,25 +430,37 @@ export default function DetailJalurPendaftaranPage() {
                     </p>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={() => loadData(true)}
-                    disabled={refreshing}
-                    className={`theme-card theme-text-secondary ${themeNeutralBorder} ${themeSmallShadow} ${themeNeutralHover} inline-flex h-11 items-center justify-center gap-2 rounded-xl border px-4 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60`}
-                  >
-                    {refreshing ? (
-                      <Loader2
-                        size={17}
-                        className="animate-spin"
-                      />
-                    ) : (
-                      <RefreshCw size={17} />
-                    )}
+                  <div className="flex flex-col gap-2 sm:flex-row">
+                    <button
+                      type="button"
+                      onClick={() => setLinkOpen(true)}
+                      disabled={!jalur?.id || !jalur?.sekolahId}
+                      className={`${themePrimaryGradient} inline-flex h-11 items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold text-[var(--color-card)] transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60`}
+                    >
+                      <Link2 size={17} />
+                      Tautan Pendaftaran
+                    </button>
 
-                    {refreshing
-                      ? "Memuat..."
-                      : "Refresh"}
-                  </button>
+                    <button
+                      type="button"
+                      onClick={() => loadData(true)}
+                      disabled={refreshing}
+                      className={`theme-card theme-text-secondary ${themeNeutralBorder} ${themeSmallShadow} ${themeNeutralHover} inline-flex h-11 items-center justify-center gap-2 rounded-xl border px-4 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60`}
+                    >
+                      {refreshing ? (
+                        <Loader2
+                          size={17}
+                          className="animate-spin"
+                        />
+                      ) : (
+                        <RefreshCw size={17} />
+                      )}
+
+                      {refreshing
+                        ? "Memuat..."
+                        : "Refresh"}
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -602,149 +591,62 @@ export default function DetailJalurPendaftaranPage() {
                   <section
                     className={`theme-card mt-6 rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
                   >
-                    <div
-                      className={`border-b ${themeDivider} p-5 sm:p-6`}
-                    >
-                      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                    <div className="p-5 sm:p-6">
+                      <div className="flex items-start gap-3">
+                        <div
+                          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${themePrimarySoft} ${themePrimaryText}`}
+                        >
+                          <ClipboardList size={19} />
+                        </div>
+
                         <div>
-                          <div className="flex items-center gap-2">
-                            <ClipboardList
-                              size={19}
-                              className={themePrimaryText}
-                            />
+                          <h2 className="theme-text text-base font-bold">
+                            Daftar Pendaftar
+                          </h2>
 
-                            <h2 className="theme-text text-base font-bold">
-                              Daftar Pendaftar
-                            </h2>
-                          </div>
-
-                          <p className="theme-text-secondary mt-1 text-sm">
-                            Daftar calon peserta didik yang
+                          <p className="theme-text-secondary mt-1 text-sm leading-6">
+                            Data calon peserta didik yang
                             mendaftar melalui jalur{" "}
                             <span className="theme-text font-semibold">
                               {jalur.nama || "-"}
-                            </span>
-                            .
+                            </span>{" "}
+                            belum dapat ditampilkan.
                           </p>
                         </div>
+                      </div>
 
-                        <div className="relative w-full lg:max-w-sm">
-                          <Search
-                            size={17}
-                            className="theme-text-muted absolute left-3.5 top-1/2 -translate-y-1/2"
-                          />
+                      <div className="mt-5 flex items-start gap-2.5 rounded-xl border border-[color-mix(in_srgb,var(--color-warning)_28%,transparent)] bg-[color-mix(in_srgb,var(--color-warning)_8%,transparent)] p-4">
+                        <AlertCircle
+                          size={17}
+                          className="mt-0.5 shrink-0 text-[var(--color-warning)]"
+                        />
 
-                          <input
-                            type="text"
-                            value={search}
-                            onChange={(event) =>
-                              setSearch(event.target.value)
-                            }
-                            placeholder="Cari nama atau NISN..."
-                            className={`theme-input h-11 w-full rounded-xl border pl-10 pr-4 text-sm outline-none transition ${themeFocus} placeholder:text-[var(--color-text-placeholder)]`}
-                          />
+                        <div>
+                          <p className="theme-text text-xs font-bold">
+                            Endpoint data pendaftar belum tersedia
+                          </p>
+
+                          <p className="theme-text-secondary mt-1 text-xs leading-5">
+                            Backend belum menyediakan
+                            endpoint untuk membaca daftar
+                            pendaftar PPDB. Karena itu
+                            halaman ini tidak menampilkan
+                            data siswa, status seleksi,
+                            atau berkas pendaftar. Data
+                            contoh sengaja tidak
+                            ditampilkan agar tidak
+                            menyesatkan.
+                          </p>
                         </div>
                       </div>
+
+                      <p className="theme-text-muted mt-4 text-xs leading-5">
+                        Setelah endpoint daftar pendaftar
+                        tersedia, tabel pendaftar dapat
+                        ditambahkan di bagian ini tanpa
+                        mengubah data jalur.
+                      </p>
                     </div>
-
-                    {filteredPendaftar.length === 0 ? (
-                      <div className="px-6 py-16 text-center">
-                        <div
-                          className={`mx-auto flex h-16 w-16 items-center justify-center rounded-2xl ${themePrimarySoft} ${themePrimaryText}`}
-                        >
-                          <UserRound size={30} />
-                        </div>
-
-                        <h3 className="theme-text mt-4 text-base font-bold">
-                          Data pendaftar belum tersedia
-                        </h3>
-
-                        <p className="theme-text-secondary mx-auto mt-1 max-w-lg text-sm leading-6">
-                          Halaman detail jalur sudah siap.
-                          Data calon siswa, status seleksi, dan
-                          berkas seperti KK, Akta, dan Ijazah
-                          akan ditampilkan pada bagian ini setelah
-                          endpoint data pendaftar tersedia.
-                        </p>
-                      </div>
-                    ) : (
-                      <div className="overflow-x-auto">
-                        <table className="min-w-full">
-                          <thead>
-                            <tr
-                              className={`border-b ${themeDivider} ${themeNeutralSurface}`}
-                            >
-                              <th className="theme-text-muted px-5 py-3 text-left text-xs font-bold uppercase tracking-wide">
-                                No
-                              </th>
-
-                              <th className="theme-text-muted px-5 py-3 text-left text-xs font-bold uppercase tracking-wide">
-                                Nama
-                              </th>
-
-                              <th className="theme-text-muted px-5 py-3 text-left text-xs font-bold uppercase tracking-wide">
-                                NISN
-                              </th>
-
-                              <th className="theme-text-muted px-5 py-3 text-left text-xs font-bold uppercase tracking-wide">
-                                Status
-                              </th>
-
-                              <th className="theme-text-muted px-5 py-3 text-right text-xs font-bold uppercase tracking-wide">
-                                Aksi
-                              </th>
-                            </tr>
-                          </thead>
-
-                          <tbody>
-                            {filteredPendaftar.map(
-                              (item, index) => (
-                                <tr
-                                  key={item.id}
-                                  className={`border-b ${themeDivider} last:border-0 ${themeNeutralHover}`}
-                                >
-                                  <td className="theme-text-secondary px-5 py-4 text-sm">
-                                    {index + 1}
-                                  </td>
-
-                                  <td className="theme-text px-5 py-4 text-sm font-semibold">
-                                    {item.namaLengkap ||
-                                      "-"}
-                                  </td>
-
-                                  <td className="theme-text-secondary px-5 py-4 text-sm">
-                                    {item.nisn || "-"}
-                                  </td>
-
-                                  <td className="theme-text-secondary px-5 py-4 text-sm">
-                                    {item.status || "-"}
-                                  </td>
-
-                                  <td className="px-5 py-4 text-right">
-                                    <button
-                                      type="button"
-                                      onClick={() =>
-                                        router.push(
-                                          `/admin/spmb/pendaftar/detail/${encodeURIComponent(
-                                            item.id
-                                          )}`
-                                        )
-                                      }
-                                      className={`theme-card theme-text-secondary ${themeNeutralBorder} ${themeNeutralHover} inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-semibold transition`}
-                                    >
-                                      Detail
-                                      <ChevronRight
-                                        size={14}
-                                      />
-                                    </button>
-                                  </td>
-                                </tr>
-                              )
-                            )}
-                          </tbody>
-                        </table>
-                      </div>
-                    )}
                   </section>
 
                   {/* =====================================================
@@ -753,7 +655,7 @@ export default function DetailJalurPendaftaranPage() {
 
                   <section className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-2">
 
-                    {/* DOKUMEN */}
+                    {/* TAUTAN */}
 
                     <div
                       className={`theme-card rounded-2xl border ${themeNeutralBorder} ${themeCardShadow} p-5 sm:p-6`}
@@ -762,26 +664,51 @@ export default function DetailJalurPendaftaranPage() {
                         <div
                           className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${themePrimarySoft} ${themePrimaryText}`}
                         >
-                          <FileCheck2 size={19} />
+                          <Link2 size={19} />
                         </div>
 
                         <div>
                           <h3 className="theme-text text-sm font-bold">
-                            Dokumen Pendukung
+                            Tautan Pendaftaran
                           </h3>
 
                           <p className="theme-text-secondary mt-1 text-xs leading-5">
-                            Persyaratan dokumen yang berkaitan
-                            dengan jalur pendaftaran.
+                            Bagikan tautan yang sudah memuat
+                            sekolah dan jalur ini kepada
+                            calon peserta didik.
                           </p>
                         </div>
                       </div>
 
-                      <div className="mt-5 space-y-2">
-                        <DocumentItem label="Kartu Keluarga (KK)" />
-                        <DocumentItem label="Akta Kelahiran" />
-                        <DocumentItem label="Dokumen persyaratan jalur" />
+                      <div
+                        className={`mt-5 rounded-xl ${themeNeutralSurface} px-4 py-3`}
+                      >
+                        <p className="theme-text-secondary text-xs leading-5">
+                          Formulir publik tidak menyediakan
+                          daftar jalur. Karena itu tautan
+                          resmi ini diperlukan agar calon
+                          peserta didik tidak perlu mengetik
+                          ID sekolah atau jalur.
+                        </p>
                       </div>
+
+                      <button
+                        type="button"
+                        onClick={() => setLinkOpen(true)}
+                        disabled={!jalur.sekolahId}
+                        className={`${themePrimaryGradient} mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-[var(--color-card)] transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60`}
+                      >
+                        <Link2 size={16} />
+                        Lihat Tautan Pendaftaran
+                      </button>
+
+                      {!jalur.sekolahId && (
+                        <p className="theme-text-muted mt-2 text-xs leading-5">
+                          ID sekolah tidak tersedia pada data
+                          jalur, sehingga tautan belum dapat
+                          dibuat.
+                        </p>
+                      )}
                     </div>
 
                     {/* SISTEM */}
@@ -840,10 +767,14 @@ export default function DetailJalurPendaftaranPage() {
                     />
 
                     <p className="theme-text-secondary leading-5">
-                      Halaman ini mengambil detail jalur berdasarkan
-                      ID pada URL. Detail calon siswa dan berkas
-                      pendaftar belum diambil dari backend karena
-                      endpoint GET pendaftaran PPDB belum tersedia.
+                      Detail jalur diambil dari{" "}
+                      <code>GET /api/jalur-ppdb/:id</code>.
+                      Daftar pendaftar dan berkas belum dapat
+                      ditampilkan karena Backend belum
+                      menyediakan endpoint GET data pendaftaran
+                      PPDB. Tautan pendaftaran dibuat dari ID
+                      sekolah dan ID jalur yang dikembalikan
+                      endpoint tersebut.
                     </p>
                   </div>
                 </>
@@ -874,6 +805,12 @@ export default function DetailJalurPendaftaranPage() {
           </div>
         </main>
       </div>
+
+      <TautanPendaftaranModal
+        open={linkOpen}
+        jalur={jalur}
+        onClose={() => setLinkOpen(false)}
+      />
     </div>
   );
 }
@@ -905,39 +842,6 @@ function InfoCard({
       <p className="theme-text mt-2 text-sm font-bold">
         {value}
       </p>
-    </div>
-  );
-}
-
-// =========================================================
-// DOCUMENT ITEM
-// =========================================================
-
-function DocumentItem({ label }) {
-  return (
-    <div
-      className={`theme-card-soft flex items-center gap-3 rounded-xl border ${themeNeutralBorder} px-3.5 py-3`}
-    >
-      <div
-        className={`theme-card flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${themeNeutralBorder} border theme-text-secondary`}
-      >
-        <FileCheck2 size={16} />
-      </div>
-
-      <div className="min-w-0 flex-1">
-        <p className="theme-text text-sm font-semibold">
-          {label}
-        </p>
-
-        <p className="theme-text-muted mt-0.5 text-xs">
-          Akan diperiksa pada detail pendaftar
-        </p>
-      </div>
-
-      <ChevronRight
-        size={15}
-        className="theme-text-muted shrink-0"
-      />
     </div>
   );
 }

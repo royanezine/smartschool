@@ -746,7 +746,8 @@ export default function KelolaSoalUjianPage() {
 
                                     const isCorrect =
                                       String(
-                                        item.jawabanBenar ??
+                                        item.kunciJawaban ??
+                                          item.jawabanBenar ??
                                           ""
                                       ).trim() ===
                                       String(

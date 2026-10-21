@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
+  AlertTriangle,
   ArrowLeft,
   Check,
   CheckCircle2,
@@ -11,7 +12,9 @@ import {
   FileCheck2,
   FileSpreadsheet,
   Info,
+  Loader2,
   LockKeyhole,
+  RefreshCw,
   Search,
   ShieldCheck,
   SlidersHorizontal,
@@ -20,69 +23,12 @@ import {
 } from "lucide-react";
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
-
-const INITIAL_CLASSES = [
-  {
-    id: "xipa1",
-    name: "X IPA 1",
-    subject: "Matematika",
-    semester: "Ganjil",
-    year: "2026/2027",
-    finalized: false,
-    students: [
-      { id: "s1", name: "Aditya Pratama", nis: "102401", tugas: 85, uts: 82, uas: 88 },
-      { id: "s2", name: "Anisa Putri", nis: "102402", tugas: 90, uts: 86, uas: 91 },
-      { id: "s3", name: "Bima Saputra", nis: "102403", tugas: 78, uts: 80, uas: 83 },
-      { id: "s4", name: "Citra Maharani", nis: "102404", tugas: 92, uts: 89, uas: 94 },
-      { id: "s5", name: "Dimas Ramadhan", nis: "102405", tugas: 75, uts: 77, uas: 80 },
-    ],
-  },
-  {
-    id: "xipa2",
-    name: "X IPA 2",
-    subject: "Matematika",
-    semester: "Ganjil",
-    year: "2026/2027",
-    finalized: false,
-    students: [
-      { id: "s6", name: "Farhan Akbar", nis: "102406", tugas: 82, uts: 84, uas: 86 },
-      { id: "s7", name: "Gita Lestari", nis: "102407", tugas: 88, uts: 90, uas: 92 },
-      { id: "s8", name: "Hendra Wijaya", nis: "102408", tugas: 79, uts: null, uas: 81 },
-    ],
-  },
-  {
-    id: "xib1",
-    name: "XI IPA 1",
-    subject: "Matematika",
-    semester: "Ganjil",
-    year: "2026/2027",
-    finalized: false,
-    students: [
-      { id: "s9", name: "Intan Permata", nis: "112401", tugas: 91, uts: 87, uas: 90 },
-      { id: "s10", name: "Joko Santoso", nis: "112402", tugas: 84, uts: 82, uas: 85 },
-    ],
-  },
-];
-
-const WEIGHTS = {
-  tugas: 30,
-  uts: 30,
-  uas: 40,
-};
-
-function calculateFinalScore(student) {
-  const values = [student.tugas, student.uts, student.uas];
-
-  if (values.some((value) => value === null || value === undefined || value === "")) {
-    return null;
-  }
-
-  return (
-    Number(student.tugas) * WEIGHTS.tugas / 100 +
-    Number(student.uts) * WEIGHTS.uts / 100 +
-    Number(student.uas) * WEIGHTS.uas / 100
-  );
-}
+import {
+  finalisasiNilai,
+  getGridNilai,
+  getKomponenNilai,
+  getNilaiKelasSaya,
+} from "@/services/nilai.service";
 
 function formatScore(value) {
   return value === null || value === undefined
@@ -93,20 +39,137 @@ function formatScore(value) {
       });
 }
 
+function hitungNilaiAkhir(siswa, komponen) {
+  if (!siswa || komponen.length === 0) {
+    return null;
+  }
+
+  let total = 0;
+
+  for (const item of komponen) {
+    const nilai = siswa.nilai?.[item.id];
+
+    if (nilai === null || nilai === undefined || nilai === "") {
+      return null;
+    }
+
+    total += (Number(nilai) * Number(item.bobot)) / 100;
+  }
+
+  return Math.round(total * 100) / 100;
+}
+
 export default function FinalisasiNilaiPage() {
   const router = useRouter();
 
-  const [classes, setClasses] = useState(INITIAL_CLASSES);
-  const [selectedClassId, setSelectedClassId] = useState("xipa1");
+  const [classes, setClasses] = useState([]);
+  const [selectedClassId, setSelectedClassId] = useState("");
+  const [komponenData, setKomponenData] = useState({
+    komponen: [],
+    totalBobot: 0,
+    sisaBobot: 100,
+    status: "draft",
+  });
+  const [grid, setGrid] = useState({
+    siswa: [],
+    status: "draft",
+  });
+
   const [search, setSearch] = useState("");
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [notice, setNotice] = useState("");
+  const [error, setError] = useState("");
+
+  const [loadingClasses, setLoadingClasses] = useState(true);
+  const [loadingDetail, setLoadingDetail] = useState(false);
+  const [finalizing, setFinalizing] = useState(false);
+
+  const loadClasses = useCallback(async () => {
+    setLoadingClasses(true);
+    setError("");
+
+    try {
+      const data = await getNilaiKelasSaya();
+
+      setClasses(data);
+
+      setSelectedClassId((current) => {
+        if (current && data.some((item) => item.kelasMapelId === current)) {
+          return current;
+        }
+
+        return data[0]?.kelasMapelId || "";
+      });
+    } catch (err) {
+      console.error("Gagal mengambil kelas nilai:", err);
+      setClasses([]);
+      setSelectedClassId("");
+      setError(
+        err?.message ||
+          "Gagal mengambil daftar kelas yang diampu. Pastikan backend berjalan dan akun memiliki akses guru."
+      );
+    } finally {
+      setLoadingClasses(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadClasses();
+  }, [loadClasses]);
+
+  const loadDetail = useCallback(async (kelasMapelId) => {
+    if (!kelasMapelId) {
+      setKomponenData({
+        komponen: [],
+        totalBobot: 0,
+        sisaBobot: 100,
+        status: "draft",
+      });
+      setGrid({ siswa: [], status: "draft" });
+      return;
+    }
+
+    setLoadingDetail(true);
+    setError("");
+
+    try {
+      const [komponenResult, gridResult] = await Promise.all([
+        getKomponenNilai(kelasMapelId),
+        getGridNilai(kelasMapelId),
+      ]);
+
+      setKomponenData(komponenResult);
+      setGrid(gridResult);
+    } catch (err) {
+      console.error("Gagal mengambil detail nilai:", err);
+      setKomponenData({
+        komponen: [],
+        totalBobot: 0,
+        sisaBobot: 100,
+        status: "draft",
+      });
+      setGrid({ siswa: [], status: "draft" });
+      setError(
+        err?.message ||
+          "Gagal mengambil komponen dan nilai kelas. Pastikan kelas ini masih diampu oleh akun Anda."
+      );
+    } finally {
+      setLoadingDetail(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadDetail(selectedClassId);
+  }, [selectedClassId, loadDetail]);
 
   const selectedClass = classes.find(
-    (item) => item.id === selectedClassId
+    (item) => item.kelasMapelId === selectedClassId
   );
 
-  const students = selectedClass?.students || [];
+  const komponen = komponenData.komponen;
+  const students = grid.siswa;
 
   const filteredStudents = useMemo(() => {
     const keyword = search.trim().toLowerCase();
@@ -114,52 +177,94 @@ export default function FinalisasiNilaiPage() {
     if (!keyword) return students;
 
     return students.filter((student) =>
-      [student.name, student.nis].some((value) =>
+      [student.namaLengkap, student.nis, student.nisn].some((value) =>
         String(value || "").toLowerCase().includes(keyword)
       )
     );
   }, [students, search]);
 
-  const completedStudents = students.filter(
-    (student) => calculateFinalScore(student) !== null
+  const completedStudents = useMemo(
+    () =>
+      students.filter(
+        (student) => hitungNilaiAkhir(student, komponen) !== null
+      ),
+    [students, komponen]
   );
 
-  const incompleteStudents = students.filter(
-    (student) => calculateFinalScore(student) === null
+  const incompleteStudents = useMemo(
+    () =>
+      students.filter(
+        (student) => hitungNilaiAkhir(student, komponen) === null
+      ),
+    [students, komponen]
   );
 
   const average = completedStudents.length
     ? completedStudents.reduce(
-        (total, student) => total + calculateFinalScore(student),
+        (total, student) =>
+          total + hitungNilaiAkhir(student, komponen),
         0
       ) / completedStudents.length
     : null;
 
   const allComplete =
-    students.length > 0 && incompleteStudents.length === 0;
+    students.length > 0 &&
+    komponen.length > 0 &&
+    incompleteStudents.length === 0;
 
-  const finalizedCount = classes.filter((item) => item.finalized).length;
+  const bobotValid = komponenData.totalBobot === 100;
 
-  const handleFinalize = () => {
-    if (!selectedClass || !allComplete) {
-      setNotice("Lengkapi semua nilai siswa sebelum melakukan finalisasi.");
+  const isFinalized =
+    grid.status === "final" ||
+    komponenData.status === "final" ||
+    selectedClass?.status === "final";
+
+  const readyToFinalize = allComplete && bobotValid && !isFinalized;
+
+  const finalizedCount = classes.filter((item) => item.status === "final")
+    .length;
+
+  const handleFinalize = async () => {
+    if (!selectedClass || !readyToFinalize) {
+      setNotice(
+        "Finalisasi belum bisa dilakukan. Periksa kelengkapan nilai dan total bobot."
+      );
       setShowConfirmation(false);
       return;
     }
 
-    setClasses((current) =>
-      current.map((item) =>
-        item.id === selectedClassId
-          ? { ...item, finalized: true }
-          : item
-      )
-    );
+    setFinalizing(true);
+    setNotice("");
 
-    setShowConfirmation(false);
-    setNotice(
-      "Status finalisasi diperbarui pada tampilan ini. Hubungkan endpoint backend agar perubahan tersimpan permanen."
-    );
+    try {
+      const result = await finalisasiNilai(selectedClass.kelasMapelId);
+
+      setClasses((current) =>
+        current.map((item) =>
+          item.kelasMapelId === selectedClass.kelasMapelId
+            ? { ...item, status: "final" }
+            : item
+        )
+      );
+      setKomponenData((current) => ({ ...current, status: "final" }));
+      setGrid((current) => ({ ...current, status: "final" }));
+      setShowConfirmation(false);
+      setNotice(
+        `Nilai ${result.mataPelajaran} berhasil difinalisasi untuk ${result.jumlahSiswa} siswa (KKM ${result.kkm}).`
+      );
+    } catch (err) {
+      console.error("Finalisasi nilai gagal:", err);
+      setShowConfirmation(false);
+      setNotice(
+        err?.message ||
+          "Finalisasi nilai gagal. Pastikan seluruh nilai komponen sudah lengkap dan total bobot 100%."
+      );
+    } finally {
+      setFinalizing(false);
+    }
   };
+
+  const showLoading = loadingClasses || loadingDetail;
 
   return (
     <div className="theme-page flex min-h-screen w-full">
@@ -211,6 +316,30 @@ export default function FinalisasiNilaiPage() {
               </div>
             </div>
 
+            {/* API error */}
+            {error && (
+              <div className="mb-6 flex flex-col gap-3 rounded-xl border border-[color-mix(in_srgb,var(--color-danger)_25%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_8%,transparent)] p-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle
+                    size={18}
+                    className="mt-0.5 shrink-0 text-[var(--color-danger)]"
+                  />
+                  <p className="text-sm leading-6 text-[var(--color-danger)]">
+                    {error}
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={loadClasses}
+                  className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-[color-mix(in_srgb,var(--color-danger)_30%,transparent)] px-3 py-2 text-xs font-semibold text-[var(--color-danger)] transition hover:bg-[color-mix(in_srgb,var(--color-danger)_8%,transparent)]"
+                >
+                  <RefreshCw size={14} />
+                  Muat ulang
+                </button>
+              </div>
+            )}
+
             {/* Overview */}
             <section className="mb-7 grid grid-cols-1 gap-4 sm:grid-cols-3">
               <article className="theme-card rounded-xl border border-[color-mix(in_srgb,var(--color-text)_10%,transparent)] p-5">
@@ -220,13 +349,13 @@ export default function FinalisasiNilaiPage() {
                       Kelas ditugaskan
                     </p>
                     <p className="theme-text mt-2 text-3xl font-bold">
-                      {classes.length}
+                      {loadingClasses ? "—" : classes.length}
                     </p>
                   </div>
                   <Users size={19} className="text-[var(--color-primary)]" />
                 </div>
                 <p className="theme-text-secondary mt-3 text-xs">
-                  Kelas pada data contoh halaman ini
+                  Kelas-mapel yang diampu akun ini
                 </p>
               </article>
 
@@ -237,7 +366,7 @@ export default function FinalisasiNilaiPage() {
                       Siswa lengkap
                     </p>
                     <p className="theme-text mt-2 text-3xl font-bold">
-                      {completedStudents.length}
+                      {showLoading ? "—" : completedStudents.length}
                       <span className="theme-text-secondary ml-2 text-sm font-medium">
                         / {students.length}
                       </span>
@@ -312,12 +441,26 @@ export default function FinalisasiNilaiPage() {
                       onChange={(event) => {
                         setSelectedClassId(event.target.value);
                         setNotice("");
+                        setShowConfirmation(false);
                       }}
-                      className="theme-input w-full appearance-none rounded-lg border border-[color-mix(in_srgb,var(--color-text)_15%,transparent)] py-3 pl-10 pr-10 text-sm outline-none focus:border-[var(--color-primary)]"
+                      disabled={loadingClasses || classes.length === 0}
+                      className="theme-input w-full appearance-none rounded-lg border border-[color-mix(in_srgb,var(--color-text)_15%,transparent)] py-3 pl-10 pr-10 text-sm outline-none focus:border-[var(--color-primary)] disabled:cursor-not-allowed disabled:opacity-60"
                     >
+                      {classes.length === 0 && (
+                        <option value="">
+                          {loadingClasses
+                            ? "Memuat kelas..."
+                            : "Belum ada kelas yang diampu"}
+                        </option>
+                      )}
+
                       {classes.map((item) => (
-                        <option key={item.id} value={item.id}>
-                          {item.name} — {item.subject}
+                        <option
+                          key={item.kelasMapelId}
+                          value={item.kelasMapelId}
+                        >
+                          {item.kelas?.nama || "-"} —{" "}
+                          {item.mataPelajaran?.nama || "-"}
                         </option>
                       ))}
                     </select>
@@ -347,8 +490,9 @@ export default function FinalisasiNilaiPage() {
                       id="search-student"
                       value={search}
                       onChange={(event) => setSearch(event.target.value)}
-                      placeholder="Nama atau NIS siswa..."
-                      className="theme-input w-full rounded-lg border border-[color-mix(in_srgb,var(--color-text)_15%,transparent)] py-3 pl-10 pr-3 text-sm outline-none focus:border-[var(--color-primary)]"
+                      placeholder="Nama, NIS, atau NISN siswa..."
+                      disabled={students.length === 0}
+                      className="theme-input w-full rounded-lg border border-[color-mix(in_srgb,var(--color-text)_15%,transparent)] py-3 pl-10 pr-3 text-sm outline-none focus:border-[var(--color-primary)] disabled:cursor-not-allowed disabled:opacity-60"
                     />
                   </div>
                 </div>
@@ -359,36 +503,42 @@ export default function FinalisasiNilaiPage() {
                 <div className="flex flex-col gap-3 border-b border-[color-mix(in_srgb,var(--color-text)_8%,transparent)] bg-[color-mix(in_srgb,var(--color-text)_2%,transparent)] p-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
                   <div>
                     <p className="theme-text text-sm font-bold">
-                      {selectedClass.name} · {selectedClass.subject}
+                      {selectedClass.kelas?.nama || "-"} ·{" "}
+                      {selectedClass.mataPelajaran?.nama || "-"}
                     </p>
                     <p className="theme-text-secondary mt-1 text-xs">
-                      Tahun ajaran {selectedClass.year} · Semester{" "}
-                      {selectedClass.semester}
+                      {komponen.length} komponen · total bobot{" "}
+                      {komponenData.totalBobot}% ·{" "}
+                      {komponenData.sisaBobot >= 0
+                        ? `sisa ${komponenData.sisaBobot}%`
+                        : `kelebihan ${Math.abs(komponenData.sisaBobot)}%`}
                     </p>
                   </div>
 
                   <span
                     className={`inline-flex w-fit items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-semibold ${
-                      selectedClass.finalized
+                      isFinalized
                         ? "bg-teal-500/10 text-teal-700"
-                        : allComplete
+                        : readyToFinalize
                           ? "bg-blue-500/10 text-blue-700"
                           : "bg-amber-500/10 text-amber-700"
                     }`}
                   >
-                    {selectedClass.finalized ? (
+                    {isFinalized ? (
                       <CheckCircle2 size={14} />
-                    ) : allComplete ? (
+                    ) : readyToFinalize ? (
                       <Check size={14} />
                     ) : (
                       <Info size={14} />
                     )}
 
-                    {selectedClass.finalized
+                    {isFinalized
                       ? "Sudah difinalisasi"
-                      : allComplete
-                        ? "Siap difinalisasi"
-                        : `${incompleteStudents.length} siswa belum lengkap`}
+                      : !bobotValid
+                        ? "Total bobot belum 100%"
+                        : readyToFinalize
+                          ? "Siap difinalisasi"
+                          : `${incompleteStudents.length} siswa belum lengkap`}
                   </span>
                 </div>
               )}
@@ -401,18 +551,19 @@ export default function FinalisasiNilaiPage() {
                       <th className="theme-text-secondary px-5 py-3.5 font-semibold sm:px-6">
                         Siswa
                       </th>
-                      <th className="theme-text-secondary px-4 py-3.5 font-semibold">
-                        Tugas
-                        <span className="mt-1 block text-xs font-normal">30%</span>
-                      </th>
-                      <th className="theme-text-secondary px-4 py-3.5 font-semibold">
-                        UTS
-                        <span className="mt-1 block text-xs font-normal">30%</span>
-                      </th>
-                      <th className="theme-text-secondary px-4 py-3.5 font-semibold">
-                        UAS
-                        <span className="mt-1 block text-xs font-normal">40%</span>
-                      </th>
+
+                      {komponen.map((item) => (
+                        <th
+                          key={item.id}
+                          className="theme-text-secondary px-4 py-3.5 font-semibold"
+                        >
+                          {item.nama}
+                          <span className="mt-1 block text-xs font-normal">
+                            {Number(item.bobot)}%
+                          </span>
+                        </th>
+                      ))}
+
                       <th className="theme-text-secondary px-4 py-3.5 font-semibold">
                         Nilai akhir
                       </th>
@@ -423,72 +574,135 @@ export default function FinalisasiNilaiPage() {
                   </thead>
 
                   <tbody>
-                    {filteredStudents.map((student) => {
-                      const finalScore = calculateFinalScore(student);
-                      const complete = finalScore !== null;
-
-                      return (
-                        <tr
-                          key={student.id}
-                          className="border-b border-[color-mix(in_srgb,var(--color-text)_7%,transparent)] last:border-0"
-                        >
-                          <td className="px-5 py-4 sm:px-6">
-                            <p className="theme-text font-semibold">
-                              {student.name}
-                            </p>
-                            <p className="theme-text-secondary mt-1 text-xs">
-                              NIS {student.nis}
-                            </p>
-                          </td>
-
-                          <td className="theme-text px-4 py-4 tabular-nums">
-                            {formatScore(student.tugas)}
-                          </td>
-                          <td className="theme-text px-4 py-4 tabular-nums">
-                            {formatScore(student.uts)}
-                          </td>
-                          <td className="theme-text px-4 py-4 tabular-nums">
-                            {formatScore(student.uas)}
-                          </td>
-                          <td className="theme-text px-4 py-4 font-bold tabular-nums">
-                            {formatScore(finalScore)}
-                          </td>
-                          <td className="px-4 py-4">
-                            <span
-                              className={`inline-flex items-center gap-1.5 text-xs font-semibold ${
-                                complete
-                                  ? "text-teal-600"
-                                  : "text-amber-600"
-                              }`}
-                            >
-                              {complete ? (
-                                <CheckCircle2 size={14} />
-                              ) : (
-                                <Info size={14} />
-                              )}
-                              {complete ? "Lengkap" : "Belum lengkap"}
-                            </span>
-                          </td>
-                        </tr>
-                      );
-                    })}
-
-                    {filteredStudents.length === 0 && (
+                    {showLoading && (
                       <tr>
-                        <td colSpan={6} className="px-5 py-12 text-center">
-                          <Search
+                        <td
+                          colSpan={Math.max(komponen.length, 1) + 3}
+                          className="px-5 py-12 text-center"
+                        >
+                          <Loader2
                             size={24}
-                            className="theme-text-secondary mx-auto"
+                            className="theme-text-secondary mx-auto animate-spin"
                           />
-                          <p className="theme-text mt-3 text-sm font-semibold">
-                            Siswa tidak ditemukan
-                          </p>
-                          <p className="theme-text-secondary mt-1 text-xs">
-                            Coba gunakan nama atau NIS yang berbeda.
+                          <p className="theme-text-secondary mt-3 text-sm">
+                            Memuat data nilai...
                           </p>
                         </td>
                       </tr>
                     )}
+
+                    {!showLoading &&
+                      filteredStudents.map((student) => {
+                        const finalScore = hitungNilaiAkhir(
+                          student,
+                          komponen
+                        );
+                        const complete = finalScore !== null;
+
+                        return (
+                          <tr
+                            key={student.penggunaId}
+                            className="border-b border-[color-mix(in_srgb,var(--color-text)_7%,transparent)] last:border-0"
+                          >
+                            <td className="px-5 py-4 sm:px-6">
+                              <p className="theme-text font-semibold">
+                                {student.namaLengkap}
+                              </p>
+                              <p className="theme-text-secondary mt-1 text-xs">
+                                NIS {student.nis || "—"}
+                                {student.nisn
+                                  ? ` · NISN ${student.nisn}`
+                                  : ""}
+                              </p>
+                            </td>
+
+                            {komponen.map((item) => (
+                              <td
+                                key={item.id}
+                                className="theme-text px-4 py-4 tabular-nums"
+                              >
+                                {formatScore(student.nilai?.[item.id])}
+                              </td>
+                            ))}
+
+                            <td className="theme-text px-4 py-4 font-bold tabular-nums">
+                              {formatScore(finalScore)}
+                            </td>
+                            <td className="px-4 py-4">
+                              <span
+                                className={`inline-flex items-center gap-1.5 text-xs font-semibold ${
+                                  complete
+                                    ? "text-teal-600"
+                                    : "text-amber-600"
+                                }`}
+                              >
+                                {complete ? (
+                                  <CheckCircle2 size={14} />
+                                ) : (
+                                  <Info size={14} />
+                                )}
+                                {complete ? "Lengkap" : "Belum lengkap"}
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      })}
+
+                    {!showLoading &&
+                      !error &&
+                      (students.length === 0 || komponen.length === 0) && (
+                        <tr>
+                          <td colSpan={Math.max(komponen.length, 1) + 3} className="px-5 py-12 text-center">
+                            <Info
+                              size={24}
+                              className="theme-text-secondary mx-auto"
+                            />
+                            <p className="theme-text mt-3 text-sm font-semibold">
+                              {komponen.length === 0
+                                ? "Belum ada komponen nilai"
+                                : "Belum ada siswa di kelas ini"}
+                            </p>
+                            <p className="theme-text-secondary mt-1 text-xs">
+                              {komponen.length === 0
+                                ? "Tambahkan komponen penilaian terlebih dahulu melalui halaman Setup Bobot."
+                                : "Pastikan siswa sudah terdaftar sebagai anggota kelas."}
+                            </p>
+
+                            {komponen.length === 0 && selectedClassId && (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  router.push("/guru/nilai/setup-bobot")
+                                }
+                                className="mt-4 inline-flex items-center gap-2 rounded-lg bg-[var(--color-primary)] px-4 py-2.5 text-xs font-semibold text-white hover:opacity-90"
+                              >
+                                <SlidersHorizontal size={14} />
+                                Buka Setup Bobot
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      )}
+
+                    {!showLoading &&
+                      students.length > 0 &&
+                      komponen.length > 0 &&
+                      filteredStudents.length === 0 && (
+                        <tr>
+                          <td colSpan={komponen.length + 3} className="px-5 py-12 text-center">
+                            <Search
+                              size={24}
+                              className="theme-text-secondary mx-auto"
+                            />
+                            <p className="theme-text mt-3 text-sm font-semibold">
+                              Siswa tidak ditemukan
+                            </p>
+                            <p className="theme-text-secondary mt-1 text-xs">
+                              Coba gunakan nama, NIS, atau NISN yang berbeda.
+                            </p>
+                          </td>
+                        </tr>
+                      )}
                   </tbody>
                 </table>
               </div>
@@ -501,8 +715,9 @@ export default function FinalisasiNilaiPage() {
                     className="theme-text-secondary mt-0.5 shrink-0"
                   />
                   <p className="theme-text-secondary max-w-xl text-xs leading-5">
-                    Periksa kembali seluruh nilai. Finalisasi idealnya
-                    mengunci perubahan nilai sesuai kebijakan sekolah.
+                    Finalisasi akan mengunci perubahan nilai pada kelas-mapel
+                    ini. Pastikan seluruh komponen sudah diisi dan total bobot
+                    tepat 100%.
                   </p>
                 </div>
 
@@ -513,8 +728,15 @@ export default function FinalisasiNilaiPage() {
 
                     if (!selectedClass) return;
 
-                    if (selectedClass.finalized) {
-                      setNotice("Kelas ini sudah difinalisasi pada tampilan ini.");
+                    if (isFinalized) {
+                      setNotice("Nilai kelas ini sudah difinalisasi.");
+                      return;
+                    }
+
+                    if (!bobotValid) {
+                      setNotice(
+                        `Total bobot komponen harus tepat 100%. Total saat ini ${komponenData.totalBobot}%.`
+                      );
                       return;
                     }
 
@@ -527,17 +749,21 @@ export default function FinalisasiNilaiPage() {
 
                     setShowConfirmation(true);
                   }}
-                  disabled={!selectedClass || selectedClass.finalized}
+                  disabled={!selectedClass || isFinalized || finalizing}
                   className="inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--color-primary)] px-5 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {selectedClass?.finalized ? (
+                  {isFinalized ? (
                     <CheckCircle2 size={16} />
+                  ) : finalizing ? (
+                    <Loader2 size={16} className="animate-spin" />
                   ) : (
                     <ShieldCheck size={16} />
                   )}
-                  {selectedClass?.finalized
+                  {isFinalized
                     ? "Sudah difinalisasi"
-                    : "Finalisasi nilai"}
+                    : finalizing
+                      ? "Memproses..."
+                      : "Finalisasi nilai"}
                 </button>
               </div>
 
@@ -554,9 +780,9 @@ export default function FinalisasiNilaiPage() {
             </section>
 
             <p className="theme-text-secondary mt-4 text-xs leading-5">
-              Tampilan contoh menggunakan data lokal. Pastikan data nilai,
-              bobot, dan status finalisasi dihubungkan ke backend sebelum
-              digunakan untuk penilaian resmi.
+              Data kelas, komponen, dan nilai dimuat langsung dari backend
+              melalui endpoint <code>/api/nilai/*</code>. Nilai akhir dihitung
+              dari bobot komponen yang tersimpan.
             </p>
           </div>
         </main>
@@ -588,7 +814,8 @@ export default function FinalisasiNilaiPage() {
                 type="button"
                 onClick={() => setShowConfirmation(false)}
                 aria-label="Tutup dialog"
-                className="theme-text-secondary rounded-lg p-2 hover:bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)]"
+                disabled={finalizing}
+                className="theme-text-secondary rounded-lg p-2 hover:bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)] disabled:opacity-50"
               >
                 <X size={18} />
               </button>
@@ -604,10 +831,11 @@ export default function FinalisasiNilaiPage() {
             <p className="theme-text-secondary mt-2 text-sm leading-6">
               Kamu akan memfinalisasi nilai{" "}
               <strong className="theme-text">
-                {selectedClass.subject} — {selectedClass.name}
+                {selectedClass.mataPelajaran?.nama || "-"} —{" "}
+                {selectedClass.kelas?.nama || "-"}
               </strong>
-              . Pastikan seluruh nilai sudah diperiksa karena pada sistem
-              sebenarnya tindakan ini dapat membatasi perubahan nilai.
+              . Setelah difinalisasi, perubahan nilai pada kelas-mapel ini
+              tidak dapat dilakukan.
             </p>
 
             <div className="mt-4 rounded-lg border border-[color-mix(in_srgb,var(--color-text)_10%,transparent)] p-4">
@@ -623,13 +851,20 @@ export default function FinalisasiNilaiPage() {
                   {completedStudents.length}
                 </span>
               </div>
+              <div className="mt-3 flex justify-between gap-3 text-sm">
+                <span className="theme-text-secondary">Total bobot</span>
+                <span className="theme-text font-semibold">
+                  {komponenData.totalBobot}%
+                </span>
+              </div>
             </div>
 
             <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
               <button
                 type="button"
                 onClick={() => setShowConfirmation(false)}
-                className="rounded-lg border border-[color-mix(in_srgb,var(--color-text)_15%,transparent)] px-4 py-2.5 text-sm font-semibold"
+                disabled={finalizing}
+                className="rounded-lg border border-[color-mix(in_srgb,var(--color-text)_15%,transparent)] px-4 py-2.5 text-sm font-semibold disabled:opacity-50"
               >
                 Periksa lagi
               </button>
@@ -637,10 +872,15 @@ export default function FinalisasiNilaiPage() {
               <button
                 type="button"
                 onClick={handleFinalize}
-                className="inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--color-primary)] px-4 py-2.5 text-sm font-semibold text-white hover:opacity-90"
+                disabled={finalizing}
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--color-primary)] px-4 py-2.5 text-sm font-semibold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                <Check size={16} />
-                Ya, finalisasi
+                {finalizing ? (
+                  <Loader2 size={16} className="animate-spin" />
+                ) : (
+                  <Check size={16} />
+                )}
+                {finalizing ? "Memproses..." : "Ya, finalisasi"}
               </button>
             </div>
           </section>

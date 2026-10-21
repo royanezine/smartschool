@@ -1,28 +1,25 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import Header from "@/app/components/Header";
-import Sidebar from "@/app/components/Sidebar";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
-  ChevronRight,
-  Pencil,
-  X,
-  AlertTriangle,
-  Search,
-  Settings2,
+  AlertCircle,
+  CalendarDays,
+  Info,
+  Loader2,
+  RefreshCw,
+  Route,
+  Users,
 } from "lucide-react";
 
-// =========================================================
-// THEME HELPERS
-// =========================================================
+import Sidebar from "@/app/components/Sidebar";
+import Header from "@/app/components/Header";
+import { getJalurPpdb } from "@/services/jalurPpdb.service";
 
 const themePrimaryText = "text-[var(--color-primary)]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
-
-const themePrimarySoftBorder =
-  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -30,14 +27,8 @@ const themePrimaryGradient =
 const themeCardShadow =
   "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
 
-const themeSmallShadow =
-  "shadow-[0_2px_8px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
-
 const themeNeutralSurface =
   "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
-
-const themeNeutralHover =
-  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
 
 const themeNeutralBorder =
   "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
@@ -45,1005 +36,349 @@ const themeNeutralBorder =
 const themeDivider =
   "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
 
-const themeInfoSurface =
-  "bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)]";
+function formatTanggal(value) {
+  if (!value) {
+    return "-";
+  }
 
-const themeInfoBorder =
-  "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
+  const date = new Date(value);
 
-const themeSuccessSurface =
-  "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
+  if (Number.isNaN(date.getTime())) {
+    return "-";
+  }
 
-const themeWarningSurface =
-  "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]";
-
-const themeWarningBorder =
-  "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
-
-// =========================================================
-// DUMMY DATA
-// =========================================================
-
-const DAYA_TAMPUNG_AWAL = 1500;
-
-const initialAlokasi = [
-  {
-    id: 1,
-    jalur: "Jalur Reguler",
-    gelombang: "Gelombang 1",
-    kuota: 300,
-    terisi: 300,
-    colorType: "primary",
-  },
-  {
-    id: 2,
-    jalur: "Jalur Reguler",
-    gelombang: "Gelombang 2",
-    kuota: 250,
-    terisi: 210,
-    colorType: "primary",
-  },
-  {
-    id: 3,
-    jalur: "Jalur Reguler",
-    gelombang: "Gelombang 3",
-    kuota: 150,
-    terisi: 91,
-    colorType: "primary",
-  },
-  {
-    id: 4,
-    jalur: "Jalur Prestasi",
-    gelombang: "Gelombang 1",
-    kuota: 200,
-    terisi: 200,
-    colorType: "warning",
-  },
-  {
-    id: 5,
-    jalur: "Jalur Prestasi",
-    gelombang: "Gelombang 2",
-    kuota: 250,
-    terisi: 212,
-    colorType: "warning",
-  },
-  {
-    id: 6,
-    jalur: "Jalur Afirmasi",
-    gelombang: "Gelombang 1",
-    kuota: 100,
-    terisi: 88,
-    colorType: "danger",
-  },
-  {
-    id: 7,
-    jalur: "Jalur Afirmasi",
-    gelombang: "Gelombang 2",
-    kuota: 100,
-    terisi: 90,
-    colorType: "danger",
-  },
-  {
-    id: 8,
-    jalur: "Jalur Mutasi",
-    gelombang: "Gelombang 2",
-    kuota: 60,
-    terisi: 57,
-    colorType: "info",
-  },
-];
-
-const JALUR_OPTIONS = [
-  "Jalur Reguler",
-  "Jalur Prestasi",
-  "Jalur Afirmasi",
-  "Jalur Mutasi",
-];
-
-const JALUR_FILTERS = [
-  "Semua",
-  ...JALUR_OPTIONS,
-];
-
-function formatRupiah(n) {
-  return n.toLocaleString("id-ID");
-}
-
-// =========================================================
-// THEME COLOR HELPERS
-// =========================================================
-
-function getThemeColor(type) {
-  const colors = {
-    primary: "var(--color-primary)",
-    warning: "var(--color-warning)",
-    danger: "var(--color-text)",
-    info: "var(--color-info)",
-  };
-
-  return colors[type] || "var(--color-text-muted)";
-}
-
-function getThemeText(type) {
-  const colors = {
-    primary: "text-[var(--color-primary)]",
-    warning: "text-[var(--color-warning)]",
-    danger: "theme-danger",
-    info: "text-[var(--color-info)]",
-  };
-
-  return colors[type] || "theme-text-secondary";
-}
-
-// =========================================================
-// PAGE
-// =========================================================
-
-export default function KuotaPPDBPage() {
-  const [isCollapsed, setIsCollapsed] =
-    useState(false);
-
-  const [alokasiList, setAlokasiList] =
-    useState(initialAlokasi);
-
-  const [dayaTampung, setDayaTampung] =
-    useState(DAYA_TAMPUNG_AWAL);
-
-  const [dayaTampungInput, setDayaTampungInput] =
-    useState(String(DAYA_TAMPUNG_AWAL));
-
-  const [activeJalur, setActiveJalur] =
-    useState("Semua");
-
-  const [search, setSearch] =
-    useState("");
-
-  const [showModal, setShowModal] =
-    useState(false);
-
-  const [editTarget, setEditTarget] =
-    useState(null);
-
-  const [kuotaInput, setKuotaInput] =
-    useState("");
-
-  const toggleSidebar = () =>
-    setIsCollapsed(!isCollapsed);
-
-  // =========================================================
-  // FILTER
-  // =========================================================
-
-  const filtered = alokasiList.filter((a) => {
-    const matchJalur =
-      activeJalur === "Semua" ||
-      a.jalur === activeJalur;
-
-    const keyword =
-      search.toLowerCase();
-
-    const matchSearch =
-      a.jalur
-        .toLowerCase()
-        .includes(keyword) ||
-      a.gelombang
-        .toLowerCase()
-        .includes(keyword);
-
-    return matchJalur && matchSearch;
+  return date.toLocaleDateString("id-ID", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
   });
+}
 
-  // =========================================================
-  // SUMMARY
-  // =========================================================
+export default function KuotaSpmbPage() {
+  const router = useRouter();
 
-  const totalDialokasikan =
-    alokasiList.reduce(
-      (a, x) => a + x.kuota,
-      0
-    );
+  const [collapsed, setCollapsed] = useState(false);
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState("");
 
-  const totalTerisi =
-    alokasiList.reduce(
-      (a, x) => a + x.terisi,
-      0
-    );
+  const loadData = useCallback(async (isRefresh = false) => {
+    try {
+      setError("");
 
-  const sisaAlokasi =
-    dayaTampung - totalDialokasikan;
-
-  const isOverAllocated =
-    sisaAlokasi < 0;
-
-  // =========================================================
-  // PER JALUR
-  // =========================================================
-
-  const perJalur = useMemo(() => {
-    return JALUR_OPTIONS.map((nama) => {
-      const rows = alokasiList.filter(
-        (a) => a.jalur === nama
-      );
-
-      const kuota = rows.reduce(
-        (a, x) => a + x.kuota,
-        0
-      );
-
-      const terisi = rows.reduce(
-        (a, x) => a + x.terisi,
-        0
-      );
-
-      const colorType =
-        rows[0]?.colorType ||
-        "primary";
-
-      return {
-        nama,
-        kuota,
-        terisi,
-        colorType,
-      };
-    });
-  }, [alokasiList]);
-
-  // =========================================================
-  // EDIT
-  // =========================================================
-
-  const openEdit = (a) => {
-    setEditTarget(a);
-    setKuotaInput(
-      String(a.kuota)
-    );
-    setShowModal(true);
-  };
-
-  const handleSaveKuota = (e) => {
-    e.preventDefault();
-
-    const nilai =
-      Number(kuotaInput);
-
-    if (
-      isNaN(nilai) ||
-      nilai < 0
-    ) {
-      return;
-    }
-
-    setAlokasiList((prev) =>
-      prev.map((a) =>
-        a.id === editTarget.id
-          ? {
-              ...a,
-              kuota: nilai,
-            }
-          : a
-      )
-    );
-
-    setShowModal(false);
-  };
-
-  // =========================================================
-  // DAYA TAMPUNG
-  // =========================================================
-
-  const handleSaveDayaTampung =
-    () => {
-      const nilai =
-        Number(dayaTampungInput);
-
-      if (
-        isNaN(nilai) ||
-        nilai < 0
-      ) {
-        return;
+      if (isRefresh) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
       }
 
-      setDayaTampung(nilai);
-    };
+      const response = await getJalurPpdb();
 
-  // =========================================================
-  // RENDER
-  // =========================================================
+      if (!response?.success) {
+        throw new Error(
+          response?.message ||
+            "Gagal mengambil data kuota jalur PPDB."
+        );
+      }
+
+      setData(
+        Array.isArray(response?.data)
+          ? response.data
+          : []
+      );
+    } catch (err) {
+      setData([]);
+
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Gagal mengambil data kuota jalur PPDB."
+      );
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    Promise.resolve().then(() => {
+      loadData();
+    });
+  }, [loadData]);
+
+  const totalKuota = useMemo(
+    () =>
+      data.reduce(
+        (total, item) =>
+          total + Number(item?.kuota || 0),
+        0
+      ),
+    [data]
+  );
+
+  const jalurAktif = useMemo(
+    () =>
+      data.filter(
+        (item) =>
+          String(item?.status || "").toLowerCase() ===
+          "aktif"
+      ).length,
+    [data]
+  );
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
       <Sidebar
-        role="adminPPDB"
-        active="kuota"
+        active="spmb"
         setActive={() => {}}
-        collapsed={isCollapsed}
-        setCollapsed={
-          setIsCollapsed
-        }
+        collapsed={collapsed}
+        setCollapsed={setCollapsed}
+        role="admin"
       />
 
-      <div className="flex h-full min-w-0 flex-1 flex-col overflow-hidden">
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <Header
-          toggleSidebar={
-            toggleSidebar
+          toggleSidebar={() =>
+            setCollapsed((value) => !value)
           }
           notifications={[]}
           user={{
-            name: "Admin PPDB",
-            email:
-              "adminppdb@smartschool.com",
-            avatar: "PP",
+            name: "Admin Sekolah",
+            email: "admin@smartschool.com",
+            avatar: "AD",
           }}
         />
 
-        <main className="theme-page flex-1 overflow-y-auto">
-          <div className="w-full p-4 md:p-6 lg:p-8">
-            <div className="mx-auto w-full max-w-[1320px] space-y-5">
+        <main className="min-h-0 flex-1 overflow-y-auto">
+          <div className="w-full p-4 sm:p-6 lg:p-8">
+            <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h1 className="theme-text text-xl font-bold sm:text-2xl">
+                  Kuota SPMB
+                </h1>
 
-              {/* =================================================
-                  BREADCRUMB
-              ================================================= */}
-
-              <div className="flex items-center gap-1.5 text-xs">
-                <span className="theme-text-muted">
-                  PPDB
-                </span>
-
-                <ChevronRight
-                  size={12}
-                  className="theme-text-placeholder"
-                />
-
-                <span
-                  className={`font-medium ${themePrimaryText}`}
-                >
-                  Kuota
-                </span>
+                <p className="theme-text-secondary mt-1 text-sm">
+                  Kuota per jalur pendaftaran yang
+                  tersimpan di database.
+                </p>
               </div>
 
-              {/* =================================================
-                  SUMMARY
-              ================================================= */}
-
-              <section className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-                <SummaryCard
-                  title="Daya Tampung Sekolah"
-                  value={formatRupiah(
-                    dayaTampung
-                  )}
-                />
-
-                <SummaryCard
-                  title="Total Dialokasikan"
-                  value={formatRupiah(
-                    totalDialokasikan
-                  )}
-                />
-
-                <div
-                  className={`theme-card ${themeNeutralBorder} rounded-xl border p-5 ${themeCardShadow}`}
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() =>
+                    router.push("/admin/spmb/jalur")
+                  }
+                  className={`${themePrimaryGradient} inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-xs font-semibold text-[var(--color-card)] transition hover:brightness-95`}
                 >
-                  <p className="theme-text-muted text-xs">
-                    Sisa Alokasi
-                  </p>
+                  <Route size={15} />
+                  Kelola Jalur
+                </button>
 
-                  <p
-                    className={`mt-2 text-2xl font-bold ${
-                      isOverAllocated
-                        ? "theme-danger"
-                        : "text-[var(--color-success)]"
-                    }`}
-                  >
-                    {isOverAllocated
-                      ? "-"
-                      : ""}
-                    {formatRupiah(
-                      Math.abs(
-                        sisaAlokasi
-                      )
-                    )}
-                  </p>
-                </div>
-
-                <div
-                  className={`theme-card ${themeNeutralBorder} flex flex-col items-center justify-center rounded-xl border p-5 text-center ${themeCardShadow}`}
+                <button
+                  type="button"
+                  onClick={() => loadData(true)}
+                  disabled={refreshing}
+                  className={`theme-neutral-border theme-text-secondary inline-flex items-center justify-center gap-2 rounded-lg border px-4 py-2.5 text-xs font-semibold transition hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)] disabled:cursor-not-allowed disabled:opacity-50`}
                 >
-                  <p className="theme-text-muted text-xs">
-                    Kuota Terisi
-                  </p>
-
-                  <p className="theme-text-secondary mt-3 text-3xl font-bold">
-                    {totalDialokasikan >
-                    0
-                      ? Math.round(
-                          (totalTerisi /
-                            totalDialokasikan) *
-                            100
-                        )
-                      : 0}
-                    %
-                  </p>
-                </div>
-              </section>
-
-              {/* =================================================
-                  WARNING
-              ================================================= */}
-
-              {isOverAllocated && (
-                <div
-                  className={`theme-danger ${themeWarningSurface} ${themeWarningBorder} flex items-center gap-2.5 rounded-xl border px-4 py-3 text-xs`}
-                >
-                  <AlertTriangle
-                    size={15}
-                    className="shrink-0"
-                  />
-
-                  <span>
-                    Total kuota yang
-                    dialokasikan
-                    melebihi daya
-                    tampung sekolah
-                    sebanyak{" "}
-                    <span className="font-semibold">
-                      {formatRupiah(
-                        Math.abs(
-                          sisaAlokasi
-                        )
-                      )}
-                    </span>{" "}
-                    siswa. Silakan
-                    sesuaikan
-                    alokasi.
-                  </span>
-                </div>
-              )}
-
-              {/* =================================================
-                  DAYA TAMPUNG
-              ================================================= */}
-
-              <section
-                className={`theme-card ${themeNeutralBorder} rounded-xl border p-5 ${themeCardShadow}`}
-              >
-                <div className="mb-4 flex items-center gap-2">
-                  <Settings2
-                    size={15}
-                    className="theme-text-muted"
-                  />
-
-                  <h3 className="theme-text text-sm font-semibold">
-                    Pengaturan Daya
-                    Tampung Sekolah
-                  </h3>
-                </div>
-
-                <div className="flex flex-wrap items-end gap-3">
-                  <div>
-                    <label className="theme-text-secondary mb-1 block text-xs">
-                      Total Daya Tampung
-                      (siswa)
-                    </label>
-
-                    <input
-                      type="number"
-                      min="0"
-                      value={
-                        dayaTampungInput
-                      }
-                      onChange={(e) =>
-                        setDayaTampungInput(
-                          e.target.value
-                        )
-                      }
-                      className={`theme-input w-48 rounded-md border px-3 py-2 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]`}
+                  {refreshing ? (
+                    <Loader2
+                      size={15}
+                      className="animate-spin"
                     />
-                  </div>
+                  ) : (
+                    <RefreshCw size={15} />
+                  )}
+                  Refresh
+                </button>
+              </div>
+            </div>
 
-                  <button
-                    onClick={
-                      handleSaveDayaTampung
-                    }
-                    className={`${themePrimaryGradient} rounded-md px-4 py-2 text-xs font-medium text-[var(--color-card)] transition hover:opacity-90`}
-                  >
-                    Simpan
-                  </button>
+            {error && (
+              <div className="mb-4 flex items-start gap-3 rounded-xl border border-[color-mix(in_srgb,var(--color-danger)_24%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_9%,transparent)] px-4 py-3">
+                <AlertCircle
+                  size={18}
+                  className="mt-0.5 shrink-0 theme-danger"
+                />
 
-                  <p className="theme-text-muted text-xs">
-                    Total kuota di seluruh
-                    jalur & gelombang
-                    tidak boleh melebihi
-                    angka ini.
+                <div>
+                  <p className="theme-danger text-sm font-semibold">
+                    Gagal memuat kuota
+                  </p>
+
+                  <p className="theme-text-secondary mt-0.5 text-xs">
+                    {error}
                   </p>
                 </div>
-              </section>
+              </div>
+            )}
 
-              {/* =================================================
-                  REKAP PER JALUR
-              ================================================= */}
+            <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+              <Stat
+                title="Total Kuota"
+                value={totalKuota}
+                icon={Users}
+              />
 
-              <section
-                className={`theme-card ${themeNeutralBorder} rounded-xl border p-5 ${themeCardShadow}`}
-              >
-                <h3 className="theme-text mb-4 text-sm font-semibold">
-                  Rekap Kuota per Jalur
-                </h3>
+              <Stat
+                title="Jumlah Jalur"
+                value={data.length}
+                icon={Route}
+              />
 
-                <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
-                  {perJalur.map((j) => {
-                    const persen =
-                      j.kuota > 0
-                        ? Math.min(
-                            100,
-                            Math.round(
-                              (j.terisi /
-                                j.kuota) *
-                                100
-                            )
-                          )
-                        : 0;
+              <Stat
+                title="Jalur Aktif"
+                value={jalurAktif}
+                icon={CalendarDays}
+              />
+            </div>
 
-                    const color =
-                      getThemeColor(
-                        j.colorType
-                      );
+            <div
+              className={`theme-card ${themeNeutralBorder} overflow-hidden rounded-xl border ${themeCardShadow}`}
+            >
+              {loading ? (
+                <div className="flex min-h-[280px] items-center justify-center">
+                  <div className="text-center">
+                    <Loader2
+                      size={26}
+                      className={`${themePrimaryText} mx-auto animate-spin`}
+                    />
 
-                    return (
-                      <div
-                        key={j.nama}
-                        className={`${themeNeutralBorder} rounded-lg border p-3.5`}
-                      >
-                        <div className="flex items-center gap-2">
-                          <span
-                            className="h-2 w-2 shrink-0 rounded-full"
-                            style={{
-                              backgroundColor:
-                                color,
-                            }}
-                          />
-
-                          <p className="theme-text-secondary truncate text-xs font-medium">
-                            {j.nama}
-                          </p>
-                        </div>
-
-                        <p className="theme-text mt-2 font-mono text-lg font-bold tabular-nums">
-                          {j.terisi}
-
-                          <span className="theme-text-muted text-xs font-normal">
-                            {" "}
-                            / {j.kuota}
-                          </span>
-                        </p>
-
-                        <div
-                          className={`mt-2 h-1.5 overflow-hidden rounded-full ${themeNeutralSurface}`}
-                        >
-                          <div
-                            className="h-full rounded-full transition-all"
-                            style={{
-                              width: `${persen}%`,
-                              backgroundColor:
-                                color,
-                            }}
-                          />
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </section>
-
-              {/* =================================================
-                  TABLE
-              ================================================= */}
-
-              <section
-                className={`theme-card ${themeNeutralBorder} overflow-hidden rounded-xl border ${themeCardShadow}`}
-              >
-                <div
-                  className={`${themeDivider} flex flex-wrap items-center justify-between gap-3 border-b px-5 pb-4 pt-4`}
-                >
-                  <div className="flex items-center gap-5 overflow-x-auto">
-                    {JALUR_FILTERS.map(
-                      (f) => (
-                        <button
-                          key={f}
-                          onClick={() =>
-                            setActiveJalur(
-                              f
-                            )
-                          }
-                          className={`relative whitespace-nowrap pb-2.5 text-sm font-medium transition-colors ${
-                            activeJalur ===
-                            f
-                              ? themePrimaryText
-                              : "theme-text-muted hover:text-[var(--color-text)]"
-                          }`}
-                        >
-                          {f}
-
-                          {activeJalur ===
-                            f && (
-                            <span
-                              className="absolute -bottom-px left-0 right-0 h-0.5 rounded-full"
-                              style={{
-                                backgroundColor:
-                                  "var(--color-primary)",
-                              }}
-                            />
-                          )}
-                        </button>
-                      )
-                    )}
+                    <p className="theme-text-muted mt-3 text-xs">
+                      Memuat kuota jalur...
+                    </p>
                   </div>
-
+                </div>
+              ) : data.length === 0 ? (
+                <div className="px-6 py-14 text-center">
                   <div
-                    className={`${themeNeutralBorder} theme-input flex items-center gap-2 rounded-md border px-3 py-1.5 text-xs`}
+                    className={`theme-text-muted mx-auto flex h-14 w-14 items-center justify-center rounded-2xl ${themeNeutralSurface}`}
                   >
-                    <Search
-                      size={13}
-                      className="theme-text-muted"
-                    />
-
-                    <input
-                      value={search}
-                      onChange={(e) =>
-                        setSearch(
-                          e.target.value
-                        )
-                      }
-                      placeholder="Cari jalur/gelombang..."
-                      className="theme-text w-40 bg-transparent outline-none placeholder:text-[var(--color-text-placeholder)]"
-                    />
+                    <Route size={24} />
                   </div>
-                </div>
 
+                  <h2 className="theme-text mt-4 text-sm font-bold">
+                    Belum ada jalur pendaftaran
+                  </h2>
+
+                  <p className="theme-text-muted mx-auto mt-1 max-w-md text-xs leading-5">
+                    Tambahkan jalur pendaftaran terlebih
+                    dahulu untuk menentukan kuota.
+                  </p>
+                </div>
+              ) : (
                 <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
+                  <table className="w-full min-w-[640px]">
                     <thead>
                       <tr
-                        className={`${themeDivider} theme-text-muted border-b text-left text-xs`}
+                        className={`border-b ${themeDivider} ${themeNeutralSurface}`}
                       >
-                        <th className="px-5 py-3 font-medium">
+                        <th className="theme-text-muted px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wide">
                           Jalur
                         </th>
 
-                        <th className="px-5 py-3 font-medium">
-                          Gelombang
-                        </th>
-
-                        <th className="px-5 py-3 font-medium">
+                        <th className="theme-text-muted px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wide">
                           Kuota
                         </th>
 
-                        <th className="px-5 py-3 font-medium">
-                          Terisi
+                        <th className="theme-text-muted px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wide">
+                          Periode
                         </th>
 
-                        <th className="px-5 py-3 font-medium">
-                          Sisa
-                        </th>
-
-                        <th className="px-5 py-3 font-medium">
-                          Progres
-                        </th>
-
-                        <th className="px-5 py-3 text-right font-medium">
-                          Aksi
+                        <th className="theme-text-muted px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wide">
+                          Status
                         </th>
                       </tr>
                     </thead>
 
                     <tbody>
-                      {filtered.length ===
-                        0 && (
-                        <tr>
-                          <td
-                            colSpan={7}
-                            className="theme-text-muted px-5 py-10 text-center text-sm"
-                          >
-                            Tidak ada
-                            alokasi
-                            ditemukan.
-                          </td>
-                        </tr>
-                      )}
-
-                      {filtered.map(
-                        (a) => {
-                          const persen =
-                            a.kuota >
-                            0
-                              ? Math.min(
-                                  100,
-                                  Math.round(
-                                    (a.terisi /
-                                      a.kuota) *
-                                      100
-                                  )
-                                )
-                              : 0;
-
-                          const sisa =
-                            a.kuota -
-                            a.terisi;
-
-                          const color =
-                            getThemeColor(
-                              a.colorType
-                            );
-
-                          return (
-                            <tr
-                              key={a.id}
-                              className={`${themeDivider} border-b transition-colors hover:bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)]`}
-                            >
-                              <td className="px-5 py-4">
-                                <div className="flex items-center gap-2">
-                                  <span
-                                    className="h-2 w-2 shrink-0 rounded-full"
-                                    style={{
-                                      backgroundColor:
-                                        color,
-                                    }}
-                                  />
-
-                                  <span className="theme-text font-medium">
-                                    {a.jalur}
-                                  </span>
-                                </div>
-                              </td>
-
-                              <td className="theme-text-secondary px-5 py-4">
-                                {a.gelombang}
-                              </td>
-
-                              <td className="theme-text px-5 py-4 font-mono tabular-nums">
-                                {a.kuota}
-                              </td>
-
-                              <td className="theme-text px-5 py-4 font-mono tabular-nums">
-                                {a.terisi}
-                              </td>
-
-                              <td className="px-5 py-4 font-mono tabular-nums">
-                                <span
-                                  className={
-                                    sisa < 0
-                                      ? "theme-danger font-semibold"
-                                      : "theme-text-secondary"
-                                  }
-                                >
-                                  {sisa}
-                                </span>
-                              </td>
-
-                              <td className="px-5 py-4">
-                                <div className="flex items-center gap-2">
-                                  <div
-                                    className={`h-1.5 w-16 overflow-hidden rounded-full ${themeNeutralSurface}`}
-                                  >
-                                    <div
-                                      className="h-full rounded-full"
-                                      style={{
-                                        width: `${persen}%`,
-                                        backgroundColor:
-                                          color,
-                                      }}
-                                    />
-                                  </div>
-
-                                  <span className="theme-text-muted font-mono text-xs">
-                                    {persen}%
-                                  </span>
-                                </div>
-                              </td>
-
-                              <td className="px-5 py-4">
-                                <div className="flex items-center justify-end">
-                                  <button
-                                    onClick={() =>
-                                      openEdit(
-                                        a
-                                      )
-                                    }
-                                    className={`theme-text-muted rounded-md p-1.5 transition-colors hover:${themePrimaryText} ${themePrimarySoft}`}
-                                  >
-                                    <Pencil
-                                      size={
-                                        14
-                                      }
-                                    />
-                                  </button>
-                                </div>
-                              </td>
-                            </tr>
-                          );
-                        }
-                      )}
-                    </tbody>
-
-                    {filtered.length >
-                      0 && (
-                      <tfoot>
+                      {data.map((item) => (
                         <tr
-                          className={`${themeDivider} ${themeNeutralSurface} border-t`}
+                          key={item.id}
+                          className={`border-b ${themeDivider} last:border-0`}
                         >
-                          <td
-                            className="theme-text-secondary px-5 py-3 text-xs font-semibold"
-                            colSpan={2}
-                          >
-                            Total (
-                            {
-                              filtered.length
-                            }{" "}
-                            alokasi)
+                          <td className="theme-text px-4 py-4 text-sm font-semibold">
+                            {item.nama || "-"}
                           </td>
 
-                          <td className="theme-text px-5 py-3 font-mono text-xs font-semibold">
-                            {filtered.reduce(
-                              (a, x) =>
-                                a +
-                                x.kuota,
-                              0
+                          <td className="theme-text-secondary px-4 py-4 text-sm">
+                            {Number(
+                              item.kuota || 0
+                            ).toLocaleString("id-ID")}
+                          </td>
+
+                          <td className="theme-text-secondary px-4 py-4 text-xs">
+                            {formatTanggal(
+                              item.tanggalMulai
+                            )}{" "}
+                            -{" "}
+                            {formatTanggal(
+                              item.tanggalSelesai
                             )}
                           </td>
 
-                          <td className="theme-text px-5 py-3 font-mono text-xs font-semibold">
-                            {filtered.reduce(
-                              (a, x) =>
-                                a +
-                                x.terisi,
-                              0
-                            )}
+                          <td className="theme-text-secondary px-4 py-4 text-xs capitalize">
+                            {item.status || "-"}
                           </td>
-
-                          <td colSpan={3} />
                         </tr>
-                      </tfoot>
-                    )}
+                      ))}
+                    </tbody>
                   </table>
                 </div>
-              </section>
+              )}
+            </div>
 
-              {/* =================================================
-                  FOOTER
-              ================================================= */}
+            <div
+              className={`${themeNeutralSurface} ${themeNeutralBorder} mt-4 flex items-start gap-2.5 rounded-xl border p-4`}
+            >
+              <Info
+                size={15}
+                className={`mt-0.5 shrink-0 ${themePrimaryText}`}
+              />
 
-              <footer className="theme-text-muted py-3 text-center text-[11px]">
-                © 2026 SmartSchool &middot;
-                Dashboard Admin PPDB
-                &middot; All rights reserved
-              </footer>
+              <p className="theme-text-secondary text-xs leading-5">
+                Jumlah pendaftar terisi per jalur belum
+                dapat dihitung karena endpoint daftar
+                pendaftar belum tersedia. Kuota dapat
+                diubah melalui menu Jalur Pendaftaran
+                (PUT /api/jalur-ppdb/:id).
+              </p>
             </div>
           </div>
         </main>
       </div>
-
-      {/* =======================================================
-          MODAL EDIT KUOTA
-      ======================================================= */}
-
-      {showModal &&
-        editTarget && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-[color-mix(in_srgb,var(--color-text)_35%,transparent)] p-4 backdrop-blur-[2px]">
-            <div
-              className={`theme-card ${themeNeutralBorder} w-full max-w-sm rounded-xl border p-6 ${themeCardShadow}`}
-            >
-              <div className="mb-5 flex items-center justify-between">
-                <h3 className="theme-text text-sm font-semibold">
-                  Edit Kuota
-                </h3>
-
-                <button
-                  onClick={() =>
-                    setShowModal(
-                      false
-                    )
-                  }
-                  className="theme-text-muted transition hover:text-[var(--color-text)]"
-                >
-                  <X size={18} />
-                </button>
-              </div>
-
-              <p className="theme-text-secondary mb-4 text-xs">
-                {editTarget.jalur}{" "}
-                &middot;{" "}
-                {
-                  editTarget.gelombang
-                }
-              </p>
-
-              <form
-                onSubmit={
-                  handleSaveKuota
-                }
-                className="space-y-4"
-              >
-                <div>
-                  <label className="theme-text-secondary mb-1 block text-xs">
-                    Kuota
-                  </label>
-
-                  <input
-                    type="number"
-                    min={
-                      editTarget.terisi
-                    }
-                    value={
-                      kuotaInput
-                    }
-                    onChange={(e) =>
-                      setKuotaInput(
-                        e.target.value
-                      )
-                    }
-                    className={`theme-input w-full rounded-md border px-3 py-2 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]`}
-                    required
-                  />
-
-                  <p className="theme-text-muted mt-1.5 text-[11px]">
-                    Sudah terisi{" "}
-                    {
-                      editTarget.terisi
-                    }{" "}
-                    siswa, kuota
-                    tidak boleh
-                    kurang dari
-                    angka ini.
-                  </p>
-                </div>
-
-                <div className="flex items-center justify-end gap-2 pt-2">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setShowModal(
-                        false
-                      )
-                    }
-                    className="theme-text-secondary px-4 py-2 text-xs font-medium transition hover:text-[var(--color-text)]"
-                  >
-                    Batal
-                  </button>
-
-                  <button
-                    type="submit"
-                    className={`${themePrimaryGradient} rounded-md px-4 py-2 text-xs font-medium text-[var(--color-card)] transition hover:opacity-90`}
-                  >
-                    Simpan
-                    Perubahan
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
     </div>
   );
 }
 
-// =========================================================
-// SUMMARY CARD
-// =========================================================
-
-function SummaryCard({
-  title,
-  value,
-}) {
+function Stat({ title, value, icon: Icon }) {
   return (
     <div
-      className={`theme-card ${themeNeutralBorder} rounded-xl border p-5 ${themeCardShadow}`}
+      className={`theme-card ${themeNeutralBorder} rounded-xl border p-4 ${themeCardShadow}`}
     >
-      <p className="theme-text-muted text-xs">
-        {title}
-      </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="theme-text-muted text-xs">
+            {title}
+          </p>
 
-      <p className="theme-text mt-2 text-2xl font-bold">
-        {value}
-      </p>
+          <p className="theme-text mt-1 text-2xl font-bold">
+            {Number(value || 0).toLocaleString(
+              "id-ID"
+            )}
+          </p>
+        </div>
+
+        <div
+          className={`flex h-10 w-10 items-center justify-center rounded-lg ${themePrimarySoft}`}
+        >
+          <Icon
+            size={18}
+            className={themePrimaryText}
+          />
+        </div>
+      </div>
     </div>
   );
 }

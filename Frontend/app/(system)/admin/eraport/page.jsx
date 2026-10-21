@@ -463,6 +463,30 @@ export default function ERaportPage() {
           <div className="mx-auto w-full max-w-[1600px] px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
 
             {/* =====================================================
+                DISCLOSURE: DATA AGREGAT BELUM TERSEDIA
+            ====================================================== */}
+
+            <div
+              className="
+                mb-6 rounded-2xl border theme-border
+                theme-card-soft
+                px-4 py-3.5
+                text-xs leading-5
+                theme-text-secondary
+              "
+            >
+              <strong className="theme-text">
+                Catatan:
+              </strong>{" "}
+              kartu ringkasan dan tabel agregat pada halaman ini masih
+              berupa contoh tampilan. Backend SmartSchool belum menyediakan
+              endpoint agregat e-Raport (rekap nilai per kelas/mapel,
+              aktivitas terbaru, maupun status raport). Data nilai dan
+              raport yang tersimpan dapat dilihat melalui menu Entry Nilai
+              dan Cetak Raport.
+            </div>
+
+            {/* =====================================================
                 HERO
             ====================================================== */}
 

@@ -1,3 +1,6 @@
+import { apiFetch } from "../lib/api";
+import { getToken } from "../lib/auth";
+
 const RAW_API_BASE =
   process.env.NEXT_PUBLIC_API_URL ||
   "http://localhost:5000";
@@ -21,11 +24,195 @@ export interface ExportRekapNilaiParams {
   kelasMapelId?: string;
 }
 
+export interface KomponenNilaiItem {
+  id: string;
+  nama: string;
+  jenis?: string;
+  bobot: number;
+  nilaiMaksimum?: number;
+  kelompok?: string;
+}
+
+export interface KomponenNilaiResponse {
+  kelasMapelId: string;
+  status: "final" | "draft";
+  totalBobot: number;
+  sisaBobot: number;
+  komponen: KomponenNilaiItem[];
+}
+
+export interface KelasMapelNilaiItem {
+  kelasMapelId: string;
+  kelasId: string;
+  kelas: {
+    id: string;
+    nama: string;
+    tingkat?: number;
+    tahunAjaranId?: string;
+  };
+  mataPelajaran: {
+    id: string;
+    nama: string;
+    kode?: string;
+  };
+  status: "final" | "draft";
+  _count?: {
+    siswa?: number;
+    komponen?: number;
+  };
+}
+
+export interface CreateKomponenNilaiPayload {
+  kelasMapelId: string;
+  nama: string;
+  jenis?: string;
+  bobot: number;
+  nilaiMaksimum?: number;
+  kelompok?: string;
+}
+
+export interface TarikSumberNilaiPayload {
+  kelasMapelId: string;
+  komponenNilaiId: string;
+  jenisSumber: "asesmen" | "tugas";
+  sumberId: string;
+}
+
+export interface InputNilaiBulkPayload {
+  kelasMapelId: string;
+  nilai: Array<{
+    penggunaId: string;
+    komponenNilaiId: string;
+    nilai: number;
+  }>;
+}
+
 /* =========================================================
-   GET TOKEN
+   GURU - KELAS SAYA
+   GET /api/nilai/kelas-saya
 ========================================================= */
 
-import { getToken } from "../lib/auth";
+export async function getNilaiKelasSaya(): Promise<KelasMapelNilaiItem[]> {
+  const result = await apiFetch("/api/nilai/kelas-saya", {
+    method: "GET",
+  });
+
+  return Array.isArray(result?.data)
+    ? result.data
+    : Array.isArray(result)
+      ? result
+      : [];
+}
+
+/* =========================================================
+   GURU - KOMPONEN NILAI
+   GET /api/nilai/komponen/:kelasMapelId
+========================================================= */
+
+export async function getKomponenNilai(
+  kelasMapelId: string
+): Promise<KomponenNilaiResponse> {
+  if (!kelasMapelId) {
+    throw new Error("kelasMapelId wajib diisi");
+  }
+
+  const result = await apiFetch(
+    `/api/nilai/komponen/${encodeURIComponent(kelasMapelId)}`,
+    {
+      method: "GET",
+    }
+  );
+
+  return result?.data || result;
+}
+
+/* =========================================================
+   GURU - CREATE KOMPONEN NILAI
+   POST /api/nilai/komponen
+========================================================= */
+
+export async function createKomponenNilai(
+  payload: CreateKomponenNilaiPayload
+): Promise<any> {
+  const result = await apiFetch("/api/nilai/komponen", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+
+  return result?.data || result;
+}
+
+/* =========================================================
+   GURU - GRID NILAI (INPUT)
+   GET /api/nilai/input/:kelasMapelId
+========================================================= */
+
+export async function getGridNilai(kelasMapelId: string): Promise<any> {
+  if (!kelasMapelId) {
+    throw new Error("kelasMapelId wajib diisi");
+  }
+
+  const result = await apiFetch(
+    `/api/nilai/input/${encodeURIComponent(kelasMapelId)}`,
+    {
+      method: "GET",
+    }
+  );
+
+  return result?.data || result;
+}
+
+/* =========================================================
+   GURU - INPUT NILAI BULK
+   POST /api/nilai/input/bulk
+========================================================= */
+
+export async function inputNilaiBulk(
+  payload: InputNilaiBulkPayload
+): Promise<any> {
+  const result = await apiFetch("/api/nilai/input/bulk", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+
+  return result?.data || result;
+}
+
+/* =========================================================
+   GURU - FINALISASI NILAI
+   POST /api/nilai/finalisasi/:kelasMapelId
+========================================================= */
+
+export async function finalisasiNilai(kelasMapelId: string): Promise<any> {
+  if (!kelasMapelId) {
+    throw new Error("kelasMapelId wajib diisi");
+  }
+
+  const result = await apiFetch(
+    `/api/nilai/finalisasi/${encodeURIComponent(kelasMapelId)}`,
+    {
+      method: "POST",
+    }
+  );
+
+  return result?.data || result;
+}
+
+/* =========================================================
+   GURU - TARIK SUMBER NILAI (TUGAS / ASESMEN)
+   POST /api/nilai/tarik-sumber
+========================================================= */
+
+export async function tarikSumberNilai(
+  payload: TarikSumberNilaiPayload
+): Promise<any> {
+  const result = await apiFetch("/api/nilai/tarik-sumber", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+
+  return result?.data || result;
+}
 
 /* =========================================================
    EXPORT REKAP NILAI

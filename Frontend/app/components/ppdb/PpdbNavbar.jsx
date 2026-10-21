@@ -12,24 +12,36 @@ const navItems = [
   {
     key: "beranda",
     label: "Beranda",
-    href: "/PPDB",
+    path: "/PPDB",
   },
   {
     key: "jalur",
     label: "Jalur Pendaftaran",
-    href: "/PPDB/jalurPendaftaran",
+    path: "/PPDB/jalurPendaftaran",
   },
   {
     key: "alur",
     label: "Alur Pendaftaran",
-    href: "/PPDB/alurPendaftaran",
+    path: "/PPDB/alurPendaftaran",
   },
   {
     key: "pengumuman",
     label: "Pengumuman",
-    href: "/PPDB/pengumuman",
+    path: "/PPDB/pengumuman",
   },
 ];
+
+function getBasePath(pathname) {
+  if (!pathname) {
+    return "";
+  }
+
+  const ppdbIndex = pathname.indexOf("/PPDB");
+
+  return ppdbIndex > 0
+    ? pathname.slice(0, ppdbIndex)
+    : "";
+}
 
 export default function PpdbNavbar() {
   const router = useRouter();
@@ -37,43 +49,32 @@ export default function PpdbNavbar() {
 
   const [menuOpen, setMenuOpen] = useState(false);
 
+  const basePath = getBasePath(pathname);
+
+  const berandaHref = `${basePath}/PPDB`;
+
+  const isBeranda =
+    pathname === berandaHref ||
+    pathname === `${berandaHref}/`;
+
   const closeMenu = () => {
     setMenuOpen(false);
   };
 
   const getActiveKey = () => {
-    if (
-      pathname === "/PPDB" ||
-      pathname === "/PPDB/"
-    ) {
+    if (isBeranda) {
       return "beranda";
     }
 
-    if (
-      pathname.startsWith(
-        "/PPDB/jalurPendaftaran"
-      )
-    ) {
-      return "jalur";
-    }
+    const activeItem = navItems.find(
+      (item) =>
+        item.key !== "beranda" &&
+        pathname?.startsWith(
+          `${basePath}${item.path}`
+        )
+    );
 
-    if (
-      pathname.startsWith(
-        "/PPDB/alurPendaftaran"
-      )
-    ) {
-      return "alur";
-    }
-
-    if (
-      pathname.startsWith(
-        "/PPDB/pengumuman"
-      )
-    ) {
-      return "pengumuman";
-    }
-
-    return "";
+    return activeItem?.key || "";
   };
 
   const activeNav = getActiveKey();
@@ -81,11 +82,9 @@ export default function PpdbNavbar() {
   const handleNavClick = (item) => {
     closeMenu();
 
-    if (
-      item.key === "beranda" &&
-      (pathname === "/PPDB" ||
-        pathname === "/PPDB/")
-    ) {
+    const href = `${basePath}${item.path}`;
+
+    if (item.key === "beranda" && isBeranda) {
       window.scrollTo({
         top: 0,
         behavior: "smooth",
@@ -94,14 +93,14 @@ export default function PpdbNavbar() {
       return;
     }
 
-    router.push(item.href);
+    router.push(href);
   };
 
   const goToCekPendaftaran = () => {
     closeMenu();
 
     router.push(
-      "/PPDB/cek-pendaftaran"
+      `${basePath}/PPDB/cek-pendaftaran`
     );
   };
 
@@ -114,16 +113,13 @@ export default function PpdbNavbar() {
           onClick={() => {
             closeMenu();
 
-            if (
-              pathname === "/PPDB" ||
-              pathname === "/PPDB/"
-            ) {
+            if (isBeranda) {
               window.scrollTo({
                 top: 0,
                 behavior: "smooth",
               });
             } else {
-              router.push("/PPDB");
+              router.push(berandaHref);
             }
           }}
           className="flex min-w-0 items-center gap-2.5 text-left"
@@ -133,7 +129,7 @@ export default function PpdbNavbar() {
           </div>
 
           <span className="truncate text-sm font-semibold text-slate-800 sm:text-base">
-            PPDB SmartSchool 2026/2027
+            PPDB SmartSchool
           </span>
         </button>
 

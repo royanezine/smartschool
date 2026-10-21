@@ -138,6 +138,36 @@ function formatDateTimeLocal(value) {
   return `${year}-${month}-${day}T${hours}:${minutes}`;
 }
 
+const JENIS_UJIAN_OPTIONS = [
+  "UTS",
+  "UAS",
+  "Kuis",
+  "Harian",
+  "Lainnya",
+];
+
+function normalizeJenisUjian(value) {
+  const normalized = String(value || "").toLowerCase();
+
+  const optionMap = JENIS_UJIAN_OPTIONS.reduce((map, option) => {
+    map[option.toLowerCase()] = option;
+    return map;
+  }, {});
+
+  if (optionMap[normalized]) {
+    return optionMap[normalized];
+  }
+
+  const legacyMap = {
+    pilihan_ganda: "Kuis",
+    essay: "Lainnya",
+    esai: "Lainnya",
+    campuran: "Lainnya",
+  };
+
+  return legacyMap[normalized] || "Kuis";
+}
+
 /* =========================================================
    PAGE
 ========================================================= */
@@ -177,13 +207,13 @@ export default function EditUjianPage() {
   const [form, setForm] = useState({
     judul: "",
     deskripsi: "",
-    jenis: "pilihan_ganda",
+    jenis: "Kuis",
     durasi: 60,
     waktuMulai: "",
     waktuSelesai: "",
     nilaiKelulusan: 75,
     dipublikasikan: false,
-    modeUjian: "online",
+    modeUjian: "standard",
     penilaianOtomatis: true,
   });
 
@@ -230,8 +260,10 @@ export default function EditUjianPage() {
             data.deskripsi || "",
 
           jenis:
-            data.jenis ||
-            "pilihan_ganda",
+            normalizeJenisUjian(
+              data.tipe ||
+                data.jenis
+            ),
 
           durasi:
             data.durasi ?? 60,
@@ -256,8 +288,9 @@ export default function EditUjianPage() {
             ),
 
           modeUjian:
+            data.modeAsesmen ||
             data.modeUjian ||
-            "online",
+            "standard",
 
           penilaianOtomatis:
             data.penilaianOtomatis !==
@@ -742,17 +775,11 @@ export default function EditUjianPage() {
                         onChange={handleChange}
                         className={`theme-input w-full rounded-xl border px-4 py-3 text-sm outline-none ${themeFocus}`}
                       >
-                        <option value="pilihan_ganda">
-                          Pilihan Ganda
-                        </option>
-
-                        <option value="essay">
-                          Essay
-                        </option>
-
-                        <option value="campuran">
-                          Campuran
-                        </option>
+                        <option value="UTS">UTS</option>
+                        <option value="UAS">UAS</option>
+                        <option value="Kuis">Kuis</option>
+                        <option value="Harian">Harian</option>
+                        <option value="Lainnya">Lainnya</option>
                       </select>
                     </div>
 
@@ -765,16 +792,21 @@ export default function EditUjianPage() {
                         name="modeUjian"
                         value={form.modeUjian}
                         onChange={handleChange}
-                        className={`theme-input w-full rounded-xl border px-4 py-3 text-sm outline-none ${themeFocus}`}
+                        disabled
+                        className={`theme-input w-full rounded-xl border px-4 py-3 text-sm outline-none ${themeFocus} disabled:cursor-not-allowed disabled:opacity-60`}
                       >
-                        <option value="online">
-                          Online
-                        </option>
-
-                        <option value="offline">
-                          Offline
-                        </option>
+                        <option value="online">Online</option>
+                        <option value="offline">Offline</option>
+                        <option value="standard">Standard</option>
                       </select>
+
+                      <p
+                        className={`mt-2 rounded-lg border ${themeWarningBorder} ${themeWarningSurface} px-3 py-2 text-xs leading-5 text-[var(--color-warning)]`}
+                      >
+                        Mode ujian tidak dapat diubah. Backend belum
+                        menyimpan perubahan field ini saat ujian
+                        diperbarui.
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -941,7 +973,8 @@ export default function EditUjianPage() {
                         form.penilaianOtomatis
                       }
                       onChange={handleChange}
-                      className="mt-1 h-4 w-4 accent-[var(--color-primary)]"
+                      disabled
+                      className="mt-1 h-4 w-4 accent-[var(--color-primary)] disabled:cursor-not-allowed disabled:opacity-60"
                     />
 
                     <div>
@@ -953,6 +986,14 @@ export default function EditUjianPage() {
                         Sistem akan menghitung
                         nilai soal yang dapat
                         dinilai secara otomatis.
+                      </p>
+
+                      <p
+                        className={`mt-2 rounded-lg border ${themeWarningBorder} ${themeWarningSurface} px-3 py-2 text-xs leading-5 text-[var(--color-warning)]`}
+                      >
+                        Pengaturan ini tidak dapat diubah. Backend belum
+                        menyimpan perubahan penilaian otomatis saat ujian
+                        diperbarui.
                       </p>
                     </div>
                   </label>

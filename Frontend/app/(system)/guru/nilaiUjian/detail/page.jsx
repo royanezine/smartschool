@@ -158,7 +158,12 @@ function getJenisLabel(jenis) {
 
 function getNilai(item) {
   if (!item) return 0;
-  const hasil = item.hasilUjian || item.hasil || item.result || null;
+  const hasil =
+    item.hasilAsesmen ||
+    item.hasilUjian ||
+    item.hasil ||
+    item.result ||
+    null;
   const candidates = [
     item.nilai,
     item.totalNilai,
@@ -182,23 +187,23 @@ function getNilai(item) {
 }
 
 function getBenar(item) {
-  const hasil = item?.hasilUjian || item?.hasil || null;
+  const hasil = item?.hasilAsesmen || item?.hasilUjian || item?.hasil || null;
   return Number(hasil?.jumlahBenar ?? item?.jumlahBenar ?? item?.benar ?? 0);
 }
 
 function getSalah(item) {
-  const hasil = item?.hasilUjian || item?.hasil || null;
+  const hasil = item?.hasilAsesmen || item?.hasilUjian || item?.hasil || null;
   return Number(hasil?.jumlahSalah ?? item?.jumlahSalah ?? item?.salah ?? 0);
 }
 
 function getLewati(item) {
-  const hasil = item?.hasilUjian || item?.hasil || null;
+  const hasil = item?.hasilAsesmen || item?.hasilUjian || item?.hasil || null;
   return Number(hasil?.jumlahLewati ?? item?.jumlahLewati ?? item?.lewati ?? 0);
 }
 
 function getStatus(item) {
   if (!item) return "belum_mengerjakan";
-  const hasil = item.hasilUjian || item.hasil || null;
+  const hasil = item.hasilAsesmen || item.hasilUjian || item.hasil || null;
   const raw =
     item.status || item.statusPengerjaan || item.statusUjian || "";
   const value = String(raw).toLowerCase().trim();
@@ -310,10 +315,14 @@ export default function DetailNilaiSiswaPage() {
             ujian: {
               id: ujianId,
               nama: detail.judul || detail.nama || "Ujian",
-              jenis: detail.jenis || "ujian",
+              jenis: detail.tipe || detail.jenis || "ujian",
               mataPelajaran: detail.kelasMapel?.mataPelajaran?.nama || "-",
               namaKelas: detail.kelasMapel?.kelas?.nama || "-",
-              jumlahSoal: detail._count?.soalUjian || 0,
+              jumlahSoal:
+                detail._count?.soalAsesmen ||
+                detail.soalAsesmen?.length ||
+                detail._count?.soalUjian ||
+                0,
               durasi: detail.durasi,
               tanggalMulai: detail.waktuMulai,
             },
@@ -431,10 +440,15 @@ export default function DetailNilaiSiswaPage() {
                 <AlertCircle className="h-7 w-7" />
               </div>
               <h2 className="theme-text mt-5 text-base font-bold">
-                Data tidak ditemukan
+                {!error && ujian && !siswa
+                  ? "Hasil pengerjaan belum tersedia"
+                  : "Data tidak ditemukan"}
               </h2>
               <p className="theme-text-secondary mt-2 text-sm leading-6">
-                {error || "Data detail siswa tidak tersedia."}
+                {error ||
+                  (!siswa && ujian
+                    ? "Endpoint detail ujian belum mengirimkan data percobaan atau hasil pengerjaan siswa. Nilai dan rincian jawaban belum dapat ditampilkan."
+                    : "Data detail siswa tidak tersedia.")}
               </p>
               <button
                 type="button"
@@ -478,7 +492,7 @@ export default function DetailNilaiSiswaPage() {
             <nav className="mb-5 flex items-center gap-2 text-xs">
               <button
                 type="button"
-                onClick={() => router.push("/guru/nilai-ujian")}
+                onClick={() => router.push("/guru/nilaiUjian")}
                 className="theme-text-secondary font-medium transition hover:text-[var(--color-primary)]"
               >
                 Nilai Ujian
@@ -940,7 +954,7 @@ export default function DetailNilaiSiswaPage() {
                 HASIL TERSIMPAN
             ====================================================== */}
 
-            {(siswa.hasilUjian || siswa.hasil) && (
+            {(siswa.hasilAsesmen || siswa.hasilUjian || siswa.hasil) && (
               <section
                 className={`rounded-2xl border ${themeInfoBorder} ${themeInfoSurface} p-5`}
               >
@@ -970,7 +984,7 @@ export default function DetailNilaiSiswaPage() {
             <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
               <button
                 type="button"
-                onClick={() => router.push("/guru/nilai-ujian")}
+                onClick={() => router.push("/guru/nilaiUjian")}
                 className={`theme-card inline-flex items-center justify-center gap-2 rounded-xl border ${themeNeutralBorder} px-5 py-2.5 text-sm font-bold theme-text-secondary ${themeSmallShadow} transition hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]`}
               >
                 Kembali ke Daftar Nilai

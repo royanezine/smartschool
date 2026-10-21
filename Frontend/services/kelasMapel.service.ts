@@ -120,3 +120,39 @@ export async function deleteKelasMapel(
     }
   );
 }
+
+export async function getKelasMapelDiampu(params: {
+  tahunAjaranId?: string;
+  guruId?: string;
+} = {}): Promise<KelasMapel[]> {
+  const query = new URLSearchParams();
+  if (params.tahunAjaranId) query.set("tahunAjaranId", params.tahunAjaranId);
+  if (params.guruId) query.set("guruId", params.guruId);
+
+  const qs = query.toString();
+  const endpoint = qs ? `/api/kelas-mapel/diampu?${qs}` : "/api/kelas-mapel/diampu";
+
+  const result = await apiFetch(endpoint, {
+    method: "GET",
+  });
+
+  return Array.isArray(result?.data) ? result.data : Array.isArray(result) ? result : [];
+}
+
+export async function getKelasMapelSiswa(params: {
+  tahunAjaranId?: string;
+  siswaId?: string;
+} = {}): Promise<KelasMapel[]> {
+  const query = new URLSearchParams();
+  if (params.tahunAjaranId) query.set("tahunAjaranId", params.tahunAjaranId);
+  if (params.siswaId) query.set("siswaId", params.siswaId);
+
+  const qs = query.toString();
+  const endpoint = qs ? `/api/kelas-mapel/siswa?${qs}` : "/api/kelas-mapel/siswa";
+
+  const result = await apiFetch(endpoint, {
+    method: "GET",
+  });
+
+  return Array.isArray(result?.data) ? result.data : Array.isArray(result) ? result : [];
+}

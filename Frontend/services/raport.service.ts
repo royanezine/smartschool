@@ -50,31 +50,64 @@ const apiFetch = async (
 ) => {
   const token = getToken();
 
-  const cleanEndpoint = endpoint.replace(/^\/+/, "");
+  const cleanEndpoint = endpoint.replace(/^\/+/, "").replace(/^api\//, "");
   const url = `${API_BASE}/${cleanEndpoint}`;
 
-  const response = await fetch(url, {
-    ...options,
-    cache: "no-store",
-    headers: {
-      "Content-Type": "application/json",
-      ...(token
-        ? {
-            Authorization: `Bearer ${token}`,
-          }
-        : {}),
-      ...(options.headers || {}),
-    },
-  });
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      ...options,
+      cache: "no-store",
+      headers: {
+        "Content-Type": "application/json",
+        ...(token
+          ? {
+              Authorization: `Bearer ${token}`,
+            }
+          : {}),
+        ...(options.headers || {}),
+      },
+    });
+  } catch {
+    const netErr: any = new Error(
+      "Tidak dapat terhubung ke server backend. Pastikan server berjalan.",
+    );
+    netErr.status = 0;
+    netErr.isNetworkError = true;
+    throw netErr;
+  }
 
   const result = await response.json().catch(() => ({}));
 
   if (!response.ok) {
-    throw new Error(
-      `${response.status} ${response.statusText} - ${url} - ${
-        result?.message || result?.error || "Request gagal"
-      }`,
-    );
+    let message =
+      result?.message || result?.error || `Request gagal (${response.status})`;
+
+    // Jika pesan tentang finalisasi nilai yang belum lengkap, sertakan daftar mata pelajaran
+    if (
+      message.includes("belum difinalisasi") &&
+      Array.isArray(result?.data) &&
+      result.data.length > 0
+    ) {
+      const mapelList = result.data
+        .map((m: any) => m.mataPelajaran)
+        .filter(Boolean)
+        .join(", ");
+      if (mapelList) {
+        message = `${message}: ${mapelList}`;
+      }
+    }
+
+    // Sensor informasi sensitif
+    message = message
+      .replace(/bearer\s+[a-zA-Z0-9._-]+/gi, "bearer [REDACTED]")
+      .replace(/(?:password|token|otp)\s*[:=]\s*[^\s,]+/gi, "[REDACTED]");
+
+    const error: any = new Error(message);
+    error.status = response.status;
+    error.data = result?.data;
+    error.raw = result;
+    throw error;
   }
 
   return result;

@@ -102,7 +102,7 @@ const themeFocus =
 // TOKEN
 // ============================================================
 
-import { getToken } from "@/lib/auth";
+import { getSessionUser, getToken } from "@/lib/auth";
 
 // ============================================================
 // RESPONSE PARSER
@@ -605,22 +605,8 @@ export default function PresensiGuruPage() {
         setAbsensi(absensiData);
         setJadwal(jadwalData);
 
-        const userRaw =
-          typeof window !== "undefined"
-            ? localStorage.getItem(
-                "user"
-              )
-            : null;
-
-        if (userRaw) {
-          try {
-            setUser(
-              JSON.parse(userRaw)
-            );
-          } catch {
-            setUser(null);
-          }
-        }
+        // Identitas sesi aktif (lib/auth) sudah berupa objek.
+        setUser(getSessionUser());
 
         const todaySchedules =
           jadwalData.filter(

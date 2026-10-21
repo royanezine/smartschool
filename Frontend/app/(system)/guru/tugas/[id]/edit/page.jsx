@@ -8,8 +8,11 @@ import Header from "@/app/components/Header";
 
 import {
   getDetailTugas,
+  getPengumpulanByTugas,
   updateTugas,
 } from "@/services/tugas.service";
+
+import { getKelasById } from "@/services/kelas.service";
 
 import {
   ClipboardList,
@@ -160,16 +163,18 @@ function getJumlahPengumpulan(data) {
     data?.jumlah_dikumpulkan ??
     data?.totalPengumpulan ??
     data?.total_pengumpulan ??
+    data?.pengumpulanTugasSiswa?.length ??
     data?.pengumpulan ??
     data?.submissionCount ??
     data?.submission_count ??
     data?._count?.pengumpulan ??
-    data?._count?.submissions ??
-    0;
+    data?._count?.submissions;
+
+  if (value === undefined || value === null) return null;
 
   const number = Number(value);
 
-  return Number.isFinite(number) && number >= 0 ? number : 0;
+  return Number.isFinite(number) && number >= 0 ? number : null;
 }
 
 function getTotalSiswa(data) {
@@ -182,17 +187,18 @@ function getTotalSiswa(data) {
     data?.kelasMapel?.kelas?.jumlah_siswa ??
     data?.kelasMapel?.kelas?._count?.anggota ??
     data?.kelasMapel?.kelas?._count?.siswa ??
-    data?._count?.siswa ??
-    0;
+    data?._count?.siswa;
+
+  if (value === undefined || value === null) return null;
 
   const number = Number(value);
 
-  return Number.isFinite(number) && number >= 0 ? number : 0;
+  return Number.isFinite(number) && number >= 0 ? number : null;
 }
 
 function getProgress(data) {
-  const submitted = getJumlahPengumpulan(data);
-  const total = getTotalSiswa(data);
+  const submitted = getJumlahPengumpulan(data) ?? 0;
+  const total = getTotalSiswa(data) ?? 0;
 
   if (!total) return 0;
 
@@ -267,6 +273,8 @@ export default function EditTugasPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
+  const [statsError, setStatsError] = useState("");
+
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const [form, setForm] = useState({
@@ -305,6 +313,7 @@ export default function EditTugasPage() {
       try {
         setLoading(true);
         setError("");
+        setStatsError("");
 
         const response = await getDetailTugas(id);
 
@@ -319,7 +328,74 @@ export default function EditTugasPage() {
           throw new Error("Data tugas tidak ditemukan");
         }
 
-        setTugas(data);
+        const kelasId =
+          data?.kelasMapel?.kelas?.id ||
+          data?.kelasMapel?.kelasId;
+
+        const [submissionResult, kelasResult] =
+          await Promise.allSettled([
+            getPengumpulanByTugas(id),
+
+            kelasId
+              ? getKelasById(kelasId)
+              : Promise.resolve(null),
+          ]);
+
+        const submissions =
+          submissionResult.status === "fulfilled"
+            ? submissionResult.value
+            : null;
+
+        const kelasResponse =
+          kelasResult.status === "fulfilled"
+            ? kelasResult.value
+            : null;
+
+        const kelasData =
+          kelasResponse?.data?.data ??
+          kelasResponse?.data ??
+          kelasResponse;
+
+        const totalSiswa = Array.isArray(kelasData?.anggota)
+          ? kelasData.anggota.length
+          : null;
+
+        const statsProblems = [];
+
+        if (submissionResult.status === "rejected") {
+          statsProblems.push("daftar pengumpulan");
+        }
+
+        if (kelasResult.status === "rejected") {
+          statsProblems.push("jumlah siswa kelas");
+        }
+
+        setStatsError(
+          statsProblems.length
+            ? `Statistik pengumpulan tidak lengkap karena gagal memuat ${statsProblems.join(
+                " dan "
+              )}. Nilai yang tidak tersedia ditampilkan sebagai "-".`
+            : ""
+        );
+
+        setTugas({
+          ...data,
+
+          ...(Array.isArray(submissions)
+            ? {
+                pengumpulanTugasSiswa: submissions,
+
+                _count: {
+                  ...(data._count || {}),
+                  pengumpulanTugasSiswa: submissions.length,
+                },
+              }
+            : {}),
+
+          ...(typeof totalSiswa === "number"
+            ? { totalSiswa }
+            : {}),
+        });
 
         setForm({
           judul: data?.judul || "",
@@ -1268,7 +1344,10 @@ export default function EditTugasPage() {
                     <span
                       className={`text-lg font-bold ${themePrimaryText}`}
                     >
-                      {progress}%
+                      {jumlahPengumpulan === null ||
+                      totalSiswa === null
+                        ? "-"
+                        : `${progress}%`}
                     </span>
                   </div>
 
@@ -1279,8 +1358,8 @@ export default function EditTugasPage() {
                       </span>
 
                       <span className="theme-text font-semibold">
-                        {jumlahPengumpulan}
-                        {totalSiswa > 0 ? ` / ${totalSiswa}` : ""}
+                        {jumlahPengumpulan ?? "-"}
+                        {totalSiswa ? ` / ${totalSiswa}` : ""}
                       </span>
                     </div>
 
@@ -1309,7 +1388,7 @@ export default function EditTugasPage() {
                       </div>
 
                       <p className="theme-text mt-1 text-base font-bold">
-                        {jumlahPengumpulan}
+                        {jumlahPengumpulan ?? "-"}
                       </p>
                     </div>
 
@@ -1325,10 +1404,18 @@ export default function EditTugasPage() {
                       </div>
 
                       <p className="theme-text mt-1 text-base font-bold">
-                        {totalSiswa || "-"}
+                        {totalSiswa ?? "-"}
                       </p>
                     </div>
                   </div>
+
+                  {statsError ? (
+                    <p
+                      className={`mt-4 rounded-lg border px-3 py-2 text-[11px] leading-4 ${themeWarningSurface} ${themeWarningBorder} text-[var(--color-warning)]`}
+                    >
+                      {statsError}
+                    </p>
+                  ) : null}
                 </section>
 
                 {/* INFO */}

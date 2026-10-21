@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { getToken, getStoredUser } from "@/lib/auth";
+import { getToken, getSessionUser } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 
 import { getKelas, getKelasById } from "@/services/kelas.service";
@@ -18,6 +18,7 @@ import {
   FlaskConical,
   GraduationCap,
   Languages,
+  LogIn,
   RefreshCw,
 } from "lucide-react";
 
@@ -247,16 +248,29 @@ function getCurrentUser() {
   }
 
   try {
-    const rawUser = getStoredUser();
+    // Identitas selalu diambil dari sesi aktif (lib/auth), yang
+    // merekonstruksi user dari klaim token bila salinan storage
+    // kosong/rusak/tidak cocok. Nilai "[object Object]" tidak
+    // pernah dianggap sebagai pengguna valid.
+    const user = getSessionUser();
 
-    if (!rawUser) {
+    if (
+      !user ||
+      typeof user !== "object" ||
+      Array.isArray(user)
+    ) {
       return null;
     }
 
-    return JSON.parse(rawUser);
+    // Identitas siswa wajib ada sebelum dipakai memanggil API.
+    if (!getUserId(user)) {
+      return null;
+    }
+
+    return user;
   } catch (error) {
-    console.error(
-      "[MATA PELAJARAN] Gagal membaca user:",
+    console.warn(
+      "[MATA PELAJARAN] Gagal membaca identitas pengguna dari sesi:",
       error
     );
 
@@ -785,7 +799,7 @@ export default function MataPelajaranPage() {
 
         if (!token) {
           setError(
-            "Token login tidak ditemukan. Silakan login kembali."
+            "Sesi siswa tidak ditemukan. Silakan login kembali."
           );
 
           setMataPelajaranList([]);
@@ -795,13 +809,17 @@ export default function MataPelajaranPage() {
         }
 
         const user =
-          currentUser ||
           getCurrentUser();
 
         if (!user) {
-          throw new Error(
-            "Data siswa tidak ditemukan. Silakan login kembali."
+          setMataPelajaranList([]);
+          setKelasSiswa(null);
+
+          setError(
+            "Sesi siswa tidak valid atau sudah berakhir. Silakan login kembali."
           );
+
+          return;
         }
 
         const kelas =
@@ -984,7 +1002,6 @@ export default function MataPelajaranPage() {
         setLoading(false);
       }
     }, [
-      currentUser,
       findKelasSiswa,
       fetchSemuaMateri,
       fetchJumlahTugasSemuaMapel,
@@ -1021,7 +1038,7 @@ export default function MataPelajaranPage() {
       setLoading(false);
 
       setError(
-        "Data siswa tidak ditemukan. Silakan login kembali."
+        "Sesi siswa tidak ditemukan. Silakan login kembali."
       );
     }
   }, [
@@ -1314,26 +1331,52 @@ export default function MataPelajaranPage() {
                   {error}
                 </p>
 
-                <button
-                  type="button"
-                  onClick={
-                    fetchMataPelajaran
-                  }
-                  className={`
-                    mt-3
-                    inline-flex items-center gap-2
-                    px-3 py-2
-                    rounded-lg
-                    ${themePrimaryGradient}
-                    text-[var(--color-card)]
-                    text-xs font-semibold
-                    hover:opacity-90
-                    transition
-                  `}
-                >
-                  <RefreshCw size={13} />
-                  Coba lagi
-                </button>
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={
+                      fetchMataPelajaran
+                    }
+                    className={`
+                      inline-flex items-center gap-2
+                      px-3 py-2
+                      rounded-lg
+                      ${themePrimaryGradient}
+                      text-[var(--color-card)]
+                      text-xs font-semibold
+                      hover:opacity-90
+                      transition
+                    `}
+                  >
+                    <RefreshCw size={13} />
+                    Coba lagi
+                  </button>
+
+                  {userLoaded && !currentUser ? (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        router.push("/login")
+                      }
+                      className={`
+                        inline-flex items-center gap-2
+                        px-3 py-2
+                        rounded-lg
+                        border
+                        ${themeNeutralBorder}
+                        ${themeTextSecondary}
+                        ${themePrimaryHoverText}
+                        ${themePrimaryHoverBorder}
+                        ${themePrimaryHoverSurface}
+                        text-xs font-semibold
+                        transition
+                      `}
+                    >
+                      <LogIn size={13} />
+                      Masuk kembali
+                    </button>
+                  ) : null}
+                </div>
               </div>
             </div>
           </div>

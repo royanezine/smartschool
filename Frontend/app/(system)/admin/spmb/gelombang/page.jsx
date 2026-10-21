@@ -1,107 +1,161 @@
 "use client";
 
-import { useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 import { useRouter } from "next/navigation";
 
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
-
 import {
-  Plus,
+  AlertCircle,
+  ArrowLeft,
   CalendarDays,
-  Users,
-  Edit3,
-  Trash2,
-  Eye,
-  CheckCircle2,
+  ChevronRight,
   Clock3,
-  MoreHorizontal,
-  X,
+  Loader2,
+  Pencil,
+  Plus,
+  RefreshCw,
+  Route,
+  Trash2,
+  Users,
 } from "lucide-react";
 
-// ============================================================
-// THEME HELPERS
-// ============================================================
+import {
+  deleteGelombangPpdb,
+  getGelombangPpdb,
+} from "@/services/gelombangPpdb.service";
 
-const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
-
+const themePrimaryText = "text-[var(--color-primary)]";
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
-
-const themePrimarySoftBorder =
-  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
-
-const themePrimaryText =
-  "text-[var(--color-primary)]";
-
-const themeNeutralSurface =
-  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
-
-const themeNeutralHover =
-  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
-
+const themePrimaryGradient =
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
 const themeNeutralBorder =
   "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
-
+const themeNeutralSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+const themeNeutralHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
 const themeDivider =
   "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
-
 const themeCardShadow =
   "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
 
-const themeSmallShadow =
-  "shadow-[0_2px_8px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+function formatTanggal(value) {
+  if (!value) {
+    return "-";
+  }
 
-// ============================================================
-// DATA
-// ============================================================
+  const date = new Date(value);
 
-const GELOMBANG = [
-  {
-    id: 1,
-    nama: "Gelombang 1",
-    mulai: "01 Agustus 2026",
-    selesai: "31 Agustus 2026",
-    kuota: 100,
-    pendaftar: 100,
-    status: "Selesai",
-    keterangan:
-      "Gelombang pendaftaran tahap pertama.",
-  },
-  {
-    id: 2,
-    nama: "Gelombang 2",
-    mulai: "01 September 2026",
-    selesai: "30 September 2026",
-    kuota: 200,
-    pendaftar: 148,
-    status: "Aktif",
-    keterangan:
-      "Gelombang pendaftaran utama tahun ajaran 2026/2027.",
-  },
-  {
-    id: 3,
-    nama: "Gelombang 3",
-    mulai: "01 Oktober 2026",
-    selesai: "31 Oktober 2026",
-    kuota: 100,
-    pendaftar: 0,
-    status: "Belum Dibuka",
-    keterangan:
-      "Gelombang terakhir penerimaan siswa baru.",
-  },
-];
+  if (Number.isNaN(date.getTime())) {
+    return "-";
+  }
 
-// ============================================================
-// PAGE
-// ============================================================
+  return date.toLocaleDateString("id-ID", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
 
-export default function GelombangPage() {
+function StatusBadge({ status }) {
+  const aktif =
+    String(status || "").toLowerCase() === "aktif";
+
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-[10px] font-semibold ${
+        aktif
+          ? "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)] bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)] text-[var(--color-success)]"
+          : "border-[color-mix(in_srgb,var(--color-text)_16%,transparent)] bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] theme-text-secondary"
+      }`}
+    >
+      {aktif ? "Aktif" : "Nonaktif"}
+    </span>
+  );
+}
+
+export default function GelombangSpmbPage() {
   const router = useRouter();
 
   const [collapsed, setCollapsed] = useState(false);
-  const [selected, setSelected] = useState(null);
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [menghapus, setMenghapus] = useState("");
+  const [apiUnavailable, setApiUnavailable] = useState(false);
+
+  const loadData = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError("");
+      setApiUnavailable(false);
+
+      const response = await getGelombangPpdb();
+
+      setData(
+        Array.isArray(response?.data)
+          ? response.data
+          : []
+      );
+    } catch (err) {
+      setData([]);
+      const msg =
+        err instanceof Error
+          ? err.message
+          : "Gagal memuat gelombang PPDB.";
+      setError(msg);
+
+      if (
+        msg.toLowerCase().includes("cannot get") ||
+        msg.toLowerCase().includes("404") ||
+        msg.toLowerCase().includes("not found") ||
+        msg.toLowerCase().includes("belum tersedia")
+      ) {
+        setApiUnavailable(true);
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    // Memuat data awal dari API saat halaman dibuka.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadData();
+  }, [loadData]);
+
+  async function hapus(item) {
+    if (
+      typeof window !== "undefined" &&
+      !window.confirm(
+        `Hapus gelombang "${item.nama}"? Data akan dinonaktifkan (soft delete).`
+      )
+    ) {
+      return;
+    }
+
+    try {
+      setMenghapus(item.id);
+      setError("");
+
+      await deleteGelombangPpdb(item.id);
+      await loadData();
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Gagal menghapus gelombang."
+      );
+    } finally {
+      setMenghapus("");
+    }
+  }
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
@@ -116,7 +170,7 @@ export default function GelombangPage() {
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <Header
           toggleSidebar={() =>
-            setCollapsed((v) => !v)
+            setCollapsed((value) => !value)
           }
           notifications={[]}
           user={{
@@ -126,457 +180,250 @@ export default function GelombangPage() {
           }}
         />
 
-        <main className="min-h-0 flex-1 overflow-hidden">
-          <div className="flex h-full min-h-0 flex-col p-4 sm:p-5 lg:p-6">
+        <main className="min-h-0 flex-1 overflow-y-auto">
+          <div className="mx-auto w-full max-w-5xl p-4 sm:p-6 lg:p-8">
+            <button
+              type="button"
+              onClick={() =>
+                router.push("/admin/spmb")
+              }
+              className="mb-4 inline-flex items-center gap-2 text-xs font-semibold theme-text-secondary transition hover:text-[var(--color-primary)]"
+            >
+              <ArrowLeft size={15} />
+              Kembali ke SPMB
+            </button>
 
-            {/* ==================================================
-                HEADER
-            ================================================== */}
-
-            <div className="mb-5 flex shrink-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex items-center gap-3">
+            <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-start gap-3">
                 <div
-                  className={`flex h-10 w-10 items-center justify-center rounded-xl ${themePrimarySoft}`}
+                  className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${themePrimarySoft} ${themePrimaryText}`}
                 >
-                  <CalendarDays
-                    size={20}
-                    className={themePrimaryText}
-                  />
+                  <CalendarDays size={21} />
                 </div>
 
                 <div>
-                  <h1 className="theme-text text-xl font-bold">
+                  <h1 className="theme-text text-xl font-bold sm:text-2xl">
                     Gelombang Pendaftaran
                   </h1>
 
-                  <p className="theme-text-muted text-xs">
-                    Kelola periode dan kuota setiap gelombang
+                  <p className="theme-text-secondary mt-1 text-sm leading-6">
+                    Kelola periode, kuota, dan status
+                    gelombang SPMB.
                   </p>
                 </div>
               </div>
 
-              <button
-                type="button"
-                onClick={() =>
-                  router.push(
-                    "/admin/spmb/gelombang/tambah"
-                  )
-                }
-                className={`${themePrimaryGradient} inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-xs font-semibold text-[var(--color-card)] ${themeSmallShadow} transition hover:brightness-95`}
-              >
-                <Plus size={16} />
-                Tambah Gelombang
-              </button>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={loadData}
+                  disabled={loading}
+                  className={`theme-neutral-border theme-text-secondary inline-flex items-center justify-center gap-2 rounded-lg border px-3 py-2.5 text-xs font-semibold transition ${themeNeutralHover} disabled:cursor-not-allowed disabled:opacity-50`}
+                >
+                  {loading ? (
+                    <Loader2
+                      size={15}
+                      className="animate-spin"
+                    />
+                  ) : (
+                    <RefreshCw size={15} />
+                  )}
+                  Refresh
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    router.push("/admin/spmb/gelombang/tambah")
+                  }
+                  disabled={loading || apiUnavailable}
+                  className={`${themePrimaryGradient} inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-xs font-semibold text-[var(--color-card)] transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50`}
+                >
+                  <Plus size={16} />
+                  Tambah Gelombang
+                </button>
+              </div>
             </div>
 
-            {/* ==================================================
-                SUMMARY
-            ================================================== */}
+            {error && (
+              <div className="mb-4 flex items-start gap-3 rounded-xl border border-[color-mix(in_srgb,var(--color-danger)_24%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_9%,transparent)] px-4 py-3">
+                <AlertCircle
+                  size={18}
+                  className="mt-0.5 shrink-0 theme-danger"
+                />
 
-            <div className="mb-5 grid shrink-0 grid-cols-2 gap-3 lg:grid-cols-4">
-              <Summary
-                title="Total Gelombang"
-                value="3"
-                icon={CalendarDays}
-              />
+                <div>
+                  <p className="text-xs font-semibold theme-danger">
+                    Gagal memuat data gelombang
+                  </p>
 
-              <Summary
-                title="Gelombang Aktif"
-                value="1"
-                icon={CheckCircle2}
-                tone="success"
-              />
+                  <p className="mt-0.5 text-xs theme-text-secondary">
+                    {error}
+                  </p>
+                </div>
+              </div>
+            )}
 
-              <Summary
-                title="Total Kuota"
-                value="400"
-                icon={Users}
-              />
+            <div
+              className={`theme-card ${themeNeutralBorder} overflow-hidden rounded-2xl border ${themeCardShadow}`}
+            >
+              {loading ? (
+                <div className="flex min-h-[360px] items-center justify-center">
+                  <div className="text-center">
+                    <Loader2
+                      size={26}
+                      className={`${themePrimaryText} mx-auto animate-spin`}
+                    />
 
-              <Summary
-                title="Total Pendaftar"
-                value="248"
-                icon={Clock3}
-                tone="warning"
-              />
-            </div>
+                    <p className="theme-text-muted mt-3 text-xs font-medium">
+                      Memuat gelombang...
+                    </p>
+                  </div>
+                </div>
+              ) : data.length === 0 ? (
+                <div className="flex min-h-[360px] items-center justify-center px-6">
+                  <div className="text-center">
+                    <div
+                      className={`theme-text-muted mx-auto flex h-14 w-14 items-center justify-center rounded-2xl ${themeNeutralSurface}`}
+                    >
+                      <CalendarDays size={25} />
+                    </div>
 
-            {/* ==================================================
-                CONTENT
-            ================================================== */}
+                    <h3 className="theme-text mt-4 text-sm font-bold">
+                      {apiUnavailable
+                        ? "Layanan Gelombang Belum Tersedia"
+                        : "Belum ada gelombang"}
+                    </h3>
 
-            <div className="min-h-0 flex-1 overflow-auto">
-              <div className="grid gap-4 xl:grid-cols-3">
-                {GELOMBANG.map((item) => {
-                  const percent =
-                    item.kuota > 0
-                      ? Math.round(
-                          (item.pendaftar /
-                            item.kuota) *
-                            100
-                        )
-                      : 0;
+                    <p className="theme-text-muted mt-1 text-xs">
+                      {apiUnavailable
+                        ? "Server backend belum menyediakan rute untuk manajemen gelombang. Pengaturan jadwal dapat dilakukan pada menu Jalur Pendaftaran."
+                        : "Tambahkan gelombang pertama untuk mengatur periode pendaftaran."}
+                    </p>
 
-                  const isActive =
-                    item.status === "Aktif";
-
-                  return (
+                    {!error && !apiUnavailable && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          router.push(
+                            "/admin/spmb/gelombang/tambah"
+                          )
+                        }
+                        className={`${themePrimaryGradient} mt-4 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-semibold text-[var(--color-card)] transition hover:brightness-95`}
+                      >
+                        <Plus size={14} />
+                        Tambah Gelombang
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="divide-y divide-[color-mix(in_srgb,var(--color-text)_8%,transparent)]">
+                  {data.map((item) => (
                     <div
                       key={item.id}
-                      className={`theme-card rounded-xl border p-5 ${themeCardShadow} ${
-                        isActive
-                          ? themePrimarySoftBorder
-                          : themeNeutralBorder
-                      }`}
+                      className={`flex flex-col gap-4 p-4 transition sm:flex-row sm:items-center sm:justify-between sm:p-5 ${themeNeutralHover}`}
                     >
-                      {/* CARD HEADER */}
-
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <h2 className="theme-text text-sm font-bold">
-                              {item.nama}
-                            </h2>
-
-                            {isActive && (
-                              <span className="rounded-md border border-[color-mix(in_srgb,var(--color-success)_24%,transparent)] bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)] px-2 py-1 text-[9px] font-semibold text-[var(--color-success)]">
-                                AKTIF
-                              </span>
-                            )}
-                          </div>
-
-                          <p className="theme-text-muted mt-1 text-[10px]">
-                            {item.keterangan}
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="theme-text text-sm font-bold">
+                            {item.nama}
                           </p>
+
+                          <StatusBadge
+                            status={item.status}
+                          />
                         </div>
+
+                        <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[11px] theme-text-secondary">
+                          <span className="inline-flex items-center gap-1.5">
+                            <Clock3 size={12} />
+                            {formatTanggal(
+                              item.tanggalMulai
+                            )}{" "}
+                            —{" "}
+                            {formatTanggal(
+                              item.tanggalSelesai
+                            )}
+                          </span>
+
+                          <span className="inline-flex items-center gap-1.5">
+                            <Route size={12} />
+                            {item.jalurPpdb?.nama ||
+                              "Semua jalur"}
+                          </span>
+
+                          <span className="inline-flex items-center gap-1.5">
+                            <Users size={12} />
+                            Kuota:{" "}
+                            {item.kuota === null ||
+                            item.kuota === undefined
+                              ? "Tidak dibatasi"
+                              : item.kuota}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex shrink-0 items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            router.push(
+                              `/admin/spmb/gelombang/${encodeURIComponent(
+                                item.id
+                              )}`
+                            )
+                          }
+                          className={`theme-neutral-border theme-text-secondary inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-[10px] font-semibold transition hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]`}
+                        >
+                          <Pencil size={12} />
+                          Edit
+                        </button>
 
                         <button
                           type="button"
-                          className="theme-text-muted transition hover:text-[var(--color-text)]"
+                          onClick={() => hapus(item)}
+                          disabled={menghapus === item.id}
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-[color-mix(in_srgb,var(--color-danger)_24%,transparent)] px-3 py-1.5 text-[10px] font-semibold theme-danger transition hover:bg-[color-mix(in_srgb,var(--color-danger)_8%,transparent)] disabled:cursor-not-allowed disabled:opacity-50"
                         >
-                          <MoreHorizontal size={17} />
+                          {menghapus === item.id ? (
+                            <Loader2
+                              size={12}
+                              className="animate-spin"
+                            />
+                          ) : (
+                            <Trash2 size={12} />
+                          )}
+                          Hapus
                         </button>
-                      </div>
 
-                      {/* PERIOD */}
-
-                      <div
-                        className={`mt-5 rounded-lg border ${themeNeutralBorder} ${themeNeutralSurface} p-3`}
-                      >
-                        <div className="flex items-center gap-2">
-                          <CalendarDays
-                            size={15}
-                            className={themePrimaryText}
-                          />
-
-                          <div>
-                            <p className="theme-text-muted text-[10px]">
-                              Periode
-                            </p>
-
-                            <p className="theme-text-secondary text-xs font-semibold">
-                              {item.mulai}
-                            </p>
-
-                            <p className="theme-text-muted text-[10px]">
-                              sampai {item.selesai}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* QUOTA */}
-
-                      <div className="mt-4">
-                        <div className="mb-2 flex items-center justify-between">
-                          <span className="theme-text-secondary text-xs">
-                            Penggunaan Kuota
-                          </span>
-
-                          <span className="theme-text text-xs font-bold">
-                            {item.pendaftar}/
-                            {item.kuota}
-                          </span>
-                        </div>
-
-                        <div
-                          className={`h-2 overflow-hidden rounded-full ${themeNeutralSurface}`}
-                        >
-                          <div
-                            className={`${themePrimaryGradient} h-full rounded-full`}
-                            style={{
-                              width: `${Math.min(
-                                percent,
-                                100
-                              )}%`,
-                            }}
-                          />
-                        </div>
-
-                        <p className="theme-text-muted mt-1 text-right text-[10px]">
-                          {percent}% terisi
-                        </p>
-                      </div>
-
-                      {/* FOOTER */}
-
-                      <div
-                        className={`mt-5 flex items-center justify-between border-t ${themeDivider} pt-4`}
-                      >
-                        <StatusBadge
-                          status={item.status}
+                        <ChevronRight
+                          size={15}
+                          className="theme-text-muted hidden sm:block"
                         />
-
-                        <div className="flex gap-1">
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setSelected(item)
-                            }
-                            className="theme-text-muted flex h-8 w-8 items-center justify-center rounded-lg transition hover:bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)] hover:text-[var(--color-primary)]"
-                          >
-                            <Eye size={15} />
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() =>
-                              router.push(
-                                `/admin/spmb/gelombang/${item.id}/edit`
-                              )
-                            }
-                            className="theme-text-muted flex h-8 w-8 items-center justify-center rounded-lg transition hover:bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)] hover:text-[var(--color-primary)]"
-                          >
-                            <Edit3 size={15} />
-                          </button>
-
-                          <button
-                            type="button"
-                            className="theme-text-muted flex h-8 w-8 items-center justify-center rounded-lg transition hover:bg-[color-mix(in_srgb,var(--color-danger)_9%,transparent)] hover:text-[var(--color-danger)]"
-                          >
-                            <Trash2 size={15} />
-                          </button>
-                        </div>
                       </div>
                     </div>
-                  );
-                })}
-              </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div
+              className={`${themeNeutralBorder} mt-5 rounded-xl border ${themeNeutralSurface} p-4`}
+            >
+              <p className="theme-text-secondary text-xs leading-5">
+                Endpoint:{" "}
+                <code>GET/POST /api/gelombang-ppdb</code> dan{" "}
+                <code>
+                  GET/PUT/DELETE /api/gelombang-ppdb/:id
+                </code>
+                . Semua operasi dibatasi oleh{" "}
+                <code>sekolahId</code> dari sesi admin.
+              </p>
             </div>
           </div>
         </main>
       </div>
-
-      {/* ======================================================
-          DETAIL MODAL
-      ====================================================== */}
-
-      {selected && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[color-mix(in_srgb,var(--color-text)_42%,transparent)] p-4 backdrop-blur-sm">
-          <div
-            className={`theme-card w-full max-w-lg overflow-hidden rounded-2xl ${themeCardShadow}`}
-          >
-            {/* MODAL HEADER */}
-
-            <div
-              className={`flex items-center justify-between border-b ${themeDivider} px-5 py-4`}
-            >
-              <div>
-                <h2 className="theme-text text-base font-bold">
-                  Detail Gelombang
-                </h2>
-
-                <p className="theme-text-muted text-xs">
-                  Informasi periode penerimaan
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={() =>
-                  setSelected(null)
-                }
-                className="theme-text-muted flex h-8 w-8 items-center justify-center rounded-lg transition hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)] hover:text-[var(--color-text)]"
-              >
-                <X size={17} />
-              </button>
-            </div>
-
-            {/* MODAL CONTENT */}
-
-            <div className="space-y-4 p-5">
-              <div
-                className={`rounded-xl border ${themePrimarySoftBorder} ${themePrimarySoft} p-4`}
-              >
-                <p className="theme-text text-lg font-bold">
-                  {selected.nama}
-                </p>
-
-                <p className="theme-text-muted mt-1 text-xs">
-                  {selected.mulai} — {selected.selesai}
-                </p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <Info
-                  label="Kuota"
-                  value={`${selected.kuota} siswa`}
-                />
-
-                <Info
-                  label="Pendaftar"
-                  value={`${selected.pendaftar} siswa`}
-                />
-
-                <Info
-                  label="Status"
-                  value={selected.status}
-                />
-
-                <Info
-                  label="Sisa Kuota"
-                  value={`${Math.max(
-                    selected.kuota -
-                      selected.pendaftar,
-                    0
-                  )} siswa`}
-                />
-              </div>
-            </div>
-
-            {/* MODAL FOOTER */}
-
-            <div
-              className={`flex justify-end border-t ${themeDivider} px-5 py-4`}
-            >
-              <button
-                type="button"
-                onClick={() =>
-                  setSelected(null)
-                }
-                className={`theme-neutral-border theme-text-secondary rounded-lg border px-4 py-2 text-xs font-semibold transition ${themeNeutralHover}`}
-              >
-                Tutup
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ============================================================
-// STATUS BADGE
-// ============================================================
-
-function StatusBadge({ status }) {
-  if (status === "Aktif") {
-    return (
-      <span className="rounded-md border border-[color-mix(in_srgb,var(--color-success)_24%,transparent)] bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)] px-2.5 py-1 text-[10px] font-semibold text-[var(--color-success)]">
-        {status}
-      </span>
-    );
-  }
-
-  if (status === "Selesai") {
-    return (
-      <span
-        className={`theme-neutral-border theme-text-muted ${themeNeutralSurface} rounded-md border px-2.5 py-1 text-[10px] font-semibold`}
-      >
-        {status}
-      </span>
-    );
-  }
-
-  return (
-    <span className="rounded-md border border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)] bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)] px-2.5 py-1 text-[10px] font-semibold text-[var(--color-warning)]">
-      {status}
-    </span>
-  );
-}
-
-// ============================================================
-// SUMMARY
-// ============================================================
-
-function Summary({
-  title,
-  value,
-  icon: Icon,
-  tone = "primary",
-}) {
-  const toneConfig = {
-    primary: {
-      surface:
-        "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]",
-      text:
-        "text-[var(--color-primary)]",
-    },
-
-    success: {
-      surface:
-        "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]",
-      text:
-        "text-[var(--color-success)]",
-    },
-
-    warning: {
-      surface:
-        "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]",
-      text:
-        "text-[var(--color-warning)]",
-    },
-  };
-
-  const current =
-    toneConfig[tone] ||
-    toneConfig.primary;
-
-  return (
-    <div
-      className={`theme-card ${themeNeutralBorder} rounded-xl border p-4 ${themeSmallShadow}`}
-    >
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="theme-text-muted text-xs">
-            {title}
-          </p>
-
-          <p className="theme-text mt-1 text-2xl font-bold">
-            {value}
-          </p>
-        </div>
-
-        <div
-          className={`flex h-10 w-10 items-center justify-center rounded-lg ${current.surface}`}
-        >
-          <Icon
-            size={18}
-            className={current.text}
-          />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ============================================================
-// INFO
-// ============================================================
-
-function Info({ label, value }) {
-  return (
-    <div
-      className={`theme-neutral-border ${themeNeutralSurface} rounded-lg border p-3`}
-    >
-      <p className="theme-text-muted text-[10px] uppercase">
-        {label}
-      </p>
-
-      <p className="theme-text-secondary mt-1 text-xs font-bold">
-        {value}
-      </p>
     </div>
   );
 }

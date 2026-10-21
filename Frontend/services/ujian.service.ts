@@ -341,14 +341,99 @@ export async function publishUjian(
   return updateUjian(ujianId, { dipublikasikan });
 }
 
+export const PESAN_NILAI_UJIAN_TIDAK_TERSEDIA =
+  "Nilai ujian untuk kelas ini belum tersedia.";
+
+/*
+ * Backend/src belum menyediakan endpoint nilai ujian per kelas-mapel.
+ * Route yang ada hanya:
+ *   GET  /api/ujian/kelas-mapel/:kelasMapelId  -> daftar ujian (metadata),
+ *   GET  /api/ujian/:id                        -> detail ujian + soal.
+ * Nilai per siswa tersimpan di percobaanAsesmen.nilai/totalNilai tetapi
+ * tidak diekspos oleh route GET mana pun. Karena itu fungsi ini TIDAK
+ * boleh mengembalikan daftar ujian sebagai nilai (itu akan dilaporkan
+ * sebagai skor siswa yang keliru). Selama endpoint nilai belum ada,
+ * kembalikan status tidak tersedia agar pemanggil melewati bagian ini.
+ */
 export async function getNilaiUjianUntukKelas(
   kelasMapelId: string,
-) {
+): Promise<{ tersedia: boolean; pesan?: string; data: any[] }> {
   if (!kelasMapelId) {
-    return [];
+    return {
+      tersedia: false,
+      pesan: PESAN_NILAI_UJIAN_TIDAK_TERSEDIA,
+      data: [],
+    };
   }
 
-  throw new Error(
-    "Endpoint pengambilan nilai ujian per kelas-mapel belum tersedia.",
-  );
+  return {
+    tersedia: false,
+    pesan: PESAN_NILAI_UJIAN_TIDAK_TERSEDIA,
+    data: [],
+  };
 }
+
+// ==================================================
+// SISWA: MULAI PERCOBAAN UJIAN
+// Backend: POST /api/ujian/:id/mulai
+// ==================================================
+
+export async function mulaiPercobaanUjian(
+  ujianId: string,
+  token: string
+): Promise<unknown> {
+  if (!ujianId) {
+    throw new Error("ID ujian tidak ditemukan.");
+  }
+
+  if (!token?.trim()) {
+    throw new Error("Token ujian wajib diisi.");
+  }
+
+  const response = await apiFetch(`/api/ujian/${ujianId}/mulai`, {
+    method: "POST",
+    body: JSON.stringify({
+      token: token.trim().toUpperCase(),
+    }),
+  });
+
+  return getData<unknown>(response);
+}
+
+export const mulaiUjian = mulaiPercobaanUjian;
+
+// ==================================================
+// SISWA: SUBMIT JAWABAN & SELESAIKAN UJIAN
+// Backend: POST /api/ujian/sesi/:sesiId/submit
+// ==================================================
+
+export interface JawabanItemPayload {
+  soalId: string;
+  jawaban?: string | null;
+}
+
+export async function submitJawabanDanSelesai(
+  sesiId: string,
+  jawaban: JawabanItemPayload[]
+): Promise<unknown> {
+  if (!sesiId) {
+    throw new Error("ID sesi ujian tidak ditemukan.");
+  }
+
+  const response = await apiFetch(`/api/ujian/sesi/${sesiId}/submit`, {
+    method: "POST",
+    body: JSON.stringify({
+      jawaban,
+    }),
+  });
+
+  return getData<unknown>(response);
+}
+
+export const submitUjian = submitJawabanDanSelesai;
+
+// Alias soal ujian agar kompatibel dengan pemanggilan dari berbagai halaman
+export const getSoalByUjian = getSoalUjian;
+export const createSoal = createSoalUjian;
+export const updateSoal = updateSoalUjian;
+export const deleteSoal = deleteSoalUjian;

@@ -1,16 +1,19 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
 
 import {
   BarChart3,
+  ChevronRight,
   ClipboardList,
   Download,
   FileCheck2,
   HelpCircle,
   NotebookPen,
+  SlidersHorizontal,
   Users,
   AlertTriangle,
   LockKeyhole,
@@ -34,30 +37,53 @@ const MATA_PELAJARAN = "Matematika";
 const subHalaman = [
   {
     key: "nilaiTugas",
+    href: "/guru/nilai/nilaiTugas",
     icon: ClipboardList,
     label: "Nilai Tugas",
     description:
-      "Kelola nilai tugas, ulangan harian, UTS, dan UAS.",
+      "Beri dan kelola nilai pengumpulan tugas siswa.",
     color: "blue",
-    tag: "Segera tersedia",
+    tag: "Terhubung API",
   },
   {
     key: "nilaiQuiz",
+    href: "/guru/nilai/nilaiQuiz",
     icon: HelpCircle,
     label: "Nilai Quiz",
     description:
-      "Kelola dan lihat hasil quiz siswa.",
+      "Sinkronkan hasil kuis ke komponen nilai kelas-mapel.",
     color: "amber",
-    tag: "Segera tersedia",
+    tag: "Terhubung API",
+  },
+  {
+    key: "setupBobot",
+    href: "/guru/nilai/setup-bobot",
+    icon: SlidersHorizontal,
+    label: "Setup Bobot",
+    description:
+      "Kelola komponen nilai dan bobot tiap kelas-mapel.",
+    color: "blue",
+    tag: "Terhubung API",
+  },
+  {
+    key: "finalisasi",
+    href: "/guru/nilai/finalisasi",
+    icon: FileCheck2,
+    label: "Finalisasi Nilai",
+    description:
+      "Periksa kelengkapan nilai lalu finalisasi hasil penilaian.",
+    color: "emerald",
+    tag: "Terhubung API",
   },
   {
     key: "rapor",
-    icon: FileCheck2,
+    href: "/guru/nilai/rapor",
+    icon: NotebookPen,
     label: "Rapor",
     description:
-      "Kelola nilai akhir dan persiapan rapor.",
+      "Lihat dan kelola nilai akhir serta catatan rapor.",
     color: "emerald",
-    tag: "Segera tersedia",
+    tag: "Terhubung API",
   },
 ];
 
@@ -151,6 +177,7 @@ const colorConfig = {
 ========================================================= */
 
 export default function GuruNilaiIndexPage() {
+  const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isExporting, setIsExporting] = useState(false);
   const [exportError, setExportError] = useState("");
@@ -345,8 +372,9 @@ export default function GuruNilaiIndexPage() {
                         "
                       >
                         Pusat pengelolaan penilaian siswa.
-                        Saat ini tersedia fitur export rekap
-                        nilai dari backend SmartSchool.
+                        Modul nilai tugas, kuis, komponen nilai,
+                        finalisasi, rapor, dan export rekap
+                        terhubung ke backend SmartSchool.
                       </p>
 
                       <div className="mt-6 flex flex-wrap gap-3">
@@ -537,7 +565,7 @@ export default function GuruNilaiIndexPage() {
                             text-[var(--color-card)]
                           "
                         >
-                          Bertahap
+                          Aktif
                         </p>
 
                       </div>
@@ -653,8 +681,8 @@ export default function GuruNilaiIndexPage() {
                     </h2>
 
                     <p className="mt-1 text-xs theme-text-secondary">
-                      Modul penilaian akan tersedia sesuai
-                      endpoint backend yang aktif.
+                      Modul penilaian berikut terhubung ke
+                      endpoint backend SmartSchool.
                     </p>
 
                   </div>
@@ -666,12 +694,12 @@ export default function GuruNilaiIndexPage() {
                       sm:block
                     "
                   >
-                    3 modul dirancang
+                    {subHalaman.length} modul terhubung
                   </span>
 
                 </div>
 
-                <div className="grid gap-4 md:grid-cols-3">
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 
                   {subHalaman.map((item) => {
 
@@ -679,14 +707,16 @@ export default function GuruNilaiIndexPage() {
                     const colors = colorConfig[item.color];
 
                     return (
-                      <div
+                      <button
                         key={item.key}
+                        type="button"
+                        onClick={() => router.push(item.href)}
                         className={`
                           group relative overflow-hidden
                           rounded-2xl border
                           ${themeNeutralBorder}
                           theme-card
-                          p-5
+                          p-5 text-left
                           ${themeCardShadow}
                           transition-all
                           ${themeNeutralHover}
@@ -720,10 +750,10 @@ export default function GuruNilaiIndexPage() {
                               rounded-lg border
                               ${themeNeutralBorder}
                               ${themeNeutralSurface}
-                              theme-text-muted
+                              theme-text-secondary
                             `}
                           >
-                            <LockKeyhole size={14} />
+                            <ChevronRight size={14} />
                           </div>
 
                         </div>
@@ -774,16 +804,19 @@ export default function GuruNilaiIndexPage() {
                             className="
                               inline-flex items-center gap-1.5
                               text-[10px] font-medium
-                              theme-text-muted
+                              theme-text-secondary
                             "
                           >
-                            <LockKeyhole size={11} />
-                            Belum tersedia di BE
+                            Buka modul
+                            <ChevronRight
+                              size={12}
+                              className="transition-transform group-hover:translate-x-0.5"
+                            />
                           </span>
 
                         </div>
 
-                      </div>
+                      </button>
                     );
                   })}
 
@@ -953,6 +986,12 @@ export default function GuruNilaiIndexPage() {
                             text-[var(--color-info)]
                           `}
                         >
+                          GET /api/nilai/kelas-saya<br />
+                          GET/POST /api/nilai/komponen<br />
+                          GET /api/nilai/input/:kelasMapelId<br />
+                          POST /api/nilai/input/bulk<br />
+                          POST /api/nilai/finalisasi/:kelasMapelId<br />
+                          POST /api/nilai/tarik-sumber<br />
                           GET /api/nilai/export
                         </code>
 
@@ -1088,7 +1127,7 @@ export default function GuruNilaiIndexPage() {
                 </span>
 
                 <span>
-                  {MATA_PELAJARAN} · Backend Export Aktif
+                  {MATA_PELAJARAN} · Backend Nilai Aktif
                 </span>
 
               </div>

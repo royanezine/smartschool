@@ -1,6 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 import { useParams, useRouter } from "next/navigation";
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
@@ -21,7 +25,11 @@ import {
   AlertCircle,
   Download,
 } from "lucide-react";
-import { getPendaftarPpdb } from "@/services/ppdb.service";
+import {
+  getPendaftarPpdbById,
+  verifikasiPpdb,
+} from "@/services/ppdb.service";
+import { getKelas } from "@/services/kelas.service";
 
 // =========================================================
 // THEME HELPERS
@@ -315,65 +323,120 @@ export default function DetailPendaftaranPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const [kelasList, setKelasList] = useState([]);
+  const [kelasId, setKelasId] = useState("");
+  const [memproses, setMemproses] = useState(false);
+  const [actionError, setActionError] = useState("");
+  const [actionSuccess, setActionSuccess] = useState("");
+
   // =======================================================
   // LOAD DETAIL
   // =======================================================
 
-  useEffect(() => {
-    async function loadDetail() {
-      if (!id) {
-        setError("ID pendaftaran tidak ditemukan.");
-        setLoading(false);
-        return;
-      }
-
-      try {
-        setLoading(true);
-        setError("");
-
-        const response = await getPendaftarPpdb();
-
-        if (!response?.success) {
-          throw new Error(
-            response?.message ||
-              "Gagal mengambil data pendaftar."
-          );
-        }
-
-        const list = Array.isArray(response?.data)
-          ? response.data
-          : [];
-
-        const found = list.find(
-          (item) =>
-            String(item?.id) === String(id)
-        );
-
-        if (!found) {
-          throw new Error(
-            "Data pendaftaran tidak ditemukan."
-          );
-        }
-
-        setData(found);
-      } catch (err) {
-        console.error(
-          "GET DETAIL PENDAFTAR PPDB ERROR:",
-          err
-        );
-
-        setError(
-          err instanceof Error
-            ? err.message
-            : "Gagal mengambil detail pendaftar."
-        );
-      } finally {
-        setLoading(false);
-      }
+  const loadDetail = useCallback(async () => {
+    if (!id) {
+      setError("ID pendaftaran tidak ditemukan.");
+      setLoading(false);
+      return;
     }
 
-    loadDetail();
+    try {
+      setLoading(true);
+      setError("");
+
+      const response = await getPendaftarPpdbById(id);
+
+      setData(response?.data || null);
+    } catch (err) {
+      setData(null);
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Gagal memuat detail pendaftar."
+      );
+    } finally {
+      setLoading(false);
+    }
   }, [id]);
+
+  useEffect(() => {
+    Promise.resolve().then(() => {
+      loadDetail();
+    });
+  }, [loadDetail]);
+
+  // =======================================================
+  // KELAS UNTUK VERIFIKASI KELULUSAN
+  // =======================================================
+
+  useEffect(() => {
+    let aktif = true;
+
+    getKelas({ page: 1, limit: 100 })
+      .then((response) => {
+        if (aktif) {
+          setKelasList(
+            Array.isArray(response?.data)
+              ? response.data
+              : []
+          );
+        }
+      })
+      .catch(() => {
+        if (aktif) {
+          setKelasList([]);
+        }
+      });
+
+    return () => {
+      aktif = false;
+    };
+  }, []);
+
+  const sudahDiputuskan = ["lulus", "ditolak"].includes(
+    String(data?.status || "").toLowerCase()
+  );
+
+  async function proses(
+    statusVerifikasi,
+    konfirmasi
+  ) {
+    if (
+      konfirmasi &&
+      typeof window !== "undefined" &&
+      !window.confirm(konfirmasi)
+    ) {
+      return;
+    }
+
+    try {
+      setMemproses(true);
+      setActionError("");
+      setActionSuccess("");
+
+      const response = await verifikasiPpdb(id, {
+        status: statusVerifikasi,
+        ...(statusVerifikasi === "lulus" && kelasId
+          ? { kelasId }
+          : {}),
+      });
+
+      setActionSuccess(
+        response?.message ||
+          "Status pendaftar berhasil diperbarui."
+      );
+
+      await loadDetail();
+    } catch (err) {
+      setActionError(
+        err instanceof Error
+          ? err.message
+          : "Gagal memperbarui status pendaftar."
+      );
+    } finally {
+      setMemproses(false);
+    }
+  }
 
   // =======================================================
   // DATA TURUNAN
@@ -939,6 +1002,122 @@ export default function DetailPendaftaranPage() {
                   ================================================= */}
 
                   <div className="space-y-5">
+                    {/* VERIFIKASI */}
+                    <Section
+                      title="Verifikasi Pendaftar"
+                      icon={CheckCircle2}
+                    >
+                      <div className="space-y-3">
+                        {actionSuccess && (
+                          <div className="rounded-lg border border-[color-mix(in_srgb,var(--color-success)_24%,transparent)] bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)] px-3 py-2 text-xs text-[var(--color-success)]">
+                            {actionSuccess}
+                          </div>
+                        )}
+
+                        {actionError && (
+                          <div className="rounded-lg border border-[color-mix(in_srgb,var(--color-danger)_24%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_9%,transparent)] px-3 py-2 text-xs theme-danger">
+                            {actionError}
+                          </div>
+                        )}
+
+                        {sudahDiputuskan ? (
+                          <p className="text-xs theme-text-secondary">
+                            Pendaftar sudah memiliki status{" "}
+                            <strong>
+                              {statusInfo.label}
+                            </strong>
+                            . Perubahan status tidak lagi
+                            ditampilkan di sini.
+                          </p>
+                        ) : (
+                          <>
+                            <p className="text-xs leading-5 theme-text-secondary">
+                              Kelulusan akan membuat akun
+                              siswa dan menempatkan pendaftar
+                              pada kelas yang dipilih.
+                              Penolakan tidak memerlukan
+                              kelas.
+                            </p>
+
+                            <label className="block">
+                              <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wide theme-text-muted">
+                                Kelas untuk pendaftar lulus
+                              </span>
+
+                              <select
+                                value={kelasId}
+                                onChange={(event) =>
+                                  setKelasId(
+                                    event.target.value
+                                  )
+                                }
+                                className={`theme-input theme-text theme-neutral-border h-9 w-full rounded-lg border ${themeNeutralSurface} px-2 text-xs outline-none ${themeFocus}`}
+                              >
+                                <option value="">
+                                  Pilih kelas
+                                </option>
+
+                                {kelasList.map((kelas) => (
+                                  <option
+                                    key={kelas.id}
+                                    value={kelas.id}
+                                  >
+                                    {kelas.nama}
+                                    {kelas.tingkat
+                                      ? ` (Tingkat ${kelas.tingkat})`
+                                      : ""}
+                                  </option>
+                                ))}
+                              </select>
+                            </label>
+
+                            <div className="flex flex-col gap-2">
+                              <button
+                                type="button"
+                                disabled={
+                                  memproses || !kelasId
+                                }
+                                onClick={() =>
+                                  proses(
+                                    "lulus",
+                                    "Terima pendaftar ini dan buat akun siswa?"
+                                  )
+                                }
+                                className={`${themePrimaryGradient} inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold text-[var(--color-card)] transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50`}
+                              >
+                                {memproses ? (
+                                  <Loader2
+                                    size={14}
+                                    className="animate-spin"
+                                  />
+                                ) : (
+                                  <CheckCircle2
+                                    size={14}
+                                  />
+                                )}
+                                Terima &amp; Jadikan Siswa
+                              </button>
+
+                              <button
+                                type="button"
+                                disabled={memproses}
+                                onClick={() =>
+                                  proses(
+                                    "ditolak",
+                                    "Tolak pendaftar ini?"
+                                  )
+                                }
+                                className="inline-flex items-center justify-center gap-2 rounded-lg border border-[color-mix(in_srgb,var(--color-danger)_24%,transparent)] px-3 py-2 text-xs font-semibold theme-danger transition hover:bg-[color-mix(in_srgb,var(--color-danger)_8%,transparent)] disabled:cursor-not-allowed disabled:opacity-50"
+                              >
+                                <XCircle size={14} />
+                                Tolak Pendaftar
+                              </button>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </Section>
+
                     {/* FOTO PENDAFTAR */}
 
                     <Section

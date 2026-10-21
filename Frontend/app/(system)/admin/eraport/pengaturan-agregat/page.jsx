@@ -348,6 +348,20 @@ export default function PengaturanAgregatPage() {
           <div className="mx-auto max-w-[1280px]">
 
             {/* =====================================================
+                DISCLOSURE: KONFIGURASI BELUM TERSIMPAN KE BACKEND
+            ====================================================== */}
+
+            <div className="mb-5 rounded-xl border theme-border theme-card-soft px-4 py-3.5 text-xs leading-5 theme-text-secondary">
+              <strong className="theme-text">
+                Catatan:
+              </strong>{" "}
+              konfigurasi bobot dan KKM pada halaman ini belum tersimpan ke
+              backend karena endpoint pengaturan agregat e-Raport belum
+              tersedia. Nilai yang berlaku saat ini dihitung dari komponen
+              nilai per kelas-mapel pada menu Setup Bobot.
+            </div>
+
+            {/* =====================================================
                 PAGE HEADER
             ====================================================== */}
 

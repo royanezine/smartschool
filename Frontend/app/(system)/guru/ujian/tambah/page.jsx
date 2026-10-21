@@ -2,7 +2,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { getStoredUser } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 
 import {
@@ -27,7 +26,7 @@ import {
 
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
-import { getKelasMapel } from "@/services/kelasMapel.service";
+import { getKelasMapelDiampu } from "@/services/kelasMapel.service";
 import { createUjian } from "@/services/ujian.service";
 
 /* =========================================================
@@ -97,20 +96,6 @@ const themeFocus =
    HELPERS
 ========================================================= */
 
-function parseData(response) {
-  if (Array.isArray(response)) return response;
-  if (Array.isArray(response?.data)) return response.data;
-  if (Array.isArray(response?.data?.data)) return response.data.data;
-  if (Array.isArray(response?.results)) return response.results;
-  if (Array.isArray(response?.items)) return response.items;
-  if (Array.isArray(response?.data?.items)) return response.data.items;
-  if (Array.isArray(response?.data?.data?.items)) {
-    return response.data.data.items;
-  }
-
-  return [];
-}
-
 function getCreatedUjianId(response) {
   const candidates = [
     response?.id,
@@ -129,30 +114,6 @@ function getCreatedUjianId(response) {
   );
 
   return id == null ? null : String(id);
-}
-
-function getCurrentUser() {
-  if (typeof window === "undefined") return null;
-
-  try {
-    const raw = getStoredUser();
-    return raw;
-  } catch (error) {
-    console.error("Gagal membaca user:", error);
-    return null;
-  }
-}
-
-function getCurrentUserId() {
-  const user = getCurrentUser();
-
-  return (
-    user?.id ||
-    user?.userId ||
-    user?.penggunaId ||
-    user?.pengguna?.id ||
-    null
-  );
 }
 
 function formatDateTime(value) {
@@ -237,32 +198,17 @@ export default function TambahUjianPage() {
         setLoadingKelasMapel(true);
         setError("");
 
-        const response = await getKelasMapel();
+        const data = await getKelasMapelDiampu();
 
         if (cancelled) return;
 
-        const data = parseData(response);
-        const userId = getCurrentUserId();
-
-        const filtered = userId
-          ? data.filter((item) => {
-              const guruId =
-                item?.guruPengajarId ||
-                item?.guruPengajar?.id ||
-                item?.guruId ||
-                "";
-
-              return String(guruId) === String(userId);
-            })
-          : [];
-
-        setKelasMapel(filtered);
+        setKelasMapel(data);
 
         setForm((prev) => ({
           ...prev,
           kelasMapelId:
             prev.kelasMapelId ||
-            (filtered.length ? String(filtered[0].id) : ""),
+            (data.length ? String(data[0].id) : ""),
         }));
       } catch (err) {
         if (cancelled) return;
@@ -327,33 +273,19 @@ export default function TambahUjianPage() {
       setLoadingKelasMapel(true);
       setError("");
 
-      const response = await getKelasMapel();
-      const data = parseData(response);
-      const userId = getCurrentUserId();
+      const data = await getKelasMapelDiampu();
 
-      const filtered = userId
-        ? data.filter((item) => {
-            const guruId =
-              item?.guruPengajarId ||
-              item?.guruPengajar?.id ||
-              item?.guruId ||
-              "";
-
-            return String(guruId) === String(userId);
-          })
-        : [];
-
-      setKelasMapel(filtered);
+      setKelasMapel(data);
 
       setForm((prev) => ({
         ...prev,
         kelasMapelId:
-          filtered.some(
+          data.some(
             (item) => String(item.id) === String(prev.kelasMapelId)
           )
             ? prev.kelasMapelId
-            : filtered.length
-              ? String(filtered[0].id)
+            : data.length
+              ? String(data[0].id)
               : "",
       }));
     } catch (err) {

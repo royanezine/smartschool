@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   UserPlus,
   UploadCloud,
@@ -19,89 +19,85 @@ import PpdbNavbar from "@/app/components/ppdb/PpdbNavbar";
 const langkahPendaftaran = [
   {
     id: 1,
-    title: "Buat Akun",
-    waktu: "1 - 20 Juni 2026",
-    icon: UserPlus,
-    desc: "Daftar akun menggunakan data calon siswa dan orang tua/wali yang valid.",
+    title: "Buka Tautan Resmi Sekolah",
+    waktu: "Sesuai jadwal sekolah",
+    icon: ListChecks,
+    desc: "Pendaftaran dibuka melalui tautan resmi yang dibagikan panitia PPDB sekolah.",
     detail: [
-      'Kunjungi halaman "Daftar Sekarang"',
-      "Masukkan data calon siswa dan orang tua/wali dengan benar",
-      "Pastikan nomor telepon dan email yang digunakan masih aktif",
+      "Minta tautan pendaftaran kepada panitia PPDB sekolah tujuan",
+      "Tautan sudah memuat sekolah dan jalur yang dibuka",
+      "Tidak perlu mengetik atau mencari ID sekolah/jalur sendiri",
     ],
-    tip: "Gunakan kontak yang aktif agar informasi terkait pendaftaran dapat diterima dengan baik.",
+    tip: "Jangan menggunakan tautan yang tidak jelas asalnya. Tanyakan langsung kepada panitia PPDB sekolah.",
   },
   {
     id: 2,
-    title: "Lengkapi Berkas",
-    waktu: "1 - 20 Juni 2026",
-    icon: UploadCloud,
-    desc: "Lengkapi dokumen pendaftaran sesuai persyaratan jalur yang dipilih.",
+    title: "Isi Data Pendaftaran",
+    waktu: "Sesuai jadwal sekolah",
+    icon: UserPlus,
+    desc: "Lengkapi data calon siswa dan orang tua/wali sesuai dokumen resmi.",
     detail: [
-      "Siapkan Kartu Keluarga (KK)",
-      "Siapkan Akta Kelahiran dan dokumen pendukung lainnya",
-      "Upload dokumen melalui halaman pendaftaran",
+      "Isi nama lengkap, NISN, tempat dan tanggal lahir",
+      "Lengkapi alamat, kontak, dan data orang tua/wali",
+      "Periksa kembali seluruh data sebelum mengirim",
     ],
-    tip: "Pastikan file dokumen dapat dibaca dengan jelas dan sesuai format serta ukuran yang ditentukan.",
+    tip: "Data yang dikirim akan diverifikasi sekolah. Pastikan sesuai dengan dokumen resmi.",
   },
   {
     id: 3,
-    title: "Pilih Jalur & Sekolah",
-    waktu: "1 - 20 Juni 2026",
-    icon: ListChecks,
-    desc: "Tentukan jalur PPDB dan sekolah tujuan sesuai ketentuan yang berlaku.",
+    title: "Unggah Dokumen",
+    waktu: "Setelah data terkirim",
+    icon: UploadCloud,
+    desc: "Unggah dokumen wajib satu per satu setelah data pendaftaran berhasil dikirim.",
     detail: [
-      "Pilih salah satu jalur pendaftaran yang tersedia",
-      "Pastikan sekolah tujuan sesuai dengan pilihan calon siswa",
-      "Periksa kembali seluruh data sebelum mengirim pendaftaran",
+      "Unggah Kartu Keluarga (KK)",
+      "Unggah Akta Kelahiran",
+      "Unggah Ijazah atau Surat Keterangan Lulus",
+      "Format JPG, PNG, atau PDF maksimal 5MB per file",
     ],
-    tip: "Pastikan jalur yang dipilih sesuai dengan kondisi dan dokumen calon siswa.",
+    tip: "Setiap dokumen memiliki status sendiri. Jika satu gagal, cukup unggah ulang dokumen tersebut tanpa mengulang dokumen yang sudah berhasil.",
   },
   {
     id: 4,
-    title: "Seleksi Berkas",
-    waktu: "21 - 24 Juni 2026",
+    title: "Verifikasi oleh Sekolah",
+    waktu: "Sesuai kebijakan sekolah",
     icon: Search,
-    desc: "Panitia PPDB melakukan pemeriksaan terhadap data dan dokumen pendaftaran.",
+    desc: "Panitia PPDB sekolah memeriksa data dan dokumen yang telah dikirim.",
     detail: [
-      "Panitia memeriksa data calon siswa",
-      "Panitia memeriksa kelengkapan dokumen yang telah diupload",
-      "Berkas yang tidak sesuai dapat memerlukan perbaikan atau verifikasi ulang",
+      "Server memberikan konfirmasi saat data dan dokumen diterima",
+      "Panitia memeriksa kelengkapan dan kesesuaian dokumen",
+      "Hubungi panitia sekolah untuk mengetahui status verifikasi",
     ],
-    tip: "Periksa informasi pendaftaran secara berkala selama proses seleksi.",
+    tip: "Backend belum menyediakan layanan cek status publik. Simpan nomor pendaftaran dan hubungi panitia sekolah.",
   },
   {
     id: 5,
-    title: "Cek Hasil Seleksi",
-    waktu: "27 Juni 2026",
+    title: "Simpan Nomor Pendaftaran",
+    waktu: "Setelah pendaftaran",
     icon: CheckCircle2,
-    desc: "Calon siswa dapat memeriksa hasil proses seleksi setelah pengumuman.",
+    desc: "Nomor pendaftaran ditampilkan hanya jika dikembalikan oleh server.",
     detail: [
-      "Buka halaman Cek Pendaftaran",
-      "Masukkan informasi pendaftaran yang diperlukan",
-      "Periksa status hasil seleksi calon siswa",
+      "Catat nomor pendaftaran yang tampil pada ringkasan",
+      "Simpan juga ID pendaftaran sebagai referensi",
+      "Ringkasan di browser bersifat sementara, bukan pengumuman resmi",
     ],
-    tip: "Simpan nomor pendaftaran dengan baik karena dapat diperlukan saat pengecekan status.",
-  },
-  {
-    id: 6,
-    title: "Daftar Ulang",
-    waktu: "28 - 30 Juni 2026",
-    icon: ChevronRight,
-    desc: "Calon siswa yang dinyatakan lulus mengikuti proses daftar ulang sesuai ketentuan sekolah.",
-    detail: [
-      "Ikuti instruksi daftar ulang dari sekolah",
-      "Siapkan dokumen asli apabila diminta",
-      "Selesaikan proses daftar ulang sesuai jadwal yang ditentukan",
-    ],
-    tip: "Pastikan proses daftar ulang diselesaikan dalam periode yang telah ditentukan.",
+    tip: "Ikuti pengumuman resmi sekolah untuk jadwal seleksi, hasil, dan daftar ulang.",
   },
 ];
 
 export default function AlurPendaftaranPage() {
   const router = useRouter();
+  const pathname = usePathname();
+
+  const ppdbIndex = pathname
+    ? pathname.indexOf("/PPDB")
+    : -1;
+
+  const basePath =
+    ppdbIndex > 0 ? pathname.slice(0, ppdbIndex) : "";
 
   const handleDaftar = () => {
-    router.push("/PPDB/daftar");
+    router.push(`${basePath}/PPDB/jalurPendaftaran`);
   };
 
   return (
@@ -119,7 +115,7 @@ export default function AlurPendaftaranPage() {
         <div className="mb-8">
           <div className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-600">
             <Clock size={13} />
-            6 tahapan — 1 Juni s/d 30 Juni 2026
+            {langkahPendaftaran.length} tahapan pendaftaran
           </div>
 
           <h1 className="mt-3 text-xl font-semibold text-slate-800 sm:text-2xl">
@@ -231,10 +227,8 @@ export default function AlurPendaftaranPage() {
 
          <button
             type="button"
-            onClick={() =>
-              router.push("/PPDB/jalurPendaftaran")
-            }
-            className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+            onClick={handleDaftar}
+            className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-white px-5 py-2.5 text-sm font-medium text-blue-700 transition-colors hover:bg-blue-50"
           >
             Mulai Pendaftaran
 
