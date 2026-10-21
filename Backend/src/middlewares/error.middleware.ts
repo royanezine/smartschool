@@ -28,10 +28,22 @@ export const globalErrorHandler = (
   res: Response,
   next: NextFunction,
 ) => {
-  let statusCode = err.statusCode || 500;
-  let message = err.message || "Internal Server Error";
-  let errorCode = err.errorCode || getErrorCodeByStatus(statusCode);
-  let errors: any = undefined;
+
+    console.error("[GLOBAL ERROR]", {
+    method: req.method,
+    path: req.originalUrl,
+    errorName: err?.name,
+    errorCode: err?.code,
+    message: err?.message,
+    modelName: err?.meta?.modelName,
+    target: err?.meta?.target,
+    stack: err?.stack,
+    });
+  
+    let statusCode = err.statusCode || 500;
+    let message = err.message || "Internal Server Error";
+    let errorCode = err.errorCode || getErrorCodeByStatus(statusCode);
+    let errors: any = undefined;
 
   if (err instanceof ZodError) {
     statusCode = 400;
