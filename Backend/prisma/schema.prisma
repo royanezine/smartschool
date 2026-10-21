@@ -217,6 +217,7 @@ model Sekolah {
   halamanCms        HalamanCms[]
   artikelCms        ArtikelCms[]
   jalurPpdb         JalurPpdb[]
+  gelombangPpdb     GelombangPpdb[]
   pendaftaranPpdb   PendaftaranPpdb[]
   langgananSekolah  LanggananSekolah[]  @relation("SekolahLangganan")
   riwayatPembayaran RiwayatPembayaran[]
@@ -1357,8 +1358,34 @@ model JalurPpdb {
 
   sekolah         Sekolah           @relation(fields: [sekolahId], references: [id])
   pendaftaranPpdb PendaftaranPpdb[]
+  gelombangPpdb   GelombangPpdb[]
 
   @@map("jalur_ppdb")
+}
+
+model GelombangPpdb {
+  id             String    @id @default(uuid())
+  sekolahId      String    @map("sekolah_id")
+  jalurPpdbId    String?   @map("jalur_ppdb_id")
+  dibuatOleh     String?   @map("dibuat_oleh")
+  diperbaruiOleh String?   @map("diperbarui_oleh")
+  dihapusOleh    String?   @map("dihapus_oleh")
+  nama           String    @db.VarChar(50)
+  tanggalMulai   DateTime  @map("tanggal_mulai") @db.Date
+  tanggalSelesai DateTime  @map("tanggal_selesai") @db.Date
+  kuota          Int?
+  status         String?   @default("aktif") @db.VarChar(20)
+  dibuatPada     DateTime  @default(now()) @map("dibuat_pada") @db.Timestamp()
+  diperbaruiPada DateTime  @default(now()) @updatedAt @map("diperbarui_pada") @db.Timestamp()
+  dihapusPada    DateTime? @map("dihapus_pada") @db.Timestamp()
+
+  sekolah         Sekolah           @relation(fields: [sekolahId], references: [id])
+  jalurPpdb       JalurPpdb?        @relation(fields: [jalurPpdbId], references: [id])
+  pendaftaranPpdb PendaftaranPpdb[]
+
+  @@index([sekolahId])
+  @@index([jalurPpdbId])
+  @@map("gelombang_ppdb")
 }
 
 model PendaftaranPpdb {
@@ -1395,7 +1422,12 @@ model PendaftaranPpdb {
   pengguna         Pengguna?         @relation(fields: [dikonversiKePenggunaId], references: [id])
   berkasPpdb       BerkasPpdb[]
   hasilSeleksiPpdb HasilSeleksiPpdb?
+  gelombangPpdb    GelombangPpdb?    @relation(fields: [gelombangPpdbId], references: [id])
+  gelombangPpdbId  String?           @map("gelombang_ppdb_id")
 
+  @@index([sekolahId])
+  @@index([jalurPpdbId])
+  @@index([gelombangPpdbId])
   @@map("pendaftaran_ppdb")
 }
 
