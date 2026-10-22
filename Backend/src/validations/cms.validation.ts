@@ -11,11 +11,28 @@ export const artikelCmsSchema = z.object({
   ringkasan: z.string().optional(),
   gambarUtama: z.string().optional(),
   status: z.string().default("draft"),
-  kategoriArtikelId: z.string().uuid("ID Kategori Artikel tidak valid").optional().nullable(),
+  kategoriArtikelId: z
+    .string()
+    .uuid("ID Kategori Artikel tidak valid")
+    .optional()
+    .nullable(),
 });
 
 export const halamanCmsSchema = z.object({
   judul: z.string().min(3, "Judul halaman minimal 3 karakter"),
   konten: z.string().optional(),
   status: z.string().default("draft"),
+});
+
+export const menuKonfigurasiSchema = z.object({
+  halaman: z.string().min(1, "Halaman wajib diisi"),
+  section: z.string().min(1, "Section wajib diisi"),
+  judul: z.string().min(1, "Judul wajib diisi"),
+  subJudul: z.string().nullable().optional(),
+  konten: z.string().nullable().optional(),
+  gambarUrl: z.string().nullable().optional(),
+  ctaText: z.string().nullable().optional(),
+  ctaLink: z.string().nullable().optional(),
+  urutan: z.number().int().default(1),
+  status: z.string().default("aktif"),
 });

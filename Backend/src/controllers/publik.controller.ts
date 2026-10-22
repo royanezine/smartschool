@@ -174,11 +174,15 @@ export const getPublicHalamanBySlug = async (
   }
 };
 
-export const getHalamanPublikBySubdomain = async (req: Request, res: Response, next: NextFunction) => {
+export const getHalamanPublikBySubdomain = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const subdomain = req.params.subdomain || req.query.subdomain;
 
-    if (!subdomain || typeof subdomain !== 'string') {
+    if (!subdomain || typeof subdomain !== "string") {
       throw new AppError("Subdomain wajib disertakan", 400);
     }
 
@@ -188,24 +192,95 @@ export const getHalamanPublikBySubdomain = async (req: Request, res: Response, n
     });
 
     if (!sekolah || sekolah.status !== "aktif") {
-      throw new AppError("Sekolah tidak ditemukan atau sedang tidak aktif", 404);
+      throw new AppError(
+        "Sekolah tidak ditemukan atau sedang tidak aktif",
+        404,
+      );
     }
 
     const halaman = await prisma.halamanCms.findMany({
       where: {
         sekolahId: sekolah.id,
         dihapusPada: null,
-        status: "publikasi"
+        status: "publikasi",
       },
       select: {
         id: true,
         judul: true,
         slug: true,
       },
-      orderBy: { dibuatPada: "asc" }
+      orderBy: { dibuatPada: "asc" },
     });
 
-    return successResponse(res, "Berhasil mengambil daftar halaman publik", halaman, 200);
+    return successResponse(
+      res,
+      "Berhasil mengambil daftar halaman publik",
+      halaman,
+      200,
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getKonfigurasiPublikBySubdomain = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const subdomain = req.params.subdomain || req.query.subdomain;
+
+    if (!subdomain || typeof subdomain !== "string") {
+      throw new AppError("Subdomain wajib disertakan", 400);
+    }
+
+    const sekolah = await prisma.sekolah.findUnique({
+      where: { subdomain },
+      select: { id: true, status: true },
+    });
+
+    if (!sekolah || sekolah.status !== "aktif") {
+      throw new AppError(
+        "Sekolah tidak ditemukan atau sedang tidak aktif",
+        404,
+      );
+    }
+
+    const konfigurasi = await prisma.menuKonfigurasi.findMany({
+      where: {
+        sekolahId: sekolah.id,
+        status: "aktif",
+        // HAPUS dihapusPada: null
+      },
+      select: {
+        halaman: true,
+        section: true,
+        judul: true,
+        subJudul: true,
+        konten: true,
+        gambarUrl: true,
+        ctaText: true,
+        ctaLink: true,
+        urutan: true,
+      },
+      orderBy: [{ halaman: "asc" }, { urutan: "asc" }],
+    });
+
+    const formattedConfig = konfigurasi.reduce((acc: any, curr) => {
+      if (!acc[curr.halaman]) {
+        acc[curr.halaman] = {};
+      }
+      acc[curr.halaman][curr.section] = curr;
+      return acc;
+    }, {});
+
+    return successResponse(
+      res,
+      "Berhasil mengambil konfigurasi halaman",
+      formattedConfig,
+      200,
+    );
   } catch (error) {
     next(error);
   }

@@ -18,14 +18,15 @@ import {
   getTemaWarna,
   updateTemaWarna,
   resetTemaWarna,
+  getMenuKonfigurasi,
+  upsertMenuKonfigurasi,
+  deleteMenuKonfigurasi,
 } from "../controllers/cms.controller";
 
 const router = Router();
 
 router.use(authenticate, requireTenant);
 
-// Tema warna: GET terbuka untuk semua user login (guru/siswa juga butuh
-// warna badge), tanpa requireIzin. Ubah/reset butuh izin CMS.
 router.get("/tema", getTemaWarna);
 router.put("/tema", requireIzin("cms.update"), updateTemaWarna);
 router.delete("/tema", requireIzin("cms.delete"), resetTemaWarna);
@@ -56,5 +57,10 @@ router.post("/halaman", requireIzin("cms.create"), createHalamanCms);
 router.get("/halaman", requireIzin("cms.view"), getHalamanCms);
 router.put("/halaman/:id", requireIzin("cms.update"), updateHalamanCms);
 router.delete("/halaman/:id", requireIzin("cms.delete"), deleteHalamanCms);
+
+router.get("/menu-konfigurasi", requireIzin("cms.view"), getMenuKonfigurasi);
+router.post("/menu-konfigurasi", requireIzin("cms.create"), upsertMenuKonfigurasi);
+router.put("/menu-konfigurasi/:id", requireIzin("cms.update"), upsertMenuKonfigurasi);
+router.delete("/menu-konfigurasi/:id", requireIzin("cms.delete"), deleteMenuKonfigurasi);
 
 export default router;
