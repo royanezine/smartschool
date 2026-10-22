@@ -1,5 +1,11 @@
 import { z } from "zod";
 
+export const shiftSiswaSchema = z
+  .string({ message: "Shift harus berupa teks" })
+  .trim()
+  .toLowerCase()
+  .pipe(z.enum(["pagi", "siang"], { message: "Shift harus pagi atau siang" }));
+
 export const createKelasSchema = z.object({
   nama: z
     .string()
@@ -34,6 +40,20 @@ export const createKelasSchema = z.object({
     .nullable(),
 
   lantaiId: z.string().uuid("ID lantai tidak valid").optional().nullable(),
+
+  shift: shiftSiswaSchema.optional().nullable(),
 });
 
 export const updateKelasSchema = createKelasSchema.partial();
+
+export const updateShiftKelasSchema = z.object({
+  shift: shiftSiswaSchema.nullable(),
+});
+
+export const updateShiftKelasMassalSchema = z.object({
+  kelasIds: z
+    .array(z.string().uuid("ID kelas tidak valid"))
+    .min(1, "Pilih minimal 1 kelas")
+    .max(100, "Maksimal 100 kelas per permintaan"),
+  shift: shiftSiswaSchema.nullable(),
+});

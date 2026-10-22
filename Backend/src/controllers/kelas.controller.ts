@@ -3,10 +3,14 @@ import { prisma } from "../config/db";
 import {
   createKelasSchema,
   updateKelasSchema,
+  updateShiftKelasSchema,
+  updateShiftKelasMassalSchema,
 } from "../validations/kelas.Validation";
 import { paginatedResponse, successResponse } from "../utils/responseFormatter";
 import { AppError } from "../utils/appError";
 import { AuthRequest } from "../middlewares/auth.middleware";
+import { normalizeShiftKerja } from "../utils/shiftKerja";
+import { buatShiftSiswa } from "../utils/profileSiswa.helper";
 
 export const getKelas = async (req: AuthRequest, res: Response) => {
   try {
@@ -17,6 +21,7 @@ export const getKelas = async (req: AuthRequest, res: Response) => {
     const limit = parseInt(req.query.limit as string) || 10;
     const search = req.query.search as string;
     const tahunAjaranId = req.query.tahunAjaranId as string;
+    const shiftQuery = req.query.shift as string | undefined;
     const tingkat = req.query.tingkat
       ? parseInt(req.query.tingkat as string)
       : undefined;
@@ -32,6 +37,21 @@ export const getKelas = async (req: AuthRequest, res: Response) => {
 
     if (tahunAjaranId) whereClause.tahunAjaranId = tahunAjaranId;
     if (tingkat !== undefined) whereClause.tingkat = tingkat;
+
+    if (shiftQuery) {
+      if (shiftQuery.trim().toLowerCase() === "belum") {
+        whereClause.shift = null;
+      } else {
+        const shiftFilter = normalizeShiftKerja(shiftQuery);
+        if (!shiftFilter) {
+          return res.status(400).json({
+            success: false,
+            message: "Filter shift tidak valid (pagi / siang / belum)",
+          });
+        }
+        whereClause.shift = shiftFilter;
+      }
+    }
 
     if (search) {
       whereClause.OR = [
@@ -182,7 +202,6 @@ export const createKelas = async (req: AuthRequest, res: Response) => {
       );
     }
 
-    // Validasi Duplikasi Nama di Tahun Ajaran yang sama
     const existing = await prisma.kelas.findFirst({
       where: {
         nama: validated.nama,
@@ -206,6 +225,7 @@ export const createKelas = async (req: AuthRequest, res: Response) => {
         kapasitas: validated.kapasitas,
         fotoKelas: validated.fotoKelasUrl || null,
         lantaiId: validated.lantaiId || null,
+        shift: validated.shift ?? null,
         sekolahId,
       },
     });
@@ -278,4 +298,88 @@ export const deleteKelas = async (req: AuthRequest, res: Response) => {
       .status(500)
       .json({ success: false, message: "Internal server error" });
   }
+};
+
+export const getShiftKelas = async (req: AuthRequest, res: Response) => {
+  const sekolahId = req.user?.sekolahId;
+  if (!sekolahId) throw new AppError("Sekolah tidak ditemukan", 400);
+
+  const id = req.params.id as string;
+
+  const kelas = await prisma.kelas.findFirst({
+    where: { id, sekolahId, dihapusPada: null },
+    select: {
+      id: true,
+      nama: true,
+      tingkat: true,
+      shift: true,
+      tahunAjaranId: true,
+      _count: { select: { anggota: true } },
+    },
+  });
+  if (!kelas) throw new AppError("Kelas tidak ditemukan", 404);
+
+  return successResponse(res, "Berhasil mengambil shift kelas", {
+    kelasId: kelas.id,
+    nama: kelas.nama,
+    tingkat: kelas.tingkat,
+    tahunAjaranId: kelas.tahunAjaranId,
+    jumlahSiswa: kelas._count.anggota,
+    shift: buatShiftSiswa(kelas.shift),
+  });
+};
+
+export const updateShiftKelas = async (req: AuthRequest, res: Response) => {
+  const sekolahId = req.user?.sekolahId;
+  if (!sekolahId) throw new AppError("Sekolah tidak ditemukan", 400);
+
+  const id = req.params.id as string;
+  const { shift } = updateShiftKelasSchema.parse(req.body);
+
+  const existing = await prisma.kelas.findFirst({
+    where: { id, sekolahId, dihapusPada: null },
+    select: { id: true },
+  });
+  if (!existing) throw new AppError("Kelas tidak ditemukan", 404);
+
+  const updated = await prisma.kelas.update({
+    where: { id },
+    data: { shift, diperbaruiOleh: req.user?.userId },
+    select: { id: true, nama: true, tingkat: true, shift: true },
+  });
+
+  return successResponse(res, "Shift kelas berhasil diperbarui", {
+    kelasId: updated.id,
+    nama: updated.nama,
+    tingkat: updated.tingkat,
+    shift: buatShiftSiswa(updated.shift),
+  });
+};
+
+export const updateShiftKelasMassal = async (
+  req: AuthRequest,
+  res: Response,
+) => {
+  const sekolahId = req.user?.sekolahId;
+  if (!sekolahId) throw new AppError("Sekolah tidak ditemukan", 400);
+
+  const { kelasIds, shift } = updateShiftKelasMassalSchema.parse(req.body);
+  const uniqueIds = Array.from(new Set(kelasIds));
+
+  const valid = await prisma.kelas.count({
+    where: { id: { in: uniqueIds }, sekolahId, dihapusPada: null },
+  });
+  if (valid !== uniqueIds.length) {
+    throw new AppError("Sebagian kelas tidak ditemukan di sekolah ini", 404);
+  }
+
+  const result = await prisma.kelas.updateMany({
+    where: { id: { in: uniqueIds }, sekolahId, dihapusPada: null },
+    data: { shift, diperbaruiOleh: req.user?.userId },
+  });
+
+  return successResponse(res, "Shift kelas berhasil diperbarui", {
+    jumlahDiperbarui: result.count,
+    shift: buatShiftSiswa(shift),
+  });
 };

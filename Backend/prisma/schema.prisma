@@ -596,6 +596,7 @@ model Kelas {
   nomorRuangan String? @map("nomor_ruangan") @db.VarChar(20)
   kapasitas    Int?    @default(30)
   status       String? @db.VarChar(20)
+  shift        String? @db.VarChar(10)
 
   dibuatPada     DateTime  @default(now()) @map("dibuat_pada") @db.Timestamp()
   diperbaruiPada DateTime  @updatedAt @map("diperbarui_pada") @db.Timestamp()

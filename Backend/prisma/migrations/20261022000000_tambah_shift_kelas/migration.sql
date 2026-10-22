@@ -1,0 +1,1 @@
+ALTER TABLE "kelas" ADD COLUMN "shift" VARCHAR(10);

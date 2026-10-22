@@ -19,27 +19,64 @@ import {
 
 const siswaSelect = { id: true, namaLengkap: true, nis: true, nisn: true } as const;
 
+const filterPeranSiswa: Prisma.PenggunaWhereInput = {
+  peran: { is: { nama: { equals: 'siswa', mode: 'insensitive' } } },
+};
+
+const BATAS_NOMINAL = new Prisma.Decimal('9999999999999');
+
 type Jenis = 'setor' | 'tarik';
+
+const tentukanAkunKas = async (
+  tx: Prisma.TransactionClient,
+  sekolahId: string,
+  akunKasId?: string
+) => {
+  if (akunKasId) {
+    const akunDipilih = await tx.akunKas.findFirst({
+      where: { id: akunKasId, sekolahId, status: 'aktif', dihapusPada: null },
+    });
+    if (!akunDipilih) throw new HttpError(404, 'Akun kas tidak ditemukan atau tidak aktif');
+    return akunDipilih;
+  }
+
+  const daftar = await tx.akunKas.findMany({
+    where: { sekolahId, status: 'aktif', dihapusPada: null },
+    orderBy: { dibuatPada: 'asc' },
+    take: 20,
+  });
+
+  const [pertama] = daftar;
+  if (!pertama) {
+    throw new HttpError(400, 'Belum ada akun kas aktif. Buat akun kas terlebih dahulu');
+  }
+  if (daftar.length === 1) return pertama;
+
+  const kas = daftar.filter((a) => a.tipe === 'kas');
+  const [akunKasTunggal] = kas;
+  if (kas.length === 1 && akunKasTunggal) return akunKasTunggal;
+
+  throw new HttpError(400, 'Akun kas wajib dipilih karena terdapat lebih dari satu akun kas aktif');
+};
 
 const prosesTransaksi = async (req: Request, res: Response, jenis: Jenis) => {
   const { id: userId, sekolahId } = getUser(req);
   const siswaId = requireStr(req.body.siswaId, 'Siswa');
-  const akunKasId = requireStr(req.body.akunKasId, 'Akun kas');
+  const akunKasInput = str(req.body.akunKasId);
   const jumlah = toMoney(req.body.jumlah, 'Jumlah');
+  if (jumlah.gt(BATAS_NOMINAL)) throw new HttpError(400, 'Jumlah melebihi batas yang diizinkan');
   const tanggal = req.body.tanggal ? toDate(req.body.tanggal, 'Tanggal') : todayDate();
   const keterangan = str(req.body.keterangan);
 
   const hasil = await prisma.$transaction(async (tx) => {
     const siswa = await tx.pengguna.findFirst({
-      where: { id: siswaId, sekolahId, dihapusPada: null },
+      where: { id: siswaId, sekolahId, dihapusPada: null, ...filterPeranSiswa },
       select: siswaSelect,
     });
     if (!siswa) throw new HttpError(404, 'Siswa tidak ditemukan');
 
-    const akun = await tx.akunKas.findFirst({
-      where: { id: akunKasId, sekolahId, status: 'aktif', dihapusPada: null },
-    });
-    if (!akun) throw new HttpError(404, 'Akun kas tidak ditemukan atau tidak aktif');
+    const akun = await tentukanAkunKas(tx, sekolahId, akunKasInput);
+    const akunKasId = akun.id;
 
     const tabungan = await tx.tabunganSiswa.upsert({
       where: { sekolahId_siswaId: { sekolahId, siswaId } },
@@ -106,7 +143,12 @@ const prosesTransaksi = async (req: Request, res: Response, jenis: Jenis) => {
       },
     });
 
-    return { siswa, transaksi, saldo: saldoSesudah };
+    return {
+      siswa,
+      transaksi,
+      saldo: saldoSesudah,
+      akunKas: { id: akun.id, kode: akun.kode, nama: akun.nama },
+    };
   });
 
   return ok(
@@ -124,6 +166,49 @@ export const setorTabungan = handle(async (req: Request, res: Response) =>
 export const tarikTabungan = handle(async (req: Request, res: Response) =>
   prosesTransaksi(req, res, 'tarik')
 );
+
+export const cariSiswaTabungan = handle(async (req: Request, res: Response) => {
+  const { sekolahId } = getUser(req);
+  const q = requireStr(req.query.q, 'Kata kunci');
+  if (q.length < 2) throw new HttpError(400, 'Kata kunci minimal 2 karakter');
+
+  const limit = Math.min(20, Math.max(1, parseInt(String(req.query.limit ?? '10'), 10) || 10));
+  const kelasId = str(req.query.kelasId);
+
+  const siswa = await prisma.pengguna.findMany({
+    where: {
+      sekolahId,
+      dihapusPada: null,
+      status: 'aktif',
+      ...filterPeranSiswa,
+      namaLengkap: { contains: q, mode: 'insensitive' },
+      ...(kelasId ? { kelasSiswa: { some: { kelasId, dihapusPada: null } } } : {}),
+    },
+    select: {
+      id: true,
+      namaLengkap: true,
+      kelasSiswa: {
+        where: {
+          dihapusPada: null,
+          kelas: { sekolahId, dihapusPada: null, tahunAjaran: { status: 'aktif' } },
+        },
+        orderBy: { dibuatPada: 'desc' },
+        take: 1,
+        select: { kelas: { select: { id: true, nama: true, tingkat: true } } },
+      },
+    },
+    orderBy: { namaLengkap: 'asc' },
+    take: limit,
+  });
+
+  const data = siswa.map((s) => ({
+    id: s.id,
+    nama: s.namaLengkap,
+    kelas: s.kelasSiswa[0]?.kelas ?? null,
+  }));
+
+  return ok(res, data);
+});
 
 export const listTabungan = handle(async (req: Request, res: Response) => {
   const { sekolahId } = getUser(req);

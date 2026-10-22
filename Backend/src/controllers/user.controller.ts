@@ -7,6 +7,7 @@ import { normalizeRole, canManageRole } from "../utils/rbac";
 import { Prisma } from "@prisma/client";
 import { AppError } from "../utils/appError";
 import { normalizeShiftKerja } from "../utils/shiftKerja";
+import { ambilDataAkademikSiswa } from "../utils/profileSiswa.helper";
 
 const isGuru = (roleName?: string | null) => normalizeRole(roleName) === "guru";
 
@@ -772,6 +773,7 @@ export const profile = async (req: AuthRequest, res: Response) => {
         nip: true,
         nuptk: true,
         nisn: true,
+        nis: true,
         nik: true,
         jabatan: true,
         golongan: true,
@@ -821,6 +823,16 @@ export const profile = async (req: AuthRequest, res: Response) => {
       return res.status(404).json({
         success: false,
         message: "Pengguna tidak ditemukan",
+      });
+    }
+
+    if (normalizeRole(user.peran?.nama) === "siswa" && user.sekolah?.id) {
+      const akademik = await ambilDataAkademikSiswa(user.id, user.sekolah.id);
+
+      return res.status(200).json({
+        success: true,
+        message: "Profile berhasil diambil",
+        data: { ...user, ...akademik },
       });
     }
 

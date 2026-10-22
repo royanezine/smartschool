@@ -8,10 +8,12 @@ import {
   mutasiTabungan,
   detailTabunganSiswa,
   listTabungan,
+  cariSiswaTabungan,
 } from "../controllers/tabungan.controller";
 
 const router = Router();
 
+router.get("/tabungan/cari-siswa", authorizeRoles(...KEUANGAN_WRITE), cariSiswaTabungan);
 router.get("/tabungan/laporan", authorizeRoles(...KEUANGAN_READ), laporanTabungan);
 router.post("/tabungan/setor", authorizeRoles(...KEUANGAN_WRITE), setorTabungan);
 router.post("/tabungan/tarik", authorizeRoles(...KEUANGAN_WRITE), tarikTabungan);
