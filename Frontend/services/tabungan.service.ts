@@ -11,9 +11,6 @@ const API_ROOT = /\/api$/i.test(API_BASE_URL)
 
 const TABUNGAN_URL = `${API_ROOT}/keuangan/tabungan`;
 
-// ======================================================
-// TYPES SESUAI BACKEND
-// ======================================================
 
 export type JenisTabungan = "setor" | "tarik";
 
@@ -130,9 +127,6 @@ interface ApiResponse<T> {
   data: T;
 }
 
-// ======================================================
-// API HELPER
-// ======================================================
 
 async function apiFetch<T>(
   url: string,
@@ -220,11 +214,6 @@ function buildQuery(
   return query ? `?${query}` : "";
 }
 
-// ======================================================
-// GET /api/keuangan/tabungan
-// Backend: listTabungan
-// Respons: { success, message, data, ringkasan, meta }
-// ======================================================
 
 export async function getTabungan(
   params: TabunganQuery = {},
@@ -241,11 +230,6 @@ export async function getTabungan(
   );
 }
 
-// ======================================================
-// GET /api/keuangan/tabungan/siswa/:siswaId
-// Backend: detailTabunganSiswa
-// Respons ok(): { success, message, data: {...} }
-// ======================================================
 
 export async function getDetailTabungan(
   siswaId: string,
@@ -263,10 +247,6 @@ export async function getDetailTabungan(
   return response.data;
 }
 
-// ======================================================
-// GET /api/keuangan/tabungan/siswa/:siswaId/mutasi
-// Backend: mutasiTabungan -> okPage()
-// ======================================================
 
 export async function getMutasiTabungan(
   siswaId: string,
@@ -289,11 +269,6 @@ export async function getMutasiTabungan(
   );
 }
 
-// ======================================================
-// GET /api/keuangan/tabungan/laporan
-// Backend: laporanTabungan
-// Respons ok(): { success, message, data: {...} }
-// ======================================================
 
 export async function getLaporanTabungan(
   params: LaporanTabunganQuery = {},
@@ -310,9 +285,6 @@ export async function getLaporanTabungan(
   return response.data;
 }
 
-// ======================================================
-// VALIDASI TRANSAKSI
-// ======================================================
 
 function validateTransaksi(
   payload: TransaksiTabunganPayload,
@@ -333,10 +305,6 @@ function validateTransaksi(
   }
 }
 
-// ======================================================
-// POST /api/keuangan/tabungan/setor
-// Backend: setorTabungan -> prosesTransaksi()
-// ======================================================
 
 export async function setorTabungan(
   payload: TransaksiTabunganPayload,
@@ -354,10 +322,6 @@ export async function setorTabungan(
   return response.data;
 }
 
-// ======================================================
-// POST /api/keuangan/tabungan/tarik
-// Backend: tarikTabungan -> prosesTransaksi()
-// ======================================================
 
 export async function tarikTabungan(
   payload: TransaksiTabunganPayload,

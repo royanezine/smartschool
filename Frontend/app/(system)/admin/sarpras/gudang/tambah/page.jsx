@@ -33,9 +33,6 @@ import {
   createAset,
 } from "@/services/sarpras.service";
 
-// ============================================================
-// GLOBAL THEME HELPERS
-// ============================================================
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -146,9 +143,6 @@ export default function TambahAsetPage() {
     catatan: "",
   });
 
-  // =========================================================
-  // LOAD MASTER DATA
-  // =========================================================
 
   useEffect(() => {
     async function loadMasterData() {
@@ -195,9 +189,6 @@ export default function TambahAsetPage() {
     loadMasterData();
   }, []);
 
-  // =========================================================
-  // HANDLE CHANGE
-  // =========================================================
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -223,9 +214,6 @@ export default function TambahAsetPage() {
     }
   };
 
-  // =========================================================
-  // VALIDATION
-  // =========================================================
 
   const validateForm = () => {
     const newErrors = {};
@@ -322,9 +310,6 @@ export default function TambahAsetPage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  // =========================================================
-  // SUBMIT
-  // =========================================================
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -398,9 +383,6 @@ export default function TambahAsetPage() {
     }
   };
 
-  // =========================================================
-  // RESET
-  // =========================================================
 
   const handleReset = () => {
     setForm({
@@ -428,9 +410,6 @@ export default function TambahAsetPage() {
     setSuccess("");
   };
 
-  // =========================================================
-  // SELECTED DATA
-  // =========================================================
 
   const selectedGudang = useMemo(() => {
     return gudangList.find(
@@ -447,9 +426,6 @@ export default function TambahAsetPage() {
     );
   }, [kategoriList, form.kategoriAsetId]);
 
-  // =========================================================
-  // COMPLETENESS
-  // =========================================================
 
   const requiredFields = [
     form.kode,
@@ -468,9 +444,6 @@ export default function TambahAsetPage() {
     (completedFields / requiredFields.length) * 100
   );
 
-  // =========================================================
-  // STOCK STATUS
-  // =========================================================
 
   const stockStatus = useMemo(() => {
     const stok = Number(
@@ -507,9 +480,6 @@ export default function TambahAsetPage() {
     form.stokMinimum,
   ]);
 
-  // =========================================================
-  // REUSABLE CLASS
-  // =========================================================
 
   const inputClass = (name) => `
     ${themeInputBase}
@@ -529,32 +499,24 @@ export default function TambahAsetPage() {
     }
   `;
 
-  // =========================================================
-  // PAGE
-  // =========================================================
 
   return (
     <div className="theme-page min-h-screen">
       <div className="flex min-h-screen items-stretch">
 
-        {/* SIDEBAR */}
         <aside className="relative z-40 shrink-0 self-stretch">
           <Sidebar />
         </aside>
 
-        {/* AREA KANAN */}
         <div className="flex min-w-0 flex-1 flex-col">
 
-          {/* HEADER */}
           <div className="theme-header relative z-30 shrink-0">
             <Header />
           </div>
 
-          {/* MAIN */}
           <main className="min-w-0 flex-1 overflow-x-hidden">
             <div className="mx-auto w-full max-w-[1600px] px-4 py-5 sm:px-6 lg:px-8">
 
-              {/* PAGE HEADER */}
               <div className="mb-6">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 
@@ -632,7 +594,6 @@ export default function TambahAsetPage() {
                 </div>
               </div>
 
-              {/* ALERT ERROR */}
               {error && (
                 <div
                   className={`
@@ -671,7 +632,6 @@ export default function TambahAsetPage() {
                 </div>
               )}
 
-              {/* ALERT SUCCESS */}
               {success && (
                 <div
                   className={`
@@ -696,14 +656,11 @@ export default function TambahAsetPage() {
                 </div>
               )}
 
-              {/* FORM */}
               <form onSubmit={handleSubmit}>
                 <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
 
-                  {/* LEFT */}
                   <div className="min-w-0 space-y-6">
 
-                    {/* INFORMASI UTAMA */}
                     <section
                       className={`
                         overflow-hidden rounded-2xl
@@ -742,7 +699,6 @@ export default function TambahAsetPage() {
 
                       <div className="grid grid-cols-1 gap-5 p-5 sm:grid-cols-2 sm:p-6">
 
-                        {/* KODE */}
                         <div>
                           <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                             Kode Aset
@@ -767,7 +723,6 @@ export default function TambahAsetPage() {
                           )}
                         </div>
 
-                        {/* NAMA */}
                         <div>
                           <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                             Nama Aset
@@ -792,7 +747,6 @@ export default function TambahAsetPage() {
                           )}
                         </div>
 
-                        {/* KONDISI */}
                         <div>
                           <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                             Kondisi Aset
@@ -818,7 +772,6 @@ export default function TambahAsetPage() {
                           </select>
                         </div>
 
-                        {/* STATUS */}
                         <div>
                           <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                             Status
@@ -842,7 +795,6 @@ export default function TambahAsetPage() {
                       </div>
                     </section>
 
-                    {/* STOK */}
                     <section
                       className={`
                         overflow-hidden rounded-2xl
@@ -882,7 +834,6 @@ export default function TambahAsetPage() {
 
                       <div className="grid grid-cols-1 gap-5 p-5 sm:grid-cols-3 sm:p-6">
 
-                        {/* JUMLAH */}
                         <div>
                           <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                             Jumlah Aset
@@ -908,7 +859,6 @@ export default function TambahAsetPage() {
                           )}
                         </div>
 
-                        {/* STOK */}
                         <div>
                           <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                             Jumlah Stok
@@ -934,7 +884,6 @@ export default function TambahAsetPage() {
                           )}
                         </div>
 
-                        {/* MINIMUM */}
                         <div>
                           <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                             Stok Minimum
@@ -962,7 +911,6 @@ export default function TambahAsetPage() {
                       </div>
                     </section>
 
-                    {/* LOKASI & MASTER */}
                     <section
                       className={`
                         overflow-hidden rounded-2xl
@@ -1002,7 +950,6 @@ export default function TambahAsetPage() {
 
                       <div className="grid grid-cols-1 gap-5 p-5 sm:grid-cols-2 sm:p-6">
 
-                        {/* LOKASI */}
                         <div>
                           <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                             Lokasi
@@ -1029,7 +976,6 @@ export default function TambahAsetPage() {
                           </div>
                         </div>
 
-                        {/* GUDANG */}
                         <div>
                           <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                             Gudang
@@ -1079,7 +1025,6 @@ export default function TambahAsetPage() {
                           )}
                         </div>
 
-                        {/* KATEGORI */}
                         <div className="sm:col-span-2">
                           <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                             Kategori Aset
@@ -1133,7 +1078,6 @@ export default function TambahAsetPage() {
                       </div>
                     </section>
 
-                    {/* TANGGAL */}
                     <section
                       className={`
                         overflow-hidden rounded-2xl
@@ -1173,7 +1117,6 @@ export default function TambahAsetPage() {
 
                       <div className="grid grid-cols-1 gap-5 p-5 sm:grid-cols-2 lg:grid-cols-3 sm:p-6">
 
-                        {/* PEMBELIAN */}
                         <div>
                           <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                             Tanggal Pembelian
@@ -1196,7 +1139,6 @@ export default function TambahAsetPage() {
                           )}
                         </div>
 
-                        {/* PERAWATAN */}
                         <div>
                           <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                             Perawatan Terakhir
@@ -1219,7 +1161,6 @@ export default function TambahAsetPage() {
                           )}
                         </div>
 
-                        {/* RUSAK */}
                         <div>
                           <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                             Tanggal Rusak
@@ -1244,7 +1185,6 @@ export default function TambahAsetPage() {
                       </div>
                     </section>
 
-                    {/* PERBAIKAN */}
                     <section
                       className={`
                         overflow-hidden rounded-2xl
@@ -1284,7 +1224,6 @@ export default function TambahAsetPage() {
 
                       <div className="grid grid-cols-1 gap-5 p-5 sm:grid-cols-2 sm:p-6">
 
-                        {/* DESKRIPSI */}
                         <div className="sm:col-span-2">
                           <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                             Deskripsi Kerusakan
@@ -1302,7 +1241,6 @@ export default function TambahAsetPage() {
                           />
                         </div>
 
-                        {/* STATUS PERBAIKAN */}
                         <div>
                           <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                             Status Perbaikan
@@ -1334,7 +1272,6 @@ export default function TambahAsetPage() {
                           </select>
                         </div>
 
-                        {/* CATATAN */}
                         <div>
                           <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                             Catatan
@@ -1345,16 +1282,20 @@ export default function TambahAsetPage() {
                             value={form.catatan}
                             onChange={handleChange}
                             rows={3}
+                            disabled={submitting}
                             placeholder="Catatan tambahan..."
                             className={`${inputClass(
                               "catatan"
                             )} resize-none`}
                           />
+
+                          <p className="theme-text-muted mt-1.5 text-[11px]">
+                            Catatan atau keterangan tambahan terkait aset.
+                          </p>
                         </div>
                       </div>
                     </section>
 
-                    {/* BUTTON */}
                     <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
 
                       <button
@@ -1415,11 +1356,9 @@ export default function TambahAsetPage() {
                     </div>
                   </div>
 
-                  {/* RIGHT - SUMMARY */}
                   <aside className="min-w-0 xl:sticky xl:top-6">
                     <div className="space-y-5">
 
-                      {/* PREVIEW */}
                       <div
                         className={`
                           overflow-hidden rounded-2xl
@@ -1501,7 +1440,6 @@ export default function TambahAsetPage() {
                           </div>
                         </div>
 
-                        {/* DETAIL */}
                         <div
                           className={`
                             divide-y
@@ -1571,7 +1509,6 @@ export default function TambahAsetPage() {
                         </div>
                       </div>
 
-                      {/* MASTER DATA */}
                       <div
                         className={`
                           rounded-2xl
@@ -1640,7 +1577,6 @@ export default function TambahAsetPage() {
                         </div>
                       </div>
 
-                      {/* COMPLETENESS */}
                       <div
                         className={`
                           rounded-2xl
@@ -1706,7 +1642,6 @@ export default function TambahAsetPage() {
                         </div>
                       </div>
 
-                      {/* INFO */}
                       <div
                         className={`
                           rounded-2xl

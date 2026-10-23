@@ -34,9 +34,6 @@ export default function SesiKonselingPage() {
 
   const perPage = 7;
 
-  // =========================================
-  // AMBIL DATA SESI DARI BACKEND
-  // =========================================
 
   const loadData = useCallback(async (showLoading = true) => {
     try {
@@ -72,9 +69,6 @@ export default function SesiKonselingPage() {
     }
   }
 
-  // =========================================
-  // PERSETUJUAN DAN PENOLAKAN
-  // =========================================
 
  
 const handleDecision = async (id, keputusan, catatan = "") => {
@@ -89,17 +83,12 @@ const handleDecision = async (id, keputusan, catatan = "") => {
       }),
     });
 
-    // Pertahankan proses refresh data dan notifikasi
-    // yang sudah ada di halamanmu setelah request berhasil.
   } catch (error) {
     console.error("Gagal memproses keputusan konseling:", error);
     alert(error.message || "Gagal memproses keputusan konseling.");
   }
 };
 
-  // =========================================
-  // HELPER DATA
-  // =========================================
 
   function getNamaSiswa(item) {
     return (
@@ -163,9 +152,6 @@ const handleDecision = async (id, keputusan, catatan = "") => {
     return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
   }
 
-  // =========================================
-  // STATUS SESUAI ALUR BACKEND
-  // =========================================
 
   function statusLabel(status) {
     const map = {
@@ -194,9 +180,6 @@ const handleDecision = async (id, keputusan, catatan = "") => {
     return "theme-info";
   }
 
-  // =========================================
-  // STATISTIK BERDASARKAN DATA BACKEND
-  // =========================================
 
   const stats = useMemo(
     () => ({
@@ -217,9 +200,6 @@ const handleDecision = async (id, keputusan, catatan = "") => {
     [data]
   );
 
-  // =========================================
-  // SEARCH, FILTER, DAN SORT
-  // =========================================
 
   const filteredData = useMemo(() => {
     const keyword = search.trim().toLocaleLowerCase("id");
@@ -287,9 +267,6 @@ const handleDecision = async (id, keputusan, catatan = "") => {
     startIndex + perPage
   );
 
-  // =========================================
-  // HAPUS SESI MELALUI SERVICE BACKEND
-  // =========================================
 
   async function handleDelete(item) {
     const id = item?.id;
@@ -330,9 +307,6 @@ const handleDecision = async (id, keputusan, catatan = "") => {
     setPage(1);
   }
 
-  // =========================================
-  // RENDER HALAMAN
-  // =========================================
 
   return (
     <div className="theme-page flex h-screen overflow-hidden">
@@ -343,7 +317,6 @@ const handleDecision = async (id, keputusan, catatan = "") => {
 
         <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-7">
           <div className="mx-auto w-full max-w-[1600px]">
-            {/* HEADER */}
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div className="flex items-start gap-3">
                 <div className="theme-info flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ring-1 ring-current/10">
@@ -399,7 +372,6 @@ const handleDecision = async (id, keputusan, catatan = "") => {
               </button>
             </div>
 
-            {/* ALERT */}
             {error && (
               <div
                 role="alert"
@@ -418,7 +390,6 @@ const handleDecision = async (id, keputusan, catatan = "") => {
               </div>
             )}
 
-            {/* STATISTIK */}
             <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
               <Stat
                 label="Total Sesi"
@@ -461,7 +432,6 @@ const handleDecision = async (id, keputusan, catatan = "") => {
               />
             </div>
 
-            {/* FILTER */}
             <section className="theme-card mb-5 rounded-xl border p-4 shadow-sm">
               <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
                 <div className="relative w-full lg:flex-1">
@@ -568,7 +538,6 @@ const handleDecision = async (id, keputusan, catatan = "") => {
               </div>
             </section>
 
-            {/* TABEL */}
             <section className="theme-card overflow-hidden rounded-xl border shadow-sm">
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[950px] text-left text-sm">
@@ -655,7 +624,6 @@ const handleDecision = async (id, keputusan, catatan = "") => {
                           key={item.id}
                           className="theme-table-hover border-b last:border-b-0 transition"
                         >
-                          {/* SISWA */}
                           <td className="px-5 py-4">
                             <div className="flex items-center gap-3">
                               <div className="theme-info flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-xs font-bold ring-1 ring-current/10">
@@ -676,7 +644,6 @@ const handleDecision = async (id, keputusan, catatan = "") => {
                             </div>
                           </td>
 
-                          {/* KONSELOR */}
                           <td className="theme-text-secondary px-5 py-4">
                             <div className="flex items-center gap-2">
                               <div className="theme-card flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border">
@@ -701,7 +668,6 @@ const handleDecision = async (id, keputusan, catatan = "") => {
                             </div>
                           </td>
 
-                          {/* JADWAL */}
                           <td className="px-5 py-4">
                             <div className="theme-text-secondary text-sm font-semibold">
                               {formatTanggal(item.tanggal)}
@@ -726,7 +692,6 @@ const handleDecision = async (id, keputusan, catatan = "") => {
                             </div>
                           </td>
 
-                          {/* TOPIK */}
                           <td className="px-5 py-4">
                             <div className="theme-text-secondary max-w-[220px] truncate text-sm font-semibold">
                               {item.topik || "-"}
@@ -739,7 +704,6 @@ const handleDecision = async (id, keputusan, catatan = "") => {
                             )}
                           </td>
 
-                          {/* STATUS */}
                           <td className="px-5 py-4">
                             <span
                               className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold ${statusClass(
@@ -751,7 +715,6 @@ const handleDecision = async (id, keputusan, catatan = "") => {
                             </span>
                           </td>
 
-                          {/* AKSI */}
                           <td className="px-5 py-4">
                             <div className="flex items-center justify-end gap-1">
                               {item.status === "diajukan" && (
@@ -882,7 +845,6 @@ const handleDecision = async (id, keputusan, catatan = "") => {
                 </table>
               </div>
 
-              {/* PAGINATION */}
               {!loading && filteredData.length > 0 && (
                 <div className="theme-card flex flex-col items-center justify-between gap-3 border-t px-5 py-4 sm:flex-row">
                   <p className="theme-text-secondary text-sm font-medium">
@@ -1009,7 +971,6 @@ const handleDecision = async (id, keputusan, catatan = "") => {
               )}
             </section>
 
-            {/* MODAL PENOLAKAN */}
             {showRejectModal && rejectTarget && (
               <div
                 className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4"
@@ -1098,9 +1059,6 @@ const handleDecision = async (id, keputusan, catatan = "") => {
   );
 }
 
-// =========================================
-// KOMPONEN STATISTIK
-// =========================================
 
 function Stat({
   label,

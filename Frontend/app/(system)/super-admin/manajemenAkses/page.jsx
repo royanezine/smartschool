@@ -45,9 +45,6 @@ import {
   deleteRole,
 } from "@/services/role.service";
 
-/* ============================================================
-   THEME HELPERS
-============================================================ */
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -109,9 +106,6 @@ const themeDangerBorder =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-/* ============================================================
-   ICON MAP
-============================================================ */
 
 const iconMap = {
   Shield,
@@ -125,9 +119,6 @@ const iconMap = {
   Key,
 };
 
-/* ============================================================
-   STATUS STYLE
-============================================================ */
 
 const statusStyle = {
   aktif: {
@@ -147,9 +138,6 @@ const statusStyle = {
   },
 };
 
-/* ============================================================
-   ROLE ICON
-============================================================ */
 
 function getRoleIconName(role) {
   const nama = `${role?.nama || ""} ${
@@ -191,9 +179,6 @@ function getRoleIconName(role) {
   return "Shield";
 }
 
-/* ============================================================
-   MAP RESPONSE BE
-============================================================ */
 
 function mapRoleFromApi(role) {
   return {
@@ -213,9 +198,6 @@ function mapRoleFromApi(role) {
   };
 }
 
-/* ============================================================
-   MAIN PAGE
-============================================================ */
 
 export default function ManajemenAksesPage() {
   const router = useRouter();
@@ -240,9 +222,6 @@ export default function ManajemenAksesPage() {
   const [openMenuId, setOpenMenuId] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
 
-  /* ============================================================
-     LOAD DATA
-  ============================================================ */
 
   const loadRoles = async () => {
     try {
@@ -277,9 +256,6 @@ export default function ManajemenAksesPage() {
     loadRoles();
   }, []);
 
-  /* ============================================================
-     RESPONSIVE
-  ============================================================ */
 
   useEffect(() => {
     const checkScreen = () => {
@@ -301,9 +277,6 @@ export default function ManajemenAksesPage() {
     };
   }, []);
 
-  /* ============================================================
-     CLOSE DROPDOWN
-  ============================================================ */
 
   useEffect(() => {
     if (!openMenuId) return;
@@ -325,9 +298,6 @@ export default function ManajemenAksesPage() {
     };
   }, [openMenuId]);
 
-  /* ============================================================
-     STATISTICS
-  ============================================================ */
 
   const statistics = useMemo(() => {
     const total = roles.length;
@@ -361,9 +331,6 @@ export default function ManajemenAksesPage() {
     };
   }, [roles]);
 
-  /* ============================================================
-     FILTER
-  ============================================================ */
 
   const filteredData = useMemo(() => {
     const keyword = searchQuery
@@ -400,9 +367,6 @@ export default function ManajemenAksesPage() {
     filterStatus,
   ]);
 
-  /* ============================================================
-     SORT
-  ============================================================ */
 
   const sortedData = useMemo(() => {
     return [...filteredData].sort(
@@ -452,9 +416,6 @@ export default function ManajemenAksesPage() {
     sortOrder,
   ]);
 
-  /* ============================================================
-     PAGINATION
-  ============================================================ */
 
   const totalPages = Math.max(
     1,
@@ -481,9 +442,6 @@ export default function ManajemenAksesPage() {
         itemsPerPage
     );
 
-  /* ============================================================
-     SORT HANDLER
-  ============================================================ */
 
   const handleSort = (field) => {
     if (sortField === field) {
@@ -500,9 +458,6 @@ export default function ManajemenAksesPage() {
     setCurrentPage(1);
   };
 
-  /* ============================================================
-     SORT ICON
-  ============================================================ */
 
   const renderSortIcon = (field) => {
     if (sortField !== field) {
@@ -522,9 +477,6 @@ export default function ManajemenAksesPage() {
     );
   };
 
-  /* ============================================================
-     RESET FILTER
-  ============================================================ */
 
   const resetFilters = () => {
     setSearchQuery("");
@@ -532,9 +484,6 @@ export default function ManajemenAksesPage() {
     setCurrentPage(1);
   };
 
-  /* ============================================================
-     DELETE ROLE
-  ============================================================ */
 
   const handleDelete = async (role) => {
     const confirmed =
@@ -572,9 +521,6 @@ export default function ManajemenAksesPage() {
     }
   };
 
-  /* ============================================================
-     EXPORT CSV
-  ============================================================ */
 
   const handleExport = () => {
     if (sortedData.length === 0) {
@@ -652,9 +598,6 @@ export default function ManajemenAksesPage() {
     URL.revokeObjectURL(url);
   };
 
-  /* ============================================================
-     STATUS LABEL
-  ============================================================ */
 
   const getStatusLabel = (status) => {
     if (status === "aktif") {
@@ -668,9 +611,6 @@ export default function ManajemenAksesPage() {
     return status || "-";
   };
 
-  /* ============================================================
-     ROLE ICON
-  ============================================================ */
 
   const getRoleIcon = (iconName) => {
     return (
@@ -679,17 +619,11 @@ export default function ManajemenAksesPage() {
     );
   };
 
-  /* ============================================================
-     RENDER
-  ============================================================ */
 
   return (
     <div className="theme-page theme-text min-h-full">
       <div className="w-full max-w-[1600px] mx-auto px-4 py-5 sm:px-6 sm:py-7 lg:px-8 lg:py-8">
 
-        {/* ==================================================
-            PREMIUM HERO
-        ================================================== */}
 
         <section
           className={`
@@ -699,7 +633,6 @@ export default function ManajemenAksesPage() {
             mb-6
           `}
         >
-          {/* Background glow */}
 
           <div
             className="
@@ -729,7 +662,6 @@ export default function ManajemenAksesPage() {
             "
           />
 
-          {/* Grid */}
 
           <div
             className="
@@ -921,7 +853,6 @@ export default function ManajemenAksesPage() {
                 </div>
               </div>
 
-              {/* ACTION */}
 
               <div className="flex flex-col sm:flex-row gap-2.5 xl:shrink-0">
 
@@ -992,9 +923,6 @@ export default function ManajemenAksesPage() {
           </div>
         </section>
 
-        {/* ==================================================
-            STATISTICS
-        ================================================== */}
 
         <section className="grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4 mb-6">
 
@@ -1034,9 +962,6 @@ export default function ManajemenAksesPage() {
 
         </section>
 
-        {/* ==================================================
-            INFORMATION
-        ================================================== */}
 
         <section
           className={`
@@ -1139,9 +1064,6 @@ export default function ManajemenAksesPage() {
           </div>
         </section>
 
-        {/* ==================================================
-            ERROR
-        ================================================== */}
 
         {errorMessage && (
           <section
@@ -1209,9 +1131,6 @@ export default function ManajemenAksesPage() {
           </section>
         )}
 
-        {/* ==================================================
-            FILTER PANEL
-        ================================================== */}
 
         <section
           className={`
@@ -1228,7 +1147,6 @@ export default function ManajemenAksesPage() {
 
             <div className="flex flex-col xl:flex-row xl:items-center gap-3">
 
-              {/* SEARCH */}
 
               <div className="relative flex-1 min-w-0">
 
@@ -1269,7 +1187,6 @@ export default function ManajemenAksesPage() {
 
               </div>
 
-              {/* FILTER */}
 
               <div className="flex flex-col sm:flex-row gap-2.5">
 
@@ -1355,7 +1272,6 @@ export default function ManajemenAksesPage() {
 
             </div>
 
-            {/* FILTER FOOTER */}
 
             <div
               className={`
@@ -1418,9 +1334,6 @@ export default function ManajemenAksesPage() {
           </div>
         </section>
 
-        {/* ==================================================
-            DATA TABLE
-        ================================================== */}
 
         <section
           className={`
@@ -1432,7 +1345,6 @@ export default function ManajemenAksesPage() {
           `}
         >
 
-          {/* TABLE HEADER */}
 
           <div
             className={`
@@ -1674,7 +1586,6 @@ export default function ManajemenAksesPage() {
                             "
                           >
 
-                            {/* ROLE */}
 
                             <td className="px-5 py-4">
 
@@ -1748,7 +1659,6 @@ export default function ManajemenAksesPage() {
 
                             </td>
 
-                            {/* DESCRIPTION */}
 
                             <td className="hidden xl:table-cell px-5 py-4 max-w-[300px]">
 
@@ -1760,7 +1670,6 @@ export default function ManajemenAksesPage() {
 
                             </td>
 
-                            {/* IZIN */}
 
                             <td className="px-5 py-4">
 
@@ -1790,7 +1699,6 @@ export default function ManajemenAksesPage() {
 
                             </td>
 
-                            {/* USERS */}
 
                             <td className="px-5 py-4">
 
@@ -1822,7 +1730,6 @@ export default function ManajemenAksesPage() {
 
                             </td>
 
-                            {/* STATUS */}
 
                             <td className="px-5 py-4">
 
@@ -1862,7 +1769,6 @@ export default function ManajemenAksesPage() {
 
                             </td>
 
-                            {/* ACTION */}
 
                             <td className="px-5 py-4">
 
@@ -2032,9 +1938,6 @@ export default function ManajemenAksesPage() {
             </div>
           )}
 
-          {/* ==================================================
-              PAGINATION
-          ================================================== */}
 
           <div
             className={`
@@ -2195,9 +2098,6 @@ export default function ManajemenAksesPage() {
           </div>
         </section>
 
-        {/* ==================================================
-            FOOTER
-        ================================================== */}
 
         <div className="flex flex-col sm:flex-row items-center justify-between gap-2 pt-5 pb-2">
 
@@ -2243,9 +2143,6 @@ export default function ManajemenAksesPage() {
   );
 }
 
-/* ============================================================
-   PREMIUM STAT CARD
-============================================================ */
 
 function PremiumStatCard({
   label,
@@ -2375,9 +2272,6 @@ function PremiumStatCard({
   );
 }
 
-/* ============================================================
-   MOBILE ROLE LIST
-============================================================ */
 
 function MobileRoleList({
   data,
@@ -2639,9 +2533,6 @@ function MobileRoleList({
   );
 }
 
-/* ============================================================
-   SORTABLE HEADER
-============================================================ */
 
 function SortableHeader({
   label,
@@ -2681,9 +2572,6 @@ function SortableHeader({
   );
 }
 
-/* ============================================================
-   ACTION BUTTON
-============================================================ */
 
 function ActionButton({
   children,
@@ -2729,9 +2617,6 @@ function ActionButton({
   );
 }
 
-/* ============================================================
-   LOADING STATE
-============================================================ */
 
 function LoadingState() {
   return (
@@ -2785,9 +2670,6 @@ function LoadingState() {
   );
 }
 
-/* ============================================================
-   EMPTY STATE
-============================================================ */
 
 function EmptyState() {
   return (

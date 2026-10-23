@@ -17,9 +17,6 @@ import {
   BookOpen,
 } from "lucide-react";
 
-/* =========================================================
-   API CONFIGURATION
-========================================================= */
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
@@ -35,10 +32,6 @@ function getApiBaseUrl() {
     .replace(/\/api$/, "");
 }
 
-/* =========================================================
-   THEME
-   Menggunakan tema sekolah jika tersedia.
-========================================================= */
 
 const THEME = {
   primary: "var(--school-primary, #155DFC)",
@@ -52,9 +45,6 @@ const THEME = {
   hero: "var(--school-hero-background, #071A36)",
 };
 
-/* =========================================================
-   MAIN COMPONENT
-========================================================= */
 
 export default function ArticlesPageClient({ tenant }) {
   const [articles, setArticles] = useState([]);
@@ -122,7 +112,6 @@ export default function ArticlesPageClient({ tenant }) {
         );
       }
 
-      // Mendukung response { data: [...] }.
       const data = result?.data ?? result;
 
       if (!Array.isArray(data)) {
@@ -155,9 +144,6 @@ export default function ArticlesPageClient({ tenant }) {
     loadArtikel();
   }, [loadArtikel]);
 
-  /* =======================================================
-     FORMAT DATE
-  ======================================================= */
 
   const formatDate = (date) => {
     if (!date) return "-";
@@ -175,9 +161,6 @@ export default function ArticlesPageClient({ tenant }) {
     }).format(parsedDate);
   };
 
-  /* =======================================================
-     IMAGE URL
-  ======================================================= */
 
   const getImage = (article) => {
     const image = article?.gambarUtama;
@@ -205,9 +188,6 @@ export default function ArticlesPageClient({ tenant }) {
     }
   };
 
-  /* =======================================================
-     HELPERS
-  ======================================================= */
 
   const closeMobileMenu = () => {
     setMobileMenu(false);
@@ -239,9 +219,6 @@ export default function ArticlesPageClient({ tenant }) {
     color: THEME.text,
   };
 
-  /* =======================================================
-     RENDER
-  ======================================================= */
 
   return (
     <main
@@ -251,7 +228,6 @@ export default function ArticlesPageClient({ tenant }) {
         color: THEME.text,
       }}
     >
-      {/* HEADER */}
 
       <header
         className="sticky top-0 z-50 border-b backdrop-blur-xl"
@@ -384,7 +360,6 @@ export default function ArticlesPageClient({ tenant }) {
         )}
       </header>
 
-      {/* HERO */}
 
       <section
         className="relative overflow-hidden"
@@ -452,10 +427,8 @@ export default function ArticlesPageClient({ tenant }) {
         </div>
       </section>
 
-      {/* ARTICLE LIST */}
 
       <section className="mx-auto max-w-7xl px-5 py-14 lg:px-8 lg:py-16">
-        {/* LOADING */}
 
         {loading && (
           <div
@@ -483,7 +456,6 @@ export default function ArticlesPageClient({ tenant }) {
           </div>
         )}
 
-        {/* ERROR */}
 
         {!loading && error && (
           <div
@@ -544,7 +516,6 @@ export default function ArticlesPageClient({ tenant }) {
           </div>
         )}
 
-        {/* EMPTY */}
 
         {!loading && !error && articles.length === 0 && (
           <div
@@ -585,11 +556,9 @@ export default function ArticlesPageClient({ tenant }) {
           </div>
         )}
 
-        {/* ARTICLES */}
 
         {!loading && !error && articles.length > 0 && (
           <>
-            {/* FEATURED ARTICLE */}
 
             {featuredArticle && (
               <div className="mb-14">
@@ -689,7 +658,7 @@ export default function ArticlesPageClient({ tenant }) {
                       </p>
 
                       <Link
-                        href={`/articles/${featuredArticle.id}`}
+                        href={`${base}/articles/${featuredArticle.slug || featuredArticle.id}`}
                         className="mt-8 inline-flex w-fit items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition hover:opacity-90"
                         style={buttonStyle}
                       >
@@ -702,7 +671,6 @@ export default function ArticlesPageClient({ tenant }) {
               </div>
             )}
 
-            {/* OTHER ARTICLES */}
 
             {otherArticles.length > 0 && (
               <div>
@@ -730,7 +698,7 @@ export default function ArticlesPageClient({ tenant }) {
                         style={surfaceStyle}
                       >
                         <Link
-                          href={`/articles/${article.id}`}
+                          href={`${base}/articles/${article.slug || article.id}`}
                           className="relative block aspect-[16/10] overflow-hidden bg-slate-100"
                         >
                           {image ? (
@@ -781,7 +749,7 @@ export default function ArticlesPageClient({ tenant }) {
                           </div>
 
                           <Link
-                            href={`/articles/${article.id}`}
+                            href={`${base}/articles/${article.slug || article.id}`}
                             className="mt-3"
                           >
                             <h3 className="line-clamp-2 text-lg font-bold leading-7 transition group-hover:opacity-75">
@@ -799,7 +767,7 @@ export default function ArticlesPageClient({ tenant }) {
 
                           <div className="mt-auto pt-6">
                             <Link
-                              href={`/articles/${article.id}`}
+                              href={`${base}/articles/${article.slug || article.id}`}
                               className="inline-flex items-center gap-2 text-sm font-semibold transition hover:opacity-70"
                               style={linkStyle}
                             >
@@ -818,7 +786,6 @@ export default function ArticlesPageClient({ tenant }) {
         )}
       </section>
 
-      {/* CTA */}
 
       <section className="mx-auto max-w-7xl px-5 pb-16 lg:px-8">
         <div
@@ -857,7 +824,6 @@ export default function ArticlesPageClient({ tenant }) {
         </div>
       </section>
 
-      {/* FOOTER */}
 
       <footer
         className="border-t"

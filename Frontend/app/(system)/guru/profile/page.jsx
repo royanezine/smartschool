@@ -37,9 +37,6 @@ import {
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
-// ============================================================
-// THEME HELPERS
-// ============================================================
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -101,9 +98,6 @@ const themeDangerBorder =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-// ============================================================
-// PAGE
-// ============================================================
 
 export default function ProfilGuruPage() {
   const router = useRouter();
@@ -150,7 +144,6 @@ export default function ProfilGuruPage() {
       console.log("PROFILE RESPONSE:", result);
 
       if (response.status === 401) {
-        // Hapus sesi aktif secara lengkap (token + user).
         clearSession();
 
         router.push("/login");
@@ -210,9 +203,6 @@ export default function ProfilGuruPage() {
     }
   };
 
-  // ============================================================
-  // LOADING
-  // ============================================================
 
   if (loading) {
     return (
@@ -231,9 +221,6 @@ export default function ProfilGuruPage() {
     );
   }
 
-  // ============================================================
-  // ERROR
-  // ============================================================
 
   if (error || !profile) {
     return (
@@ -289,13 +276,9 @@ export default function ProfilGuruPage() {
     );
   }
 
-  // ============================================================
-  // MAIN
-  // ============================================================
 
   return (
     <div className="theme-page flex h-screen w-full min-w-0 overflow-hidden">
-      {/* SIDEBAR */}
       <Sidebar
         active="profil"
         setActive={() => {}}
@@ -304,7 +287,6 @@ export default function ProfilGuruPage() {
         role="guru"
       />
 
-      {/* MAIN */}
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <Header
           toggleSidebar={toggleSidebar}
@@ -320,9 +302,6 @@ export default function ProfilGuruPage() {
           <div className="w-full min-w-0 p-3 sm:p-4 md:p-6 lg:p-7 xl:p-8">
             <div className="mx-auto w-full max-w-[1500px] space-y-6">
 
-              {/* ================================================= */}
-              {/* PAGE HEADER */}
-              {/* ================================================= */}
 
               <section
                 className={`theme-card rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
@@ -362,9 +341,6 @@ export default function ProfilGuruPage() {
                 </div>
               </section>
 
-              {/* ================================================= */}
-              {/* PROFILE HERO */}
-              {/* ================================================= */}
 
               <section
                 className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
@@ -389,7 +365,6 @@ export default function ProfilGuruPage() {
                   <div className="-mt-12 flex flex-col gap-5 sm:-mt-14 lg:flex-row lg:items-end lg:justify-between">
                     <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-end">
 
-                      {/* AVATAR */}
                       <div className="relative w-fit">
                         <div
                           className={`theme-card flex h-24 w-24 items-center justify-center rounded-2xl border-4 text-2xl font-bold sm:h-28 sm:w-28 sm:text-3xl ${themeNeutralBorder} ${themePrimaryText} ${themeCardShadow}`}
@@ -407,7 +382,6 @@ export default function ProfilGuruPage() {
                         </button>
                       </div>
 
-                      {/* NAME */}
                       <div className="min-w-0 pb-1">
                         <div className="flex flex-wrap items-center gap-2">
                           <h2 className="theme-text text-xl font-bold sm:text-2xl">
@@ -440,7 +414,6 @@ export default function ProfilGuruPage() {
                       </div>
                     </div>
 
-                    {/* CODE */}
                     <div
                       className={`flex items-center gap-3 rounded-xl border px-4 py-3 ${themeNeutralSurface} ${themeNeutralBorder}`}
                     >
@@ -464,9 +437,6 @@ export default function ProfilGuruPage() {
                 </div>
               </section>
 
-              {/* ================================================= */}
-              {/* TABS */}
-              {/* ================================================= */}
 
               <div
                 className={`theme-card overflow-x-auto rounded-xl border ${themeNeutralBorder} ${themeCardShadow}`}
@@ -495,9 +465,6 @@ export default function ProfilGuruPage() {
                 </div>
               </div>
 
-              {/* ================================================= */}
-              {/* PROFIL */}
-              {/* ================================================= */}
 
               {activeTab === "profil" && (
                 <div className="grid min-w-0 grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
@@ -611,10 +578,8 @@ export default function ProfilGuruPage() {
                     </ProfileSection>
                   </div>
 
-                  {/* RIGHT */}
                   <aside className="min-w-0 space-y-6">
 
-                    {/* STATUS */}
                     <div
                       className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
                     >
@@ -670,7 +635,6 @@ export default function ProfilGuruPage() {
                       </div>
                     </div>
 
-                    {/* ACTIVITY */}
                     <div
                       className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
                     >
@@ -713,7 +677,6 @@ export default function ProfilGuruPage() {
                       </div>
                     </div>
 
-                    {/* QUICK ACTION */}
                     <div
                       className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
                     >
@@ -760,9 +723,6 @@ export default function ProfilGuruPage() {
                 </div>
               )}
 
-              {/* ================================================= */}
-              {/* KEPEGAWAIAN */}
-              {/* ================================================= */}
 
               {activeTab === "kepegawaian" && (
                 <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
@@ -840,9 +800,6 @@ export default function ProfilGuruPage() {
                 </div>
               )}
 
-              {/* ================================================= */}
-              {/* AKUN */}
-              {/* ================================================= */}
 
               {activeTab === "akun" && (
                 <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
@@ -901,7 +858,6 @@ export default function ProfilGuruPage() {
 
                   <div className="space-y-6">
 
-                    {/* PROTECTED */}
                     <div
                       className={`rounded-2xl border p-5 ${themeSuccessSurface} ${themeSuccessBorder}`}
                     >
@@ -922,7 +878,6 @@ export default function ProfilGuruPage() {
                       </p>
                     </div>
 
-                    {/* INFORMATION */}
                     <div
                       className={`rounded-2xl border p-5 ${themeInfoSurface} ${themeInfoBorder}`}
                     >
@@ -946,7 +901,6 @@ export default function ProfilGuruPage() {
                 </div>
               )}
 
-              {/* FOOTER */}
 
               <footer className={`border-t pt-5 text-center ${themeDivider}`}>
                 <p className="theme-text-muted text-[11px]">
@@ -961,9 +915,6 @@ export default function ProfilGuruPage() {
   );
 }
 
-/* ============================================================
-   NORMALIZE PROFILE
-============================================================ */
 
 function normalizeProfile(data) {
   const nama =
@@ -1113,9 +1064,6 @@ function normalizeProfile(data) {
   };
 }
 
-/* ============================================================
-   FORMAT DATE
-============================================================ */
 
 function formatDate(value) {
   if (!value) return "";
@@ -1142,9 +1090,6 @@ function formatDate(value) {
   });
 }
 
-/* ============================================================
-   FORMAT STATUS
-============================================================ */
 
 function formatStatus(value) {
   if (!value) return "Aktif";
@@ -1168,9 +1113,6 @@ function formatStatus(value) {
   return value;
 }
 
-/* ============================================================
-   INITIALS
-============================================================ */
 
 function getInitials(name) {
   if (!name) return "GU";
@@ -1190,9 +1132,6 @@ function getInitials(name) {
   ).toUpperCase();
 }
 
-/* ============================================================
-   TAB BUTTON
-============================================================ */
 
 function TabButton({
   active,
@@ -1223,9 +1162,6 @@ function TabButton({
   );
 }
 
-/* ============================================================
-   PROFILE SECTION
-============================================================ */
 
 function ProfileSection({
   icon: Icon,
@@ -1275,9 +1211,6 @@ function ProfileSection({
   );
 }
 
-/* ============================================================
-   DETAIL ITEM
-============================================================ */
 
 function DetailItem({
   icon: Icon,
@@ -1307,9 +1240,6 @@ function DetailItem({
   );
 }
 
-/* ============================================================
-   INFO BOX
-============================================================ */
 
 function InfoBox({
   icon: Icon,
@@ -1339,9 +1269,6 @@ function InfoBox({
   );
 }
 
-/* ============================================================
-   STATUS ROW
-============================================================ */
 
 function StatusRow({
   label,
@@ -1379,9 +1306,6 @@ function StatusRow({
   );
 }
 
-/* ============================================================
-   MINI STAT
-============================================================ */
 
 function MiniStat({
   icon: Icon,
@@ -1413,9 +1337,6 @@ function MiniStat({
   );
 }
 
-/* ============================================================
-   QUICK ACTION
-============================================================ */
 
 function QuickAction({
   icon: Icon,
@@ -1453,9 +1374,6 @@ function QuickAction({
   );
 }
 
-/* ============================================================
-   INFO ICON
-============================================================ */
 
 function InfoIcon() {
   return (

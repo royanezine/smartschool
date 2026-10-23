@@ -25,10 +25,6 @@ export default function PaymentPage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    // Informasi pembayaran berasal dari respons POST /api/tenant/verify yang
-    // sudah disimpan oleh halaman verifikasi. Backend saat ini tidak memiliki
-    // rute create-va maupun status tenant, sehingga halaman ini tidak boleh
-    // memanggil endpoint tambahan apa pun dan tidak mengarang status sukses.
     const savedUrl = sessionStorage.getItem("onboarding_payment_url") || "";
     const savedOrderId = sessionStorage.getItem("onboarding_order_id") || "";
     const savedVaNumber = sessionStorage.getItem("onboarding_va_number") || "";

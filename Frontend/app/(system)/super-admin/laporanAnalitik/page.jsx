@@ -7,9 +7,6 @@ import {
   ArrowDownRight,
 } from "lucide-react";
 
-// =========================================================
-// THEME HELPERS
-// =========================================================
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -68,9 +65,6 @@ const themeDangerBorder =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-// =========================================================
-// DUMMY DATA
-// =========================================================
 
 const summaryStats = [
   {
@@ -195,9 +189,6 @@ const reportData = [
   },
 ];
 
-// =========================================================
-// UTILITY
-// =========================================================
 
 const formatRupiah = (angka) => {
   if (!angka) return "Rp0";
@@ -214,9 +205,6 @@ const getStatusColor = (status) => {
   return map[status] || map.Nonaktif;
 };
 
-// =========================================================
-// MAIN COMPONENT
-// =========================================================
 
 export default function LaporanAnalitikPage() {
   const [activeTab, setActiveTab] =
@@ -321,9 +309,6 @@ export default function LaporanAnalitikPage() {
     <div className="theme-page theme-text min-h-full">
       <div className="mx-auto w-full max-w-[1600px] px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
 
-        {/* =====================================================
-            HEADER
-        ===================================================== */}
 
         <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 
@@ -357,9 +342,6 @@ export default function LaporanAnalitikPage() {
           </div>
         </div>
 
-        {/* =====================================================
-            STATS CARDS
-        ===================================================== */}
 
         <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
 
@@ -404,9 +386,6 @@ export default function LaporanAnalitikPage() {
 
         </div>
 
-        {/* =====================================================
-            TABS
-        ===================================================== */}
 
         <div
           className={`mb-6 overflow-x-auto border-b ${themeDivider}`}
@@ -439,9 +418,6 @@ export default function LaporanAnalitikPage() {
           </nav>
         </div>
 
-        {/* =====================================================
-            CONTENT
-        ===================================================== */}
 
         <div className="space-y-4">
 
@@ -489,9 +465,6 @@ export default function LaporanAnalitikPage() {
 
         </div>
 
-        {/* =====================================================
-            FOOTER
-        ===================================================== */}
 
         <div
           className={`mt-6 border-t ${themeDivider} py-3 text-center text-xs theme-text-muted`}
@@ -505,9 +478,6 @@ export default function LaporanAnalitikPage() {
   );
 }
 
-// =========================================================
-// TAB RINGKASAN
-// =========================================================
 
 function RingkasanTab({
   monthlyData,
@@ -550,9 +520,6 @@ function RingkasanTab({
   return (
     <div className="space-y-4">
 
-      {/* =====================================================
-          CHART CONTROLS
-      ===================================================== */}
 
       <div
         className={`theme-card flex flex-wrap items-center gap-2 rounded-xl border ${themeNeutralBorder} p-3 ${themeCardShadow}`}
@@ -586,9 +553,6 @@ function RingkasanTab({
         })}
       </div>
 
-      {/* =====================================================
-          AREA CHART
-      ===================================================== */}
 
       <div
         className={`theme-card rounded-xl border ${themeNeutralBorder} p-4 ${themeCardShadow}`}
@@ -638,7 +602,6 @@ function RingkasanTab({
               </linearGradient>
             </defs>
 
-            {/* Grid Lines */}
 
             {[0, 25, 50, 75, 100].map(
               (percent) => {
@@ -660,7 +623,6 @@ function RingkasanTab({
               }
             )}
 
-            {/* Area */}
 
             <polygon
               points={
@@ -692,7 +654,6 @@ function RingkasanTab({
               fill="url(#areaGradient)"
             />
 
-            {/* Line */}
 
             <polyline
               points={monthlyData
@@ -725,7 +686,6 @@ function RingkasanTab({
               strokeLinejoin="round"
             />
 
-            {/* Data Points */}
 
             {monthlyData.map(
               (d, i) => {
@@ -792,7 +752,6 @@ function RingkasanTab({
               }
             )}
 
-            {/* X Axis */}
 
             {monthlyData.map(
               (d, i) => {
@@ -818,7 +777,6 @@ function RingkasanTab({
               }
             )}
 
-            {/* Y Axis */}
 
             {[0, 25, 50, 75, 100].map(
               (percent) => {
@@ -868,7 +826,6 @@ function RingkasanTab({
 
         </div>
 
-        {/* Metric Summary */}
 
         <div
           className={`mt-4 grid grid-cols-3 gap-3 border-t ${themeDivider} pt-3`}
@@ -946,9 +903,6 @@ function RingkasanTab({
         </div>
       </div>
 
-      {/* =====================================================
-          RINGKASAN 3 METRIK
-      ===================================================== */}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
 
@@ -1044,9 +998,6 @@ function RingkasanTab({
   );
 }
 
-// =========================================================
-// TAB SEKOLAH
-// =========================================================
 
 function SekolahTab({
   reportData,
@@ -1070,7 +1021,6 @@ function SekolahTab({
       className={`theme-card overflow-hidden rounded-xl border ${themeNeutralBorder} ${themeCardShadow}`}
     >
 
-      {/* FILTER */}
 
       <div
         className={`flex flex-col gap-3 border-b ${themeDivider} p-4 sm:flex-row`}
@@ -1157,7 +1107,6 @@ function SekolahTab({
         </div>
       </div>
 
-      {/* TABLE */}
 
       <div className="overflow-x-auto">
 
@@ -1271,7 +1220,6 @@ function SekolahTab({
         </table>
       </div>
 
-      {/* PAGINATION */}
 
       {totalPages > 1 && (
         <div
@@ -1362,9 +1310,6 @@ function SekolahTab({
   );
 }
 
-// =========================================================
-// TAB KEUANGAN
-// =========================================================
 
 function KeuanganTab({
   monthlyData,
@@ -1391,7 +1336,6 @@ function KeuanganTab({
   return (
     <div className="space-y-4">
 
-      {/* SUMMARY */}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
 
@@ -1455,7 +1399,6 @@ function KeuanganTab({
 
       </div>
 
-      {/* DETAIL */}
 
       <div
         className={`theme-card rounded-xl border ${themeNeutralBorder} p-4 ${themeCardShadow}`}
@@ -1538,9 +1481,6 @@ function KeuanganTab({
   );
 }
 
-// =========================================================
-// TAB PENGGUNA
-// =========================================================
 
 function PenggunaTab({
   monthlyData,
@@ -1570,7 +1510,6 @@ function PenggunaTab({
   return (
     <div className="space-y-4">
 
-      {/* SUMMARY */}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
 
@@ -1635,7 +1574,6 @@ function PenggunaTab({
 
       </div>
 
-      {/* CHART */}
 
       <div
         className={`theme-card rounded-xl border ${themeNeutralBorder} p-4 ${themeCardShadow}`}

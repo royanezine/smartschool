@@ -41,7 +41,6 @@ export default function Implementation() {
     <section className="py-24 bg-white">
       <div className="max-w-7xl mx-auto px-6">
 
-        {/* Heading */}
         <div className="text-center">
 
           <span className="inline-flex rounded-full bg-blue-100 px-4 py-2 text-sm font-semibold text-blue-600">
@@ -62,10 +61,8 @@ export default function Implementation() {
 
         </div>
 
-        {/* Timeline */}
         <div className="relative mt-20">
 
-          {/* Line */}
           <div className="hidden lg:block absolute left-0 right-0 top-12 h-1 bg-blue-100"></div>
 
           <div className="grid gap-8 lg:grid-cols-4 relative">
@@ -75,14 +72,12 @@ export default function Implementation() {
                 key={index}
                 className="relative bg-white rounded-3xl border border-gray-100 p-8 shadow-sm hover:shadow-xl transition duration-300"
               >
-                {/* Circle */}
                 <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg">
 
                   {item.icon}
 
                 </div>
 
-                {/* Step */}
                 <div className="mt-6 text-center">
 
                   <span className="text-blue-600 font-bold text-sm">

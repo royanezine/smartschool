@@ -32,9 +32,6 @@ import {
   Users,
 } from "lucide-react";
 
-// ============================================================
-// THEME HELPERS
-// ============================================================
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -95,9 +92,6 @@ const themeDangerBorder =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-// ============================================================
-// HELPERS
-// ============================================================
 
 function parseData(response) {
   if (!response) return [];
@@ -467,9 +461,6 @@ function getEndTime(item) {
   );
 }
 
-// ============================================================
-// STAT CARD
-// ============================================================
 
 function StatCard({
   label,
@@ -510,9 +501,6 @@ function StatCard({
   );
 }
 
-// ============================================================
-// PAGE
-// ============================================================
 
 export default function NilaiUjianGuruPage() {
   const router = useRouter();
@@ -705,11 +693,6 @@ export default function NilaiUjianGuruPage() {
     );
   }, [detailUjian]);
 
-  /**
-   * GET /api/ujian/:id saat ini hanya mengembalikan data ujian + soal,
-   * TANPA percobaan/hasil siswa. Jika field hasil tidak ada, jangan
-   * tampilkan nilai 0 atau "belum mengerjakan" karena menyesatkan.
-   */
   const hasilTersedia = useMemo(() => {
     if (!detailUjian) return false;
 
@@ -1110,9 +1093,6 @@ export default function NilaiUjianGuruPage() {
     kelas?.nama ||
     "-";
 
-  // ==========================================================
-  // NAVIGASI KE HALAMAN DETAIL
-  // ==========================================================
 
   const openDetail = useCallback(
     (item) => {
@@ -1157,9 +1137,6 @@ export default function NilaiUjianGuruPage() {
     ]
   );
 
-  // ==========================================================
-  // LOADING
-  // ==========================================================
 
   if (loadingKelasMapel) {
     return (
@@ -1225,9 +1202,6 @@ export default function NilaiUjianGuruPage() {
 
         <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
           <div className="mx-auto w-full max-w-[1500px]">
-            {/* =====================================================
-                HERO
-            ====================================================== */}
 
             <section
               className={`relative mb-6 overflow-hidden rounded-3xl ${themePrimaryGradient} ${themePrimaryShadow}`}
@@ -1339,9 +1313,6 @@ export default function NilaiUjianGuruPage() {
               </div>
             </section>
 
-            {/* =====================================================
-                ERROR
-            ====================================================== */}
 
             {error && (
               <div
@@ -1376,9 +1347,6 @@ export default function NilaiUjianGuruPage() {
               </div>
             )}
 
-            {/* =====================================================
-                SELECTOR
-            ====================================================== */}
 
             <section className="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
               <div
@@ -1489,9 +1457,6 @@ export default function NilaiUjianGuruPage() {
               </div>
             </section>
 
-            {/* =====================================================
-                EMPTY EXAM
-            ====================================================== */}
 
             {!loadingUjian && ujian.length === 0 && (
               <div
@@ -1516,9 +1481,6 @@ export default function NilaiUjianGuruPage() {
 
             {selectedUjianId && currentUjian && (
               <>
-                {/* =================================================
-                    EXAM INFO
-                ================================================== */}
 
                 <section
                   className={`theme-card mb-6 overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
@@ -1666,9 +1628,6 @@ export default function NilaiUjianGuruPage() {
                   </div>
                 )}
 
-                {/* =================================================
-                    STATISTICS
-                ================================================== */}
 
                 <section className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
                   <StatCard
@@ -1727,9 +1686,6 @@ export default function NilaiUjianGuruPage() {
                   />
                 </section>
 
-                {/* =================================================
-                    SCORE SUMMARY
-                ================================================== */}
 
                 <section className="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-3">
                   <div
@@ -1845,9 +1801,6 @@ export default function NilaiUjianGuruPage() {
                   </div>
                 </section>
 
-                {/* =================================================
-                    FILTER
-                ================================================== */}
 
                 <section
                   className={`theme-card mb-6 rounded-2xl border ${themeNeutralBorder} p-5 ${themeCardShadow}`}
@@ -1950,9 +1903,6 @@ export default function NilaiUjianGuruPage() {
                   </div>
                 </section>
 
-                {/* =================================================
-                    LOADING / EMPTY
-                ================================================== */}
 
                 {loadingDetail ? (
                   <div
@@ -1993,9 +1943,6 @@ export default function NilaiUjianGuruPage() {
                   </div>
                 ) : (
                   <>
-                    {/* =================================================
-                        DESKTOP TABLE
-                    ================================================== */}
 
                     <div
                       className={`theme-card hidden overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow} md:block`}
@@ -2203,9 +2150,6 @@ export default function NilaiUjianGuruPage() {
                       </div>
                     </div>
 
-                    {/* =================================================
-                        MOBILE
-                    ================================================== */}
 
                     <div className="space-y-4 md:hidden">
                       {filteredNilaiSiswa.map((item, index) => {

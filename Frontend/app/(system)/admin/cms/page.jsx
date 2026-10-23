@@ -1,4 +1,3 @@
-// app/cmsAdmin/page.jsx
 
 "use client";
 
@@ -36,9 +35,6 @@ export default function CmsDashboardPage() {
 
   const latestArticles = dummyArticles.slice(0, 5);
 
-  // ============================================================
-  // STATISTICS
-  // ============================================================
 
   const statCards = [
     {
@@ -71,9 +67,6 @@ export default function CmsDashboardPage() {
     },
   ];
 
-  // ============================================================
-  // WRITING TIPS
-  // ============================================================
 
   const tips = [
     {
@@ -98,9 +91,6 @@ export default function CmsDashboardPage() {
     },
   ];
 
-  // ============================================================
-  // COLOR CONFIG
-  // ============================================================
 
   const colorClasses = {
     info: {
@@ -129,15 +119,9 @@ export default function CmsDashboardPage() {
     },
   };
 
-  // ============================================================
-  // MAIN
-  // ============================================================
 
   return (
     <div className="theme-page flex min-h-screen w-full">
-      {/* ========================================================
-          SIDEBAR
-      ======================================================== */}
 
       <Sidebar
         active={active}
@@ -146,12 +130,8 @@ export default function CmsDashboardPage() {
         setCollapsed={setCollapsed}
       />
 
-      {/* ========================================================
-          MAIN AREA
-      ======================================================== */}
 
       <div className="flex min-w-0 flex-1 flex-col">
-        {/* HEADER */}
 
         <Header
           user={{
@@ -162,24 +142,16 @@ export default function CmsDashboardPage() {
           notifications={[]}
         />
 
-        {/* ======================================================
-            CONTENT
-        ====================================================== */}
 
         <main className="theme-page flex-1 min-w-0 p-4 sm:p-6 lg:p-8">
           <div className="w-full max-w-[1600px] mx-auto">
 
-            {/* ==================================================
-                PAGE HEADER
-            ================================================== */}
 
             <section className="mb-7">
               <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
 
-                {/* LEFT */}
 
                 <div className="min-w-0">
-                  {/* Title */}
 
                   <div className="flex items-center gap-3">
                     <div
@@ -250,7 +222,6 @@ export default function CmsDashboardPage() {
                   </div>
                 </div>
 
-                {/* RIGHT */}
 
                 <div className="flex flex-wrap items-center gap-2">
                   <a
@@ -306,14 +277,10 @@ export default function CmsDashboardPage() {
                 </div>
               </div>
 
-              {/* Divider */}
 
               <div className="mt-6 border-b theme-border" />
             </section>
 
-            {/* ==================================================
-                STATISTICS
-            ================================================== */}
 
             <section className="grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4 mb-6">
               {statCards.map((stat) => {
@@ -338,7 +305,6 @@ export default function CmsDashboardPage() {
                       duration-200
                     `}
                   >
-                    {/* Small accent */}
 
                     <div
                       className={`
@@ -412,15 +378,9 @@ export default function CmsDashboardPage() {
               })}
             </section>
 
-            {/* ==================================================
-                MAIN CONTENT GRID
-            ================================================== */}
 
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
 
-              {/* =================================================
-                  ARTICLES
-              ================================================= */}
 
               <section
                 className="
@@ -433,7 +393,6 @@ export default function CmsDashboardPage() {
                   overflow-hidden
                 "
               >
-                {/* Card Header */}
 
                 <div
                   className="
@@ -509,7 +468,6 @@ export default function CmsDashboardPage() {
                   </div>
                 </div>
 
-                {/* Article List */}
 
                 <div className="px-5 sm:px-6">
                   {latestArticles.length > 0 ? (
@@ -526,7 +484,6 @@ export default function CmsDashboardPage() {
                             theme-table-hover
                           "
                         >
-                          {/* Icon */}
 
                           <div
                             className="
@@ -550,7 +507,6 @@ export default function CmsDashboardPage() {
                             <PenLine size={16} />
                           </div>
 
-                          {/* Content */}
 
                           <div className="flex-1 min-w-0">
                             <p
@@ -567,7 +523,6 @@ export default function CmsDashboardPage() {
                             </p>
 
                             <div className="flex items-center flex-wrap gap-2 mt-1.5">
-                              {/* Status */}
 
                               <span
                                 className={`
@@ -598,7 +553,6 @@ export default function CmsDashboardPage() {
                                   : "Draft"}
                               </span>
 
-                              {/* Category */}
 
                               <span className="text-[11px] theme-text-muted">
                                 {article.category || "Uncategorized"}
@@ -606,7 +560,6 @@ export default function CmsDashboardPage() {
                             </div>
                           </div>
 
-                          {/* Date */}
 
                           <div
                             className="
@@ -630,7 +583,6 @@ export default function CmsDashboardPage() {
                             })}
                           </div>
 
-                          {/* Arrow */}
 
                           <ArrowRight
                             size={15}
@@ -676,7 +628,6 @@ export default function CmsDashboardPage() {
                   )}
                 </div>
 
-                {/* Footer */}
 
                 <div
                   className="
@@ -708,9 +659,6 @@ export default function CmsDashboardPage() {
                 </div>
               </section>
 
-              {/* =================================================
-                  CONTENT OVERVIEW
-              ================================================= */}
 
               <section
                 className="
@@ -722,7 +670,6 @@ export default function CmsDashboardPage() {
                   overflow-hidden
                 "
               >
-                {/* Header */}
 
                 <div
                   className="
@@ -774,11 +721,9 @@ export default function CmsDashboardPage() {
                   </div>
                 </div>
 
-                {/* Overview */}
 
                 <div className="p-5 sm:p-6 space-y-5">
 
-                  {/* Published */}
 
                   <div>
                     <div className="flex items-center justify-between mb-2">
@@ -834,7 +779,6 @@ export default function CmsDashboardPage() {
                     </div>
                   </div>
 
-                  {/* Pages */}
 
                   <div
                     className="
@@ -899,7 +843,6 @@ export default function CmsDashboardPage() {
                     </span>
                   </div>
 
-                  {/* Views */}
 
                   <div
                     className="
@@ -964,7 +907,6 @@ export default function CmsDashboardPage() {
                     </span>
                   </div>
 
-                  {/* Create Button */}
 
                   <a
                     href="/cmsAdmin/articles/create"
@@ -992,13 +934,9 @@ export default function CmsDashboardPage() {
               </section>
             </div>
 
-            {/* ==================================================
-                TIPS SECTION
-            ================================================== */}
 
             <section className="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
-              {/* Tips */}
 
               <div
                 className="
@@ -1130,7 +1068,6 @@ export default function CmsDashboardPage() {
                 </div>
               </div>
 
-              {/* Quick Action */}
 
               <div
                 className="
@@ -1236,9 +1173,6 @@ export default function CmsDashboardPage() {
               </div>
             </section>
 
-            {/* ==================================================
-                FOOTER
-            ================================================== */}
 
             <footer
               className="

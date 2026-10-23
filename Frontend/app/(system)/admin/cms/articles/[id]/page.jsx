@@ -107,10 +107,6 @@ export default function ArticleDetailPage() {
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState("");
 
-  /*
-   * State sidebar.
-   * Default true (expanded).
-   */
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   useEffect(() => {
@@ -194,9 +190,6 @@ export default function ArticleDetailPage() {
     }
   }
 
-  /* =========================================================
-     LOADING STATE
-  ========================================================= */
 
   if (loading) {
     return (
@@ -243,9 +236,6 @@ export default function ArticleDetailPage() {
     );
   }
 
-  /* =========================================================
-     ERROR STATE
-  ========================================================= */
 
   if (error || !article) {
     return (
@@ -338,9 +328,6 @@ export default function ArticleDetailPage() {
     );
   }
 
-  /* =========================================================
-     MAIN RENDER
-  ========================================================= */
 
   const categoryName =
     article.kategoriArtikel?.nama ||
@@ -354,9 +341,6 @@ export default function ArticleDetailPage() {
 
   return (
     <div className="theme-page flex h-screen overflow-hidden">
-      {/* =====================================================
-          SIDEBAR
-      ===================================================== */}
 
       <Sidebar
         role="cms"
@@ -371,14 +355,8 @@ export default function ArticleDetailPage() {
         }}
       />
 
-      {/* =====================================================
-          CONTENT
-      ===================================================== */}
 
       <div className="flex h-screen min-w-0 flex-1 flex-col overflow-hidden">
-        {/* ===================================================
-            HEADER (STICKY)
-        =================================================== */}
 
         <div className="sticky top-0 z-30 shrink-0">
           <Header
@@ -388,12 +366,8 @@ export default function ArticleDetailPage() {
           />
         </div>
 
-        {/* ===================================================
-            MAIN (SCROLL INTERNAL)
-        =================================================== */}
 
         <main className="theme-page flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
-          {/* TOP BAR */}
 
           <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <button
@@ -483,13 +457,10 @@ export default function ArticleDetailPage() {
             </div>
           </div>
 
-          {/* ARTICLE */}
 
           <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
-            {/* CONTENT */}
 
             <article className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
-              {/* IMAGE */}
 
               {imageUrl ? (
                 <div
@@ -526,7 +497,6 @@ export default function ArticleDetailPage() {
               )}
 
               <div className="p-5 sm:p-7 lg:p-9">
-                {/* CATEGORY + STATUS */}
 
                 <div className="mb-4 flex flex-wrap items-center gap-2">
                   <span className="theme-info inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-bold">
@@ -540,13 +510,11 @@ export default function ArticleDetailPage() {
                   />
                 </div>
 
-                {/* TITLE */}
 
                 <h1 className="theme-text text-2xl font-bold leading-tight tracking-tight sm:text-3xl lg:text-4xl">
                   {article.judul}
                 </h1>
 
-                {/* META */}
 
                 <div className="theme-border-soft theme-text-muted mt-5 flex flex-wrap gap-x-5 gap-y-2 border-b pb-5 text-xs">
                   <span className="inline-flex items-center gap-1.5">
@@ -573,7 +541,6 @@ export default function ArticleDetailPage() {
                   )}
                 </div>
 
-                {/* SUMMARY */}
 
                 {article.ringkasan && (
                   <div className="theme-info mt-6 rounded-r-xl border-l-4 px-5 py-4">
@@ -583,7 +550,6 @@ export default function ArticleDetailPage() {
                   </div>
                 )}
 
-                {/* CONTENT */}
 
                 <div className="theme-text mt-7">
                   {article.konten ? (
@@ -616,10 +582,8 @@ export default function ArticleDetailPage() {
               </div>
             </article>
 
-            {/* SIDEBAR DETAIL */}
 
             <aside className="space-y-5">
-              {/* INFO */}
 
               <div className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
                 <div className="theme-card-soft theme-border-soft border-b px-5 py-4">
@@ -668,7 +632,6 @@ export default function ArticleDetailPage() {
                 </div>
               </div>
 
-              {/* QUICK ACTION */}
 
               <div className="theme-card theme-border rounded-2xl border p-5 shadow-sm">
                 <div className="flex items-center gap-3">

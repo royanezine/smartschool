@@ -39,9 +39,6 @@ import {
   getNilaiUjianUntukKelas,
 } from "@/services/ujian.service";
 
-/* =========================================================
-   HELPERS
-========================================================= */
 
 function getResultData(result) {
   if (result?.data?.data) {
@@ -112,10 +109,6 @@ function getGrade(finalScore) {
   return "E";
 }
 
-/* =========================================================
-   GRADE STYLE
-   Menggunakan theme status global
-========================================================= */
 
 function getGradeStyle(grade) {
   if (grade === "A") {
@@ -133,9 +126,6 @@ function getGradeStyle(grade) {
   return "theme-danger";
 }
 
-/* =========================================================
-   STAT CARD
-========================================================= */
 
 function StatCard({
   icon: Icon,
@@ -224,14 +214,8 @@ function StatCard({
   );
 }
 
-/* =========================================================
-   MAIN PAGE
-========================================================= */
 
 export default function EntryNilaiPage() {
-  /* =======================================================
-     DATA STATE
-  ======================================================= */
 
   const [tahunAjaranList, setTahunAjaranList] = useState([]);
   const [kelasList, setKelasList] = useState([]);
@@ -239,9 +223,6 @@ export default function EntryNilaiPage() {
   const [mapelList, setMapelList] = useState([]);
   const [selectedKelasData, setSelectedKelasData] = useState(null);
 
-  /* =======================================================
-     FILTER STATE
-  ======================================================= */
 
   const [tahunAjaranId, setTahunAjaranId] = useState("");
   const [semester, setSemester] = useState("");
@@ -249,9 +230,6 @@ export default function EntryNilaiPage() {
   const [kelasMapelId, setKelasMapelId] = useState("");
   const [search, setSearch] = useState("");
 
-  /* =======================================================
-     UI STATE
-  ======================================================= */
 
   const [loadingTahunAjaran, setLoadingTahunAjaran] =
     useState(true);
@@ -264,9 +242,6 @@ export default function EntryNilaiPage() {
   const [error, setError] = useState("");
   const [modalStudent, setModalStudent] = useState(null);
 
-  /* =======================================================
-     LOAD TAHUN AJARAN
-  ======================================================= */
 
   const loadTahunAjaran = useCallback(async () => {
     try {
@@ -360,9 +335,6 @@ export default function EntryNilaiPage() {
     loadTahunAjaran();
   }, [loadTahunAjaran]);
 
-  /* =======================================================
-     LOAD KELAS
-  ======================================================= */
 
   const loadKelas = useCallback(async () => {
     if (!tahunAjaranId) {
@@ -465,9 +437,6 @@ export default function EntryNilaiPage() {
     loadKelas();
   }, [loadKelas]);
 
-  /* =======================================================
-     LOAD DETAIL KELAS
-  ======================================================= */
 
   const loadDetailKelas = useCallback(async () => {
     if (!kelasId) {
@@ -575,9 +544,6 @@ export default function EntryNilaiPage() {
     loadDetailKelas();
   }, [loadDetailKelas]);
 
-  /* =======================================================
-     LOAD NILAI RAPORT + NILAI UJIAN
-  ======================================================= */
 
   useEffect(() => {
     if (
@@ -593,9 +559,6 @@ export default function EntryNilaiPage() {
       try {
         setLoadingNilai(true);
 
-        /* =================================================
-           1. NILAI UJIAN
-        ================================================= */
 
         let nilaiUjian = [];
 
@@ -634,9 +597,6 @@ export default function EntryNilaiPage() {
           }
         }
 
-        /* =================================================
-           2. NILAI RAPORT
-        ================================================= */
 
         const results =
           await Promise.all(
@@ -694,9 +654,6 @@ export default function EntryNilaiPage() {
           return;
         }
 
-        /* =================================================
-           3. UPDATE DATA SISWA
-        ================================================= */
 
         setStudents(
           (current) =>
@@ -876,9 +833,6 @@ export default function EntryNilaiPage() {
     students.length,
   ]);
 
-  /* =======================================================
-     SELECTED DATA
-  ======================================================= */
 
   const selectedTahunAjaran =
     useMemo(
@@ -925,9 +879,6 @@ export default function EntryNilaiPage() {
       ?.nama ||
     "Mata Pelajaran";
 
-  /* =======================================================
-     FILTER STUDENTS
-  ======================================================= */
 
   const filteredStudents =
     useMemo(() => {
@@ -963,9 +914,6 @@ export default function EntryNilaiPage() {
       search,
     ]);
 
-  /* =======================================================
-     STATISTIC
-  ======================================================= */
 
   const totalStudents =
     students.length;
@@ -998,9 +946,6 @@ export default function EntryNilaiPage() {
         )
       : 0;
 
-  /* =======================================================
-     RESET
-  ======================================================= */
 
   const resetFilter = () => {
     setSearch("");
@@ -1059,9 +1004,6 @@ export default function EntryNilaiPage() {
     }
   };
 
-  /* =======================================================
-     EXPORT
-  ======================================================= */
 
   const handleExport = async () => {
     try {
@@ -1099,9 +1041,6 @@ export default function EntryNilaiPage() {
     }
   };
 
-  /* =======================================================
-     RENDER
-  ======================================================= */
 
   return (
     <div className="theme-page flex min-h-screen">
@@ -1113,9 +1052,6 @@ export default function EntryNilaiPage() {
         <main className="min-w-0 flex-1 px-4 py-5 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-[1280px]">
 
-            {/* =================================================
-                PAGE HEADER
-            ================================================= */}
 
             <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex min-w-0 items-center gap-3">
@@ -1207,9 +1143,6 @@ export default function EntryNilaiPage() {
               </div>
             </div>
 
-            {/* =================================================
-                ERROR
-            ================================================= */}
 
             {error && (
               <div className="theme-danger mb-5 flex items-start gap-3 rounded-xl border px-4 py-3 text-sm">
@@ -1230,9 +1163,6 @@ export default function EntryNilaiPage() {
               </div>
             )}
 
-            {/* =================================================
-                STAT CARDS
-            ================================================= */}
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
 
@@ -1266,9 +1196,6 @@ export default function EntryNilaiPage() {
 
             </div>
 
-            {/* =================================================
-                FILTER CARD
-            ================================================= */}
 
             <div
               className="
@@ -1285,7 +1212,6 @@ export default function EntryNilaiPage() {
 
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
 
-                {/* TAHUN AJARAN */}
 
                 <div>
                   <label className="theme-text-secondary mb-2 block text-xs font-semibold">
@@ -1399,7 +1325,6 @@ export default function EntryNilaiPage() {
                   </div>
                 </div>
 
-                {/* SEMESTER */}
 
                 <div>
                   <label className="theme-text-secondary mb-2 block text-xs font-semibold">
@@ -1452,7 +1377,6 @@ export default function EntryNilaiPage() {
                   </p>
                 </div>
 
-                {/* KELAS */}
 
                 <div>
                   <label className="theme-text-secondary mb-2 block text-xs font-semibold">
@@ -1528,7 +1452,6 @@ export default function EntryNilaiPage() {
                   </div>
                 </div>
 
-                {/* MAPEL */}
 
                 <div>
                   <label className="theme-text-secondary mb-2 block text-xs font-semibold">
@@ -1600,7 +1523,6 @@ export default function EntryNilaiPage() {
 
               </div>
 
-              {/* SEARCH */}
 
               <div className="mt-4 flex flex-col gap-3 lg:flex-row lg:items-center">
 
@@ -1647,9 +1569,6 @@ export default function EntryNilaiPage() {
               </div>
             </div>
 
-            {/* =================================================
-                SUBJECT INFO
-            ================================================= */}
 
             <div
               className="
@@ -1715,9 +1634,6 @@ export default function EntryNilaiPage() {
               </div>
             </div>
 
-            {/* =================================================
-                LOADING
-            ================================================= */}
 
             {(loadingSiswa ||
               loadingNilai) && (
@@ -1749,9 +1665,6 @@ export default function EntryNilaiPage() {
               </div>
             )}
 
-            {/* =================================================
-                TABLE
-            ================================================= */}
 
             {!loadingSiswa &&
               !loadingNilai && (
@@ -1988,7 +1901,6 @@ export default function EntryNilaiPage() {
                     </table>
                   </div>
 
-                  {/* FOOTER */}
 
                   <div className="theme-border-soft flex flex-col gap-2 border-t px-5 py-3 sm:flex-row sm:items-center sm:justify-between">
                     <p className="theme-text-muted text-xs">
@@ -2014,9 +1926,6 @@ export default function EntryNilaiPage() {
                 </div>
               )}
 
-            {/* =================================================
-                INFO
-            ================================================= */}
 
             <div className="theme-warning mt-5 rounded-xl border px-5 py-4">
               <div className="flex gap-3">
@@ -2049,9 +1958,6 @@ export default function EntryNilaiPage() {
         </main>
       </div>
 
-      {/* =====================================================
-          DETAIL NILAI MODAL
-      ===================================================== */}
 
       {modalStudent && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 backdrop-blur-[2px]">
@@ -2069,7 +1975,6 @@ export default function EntryNilaiPage() {
             "
           >
 
-            {/* HEADER */}
 
             <div className="theme-border flex items-center justify-between border-b px-5 py-4 sm:px-6">
 
@@ -2106,7 +2011,6 @@ export default function EntryNilaiPage() {
 
             </div>
 
-            {/* BODY */}
 
             <div className="p-5 sm:p-6">
 
@@ -2134,7 +2038,6 @@ export default function EntryNilaiPage() {
 
               </div>
 
-              {/* NILAI */}
 
               <div className="theme-card theme-border rounded-xl border p-5">
 
@@ -2231,7 +2134,6 @@ export default function EntryNilaiPage() {
 
               </div>
 
-              {/* INFO */}
 
               <div className="theme-warning mt-4 rounded-lg border px-4 py-3">
 
@@ -2247,7 +2149,6 @@ export default function EntryNilaiPage() {
 
             </div>
 
-            {/* FOOTER */}
 
             <div className="theme-border flex justify-end border-t px-5 py-4 sm:px-6">
 

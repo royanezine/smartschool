@@ -16,9 +16,6 @@ import {
   ArrowLeft,
 } from "lucide-react";
 
-// =========================================================
-// TABS
-// =========================================================
 
 const TABS = [
   { key: "keamanan", label: "Keamanan", icon: Lock },
@@ -26,9 +23,6 @@ const TABS = [
   { key: "tampilan", label: "Tampilan", icon: Palette },
 ];
 
-// =========================================================
-// DATA DUMMY
-// =========================================================
 
 const notifications = [
   {
@@ -45,22 +39,17 @@ const notifications = [
   },
 ];
 
-// =========================================================
-// KOMPONEN UTAMA
-// =========================================================
 
 export default function AdminPengaturanPage() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [tabAktif, setTabAktif] = useState("keamanan");
   const [tersimpan, setTersimpan] = useState(false);
 
-  // KEAMANAN
   const [passwordLama, setPasswordLama] = useState("");
   const [passwordBaru, setPasswordBaru] = useState("");
   const [konfirmasiPassword, setKonfirmasiPassword] = useState("");
   const [lihatPassword, setLihatPassword] = useState(false);
 
-  // NOTIFIKASI
   const [notifikasi, setNotifikasi] = useState({
     emailPengumuman: true,
     emailTugas: true,
@@ -69,11 +58,9 @@ export default function AdminPengaturanPage() {
     pushPersetujuan: false,
   });
 
-  // TAMPILAN
   const [tema, setTema] = useState("terang");
   const [ukuranFont, setUkuranFont] = useState("sedang");
 
-  // HANDLERS
   const tampilkanTersimpan = () => {
     setTersimpan(true);
     setTimeout(() => setTersimpan(false), 2500);
@@ -104,7 +91,6 @@ export default function AdminPengaturanPage() {
 
   return (
     <div className="flex h-screen overflow-hidden theme-page">
-      {/* SIDEBAR */}
       <Sidebar
         active="pengaturan"
         setActive={() => {}}
@@ -112,7 +98,6 @@ export default function AdminPengaturanPage() {
         setCollapsed={() => setSidebarOpen(!sidebarOpen)}
       />
 
-      {/* MAIN AREA */}
       <div className="flex min-w-0 flex-1 flex-col theme-page">
         <Header
           toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
@@ -126,7 +111,6 @@ export default function AdminPengaturanPage() {
 
         <main className="flex-1 overflow-y-auto theme-page">
           <div className="mx-auto w-full max-w-3xl px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
-            {/* HEADER PAGE */}
             <div className="flex flex-col gap-5 mb-7">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-start gap-3 min-w-0">
@@ -184,7 +168,6 @@ export default function AdminPengaturanPage() {
               </div>
             </div>
 
-            {/* TABS */}
             <div
               className="
                 flex gap-1.5
@@ -226,9 +209,6 @@ export default function AdminPengaturanPage() {
               })}
             </div>
 
-            {/* =================================================
-                TAB: KEAMANAN
-            ================================================= */}
             {tabAktif === "keamanan" && (
               <form
                 onSubmit={simpanPassword}
@@ -256,7 +236,6 @@ export default function AdminPengaturanPage() {
                 </div>
 
                 <div className="p-5 sm:p-6 space-y-5">
-                  {/* PASSWORD LAMA */}
                   <div>
                     <label className="text-xs font-semibold theme-text-secondary">
                       Kata Sandi Saat Ini
@@ -297,7 +276,6 @@ export default function AdminPengaturanPage() {
                     </div>
                   </div>
 
-                  {/* PASSWORD BARU + KONFIRMASI */}
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
                       <label className="text-xs font-semibold theme-text-secondary">
@@ -381,12 +359,8 @@ export default function AdminPengaturanPage() {
               </form>
             )}
 
-            {/* =================================================
-                TAB: NOTIFIKASI
-            ================================================= */}
             {tabAktif === "notifikasi" && (
               <div className="rounded-2xl border theme-border theme-card overflow-hidden shadow-sm">
-                {/* EMAIL HEADER */}
                 <div className="flex items-center gap-3 px-5 sm:px-6 py-4 border-b theme-border-soft">
                   <div className="w-10 h-10 rounded-xl theme-info flex items-center justify-center flex-shrink-0">
                     <Bell size={18} className="text-[var(--color-info)]" />
@@ -426,7 +400,6 @@ export default function AdminPengaturanPage() {
                   />
                 </div>
 
-                {/* PUSH HEADER */}
                 <div className="flex items-center gap-3 px-5 sm:px-6 py-4 border-y theme-border-soft">
                   <div className="w-10 h-10 rounded-xl theme-info flex items-center justify-center flex-shrink-0">
                     <Bell size={18} className="text-[var(--color-info)]" />
@@ -461,9 +434,6 @@ export default function AdminPengaturanPage() {
               </div>
             )}
 
-            {/* =================================================
-                TAB: TAMPILAN
-            ================================================= */}
             {tabAktif === "tampilan" && (
               <div className="rounded-2xl border theme-border theme-card overflow-hidden shadow-sm">
                 <div className="flex items-center gap-3 px-5 sm:px-6 py-4 border-b theme-border-soft">
@@ -483,7 +453,6 @@ export default function AdminPengaturanPage() {
                 </div>
 
                 <div className="p-5 sm:p-6 space-y-6">
-                  {/* TEMA */}
                   <div>
                     <label className="text-xs font-semibold theme-text-secondary">
                       Tema
@@ -518,7 +487,6 @@ export default function AdminPengaturanPage() {
                     </div>
                   </div>
 
-                  {/* UKURAN FONT */}
                   <div>
                     <label className="text-xs font-semibold theme-text-secondary">
                       Ukuran Font
@@ -576,7 +544,6 @@ export default function AdminPengaturanPage() {
               </div>
             )}
 
-            {/* FOOTER */}
             <div className="py-7 text-center">
               <p className="text-xs theme-text-placeholder">
                 SmartSchool Admin • Pengaturan
@@ -589,9 +556,6 @@ export default function AdminPengaturanPage() {
   );
 }
 
-// =========================================================
-// KOMPONEN TOGGLE ROW
-// =========================================================
 
 function ToggleRow({ label, desc, checked, onChange }) {
   return (

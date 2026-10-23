@@ -30,9 +30,6 @@ import { getUsers } from "@/services/user.service";
 import { getKelasMapel } from "@/services/kelasMapel.service";
 import { apiFetch } from "@/lib/api";
 
-// =========================================================
-// HELPERS
-// =========================================================
 
 const getInitials = (nama = "") => {
   const parts = String(nama).trim().split(/\s+/).filter(Boolean);
@@ -77,9 +74,6 @@ const formatDate = (value) => {
   }
 };
 
-// =========================================================
-// INFO ITEM
-// =========================================================
 
 function InfoItem({
   icon: Icon,
@@ -108,9 +102,6 @@ function InfoItem({
   );
 }
 
-// =========================================================
-// STAT CARD
-// =========================================================
 
 function StatCard({
   icon: Icon,
@@ -149,9 +140,6 @@ function StatCard({
   );
 }
 
-// =========================================================
-// NORMALIZE RESPONSE
-// =========================================================
 
 function extractList(response) {
   const candidates = [
@@ -206,9 +194,6 @@ function hitungRataKehadiran(dataAbsensi) {
   return `${((jumlahHadir / dataValid.length) * 100).toFixed(1)}%`;
 }
 
-// =========================================================
-// MAIN COMPONENT
-// =========================================================
 
 export default function DetailGuruPage() {
   const router = useRouter();
@@ -227,9 +212,6 @@ export default function DetailGuruPage() {
   const [loadingStatistik, setLoadingStatistik] = useState(true);
   const [rataKehadiran, setRataKehadiran] = useState("-");
 
-  // =======================================================
-  // FETCH GURU
-  // =======================================================
 
   useEffect(() => {
     let mounted = true;
@@ -286,9 +268,6 @@ export default function DetailGuruPage() {
     };
   }, [id]);
 
-  // =======================================================
-  // FETCH TEACHING STATISTICS
-  // =======================================================
 
  
  
@@ -320,10 +299,8 @@ useEffect(() => {
         );
       });
 
-      // Kumpulkan mata pelajaran unik.
       const mapelUnik = new Map();
 
-      // Kumpulkan kelas unik berdasarkan relasi BE.
       const kelasUnik = new Map();
 
       penugasanGuru.forEach((item) => {
@@ -352,8 +329,6 @@ useEffect(() => {
       setMapelGuru([...mapelUnik.values()]);
       setKelasDiampu(kelasUnik.size);
 
-      // Endpoint kelas-mapel tidak mengirim data anggota siswa.
-      // Jangan menampilkan angka siswa yang belum berhasil dihitung.
       setTotalSiswa("-");
     } catch (err) {
       console.error("Gagal mengambil statistik guru:", err);
@@ -377,9 +352,6 @@ useEffect(() => {
   };
 }, [id]);
 
-  // =======================================================
-  // LOADING
-  // =======================================================
 
   if (loading) {
     return (
@@ -418,9 +390,6 @@ useEffect(() => {
     );
   }
 
-  // =======================================================
-  // ERROR
-  // =======================================================
 
   if (error || !guru) {
     return (
@@ -472,9 +441,6 @@ useEffect(() => {
     );
   }
 
-  // =======================================================
-  // NORMALIZE USER DATA
-  // =======================================================
 
   const nama =
     guru.nama ||
@@ -538,9 +504,6 @@ useEffect(() => {
       ? "Perempuan"
       : gender || "-";
 
-  // =======================================================
-  // RENDER
-  // =======================================================
 
   return (
     <div className="flex min-h-screen w-full min-w-0 theme-page">
@@ -568,7 +531,6 @@ useEffect(() => {
           <div className="w-full px-3 py-4 sm:px-5 sm:py-5 md:px-6 lg:px-8 xl:px-10 2xl:px-12">
             <div className="w-full space-y-5">
 
-              {/* PAGE HEADER */}
               <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0">
                   <button
@@ -600,7 +562,6 @@ useEffect(() => {
                 </button>
               </div>
 
-              {/* PROFILE CARD */}
               <section className="w-full overflow-hidden rounded-xl border theme-card shadow-sm">
                 <div className="h-1 bg-[var(--color-primary)]" />
 
@@ -680,10 +641,8 @@ useEffect(() => {
                 </div>
               </section>
 
-              {/* MAIN GRID */}
               <div className="grid min-w-0 grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1.75fr)_minmax(280px,0.75fr)] xl:grid-cols-[minmax(0,1.8fr)_minmax(300px,0.72fr)] 2xl:grid-cols-[minmax(0,2fr)_minmax(320px,0.7fr)]">
 
-                {/* LEFT COLUMN */}
                 <div className="min-w-0 space-y-5">
                   <section className="w-full rounded-xl border theme-card shadow-sm">
                     <div className="border-b theme-border px-4 py-4 sm:px-6">
@@ -759,7 +718,6 @@ useEffect(() => {
                   </section>
                 </div>
 
-                {/* RIGHT COLUMN */}
                 <aside className="min-w-0 space-y-5">
                   <section className="w-full rounded-xl border theme-card shadow-sm">
                     <div className="border-b theme-border px-4 py-4 sm:px-5">
@@ -874,7 +832,6 @@ useEffect(() => {
                 </aside>
               </div>
 
-              {/* BOTTOM ACTION */}
               <div className="flex min-w-0 flex-col gap-3 border-t theme-border pb-4 pt-5 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0">
                   <p className="text-sm font-semibold theme-text-secondary">

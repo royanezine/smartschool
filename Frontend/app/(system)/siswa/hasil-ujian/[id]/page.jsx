@@ -19,9 +19,6 @@ import {
   XCircle,
 } from "lucide-react";
 
-/* =========================================================
-   THEME HELPERS
-========================================================= */
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -80,9 +77,6 @@ const themeDangerSurface =
 const themeDangerBorder =
   "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
 
-/* =========================================================
-   API
-========================================================= */
 
 async function getUjianById(id) {
   if (!id) {
@@ -133,9 +127,6 @@ async function getUjianById(id) {
   return data;
 }
 
-/* =========================================================
-   NORMALIZER RESPONSE UTAMA
-========================================================= */
 
 function normalizeObjectResponse(response) {
   if (!response) {
@@ -175,9 +166,6 @@ function normalizeObjectResponse(response) {
   return response;
 }
 
-/* =========================================================
-   NORMALIZE HASIL UJIAN
-========================================================= */
 
 function normalizeHasilUjian(value) {
   if (
@@ -262,9 +250,6 @@ function normalizeHasilUjian(value) {
   return value;
 }
 
-/* =========================================================
-   CEK HASIL UJIAN
-========================================================= */
 
 function isValidHasilUjian(value) {
   if (
@@ -288,9 +273,6 @@ function isValidHasilUjian(value) {
   );
 }
 
-/* =========================================================
-   CARI HASIL UJIAN
-========================================================= */
 
 function getResultData(ujian, percobaan) {
   const candidates = [
@@ -343,9 +325,6 @@ function getResultData(ujian, percobaan) {
   return null;
 }
 
-/* =========================================================
-   LOCAL STORAGE
-========================================================= */
 
 function getSavedHasilUjian(id) {
   if (
@@ -407,7 +386,6 @@ function getSavedHasilUjian(id) {
           };
         }
       } catch {
-        // ignore
       }
     }
   }
@@ -446,15 +424,11 @@ function getSavedHasilUjian(id) {
       }
     }
   } catch {
-    // ignore
   }
 
   return null;
 }
 
-/* =========================================================
-   NUMBER
-========================================================= */
 
 function firstValidNumber(...values) {
   for (const value of values) {
@@ -477,9 +451,6 @@ function firstValidNumber(...values) {
   return 0;
 }
 
-/* =========================================================
-   SCORE
-========================================================= */
 
 function getScore(ujian, percobaan) {
   const hasil =
@@ -503,9 +474,6 @@ function getScore(ujian, percobaan) {
   );
 }
 
-/* =========================================================
-   JUMLAH BENAR
-========================================================= */
 
 function getJumlahBenar(
   ujian,
@@ -526,9 +494,6 @@ function getJumlahBenar(
   );
 }
 
-/* =========================================================
-   JUMLAH SALAH
-========================================================= */
 
 function getJumlahSalah(
   ujian,
@@ -549,9 +514,6 @@ function getJumlahSalah(
   );
 }
 
-/* =========================================================
-   JUMLAH LEWATI
-========================================================= */
 
 function getJumlahLewati(
   ujian,
@@ -572,9 +534,6 @@ function getJumlahLewati(
   );
 }
 
-/* =========================================================
-   FORMAT NUMBER
-========================================================= */
 
 function formatNumber(value) {
   const number =
@@ -595,9 +554,6 @@ function formatNumber(value) {
   return number.toFixed(2);
 }
 
-/* =========================================================
-   FORMAT DATE
-========================================================= */
 
 function formatDateTime(dateString) {
   if (!dateString) {
@@ -627,9 +583,6 @@ function formatDateTime(dateString) {
   );
 }
 
-/* =========================================================
-   STATUS
-========================================================= */
 
 function getStatusLabel(status) {
   const normalized =
@@ -658,9 +611,6 @@ function getStatusLabel(status) {
   return "Belum Selesai";
 }
 
-/* =========================================================
-   PERCOBAAN
-========================================================= */
 
 function getPercobaanFromUjian(ujian) {
   if (!ujian) {
@@ -709,9 +659,6 @@ function getPercobaanFromUjian(ujian) {
   );
 }
 
-/* =========================================================
-   PAGE
-========================================================= */
 
 export default function HasilUjianPage() {
   const router = useRouter();
@@ -735,9 +682,6 @@ export default function HasilUjianPage() {
   const [error, setError] =
     useState("");
 
-  /* =======================================================
-     LOAD DATA
-  ======================================================= */
 
   const loadHasil =
     useCallback(
@@ -829,9 +773,6 @@ export default function HasilUjianPage() {
     loadHasil();
   }, [loadHasil]);
 
-  /* =======================================================
-     PERCOBAAN SISWA
-  ======================================================= */
 
   const percobaanSaya =
     useMemo(() => {
@@ -887,9 +828,6 @@ export default function HasilUjianPage() {
       savedHasil,
     ]);
 
-  /* =======================================================
-     HASIL UJIAN
-  ======================================================= */
 
   const hasilUjian =
     useMemo(() => {
@@ -912,9 +850,6 @@ export default function HasilUjianPage() {
       savedHasil,
     ]);
 
-  /* =======================================================
-     NILAI
-  ======================================================= */
 
   const nilaiNumber =
     useMemo(() => {
@@ -938,9 +873,6 @@ export default function HasilUjianPage() {
       percobaanSaya,
     ]);
 
-  /* =======================================================
-     JUMLAH BENAR
-  ======================================================= */
 
   const jumlahBenar =
     useMemo(() => {
@@ -962,9 +894,6 @@ export default function HasilUjianPage() {
       percobaanSaya,
     ]);
 
-  /* =======================================================
-     JUMLAH SALAH
-  ======================================================= */
 
   const jumlahSalah =
     useMemo(() => {
@@ -986,9 +915,6 @@ export default function HasilUjianPage() {
       percobaanSaya,
     ]);
 
-  /* =======================================================
-     JUMLAH LEWATI
-  ======================================================= */
 
   const jumlahLewati =
     useMemo(() => {
@@ -1010,9 +936,6 @@ export default function HasilUjianPage() {
       percobaanSaya,
     ]);
 
-  /* =======================================================
-     TOTAL SOAL
-  ======================================================= */
 
   const totalSoal =
     useMemo(() => {
@@ -1058,9 +981,6 @@ export default function HasilUjianPage() {
       jumlahLewati,
     ]);
 
-  /* =======================================================
-     NILAI KELULUSAN
-  ======================================================= */
 
   const nilaiKelulusan =
     firstValidNumber(
@@ -1072,9 +992,6 @@ export default function HasilUjianPage() {
     nilaiNumber >=
     nilaiKelulusan;
 
-  /* =======================================================
-     STATUS
-  ======================================================= */
 
   const status =
     getStatusLabel(
@@ -1083,9 +1000,6 @@ export default function HasilUjianPage() {
         "selesai"
     );
 
-  /* =======================================================
-     TANGGAL
-  ======================================================= */
 
   const tanggalSelesai =
     savedHasil?.submittedAt ||
@@ -1096,9 +1010,6 @@ export default function HasilUjianPage() {
     percobaanSaya?.diperbaruiPada ||
     null;
 
-  /* =======================================================
-     PROGRESS
-  ======================================================= */
 
   const progressNilai =
     Math.min(
@@ -1109,9 +1020,6 @@ export default function HasilUjianPage() {
       100
     );
 
-  /* =======================================================
-     LOADING
-  ======================================================= */
 
   if (loading) {
     return (
@@ -1141,9 +1049,6 @@ export default function HasilUjianPage() {
     );
   }
 
-  /* =======================================================
-     ERROR
-  ======================================================= */
 
   if (error) {
     return (
@@ -1191,15 +1096,11 @@ export default function HasilUjianPage() {
     );
   }
 
-  /* =======================================================
-     MAIN
-  ======================================================= */
 
   return (
     <div className="theme-page min-h-full min-w-0 flex-1 overflow-y-auto">
       <div className="mx-auto w-full max-w-6xl px-4 py-5 sm:px-6 sm:py-7 lg:px-8 lg:py-8">
 
-        {/* BACK */}
 
         <button
           type="button"
@@ -1214,7 +1115,6 @@ export default function HasilUjianPage() {
           Kembali ke Daftar Ujian
         </button>
 
-        {/* HERO RESULT */}
 
         <section
           className={`relative overflow-hidden rounded-3xl border theme-border theme-card ${themeCardShadow}`}
@@ -1236,7 +1136,6 @@ export default function HasilUjianPage() {
             <div className="relative">
               <div className="flex flex-col gap-7 lg:flex-row lg:items-center lg:justify-between">
 
-                {/* TITLE */}
 
                 <div className="min-w-0">
                   <div
@@ -1291,7 +1190,6 @@ export default function HasilUjianPage() {
                   </div>
                 </div>
 
-                {/* SCORE */}
 
                 <div className="shrink-0 lg:w-[250px]">
                   <div
@@ -1371,7 +1269,6 @@ export default function HasilUjianPage() {
           </div>
         </section>
 
-        {/* STATISTICS */}
 
         <section className="mt-5 grid gap-4 sm:grid-cols-3">
           <ResultStat
@@ -1429,11 +1326,9 @@ export default function HasilUjianPage() {
           />
         </section>
 
-        {/* CONTENT GRID */}
 
         <div className="mt-5 grid gap-5 lg:grid-cols-[1.35fr_0.65fr]">
 
-          {/* DETAIL UJIAN */}
 
           <section
             className={`rounded-3xl border theme-border theme-card ${themeCardShadow}`}
@@ -1485,7 +1380,6 @@ export default function HasilUjianPage() {
             </div>
           </section>
 
-          {/* RINGKASAN */}
 
           <section
             className={`rounded-3xl border theme-border theme-card ${themeCardShadow}`}
@@ -1572,7 +1466,6 @@ export default function HasilUjianPage() {
           </section>
         </div>
 
-        {/* WAKTU PENGERJAAN */}
 
         {percobaanSaya && (
           <section
@@ -1618,7 +1511,6 @@ export default function HasilUjianPage() {
           </section>
         )}
 
-        {/* RESULT NOT FOUND */}
 
         {!percobaanSaya &&
           !hasilUjian && (
@@ -1647,7 +1539,6 @@ export default function HasilUjianPage() {
             </section>
           )}
 
-        {/* DATA STATUS */}
 
         {percobaanSaya && (
           <section
@@ -1692,7 +1583,6 @@ export default function HasilUjianPage() {
           </section>
         )}
 
-        {/* ACTION */}
 
         <div className="mt-6 flex justify-center">
           <button
@@ -1719,9 +1609,6 @@ export default function HasilUjianPage() {
   );
 }
 
-/* =========================================================
-   RESULT STAT
-========================================================= */
 
 function ResultStat({
   icon,
@@ -1782,9 +1669,6 @@ function ResultStat({
   );
 }
 
-/* =========================================================
-   SECTION HEADER
-========================================================= */
 
 function SectionHeader({
   icon,
@@ -1814,9 +1698,6 @@ function SectionHeader({
   );
 }
 
-/* =========================================================
-   INFO CARD
-========================================================= */
 
 function InfoCard({
   icon,
@@ -1879,9 +1760,6 @@ function InfoCard({
   );
 }
 
-/* =========================================================
-   MINI RESULT ROW
-========================================================= */
 
 function MiniResultRow({
   icon,
@@ -1921,9 +1799,6 @@ function MiniResultRow({
   );
 }
 
-/* =========================================================
-   TIME INFO
-========================================================= */
 
 function TimeInfo({
   label,

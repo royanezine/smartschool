@@ -28,9 +28,6 @@ import {
   RefreshCw,
 } from "lucide-react";
 
-/* =========================================================
-   ICON
-========================================================= */
 
 const ICONS = {
   FlaskConical,
@@ -43,9 +40,6 @@ const ICONS = {
   UtensilsCrossed,
 };
 
-/* =========================================================
-   DATA
-========================================================= */
 
 const initialData = [
   {
@@ -160,9 +154,6 @@ const emptyForm = {
   icon: "Code2",
 };
 
-/* =========================================================
-   STAT CARD
-========================================================= */
 
 function StatCard({ icon: Icon, label, value, type = "blue" }) {
   const styles = {
@@ -218,9 +209,6 @@ function StatCard({ icon: Icon, label, value, type = "blue" }) {
   );
 }
 
-/* =========================================================
-   STATUS BADGE
-========================================================= */
 
 function StatusBadge({ status }) {
   const active = status === "Aktif";
@@ -244,9 +232,6 @@ function StatusBadge({ status }) {
   );
 }
 
-/* =========================================================
-   JENJANG BADGE
-========================================================= */
 
 function JenjangBadge({ jenjang }) {
   return (
@@ -263,9 +248,6 @@ function JenjangBadge({ jenjang }) {
   );
 }
 
-/* =========================================================
-   FORM
-========================================================= */
 
 function JurusanForm({ initial, onCancel, onSave }) {
   const [form, setForm] = useState(initial);
@@ -292,7 +274,6 @@ function JurusanForm({ initial, onCancel, onSave }) {
 
   return (
     <form onSubmit={submit} className="space-y-5">
-      {/* KODE + JENJANG */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
           <label className="mb-2 block text-xs font-semibold theme-text-secondary">
@@ -346,7 +327,6 @@ function JurusanForm({ initial, onCancel, onSave }) {
         </div>
       </div>
 
-      {/* NAMA */}
       <div>
         <label className="mb-2 block text-xs font-semibold theme-text-secondary">
           Nama Jurusan
@@ -367,7 +347,6 @@ function JurusanForm({ initial, onCancel, onSave }) {
         />
       </div>
 
-      {/* KEPALA */}
       <div>
         <label className="mb-2 block text-xs font-semibold theme-text-secondary">
           Kepala Jurusan
@@ -387,7 +366,6 @@ function JurusanForm({ initial, onCancel, onSave }) {
         />
       </div>
 
-      {/* KELAS / SISWA / STATUS */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div>
           <label className="mb-2 block text-xs font-semibold theme-text-secondary">
@@ -461,7 +439,6 @@ function JurusanForm({ initial, onCancel, onSave }) {
         </div>
       </div>
 
-      {/* ICON */}
       <div>
         <label className="mb-2 block text-xs font-semibold theme-text-secondary">
           Ikon Jurusan
@@ -494,7 +471,6 @@ function JurusanForm({ initial, onCancel, onSave }) {
         </div>
       </div>
 
-      {/* FOOTER */}
       <div className="flex flex-col-reverse gap-2 border-t theme-border pt-5 sm:flex-row sm:justify-end">
         <button
           type="button"
@@ -530,9 +506,6 @@ function JurusanForm({ initial, onCancel, onSave }) {
   );
 }
 
-/* =========================================================
-   MAIN PAGE
-========================================================= */
 
 export default function ListJurusanPage() {
   const [data, setData] = useState(initialData);
@@ -545,9 +518,6 @@ export default function ListJurusanPage() {
   const [activeItem, setActiveItem] = useState(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
 
-  /* =========================================================
-     FILTER
-  ========================================================= */
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -569,9 +539,6 @@ export default function ListJurusanPage() {
     });
   }, [data, search, jenjangFilter, statusFilter]);
 
-  /* =========================================================
-     STATISTIC
-  ========================================================= */
 
   const totalSiswa = data.reduce(
     (total, item) => total + item.siswa,
@@ -591,9 +558,6 @@ export default function ListJurusanPage() {
     0
   );
 
-  /* =========================================================
-     MODAL
-  ========================================================= */
 
   const openAdd = () => {
     setActiveItem(emptyForm);
@@ -610,9 +574,6 @@ export default function ListJurusanPage() {
     setActiveItem(null);
   };
 
-  /* =========================================================
-     SAVE
-  ========================================================= */
 
   const saveItem = (form) => {
     if (modalMode === "add") {
@@ -634,9 +595,6 @@ export default function ListJurusanPage() {
     closeModal();
   };
 
-  /* =========================================================
-     DELETE
-  ========================================================= */
 
   const removeItem = (id) => {
     setData((current) =>
@@ -646,9 +604,6 @@ export default function ListJurusanPage() {
     setConfirmDeleteId(null);
   };
 
-  /* =========================================================
-     RESET FILTER
-  ========================================================= */
 
   const resetFilter = () => {
     setSearch("");
@@ -656,24 +611,16 @@ export default function ListJurusanPage() {
     setStatusFilter("Semua");
   };
 
-  /* =========================================================
-     RENDER
-  ========================================================= */
 
   return (
     <div className="flex min-h-screen theme-page">
-      {/* SIDEBAR */}
       <Sidebar />
 
       <div className="flex min-w-0 flex-1 flex-col">
-        {/* HEADER */}
         <Header />
 
         <main className="min-w-0 flex-1 px-4 py-5 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-[1280px]">
-            {/* =================================================
-                PAGE HEADER
-            ================================================= */}
 
             <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex min-w-0 items-center gap-3">
@@ -736,9 +683,6 @@ export default function ListJurusanPage() {
               </div>
             </div>
 
-            {/* =================================================
-                STAT CARDS
-            ================================================= */}
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
               <StatCard
@@ -770,9 +714,6 @@ export default function ListJurusanPage() {
               />
             </div>
 
-            {/* =================================================
-                FILTER CARD
-            ================================================= */}
 
             <div
               className="
@@ -782,7 +723,6 @@ export default function ListJurusanPage() {
                 p-4 shadow-sm sm:p-5
               "
             >
-              {/* SEARCH */}
 
               <div className="relative">
                 <Search
@@ -811,7 +751,6 @@ export default function ListJurusanPage() {
                 />
               </div>
 
-              {/* FILTER */}
               <div className="mt-3 flex flex-col gap-2 lg:flex-row lg:items-center">
                 <div className="relative w-full lg:w-48">
                   <select
@@ -914,9 +853,6 @@ export default function ListJurusanPage() {
               </div>
             </div>
 
-            {/* =================================================
-                TABLE
-            ================================================= */}
 
             <div
               className="
@@ -980,12 +916,10 @@ export default function ListJurusanPage() {
                             last:border-0
                           "
                         >
-                          {/* NO */}
                           <td className="px-5 py-4 text-center text-sm font-medium theme-text-muted">
                             {index + 1}
                           </td>
 
-                          {/* JURUSAN */}
                           <td className="px-5 py-4">
                             <div className="flex items-center gap-3">
                               <div className="theme-info flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
@@ -1007,38 +941,32 @@ export default function ListJurusanPage() {
                             </div>
                           </td>
 
-                          {/* JENJANG */}
                           <td className="px-5 py-4">
                             <JenjangBadge
                               jenjang={j.jenjang}
                             />
                           </td>
 
-                          {/* KEPALA */}
                           <td className="px-5 py-4">
                             <p className="max-w-[220px] truncate text-sm theme-text-secondary">
                               {j.kepala || "-"}
                             </p>
                           </td>
 
-                          {/* KELAS */}
                           <td className="px-5 py-4 text-center text-sm font-medium theme-text-secondary">
                             {j.kelas}
                           </td>
 
-                          {/* SISWA */}
                           <td className="px-5 py-4 text-center text-sm font-medium theme-text-secondary">
                             {j.siswa.toLocaleString("id-ID")}
                           </td>
 
-                          {/* STATUS */}
                           <td className="px-5 py-4">
                             <StatusBadge
                               status={j.status}
                             />
                           </td>
 
-                          {/* AKSI */}
                           <td className="px-5 py-4">
                             <div className="flex items-center justify-end gap-1">
                               <button
@@ -1096,7 +1024,6 @@ export default function ListJurusanPage() {
                       );
                     })}
 
-                    {/* EMPTY */}
                     {filtered.length === 0 && (
                       <tr>
                         <td
@@ -1130,7 +1057,6 @@ export default function ListJurusanPage() {
                 </table>
               </div>
 
-              {/* TABLE FOOTER */}
               <div className="border-t theme-border-soft theme-card-soft px-5 py-3">
                 <p className="text-xs theme-text-muted">
                   Menampilkan{" "}
@@ -1146,9 +1072,6 @@ export default function ListJurusanPage() {
               </div>
             </div>
 
-            {/* =================================================
-                ADD / EDIT MODAL
-            ================================================= */}
 
             {modalMode && (
               <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-[2px]">
@@ -1162,7 +1085,6 @@ export default function ListJurusanPage() {
                     shadow-2xl
                   "
                 >
-                  {/* MODAL HEADER */}
                   <div
                     className="
                       theme-card
@@ -1201,7 +1123,6 @@ export default function ListJurusanPage() {
                     </button>
                   </div>
 
-                  {/* MODAL BODY */}
                   <div className="p-5 sm:p-6">
                     <JurusanForm
                       initial={activeItem}
@@ -1213,9 +1134,6 @@ export default function ListJurusanPage() {
               </div>
             )}
 
-            {/* =================================================
-                DELETE MODAL
-            ================================================= */}
 
             {confirmDeleteId !== null && (
               <div className="fixed inset-0 z-[110] flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-[2px]">

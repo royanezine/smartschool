@@ -33,17 +33,11 @@ import {
   FileText,
 } from "lucide-react";
 
-/* =========================================================
-   API
-========================================================= */
 
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL ||
   "http://localhost:5000";
 
-/* =========================================================
-   GLOBAL THEME HELPERS
-========================================================= */
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -81,9 +75,6 @@ const themeWarningSurface =
 const themeWarningBorder =
   "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
 
-/* =========================================================
-   THEME MATA PELAJARAN
-========================================================= */
 
 const subjectThemes = [
   {
@@ -148,9 +139,6 @@ const subjectThemes = [
   },
 ];
 
-/* =========================================================
-   ICON MATA PELAJARAN
-========================================================= */
 
 function getMapelIcon(nama = "") {
   const value = String(nama).toLowerCase();
@@ -221,9 +209,6 @@ function getMapelIcon(nama = "") {
   return BookOpen;
 }
 
-/* =========================================================
-   ICON MAP (untuk kelasMapel baru)
-========================================================= */
 
 const iconMap = {
   matematika: Calculator,
@@ -246,17 +231,11 @@ function normalizeText(value) {
     .replace(/\s+/g, " ");
 }
 
-/* =========================================================
-   THEME MATA PELAJARAN (index based)
-========================================================= */
 
 function getMapelTheme(index) {
   return subjectThemes[index % subjectThemes.length];
 }
 
-/* =========================================================
-   AMBIL USERNAME
-========================================================= */
 
 function getUsername(user) {
   if (!user || typeof user !== "object") return "";
@@ -285,9 +264,6 @@ function getUsername(user) {
   return name ? name.trim() : "";
 }
 
-/* =========================================================
-   AMBIL USER ID
-========================================================= */
 
 function getUserId(user) {
   if (!user) {
@@ -310,9 +286,6 @@ function getUserId(user) {
   return userId ? String(userId) : "";
 }
 
-/* =========================================================
-   AMBIL KELAS ID
-========================================================= */
 
 function getUserKelasId(user) {
   if (!user) {
@@ -334,9 +307,6 @@ function getUserKelasId(user) {
   return kelasId ? String(kelasId) : "";
 }
 
-/* =========================================================
-   AMBIL NAMA KELAS
-========================================================= */
 
 function getUserKelasName(user) {
   if (!user) {
@@ -360,17 +330,7 @@ function getUserKelasName(user) {
     : "";
 }
 
-/* =========================================================
-   SESI PENGGUNA (SUMBER KEBENARAN TUNGGAL)
-========================================================= */
 
-/*
- * Membaca identitas siswa dari sesi kanonik (lib/auth).
- *
- * lib/auth memastikan `user` pada storage selalu cocok dengan token,
- * sehingga nama/ID siswa tidak tertukar dengan akun lain pada origin
- * yang sama.
- */
 function readSessionUser() {
   const sessionUser = getSessionUser();
 
@@ -388,9 +348,6 @@ function readSessionUser() {
   };
 }
 
-/* =========================================================
-   EXTRACT ARRAY
-========================================================= */
 
 function extractArray(response) {
   if (Array.isArray(response)) {
@@ -420,9 +377,6 @@ function extractArray(response) {
   return [];
 }
 
-/* =========================================================
-   EXTRACT OBJECT
-========================================================= */
 
 function extractObject(response) {
   if (!response) {
@@ -446,15 +400,8 @@ function extractObject(response) {
   return response;
 }
 
-/* =========================================================
-   TOKEN
-========================================================= */
 
-// getToken diimpor dari @/lib/auth (single source of truth)
 
-/* =========================================================
-   GET HEADERS
-========================================================= */
 
 function getHeaders() {
   const token = getToken();
@@ -466,9 +413,6 @@ function getHeaders() {
   };
 }
 
-/* =========================================================
-   FETCH DETAIL KELAS
-========================================================= */
 
 async function fetchKelasDetail(id) {
   if (!id) {
@@ -488,15 +432,11 @@ async function fetchKelasDetail(id) {
   }
 }
 
-/* =========================================================
-   CARI KELAS SISWA
-========================================================= */
 
 async function findStudentClass(
   userId,
   existingKelasId = ""
 ) {
-  /* PRIORITAS 1: kelasId tersedia di user */
   if (existingKelasId) {
     console.log(
       "[KELAS] Menggunakan kelasId dari user:",
@@ -510,7 +450,6 @@ async function findStudentClass(
     }
   }
 
-  /* PRIORITAS 2: ambil semua kelas */
   console.log("[KELAS] kelasId belum tersedia.");
   console.log("[KELAS] Mengambil daftar kelas...");
 
@@ -527,7 +466,6 @@ async function findStudentClass(
     throw new Error("Belum ada data kelas yang tersedia.");
   }
 
-  /* Cari siswa di setiap kelas */
   for (const kelas of daftarKelas) {
     if (!kelas?.id) {
       continue;
@@ -563,9 +501,6 @@ async function findStudentClass(
   return null;
 }
 
-/* =========================================================
-   FETCH JUMLAH TUGAS PER KELAS MAPEL
-========================================================= */
 
 async function fetchJumlahTugas(kelasMapelId) {
   try {
@@ -605,9 +540,6 @@ async function fetchJumlahTugas(kelasMapelId) {
   }
 }
 
-/* =========================================================
-   FETCH SEMUA MATERI
-========================================================= */
 
 async function fetchSemuaMateri() {
   try {
@@ -645,9 +577,6 @@ async function fetchSemuaMateri() {
   }
 }
 
-/* =========================================================
-   NORMALISASI KELAS MAPEL
-========================================================= */
 
 function normalizeKelasMapel(
   item,
@@ -695,9 +624,6 @@ function normalizeKelasMapel(
   };
 }
 
-/* =========================================================
-   DASHBOARD SISWA
-========================================================= */
 
 export default function SiswaDashboardPage() {
   const router = useRouter();
@@ -717,9 +643,6 @@ export default function SiswaDashboardPage() {
   const [loadingMapel, setLoadingMapel] = useState(true);
   const [mapelError, setMapelError] = useState("");
 
-  /* =======================================================
-     LOAD USER LOGIN
-  ======================================================= */
 
   useEffect(() => {
     setMounted(true);
@@ -738,10 +661,6 @@ export default function SiswaDashboardPage() {
     console.log("[USER] Data user login berhasil dibaca:", sessionUser);
   }, []);
 
-  /*
-   * Sinkronkan identitas bila sesi berubah (tab ini atau tab lain),
-   * agar nama/ID profil di dashboard tidak tertinggal akun sebelumnya.
-   */
   useEffect(() => {
     const syncUser = () => {
       const sessionUser = readSessionUser();
@@ -751,8 +670,6 @@ export default function SiswaDashboardPage() {
       }
     };
 
-    // Sinkronkan pada perubahan sesi tab ini maupun tab lain (satu sesi
-    // per browser pada produksi), agar profil tidak tertinggal.
     const unsubscribe = subscribeAuth(syncUser);
 
     return () => {
@@ -760,9 +677,6 @@ export default function SiswaDashboardPage() {
     };
   }, []);
 
-  /* =======================================================
-     LOAD MAPEL SESUAI SISWA LOGIN
-  ======================================================= */
 
   useEffect(() => {
     let cancelled = false;
@@ -796,7 +710,6 @@ export default function SiswaDashboardPage() {
           );
         }
 
-        /* Cari kelas siswa */
         const kelasSiswa = await findStudentClass(
           userId,
           existingKelasId
@@ -818,14 +731,12 @@ export default function SiswaDashboardPage() {
           kelasSiswa.namaKelas ||
           "Kelas siswa";
 
-        /* Update informasi kelas user */
         setUser((previous) => ({
           ...previous,
           kelasId,
           kelasName,
         }));
 
-        /* Ambil kelasMapel dari detail kelas */
         const dataKelasSiswa = Array.isArray(kelasSiswa?.kelasMapel)
           ? kelasSiswa.kelasMapel.filter(
               (item) => item?.dihapusPada == null
@@ -842,7 +753,6 @@ export default function SiswaDashboardPage() {
           return;
         }
 
-        /* Fetch materi & jumlah tugas paralel */
         const [materiData, tugasCounts] = await Promise.all([
           fetchSemuaMateri(),
           Promise.all(
@@ -908,16 +818,10 @@ export default function SiswaDashboardPage() {
     };
   }, []);
 
-  /* =======================================================
-     DISPLAY USER
-  ======================================================= */
 
   const username = user.username || "Siswa";
   const email = user.email || "Akun siswa";
 
-  /* =======================================================
-     QUICK STATS
-  ======================================================= */
 
   const quickStats = [
     {
@@ -949,9 +853,6 @@ export default function SiswaDashboardPage() {
     },
   ];
 
-  /* =======================================================
-     RETURN
-  ======================================================= */
 
   return (
     <div className="theme-page min-h-full w-full">
@@ -973,7 +874,6 @@ export default function SiswaDashboardPage() {
           }
         `}
       >
-        {/* HERO */}
         <section
           className={`
             theme-card
@@ -986,7 +886,6 @@ export default function SiswaDashboardPage() {
             ${themeCardShadow}
           `}
         >
-          {/* BACKGROUND */}
           <div
             className={`
               absolute
@@ -1038,7 +937,6 @@ export default function SiswaDashboardPage() {
             "
           />
 
-          {/* DECORATION */}
           <div className="pointer-events-none absolute inset-0 overflow-hidden">
             <div
               className="
@@ -1124,7 +1022,6 @@ export default function SiswaDashboardPage() {
               "
             />
 
-            {/* SCHOOL ILLUSTRATION */}
             <div className="absolute bottom-0 right-4 hidden h-[90%] w-[400px] lg:block">
               <div
                 className="
@@ -1344,7 +1241,6 @@ export default function SiswaDashboardPage() {
             </div>
           </div>
 
-          {/* HERO CONTENT */}
           <div className="relative z-10 px-5 py-7 sm:px-7 sm:py-8 lg:px-9 lg:py-10">
             <div className="max-w-2xl">
               <div
@@ -1513,7 +1409,6 @@ export default function SiswaDashboardPage() {
           />
         </section>
 
-        {/* QUICK STATS */}
         <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {quickStats.map((stat) => {
             const Icon = stat.icon;
@@ -1578,7 +1473,6 @@ export default function SiswaDashboardPage() {
           })}
         </section>
 
-        {/* MATA PELAJARAN */}
         <section
           className={`
             theme-card
@@ -1589,7 +1483,6 @@ export default function SiswaDashboardPage() {
             ${themeCardShadow}
           `}
         >
-          {/* HEADER */}
           <div
             className={`
               border-b
@@ -1667,9 +1560,7 @@ export default function SiswaDashboardPage() {
             </div>
           </div>
 
-          {/* CONTENT */}
           <div className="p-5 sm:p-6">
-            {/* LOADING */}
             {loadingMapel && (
               <div className="flex min-h-[220px] flex-col items-center justify-center">
                 <div
@@ -1697,7 +1588,6 @@ export default function SiswaDashboardPage() {
               </div>
             )}
 
-            {/* ERROR */}
             {!loadingMapel &&
               mapelError &&
               mataPelajaranList.length === 0 && (
@@ -1742,7 +1632,6 @@ export default function SiswaDashboardPage() {
                 </div>
               )}
 
-            {/* EMPTY */}
             {!loadingMapel &&
               !mapelError &&
               mataPelajaranList.length === 0 && (
@@ -1787,7 +1676,6 @@ export default function SiswaDashboardPage() {
                 </div>
               )}
 
-            {/* MAPEL */}
             {!loadingMapel && mataPelajaranList.length > 0 && (
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {mataPelajaranList.map((mapel) => {
@@ -1934,7 +1822,6 @@ export default function SiswaDashboardPage() {
             )}
           </div>
 
-          {/* FOOTER */}
           <div
             className={`
               border-t

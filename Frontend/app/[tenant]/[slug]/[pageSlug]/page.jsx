@@ -18,9 +18,6 @@ const API_URL =
   process.env.NEXT_PUBLIC_API_URL ||
   "http://localhost:5000";
 
-/* =========================================================
-   API BASE URL
-========================================================= */
 
 function getApiBaseUrl() {
   return API_URL
@@ -29,9 +26,6 @@ function getApiBaseUrl() {
     .replace(/\/api$/, "");
 }
 
-/* =========================================================
-   PAGE
-========================================================= */
 
 export default function PublicCmsPage() {
  const params = useParams();
@@ -56,9 +50,6 @@ useEffect(() => {
   const [error, setError] = useState("");
   const [mobileMenu, setMobileMenu] = useState(false);
 
-  /* =======================================================
-     FETCH PAGE
-  ======================================================= */
 
   useEffect(() => {
     if (!subdomain || !pageSlug) {
@@ -171,9 +162,6 @@ useEffect(() => {
     };
   }, [subdomain, pageSlug]);
 
-  /* =======================================================
-     TITLE
-  ======================================================= */
 
   const title =
     page?.judul ||
@@ -183,9 +171,6 @@ useEffect(() => {
         char.toUpperCase()
       );
 
-  /* =======================================================
-     LOADING
-  ======================================================= */
 
   if (loading) {
     return (
@@ -243,9 +228,6 @@ useEffect(() => {
     );
   }
 
-  /* =======================================================
-     ERROR
-  ======================================================= */
 
   if (error || !page) {
     return (
@@ -305,22 +287,15 @@ useEffect(() => {
     );
   }
 
-  /* =======================================================
-     PAGE CONTENT
-  ======================================================= */
 
   return (
     <main className="min-h-screen bg-[#F8FAFC] text-slate-900">
 
-      {/* =====================================================
-          NAVBAR
-      ===================================================== */}
 
       <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur">
 
         <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 sm:px-6 lg:px-8">
 
-          {/* BRAND */}
 
           <Link
             href="/"
@@ -343,7 +318,6 @@ useEffect(() => {
 
           </Link>
 
-          {/* DESKTOP NAV */}
 
           <nav className="hidden items-center gap-1 md:flex">
 
@@ -396,7 +370,6 @@ useEffect(() => {
 
           </nav>
 
-          {/* MOBILE */}
 
           <button
             type="button"
@@ -479,9 +452,6 @@ useEffect(() => {
 
       </header>
 
-      {/* =====================================================
-          HERO
-      ===================================================== */}
 
       <section className="relative overflow-hidden bg-gradient-to-br from-blue-50 via-[#F8FAFC] to-indigo-50">
 
@@ -520,9 +490,6 @@ useEffect(() => {
 
       </section>
 
-      {/* =====================================================
-          CMS CONTENT
-      ===================================================== */}
 
       <section className="mx-auto max-w-5xl px-5 py-12 sm:px-6 lg:px-8 lg:py-16">
 
@@ -636,9 +603,6 @@ useEffect(() => {
 
       </section>
 
-      {/* =====================================================
-          FOOTER
-      ===================================================== */}
 
       <footer className="bg-[#0F172A] px-5 py-10 text-white sm:px-6 lg:px-8">
 

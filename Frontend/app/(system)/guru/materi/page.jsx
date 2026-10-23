@@ -43,9 +43,6 @@ import {
   deleteMateriPembelajaran,
 } from "@/services/materiPembelajaran.service";
 
-// ============================================================
-// THEME HELPERS
-// ============================================================
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -110,9 +107,6 @@ const themeFocus =
 const themeOverlay =
   "bg-[color-mix(in_srgb,var(--color-text)_70%,transparent)]";
 
-// ============================================================
-// HELPER
-// ============================================================
 
 function getKelasName(materi) {
   return (
@@ -164,9 +158,6 @@ function formatTanggal(value) {
   });
 }
 
-// ============================================================
-// TIPE MATERI
-// ============================================================
 
 function getTipeInfo(tipe) {
   switch (String(tipe || "").toLowerCase()) {
@@ -212,9 +203,6 @@ function getTipeInfo(tipe) {
   }
 }
 
-// ============================================================
-// KELAS STYLE
-// ============================================================
 
 function getKelasColor(kelas) {
   const value = String(kelas || "").toLowerCase();
@@ -246,9 +234,6 @@ function getKelasColor(kelas) {
   return `${themeNeutralSurface} theme-text-secondary ${themeNeutralBorder}`;
 }
 
-// ============================================================
-// SKELETON
-// ============================================================
 
 function SkeletonCard() {
   return (
@@ -285,9 +270,6 @@ function SkeletonCard() {
   );
 }
 
-// ============================================================
-// SEARCHABLE KELAS DROPDOWN
-// ============================================================
 
 function KelasSearchDropdown({
   value,
@@ -511,9 +493,6 @@ function KelasSearchDropdown({
   );
 }
 
-// ============================================================
-// MAIN PAGE
-// ============================================================
 
 export default function GuruMateriPage() {
   const router = useRouter();
@@ -563,9 +542,6 @@ export default function GuruMateriPage() {
     },
   ];
 
-  // ============================================================
-  // LOAD MATERI
-  // ============================================================
 
   const loadMateri = useCallback(
     async (isRefresh = false) => {
@@ -614,9 +590,6 @@ export default function GuruMateriPage() {
     loadMateri();
   }, [loadMateri]);
 
-  // ============================================================
-  // KELAS
-  // ============================================================
 
   const kelasOptions = useMemo(() => {
     const values = materiList
@@ -649,9 +622,6 @@ export default function GuruMateriPage() {
     ];
   }, [materiList]);
 
-  // ============================================================
-  // TIPE
-  // ============================================================
 
   const tipeOptions = [
     "Semua Tipe",
@@ -660,9 +630,6 @@ export default function GuruMateriPage() {
     "link",
   ];
 
-  // ============================================================
-  // FILTER
-  // ============================================================
 
   const filteredMateri = useMemo(() => {
     const keyword =
@@ -727,9 +694,6 @@ export default function GuruMateriPage() {
     search,
   ]);
 
-  // ============================================================
-  // SUMMARY
-  // ============================================================
 
   const summary = useMemo(() => {
     const now = new Date();
@@ -791,9 +755,6 @@ export default function GuruMateriPage() {
     };
   }, [materiList]);
 
-  // ============================================================
-  // DELETE
-  // ============================================================
 
   async function handleDelete(id) {
     const materi =
@@ -849,9 +810,6 @@ export default function GuruMateriPage() {
     }
   }
 
-  // ============================================================
-  // RESET
-  // ============================================================
 
   function resetFilter() {
     setKelas("Semua Kelas");
@@ -864,9 +822,6 @@ export default function GuruMateriPage() {
     tipe !== "Semua Tipe" ||
     search.trim() !== "";
 
-  // ============================================================
-  // SIDEBAR
-  // ============================================================
 
   function toggleSidebar() {
     setSidebarOpen(
@@ -874,13 +829,9 @@ export default function GuruMateriPage() {
     );
   }
 
-  // ============================================================
-  // RENDER
-  // ============================================================
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
-      {/* SIDEBAR */}
 
       <Sidebar
         active="materi"
@@ -894,7 +845,6 @@ export default function GuruMateriPage() {
         role="guru"
       />
 
-      {/* CONTENT */}
 
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
         <Header
@@ -916,9 +866,6 @@ export default function GuruMateriPage() {
           <div className="w-full p-4 sm:p-6 lg:p-8">
             <div className="max-w-7xl mx-auto space-y-6">
 
-              {/* ==================================================
-                  HERO
-              ================================================== */}
 
               <section
                 className={`relative overflow-hidden rounded-2xl ${themeCardShadow} border ${themePrimarySoftBorder} p-6 sm:p-8`}
@@ -1009,7 +956,6 @@ export default function GuruMateriPage() {
                   </div>
                 </div>
 
-                {/* QUICK STATS */}
 
                 <div className="relative mt-5 grid grid-cols-2 sm:grid-cols-4 gap-3">
                   {[
@@ -1073,7 +1019,6 @@ export default function GuruMateriPage() {
                 </div>
               </section>
 
-              {/* SUCCESS */}
 
               {successMessage && (
                 <div
@@ -1091,7 +1036,6 @@ export default function GuruMateriPage() {
                 </div>
               )}
 
-              {/* ERROR */}
 
               {error && (
                 <div
@@ -1115,13 +1059,11 @@ export default function GuruMateriPage() {
                 </div>
               )}
 
-              {/* FILTER */}
 
               <section
                 className={`theme-card rounded-2xl ${themeCardShadow} border ${themeNeutralBorder} p-4 sm:p-5`}
               >
                 <div className="flex flex-col lg:flex-row lg:items-end gap-4">
-                  {/* FILTER TITLE */}
 
                   <div className="lg:w-36 shrink-0">
                     <div className="flex items-center gap-2">
@@ -1143,7 +1085,6 @@ export default function GuruMateriPage() {
                     </div>
                   </div>
 
-                  {/* KELAS */}
 
                   <div className="w-full lg:w-64">
                     <KelasSearchDropdown
@@ -1154,7 +1095,6 @@ export default function GuruMateriPage() {
                     />
                   </div>
 
-                  {/* TIPE */}
 
                   <div className="w-full lg:w-56">
                     <label className="block text-xs font-semibold theme-text-secondary mb-1.5">
@@ -1196,7 +1136,6 @@ export default function GuruMateriPage() {
                     </div>
                   </div>
 
-                  {/* SEARCH */}
 
                   <div className="flex-1 min-w-0">
                     <label className="block text-xs font-semibold theme-text-secondary mb-1.5">
@@ -1236,7 +1175,6 @@ export default function GuruMateriPage() {
                     </div>
                   </div>
 
-                  {/* RESET */}
 
                   {hasFilter && (
                     <button
@@ -1250,7 +1188,6 @@ export default function GuruMateriPage() {
                   )}
                 </div>
 
-                {/* INFO KELAS */}
 
                 {!loading &&
                   kelasOptions.length > 1 && (
@@ -1281,7 +1218,6 @@ export default function GuruMateriPage() {
                   )}
               </section>
 
-              {/* LIST HEADER */}
 
               {!loading && (
                 <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2">
@@ -1307,7 +1243,6 @@ export default function GuruMateriPage() {
                 </div>
               )}
 
-              {/* LOADING */}
 
               {loading ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 xl:gap-5">
@@ -1318,7 +1253,6 @@ export default function GuruMateriPage() {
                   )}
                 </div>
               ) : filteredMateri.length === 0 ? (
-                /* EMPTY */
 
                 <section
                   className={`theme-card rounded-2xl ${themeCardShadow} border ${themeNeutralBorder} p-12 sm:p-16 text-center`}
@@ -1371,7 +1305,6 @@ export default function GuruMateriPage() {
                   </div>
                 </section>
               ) : (
-                /* CARD GRID */
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 xl:gap-5">
                   {filteredMateri.map(
@@ -1407,7 +1340,6 @@ export default function GuruMateriPage() {
                           className={`group flex flex-col min-w-0 theme-card border ${themeNeutralBorder} rounded-2xl ${themeSmallShadow} hover:border-[var(--color-primary)] hover:shadow-[0_10px_30px_color-mix(in_srgb,var(--color-primary)_10%,transparent)] transition-all duration-300 overflow-hidden`}
                         >
                           <div className="p-5 flex flex-col flex-1">
-                            {/* HEADER */}
 
                             <div className="flex items-start justify-between gap-3">
                               <div
@@ -1425,7 +1357,6 @@ export default function GuruMateriPage() {
                               </span>
                             </div>
 
-                            {/* TITLE */}
 
                             <h3
                               className={`mt-4 text-base sm:text-[17px] font-semibold leading-6 theme-text break-words line-clamp-2 group-hover:text-[var(--color-primary)] transition-colors`}
@@ -1434,7 +1365,6 @@ export default function GuruMateriPage() {
                                 "Tanpa Judul"}
                             </h3>
 
-                            {/* MAPEL */}
 
                             <div className="flex items-center gap-2 mt-2">
                               <BookOpen
@@ -1449,7 +1379,6 @@ export default function GuruMateriPage() {
                               </p>
                             </div>
 
-                            {/* KATEGORI */}
 
                             {materi.kategori && (
                               <div className="mt-3">
@@ -1461,14 +1390,12 @@ export default function GuruMateriPage() {
                               </div>
                             )}
 
-                            {/* DESKRIPSI */}
 
                             <p className="mt-3 text-sm theme-text-secondary leading-6 line-clamp-3 min-h-[72px]">
                               {materi.deskripsi ||
                                 "Belum ada deskripsi materi."}
                             </p>
 
-                            {/* META */}
 
                             <div
                               className={`mt-4 pt-4 border-t ${themeDivider} flex-1`}
@@ -1523,7 +1450,6 @@ export default function GuruMateriPage() {
                             </div>
                           </div>
 
-                          {/* ACTION */}
 
                           <div className="px-5 pb-5">
                             <div className="grid grid-cols-2 gap-2">
@@ -1591,7 +1517,6 @@ export default function GuruMateriPage() {
                 </div>
               )}
 
-              {/* FOOTER */}
 
               {!loading &&
                 filteredMateri.length > 0 && (

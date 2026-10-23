@@ -85,11 +85,7 @@ const cardAccents = [
   },
 ];
 
-/* =========================================================
-   DATA HELPERS
-========================================================= */
 
-// getStoredUser diimpor dari @/lib/auth (single source of truth)
 
 function getTeacherId(user) {
   if (!user) return "";
@@ -216,8 +212,6 @@ function getClassId(item) {
 }
 
 function getStudentCount(item) {
-  // Prioritaskan angka total dari backend, lalu gunakan panjang relasi siswa
-  // jika endpoint kelas-mapel menyertakan daftar siswanya.
   const possibleCounts = [
     item?.jumlahSiswa,
     item?.totalSiswa,
@@ -252,7 +246,6 @@ function unwrapObject(response) {
 }
 
 function countStudentsInClass(detail) {
-  // Prioritaskan jumlah yang secara eksplisit dikirim backend.
   const possibleCounts = [
     detail?.jumlahSiswa,
     detail?.totalSiswa,
@@ -273,7 +266,6 @@ function countStudentsInClass(detail) {
     return Number(count);
   }
 
-  // Jika backend tidak mengirim total, hitung anggota kelas.
   const anggota = Array.isArray(detail?.anggota)
     ? detail.anggota
     : Array.isArray(detail?.siswaKelas)
@@ -329,9 +321,6 @@ function normalizeTeachingAssignment(item, index) {
   };
 }
 
-/* =========================================================
-   PAGE
-========================================================= */
 
 export default function GuruKelasSayaPage() {
   const router = useRouter();
@@ -373,7 +362,6 @@ const [loadingTahunAjaran, setLoadingTahunAjaran] = useState(true);
     try {
       const data = await getTahunAjaran();
 
-      // Pilih tahun ajaran dengan status aktif dari backend.
       const aktif = data.find(
         (item) =>
           String(item.status).toLowerCase() === "aktif"
@@ -425,7 +413,6 @@ async function loadKelasSaya() {
       );
     }
 
-    // 1. Ambil penugasan kelas dan mata pelajaran.
     const response = await getKelasMapel();
     const data = unwrapArray(response);
 
@@ -435,13 +422,11 @@ async function loadKelasSaya() {
       );
     }
 
-    // 2. Ambil hanya penugasan guru yang sedang login.
     const teacherAssignments = data.filter((item) => {
       const ids = getTeacherRelationIds(item);
       return ids.includes(String(teacherId));
     });
 
-    // 3. Normalisasi data dan hilangkan penugasan duplikat.
     const normalized = teacherAssignments
       .map((item, index) =>
         normalizeTeachingAssignment(item, index)
@@ -461,8 +446,6 @@ async function loadKelasSaya() {
       }
     }
 
-    // 4. Ambil detail setiap kelas untuk mendapatkan total siswa.
-    // Satu kelas bisa memiliki beberapa mata pelajaran.
     const classIds = [
       ...new Set(
         uniqueAssignments
@@ -497,7 +480,6 @@ async function loadKelasSaya() {
       })
     );
 
-    // 5. Masukkan jumlah siswa ke masing-masing penugasan.
     const result = uniqueAssignments.map((item) => ({
       ...item,
       jumlahSiswa: item.kelasId
@@ -536,7 +518,6 @@ async function loadKelasSaya() {
 
   useEffect(() => {
     loadKelasSaya();
-    // loadKelasSaya hanya dijalankan saat halaman dibuka.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -681,7 +662,6 @@ async function loadKelasSaya() {
           }
         `}
       >
-        {/* PAGE HEADER */}
         <section
           className={`
             theme-card
@@ -853,7 +833,6 @@ async function loadKelasSaya() {
           <div className="absolute bottom-0 left-0 h-1 w-full bg-[linear-gradient(90deg,var(--color-primary),var(--color-info))]" />
         </section>
 
-        {/* SUMMARY CARDS */}
         <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {stats.map((stat) => {
             const Icon = stat.icon;
@@ -912,7 +891,6 @@ async function loadKelasSaya() {
           })}
         </section>
 
-        {/* SEARCH & FILTER */}
         <section
           className={`
             theme-card
@@ -1069,7 +1047,6 @@ async function loadKelasSaya() {
           </div>
         </section>
 
-        {/* CLASS LIST */}
         <section>
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <div>
@@ -1084,7 +1061,6 @@ async function loadKelasSaya() {
             </div>
           </div>
 
-          {/* LOADING */}
           {loading && (
             <div
               className={`
@@ -1123,7 +1099,6 @@ async function loadKelasSaya() {
             </div>
           )}
 
-          {/* ERROR / EMPTY */}
           {!loading && kelasList.length === 0 && (
             <div
               className={`
@@ -1197,7 +1172,6 @@ async function loadKelasSaya() {
             </div>
           )}
 
-          {/* NO FILTER RESULTS */}
           {!loading && kelasList.length > 0 && filteredKelas.length === 0 && (
             <div
               className={`
@@ -1246,7 +1220,6 @@ async function loadKelasSaya() {
             </div>
           )}
 
-          {/* CLASS CARDS */}
           {!loading && filteredKelas.length > 0 && (
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
               {filteredKelas.map((item, index) => {
@@ -1414,7 +1387,6 @@ async function loadKelasSaya() {
           )}
         </section>
 
-        {/* FOOTER NOTE */}
         <div
           className={`
             flex

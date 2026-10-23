@@ -162,7 +162,6 @@ export default function RiwayatPembayaranPage() {
 
         <main className="flex-1 overflow-y-auto theme-page">
           <div className="p-4 sm:p-6 lg:p-8 space-y-6">
-            {/* PAGE HEADER */}
             <div className="flex items-center justify-between gap-4 flex-wrap">
               <div className="flex items-center gap-3">
                 <div
@@ -217,7 +216,6 @@ export default function RiwayatPembayaranPage() {
 
             {!loading && !error && (
               <>
-                {/* SUMMARY */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                   <StatCard
                     title="Total Pembayaran"
@@ -250,7 +248,6 @@ export default function RiwayatPembayaranPage() {
                   />
                 </div>
 
-                {/* INFO */}
                 <section className="theme-card theme-border rounded-xl border shadow-[0_1px_3px_color-mix(in_srgb,var(--color-text)_8%,transparent)] p-4">
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                     <div className="flex items-start gap-3">
@@ -289,7 +286,6 @@ export default function RiwayatPembayaranPage() {
                   </div>
                 </section>
 
-                {/* FILTER */}
                 <section className="theme-card theme-border rounded-xl border shadow-[0_1px_3px_color-mix(in_srgb,var(--color-text)_8%,transparent)] p-4">
                   <div className="flex flex-col lg:flex-row gap-3">
                     <div className="relative flex-1">
@@ -319,7 +315,6 @@ export default function RiwayatPembayaranPage() {
                   </div>
                 </section>
 
-                {/* TABLE */}
                 <section className="theme-card theme-border rounded-xl border shadow-[0_1px_3px_color-mix(in_srgb,var(--color-text)_8%,transparent)] overflow-hidden">
                   <div className="overflow-x-auto">
                     <table className="w-full min-w-[1000px] text-sm border-collapse">

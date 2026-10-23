@@ -36,9 +36,6 @@ import {
   deleteLantai,
 } from "@/services/infrastruktur.service";
 
-/* =========================================================
-   THEME HELPERS
-========================================================= */
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -85,9 +82,6 @@ const themeNeutralBorderHover =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-4 focus:ring-[color-mix(in_srgb,var(--color-primary)_12%,transparent)]";
 
-/* =========================================================
-   STAT CARD
-========================================================= */
 
 function StatCard({
   icon: Icon,
@@ -152,9 +146,6 @@ function StatCard({
   );
 }
 
-/* =========================================================
-   TOAST
-========================================================= */
 
 function Toast({ toast, onClose }) {
   if (!toast) return null;
@@ -220,42 +211,30 @@ function Toast({ toast, onClose }) {
   );
 }
 
-/* =========================================================
-   PAGE
-========================================================= */
 
 export default function SarprasLantaiPage() {
   const router = useRouter();
 
   const [isCollapsed, setIsCollapsed] = useState(false);
 
-  /* DATA */
   const [data, setData] = useState([]);
   const [gedungList, setGedungList] = useState([]);
 
-  /* STATE */
   const [loading, setLoading] = useState(true);
   const [loadingGedung, setLoadingGedung] = useState(true);
   const [deletingId, setDeletingId] = useState(null);
 
-  /* FILTER */
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("nama_asc");
   const [selectedGedung, setSelectedGedung] = useState("");
 
-  /* PAGINATION */
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
-  /* EXPORT */
   const [showExport, setShowExport] = useState(false);
 
-  /* TOAST */
   const [toast, setToast] = useState(null);
 
-  /* =========================================================
-     TOAST HELPER
-  ========================================================= */
 
   const showToast = useCallback((type, message) => {
     setToast({ type, message });
@@ -265,9 +244,6 @@ export default function SarprasLantaiPage() {
     }, 3500);
   }, []);
 
-  /* =========================================================
-     FETCH GEDUNG
-  ========================================================= */
 
   const fetchGedungList = useCallback(async () => {
     try {
@@ -303,9 +279,6 @@ export default function SarprasLantaiPage() {
     }
   }, [showToast]);
 
-  /* =========================================================
-     FETCH LANTAI
-  ========================================================= */
 
   const fetchLantai = useCallback(
     async (gedungId = selectedGedung) => {
@@ -411,9 +384,6 @@ export default function SarprasLantaiPage() {
     [selectedGedung, gedungList, showToast]
   );
 
-  /* =========================================================
-     INITIAL LOAD
-  ========================================================= */
 
   useEffect(() => {
     const load = async () => {
@@ -429,9 +399,6 @@ export default function SarprasLantaiPage() {
     load();
   }, []);
 
-  /* =========================================================
-     REFRESH
-  ========================================================= */
 
   const handleRefresh = async () => {
     setShowExport(false);
@@ -442,9 +409,6 @@ export default function SarprasLantaiPage() {
     showToast("success", "Data berhasil diperbarui.");
   };
 
-  /* =========================================================
-     FILTER GEDUNG
-  ========================================================= */
 
   const handleGedungChange = async (value) => {
     setSelectedGedung(value);
@@ -453,9 +417,6 @@ export default function SarprasLantaiPage() {
     await fetchLantai(value);
   };
 
-  /* =========================================================
-     NAVIGATION
-  ========================================================= */
 
   const handleAdd = () => {
     router.push("/admin/sarpras/gedung/lantai/tambah");
@@ -469,9 +430,6 @@ export default function SarprasLantaiPage() {
     router.push(`/admin/sarpras/gedung/lantai/detail/${id}`);
   };
 
-  /* =========================================================
-     DELETE
-  ========================================================= */
 
   const handleDelete = async (id, nama) => {
     const confirmed = window.confirm(
@@ -512,9 +470,6 @@ export default function SarprasLantaiPage() {
     }
   };
 
-  /* =========================================================
-     FILTER & SEARCH
-  ========================================================= */
 
   const filteredData = useMemo(() => {
     let result = [...data];
@@ -546,9 +501,6 @@ export default function SarprasLantaiPage() {
     return result;
   }, [data, search]);
 
-  /* =========================================================
-     SORT
-  ========================================================= */
 
   const sortedData = useMemo(() => {
     const result = [...filteredData];
@@ -613,9 +565,6 @@ export default function SarprasLantaiPage() {
     return result;
   }, [filteredData, sortBy]);
 
-  /* =========================================================
-     PAGINATION
-  ========================================================= */
 
   const totalItems = sortedData.length;
 
@@ -691,9 +640,6 @@ export default function SarprasLantaiPage() {
     ];
   };
 
-  /* =========================================================
-     STATISTICS
-  ========================================================= */
 
   const totalGedungTerpakai = useMemo(() => {
     return new Set(
@@ -714,9 +660,6 @@ export default function SarprasLantaiPage() {
     );
   }, [data]);
 
-  /* =========================================================
-     CSV EXPORT
-  ========================================================= */
 
   const exportCSV = () => {
     if (!sortedData.length) return;
@@ -786,9 +729,6 @@ export default function SarprasLantaiPage() {
     );
   };
 
-  /* =========================================================
-     EXCEL EXPORT
-  ========================================================= */
 
   const exportExcel = () => {
     if (!sortedData.length) return;
@@ -881,9 +821,6 @@ export default function SarprasLantaiPage() {
     );
   };
 
-  /* =========================================================
-     RENDER
-  ========================================================= */
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
@@ -916,9 +853,6 @@ export default function SarprasLantaiPage() {
           <div className="w-full p-3 sm:p-5 lg:p-7">
             <div className="mx-auto w-full max-w-[1600px] space-y-5">
 
-              {/* =================================================
-                  HERO
-              ================================================= */}
 
               <section
                 className={`
@@ -1016,7 +950,6 @@ export default function SarprasLantaiPage() {
 
                     <div className="flex flex-wrap gap-2">
 
-                      {/* EXPORT */}
 
                       <div className="relative">
                         <button
@@ -1097,7 +1030,6 @@ export default function SarprasLantaiPage() {
                         )}
                       </div>
 
-                      {/* REFRESH */}
 
                       <button
                         onClick={handleRefresh}
@@ -1127,7 +1059,6 @@ export default function SarprasLantaiPage() {
                         />
                       </button>
 
-                      {/* ADD */}
 
                       <button
                         onClick={handleAdd}
@@ -1157,9 +1088,6 @@ export default function SarprasLantaiPage() {
                 </div>
               </section>
 
-              {/* =================================================
-                  STATISTICS
-              ================================================= */}
 
               <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
                 <StatCard
@@ -1192,9 +1120,6 @@ export default function SarprasLantaiPage() {
                 </div>
               </div>
 
-              {/* =================================================
-                  FILTER
-              ================================================= */}
 
               <section
                 className={`
@@ -1255,7 +1180,6 @@ export default function SarprasLantaiPage() {
 
                 <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 
-                  {/* SEARCH */}
 
                   <div className="relative">
                     <Search
@@ -1289,7 +1213,6 @@ export default function SarprasLantaiPage() {
                     />
                   </div>
 
-                  {/* GEDUNG */}
 
                   <select
                     value={selectedGedung}
@@ -1332,7 +1255,6 @@ export default function SarprasLantaiPage() {
                     ))}
                   </select>
 
-                  {/* SORT */}
 
                   <div className="relative">
                     <ArrowUpDown
@@ -1392,7 +1314,6 @@ export default function SarprasLantaiPage() {
                     </select>
                   </div>
 
-                  {/* TOTAL */}
 
                   <div
                     className={`
@@ -1415,9 +1336,6 @@ export default function SarprasLantaiPage() {
                 </div>
               </section>
 
-              {/* =================================================
-                  TABLE
-              ================================================= */}
 
               <section
                 className={`
@@ -1496,7 +1414,6 @@ export default function SarprasLantaiPage() {
 
                     <tbody className="divide-y divide-[color-mix(in_srgb,var(--color-text)_7%,transparent)]">
 
-                      {/* LOADING */}
 
                       {loading && (
                         <tr>
@@ -1535,7 +1452,6 @@ export default function SarprasLantaiPage() {
                         </tr>
                       )}
 
-                      {/* DATA */}
 
                       {!loading &&
                         currentItems.map(
@@ -1565,7 +1481,6 @@ export default function SarprasLantaiPage() {
                                   {rowNumber}
                                 </td>
 
-                                {/* LANTAI */}
 
                                 <td className="px-4 py-4">
                                   <div className="flex items-center gap-3">
@@ -1597,7 +1512,6 @@ export default function SarprasLantaiPage() {
                                   </div>
                                 </td>
 
-                                {/* GEDUNG */}
 
                                 <td className="px-4 py-4">
                                   <div className="flex items-center gap-2.5">
@@ -1629,7 +1543,6 @@ export default function SarprasLantaiPage() {
                                   </div>
                                 </td>
 
-                                {/* KELAS */}
 
                                 <td className="px-4 py-4">
                                   <button
@@ -1656,7 +1569,6 @@ export default function SarprasLantaiPage() {
                                   </button>
                                 </td>
 
-                                {/* CREATED */}
 
                                 <td className="px-4 py-4">
                                   <span className="theme-text-secondary text-xs font-medium">
@@ -1675,12 +1587,10 @@ export default function SarprasLantaiPage() {
                                   </span>
                                 </td>
 
-                                {/* ACTION */}
 
                                 <td className="px-4 py-4">
                                   <div className="flex items-center justify-center gap-1">
 
-                                    {/* DETAIL */}
 
                                     <button
                                       onClick={() =>
@@ -1703,7 +1613,6 @@ export default function SarprasLantaiPage() {
                                       <Eye size={16} />
                                     </button>
 
-                                    {/* EDIT */}
 
                                     <button
                                       onClick={() =>
@@ -1726,7 +1635,6 @@ export default function SarprasLantaiPage() {
                                       <Pencil size={16} />
                                     </button>
 
-                                    {/* DELETE */}
 
                                     <button
                                       onClick={() =>
@@ -1773,9 +1681,6 @@ export default function SarprasLantaiPage() {
                   </table>
                 </div>
 
-                {/* =================================================
-                    EMPTY
-                ================================================= */}
 
                 {!loading &&
                   currentItems.length === 0 && (
@@ -1826,9 +1731,6 @@ export default function SarprasLantaiPage() {
                     </div>
                   )}
 
-                {/* =================================================
-                    PAGINATION
-                ================================================= */}
 
                 {!loading &&
                   totalItems > 0 && (
@@ -1901,7 +1803,6 @@ export default function SarprasLantaiPage() {
 
                       <div className="flex items-center gap-1">
 
-                        {/* FIRST */}
 
                         <button
                           onClick={() =>
@@ -1922,7 +1823,6 @@ export default function SarprasLantaiPage() {
                           <ChevronsLeft size={14} />
                         </button>
 
-                        {/* PREVIOUS */}
 
                         <button
                           onClick={() =>
@@ -1945,7 +1845,6 @@ export default function SarprasLantaiPage() {
                           <ChevronLeft size={14} />
                         </button>
 
-                        {/* PAGE NUMBERS */}
 
                         {getPageNumbers().map(
                           (page) => (
@@ -1973,7 +1872,6 @@ export default function SarprasLantaiPage() {
                           )
                         )}
 
-                        {/* NEXT */}
 
                         <button
                           onClick={() =>
@@ -1999,7 +1897,6 @@ export default function SarprasLantaiPage() {
                           <ChevronRight size={14} />
                         </button>
 
-                        {/* LAST */}
 
                         <button
                           onClick={() =>
@@ -2027,9 +1924,6 @@ export default function SarprasLantaiPage() {
                   )}
               </section>
 
-              {/* =================================================
-                  FOOTER
-              ================================================= */}
 
               <footer className="border-t theme-border py-2 text-center">
                 <p className="theme-text-muted text-[11px]">

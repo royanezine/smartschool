@@ -20,7 +20,7 @@ function formatTanggal(iso) {
   });
 }
 
-function normalizeSlug(value) {
+function normalizeParam(value) {
   if (typeof value !== "string") return "";
 
   try {
@@ -30,18 +30,21 @@ function normalizeSlug(value) {
   }
 }
 
-function cariArtikel(daftarArtikel, slug) {
+function cariArtikel(daftarArtikel, slugOrId) {
   if (!Array.isArray(daftarArtikel)) return null;
 
-  const slugDicari = normalizeSlug(slug);
+  const target = normalizeParam(slugOrId);
+  if (!target) return null;
 
   return (
-    daftarArtikel.find(
-      (item) =>
-        item &&
+    daftarArtikel.find((item) => {
+      if (!item) return false;
+      const matchSlug =
         typeof item.slug === "string" &&
-        normalizeSlug(item.slug) === slugDicari
-    ) || null
+        normalizeParam(item.slug).toLowerCase() === target.toLowerCase();
+      const matchId = String(item.id) === target;
+      return matchSlug || matchId;
+    }) || null
   );
 }
 
@@ -130,7 +133,6 @@ export default async function ArticleDetailPage({ params }) {
         }}
       >
         <div className="mx-auto max-w-5xl">
-          {/* BREADCRUMB */}
           <nav
             className="mb-6 flex items-center gap-2 text-sm font-bold"
             style={{
@@ -155,7 +157,6 @@ export default async function ArticleDetailPage({ params }) {
           </nav>
 
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
-            {/* JUDUL DAN PENULIS */}
             <div
               className="flex flex-col justify-center rounded-[2rem] p-8 sm:p-10 lg:col-span-8"
               style={{
@@ -236,7 +237,6 @@ export default async function ArticleDetailPage({ params }) {
               </div>
             </div>
 
-            {/* GAMBAR UTAMA */}
             <div className="relative min-h-[300px] overflow-hidden rounded-[2rem] shadow-sm lg:col-span-4">
               {gambar ? (
                 <Image
@@ -260,7 +260,6 @@ export default async function ArticleDetailPage({ params }) {
               )}
             </div>
 
-            {/* RINGKASAN */}
             {artikel.ringkasan && (
               <div
                 className="relative overflow-hidden rounded-[2rem] p-8 sm:p-10 lg:col-span-12"
@@ -287,7 +286,6 @@ export default async function ArticleDetailPage({ params }) {
               </div>
             )}
 
-            {/* KONTEN ARTIKEL */}
             <div
               className="rounded-[2rem] p-8 sm:p-12 lg:col-span-12"
               style={{
@@ -305,7 +303,6 @@ export default async function ArticleDetailPage({ params }) {
               />
             </div>
 
-            {/* TOMBOL KEMBALI DAN BAGIKAN */}
             <div
               className="flex flex-col items-center justify-between gap-6 rounded-[2rem] p-8 sm:flex-row lg:col-span-12"
               style={{

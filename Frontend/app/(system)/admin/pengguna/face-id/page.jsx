@@ -11,9 +11,6 @@ import {
 } from "lucide-react";
 import { apiFetch } from "../../../../../lib/api";
 
-/* =========================================================
-   THEME HELPERS & NORMALIZERS
-========================================================= */
 const themePrimarySoft = "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]";
 const themePrimarySoftBorder = "border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)]";
 const themePrimaryHover = "hover:bg-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]";
@@ -66,9 +63,6 @@ function getAccountStatus(status) {
   return ["aktif", "active"].includes(value) ? "Aktif" : "Nonaktif";
 }
 
-/* =========================================================
-   UI COMPONENTS
-========================================================= */
 function RoleBadge({ role }) {
   return (
     <span className={["inline-flex items-center rounded-md border px-2.5 py-1", "text-xs font-medium", "theme-card-soft", "theme-border", "theme-text-secondary"].join(" ")}>
@@ -114,9 +108,6 @@ function StatCard({ title, value, description, icon: Icon, iconBg }) {
   );
 }
 
-/* =========================================================
-   MAIN PAGE COMPONENT
-========================================================= */
 function FaceIdPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -135,16 +126,12 @@ function FaceIdPageContent() {
   const [deleteUser, setDeleteUser] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  /* =======================================================
-     LOAD USERS
-  ======================================================= */
   const loadUsers = useCallback(async ({ silent = false } = {}) => {
     try {
       if (silent) setIsRefreshing(true);
       else setIsLoading(true);
       setError("");
 
-      // Tambahkan timestamp agar browser/Next.js tidak men-cache data
       const response = await apiFetch(`/api/users?page=1&limit=1000&_t=${Date.now()}`, {
         method: "GET",
       });
@@ -190,13 +177,9 @@ function FaceIdPageContent() {
     }
   }, []);
 
-  /* =======================================================
-     AUTO REFRESH SAAT KEMBALI DARI HALAMAN TAMBAH
-  ======================================================= */
   useEffect(() => {
     loadUsers();
 
-    // Jika URL punya ?refresh=true, paksa fetch ulang & bersihkan URL
     if (searchParams.get("refresh") === "true") {
       loadUsers({ silent: true });
       router.replace("/admin/pengguna/face-id", { scroll: false });
@@ -216,9 +199,6 @@ function FaceIdPageContent() {
     };
   }, [loadUsers, searchParams, router]);
 
-  /* =======================================================
-     FILTER & PAGINATION
-  ======================================================= */
   const filteredUsers = useMemo(() => {
     return users.filter((user) => {
       const search = searchQuery.toLowerCase().trim();
@@ -241,17 +221,11 @@ function FaceIdPageContent() {
   const safeCurrentPage = Math.min(currentPage, totalPages);
   const paginatedUsers = filteredUsers.slice((safeCurrentPage - 1) * itemsPerPage, safeCurrentPage * itemsPerPage);
 
-  /* =======================================================
-     STATISTICS
-  ======================================================= */
   const totalUsers = users.length;
   const registeredUsers = users.filter((user) => user.faceStatus === "Terdaftar").length;
   const notRegisteredUsers = users.filter((user) => user.faceStatus === "Belum Terdaftar").length;
   const activeUsers = users.filter((user) => user.status === "Aktif").length;
 
-  /* =======================================================
-     HANDLERS
-  ======================================================= */
   const resetFilters = () => {
     setSearchQuery("");
     setRoleFilter("Semua");
@@ -298,7 +272,6 @@ function FaceIdPageContent() {
 
         <main className="min-h-0 flex-1 overflow-hidden">
           <div className="flex h-full min-h-0 flex-col px-4 py-4 sm:px-5 lg:px-6">
-            {/* HEADER */}
             <div className="mb-4 shrink-0">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex min-w-0 items-center gap-2">
@@ -322,7 +295,6 @@ function FaceIdPageContent() {
               </div>
             </div>
 
-            {/* STATISTICS */}
             <div className="mb-4 grid shrink-0 grid-cols-2 gap-3 xl:grid-cols-4">
               <StatCard title="Total Pengguna" value={isLoading ? "..." : totalUsers} description="Seluruh pengguna" icon={Users} iconBg={themePrimarySoft} />
               <StatCard title="Face ID Terdaftar" value={isLoading ? "..." : registeredUsers} description="Sudah memiliki Face ID" icon={CheckCircle2} iconBg="theme-success" />
@@ -330,9 +302,7 @@ function FaceIdPageContent() {
               <StatCard title="Pengguna Aktif" value={isLoading ? "..." : activeUsers} description="Akun berstatus aktif" icon={UserRound} iconBg={themePrimarySoft} />
             </div>
 
-            {/* MAIN CARD */}
             <div className={["flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border", "theme-card", "theme-border", themeCardShadow].join(" ")}>
-              {/* FILTER */}
               <div className={["shrink-0 border-b p-3 sm:p-4", "theme-border-soft"].join(" ")}>
                 <div className="flex flex-col gap-3 xl:flex-row xl:items-center">
                   <div className="relative min-w-0 flex-1">
@@ -371,7 +341,6 @@ function FaceIdPageContent() {
                 </div>
               </div>
 
-              {/* ERROR */}
               {error && (
                 <div className={["shrink-0 border-b px-4 py-3", "theme-danger", "theme-border-soft"].join(" ")}>
                   <div className="flex items-center justify-between gap-3 text-xs">
@@ -381,7 +350,6 @@ function FaceIdPageContent() {
                 </div>
               )}
 
-              {/* TABLE */}
               <div className="min-h-0 flex-1 overflow-auto">
                 <table className="w-full min-w-[900px] border-collapse">
                   <thead className={["sticky top-0 z-10", "theme-card-soft"].join(" ")}>
@@ -462,7 +430,6 @@ function FaceIdPageContent() {
                 </table>
               </div>
 
-              {/* PAGINATION */}
               <div className={["flex shrink-0 flex-col gap-2 border-t px-4 py-3", "theme-border-soft", "sm:flex-row sm:items-center sm:justify-between"].join(" ")}>
                 <p className="text-xs theme-text-muted">
                   Menampilkan <span className="font-medium theme-text-secondary">{filteredUsers.length === 0 ? 0 : (safeCurrentPage - 1) * itemsPerPage + 1}</span> - <span className="font-medium theme-text-secondary">{Math.min(safeCurrentPage * itemsPerPage, filteredUsers.length)}</span> dari <span className="font-medium theme-text-secondary">{filteredUsers.length}</span> data
@@ -486,7 +453,6 @@ function FaceIdPageContent() {
         </main>
       </div>
 
-      {/* DELETE MODAL */}
       {deleteUser && (
         <div className="fixed inset-0 z-[120] flex items-center justify-center bg-[color-mix(in_srgb,var(--color-text)_45%,transparent)] p-4 backdrop-blur-[2px]">
           <div className={["w-full max-w-md rounded-2xl border p-5", "theme-card", "theme-border", themeModalShadow].join(" ")}>

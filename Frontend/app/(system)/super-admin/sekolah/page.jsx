@@ -26,9 +26,6 @@ import {
   Database,
 } from "lucide-react";
 
-/* ============================================================
-   THEME HELPERS
-============================================================ */
 
 const themeCardShadow =
   "shadow-[0_3px_14px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
@@ -90,9 +87,6 @@ const themeFocus =
 const themePrimaryButton =
   "bg-[var(--color-primary)] hover:bg-[color-mix(in_srgb,var(--color-primary)_88%,var(--color-text))] text-[var(--color-card)]";
 
-/* ============================================================
-   STATUS STYLE
-============================================================ */
 
 const statusColorMap = {
   Aktif: {
@@ -117,9 +111,6 @@ const statusColorMap = {
   },
 };
 
-/* ============================================================
-   PAKET STYLE
-============================================================ */
 
 const paketColorMap = {
   Enterprise: {
@@ -141,9 +132,6 @@ const paketColorMap = {
   },
 };
 
-/* ============================================================
-   HELPER RESPONSE API
-============================================================ */
 
 function unwrapArrayResponse(result) {
   if (Array.isArray(result)) {
@@ -225,9 +213,6 @@ function unwrapObjectResponse(result) {
   return result;
 }
 
-/* ============================================================
-   HELPER VALUE
-============================================================ */
 
 function firstValue(...values) {
   for (const value of values) {
@@ -423,9 +408,6 @@ function normalizeSchool(item, index) {
   };
 }
 
-/* ============================================================
-   SORT CONTROL
-============================================================ */
 
 function SortControl({
   sortField,
@@ -539,9 +521,6 @@ function SortControl({
   );
 }
 
-/* ============================================================
-   PAGE
-============================================================ */
 
 export default function DataSekolahPage() {
   const router = useRouter();
@@ -588,9 +567,6 @@ export default function DataSekolahPage() {
 
   const itemsPerPage = 5;
 
-  /* ==========================================================
-     RESPONSIVE
-  ========================================================== */
 
   useEffect(() => {
     const handleResize = () => {
@@ -613,9 +589,6 @@ export default function DataSekolahPage() {
       );
   }, []);
 
-  /* ==========================================================
-     FETCH DATA
-  ========================================================== */
 
   const loadData = async () => {
     try {
@@ -770,9 +743,6 @@ export default function DataSekolahPage() {
     loadData();
   }, []);
 
-  /* ==========================================================
-     FILTER OPTIONS
-  ========================================================== */
 
   const jenjangOptions =
     useMemo(() => {
@@ -796,9 +766,6 @@ export default function DataSekolahPage() {
       ];
     }, [sekolahData]);
 
-  /* ==========================================================
-     FILTER
-  ========================================================== */
 
   const filteredData =
     useMemo(() => {
@@ -851,9 +818,6 @@ export default function DataSekolahPage() {
       selectedStatus,
     ]);
 
-  /* ==========================================================
-     SORT
-  ========================================================== */
 
   const sortedData =
     useMemo(() => {
@@ -898,9 +862,6 @@ export default function DataSekolahPage() {
       sortOrder,
     ]);
 
-  /* ==========================================================
-     PAGINATION
-  ========================================================== */
 
   const totalPages =
     Math.ceil(
@@ -931,9 +892,6 @@ export default function DataSekolahPage() {
         itemsPerPage
     );
 
-  /* ==========================================================
-     RESET PAGE WHEN FILTER CHANGES
-  ========================================================== */
 
   useEffect(() => {
     setCurrentPage(1);
@@ -943,9 +901,6 @@ export default function DataSekolahPage() {
     selectedStatus,
   ]);
 
-  /* ==========================================================
-     SORT
-  ========================================================== */
 
   const handleSort = (
     field,
@@ -989,9 +944,6 @@ export default function DataSekolahPage() {
     );
   };
 
-  /* ==========================================================
-     DELETE
-  ========================================================== */
 
   const handleDelete = (
     item
@@ -1001,18 +953,12 @@ export default function DataSekolahPage() {
     );
   };
 
-  /* ==========================================================
-     PAGE
-  ========================================================== */
 
   return (
     <div className="theme-page theme-text min-h-full">
       <main className="w-full p-3 sm:p-5 lg:p-7 xl:p-8">
         <div className="mx-auto w-full max-w-[1600px] space-y-5 sm:space-y-6">
 
-          {/* ==================================================
-              PAGE HEADER
-          ================================================== */}
 
           <section
             className={`
@@ -1100,9 +1046,6 @@ export default function DataSekolahPage() {
             </div>
           </section>
 
-          {/* ==================================================
-              STATISTICS
-          ================================================== */}
 
           <section className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
             <StatCard
@@ -1148,9 +1091,6 @@ export default function DataSekolahPage() {
             />
           </section>
 
-          {/* ==================================================
-              FILTER
-          ================================================== */}
 
           <section
             className={`
@@ -1166,7 +1106,6 @@ export default function DataSekolahPage() {
             <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
               <div className="flex min-w-0 flex-1 flex-col gap-3 sm:flex-row">
 
-                {/* SEARCH */}
 
                 <div className="relative min-w-0 flex-1">
                   <Search
@@ -1202,7 +1141,6 @@ export default function DataSekolahPage() {
                   />
                 </div>
 
-                {/* JENJANG */}
 
                 <div className="w-full sm:w-[170px]">
                   <FilterSelect
@@ -1218,7 +1156,6 @@ export default function DataSekolahPage() {
                   />
                 </div>
 
-                {/* STATUS */}
 
                 <div className="w-full sm:w-[160px]">
                   <FilterSelect
@@ -1391,9 +1328,6 @@ export default function DataSekolahPage() {
             )}
           </section>
 
-          {/* ==================================================
-              TABLE / MOBILE
-          ================================================== */}
 
           <section
             className={`
@@ -1412,7 +1346,6 @@ export default function DataSekolahPage() {
                 message={error}
               />
             ) : isMobile ? (
-              /* ================= MOBILE ================= */
 
               <div
                 className={`divide-y ${themeDivider}`}
@@ -1456,7 +1389,6 @@ export default function DataSekolahPage() {
                 )}
               </div>
             ) : (
-              /* ================= DESKTOP ================= */
 
               <div className="w-full overflow-x-auto">
                 <table className="w-full min-w-[1080px] border-collapse">
@@ -1646,7 +1578,6 @@ export default function DataSekolahPage() {
                                 ${themeNeutralHover}
                               `}
                             >
-                              {/* NO */}
 
                               <td className="px-5 py-4 text-center text-sm theme-text-muted">
                                 {startIndex +
@@ -1654,7 +1585,6 @@ export default function DataSekolahPage() {
                                   1}
                               </td>
 
-                              {/* NAMA */}
 
                               <td className="px-4 py-4">
                                 <div className="flex items-center gap-3">
@@ -1699,7 +1629,6 @@ export default function DataSekolahPage() {
                                 </div>
                               </td>
 
-                              {/* NPSN */}
 
                               <td className="px-4 py-4">
                                 <span className="font-mono text-xs font-medium tracking-wide theme-text-secondary">
@@ -1709,7 +1638,6 @@ export default function DataSekolahPage() {
                                 </span>
                               </td>
 
-                              {/* JENJANG */}
 
                               <td className="px-4 py-4">
                                 <span
@@ -1733,7 +1661,6 @@ export default function DataSekolahPage() {
                                 </span>
                               </td>
 
-                              {/* YAYASAN */}
 
                               <td className="px-4 py-4">
                                 <p
@@ -1748,7 +1675,6 @@ export default function DataSekolahPage() {
                                 </p>
                               </td>
 
-                              {/* PAKET */}
 
                               <td className="px-4 py-4">
                                 <span
@@ -1772,7 +1698,6 @@ export default function DataSekolahPage() {
                                 </span>
                               </td>
 
-                              {/* STATUS */}
 
                               <td className="px-4 py-4">
                                 <span
@@ -1806,7 +1731,6 @@ export default function DataSekolahPage() {
                                 </span>
                               </td>
 
-                              {/* ACTION */}
 
                               <td className="px-4 py-4">
                                 <div className="flex items-center justify-end gap-1">
@@ -1868,9 +1792,6 @@ export default function DataSekolahPage() {
               </div>
             )}
 
-            {/* ==================================================
-                PAGINATION
-            ================================================== */}
 
             {!loading &&
               !error && (
@@ -1916,7 +1837,6 @@ export default function DataSekolahPage() {
                   </p>
 
                   <div className="flex items-center justify-center gap-1">
-                    {/* PREVIOUS */}
 
                     <button
                       type="button"
@@ -1956,7 +1876,6 @@ export default function DataSekolahPage() {
                       />
                     </button>
 
-                    {/* PAGE NUMBERS */}
 
                     {[
                       ...Array(
@@ -2046,7 +1965,6 @@ export default function DataSekolahPage() {
                       </>
                     )}
 
-                    {/* NEXT */}
 
                     <button
                       type="button"
@@ -2092,9 +2010,6 @@ export default function DataSekolahPage() {
               )}
           </section>
 
-          {/* ==================================================
-              FOOTER
-          ================================================== */}
 
           <div
             className={`
@@ -2116,9 +2031,6 @@ export default function DataSekolahPage() {
   );
 }
 
-/* ============================================================
-   TABLE HEAD
-============================================================ */
 
 function TableHead({
   children,
@@ -2167,9 +2079,6 @@ function TableHead({
   );
 }
 
-/* ============================================================
-   FILTER SELECT
-============================================================ */
 
 function FilterSelect({
   value,
@@ -2213,9 +2122,6 @@ function FilterSelect({
   );
 }
 
-/* ============================================================
-   ACTION BUTTON
-============================================================ */
 
 function ActionButton({
   children,
@@ -2253,9 +2159,6 @@ function ActionButton({
   );
 }
 
-/* ============================================================
-   MOBILE SCHOOL CARD
-============================================================ */
 
 function MobileSchoolCard({
   item,
@@ -2287,13 +2190,11 @@ function MobileSchoolCard({
     >
       <div className="flex items-start gap-3">
 
-        {/* NUMBER */}
 
         <span className="w-5 pt-2 text-xs font-medium theme-text-muted">
           {number}
         </span>
 
-        {/* ICON */}
 
         <div
           className={`
@@ -2316,7 +2217,6 @@ function MobileSchoolCard({
           />
         </div>
 
-        {/* INFORMATION */}
 
         <div className="min-w-0 flex-1">
           <p
@@ -2379,7 +2279,6 @@ function MobileSchoolCard({
           </div>
         </div>
 
-        {/* ACTION */}
 
         <div className="flex items-center gap-1">
           <ActionButton
@@ -2417,7 +2316,6 @@ function MobileSchoolCard({
         </div>
       </div>
 
-      {/* BADGES */}
 
       <div className="ml-8 mt-3 flex flex-wrap items-center gap-1.5">
         <span
@@ -2507,9 +2405,6 @@ function MobileSchoolCard({
   );
 }
 
-/* ============================================================
-   LOADING
-============================================================ */
 
 function LoadingState() {
   return (
@@ -2538,9 +2433,6 @@ function LoadingState() {
   );
 }
 
-/* ============================================================
-   ERROR
-============================================================ */
 
 function ErrorState({
   message,
@@ -2581,9 +2473,6 @@ function ErrorState({
   );
 }
 
-/* ============================================================
-   EMPTY STATE
-============================================================ */
 
 function EmptyState() {
   return (
@@ -2617,9 +2506,6 @@ function EmptyState() {
   );
 }
 
-/* ============================================================
-   STAT CARD
-============================================================ */
 
 function StatCard({
   label,

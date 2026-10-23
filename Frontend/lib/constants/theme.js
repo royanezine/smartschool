@@ -1,14 +1,4 @@
-// lib/constants/theme.js
 
-/**
- * Semantic Theme Tokens
- *
- * File ini berisi nama/fungsi warna yang digunakan
- * oleh seluruh halaman SmartSchool.
- *
- * Nilai warna sebenarnya dikontrol oleh globals.css
- * melalui CSS variables.
- */
 
 export const THEME = {
   background: "var(--background)",

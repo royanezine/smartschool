@@ -19,15 +19,9 @@ import {
 export default function MenuHeaderPage() {
   const router = useRouter();
 
-  // =========================
-  // SIDEBAR
-  // =========================
   const [active, setActive] = useState("menu");
   const [collapsed, setCollapsed] = useState(false);
 
-  // =========================
-  // MENU DATA
-  // =========================
   const [menuItems, setMenuItems] = useState([
     {
       id: 1,
@@ -55,9 +49,6 @@ export default function MenuHeaderPage() {
     },
   ]);
 
-  // =========================
-  // DELETE
-  // =========================
   const handleDelete = (id) => {
     if (
       !confirm(
@@ -70,9 +61,6 @@ export default function MenuHeaderPage() {
     setMenuItems((prev) => prev.filter((item) => item.id !== id));
   };
 
-  // =========================
-  // MOVE MENU
-  // =========================
   const handleMove = (id, direction) => {
     setMenuItems((prev) => {
       const index = prev.findIndex((item) => item.id === id);
@@ -104,13 +92,9 @@ export default function MenuHeaderPage() {
     });
   };
 
-  // =========================
-  // EMPTY STATE
-  // =========================
   if (menuItems.length === 0) {
     return (
       <div className="theme-page flex min-h-screen w-full overflow-x-hidden">
-        {/* SIDEBAR */}
         <div className="shrink-0">
           <Sidebar
             active={active}
@@ -120,7 +104,6 @@ export default function MenuHeaderPage() {
           />
         </div>
 
-        {/* MAIN */}
         <main
           className="
             theme-page
@@ -160,7 +143,6 @@ export default function MenuHeaderPage() {
                 sm:space-y-6
               "
             >
-              {/* BREADCRUMB */}
               <div
                 className="
                   flex
@@ -245,7 +227,6 @@ export default function MenuHeaderPage() {
                 </button>
               </div>
 
-              {/* EMPTY CARD */}
               <div
                 className="
                   theme-card
@@ -294,12 +275,8 @@ export default function MenuHeaderPage() {
     );
   }
 
-  // =========================
-  // MAIN PAGE
-  // =========================
   return (
     <div className="theme-page flex min-h-screen w-full overflow-x-hidden">
-      {/* ================= SIDEBAR ================= */}
       <div className="shrink-0">
         <Sidebar
           active={active}
@@ -309,7 +286,6 @@ export default function MenuHeaderPage() {
         />
       </div>
 
-      {/* ================= MAIN CONTENT ================= */}
       <main
         className="
           theme-page
@@ -322,13 +298,11 @@ export default function MenuHeaderPage() {
           duration-300
         "
       >
-        {/* HEADER */}
         <Header
           title="Menu Header"
           user={{ name: "Admin" }}
         />
 
-        {/* ================= PAGE CONTENT ================= */}
         <div
           className="
             w-full
@@ -351,7 +325,6 @@ export default function MenuHeaderPage() {
               sm:space-y-6
             "
           >
-            {/* ================= BREADCRUMB ================= */}
             <div
               className="
                 flex
@@ -362,7 +335,6 @@ export default function MenuHeaderPage() {
                 sm:justify-between
               "
             >
-              {/* Breadcrumb */}
               <nav
                 className="
                   min-w-0
@@ -416,7 +388,6 @@ export default function MenuHeaderPage() {
                 </ol>
               </nav>
 
-              {/* Back */}
               <button
                 type="button"
                 onClick={() => router.back()}
@@ -438,7 +409,6 @@ export default function MenuHeaderPage() {
               </button>
             </div>
 
-            {/* ================= PAGE HEADER ================= */}
             <div
               className="
                 theme-card
@@ -463,7 +433,6 @@ export default function MenuHeaderPage() {
                   lg:justify-between
                 "
               >
-                {/* Title */}
                 <div
                   className="
                     flex
@@ -518,7 +487,6 @@ export default function MenuHeaderPage() {
                   </div>
                 </div>
 
-                {/* Add Button */}
                 <button
                   type="button"
                   onClick={() =>
@@ -557,7 +525,6 @@ export default function MenuHeaderPage() {
               </div>
             </div>
 
-            {/* ================= MENU LIST ================= */}
             <div
               className="
                 theme-card
@@ -570,7 +537,6 @@ export default function MenuHeaderPage() {
                 overflow-hidden
               "
             >
-              {/* List Header */}
               <div
                 className="
                   border-b
@@ -623,7 +589,6 @@ export default function MenuHeaderPage() {
                 </span>
               </div>
 
-              {/* Items */}
               <div className="divide-y divide-[var(--color-border-soft)]">
                 {menuItems.map((item, index) => (
                   <div
@@ -645,7 +610,6 @@ export default function MenuHeaderPage() {
                       min-w-0
                     "
                   >
-                    {/* Number */}
                     <span
                       className="
                         flex
@@ -665,7 +629,6 @@ export default function MenuHeaderPage() {
                       {index + 1}
                     </span>
 
-                    {/* Drag Icon */}
                     <GripVertical
                       className="
                         shrink-0
@@ -679,7 +642,6 @@ export default function MenuHeaderPage() {
                       "
                     />
 
-                    {/* ================= DETAIL ================= */}
                     <div
                       className="
                         flex-1
@@ -689,7 +651,6 @@ export default function MenuHeaderPage() {
                         gap-1
                       "
                     >
-                      {/* Label */}
                       <p
                         className="
                           text-sm
@@ -703,7 +664,6 @@ export default function MenuHeaderPage() {
                         {item.label}
                       </p>
 
-                      {/* URL */}
                       <div
                         className="
                           flex
@@ -742,7 +702,6 @@ export default function MenuHeaderPage() {
                       </div>
                     </div>
 
-                    {/* ================= ACTION ================= */}
                     <div
                       className="
                         flex
@@ -753,7 +712,6 @@ export default function MenuHeaderPage() {
                         ml-1
                       "
                     >
-                      {/* Up Down */}
                       <div
                         className="
                           flex
@@ -817,7 +775,6 @@ export default function MenuHeaderPage() {
                         </button>
                       </div>
 
-                      {/* Edit */}
                       <button
                         type="button"
                         className="
@@ -834,7 +791,6 @@ export default function MenuHeaderPage() {
                         <Pencil className="w-4 h-4" />
                       </button>
 
-                      {/* Delete */}
                       <button
                         type="button"
                         onClick={() =>
@@ -858,7 +814,6 @@ export default function MenuHeaderPage() {
                 ))}
               </div>
 
-              {/* ================= FOOTER ================= */}
               <div
                 className="
                   px-4
@@ -893,7 +848,6 @@ export default function MenuHeaderPage() {
               </div>
             </div>
 
-            {/* ================= TIPS ================= */}
             <div
               className="
                 theme-info
@@ -910,7 +864,6 @@ export default function MenuHeaderPage() {
                 shadow-sm
               "
             >
-              {/* Icon */}
               <div
                 className="
                   p-2
@@ -927,7 +880,6 @@ export default function MenuHeaderPage() {
                 <Info className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
 
-              {/* Text */}
               <div className="min-w-0">
                 <h4
                   className="

@@ -40,9 +40,6 @@ const HARI = [
   { value: "sabtu", label: "Sabtu" },
 ];
 
-/* =========================================================
-   LAYOUT SHELL
-========================================================= */
 const HEADER_HEIGHT = 88;
 const SIDEBAR_WIDTH = 280;
 
@@ -82,9 +79,6 @@ function AppShell({ children }) {
   );
 }
 
-/* =========================================================
-   HELPERS (dipakai di luar komponen supaya stabil)
-========================================================= */
 function getKelasName(item) {
   return item?.kelas?.nama || "-";
 }
@@ -110,9 +104,6 @@ function formatKelasMapel(item) {
   return `${getKelasName(item)} • ${getMapelName(item)} • ${getGuruName(item)}`;
 }
 
-/* =========================================================
-   SEARCHABLE DROPDOWN (Kelas / Mapel / Guru)
-========================================================= */
 function SearchableKelasMapelSelect({
   value,
   onChange,
@@ -149,7 +140,6 @@ function SearchableKelasMapelSelect({
     });
   }, [options, query]);
 
-  // Tutup dropdown saat klik di luar
   useEffect(() => {
     function handleClickOutside(event) {
       if (
@@ -364,9 +354,6 @@ function SearchableKelasMapelSelect({
   );
 }
 
-/* =========================================================
-   PAGE
-========================================================= */
 export default function EditJadwalMengajarPage() {
   const router = useRouter();
   const params = useParams();
@@ -550,7 +537,6 @@ export default function EditJadwalMengajarPage() {
     router.push("/admin/jadwal-mengajar");
   }
 
-  /* LOADING */
   if (loading) {
     return (
       <AppShell>
@@ -577,7 +563,6 @@ export default function EditJadwalMengajarPage() {
     <AppShell>
       <div className="w-full px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
         <div className="mx-auto w-full max-w-6xl">
-          {/* PAGE HEADER */}
           <div className="mb-6">
             <Link
               href="/admin/guru/jadwal-mengajar"
@@ -618,7 +603,6 @@ export default function EditJadwalMengajarPage() {
             </div>
           </div>
 
-          {/* ERROR */}
           {error && (
             <div
               className="
@@ -658,7 +642,6 @@ export default function EditJadwalMengajarPage() {
             </div>
           )}
 
-          {/* SUCCESS */}
           {success && (
             <div
               className="
@@ -688,7 +671,6 @@ export default function EditJadwalMengajarPage() {
 
           <form onSubmit={handleSubmit}>
             <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
-              {/* FORM UTAMA */}
               <div className="theme-card rounded-2xl border theme-border shadow-sm">
                 <div className="border-b theme-border-soft px-6 py-5">
                   <div className="flex items-center gap-3">
@@ -719,7 +701,6 @@ export default function EditJadwalMengajarPage() {
                 </div>
 
                 <div className="space-y-6 p-6">
-                  {/* KELAS MAPEL (searchable) */}
                   <div>
                     <label className="mb-2 block text-sm font-semibold theme-text-secondary">
                       Kelas / Mata Pelajaran / Guru
@@ -750,7 +731,6 @@ export default function EditJadwalMengajarPage() {
                     </p>
                   </div>
 
-                  {/* DETAIL SELECTED */}
                   {selectedKelasMapel && (
                     <div className="grid gap-3 md:grid-cols-3">
                       <div
@@ -830,7 +810,6 @@ export default function EditJadwalMengajarPage() {
                     </div>
                   )}
 
-                  {/* HARI */}
                   <div>
                     <label
                       htmlFor="hari"
@@ -891,7 +870,6 @@ export default function EditJadwalMengajarPage() {
                     </div>
                   </div>
 
-                  {/* JAM */}
                   <div className="grid gap-5 md:grid-cols-2">
                     <div>
                       <label
@@ -988,7 +966,6 @@ export default function EditJadwalMengajarPage() {
                     </div>
                   </div>
 
-                  {/* RUANGAN */}
                   <div>
                     <label
                       htmlFor="ruangan"
@@ -1039,7 +1016,6 @@ export default function EditJadwalMengajarPage() {
                   </div>
                 </div>
 
-                {/* FOOTER FORM */}
                 <div
                   className="
                     flex flex-col-reverse gap-3
@@ -1105,7 +1081,6 @@ export default function EditJadwalMengajarPage() {
                 </div>
               </div>
 
-              {/* SIDEBAR INFO */}
               <div className="space-y-5">
                 <div
                   className="

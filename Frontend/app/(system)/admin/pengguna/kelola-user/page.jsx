@@ -42,9 +42,6 @@ import {
   Info,
 } from "lucide-react";
 
-// =========================================================
-// HELPERS
-// =========================================================
 
 const getRoleIcon = (role = "") => {
   const value = String(role).toLowerCase();
@@ -182,8 +179,6 @@ const normalizeUser = (user) => ({
   nisn: user?.nisn || "",
   avatar: user?.avatar || "",
   status: String(user?.status || "nonaktif").toLowerCase(),
-  // Hanya menggunakan waktu login yang benar-benar dikirim oleh API.
-  // Tidak menggunakan dibuatPada sebagai pengganti.
   terakhirLogin:
     user?.terakhirLogin ??
     user?.lastLogin ??
@@ -198,9 +193,6 @@ const normalizeUser = (user) => ({
   },
 });
 
-// =========================================================
-// MAIN COMPONENT
-// =========================================================
 
 export default function KelolaUserPage() {
   const router = useRouter();
@@ -228,9 +220,6 @@ export default function KelolaUserPage() {
   const [deletingId, setDeletingId] = useState(null);
   const [updatingStatusId, setUpdatingStatusId] = useState(null);
 
-  // =======================================================
-  // LOAD DATA
-  // =======================================================
 
   const loadUsers = useCallback(
     async ({ page = currentPage, showRefresh = false } = {}) => {
@@ -285,18 +274,12 @@ export default function KelolaUserPage() {
     loadUsers({ page: currentPage });
   }, [loadUsers, currentPage]);
 
-  // =======================================================
-  // CEK KETERSEDIAAN DATA TERAKHIR LOGIN
-  // =======================================================
 
   const loginFieldAvailable = useMemo(
     () => users.some((user) => user.terakhirLogin != null),
     [users]
   );
 
-  // =======================================================
-  // ROLE OPTIONS
-  // =======================================================
 
   const roleOptions = useMemo(() => {
     const roleMap = new Map();
@@ -315,16 +298,10 @@ export default function KelolaUserPage() {
     }));
   }, [users]);
 
-  // =======================================================
-  // STATISTICS
-  // =======================================================
 
   const totalAktif = users.filter((user) => user.status === "aktif").length;
   const totalNonaktif = users.filter((user) => user.status !== "aktif").length;
 
-  // =======================================================
-  // FILTER & SORT
-  // =======================================================
 
   const handleReset = () => {
     setSearch("");
@@ -409,9 +386,6 @@ export default function KelolaUserPage() {
     return list.sort(compare);
   }, [users, sortBy, sortDir]);
 
-  // =======================================================
-  // TOGGLE STATUS
-  // =======================================================
 
   const handleToggleStatus = async (user) => {
     const isActive = user.status === "aktif";
@@ -447,9 +421,6 @@ export default function KelolaUserPage() {
     }
   };
 
-  // =======================================================
-  // DELETE
-  // =======================================================
 
   const handleDelete = async (user) => {
     const confirmed = window.confirm(
@@ -485,9 +456,6 @@ export default function KelolaUserPage() {
     }
   };
 
-  // =======================================================
-  // PAGINATION
-  // =======================================================
 
   const goToPage = (page) => {
     if (page >= 1 && page <= totalPages) setCurrentPage(page);
@@ -523,9 +491,6 @@ export default function KelolaUserPage() {
     totalItems === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
   const endIndex = Math.min(currentPage * itemsPerPage, totalItems);
 
-  // =======================================================
-  // RENDER
-  // =======================================================
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
@@ -551,7 +516,6 @@ export default function KelolaUserPage() {
           <div className="w-full p-3 sm:p-5 lg:p-7 xl:p-8">
             <div className="mx-auto w-full max-w-[1600px] space-y-4 sm:space-y-5 lg:space-y-6">
 
-              {/* PAGE HEADER */}
               <section className="theme-card relative overflow-hidden rounded-2xl border shadow-sm">
                 <div
                   className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full blur-3xl"
@@ -622,7 +586,6 @@ export default function KelolaUserPage() {
                 </div>
               </section>
 
-              {/* PERINGATAN DATA LOGIN DARI BE */}
               {!loading && !loginFieldAvailable && users.length > 0 && (
                 <div className="flex items-start gap-3 rounded-xl border border-amber-300 bg-amber-50 p-4 text-amber-950 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-100">
                   <Info size={19} className="mt-0.5 shrink-0" />
@@ -644,7 +607,6 @@ export default function KelolaUserPage() {
                 </div>
               )}
 
-              {/* ERROR */}
               {error && (
                 <div className="theme-danger flex items-start gap-3 rounded-xl border p-4">
                   <AlertCircle size={18} className="mt-0.5 shrink-0" />
@@ -664,7 +626,6 @@ export default function KelolaUserPage() {
                 </div>
               )}
 
-              {/* SUCCESS NOTICE */}
               {notice && (
                 <div className="theme-success flex items-start gap-3 rounded-xl border p-4">
                   <CheckCircle size={18} className="mt-0.5 shrink-0" />
@@ -678,7 +639,6 @@ export default function KelolaUserPage() {
                 </div>
               )}
 
-              {/* STATS */}
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                 <StatCard label="Total User" value={totalItems} icon={Users} color="blue" />
                 <StatCard label="Aktif di Halaman" value={totalAktif} icon={CheckCircle} color="emerald" />
@@ -686,7 +646,6 @@ export default function KelolaUserPage() {
                 <StatCard label="Role di Halaman" value={roleOptions.length} icon={Shield} color="indigo" />
               </div>
 
-              {/* SEARCH & FILTER */}
               <section className="theme-card rounded-2xl border p-4 shadow-sm sm:p-5">
                 <div className="mb-4 flex items-center gap-2 sm:gap-3">
                   <div className="theme-info flex h-8 w-8 shrink-0 items-center justify-center rounded-xl sm:h-9 sm:w-9">
@@ -768,7 +727,6 @@ export default function KelolaUserPage() {
                 </div>
               </section>
 
-              {/* TABLE */}
               <section className="theme-card overflow-hidden rounded-2xl border shadow-sm">
                 <div className="theme-border-soft border-b px-5 py-4 sm:px-6 sm:py-5">
                   <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
@@ -992,7 +950,6 @@ export default function KelolaUserPage() {
                       </table>
                     </div>
 
-                    {/* PAGINATION */}
                     <div className="theme-border border-t px-4 py-4 sm:px-5">
                       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                         <div className="theme-text-muted text-xs">
@@ -1062,7 +1019,6 @@ export default function KelolaUserPage() {
                 )}
               </section>
 
-              {/* ROLE REFERENCE */}
               <section className="theme-card rounded-2xl border p-5 shadow-sm sm:p-6">
                 <div className="mb-4 flex items-center gap-3">
                   <div className="theme-info flex h-9 w-9 items-center justify-center rounded-xl">
@@ -1125,9 +1081,6 @@ export default function KelolaUserPage() {
   );
 }
 
-// =========================================================
-// SORTABLE HEADER
-// =========================================================
 
 function SortableHeader({
   label,
@@ -1166,9 +1119,6 @@ function SortableHeader({
   );
 }
 
-// =========================================================
-// STAT CARD
-// =========================================================
 
 function StatCard({ label, value, icon: Icon, color }) {
   const colorMap = {
@@ -1211,9 +1161,6 @@ function StatCard({ label, value, icon: Icon, color }) {
   );
 }
 
-// =========================================================
-// LOADING TABLE
-// =========================================================
 
 function LoadingTable() {
   return (

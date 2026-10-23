@@ -43,9 +43,6 @@ import {
   deleteJadwalMengajar,
 } from "@/services/jadwalMengajar.service";
 
-/* =========================================================
-   HARI
-========================================================= */
 
 const HARI = [
   {
@@ -80,9 +77,6 @@ const HARI = [
   },
 ];
 
-/* =========================================================
-   HELPER
-========================================================= */
 
 function getNamaGuru(item) {
   return (
@@ -172,9 +166,6 @@ function normalizeHari(hari) {
   return map[value] || value;
 }
 
-/* =========================================================
-   NORMALISASI DATA
-========================================================= */
 
 function normalizeJadwalData(data) {
   if (!Array.isArray(data)) {
@@ -223,10 +214,6 @@ function normalizeJadwalData(data) {
   });
 }
 
-/* =========================================================
-   COLOR MAP
-   SEMUA MENGGUNAKAN THEME SYSTEM
-========================================================= */
 
 const MAPEL_COLOR = [
   {
@@ -284,9 +271,6 @@ function getColor(index) {
   return MAPEL_COLOR[index % MAPEL_COLOR.length];
 }
 
-/* =========================================================
-   PAGE
-========================================================= */
 
 export default function JadwalMengajarPage() {
   const router = useRouter();
@@ -322,9 +306,6 @@ export default function JadwalMengajarPage() {
     setIsCollapsed((prev) => !prev);
   };
 
-  /* =========================================================
-     FETCH
-  ========================================================= */
 
   const fetchJadwal = async () => {
     try {
@@ -371,9 +352,6 @@ export default function JadwalMengajarPage() {
     fetchJadwal();
   }, []);
 
-  /* =========================================================
-     MAPEL OPTIONS
-  ========================================================= */
 
   const MAPEL_OPTIONS = useMemo(() => {
     const mapel = jadwal
@@ -388,9 +366,6 @@ export default function JadwalMengajarPage() {
     ];
   }, [jadwal]);
 
-  /* =========================================================
-     FILTER
-  ========================================================= */
 
   const filteredJadwal = useMemo(() => {
     const keyword = search
@@ -436,9 +411,6 @@ export default function JadwalMengajarPage() {
     mapelFilter,
   ]);
 
-  /* =========================================================
-     HARI DATA
-  ========================================================= */
 
   const jadwalHariAktif =
     useMemo(() => {
@@ -462,9 +434,6 @@ export default function JadwalMengajarPage() {
       selectedHari,
     ]);
 
-  /* =========================================================
-     STATISTIK
-  ========================================================= */
 
   const totalGuru = useMemo(() => {
     return new Set(
@@ -503,9 +472,6 @@ export default function JadwalMengajarPage() {
   const totalSlot =
     jadwal.length;
 
-  /* =========================================================
-     DAY COUNTS
-  ========================================================= */
 
   const getDayCount = (day) => {
     return filteredJadwal.filter(
@@ -514,9 +480,6 @@ export default function JadwalMengajarPage() {
     ).length;
   };
 
-  /* =========================================================
-     DELETE
-  ========================================================= */
 
   const handleDelete = async (
     item
@@ -579,9 +542,6 @@ export default function JadwalMengajarPage() {
     }
   };
 
-  /* =========================================================
-     EDIT
-  ========================================================= */
 
   const handleEdit = (item) => {
     if (!item?.id) {
@@ -596,9 +556,6 @@ export default function JadwalMengajarPage() {
     );
   };
 
-  /* =========================================================
-     TAMBAH
-  ========================================================= */
 
   const handleTambah = () => {
     router.push(
@@ -606,17 +563,11 @@ export default function JadwalMengajarPage() {
     );
   };
 
-  /* =========================================================
-     PRINT
-  ========================================================= */
 
   const handlePrint = () => {
     window.print();
   };
 
-  /* =========================================================
-     RESET
-  ========================================================= */
 
   const resetFilter = () => {
     setSearch("");
@@ -626,13 +577,9 @@ export default function JadwalMengajarPage() {
     setSelectedHari("senin");
   };
 
-  /* =========================================================
-     RENDER
-  ========================================================= */
 
   return (
     <div className="flex h-screen w-full theme-page overflow-hidden">
-      {/* SIDEBAR */}
 
       <Sidebar
         active="guruJadwalMengajar"
@@ -642,7 +589,6 @@ export default function JadwalMengajarPage() {
         role="admin"
       />
 
-      {/* MAIN */}
 
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
         <Header
@@ -660,13 +606,9 @@ export default function JadwalMengajarPage() {
           <div className="p-4 sm:p-6 lg:p-8">
             <div className="max-w-[1500px] mx-auto space-y-6">
 
-              {/* =================================================
-                  HERO
-              ================================================= */}
 
               <section className="relative overflow-hidden rounded-[24px] theme-card theme-border border shadow-sm">
 
-                {/* DECORATION */}
 
                 <div className="absolute -right-16 -top-20 w-72 h-72 rounded-full bg-[var(--color-primary)]/5 blur-sm" />
 
@@ -738,7 +680,6 @@ export default function JadwalMengajarPage() {
 
                     </div>
 
-                    {/* HERO ACTION */}
 
                     <div className="flex flex-col sm:flex-row lg:flex-col gap-2 lg:min-w-[190px]">
 
@@ -775,9 +716,6 @@ export default function JadwalMengajarPage() {
                 </div>
               </section>
 
-              {/* =================================================
-                  STATISTICS
-              ================================================= */}
 
               <section className="grid grid-cols-2 xl:grid-cols-4 gap-3">
 
@@ -819,15 +757,11 @@ export default function JadwalMengajarPage() {
 
               </section>
 
-              {/* =================================================
-                  CONTROL BAR
-              ================================================= */}
 
               <section className="theme-card theme-border border rounded-2xl shadow-sm p-4">
 
                 <div className="flex flex-col xl:flex-row xl:items-center gap-3">
 
-                  {/* SEARCH */}
 
                   <div className="relative flex-1">
 
@@ -862,7 +796,6 @@ export default function JadwalMengajarPage() {
 
                   </div>
 
-                  {/* MAPEL */}
 
                   <div className="flex items-center gap-2">
 
@@ -896,7 +829,6 @@ export default function JadwalMengajarPage() {
 
                   </div>
 
-                  {/* VIEW */}
 
                   <div className="flex items-center gap-1 p-1 theme-card-soft rounded-xl">
 
@@ -940,7 +872,6 @@ export default function JadwalMengajarPage() {
 
                   </div>
 
-                  {/* RESET */}
 
                   <button
                     type="button"
@@ -959,9 +890,6 @@ export default function JadwalMengajarPage() {
 
               </section>
 
-              {/* =================================================
-                  ERROR
-              ================================================= */}
 
               {error && (
                 <div className="rounded-2xl theme-danger theme-border border p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -993,24 +921,17 @@ export default function JadwalMengajarPage() {
                 </div>
               )}
 
-              {/* =================================================
-                  LOADING
-              ================================================= */}
 
               {loading && (
                 <LoadingState />
               )}
 
-              {/* =================================================
-                  TIMELINE VIEW
-              ================================================= */}
 
               {!loading &&
                 viewMode ===
                   "timeline" && (
                   <section className="space-y-4">
 
-                    {/* DAY NAVIGATION */}
 
                     <div className="theme-card theme-border border rounded-2xl shadow-sm p-3">
 
@@ -1094,7 +1015,6 @@ export default function JadwalMengajarPage() {
 
                     </div>
 
-                    {/* TIMELINE */}
 
                     <div className="theme-card theme-border border rounded-2xl shadow-sm overflow-hidden">
 
@@ -1156,7 +1076,6 @@ export default function JadwalMengajarPage() {
 
                           <div className="relative">
 
-                            {/* VERTICAL LINE */}
 
                             <div className="absolute left-[51px] sm:left-[75px] top-5 bottom-5 w-px bg-[var(--color-border)]" />
 
@@ -1208,9 +1127,6 @@ export default function JadwalMengajarPage() {
                   </section>
                 )}
 
-              {/* =================================================
-                  TABLE VIEW
-              ================================================= */}
 
               {!loading &&
                 viewMode ===
@@ -1493,9 +1409,6 @@ export default function JadwalMengajarPage() {
                   </section>
                 )}
 
-              {/* =================================================
-                  BOTTOM SUMMARY
-              ================================================= */}
 
               {!loading &&
                 filteredJadwal.length >
@@ -1561,7 +1474,6 @@ export default function JadwalMengajarPage() {
                   </section>
                 )}
 
-              {/* FOOTER */}
 
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 px-1 pb-4">
 
@@ -1588,9 +1500,6 @@ export default function JadwalMengajarPage() {
   );
 }
 
-/* =========================================================
-   STAT
-========================================================= */
 
 function PremiumStat({
   icon: Icon,
@@ -1632,9 +1541,6 @@ function PremiumStat({
   );
 }
 
-/* =========================================================
-   TIMELINE ITEM
-========================================================= */
 
 function TimelineItem({
   item,
@@ -1649,7 +1555,6 @@ function TimelineItem({
   return (
     <div className="relative grid grid-cols-[72px_1fr] sm:grid-cols-[100px_1fr] gap-3 sm:gap-5">
 
-      {/* TIME */}
 
       <div className="pt-4 text-right pr-1 sm:pr-2">
 
@@ -1665,7 +1570,6 @@ function TimelineItem({
 
       </div>
 
-      {/* DOT */}
 
       <div className="absolute left-[51px] sm:left-[75px] top-5 -translate-x-1/2 z-10">
 
@@ -1675,7 +1579,6 @@ function TimelineItem({
 
       </div>
 
-      {/* CARD */}
 
       <div
         className={`relative overflow-hidden rounded-xl border ${color.border} ${color.bg} p-4 sm:p-5 group hover:shadow-md transition-all duration-200`}
@@ -1732,7 +1635,6 @@ function TimelineItem({
 
             </div>
 
-            {/* ACTION */}
 
             <div className="flex items-center gap-1.5 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
 
@@ -1824,9 +1726,6 @@ function TimelineItem({
   );
 }
 
-/* =========================================================
-   EMPTY
-========================================================= */
 
 function EmptyState({
   onTambah,
@@ -1868,9 +1767,6 @@ function EmptyState({
   );
 }
 
-/* =========================================================
-   LOADING
-========================================================= */
 
 function LoadingState() {
   return (

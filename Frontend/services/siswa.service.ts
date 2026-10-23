@@ -49,9 +49,6 @@ export async function createSiswa(data: CreateSiswaData) {
   });
 }
 
-/**
- * Mengambil kelas siswa yang sedang login.
- */
 export async function getKelasSaya(): Promise<KelasSaya> {
   const response = await apiFetch("/api/siswa/me", {
     method: "GET",

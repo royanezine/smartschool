@@ -70,7 +70,6 @@ function formatDateForInput(value) {
 
   if (Number.isNaN(date.getTime())) return "";
 
-  // Gunakan tanggal lokal agar tidak bergeser karena zona waktu.
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
@@ -132,8 +131,6 @@ export default function EditSiswaPage() {
 
       const response = await getUserById(id);
 
-      // Mendukung service yang mengembalikan JSON langsung
-      // maupun Axios yang membungkus JSON dalam response.data.
       const result = response?.data?.data ?? response?.data ?? response;
       const user = result?.data ?? result;
 

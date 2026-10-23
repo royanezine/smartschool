@@ -28,9 +28,6 @@ import {
   kembalikanPeminjaman,
 } from "@/services/sarpras.service";
 
-/* =========================================================
-   THEME HELPERS
-========================================================= */
 
 const themePrimarySurface =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -92,9 +89,6 @@ const themeDangerSurface =
 const themeDangerBorder =
   "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
 
-/* =========================================================
-   STATUS
-========================================================= */
 
 const STATUS = {
   MENUNGGU: "menunggu_persetujuan",
@@ -140,9 +134,6 @@ const ACTION_CONFIG = {
   },
 };
 
-/* =========================================================
-   PAGE
-========================================================= */
 
 function AksiContent() {
   const router = useRouter();
@@ -165,7 +156,6 @@ function AksiContent() {
   const [submitting, setSubmitting] = useState(false);
   const [actionError, setActionError] = useState("");
 
-  /* Form state */
   const [catatanPenolakan, setCatatanPenolakan] = useState("");
   const [siswaPengambilId, setSiswaPengambilId] = useState("");
   const [namaSiswaPengambil, setNamaSiswaPengambil] = useState("");
@@ -190,9 +180,6 @@ function AksiContent() {
     },
   ];
 
-  /* =========================================================
-     LOAD DETAIL
-  ========================================================= */
 
   useEffect(() => {
     let mounted = true;
@@ -236,9 +223,6 @@ function AksiContent() {
   const handleBack = () =>
     router.push(`/admin/sarpras/peminjaman/${id}`);
 
-  /* =========================================================
-     SUBMIT
-  ========================================================= */
 
   const handleSubmit = async () => {
     if (!detail) return;
@@ -354,9 +338,6 @@ function AksiContent() {
 
   return (
     <div className="flex h-screen overflow-hidden theme-page">
-      {/* =====================================================
-          SIDEBAR
-      ===================================================== */}
 
       <Sidebar
         active="sarpras"
@@ -368,9 +349,6 @@ function AksiContent() {
       />
 
       <div className="flex flex-1 min-w-0 flex-col">
-        {/* ===================================================
-            HEADER
-        =================================================== */}
 
         <Header
           toggleSidebar={() =>
@@ -387,9 +365,6 @@ function AksiContent() {
         <main className="flex-1 overflow-y-auto theme-page">
           <div className="mx-auto w-full max-w-[900px] space-y-5 p-4 sm:p-6 lg:p-8">
 
-            {/* =================================================
-                BACK
-            ================================================= */}
 
             <button
               type="button"
@@ -426,9 +401,6 @@ function AksiContent() {
               Kembali ke Detail Peminjaman
             </button>
 
-            {/* =================================================
-                HEADER
-            ================================================= */}
 
             <div className="flex items-start gap-4">
               <div
@@ -487,9 +459,6 @@ function AksiContent() {
               </div>
             </div>
 
-            {/* =================================================
-                LOADING
-            ================================================= */}
 
             {loading && (
               <div
@@ -520,9 +489,6 @@ function AksiContent() {
               </div>
             )}
 
-            {/* =================================================
-                ERROR
-            ================================================= */}
 
             {!loading && error && (
               <div
@@ -563,18 +529,12 @@ function AksiContent() {
               </div>
             )}
 
-            {/* =================================================
-                FORM
-            ================================================= */}
 
             {!loading &&
               !error &&
               detail && (
                 <div className="space-y-5">
 
-                  {/* ===========================================
-                      INFO ITEM
-                  =========================================== */}
 
                   <div
                     className={`
@@ -662,9 +622,6 @@ function AksiContent() {
                     </div>
                   </div>
 
-                  {/* =========================================
-                      FORM SETUJUI
-                  ========================================= */}
 
                   {type === "setujui" && (
                     <div
@@ -714,9 +671,6 @@ function AksiContent() {
                     </div>
                   )}
 
-                  {/* =========================================
-                      FORM TOLAK
-                  ========================================= */}
 
                   {type === "tolak" && (
                     <div
@@ -798,9 +752,6 @@ function AksiContent() {
                     </div>
                   )}
 
-                  {/* =========================================
-                      FORM SERAHKAN
-                  ========================================= */}
 
                   {type === "serahkan" && (
                     <div
@@ -847,7 +798,6 @@ function AksiContent() {
 
                       <div className="space-y-4 p-5">
 
-                        {/* INFO */}
                         <div
                           className={`
                             rounded-lg
@@ -871,7 +821,6 @@ function AksiContent() {
                           </p>
                         </div>
 
-                        {/* ID SISWA */}
                         <div>
                           <label className="mb-1.5 block text-xs font-semibold theme-text-secondary">
                             ID Siswa Pengambil
@@ -901,7 +850,6 @@ function AksiContent() {
                           />
                         </div>
 
-                        {/* ATAU */}
                         <div className="flex items-center gap-3">
                           <div
                             className={`
@@ -922,7 +870,6 @@ function AksiContent() {
                           />
                         </div>
 
-                        {/* NAMA SISWA */}
                         <div>
                           <label className="mb-1.5 block text-xs font-semibold theme-text-secondary">
                             Nama Siswa Pengambil
@@ -952,7 +899,6 @@ function AksiContent() {
                           />
                         </div>
 
-                        {/* KONDISI */}
                         <div>
                           <label className="mb-1.5 block text-xs font-semibold theme-text-secondary">
                             Kondisi Saat Pinjam
@@ -994,9 +940,6 @@ function AksiContent() {
                     </div>
                   )}
 
-                  {/* =========================================
-                      FORM KEMBALIKAN
-                  ========================================= */}
 
                   {type === "kembalikan" && (
                     <div
@@ -1043,7 +986,6 @@ function AksiContent() {
 
                       <div className="space-y-4 p-5">
 
-                        {/* INFO */}
                         <div
                           className={`
                             rounded-lg
@@ -1067,7 +1009,6 @@ function AksiContent() {
                           </p>
                         </div>
 
-                        {/* ID SISWA */}
                         <div>
                           <label className="mb-1.5 block text-xs font-semibold theme-text-secondary">
                             ID Siswa Pengembali
@@ -1097,7 +1038,6 @@ function AksiContent() {
                           />
                         </div>
 
-                        {/* ATAU */}
                         <div className="flex items-center gap-3">
                           <div
                             className={`
@@ -1118,7 +1058,6 @@ function AksiContent() {
                           />
                         </div>
 
-                        {/* NAMA SISWA */}
                         <div>
                           <label className="mb-1.5 block text-xs font-semibold theme-text-secondary">
                             Nama Siswa Pengembali
@@ -1148,7 +1087,6 @@ function AksiContent() {
                           />
                         </div>
 
-                        {/* KONDISI ASET */}
                         <div className="space-y-3 pt-2">
                           <p className="text-xs font-bold theme-text">
                             Kondisi Aset Saat Kembali
@@ -1199,7 +1137,6 @@ function AksiContent() {
                                   </div>
                                 </div>
 
-                                {/* SELECT KONDISI */}
                                 <select
                                   value={
                                     kondisiKembali[
@@ -1244,7 +1181,6 @@ function AksiContent() {
                                   </option>
                                 </select>
 
-                                {/* CATATAN */}
                                 <textarea
                                   rows={2}
                                   value={
@@ -1283,9 +1219,6 @@ function AksiContent() {
                     </div>
                   )}
 
-                  {/* =========================================
-                      ACTION ERROR
-                  ========================================= */}
 
                   {actionError && (
                     <div
@@ -1321,9 +1254,6 @@ function AksiContent() {
                     </div>
                   )}
 
-                  {/* =========================================
-                      BUTTONS
-                  ========================================= */}
 
                   <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
                     <button
@@ -1396,9 +1326,6 @@ function AksiContent() {
   );
 }
 
-/* =========================================================
-   SUB COMPONENTS
-========================================================= */
 
 function InfoRow({ label, value, mono }) {
   return (
@@ -1433,9 +1360,6 @@ function Divider() {
   );
 }
 
-/* =========================================================
-   WRAPPER
-========================================================= */
 
 export default function AksiPage() {
   return (

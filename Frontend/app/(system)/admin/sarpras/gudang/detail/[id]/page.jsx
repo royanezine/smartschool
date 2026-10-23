@@ -174,7 +174,6 @@ export default function DetailAsetPage() {
 
         setError("");
 
-        // Mengambil data melalui endpoint BE yang sudah tersedia.
         const response = await getAset();
         const list = extractArray(response);
         const found = list.find(

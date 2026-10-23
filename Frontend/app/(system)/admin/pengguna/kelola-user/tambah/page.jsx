@@ -273,7 +273,6 @@ async function handleSubmit(event) {
   setServerError("");
   setSaved(false);
 
-  // Pastikan validasi lolos
   if (!validate()) {
     setServerError("Periksa kembali data yang wajib diisi.");
     return;
@@ -317,7 +316,6 @@ async function handleSubmit(event) {
 
     setSaved(true);
 
-    // Beri waktu agar pesan sukses sempat terlihat
     router.replace("/admin/pengguna/kelola-user");
     router.refresh();
   } catch (error) {

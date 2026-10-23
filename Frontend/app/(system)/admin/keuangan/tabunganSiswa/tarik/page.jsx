@@ -51,9 +51,6 @@ function Field({ label, required, hint, children }) {
   );
 }
 
-/* =========================================================
-   INNER — pakai useSearchParams()
-========================================================= */
 
 function TarikFormContent() {
   const router = useRouter();

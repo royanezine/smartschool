@@ -107,7 +107,6 @@ export default function PpdbNavbar() {
   return (
     <header className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/90 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
-        {/* BRAND */}
         <button
           type="button"
           onClick={() => {
@@ -133,7 +132,6 @@ export default function PpdbNavbar() {
           </span>
         </button>
 
-        {/* DESKTOP NAV */}
         <nav className="hidden items-center gap-1 text-sm text-slate-600 md:flex">
           {navItems.map((item) => {
             const isActive =
@@ -162,7 +160,6 @@ export default function PpdbNavbar() {
           })}
         </nav>
 
-        {/* DESKTOP CTA */}
         <div className="hidden shrink-0 md:flex">
           <button
             type="button"
@@ -175,7 +172,6 @@ export default function PpdbNavbar() {
           </button>
         </div>
 
-        {/* MOBILE */}
         <button
           type="button"
           onClick={() =>
@@ -199,7 +195,6 @@ export default function PpdbNavbar() {
         </button>
       </div>
 
-      {/* MOBILE MENU */}
       {menuOpen && (
         <div className="space-y-1 border-t border-slate-100 bg-white px-4 py-3 md:hidden">
           {navItems.map((item) => {

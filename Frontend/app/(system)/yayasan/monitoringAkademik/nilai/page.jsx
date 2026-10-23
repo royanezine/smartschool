@@ -7,9 +7,6 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-// ============================================================
-// THEME HELPERS
-// ============================================================
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -40,9 +37,6 @@ export default function MonitoringAkademikNilaiPage() {
     <div className="theme-page theme-text min-h-full">
       <div className="w-full max-w-[1500px] mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
 
-        {/* ======================================================
-            BACK BUTTON
-        ====================================================== */}
 
         <div className="mb-5 flex items-center">
           <button
@@ -69,9 +63,6 @@ export default function MonitoringAkademikNilaiPage() {
           </button>
         </div>
 
-        {/* ======================================================
-            HERO
-        ====================================================== */}
 
         <section
           className={`
@@ -81,7 +72,6 @@ export default function MonitoringAkademikNilaiPage() {
             ${themePrimaryShadow}
           `}
         >
-          {/* Decorative background */}
           <div
             className="
               pointer-events-none
@@ -99,7 +89,6 @@ export default function MonitoringAkademikNilaiPage() {
           <div className="relative p-5 sm:p-6 md:p-8">
             <div className="flex items-start gap-4">
 
-              {/* ICON */}
               <div
                 className="
                   flex
@@ -122,7 +111,6 @@ export default function MonitoringAkademikNilaiPage() {
                 <BarChart3 className="h-6 w-6 sm:h-7 sm:w-7" />
               </div>
 
-              {/* TITLE */}
               <div className="min-w-0">
                 <p
                   className="
@@ -160,9 +148,6 @@ export default function MonitoringAkademikNilaiPage() {
           </div>
         </section>
 
-        {/* ======================================================
-            DEVELOPMENT CARD
-        ====================================================== */}
 
         <div
           className={`
@@ -179,7 +164,6 @@ export default function MonitoringAkademikNilaiPage() {
             ${themeCardShadow}
           `}
         >
-          {/* ICON */}
           <div
             className={`
               flex
@@ -197,18 +181,15 @@ export default function MonitoringAkademikNilaiPage() {
             <Construction className="h-6 w-6" />
           </div>
 
-          {/* TITLE */}
           <h3 className="mt-4 text-sm font-bold theme-text">
             Halaman dalam pengembangan
           </h3>
 
-          {/* DESCRIPTION */}
           <p className="mt-1 max-w-sm text-sm leading-relaxed theme-text-muted">
             Fitur monitoring nilai per sekolah dan per mata
             pelajaran belum tersedia saat ini.
           </p>
 
-          {/* BACK BUTTON */}
           <button
             type="button"
             onClick={handleBack}

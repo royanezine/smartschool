@@ -17,9 +17,6 @@ import {
   ChevronRight,
 } from "lucide-react";
 
-// =============================================================
-// THEME HELPERS
-// =============================================================
 const themeCardShadow =
   "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
 
@@ -47,9 +44,6 @@ const themeNeutralBorder =
 const themeDivider =
   "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
 
-// =============================================================
-// INPUT STYLE
-// =============================================================
 const inputClass = `
   w-full rounded-lg
   border theme-border
@@ -71,9 +65,6 @@ const selectClass = `
   ${themeFocus}
 `;
 
-// =============================================================
-// EDIT YAYASAN
-// =============================================================
 export default function EditYayasanPage() {
   const router = useRouter();
 
@@ -97,9 +88,6 @@ export default function EditYayasanPage() {
 
   const [logoPreview, setLogoPreview] = useState(null);
 
-  // =========================================================
-  // HANDLE CHANGE
-  // =========================================================
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -109,9 +97,6 @@ export default function EditYayasanPage() {
     }));
   };
 
-  // =========================================================
-  // HANDLE LOGO
-  // =========================================================
   const handleLogoChange = (e) => {
     const file = e.target.files?.[0];
 
@@ -121,13 +106,9 @@ export default function EditYayasanPage() {
     setLogoPreview(previewUrl);
   };
 
-  // =========================================================
-  // SUBMIT
-  // =========================================================
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // FE saja untuk sekarang
     console.log("Data Yayasan:", formData);
 
     alert("Data yayasan berhasil disimpan!");
@@ -135,9 +116,6 @@ export default function EditYayasanPage() {
     router.push("/super-admin/yayasan");
   };
 
-  // =========================================================
-  // BACK
-  // =========================================================
   const goBack = () => {
     router.push("/super-admin/yayasan");
   };
@@ -145,9 +123,6 @@ export default function EditYayasanPage() {
   return (
     <div className="theme-page theme-text min-h-full">
       <div className="w-full max-w-[1400px] mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
-        {/* =====================================================
-            BREADCRUMB
-        ===================================================== */}
         <div className="mb-5 flex items-center gap-2 text-sm">
           <button
             onClick={goBack}
@@ -166,9 +141,6 @@ export default function EditYayasanPage() {
           </span>
         </div>
 
-        {/* =====================================================
-            HEADER
-        ===================================================== */}
         <div className="mb-7 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <div>
             <div className="mb-2 flex flex-wrap items-center gap-3">
@@ -198,16 +170,10 @@ export default function EditYayasanPage() {
           </button>
         </div>
 
-        {/* =====================================================
-            FORM
-        ===================================================== */}
         <form onSubmit={handleSubmit}>
           <div
             className={`theme-card overflow-hidden rounded-xl border theme-border ${themeCardShadow}`}
           >
-            {/* =================================================
-                CARD HEADER
-            ================================================= */}
             <div
               className={`border-b ${themeDivider} px-5 py-5 sm:px-6`}
             >
@@ -232,9 +198,6 @@ export default function EditYayasanPage() {
               </div>
             </div>
 
-            {/* =================================================
-                INFORMASI YAYASAN
-            ================================================= */}
             <div
               className={`border-b ${themeDivider} px-5 py-6 sm:px-6`}
             >
@@ -249,7 +212,6 @@ export default function EditYayasanPage() {
               </div>
 
               <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                {/* Nama */}
                 <FormField
                   label="Nama Yayasan"
                   required
@@ -265,7 +227,6 @@ export default function EditYayasanPage() {
                   />
                 </FormField>
 
-                {/* Kode */}
                 <FormField
                   label="Kode Yayasan"
                   required
@@ -281,7 +242,6 @@ export default function EditYayasanPage() {
                   />
                 </FormField>
 
-                {/* Ketua */}
                 <FormField
                   label="Ketua Yayasan"
                   required
@@ -297,7 +257,6 @@ export default function EditYayasanPage() {
                   />
                 </FormField>
 
-                {/* Status */}
                 <FormField
                   label="Status"
                   required
@@ -322,7 +281,6 @@ export default function EditYayasanPage() {
                   </select>
                 </FormField>
 
-                {/* Email */}
                 <FormField
                   label="Email"
                   icon={<Mail size={16} />}
@@ -337,7 +295,6 @@ export default function EditYayasanPage() {
                   />
                 </FormField>
 
-                {/* Telepon */}
                 <FormField
                   label="No. Telepon"
                   icon={<Phone size={16} />}
@@ -352,7 +309,6 @@ export default function EditYayasanPage() {
                   />
                 </FormField>
 
-                {/* Website */}
                 <div className="md:col-span-2">
                   <FormField
                     label="Website"
@@ -369,9 +325,6 @@ export default function EditYayasanPage() {
                   </FormField>
                 </div>
 
-                {/* =================================================
-                    LOGO
-                ================================================= */}
                 <div className="md:col-span-2">
                   <FormField
                     label="Logo Yayasan"
@@ -432,9 +385,6 @@ export default function EditYayasanPage() {
               </div>
             </div>
 
-            {/* =================================================
-                ALAMAT
-            ================================================= */}
             <div className="px-5 py-6 sm:px-6">
               <div className="mb-5">
                 <div className="flex items-center gap-2">
@@ -454,7 +404,6 @@ export default function EditYayasanPage() {
               </div>
 
               <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                {/* Provinsi */}
                 <FormField label="Provinsi">
                   <select
                     name="provinsi"
@@ -488,7 +437,6 @@ export default function EditYayasanPage() {
                   </select>
                 </FormField>
 
-                {/* Kabupaten */}
                 <FormField label="Kabupaten / Kota">
                   <select
                     name="kabupaten"
@@ -522,7 +470,6 @@ export default function EditYayasanPage() {
                   </select>
                 </FormField>
 
-                {/* Kecamatan */}
                 <FormField label="Kecamatan">
                   <input
                     type="text"
@@ -534,7 +481,6 @@ export default function EditYayasanPage() {
                   />
                 </FormField>
 
-                {/* Kelurahan */}
                 <FormField label="Kelurahan">
                   <input
                     type="text"
@@ -546,7 +492,6 @@ export default function EditYayasanPage() {
                   />
                 </FormField>
 
-                {/* Kode Pos */}
                 <FormField label="Kode Pos">
                   <input
                     type="text"
@@ -558,7 +503,6 @@ export default function EditYayasanPage() {
                   />
                 </FormField>
 
-                {/* Alamat */}
                 <div className="md:col-span-2">
                   <FormField
                     label="Alamat Lengkap"
@@ -577,9 +521,6 @@ export default function EditYayasanPage() {
               </div>
             </div>
 
-            {/* =================================================
-                FOOTER ACTION
-            ================================================= */}
             <div
               className={`
                 flex flex-col-reverse gap-3
@@ -632,9 +573,6 @@ export default function EditYayasanPage() {
   );
 }
 
-// =============================================================
-// FORM FIELD
-// =============================================================
 function FormField({
   label,
   required,

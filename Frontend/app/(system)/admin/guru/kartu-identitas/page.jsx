@@ -4,6 +4,7 @@ import { Suspense, useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
+import { getUsers } from "@/services/user.service";
 import {
   Search,
   Filter,
@@ -17,34 +18,6 @@ import {
   Plus,
 } from "lucide-react";
 
-/**
- * app/admin/guru/kartu-identitas/page.jsx
- *
- * Halaman Kartu Identitas — daftar guru & staff dengan aksi untuk melihat
- * detail profil masing-masing. Tombol "Tambah Pegawai" membuka halaman
- * tambah terpisah; pegawai baru yang disimpan di sana otomatis muncul di
- * sini setelah kembali.
- *
- * CATATAN ROUTE DETAIL & ID CARD:
- * Detail pegawai TIDAK LAGI modal — sekarang halaman sendiri di
- * app/admin/guru/kartu-identitas/[id]/page.jsx (dynamic segment). Tombol
- * "Detail" di tabel mengarah ke /admin/guru/kartu-identitas/{id}.
- *
- * Preview kartu identitas JUGA TIDAK LAGI modal — sekarang halaman sendiri
- * di app/admin/guru/kartu-identitas/card/page.jsx (route STATIS, bukan
- * dynamic segment). Karena itu id pegawai dikirim lewat QUERY STRING,
- * bukan lewat path — tombol "ID Card" di tabel mengarah ke
- * /admin/guru/kartu-identitas/card?id={id}, dan halaman card membaca id
- * itu pakai useSearchParams().
- *
- * CATATAN DATA:
- * MOCK_PEGAWAI di bawah masih dummy dan dipakai sebagai initial state. Data
- * pegawai baru dari halaman /tambah dititipkan sebentar lewat localStorage
- * (key "ki_new_pegawai_queue") lalu digabung ke state di sini saat halaman
- * ini dibuka lagi. Kalau nanti nyambung ke API, ganti MOCK_PEGAWAI dengan
- * hasil fetch dan ganti mekanisme "titip lewat localStorage" ini dengan
- * POST ke endpoint tambah pegawai.
- */
 
 const MOCK_PEGAWAI = [
   {
@@ -139,9 +112,6 @@ const MOCK_PEGAWAI = [
   },
 ];
 
-const QUEUE_KEY = "ki_new_pegawai_queue";
-
-const TIPE_OPTIONS = ["Semua Tipe", "Guru", "Staff"];
 const STATUS_OPTIONS = ["Semua Status", "Aktif", "Nonaktif"];
 
 function getInitials(nama) {
@@ -242,40 +212,68 @@ function KartuIdentitasPageContent() {
 
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [search, setSearch] = useState("");
-  const [tipeFilter, setTipeFilter] = useState("Semua Tipe");
   const [statusFilter, setStatusFilter] = useState("Semua Status");
-  const [pegawaiList, setPegawaiList] = useState(MOCK_PEGAWAI);
+  const [pegawaiList, setPegawaiList] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Ambil pegawai baru yang "dititipkan" oleh halaman /tambah lewat localStorage,
-  // gabungkan ke daftar, lalu bersihkan titipannya supaya tidak dobel kalau
-  // halaman ini dibuka ulang.
   useEffect(() => {
-    try {
-      const raw = window.localStorage.getItem(QUEUE_KEY);
+    let isMounted = true;
 
-      if (raw) {
-        const queued = JSON.parse(raw);
+    async function loadData() {
+      try {
+        setLoading(true);
+        let allUsers = [];
+        let page = 1;
+        let totalPages = 1;
 
-        if (Array.isArray(queued) && queued.length > 0) {
-          setPegawaiList((prev) => {
-            let nextId = prev.length
-              ? Math.max(...prev.map((p) => p.id)) + 1
-              : 1;
+        do {
+          const res = await getUsers({ page, limit: 100, role: "guru" });
+          const raw = res?.data ?? res ?? [];
+          const users = Array.isArray(raw) ? raw : [];
+          allUsers = allUsers.concat(users);
 
-            const withIds = queued.map((q) => ({
-              ...q,
-              id: nextId++,
-            }));
+          totalPages = res?.pagination?.totalPages || 1;
+          page++;
+        } while (page <= totalPages);
 
-            return [...prev, ...withIds];
+        if (isMounted) {
+          const formatted = allUsers.map((u) => {
+            const mapelNama =
+              u.mataPelajaran?.nama ??
+              u.guruMapel?.[0]?.mataPelajaran?.nama ??
+              u.mapel ??
+              "-";
+
+            return {
+              id: u.id,
+              nama: u.namaLengkap || u.nama || "Tanpa Nama",
+              nip: u.nip || "-",
+              nuptk: u.nuptk || "-",
+              tipe: "Guru",
+              jabatan: u.jabatan || "Tenaga Pendidik",
+              status: u.status || "aktif",
+              email: u.email || "-",
+              telp: u.noTelepon || "-",
+              alamat: u.alamat || u.alamatDomisili || "-",
+              avatar: u.avatar || null,
+              sekolahNama: u.sekolah?.nama || "SMARTSCHOOL",
+            };
           });
-        }
 
-        window.localStorage.removeItem(QUEUE_KEY);
+          setPegawaiList(formatted);
+        }
+      } catch (err) {
+        console.error("Gagal mengambil data guru dari API:", err);
+      } finally {
+        if (isMounted) setLoading(false);
       }
-    } catch (err) {
-      console.error("Gagal memuat data pegawai baru:", err);
     }
+
+    loadData();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const toggleSidebar = () => setIsCollapsed(!isCollapsed);
@@ -288,41 +286,26 @@ function KartuIdentitasPageContent() {
           .includes(search.toLowerCase()) ||
         p.nip.includes(search);
 
-      const matchTipe =
-        tipeFilter === "Semua Tipe" ||
-        p.tipe === tipeFilter;
-
       const matchStatus =
         statusFilter === "Semua Status" ||
         (statusFilter === "Aktif"
           ? p.status === "aktif"
           : p.status === "nonaktif");
 
-      return matchSearch && matchTipe && matchStatus;
+      return matchSearch && matchStatus;
     });
-  }, [pegawaiList, search, tipeFilter, statusFilter]);
+  }, [pegawaiList, search, statusFilter]);
 
-  const totalGuru = pegawaiList.filter(
-    (p) => p.tipe === "Guru"
-  ).length;
-
-  const totalStaff = pegawaiList.filter(
-    (p) => p.tipe === "Staff"
-  ).length;
+  const totalGuru = pegawaiList.length;
 
   const totalAktif = pegawaiList.filter(
     (p) => p.status === "aktif"
   ).length;
 
-  // PENTING: route detail itu DYNAMIC SEGMENT ([id]/page.jsx), id dikirim
-  // lewat path, bukan modal lagi.
   const handleDetail = (p) => {
     router.push(`/admin/guru/kartu-identitas/${p.id}`);
   };
 
-  // PENTING: halaman card ini route STATIS (kartu-identitas/card/page.jsx),
-  // bukan dynamic segment. Id pegawai dikirim lewat QUERY STRING (?id=...),
-  // lalu dibaca di halaman card pakai useSearchParams().
   const handleIdCard = (p) => {
     router.push(`/admin/guru/kartu-identitas/card?id=${p.id}`);
   };
@@ -350,7 +333,6 @@ function KartuIdentitasPageContent() {
 
         <main className="flex-1 overflow-y-auto">
           <div className="p-4 sm:p-6 lg:p-8 space-y-6">
-            {/* HEADER */}
             <div className="flex items-center justify-between gap-3 flex-wrap">
               <div className="flex items-center gap-3">
                 <div className="p-2.5 rounded-xl theme-primary shadow-lg">
@@ -363,7 +345,7 @@ function KartuIdentitasPageContent() {
                   </h1>
 
                   <p className="text-sm theme-text-muted">
-                    Data identitas guru & staff dan lihat detail profil.
+                    Data identitas guru dan cetak pratinjau kartu.
                   </p>
                 </div>
               </div>
@@ -394,25 +376,7 @@ function KartuIdentitasPageContent() {
               </button>
             </div>
 
-            {/* STATISTIK RINGKAS */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <div className="theme-card rounded-xl border theme-border p-4 shadow-sm">
-                <div className="flex items-center gap-2">
-                  <Users
-                    size={14}
-                    className="text-[var(--color-primary)]"
-                  />
-
-                  <p className="text-[11px] font-medium theme-text-muted tracking-wide">
-                    Total Pegawai
-                  </p>
-                </div>
-
-                <p className="text-2xl font-bold theme-text mt-1.5">
-                  {pegawaiList.length}
-                </p>
-              </div>
-
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="theme-card rounded-xl border theme-border p-4 shadow-sm">
                 <div className="flex items-center gap-2">
                   <GraduationCap
@@ -421,29 +385,12 @@ function KartuIdentitasPageContent() {
                   />
 
                   <p className="text-[11px] font-medium theme-text-muted tracking-wide">
-                    Guru
+                    Total Guru
                   </p>
                 </div>
 
                 <p className="text-2xl font-bold theme-text mt-1.5">
                   {totalGuru}
-                </p>
-              </div>
-
-              <div className="theme-card rounded-xl border theme-border p-4 shadow-sm">
-                <div className="flex items-center gap-2">
-                  <Briefcase
-                    size={14}
-                    className="text-[var(--color-warning)]"
-                  />
-
-                  <p className="text-[11px] font-medium theme-text-muted tracking-wide">
-                    Staff
-                  </p>
-                </div>
-
-                <p className="text-2xl font-bold theme-text mt-1.5">
-                  {totalStaff}
                 </p>
               </div>
 
@@ -465,7 +412,6 @@ function KartuIdentitasPageContent() {
               </div>
             </div>
 
-            {/* FILTER BAR */}
             <div
               className="
                 theme-card
@@ -516,39 +462,13 @@ function KartuIdentitasPageContent() {
 
               <div className="flex items-center gap-2">
                 <Filter
-                  size={15}
+                  size={16}
                   className="
                     theme-text-placeholder
                     hidden
                     sm:block
                   "
                 />
-
-                <select
-                  value={tipeFilter}
-                  onChange={(e) =>
-                    setTipeFilter(e.target.value)
-                  }
-                  className="
-                    theme-input
-                    text-sm
-                    rounded-lg
-                    border
-                    px-3
-                    py-2
-                    focus:outline-none
-                    focus:ring-2
-                    focus:ring-[var(--color-primary)]/20
-                    focus:border-[var(--color-primary)]
-                    font-medium
-                  "
-                >
-                  {TIPE_OPTIONS.map((t) => (
-                    <option key={t} value={t}>
-                      {t}
-                    </option>
-                  ))}
-                </select>
 
                 <select
                   value={statusFilter}
@@ -578,7 +498,6 @@ function KartuIdentitasPageContent() {
               </div>
             </div>
 
-            {/* TABEL PEGAWAI */}
             <div
               className="
                 theme-card

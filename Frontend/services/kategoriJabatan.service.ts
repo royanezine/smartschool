@@ -1,9 +1,6 @@
 
 import { apiFetch } from "../lib/api";
 
-/* =========================================================
-   TYPES
-========================================================= */
 
 export type StatusKategoriJabatan = "aktif" | "nonaktif";
 
@@ -94,9 +91,6 @@ type ApiResponse<T> = {
   };
 };
 
-/* =========================================================
-   RESPONSE HELPERS
-========================================================= */
 
 function unwrapData<T>(response: unknown): T {
   let result: unknown = response;
@@ -212,9 +206,6 @@ function getPagination(
   };
 }
 
-/* =========================================================
-   GET ALL KATEGORI JABATAN
-========================================================= */
 
 export async function getKategoriJabatan(
   params: KategoriJabatanQuery = {},
@@ -254,9 +245,6 @@ export async function getKategoriJabatan(
   };
 }
 
-/* =========================================================
-   GET DETAIL KATEGORI JABATAN
-========================================================= */
 
 export async function getKategoriJabatanById(
   id: string,
@@ -275,9 +263,6 @@ export async function getKategoriJabatanById(
   );
 }
 
-/* =========================================================
-   CREATE KATEGORI JABATAN
-========================================================= */
 
 export async function createKategoriJabatan(
   payload: KategoriJabatanPayload,
@@ -305,9 +290,6 @@ export async function createKategoriJabatan(
   );
 }
 
-/* =========================================================
-   UPDATE KATEGORI JABATAN
-========================================================= */
 
 export async function updateKategoriJabatan(
   id: string,
@@ -348,9 +330,6 @@ export async function updateKategoriJabatan(
   );
 }
 
-/* =========================================================
-   ADD TARIFF HISTORY
-========================================================= */
 
 export async function tambahTarifKategoriJabatan(
   id: string,
@@ -377,9 +356,6 @@ export async function tambahTarifKategoriJabatan(
   return unwrapData<KategoriJabatan | TarifJabatan>(response);
 }
 
-/* =========================================================
-   DELETE / NONAKTIFKAN KATEGORI
-========================================================= */
 
 export async function deleteKategoriJabatan(
   id: string,

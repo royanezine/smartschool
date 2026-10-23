@@ -190,7 +190,6 @@ export default function DetailBukuPage() {
               </div>
             ) : book ? (
               <div className="space-y-5">
-                {/* HEADER CARD */}
                 <section className="theme-card overflow-hidden rounded-2xl border theme-border shadow-sm">
                   <div className="flex flex-col gap-4 p-5 sm:flex-row sm:p-6">
                     <div className="flex h-40 w-full shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[var(--color-primary)] text-[var(--color-card)] sm:h-36 sm:w-28">
@@ -226,7 +225,6 @@ export default function DetailBukuPage() {
                   </div>
                 </section>
 
-                {/* INFO */}
                 <section className="theme-card overflow-hidden rounded-2xl border theme-border shadow-sm">
                   <div className="border-b theme-border px-5 py-4 sm:px-6">
                     <h3 className="theme-text text-sm font-semibold">
@@ -261,7 +259,6 @@ export default function DetailBukuPage() {
                   </div>
                 </section>
 
-                {/* STOK */}
                 <section className="theme-card overflow-hidden rounded-2xl border theme-border shadow-sm">
                   <div className="border-b theme-border px-5 py-4 sm:px-6">
                     <h3 className="theme-text text-sm font-semibold">
@@ -294,7 +291,6 @@ export default function DetailBukuPage() {
                   </div>
                 </section>
 
-                {/* DESKRIPSI */}
                 {book.deskripsi && (
                   <section className="theme-card overflow-hidden rounded-2xl border theme-border shadow-sm">
                     <div className="border-b theme-border px-5 py-4 sm:px-6">
@@ -314,7 +310,6 @@ export default function DetailBukuPage() {
                   </section>
                 )}
 
-                {/* EBOOK URL */}
                 {book.urlEbook && (
                   <section className="theme-card flex flex-col gap-3 rounded-2xl border theme-border p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:p-6">
                     <div>

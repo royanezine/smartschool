@@ -1,4 +1,3 @@
-// app/cmsAdmin/website/page.jsx
 
 "use client";
 
@@ -20,9 +19,6 @@ import {
   Activity,
 } from "lucide-react";
 
-// =====================================================
-// DUMMY DATA
-// =====================================================
 
 const stats = {
   totalDokumen: 24,
@@ -31,9 +27,6 @@ const stats = {
   totalKategori: 8,
 };
 
-// =====================================================
-// PAGE
-// =====================================================
 
 export default function WebsitePage() {
   const [active, setActive] = useState("website");
@@ -41,7 +34,6 @@ export default function WebsitePage() {
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
-      {/* SIDEBAR - TETAP DI KIRI */}
       <Sidebar
         active={active}
         setActive={setActive}
@@ -49,9 +41,6 @@ export default function WebsitePage() {
         setCollapsed={setCollapsed}
       />
 
-      {/* =================================================
-          CONTENT AREA - MENYESUAIKAN SISA LEBAR
-      ================================================= */}
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
         <Header
           title="Dashboard Website"
@@ -62,12 +51,8 @@ export default function WebsitePage() {
           }}
         />
 
-        {/* =================================================
-            MAIN CONTENT - SCROLLABLE
-        ================================================= */}
         <main className="theme-page flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-6 lg:p-8">
           <div className="w-full max-w-7xl mx-auto space-y-6">
-            {/* ===== BREADCRUMB ===== */}
             <nav className="flex items-center gap-1.5 flex-wrap text-xs sm:text-sm">
               <span className="font-medium theme-text-muted">
                 Dashboard
@@ -80,7 +65,6 @@ export default function WebsitePage() {
               </span>
             </nav>
 
-            {/* ===== HERO ===== */}
             <section
               className="
                 relative
@@ -94,7 +78,6 @@ export default function WebsitePage() {
                 shadow-sm
               "
             >
-              {/* Decoration */}
               <div
                 className="
                   absolute
@@ -125,7 +108,6 @@ export default function WebsitePage() {
 
               <div className="relative z-10 p-5 sm:p-6 lg:p-7 xl:p-8">
                 <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-6">
-                  {/* Left */}
                   <div className="flex items-start gap-4 min-w-0">
                     <div
                       className="
@@ -202,7 +184,6 @@ export default function WebsitePage() {
                     </div>
                   </div>
 
-                  {/* Right */}
                   <div className="flex flex-col sm:flex-row gap-2.5 xl:shrink-0">
                     <div
                       className="
@@ -288,7 +269,6 @@ export default function WebsitePage() {
               </div>
             </section>
 
-            {/* ===== STATISTIK ===== */}
             <section>
               <div className="flex items-end justify-between gap-3 mb-4">
                 <div className="min-w-0">
@@ -378,7 +358,6 @@ export default function WebsitePage() {
               </div>
             </section>
 
-            {/* ===== FEATURES ===== */}
             <section>
               <div className="mb-5">
                 <div className="flex items-center gap-2">
@@ -490,7 +469,6 @@ export default function WebsitePage() {
               </div>
             </section>
 
-            {/* ===== INFO BANNER ===== */}
             <section
               className="
                 relative
@@ -594,7 +572,6 @@ export default function WebsitePage() {
               </div>
             </section>
 
-            {/* ===== FOOTER ===== */}
             <footer
               className="
                 w-full
@@ -622,9 +599,6 @@ export default function WebsitePage() {
   );
 }
 
-// =====================================================
-// STAT CARD
-// =====================================================
 
 function StatCard({
   icon,
@@ -748,9 +722,6 @@ function StatCard({
   );
 }
 
-// =====================================================
-// FEATURE CARD
-// =====================================================
 
 function FeatureCard({
   icon,
@@ -786,7 +757,6 @@ function FeatureCard({
         duration-300
       "
     >
-      {/* Glow */}
       <div
         className="
           absolute
@@ -947,9 +917,6 @@ function FeatureCard({
   );
 }
 
-// =====================================================
-// INFO TAG
-// =====================================================
 
 function InfoTag({ text }) {
   return (

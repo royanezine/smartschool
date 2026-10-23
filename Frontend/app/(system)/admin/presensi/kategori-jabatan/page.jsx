@@ -154,9 +154,6 @@ function Field({ label, required, hint, children }) {
   );
 }
 
-/**
- * Header kolom yang bisa diklik untuk sorting ASC/DESC.
- */
 function SortableHeader({
   label,
   column,
@@ -225,9 +222,6 @@ export default function KategoriJabatanPage() {
     totalPages: 1,
   });
 
-  // ============================================================
-  // SORTING STATE
-  // ============================================================
   const [sortBy, setSortBy] = useState("nama");
   const [sortOrder, setSortOrder] = useState("asc");
 
@@ -291,9 +285,6 @@ export default function KategoriJabatanPage() {
     return () => clearTimeout(timeout);
   }, [notice]);
 
-  // ============================================================
-  // DATA YANG SUDAH DI-SORT
-  // ============================================================
   const sortedItems = useMemo(() => {
     const data = [...items];
 
@@ -529,9 +520,6 @@ export default function KategoriJabatanPage() {
         <main className="min-w-0 flex-1 overflow-y-auto theme-page theme-text">
           <div className="w-full px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
             <div className="mx-auto w-full max-w-7xl space-y-6">
-              {/* ============================================
-                  PAGE HEADER
-              ============================================ */}
               <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
                 <div className="flex items-start gap-3">
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
@@ -575,9 +563,6 @@ export default function KategoriJabatanPage() {
                 </div>
               </div>
 
-              {/* ============================================
-                  INFO BANNER
-              ============================================ */}
               <div className="flex items-start gap-3 rounded-lg border theme-border theme-card p-4">
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                   <Info size={18} />
@@ -593,9 +578,6 @@ export default function KategoriJabatanPage() {
                 </div>
               </div>
 
-              {/* ============================================
-                  ALERTS
-              ============================================ */}
               {notice && (
                 <div
                   role="status"
@@ -635,9 +617,6 @@ export default function KategoriJabatanPage() {
                 </div>
               )}
 
-              {/* ============================================
-                  SUMMARY CARDS
-              ============================================ */}
               <div className="grid grid-cols-1 items-stretch gap-4 sm:grid-cols-3">
                 <SummaryCard
                   title="Kategori pada halaman"
@@ -662,9 +641,6 @@ export default function KategoriJabatanPage() {
                 />
               </div>
 
-              {/* ============================================
-                  TABLE SECTION
-              ============================================ */}
               <section className="theme-card overflow-hidden rounded-xl border theme-border shadow-sm">
                 <div className="border-b theme-border p-4 sm:p-5">
                   <form
@@ -890,9 +866,6 @@ export default function KategoriJabatanPage() {
                   )}
                 </div>
 
-                {/* ============================================
-                    PAGINATION
-                ============================================ */}
                 <div className="flex flex-col gap-3 border-t theme-border px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
                   <p className="text-sm theme-text-muted">
                     Menampilkan{" "}
@@ -942,9 +915,6 @@ export default function KategoriJabatanPage() {
         </main>
       </div>
 
-      {/* ============================================================
-          MODAL: CREATE / EDIT
-      ============================================================ */}
       {(modal === "create" || modal === "edit") && (
         <Modal
           title={
@@ -1108,9 +1078,6 @@ export default function KategoriJabatanPage() {
         </Modal>
       )}
 
-      {/* ============================================================
-          MODAL: TARIF
-      ============================================================ */}
       {modal === "tarif" && selected && (
         <Modal
           title="Atur Tarif Jabatan"
@@ -1204,9 +1171,6 @@ export default function KategoriJabatanPage() {
         </Modal>
       )}
 
-      {/* ============================================================
-          MODAL: DETAIL
-      ============================================================ */}
       {modal === "detail" && selected && (
         <Modal
           title="Detail Kategori Jabatan"
@@ -1346,9 +1310,6 @@ export default function KategoriJabatanPage() {
   );
 }
 
-/* =========================================================
-   SUMMARY CARD
-========================================================= */
 
 function SummaryCard({ title, value, description, icon: Icon, tone = "blue" }) {
   const toneClasses = {

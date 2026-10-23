@@ -1,4 +1,3 @@
-// app/cmsAdmin/pengaturan/identitas/page.jsx
 "use client";
 
 import { useState } from "react";
@@ -77,7 +76,6 @@ export default function IdentitasPage() {
       />
 
       <div className="flex-1 min-w-0 flex flex-col">
-        {/* ===== HEADER ===== */}
         <Header
           title="Identitas Website"
           user={{
@@ -90,7 +88,6 @@ export default function IdentitasPage() {
 
         <main className="flex-1 min-w-0 overflow-y-auto p-4 md:p-6 lg:p-8 theme-page">
           <div className="w-full min-w-0 max-w-6xl mx-auto space-y-6">
-            {/* Breadcrumb */}
             <nav className="flex items-center gap-2 text-sm">
               <a
                 href="/cmsAdmin"
@@ -115,7 +112,6 @@ export default function IdentitasPage() {
               </span>
             </nav>
 
-            {/* Header */}
             <div className="flex items-start gap-4">
               <div className="shrink-0 p-3 rounded-xl theme-info border">
                 <Globe className="w-6 h-6" />
@@ -132,9 +128,7 @@ export default function IdentitasPage() {
               </div>
             </div>
 
-            {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Branding Card */}
               <div className="theme-card rounded-xl border shadow-sm overflow-hidden">
                 <div className="px-5 py-4 border-b theme-border flex items-center justify-between">
                   <div>
@@ -154,7 +148,6 @@ export default function IdentitasPage() {
                 </div>
 
                 <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-5">
-                  {/* Logo */}
                   <div className="theme-card-soft border theme-border rounded-xl p-4">
                     <label className="text-xs font-medium theme-text-secondary block mb-2">
                       Logo Website
@@ -187,7 +180,6 @@ export default function IdentitasPage() {
                     </p>
                   </div>
 
-                  {/* Favicon */}
                   <div className="theme-card-soft border theme-border rounded-xl p-4">
                     <label className="text-xs font-medium theme-text-secondary block mb-2">
                       Favicon
@@ -222,7 +214,6 @@ export default function IdentitasPage() {
                 </div>
               </div>
 
-              {/* Informasi Dasar Card */}
               <div className="theme-card rounded-xl border shadow-sm overflow-hidden">
                 <div className="px-5 py-4 border-b theme-border">
                   <h3 className="text-sm font-semibold theme-text">
@@ -235,7 +226,6 @@ export default function IdentitasPage() {
                 </div>
 
                 <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Nama Website */}
                   <div>
                     <label className="text-xs font-medium theme-text-secondary block mb-1.5">
                       Nama Website
@@ -250,7 +240,6 @@ export default function IdentitasPage() {
                     />
                   </div>
 
-                  {/* Email */}
                   <div>
                     <label className="text-xs font-medium theme-text-secondary block mb-1.5">
                       Email
@@ -265,7 +254,6 @@ export default function IdentitasPage() {
                     />
                   </div>
 
-                  {/* Deskripsi */}
                   <div className="md:col-span-2">
                     <label className="text-xs font-medium theme-text-secondary block mb-1.5">
                       Deskripsi Singkat
@@ -280,7 +268,6 @@ export default function IdentitasPage() {
                     />
                   </div>
 
-                  {/* Telepon */}
                   <div>
                     <label className="text-xs font-medium theme-text-secondary block mb-1.5">
                       Telepon
@@ -294,7 +281,6 @@ export default function IdentitasPage() {
                     />
                   </div>
 
-                  {/* Alamat */}
                   <div>
                     <label className="text-xs font-medium theme-text-secondary block mb-1.5">
                       Alamat
@@ -310,9 +296,7 @@ export default function IdentitasPage() {
                 </div>
               </div>
 
-              {/* Actions */}
               <div className="flex flex-col sm:flex-row justify-end gap-3 pt-2">
-                {/* Batal */}
                 <button
                   type="button"
                   onClick={() => window.history.back()}
@@ -331,7 +315,6 @@ export default function IdentitasPage() {
                   Batal
                 </button>
 
-                {/* Simpan */}
                 <button
                   type="submit"
                   disabled={loading}
@@ -360,7 +343,6 @@ export default function IdentitasPage() {
               </div>
             </form>
 
-            {/* Footer */}
             <footer className="pt-4 border-t theme-border text-center text-xs theme-text-muted">
               © 2026 SmartSchool CMS • Identitas Website
             </footer>

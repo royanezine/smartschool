@@ -283,7 +283,6 @@ async function handleSubmit(event) {
     return;
   }
 
-  // Field mengikuti tenantOnboardingSchema di Backend.
   const payload = {
     jenisPendaftaran: "sekolah",
     paketId: selectedPaket.id,

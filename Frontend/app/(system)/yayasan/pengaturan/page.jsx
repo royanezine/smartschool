@@ -25,9 +25,6 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-// ============================================================
-// THEME HELPERS
-// ============================================================
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -83,9 +80,6 @@ const themeDangerBorder =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-// ============================================================
-// DUMMY DATA
-// ============================================================
 
 const TABS = [
   {
@@ -157,9 +151,6 @@ const initialNotifikasi = [
   },
 ];
 
-// ============================================================
-// TOGGLE
-// ============================================================
 
 function Toggle({ checked, onChange }) {
   return (
@@ -210,9 +201,6 @@ function Toggle({ checked, onChange }) {
   );
 }
 
-// ============================================================
-// SECTION CARD
-// ============================================================
 
 function SectionCard({ children }) {
   return (
@@ -231,9 +219,6 @@ function SectionCard({ children }) {
   );
 }
 
-// ============================================================
-// FIELD LABEL
-// ============================================================
 
 function FieldLabel({ children }) {
   return (
@@ -243,9 +228,6 @@ function FieldLabel({ children }) {
   );
 }
 
-// ============================================================
-// INPUT
-// ============================================================
 
 const inputClass = `
   theme-input
@@ -259,9 +241,6 @@ const inputClass = `
   placeholder:text-[var(--color-text-placeholder)]
 `;
 
-// ============================================================
-// MAIN COMPONENT
-// ============================================================
 
 export default function PengaturanPage() {
   const router = useRouter();
@@ -290,9 +269,6 @@ export default function PengaturanPage() {
     konfirmasi: "",
   });
 
-  // ==========================================================
-  // TOGGLE NOTIFIKASI
-  // ==========================================================
 
   const toggleNotifikasi = (id) => {
     setNotifikasi((prev) =>
@@ -307,9 +283,6 @@ export default function PengaturanPage() {
     );
   };
 
-  // ==========================================================
-  // SIMPAN
-  // ==========================================================
 
   const handleSimpan = () => {
     setSaved(true);
@@ -323,9 +296,6 @@ export default function PengaturanPage() {
     <div className="theme-page theme-text min-h-full">
       <div className="w-full max-w-[1500px] mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 space-y-6">
 
-        {/* ====================================================
-            PAGE HEADER
-        ==================================================== */}
 
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="min-w-0">
@@ -415,15 +385,9 @@ export default function PengaturanPage() {
           </button>
         </div>
 
-        {/* ====================================================
-            CONTENT
-        ==================================================== */}
 
         <div className="flex flex-col lg:flex-row gap-6">
 
-          {/* ==================================================
-              TAB NAV
-          ================================================== */}
 
           <div className="lg:w-56 flex-shrink-0">
             <div
@@ -483,15 +447,9 @@ export default function PengaturanPage() {
             </div>
           </div>
 
-          {/* ==================================================
-              PANEL
-          ================================================== */}
 
           <div className="flex-1 min-w-0 space-y-4">
 
-            {/* =================================================
-                PROFIL
-            ================================================= */}
 
             {activeTab === "profil" && (
               <SectionCard>
@@ -655,9 +613,6 @@ export default function PengaturanPage() {
               </SectionCard>
             )}
 
-            {/* =================================================
-                INFO YAYASAN
-            ================================================= */}
 
             {activeTab === "yayasan" && (
               <SectionCard>
@@ -760,9 +715,6 @@ export default function PengaturanPage() {
               </SectionCard>
             )}
 
-            {/* =================================================
-                KEAMANAN
-            ================================================= */}
 
             {activeTab === "keamanan" && (
               <>
@@ -773,7 +725,6 @@ export default function PengaturanPage() {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
-                    {/* PASSWORD LAMA */}
                     <div className="sm:col-span-2 sm:max-w-sm">
                       <FieldLabel>
                         Password Saat Ini
@@ -823,7 +774,6 @@ export default function PengaturanPage() {
                       </div>
                     </div>
 
-                    {/* PASSWORD BARU */}
                     <div>
                       <FieldLabel>
                         Password Baru
@@ -873,7 +823,6 @@ export default function PengaturanPage() {
                       </div>
                     </div>
 
-                    {/* KONFIRMASI */}
                     <div>
                       <FieldLabel>
                         Konfirmasi Password Baru
@@ -901,7 +850,6 @@ export default function PengaturanPage() {
                   </p>
                 </SectionCard>
 
-                {/* VERIFIKASI DUA LANGKAH */}
                 <SectionCard>
                   <div className="flex items-start gap-3">
 
@@ -943,9 +891,6 @@ export default function PengaturanPage() {
               </>
             )}
 
-            {/* =================================================
-                NOTIFIKASI
-            ================================================= */}
 
             {activeTab === "notifikasi" && (
               <SectionCard>
@@ -992,13 +937,9 @@ export default function PengaturanPage() {
               </SectionCard>
             )}
 
-            {/* =================================================
-                TAMPILAN
-            ================================================= */}
 
             {activeTab === "tampilan" && (
               <>
-                {/* TEMA */}
                 <SectionCard>
                   <h3 className="text-sm font-semibold theme-text-secondary mb-4">
                     Tema
@@ -1006,7 +947,6 @@ export default function PengaturanPage() {
 
                   <div className="grid grid-cols-2 gap-3 max-w-sm">
 
-                    {/* TERANG */}
                     <button
                       type="button"
                       onClick={() =>
@@ -1034,7 +974,6 @@ export default function PengaturanPage() {
                       Terang
                     </button>
 
-                    {/* GELAP */}
                     <button
                       type="button"
                       onClick={() =>
@@ -1064,7 +1003,6 @@ export default function PengaturanPage() {
                   </div>
                 </SectionCard>
 
-                {/* BAHASA */}
                 <SectionCard>
                   <h3 className="text-sm font-semibold theme-text-secondary mb-4">
                     Bahasa
@@ -1116,9 +1054,6 @@ export default function PengaturanPage() {
               </>
             )}
 
-            {/* =================================================
-                DANGER ZONE
-            ================================================= */}
 
             {activeTab === "keamanan" && (
               <SectionCard>

@@ -17,10 +17,8 @@ import {
 
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
+import { getUserById } from "@/services/user.service";
 
-/* =========================================================
-   MOCK DATA
-========================================================= */
 
 const MOCK_SISWA = [
   {
@@ -115,15 +113,9 @@ const MOCK_SISWA = [
   },
 ];
 
-/* =========================================================
-   CONSTANT
-========================================================= */
 
 const KARTU_IDENTITAS_URL = "/admin/siswa/kartu-identitas";
 
-/* =========================================================
-   THEME HELPERS
-========================================================= */
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -158,9 +150,6 @@ const themeSuccessSurface =
 const themeSuccessBorder =
   "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
 
-/* =========================================================
-   HELPER
-========================================================= */
 
 function getInitials(nama) {
   return nama
@@ -171,9 +160,6 @@ function getInitials(nama) {
     .toUpperCase();
 }
 
-/* =========================================================
-   QR PLACEHOLDER
-========================================================= */
 
 function QRCodePlaceholder() {
   const patterns = [
@@ -232,9 +218,6 @@ function QRCodePlaceholder() {
   );
 }
 
-/* =========================================================
-   CARD FRONT
-========================================================= */
 
 function StudentCard({ siswa }) {
   return (
@@ -242,7 +225,6 @@ function StudentCard({ siswa }) {
       id="student-card"
       className={`relative w-[430px] max-w-full aspect-[1.586/1] rounded-2xl overflow-hidden theme-card ${themeCardShadow} border ${themeNeutralBorder} print:shadow-none print:border-0`}
     >
-      {/* BACKGROUND */}
       <div className="absolute inset-0 overflow-hidden">
         <div
           className="absolute -right-24 -top-28 w-72 h-72 rounded-full"
@@ -281,9 +263,7 @@ function StudentCard({ siswa }) {
         />
       </div>
 
-      {/* CONTENT */}
       <div className="relative z-10 h-full flex flex-col p-5">
-        {/* HEADER */}
         <div className="flex items-center gap-3">
           <div
             className={`w-11 h-11 rounded-xl theme-card flex items-center justify-center ${themeCardShadow}`}
@@ -309,9 +289,7 @@ function StudentCard({ siswa }) {
           </div>
         </div>
 
-        {/* MAIN */}
         <div className="flex-1 flex items-center gap-4 mt-2">
-          {/* PHOTO */}
           <div
             className={`relative w-[92px] h-[115px] rounded-xl overflow-hidden border-4 theme-card ${themeCardShadow} ${themeNeutralSurface} flex-shrink-0`}
           >
@@ -322,7 +300,6 @@ function StudentCard({ siswa }) {
             </div>
           </div>
 
-          {/* INFO */}
           <div className="min-w-0">
             <p className="text-[8px] uppercase tracking-wider theme-text-muted font-semibold">
               Nama Lengkap
@@ -366,7 +343,6 @@ function StudentCard({ siswa }) {
           </div>
         </div>
 
-        {/* FOOTER */}
         <div className="flex items-end justify-between">
           <div>
             <p className="text-[8px] theme-text-muted">
@@ -382,13 +358,12 @@ function StudentCard({ siswa }) {
             <QRCodePlaceholder />
 
             <span className="text-[6px] theme-text-muted mt-1">
-              SCAN TO VERIFY
+              {siswa.nisn !== "-" ? siswa.nisn : "IDENTITAS SISWA"}
             </span>
           </div>
         </div>
       </div>
 
-      {/* CARD LABEL */}
       <div className="absolute right-4 top-4 z-20">
         <span
           className="inline-flex items-center gap-1 px-2 py-1 rounded-full backdrop-blur-sm border text-[7px] font-bold uppercase tracking-wider"
@@ -408,16 +383,12 @@ function StudentCard({ siswa }) {
   );
 }
 
-/* =========================================================
-   CARD BACK
-========================================================= */
 
 function StudentCardBack({ siswa }) {
   return (
     <div
       className={`relative w-[430px] max-w-full aspect-[1.586/1] rounded-2xl overflow-hidden theme-card ${themeCardShadow} border ${themeNeutralBorder} print:shadow-none print:border-0`}
     >
-      {/* TOP */}
       <div
         className={`h-[30%] ${themePrimaryGradient} relative overflow-hidden`}
       >
@@ -443,13 +414,11 @@ function StudentCardBack({ siswa }) {
         </div>
       </div>
 
-      {/* STRIPE */}
       <div
         className="h-7 mt-3"
         style={{ background: "var(--color-text)" }}
       />
 
-      {/* CONTENT */}
       <div className="p-5">
         <div className="grid grid-cols-2 gap-x-6 gap-y-3">
           <div>
@@ -532,9 +501,6 @@ function StudentCardBack({ siswa }) {
   );
 }
 
-/* =========================================================
-   INFO ITEM
-========================================================= */
 
 function InfoItem({ icon, label, value }) {
   return (
@@ -558,9 +524,6 @@ function InfoItem({ icon, label, value }) {
   );
 }
 
-/* =========================================================
-   MAIN
-========================================================= */
 
 function IDCardPageContent() {
   const router = useRouter();
@@ -572,51 +535,76 @@ function IDCardPageContent() {
 
   const id = searchParams.get("id");
 
-  /* =======================================================
-     GET DATA
-  ======================================================= */
 
   useEffect(() => {
-    if (!id) {
-      setLoading(false);
-      return;
-    }
+    let isMounted = true;
 
-    const found = MOCK_SISWA.find(
-      (item) => item.id === Number(id)
-    );
+    const timer = setTimeout(async () => {
+      if (!id) {
+        if (isMounted) setLoading(false);
+        return;
+      }
 
-    setSiswa(found || null);
-    setLoading(false);
+      try {
+        if (isMounted) setLoading(true);
+        const res = await getUserById(id);
+        const data = res?.data ?? res;
+
+        if (data && isMounted) {
+          const kelasNama =
+            data.kelasSiswa?.[0]?.kelas?.nama ??
+            data.kelas?.nama ??
+            data.kelasNama ??
+            "-";
+
+          setSiswa({
+            id: data.id,
+            nama: data.namaLengkap || data.nama || "Tanpa Nama",
+            nisn: data.nisn || "-",
+            nik: data.nik || "-",
+            kelas: kelasNama,
+            jenisKelamin: data.jenisKelamin || "-",
+            tempatLahir: data.tempatLahir || "-",
+            tanggalLahir: data.tanggalLahir
+              ? new Date(data.tanggalLahir).toLocaleDateString("id-ID")
+              : "-",
+            agama: data.agama || "-",
+            noTelepon: data.noTelepon || "-",
+            alamat: data.alamat || data.alamatDomisili || "-",
+            status: data.status || "aktif",
+            avatar: data.avatar || null,
+            sekolahNama: data.sekolah?.nama || "SMARTSCHOOL",
+          });
+        }
+      } catch (error) {
+        console.error("Gagal mengambil data siswa dari API:", error);
+        if (isMounted) setSiswa(null);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    }, 0);
+
+    return () => {
+      isMounted = false;
+      clearTimeout(timer);
+    };
   }, [id]);
 
-  /* =======================================================
-     KEMBALI
-  ======================================================= */
 
   const handleBackToKartuIdentitas = () => {
     router.push(KARTU_IDENTITAS_URL);
   };
 
-  /* =======================================================
-     PRINT
-  ======================================================= */
 
   const handlePrint = () => {
     window.print();
   };
 
-  /* =======================================================
-     SIDEBAR
-  ======================================================= */
 
   const toggleSidebar = () => {
     setIsCollapsed((prev) => !prev);
   };
 
-  /* =======================================================
-     LOADING
-  ======================================================= */
 
   if (loading) {
     return (
@@ -655,9 +643,6 @@ function IDCardPageContent() {
     );
   }
 
-  /* =======================================================
-     NOT FOUND
-  ======================================================= */
 
   if (!siswa) {
     return (
@@ -714,13 +699,9 @@ function IDCardPageContent() {
     );
   }
 
-  /* =======================================================
-     PAGE
-  ======================================================= */
 
   return (
     <div className="flex h-screen w-full theme-page overflow-hidden">
-      {/* SIDEBAR */}
       <Sidebar
         active="siswaKartuIdentitas"
         setActive={() => {}}
@@ -729,9 +710,7 @@ function IDCardPageContent() {
         role="admin"
       />
 
-      {/* CONTENT */}
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
-        {/* HEADER */}
         <div className="print:hidden">
           <Header
             toggleSidebar={toggleSidebar}
@@ -744,10 +723,8 @@ function IDCardPageContent() {
           />
         </div>
 
-        {/* MAIN */}
         <main className="flex-1 overflow-y-auto">
           <div className="p-4 sm:p-6 lg:p-8">
-            {/* PAGE HEADER */}
             <div className="print:hidden flex items-center justify-between gap-4 flex-wrap mb-7">
               <div className="flex items-center gap-3">
                 <button
@@ -788,7 +765,6 @@ function IDCardPageContent() {
               </div>
             </div>
 
-            {/* PREVIEW */}
             <div
               className={`theme-card rounded-2xl border ${themeNeutralBorder} ${themeCardShadow} overflow-hidden`}
             >
@@ -811,10 +787,8 @@ function IDCardPageContent() {
                 </p>
               </div>
 
-              {/* CARDS */}
               <div className="p-5 sm:p-8 lg:p-10">
                 <div className="flex flex-col xl:flex-row items-center justify-center gap-8 xl:gap-12">
-                  {/* FRONT */}
                   <div className="w-full flex flex-col items-center gap-3">
                     <div className="print:hidden flex items-center gap-2">
                       <span
@@ -831,7 +805,6 @@ function IDCardPageContent() {
                     <StudentCard siswa={siswa} />
                   </div>
 
-                  {/* BACK */}
                   <div className="w-full flex flex-col items-center gap-3">
                     <div className="print:hidden flex items-center gap-2">
                       <span
@@ -851,7 +824,6 @@ function IDCardPageContent() {
               </div>
             </div>
 
-            {/* DATA SISWA */}
             <div
               className={`print:hidden mt-5 theme-card rounded-xl border ${themeNeutralBorder} ${themeCardShadow} overflow-hidden`}
             >
@@ -926,7 +898,6 @@ function IDCardPageContent() {
               </div>
             </div>
 
-            {/* FOOTER */}
             <div className="print:hidden flex items-center justify-between mt-5 pb-4">
               <button
                 onClick={handleBackToKartuIdentitas}
@@ -948,7 +919,6 @@ function IDCardPageContent() {
         </main>
       </div>
 
-      {/* PRINT STYLE */}
       <style jsx global>{`
         .clip-card {
           clip-path: polygon(30% 0, 100% 0, 100% 100%, 0% 100%);

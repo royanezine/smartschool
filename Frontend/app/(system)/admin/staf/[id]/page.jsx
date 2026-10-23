@@ -22,9 +22,6 @@ import {
   Loader2,
 } from "lucide-react";
 
-// ======================================================
-// THEME HELPERS
-// ======================================================
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
 
@@ -79,9 +76,6 @@ const themeDangerSurface =
 const themeDangerBorder =
   "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
 
-// ======================================================
-// DUMMY DATA
-// ======================================================
 const dummyStaf = [
   {
     id: 1,
@@ -164,9 +158,6 @@ export default function DetailStafPage() {
     },
   ];
 
-  // ======================================================
-  // LOAD DATA
-  // ======================================================
   useEffect(() => {
     const loadData = () => {
       try {
@@ -193,9 +184,6 @@ export default function DetailStafPage() {
     }
   }, [id]);
 
-  // ======================================================
-  // ACTION
-  // ======================================================
   const goBack = () => {
     router.push("/admin/staf");
   };
@@ -211,9 +199,6 @@ export default function DetailStafPage() {
     }
   };
 
-  // ======================================================
-  // STATUS
-  // ======================================================
   const getStatusStyle = (status) => {
     if (status === "aktif") {
       return {
@@ -236,9 +221,6 @@ export default function DetailStafPage() {
     };
   };
 
-  // ======================================================
-  // LOADING
-  // ======================================================
   if (loading) {
     return (
       <div className="min-h-screen theme-page flex">
@@ -277,9 +259,6 @@ export default function DetailStafPage() {
     );
   }
 
-  // ======================================================
-  // ERROR
-  // ======================================================
   if (error || !staf) {
     return (
       <div className="min-h-screen theme-page flex">
@@ -337,12 +316,8 @@ export default function DetailStafPage() {
   const statusStyle = getStatusStyle(staf.status);
   const StatusIcon = statusStyle.icon;
 
-  // ======================================================
-  // MAIN PAGE
-  // ======================================================
   return (
     <div className="min-h-screen theme-page flex">
-      {/* SIDEBAR */}
       <Sidebar
         active="staf"
         setActive={() => {}}
@@ -350,7 +325,6 @@ export default function DetailStafPage() {
         setCollapsed={() => setSidebarOpen(!sidebarOpen)}
       />
 
-      {/* CONTENT */}
       <div className="flex-1 min-w-0 flex flex-col">
         <Header
           toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
@@ -365,9 +339,6 @@ export default function DetailStafPage() {
         <main className="flex-1 min-w-0">
           <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-6 lg:py-8">
 
-            {/* ==================================================
-                PAGE HEADER
-            ================================================== */}
             <div className="mb-6">
               <button
                 onClick={goBack}
@@ -403,14 +374,10 @@ export default function DetailStafPage() {
               </div>
             </div>
 
-            {/* ==================================================
-                PROFILE CARD
-            ================================================== */}
             <section
               className={`theme-card border ${themeNeutralBorder} rounded-xl ${themeCardShadow} overflow-hidden`}
             >
 
-              {/* PROFILE HEADER */}
               <div
                 className={`px-5 sm:px-6 lg:px-7 py-6 border-b ${themeDivider}`}
               >
@@ -418,7 +385,6 @@ export default function DetailStafPage() {
 
                   <div className="flex items-center gap-4 min-w-0">
 
-                    {/* AVATAR */}
                     <div
                       className={`w-16 h-16 sm:w-[72px] sm:h-[72px] rounded-full ${themePrimarySoft} ${themePrimarySoftBorder} border flex items-center justify-center shrink-0`}
                     >
@@ -429,7 +395,6 @@ export default function DetailStafPage() {
                       />
                     </div>
 
-                    {/* NAME */}
                     <div className="min-w-0">
                       <h2 className="text-lg sm:text-xl font-semibold theme-text break-words">
                         {staf.nama}
@@ -437,7 +402,6 @@ export default function DetailStafPage() {
 
                       <div className="flex flex-wrap items-center gap-2 mt-2">
 
-                        {/* ROLE */}
                         <span
                           className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md ${themeNeutralSurface} border ${themeNeutralBorder} text-xs font-medium theme-text-secondary`}
                         >
@@ -445,7 +409,6 @@ export default function DetailStafPage() {
                           {staf.role}
                         </span>
 
-                        {/* STATUS */}
                         <span
                           className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-xs font-medium ${statusStyle.bg} ${statusStyle.text} ${statusStyle.border}`}
                         >
@@ -459,7 +422,6 @@ export default function DetailStafPage() {
                     </div>
                   </div>
 
-                  {/* ACTION BUTTONS */}
                   <div className="flex flex-wrap items-center gap-2">
                     <button
                       onClick={() =>
@@ -484,12 +446,8 @@ export default function DetailStafPage() {
                 </div>
               </div>
 
-              {/* ==================================================
-                  INFORMATION BODY
-              ================================================== */}
               <div className="p-5 sm:p-6 lg:p-7">
 
-                {/* SECTION TITLE */}
                 <div className="mb-4">
                   <h3 className="text-sm font-semibold theme-text">
                     Informasi Kontak & Unit
@@ -500,7 +458,6 @@ export default function DetailStafPage() {
                   </p>
                 </div>
 
-                {/* CONTACT GRID */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
 
                   <InfoCard
@@ -528,9 +485,6 @@ export default function DetailStafPage() {
                   />
                 </div>
 
-                {/* ==================================================
-                    DATA PERSONAL
-                ================================================== */}
                 <div className={`mt-7 pt-6 border-t ${themeDivider}`}>
 
                   <div className="mb-4">
@@ -572,9 +526,6 @@ export default function DetailStafPage() {
                   </div>
                 </div>
 
-                {/* ==================================================
-                    PENDIDIKAN
-                ================================================== */}
                 <div className={`mt-7 pt-6 border-t ${themeDivider}`}>
 
                   <div className="mb-4">
@@ -617,9 +568,6 @@ export default function DetailStafPage() {
                   </div>
                 </div>
 
-                {/* ==================================================
-                    CATATAN
-                ================================================== */}
                 {staf.catatan && (
                   <div className={`mt-7 pt-6 border-t ${themeDivider}`}>
                     <div
@@ -646,9 +594,6 @@ export default function DetailStafPage() {
                   </div>
                 )}
 
-                {/* ==================================================
-                    FOOTER STATUS
-                ================================================== */}
                 <div
                   className={`mt-7 pt-5 border-t ${themeDivider} flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3`}
                 >
@@ -687,9 +632,6 @@ export default function DetailStafPage() {
   );
 }
 
-// ======================================================
-// COMPONENT: INFO CARD
-// ======================================================
 function InfoCard({ icon: Icon, label, value }) {
   return (
     <div
@@ -720,9 +662,6 @@ function InfoCard({ icon: Icon, label, value }) {
   );
 }
 
-// ======================================================
-// COMPONENT: DETAIL ITEM
-// ======================================================
 function DetailItem({
   icon: Icon,
   label,
@@ -758,9 +697,6 @@ function DetailItem({
   );
 }
 
-// ======================================================
-// FORMAT DATE
-// ======================================================
 function formatDate(date) {
   if (!date) return "-";
 

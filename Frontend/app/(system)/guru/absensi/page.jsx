@@ -29,9 +29,6 @@ import {
 import { getAbsensiKelas } from "@/services/absensi.service";
 import { getKelas } from "@/services/kelas.service";
 
-/* ============================================================
-   THEME HELPERS
-============================================================ */
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -93,9 +90,6 @@ const themeDangerBorder =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-/* ============================================================
-   STATUS CONFIG
-============================================================ */
 
 const STATUS_CONFIG = {
   hadir: {
@@ -123,9 +117,6 @@ const STATUS_CONFIG = {
   },
 };
 
-/* ============================================================
-   METODE CONFIG
-============================================================ */
 
 const METODE_CONFIG = {
   lokasi: {
@@ -149,9 +140,6 @@ const METODE_CONFIG = {
   },
 };
 
-/* ============================================================
-   FORMAT TANGGAL
-============================================================ */
 
 function formatTanggal(tanggal) {
   if (!tanggal) return "-";
@@ -169,9 +157,6 @@ function formatTanggal(tanggal) {
   });
 }
 
-/* ============================================================
-   FORMAT JAM
-============================================================ */
 
 function formatJam(tanggal) {
   if (!tanggal) return "-";
@@ -188,9 +173,6 @@ function formatJam(tanggal) {
   });
 }
 
-/* ============================================================
-   NORMALIZE KELAS RESPONSE
-============================================================ */
 
 function normalizeKelasResponse(response) {
   if (Array.isArray(response)) {
@@ -212,9 +194,6 @@ function normalizeKelasResponse(response) {
   return [];
 }
 
-/* ============================================================
-   NORMALIZE ABSENSI RESPONSE
-============================================================ */
 
 function normalizeAbsensiResponse(response) {
   if (Array.isArray(response)) {
@@ -236,44 +215,26 @@ function normalizeAbsensiResponse(response) {
   return [];
 }
 
-/* ============================================================
-   PAGE
-============================================================ */
 
 export default function GuruAbsensiPage() {
   const router = useRouter();
 
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  /* ==========================================================
-     DATA KELAS
-  ========================================================== */
 
   const [kelas, setKelas] = useState([]);
   const [kelasId, setKelasId] = useState("");
 
-  /* ==========================================================
-     FILTER TANGGAL
-  ========================================================== */
 
   const [tanggal, setTanggal] = useState("");
 
-  /* ==========================================================
-     DATA ABSENSI
-  ========================================================== */
 
   const [absensi, setAbsensi] = useState([]);
 
-  /* ==========================================================
-     LOADING
-  ========================================================== */
 
   const [loadingKelas, setLoadingKelas] = useState(false);
   const [loadingAbsensi, setLoadingAbsensi] = useState(false);
 
-  /* ==========================================================
-     ERROR
-  ========================================================== */
 
   const [errorKelas, setErrorKelas] = useState("");
   const [errorAbsensi, setErrorAbsensi] = useState("");
@@ -295,9 +256,6 @@ export default function GuruAbsensiPage() {
     },
   ];
 
-  /* ==========================================================
-     AMBIL DATA KELAS
-  ========================================================== */
 
   const fetchKelas = useCallback(async () => {
     try {
@@ -352,17 +310,11 @@ export default function GuruAbsensiPage() {
     }
   }, []);
 
-  /* ==========================================================
-     LOAD KELAS SAAT HALAMAN DIBUKA
-  ========================================================== */
 
   useEffect(() => {
     fetchKelas();
   }, [fetchKelas]);
 
-  /* ==========================================================
-     AMBIL KELAS ID DARI URL
-  ========================================================== */
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -378,9 +330,6 @@ export default function GuruAbsensiPage() {
     }
   }, []);
 
-  /* ==========================================================
-     FETCH ABSENSI
-  ========================================================== */
 
   const fetchAbsensi = useCallback(async () => {
     if (!kelasId) {
@@ -437,9 +386,6 @@ export default function GuruAbsensiPage() {
     }
   }, [kelasId, tanggal]);
 
-  /* ==========================================================
-     FETCH ABSENSI SETIAP KELAS / TANGGAL BERUBAH
-  ========================================================== */
 
   useEffect(() => {
     if (kelasId) {
@@ -447,9 +393,6 @@ export default function GuruAbsensiPage() {
     }
   }, [kelasId, fetchAbsensi]);
 
-  /* ==========================================================
-     KELAS YANG DIPILIH
-  ========================================================== */
 
   const selectedKelas = useMemo(() => {
     return kelas.find(
@@ -457,9 +400,6 @@ export default function GuruAbsensiPage() {
     );
   }, [kelas, kelasId]);
 
-  /* ==========================================================
-     REKAP ABSENSI
-  ========================================================== */
 
   const rekap = useMemo(() => {
     const result = {
@@ -498,9 +438,6 @@ export default function GuruAbsensiPage() {
     return result;
   }, [absensi]);
 
-  /* ==========================================================
-     RIWAYAT TANGGAL
-  ========================================================== */
 
   const riwayatTanggal = useMemo(() => {
     const map = new Map();
@@ -530,9 +467,6 @@ export default function GuruAbsensiPage() {
     );
   }, [absensi]);
 
-  /* ==========================================================
-     SORT DATA ABSENSI
-  ========================================================== */
 
   const daftarAbsensi = useMemo(() => {
     return [...absensi].sort(
@@ -550,9 +484,6 @@ export default function GuruAbsensiPage() {
     );
   }, [absensi]);
 
-  /* ==========================================================
-     PILIH KELAS
-  ========================================================== */
 
   const handleChangeKelas = (e) => {
     const value = e.target.value;
@@ -573,9 +504,6 @@ export default function GuruAbsensiPage() {
     }
   };
 
-  /* ==========================================================
-     PILIH TANGGAL DARI RIWAYAT
-  ========================================================== */
 
   const pilihTanggal = (value) => {
     if (!value) return;
@@ -601,9 +529,6 @@ export default function GuruAbsensiPage() {
     );
   };
 
-  /* ==========================================================
-     TAMBAH ABSENSI
-  ========================================================== */
 
   const handleTambahAbsensi = () => {
     if (!kelasId) {
@@ -620,9 +545,6 @@ export default function GuruAbsensiPage() {
     );
   };
 
-  /* ==========================================================
-     REFRESH
-  ========================================================== */
 
   const handleRefresh = async () => {
     await fetchKelas();
@@ -632,15 +554,9 @@ export default function GuruAbsensiPage() {
     }
   };
 
-  /* ==========================================================
-     RENDER
-  ========================================================== */
 
   return (
     <div className="flex h-screen theme-page overflow-hidden">
-      {/* ======================================================
-          SIDEBAR
-      ====================================================== */}
 
       <Sidebar
         active="absensi"
@@ -652,9 +568,6 @@ export default function GuruAbsensiPage() {
       />
 
       <div className="flex-1 flex flex-col min-w-0">
-        {/* ====================================================
-            HEADER
-        ==================================================== */}
 
         <Header
           toggleSidebar={() =>
@@ -670,9 +583,6 @@ export default function GuruAbsensiPage() {
 
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           <div className="w-full space-y-6">
-            {/* =================================================
-                PAGE HEADER
-            ================================================= */}
 
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
               <div className="min-w-0">
@@ -694,7 +604,6 @@ export default function GuruAbsensiPage() {
                 </p>
               </div>
 
-              {/* ACTION */}
 
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                 <button
@@ -734,15 +643,11 @@ export default function GuruAbsensiPage() {
               </div>
             </div>
 
-            {/* =================================================
-                FILTER
-            ================================================= */}
 
             <div
               className={`theme-card rounded-xl border ${themeNeutralBorder} p-4 ${themeCardShadow}`}
             >
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                {/* KELAS */}
 
                 <div>
                   <label className="block text-xs font-medium theme-text-secondary mb-1.5">
@@ -810,7 +715,6 @@ export default function GuruAbsensiPage() {
                     />
                   </div>
 
-                  {/* INFO KELAS */}
 
                   {selectedKelas && (
                     <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -850,7 +754,6 @@ export default function GuruAbsensiPage() {
                   )}
                 </div>
 
-                {/* TANGGAL */}
 
                 <div>
                   <label className="block text-xs font-medium theme-text-secondary mb-1.5">
@@ -892,9 +795,6 @@ export default function GuruAbsensiPage() {
               </div>
             </div>
 
-            {/* =================================================
-                ERROR KELAS
-            ================================================= */}
 
             {errorKelas && (
               <div
@@ -918,9 +818,6 @@ export default function GuruAbsensiPage() {
               </div>
             )}
 
-            {/* =================================================
-                ERROR ABSENSI
-            ================================================= */}
 
             {errorAbsensi && (
               <div
@@ -944,9 +841,6 @@ export default function GuruAbsensiPage() {
               </div>
             )}
 
-            {/* =================================================
-                BELUM ADA KELAS
-            ================================================= */}
 
             {!loadingKelas &&
               kelas.length === 0 &&
@@ -976,9 +870,6 @@ export default function GuruAbsensiPage() {
                 </div>
               )}
 
-            {/* =================================================
-                LOADING ABSENSI
-            ================================================= */}
 
             {loadingAbsensi && (
               <div
@@ -1002,21 +893,14 @@ export default function GuruAbsensiPage() {
               </div>
             )}
 
-            {/* =================================================
-                CONTENT
-            ================================================= */}
 
             {!loadingKelas &&
               !loadingAbsensi &&
               kelasId &&
               !errorAbsensi && (
                 <>
-                  {/* =================================================
-                      SUMMARY
-                  ================================================= */}
 
                   <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-                    {/* TOTAL */}
 
                     <div
                       className={`theme-card rounded-xl border ${themeNeutralBorder} p-3.5 ${themeCardShadow} flex items-center gap-3`}
@@ -1038,7 +922,6 @@ export default function GuruAbsensiPage() {
                       </div>
                     </div>
 
-                    {/* STATUS */}
 
                     {Object.entries(
                       STATUS_CONFIG,
@@ -1079,9 +962,6 @@ export default function GuruAbsensiPage() {
                     )}
                   </div>
 
-                  {/* =================================================
-                      DATA ABSENSI
-                  ================================================= */}
 
                   <div
                     className={`theme-card rounded-xl border ${themeNeutralBorder} ${themeCardShadow} overflow-hidden`}
@@ -1118,7 +998,6 @@ export default function GuruAbsensiPage() {
                       )}
                     </div>
 
-                    {/* EMPTY */}
 
                     {daftarAbsensi.length ===
                     0 ? (
@@ -1233,7 +1112,6 @@ export default function GuruAbsensiPage() {
                                     }
                                     className={`border-b ${themeDivider} ${themeNeutralHover} transition-colors`}
                                   >
-                                    {/* SISWA */}
 
                                     <td className="px-5 py-4">
                                       <div className="flex items-center gap-3">
@@ -1264,7 +1142,6 @@ export default function GuruAbsensiPage() {
                                       </div>
                                     </td>
 
-                                    {/* TANGGAL */}
 
                                     <td className="px-5 py-4">
                                       <div>
@@ -1284,7 +1161,6 @@ export default function GuruAbsensiPage() {
                                       </div>
                                     </td>
 
-                                    {/* STATUS */}
 
                                     <td className="px-5 py-4">
                                       <span
@@ -1305,7 +1181,6 @@ export default function GuruAbsensiPage() {
                                       </span>
                                     </td>
 
-                                    {/* METODE */}
 
                                     <td className="px-5 py-4">
                                       <span className="inline-flex items-center gap-1.5 text-xs theme-text-secondary">
@@ -1322,7 +1197,6 @@ export default function GuruAbsensiPage() {
                                       </span>
                                     </td>
 
-                                    {/* KETERANGAN */}
 
                                     <td className="px-5 py-4">
                                       <span className="text-xs theme-text-secondary">
@@ -1340,9 +1214,6 @@ export default function GuruAbsensiPage() {
                     )}
                   </div>
 
-                  {/* =================================================
-                      RIWAYAT
-                  ================================================= */}
 
                   <div
                     className={`theme-card rounded-xl border ${themeNeutralBorder} ${themeCardShadow} overflow-hidden`}

@@ -28,6 +28,12 @@ export interface GelombangPpdbPayload {
   status?: string;
 }
 
+export interface GelombangPpdbFilters {
+  search?: string;
+  status?: string;
+  jalurPpdbId?: string;
+}
+
 export interface GelombangPpdbListResponse {
   success: boolean;
   message?: string;
@@ -88,10 +94,55 @@ function serialize(payload: GelombangPpdbPayload) {
   };
 }
 
-export async function getGelombangPpdb(): Promise<GelombangPpdbListResponse> {
-  return apiFetch(ENDPOINT, {
+export async function getGelombangPpdb(
+  filters?: GelombangPpdbFilters
+): Promise<GelombangPpdbListResponse> {
+  const query = new URLSearchParams();
+
+  if (filters?.search?.trim()) {
+    query.set("search", filters.search.trim());
+  }
+
+  if (filters?.status?.trim()) {
+    query.set("status", filters.status.trim());
+  }
+
+  if (filters?.jalurPpdbId?.trim()) {
+    query.set("jalurPpdbId", filters.jalurPpdbId.trim());
+  }
+
+  const qs = query.toString();
+
+  return apiFetch(`${ENDPOINT}${qs ? `?${qs}` : ""}`, {
     method: "GET",
   });
+}
+
+export function isGelombangEndpointMissing(
+  error: unknown
+): boolean {
+  const err = error as {
+    status?: number;
+    raw?: unknown;
+  };
+
+  if (err?.status !== 404) {
+    return false;
+  }
+
+  if (typeof err.raw === "string") {
+    return true;
+  }
+
+  if (
+    err.raw &&
+    typeof err.raw === "object" &&
+    "errorCode" in err.raw
+  ) {
+    return false;
+  }
+
+  return true;
 }
 
 export async function getGelombangPpdbById(

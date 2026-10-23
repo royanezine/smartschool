@@ -1,8 +1,5 @@
 import { apiFetch } from "../lib/api";
 
-/* =========================================================
-   AUTHENTICATION
-========================================================= */
 
 export async function login(
   identifier: string,
@@ -23,9 +20,6 @@ export async function logout() {
   });
 }
 
-/* =========================================================
-   REGISTRATION
-========================================================= */
 
 export async function registerAuth(data: Record<string, unknown>) {
   return apiFetch("/api/auth/register", {
@@ -47,9 +41,6 @@ export async function verifyRegister(
   });
 }
 
-/* =========================================================
-   PASSWORD
-========================================================= */
 
 export async function forgotPassword(email: string) {
   return apiFetch("/api/auth/lupa-kata-sandi", {
@@ -67,9 +58,6 @@ export async function resetPassword(data: Record<string, unknown>) {
   });
 }
 
-/* =========================================================
-   STUDENT PIN
-========================================================= */
 
 export async function setupPin(
   pin: string,
@@ -121,9 +109,6 @@ export async function resetPin(
   });
 }
 
-/* =========================================================
-   ADMIN: RESET STUDENT PIN
-========================================================= */
 
 export async function resetPinByAdmin(userId: string | number) {
   return apiFetch(

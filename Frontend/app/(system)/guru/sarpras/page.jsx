@@ -15,9 +15,6 @@ import {
   Clock,
 } from "lucide-react";
 
-// =========================================================
-// THEME HELPERS
-// =========================================================
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -76,13 +73,7 @@ const themeDangerSurface =
 const themeDangerBorder =
   "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
 
-// =========================================================
-// DUMMY DATA
-// =========================================================
 
-// Ringkasan peminjaman sarana-prasarana untuk ditampilkan
-// di halaman index Sarpras.
-// Ganti dengan data asli dari API/DB begitu tersedia.
 
 const subHalaman = [
   {
@@ -177,9 +168,6 @@ const statusLabel = {
   terlambat: "Terlambat",
 };
 
-// =========================================================
-// PAGE
-// =========================================================
 
 export default function GuruSarprasIndexPage() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -201,7 +189,6 @@ export default function GuruSarprasIndexPage() {
 
   return (
     <div className="theme-page flex h-screen overflow-hidden">
-      {/* SIDEBAR */}
       <Sidebar
         active="sarpras"
         setActive={() => {}}
@@ -210,7 +197,6 @@ export default function GuruSarprasIndexPage() {
       />
 
       <div className="flex min-w-0 flex-1 flex-col">
-        {/* HEADER */}
         <Header
           toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
           notifications={notifications}
@@ -221,13 +207,9 @@ export default function GuruSarprasIndexPage() {
           }}
         />
 
-        {/* MAIN */}
         <main className="theme-page flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           <div className="w-full space-y-6">
 
-            {/* =====================================================
-                PAGE HEADER
-            ===================================================== */}
 
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="min-w-0">
@@ -257,9 +239,6 @@ export default function GuruSarprasIndexPage() {
               </div>
             </div>
 
-            {/* =====================================================
-                SUB-HALAMAN CARDS
-            ===================================================== */}
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               {subHalaman.map((s) => {
@@ -271,7 +250,6 @@ export default function GuruSarprasIndexPage() {
                     href={s.href}
                     className={`theme-card group flex flex-col gap-3 rounded-xl border p-5 ${themeNeutralBorder} ${themeCardShadow} transition-all hover:border-[color-mix(in_srgb,var(--color-primary)_30%,transparent)] hover:shadow-[0_10px_30px_color-mix(in_srgb,var(--color-text)_9%,transparent)]`}
                   >
-                    {/* ICON + ARROW */}
                     <div className="flex items-center justify-between">
                       <div
                         className={`flex flex-shrink-0 items-center justify-center rounded-lg p-2.5 text-[var(--color-card)] ${theme.iconBg} ${themeSmallShadow}`}
@@ -285,7 +263,6 @@ export default function GuruSarprasIndexPage() {
                       />
                     </div>
 
-                    {/* CONTENT */}
                     <div>
                       <h2 className="theme-text text-sm font-semibold">
                         {s.label}
@@ -296,7 +273,6 @@ export default function GuruSarprasIndexPage() {
                       </p>
                     </div>
 
-                    {/* INFO BADGE */}
                     <span
                       className={`w-fit rounded-full border px-2.5 py-1 text-[11px] font-medium ${theme.badge}`}
                     >
@@ -307,14 +283,10 @@ export default function GuruSarprasIndexPage() {
               })}
             </div>
 
-            {/* =====================================================
-                RINGKASAN PEMINJAMAN AKTIF
-            ===================================================== */}
 
             <div
               className={`theme-card overflow-hidden rounded-xl border ${themeNeutralBorder} ${themeCardShadow}`}
             >
-              {/* HEADER */}
               <div
                 className={`flex items-center gap-2 border-b p-4 sm:p-5 ${themeDivider}`}
               >
@@ -329,7 +301,6 @@ export default function GuruSarprasIndexPage() {
                 </h2>
               </div>
 
-              {/* LIST */}
               <div>
                 {ringkasanPeminjaman.map((p, idx) => {
                   const isLast = idx === ringkasanPeminjaman.length - 1;
@@ -341,7 +312,6 @@ export default function GuruSarprasIndexPage() {
                         !isLast ? `border-b ${themeDivider}` : ""
                       } ${themeNeutralHover} transition-colors`}
                     >
-                      {/* ITEM */}
                       <div className="min-w-0 flex-1">
                         <p className="theme-text truncate text-sm font-medium">
                           {p.item}
@@ -352,7 +322,6 @@ export default function GuruSarprasIndexPage() {
                         </p>
                       </div>
 
-                      {/* DEADLINE */}
                       <div className="theme-text-secondary flex flex-shrink-0 items-center gap-1.5 text-xs">
                         {p.status === "terlambat" ? (
                           <AlertTriangle
@@ -371,7 +340,6 @@ export default function GuruSarprasIndexPage() {
                         </span>
                       </div>
 
-                      {/* STATUS */}
                       <span
                         className={`flex-shrink-0 rounded-full border px-2.5 py-1 text-[11px] font-medium ${statusClasses[p.status]}`}
                       >

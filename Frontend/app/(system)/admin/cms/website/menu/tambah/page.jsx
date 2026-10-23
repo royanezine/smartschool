@@ -1,4 +1,3 @@
-// app/cmsAdmin/website/menu/tambah/page.jsx
 "use client";
 
 import { useState } from "react";
@@ -22,24 +21,20 @@ import {
 export default function TambahMenuPage() {
   const router = useRouter();
 
-  // SIDEBAR
   const [active, setActive] = useState("menu");
   const [collapsed, setCollapsed] = useState(false);
 
-  // FORM
   const [label, setLabel] = useState("");
   const [url, setUrl] = useState("");
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
 
-  // CLEAR ERROR
   const clearError = (field) => {
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: "" }));
     }
   };
 
-  // SUBMIT
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -68,12 +63,8 @@ export default function TambahMenuPage() {
     }, 1200);
   };
 
-  // =========================================================
-  // RENDER
-  // =========================================================
   return (
     <div className="theme-page flex min-h-screen w-full">
-      {/* SIDEBAR */}
       <Sidebar
         active={active}
         setActive={setActive}
@@ -81,7 +72,6 @@ export default function TambahMenuPage() {
         setCollapsed={setCollapsed}
       />
 
-      {/* CONTENT AREA */}
       <div className="flex-1 min-w-0 flex flex-col">
         <Header
           title="Tambah Menu"
@@ -91,7 +81,6 @@ export default function TambahMenuPage() {
 
         <main className="theme-page flex-1 min-w-0 overflow-y-auto p-4 md:p-6 lg:p-8">
           <div className="w-full min-w-0 max-w-7xl mx-auto space-y-6">
-            {/* BREADCRUMB & BACK */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <nav className="flex items-center gap-2 text-xs sm:text-sm theme-text-muted overflow-x-auto">
                 <a
@@ -144,7 +133,6 @@ export default function TambahMenuPage() {
               </button>
             </div>
 
-            {/* HEADER */}
             <div className="flex items-start gap-4">
               <div
                 className="
@@ -206,9 +194,7 @@ export default function TambahMenuPage() {
               </div>
             </div>
 
-            {/* FORM + SIDEBAR */}
             <div className="grid grid-cols-1 xl:grid-cols-[1fr_300px] 2xl:grid-cols-[1fr_340px] gap-6 items-start">
-              {/* FORM CARD */}
               <section
                 className="
                   theme-card
@@ -266,7 +252,6 @@ export default function TambahMenuPage() {
                   onSubmit={handleSubmit}
                   className="p-6 space-y-6"
                 >
-                  {/* LABEL */}
                   <div>
                     <label
                       className="
@@ -354,7 +339,6 @@ export default function TambahMenuPage() {
                     )}
                   </div>
 
-                  {/* URL */}
                   <div>
                     <label
                       className="
@@ -450,7 +434,6 @@ export default function TambahMenuPage() {
                     )}
                   </div>
 
-                  {/* ACTION */}
                   <div
                     className="
                       border-t
@@ -550,9 +533,7 @@ export default function TambahMenuPage() {
                 </form>
               </section>
 
-              {/* SIDEBAR KANAN */}
               <aside className="space-y-4 xl:sticky xl:top-6">
-                {/* PREVIEW */}
                 <div
                   className="
                     theme-card
@@ -668,7 +649,6 @@ export default function TambahMenuPage() {
                   </div>
                 </div>
 
-                {/* TIPS */}
                 <div
                   className="
                     rounded-2xl
@@ -717,7 +697,6 @@ export default function TambahMenuPage() {
                   </div>
                 </div>
 
-                {/* INFO */}
                 <div
                   className="
                     theme-card
@@ -769,7 +748,6 @@ export default function TambahMenuPage() {
               </aside>
             </div>
 
-            {/* FOOTER */}
             <footer
               className="
                 pt-5

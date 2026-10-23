@@ -87,12 +87,10 @@ export default function PembayaranLanggananPage() {
     [orderId]
   );
 
-  // Muat awal
   useEffect(() => {
     checkStatus({ showLoading: true });
   }, [checkStatus]);
 
-  // Redirect ke halaman hasil hanya ketika backend memverifikasi sukses.
   useEffect(() => {
     if (status?.status === "success") {
       router.replace(
@@ -101,7 +99,6 @@ export default function PembayaranLanggananPage() {
     }
   }, [status, orderId, router]);
 
-  // Polling selama status masih menunggu.
   useEffect(() => {
     const menunggu = status?.status === "pending" || !status;
 
@@ -188,7 +185,6 @@ export default function PembayaranLanggananPage() {
 
             {!loading && !error && status && (
               <>
-                {/* STATUS HEADER */}
                 <section className="theme-card theme-border rounded-xl border p-5 sm:p-6 shadow-[0_1px_3px_color-mix(in_srgb,var(--color-text)_8%,transparent)]">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div className="flex items-start gap-4">
@@ -248,7 +244,6 @@ export default function PembayaranLanggananPage() {
                   )}
                 </section>
 
-                {/* RINGKASAN */}
                 <section className="theme-card theme-border rounded-xl border p-5 sm:p-6">
                   <div className="flex items-center gap-2">
                     <CreditCard
@@ -310,7 +305,6 @@ export default function PembayaranLanggananPage() {
                   </div>
                 </section>
 
-                {/* AKSI PEMBAYARAN */}
                 {isPending && status.payment_url && (
                   <section className="theme-card theme-border rounded-xl border p-5 sm:p-6">
                     <div className="flex items-start gap-3">

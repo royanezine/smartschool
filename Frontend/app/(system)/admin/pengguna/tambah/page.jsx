@@ -19,11 +19,7 @@ const API_URL = (
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
 ).replace(/\/$/, "");
 
-// getToken diimpor dari @/lib/auth (single source of truth)
 
-// ============================================================
-// THEME HELPERS
-// ============================================================
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]";
@@ -40,9 +36,6 @@ const themeTextHover =
 const themePrimaryShadow =
   "shadow-[0_8px_24px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
 
-// ============================================================
-// FORM INPUT
-// ============================================================
 
 function FormInput({
   label,
@@ -89,9 +82,6 @@ function FormInput({
   );
 }
 
-// ============================================================
-// FORM SELECT
-// ============================================================
 
 function FormSelect({
   label,
@@ -151,9 +141,6 @@ function FormSelect({
   );
 }
 
-// ============================================================
-// PAGE
-// ============================================================
 
 export default function TambahPenggunaPage() {
   const router = useRouter();
@@ -180,9 +167,6 @@ export default function TambahPenggunaPage() {
     peran: "",
   });
 
-  // ==========================================================
-  // LOAD DATA ROLE + SEKOLAH
-  // ==========================================================
 
   useEffect(() => {
     const loadInitialData = async () => {
@@ -203,9 +187,6 @@ export default function TambahPenggunaPage() {
           Authorization: `Bearer ${token}`,
         };
 
-        // ====================================================
-        // AMBIL PROFILE ADMIN
-        // ====================================================
 
         const profileResponse = await fetch(
           `${API_URL}/api/users/profile`,
@@ -240,9 +221,6 @@ export default function TambahPenggunaPage() {
           setSekolahId(currentSekolahId);
         }
 
-        // ====================================================
-        // AMBIL USERS UNTUK MENDAPATKAN ROLE
-        // ====================================================
 
         const usersResponse = await fetch(
           `${API_URL}/api/users?page=1&limit=1000`,
@@ -267,9 +245,6 @@ export default function TambahPenggunaPage() {
           );
         }
 
-        // ====================================================
-        // NORMALISASI DATA USERS
-        // ====================================================
 
         let users = [];
 
@@ -295,9 +270,6 @@ export default function TambahPenggunaPage() {
             usersResult.items;
         }
 
-        // ====================================================
-        // AMBIL ROLE UNIK
-        // ====================================================
 
         const roleMap = new Map();
 
@@ -325,9 +297,6 @@ export default function TambahPenggunaPage() {
           }
         });
 
-        // ====================================================
-        // SUSUN ROLE
-        // ====================================================
 
         const preferredRoles = [
           "guru",
@@ -363,9 +332,6 @@ export default function TambahPenggunaPage() {
           }
         );
 
-        // ====================================================
-        // TAMBAHKAN ROLE LAIN
-        // ====================================================
 
         Array.from(
           roleMap.values()
@@ -415,9 +381,6 @@ export default function TambahPenggunaPage() {
     loadInitialData();
   }, []);
 
-  // ==========================================================
-  // HANDLE CHANGE
-  // ==========================================================
 
   const handleChange = (e) => {
     const {
@@ -435,9 +398,6 @@ export default function TambahPenggunaPage() {
     }
   };
 
-  // ==========================================================
-  // ROLE OPTIONS
-  // ==========================================================
 
   const roleOptions = roles.map((role) => {
     let label =
@@ -476,9 +436,6 @@ export default function TambahPenggunaPage() {
     };
   });
 
-  // ==========================================================
-  // HANDLE SUBMIT
-  // ==========================================================
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -495,9 +452,6 @@ export default function TambahPenggunaPage() {
         );
       }
 
-      // ======================================================
-      // VALIDASI
-      // ======================================================
 
       if (
         !form.namaLengkap.trim()
@@ -547,9 +501,6 @@ export default function TambahPenggunaPage() {
         );
       }
 
-      // ======================================================
-      // PAYLOAD
-      // ======================================================
 
       const payload = {
         namaLengkap:
@@ -604,9 +555,6 @@ export default function TambahPenggunaPage() {
         payload
       );
 
-      // ======================================================
-      // POST CREATE USER
-      // ======================================================
 
       const response = await fetch(
         `${API_URL}/api/users`,
@@ -635,9 +583,6 @@ export default function TambahPenggunaPage() {
         result
       );
 
-      // ======================================================
-      // ERROR BACKEND
-      // ======================================================
 
       if (!response.ok) {
         throw new Error(
@@ -646,9 +591,6 @@ export default function TambahPenggunaPage() {
         );
       }
 
-      // ======================================================
-      // BERHASIL
-      // ======================================================
 
       router.push(
         "/admin/pengguna"
@@ -670,15 +612,9 @@ export default function TambahPenggunaPage() {
     }
   };
 
-  // ==========================================================
-  // RENDER
-  // ==========================================================
 
   return (
     <div className="flex h-screen w-full theme-page overflow-hidden">
-      {/* =====================================================
-          SIDEBAR
-      ====================================================== */}
 
       <Sidebar
         role="admin"
@@ -691,12 +627,8 @@ export default function TambahPenggunaPage() {
         }
       />
 
-      {/* =====================================================
-          MAIN CONTENT
-      ====================================================== */}
 
       <div className="flex flex-1 min-w-0 h-full flex-col overflow-hidden">
-        {/* HEADER */}
 
         <Header
           title="Tambah Pengguna"
@@ -707,18 +639,11 @@ export default function TambahPenggunaPage() {
           }
         />
 
-        {/* ===================================================
-            PAGE
-        ==================================================== */}
 
         <main className="flex-1 overflow-y-auto">
           <div className="space-y-5 p-4 sm:space-y-6 sm:p-6 lg:p-8">
-            {/* =================================================
-                PAGE HEADER
-            ================================================== */}
 
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-              {/* TITLE */}
 
               <div className="flex items-center gap-3">
                 <div
@@ -749,7 +674,6 @@ export default function TambahPenggunaPage() {
                 </div>
               </div>
 
-              {/* ACTION */}
 
               <div className="flex flex-col gap-2 sm:flex-row">
                 <button
@@ -781,9 +705,6 @@ export default function TambahPenggunaPage() {
               </div>
             </div>
 
-            {/* =================================================
-                ERROR
-            ================================================== */}
 
             {error && (
               <div
@@ -824,9 +745,6 @@ export default function TambahPenggunaPage() {
               </div>
             )}
 
-            {/* =================================================
-                FORM CARD
-            ================================================== */}
 
             <section
               className="
@@ -838,7 +756,6 @@ export default function TambahPenggunaPage() {
                 shadow-[0_6px_24px_color-mix(in_srgb,var(--color-text)_6%,transparent)]
               "
             >
-              {/* FORM HEADER */}
 
               <div
                 className="
@@ -888,7 +805,6 @@ export default function TambahPenggunaPage() {
                 </div>
               </div>
 
-              {/* FORM BODY */}
 
               <form onSubmit={handleSubmit}>
                 <div className="p-4 sm:p-6 lg:p-8">
@@ -1051,7 +967,6 @@ export default function TambahPenggunaPage() {
                   </div>
                 </div>
 
-                {/* FORM FOOTER */}
 
                 <div
                   className="
@@ -1152,9 +1067,6 @@ export default function TambahPenggunaPage() {
               </form>
             </section>
 
-            {/* =================================================
-                INFO CARD
-            ================================================== */}
 
             <section
               className="

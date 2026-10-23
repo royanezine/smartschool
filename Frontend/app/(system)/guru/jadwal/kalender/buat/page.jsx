@@ -27,9 +27,6 @@ import {
 import { getKelasMapel } from "@/services/kelasMapel.service";
 import { createJadwalMengajar } from "@/services/jadwalMengajar.service";
 
-// ============================================================
-// THEME HELPERS
-// ============================================================
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -91,9 +88,6 @@ const themeDangerBorder =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-4 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-// ============================================================
-// CONSTANTS
-// ============================================================
 
 const DAYS = [
   { value: "senin", label: "Senin" },
@@ -121,9 +115,6 @@ function getErrorMessage(error) {
   return "Terjadi kesalahan saat memproses data.";
 }
 
-// ============================================================
-// LAYOUT SHELL
-// ============================================================
 
 const HEADER_HEIGHT = 88;
 const SIDEBAR_WIDTH = 280;
@@ -131,7 +122,6 @@ const SIDEBAR_WIDTH = 280;
 function AppShell({ children }) {
   return (
     <div className="min-h-screen theme-page">
-      {/* Sidebar desktop */}
       <aside
         className="fixed inset-y-0 left-0 z-50 hidden lg:block"
         style={{ width: SIDEBAR_WIDTH }}
@@ -139,12 +129,10 @@ function AppShell({ children }) {
         <Sidebar role="guru" />
       </aside>
 
-      {/* Sidebar mobile */}
       <div className="lg:hidden">
         <Sidebar role="guru" />
       </div>
 
-      {/* Header */}
       <header
         className={`fixed left-0 right-0 top-0 z-40 border-b ${themeDivider} theme-header lg:left-[280px]`}
         style={{ height: HEADER_HEIGHT }}
@@ -152,7 +140,6 @@ function AppShell({ children }) {
         <Header />
       </header>
 
-      {/* Content */}
       <main
         className="lg:ml-[280px] theme-page"
         style={{ paddingTop: HEADER_HEIGHT }}
@@ -163,9 +150,6 @@ function AppShell({ children }) {
   );
 }
 
-// ============================================================
-// SEARCHABLE KELAS + MAPEL
-// ============================================================
 
 function SearchableKelasMapelSelect({
   value,
@@ -257,7 +241,6 @@ function SearchableKelasMapelSelect({
       className="relative"
       ref={wrapperRef}
     >
-      {/* Selected button */}
 
       <button
         type="button"
@@ -308,13 +291,11 @@ function SearchableKelasMapelSelect({
         />
       </button>
 
-      {/* Dropdown */}
 
       {open && !loading && (
         <div
           className={`absolute left-0 right-0 z-30 mt-2 overflow-hidden rounded-xl border ${themeNeutralBorder} theme-card ${themeCardShadow}`}
         >
-          {/* Search */}
 
           <div
             className={`border-b ${themeDivider} p-3`}
@@ -338,7 +319,6 @@ function SearchableKelasMapelSelect({
             </div>
           </div>
 
-          {/* Options */}
 
           <div className="max-h-72 overflow-y-auto p-2">
             {filtered.length === 0 ? (
@@ -424,9 +404,6 @@ function SearchableKelasMapelSelect({
   );
 }
 
-// ============================================================
-// PAGE
-// ============================================================
 
 export default function BuatJadwalGuruPage() {
   const router = useRouter();
@@ -601,9 +578,6 @@ export default function BuatJadwalGuruPage() {
       <div className="w-full px-4 py-6 sm:px-6 lg:px-8 lg:py-8 theme-page">
         <div className="mx-auto w-full max-w-6xl">
 
-          {/* ==================================================
-              PAGE HEADER
-          ================================================== */}
 
           <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0">
@@ -636,7 +610,6 @@ export default function BuatJadwalGuruPage() {
               </p>
             </div>
 
-            {/* KEMBALI */}
 
             <Link
               href="/guru/jadwal/kalender"
@@ -647,9 +620,6 @@ export default function BuatJadwalGuruPage() {
             </Link>
           </div>
 
-          {/* ==================================================
-              ERROR
-          ================================================== */}
 
           {error && (
             <div
@@ -672,9 +642,6 @@ export default function BuatJadwalGuruPage() {
             </div>
           )}
 
-          {/* ==================================================
-              SUCCESS
-          ================================================== */}
 
           {success && (
             <div
@@ -697,21 +664,14 @@ export default function BuatJadwalGuruPage() {
             </div>
           )}
 
-          {/* ==================================================
-              FORM
-          ================================================== */}
 
           <form onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
 
-              {/* ==================================================
-                  FORM CARD
-              ================================================== */}
 
               <div
                 className={`min-w-0 theme-card rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
               >
-                {/* CARD HEADER */}
 
                 <div
                   className={`border-b ${themeDivider} px-6 py-5`}
@@ -736,11 +696,9 @@ export default function BuatJadwalGuruPage() {
                   </div>
                 </div>
 
-                {/* CARD BODY */}
 
                 <div className="space-y-6 p-6">
 
-                  {/* KELAS + MAPEL */}
 
                   <div>
                     <label className="mb-2 block text-sm font-semibold theme-text-secondary">
@@ -776,7 +734,6 @@ export default function BuatJadwalGuruPage() {
                     </p>
                   </div>
 
-                  {/* DETAIL KELAS MAPEL */}
 
                   {selectedKelasMapel && (
                     <div
@@ -790,7 +747,6 @@ export default function BuatJadwalGuruPage() {
 
                       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
 
-                        {/* KELAS */}
 
                         <div className="flex items-start gap-3">
                           <div
@@ -811,7 +767,6 @@ export default function BuatJadwalGuruPage() {
                           </div>
                         </div>
 
-                        {/* MAPEL */}
 
                         <div className="flex items-start gap-3">
                           <div
@@ -846,7 +801,6 @@ export default function BuatJadwalGuruPage() {
                           </div>
                         </div>
 
-                        {/* GURU */}
 
                         <div className="flex items-start gap-3">
                           <div
@@ -872,7 +826,6 @@ export default function BuatJadwalGuruPage() {
                     </div>
                   )}
 
-                  {/* HARI */}
 
                   <div>
                     <label
@@ -911,11 +864,9 @@ export default function BuatJadwalGuruPage() {
                     </div>
                   </div>
 
-                  {/* JAM */}
 
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
 
-                    {/* JAM MULAI */}
 
                     <div>
                       <label
@@ -946,7 +897,6 @@ export default function BuatJadwalGuruPage() {
                       </div>
                     </div>
 
-                    {/* JAM SELESAI */}
 
                     <div>
                       <label
@@ -978,7 +928,6 @@ export default function BuatJadwalGuruPage() {
                     </div>
                   </div>
 
-                  {/* RUANGAN */}
 
                   <div>
                     <label
@@ -1012,7 +961,6 @@ export default function BuatJadwalGuruPage() {
                   </div>
                 </div>
 
-                {/* ACTION */}
 
                 <div
                   className={`flex flex-col-reverse gap-3 border-t ${themeDivider} px-6 py-5 sm:flex-row sm:justify-end`}
@@ -1051,14 +999,10 @@ export default function BuatJadwalGuruPage() {
                 </div>
               </div>
 
-              {/* ==================================================
-                  PREVIEW
-              ================================================== */}
 
               <div
                 className={`h-fit min-w-0 theme-card rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
               >
-                {/* PREVIEW HEADER */}
 
                 <div
                   className={`border-b ${themeDivider} px-6 py-5`}
@@ -1083,14 +1027,12 @@ export default function BuatJadwalGuruPage() {
                   </div>
                 </div>
 
-                {/* PREVIEW BODY */}
 
                 <div className="p-6">
 
                   <div
                     className={`overflow-hidden rounded-2xl border ${themeNeutralBorder}`}
                   >
-                    {/* DAY HEADER */}
 
                     <div
                       className={`${themePrimaryGradient} px-5 py-4 text-[var(--color-card)]`}
@@ -1104,11 +1046,9 @@ export default function BuatJadwalGuruPage() {
                       </p>
                     </div>
 
-                    {/* DETAILS */}
 
                     <div className="space-y-5 p-5">
 
-                      {/* WAKTU */}
 
                       <div className="flex gap-3">
                         <div
@@ -1132,7 +1072,6 @@ export default function BuatJadwalGuruPage() {
                         </div>
                       </div>
 
-                      {/* MAPEL */}
 
                       <div className="flex gap-3">
                         <div
@@ -1168,7 +1107,6 @@ export default function BuatJadwalGuruPage() {
                         </div>
                       </div>
 
-                      {/* KELAS */}
 
                       <div className="flex gap-3">
                         <div
@@ -1192,7 +1130,6 @@ export default function BuatJadwalGuruPage() {
                         </div>
                       </div>
 
-                      {/* GURU */}
 
                       <div className="flex gap-3">
                         <div
@@ -1215,7 +1152,6 @@ export default function BuatJadwalGuruPage() {
                         </div>
                       </div>
 
-                      {/* RUANGAN */}
 
                       <div className="flex gap-3">
                         <div
@@ -1238,7 +1174,6 @@ export default function BuatJadwalGuruPage() {
                     </div>
                   </div>
 
-                  {/* INFO */}
 
                   <div
                     className={`mt-5 rounded-xl ${themeNeutralSurface} p-4`}

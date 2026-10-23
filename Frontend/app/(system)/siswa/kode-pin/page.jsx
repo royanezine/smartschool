@@ -16,9 +16,6 @@ XCircle,
 
 const DUMMY_PIN = "123456";
 
-// ============================================================
-// GLOBAL THEME HELPERS
-// ============================================================
 
 const themePrimaryGradient =
 "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -47,7 +44,6 @@ const themePrimaryHoverBorder =
 const themeCardShadow =
 "shadow-[0_18px_55px_color-mix(in_srgb,var(--color-text)_12%,transparent)]";
 
-// FIX: Tambahkan deklarasi themeCardSurface
 const themeCardSurface =
 "bg-[var(--color-card)]";
 
@@ -102,9 +98,6 @@ const themeDisabledSurface =
 const themeFocus =
 "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-// ============================================================
-// PAGE
-// ============================================================
 
 export default function KodePinSiswaPage() {
 const router = useRouter();
@@ -116,17 +109,11 @@ const [loading, setLoading] = useState(false);
 
 const inputRef = useRef(null);
 
-// ==========================================================
-// AUTO FOCUS
-// ==========================================================
 
 useEffect(() => {
 inputRef.current?.focus();
 }, []);
 
-// ==========================================================
-// NUMBER
-// ==========================================================
 
 const handleNumber = (number) => {
 if (loading || success) {
@@ -143,9 +130,6 @@ if (pin.length < 6) {
 
 };
 
-// ==========================================================
-// DELETE
-// ==========================================================
 
 const handleDelete = () => {
 if (loading || success) {
@@ -159,9 +143,6 @@ setPin((prev) => prev.slice(0, -1));
 
 };
 
-// ==========================================================
-// CLEAR
-// ==========================================================
 
 const handleClear = () => {
 if (loading || success) {
@@ -175,9 +156,6 @@ setPin("");
 
 };
 
-// ==========================================================
-// SUBMIT
-// ==========================================================
 
 const handleSubmit = () => {
 if (pin.length !== 6) {
@@ -206,13 +184,7 @@ setTimeout(() => {
 
 };
 
-// ==========================================================
-// AUTO SUBMIT
-// ==========================================================
 
-  // ==========================================================
-  // AUTO SUBMIT
-  // ==========================================================
 
   useEffect(() => {
     if (pin.length === 6 && !loading && !success) {
@@ -226,9 +198,6 @@ setTimeout(() => {
     }
   }, [pin, loading, success]);
 
-// ==========================================================
-// KEYBOARD
-// ==========================================================
 
 const handleKeyboard = (event) => {
 if (event.key >= "0" && event.key <= "9") {
@@ -262,18 +231,11 @@ return () => {
 
 }, [pin, loading, success]);
 
-// ==========================================================
-// NUMBER PAD
-// ==========================================================
 
 const numbers = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
 
-// ==========================================================
-// RENDER
-// ==========================================================
 
 return ( <main className="min-h-screen theme-page theme-text overflow-hidden">
-{/* BACKGROUND */}
 
 ```
   <div className="fixed inset-0 pointer-events-none overflow-hidden">
@@ -306,7 +268,6 @@ return ( <main className="min-h-screen theme-page theme-text overflow-hidden">
   </div>
 
   <div className="relative min-h-screen flex flex-col">
-    {/* TOP BAR */}
 
     <header
       className={`
@@ -359,7 +320,6 @@ return ( <main className="min-h-screen theme-page theme-text overflow-hidden">
       </div>
     </header>
 
-    {/* CONTENT */}
 
     <section
       className="
@@ -368,7 +328,6 @@ return ( <main className="min-h-screen theme-page theme-text overflow-hidden">
       "
     >
       <div className="w-full max-w-[430px]">
-        {/* MAIN CARD */}
 
         <div
           className={`
@@ -378,7 +337,6 @@ return ( <main className="min-h-screen theme-page theme-text overflow-hidden">
             ${themeCardShadow}
           `}
         >
-          {/* HERO HEADER */}
 
           <div
             className={`
@@ -472,10 +430,8 @@ return ( <main className="min-h-screen theme-page theme-text overflow-hidden">
             </div>
           </div>
 
-          {/* PIN AREA */}
 
           <div className="px-6 pb-7 pt-7 sm:px-8">
-            {/* PIN INDICATORS */}
 
             <div className="mb-3 flex justify-center gap-2.5">
               {Array.from({ length: 6 }).map((_, index) => {
@@ -522,7 +478,6 @@ return ( <main className="min-h-screen theme-page theme-text overflow-hidden">
               })}
             </div>
 
-            {/* STATUS */}
 
             <div className="mb-6 min-h-[38px] text-center">
               {error ? (
@@ -552,7 +507,6 @@ return ( <main className="min-h-screen theme-page theme-text overflow-hidden">
               )}
             </div>
 
-            {/* NUMBER PAD */}
 
             <div
               className="
@@ -589,7 +543,6 @@ return ( <main className="min-h-screen theme-page theme-text overflow-hidden">
                 </button>
               ))}
 
-              {/* CLEAR */}
 
               <button
                 type="button"
@@ -607,7 +560,6 @@ return ( <main className="min-h-screen theme-page theme-text overflow-hidden">
                 Bersihkan
               </button>
 
-              {/* ZERO */}
 
               <button
                 type="button"
@@ -635,7 +587,6 @@ return ( <main className="min-h-screen theme-page theme-text overflow-hidden">
                 0
               </button>
 
-              {/* DELETE */}
 
               <button
                 type="button"
@@ -654,7 +605,6 @@ return ( <main className="min-h-screen theme-page theme-text overflow-hidden">
               </button>
             </div>
 
-            {/* SUBMIT */}
 
             <button
               type="button"
@@ -695,7 +645,6 @@ return ( <main className="min-h-screen theme-page theme-text overflow-hidden">
               )}
             </button>
 
-            {/* SECURITY INFO */}
 
             <div
               className={`
@@ -725,7 +674,6 @@ return ( <main className="min-h-screen theme-page theme-text overflow-hidden">
               </div>
             </div>
 
-            {/* BACK */}
 
             <button
               type="button"
@@ -742,7 +690,6 @@ return ( <main className="min-h-screen theme-page theme-text overflow-hidden">
           </div>
         </div>
 
-        {/* FOOTER */}
 
         <div className="mt-5 text-center">
           <p className="text-[11px] font-medium theme-text-muted">
@@ -757,7 +704,6 @@ return ( <main className="min-h-screen theme-page theme-text overflow-hidden">
     </section>
   </div>
 
-  {/* HIDDEN INPUT */}
 
   <input
     ref={inputRef}

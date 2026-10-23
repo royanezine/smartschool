@@ -1,13 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
+import Link from "next/link";
 import {
   ClipboardList,
-  Plus,
   Search,
-  Filter,
   Eye,
-  Edit3,
+  Pencil,
   Trash2,
   X,
   CheckCircle2,
@@ -17,20 +16,27 @@ import {
   CalendarDays,
   BookOpen,
   AlertCircle,
+  RefreshCw,
+  Loader2,
+  ExternalLink,
+  ChevronLeft,
+  ChevronRight,
+  Award,
 } from "lucide-react";
 
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
+import {
+  getAllTugasAdmin,
+  updateTugas,
+  deleteTugas,
+  getPengumpulanByTugas,
+  beriNilaiTugas,
+} from "@/services/tugas.service";
 
-/* ============================================================
-   THEME HELPERS
-============================================================ */
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]";
-
-const themePrimarySoftBorder =
-  "border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)]";
 
 const themePrimaryHover =
   "hover:bg-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]";
@@ -39,1560 +45,917 @@ const themeTextHover =
   "hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
 
 const themePrimaryShadow =
-  "shadow-[0_10px_25px_color-mix(in_srgb,var(--color-primary)_20%,transparent)]";
+  "shadow-[0_8px_24px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
 
 const themeCardShadow =
   "shadow-[0_6px_24px_color-mix(in_srgb,var(--color-text)_6%,transparent)]";
 
-/* ============================================================
-   PAGE
-============================================================ */
+
+function formatTanggal(isoString) {
+  if (!isoString) return "-";
+  try {
+    const d = new Date(isoString);
+    if (isNaN(d.getTime())) return "-";
+    return new Intl.DateTimeFormat("id-ID", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    }).format(d);
+  } catch {
+    return "-";
+  }
+}
+
+function formatWaktu(isoString) {
+  if (!isoString) return "-";
+  try {
+    const d = new Date(isoString);
+    if (isNaN(d.getTime())) return "-";
+    return new Intl.DateTimeFormat("id-ID", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    }).format(d);
+  } catch {
+    return "-";
+  }
+}
+
+function getStatusTugas(batasWaktu) {
+  if (!batasWaktu) return { label: "Aktif", className: "theme-success", isExpired: false };
+  const deadline = new Date(batasWaktu);
+  const now = new Date();
+  if (isNaN(deadline.getTime())) {
+    return { label: "Aktif", className: "theme-success", isExpired: false };
+  }
+  if (now > deadline) {
+    return { label: "Lewat Tenggat", className: "theme-danger", isExpired: true };
+  }
+  return { label: "Berjalan", className: "theme-success", isExpired: false };
+}
+
+function getStatusPengumpulanBadge(status) {
+  const s = String(status || "").toLowerCase();
+  if (s === "dinilai") {
+    return { label: "Dinilai", className: "theme-success" };
+  }
+  if (s === "terlambat") {
+    return { label: "Terlambat", className: "theme-warning" };
+  }
+  return { label: "Dikumpulkan", className: "theme-info" };
+}
+
 
 export default function TugasSiswaPage() {
-  const [tugas, setTugas] = useState([
-    {
-      id: 1,
-      judul: "Membuat Website Sederhana",
-      mapel: "Pemrograman Web",
-      kelas: "XI PPLG 1",
-      guru: "Budi Santoso",
-      tipe: "Tugas Individu",
-      deadline: "2026-09-12",
-      waktu: "23:59",
-      status: "Published",
-      jumlahSiswa: 32,
-      dikumpulkan: 24,
-      deskripsi:
-        "Siswa membuat sebuah website sederhana menggunakan HTML, CSS, dan JavaScript.",
-    },
-    {
-      id: 2,
-      judul: "Normalisasi Database",
-      mapel: "Basis Data",
-      kelas: "XI PPLG 2",
-      guru: "Andi Wijaya",
-      tipe: "Tugas Individu",
-      deadline: "2026-09-15",
-      waktu: "20:00",
-      status: "Published",
-      jumlahSiswa: 30,
-      dikumpulkan: 21,
-      deskripsi:
-        "Mengerjakan latihan normalisasi database dari bentuk tidak normal sampai 3NF.",
-    },
-    {
-      id: 3,
-      judul: "Konfigurasi Jaringan LAN",
-      mapel: "Jaringan Komputer",
-      kelas: "XII TKJ 1",
-      guru: "Rina Marlina",
-      tipe: "Tugas Kelompok",
-      deadline: "2026-09-18",
-      waktu: "21:00",
-      status: "Published",
-      jumlahSiswa: 28,
-      dikumpulkan: 18,
-      deskripsi:
-        "Membuat laporan konfigurasi jaringan LAN beserta dokumentasi praktik.",
-    },
-    {
-      id: 4,
-      judul: "Algoritma Percabangan",
-      mapel: "Pemrograman Dasar",
-      kelas: "X PPLG 1",
-      guru: "Dedi Kurniawan",
-      tipe: "Tugas Individu",
-      deadline: "2026-09-20",
-      waktu: "23:59",
-      status: "Draft",
-      jumlahSiswa: 34,
-      dikumpulkan: 0,
-      deskripsi:
-        "Latihan membuat program menggunakan percabangan if, else if, dan switch.",
-    },
-    {
-      id: 5,
-      judul: "Analisis Sistem Informasi",
-      mapel: "Analisis Sistem",
-      kelas: "XII PPLG 2",
-      guru: "Siti Rahma",
-      tipe: "Tugas Individu",
-      deadline: "2026-09-22",
-      waktu: "22:00",
-      status: "Published",
-      jumlahSiswa: 31,
-      dikumpulkan: 27,
-      deskripsi:
-        "Membuat analisis kebutuhan sistem informasi berdasarkan studi kasus.",
-    },
-  ]);
+  const [tugasList, setTugasList] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [pageError, setPageError] = useState(null);
+  const [feedback, setFeedback] = useState(null);
 
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("Semua");
+  const [filterKelas, setFilterKelas] = useState("Semua");
   const [filterMapel, setFilterMapel] = useState("Semua");
 
-  const [showModal, setShowModal] = useState(false);
-  const [modalType, setModalType] = useState("add");
-  const [selectedTugas, setSelectedTugas] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
 
-  const [form, setForm] = useState({
-    judul: "",
-    mapel: "",
-    kelas: "",
-    guru: "",
-    tipe: "Tugas Individu",
-    deadline: "",
-    waktu: "23:59",
-    status: "Draft",
-    deskripsi: "",
-  });
+  const [deleteConfirmItem, setDeleteConfirmItem] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
 
-  /* ============================================================
-     STATISTICS
-  ============================================================ */
 
-  const totalTugas = tugas.length;
+  const loadData = useCallback(async (isRefresh = false) => {
+    if (isRefresh) {
+      setRefreshing(true);
+    } else {
+      setLoading(true);
+    }
+    setPageError(null);
 
-  const published = tugas.filter(
-    (item) => item.status === "Published"
-  ).length;
+    try {
+      const data = await getAllTugasAdmin();
+      setTugasList(Array.isArray(data) ? data : []);
+    } catch (err) {
+      setPageError(err.message || "Gagal menghubungi server backend.");
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, []);
 
-  const draft = tugas.filter(
-    (item) => item.status === "Draft"
-  ).length;
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      loadData();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [loadData]);
 
-  const totalDikumpulkan = tugas.reduce(
-    (total, item) => total + item.dikumpulkan,
+
+  const totalTugas = tugasList.length;
+  const now = new Date();
+
+  const activeCount = tugasList.filter((item) => {
+    if (!item.batasWaktu) return true;
+    return new Date(item.batasWaktu) >= now;
+  }).length;
+
+  const expiredCount = tugasList.filter((item) => {
+    if (!item.batasWaktu) return false;
+    return new Date(item.batasWaktu) < now;
+  }).length;
+
+  const totalDikumpulkan = tugasList.reduce(
+    (total, item) => total + (item.jumlahPengumpulan || 0),
     0
   );
 
-  const mapelList = [...new Set(tugas.map((item) => item.mapel))];
 
-  /* ============================================================
-     FILTER
-  ============================================================ */
+  const kelasOptions = useMemo(() => {
+    const set = new Set();
+    tugasList.forEach((t) => {
+      if (t.kelasNama && t.kelasNama !== "-") set.add(t.kelasNama);
+    });
+    return Array.from(set);
+  }, [tugasList]);
+
+  const mapelOptions = useMemo(() => {
+    const set = new Set();
+    tugasList.forEach((t) => {
+      if (t.mapelNama && t.mapelNama !== "-") set.add(t.mapelNama);
+    });
+    return Array.from(set);
+  }, [tugasList]);
 
   const filteredTugas = useMemo(() => {
-    return tugas.filter((item) => {
-      const keyword = search.toLowerCase();
+    const keyword = search.trim().toLowerCase();
+    const currTime = new Date();
 
-      const cocokSearch =
-        item.judul.toLowerCase().includes(keyword) ||
-        item.mapel.toLowerCase().includes(keyword) ||
-        item.kelas.toLowerCase().includes(keyword) ||
-        item.guru.toLowerCase().includes(keyword);
+    return tugasList.filter((item) => {
+      if (filterStatus === "Berjalan") {
+        if (item.batasWaktu && new Date(item.batasWaktu) < currTime) return false;
+      } else if (filterStatus === "Lewat Tenggat") {
+        if (!item.batasWaktu || new Date(item.batasWaktu) >= currTime) return false;
+      }
 
-      const cocokStatus =
-        filterStatus === "Semua" ||
-        item.status === filterStatus;
+      if (filterKelas !== "Semua" && item.kelasNama !== filterKelas) {
+        return false;
+      }
 
-      const cocokMapel =
-        filterMapel === "Semua" ||
-        item.mapel === filterMapel;
+      if (filterMapel !== "Semua" && item.mapelNama !== filterMapel) {
+        return false;
+      }
 
-      return cocokSearch && cocokStatus && cocokMapel;
-    });
-  }, [tugas, search, filterStatus, filterMapel]);
+      if (!keyword) return true;
 
-  /* ============================================================
-     MODAL
-  ============================================================ */
+      const judul = (item.judul || "").toLowerCase();
+      const deskripsi = (item.deskripsi || "").toLowerCase();
+      const mapel = (item.mapelNama || "").toLowerCase();
+      const kelas = (item.kelasNama || "").toLowerCase();
+      const guru = (item.guruNama || "").toLowerCase();
 
-  const openAddModal = () => {
-    setModalType("add");
-    setSelectedTugas(null);
-
-    setForm({
-      judul: "",
-      mapel: "",
-      kelas: "",
-      guru: "",
-      tipe: "Tugas Individu",
-      deadline: "",
-      waktu: "23:59",
-      status: "Draft",
-      deskripsi: "",
-    });
-
-    setShowModal(true);
-  };
-
-  const openEditModal = (item) => {
-    setModalType("edit");
-    setSelectedTugas(item);
-
-    setForm({
-      judul: item.judul,
-      mapel: item.mapel,
-      kelas: item.kelas,
-      guru: item.guru,
-      tipe: item.tipe,
-      deadline: item.deadline,
-      waktu: item.waktu,
-      status: item.status,
-      deskripsi: item.deskripsi,
-    });
-
-    setShowModal(true);
-  };
-
-  const openDetailModal = (item) => {
-    setModalType("detail");
-    setSelectedTugas(item);
-    setShowModal(true);
-  };
-
-  /* ============================================================
-     DELETE
-  ============================================================ */
-
-  const handleDelete = (id) => {
-    const yakin = window.confirm(
-      "Apakah Anda yakin ingin menghapus tugas ini?"
-    );
-
-    if (!yakin) return;
-
-    setTugas((prev) =>
-      prev.filter((item) => item.id !== id)
-    );
-  };
-
-  /* ============================================================
-     SUBMIT
-  ============================================================ */
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    if (
-      !form.judul ||
-      !form.mapel ||
-      !form.kelas ||
-      !form.deadline
-    ) {
-      alert("Mohon lengkapi data tugas.");
-      return;
-    }
-
-    if (modalType === "edit" && selectedTugas) {
-      setTugas((prev) =>
-        prev.map((item) =>
-          item.id === selectedTugas.id
-            ? {
-                ...item,
-                ...form,
-              }
-            : item
-        )
+      return (
+        judul.includes(keyword) ||
+        deskripsi.includes(keyword) ||
+        mapel.includes(keyword) ||
+        kelas.includes(keyword) ||
+        guru.includes(keyword)
       );
-    } else {
-      const newTugas = {
-        id: Date.now(),
-        ...form,
-        jumlahSiswa: 0,
-        dikumpulkan: 0,
-      };
-
-      setTugas((prev) => [newTugas, ...prev]);
-    }
-
-    setShowModal(false);
-  };
-
-  /* ============================================================
-     HELPERS
-  ============================================================ */
-
-  const formatTanggal = (tanggal) => {
-    if (!tanggal) return "-";
-
-    return new Date(
-      tanggal + "T00:00:00"
-    ).toLocaleDateString("id-ID", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
     });
+  }, [tugasList, search, filterStatus, filterKelas, filterMapel]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredTugas.length / pageSize));
+
+  const paginatedTugas = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredTugas.slice(start, start + pageSize);
+  }, [filteredTugas, currentPage]);
+
+  const handleFilterChange = (setter, val) => {
+    setter(val);
+    setCurrentPage(1);
   };
 
-  const getProgress = (item) => {
-    if (!item.jumlahSiswa) return 0;
 
-    return Math.round(
-      (item.dikumpulkan / item.jumlahSiswa) * 100
-    );
+  const confirmDelete = async () => {
+    if (!deleteConfirmItem) return;
+    setSubmitting(true);
+    try {
+      await deleteTugas(deleteConfirmItem.id);
+      setFeedback({
+        type: "success",
+        message: `Tugas "${deleteConfirmItem.judul}" berhasil dihapus.`,
+      });
+      setDeleteConfirmItem(null);
+      await loadData(true);
+    } catch (err) {
+      setFeedback({
+        type: "error",
+        message: err.message || "Gagal menghapus tugas.",
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
+
 
   return (
     <div className="flex min-h-screen theme-page">
-      {/* ======================================================
-          SIDEBAR
-      ====================================================== */}
-
       <Sidebar />
-
-      {/* ======================================================
-          MAIN
-      ====================================================== */}
 
       <div className="flex-1 min-w-0 flex flex-col">
         <Header />
 
-        <main className="flex-1 p-4 md:p-6 lg:p-8">
-          {/* ==================================================
-              BREADCRUMB
-          ================================================== */}
-
-          <div className="mb-2 text-sm theme-text-secondary">
-            LMS & CBT
-
-            <span className="mx-2 theme-text-muted">
-              /
-            </span>
-
-            <span className="theme-text">
-              Tugas Siswa
-            </span>
+        <main className="flex-1 px-4 md:px-6 lg:px-8 py-6 theme-page">
+          <div className="mb-3">
+            <p className="text-sm theme-text-muted">
+              LMS & CBT
+              <span className="mx-2 theme-text-placeholder">/</span>
+              <span className="theme-text-secondary">Tugas Siswa</span>
+            </p>
           </div>
 
-          {/* ==================================================
-              HEADER
-          ================================================== */}
-
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-7">
-            <div className="flex items-start gap-4">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-7">
+            <div className="flex items-center gap-3">
               <div
                 className={`
-                  w-12 h-12 rounded-xl
+                  w-12 h-12
+                  rounded-xl
                   bg-[var(--color-primary)]
-                  flex items-center justify-center
-                  text-white
+                  flex
+                  items-center
+                  justify-center
                   ${themePrimaryShadow}
-                  shrink-0
                 `}
               >
-                <ClipboardList size={24} />
+                <ClipboardList size={24} className="text-white" />
               </div>
 
               <div>
-                <h1 className="text-2xl md:text-3xl font-bold theme-text">
-                  Tugas Siswa
-                </h1>
-
-                <p className="text-sm theme-text-secondary mt-1">
-                  Kelola tugas, deadline, dan pengumpulan tugas siswa.
+                <h1 className="text-2xl font-bold theme-text">Tugas Siswa</h1>
+                <p className="text-sm theme-text-muted mt-1">
+                  Pantau penugasan kelas, tenggat waktu, pengumpulan berkas jawaban, dan penilaian siswa.
                 </p>
               </div>
             </div>
 
-            <button
-              onClick={openAddModal}
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => loadData(true)}
+                disabled={loading || refreshing}
+                className={`
+                  inline-flex
+                  items-center
+                  gap-2
+                  px-4
+                  py-2.5
+                  rounded-xl
+                  theme-card
+                  theme-border
+                  border
+                  text-sm
+                  font-medium
+                  theme-text-secondary
+                  ${themeTextHover}
+                  transition-all
+                  ${themeCardShadow}
+                `}
+                title="Segarkan data dari server"
+              >
+                <RefreshCw
+                  size={16}
+                  className={refreshing ? "animate-spin" : ""}
+                />
+                <span className="hidden sm:inline">Segarkan</span>
+              </button>
+            </div>
+          </div>
+
+          {feedback && (
+            <div
               className={`
-                inline-flex items-center justify-center gap-2
-                px-5 py-3 rounded-xl
-                bg-[var(--color-primary)]
-                hover:opacity-90
-                text-white
-                text-sm font-semibold
-                ${themePrimaryShadow}
-                transition-all
+                mb-6 p-4 rounded-xl border flex items-center justify-between
+                ${
+                  feedback.type === "success"
+                    ? "theme-success border-[color-mix(in_srgb,var(--color-success)_30%,transparent)]"
+                    : "theme-danger border-[color-mix(in_srgb,var(--color-danger)_30%,transparent)]"
+                }
               `}
             >
-              <Plus size={18} />
-              Tambah Tugas
-            </button>
-          </div>
+              <div className="flex items-center gap-3">
+                {feedback.type === "success" ? (
+                  <CheckCircle2 size={18} />
+                ) : (
+                  <AlertCircle size={18} />
+                )}
+                <p className="text-sm font-medium">{feedback.message}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setFeedback(null)}
+                className="p-1 rounded-lg hover:opacity-70 transition"
+              >
+                <X size={16} />
+              </button>
+            </div>
+          )}
 
-          {/* ==================================================
-              STATISTICS
-          ================================================== */}
+          {pageError && (
+            <div className="mb-6 p-4 rounded-xl border theme-danger border-[color-mix(in_srgb,var(--color-danger)_30%,transparent)] flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <AlertCircle size={18} />
+                <p className="text-sm font-medium">{pageError}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => loadData(true)}
+                className="text-xs underline font-semibold px-2 py-1"
+              >
+                Coba Lagi
+              </button>
+            </div>
+          )}
 
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
-            <StatCard
-              title="Total Tugas"
-              value={totalTugas}
-              description="Semua tugas"
-              icon={ClipboardList}
-              variant="primary"
-            />
+            <div
+              className={`
+                theme-card
+                theme-border
+                rounded-2xl
+                border
+                p-5
+                ${themeCardShadow}
+              `}
+            >
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-sm theme-text-muted">Total Tugas</p>
+                  <p className="text-3xl font-bold theme-text mt-2">
+                    {loading ? "..." : totalTugas}
+                  </p>
+                  <p className="text-xs theme-text-placeholder mt-2">
+                    Seluruh penugasan terdaftar
+                  </p>
+                </div>
+                <div
+                  className={`
+                    w-11 h-11
+                    rounded-xl
+                    ${themePrimarySoft}
+                    flex items-center justify-center
+                    text-[var(--color-primary)]
+                  `}
+                >
+                  <ClipboardList size={21} />
+                </div>
+              </div>
+            </div>
 
-            <StatCard
-              title="Published"
-              value={published}
-              description="Sudah diterbitkan"
-              icon={CheckCircle2}
-              variant="success"
-            />
+            <div
+              className={`
+                theme-card
+                theme-border
+                rounded-2xl
+                border
+                p-5
+                ${themeCardShadow}
+              `}
+            >
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-sm theme-text-muted">Tugas Berjalan</p>
+                  <p className="text-3xl font-bold theme-text mt-2">
+                    {loading ? "..." : activeCount}
+                  </p>
+                  <p className="text-xs theme-text-placeholder mt-2">
+                    Masih dalam tenggat waktu
+                  </p>
+                </div>
+                <div className="w-11 h-11 rounded-xl theme-success flex items-center justify-center">
+                  <CheckCircle2 size={21} />
+                </div>
+              </div>
+            </div>
 
-            <StatCard
-              title="Draft"
-              value={draft}
-              description="Belum diterbitkan"
-              icon={FileText}
-              variant="warning"
-            />
+            <div
+              className={`
+                theme-card
+                theme-border
+                rounded-2xl
+                border
+                p-5
+                ${themeCardShadow}
+              `}
+            >
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-sm theme-text-muted">Lewat Tenggat</p>
+                  <p className="text-3xl font-bold theme-text mt-2">
+                    {loading ? "..." : expiredCount}
+                  </p>
+                  <p className="text-xs theme-text-placeholder mt-2">
+                    Tenggat waktu terlampaui
+                  </p>
+                </div>
+                <div className="w-11 h-11 rounded-xl theme-danger flex items-center justify-center">
+                  <Clock3 size={21} />
+                </div>
+              </div>
+            </div>
 
-            <StatCard
-              title="Dikumpulkan"
-              value={totalDikumpulkan}
-              description="Total pengumpulan"
-              icon={Users}
-              variant="info"
-            />
+            <div
+              className={`
+                theme-card
+                theme-border
+                rounded-2xl
+                border
+                p-5
+                ${themeCardShadow}
+              `}
+            >
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-sm theme-text-muted">Total Pengumpulan</p>
+                  <p className="text-3xl font-bold theme-text mt-2">
+                    {loading ? "..." : totalDikumpulkan}
+                  </p>
+                  <p className="text-xs theme-text-placeholder mt-2">
+                    Berkas jawaban siswa diterima
+                  </p>
+                </div>
+                <div className="w-11 h-11 rounded-xl theme-info flex items-center justify-center">
+                  <FileText size={21} />
+                </div>
+              </div>
+            </div>
           </div>
 
-          {/* ==================================================
-              FILTER CARD
-          ================================================== */}
-
-          <div className="theme-card rounded-2xl theme-border border p-4 mb-5 themeCardShadow">
-            <div className="flex flex-col xl:flex-row gap-3">
-              {/* SEARCH */}
-
-              <div className="relative flex-1">
+          <div
+            className={`
+              theme-card
+              theme-border
+              rounded-2xl
+              border
+              p-5
+              mb-6
+              ${themeCardShadow}
+            `}
+          >
+            <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
+              <div className="relative flex-1 max-w-md">
                 <Search
-                  size={18}
+                  size={16}
                   className="
-                    absolute left-3.5 top-1/2
+                    absolute
+                    left-3.5
+                    top-1/2
                     -translate-y-1/2
-                    theme-text-muted
+                    theme-text-placeholder
                   "
                 />
-
                 <input
                   type="text"
                   value={search}
                   onChange={(e) =>
-                    setSearch(e.target.value)
+                    handleFilterChange(setSearch, e.target.value)
                   }
-                  placeholder="Cari tugas, mata pelajaran, kelas, atau guru..."
+                  placeholder="Cari judul tugas, mapel, kelas, atau guru..."
                   className="
                     theme-input
                     w-full
-                    pl-10 pr-4 py-2.5
+                    pl-10
+                    pr-4
+                    py-2.5
                     rounded-xl
-                    border
-                    theme-border
                     text-sm
-                    theme-text
-                    theme-text-placeholder
                     focus:outline-none
-                    focus:ring-2
-                    focus:ring-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]
-                    focus:border-[var(--color-primary)]
                   "
                 />
               </div>
 
-              {/* STATUS */}
-
-              <div className="relative">
-                <Filter
-                  size={16}
-                  className="
-                    absolute left-3 top-1/2
-                    -translate-y-1/2
-                    theme-text-muted
-                    pointer-events-none
-                  "
-                />
-
+              <div className="flex flex-wrap items-center gap-3">
                 <select
                   value={filterStatus}
                   onChange={(e) =>
-                    setFilterStatus(e.target.value)
+                    handleFilterChange(setFilterStatus, e.target.value)
                   }
                   className="
                     theme-input
-                    appearance-none
-                    w-full xl:w-44
-                    pl-9 pr-8 py-2.5
+                    px-3.5
+                    py-2.5
                     rounded-xl
-                    border
-                    theme-border
-                    text-sm
-                    theme-text-secondary
+                    text-xs
                     focus:outline-none
-                    focus:ring-2
-                    focus:ring-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]
-                    focus:border-[var(--color-primary)]
                   "
                 >
-                  <option value="Semua">
-                    Semua Status
-                  </option>
-
-                  <option value="Published">
-                    Published
-                  </option>
-
-                  <option value="Draft">
-                    Draft
-                  </option>
+                  <option value="Semua">Semua Status</option>
+                  <option value="Berjalan">Berjalan</option>
+                  <option value="Lewat Tenggat">Lewat Tenggat</option>
                 </select>
+
+                {kelasOptions.length > 0 && (
+                  <select
+                    value={filterKelas}
+                    onChange={(e) =>
+                      handleFilterChange(setFilterKelas, e.target.value)
+                    }
+                    className="
+                      theme-input
+                      px-3.5
+                      py-2.5
+                      rounded-xl
+                      text-xs
+                      focus:outline-none
+                    "
+                  >
+                    <option value="Semua">Semua Kelas</option>
+                    {kelasOptions.map((k) => (
+                      <option key={k} value={k}>
+                        {k}
+                      </option>
+                    ))}
+                  </select>
+                )}
+
+                {mapelOptions.length > 0 && (
+                  <select
+                    value={filterMapel}
+                    onChange={(e) =>
+                      handleFilterChange(setFilterMapel, e.target.value)
+                    }
+                    className="
+                      theme-input
+                      px-3.5
+                      py-2.5
+                      rounded-xl
+                      text-xs
+                      focus:outline-none
+                    "
+                  >
+                    <option value="Semua">Semua Mata Pelajaran</option>
+                    {mapelOptions.map((m) => (
+                      <option key={m} value={m}>
+                        {m}
+                      </option>
+                    ))}
+                  </select>
+                )}
               </div>
-
-              {/* MAPEL */}
-
-              <select
-                value={filterMapel}
-                onChange={(e) =>
-                  setFilterMapel(e.target.value)
-                }
-                className="
-                  theme-input
-                  w-full xl:w-52
-                  px-4 py-2.5
-                  rounded-xl
-                  border
-                  theme-border
-                  text-sm
-                  theme-text-secondary
-                  focus:outline-none
-                  focus:ring-2
-                  focus:ring-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]
-                  focus:border-[var(--color-primary)]
-                "
-              >
-                <option value="Semua">
-                  Semua Mata Pelajaran
-                </option>
-
-                {mapelList.map((mapel) => (
-                  <option key={mapel} value={mapel}>
-                    {mapel}
-                  </option>
-                ))}
-              </select>
             </div>
           </div>
 
-          {/* ==================================================
-              LIST
-          ================================================== */}
+          <div className="space-y-4 mb-6">
+            {loading ? (
+              <div className="theme-card theme-border rounded-2xl border p-12 text-center">
+                <Loader2
+                  size={32}
+                  className="mx-auto animate-spin text-[var(--color-primary)] mb-3"
+                />
+                <p className="text-sm font-medium theme-text-secondary">
+                  Memuat daftar tugas siswa...
+                </p>
+              </div>
+            ) : paginatedTugas.length > 0 ? (
+              paginatedTugas.map((item) => {
+                const status = getStatusTugas(item.batasWaktu);
 
-          <div className="space-y-4">
-            {filteredTugas.length > 0 ? (
-              filteredTugas.map((item) => (
-                <div
-                  key={item.id}
-                  className="
-                    theme-card
-                    rounded-2xl
-                    border
-                    theme-border
-                    overflow-hidden
-                    transition-all
-                    hover:-translate-y-[1px]
-                    shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_4%,transparent)]
-                    hover:shadow-[0_8px_28px_color-mix(in_srgb,var(--color-text)_8%,transparent)]
-                  "
-                >
-                  <div className="p-5">
-                    <div className="flex flex-col lg:flex-row lg:items-start gap-5">
-                      {/* ICON */}
-
-                      <div
-                        className={`
-                          w-12 h-12 rounded-xl
-                          ${themePrimarySoft}
-                          flex items-center justify-center
-                          shrink-0
-                          text-[var(--color-primary)]
-                        `}
-                      >
-                        <ClipboardList size={23} />
-                      </div>
-
-                      {/* CONTENT */}
-
-                      <div className="flex-1 min-w-0">
-                        <div className="flex flex-wrap items-center gap-2 mb-2">
-                          <h2 className="text-base md:text-lg font-bold theme-text">
-                            {item.judul}
-                          </h2>
-
-                          <StatusBadge
-                            status={item.status}
-                          />
-                        </div>
-
-                        <div className="flex flex-wrap gap-x-5 gap-y-2 text-xs theme-text-secondary mb-3">
-                          <span className="inline-flex items-center gap-1.5">
-                            <BookOpen size={14} />
-                            {item.mapel}
-                          </span>
-
-                          <span className="inline-flex items-center gap-1.5">
-                            <Users size={14} />
-                            {item.kelas}
-                          </span>
-
-                          <span className="inline-flex items-center gap-1.5">
-                            <FileText size={14} />
-                            {item.tipe}
-                          </span>
-                        </div>
-
-                        <p className="text-sm theme-text-secondary line-clamp-2 max-w-3xl">
-                          {item.deskripsi}
-                        </p>
-
-                        {/* META */}
-
-                        <div className="flex flex-wrap gap-4 mt-4">
-                          <div className="flex items-center gap-2 text-xs theme-text-secondary">
-                            <CalendarDays
-                              size={15}
-                              className="text-[var(--color-primary)]"
-                            />
-
-                            <span>
-                              Deadline:{" "}
-                              <strong className="theme-text">
-                                {formatTanggal(
-                                  item.deadline
-                                )}
-                              </strong>
-                            </span>
-                          </div>
-
-                          <div className="flex items-center gap-2 text-xs theme-text-secondary">
-                            <Clock3
-                              size={15}
-                              className="text-[var(--color-warning)]"
-                            />
-
-                            <span>
-                              <strong className="theme-text">
-                                {item.waktu}
-                              </strong>
-                            </span>
-                          </div>
-
-                          <div className="flex items-center gap-2 text-xs theme-text-secondary">
-                            <Users
-                              size={15}
-                              className="text-[var(--color-info)]"
-                            />
-
-                            <span>
-                              Guru:{" "}
-                              <strong className="theme-text">
-                                {item.guru}
-                              </strong>
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* ACTION */}
-
-                      <div className="flex lg:flex-col items-center gap-2">
-                        {/* DETAIL */}
-
-                        <button
-                          onClick={() =>
-                            openDetailModal(item)
-                          }
+                return (
+                  <div
+                    key={item.id}
+                    className={`
+                      theme-card
+                      theme-border
+                      rounded-2xl
+                      border
+                      overflow-hidden
+                      transition-all
+                      hover:-translate-y-[1px]
+                      ${themeCardShadow}
+                    `}
+                  >
+                    <div className="p-5">
+                      <div className="flex flex-col lg:flex-row lg:items-start gap-4">
+                        <div
                           className={`
-                            w-9 h-9
-                            rounded-lg
-                            border
-                            theme-border
+                            w-12 h-12 rounded-xl
+                            ${themePrimarySoft}
                             flex items-center justify-center
-                            theme-text-secondary
-                            ${themePrimaryHover}
-                            hover:text-[var(--color-primary)]
-                            hover:border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)]
-                            transition-all
+                            shrink-0
+                            text-[var(--color-primary)]
                           `}
-                          title="Lihat detail"
                         >
-                          <Eye size={16} />
-                        </button>
+                          <ClipboardList size={22} />
+                        </div>
 
-                        {/* EDIT */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex flex-wrap items-center gap-2 mb-2">
+                            <h2 className="text-base font-bold theme-text">
+                              {item.judul}
+                            </h2>
+                            <span
+                              className={`
+                                inline-flex
+                                items-center
+                                px-2.5
+                                py-0.5
+                                rounded-full
+                                text-xs
+                                font-semibold
+                                ${status.className}
+                              `}
+                            >
+                              {status.label}
+                            </span>
+                          </div>
 
-                        <button
-                          onClick={() =>
-                            openEditModal(item)
-                          }
-                          className="
-                            w-9 h-9
-                            rounded-lg
-                            border
-                            theme-border
-                            flex items-center justify-center
-                            theme-text-secondary
-                            hover:bg-[color-mix(in_srgb,var(--color-warning)_10%,transparent)]
-                            hover:text-[var(--color-warning)]
-                            hover:border-[color-mix(in_srgb,var(--color-warning)_25%,transparent)]
-                            transition-all
-                          "
-                          title="Edit"
-                        >
-                          <Edit3 size={16} />
-                        </button>
+                          <div className="flex flex-wrap gap-x-5 gap-y-1.5 text-xs theme-text-secondary mb-3">
+                            <span className="inline-flex items-center gap-1.5">
+                              <BookOpen size={14} className="text-[var(--color-primary)]" />
+                              {item.mapelNama}
+                            </span>
 
-                        {/* DELETE */}
+                            <span className="inline-flex items-center gap-1.5">
+                              <Users size={14} />
+                              {item.kelasNama}
+                            </span>
 
-                        <button
-                          onClick={() =>
-                            handleDelete(item.id)
-                          }
-                          className="
-                            w-9 h-9
-                            rounded-lg
-                            border
-                            theme-border
-                            flex items-center justify-center
-                            theme-text-secondary
-                            hover:bg-[color-mix(in_srgb,var(--color-danger)_10%,transparent)]
-                            hover:text-[var(--color-danger)]
-                            hover:border-[color-mix(in_srgb,var(--color-danger)_25%,transparent)]
-                            transition-all
-                          "
-                          title="Hapus"
-                        >
-                          <Trash2 size={16} />
-                        </button>
+                            <span className="inline-flex items-center gap-1.5">
+                              <FileText size={14} />
+                              Guru: {item.guruNama}
+                            </span>
+                          </div>
+
+                          {item.deskripsi && (
+                            <p className="text-sm theme-text-secondary line-clamp-2 max-w-3xl mb-3">
+                              {item.deskripsi}
+                            </p>
+                          )}
+
+                          <div className="flex flex-wrap items-center gap-4 text-xs theme-text-secondary pt-2 theme-border-soft border-t">
+                            <div className="flex items-center gap-1.5">
+                              <CalendarDays
+                                size={14}
+                                className="text-[var(--color-primary)]"
+                              />
+                              <span>
+                                Tenggat:{" "}
+                                <strong className="theme-text">
+                                  {formatTanggal(item.batasWaktu)}
+                                </strong>
+                              </span>
+                            </div>
+
+                            <div className="flex items-center gap-1.5">
+                              <Clock3
+                                size={14}
+                                className={status.isExpired ? "text-red-500" : "text-yellow-500"}
+                              />
+                              <span>
+                                Jam:{" "}
+                                <strong className="theme-text">
+                                  {formatWaktu(item.batasWaktu)}
+                                </strong>
+                              </span>
+                            </div>
+
+                            <div className="flex items-center gap-1.5 ml-auto">
+                              <CheckCircle2 size={14} className="text-blue-500" />
+                              <span>
+                                Pengumpulan:{" "}
+                                <strong className="theme-text">
+                                  {item.jumlahPengumpulan || 0} Siswa
+                                </strong>
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex lg:flex-col items-center justify-end gap-2 shrink-0 pt-3 lg:pt-0 border-t lg:border-t-0 theme-border-soft">
+                          <Link
+                            href={`/admin/lms-cbt/tugas-siswa/${item.id}`}
+                            className={`
+                              inline-flex
+                              items-center
+                              gap-1.5
+                              px-3.5
+                              py-2
+                              rounded-xl
+                              text-xs
+                              font-semibold
+                              ${themePrimarySoft}
+                              text-[var(--color-primary)]
+                              hover:brightness-95
+                              transition
+                            `}
+                            title="Lihat Detail & Pengumpulan Siswa"
+                          >
+                            <Eye size={14} />
+                            <span>Detail & Jawaban</span>
+                          </Link>
+
+                          <div className="flex items-center gap-1.5">
+                            <Link
+                              href={`/admin/lms-cbt/tugas-siswa/${item.id}/edit`}
+                              className="
+                                p-2
+                                rounded-xl
+                                theme-card-soft
+                                theme-text-secondary
+                                hover:theme-warning
+                                transition
+                              "
+                              title="Edit Tugas"
+                            >
+                              <Pencil size={15} />
+                            </Link>
+
+                            <button
+                              type="button"
+                              onClick={() => setDeleteConfirmItem(item)}
+                              className="
+                                p-2
+                                rounded-xl
+                                theme-card-soft
+                                theme-text-secondary
+                                hover:theme-danger
+                                transition
+                              "
+                              title="Hapus Tugas"
+                            >
+                              <Trash2 size={15} />
+                            </button>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
-
-                  {/* ==================================================
-                      PROGRESS
-                  ================================================== */}
-
-                  <div className="border-t theme-border-soft theme-card-soft px-5 py-3">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs font-medium theme-text-secondary">
-                        Pengumpulan Tugas
-                      </span>
-
-                      <span className="text-xs font-semibold theme-text">
-                        {item.dikumpulkan}/
-                        {item.jumlahSiswa} siswa
-                      </span>
-                    </div>
-
-                    <div className="h-2 theme-card rounded-full overflow-hidden">
-                      <div
-                        className="
-                          h-full
-                          bg-[var(--color-primary)]
-                          rounded-full
-                          transition-all
-                        "
-                        style={{
-                          width: `${getProgress(item)}%`,
-                        }}
-                      />
-                    </div>
-                  </div>
-                </div>
-              ))
+                );
+              })
             ) : (
-              /* ==================================================
-                 EMPTY STATE
-              ================================================== */
-
-              <div className="theme-card rounded-2xl border theme-border p-12 text-center">
-                <div
-                  className={`
-                    w-14 h-14 rounded-full
-                    ${themePrimarySoft}
-                    flex items-center justify-center
-                    mx-auto mb-3
-                    text-[var(--color-primary)]
-                  `}
-                >
-                  <ClipboardList size={25} />
-                </div>
-
-                <h3 className="text-sm font-semibold theme-text">
+              <div className="theme-card theme-border rounded-2xl border p-12 text-center">
+                <ClipboardList
+                  size={36}
+                  className="mx-auto theme-text-placeholder mb-3"
+                />
+                <p className="text-sm font-medium theme-text-secondary">
                   Tugas tidak ditemukan
-                </h3>
-
-                <p className="text-xs theme-text-muted mt-1">
-                  Coba ubah kata pencarian atau filter.
+                </p>
+                <p className="text-xs theme-text-placeholder mt-1">
+                  {search || filterStatus !== "Semua" || filterKelas !== "Semua" || filterMapel !== "Semua"
+                    ? "Coba sesuaikan kata kunci pencarian atau filter yang dipilih."
+                    : "Belum ada penugasan kelas yang dibuat di sekolah ini."}
                 </p>
               </div>
             )}
           </div>
+
+          {!loading && filteredTugas.length > 0 && (
+            <div className="theme-card theme-border rounded-2xl border px-5 py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+              <p className="text-xs theme-text-muted">
+                Menampilkan{" "}
+                <span className="font-semibold theme-text">
+                  {(currentPage - 1) * pageSize + 1}
+                </span>{" "}
+                sampai{" "}
+                <span className="font-semibold theme-text">
+                  {Math.min(currentPage * pageSize, filteredTugas.length)}
+                </span>{" "}
+                dari{" "}
+                <span className="font-semibold theme-text">
+                  {filteredTugas.length}
+                </span>{" "}
+                tugas
+              </p>
+
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="
+                    p-2
+                    rounded-lg
+                    theme-card-soft
+                    theme-border-soft
+                    border
+                    theme-text-secondary
+                    hover:brightness-95
+                    disabled:opacity-40
+                    disabled:cursor-not-allowed
+                    transition
+                  "
+                  title="Halaman Sebelumnya"
+                >
+                  <ChevronLeft size={16} />
+                </button>
+
+                <span className="px-3 py-1 text-xs font-semibold theme-text">
+                  {currentPage} / {totalPages}
+                </span>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setCurrentPage((p) => Math.min(totalPages, p + 1))
+                  }
+                  disabled={currentPage >= totalPages}
+                  className="
+                    p-2
+                    rounded-lg
+                    theme-card-soft
+                    theme-border-soft
+                    border
+                    theme-text-secondary
+                    hover:brightness-95
+                    disabled:opacity-40
+                    disabled:cursor-not-allowed
+                    transition
+                  "
+                  title="Halaman Selanjutnya"
+                >
+                  <ChevronRight size={16} />
+                </button>
+              </div>
+            </div>
+          )}
         </main>
       </div>
 
-      {/* ========================================================
-          MODAL
-      ======================================================== */}
-
-      {showModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[color-mix(in_srgb,var(--color-text)_40%,transparent)] backdrop-blur-sm">
+      {deleteConfirmItem && (
+        <div className="fixed inset-0 z-50 bg-[color-mix(in_srgb,var(--color-text)_45%,transparent)] backdrop-blur-sm flex items-center justify-center p-4">
           <div
-            className="
-              w-full max-w-2xl
-              max-h-[90vh]
-              overflow-y-auto
+            className={`
               theme-card
-              rounded-2xl
-              shadow-[0_20px_60px_color-mix(in_srgb,var(--color-text)_20%,transparent)]
-              border
               theme-border
-            "
+              w-full
+              max-w-md
+              rounded-2xl
+              border
+              ${themeCardShadow}
+              p-6
+            `}
           >
-            {/* ==================================================
-                MODAL HEADER
-            ================================================== */}
-
-            <div
-              className="
-                sticky top-0
-                theme-card
-                border-b
-                theme-border-soft
-                px-5 py-4
-                flex items-center justify-between
-                z-10
-              "
-            >
-              <div>
-                <h2 className="text-lg font-bold theme-text">
-                  {modalType === "add"
-                    ? "Tambah Tugas"
-                    : modalType === "edit"
-                    ? "Edit Tugas"
-                    : "Detail Tugas"}
-                </h2>
-
-                <p className="text-xs theme-text-muted mt-0.5">
-                  {modalType === "detail"
-                    ? "Informasi lengkap tugas siswa"
-                    : "Lengkapi informasi tugas"}
-                </p>
-              </div>
-
-              <button
-                onClick={() => setShowModal(false)}
-                className="
-                  w-9 h-9
-                  rounded-lg
-                  theme-text-secondary
-                  flex items-center justify-center
-                  hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]
-                  transition-colors
-                "
-              >
-                <X size={19} />
-              </button>
+            <div className="w-12 h-12 rounded-xl theme-danger flex items-center justify-center mb-4">
+              <Trash2 size={24} />
             </div>
 
-            {/* ==================================================
-                DETAIL
-            ================================================== */}
+            <h3 className="text-lg font-bold theme-text">Hapus Tugas Siswa</h3>
+            <p className="text-sm theme-text-secondary mt-2">
+              Apakah Anda yakin ingin menghapus penugasan{" "}
+              <span className="font-semibold text-[var(--color-primary)]">
+                &ldquo;{deleteConfirmItem.judul}&rdquo;
+              </span>
+              ? Tindakan ini akan menghapus tugas dari sistem.
+            </p>
 
-            {modalType === "detail" &&
-            selectedTugas ? (
-              <div className="p-5">
-                <div className="flex items-start gap-4 mb-6">
-                  <div
-                    className={`
-                      w-12 h-12 rounded-xl
-                      ${themePrimarySoft}
-                      text-[var(--color-primary)]
-                      flex items-center justify-center
-                      shrink-0
-                    `}
-                  >
-                    <ClipboardList size={23} />
-                  </div>
-
-                  <div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="text-xl font-bold theme-text">
-                        {selectedTugas.judul}
-                      </h3>
-
-                      <StatusBadge
-                        status={selectedTugas.status}
-                      />
-                    </div>
-
-                    <p className="text-sm theme-text-muted mt-1">
-                      {selectedTugas.mapel} •{" "}
-                      {selectedTugas.kelas}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
-                  <DetailBox
-                    label="Mata Pelajaran"
-                    value={selectedTugas.mapel}
-                    icon={BookOpen}
-                  />
-
-                  <DetailBox
-                    label="Kelas"
-                    value={selectedTugas.kelas}
-                    icon={Users}
-                  />
-
-                  <DetailBox
-                    label="Guru"
-                    value={selectedTugas.guru}
-                    icon={Users}
-                  />
-
-                  <DetailBox
-                    label="Tipe Tugas"
-                    value={selectedTugas.tipe}
-                    icon={FileText}
-                  />
-
-                  <DetailBox
-                    label="Deadline"
-                    value={`${formatTanggal(
-                      selectedTugas.deadline
-                    )} • ${selectedTugas.waktu}`}
-                    icon={CalendarDays}
-                  />
-
-                  <DetailBox
-                    label="Pengumpulan"
-                    value={`${selectedTugas.dikumpulkan}/${selectedTugas.jumlahSiswa} siswa`}
-                    icon={CheckCircle2}
-                  />
-                </div>
-
-                <div className="theme-card-soft rounded-xl p-4 border theme-border-soft">
-                  <p className="text-xs font-semibold theme-text-secondary mb-2">
-                    Deskripsi Tugas
-                  </p>
-
-                  <p className="text-sm theme-text-secondary leading-relaxed">
-                    {selectedTugas.deskripsi ||
-                      "Tidak ada deskripsi."}
-                  </p>
-                </div>
-
-                <div className="flex justify-end gap-2 mt-5">
-                  <button
-                    onClick={() =>
-                      setShowModal(false)
-                    }
-                    className="
-                      px-4 py-2.5
-                      rounded-xl
-                      border
-                      theme-border
-                      text-sm
-                      font-medium
-                      theme-text-secondary
-                      hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]
-                      transition-colors
-                    "
-                  >
-                    Tutup
-                  </button>
-
-                  <button
-                    onClick={() =>
-                      openEditModal(selectedTugas)
-                    }
-                    className="
-                      px-4 py-2.5
-                      rounded-xl
-                      bg-[var(--color-primary)]
-                      hover:opacity-90
-                      text-white
-                      text-sm
-                      font-semibold
-                      transition-all
-                    "
-                  >
-                    Edit Tugas
-                  </button>
-                </div>
-              </div>
-            ) : (
-              /* ==================================================
-                 FORM
-              ================================================== */
-
-              <form
-                onSubmit={handleSubmit}
-                className="p-5"
+            <div className="flex justify-end gap-3 mt-6">
+              <button
+                type="button"
+                onClick={() => setDeleteConfirmItem(null)}
+                disabled={submitting}
+                className="
+                  px-4
+                  py-2.5
+                  rounded-xl
+                  theme-card-soft
+                  theme-text-secondary
+                  text-sm
+                  font-medium
+                  hover:brightness-95
+                  transition
+                "
               >
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* JUDUL */}
+                Batal
+              </button>
 
-                  <div className="md:col-span-2">
-                    <label className="block text-xs font-semibold theme-text-secondary mb-1.5">
-                      Judul Tugas{" "}
-                      <span className="text-[var(--color-danger)]">
-                        *
-                      </span>
-                    </label>
-
-                    <input
-                      type="text"
-                      value={form.judul}
-                      onChange={(e) =>
-                        setForm({
-                          ...form,
-                          judul: e.target.value,
-                        })
-                      }
-                      placeholder="Masukkan judul tugas"
-                      className="
-                        theme-input
-                        w-full
-                        px-3.5 py-2.5
-                        rounded-xl
-                        border
-                        theme-border
-                        text-sm
-                        theme-text
-                        theme-text-placeholder
-                        focus:outline-none
-                        focus:ring-2
-                        focus:ring-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]
-                        focus:border-[var(--color-primary)]
-                      "
-                    />
-                  </div>
-
-                  {/* MAPEL */}
-
-                  <div>
-                    <label className="block text-xs font-semibold theme-text-secondary mb-1.5">
-                      Mata Pelajaran{" "}
-                      <span className="text-[var(--color-danger)]">
-                        *
-                      </span>
-                    </label>
-
-                    <input
-                      type="text"
-                      value={form.mapel}
-                      onChange={(e) =>
-                        setForm({
-                          ...form,
-                          mapel: e.target.value,
-                        })
-                      }
-                      placeholder="Contoh: Pemrograman Web"
-                      className="
-                        theme-input
-                        w-full
-                        px-3.5 py-2.5
-                        rounded-xl
-                        border
-                        theme-border
-                        text-sm
-                        theme-text
-                        theme-text-placeholder
-                        focus:outline-none
-                        focus:ring-2
-                        focus:ring-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]
-                        focus:border-[var(--color-primary)]
-                      "
-                    />
-                  </div>
-
-                  {/* KELAS */}
-
-                  <div>
-                    <label className="block text-xs font-semibold theme-text-secondary mb-1.5">
-                      Kelas{" "}
-                      <span className="text-[var(--color-danger)]">
-                        *
-                      </span>
-                    </label>
-
-                    <input
-                      type="text"
-                      value={form.kelas}
-                      onChange={(e) =>
-                        setForm({
-                          ...form,
-                          kelas: e.target.value,
-                        })
-                      }
-                      placeholder="Contoh: XI PPLG 1"
-                      className="
-                        theme-input
-                        w-full
-                        px-3.5 py-2.5
-                        rounded-xl
-                        border
-                        theme-border
-                        text-sm
-                        theme-text
-                        theme-text-placeholder
-                        focus:outline-none
-                        focus:ring-2
-                        focus:ring-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]
-                        focus:border-[var(--color-primary)]
-                      "
-                    />
-                  </div>
-
-                  {/* GURU */}
-
-                  <div>
-                    <label className="block text-xs font-semibold theme-text-secondary mb-1.5">
-                      Guru
-                    </label>
-
-                    <input
-                      type="text"
-                      value={form.guru}
-                      onChange={(e) =>
-                        setForm({
-                          ...form,
-                          guru: e.target.value,
-                        })
-                      }
-                      placeholder="Nama guru"
-                      className="
-                        theme-input
-                        w-full
-                        px-3.5 py-2.5
-                        rounded-xl
-                        border
-                        theme-border
-                        text-sm
-                        theme-text
-                        theme-text-placeholder
-                        focus:outline-none
-                        focus:ring-2
-                        focus:ring-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]
-                        focus:border-[var(--color-primary)]
-                      "
-                    />
-                  </div>
-
-                  {/* TIPE */}
-
-                  <div>
-                    <label className="block text-xs font-semibold theme-text-secondary mb-1.5">
-                      Tipe Tugas
-                    </label>
-
-                    <select
-                      value={form.tipe}
-                      onChange={(e) =>
-                        setForm({
-                          ...form,
-                          tipe: e.target.value,
-                        })
-                      }
-                      className="
-                        theme-input
-                        w-full
-                        px-3.5 py-2.5
-                        rounded-xl
-                        border
-                        theme-border
-                        text-sm
-                        theme-text
-                        focus:outline-none
-                        focus:ring-2
-                        focus:ring-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]
-                        focus:border-[var(--color-primary)]
-                      "
-                    >
-                      <option>
-                        Tugas Individu
-                      </option>
-
-                      <option>
-                        Tugas Kelompok
-                      </option>
-
-                      <option>
-                        Proyek
-                      </option>
-
-                      <option>
-                        Praktikum
-                      </option>
-                    </select>
-                  </div>
-
-                  {/* DEADLINE */}
-
-                  <div>
-                    <label className="block text-xs font-semibold theme-text-secondary mb-1.5">
-                      Deadline{" "}
-                      <span className="text-[var(--color-danger)]">
-                        *
-                      </span>
-                    </label>
-
-                    <input
-                      type="date"
-                      value={form.deadline}
-                      onChange={(e) =>
-                        setForm({
-                          ...form,
-                          deadline: e.target.value,
-                        })
-                      }
-                      className="
-                        theme-input
-                        w-full
-                        px-3.5 py-2.5
-                        rounded-xl
-                        border
-                        theme-border
-                        text-sm
-                        theme-text
-                        focus:outline-none
-                        focus:ring-2
-                        focus:ring-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]
-                        focus:border-[var(--color-primary)]
-                      "
-                    />
-                  </div>
-
-                  {/* WAKTU */}
-
-                  <div>
-                    <label className="block text-xs font-semibold theme-text-secondary mb-1.5">
-                      Waktu Deadline
-                    </label>
-
-                    <input
-                      type="time"
-                      value={form.waktu}
-                      onChange={(e) =>
-                        setForm({
-                          ...form,
-                          waktu: e.target.value,
-                        })
-                      }
-                      className="
-                        theme-input
-                        w-full
-                        px-3.5 py-2.5
-                        rounded-xl
-                        border
-                        theme-border
-                        text-sm
-                        theme-text
-                        focus:outline-none
-                        focus:ring-2
-                        focus:ring-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]
-                        focus:border-[var(--color-primary)]
-                      "
-                    />
-                  </div>
-
-                  {/* STATUS */}
-
-                  <div>
-                    <label className="block text-xs font-semibold theme-text-secondary mb-1.5">
-                      Status
-                    </label>
-
-                    <select
-                      value={form.status}
-                      onChange={(e) =>
-                        setForm({
-                          ...form,
-                          status: e.target.value,
-                        })
-                      }
-                      className="
-                        theme-input
-                        w-full
-                        px-3.5 py-2.5
-                        rounded-xl
-                        border
-                        theme-border
-                        text-sm
-                        theme-text
-                        focus:outline-none
-                        focus:ring-2
-                        focus:ring-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]
-                        focus:border-[var(--color-primary)]
-                      "
-                    >
-                      <option value="Draft">
-                        Draft
-                      </option>
-
-                      <option value="Published">
-                        Published
-                      </option>
-                    </select>
-                  </div>
-
-                  {/* DESKRIPSI */}
-
-                  <div className="md:col-span-2">
-                    <label className="block text-xs font-semibold theme-text-secondary mb-1.5">
-                      Deskripsi Tugas
-                    </label>
-
-                    <textarea
-                      rows={5}
-                      value={form.deskripsi}
-                      onChange={(e) =>
-                        setForm({
-                          ...form,
-                          deskripsi: e.target.value,
-                        })
-                      }
-                      placeholder="Tuliskan instruksi atau deskripsi tugas..."
-                      className="
-                        theme-input
-                        w-full
-                        px-3.5 py-2.5
-                        rounded-xl
-                        border
-                        theme-border
-                        text-sm
-                        theme-text
-                        theme-text-placeholder
-                        resize-none
-                        focus:outline-none
-                        focus:ring-2
-                        focus:ring-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]
-                        focus:border-[var(--color-primary)]
-                      "
-                    />
-                  </div>
-                </div>
-
-                {/* ==================================================
-                    INFO
-                ================================================== */}
-
-                <div
-                  className={`
-                    mt-4
-                    flex items-start gap-2
-                    p-3 rounded-xl
-                    ${themePrimarySoft}
-                    border
-                    ${themePrimarySoftBorder}
-                  `}
-                >
-                  <AlertCircle
-                    size={16}
-                    className="text-[var(--color-primary)] mt-0.5 shrink-0"
-                  />
-
-                  <p className="text-xs text-[var(--color-primary)] leading-relaxed">
-                    Data tugas saat ini masih tersimpan sementara di
-                    frontend. Setelah API backend tersedia, bagian ini
-                    dapat dihubungkan ke endpoint tugas siswa.
-                  </p>
-                </div>
-
-                {/* ==================================================
-                    FOOTER
-                ================================================== */}
-
-                <div className="flex justify-end gap-2 mt-6 pt-4 border-t theme-border-soft">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setShowModal(false)
-                    }
-                    className="
-                      px-4 py-2.5
-                      rounded-xl
-                      border
-                      theme-border
-                      text-sm
-                      font-medium
-                      theme-text-secondary
-                      hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]
-                      transition-colors
-                    "
-                  >
-                    Batal
-                  </button>
-
-                  <button
-                    type="submit"
-                    className="
-                      px-5 py-2.5
-                      rounded-xl
-                      bg-[var(--color-primary)]
-                      hover:opacity-90
-                      text-white
-                      text-sm
-                      font-semibold
-                      shadow-[0_6px_18px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]
-                      transition-all
-                    "
-                  >
-                    {modalType === "edit"
-                      ? "Simpan Perubahan"
-                      : "Simpan Tugas"}
-                  </button>
-                </div>
-              </form>
-            )}
+              <button
+                type="button"
+                onClick={confirmDelete}
+                disabled={submitting}
+                className="
+                  inline-flex
+                  items-center
+                  gap-2
+                  px-5
+                  py-2.5
+                  rounded-xl
+                  bg-[var(--color-danger,#ef4444)]
+                  text-white
+                  text-sm
+                  font-semibold
+                  hover:brightness-95
+                  disabled:opacity-60
+                  transition
+                "
+              >
+                {submitting && <Loader2 size={16} className="animate-spin" />}
+                {submitting ? "Menghapus..." : "Ya, Hapus"}
+              </button>
+            </div>
           </div>
         </div>
       )}
-    </div>
-  );
-}
-
-/* ============================================================
-   STAT CARD
-============================================================ */
-
-function StatCard({
-  title,
-  value,
-  description,
-  icon: Icon,
-  variant = "primary",
-}) {
-  const variantConfig = {
-    primary: {
-      bg: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]",
-      text: "text-[var(--color-primary)]",
-    },
-
-    success: {
-      bg: "bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)]",
-      text: "text-[var(--color-success)]",
-    },
-
-    warning: {
-      bg: "bg-[color-mix(in_srgb,var(--color-warning)_10%,transparent)]",
-      text: "text-[var(--color-warning)]",
-    },
-
-    info: {
-      bg: "bg-[color-mix(in_srgb,var(--color-info)_10%,transparent)]",
-      text: "text-[var(--color-info)]",
-    },
-  };
-
-  const current =
-    variantConfig[variant] ||
-    variantConfig.primary;
-
-  return (
-    <div
-      className="
-        theme-card
-        rounded-2xl
-        border
-        theme-border
-        p-5
-        shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_4%,transparent)]
-      "
-    >
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-sm theme-text-secondary">
-            {title}
-          </p>
-
-          <p className="text-2xl font-bold theme-text mt-2">
-            {value}
-          </p>
-
-          <p className="text-xs theme-text-muted mt-1">
-            {description}
-          </p>
-        </div>
-
-        <div
-          className={`
-            w-11 h-11
-            rounded-xl
-            ${current.bg}
-            flex items-center justify-center
-            ${current.text}
-          `}
-        >
-          <Icon size={21} />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ============================================================
-   STATUS BADGE
-============================================================ */
-
-function StatusBadge({ status }) {
-  if (status === "Published") {
-    return (
-      <span
-        className="
-          inline-flex items-center gap-1
-          px-2.5 py-1
-          rounded-full
-          text-[10px]
-          font-semibold
-          bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)]
-          text-[var(--color-success)]
-          border
-          border-[color-mix(in_srgb,var(--color-success)_20%,transparent)]
-        "
-      >
-        <CheckCircle2 size={11} />
-        Published
-      </span>
-    );
-  }
-
-  return (
-    <span
-      className="
-        inline-flex items-center gap-1
-        px-2.5 py-1
-        rounded-full
-        text-[10px]
-        font-semibold
-        bg-[color-mix(in_srgb,var(--color-warning)_10%,transparent)]
-        text-[var(--color-warning)]
-        border
-        border-[color-mix(in_srgb,var(--color-warning)_20%,transparent)]
-      "
-    >
-      <Clock3 size={11} />
-      Draft
-    </span>
-  );
-}
-
-/* ============================================================
-   DETAIL BOX
-============================================================ */
-
-function DetailBox({
-  label,
-  value,
-  icon: Icon,
-}) {
-  return (
-    <div className="theme-card-soft border theme-border-soft rounded-xl p-3.5">
-      <div className="flex items-center gap-2 text-xs theme-text-muted mb-1.5">
-        <Icon size={14} />
-        {label}
-      </div>
-
-      <p className="text-sm font-semibold theme-text">
-        {value || "-"}
-      </p>
     </div>
   );
 }

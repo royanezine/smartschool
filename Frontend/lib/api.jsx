@@ -5,10 +5,8 @@ function normalizeEndpoint(endpoint) {
   let path = String(endpoint).trim();
   if (!path.startsWith("/")) path = `/${path}`;
 
-  // Hindari duplikasi /api/api
   path = path.replace(/^\/api\/api(\/|$)/, "/api$1");
 
-  // Jika endpoint belum berawalan /api dan bukan root/health/ready/uploads, tambahkan /api
   if (
     !path.startsWith("/api/") &&
     path !== "/api" &&
@@ -32,9 +30,6 @@ function resolveFullUrl(endpoint) {
 }
 
 export async function apiFetch(endpoint, options = {}) {
-  // Selalu ambil token dari sumber kebenaran tunggal (lib/auth), yaitu
-  // token sesi aktif di localStorage. Tidak ada fallback ke token
-  // global di memori.
   const token = getToken();
 
   const isFormData =
@@ -45,9 +40,6 @@ export async function apiFetch(endpoint, options = {}) {
     ...(options.headers || {}),
   };
 
-  // Jangan set Content-Type untuk FormData.
-  // Browser akan otomatis membuat:
-  // multipart/form-data; boundary=...
   if (!isFormData) {
     headers["Content-Type"] = "application/json";
   }
@@ -73,15 +65,6 @@ export async function apiFetch(endpoint, options = {}) {
     throw err;
   }
 
-  /*
-   * Ambil response sesuai Content-Type.
-   *
-   * JSON:
-   * application/json
-   *
-   * File / text:
-   * text/plain, application/octet-stream, dll.
-   */
   const contentType =
     response.headers.get("content-type") || "";
 
@@ -102,11 +85,7 @@ export async function apiFetch(endpoint, options = {}) {
     }
   }
 
-  /*
-   * HANDLE ERROR
-   */
   if (!response.ok) {
-    // HTTP 401 = sesi tidak valid/kedaluwarsa. Bersihkan sesi aktif.
     if (response.status === 401) {
       clearSession();
     }
@@ -121,7 +100,6 @@ export async function apiFetch(endpoint, options = {}) {
     } else if (typeof data === "string" && data.trim()) {
       const rawText = data.trim();
       if (/<[a-z][\s\S]*>/i.test(rawText)) {
-        // Response adalah HTML (mis. default 404/502 dari Express atau reverse proxy)
         const preMatch = rawText.match(/<pre>([\s\S]*?)<\/pre>/i);
         const titleMatch = rawText.match(/<title>([\s\S]*?)<\/title>/i);
         const extracted = preMatch
@@ -135,7 +113,6 @@ export async function apiFetch(endpoint, options = {}) {
       }
     }
 
-    // Sensor informasi sensitif seperti token, password, atau OTP
     message = String(message)
       .replace(/Bearer\s+[a-zA-Z0-9._-]+/gi, "Bearer [REDACTED]")
       .replace(/(?:password|token|tokenPendaftaran|otp)\s*[:=]\s*[^\s,]+/gi, "token: [REDACTED]")
@@ -149,8 +126,5 @@ export async function apiFetch(endpoint, options = {}) {
     throw error;
   }
 
-  /*
-   * HANDLE SUCCESS
-   */
   return data;
 }

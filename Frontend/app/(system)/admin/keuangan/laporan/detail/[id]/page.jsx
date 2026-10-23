@@ -197,7 +197,6 @@ export default function DetailJurnalKasPage() {
         <main className="theme-page min-h-0 flex-1 overflow-y-auto">
           <div className="mx-auto w-full max-w-[1200px] px-4 py-6 sm:px-6 lg:px-8">
 
-            {/* TOP */}
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 
               <div>
@@ -276,7 +275,6 @@ export default function DetailJurnalKasPage() {
               </div>
             </div>
 
-            {/* HERO AMOUNT */}
             <div
               className={
                 isIncome
@@ -334,7 +332,6 @@ export default function DetailJurnalKasPage() {
 
             <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_340px]">
 
-              {/* DETAIL */}
               <div className="theme-card overflow-hidden rounded-2xl border shadow-sm">
 
                 <div className="theme-border border-b px-5 py-4 sm:px-6">
@@ -406,7 +403,6 @@ export default function DetailJurnalKasPage() {
                 </div>
               </div>
 
-              {/* SIDE */}
               <div className="space-y-5">
 
                 <div className="theme-card overflow-hidden rounded-2xl border shadow-sm">
@@ -499,7 +495,6 @@ export default function DetailJurnalKasPage() {
               </div>
             </div>
 
-            {/* CATATAN */}
             <div className="theme-card mt-5 overflow-hidden rounded-2xl border shadow-sm">
 
               <div className="theme-border border-b px-5 py-4">

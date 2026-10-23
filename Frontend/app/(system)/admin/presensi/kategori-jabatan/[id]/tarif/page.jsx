@@ -23,9 +23,6 @@ import {
   History,
 } from "lucide-react";
 
-/* =========================================================
-   HELPERS
-========================================================= */
 
 function formatRupiah(value) {
   return new Intl.NumberFormat("id-ID", {
@@ -87,9 +84,6 @@ function Field({ label, required, hint, children }) {
   );
 }
 
-/* =========================================================
-   PAGE
-========================================================= */
 
 export default function AturTarifKategoriJabatanPage() {
   const params = useParams();
@@ -206,9 +200,6 @@ export default function AturTarifKategoriJabatanPage() {
 
         <main className="min-h-0 min-w-0 flex-1 overflow-y-auto theme-page theme-text">
           <div className="w-full px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
-            {/* ============================================
-                TOP BAR: BACK BUTTON (KIRI ATAS)
-            ============================================ */}
             <div className="mb-4 flex items-center">
               <button
                 type="button"
@@ -221,9 +212,6 @@ export default function AturTarifKategoriJabatanPage() {
               </button>
             </div>
 
-            {/* ============================================
-                PAGE HEADER
-            ============================================ */}
             <div className="mb-6 flex items-start gap-3">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                 <Wallet size={23} />
@@ -244,9 +232,6 @@ export default function AturTarifKategoriJabatanPage() {
               </div>
             </div>
 
-            {/* ============================================
-                NOTICE
-            ============================================ */}
             {notice && (
               <div
                 role="status"
@@ -257,9 +242,6 @@ export default function AturTarifKategoriJabatanPage() {
               </div>
             )}
 
-            {/* ============================================
-                ERROR
-            ============================================ */}
             {error && (
               <div
                 role="alert"
@@ -273,9 +255,6 @@ export default function AturTarifKategoriJabatanPage() {
               </div>
             )}
 
-            {/* ============================================
-                LOADING
-            ============================================ */}
             {loading ? (
               <div className="flex min-h-[300px] flex-col items-center justify-center gap-3 theme-card rounded-xl border theme-border">
                 <LoaderCircle
@@ -291,9 +270,6 @@ export default function AturTarifKategoriJabatanPage() {
               </div>
             ) : (
               <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-                {/* ============================================
-                    FORM TARIF
-                ============================================ */}
                 <section className="theme-card overflow-hidden rounded-xl border theme-border shadow-sm lg:col-span-2">
                   <div className="flex items-start gap-3 border-b theme-border p-5 sm:p-6">
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300">
@@ -398,9 +374,6 @@ export default function AturTarifKategoriJabatanPage() {
                   </form>
                 </section>
 
-                {/* ============================================
-                    SIDEBAR INFO: KATEGORI & RIWAYAT
-                ============================================ */}
                 <div className="space-y-5">
                   <section className="theme-card rounded-xl border theme-border p-5 shadow-sm">
                     <div className="flex items-start gap-3">

@@ -32,9 +32,6 @@ export default function CreatePelanggaranPage() {
     catatan: "",
   });
 
-  // =========================================================
-  // LOAD KATEGORI
-  // =========================================================
   useEffect(() => {
     async function loadKategori() {
       try {
@@ -51,9 +48,6 @@ export default function CreatePelanggaranPage() {
     loadKategori();
   }, []);
 
-  // =========================================================
-  // CHANGE INPUT
-  // =========================================================
   function handleChange(field, value) {
     setForm((prev) => ({
       ...prev,
@@ -61,9 +55,6 @@ export default function CreatePelanggaranPage() {
     }));
   }
 
-  // =========================================================
-  // CHANGE KATEGORI
-  // =========================================================
   function handleKategoriChange(value) {
     const selectedKategori = kategori.find(
       (item) => item.id === value
@@ -79,9 +70,6 @@ export default function CreatePelanggaranPage() {
     }));
   }
 
-  // =========================================================
-  // CHANGE TINDAK LANJUT
-  // =========================================================
   function handleTindakLanjutChange(value) {
     setForm((prev) => ({
       ...prev,
@@ -92,9 +80,6 @@ export default function CreatePelanggaranPage() {
     }));
   }
 
-  // =========================================================
-  // SUBMIT
-  // =========================================================
   async function handleSubmit(e) {
     e.preventDefault();
 
@@ -154,9 +139,6 @@ export default function CreatePelanggaranPage() {
     }
   }
 
-  // =========================================================
-  // PREVIEW DATA
-  // =========================================================
   const selectedKategori = kategori.find(
     (item) =>
       item.id === form.kategoriPelanggaranId
@@ -176,9 +158,6 @@ export default function CreatePelanggaranPage() {
         <main className="theme-page flex-1 overflow-y-auto p-5 md:p-6 lg:p-8">
           <div className="mx-auto w-full max-w-[1200px]">
 
-            {/* =====================================================
-                HEADER
-            ====================================================== */}
             <div className="mb-7 flex items-start gap-4">
               <button
                 type="button"
@@ -248,9 +227,6 @@ export default function CreatePelanggaranPage() {
               </div>
             </div>
 
-            {/* =====================================================
-                ERROR
-            ====================================================== */}
             {error && (
               <div className="theme-danger mb-6 flex items-start gap-3 rounded-xl border px-4 py-3.5 text-sm font-semibold shadow-sm">
                 <svg
@@ -273,14 +249,10 @@ export default function CreatePelanggaranPage() {
 
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_340px]">
 
-              {/* =================================================
-                  FORM
-              ================================================== */}
               <form
                 onSubmit={handleSubmit}
                 className="theme-card overflow-hidden rounded-2xl border shadow-xl"
               >
-                {/* FORM HEADER */}
                 <div className="theme-card-soft flex items-center gap-3 border-b px-6 py-5">
                   <div className="theme-info flex h-9 w-9 items-center justify-center rounded-lg">
                     <svg
@@ -311,7 +283,6 @@ export default function CreatePelanggaranPage() {
 
                 <div className="grid gap-5 p-6 md:grid-cols-2">
 
-                  {/* SISWA ID */}
                   <Field
                     label="Siswa ID"
                     required
@@ -330,7 +301,6 @@ export default function CreatePelanggaranPage() {
                     />
                   </Field>
 
-                  {/* KATEGORI */}
                   <Field
                     label="Kategori Pelanggaran"
                     required
@@ -360,7 +330,6 @@ export default function CreatePelanggaranPage() {
                     </select>
                   </Field>
 
-                  {/* TANGGAL */}
                   <Field
                     label="Tanggal"
                     required
@@ -379,7 +348,6 @@ export default function CreatePelanggaranPage() {
                     />
                   </Field>
 
-                  {/* POIN */}
                   <Field label="Poin">
                     <input
                       type="number"
@@ -396,7 +364,6 @@ export default function CreatePelanggaranPage() {
                     />
                   </Field>
 
-                  {/* STATUS */}
                   <div className="md:col-span-2">
                     <Field label="Status">
                       <select
@@ -433,7 +400,6 @@ export default function CreatePelanggaranPage() {
                     </Field>
                   </div>
 
-                  {/* KRONOLOGI */}
                   <div className="md:col-span-2">
                     <Field label="Kronologi">
                       <textarea
@@ -451,7 +417,6 @@ export default function CreatePelanggaranPage() {
                     </Field>
                   </div>
 
-                  {/* TINDAK LANJUT */}
                   <div className="md:col-span-2">
                     <Field label="Tindak Lanjut">
                       <textarea
@@ -477,7 +442,6 @@ export default function CreatePelanggaranPage() {
                     </Field>
                   </div>
 
-                  {/* CATATAN */}
                   <div className="md:col-span-2">
                     <Field label="Catatan">
                       <textarea
@@ -496,7 +460,6 @@ export default function CreatePelanggaranPage() {
                   </div>
                 </div>
 
-                {/* BUTTON */}
                 <div className="theme-card-soft flex justify-end gap-3 border-t px-6 py-4">
                   <button
                     type="button"
@@ -567,12 +530,8 @@ export default function CreatePelanggaranPage() {
                 </div>
               </form>
 
-              {/* =================================================
-                  LIVE PREVIEW
-              ================================================== */}
               <aside className="space-y-5">
 
-                {/* LIVE PREVIEW */}
                 <div className="theme-card relative overflow-hidden rounded-2xl border p-6 shadow-xl">
                   <div
                     className="
@@ -671,7 +630,6 @@ export default function CreatePelanggaranPage() {
                   </div>
                 </div>
 
-                {/* INFO */}
                 <div className="theme-info relative overflow-hidden rounded-2xl border p-5">
                   <div className="flex items-start gap-3">
 
@@ -715,9 +673,6 @@ export default function CreatePelanggaranPage() {
   );
 }
 
-// =============================================================
-// FIELD
-// =============================================================
 function Field({ label, children, required }) {
   return (
     <div>
@@ -736,9 +691,6 @@ function Field({ label, children, required }) {
   );
 }
 
-// =============================================================
-// PREVIEW ROW
-// =============================================================
 function PreviewRow({
   label,
   value,

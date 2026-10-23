@@ -20,9 +20,6 @@ import {
 } from "lucide-react";
 import { getAset, deleteAset } from "@/services/sarpras.service";
 
-// =========================================================
-// HELPERS
-// =========================================================
 const kondisiConfig = {
   baik: {
     label: "Baik",
@@ -79,9 +76,6 @@ function formatTanggal(raw) {
   }
 }
 
-// =========================================================
-// THEME HELPERS
-// =========================================================
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)]";
 
@@ -118,9 +112,6 @@ const themePrimaryGradientHover =
 const themeRowSoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_4%,transparent)]";
 
-// =========================================================
-// MAIN COMPONENT
-// =========================================================
 export default function AdminSarprasAsetPage() {
   const router = useRouter();
 
@@ -263,7 +254,6 @@ export default function AdminSarprasAsetPage() {
           <div className="w-full p-4 md:p-6 lg:p-8">
             <div className="w-full space-y-5">
 
-              {/* HEADER */}
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-3">
                   <div
@@ -288,7 +278,6 @@ export default function AdminSarprasAsetPage() {
 
                 <div className="flex flex-wrap items-center gap-2">
 
-                  {/* REFRESH */}
                   <button
                     onClick={() => loadData(true)}
                     disabled={loading || refreshing}
@@ -301,7 +290,6 @@ export default function AdminSarprasAsetPage() {
                     />
                   </button>
 
-                  {/* TAMBAH ASET */}
                   <button
                     onClick={() =>
                       router.push(
@@ -322,7 +310,6 @@ export default function AdminSarprasAsetPage() {
                 </div>
               </div>
 
-              {/* ERROR ALERT */}
               {error && (
                 <div className="flex items-center gap-3 rounded-xl border border-rose-200 bg-rose-50 p-4 text-xs text-rose-700">
                   <AlertCircle size={18} className="shrink-0 text-rose-500" />
@@ -339,13 +326,11 @@ export default function AdminSarprasAsetPage() {
                 </div>
               )}
 
-              {/* SEARCH & FILTER */}
               <div
                 className={`theme-card theme-border rounded-xl border p-4 ${themeCardShadow}`}
               >
                 <div className="flex flex-col gap-3 sm:flex-row">
 
-                  {/* SEARCH */}
                   <div className="relative flex-1">
                     <Search
                       size={17}
@@ -363,7 +348,6 @@ export default function AdminSarprasAsetPage() {
                     />
                   </div>
 
-                  {/* FILTER */}
                   <div className="flex flex-wrap items-center gap-2">
                     <Filter
                       size={17}
@@ -426,7 +410,6 @@ export default function AdminSarprasAsetPage() {
                 </div>
               </div>
 
-              {/* TABEL ASET */}
               <div
                 className={`theme-card theme-border overflow-hidden rounded-xl border ${themeCardShadow}`}
               >
@@ -609,7 +592,6 @@ export default function AdminSarprasAsetPage() {
                               <td className="px-4 py-2.5">
                                 <div className="flex items-center justify-center gap-1.5">
 
-                                  {/* EDIT */}
                                   <button
                                     onClick={() =>
                                       router.push(
@@ -622,7 +604,6 @@ export default function AdminSarprasAsetPage() {
                                     <Edit size={16} />
                                   </button>
 
-                                  {/* DELETE */}
                                   <button
                                     onClick={() =>
                                       handleDelete(
@@ -648,7 +629,6 @@ export default function AdminSarprasAsetPage() {
                         })
                       )}
 
-                      {/* EMPTY STATE */}
                       {!loading && filtered.length === 0 && (
                         <tr>
                           <td
@@ -685,7 +665,6 @@ export default function AdminSarprasAsetPage() {
                 </div>
               </div>
 
-              {/* FOOTER */}
               <footer className="theme-border theme-text-muted border-t py-3 text-center text-[11px]">
                 © 2026 SmartSchool • Aset Sarana & Prasarana
               </footer>

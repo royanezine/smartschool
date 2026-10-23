@@ -26,9 +26,6 @@ import {
   createGudang,
 } from "@/services/sarpras.service";
 
-/* =========================================================
-   GLOBAL THEME
-========================================================= */
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -84,9 +81,6 @@ const themeDangerBorder =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-4 focus:ring-[color-mix(in_srgb,var(--color-primary)_12%,transparent)]";
 
-/* =========================================================
-   PAGE
-========================================================= */
 
 export default function TambahMasterGudangPage() {
   const router = useRouter();
@@ -102,9 +96,6 @@ export default function TambahMasterGudangPage() {
     status: "aktif",
   });
 
-  /* =========================================================
-     HANDLE CHANGE
-  ========================================================= */
 
   function handleChange(e) {
     const { name, value } = e.target;
@@ -119,9 +110,6 @@ export default function TambahMasterGudangPage() {
     }
   }
 
-  /* =========================================================
-     SUBMIT
-  ========================================================= */
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -190,9 +178,6 @@ export default function TambahMasterGudangPage() {
     }
   }
 
-  /* =========================================================
-     SIDEBAR
-  ========================================================= */
 
   function toggleSidebar() {
     setIsCollapsed(
@@ -200,9 +185,6 @@ export default function TambahMasterGudangPage() {
     );
   }
 
-  /* =========================================================
-     FORM STATUS
-  ========================================================= */
 
   const isFormComplete =
     form.nama.trim().length >= 3;
@@ -210,9 +192,6 @@ export default function TambahMasterGudangPage() {
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
 
-      {/* =====================================================
-          SIDEBAR
-      ===================================================== */}
 
       <Sidebar
         active="sarpras"
@@ -221,15 +200,9 @@ export default function TambahMasterGudangPage() {
         setCollapsed={setIsCollapsed}
       />
 
-      {/* =====================================================
-          CONTENT
-      ===================================================== */}
 
       <div className="flex h-screen min-w-0 flex-1 flex-col overflow-hidden">
 
-        {/* ===================================================
-            HEADER
-        =================================================== */}
 
         <Header
           toggleSidebar={toggleSidebar}
@@ -242,17 +215,11 @@ export default function TambahMasterGudangPage() {
           }}
         />
 
-        {/* ===================================================
-            MAIN
-        =================================================== */}
 
         <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
 
           <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
 
-            {/* =================================================
-                BACK
-            ================================================= */}
 
             <Link
               href="/admin/sarpras/gudang/master"
@@ -263,9 +230,6 @@ export default function TambahMasterGudangPage() {
               Kembali ke Master Gudang
             </Link>
 
-            {/* =================================================
-                PAGE HEADER
-            ================================================= */}
 
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 
@@ -305,9 +269,6 @@ export default function TambahMasterGudangPage() {
 
             </div>
 
-            {/* =================================================
-                ALERT ERROR
-            ================================================= */}
 
             {error && (
               <div
@@ -349,9 +310,6 @@ export default function TambahMasterGudangPage() {
               </div>
             )}
 
-            {/* =================================================
-                ALERT SUCCESS
-            ================================================= */}
 
             {saved && (
               <div
@@ -372,15 +330,9 @@ export default function TambahMasterGudangPage() {
               </div>
             )}
 
-            {/* =================================================
-                GRID
-            ================================================= */}
 
             <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
 
-              {/* =================================================
-                  LEFT - FORM
-              ================================================= */}
 
               <form
                 onSubmit={handleSubmit}
@@ -390,9 +342,6 @@ export default function TambahMasterGudangPage() {
                   className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
                 >
 
-                  {/* =================================================
-                      FORM HEADER
-                  ================================================= */}
 
                   <div
                     className={`border-b ${themeDivider} px-5 py-5 sm:px-7`}
@@ -423,15 +372,9 @@ export default function TambahMasterGudangPage() {
 
                   </div>
 
-                  {/* =================================================
-                      FORM BODY
-                  ================================================= */}
 
                   <div className="space-y-6 px-5 py-6 sm:px-7">
 
-                    {/* =================================================
-                        NAMA GUDANG
-                    ================================================= */}
 
                     <div>
 
@@ -484,9 +427,6 @@ export default function TambahMasterGudangPage() {
 
                     </div>
 
-                    {/* =================================================
-                        LOKASI
-                    ================================================= */}
 
                     <div>
 
@@ -526,9 +466,6 @@ export default function TambahMasterGudangPage() {
 
                     </div>
 
-                    {/* =================================================
-                        STATUS
-                    ================================================= */}
 
                     <div>
 
@@ -570,7 +507,6 @@ export default function TambahMasterGudangPage() {
 
                         </select>
 
-                        {/* CUSTOM ARROW */}
 
                         <div className="theme-text-muted pointer-events-none absolute right-4 top-1/2 -translate-y-1/2">
 
@@ -600,9 +536,6 @@ export default function TambahMasterGudangPage() {
 
                   </div>
 
-                  {/* =================================================
-                      FORM FOOTER
-                  ================================================= */}
 
                   <div
                     className={`flex flex-col-reverse gap-3 border-t ${themeDivider} ${themeNeutralSurface} px-5 py-5 sm:flex-row sm:justify-end sm:px-7`}
@@ -646,21 +579,14 @@ export default function TambahMasterGudangPage() {
 
               </form>
 
-              {/* =================================================
-                  RIGHT - PREVIEW
-              ================================================= */}
 
               <aside className="space-y-5">
 
-                {/* =================================================
-                    PREVIEW CARD
-                ================================================= */}
 
                 <div
                   className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow} xl:sticky xl:top-6`}
                 >
 
-                  {/* CARD HEADER */}
 
                   <div
                     className={`border-b ${themeDivider} ${themePrimarySoft} px-5 py-5`}
@@ -692,13 +618,9 @@ export default function TambahMasterGudangPage() {
 
                   </div>
 
-                  {/* =================================================
-                      PREVIEW BODY
-                  ================================================= */}
 
                   <div className="p-5">
 
-                    {/* NAME PREVIEW */}
 
                     <div
                       className={`rounded-xl border ${themeNeutralBorder} ${themeNeutralSurface} p-4`}
@@ -721,13 +643,9 @@ export default function TambahMasterGudangPage() {
 
                     </div>
 
-                    {/* =================================================
-                        INFO LIST
-                    ================================================= */}
 
                     <div className="mt-4 space-y-3">
 
-                      {/* LOCATION */}
 
                       <div className="flex items-start gap-3">
 
@@ -758,7 +676,6 @@ export default function TambahMasterGudangPage() {
 
                       </div>
 
-                      {/* STATUS */}
 
                       <div className="flex items-start gap-3">
 
@@ -803,17 +720,11 @@ export default function TambahMasterGudangPage() {
 
                     </div>
 
-                    {/* =================================================
-                        DIVIDER
-                    ================================================= */}
 
                     <div
                       className={`my-5 border-t ${themeDivider}`}
                     />
 
-                    {/* =================================================
-                        COMPLETION
-                    ================================================= */}
 
                     <div>
 
@@ -855,13 +766,9 @@ export default function TambahMasterGudangPage() {
 
                     </div>
 
-                    {/* =================================================
-                        CHECKLIST
-                    ================================================= */}
 
                     <div className="mt-5 space-y-2.5">
 
-                      {/* NAMA */}
 
                       <div className="flex items-center gap-2.5">
 
@@ -892,7 +799,6 @@ export default function TambahMasterGudangPage() {
 
                       </div>
 
-                      {/* LOKASI */}
 
                       <div className="flex items-center gap-2.5">
 
@@ -921,7 +827,6 @@ export default function TambahMasterGudangPage() {
 
                       </div>
 
-                      {/* STATUS */}
 
                       <div className="flex items-center gap-2.5">
 
@@ -942,9 +847,6 @@ export default function TambahMasterGudangPage() {
 
                 </div>
 
-                {/* =================================================
-                    INFORMATION CARD
-                ================================================= */}
 
                 <div
                   className={`rounded-2xl border ${themeInfoBorder} ${themeInfoSurface} p-5`}

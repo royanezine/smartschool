@@ -35,9 +35,6 @@ import {
   createJadwalMengajar,
 } from "@/services/jadwalMengajar.service";
 
-/* =========================================================
-   HARI
-========================================================= */
 
 const HARI = [
   {
@@ -66,9 +63,6 @@ const HARI = [
   },
 ];
 
-/* =========================================================
-   EMPTY JADWAL
-========================================================= */
 
 const emptyJadwal = () =>
   HARI.reduce((acc, hari) => {
@@ -80,9 +74,6 @@ const emptyJadwal = () =>
     return acc;
   }, {});
 
-/* =========================================================
-   INITIALS
-========================================================= */
 
 const getInitials = (name = "") => {
   const parts = name
@@ -102,9 +93,6 @@ const getInitials = (name = "") => {
     .toUpperCase();
 };
 
-/* =========================================================
-   SEARCHABLE SELECT
-========================================================= */
 
 function SearchableSelect({
   label,
@@ -226,7 +214,6 @@ function SearchableSelect({
 
           <div className="absolute left-0 right-0 top-full z-40 mt-2 overflow-hidden rounded-xl border theme-card theme-border shadow-xl">
 
-            {/* SEARCH */}
 
             <div className="border-b theme-border-soft p-3">
               <div className="relative">
@@ -253,7 +240,6 @@ function SearchableSelect({
               </div>
             </div>
 
-            {/* OPTIONS */}
 
             <div className="max-h-72 overflow-y-auto p-1.5">
               {filteredOptions.length >
@@ -341,9 +327,6 @@ function SearchableSelect({
   );
 }
 
-/* =========================================================
-   MAIN PAGE
-========================================================= */
 
 export default function TambahJadwalMengajarPage() {
   const router = useRouter();
@@ -351,9 +334,6 @@ export default function TambahJadwalMengajarPage() {
   const [isCollapsed, setIsCollapsed] =
     useState(false);
 
-  /* =======================================================
-     DATA KELAS MAPEL
-  ======================================================= */
 
   const [kelasMapelList, setKelasMapelList] =
     useState([]);
@@ -364,9 +344,6 @@ export default function TambahJadwalMengajarPage() {
   const [selectedKelasMapelId, setSelectedKelasMapelId] =
     useState("");
 
-  /* =======================================================
-     JADWAL
-  ======================================================= */
 
   const [jadwal, setJadwal] =
     useState(emptyJadwal());
@@ -374,9 +351,6 @@ export default function TambahJadwalMengajarPage() {
   const [ruangan, setRuangan] =
     useState("");
 
-  /* =======================================================
-     STATE
-  ======================================================= */
 
   const [saving, setSaving] =
     useState(false);
@@ -387,9 +361,6 @@ export default function TambahJadwalMengajarPage() {
   const [success, setSuccess] =
     useState(false);
 
-  /* =======================================================
-     TOGGLE SIDEBAR
-  ======================================================= */
 
   const toggleSidebar = () => {
     setIsCollapsed(
@@ -397,9 +368,6 @@ export default function TambahJadwalMengajarPage() {
     );
   };
 
-  /* =======================================================
-     LOAD KELAS MAPEL
-  ======================================================= */
 
   useEffect(() => {
     let mounted = true;
@@ -466,9 +434,6 @@ export default function TambahJadwalMengajarPage() {
     };
   }, []);
 
-  /* =======================================================
-     OPTIONS KELAS MAPEL
-  ======================================================= */
 
   const kelasMapelOptions =
     useMemo(() => {
@@ -533,9 +498,6 @@ export default function TambahJadwalMengajarPage() {
         });
     }, [kelasMapelList]);
 
-  /* =======================================================
-     KELAS MAPEL TERPILIH
-  ======================================================= */
 
   const kelasMapelTerpilih =
     useMemo(() => {
@@ -551,9 +513,6 @@ export default function TambahJadwalMengajarPage() {
       selectedKelasMapelId,
     ]);
 
-  /* =======================================================
-     JADWAL HANDLER
-  ======================================================= */
 
   const handleSlotChange =
     (hariKey, field) =>
@@ -571,9 +530,6 @@ export default function TambahJadwalMengajarPage() {
       }));
     };
 
-  /* =======================================================
-     JUMLAH HARI TERISI
-  ======================================================= */
 
   const jumlahHariDiisi =
     HARI.filter((hari) => {
@@ -586,9 +542,6 @@ export default function TambahJadwalMengajarPage() {
       );
     }).length;
 
-  /* =======================================================
-     VALIDATION
-  ======================================================= */
 
   const validateJadwal = () => {
     for (const hari of HARI) {
@@ -621,9 +574,6 @@ export default function TambahJadwalMengajarPage() {
     return "";
   };
 
-  /* =======================================================
-     SUBMIT
-  ======================================================= */
 
   const handleSubmit = async (
     event
@@ -632,9 +582,6 @@ export default function TambahJadwalMengajarPage() {
 
     setError("");
 
-    /* -----------------------------------------------
-       VALIDASI KELAS MAPEL
-    ------------------------------------------------ */
 
     if (!selectedKelasMapelId) {
       setError(
@@ -644,9 +591,6 @@ export default function TambahJadwalMengajarPage() {
       return;
     }
 
-    /* -----------------------------------------------
-       VALIDASI HARI
-    ------------------------------------------------ */
 
     if (jumlahHariDiisi === 0) {
       setError(
@@ -656,9 +600,6 @@ export default function TambahJadwalMengajarPage() {
       return;
     }
 
-    /* -----------------------------------------------
-       VALIDASI JAM
-    ------------------------------------------------ */
 
     const validationError =
       validateJadwal();
@@ -712,9 +653,6 @@ export default function TambahJadwalMengajarPage() {
         "==================================="
       );
 
-      /* -----------------------------------------------
-         BUAT JADWAL SATU PER SATU
-      ------------------------------------------------ */
 
       const hariTerisi =
         HARI.filter((hari) => {
@@ -792,9 +730,6 @@ export default function TambahJadwalMengajarPage() {
     }
   };
 
-  /* =======================================================
-     RESET
-  ======================================================= */
 
   const handleReset = () => {
     setSelectedKelasMapelId("");
@@ -810,16 +745,10 @@ export default function TambahJadwalMengajarPage() {
     setSuccess(false);
   };
 
-  /* =======================================================
-     RENDER
-  ======================================================= */
 
   return (
     <div className="flex h-screen w-full overflow-hidden theme-page">
 
-      {/* ===================================================
-          SIDEBAR
-      =================================================== */}
 
       <Sidebar
         active="guruJadwalMengajar"
@@ -833,13 +762,9 @@ export default function TambahJadwalMengajarPage() {
         role="admin"
       />
 
-      {/* ===================================================
-          CONTENT
-      =================================================== */}
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
 
-        {/* HEADER */}
 
         <Header
           toggleSidebar={
@@ -854,7 +779,6 @@ export default function TambahJadwalMengajarPage() {
           }}
         />
 
-        {/* MAIN */}
 
         <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
 
@@ -862,9 +786,6 @@ export default function TambahJadwalMengajarPage() {
 
             <div className="space-y-6">
 
-              {/* =================================================
-                  TOP HEADER
-              ================================================== */}
 
               <section>
 
@@ -916,7 +837,6 @@ export default function TambahJadwalMengajarPage() {
 
                   </div>
 
-                  {/* SUMMARY */}
 
                   <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center">
 
@@ -955,9 +875,6 @@ export default function TambahJadwalMengajarPage() {
 
               </section>
 
-              {/* =================================================
-                  LOADING
-              ================================================== */}
 
               {loadingData && (
                 <div className="flex items-center gap-3 rounded-xl border p-4 theme-info theme-border">
@@ -980,9 +897,6 @@ export default function TambahJadwalMengajarPage() {
                 </div>
               )}
 
-              {/* =================================================
-                  SUCCESS
-              ================================================== */}
 
               {success && (
                 <div className="flex items-start gap-3 rounded-xl border p-4 theme-success theme-border">
@@ -1007,9 +921,6 @@ export default function TambahJadwalMengajarPage() {
                 </div>
               )}
 
-              {/* =================================================
-                  ERROR
-              ================================================== */}
 
               {error && (
                 <div className="flex items-start gap-3 rounded-xl border p-4 theme-danger theme-border">
@@ -1048,15 +959,9 @@ export default function TambahJadwalMengajarPage() {
                 </div>
               )}
 
-              {/* =================================================
-                  MAIN GRID
-              ================================================== */}
 
               <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_360px] 2xl:grid-cols-[minmax(0,1fr)_390px]">
 
-                {/* =================================================
-                    FORM
-                ================================================== */}
 
                 <form
                   onSubmit={
@@ -1065,7 +970,6 @@ export default function TambahJadwalMengajarPage() {
                   className="min-w-0 overflow-hidden rounded-xl border shadow-sm theme-card theme-border"
                 >
 
-                  {/* FORM HEADER */}
 
                   <div className="border-b px-5 py-5 sm:px-6 theme-border-soft">
 
@@ -1094,9 +998,6 @@ export default function TambahJadwalMengajarPage() {
 
                   </div>
 
-                  {/* =================================================
-                      KELAS MAPEL
-                  ================================================== */}
 
                   <div className="p-5 sm:p-6">
 
@@ -1178,7 +1079,6 @@ export default function TambahJadwalMengajarPage() {
                       )}
                     />
 
-                    {/* DETAIL SELECTED */}
 
                     {kelasMapelTerpilih && (
                       <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
@@ -1275,9 +1175,6 @@ export default function TambahJadwalMengajarPage() {
 
                   </div>
 
-                  {/* =================================================
-                      RUANGAN
-                  ================================================== */}
 
                   <div className="border-y px-5 py-4 sm:px-6 theme-card-soft theme-border">
 
@@ -1321,9 +1218,6 @@ export default function TambahJadwalMengajarPage() {
 
                   </div>
 
-                  {/* =================================================
-                      JADWAL HEADER
-                  ================================================== */}
 
                   <div className="border-b px-5 py-4 sm:px-6 theme-border-soft theme-card">
 
@@ -1356,9 +1250,6 @@ export default function TambahJadwalMengajarPage() {
 
                   </div>
 
-                  {/* =================================================
-                      DAYS
-                  ================================================== */}
 
                   <div className="p-5 sm:p-6">
 
@@ -1399,7 +1290,6 @@ export default function TambahJadwalMengajarPage() {
 
                               <div className="grid grid-cols-1 gap-3 xl:grid-cols-[160px_minmax(0,1fr)_minmax(0,1fr)] xl:items-center">
 
-                                {/* HARI */}
 
                                 <div className="flex items-center gap-3">
 
@@ -1443,7 +1333,6 @@ export default function TambahJadwalMengajarPage() {
 
                                 </div>
 
-                                {/* MULAI */}
 
                                 <div>
 
@@ -1468,7 +1357,6 @@ export default function TambahJadwalMengajarPage() {
 
                                 </div>
 
-                                {/* SELESAI */}
 
                                 <div>
 
@@ -1504,9 +1392,6 @@ export default function TambahJadwalMengajarPage() {
 
                   </div>
 
-                  {/* =================================================
-                      FORM FOOTER
-                  ================================================== */}
 
                   <div className="border-t px-5 py-4 sm:px-6 theme-border theme-card-soft">
 
@@ -1582,15 +1467,9 @@ export default function TambahJadwalMengajarPage() {
 
                 </form>
 
-                {/* =================================================
-                    SIDE PANEL
-                ================================================== */}
 
                 <aside className="min-w-0 space-y-5">
 
-                  {/* =================================================
-                      PREVIEW
-                  ================================================== */}
 
                   <section className="overflow-hidden rounded-xl border shadow-sm theme-card theme-border">
 
@@ -1623,7 +1502,6 @@ export default function TambahJadwalMengajarPage() {
 
                     <div className="p-5">
 
-                      {/* GURU */}
 
                       <div className="flex items-center gap-3 pb-4">
 
@@ -1660,7 +1538,6 @@ export default function TambahJadwalMengajarPage() {
 
                       </div>
 
-                      {/* MAPEL */}
 
                       <div className="rounded-lg border p-3.5 theme-card-soft theme-border">
 
@@ -1698,7 +1575,6 @@ export default function TambahJadwalMengajarPage() {
 
                       </div>
 
-                      {/* KELAS */}
 
                       <div className="mt-3 rounded-lg border p-3.5 theme-card-soft theme-border">
 
@@ -1727,7 +1603,6 @@ export default function TambahJadwalMengajarPage() {
 
                       </div>
 
-                      {/* RUANGAN */}
 
                       <div className="mt-3 rounded-lg border p-3.5 theme-card-soft theme-border">
 
@@ -1755,7 +1630,6 @@ export default function TambahJadwalMengajarPage() {
 
                       </div>
 
-                      {/* DAYS PREVIEW */}
 
                       <div className="mt-4 space-y-2">
 
@@ -1840,9 +1714,6 @@ export default function TambahJadwalMengajarPage() {
 
                   </section>
 
-                  {/* =================================================
-                      INFORMATION
-                  ================================================== */}
 
                   <section className="rounded-xl border p-5 theme-info theme-border">
 
@@ -1911,9 +1782,6 @@ export default function TambahJadwalMengajarPage() {
 
                   </section>
 
-                  {/* =================================================
-                      COMPLETION
-                  ================================================== */}
 
                   <section className="rounded-xl border p-5 shadow-sm theme-card theme-border">
 
@@ -1977,9 +1845,6 @@ export default function TambahJadwalMengajarPage() {
 
               </div>
 
-              {/* =================================================
-                  FOOTER
-              ================================================== */}
 
               <footer className="pb-3 pt-1 text-center">
 

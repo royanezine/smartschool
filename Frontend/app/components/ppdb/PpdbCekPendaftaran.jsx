@@ -20,11 +20,6 @@ import {
 import PpdbNavbar from "@/app/components/ppdb/PpdbNavbar";
 import { urlFormulirPendaftaran } from "@/app/components/ppdb/rutePpdb";
 
-/*
- * Backend belum menyediakan endpoint publik untuk mengecek status
- * pendaftaran PPDB (nomor pendaftaran + NIK). Halaman ini TIDAK
- * mensimulasikan hasil dan TIDAK memakai data contoh.
- */
 export const CEK_PENDAFTARAN_UNAVAILABLE =
   "Layanan cek status pendaftaran belum tersedia. Backend belum " +
   "menyediakan endpoint publik untuk memeriksa status berdasarkan nomor " +
@@ -61,10 +56,6 @@ export default function PpdbCekPendaftaran() {
 
     setValidation("");
 
-    /*
-     * Tidak ada endpoint yang dapat dipanggil. Tampilkan blocker
-     * secara eksplisit, bukan hasil palsu.
-     */
     setShowBlocker(true);
   };
 

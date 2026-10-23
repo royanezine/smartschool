@@ -26,9 +26,6 @@ import {
 import { useState, useEffect } from "react";
 import { getDetailSekolahBinaan } from "@/services/yayasan.service";
 
-// =============================================================
-// THEME HELPERS
-// =============================================================
 
 const themeCardShadow =
     "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
@@ -84,15 +81,11 @@ const themeDangerSurface =
 const themeDangerBorder =
     "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
 
-// =============================================================
-// PAGE
-// =============================================================
 
 export default function DetailSekolahPage() {
     const params = useParams();
     const router = useRouter();
 
-    // ID backend berupa UUID, jadi JANGAN parseInt
     const id = Array.isArray(params?.id)
         ? params.id[0]
         : params?.id;
@@ -102,9 +95,6 @@ export default function DetailSekolahPage() {
     const [error, setError] = useState("");
     const [isMobile, setIsMobile] = useState(false);
 
-    // =========================================================
-    // CEK MOBILE
-    // =========================================================
 
     useEffect(() => {
         const checkMobile = () => {
@@ -123,9 +113,6 @@ export default function DetailSekolahPage() {
         };
     }, []);
 
-    // =========================================================
-    // AMBIL DETAIL SEKOLAH DARI BACKEND
-    // =========================================================
 
     useEffect(() => {
         if (!id) {
@@ -156,18 +143,6 @@ export default function DetailSekolahPage() {
 
                 if (cancelled) return;
 
-                /*
-                 * Backend successResponse biasanya menghasilkan:
-                 *
-                 * {
-                 *   success: true,
-                 *   message: "...",
-                 *   data: {
-                 *      profil: {...},
-                 *      statistik: {...}
-                 *   }
-                 * }
-                 */
 
                 let result = response;
 
@@ -175,16 +150,6 @@ export default function DetailSekolahPage() {
                     result = result.data;
                 }
 
-                /*
-                 * Kalau masih berupa:
-                 *
-                 * {
-                 *   data: {
-                 *      profil,
-                 *      statistik
-                 *   }
-                 * }
-                 */
 
                 if (
                     result?.data?.profil ||
@@ -215,9 +180,6 @@ export default function DetailSekolahPage() {
                     );
                 }
 
-                // =================================================
-                // LANGGANAN TERBARU
-                // =================================================
 
                 const langganan =
                     Array.isArray(
@@ -227,9 +189,6 @@ export default function DetailSekolahPage() {
                         : profil?.langgananSekolah ||
                           null;
 
-                // =================================================
-                // NORMALISASI DATA
-                // =================================================
 
                 const normalizedSchool = {
                     id: profil?.id || id,
@@ -430,9 +389,6 @@ export default function DetailSekolahPage() {
         };
     }, [id]);
 
-    // =========================================================
-    // LOADING
-    // =========================================================
 
     if (loading) {
         return (
@@ -464,9 +420,6 @@ export default function DetailSekolahPage() {
         );
     }
 
-    // =========================================================
-    // ERROR / SCHOOL NOT FOUND
-    // =========================================================
 
     if (!school) {
         return (
@@ -519,9 +472,6 @@ export default function DetailSekolahPage() {
         );
     }
 
-    // =========================================================
-    // STATUS STYLE
-    // =========================================================
 
     const statusStyleMap = {
         Aktif: {
@@ -550,17 +500,11 @@ export default function DetailSekolahPage() {
         statusStyleMap[school.status] ||
         statusStyleMap.Nonaktif;
 
-    // =========================================================
-    // RENDER
-    // =========================================================
 
     return (
         <div className="theme-page theme-text min-h-full">
             <div className="w-full max-w-[1280px] mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
                 <div className="max-w-4xl mx-auto space-y-4 sm:space-y-5 md:space-y-6">
-                    {/* =================================================
-                        TOMBOL KEMBALI
-                    ================================================= */}
 
                     <button
                         onClick={() => router.back()}
@@ -574,16 +518,12 @@ export default function DetailSekolahPage() {
                         Kembali
                     </button>
 
-                    {/* =================================================
-                        HEADER DETAIL SEKOLAH
-                    ================================================= */}
 
                     <div
                         className={`theme-card rounded-xl ${themeNeutralBorder} p-3 sm:p-4 md:p-6 ${themeCardShadow}`}
                     >
                         <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
                             <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-                                {/* LOGO */}
 
                                 <div
                                     className={`w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-lg ${themeNeutralSurface} flex items-center justify-center overflow-hidden ${themeSmallShadow} flex-shrink-0`}
@@ -612,7 +552,6 @@ export default function DetailSekolahPage() {
                                     )}
                                 </div>
 
-                                {/* NAMA + NPSN */}
 
                                 <div className="min-w-0">
                                     <h1 className="text-base sm:text-xl md:text-2xl font-semibold theme-text truncate">
@@ -627,7 +566,6 @@ export default function DetailSekolahPage() {
                                 </div>
                             </div>
 
-                            {/* STATUS + PAKET */}
 
                             <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 sm:ml-auto">
                                 <span
@@ -650,7 +588,6 @@ export default function DetailSekolahPage() {
                             </div>
                         </div>
 
-                        {/* BERGABUNG */}
 
                         {school.bergabung && (
                             <p className="text-xs sm:text-sm theme-text-muted mt-2 sm:mt-3 flex items-center gap-1 sm:gap-1.5">
@@ -673,9 +610,6 @@ export default function DetailSekolahPage() {
                         )}
                     </div>
 
-                    {/* =================================================
-                        INFO SINGKAT
-                    ================================================= */}
 
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
                         <InfoCard
@@ -713,9 +647,6 @@ export default function DetailSekolahPage() {
                         />
                     </div>
 
-                    {/* =================================================
-                        KONTAK
-                    ================================================= */}
 
                     <div
                         className={`theme-card rounded-xl ${themeNeutralBorder} p-3 sm:p-4 md:p-5 ${themeCardShadow}`}
@@ -767,9 +698,6 @@ export default function DetailSekolahPage() {
                         </div>
                     </div>
 
-                    {/* =================================================
-                        ALAMAT
-                    ================================================= */}
 
                     <div
                         className={`theme-card rounded-xl ${themeNeutralBorder} p-3 sm:p-4 md:p-5 ${themeCardShadow}`}
@@ -823,9 +751,6 @@ export default function DetailSekolahPage() {
                         </p>
                     </div>
 
-                    {/* =================================================
-                        MASA LANGGANAN
-                    ================================================= */}
 
                     <div
                         className={`theme-card rounded-xl ${themeNeutralBorder} p-3 sm:p-4 md:p-5 ${themeCardShadow}`}
@@ -849,7 +774,6 @@ export default function DetailSekolahPage() {
                         {school.tanggalMulai ||
                         school.tanggalBerakhir ? (
                             <div className="flex flex-col xs:flex-row flex-wrap items-start xs:items-center gap-1.5 xs:gap-2 sm:gap-4 text-xs sm:text-sm">
-                                {/* MULAI */}
 
                                 <div className="flex items-center gap-1.5 sm:gap-2">
                                     <Clock
@@ -880,7 +804,6 @@ export default function DetailSekolahPage() {
                                     -
                                 </span>
 
-                                {/* BERAKHIR */}
 
                                 <div className="flex items-center gap-1.5 sm:gap-2">
                                     <Clock
@@ -911,9 +834,6 @@ export default function DetailSekolahPage() {
                         )}
                     </div>
 
-                    {/* =================================================
-                        STATISTIK SEKOLAH
-                    ================================================= */}
 
                     <div>
                         <h3 className="text-xs sm:text-sm font-semibold theme-text-secondary mb-2 sm:mb-3 flex items-center gap-2 sm:gap-2.5">
@@ -999,9 +919,6 @@ export default function DetailSekolahPage() {
                         </div>
                     </div>
 
-                    {/* =================================================
-                        TOMBOL AKSI
-                    ================================================= */}
 
                     <div
                         className={`flex flex-col-reverse sm:flex-row items-center justify-end gap-2 sm:gap-3 pt-3 sm:pt-4 border-t ${themeDivider}`}
@@ -1034,9 +951,6 @@ export default function DetailSekolahPage() {
     );
 }
 
-// =============================================================
-// HELPER: NORMALIZE STATUS
-// =============================================================
 
 function normalizeStatus(status) {
     if (!status) {
@@ -1077,9 +991,6 @@ function normalizeStatus(status) {
     );
 }
 
-// =============================================================
-// HELPER: FORMAT DATE
-// =============================================================
 
 function formatDate(date) {
     if (!date) {
@@ -1102,9 +1013,6 @@ function formatDate(date) {
     );
 }
 
-// =============================================================
-// KOMPONEN INFO CARD
-// =============================================================
 
 function InfoCard({
     label,
@@ -1183,9 +1091,6 @@ function InfoCard({
     );
 }
 
-// =============================================================
-// KOMPONEN KONTAK ITEM
-// =============================================================
 
 function ContactItem({
     icon: Icon,
@@ -1216,9 +1121,6 @@ function ContactItem({
     );
 }
 
-// =============================================================
-// KOMPONEN STAT CARD
-// =============================================================
 
 function StatCard({
     label,

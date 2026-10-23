@@ -87,7 +87,6 @@ export default function DetailPelanggaranPage() {
 
         <main className="theme-page flex-1 overflow-y-auto p-5 md:p-6 lg:p-8">
           <div className="mx-auto w-full max-w-[1200px]">
-            {/* PAGE HEADER */}
             <div className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div className="flex items-start gap-4">
                 <button
@@ -192,14 +191,12 @@ export default function DetailPelanggaranPage() {
               </button>
             </div>
 
-            {/* ERROR */}
             {error && (
               <div className="theme-danger mb-6 rounded-xl border px-4 py-3.5 text-sm font-semibold shadow-sm">
                 {error}
               </div>
             )}
 
-            {/* LOADING */}
             {loading ? (
               <div className="theme-card rounded-2xl border p-12 text-center shadow-xl">
                 <div className="theme-text-muted inline-flex items-center gap-2 text-sm font-medium">
@@ -217,7 +214,6 @@ export default function DetailPelanggaranPage() {
             ) : data ? (
               <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_340px]">
                 <div className="space-y-5">
-                  {/* HERO CARD */}
                   <div className="theme-card overflow-hidden rounded-2xl border shadow-xl">
                     <div className="h-1.5 w-full bg-[var(--color-primary)]" />
 
@@ -294,7 +290,6 @@ export default function DetailPelanggaranPage() {
                     </div>
                   </div>
 
-                  {/* KRONOLOGI */}
                   <SectionCard
                     icon="note"
                     tone="slate"
@@ -305,7 +300,6 @@ export default function DetailPelanggaranPage() {
                     </p>
                   </SectionCard>
 
-                  {/* TINDAK LANJUT */}
                   <SectionCard
                     icon="arrow"
                     tone="blue"
@@ -316,7 +310,6 @@ export default function DetailPelanggaranPage() {
                     </p>
                   </SectionCard>
 
-                  {/* CATATAN */}
                   <SectionCard
                     icon="note"
                     tone="amber"
@@ -328,9 +321,7 @@ export default function DetailPelanggaranPage() {
                   </SectionCard>
                 </div>
 
-                {/* SIDEBAR DETAIL */}
                 <aside className="space-y-5">
-                  {/* INFO PELANGGARAN */}
                   <div className="theme-card relative overflow-hidden rounded-2xl border p-6 shadow-xl">
                     <div className="mb-4 flex items-center gap-2">
                       <div className="theme-info flex h-7 w-7 items-center justify-center rounded-lg">
@@ -383,7 +374,6 @@ export default function DetailPelanggaranPage() {
                     </div>
                   </div>
 
-                  {/* AKSI CEPAT */}
                   <div className="theme-card rounded-2xl border p-6 shadow-xl">
                     <h3 className="theme-text-muted mb-4 text-xs font-bold uppercase tracking-wider">
                       Aksi Cepat
@@ -471,9 +461,6 @@ export default function DetailPelanggaranPage() {
   );
 }
 
-/* =========================================================
-   DETAIL BOX
-========================================================= */
 
 function DetailBox({ icon, label, value }) {
   const icons = {
@@ -555,9 +542,6 @@ function DetailBox({ icon, label, value }) {
   );
 }
 
-/* =========================================================
-   SECTION CARD
-========================================================= */
 
 function SectionCard({
   icon,
@@ -638,9 +622,6 @@ function SectionCard({
   );
 }
 
-/* =========================================================
-   INFO ROW
-========================================================= */
 
 function InfoRow({ icon, label, value }) {
   const icons = {

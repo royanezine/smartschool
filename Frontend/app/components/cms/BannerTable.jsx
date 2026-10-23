@@ -1,4 +1,3 @@
-// app/cmsAdmin/components/BannerTable.jsx
 
 "use client";
 
@@ -23,7 +22,6 @@ const BannerTable = ({ banners: initialBanners }) => {
     setBanners(banners.filter((banner) => banner.id !== id));
   };
 
-  // Warna badge posisi
   const positionColors = {
     'hero': 'bg-indigo-50 text-indigo-700 ring-1 ring-indigo-200/50',
     'promo': 'bg-violet-50 text-violet-700 ring-1 ring-violet-200/50',
@@ -31,7 +29,6 @@ const BannerTable = ({ banners: initialBanners }) => {
     'default': 'bg-slate-50 text-slate-600 ring-1 ring-slate-200/50'
   };
 
-  // EMPTY STATE
   if (banners.length === 0) {
     return (
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-12 text-center">
@@ -49,7 +46,6 @@ const BannerTable = ({ banners: initialBanners }) => {
   return (
     <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden w-full">
       
-      {/* DESKTOP & TABLET TABLE VIEW */}
       <div className="hidden sm:block overflow-x-auto">
         <table className="w-full min-w-[640px] text-left">
           <thead>
@@ -77,7 +73,6 @@ const BannerTable = ({ banners: initialBanners }) => {
                 key={banner.id} 
                 className="group transition-colors hover:bg-slate-50/80"
               >
-                {/* Gambar Thumbnail */}
                 <td className="px-6 py-4">
                   <div className="flex-shrink-0 w-20 h-12 rounded-lg overflow-hidden bg-slate-100 border border-slate-200 shadow-sm">
                     <img
@@ -88,13 +83,11 @@ const BannerTable = ({ banners: initialBanners }) => {
                   </div>
                 </td>
 
-                {/* Judul */}
                 <td className="px-6 py-4">
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-slate-900 group-hover:text-indigo-600 transition-colors truncate">
                       {banner.title}
                     </p>
-                    {/* Info singkat untuk tampilan tablet/small */}
                     <div className="flex items-center gap-2 mt-1 md:hidden flex-wrap">
                       <span className={`inline-flex items-center gap-1.5 text-[10px] font-medium px-2 py-0.5 rounded-full ${
                         banner.status === "active"
@@ -113,7 +106,6 @@ const BannerTable = ({ banners: initialBanners }) => {
                   </div>
                 </td>
 
-                {/* Posisi - Desktop */}
                 <td className="px-6 py-4 hidden md:table-cell">
                   <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium capitalize ${
                     positionColors[banner.position.toLowerCase()] || positionColors.default
@@ -123,7 +115,6 @@ const BannerTable = ({ banners: initialBanners }) => {
                   </span>
                 </td>
 
-                {/* Status - Desktop */}
                 <td className="px-6 py-4 hidden lg:table-cell">
                   <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
                     banner.status === "active"
@@ -137,7 +128,6 @@ const BannerTable = ({ banners: initialBanners }) => {
                   </span>
                 </td>
 
-                {/* Action Buttons */}
                 <td className="px-6 py-4 text-right">
                   <div className="flex items-center justify-end gap-1">
                     <Link
@@ -170,12 +160,10 @@ const BannerTable = ({ banners: initialBanners }) => {
         </table>
       </div>
 
-      {/* MOBILE - CARD LIST VIEW */}
       <div className="sm:hidden divide-y divide-slate-100">
         {banners.map((banner) => (
           <div key={banner.id} className="p-4 hover:bg-slate-50/60 transition-colors">
             <div className="flex items-start gap-3">
-              {/* Gambar Thumbnail */}
               <div className="flex-shrink-0 w-16 h-10 rounded-lg overflow-hidden bg-slate-100 border border-slate-200 shadow-sm mt-0.5">
                 <img
                   src={banner.image}
@@ -189,7 +177,6 @@ const BannerTable = ({ banners: initialBanners }) => {
                   {banner.title}
                 </p>
                 
-                {/* Info Row Mobile */}
                 <div className="flex flex-wrap items-center gap-2">
                   <span className={`inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full ${
                     banner.status === "active"
@@ -210,7 +197,6 @@ const BannerTable = ({ banners: initialBanners }) => {
                 </div>
               </div>
 
-              {/* Aksi Mobile */}
               <div className="flex items-center gap-1 flex-shrink-0 mt-1">
                 <Link href={`/cmsAdmin/banners/${banner.id}/edit`} className="p-1.5 text-slate-400 hover:text-blue-600 transition-colors">
                   <Pencil className="w-4 h-4" />
@@ -224,7 +210,6 @@ const BannerTable = ({ banners: initialBanners }) => {
         ))}
       </div>
 
-      {/* FOOTER - Ringkasan Data */}
       <div className="px-6 py-3 border-t border-slate-200 bg-slate-50/40 flex flex-col sm:flex-row items-center justify-between gap-2">
         <div className="flex items-center gap-4 text-xs text-slate-500">
           <span className="flex items-center gap-1.5">

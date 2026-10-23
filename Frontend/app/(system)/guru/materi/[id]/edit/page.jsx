@@ -32,9 +32,6 @@ import {
   updateMateriTanpaSumber,
 } from "@/services/materiPembelajaran.service";
 
-/* ============================================================
-   GLOBAL THEME HELPERS
-============================================================ */
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -99,9 +96,6 @@ const themeDangerBorder =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-/* ============================================================
-   HELPERS
-============================================================ */
 
 function getKelasName(item) {
   return (
@@ -121,9 +115,6 @@ function getMapelName(item) {
   );
 }
 
-/* ============================================================
-   PAGE
-============================================================ */
 
 export default function EditMateriPage() {
   const params = useParams();
@@ -154,9 +145,6 @@ export default function EditMateriPage() {
   const [mode, setMode] = useState("file");
   const [file, setFile] = useState(null);
 
-  /* ==========================================================
-     LOAD DATA
-  ========================================================== */
 
   useEffect(() => {
     if (!id) return;
@@ -245,9 +233,6 @@ export default function EditMateriPage() {
         item.id === kelasMapelId
     ) || null;
 
-  /* ==========================================================
-     FILE VALIDATION
-  ========================================================== */
 
   function validateFile(selectedFile) {
     const allowedMimeTypes = [
@@ -327,9 +312,6 @@ export default function EditMateriPage() {
     }
   }
 
-  /* ==========================================================
-     SUBMIT
-  ========================================================== */
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -432,9 +414,6 @@ export default function EditMateriPage() {
     }
   }
 
-  /* ==========================================================
-     LOADING
-  ========================================================== */
 
   if (loading) {
     return (
@@ -476,15 +455,9 @@ export default function EditMateriPage() {
     );
   }
 
-  /* ==========================================================
-     RENDER
-  ========================================================== */
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
-      {/* =====================================================
-          SIDEBAR GURU
-      ===================================================== */}
 
       <Sidebar
         active="materi"
@@ -494,9 +467,6 @@ export default function EditMateriPage() {
         role="guru"
       />
 
-      {/* =====================================================
-          MAIN
-      ===================================================== */}
 
       <div className="flex min-w-0 flex-1 flex-col h-full overflow-hidden">
         <Header
@@ -513,9 +483,6 @@ export default function EditMateriPage() {
         <main className="flex-1 overflow-y-auto">
           <div className="w-full p-4 sm:p-6 lg:p-8">
             <div className="mx-auto max-w-7xl space-y-6">
-              {/* =================================================
-                  PAGE HEADER
-              ================================================= */}
 
               <section
                 className={`theme-card rounded-2xl border ${themeNeutralBorder} p-5 sm:p-6 lg:p-7 ${themeCardShadow}`}
@@ -553,7 +520,6 @@ export default function EditMateriPage() {
                   </button>
                 </div>
 
-                {/* INFO BAR */}
 
                 <div
                   className={`mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 border-t ${themeDivider} pt-4`}
@@ -609,9 +575,6 @@ export default function EditMateriPage() {
                 </div>
               </section>
 
-              {/* =================================================
-                  NOTIFICATIONS
-              ================================================= */}
 
               {error && (
                 <div
@@ -665,20 +628,11 @@ export default function EditMateriPage() {
                 </div>
               )}
 
-              {/* =================================================
-                  FORM
-              ================================================= */}
 
               <form onSubmit={handleSubmit}>
                 <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
-                  {/* =================================================
-                      LEFT
-                  ================================================= */}
 
                   <div className="space-y-6">
-                    {/* =================================================
-                        INFORMASI DASAR
-                    ================================================= */}
 
                     <section
                       className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
@@ -690,7 +644,6 @@ export default function EditMateriPage() {
                       />
 
                       <div className="space-y-5 p-5 sm:p-6">
-                        {/* KELAS MAPEL */}
 
                         <div>
                           <label className="theme-text mb-1.5 block text-sm font-semibold">
@@ -758,7 +711,6 @@ export default function EditMateriPage() {
                           )}
                         </div>
 
-                        {/* JUDUL */}
 
                         <div>
                           <div className="mb-1.5 flex items-center justify-between gap-3">
@@ -790,7 +742,6 @@ export default function EditMateriPage() {
                           />
                         </div>
 
-                        {/* KATEGORI */}
 
                         <div>
                           <label className="theme-text mb-1.5 block text-sm font-semibold">
@@ -812,7 +763,6 @@ export default function EditMateriPage() {
                           />
                         </div>
 
-                        {/* DESKRIPSI */}
 
                         <div>
                           <label className="theme-text mb-1.5 block text-sm font-semibold">
@@ -838,9 +788,6 @@ export default function EditMateriPage() {
                       </div>
                     </section>
 
-                    {/* =================================================
-                        SUMBER MATERI
-                    ================================================= */}
 
                     <section
                       className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
@@ -852,7 +799,6 @@ export default function EditMateriPage() {
                       />
 
                       <div className="space-y-5 p-5 sm:p-6">
-                        {/* MODE TOGGLE */}
 
                         <div className="grid grid-cols-2 gap-3">
                           <button
@@ -898,7 +844,6 @@ export default function EditMateriPage() {
                           </button>
                         </div>
 
-                        {/* FILE */}
 
                         {mode ===
                           "file" && (
@@ -1009,7 +954,6 @@ export default function EditMateriPage() {
                           </div>
                         )}
 
-                        {/* LINK */}
 
                         {mode ===
                           "link" && (
@@ -1057,12 +1001,8 @@ export default function EditMateriPage() {
                     </section>
                   </div>
 
-                  {/* =================================================
-                      RIGHT SIDEBAR
-                  ================================================= */}
 
                   <div className="space-y-6">
-                    {/* RINGKASAN */}
 
                     <section
                       className={`theme-card rounded-2xl border ${themeNeutralBorder} p-5 ${themeCardShadow}`}
@@ -1148,7 +1088,6 @@ export default function EditMateriPage() {
                       </div>
                     </section>
 
-                    {/* TIPS */}
 
                     <section
                       className={`rounded-2xl border ${themeInfoBorder} ${themeInfoSurface} p-5`}
@@ -1185,9 +1124,6 @@ export default function EditMateriPage() {
                   </div>
                 </div>
 
-                {/* =================================================
-                    ACTION BUTTONS
-                ================================================= */}
 
                 <div
                   className={`theme-card mt-6 flex flex-col gap-3 rounded-2xl border ${themeNeutralBorder} p-5 sm:flex-row sm:items-center sm:justify-between ${themeCardShadow}`}
@@ -1238,9 +1174,6 @@ export default function EditMateriPage() {
   );
 }
 
-/* ============================================================
-   SECTION HEADER
-============================================================ */
 
 function SectionHeader({
   icon: Icon,
@@ -1275,9 +1208,6 @@ function SectionHeader({
   );
 }
 
-/* ============================================================
-   SUMMARY ITEM
-============================================================ */
 
 function SummaryItem({
   label,
@@ -1298,9 +1228,6 @@ function SummaryItem({
   );
 }
 
-/* ============================================================
-   TIP ITEM
-============================================================ */
 
 function TipItem({ children }) {
   return (

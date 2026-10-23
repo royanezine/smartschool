@@ -4,9 +4,6 @@ import { getToken } from "../lib/auth";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-/* =========================================================
-   TYPES
-========================================================= */
 
 export type GedungPayload = {
   nama: string;
@@ -21,9 +18,6 @@ export type LantaiPayload = {
   [key: string]: unknown;
 };
 
-/* =========================================================
-   HELPER: NORMALISASI PAYLOAD GEDUNG
-========================================================= */
 
 function normalizeGedungPayload(data: GedungPayload) {
   const nama = String(data.nama ?? "").trim();
@@ -72,9 +66,6 @@ function normalizeGedungPayload(data: GedungPayload) {
   };
 }
 
-/* =========================================================
-   GET GEDUNG
-========================================================= */
 
 export async function getGedung() {
   try {
@@ -140,9 +131,6 @@ export async function getGedung() {
   }
 }
 
-/* =========================================================
-   CREATE GEDUNG
-========================================================= */
 
 export async function createGedung(data: GedungPayload) {
   const payload = normalizeGedungPayload(data);
@@ -153,9 +141,6 @@ export async function createGedung(data: GedungPayload) {
   });
 }
 
-/* =========================================================
-   UPDATE GEDUNG
-========================================================= */
 
 export async function updateGedung(
   id: string,
@@ -176,9 +161,6 @@ export async function updateGedung(
   );
 }
 
-/* =========================================================
-   DELETE GEDUNG
-========================================================= */
 
 export async function deleteGedung(id: string) {
   if (!id) {
@@ -193,9 +175,6 @@ export async function deleteGedung(id: string) {
   );
 }
 
-/* =========================================================
-   GET LANTAI BY GEDUNG
-========================================================= */
 
 export async function getLantaiByGedung(gedungId: string) {
   if (!gedungId) {
@@ -210,9 +189,6 @@ export async function getLantaiByGedung(gedungId: string) {
   );
 }
 
-/* =========================================================
-   CREATE LANTAI
-========================================================= */
 
 export async function createLantai(data: LantaiPayload) {
   return apiFetch("/api/infrastruktur/lantai", {
@@ -221,9 +197,6 @@ export async function createLantai(data: LantaiPayload) {
   });
 }
 
-/* =========================================================
-   UPDATE LANTAI
-========================================================= */
 
 export async function updateLantai(
   id: string,
@@ -242,9 +215,6 @@ export async function updateLantai(
   );
 }
 
-/* =========================================================
-   DELETE LANTAI
-========================================================= */
 
 export async function deleteLantai(id: string) {
   if (!id) {

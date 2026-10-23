@@ -101,9 +101,6 @@ export default function RegisterPage() {
 
   return (
     <section className="relative min-h-screen overflow-hidden flex items-center justify-center">
-      {/* ==========================================
-          BACKGROUND IMAGE
-      ========================================== */}
       <div className="absolute inset-0">
         <Image
           src="/hero/hero.png"
@@ -114,9 +111,6 @@ export default function RegisterPage() {
         />
       </div>
 
-      {/* ==========================================
-          OVERLAY - SANGAT TIPIS
-      ========================================== */}
       <div
         className="absolute inset-0"
         style={{
@@ -133,18 +127,11 @@ export default function RegisterPage() {
         }}
       />
 
-      {/* ==========================================
-          MAIN CONTENT
-      ========================================== */}
       <div className="relative z-10 w-full max-w-6xl mx-auto px-6 py-12">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
 
-          {/* ==========================================
-              LEFT CONTENT
-          ========================================== */}
           <div className="space-y-5">
 
-            {/* LOGO */}
            <div className="flex items-center gap-3">
                          <div className="relative w-12 h-12 rounded-2xl bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-xl border border-white/50">
                            <Image
@@ -164,7 +151,6 @@ export default function RegisterPage() {
                          </span>
                        </div>
 
-            {/* HEADING */}
             <div className="space-y-4">
               <h1 className="text-4xl lg:text-5xl font-extrabold leading-tight text-white drop-shadow-[0_4px_10px_rgba(15,23,42,0.8)]">
                 Selamat Datang di
@@ -180,7 +166,6 @@ export default function RegisterPage() {
               </p>
             </div>
 
-            {/* FEATURES */}
             <div className="flex flex-wrap gap-2">
               {[
                 { icon: GraduationCap, label: "Efisien" },
@@ -201,7 +186,6 @@ export default function RegisterPage() {
               ))}
             </div>
 
-            {/* LOGIN LINK */}
             <p className="text-sm text-white/80 drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)]">
               Sudah punya akun?{" "}
               <Link
@@ -213,14 +197,10 @@ export default function RegisterPage() {
             </p>
           </div>
 
-          {/* ==========================================
-              RIGHT — REGISTER CARD
-          ========================================== */}
           <div className="flex justify-center lg:justify-end">
             <div className="w-full max-w-sm">
               <div className="bg-white rounded-2xl shadow-2xl p-6">
 
-                {/* CARD HEADER */}
                 <div className="text-center mb-6">
                   <div className="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-white shadow-lg shadow-blue-500/20 mb-3">
                     <Image
@@ -241,7 +221,6 @@ export default function RegisterPage() {
                   </p>
                 </div>
 
-                {/* ERROR */}
                 {error && (
                   <div className="mb-4 rounded-xl bg-red-50 border border-red-200 px-3 py-2">
                     <p className="text-xs text-red-600 text-center">
@@ -250,10 +229,8 @@ export default function RegisterPage() {
                   </div>
                 )}
 
-                {/* FORM */}
                 <form onSubmit={handleRegister} className="space-y-3">
 
-                  {/* NAMA LENGKAP */}
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                       Nama Lengkap
@@ -276,7 +253,6 @@ export default function RegisterPage() {
                     </div>
                   </div>
 
-                  {/* USERNAME */}
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                       Username
@@ -299,7 +275,6 @@ export default function RegisterPage() {
                     </div>
                   </div>
 
-                  {/* EMAIL */}
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                       Email
@@ -322,7 +297,6 @@ export default function RegisterPage() {
                     </div>
                   </div>
 
-                  {/* PASSWORD */}
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                       Password
@@ -358,7 +332,6 @@ export default function RegisterPage() {
                     </div>
                   </div>
 
-                  {/* CONFIRM PASSWORD */}
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                       Konfirmasi Password
@@ -396,7 +369,6 @@ export default function RegisterPage() {
                     </div>
                   </div>
 
-                  {/* TERMS */}
                   <div className="flex items-start gap-2">
                     <input
                       type="checkbox"
@@ -417,7 +389,6 @@ export default function RegisterPage() {
                     </label>
                   </div>
 
-                  {/* SUBMIT */}
                   <button
                     type="submit"
                     disabled={loading}
@@ -456,7 +427,6 @@ export default function RegisterPage() {
                     )}
                   </button>
 
-                  {/* DIVIDER */}
                   <div className="relative">
                     <div className="absolute inset-0 flex items-center">
                       <div className="w-full border-t border-gray-200" />
@@ -469,7 +439,6 @@ export default function RegisterPage() {
                     </div>
                   </div>
 
-                  {/* GOOGLE */}
                   <button
                     type="button"
                     disabled={loading}
@@ -488,9 +457,6 @@ export default function RegisterPage() {
   );
 }
 
-// ==========================================
-// GOOGLE ICON
-// ==========================================
 function GoogleIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">

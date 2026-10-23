@@ -25,9 +25,6 @@ import {
   updateGudang,
 } from "@/services/sarpras.service";
 
-/* =========================================================
-   GLOBAL THEME
-========================================================= */
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -88,9 +85,6 @@ const themeFocus =
 
 const themeBorderClass = "theme-border";
 
-/* =========================================================
-   RESPONSE HELPER
-========================================================= */
 
 function getResponseData(response) {
   if (Array.isArray(response)) return response;
@@ -114,9 +108,6 @@ function getResponseData(response) {
   return [];
 }
 
-/* =========================================================
-   PAGE
-========================================================= */
 
 export default function EditGudangPage() {
   const router = useRouter();
@@ -137,9 +128,6 @@ export default function EditGudangPage() {
     status: "aktif",
   });
 
-  /* =========================================================
-     LOAD DATA
-  ========================================================= */
 
   useEffect(() => {
     if (!id) return;
@@ -189,9 +177,6 @@ export default function EditGudangPage() {
     }
   };
 
-  /* =========================================================
-     HANDLE CHANGE
-  ========================================================= */
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -205,9 +190,6 @@ export default function EditGudangPage() {
     if (success) setSuccess("");
   };
 
-  /* =========================================================
-     SUBMIT
-  ========================================================= */
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -266,9 +248,6 @@ export default function EditGudangPage() {
     }
   };
 
-  /* =========================================================
-     CANCEL
-  ========================================================= */
 
   const handleCancel = () => {
     router.push(
@@ -276,14 +255,10 @@ export default function EditGudangPage() {
     );
   };
 
-  /* =========================================================
-     LOADING
-  ========================================================= */
 
   if (loading) {
     return (
       <div className="theme-page flex h-screen w-full overflow-hidden">
-        {/* SIDEBAR */}
 
         <div className="shrink-0">
           <Sidebar
@@ -294,7 +269,6 @@ export default function EditGudangPage() {
           />
         </div>
 
-        {/* CONTENT */}
 
         <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
           <div className="shrink-0">
@@ -345,15 +319,9 @@ export default function EditGudangPage() {
     );
   }
 
-  /* =========================================================
-     MAIN
-  ========================================================= */
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
-      {/* =====================================================
-          SIDEBAR
-      ===================================================== */}
 
       <div className="shrink-0">
         <Sidebar
@@ -364,12 +332,8 @@ export default function EditGudangPage() {
         />
       </div>
 
-      {/* =====================================================
-          MAIN CONTENT
-      ===================================================== */}
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        {/* HEADER */}
 
         <div className="shrink-0">
           <Header
@@ -388,15 +352,11 @@ export default function EditGudangPage() {
           />
         </div>
 
-        {/* PAGE */}
 
         <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
           <div className="w-full p-4 sm:p-5 lg:p-7 xl:p-8">
             <div className="mx-auto w-full max-w-[1250px]">
 
-              {/* =================================================
-                  BACK
-              ================================================= */}
 
               <button
                 type="button"
@@ -411,9 +371,6 @@ export default function EditGudangPage() {
                 Kembali ke Daftar Gudang
               </button>
 
-              {/* =================================================
-                  PAGE HEADER
-              ================================================= */}
 
               <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex min-w-0 items-center gap-4">
@@ -455,9 +412,6 @@ export default function EditGudangPage() {
                 </div>
               </div>
 
-              {/* =================================================
-                  ERROR
-              ================================================= */}
 
               {error && (
                 <div
@@ -491,9 +445,6 @@ export default function EditGudangPage() {
                 </div>
               )}
 
-              {/* =================================================
-                  SUCCESS
-              ================================================= */}
 
               {success && (
                 <div
@@ -517,15 +468,9 @@ export default function EditGudangPage() {
                 </div>
               )}
 
-              {/* =================================================
-                  MAIN GRID
-              ================================================= */}
 
               <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
 
-                {/* =================================================
-                    LEFT FORM
-                ================================================= */}
 
                 <form
                   onSubmit={handleSubmit}
@@ -535,7 +480,6 @@ export default function EditGudangPage() {
                     className={`theme-card overflow-hidden rounded-3xl border ${themeBorderClass} ${themeCardShadow}`}
                   >
 
-                    {/* FORM HEADER */}
 
                     <div
                       className={`border-b ${themeDivider} px-5 py-5 sm:px-7`}
@@ -571,13 +515,9 @@ export default function EditGudangPage() {
                       </div>
                     </div>
 
-                    {/* FORM BODY */}
 
                     <div className="space-y-6 p-5 sm:p-7">
 
-                      {/* =================================================
-                          NAMA
-                      ================================================= */}
 
                       <div>
                         <div className="mb-2 flex items-center justify-between gap-3">
@@ -625,9 +565,6 @@ export default function EditGudangPage() {
                         </p>
                       </div>
 
-                      {/* =================================================
-                          LOKASI
-                      ================================================= */}
 
                       <div>
                         <div className="mb-2 flex items-center justify-between gap-3">
@@ -672,9 +609,6 @@ export default function EditGudangPage() {
                         </p>
                       </div>
 
-                      {/* =================================================
-                          STATUS
-                      ================================================= */}
 
                       <div>
                         <label
@@ -734,9 +668,6 @@ export default function EditGudangPage() {
                         </p>
                       </div>
 
-                      {/* =================================================
-                          INFO
-                      ================================================= */}
 
                       <div
                         className={`rounded-2xl border ${themeInfoBorder} ${themeInfoSurface} p-4`}
@@ -766,9 +697,6 @@ export default function EditGudangPage() {
                       </div>
                     </div>
 
-                    {/* =================================================
-                        FORM FOOTER
-                    ================================================= */}
 
                     <div
                       className={`flex flex-col-reverse gap-3 border-t ${themeDivider} ${themeNeutralSurface} px-5 py-4 sm:flex-row sm:items-center sm:justify-end sm:px-7`}
@@ -811,16 +739,12 @@ export default function EditGudangPage() {
                   </div>
                 </form>
 
-                {/* =================================================
-                    RIGHT PREVIEW
-                ================================================= */}
 
                 <aside className="min-w-0">
                   <div
                     className={`sticky top-5 overflow-hidden rounded-3xl border ${themeBorderClass} theme-card ${themeCardShadow}`}
                   >
 
-                    {/* CARD HEADER */}
 
                     <div
                       className={`border-b ${themeDivider} px-5 py-5`}
@@ -859,11 +783,9 @@ export default function EditGudangPage() {
                       </div>
                     </div>
 
-                    {/* PREVIEW BODY */}
 
                     <div className="p-5">
 
-                      {/* VISUAL CARD */}
 
                       <div
                         className={`relative overflow-hidden rounded-2xl ${themePrimaryGradient} p-5`}
@@ -904,13 +826,11 @@ export default function EditGudangPage() {
                         </div>
                       </div>
 
-                      {/* DETAIL */}
 
                       <div
                         className={`theme-card mt-4 divide-y ${themeDivider} overflow-hidden rounded-2xl border ${themeBorderClass}`}
                       >
 
-                        {/* STATUS */}
 
                         <div className="flex items-center justify-between gap-4 px-4 py-3.5">
                           <div className="flex items-center gap-2.5">
@@ -948,7 +868,6 @@ export default function EditGudangPage() {
                           </span>
                         </div>
 
-                        {/* LOKASI */}
 
                         <div className="flex items-start justify-between gap-4 px-4 py-3.5">
                           <div className="flex items-center gap-2.5">
@@ -968,7 +887,6 @@ export default function EditGudangPage() {
                           </span>
                         </div>
 
-                        {/* ID */}
 
                         <div className="flex items-center justify-between gap-4 px-4 py-3.5">
                           <div className="flex items-center gap-2.5">
@@ -990,7 +908,6 @@ export default function EditGudangPage() {
                         </div>
                       </div>
 
-                      {/* TIP */}
 
                       <div
                         className={`theme-card mt-4 rounded-2xl border ${themeBorderClass} p-4`}
@@ -1010,7 +927,6 @@ export default function EditGudangPage() {
                       </div>
                     </div>
 
-                    {/* CARD FOOTER */}
 
                     <div
                       className={`border-t ${themeDivider} ${themeNeutralSurface} px-5 py-3.5`}
@@ -1031,9 +947,6 @@ export default function EditGudangPage() {
                 </aside>
               </div>
 
-              {/* =================================================
-                  FOOTER
-              ================================================= */}
 
               <div
                 className={`mt-6 border-t ${themeDivider} pt-5 text-center`}

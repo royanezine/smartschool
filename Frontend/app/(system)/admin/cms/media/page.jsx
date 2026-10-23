@@ -1,4 +1,3 @@
-// app/cmsAdmin/media/page.jsx
 
 "use client";
 
@@ -38,9 +37,6 @@ export default function MediaPage() {
   const [viewMode, setViewMode] = useState("table");
   const [media, setMedia] = useState(dummyMedia);
 
-  /* =========================================================
-     FILTER
-  ========================================================= */
 
   const filteredMedia = useMemo(() => {
     const query = searchQuery.toLowerCase().trim();
@@ -55,9 +51,6 @@ export default function MediaPage() {
     );
   }, [media, searchQuery]);
 
-  /* =========================================================
-     STATISTIK
-  ========================================================= */
 
   const totalMedia = media.length;
 
@@ -73,9 +66,6 @@ export default function MediaPage() {
     (m) => m.type === "application/pdf"
   ).length;
 
-  /* =========================================================
-     ACTION
-  ========================================================= */
 
   const handleDelete = (id) => {
     const confirmed = window.confirm(
@@ -93,9 +83,6 @@ export default function MediaPage() {
     setSearchQuery("");
   };
 
-  /* =========================================================
-     FILE TYPE
-  ========================================================= */
 
   const getFileType = (type = "") => {
     if (type.startsWith("image/")) return "image";
@@ -139,9 +126,6 @@ export default function MediaPage() {
     return configs[type] || configs.default;
   };
 
-  /* =========================================================
-     FILE SIZE
-  ========================================================= */
 
   const formatFileSize = (size) => {
     if (!size) return "-";
@@ -161,9 +145,6 @@ export default function MediaPage() {
     return `${size} B`;
   };
 
-  /* =========================================================
-     STAT CARD
-  ========================================================= */
 
   const stats = [
     {
@@ -195,9 +176,6 @@ export default function MediaPage() {
     },
   ];
 
-  /* =========================================================
-     STAT THEME
-  ========================================================= */
 
   const getStatTheme = (type) => {
     switch (type) {
@@ -223,16 +201,10 @@ export default function MediaPage() {
     }
   };
 
-  /* =========================================================
-     RENDER
-  ========================================================= */
 
   return (
     <div className="theme-page flex min-h-screen w-full">
 
-      {/* =====================================================
-          SIDEBAR
-      ===================================================== */}
 
       <Sidebar
         active={active}
@@ -241,15 +213,9 @@ export default function MediaPage() {
         setCollapsed={setCollapsed}
       />
 
-      {/* =====================================================
-          CONTENT AREA
-      ===================================================== */}
 
       <div className="flex min-w-0 flex-1 flex-col">
 
-        {/* ===================================================
-            HEADER
-        =================================================== */}
 
         <Header
           user={{
@@ -259,9 +225,6 @@ export default function MediaPage() {
           }}
         />
 
-        {/* ===================================================
-            MAIN
-        =================================================== */}
 
         <main className="min-w-0 flex-1">
 
@@ -269,9 +232,6 @@ export default function MediaPage() {
 
             <div className="mx-auto w-full max-w-[1700px]">
 
-              {/* =================================================
-                  BREADCRUMB
-              ================================================= */}
 
               <div
                 className="
@@ -305,9 +265,6 @@ export default function MediaPage() {
 
               </div>
 
-              {/* =================================================
-                  HERO
-              ================================================= */}
 
               <section
                 className="
@@ -322,7 +279,6 @@ export default function MediaPage() {
                 "
               >
 
-                {/* Decorative */}
 
                 <div
                   className="
@@ -358,7 +314,6 @@ export default function MediaPage() {
 
                   <div className="flex flex-col gap-6 xl:flex-row xl:items-center xl:justify-between">
 
-                    {/* TITLE */}
 
                     <div className="flex min-w-0 items-start gap-4">
 
@@ -449,7 +404,6 @@ export default function MediaPage() {
                       </div>
                     </div>
 
-                    {/* UPLOAD */}
 
                     <Link
                       href="/cmsAdmin/media/upload"
@@ -481,9 +435,6 @@ export default function MediaPage() {
                 </div>
               </section>
 
-              {/* =================================================
-                  STATISTICS
-              ================================================= */}
 
               <div
                 className="
@@ -594,9 +545,6 @@ export default function MediaPage() {
 
               </div>
 
-              {/* =================================================
-                  TOOLBAR
-              ================================================= */}
 
               <section
                 className="
@@ -622,7 +570,6 @@ export default function MediaPage() {
                   "
                 >
 
-                  {/* SEARCH */}
 
                   <div className="relative w-full min-w-0 lg:max-w-xl">
 
@@ -683,7 +630,6 @@ export default function MediaPage() {
 
                   </div>
 
-                  {/* RIGHT TOOLBAR */}
 
                   <div
                     className="
@@ -716,7 +662,6 @@ export default function MediaPage() {
                       "
                     >
 
-                      {/* LIST */}
 
                       <button
                         type="button"
@@ -745,7 +690,6 @@ export default function MediaPage() {
                         </span>
                       </button>
 
-                      {/* GRID */}
 
                       <button
                         type="button"
@@ -780,9 +724,6 @@ export default function MediaPage() {
                 </div>
               </section>
 
-              {/* =================================================
-                  EMPTY STATE
-              ================================================= */}
 
               {filteredMedia.length === 0 ? (
 
@@ -891,9 +832,6 @@ export default function MediaPage() {
 
               ) : viewMode === "grid" ? (
 
-                /* =================================================
-                    GRID VIEW
-                ================================================= */
 
                 <div
                   className="
@@ -934,7 +872,6 @@ export default function MediaPage() {
                         "
                       >
 
-                        {/* PREVIEW */}
 
                         <div
                           className="
@@ -991,7 +928,6 @@ export default function MediaPage() {
 
                           )}
 
-                          {/* OVERLAY */}
 
                           <div
                             className="
@@ -1081,7 +1017,6 @@ export default function MediaPage() {
 
                           </div>
 
-                          {/* FOLDER */}
 
                           <div
                             className="
@@ -1124,7 +1059,6 @@ export default function MediaPage() {
 
                         </div>
 
-                        {/* INFO */}
 
                         <div className="min-w-0 p-3">
 
@@ -1190,9 +1124,6 @@ export default function MediaPage() {
 
               ) : (
 
-                /* =================================================
-                    TABLE VIEW
-                ================================================= */
 
                 <div
                   className="
@@ -1308,7 +1239,6 @@ export default function MediaPage() {
                               "
                             >
 
-                              {/* FILE */}
 
                               <td className="px-4 py-4 sm:px-5">
 
@@ -1401,7 +1331,6 @@ export default function MediaPage() {
 
                               </td>
 
-                              {/* TYPE */}
 
                               <td className="hidden px-5 py-4 md:table-cell">
 
@@ -1425,7 +1354,6 @@ export default function MediaPage() {
 
                               </td>
 
-                              {/* SIZE */}
 
                               <td
                                 className="
@@ -1441,7 +1369,6 @@ export default function MediaPage() {
                                 {formatFileSize(item.size)}
                               </td>
 
-                              {/* FOLDER */}
 
                               <td className="hidden px-5 py-4 lg:table-cell">
 
@@ -1471,7 +1398,6 @@ export default function MediaPage() {
 
                               </td>
 
-                              {/* ACTION */}
 
                               <td className="px-4 py-4 text-right sm:px-5">
 
@@ -1554,7 +1480,6 @@ export default function MediaPage() {
 
                   </div>
 
-                  {/* FOOTER */}
 
                   <div
                     className="
@@ -1606,9 +1531,6 @@ export default function MediaPage() {
                 </div>
               )}
 
-              {/* =================================================
-                  FOOTER
-              ================================================= */}
 
               <footer className="py-8 text-center">
 

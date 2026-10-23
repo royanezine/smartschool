@@ -5,9 +5,8 @@ export default function CTA() {
     <section className="py-24 bg-white">
       <div className="max-w-7xl mx-auto px-6">
 
-        <div className="relative overflow-hidden rounded-[32px] bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 px-8 py-16 md:px-16">
+        <div className="relative overflow-hidden rounded-[32px] bg-blue-600 px-8 py-16 md:px-16 shadow-xl shadow-blue-600/15">
 
-          {/* Background Decoration */}
           <div className="absolute -top-24 -right-24 h-72 w-72 rounded-full bg-white/10"></div>
           <div className="absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-white/10"></div>
 

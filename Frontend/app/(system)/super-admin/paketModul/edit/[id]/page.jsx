@@ -24,9 +24,6 @@ import {
   updatePaket,
 } from "@/services/paket.service";
 
-/* ============================================================
-   THEME HELPERS
-============================================================ */
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -85,9 +82,6 @@ const themeFocus =
 const themeCardText =
   "text-[var(--color-card)]";
 
-/* ============================================================
-   ICON MAP
-============================================================ */
 
 const ICON_MAP = {
   akademik: Layers,
@@ -108,9 +102,6 @@ const ICON_MAP = {
   inventaris: Layers,
 };
 
-/* ============================================================
-   RESPONSE HELPER
-============================================================ */
 
 function extractData(response) {
   if (!response) return null;
@@ -136,9 +127,6 @@ function extractArray(response) {
   return [];
 }
 
-/* ============================================================
-   FEATURE HELPERS
-============================================================ */
 
 function getFeatureId(item) {
   if (!item) return null;
@@ -236,9 +224,6 @@ function normalizeFeature(item, index) {
   };
 }
 
-/* ============================================================
-   GET PACKAGE FEATURES
-============================================================ */
 
 function getPaketFeatures(paket) {
   if (!paket) {
@@ -266,9 +251,6 @@ function getPaketFeatures(paket) {
   return [];
 }
 
-/* ============================================================
-   PACKAGE FEATURE IDS
-============================================================ */
 
 function getPaketFeatureIds(paket) {
   return getPaketFeatures(paket)
@@ -276,9 +258,6 @@ function getPaketFeatureIds(paket) {
     .filter(Boolean);
 }
 
-/* ============================================================
-   PACKAGE FEATURE CODES
-============================================================ */
 
 function getPaketFeatureCodes(paket) {
   return getPaketFeatures(paket)
@@ -286,9 +265,6 @@ function getPaketFeatureCodes(paket) {
     .filter(Boolean);
 }
 
-/* ============================================================
-   MAIN COMPONENT
-============================================================ */
 
 export default function EditPaketPage() {
   const router = useRouter();
@@ -298,9 +274,6 @@ export default function EditPaketPage() {
     ? params.id[0]
     : params?.id;
 
-  /* ==========================================================
-     STATE
-  ========================================================== */
 
   const [loading, setLoading] = useState(true);
 
@@ -331,9 +304,6 @@ export default function EditPaketPage() {
   const [searchFitur, setSearchFitur] =
     useState("");
 
-  /* ==========================================================
-     LOAD DATA
-  ========================================================== */
 
   useEffect(() => {
     if (!id) {
@@ -376,9 +346,6 @@ export default function EditPaketPage() {
 
         if (!mounted) return;
 
-        /* ======================================================
-           PACKAGE
-        ====================================================== */
 
         const paket =
           extractData(paketResponse);
@@ -410,9 +377,6 @@ export default function EditPaketPage() {
           ).toLowerCase()
         );
 
-        /* ======================================================
-           EXISTING PACKAGE FEATURES
-        ====================================================== */
 
         const paketFeatures =
           getPaketFeatures(paket);
@@ -438,9 +402,6 @@ export default function EditPaketPage() {
           paketFeatureCodes
         );
 
-        /* ======================================================
-           ALL ACTIVE MODULES
-        ====================================================== */
 
         const semuaFitur =
           extractArray(fiturResponse);
@@ -521,9 +482,6 @@ export default function EditPaketPage() {
           );
         }
 
-        /* ======================================================
-           REMOVE DUPLICATE
-        ====================================================== */
 
         const uniqueMap =
           new Map();
@@ -568,9 +526,6 @@ export default function EditPaketPage() {
           finalFeatures
         );
 
-        /* ======================================================
-           DETERMINE SELECTED MODULES
-        ====================================================== */
 
         const selectedIds =
           finalFeatures
@@ -645,9 +600,6 @@ export default function EditPaketPage() {
     };
   }, [id]);
 
-  /* ==========================================================
-     FILTER FEATURE
-  ========================================================== */
 
   const filteredFitur = useMemo(() => {
     const keyword =
@@ -688,9 +640,6 @@ export default function EditPaketPage() {
     searchFitur,
   ]);
 
-  /* ==========================================================
-     SELECTED FEATURES
-  ========================================================== */
 
   const selectedFeatures =
     useMemo(() => {
@@ -711,9 +660,6 @@ export default function EditPaketPage() {
       fiturTerpilih,
     ]);
 
-  /* ==========================================================
-     TOGGLE FEATURE
-  ========================================================== */
 
   function toggleFitur(fiturId) {
     if (!fiturId) return;
@@ -743,9 +689,6 @@ export default function EditPaketPage() {
     );
   }
 
-  /* ==========================================================
-     SELECT ALL
-  ========================================================== */
 
   function pilihSemuaFitur() {
     const ids =
@@ -759,17 +702,11 @@ export default function EditPaketPage() {
     setFiturTerpilih(ids);
   }
 
-  /* ==========================================================
-     CLEAR ALL
-  ========================================================== */
 
   function hapusSemuaFitur() {
     setFiturTerpilih([]);
   }
 
-  /* ==========================================================
-     BACK
-  ========================================================== */
 
   function goBack() {
     if (saving) return;
@@ -779,9 +716,6 @@ export default function EditPaketPage() {
     );
   }
 
-  /* ==========================================================
-     SUBMIT UPDATE
-  ========================================================== */
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -915,9 +849,6 @@ export default function EditPaketPage() {
     }
   }
 
-  /* ==========================================================
-     LOADING PAGE
-  ========================================================== */
 
   if (loading) {
     return (
@@ -942,17 +873,11 @@ export default function EditPaketPage() {
     );
   }
 
-  /* ==========================================================
-     MAIN
-  ========================================================== */
 
   return (
     <div className="theme-page theme-text min-h-full">
       <div className="w-full max-w-[1600px] mx-auto px-4 py-5 sm:px-6 sm:py-7 lg:px-8">
 
-        {/* ==================================================
-            PAGE HEADER
-        ================================================== */}
 
         <div className="mb-6">
           <div className="flex min-w-0 items-start gap-3">
@@ -992,9 +917,6 @@ export default function EditPaketPage() {
           </div>
         </div>
 
-        {/* ==================================================
-            ERROR
-        ================================================== */}
 
         {error && (
           <div
@@ -1030,15 +952,9 @@ export default function EditPaketPage() {
           </div>
         )}
 
-        {/* ==================================================
-            GRID
-        ================================================== */}
 
         <div className="grid w-full min-w-0 grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_350px] 2xl:grid-cols-[minmax(0,1fr)_390px]">
 
-          {/* ==================================================
-              FORM
-          ================================================== */}
 
           <form
             onSubmit={handleSubmit}
@@ -1048,7 +964,6 @@ export default function EditPaketPage() {
               className={`w-full min-w-0 overflow-hidden rounded-2xl border ${themeNeutralBorder} theme-card ${themeCardShadow}`}
             >
 
-              {/* FORM HEADER */}
 
               <div
                 className={`border-b ${themeDivider} px-4 py-5 sm:px-6 lg:px-7`}
@@ -1076,13 +991,9 @@ export default function EditPaketPage() {
                 </div>
               </div>
 
-              {/* FORM BODY */}
 
               <div className="space-y-6 p-4 sm:p-6 lg:p-7">
 
-                {/* ==================================================
-                    NAMA
-                ================================================== */}
 
                 <div>
                   <label className="block text-sm font-semibold theme-text-secondary">
@@ -1105,9 +1016,6 @@ export default function EditPaketPage() {
                   />
                 </div>
 
-                {/* ==================================================
-                    DESKRIPSI
-                ================================================== */}
 
                 <div>
                   <label className="block text-sm font-semibold theme-text-secondary">
@@ -1127,13 +1035,9 @@ export default function EditPaketPage() {
                   />
                 </div>
 
-                {/* ==================================================
-                    HARGA + DURASI
-                ================================================== */}
 
                 <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
 
-                  {/* HARGA */}
 
                   <div>
                     <label className="block text-sm font-semibold theme-text-secondary">
@@ -1161,7 +1065,6 @@ export default function EditPaketPage() {
                     </div>
                   </div>
 
-                  {/* DURASI */}
 
                   <div>
                     <label className="block text-sm font-semibold theme-text-secondary">
@@ -1201,9 +1104,6 @@ export default function EditPaketPage() {
                   </div>
                 </div>
 
-                {/* ==================================================
-                    STATUS
-                ================================================== */}
 
                 <div>
                   <label className="block text-sm font-semibold theme-text-secondary">
@@ -1212,7 +1112,6 @@ export default function EditPaketPage() {
 
                   <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
 
-                    {/* AKTIF */}
 
                     <button
                       type="button"
@@ -1262,7 +1161,6 @@ export default function EditPaketPage() {
 
                     </button>
 
-                    {/* NONAKTIF */}
 
                     <button
                       type="button"
@@ -1316,9 +1214,6 @@ export default function EditPaketPage() {
                   </div>
                 </div>
 
-                {/* ==================================================
-                    MODUL / FITUR
-                ================================================== */}
 
                 <div>
 
@@ -1382,7 +1277,6 @@ export default function EditPaketPage() {
                     </div>
                   </div>
 
-                  {/* SEARCH */}
 
                   {!loadingFitur &&
                     fiturList.length >
@@ -1410,7 +1304,6 @@ export default function EditPaketPage() {
                       </div>
                     )}
 
-                  {/* LOADING FEATURE */}
 
                   {loadingFitur ? (
                     <div
@@ -1510,7 +1403,6 @@ export default function EditPaketPage() {
                               }`}
                             >
 
-                              {/* CHECKBOX */}
 
                               <span
                                 className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border ${
@@ -1530,7 +1422,6 @@ export default function EditPaketPage() {
                                 )}
                               </span>
 
-                              {/* ICON */}
 
                               <span
                                 className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
@@ -1544,7 +1435,6 @@ export default function EditPaketPage() {
                                 />
                               </span>
 
-                              {/* TEXT */}
 
                               <span className="min-w-0 flex-1">
 
@@ -1596,9 +1486,6 @@ export default function EditPaketPage() {
                 </div>
               </div>
 
-              {/* ==================================================
-                  FOOTER
-              ================================================== */}
 
               <div
                 className={`border-t ${themeDivider} ${themeNeutralSurface} px-4 py-5 sm:px-6 lg:px-7`}
@@ -1644,9 +1531,6 @@ export default function EditPaketPage() {
             </div>
           </form>
 
-          {/* ==================================================
-              PREVIEW
-          ================================================== */}
 
           <aside className="w-full min-w-0 xl:sticky xl:top-6">
 
@@ -1654,7 +1538,6 @@ export default function EditPaketPage() {
               className={`w-full min-w-0 overflow-hidden rounded-2xl border ${themeNeutralBorder} theme-card ${themeCardShadow}`}
             >
 
-              {/* PREVIEW HEADER */}
 
               <div
                 className={`${themePrimaryGradient} px-4 py-5 ${themeCardText} sm:px-5`}
@@ -1680,11 +1563,9 @@ export default function EditPaketPage() {
                 </div>
               </div>
 
-              {/* PREVIEW BODY */}
 
               <div className="p-4 sm:p-5">
 
-                {/* PACKAGE */}
 
                 <div
                   className={`rounded-xl border ${themeNeutralBorder} ${themeNeutralSurface} p-4`}
@@ -1759,7 +1640,6 @@ export default function EditPaketPage() {
                   </div>
                 </div>
 
-                {/* SELECTED MODULES */}
 
                 <div className="mt-5">
 
@@ -1858,7 +1738,6 @@ export default function EditPaketPage() {
                   </div>
                 </div>
 
-                {/* INFO */}
 
                 <div
                   className={`mt-5 flex min-w-0 gap-2.5 rounded-xl border ${themeInfoBorder} ${themeInfoSurface} p-3.5`}

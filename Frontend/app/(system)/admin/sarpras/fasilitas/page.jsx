@@ -13,9 +13,6 @@ import {
   SlidersHorizontal,
 } from "lucide-react";
 
-// ============================================================
-// DUMMY DATA FASILITAS
-// ============================================================
 const fasilitasList = [
   {
     id: "fs-001",
@@ -73,9 +70,6 @@ const fasilitasList = [
   },
 ];
 
-// ============================================================
-// THEME CONFIG KONDISI
-// ============================================================
 const kondisiStyle = {
   Baik: {
     text: "theme-success",
@@ -102,9 +96,6 @@ const kondisiStyle = {
   },
 };
 
-// ============================================================
-// KATEGORI
-// ============================================================
 const kategoriOptions = [
   "Semua",
   "Olahraga",
@@ -113,9 +104,6 @@ const kategoriOptions = [
   "Ibadah",
 ];
 
-// ============================================================
-// THEME HELPERS
-// ============================================================
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)]";
 
@@ -149,9 +137,6 @@ const themePrimaryGradientHover =
 const themeSoftSurface =
   "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
 
-// ============================================================
-// PAGE
-// ============================================================
 export default function FasilitasPage() {
   const router = useRouter();
 
@@ -169,9 +154,6 @@ export default function FasilitasPage() {
     },
   ];
 
-  // ============================================================
-  // FILTER
-  // ============================================================
   const filteredList = fasilitasList.filter((f) => {
     const matchSearch =
       f.nama
@@ -188,9 +170,6 @@ export default function FasilitasPage() {
     return matchSearch && matchKategori;
   });
 
-  // ============================================================
-  // DETAIL
-  // ============================================================
   const handleOpenDetail = (id) => {
     router.push(`/adminSarpras/fasilitas/${id}`);
   };
@@ -223,9 +202,6 @@ export default function FasilitasPage() {
         <main className="theme-page flex-1 p-4 sm:p-6 lg:p-8">
           <div className="w-full space-y-6">
 
-            {/* ==================================================
-                PAGE HEADER
-            ================================================== */}
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
 
               <div className="min-w-0">
@@ -242,7 +218,6 @@ export default function FasilitasPage() {
                 </p>
               </div>
 
-              {/* TAMBAH */}
               <button
                 onClick={() =>
                   router.push(
@@ -262,14 +237,10 @@ export default function FasilitasPage() {
               </button>
             </div>
 
-            {/* ==================================================
-                SEARCH & FILTER
-            ================================================== */}
             <div
               className={`theme-card theme-border flex flex-col gap-3 rounded-2xl border p-4 sm:flex-row ${themeCardShadow}`}
             >
 
-              {/* SEARCH */}
               <div className="relative flex-1">
                 <Search
                   size={16}
@@ -287,7 +258,6 @@ export default function FasilitasPage() {
                 />
               </div>
 
-              {/* FILTER */}
               <div className="relative">
                 <SlidersHorizontal
                   size={14}
@@ -310,9 +280,6 @@ export default function FasilitasPage() {
               </div>
             </div>
 
-            {/* ==================================================
-                GRID FASILITAS
-            ================================================== */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
 
               {filteredList.map((f) => {
@@ -329,9 +296,6 @@ export default function FasilitasPage() {
                     className={`theme-card theme-border group overflow-hidden rounded-2xl border text-left transition-all duration-300 ${themePrimaryBorderHover} ${themeCardShadow} ${themeCardHoverShadow}`}
                   >
 
-                    {/* ==================================================
-                        IMAGE / COVER
-                    ================================================== */}
                     <div
                       className={`flex h-32 items-center justify-center transition-colors ${themePrimarySoft} ${themePrimarySoftHover}`}
                     >
@@ -345,9 +309,6 @@ export default function FasilitasPage() {
                       </div>
                     </div>
 
-                    {/* ==================================================
-                        CONTENT
-                    ================================================== */}
                     <div className="p-4">
 
                       <div className="flex items-start justify-between gap-2">
@@ -362,7 +323,6 @@ export default function FasilitasPage() {
                         />
                       </div>
 
-                      {/* LOKASI */}
                       <div className="theme-text-secondary mt-1.5 flex items-center gap-1.5 text-xs">
                         <MapPin
                           size={12}
@@ -374,7 +334,6 @@ export default function FasilitasPage() {
                         </span>
                       </div>
 
-                      {/* FOOTER CARD */}
                       <div className="mt-3 flex items-center justify-between">
 
                         <span className="theme-text-muted text-[11px]">
@@ -392,9 +351,6 @@ export default function FasilitasPage() {
                 );
               })}
 
-              {/* ==================================================
-                  EMPTY STATE
-              ================================================== */}
               {filteredList.length === 0 && (
                 <div className="col-span-full py-12 text-center">
                   <div

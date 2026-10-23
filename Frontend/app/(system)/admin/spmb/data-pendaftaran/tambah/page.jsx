@@ -24,9 +24,6 @@ import { daftarPpdb } from "@/services/ppdb.service";
 import { getJalurPpdb } from "@/services/jalurPpdb.service";
 import { getAuthPayload, getStoredUser } from "@/lib/auth";
 
-// =========================================================
-// THEME HELPERS
-// =========================================================
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -50,9 +47,6 @@ const themeFocus =
 
 const EMAIL_REGEX = /^\S+@\S+\.\S+$/;
 
-// =========================================================
-// PAGE
-// =========================================================
 
 export default function TambahPendaftarPage() {
   const router = useRouter();
@@ -83,9 +77,6 @@ export default function TambahPendaftarPage() {
   const [submitError, setSubmitError] = useState("");
   const [successData, setSuccessData] = useState(null);
 
-  // =======================================================
-  // LOAD JALUR & SEKOLAH
-  // =======================================================
 
   const loadJalur = useCallback(async () => {
     try {
@@ -125,9 +116,6 @@ export default function TambahPendaftarPage() {
     });
   }, [loadJalur]);
 
-  // =======================================================
-  // HANDLERS
-  // =======================================================
 
   const handleChange = (field, value) => {
     setForm((prev) => ({
@@ -289,9 +277,6 @@ export default function TambahPendaftarPage() {
     setSubmitError("");
   };
 
-  // =======================================================
-  // RENDER: SUCCESS STATE
-  // =======================================================
 
   if (successData) {
     const uploadUrl = `/PPDB/daftar/uploadBerkas?id=${encodeURIComponent(
@@ -337,7 +322,7 @@ export default function TambahPendaftarPage() {
                       Pendaftaran Calon Siswa Berhasil
                     </h1>
                     <p className="theme-text-secondary mt-0.5 text-xs">
-                      Data pendaftaran telah terverifikasi dan disimpan oleh server backend.
+                      Data pendaftaran telah disimpan oleh server backend.
                     </p>
                   </div>
                 </div>
@@ -368,9 +353,9 @@ export default function TambahPendaftarPage() {
                 </div>
 
                 <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-3.5 text-xs text-emerald-800">
-                  <p className="font-semibold">Informasi Sinkronisasi Tabel Data Pendaftaran:</p>
+                  <p className="font-semibold">Data Tersimpan di Backend</p>
                   <p className="mt-1 leading-5 text-emerald-700">
-                    Data calon siswa ini telah masuk ke database backend dan langsung tersinkronisasi pada tabel Data Pendaftaran SPMB.
+                    Data calon siswa sudah tersimpan melalui POST /api/ppdb/daftar. Daftar pendaftar belum dapat ditampilkan di halaman Data Pendaftaran karena endpoint baca GET /api/ppdb/pendaftar belum tersedia di Backend.
                   </p>
                 </div>
 
@@ -410,9 +395,6 @@ export default function TambahPendaftarPage() {
     );
   }
 
-  // =======================================================
-  // RENDER: FORM
-  // =======================================================
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
@@ -504,7 +486,6 @@ export default function TambahPendaftarPage() {
               onSubmit={handleSubmit}
               className={`theme-card ${themeNeutralBorder} ${themeCardShadow} space-y-6 overflow-hidden rounded-2xl border p-5 sm:p-7`}
             >
-              {/* JALUR PENERIMAAN */}
               <FormSection
                 icon={GraduationCap}
                 title="Jalur PPDB"
@@ -537,7 +518,6 @@ export default function TambahPendaftarPage() {
                 </div>
               </FormSection>
 
-              {/* DATA CALON SISWA */}
               <FormSection
                 icon={UserRound}
                 title="Data Calon Siswa"
@@ -687,7 +667,6 @@ export default function TambahPendaftarPage() {
                 </div>
               </FormSection>
 
-              {/* DATA ASAL SEKOLAH */}
               <FormSection
                 icon={School}
                 title="Data Pendidikan Sebelumnya"
@@ -731,7 +710,6 @@ export default function TambahPendaftarPage() {
                 </div>
               </FormSection>
 
-              {/* DATA ORANG TUA */}
               <FormSection
                 icon={Phone}
                 title="Data Orang Tua / Wali"
@@ -770,7 +748,6 @@ export default function TambahPendaftarPage() {
                 </div>
               </FormSection>
 
-              {/* ACTIONS */}
               <div className="flex items-center justify-between border-t border-slate-100 pt-5">
                 <button
                   type="button"
@@ -808,9 +785,6 @@ export default function TambahPendaftarPage() {
   );
 }
 
-// =========================================================
-// HELPER SECTION COMPONENT
-// =========================================================
 
 function FormSection({ icon: Icon, title, description, children }) {
   return (

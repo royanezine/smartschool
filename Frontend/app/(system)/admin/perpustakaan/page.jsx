@@ -32,9 +32,6 @@ import {
   getPeminjaman,
 } from "@/services/perpustakaan.service";
 
-/* =========================================================
-   THEME HELPERS
-========================================================= */
 
 const themeCardShadow =
   "shadow-[0_8px_30px_color-mix(in_srgb,var(--color-text)_6%,transparent)]";
@@ -69,10 +66,6 @@ const themePrimaryShadow =
 const dangerSoft =
   "bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)]";
 
-/* =========================================================
-   STATIC NAV MODULES
-   Ini bukan data database; hanya shortcut menu.
-========================================================= */
 
 const QUICK_MODULES = [
   {
@@ -109,9 +102,6 @@ const QUICK_MODULES = [
   },
 ];
 
-/* =========================================================
-   HELPERS
-========================================================= */
 
 function unwrapValue(response) {
   if (response?.data !== undefined) return response.data;
@@ -383,9 +373,6 @@ function initials(name) {
   return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
 }
 
-/* =========================================================
-   THEME TONE MAP
-========================================================= */
 
 const toneMap = {
   blue: {
@@ -429,9 +416,6 @@ const toneMap = {
   },
 };
 
-/* =========================================================
-   COMPONENTS
-========================================================= */
 
 function StatCard({ label, value, description, icon: Icon, tone = "blue", href }) {
   const theme = toneMap[tone] || toneMap.blue;
@@ -503,9 +487,6 @@ function SectionHeader({ eyebrow, title, description, href, action = "Lihat semu
   );
 }
 
-/* =========================================================
-   PAGE
-========================================================= */
 
 export default function PerpustakaanPage() {
   const [books, setBooks] = useState([]);
@@ -721,7 +702,6 @@ export default function PerpustakaanPage() {
 
         <main className="min-h-0 flex-1 overflow-y-auto">
           <div className="mx-auto w-full max-w-[1600px] px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
-            {/* HERO */}
             <section
               className={`relative mb-6 overflow-hidden rounded-[28px] border ${themePrimaryBorder} ${themePrimaryShadow} bg-[color-mix(in_srgb,var(--color-primary)_12%,var(--color-card))]`}
             >
@@ -846,7 +826,6 @@ export default function PerpustakaanPage() {
               </div>
             )}
 
-            {/* QUICK MODULES */}
             <section className="mb-7">
               <SectionHeader
                 eyebrow="PERPUSTAKAAN"
@@ -897,7 +876,6 @@ export default function PerpustakaanPage() {
               </div>
             </section>
 
-            {/* STATISTICS */}
             <section className="mb-7">
               <div className="mb-3 flex justify-end">
                 <button
@@ -950,9 +928,7 @@ export default function PerpustakaanPage() {
               </div>
             </section>
 
-            {/* OVERVIEW */}
             <section className="mb-7 grid gap-5 xl:grid-cols-[1.3fr_.7fr]">
-              {/* POPULAR BOOK */}
               <div className={`theme-card rounded-2xl border theme-border ${themeCardShadow}`}>
                 <div className="flex flex-col gap-4 border-b theme-border-soft px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
                   <div>
@@ -1023,7 +999,6 @@ export default function PerpustakaanPage() {
                 </div>
               </div>
 
-              {/* CATEGORY */}
               <div className={`theme-card rounded-2xl border theme-border ${themeCardShadow} p-5 sm:p-6`}>
                 <div className="flex items-start justify-between">
                   <div>
@@ -1090,7 +1065,6 @@ export default function PerpustakaanPage() {
               </div>
             </section>
 
-            {/* TRANSACTION + ACTIVITY */}
             <section className="mb-7 grid gap-5 xl:grid-cols-[1.2fr_.8fr]">
               <div className={`theme-card rounded-2xl border theme-border ${themeCardShadow}`}>
                 <div className="flex flex-col gap-4 border-b theme-border-soft px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
@@ -1243,7 +1217,6 @@ export default function PerpustakaanPage() {
               </div>
             </section>
 
-            {/* QUICK ACTION */}
             <section className="mb-7">
               <div className={`relative overflow-hidden rounded-2xl border ${themePrimaryBorder} ${themePrimarySoft} p-5 sm:p-6`}>
                 <div className="absolute -right-16 -top-20 h-44 w-44 rounded-full bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] blur-2xl" />
@@ -1291,7 +1264,6 @@ export default function PerpustakaanPage() {
               </div>
             </section>
 
-            {/* FOOTER */}
             <div className="flex flex-col gap-3 border-t theme-border-soft py-5 text-xs theme-text-muted sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-2">
                 <GraduationCap size={15} />

@@ -16,9 +16,6 @@ import {
   AlertCircle,
 } from "lucide-react";
 
-// ======================================================
-// THEME HELPERS
-// ======================================================
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -65,9 +62,6 @@ const themeDangerBorder =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-// ======================================================
-// DATA DUMMY
-// ======================================================
 
 const stafData = [
   {
@@ -127,9 +121,6 @@ const stafData = [
   },
 ];
 
-// ======================================================
-// PAGE
-// ======================================================
 
 export default function EditStafPage() {
   const router = useRouter();
@@ -152,9 +143,6 @@ export default function EditStafPage() {
     password: "",
   });
 
-  // ======================================================
-  // NOTIFICATIONS
-  // ======================================================
 
   const notifications = [
     {
@@ -171,9 +159,6 @@ export default function EditStafPage() {
     },
   ];
 
-  // ======================================================
-  // LOAD DATA
-  // ======================================================
 
   useEffect(() => {
     if (!id) return;
@@ -200,9 +185,6 @@ export default function EditStafPage() {
     setLoading(false);
   }, [id]);
 
-  // ======================================================
-  // ACTION
-  // ======================================================
 
   const goBack = () => {
     router.push("/admin/staf");
@@ -237,9 +219,6 @@ export default function EditStafPage() {
     router.push("/admin/staf");
   };
 
-  // ======================================================
-  // SIDEBAR
-  // ======================================================
 
   const sidebar = (
     <div className="shrink-0">
@@ -254,9 +233,6 @@ export default function EditStafPage() {
     </div>
   );
 
-  // ======================================================
-  // HEADER
-  // ======================================================
 
   const header = (
     <Header
@@ -272,9 +248,6 @@ export default function EditStafPage() {
     />
   );
 
-  // ======================================================
-  // LOADING
-  // ======================================================
 
   if (loading) {
     return (
@@ -300,9 +273,6 @@ export default function EditStafPage() {
     );
   }
 
-  // ======================================================
-  // NOT FOUND
-  // ======================================================
 
   if (notFound || !staf) {
     return (
@@ -345,38 +315,24 @@ export default function EditStafPage() {
     );
   }
 
-  // ======================================================
-  // MAIN
-  // ======================================================
 
   return (
     <div className="min-h-screen theme-page flex">
 
-      {/* ==================================================
-          SIDEBAR
-      ================================================== */}
 
       {sidebar}
 
-      {/* ==================================================
-          MAIN CONTENT
-      ================================================== */}
 
       <div className="flex-1 min-w-0 w-0 flex flex-col">
 
-        {/* HEADER */}
 
         {header}
 
-        {/* CONTENT */}
 
         <main className="flex-1 min-w-0">
 
           <div className="w-full px-4 sm:px-5 lg:px-6 xl:px-8 py-5 sm:py-6">
 
-            {/* ==================================================
-                PAGE HEADER
-            ================================================== */}
 
             <div className="mb-6">
 
@@ -413,18 +369,12 @@ export default function EditStafPage() {
               </div>
             </div>
 
-            {/* ==================================================
-                FORM
-            ================================================== */}
 
             <form
               onSubmit={handleSubmit}
               className="w-full theme-card border theme-border rounded-xl shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)] overflow-hidden"
             >
 
-              {/* ==================================================
-                  PROFILE SUMMARY
-              ================================================== */}
 
               <div
                 className={`px-4 sm:px-5 lg:px-6 py-5 border-b ${themeDivider} ${themeNeutralSurface}`}
@@ -432,7 +382,6 @@ export default function EditStafPage() {
 
                 <div className="flex flex-col sm:flex-row sm:items-center gap-4">
 
-                  {/* AVATAR */}
 
                   <div
                     className={`w-14 h-14 shrink-0 rounded-full ${themePrimarySoft} ${themePrimarySoftBorder} border flex items-center justify-center`}
@@ -442,7 +391,6 @@ export default function EditStafPage() {
                     </span>
                   </div>
 
-                  {/* INFO */}
 
                   <div className="min-w-0 flex-1">
 
@@ -495,13 +443,9 @@ export default function EditStafPage() {
                 </div>
               </div>
 
-              {/* ==================================================
-                  FORM BODY
-              ================================================== */}
 
               <div className="p-4 sm:p-5 lg:p-6">
 
-                {/* SECTION */}
 
                 <div className="mb-5">
                   <h3 className="text-sm font-semibold theme-text">
@@ -513,13 +457,9 @@ export default function EditStafPage() {
                   </p>
                 </div>
 
-                {/* ==================================================
-                    FORM GRID
-                ================================================== */}
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-5 gap-y-5">
 
-                  {/* NAMA */}
 
                   <FormField
                     label="Nama Lengkap"
@@ -537,7 +477,6 @@ export default function EditStafPage() {
                     />
                   </FormField>
 
-                  {/* EMAIL */}
 
                   <FormField
                     label="Email"
@@ -555,7 +494,6 @@ export default function EditStafPage() {
                     />
                   </FormField>
 
-                  {/* TELEPON */}
 
                   <FormField
                     label="Nomor Telepon"
@@ -571,7 +509,6 @@ export default function EditStafPage() {
                     />
                   </FormField>
 
-                  {/* ROLE */}
 
                   <FormField
                     label="Role"
@@ -611,7 +548,6 @@ export default function EditStafPage() {
                     </select>
                   </FormField>
 
-                  {/* STATUS */}
 
                   <FormField
                     label="Status Akun"
@@ -639,9 +575,6 @@ export default function EditStafPage() {
                     </select>
                   </FormField>
 
-                  {/* ==================================================
-                      SECURITY
-                  ================================================== */}
 
                   <div className="lg:col-span-2">
 
@@ -686,9 +619,6 @@ export default function EditStafPage() {
                 </div>
               </div>
 
-              {/* ==================================================
-                  FOOTER
-              ================================================== */}
 
               <div
                 className={`px-4 sm:px-5 lg:px-6 py-4 ${themeNeutralSurface} border-t ${themeDivider}`}
@@ -730,9 +660,6 @@ export default function EditStafPage() {
   );
 }
 
-// ======================================================
-// FORM FIELD
-// ======================================================
 
 function FormField({
   label,
@@ -769,9 +696,6 @@ function FormField({
   );
 }
 
-// ======================================================
-// INPUT STYLE
-// ======================================================
 
 const inputClass = `
   block

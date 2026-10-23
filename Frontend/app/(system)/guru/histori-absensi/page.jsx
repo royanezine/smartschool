@@ -24,9 +24,6 @@ import {
   BarChart3,
 } from "lucide-react";
 
-/* ============================================================
-   THEME HELPERS
-============================================================ */
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -88,9 +85,6 @@ const themeDangerBorder =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-/* ============================================================
-   DATA DUMMY
-============================================================ */
 
 const MAPEL_LIST = [
   "Matematika",
@@ -158,9 +152,6 @@ const SISWA_LIST = [
   { id: 50, nama: "Wahyu Setiawan", nis: "2409015", kelas: "X IPA 1" },
 ];
 
-/* ============================================================
-   GENERATE ATTENDANCE DATA
-============================================================ */
 
 const generateAttendanceData = () => {
   const data = [];
@@ -265,9 +256,6 @@ const generateAttendanceData = () => {
   return data;
 };
 
-/* ============================================================
-   PAGE
-============================================================ */
 
 export default function HistoriAbsensiPage() {
   const router = useRouter();
@@ -295,9 +283,6 @@ export default function HistoriAbsensiPage() {
 
   const itemsPerPage = 10;
 
-  /* ==========================================================
-     LOAD DATA
-  ========================================================== */
 
   useEffect(() => {
     setAttendanceData(
@@ -305,9 +290,6 @@ export default function HistoriAbsensiPage() {
     );
   }, []);
 
-  /* ==========================================================
-     FILTER DATA
-  ========================================================== */
 
   const filteredData = useMemo(() => {
     let data = [...attendanceData];
@@ -369,9 +351,6 @@ export default function HistoriAbsensiPage() {
     endDate,
   ]);
 
-  /* ==========================================================
-     STATISTICS
-  ========================================================== */
 
   const stats = useMemo(() => {
     const total = filteredData.length;
@@ -407,9 +386,6 @@ export default function HistoriAbsensiPage() {
     };
   }, [filteredData]);
 
-  /* ==========================================================
-     PAGINATION
-  ========================================================== */
 
   const totalPages = Math.ceil(
     filteredData.length / itemsPerPage,
@@ -439,9 +415,6 @@ export default function HistoriAbsensiPage() {
     endDate,
   ]);
 
-  /* ==========================================================
-     AVAILABLE CLASS
-  ========================================================== */
 
   const availableKelas = useMemo(() => {
     const kelas = new Set();
@@ -461,9 +434,6 @@ export default function HistoriAbsensiPage() {
     selectedMapel,
   ]);
 
-  /* ==========================================================
-     STATUS HELPERS
-  ========================================================== */
 
   const getStatusBadge = (status) => {
     const map = {
@@ -516,9 +486,6 @@ export default function HistoriAbsensiPage() {
     return map[status] || null;
   };
 
-  /* ==========================================================
-     INITIALS
-  ========================================================== */
 
   const getInitials = (nama) => {
     const parts = nama.split(" ");
@@ -535,17 +502,11 @@ export default function HistoriAbsensiPage() {
       .toUpperCase();
   };
 
-  /* ==========================================================
-     AVATAR
-  ========================================================== */
 
   const getAvatarColor = () => {
     return `${themePrimarySoft} ${themePrimaryText} border ${themePrimarySoftBorder}`;
   };
 
-  /* ==========================================================
-     FORMAT DATE
-  ========================================================== */
 
   const formatDate = (dateStr) => {
     const d = new Date(dateStr);
@@ -561,54 +522,34 @@ export default function HistoriAbsensiPage() {
     );
   };
 
-  /* ==========================================================
-     EXPORT
-  ========================================================== */
 
   const handleExport = () =>
     alert(
       "Fitur ekspor akan segera hadir!",
     );
 
-  /* ==========================================================
-     RENDER
-  ========================================================== */
 
   return (
     <div className="min-h-screen w-full theme-page flex">
-      {/* =====================================================
-          SIDEBAR
-      ====================================================== */}
 
       <div className="flex-shrink-0">
         <Sidebar />
       </div>
 
-      {/* =====================================================
-          AREA UTAMA
-      ====================================================== */}
 
       <div className="flex-1 min-w-0 min-h-screen flex flex-col">
-        {/* HEADER */}
 
         <div className="flex-shrink-0">
           <Header />
         </div>
 
-        {/* ===================================================
-            CONTENT
-        ==================================================== */}
 
         <main className="flex-1 min-w-0 theme-page overflow-x-hidden">
           <div className="w-full min-w-0 px-3 py-4 sm:px-5 sm:py-5 md:px-6 lg:px-8 xl:px-10">
             <div className="w-full max-w-none mx-auto space-y-5 sm:space-y-6">
-              {/* =================================================
-                  HEADER HALAMAN
-              ================================================== */}
 
               <section className="w-full">
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                  {/* TITLE */}
 
                   <div className="min-w-0">
                     <div className="flex items-center gap-3">
@@ -642,7 +583,6 @@ export default function HistoriAbsensiPage() {
                     </div>
                   </div>
 
-                  {/* ACTION */}
 
                   <div className="flex items-center gap-2">
                     <button
@@ -664,15 +604,11 @@ export default function HistoriAbsensiPage() {
                 </div>
               </section>
 
-              {/* =================================================
-                  FILTER
-              ================================================== */}
 
               <section
                 className={`w-full theme-card rounded-2xl border ${themeNeutralBorder} ${themeCardShadow} overflow-hidden`}
               >
                 <div className="p-4 sm:p-5 lg:p-6">
-                  {/* FILTER HEADER */}
 
                   <div className="flex items-center gap-2 mb-5">
                     <div
@@ -696,10 +632,8 @@ export default function HistoriAbsensiPage() {
                     </div>
                   </div>
 
-                  {/* FILTER GRID */}
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {/* MAPEL */}
 
                     <div className="min-w-0">
                       <label className="block text-xs font-semibold theme-text-secondary mb-1.5">
@@ -732,7 +666,6 @@ export default function HistoriAbsensiPage() {
                       </select>
                     </div>
 
-                    {/* KELAS */}
 
                     <div className="min-w-0">
                       <label className="block text-xs font-semibold theme-text-secondary mb-1.5">
@@ -769,7 +702,6 @@ export default function HistoriAbsensiPage() {
                       </select>
                     </div>
 
-                    {/* SEARCH */}
 
                     <div className="min-w-0">
                       <label className="block text-xs font-semibold theme-text-secondary mb-1.5">
@@ -799,10 +731,8 @@ export default function HistoriAbsensiPage() {
                       </div>
                     </div>
 
-                    {/* DATE */}
 
                     <div className="grid grid-cols-2 gap-2 min-w-0">
-                      {/* FROM */}
 
                       <div className="min-w-0">
                         <label className="block text-xs font-semibold theme-text-secondary mb-1.5">
@@ -824,7 +754,6 @@ export default function HistoriAbsensiPage() {
                         />
                       </div>
 
-                      {/* TO */}
 
                       <div className="min-w-0">
                         <label className="block text-xs font-semibold theme-text-secondary mb-1.5">
@@ -848,7 +777,6 @@ export default function HistoriAbsensiPage() {
                     </div>
                   </div>
 
-                  {/* ACTIVE FILTER */}
 
                   {(selectedKelas ||
                     searchQuery ||
@@ -862,7 +790,6 @@ export default function HistoriAbsensiPage() {
                           Filter aktif:
                         </span>
 
-                        {/* KELAS */}
 
                         {selectedKelas && (
                           <span
@@ -887,7 +814,6 @@ export default function HistoriAbsensiPage() {
                           </span>
                         )}
 
-                        {/* SEARCH */}
 
                         {searchQuery && (
                           <span
@@ -912,7 +838,6 @@ export default function HistoriAbsensiPage() {
                           </span>
                         )}
 
-                        {/* DATE */}
 
                         {(startDate ||
                           endDate) && (
@@ -950,7 +875,6 @@ export default function HistoriAbsensiPage() {
                           </span>
                         )}
 
-                        {/* CLEAR */}
 
                         <button
                           type="button"
@@ -976,12 +900,8 @@ export default function HistoriAbsensiPage() {
                 </div>
               </section>
 
-              {/* =================================================
-                  STATISTIK
-              ================================================== */}
 
               <section className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-6 gap-3">
-                {/* TOTAL */}
 
                 <div
                   className={`theme-card rounded-2xl border ${themeNeutralBorder} ${themeCardShadow} p-4 ${themeNeutralHover} transition-all min-w-0`}
@@ -1003,7 +923,6 @@ export default function HistoriAbsensiPage() {
                   </p>
                 </div>
 
-                {/* HADIR */}
 
                 <div
                   className={`theme-card rounded-2xl border ${themeSuccessBorder} ${themeSuccessSurface} ${themeCardShadow} p-4 ${themeNeutralHover} transition-all min-w-0`}
@@ -1023,7 +942,6 @@ export default function HistoriAbsensiPage() {
                   </p>
                 </div>
 
-                {/* SAKIT */}
 
                 <div
                   className={`theme-card rounded-2xl border ${themeWarningBorder} ${themeWarningSurface} ${themeCardShadow} p-4 ${themeNeutralHover} transition-all min-w-0`}
@@ -1043,7 +961,6 @@ export default function HistoriAbsensiPage() {
                   </p>
                 </div>
 
-                {/* IZIN */}
 
                 <div
                   className={`theme-card rounded-2xl border ${themeInfoBorder} ${themeInfoSurface} ${themeCardShadow} p-4 ${themeNeutralHover} transition-all min-w-0`}
@@ -1063,7 +980,6 @@ export default function HistoriAbsensiPage() {
                   </p>
                 </div>
 
-                {/* ALPA */}
 
                 <div
                   className={`theme-card rounded-2xl border ${themeDangerBorder} ${themeDangerSurface} ${themeCardShadow} p-4 ${themeNeutralHover} transition-all min-w-0`}
@@ -1083,7 +999,6 @@ export default function HistoriAbsensiPage() {
                   </p>
                 </div>
 
-                {/* KEHADIRAN */}
 
                 <div
                   className={`rounded-2xl border ${themePrimarySoftBorder} ${themePrimarySoft} ${themeCardShadow} p-4 ${themeNeutralHover} transition-all min-w-0`}
@@ -1124,14 +1039,10 @@ export default function HistoriAbsensiPage() {
                 </div>
               </section>
 
-              {/* =================================================
-                  TABLE
-              ================================================== */}
 
               <section
                 className={`w-full theme-card rounded-2xl border ${themeNeutralBorder} ${themeCardShadow} overflow-hidden`}
               >
-                {/* TABLE HEADER */}
 
                 <div
                   className={`p-4 sm:p-5 lg:p-6 border-b ${themeDivider}`}
@@ -1178,7 +1089,6 @@ export default function HistoriAbsensiPage() {
                   </div>
                 </div>
 
-                {/* TABLE WRAPPER */}
 
                 <div className="w-full overflow-x-auto">
                   <table className="w-full min-w-[760px]">
@@ -1255,7 +1165,6 @@ export default function HistoriAbsensiPage() {
                               }
                               className={`border-b ${themeDivider} ${themeNeutralHover} transition-colors`}
                             >
-                              {/* SISWA */}
 
                               <td className="px-4 py-3.5">
                                 <div className="flex items-center gap-3">
@@ -1284,7 +1193,6 @@ export default function HistoriAbsensiPage() {
                                 </div>
                               </td>
 
-                              {/* KELAS */}
 
                               <td className="px-4 py-3.5">
                                 <span className="text-xs theme-text-secondary whitespace-nowrap">
@@ -1294,7 +1202,6 @@ export default function HistoriAbsensiPage() {
                                 </span>
                               </td>
 
-                              {/* MAPEL */}
 
                               <td className="px-4 py-3.5">
                                 <span
@@ -1306,7 +1213,6 @@ export default function HistoriAbsensiPage() {
                                 </span>
                               </td>
 
-                              {/* TANGGAL */}
 
                               <td className="px-4 py-3.5">
                                 <span className="text-xs theme-text-secondary flex items-center gap-1.5 whitespace-nowrap">
@@ -1321,7 +1227,6 @@ export default function HistoriAbsensiPage() {
                                 </span>
                               </td>
 
-                              {/* STATUS */}
 
                               <td className="px-4 py-3.5">
                                 <span
@@ -1339,7 +1244,6 @@ export default function HistoriAbsensiPage() {
                                 </span>
                               </td>
 
-                              {/* CATATAN */}
 
                               <td className="px-4 py-3.5">
                                 <span className="text-xs theme-text-secondary">
@@ -1350,7 +1254,6 @@ export default function HistoriAbsensiPage() {
                                 </span>
                               </td>
 
-                              {/* AKSI */}
 
                               <td className="px-4 py-3.5">
                                 <div className="flex justify-end">
@@ -1380,9 +1283,6 @@ export default function HistoriAbsensiPage() {
                   </table>
                 </div>
 
-                {/* =================================================
-                    PAGINATION
-                ================================================== */}
 
                 {totalPages > 1 && (
                   <div
@@ -1400,7 +1300,6 @@ export default function HistoriAbsensiPage() {
                     </span>
 
                     <div className="flex items-center gap-1">
-                      {/* PREVIOUS */}
 
                       <button
                         type="button"
@@ -1424,7 +1323,6 @@ export default function HistoriAbsensiPage() {
                         />
                       </button>
 
-                      {/* PAGE NUMBERS */}
 
                       {Array.from(
                         {
@@ -1490,7 +1388,6 @@ export default function HistoriAbsensiPage() {
                         },
                       )}
 
-                      {/* NEXT */}
 
                       <button
                         type="button"
@@ -1518,9 +1415,6 @@ export default function HistoriAbsensiPage() {
                 )}
               </section>
 
-              {/* =================================================
-                  FOOTER
-              ================================================== */}
 
               <footer
                 className={`text-center text-xs theme-text-muted py-5 border-t ${themeDivider}`}

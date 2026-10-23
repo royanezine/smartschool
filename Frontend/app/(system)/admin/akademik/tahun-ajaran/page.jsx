@@ -36,9 +36,6 @@ import {
 
 import { getKelas } from "@/services/kelas.service";
 
-/* =========================================================
-   HELPERS
-========================================================= */
 
 const extractArray = (response) => {
   if (Array.isArray(response)) return response;
@@ -58,9 +55,6 @@ const normalizeTahunAjaran = (item) => {
   };
 };
 
-/* =========================================================
-   PAGE
-========================================================= */
 
 export default function AdminTahunAjaranPage() {
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -84,9 +78,6 @@ export default function AdminTahunAjaranPage() {
 
   const itemsPerPage = 8;
 
-  /* =========================================================
-     LOAD DATA
-  ========================================================= */
 
   const loadData = async (isRefresh = false) => {
     try {
@@ -134,9 +125,6 @@ export default function AdminTahunAjaranPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  /* =========================================================
-     KELOMPOKKAN KELAS BERDASARKAN TAHUN AJARAN
-  ========================================================= */
 
   const kelasByTahunAjaran = useMemo(() => {
     const grouped = {};
@@ -154,9 +142,6 @@ export default function AdminTahunAjaranPage() {
     return grouped;
   }, [kelas]);
 
-  /* =========================================================
-     FILTER
-  ========================================================= */
 
   const filteredData = useMemo(() => {
     let result = [...tahunAjaran];
@@ -206,9 +191,6 @@ export default function AdminTahunAjaranPage() {
     filterSemester,
   ]);
 
-  /* =========================================================
-     PAGINATION
-  ========================================================= */
 
   const totalPages = Math.max(
     1,
@@ -226,9 +208,6 @@ export default function AdminTahunAjaranPage() {
     if (currentPage > totalPages) setCurrentPage(totalPages);
   }, [currentPage, totalPages]);
 
-  /* =========================================================
-     STATISTIK
-  ========================================================= */
 
   const activeYear = tahunAjaran.find((item) => item?.status === "aktif");
   const activeCount = tahunAjaran.filter(
@@ -239,9 +218,6 @@ export default function AdminTahunAjaranPage() {
   ).length;
   const totalKelas = kelas.length;
 
-  /* =========================================================
-     ACTIONS
-  ========================================================= */
 
   const toggleRow = (id) =>
     setExpandedRows((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -297,9 +273,6 @@ export default function AdminTahunAjaranPage() {
     setCurrentPage(1);
   };
 
-  /* =========================================================
-     LOADING
-  ========================================================= */
 
   if (loading) {
     return (
@@ -337,9 +310,6 @@ export default function AdminTahunAjaranPage() {
     );
   }
 
-  /* =========================================================
-     RENDER
-  ========================================================= */
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
@@ -366,9 +336,6 @@ export default function AdminTahunAjaranPage() {
         <main className="min-w-0 flex-1 overflow-y-auto">
           <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
             <div className="space-y-5">
-              {/* ================================================= */}
-              {/* PAGE HEADER */}
-              {/* ================================================= */}
 
               <section className="theme-card relative overflow-hidden rounded-2xl border theme-border p-5 shadow-sm sm:p-6">
                 <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full blur-3xl bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)]" />
@@ -419,9 +386,6 @@ export default function AdminTahunAjaranPage() {
                 </div>
               </section>
 
-              {/* ================================================= */}
-              {/* STATS */}
-              {/* ================================================= */}
 
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
                 <StatCard
@@ -450,9 +414,6 @@ export default function AdminTahunAjaranPage() {
                 />
               </div>
 
-              {/* ================================================= */}
-              {/* ERROR */}
-              {/* ================================================= */}
 
               {error && (
                 <div className="theme-danger flex items-start gap-3 rounded-xl border theme-border p-4">
@@ -471,9 +432,6 @@ export default function AdminTahunAjaranPage() {
                 </div>
               )}
 
-              {/* ================================================= */}
-              {/* FILTER */}
-              {/* ================================================= */}
 
               <section className="theme-card rounded-2xl border theme-border p-4 shadow-sm sm:p-5">
                 <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
@@ -549,9 +507,6 @@ export default function AdminTahunAjaranPage() {
                 </div>
               </section>
 
-              {/* ================================================= */}
-              {/* TABLE HEADER */}
-              {/* ================================================= */}
 
               <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
                 <div>
@@ -576,9 +531,6 @@ export default function AdminTahunAjaranPage() {
                 )}
               </div>
 
-              {/* ================================================= */}
-              {/* TABLE */}
-              {/* ================================================= */}
 
               <section className="theme-card overflow-hidden rounded-2xl border theme-border shadow-sm">
                 <div className="overflow-x-auto">
@@ -654,12 +606,10 @@ export default function AdminTahunAjaranPage() {
                                   : ""
                               }`}
                             >
-                              {/* NO */}
                               <td className="theme-text-muted px-5 py-4 text-center text-sm font-medium">
                                 {startIndex + index + 1}
                               </td>
 
-                              {/* TAHUN AJARAN */}
                               <td className="px-5 py-4">
                                 <div className="flex items-center gap-3">
                                   <div
@@ -684,7 +634,6 @@ export default function AdminTahunAjaranPage() {
                                 </div>
                               </td>
 
-                              {/* SEMESTER */}
                               <td className="px-5 py-4">
                                 <span
                                   className={
@@ -697,7 +646,6 @@ export default function AdminTahunAjaranPage() {
                                 </span>
                               </td>
 
-                              {/* KELAS */}
                               <td className="px-5 py-4">
                                 {daftarKelas.length === 0 ? (
                                   <span className="theme-text-muted text-xs">
@@ -742,7 +690,6 @@ export default function AdminTahunAjaranPage() {
                                 )}
                               </td>
 
-                              {/* STATUS */}
                               <td className="px-5 py-4">
                                 <span
                                   className={
@@ -760,7 +707,6 @@ export default function AdminTahunAjaranPage() {
                                 </span>
                               </td>
 
-                              {/* AKSI */}
                               <td className="px-5 py-4">
                                 <div className="flex items-center justify-end gap-1">
                                   <Link
@@ -806,7 +752,6 @@ export default function AdminTahunAjaranPage() {
                   </table>
                 </div>
 
-                {/* PAGINATION */}
                 {filteredData.length > 0 && (
                   <div className="theme-card-soft flex flex-col gap-3 border-t theme-border px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
                     <p className="theme-text-muted text-xs sm:text-sm">
@@ -874,9 +819,6 @@ export default function AdminTahunAjaranPage() {
                 )}
               </section>
 
-              {/* ================================================= */}
-              {/* ACTIVE PERIOD INFO */}
-              {/* ================================================= */}
 
               <section className="theme-info rounded-2xl border theme-border p-5">
                 <div className="flex items-start gap-3">
@@ -907,9 +849,6 @@ export default function AdminTahunAjaranPage() {
   );
 }
 
-/* =========================================================
-   STAT CARD
-========================================================= */
 
 function StatCard({ label, value, icon: Icon, tone = "primary" }) {
   const toneMap = {

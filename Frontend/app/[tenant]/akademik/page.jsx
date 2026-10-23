@@ -148,7 +148,6 @@ export default function AkademikPage() {
         color: "var(--school-text, #0F172A)",
       }}
     >
-      {/* HEADER */}
       <header
         className="sticky top-0 z-50 border-b backdrop-blur-xl"
         style={{
@@ -273,7 +272,6 @@ export default function AkademikPage() {
         )}
       </header>
 
-      {/* HERO */}
       <section
         className="relative overflow-hidden"
         style={{
@@ -394,7 +392,6 @@ export default function AkademikPage() {
         </div>
       </section>
 
-      {/* LINGKUP AKADEMIK */}
       <section
         id="informasi-akademik"
         className="mx-auto max-w-7xl px-6 py-14 lg:px-8 lg:py-20"
@@ -448,7 +445,6 @@ export default function AkademikPage() {
         </div>
       </section>
 
-      {/* KONTEN DARI CMS */}
       <section className="mx-auto max-w-7xl px-6 pb-16 lg:px-8 lg:pb-20">
         {loading && (
           <div
@@ -626,7 +622,6 @@ export default function AkademikPage() {
         )}
       </section>
 
-      {/* CTA */}
       <section className="mx-auto max-w-7xl px-6 pb-16 lg:px-8">
         <div
           className="relative overflow-hidden rounded-3xl px-7 py-10 sm:px-10 lg:px-12 lg:py-12"
@@ -661,7 +656,6 @@ export default function AkademikPage() {
         </div>
       </section>
 
-      {/* FOOTER */}
       <footer
         className="border-t"
         style={{

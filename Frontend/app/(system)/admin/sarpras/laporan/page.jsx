@@ -16,7 +16,6 @@ import {
   Calendar,
 } from "lucide-react";
 
-// Dummy data laporan. Ganti dengan data asli dari API kalau sudah ada.
 const laporanList = [
   {
     id: "lap-001",
@@ -78,9 +77,6 @@ const jenisOptions = ["Semua", "Kerusakan", "Pemeriksaan"];
 const targetOptions = ["Semua", "Fasilitas", "Inventaris"];
 const statusOptions = ["Semua", "Menunggu", "Diproses", "Selesai"];
 
-// ============================================================
-// THEME HELPERS
-// ============================================================
 
 const themePrimarySurface =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -136,9 +132,6 @@ const themeWarningBorder =
 const themeWarningText =
   "text-[var(--color-warning)]";
 
-// ============================================================
-// STATUS STYLE
-// ============================================================
 
 const statusStyle = {
   Menunggu: `${themeWarningText} ${themeWarningSurface} ${themeWarningBorder}`,
@@ -231,15 +224,11 @@ export default function LaporanPage() {
   });
 
   const handleExport = () => {
-    // TODO: ganti dengan pemanggilan API asli untuk export (PDF/Excel)
     console.log("Export laporan:", filteredList);
   };
 
   return (
     <div className="flex min-h-screen theme-page">
-      {/* ========================================================
-          SIDEBAR
-      ======================================================== */}
       <Sidebar
         role="adminSarpras"
         active="laporan"
@@ -249,9 +238,6 @@ export default function LaporanPage() {
       />
 
       <div className="flex-1 flex flex-col min-w-0">
-        {/* ======================================================
-            HEADER
-        ====================================================== */}
         <Header
           toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
           notifications={notifications}
@@ -265,9 +251,6 @@ export default function LaporanPage() {
         <main className="flex-1 p-4 sm:p-6 lg:p-8">
           <div className="w-full space-y-6">
 
-            {/* ==================================================
-                PAGE HEADER
-            ================================================== */}
             <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
               <div className="min-w-0">
                 <p
@@ -306,9 +289,6 @@ export default function LaporanPage() {
               </button>
             </div>
 
-            {/* ==================================================
-                QUICK STATS
-            ================================================== */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {quickStats.map(
                 ({ key, label, value, icon: Icon, tone }) => (
@@ -349,9 +329,6 @@ export default function LaporanPage() {
               )}
             </div>
 
-            {/* ==================================================
-                SEARCH & FILTER
-            ================================================== */}
             <div
               className={`
                 theme-card
@@ -362,7 +339,6 @@ export default function LaporanPage() {
                 flex flex-col lg:flex-row gap-3
               `}
             >
-              {/* SEARCH */}
               <div className="relative flex-1">
                 <Search
                   size={16}
@@ -393,9 +369,7 @@ export default function LaporanPage() {
                 />
               </div>
 
-              {/* FILTERS */}
               <div className="flex flex-wrap gap-3">
-                {/* JENIS */}
                 <div className="relative">
                   <SlidersHorizontal
                     size={14}
@@ -430,7 +404,6 @@ export default function LaporanPage() {
                   </select>
                 </div>
 
-                {/* TARGET */}
                 <select
                   value={targetFilter}
                   onChange={(e) => setTargetFilter(e.target.value)}
@@ -453,7 +426,6 @@ export default function LaporanPage() {
                   ))}
                 </select>
 
-                {/* STATUS */}
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
@@ -478,9 +450,6 @@ export default function LaporanPage() {
               </div>
             </div>
 
-            {/* ==================================================
-                TABLE LAPORAN
-            ================================================== */}
             <div
               className={`
                 theme-card
@@ -490,7 +459,6 @@ export default function LaporanPage() {
                 overflow-hidden
               `}
             >
-              {/* TABLE HEADER */}
               <div
                 className={`
                   flex items-center justify-between gap-2
@@ -523,7 +491,6 @@ export default function LaporanPage() {
                 </div>
               </div>
 
-              {/* TABLE */}
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
@@ -581,7 +548,6 @@ export default function LaporanPage() {
                             hover:bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)]
                           `}
                         >
-                          {/* JUDUL */}
                           <td className="px-5 py-3.5">
                             <div className="flex items-center gap-2.5">
                               <div
@@ -602,12 +568,10 @@ export default function LaporanPage() {
                             </div>
                           </td>
 
-                          {/* JENIS */}
                           <td className="px-5 py-3.5 theme-text-secondary">
                             {l.jenis}
                           </td>
 
-                          {/* TARGET */}
                           <td className="px-5 py-3.5">
                             <div className="flex items-center gap-1.5 theme-text-secondary">
                               <TargetIcon
@@ -619,12 +583,10 @@ export default function LaporanPage() {
                             </div>
                           </td>
 
-                          {/* PELAPOR */}
                           <td className="px-5 py-3.5 theme-text-secondary">
                             {l.pelapor}
                           </td>
 
-                          {/* TANGGAL */}
                           <td className="px-5 py-3.5">
                             <div className="flex items-center gap-1.5 theme-text-secondary">
                               <Calendar
@@ -636,7 +598,6 @@ export default function LaporanPage() {
                             </div>
                           </td>
 
-                          {/* STATUS */}
                           <td className="px-5 py-3.5">
                             <span
                               className={`
@@ -655,7 +616,6 @@ export default function LaporanPage() {
                       );
                     })}
 
-                    {/* EMPTY STATE */}
                     {filteredList.length === 0 && (
                       <tr>
                         <td

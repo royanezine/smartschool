@@ -45,9 +45,6 @@ export default function PagesPage() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
 
-  // ============================================================
-  // FETCH DATA
-  // ============================================================
 
   const fetchPages = async (showRefresh = false) => {
     try {
@@ -88,9 +85,6 @@ export default function PagesPage() {
     fetchPages();
   }, []);
 
-  // ============================================================
-  // FILTER
-  // ============================================================
 
   const filteredPages = useMemo(() => {
     const keyword = searchQuery.trim().toLowerCase();
@@ -112,9 +106,6 @@ export default function PagesPage() {
     });
   }, [pages, searchQuery]);
 
-  // ============================================================
-  // STATISTICS
-  // ============================================================
 
   const totalPages = pages.length;
 
@@ -134,9 +125,6 @@ export default function PagesPage() {
     return status === "draft";
   }).length;
 
-  // ============================================================
-  // HELPERS
-  // ============================================================
 
   const getPageTitle = (page) => {
     return page?.judul || "Tanpa Judul";
@@ -191,9 +179,6 @@ export default function PagesPage() {
     };
   };
 
-  // ============================================================
-  // PUBLIC WEBSITE URL
-  // ============================================================
 
   const getPageUrl = (page) => {
     if (!page?.slug) {
@@ -203,9 +188,6 @@ export default function PagesPage() {
     return `/website/${page.slug}`;
   };
 
-  // ============================================================
-  // DELETE
-  // ============================================================
 
   const handleDelete = async () => {
     if (!deleteTarget?.id) {
@@ -250,9 +232,6 @@ export default function PagesPage() {
     }
   };
 
-  // ============================================================
-  // LOADING
-  // ============================================================
 
   if (loading) {
     return (
@@ -294,15 +273,9 @@ export default function PagesPage() {
     );
   }
 
-  // ============================================================
-  // MAIN
-  // ============================================================
 
   return (
     <div className="theme-page flex min-h-screen w-full">
-      {/* ========================================================
-          SIDEBAR
-      ======================================================== */}
 
       <Sidebar
         active={active}
@@ -311,14 +284,8 @@ export default function PagesPage() {
         setCollapsed={setCollapsed}
       />
 
-      {/* ========================================================
-          MAIN AREA
-      ======================================================== */}
 
       <div className="flex min-w-0 flex-1 flex-col">
-        {/* ======================================================
-            HEADER
-        ====================================================== */}
 
         <Header
           title="Halaman Statis"
@@ -329,17 +296,11 @@ export default function PagesPage() {
           }}
         />
 
-        {/* ======================================================
-            CONTENT
-        ====================================================== */}
 
         <main className="theme-page min-w-0 flex-1 overflow-y-auto">
           <div className="w-full min-w-0 px-3 py-4 sm:px-5 sm:py-6 md:px-7 lg:px-9 xl:px-10">
             <div className="mx-auto w-full max-w-[1700px]">
 
-              {/* ==================================================
-                  TOP BAR
-              ================================================== */}
 
               <div className="mb-6 flex flex-col gap-4 lg:mb-7 lg:flex-row lg:items-center lg:justify-between">
                 <div className="min-w-0">
@@ -396,9 +357,6 @@ export default function PagesPage() {
                 </div>
               </div>
 
-              {/* ==================================================
-                  SUCCESS
-              ================================================== */}
 
               {success && (
                 <div className="theme-success mb-5 flex items-start gap-3 rounded-2xl border p-4">
@@ -426,9 +384,6 @@ export default function PagesPage() {
                 </div>
               )}
 
-              {/* ==================================================
-                  ERROR
-              ================================================== */}
 
               {error && (
                 <div className="theme-danger mb-5 flex items-start gap-3 rounded-2xl border p-4">
@@ -456,9 +411,6 @@ export default function PagesPage() {
                 </div>
               )}
 
-              {/* ==================================================
-                  HERO
-              ================================================== */}
 
               <section
                 className="
@@ -505,11 +457,9 @@ export default function PagesPage() {
                     </p>
                   </div>
 
-                  {/* STATS */}
 
                   <div className="grid w-full grid-cols-3 gap-2 sm:max-w-lg sm:gap-3">
 
-                    {/* TOTAL */}
 
                     <div className="theme-card rounded-2xl border p-3 shadow-sm sm:p-4">
                       <div className="mb-2 flex items-center justify-between">
@@ -529,7 +479,6 @@ export default function PagesPage() {
                       </p>
                     </div>
 
-                    {/* PUBLISH */}
 
                     <div className="theme-card rounded-2xl border p-3 shadow-sm sm:p-4">
                       <div className="mb-2 flex items-center justify-between">
@@ -549,7 +498,6 @@ export default function PagesPage() {
                       </p>
                     </div>
 
-                    {/* DRAFT */}
 
                     <div className="theme-card rounded-2xl border p-3 shadow-sm sm:p-4">
                       <div className="mb-2 flex items-center justify-between">
@@ -572,9 +520,6 @@ export default function PagesPage() {
                 </div>
               </section>
 
-              {/* ==================================================
-                  CONTENT HEADER
-              ================================================== */}
 
               <div className="mb-4 flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
                 <div>
@@ -587,7 +532,6 @@ export default function PagesPage() {
                   </p>
                 </div>
 
-                {/* SEARCH */}
 
                 <div className="relative w-full xl:w-[360px]">
                   <Search className="theme-text-muted absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2" />
@@ -614,9 +558,6 @@ export default function PagesPage() {
                 </div>
               </div>
 
-              {/* ==================================================
-                  TABLE
-              ================================================== */}
 
               <section className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
                 <div className="theme-card-soft theme-border flex flex-col gap-3 border-b px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
@@ -645,9 +586,6 @@ export default function PagesPage() {
 
                 {filteredPages.length > 0 ? (
                   <>
-                    {/* ==================================================
-                        DESKTOP
-                    ================================================== */}
 
                     <div className="hidden w-full overflow-x-auto md:block">
                       <table className="w-full min-w-[900px] border-collapse">
@@ -685,7 +623,6 @@ export default function PagesPage() {
                                 key={page.id}
                                 className="theme-table-hover theme-border-soft border-b transition-colors"
                               >
-                                {/* PAGE */}
 
                                 <td className="px-6 py-4">
                                   <div className="flex items-center gap-3">
@@ -705,7 +642,6 @@ export default function PagesPage() {
                                   </div>
                                 </td>
 
-                                {/* SLUG */}
 
                                 <td className="px-6 py-4">
                                   <div className="theme-card-soft inline-flex max-w-[300px] items-center gap-1.5 rounded-lg border px-2.5 py-1.5">
@@ -717,7 +653,6 @@ export default function PagesPage() {
                                   </div>
                                 </td>
 
-                                {/* STATUS */}
 
                                 <td className="px-6 py-4">
                                   <span
@@ -733,7 +668,6 @@ export default function PagesPage() {
                                   </span>
                                 </td>
 
-                                {/* TYPE */}
 
                                 <td className="px-6 py-4">
                                   <span className="theme-text-secondary text-xs font-medium">
@@ -741,12 +675,10 @@ export default function PagesPage() {
                                   </span>
                                 </td>
 
-                                {/* ACTION */}
 
                                 <td className="px-6 py-4">
                                   <div className="flex items-center justify-end gap-1">
 
-                                    {/* DETAIL */}
 
                                     <Link
                                       href={`/cmsAdmin/pages/${page.id}`}
@@ -756,7 +688,6 @@ export default function PagesPage() {
                                       <Eye className="h-4 w-4" />
                                     </Link>
 
-                                    {/* EDIT */}
 
                                     <Link
                                       href={`/admin/cms/pages/${page.id}/edit`}
@@ -766,7 +697,6 @@ export default function PagesPage() {
                                       <Pencil className="h-4 w-4" />
                                     </Link>
 
-                                    {/* DELETE */}
 
                                     <button
                                       type="button"
@@ -779,7 +709,6 @@ export default function PagesPage() {
                                       <Trash2 className="h-4 w-4" />
                                     </button>
 
-                                    {/* MENU */}
 
                                     <button
                                       type="button"
@@ -800,9 +729,6 @@ export default function PagesPage() {
                       </table>
                     </div>
 
-                    {/* ==================================================
-                        MOBILE
-                    ================================================== */}
 
                     <div className="theme-border-soft divide-y md:hidden">
                       {filteredPages.map((page) => {
@@ -851,7 +777,6 @@ export default function PagesPage() {
 
                                   <div className="flex items-center gap-1">
 
-                                    {/* DETAIL */}
 
                                     <Link
                                       href={`/cmsAdmin/pages/${page.id}`}
@@ -860,7 +785,6 @@ export default function PagesPage() {
                                       <Eye className="h-4 w-4" />
                                     </Link>
 
-                                    {/* EDIT */}
 
                                     <Link
                                       href={`/cmsAdmin/pages/${page.id}/edit`}
@@ -869,7 +793,6 @@ export default function PagesPage() {
                                       <Pencil className="h-4 w-4" />
                                     </Link>
 
-                                    {/* DELETE */}
 
                                     <button
                                       type="button"
@@ -890,9 +813,6 @@ export default function PagesPage() {
                     </div>
                   </>
                 ) : (
-                  /* ==================================================
-                     EMPTY
-                  ================================================== */
 
                   <div className="px-6 py-16 text-center">
                     <div className="mx-auto flex max-w-sm flex-col items-center">
@@ -926,9 +846,6 @@ export default function PagesPage() {
                   </div>
                 )}
 
-                {/* ==================================================
-                    FOOTER TABLE
-                ================================================== */}
 
                 <div className="theme-card-soft theme-border flex flex-col gap-3 border-t px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
                   <p className="theme-text-muted text-xs">
@@ -956,13 +873,9 @@ export default function PagesPage() {
                 </div>
               </section>
 
-              {/* ==================================================
-                  INFO CARDS
-              ================================================== */}
 
               <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
 
-                {/* CARD 1 */}
 
                 <div className="theme-card theme-border rounded-2xl border p-5">
                   <div className="theme-info mb-3 flex h-9 w-9 items-center justify-center rounded-xl border">
@@ -980,7 +893,6 @@ export default function PagesPage() {
                   </p>
                 </div>
 
-                {/* CARD 2 */}
 
                 <div className="theme-card theme-border rounded-2xl border p-5">
                   <div className="theme-info mb-3 flex h-9 w-9 items-center justify-center rounded-xl border">
@@ -997,7 +909,6 @@ export default function PagesPage() {
                   </p>
                 </div>
 
-                {/* CARD 3 */}
 
                 <div className="theme-card theme-border rounded-2xl border p-5">
                   <div className="theme-success mb-3 flex h-9 w-9 items-center justify-center rounded-xl border">
@@ -1015,9 +926,6 @@ export default function PagesPage() {
                 </div>
               </div>
 
-              {/* ==================================================
-                  FOOTER
-              ================================================== */}
 
               <footer className="py-7 text-center">
                 <p className="theme-text-muted text-[11px]">
@@ -1029,15 +937,11 @@ export default function PagesPage() {
         </main>
       </div>
 
-      {/* ========================================================
-          PREVIEW MODAL
-      ======================================================== */}
 
       {selectedPage && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm">
           <div className="theme-card theme-border max-h-[90vh] w-full max-w-3xl overflow-hidden rounded-3xl border shadow-2xl">
 
-            {/* HEADER */}
 
             <div className="theme-border flex items-center justify-between border-b px-5 py-4">
               <div className="flex min-w-0 items-center gap-3">
@@ -1065,11 +969,9 @@ export default function PagesPage() {
               </button>
             </div>
 
-            {/* CONTENT */}
 
             <div className="max-h-[65vh] overflow-y-auto p-5 sm:p-6">
 
-              {/* TITLE */}
 
               <div className="mb-5">
                 <p className="theme-text-muted text-[10px] font-bold uppercase tracking-wider">
@@ -1081,7 +983,6 @@ export default function PagesPage() {
                 </h4>
               </div>
 
-              {/* SLUG */}
 
               <div className="mb-5">
                 <p className="theme-text-muted text-[10px] font-bold uppercase tracking-wider">
@@ -1097,7 +998,6 @@ export default function PagesPage() {
                 </div>
               </div>
 
-              {/* STATUS */}
 
               <div className="mb-5">
                 <p className="theme-text-muted mb-2 text-[10px] font-bold uppercase tracking-wider">
@@ -1125,7 +1025,6 @@ export default function PagesPage() {
                 </span>
               </div>
 
-              {/* CONTENT */}
 
               <div>
                 <p className="theme-text-muted mb-2 text-[10px] font-bold uppercase tracking-wider">
@@ -1193,7 +1092,6 @@ export default function PagesPage() {
               </div>
             </div>
 
-            {/* FOOTER */}
 
             <div className="theme-card-soft theme-border flex flex-col gap-2 border-t p-4 sm:flex-row sm:justify-end">
 
@@ -1230,9 +1128,6 @@ export default function PagesPage() {
         </div>
       )}
 
-      {/* ========================================================
-          DELETE MODAL
-      ======================================================== */}
 
       {deleteTarget && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm">

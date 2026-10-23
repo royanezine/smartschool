@@ -27,9 +27,6 @@ import {
 
 import { getSessionUser } from "@/lib/auth";
 
-/* =========================================================
-   THEME HELPERS
-========================================================= */
 
 const themeCardShadow =
   "shadow-[0_8px_30px_color-mix(in_srgb,var(--color-text)_6%,transparent)]";
@@ -64,9 +61,6 @@ const themeWarningSoft =
 const themeDangerSoft =
   "bg-[color-mix(in_srgb,var(--color-danger)_10%,transparent)]";
 
-/* =========================================================
-   HELPERS
-========================================================= */
 
 function unwrapValue(response) {
   if (response?.data !== undefined) {
@@ -128,11 +122,8 @@ function getErrorMessage(error, fallback) {
   );
 }
 
-// getToken diimpor dari @/lib/auth (single source of truth)
 
 function getStoredUser() {
-  // Identitas selalu berasal dari sesi aktif (lib/auth). Membaca
-  // localStorage("user") langsung berisiko menampilkan akun lain.
   return getSessionUser();
 }
 
@@ -452,9 +443,6 @@ function normalizeLoan(item) {
   };
 }
 
-/* =========================================================
-   STATUS BADGE
-========================================================= */
 
 function StatusBadge({ loan }) {
   const status = loan.status;
@@ -491,9 +479,6 @@ function StatusBadge({ loan }) {
   );
 }
 
-/* =========================================================
-   DETAIL MODAL
-========================================================= */
 
 function DetailModal({
   loan,
@@ -671,9 +656,6 @@ function DetailModal({
   );
 }
 
-/* =========================================================
-   MAIN PAGE
-========================================================= */
 
 export default function PeminjamanSiswaPage() {
   const [mounted, setMounted] = useState(false);
@@ -904,9 +886,6 @@ export default function PeminjamanSiswaPage() {
             : "translate-y-4 opacity-0"
         }`}
       >
-        {/* =====================================================
-            HEADER
-        ====================================================== */}
 
         <section
           className={`relative overflow-hidden rounded-[28px] border ${themePrimaryBorder} ${themeCardShadow} bg-[color-mix(in_srgb,var(--color-primary)_10%,var(--color-card))]`}
@@ -969,9 +948,6 @@ export default function PeminjamanSiswaPage() {
           </div>
         </section>
 
-        {/* =====================================================
-            ERROR
-        ====================================================== */}
 
         {error && (
           <div
@@ -1008,9 +984,6 @@ export default function PeminjamanSiswaPage() {
           </div>
         )}
 
-        {/* =====================================================
-            STATS
-        ====================================================== */}
 
         <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <div
@@ -1134,9 +1107,6 @@ export default function PeminjamanSiswaPage() {
           </div>
         </section>
 
-        {/* =====================================================
-            TRANSACTIONS
-        ====================================================== */}
 
         <section
           className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
@@ -1525,9 +1495,6 @@ export default function PeminjamanSiswaPage() {
           </div>
         </section>
 
-        {/* =====================================================
-            INFO
-        ====================================================== */}
 
         <section className="grid gap-5 lg:grid-cols-3">
           <div
@@ -1601,9 +1568,6 @@ export default function PeminjamanSiswaPage() {
           </div>
         </section>
 
-        {/* =====================================================
-            FOOTER
-        ====================================================== */}
 
         <div
           className={`flex flex-col gap-3 border-t ${themeDivider} py-5 text-xs theme-text-muted sm:flex-row sm:items-center sm:justify-between`}

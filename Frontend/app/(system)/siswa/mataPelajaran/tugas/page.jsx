@@ -32,9 +32,6 @@ import {
   GraduationCap,
 } from "lucide-react";
 
-/* =========================================================
-   API
-========================================================= */
 
 const API_URL = (
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
@@ -43,9 +40,6 @@ const API_URL = (
 const KELAS_BASE_URL = `${API_URL}/api/kelas`;
 const TASK_BASE_URL = `${API_URL}/api/tugas`;
 
-/* =========================================================
-   THEME HELPERS
-========================================================= */
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -128,9 +122,6 @@ const themeFocus =
 const themeDisabled =
   "disabled:cursor-not-allowed disabled:opacity-60";
 
-/* =========================================================
-   API REQUEST
-========================================================= */
 
 async function apiRequest(endpoint, options = {}) {
   const token =
@@ -183,9 +174,6 @@ async function apiRequest(endpoint, options = {}) {
   return result;
 }
 
-/* =========================================================
-   GET RESPONSE DATA
-========================================================= */
 
 function getData(response) {
   if (!response) return null;
@@ -197,9 +185,6 @@ function getData(response) {
   return response;
 }
 
-/* =========================================================
-   GET USER ID
-========================================================= */
 
 function getLoggedInUserId() {
   if (typeof window === "undefined") {
@@ -269,9 +254,6 @@ function getLoggedInUserId() {
   }
 }
 
-/* =========================================================
-   GET ARRAY FROM RESPONSE
-========================================================= */
 
 function getArrayData(response) {
   const data = getData(response);
@@ -305,9 +287,6 @@ function getNamaMapel(data) {
   );
 }
 
-/* =========================================================
-   GET KELAS ID SISWA
-========================================================= */
 
 async function getKelasSiswaId() {
   const userId = getLoggedInUserId();
@@ -376,9 +355,6 @@ async function getKelasSiswaId() {
   );
 }
 
-/* =========================================================
-   GET KELAS MAPEL SISWA
-========================================================= */
 
 async function getKelasMapelSiswa() {
   const params =
@@ -414,9 +390,6 @@ async function getKelasMapelSiswa() {
     .filter(Boolean);
 }
 
-/* =========================================================
-   FORMAT DATE
-========================================================= */
 
 function formatDate(dateString) {
   if (!dateString) return "-";
@@ -436,9 +409,6 @@ function formatDate(dateString) {
   });
 }
 
-/* =========================================================
-   DEADLINE
-========================================================= */
 
 function isDeadlinePassed(dateString) {
   if (!dateString) return false;
@@ -452,9 +422,6 @@ function isDeadlinePassed(dateString) {
   return new Date() > deadline;
 }
 
-/* =========================================================
-   NORMALIZE STATUS
-========================================================= */
 
 function normalizeStatus(
   submission,
@@ -471,9 +438,6 @@ function normalizeStatus(
   return "belum";
 }
 
-/* =========================================================
-   STATUS LABEL
-========================================================= */
 
 function statusLabel(status) {
   switch (status) {
@@ -491,9 +455,6 @@ function statusLabel(status) {
   }
 }
 
-/* =========================================================
-   STATUS CLASS
-========================================================= */
 
 function statusClass(status) {
   switch (status) {
@@ -511,9 +472,6 @@ function statusClass(status) {
   }
 }
 
-/* =========================================================
-   PAGE CONTENT
-========================================================= */
 
 function TugasSiswaPageContent() {
   const router = useRouter();
@@ -548,9 +506,6 @@ function TugasSiswaPageContent() {
   const [keterangan, setKeterangan] =
     useState("");
 
-  /* =======================================================
-     GET DETAIL TUGAS
-  ======================================================= */
 
   const loadDetailTugas = useCallback(
     async (
@@ -628,9 +583,6 @@ function TugasSiswaPageContent() {
     []
   );
 
-  /* =======================================================
-     GET DAFTAR TUGAS
-  ======================================================= */
 
   const loadTugas = useCallback(async () => {
     try {
@@ -769,17 +721,11 @@ function TugasSiswaPageContent() {
     }
   }, [kelasMapelId]);
 
-  /* =======================================================
-     INITIAL LOAD
-  ======================================================= */
 
   useEffect(() => {
     loadTugas();
   }, [loadTugas]);
 
-  /* =======================================================
-     PILIH TUGAS PERTAMA
-  ======================================================= */
 
   useEffect(() => {
     if (
@@ -800,9 +746,6 @@ function TugasSiswaPageContent() {
     loadDetailTugas,
   ]);
 
-  /* =======================================================
-     CURRENT SUBMISSION
-  ======================================================= */
 
   const currentSubmission =
     useMemo(() => {
@@ -821,9 +764,6 @@ function TugasSiswaPageContent() {
       submissionMap,
     ]);
 
-  /* =======================================================
-     CURRENT STATUS
-  ======================================================= */
 
   const currentStatus =
     useMemo(() => {
@@ -836,9 +776,6 @@ function TugasSiswaPageContent() {
       selectedTugas,
     ]);
 
-  /* =======================================================
-     SUDAH DINILAI
-  ======================================================= */
 
   const isGraded = useMemo(() => {
     return (
@@ -847,9 +784,6 @@ function TugasSiswaPageContent() {
     );
   }, [currentSubmission]);
 
-  /* =======================================================
-     DEADLINE PASSED
-  ======================================================= */
 
   const deadlinePassed =
     useMemo(() => {
@@ -858,9 +792,6 @@ function TugasSiswaPageContent() {
       );
     }, [selectedTugas]);
 
-  /* =======================================================
-     STATISTIK TUGAS
-  ======================================================= */
 
   const stats = useMemo(() => {
     let belum = 0;
@@ -904,9 +835,6 @@ function TugasSiswaPageContent() {
     };
   }, [tugasList, submissionMap]);
 
-  /* =======================================================
-     SELECT TASK
-  ======================================================= */
 
   const handleSelectTugas = async (
     tugasId
@@ -922,9 +850,6 @@ function TugasSiswaPageContent() {
     await loadDetailTugas(tugasId);
   };
 
-  /* =======================================================
-     SUBMIT TUGAS
-  ======================================================= */
 
   const handleSubmit = async (
     event
@@ -1082,9 +1007,6 @@ function TugasSiswaPageContent() {
     }
   };
 
-  /* =======================================================
-     REFRESH
-  ======================================================= */
 
   const handleRefresh =
     async () => {
@@ -1098,17 +1020,10 @@ function TugasSiswaPageContent() {
       await loadTugas();
     };
 
-  /* =======================================================
-     UI
-  ======================================================= */
 
   return (
     <main className="min-w-0 flex-1 overflow-y-auto theme-page theme-text">
-      {/* Konten w-full: melebar saat zoom out, tidak dibatasi max-width */}
       <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
-        {/* =================================================
-            PAGE HEADER
-        ================================================= */}
 
         <div className="mb-6">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -1157,9 +1072,6 @@ function TugasSiswaPageContent() {
           </div>
         </div>
 
-        {/* =================================================
-            STAT CARDS — grid responsif dengan 2xl:grid-cols-6
-        ================================================= */}
 
         <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-6">
           <div className={`theme-card ${themeNeutralBorder} ${themeSmallShadow} rounded-xl px-4 py-4`}>
@@ -1247,9 +1159,6 @@ function TugasSiswaPageContent() {
           </div>
         </div>
 
-        {/* =================================================
-            ERROR
-        ================================================= */}
 
         {error && (
           <div
@@ -1272,9 +1181,6 @@ function TugasSiswaPageContent() {
           </div>
         )}
 
-        {/* =================================================
-            SUCCESS
-        ================================================= */}
 
         {successMessage && (
           <div
@@ -1297,14 +1203,8 @@ function TugasSiswaPageContent() {
           </div>
         )}
 
-        {/* =================================================
-            MAIN GRID
-        ================================================= */}
 
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(300px,0.9fr)_minmax(0,1.6fr)] xl:items-start">
-          {/* =================================================
-              DAFTAR TUGAS
-          ================================================= */}
 
           <section
             className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
@@ -1365,7 +1265,6 @@ function TugasSiswaPageContent() {
                 </p>
               </div>
             ) : (
-              /* overflow-x-auto agar daftar tidak merusak layout di layar kecil */
               <div className="max-h-[calc(100vh-380px)] overflow-y-auto overflow-x-auto p-3">
                 <div className="space-y-2 min-w-[260px]">
                   {tugasList.map(
@@ -1455,9 +1354,6 @@ function TugasSiswaPageContent() {
             )}
           </section>
 
-          {/* =================================================
-              DETAIL TUGAS
-          ================================================= */}
 
           <section className="min-w-0">
             {loadingDetail ? (
@@ -1501,7 +1397,6 @@ function TugasSiswaPageContent() {
                 <div
                   className={`theme-card rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
                 >
-                  {/* HEADER DETAIL */}
 
                   <div
                     className={`border-b ${themeDivider} px-5 py-5 sm:px-6`}
@@ -1541,10 +1436,8 @@ function TugasSiswaPageContent() {
                     </div>
                   </div>
 
-                  {/* DETAIL BODY */}
 
                   <div className="px-5 py-6 sm:px-6">
-                    {/* INFO */}
 
                     <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
                       <div
@@ -1582,7 +1475,6 @@ function TugasSiswaPageContent() {
                       </div>
                     </div>
 
-                    {/* DESKRIPSI */}
 
                     <div className="mb-7">
                       <h3 className="mb-3 text-sm font-bold theme-text">
@@ -1599,7 +1491,6 @@ function TugasSiswaPageContent() {
                       </div>
                     </div>
 
-                    {/* DEADLINE WARNING */}
 
                     {deadlinePassed &&
                       currentStatus !==
@@ -1642,7 +1533,6 @@ function TugasSiswaPageContent() {
                         </div>
                       )}
 
-                    {/* SUDAH DINILAI */}
 
                     {isGraded && (
                       <div
@@ -1676,7 +1566,6 @@ function TugasSiswaPageContent() {
                       </div>
                     )}
 
-                    {/* SUBMISSION EXISTING */}
 
                     {currentSubmission && (
                       <div
@@ -1785,7 +1674,6 @@ function TugasSiswaPageContent() {
                       </div>
                     )}
 
-                    {/* FORM SUBMISSION */}
 
                     <form
                       onSubmit={
@@ -1793,7 +1681,6 @@ function TugasSiswaPageContent() {
                       }
                       className="space-y-5"
                     >
-                      {/* URL FILE */}
 
                       <div>
                         <label
@@ -1846,7 +1733,6 @@ function TugasSiswaPageContent() {
                         </p>
                       </div>
 
-                      {/* KETERANGAN */}
 
                       <div>
                         <label
@@ -1879,7 +1765,6 @@ function TugasSiswaPageContent() {
                         />
                       </div>
 
-                      {/* SUBMIT FOOTER */}
 
                       <div
                         className={`flex flex-col gap-3 border-t ${themeDivider} pt-5 sm:flex-row sm:items-center sm:justify-between`}
@@ -1943,9 +1828,6 @@ function TugasSiswaPageContent() {
   );
 }
 
-/* =========================================================
-   EXPORT
-========================================================= */
 
 export default function TugasSiswaPage() {
   return (

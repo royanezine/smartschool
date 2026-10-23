@@ -21,9 +21,6 @@ import {
   Trash2,
 } from "lucide-react";
 
-/* =========================================================
-   THEME HELPERS
-========================================================= */
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -70,9 +67,6 @@ const themeDangerSurface =
 const themeDangerBorder =
   "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
 
-/* =========================================================
-   DATA DASAR
-========================================================= */
 
 const KELAS_LIST = [
   "7A",
@@ -154,9 +148,6 @@ const MAPEL_POOL = [
   },
 ];
 
-/* =========================================================
-   BUILD JADWAL AWAL
-========================================================= */
 
 function buildJadwalKelas(offset) {
   const jadwal = {};
@@ -247,9 +238,6 @@ function buildInitialJadwal() {
   return data;
 }
 
-/* =========================================================
-   STYLE CELL
-========================================================= */
 
 function cellStyle(tipe) {
   switch (tipe) {
@@ -267,9 +255,6 @@ function cellStyle(tipe) {
   }
 }
 
-/* =========================================================
-   MAIN PAGE
-========================================================= */
 
 export default function JadwalPelajaranPage() {
   const [isCollapsed, setIsCollapsed] =
@@ -292,9 +277,6 @@ export default function JadwalPelajaranPage() {
 
   const fileInputRef = useRef(null);
 
-  /* =======================================================
-     FORM
-  ======================================================= */
 
   const [form, setForm] = useState({
     mapel: "",
@@ -302,24 +284,15 @@ export default function JadwalPelajaranPage() {
     tipe: "reguler",
   });
 
-  /* =======================================================
-     SIDEBAR
-  ======================================================= */
 
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
   };
 
-  /* =======================================================
-     DATA KELAS AKTIF
-  ======================================================= */
 
   const jadwalKelasAktif =
     jadwalData[kelasAktif];
 
-  /* =======================================================
-     STATISTIK
-  ======================================================= */
 
   const totalMapelUnik = useMemo(() => {
     const set = new Set();
@@ -382,9 +355,6 @@ export default function JadwalPelajaranPage() {
     return set.size;
   }, [jadwalKelasAktif]);
 
-  /* =======================================================
-     TAMBAH
-  ======================================================= */
 
   function handleTambah(hari, slotIdx) {
     const slot =
@@ -406,9 +376,6 @@ export default function JadwalPelajaranPage() {
     setShowModal(true);
   }
 
-  /* =======================================================
-     EDIT
-  ======================================================= */
 
   function handleEdit(hari, slotIdx) {
     const slot =
@@ -438,9 +405,6 @@ export default function JadwalPelajaranPage() {
     setShowModal(true);
   }
 
-  /* =======================================================
-     HAPUS
-  ======================================================= */
 
   function handleHapus(hari, slotIdx) {
     const slot =
@@ -484,9 +448,6 @@ export default function JadwalPelajaranPage() {
     });
   }
 
-  /* =======================================================
-     SIMPAN FORM
-  ======================================================= */
 
   function handleSave() {
     if (!editingData) return;
@@ -589,9 +550,6 @@ export default function JadwalPelajaranPage() {
     }, 3000);
   }
 
-  /* =======================================================
-     EXPORT EXCEL
-  ======================================================= */
 
   function handleExportExcel() {
     const workbook =
@@ -696,9 +654,6 @@ export default function JadwalPelajaranPage() {
     );
   }
 
-  /* =======================================================
-     IMPORT EXCEL
-  ======================================================= */
 
   function handleImportExcel(e) {
     const file =
@@ -891,14 +846,10 @@ export default function JadwalPelajaranPage() {
     e.target.value = "";
   }
 
-  /* =======================================================
-     RENDER
-  ======================================================= */
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
 
-      {/* SIDEBAR */}
 
       <Sidebar
         active="jadwalPelajaran"
@@ -908,11 +859,9 @@ export default function JadwalPelajaranPage() {
         role="admin"
       />
 
-      {/* CONTENT */}
 
       <div className="flex h-full min-w-0 flex-1 flex-col overflow-hidden">
 
-        {/* HEADER */}
 
         <Header
           toggleSidebar={toggleSidebar}
@@ -924,13 +873,11 @@ export default function JadwalPelajaranPage() {
           }}
         />
 
-        {/* MAIN */}
 
         <main className="flex-1 overflow-y-auto">
 
           <div className="space-y-6 p-4 sm:p-6 lg:p-8">
 
-            {/* PAGE HEADER */}
 
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 
@@ -996,7 +943,6 @@ export default function JadwalPelajaranPage() {
 
             </div>
 
-            {/* MESSAGE */}
 
             {importMsg && (
               <div
@@ -1032,7 +978,6 @@ export default function JadwalPelajaranPage() {
               </div>
             )}
 
-            {/* STATISTIK */}
 
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
 
@@ -1062,7 +1007,6 @@ export default function JadwalPelajaranPage() {
 
             </div>
 
-            {/* TAB KELAS */}
 
             <div className="flex flex-wrap items-center gap-2">
 
@@ -1089,7 +1033,6 @@ export default function JadwalPelajaranPage() {
 
             </div>
 
-            {/* INFO */}
 
             <div className="flex items-center justify-between gap-3">
 
@@ -1114,7 +1057,6 @@ export default function JadwalPelajaranPage() {
 
             </div>
 
-            {/* JADWAL */}
 
             <div
               className={`theme-card overflow-hidden rounded-xl border ${themeNeutralBorder} ${themeCardShadow}`}
@@ -1160,13 +1102,11 @@ export default function JadwalPelajaranPage() {
                           className={`border-b ${themeDivider} last:border-0`}
                         >
 
-                          {/* JAM */}
 
                           <td className="theme-text-muted whitespace-nowrap px-3 py-2.5 align-top font-mono text-xs">
                             {jam}
                           </td>
 
-                          {/* HARI */}
 
                           {HARI_LIST.map(
                             (hari) => {
@@ -1218,7 +1158,6 @@ export default function JadwalPelajaranPage() {
                                     )}`}
                                   >
 
-                                    {/* CONTENT */}
 
                                     <div className="pr-8">
 
@@ -1239,11 +1178,9 @@ export default function JadwalPelajaranPage() {
 
                                     </div>
 
-                                    {/* ACTION */}
 
                                     <div className="absolute right-1.5 top-1.5 flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
 
-                                      {/* EDIT */}
 
                                       <button
                                         type="button"
@@ -1259,7 +1196,6 @@ export default function JadwalPelajaranPage() {
                                         <Pencil size={11} />
                                       </button>
 
-                                      {/* HAPUS */}
 
                                       {isReguler && (
                                         <button
@@ -1299,7 +1235,6 @@ export default function JadwalPelajaranPage() {
 
             </div>
 
-            {/* FOOTER INFO */}
 
             <div className="flex flex-wrap items-center gap-4 theme-text-muted text-xs">
 
@@ -1331,9 +1266,6 @@ export default function JadwalPelajaranPage() {
 
       </div>
 
-      {/* =====================================================
-          MODAL TAMBAH / EDIT
-      ===================================================== */}
 
       {showModal &&
         editingData && (
@@ -1344,7 +1276,6 @@ export default function JadwalPelajaranPage() {
               className={`theme-card w-full max-w-md overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
             >
 
-              {/* MODAL HEADER */}
 
               <div
                 className={`flex items-center justify-between border-b ${themeDivider} p-5`}
@@ -1383,11 +1314,9 @@ export default function JadwalPelajaranPage() {
 
               </div>
 
-              {/* FORM */}
 
               <div className="space-y-4 p-5">
 
-                {/* KELAS */}
 
                 <div>
 
@@ -1403,7 +1332,6 @@ export default function JadwalPelajaranPage() {
 
                 </div>
 
-                {/* HARI */}
 
                 <div>
 
@@ -1419,7 +1347,6 @@ export default function JadwalPelajaranPage() {
 
                 </div>
 
-                {/* JAM */}
 
                 <div>
 
@@ -1435,7 +1362,6 @@ export default function JadwalPelajaranPage() {
 
                 </div>
 
-                {/* TIPE */}
 
                 <div>
 
@@ -1476,7 +1402,6 @@ export default function JadwalPelajaranPage() {
 
                 </div>
 
-                {/* MAPEL */}
 
                 {form.tipe === "reguler" && (
 
@@ -1520,7 +1445,6 @@ export default function JadwalPelajaranPage() {
 
                     </div>
 
-                    {/* GURU */}
 
                     <div>
 
@@ -1564,7 +1488,6 @@ export default function JadwalPelajaranPage() {
 
                 )}
 
-                {/* BUTTON */}
 
                 <div className="flex items-center justify-end gap-2 pt-2">
 
@@ -1606,9 +1529,6 @@ export default function JadwalPelajaranPage() {
   );
 }
 
-/* =========================================================
-   STAT CARD
-========================================================= */
 
 function StatCard({
   icon: Icon,
@@ -1641,9 +1561,6 @@ function StatCard({
   );
 }
 
-/* =========================================================
-   LEGEND
-========================================================= */
 
 function LegendItem({
   className,

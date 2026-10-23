@@ -28,10 +28,6 @@ import {
   updateUser,
 } from "@/services/user.service";
 
-/* =========================================================
-   HALAMAN UTAMA
-   Suspense membungkus komponen yang memakai useSearchParams
-========================================================= */
 
 export default function EditUserPage() {
   return (
@@ -52,9 +48,6 @@ export default function EditUserPage() {
   );
 }
 
-/* =========================================================
-   KONTEN EDIT USER
-========================================================= */
 
 function EditUserContent() {
   const router = useRouter();
@@ -84,9 +77,6 @@ function EditUserContent() {
     status: "aktif",
   });
 
-  /* =========================================================
-     LOAD USER
-  ========================================================= */
 
   useEffect(() => {
     let cancelled = false;
@@ -159,9 +149,6 @@ function EditUserContent() {
     };
   }, [userId]);
 
-  /* =========================================================
-     HANDLE FORM
-  ========================================================= */
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -172,9 +159,6 @@ function EditUserContent() {
     }));
   };
 
-  /* =========================================================
-     SUBMIT
-  ========================================================= */
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -215,7 +199,6 @@ function EditUserContent() {
         status: form.status,
       };
 
-      // Password hanya dikirim jika diisi.
       if (form.kataSandi.trim()) {
         payload.kataSandi = form.kataSandi.trim();
       }
@@ -238,9 +221,6 @@ function EditUserContent() {
     }
   };
 
-  /* =========================================================
-     HEADER COMPONENT
-  ========================================================= */
 
   const renderHeader = () => (
     <Header
@@ -254,9 +234,6 @@ function EditUserContent() {
     />
   );
 
-  /* =========================================================
-     LOADING
-  ========================================================= */
 
   if (loading) {
     return (
@@ -290,9 +267,6 @@ function EditUserContent() {
     );
   }
 
-  /* =========================================================
-     RENDER
-  ========================================================= */
 
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50">
@@ -307,7 +281,6 @@ function EditUserContent() {
 
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           <div className="mx-auto w-full max-w-[1200px]">
-            {/* HEADER */}
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <button
@@ -331,7 +304,6 @@ function EditUserContent() {
               </div>
             </div>
 
-            {/* ERROR */}
             {error && (
               <div
                 role="alert"
@@ -352,7 +324,6 @@ function EditUserContent() {
               </div>
             )}
 
-            {/* SUCCESS */}
             {success && (
               <div
                 role="status"
@@ -374,7 +345,6 @@ function EditUserContent() {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* INFORMASI AKUN */}
               <section className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
                 <SectionHeader
                   icon={User}
@@ -427,7 +397,6 @@ function EditUserContent() {
                 </div>
               </section>
 
-              {/* ROLE DAN AKSES */}
               <section className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
                 <SectionHeader
                   icon={ShieldCheck}
@@ -460,7 +429,6 @@ function EditUserContent() {
                 </div>
               </section>
 
-              {/* SEKOLAH DAN YAYASAN */}
               <section className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
                 <SectionHeader
                   icon={Building2}
@@ -490,7 +458,6 @@ function EditUserContent() {
                 </div>
               </section>
 
-              {/* IDENTITAS */}
               <section className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
                 <SectionHeader
                   icon={GraduationCap}
@@ -563,7 +530,6 @@ function EditUserContent() {
                 </div>
               </section>
 
-              {/* TOMBOL */}
               <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
                 <button
                   type="button"
@@ -602,9 +568,6 @@ function EditUserContent() {
   );
 }
 
-/* =========================================================
-   SECTION HEADER
-========================================================= */
 
 function SectionHeader({
   icon: Icon,
@@ -641,9 +604,6 @@ function SectionHeader({
   );
 }
 
-/* =========================================================
-   FORM INPUT
-========================================================= */
 
 function FormInput({
   label,
@@ -691,9 +651,6 @@ function FormInput({
   );
 }
 
-/* =========================================================
-   FORM SELECT
-========================================================= */
 
 function FormSelect({
   label,

@@ -12,9 +12,6 @@ export default function YayasanLayout({ children }) {
 
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  // ============================================================
-  // ACTIVE MENU
-  // ============================================================
 
   const getActiveMenu = () => {
     if (!pathname || pathname === "/yayasan") {
@@ -50,11 +47,6 @@ export default function YayasanLayout({ children }) {
 
   const activeMenu = getActiveMenu();
 
-  // ============================================================
-  // NOTIFICATIONS
-  // ============================================================
-  // Sementara masih dummy.
-  // Nanti bisa diganti API notifikasi yayasan tanpa mengubah layout.
 
   const notifications = [
     {
@@ -71,18 +63,12 @@ export default function YayasanLayout({ children }) {
     },
   ];
 
-  // ============================================================
-  // RENDER
-  // ============================================================
 
   return (
     <AuthGuard
       allowedRoles={["admin_yayasan", "yayasan", "super_admin"]}
     >
       <div className="theme-page theme-text min-h-screen flex overflow-hidden">
-        {/* ======================================================
-            SIDEBAR
-        ====================================================== */}
 
         <Sidebar
           role="yayasan"
@@ -92,14 +78,8 @@ export default function YayasanLayout({ children }) {
           setCollapsed={() => setSidebarOpen((prev) => !prev)}
         />
 
-        {/* ======================================================
-            MAIN AREA
-        ====================================================== */}
 
         <div className="flex-1 flex flex-col min-w-0 min-h-screen">
-          {/* ====================================================
-              HEADER
-          ==================================================== */}
 
           <Header
             toggleSidebar={() => setSidebarOpen((prev) => !prev)}
@@ -111,9 +91,6 @@ export default function YayasanLayout({ children }) {
             }}
           />
 
-          {/* ====================================================
-              PAGE CONTENT
-          ==================================================== */}
 
           <main className="flex-1 min-w-0 overflow-y-auto theme-page">
             {children}

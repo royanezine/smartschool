@@ -23,9 +23,6 @@ import {
   kembalikanBuku,
 } from "@/services/perpustakaan.service";
 
-/* =========================================================
-   HELPERS
-========================================================= */
 
 function unwrapValue(response) {
   if (response?.data !== undefined) return response.data;
@@ -177,9 +174,6 @@ function getErrorMessage(error, fallback) {
   return error?.message || error?.error || fallback;
 }
 
-/* =========================================================
-   BADGE
-========================================================= */
 
 function StatusBadge({ status }) {
   if (status === "Dipinjam") {
@@ -206,9 +200,6 @@ function StatusBadge({ status }) {
   );
 }
 
-/* =========================================================
-   PAGE
-========================================================= */
 
 export default function DetailPeminjamanPage() {
   const params = useParams();
@@ -344,7 +335,6 @@ export default function DetailPeminjamanPage() {
               </div>
             ) : loan ? (
               <div className="space-y-5">
-                {/* HEADER CARD */}
                 <section className="theme-card overflow-hidden rounded-2xl border theme-border shadow-sm">
                   <div className="flex flex-col gap-4 p-5 sm:flex-row sm:p-6">
                     <div className="theme-primary flex h-16 w-16 shrink-0 items-center justify-center rounded-xl">
@@ -370,7 +360,6 @@ export default function DetailPeminjamanPage() {
                   </div>
                 </section>
 
-                {/* PEMINJAM */}
                 <section className="theme-card overflow-hidden rounded-2xl border theme-border shadow-sm">
                   <div className="border-b theme-border px-5 py-4 sm:px-6">
                     <h3 className="theme-text text-sm font-semibold">
@@ -392,7 +381,6 @@ export default function DetailPeminjamanPage() {
                   </div>
                 </section>
 
-                {/* TANGGAL */}
                 <section className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                   <div className="theme-card rounded-xl border theme-border p-4">
                     <div className="theme-text-muted flex items-center gap-2">
@@ -425,7 +413,6 @@ export default function DetailPeminjamanPage() {
                   </div>
                 </section>
 
-                {/* DENDA */}
                 <section className="theme-card flex items-center justify-between rounded-2xl border theme-border px-5 py-4 shadow-sm">
                   <span className="theme-text-secondary text-sm">
                     Total Denda
@@ -435,7 +422,6 @@ export default function DetailPeminjamanPage() {
                   </span>
                 </section>
 
-                {/* INFO TEKNIS */}
                 <section className="theme-card overflow-hidden rounded-2xl border theme-border shadow-sm">
                   <div className="border-b theme-border px-5 py-4 sm:px-6">
                     <h3 className="theme-text text-sm font-semibold">
@@ -475,7 +461,6 @@ export default function DetailPeminjamanPage() {
         </main>
       </div>
 
-      {/* KONFIRMASI PENGEMBALIAN — tetap modal */}
       {showReturn && loan && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/40 p-4 backdrop-blur-[2px]">
           <div className="theme-card w-full max-w-md rounded-2xl border theme-border p-6 shadow-xl">

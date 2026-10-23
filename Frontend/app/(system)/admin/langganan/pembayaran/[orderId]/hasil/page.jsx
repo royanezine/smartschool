@@ -67,7 +67,6 @@ export default function HasilPembayaranLanggananPage() {
     loadData();
   }, [loadData]);
 
-  // Halaman sukses HANYA boleh tampil jika backend memverifikasi sukses.
   useEffect(() => {
     if (!loading && status && status.status !== "success") {
       router.replace(`/admin/langganan/pembayaran/${orderId}`);
@@ -131,7 +130,6 @@ export default function HasilPembayaranLanggananPage() {
 
             {!loading && !error && terverifikasi && (
               <>
-                {/* HERO SUKSES */}
                 <section className="theme-card theme-border rounded-xl border p-6 sm:p-8 text-center shadow-[0_1px_3px_color-mix(in_srgb,var(--color-text)_8%,transparent)]">
                   <div className="mx-auto w-16 h-16 rounded-2xl theme-success flex items-center justify-center">
                     <CheckCircle2
@@ -157,7 +155,6 @@ export default function HasilPembayaranLanggananPage() {
                   </div>
                 </section>
 
-                {/* DETAIL */}
                 <section className="theme-card theme-border rounded-xl border p-5 sm:p-6">
                   <div className="flex items-center gap-2">
                     <Package
@@ -217,7 +214,6 @@ export default function HasilPembayaranLanggananPage() {
                   </div>
                 </section>
 
-                {/* AKSI */}
                 <div className="flex flex-col sm:flex-row gap-3">
                   <button
                     type="button"

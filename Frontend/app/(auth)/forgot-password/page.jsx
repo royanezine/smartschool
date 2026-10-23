@@ -19,9 +19,6 @@ import {
   RefreshCw,
 } from "lucide-react";
 
-/* =========================================================
-   GET API URL
-========================================================= */
 
 function getApiUrl() {
   const envUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -35,12 +32,6 @@ function getApiUrl() {
   return envUrl.trim().replace(/\/+$/, "");
 }
 
-/* =========================================================
-   GET API BASE URL
-   Support:
-   http://localhost:5000
-   http://localhost:5000/api
-========================================================= */
 
 function getApiBaseUrl() {
   const apiUrl = getApiUrl();
@@ -52,9 +43,6 @@ function getApiBaseUrl() {
   return `${apiUrl}/api`;
 }
 
-/* =========================================================
-   PARSE RESPONSE
-========================================================= */
 
 async function parseResponse(response) {
   const contentType =
@@ -75,38 +63,23 @@ async function parseResponse(response) {
   return null;
 }
 
-/* =========================================================
-   PAGE
-========================================================= */
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
 
-  /* =======================================================
-     STEP
-  ======================================================= */
 
   const [step, setStep] = useState(1);
 
-  /* =======================================================
-     FORM
-  ======================================================= */
 
   const [email, setEmail] = useState("");
   const [kodeOtp, setKodeOtp] = useState("");
   const [kataSandi, setKataSandi] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  /* =======================================================
-     PASSWORD VISIBILITY
-  ======================================================= */
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
-  /* =======================================================
-     UI
-  ======================================================= */
 
   const [loading, setLoading] = useState(false);
   const [resending, setResending] = useState(false);
@@ -114,9 +87,6 @@ export default function ForgotPasswordPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  /* =======================================================
-     LOAD EMAIL DARI SESSION
-  ======================================================= */
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -130,17 +100,11 @@ export default function ForgotPasswordPage() {
     }
   }, []);
 
-  /* =======================================================
-     VALIDATE EMAIL
-  ======================================================= */
 
   function validateEmail(value) {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
   }
 
-  /* =======================================================
-     SEND OTP
-  ======================================================= */
 
   async function handleSendOtp(e) {
     e.preventDefault();
@@ -168,9 +132,6 @@ export default function ForgotPasswordPage() {
       const endpoint =
         `${baseUrl}/auth/lupa-kata-sandi`;
 
-      /* ===================================================
-         DEBUG FRONTEND
-      =================================================== */
 
       console.log("====================================");
       console.log("FORGOT PASSWORD");
@@ -205,9 +166,6 @@ export default function ForgotPasswordPage() {
         data
       );
 
-      /* ===================================================
-         ERROR HTTP
-      =================================================== */
 
       if (!response.ok) {
         throw new Error(
@@ -217,9 +175,6 @@ export default function ForgotPasswordPage() {
         );
       }
 
-      /* ===================================================
-         ERROR DARI BACKEND
-      =================================================== */
 
       if (data?.success === false) {
         throw new Error(
@@ -228,9 +183,6 @@ export default function ForgotPasswordPage() {
         );
       }
 
-      /* ===================================================
-         SIMPAN EMAIL
-      =================================================== */
 
       sessionStorage.setItem(
         "forgot_password_email",
@@ -243,9 +195,6 @@ export default function ForgotPasswordPage() {
       setKataSandi("");
       setConfirmPassword("");
 
-      /* ===================================================
-         BERHASIL
-      =================================================== */
 
       setSuccess(
         data?.message ||
@@ -268,9 +217,6 @@ export default function ForgotPasswordPage() {
     }
   }
 
-  /* =======================================================
-     RESEND OTP
-  ======================================================= */
 
   async function handleResendOtp() {
     setError("");
@@ -363,9 +309,6 @@ export default function ForgotPasswordPage() {
     }
   }
 
-  /* =======================================================
-     RESET PASSWORD
-  ======================================================= */
 
   async function handleResetPassword(e) {
     e.preventDefault();
@@ -375,18 +318,12 @@ export default function ForgotPasswordPage() {
 
     const normalizedEmail = email.trim().toLowerCase();
 
-    /* ===================================================
-       EMAIL
-    =================================================== */
 
     if (!normalizedEmail) {
       setError("Email tidak ditemukan.");
       return;
     }
 
-    /* ===================================================
-       OTP
-    =================================================== */
 
     const normalizedOtp = kodeOtp.trim();
 
@@ -402,9 +339,6 @@ export default function ForgotPasswordPage() {
       return;
     }
 
-    /* ===================================================
-       PASSWORD
-    =================================================== */
 
     if (!kataSandi) {
       setError(
@@ -449,9 +383,6 @@ export default function ForgotPasswordPage() {
       const endpoint =
         `${baseUrl}/auth/atur-ulang-kata-sandi`;
 
-      /* ===================================================
-         DEBUG
-      =================================================== */
 
       console.log("====================================");
       console.log("RESET PASSWORD");
@@ -502,9 +433,6 @@ export default function ForgotPasswordPage() {
         );
       }
 
-      /* ===================================================
-         SUCCESS
-      =================================================== */
 
       sessionStorage.removeItem(
         "forgot_password_email"
@@ -533,9 +461,6 @@ export default function ForgotPasswordPage() {
     }
   }
 
-  /* =======================================================
-     BACK TO EMAIL
-  ======================================================= */
 
   function handleBackToEmail() {
     setStep(1);
@@ -548,15 +473,9 @@ export default function ForgotPasswordPage() {
     setSuccess("");
   }
 
-  /* =======================================================
-     RENDER
-  ======================================================= */
 
   return (
     <section className="relative flex min-h-screen items-center justify-center overflow-hidden bg-slate-950">
-      {/* ===================================================
-          BACKGROUND
-      =================================================== */}
 
       <div className="absolute inset-0">
         <Image
@@ -572,20 +491,11 @@ export default function ForgotPasswordPage() {
         <div className="absolute inset-0 bg-gradient-to-br from-blue-950/80 via-slate-950/60 to-indigo-950/80" />
       </div>
 
-      {/* ===================================================
-          TOP ACCENT
-      =================================================== */}
 
       <div className="absolute left-0 right-0 top-0 h-1 bg-gradient-to-r from-blue-400 via-blue-500 to-indigo-500" />
 
-      {/* ===================================================
-          CONTENT
-      =================================================== */}
 
       <div className="relative z-10 w-full max-w-md px-4 py-8 sm:px-6 sm:py-10">
-        {/* =================================================
-            LOGO
-        ================================================= */}
 
         <div className="mb-6 flex justify-center">
           <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl border border-white/20 bg-white shadow-xl">
@@ -599,12 +509,8 @@ export default function ForgotPasswordPage() {
           </div>
         </div>
 
-        {/* =================================================
-            CARD
-        ================================================= */}
 
         <div className="rounded-3xl bg-white p-5 shadow-2xl sm:p-7">
-          {/* HEADER */}
 
           <div className="mb-7 text-center">
             <div className="mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50">
@@ -634,9 +540,6 @@ export default function ForgotPasswordPage() {
             </p>
           </div>
 
-          {/* =================================================
-              ERROR
-          ================================================= */}
 
           {error && (
             <div className="mb-5 flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3">
@@ -651,9 +554,6 @@ export default function ForgotPasswordPage() {
             </div>
           )}
 
-          {/* =================================================
-              SUCCESS
-          ================================================= */}
 
           {success && (
             <div className="mb-5 flex items-start gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
@@ -668,9 +568,6 @@ export default function ForgotPasswordPage() {
             </div>
           )}
 
-          {/* =================================================
-              STEP 1
-          ================================================= */}
 
           {step === 1 && (
             <form
@@ -727,16 +624,12 @@ export default function ForgotPasswordPage() {
             </form>
           )}
 
-          {/* =================================================
-              STEP 2
-          ================================================= */}
 
           {step === 2 && (
             <form
               onSubmit={handleResetPassword}
               className="space-y-4"
             >
-              {/* EMAIL */}
 
               <div>
                 <label className="mb-2 block text-xs font-semibold text-slate-700">
@@ -758,7 +651,6 @@ export default function ForgotPasswordPage() {
                 </div>
               </div>
 
-              {/* OTP */}
 
               <div>
                 <label className="mb-2 block text-xs font-semibold text-slate-700">
@@ -805,7 +697,6 @@ export default function ForgotPasswordPage() {
                 </button>
               </div>
 
-              {/* PASSWORD */}
 
               <div>
                 <label className="mb-2 block text-xs font-semibold text-slate-700">
@@ -859,7 +750,6 @@ export default function ForgotPasswordPage() {
                 </p>
               </div>
 
-              {/* CONFIRM PASSWORD */}
 
               <div>
                 <label className="mb-2 block text-xs font-semibold text-slate-700">
@@ -908,7 +798,6 @@ export default function ForgotPasswordPage() {
                 </div>
               </div>
 
-              {/* SUBMIT */}
 
               <button
                 type="submit"
@@ -933,7 +822,6 @@ export default function ForgotPasswordPage() {
                 )}
               </button>
 
-              {/* CHANGE EMAIL */}
 
               <button
                 type="button"
@@ -948,9 +836,6 @@ export default function ForgotPasswordPage() {
             </form>
           )}
 
-          {/* =================================================
-              BACK LOGIN
-          ================================================= */}
 
           <div className="mt-6 border-t border-slate-100 pt-5">
             <Link
@@ -964,9 +849,6 @@ export default function ForgotPasswordPage() {
           </div>
         </div>
 
-        {/* =================================================
-            FOOTER
-        ================================================= */}
 
         <p className="mt-5 text-center text-[11px] text-white/50">
           © 2026 Smart School. Semua hak dilindungi.

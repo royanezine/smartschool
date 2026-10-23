@@ -44,11 +44,6 @@ export default function EditPageCms() {
 
   const [originalPage, setOriginalPage] = useState(null);
 
-  // ============================================================
-  // FETCH DETAIL
-  // Backend belum menyediakan GET /halaman/:id
-  // Jadi kita ambil semua halaman lalu cari berdasarkan ID.
-  // ============================================================
 
   const fetchPage = async () => {
     if (!id) return;
@@ -101,9 +96,6 @@ export default function EditPageCms() {
     fetchPage();
   }, [id]);
 
-  // ============================================================
-  // FORM CHANGE
-  // ============================================================
 
   const handleChange = (field, value) => {
     setForm((current) => ({
@@ -120,9 +112,6 @@ export default function EditPageCms() {
     }
   };
 
-  // ============================================================
-  // SUBMIT
-  // ============================================================
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -176,9 +165,6 @@ export default function EditPageCms() {
     }
   };
 
-  // ============================================================
-  // LOADING
-  // ============================================================
 
   if (loading) {
     return (
@@ -220,13 +206,9 @@ export default function EditPageCms() {
     );
   }
 
-  // ============================================================
-  // MAIN
-  // ============================================================
 
   return (
     <div className="theme-page flex min-h-screen w-full">
-      {/* SIDEBAR */}
 
       <Sidebar
         active={active}
@@ -235,10 +217,8 @@ export default function EditPageCms() {
         setCollapsed={setCollapsed}
       />
 
-      {/* MAIN */}
 
       <div className="flex min-w-0 flex-1 flex-col">
-        {/* HEADER */}
 
         <Header
           title="Edit Halaman"
@@ -249,15 +229,11 @@ export default function EditPageCms() {
           }}
         />
 
-        {/* CONTENT */}
 
         <main className="min-w-0 flex-1 overflow-y-auto">
           <div className="w-full px-3 py-4 sm:px-5 sm:py-6 md:px-7 lg:px-9 xl:px-10">
             <div className="mx-auto w-full max-w-[1500px]">
 
-              {/* ==================================================
-                  TOP NAVIGATION
-              ================================================== */}
 
               <div className="mb-6">
                 <Link
@@ -269,9 +245,6 @@ export default function EditPageCms() {
                 </Link>
               </div>
 
-              {/* ==================================================
-                  TITLE
-              ================================================== */}
 
               <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex min-w-0 items-center gap-3">
@@ -303,9 +276,6 @@ export default function EditPageCms() {
                 )}
               </div>
 
-              {/* ==================================================
-                  ALERT ERROR
-              ================================================== */}
 
               {error && (
                 <div className="theme-danger mb-5 flex items-start gap-3 rounded-2xl border p-4">
@@ -333,9 +303,6 @@ export default function EditPageCms() {
                 </div>
               )}
 
-              {/* ==================================================
-                  SUCCESS
-              ================================================== */}
 
               {success && (
                 <div className="theme-success mb-5 flex items-start gap-3 rounded-2xl border p-4">
@@ -355,20 +322,13 @@ export default function EditPageCms() {
                 </div>
               )}
 
-              {/* ==================================================
-                  FORM
-              ================================================== */}
 
               <form onSubmit={handleSubmit}>
                 <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
 
-                  {/* ==================================================
-                      LEFT
-                  ================================================== */}
 
                   <div className="min-w-0 space-y-6">
 
-                    {/* TITLE + CONTENT */}
 
                     <section className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
                       <div className="theme-card-soft theme-border border-b px-5 py-4 sm:px-6">
@@ -391,7 +351,6 @@ export default function EditPageCms() {
 
                       <div className="space-y-6 p-5 sm:p-6">
 
-                        {/* JUDUL */}
 
                         <div>
                           <label
@@ -423,7 +382,6 @@ export default function EditPageCms() {
                           </p>
                         </div>
 
-                        {/* CONTENT */}
 
                         <div>
                           <div className="mb-2 flex items-center justify-between gap-3">
@@ -457,7 +415,6 @@ export default function EditPageCms() {
                       </div>
                     </section>
 
-                    {/* SLUG INFORMATION */}
 
                     <section className="theme-card theme-border rounded-2xl border p-5 shadow-sm sm:p-6">
                       <div className="flex items-start gap-3">
@@ -494,13 +451,9 @@ export default function EditPageCms() {
                     </section>
                   </div>
 
-                  {/* ==================================================
-                      RIGHT SIDEBAR
-                  ================================================== */}
 
                   <div className="min-w-0 space-y-6">
 
-                    {/* STATUS */}
 
                     <section className="theme-card theme-border rounded-2xl border shadow-sm">
                       <div className="theme-border border-b px-5 py-4">
@@ -547,7 +500,6 @@ export default function EditPageCms() {
                       </div>
                     </section>
 
-                    {/* PAGE INFORMATION */}
 
                     <section className="theme-card theme-border rounded-2xl border shadow-sm">
                       <div className="theme-border border-b px-5 py-4">
@@ -614,7 +566,6 @@ export default function EditPageCms() {
                       </div>
                     </section>
 
-                    {/* SAVE */}
 
                     <section className="theme-card theme-border rounded-2xl border p-5 shadow-sm">
                       <div className="flex items-start gap-3">
@@ -664,7 +615,6 @@ export default function EditPageCms() {
                 </div>
               </form>
 
-              {/* FOOTER */}
 
               <footer className="py-7 text-center">
                 <p className="theme-text-muted text-[11px]">

@@ -29,9 +29,6 @@ export default function AgendaPage() {
   const [search, setSearch] = useState("");
   const [filterCategory, setFilterCategory] = useState("Semua");
 
-  // =====================================================
-  // DUMMY DATA
-  // =====================================================
 
   const [agendas, setAgendas] = useState([
     {
@@ -68,9 +65,6 @@ export default function AgendaPage() {
     },
   ]);
 
-  // =====================================================
-  // FILTER DATA
-  // =====================================================
 
   const filteredData = useMemo(() => {
     return agendas.filter((item) => {
@@ -90,9 +84,6 @@ export default function AgendaPage() {
     });
   }, [agendas, search, filterCategory]);
 
-  // =====================================================
-  // DELETE
-  // =====================================================
 
   const handleDelete = (id) => {
     const target = agendas.find((item) => item.id === id);
@@ -108,9 +99,6 @@ export default function AgendaPage() {
     }
   };
 
-  // =====================================================
-  // STATUS STYLE
-  // =====================================================
 
   const getStatusStyle = (status) => {
     if (status === "published") {
@@ -139,9 +127,6 @@ export default function AgendaPage() {
     };
   };
 
-  // =====================================================
-  // CATEGORY STYLE
-  // =====================================================
 
   const getCategoryStyle = (category) => {
     if (category === "Rapat") {
@@ -159,9 +144,6 @@ export default function AgendaPage() {
     return "theme-card-soft theme-text-secondary";
   };
 
-  // =====================================================
-  // STATISTICS
-  // =====================================================
 
   const totalAgenda = agendas.length;
 
@@ -177,24 +159,15 @@ export default function AgendaPage() {
     (item) => item.status === "draft"
   ).length;
 
-  // =====================================================
-  // CLEAR FILTER
-  // =====================================================
 
   const clearFilter = () => {
     setSearch("");
     setFilterCategory("Semua");
   };
 
-  // =====================================================
-  // PAGE
-  // =====================================================
 
   return (
     <div className="theme-page flex min-h-screen w-full min-w-0 overflow-x-clip">
-      {/* =====================================================
-          SIDEBAR
-      ===================================================== */}
 
       <div className="shrink-0">
         <Sidebar
@@ -205,12 +178,8 @@ export default function AgendaPage() {
         />
       </div>
 
-      {/* =====================================================
-          MAIN AREA
-      ===================================================== */}
 
       <div className="flex min-w-0 flex-1 flex-col">
-        {/* HEADER */}
 
         <Header
           title="Agenda"
@@ -221,9 +190,6 @@ export default function AgendaPage() {
           }}
         />
 
-        {/* ===================================================
-            CONTENT
-        ==================================================== */}
 
         <main className="theme-page min-w-0 flex-1">
           <div
@@ -245,9 +211,6 @@ export default function AgendaPage() {
             "
           >
             <div className="w-full min-w-0 space-y-5 sm:space-y-6">
-              {/* =================================================
-                  BREADCRUMB
-              ================================================== */}
 
               <nav
                 aria-label="Breadcrumb"
@@ -276,9 +239,6 @@ export default function AgendaPage() {
                 </ol>
               </nav>
 
-              {/* =================================================
-                  HERO / HEADER
-              ================================================== */}
 
               <section
                 className="
@@ -294,7 +254,6 @@ export default function AgendaPage() {
                   sm:rounded-3xl
                 "
               >
-                {/* DECORATION */}
 
                 <div
                   className="
@@ -347,7 +306,6 @@ export default function AgendaPage() {
                     xl:p-8
                   "
                 >
-                  {/* LEFT */}
 
                   <div className="flex min-w-0 items-start gap-3 sm:gap-4">
                     <div
@@ -418,7 +376,6 @@ export default function AgendaPage() {
                     </div>
                   </div>
 
-                  {/* BUTTON */}
 
                   <button
                     type="button"
@@ -453,9 +410,6 @@ export default function AgendaPage() {
                 </div>
               </section>
 
-              {/* =================================================
-                  STATISTICS
-              ================================================== */}
 
               <section
                 className="
@@ -502,9 +456,6 @@ export default function AgendaPage() {
                 />
               </section>
 
-              {/* =================================================
-                  SEARCH + FILTER
-              ================================================== */}
 
               <section
                 className="
@@ -531,7 +482,6 @@ export default function AgendaPage() {
                     lg:justify-between
                   "
                 >
-                  {/* SEARCH */}
 
                   <div className="relative min-w-0 flex-1">
                     <Search
@@ -590,7 +540,6 @@ export default function AgendaPage() {
                     )}
                   </div>
 
-                  {/* FILTER */}
 
                   <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center lg:shrink-0">
                     <div className="flex min-w-0 items-center gap-2">
@@ -680,9 +629,6 @@ export default function AgendaPage() {
                 </div>
               </section>
 
-              {/* =================================================
-                  TABLE
-              ================================================== */}
 
               <section
                 className="
@@ -697,7 +643,6 @@ export default function AgendaPage() {
                   sm:rounded-3xl
                 "
               >
-                {/* TABLE HEADER */}
 
                 <div
                   className="
@@ -741,7 +686,6 @@ export default function AgendaPage() {
                   </div>
                 </div>
 
-                {/* TABLE WRAPPER */}
 
                 <div className="w-full min-w-0 overflow-x-auto">
                   <table className="w-full min-w-[850px] table-auto">
@@ -801,7 +745,6 @@ export default function AgendaPage() {
                                 duration-200
                               "
                             >
-                              {/* AGENDA */}
 
                               <td className="px-4 py-4 sm:px-6 sm:py-5">
                                 <div className="flex min-w-0 items-start gap-3">
@@ -859,7 +802,6 @@ export default function AgendaPage() {
                                 </div>
                               </td>
 
-                              {/* TANGGAL */}
 
                               <td className="px-4 py-4 sm:px-6 sm:py-5">
                                 <div className="flex items-center gap-2">
@@ -879,7 +821,6 @@ export default function AgendaPage() {
                                 </div>
                               </td>
 
-                              {/* LOKASI */}
 
                               <td className="px-4 py-4 sm:px-6 sm:py-5">
                                 <div className="flex max-w-[190px] items-center gap-2">
@@ -891,7 +832,6 @@ export default function AgendaPage() {
                                 </div>
                               </td>
 
-                              {/* STATUS */}
 
                               <td className="px-4 py-4 sm:px-6 sm:py-5">
                                 <span
@@ -923,7 +863,6 @@ export default function AgendaPage() {
                                 </span>
                               </td>
 
-                              {/* AKSI */}
 
                               <td className="px-4 py-4 sm:px-6 sm:py-5">
                                 <div className="flex items-center justify-end gap-1">
@@ -1038,7 +977,6 @@ export default function AgendaPage() {
                   </table>
                 </div>
 
-                {/* TABLE FOOTER */}
 
                 <div
                   className="
@@ -1099,9 +1037,6 @@ export default function AgendaPage() {
                 </div>
               </section>
 
-              {/* =================================================
-                  FOOTER
-              ================================================== */}
 
               <footer className="theme-border w-full border-t pt-5 pb-4 text-center">
                 <p className="theme-text-muted text-[10px] font-medium sm:text-xs">
@@ -1116,9 +1051,6 @@ export default function AgendaPage() {
   );
 }
 
-// =====================================================
-// STAT CARD
-// =====================================================
 
 function StatCard({
   icon,
@@ -1157,7 +1089,6 @@ function StatCard({
         sm:p-5
       "
     >
-      {/* TOP ACCENT */}
 
       <div
         className="absolute left-0 right-0 top-0 h-0.5"

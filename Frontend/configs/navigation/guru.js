@@ -26,9 +26,6 @@ export const guruSidebarConfig = {
   brandName: "Guru",
 
   menuSections: [
-    // =====================================================
-    // DASHBOARD
-    // =====================================================
     {
       type: "item",
       key: "dashboard",
@@ -37,9 +34,6 @@ export const guruSidebarConfig = {
       path: "/guru",
     },
 
-    // =====================================================
-    // PROSES BELAJAR
-    // =====================================================
     {
       type: "header",
       key: "proses-belajar-header",
@@ -82,9 +76,6 @@ export const guruSidebarConfig = {
       permission: "akademik.view",
     },
 
-    // =====================================================
-    // AKADEMIK
-    // =====================================================
     {
       type: "header",
       key: "akademik-header",
@@ -165,9 +156,6 @@ export const guruSidebarConfig = {
       permission: "akademik.view",
     },
 
-    // =====================================================
-    // KEHADIRAN
-    // =====================================================
     {
       type: "header",
       key: "kehadiran-header",
@@ -192,9 +180,6 @@ export const guruSidebarConfig = {
       permission: "akademik.view",
     },
 
-    // =====================================================
-    // LAINNYA
-    // =====================================================
     {
       type: "header",
       key: "lainnya-header",
@@ -219,9 +204,6 @@ export const guruSidebarConfig = {
       permission: "akademik.view",
     },
 
-        // =====================================================
-    // KEUANGAN
-    // =====================================================
     {
       type: "header",
       key: "keuangan-header",
@@ -237,9 +219,6 @@ export const guruSidebarConfig = {
       permission: "akademik.view",
     },
 
-    // =====================================================
-    // AKUN
-    // =====================================================
     {
       type: "header",
       key: "akun-header",

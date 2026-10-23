@@ -349,7 +349,6 @@ export default function TambahGedungPage() {
 
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                  {/* NAMA GEDUNG */}
                   <div>
                     <label className="theme-text-secondary mb-1.5 block text-xs font-medium">
                       Nama Gedung <span className="theme-danger">*</span>
@@ -385,7 +384,6 @@ export default function TambahGedungPage() {
                     </div>
                   </div>
 
-                  {/* KODE GEDUNG */}
                   <div>
                     <label className="theme-text-secondary mb-1.5 block text-xs font-medium">
                       Kode Gedung{" "}
@@ -424,7 +422,6 @@ export default function TambahGedungPage() {
                     </div>
                   </div>
 
-                  {/* FOTO GEDUNG */}
                   <div className="md:col-span-2">
                     <label className="theme-text-secondary mb-1.5 block text-xs font-medium">
                       URL Foto Gedung{" "}

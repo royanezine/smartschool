@@ -331,9 +331,6 @@ export default function JurnalKasPage() {
           <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
             <div className="w-full space-y-6">
 
-              {/* =================================================
-                  HEADER
-              ================================================= */}
 
               <section className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
                 <div>
@@ -393,9 +390,6 @@ export default function JurnalKasPage() {
                 </div>
               </section>
 
-              {/* =================================================
-                  ERROR
-              ================================================= */}
 
               {error && (
                 <div className="flex items-start gap-3 rounded-xl border border-[color-mix(in_srgb,var(--color-danger)_28%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_6%,transparent)] p-4 text-sm">
@@ -419,9 +413,6 @@ export default function JurnalKasPage() {
                 </div>
               )}
 
-              {/* =================================================
-                  STAT CARDS
-              ================================================= */}
 
               <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
                 <FinanceCard
@@ -457,9 +448,6 @@ export default function JurnalKasPage() {
                 />
               </section>
 
-              {/* =================================================
-                  RINGKASAN KAS
-              ================================================= */}
 
               <section className="grid grid-cols-1 gap-4 lg:grid-cols-3">
                 <div className="theme-card overflow-hidden rounded-2xl border shadow-sm lg:col-span-2">
@@ -520,9 +508,6 @@ export default function JurnalKasPage() {
                 </div>
               </section>
 
-              {/* =================================================
-                  FILTER
-              ================================================= */}
 
               <section className="theme-card overflow-hidden rounded-2xl border shadow-sm">
                 <div className="theme-border border-b px-5 py-4">
@@ -644,9 +629,6 @@ export default function JurnalKasPage() {
                 </div>
               </section>
 
-              {/* =================================================
-                  TABEL
-              ================================================= */}
 
               <section className="theme-card overflow-hidden rounded-2xl border shadow-sm">
                 <div className="theme-border flex flex-col gap-3 border-b px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
@@ -875,9 +857,6 @@ export default function JurnalKasPage() {
         </main>
       </div>
 
-      {/* =====================================================
-          MODAL BATALKAN
-      ===================================================== */}
 
       {selectedJurnal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-[2px] p-4">
@@ -969,9 +948,6 @@ export default function JurnalKasPage() {
   );
 }
 
-/* =========================================================
-   FINANCE CARD (Warna Kalem)
-========================================================= */
 
 function FinanceCard({ label, value, description, icon, tone = "primary" }) {
   const toneMap = {
@@ -1026,9 +1002,6 @@ function FinanceCard({ label, value, description, icon, tone = "primary" }) {
   );
 }
 
-/* =========================================================
-   TRANSACTION BADGE
-========================================================= */
 
 function TransactionBadge({ jenis }) {
   const masuk = jenis === "masuk";
@@ -1047,9 +1020,6 @@ function TransactionBadge({ jenis }) {
   );
 }
 
-/* =========================================================
-   STATUS BADGE
-========================================================= */
 
 function StatusBadge({ status }) {
   const aktif = status === "aktif";

@@ -27,9 +27,6 @@ import {
   X,
 } from "lucide-react";
 
-/* =========================================================
-   THEME HELPERS
-========================================================= */
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]";
@@ -46,9 +43,6 @@ const themeTextHover =
 const themeCardShadow =
   "shadow-[0_6px_24px_color-mix(in_srgb,var(--color-text)_6%,transparent)]";
 
-/* =========================================================
-   API CONFIG
-========================================================= */
 
 const API_BASE = (
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
@@ -58,9 +52,6 @@ const API_URL = API_BASE.endsWith("/api")
   ? API_BASE
   : `${API_BASE}/api`;
 
-/* =========================================================
-   ROLE CONFIG
-========================================================= */
 
 const roleConfig = {
   Guru: {
@@ -85,9 +76,6 @@ const roleConfig = {
   },
 };
 
-/* =========================================================
-   ROLE BADGE
-========================================================= */
 
 function RoleBadge({ role }) {
   const config = roleConfig[role] || {
@@ -107,9 +95,6 @@ function RoleBadge({ role }) {
   );
 }
 
-/* =========================================================
-   INFO ITEM
-========================================================= */
 
 function InfoItem({ icon: Icon, label, value }) {
   return (
@@ -132,9 +117,6 @@ function InfoItem({ icon: Icon, label, value }) {
   );
 }
 
-/* =========================================================
-   NORMALIZE ROLE
-========================================================= */
 
 function normalizeRole(user) {
   const role = (
@@ -151,9 +133,6 @@ function normalizeRole(user) {
   return "Staff";
 }
 
-/* =========================================================
-   NORMALIZE USER
-========================================================= */
 
 function normalizeUser(user) {
   const nama =
@@ -174,23 +153,18 @@ function normalizeUser(user) {
   };
 }
 
-/* =========================================================
-   MAIN PAGE
-========================================================= */
 
 export default function TambahFaceIdPage() {
   const router = useRouter();
 
   const [isCollapsed, setIsCollapsed] = useState(false);
 
-  /* USER */
   const [users, setUsers] = useState([]);
   const [loadingUsers, setLoadingUsers] = useState(true);
   const [searchUser, setSearchUser] = useState("");
   const [selectedUser, setSelectedUser] = useState(null);
   const [showUserList, setShowUserList] = useState(false);
 
-  /* CAMERA */
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const streamRef = useRef(null);
@@ -200,17 +174,12 @@ export default function TambahFaceIdPage() {
   const [capturedFile, setCapturedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState("");
 
-  /* REGISTRATION */
   const [registrationComplete, setRegistrationComplete] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  /* MESSAGE */
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
-  /* =======================================================
-     LOAD USERS
-  ======================================================= */
 
   const loadUsers = async () => {
     try {
@@ -252,17 +221,11 @@ export default function TambahFaceIdPage() {
     }
   };
 
-  /* =======================================================
-     INITIAL LOAD
-  ======================================================= */
 
   useEffect(() => {
     loadUsers();
   }, []);
 
-  /* =======================================================
-     FILTER USER
-  ======================================================= */
 
   const availableUsers = useMemo(() => {
     const keyword = searchUser.toLowerCase().trim();
@@ -278,17 +241,11 @@ export default function TambahFaceIdPage() {
     });
   }, [users, searchUser]);
 
-  /* =======================================================
-     SIDEBAR
-  ======================================================= */
 
   const toggleSidebar = () => {
     setIsCollapsed((prev) => !prev);
   };
 
-  /* =======================================================
-     STOP CAMERA
-  ======================================================= */
 
   const stopCamera = () => {
     if (streamRef.current) {
@@ -306,9 +263,6 @@ export default function TambahFaceIdPage() {
     setCameraActive(false);
   };
 
-  /* =======================================================
-     SELECT USER
-  ======================================================= */
 
   const handleSelectUser = (user) => {
     stopCamera();
@@ -328,9 +282,6 @@ export default function TambahFaceIdPage() {
     setSuccessMessage("");
   };
 
-  /* =======================================================
-     START CAMERA
-  ======================================================= */
 
   const handleStartCamera = async () => {
     if (!selectedUser) {
@@ -383,9 +334,6 @@ export default function TambahFaceIdPage() {
     }
   };
 
-  /* =======================================================
-     CONNECT STREAM TO VIDEO
-  ======================================================= */
 
   useEffect(() => {
     if (cameraActive && videoRef.current && streamRef.current) {
@@ -394,9 +342,6 @@ export default function TambahFaceIdPage() {
     }
   }, [cameraActive]);
 
-  /* =======================================================
-     CAPTURE PHOTO
-  ======================================================= */
 
   const handleCapture = () => {
     if (!videoRef.current) {
@@ -463,9 +408,6 @@ export default function TambahFaceIdPage() {
     );
   };
 
-  /* =======================================================
-     RESET CAPTURE
-  ======================================================= */
 
   const handleReset = () => {
     stopCamera();
@@ -482,9 +424,6 @@ export default function TambahFaceIdPage() {
     setSuccessMessage("");
   };
 
-  /* =======================================================
-     REGISTER FACE ID (SESUAI BACKEND)
-  ======================================================= */
 
   const handleRegisterFace = async () => {
     if (!selectedUser) {
@@ -510,11 +449,9 @@ export default function TambahFaceIdPage() {
 
       const formData = new FormData();
       
-      // Backend membutuhkan "foto" dan "targetUserId"
       formData.append("foto", capturedFile);
       formData.append("targetUserId", String(selectedUser.id));
 
-      // Endpoint yang benar sesuai backend
       const response = await fetch(`${API_URL}/absensi/register-face`, {
         method: "POST",
         headers: {
@@ -523,7 +460,6 @@ export default function TambahFaceIdPage() {
         body: formData,
       });
 
-      // Parsing response
       const contentType = response.headers.get("content-type") || "";
       const responseText = await response.text();
       
@@ -536,7 +472,6 @@ export default function TambahFaceIdPage() {
             throw new Error(`Respons API bukan JSON valid (HTTP ${response.status}).`);
           }
         } else {
-          // Jika backend error dan mengembalikan HTML
           if (response.status === 404) {
             throw new Error(
               "Endpoint /api/absensi/register-face tidak ditemukan (404). Periksa route backend."
@@ -557,12 +492,10 @@ export default function TambahFaceIdPage() {
         );
       }
 
-      // Registrasi berhasil
       setRegistrationComplete(true);
       setSuccessMessage(result?.message || "Face ID berhasil didaftarkan.");
       stopCamera();
 
-      // Beri kesempatan agar pesan berhasil tampil, kemudian kembali
       await new Promise((resolve) => setTimeout(resolve, 1200));
 
       router.replace("/admin/pengguna/face-id?refresh=true");
@@ -575,9 +508,6 @@ export default function TambahFaceIdPage() {
     }
   };
 
-  /* =======================================================
-     CLOSE SELECTED USER
-  ======================================================= */
 
   const handleClearUser = () => {
     stopCamera();
@@ -597,9 +527,6 @@ export default function TambahFaceIdPage() {
     setSuccessMessage("");
   };
 
-  /* =======================================================
-     CLEANUP
-  ======================================================= */
 
   useEffect(() => {
     return () => {
@@ -639,7 +566,6 @@ export default function TambahFaceIdPage() {
         <main className="flex-1 overflow-y-auto">
           <div className="p-4 sm:p-6 lg:p-8">
             <div className="max-w-[1400px] mx-auto space-y-6">
-              {/* BACK */}
               <div className="flex items-center justify-between gap-3">
                 <button
                   type="button"
@@ -661,7 +587,6 @@ export default function TambahFaceIdPage() {
                 </div>
               </div>
 
-              {/* PAGE HEADER */}
               <div className={`theme-card rounded-2xl border theme-border ${themeCardShadow} overflow-hidden`}>
                 <div className="p-5 sm:p-6 lg:p-7">
                   <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
@@ -699,7 +624,6 @@ export default function TambahFaceIdPage() {
                 </div>
               </div>
 
-              {/* ERROR */}
               {error && (
                 <div className="flex items-start gap-3 p-4 rounded-xl theme-danger border">
                   <CircleAlert size={17} className="shrink-0 mt-0.5" />
@@ -713,7 +637,6 @@ export default function TambahFaceIdPage() {
                 </div>
               )}
 
-              {/* SUCCESS */}
               {successMessage && (
                 <div className="flex items-start gap-3 p-4 rounded-xl theme-success border">
                   <CheckCircle2 size={17} className="shrink-0 mt-0.5" />
@@ -727,7 +650,6 @@ export default function TambahFaceIdPage() {
                 </div>
               )}
 
-              {/* STEP INDICATOR */}
               <div className={`theme-card rounded-2xl border theme-border ${themeCardShadow} p-5 sm:p-6`}>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="flex items-center gap-3">
@@ -762,9 +684,7 @@ export default function TambahFaceIdPage() {
                 </div>
               </div>
 
-              {/* MAIN GRID */}
               <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1.25fr)_minmax(340px,0.75fr)] gap-6">
-                {/* LEFT - CAMERA */}
                 <section className={`theme-card rounded-2xl border theme-border ${themeCardShadow} overflow-hidden`}>
                   <div className="px-5 sm:px-6 py-4 border-b theme-border">
                     <div className="flex items-center justify-between gap-3">
@@ -905,9 +825,7 @@ export default function TambahFaceIdPage() {
                   </div>
                 </section>
 
-                {/* RIGHT */}
                 <div className="space-y-6">
-                  {/* USER SELECT */}
                   <section className={`theme-card rounded-2xl border theme-border ${themeCardShadow} overflow-visible`}>
                     <div className="px-5 sm:px-6 py-4 border-b theme-border">
                       <h2 className="text-sm font-bold theme-text">Pilih Pengguna</h2>
@@ -990,7 +908,6 @@ export default function TambahFaceIdPage() {
                     </div>
                   </section>
 
-                  {/* DETAIL USER */}
                   <section className={`theme-card rounded-2xl border theme-border ${themeCardShadow} overflow-hidden`}>
                     <div className="px-5 sm:px-6 py-4 border-b theme-border">
                       <h2 className="text-sm font-bold theme-text">Informasi Pengguna</h2>
@@ -1017,7 +934,6 @@ export default function TambahFaceIdPage() {
                     </div>
                   </section>
 
-                  {/* INSTRUCTION */}
                   <section className={`theme-card rounded-2xl border theme-border ${themeCardShadow} overflow-hidden`}>
                     <div className="px-5 sm:px-6 py-4 border-b theme-border">
                       <div className="flex items-center gap-2">
@@ -1047,7 +963,6 @@ export default function TambahFaceIdPage() {
                 </div>
               </div>
 
-              {/* SECURITY NOTICE */}
               <section className={`rounded-2xl ${themePrimarySoft} ${themePrimarySoftBorder} border p-4 sm:p-5`}>
                 <div className="flex items-start gap-3">
                   <div className={`w-9 h-9 rounded-xl theme-card ${themePrimarySoftBorder} border flex items-center justify-center shrink-0`}>
@@ -1060,7 +975,6 @@ export default function TambahFaceIdPage() {
                 </div>
               </section>
 
-              {/* BOTTOM ACTION */}
               <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3 pb-4">
                 <button type="button" onClick={() => router.push("/admin/pengguna/face-id")} className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl theme-card border theme-border theme-text-secondary text-sm font-semibold themeTextHover transition">
                   <ArrowLeft size={15} /> Batal

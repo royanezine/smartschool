@@ -28,9 +28,6 @@ import {
   deleteBuku,
 } from "@/services/perpustakaan.service";
 
-/* =========================================================
-   THEME HELPERS
-========================================================= */
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]";
@@ -47,9 +44,6 @@ const themeCardShadow =
 const themePrimaryShadow =
   "shadow-[0_10px_25px_color-mix(in_srgb,var(--color-primary)_20%,transparent)]";
 
-/* =========================================================
-   HELPERS
-========================================================= */
 
 function normalizeBook(book) {
   if (!book) return null;
@@ -96,9 +90,6 @@ function typeLabel(tipe) {
   return tipe === "EBOOK" ? "E-Book" : "Buku Fisik";
 }
 
-/* =========================================================
-   STAT CARD
-========================================================= */
 
 function StatCard({ icon: Icon, label, value, type = "blue" }) {
   const styles = {
@@ -154,9 +145,6 @@ function StatCard({ icon: Icon, label, value, type = "blue" }) {
   );
 }
 
-/* =========================================================
-   STATUS BADGE
-========================================================= */
 
 function StatusBadge({ status }) {
   const active = status === "aktif";
@@ -175,9 +163,6 @@ function StatusBadge({ status }) {
   );
 }
 
-/* =========================================================
-   TYPE BADGE
-========================================================= */
 
 function TypeBadge({ tipe }) {
   const ebook = tipe === "EBOOK";
@@ -196,9 +181,6 @@ function TypeBadge({ tipe }) {
   );
 }
 
-/* =========================================================
-   MAIN PAGE
-========================================================= */
 
 export default function DataBukuPage() {
   const router = useRouter();
@@ -215,9 +197,6 @@ export default function DataBukuPage() {
   const [deleteBook, setDeleteBook] = useState(null);
   const [deleting, setDeleting] = useState(false);
 
-  /* =========================================================
-     LOAD BUKU DARI BE
-  ========================================================= */
 
   const loadBooks = async () => {
     try {
@@ -244,18 +223,12 @@ export default function DataBukuPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  /* =========================================================
-     CATEGORY OPTIONS
-  ========================================================= */
 
   const categories = useMemo(() => {
     const values = books.map((book) => book.kategori).filter(Boolean);
     return [...new Set(values)].sort((a, b) => a.localeCompare(b));
   }, [books]);
 
-  /* =========================================================
-     FILTER
-  ========================================================= */
 
   const filteredBooks = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -280,9 +253,6 @@ export default function DataBukuPage() {
     });
   }, [books, search, categoryFilter, typeFilter, statusFilter]);
 
-  /* =========================================================
-     STATISTIC
-  ========================================================= */
 
   const totalJudul = books.length;
   const totalStok = books.reduce(
@@ -298,9 +268,6 @@ export default function DataBukuPage() {
     0
   );
 
-  /* =========================================================
-     DELETE
-  ========================================================= */
 
   const confirmDelete = async () => {
     if (!deleteBook) return;
@@ -319,9 +286,6 @@ export default function DataBukuPage() {
     }
   };
 
-  /* =========================================================
-     RESET
-  ========================================================= */
 
   const resetFilter = () => {
     setSearch("");
@@ -330,9 +294,6 @@ export default function DataBukuPage() {
     setStatusFilter("Semua");
   };
 
-  /* =========================================================
-     RENDER
-  ========================================================= */
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
@@ -345,7 +306,6 @@ export default function DataBukuPage() {
 
         <main className="min-w-0 flex-1 overflow-y-auto">
           <div className="w-full px-4 py-5 sm:px-6 lg:px-8">
-            {/* HEADER */}
             <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex items-center gap-3">
                 <div
@@ -399,7 +359,6 @@ export default function DataBukuPage() {
               </div>
             </div>
 
-            {/* ERROR */}
             {error && (
               <div className="theme-border mb-5 flex items-start gap-3 rounded-xl border p-4">
                 <AlertCircle
@@ -424,7 +383,6 @@ export default function DataBukuPage() {
               </div>
             )}
 
-            {/* STATISTIC */}
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
               <StatCard
                 icon={BookOpen}
@@ -452,7 +410,6 @@ export default function DataBukuPage() {
               />
             </div>
 
-            {/* FILTER */}
             <div
               className={`theme-card theme-border mt-5 rounded-xl border p-4 ${themeCardShadow}`}
             >
@@ -470,7 +427,6 @@ export default function DataBukuPage() {
               </div>
 
               <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3 xl:flex xl:items-center">
-                {/* CATEGORY */}
                 <div className="relative xl:w-52">
                   <select
                     value={categoryFilter}
@@ -492,7 +448,6 @@ export default function DataBukuPage() {
                   />
                 </div>
 
-                {/* TYPE */}
                 <div className="relative xl:w-44">
                   <select
                     value={typeFilter}
@@ -511,7 +466,6 @@ export default function DataBukuPage() {
                   />
                 </div>
 
-                {/* STATUS */}
                 <div className="relative xl:w-40">
                   <select
                     value={statusFilter}
@@ -546,7 +500,6 @@ export default function DataBukuPage() {
               </div>
             </div>
 
-            {/* TABLE */}
             <div
               className={`theme-card theme-border mt-5 overflow-hidden rounded-xl border ${themeCardShadow}`}
             >
@@ -609,7 +562,6 @@ export default function DataBukuPage() {
                           key={book.id}
                           className={`transition ${themeTextHover}`}
                         >
-                          {/* BOOK */}
                           <td className="px-5 py-4">
                             <div className="flex items-center gap-3">
                               <div
@@ -652,26 +604,22 @@ export default function DataBukuPage() {
                             </div>
                           </td>
 
-                          {/* ISBN */}
                           <td className="px-4 py-4">
                             <span className="theme-text-secondary text-xs">
                               {book.isbn || "-"}
                             </span>
                           </td>
 
-                          {/* TYPE */}
                           <td className="px-4 py-4">
                             <TypeBadge tipe={book.tipe} />
                           </td>
 
-                          {/* CATEGORY */}
                           <td className="px-4 py-4">
                             <span className="theme-card-soft theme-border theme-text-secondary inline-flex rounded-md border px-2.5 py-1 text-xs font-medium">
                               {book.kategori || "-"}
                             </span>
                           </td>
 
-                          {/* STOCK */}
                           <td className="px-4 py-4">
                             <div className="min-w-[120px]">
                               <div className="flex items-center justify-between text-xs">
@@ -704,12 +652,10 @@ export default function DataBukuPage() {
                             </div>
                           </td>
 
-                          {/* STATUS */}
                           <td className="px-4 py-4">
                             <StatusBadge status={book.status} />
                           </td>
 
-                          {/* ACTION */}
                           <td className="px-5 py-4">
                             <div className="flex items-center justify-end gap-1">
                               <button
@@ -772,7 +718,6 @@ export default function DataBukuPage() {
                 </table>
               </div>
 
-              {/* FOOTER */}
               <div className="theme-border flex flex-col gap-2 border-t px-5 py-3 sm:flex-row sm:items-center sm:justify-between">
                 <p className="theme-text-muted text-xs">
                   Menampilkan{" "}
@@ -798,9 +743,6 @@ export default function DataBukuPage() {
         </main>
       </div>
 
-      {/* =====================================================
-          DELETE CONFIRMATION — tetap modal
-      ===================================================== */}
       {deleteBook && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/40 p-4 backdrop-blur-[2px]">
           <div

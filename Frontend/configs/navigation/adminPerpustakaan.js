@@ -9,9 +9,6 @@ import {
 } from "lucide-react";
 
 export const adminPerpustakaanNavigation = {
-  // =====================================================
-  // IDENTITAS
-  // =====================================================
 
   basePath: "/admin/perpustakaan",
 
@@ -21,14 +18,8 @@ export const adminPerpustakaanNavigation = {
 
   email: "perpustakaan@smartschool.com",
 
-  // =====================================================
-  // NAVIGASI
-  // =====================================================
 
   menuSections: [
-    // ===================================================
-    // DASHBOARD
-    // ===================================================
 
     {
       type: "item",
@@ -38,9 +29,6 @@ export const adminPerpustakaanNavigation = {
       path: "/admin/perpustakaan",
     },
 
-    // ===================================================
-    // KOLEKSI
-    // ===================================================
 
     {
       type: "header",
@@ -63,9 +51,6 @@ export const adminPerpustakaanNavigation = {
       path: "/admin/perpustakaan/buku-digital",
     },
 
-    // ===================================================
-    // TRANSAKSI
-    // ===================================================
 
     {
       type: "header",
@@ -88,9 +73,6 @@ export const adminPerpustakaanNavigation = {
       path: "/admin/perpustakaan/pengembalian",
     },
 
-    // ===================================================
-    // LAPORAN
-    // ===================================================
 
     {
       type: "header",

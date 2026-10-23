@@ -31,9 +31,6 @@ export default function EditTahunAjaranPage() {
   const router = useRouter();
   const id = params?.id;
 
-  // =========================================================
-  // STATE
-  // =========================================================
 
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -48,17 +45,11 @@ export default function EditTahunAjaranPage() {
 
   const [kelas, setKelas] = useState([]);
 
-  // =========================================================
-  // SIDEBAR
-  // =========================================================
 
   const toggleSidebar = () => {
     setIsCollapsed((prev) => !prev);
   };
 
-  // =========================================================
-  // EXTRACT RESPONSE TAHUN AJARAN
-  // =========================================================
 
   const extractTahunAjaran = (response) => {
     if (Array.isArray(response)) {
@@ -84,9 +75,6 @@ export default function EditTahunAjaranPage() {
     return [];
   };
 
-  // =========================================================
-  // EXTRACT KELAS
-  // =========================================================
 
   const extractKelas = (response) => {
     if (Array.isArray(response)) {
@@ -112,9 +100,6 @@ export default function EditTahunAjaranPage() {
     return [];
   };
 
-  // =========================================================
-  // LOAD DATA
-  // =========================================================
 
   useEffect(() => {
     const load = async () => {
@@ -127,9 +112,6 @@ export default function EditTahunAjaranPage() {
         setLoadingKelas(true);
         setError("");
 
-        // =====================================================
-        // AMBIL TAHUN AJARAN
-        // =====================================================
 
         const response = await getTahunAjaran();
 
@@ -143,17 +125,11 @@ export default function EditTahunAjaranPage() {
           throw new Error("Tahun ajaran tidak ditemukan.");
         }
 
-        // =====================================================
-        // SET FORM
-        // =====================================================
 
         setNama(item.nama ?? "");
         setSemester(item.semester ?? "Ganjil");
         setStatus(item.status ?? "tidak_aktif");
 
-        // =====================================================
-        // AMBIL KELAS
-        // =====================================================
 
         try {
           const kelasResponse = await getKelas({
@@ -191,9 +167,6 @@ export default function EditTahunAjaranPage() {
     load();
   }, [id]);
 
-  // =========================================================
-  // SUBMIT
-  // =========================================================
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -205,9 +178,6 @@ export default function EditTahunAjaranPage() {
 
     setError("");
 
-    // =======================================================
-    // VALIDASI NAMA
-    // =======================================================
 
     const cleanNama = nama.trim();
 
@@ -236,18 +206,12 @@ export default function EditTahunAjaranPage() {
       return;
     }
 
-    // =======================================================
-    // VALIDASI SEMESTER
-    // =======================================================
 
     if (!["Ganjil", "Genap"].includes(semester)) {
       setError("Semester harus Ganjil atau Genap.");
       return;
     }
 
-    // =======================================================
-    // VALIDASI STATUS
-    // =======================================================
 
     if (!["aktif", "tidak_aktif"].includes(status)) {
       setError("Status tahun ajaran tidak valid.");
@@ -257,9 +221,6 @@ export default function EditTahunAjaranPage() {
     try {
       setSaving(true);
 
-      // =====================================================
-      // UPDATE DATA
-      // =====================================================
 
       await updateTahunAjaran(id, {
         nama: cleanNama,
@@ -267,9 +228,6 @@ export default function EditTahunAjaranPage() {
         status,
       });
 
-      // =====================================================
-      // KEMBALI KE LIST
-      // =====================================================
 
       router.replace("/admin/akademik/tahun-ajaran");
       router.refresh();
@@ -289,9 +247,6 @@ export default function EditTahunAjaranPage() {
     }
   };
 
-  // =========================================================
-  // LOADING PAGE
-  // =========================================================
 
   if (loading) {
     return (
@@ -333,15 +288,9 @@ export default function EditTahunAjaranPage() {
     );
   }
 
-  // =========================================================
-  // MAIN PAGE
-  // =========================================================
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
-      {/* =====================================================
-          SIDEBAR
-      ===================================================== */}
 
       <Sidebar
         active="tahunAjaran"
@@ -350,12 +299,8 @@ export default function EditTahunAjaranPage() {
         setCollapsed={setIsCollapsed}
       />
 
-      {/* =====================================================
-          CONTENT
-      ===================================================== */}
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        {/* HEADER */}
 
         <Header
           toggleSidebar={toggleSidebar}
@@ -367,14 +312,10 @@ export default function EditTahunAjaranPage() {
           }}
         />
 
-        {/* MAIN */}
 
         <main className="theme-page min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
           <div className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8 xl:px-10">
             <div className="space-y-7">
-              {/* =================================================
-                  BREADCRUMB
-              ================================================= */}
 
               <div className="flex items-center gap-2 text-sm">
                 <button
@@ -396,9 +337,6 @@ export default function EditTahunAjaranPage() {
                 </span>
               </div>
 
-              {/* =================================================
-                  ERROR
-              ================================================= */}
 
               {error && (
                 <div className="theme-danger rounded-xl border p-5">
@@ -428,14 +366,8 @@ export default function EditTahunAjaranPage() {
                 </div>
               )}
 
-              {/* =================================================
-                  FORM CARD
-              ================================================= */}
 
               <div className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
-                {/* =================================================
-                    HERO HEADER
-                ================================================= */}
 
                 <div className="theme-primary px-6 py-6 sm:px-8 sm:py-7">
                   <div className="flex items-center gap-4">
@@ -460,17 +392,11 @@ export default function EditTahunAjaranPage() {
                   </div>
                 </div>
 
-                {/* =================================================
-                    FORM
-                ================================================= */}
 
                 <form
                   onSubmit={handleSubmit}
                   className="space-y-6 p-6 sm:p-8"
                 >
-                  {/* =================================================
-                      NAMA TAHUN AJARAN
-                  ================================================= */}
 
                   <div>
                     <label
@@ -511,9 +437,6 @@ export default function EditTahunAjaranPage() {
                     </p>
                   </div>
 
-                  {/* =================================================
-                      SEMESTER
-                  ================================================= */}
 
                   <div>
                     <label className="theme-text-secondary mb-2 block text-sm font-semibold">
@@ -552,9 +475,6 @@ export default function EditTahunAjaranPage() {
                     </div>
                   </div>
 
-                  {/* =================================================
-                      STATUS
-                  ================================================= */}
 
                   <div>
                     <label
@@ -599,9 +519,6 @@ export default function EditTahunAjaranPage() {
                     </div>
                   </div>
 
-                  {/* =================================================
-                      INFO KELAS
-                  ================================================= */}
 
                   <div className="theme-info rounded-xl border p-4">
                     <div className="flex items-start gap-3">
@@ -625,12 +542,8 @@ export default function EditTahunAjaranPage() {
                     </div>
                   </div>
 
-                  {/* =================================================
-                      KELAS TERHUBUNG
-                  ================================================= */}
 
                   <div className="theme-card theme-border overflow-hidden rounded-xl border">
-                    {/* HEADER */}
 
                     <div className="theme-table-header flex items-center justify-between gap-4 border-b px-4 py-4">
                       <div className="flex min-w-0 items-center gap-3">
@@ -657,10 +570,8 @@ export default function EditTahunAjaranPage() {
                       </span>
                     </div>
 
-                    {/* CONTENT */}
 
                     <div className="p-4">
-                      {/* LOADING */}
 
                       {loadingKelas ? (
                         <div className="theme-text-muted flex items-center justify-center gap-2 py-6 text-sm">
@@ -672,7 +583,6 @@ export default function EditTahunAjaranPage() {
                           Memuat kelas...
                         </div>
                       ) : kelas.length === 0 ? (
-                        /* EMPTY */
 
                         <div className="py-7 text-center">
                           <Layers3
@@ -690,7 +600,6 @@ export default function EditTahunAjaranPage() {
                           </p>
                         </div>
                       ) : (
-                        /* LIST KELAS */
 
                         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                           {kelas.map((item, index) => (
@@ -733,9 +642,6 @@ export default function EditTahunAjaranPage() {
                     </div>
                   </div>
 
-                  {/* =================================================
-                      ACTION
-                  ================================================= */}
 
                   <div className="theme-border-soft flex flex-col-reverse gap-3 border-t pt-5 sm:flex-row sm:justify-end">
                     <button
@@ -773,9 +679,6 @@ export default function EditTahunAjaranPage() {
                 </form>
               </div>
 
-              {/* =================================================
-                  FOOTER
-              ================================================= */}
 
               <footer className="theme-text-muted pt-6 text-center text-xs">
                 © 2026 SmartSchool • Edit Tahun Ajaran

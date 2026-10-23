@@ -266,7 +266,6 @@ export default function SetupBobotPage() {
 
         <main className="theme-page flex-1">
           <div className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 lg:px-9 lg:py-8">
-            {/* Header halaman */}
             <div className="mb-8 flex flex-col gap-5 border-b border-[color-mix(in_srgb,var(--color-text)_10%,transparent)] pb-6 lg:flex-row lg:items-end lg:justify-between">
               <div>
                 <button
@@ -324,7 +323,6 @@ export default function SetupBobotPage() {
               </div>
             </div>
 
-            {/* API error */}
             {error && (
               <div className="mb-6 flex flex-col gap-3 rounded-xl border border-[color-mix(in_srgb,var(--color-danger)_25%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_8%,transparent)] p-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-start gap-3">
@@ -348,7 +346,6 @@ export default function SetupBobotPage() {
               </div>
             )}
 
-            {/* Feedback */}
             {feedback && (
               <div
                 role="status"
@@ -381,7 +378,6 @@ export default function SetupBobotPage() {
               </div>
             )}
 
-            {/* Ringkasan */}
             <section className="mb-7 grid grid-cols-1 gap-4 sm:grid-cols-3">
               <article className="theme-card rounded-xl border border-[color-mix(in_srgb,var(--color-text)_10%,transparent)] p-5">
                 <div className="flex items-start justify-between">
@@ -484,7 +480,6 @@ export default function SetupBobotPage() {
             </section>
 
             <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
-              {/* Konfigurasi utama */}
               <section className="theme-card min-w-0 overflow-hidden rounded-xl border border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]">
                 <div className="flex flex-col gap-4 border-b border-[color-mix(in_srgb,var(--color-text)_9%,transparent)] p-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
                   <div>
@@ -814,7 +809,6 @@ export default function SetupBobotPage() {
                 </div>
               </section>
 
-              {/* Panel samping */}
               <aside className="space-y-5">
                 <section className="theme-card rounded-xl border border-[color-mix(in_srgb,var(--color-text)_10%,transparent)] p-5">
                   <div className="flex items-center gap-2">

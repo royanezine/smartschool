@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
@@ -8,145 +8,27 @@ import {
   ArrowLeft,
   UserCheck,
   Pencil,
-  Trash2,
-  Power,
-  PowerOff,
+  Unlink,
   Phone,
   Mail,
   ClipboardList,
   School,
   Hash,
+  Users,
   AlertTriangle,
   AlertCircle,
+  CheckCircle2,
+  Loader2,
 } from "lucide-react";
+import {
+  getWaliKelasDetail,
+  releaseWaliKelas,
+} from "@/services/kelas.service";
 
-/**
- * app/admin/guru/wali-kelas/[id]/page.jsx
- *
- * Halaman Detail Wali Kelas — dibuka lewat klik "Detail" dari daftar.
- * Menampilkan data lengkap satu wali kelas berdasarkan [id] di URL, dengan
- * aksi Ubah (ke /wali-kelas/[id]/edit), Nonaktifkan/Aktifkan, dan Hapus.
- *
- * CATATAN DATA:
- * MOCK_WALIKELAS di sini masih salinan dummy yang sama dengan halaman
- * daftar, supaya halaman ini bisa langsung dibuka lewat URL tanpa lewat
- * klik dari daftar dulu. Begitu backend API tersedia, ganti dengan fetch
- * detail wali kelas berdasarkan id (mis. getWaliKelasById(id)), dan
- * sambungkan toggle status / hapus ke endpoint terkait.
- */
-
-const MOCK_WALIKELAS = [
-  {
-    id: 1,
-    kelas: "7A",
-    jenjang: "VII",
-    waliKelas: "Siti Rahayu, S.Pd",
-    nip: "198501152010012001",
-    telp: "0812-3456-7890",
-    email: "sarah.amelia@smartschool.sch.id",
-    jumlahSiswa: 32,
-    tahunAjaran: "2025/2026",
-    status: "aktif",
-    siswa: [
-      "Alya Ramadhani",
-      "Bunga Citra Lestari",
-      "Cahyo Nugroho",
-      "Dimas Prasetyo",
-    ],
-  },
-  {
-    id: 2,
-    kelas: "7B",
-    jenjang: "VII",
-    waliKelas: "Andi Prasetyo, S.Pd",
-    nip: "198712052012011002",
-    telp: "0857-1122-3344",
-    email: "andi.prasetyo@smartschool.sch.id",
-    jumlahSiswa: 30,
-    tahunAjaran: "2025/2026",
-    status: "aktif",
-    siswa: [
-      "Eka Wulandari",
-      "Fajar Setiawan",
-      "Gilang Ramadhan",
-      "Hana Permatasari",
-    ],
-  },
-  {
-    id: 3,
-    kelas: "8A",
-    jenjang: "VIII",
-    waliKelas: "Dewi Anggraini, S.Si",
-    nip: "199002202015022004",
-    telp: "0821-9988-7766",
-    email: "dewi.anggraini@smartschool.sch.id",
-    jumlahSiswa: 31,
-    tahunAjaran: "2025/2026",
-    status: "aktif",
-    siswa: [
-      "Indra Kusuma",
-      "Julia Anggraeni",
-      "Krisna Aditya",
-      "Larasati Dewi",
-    ],
-  },
-  {
-    id: 4,
-    kelas: "8B",
-    jenjang: "VIII",
-    waliKelas: "Nina Kartika, S.Sn",
-    nip: "199105182018022005",
-    telp: "0878-5566-7788",
-    email: "nina.kartika@smartschool.sch.id",
-    jumlahSiswa: 29,
-    tahunAjaran: "2025/2026",
-    status: "aktif",
-    siswa: [
-      "Muhammad Fadli",
-      "Naila Zahra",
-      "Oka Wijaya",
-      "Putri Ayuningtyas",
-    ],
-  },
-  {
-    id: 5,
-    kelas: "9A",
-    jenjang: "IX",
-    waliKelas: "Budi Santoso, S.Pd",
-    nip: "197803102005011003",
-    telp: "0813-2233-4455",
-    email: "budi.santoso@smartschool.sch.id",
-    jumlahSiswa: 28,
-    tahunAjaran: "2025/2026",
-    status: "aktif",
-    siswa: [
-      "Reza Firmansyah",
-      "Salsabila Putri",
-      "Taufik Hidayat",
-      "Umi Kalsum",
-    ],
-  },
-  {
-    id: 6,
-    kelas: "9B",
-    jenjang: "IX",
-    waliKelas: "Rudi Hartono, S.Pd",
-    nip: "198309252008011006",
-    telp: "0896-4433-2211",
-    email: "rudi.hartono@smartschool.sch.id",
-    jumlahSiswa: 27,
-    tahunAjaran: "2024/2025",
-    status: "nonaktif",
-    siswa: [
-      "Vino Bastian",
-      "Wulan Sari",
-      "Yoga Pratama",
-      "Zahra Aulia",
-    ],
-  },
-];
 
 function getInitials(nama) {
+  if (!nama) return "WK";
+
   return nama
     .replace(/,.*/, "")
     .split(" ")
@@ -158,25 +40,25 @@ function getInitials(nama) {
 }
 
 function StatusBadge({ status }) {
-  const isActive = status === "aktif";
+  const isAssigned = status === "ditugaskan";
 
   return (
     <span
       className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border ${
-        isActive
+        isAssigned
           ? "theme-success theme-border"
           : "theme-card-soft theme-text-muted theme-border"
       }`}
     >
       <span
         className={`w-1.5 h-1.5 rounded-full ${
-          isActive
+          isAssigned
             ? "bg-[var(--color-success)]"
             : "bg-[var(--color-text-muted)]"
         }`}
       />
 
-      {isActive ? "Aktif" : "Nonaktif"}
+      {isAssigned ? "Ditugaskan" : "Belum Ditugaskan"}
     </span>
   );
 }
@@ -184,40 +66,110 @@ function StatusBadge({ status }) {
 export default function DetailWaliKelasPage() {
   const router = useRouter();
   const params = useParams();
-  const id = String(params?.id);
+
+  const rawId = params?.id;
+  const id = Array.isArray(rawId)
+    ? String(rawId[0] ?? "")
+    : String(rawId ?? "");
 
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const toggleSidebar = () => setIsCollapsed(!isCollapsed);
 
-  // Data lokal supaya toggle status langsung terlihat di halaman ini.
-  const [wali, setWali] = useState(MOCK_WALIKELAS);
-  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
+  const [confirmRelease, setConfirmRelease] = useState(false);
+  const [releasing, setReleasing] = useState(false);
 
-  const data = useMemo(
-    () => wali.find((w) => String(w.id) === id) || null,
-    [wali, id]
-  );
+  const fetchDetail = useCallback(async () => {
+    if (!id) {
+      throw new Error(
+        "ID kelas tidak ditemukan pada URL."
+      );
+    }
 
-  function handleToggleStatus() {
-    setWali((prev) =>
-      prev.map((w) =>
-        String(w.id) === id
-          ? {
-              ...w,
-              status:
-                w.status === "aktif" ? "nonaktif" : "aktif",
-            }
-          : w
-      )
-    );
-  }
+    return getWaliKelasDetail(id);
+  }, [id]);
 
-  function handleDelete() {
-    // TODO: sambungkan ke endpoint deleteWaliKelas(id) kalau API sudah ada.
-    console.log("Hapus wali kelas id:", id);
-    setConfirmDelete(false);
-    router.push("/admin/guru/wali-kelas");
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    setError("");
+
+    try {
+      const detail = await fetchDetail();
+      setData(detail);
+    } catch (err) {
+      console.error(
+        "[DetailWaliKelas] Gagal mengambil detail:",
+        err
+      );
+      setData(null);
+      setError(
+        err?.message ||
+          "Data wali kelas tidak ditemukan."
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, [fetchDetail]);
+
+  useEffect(() => {
+    let active = true;
+
+    fetchDetail()
+      .then((detail) => {
+        if (!active) return;
+        setData(detail);
+        setError("");
+      })
+      .catch((err) => {
+        if (!active) return;
+
+        console.error(
+          "[DetailWaliKelas] Gagal mengambil detail:",
+          err
+        );
+        setData(null);
+        setError(
+          err?.message ||
+            "Data wali kelas tidak ditemukan."
+        );
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [fetchDetail]);
+
+  async function handleRelease() {
+    if (!data) return;
+
+    setReleasing(true);
+    setError("");
+    setNotice("");
+
+    try {
+      await releaseWaliKelas(data.id);
+      setConfirmRelease(false);
+      setNotice("Wali kelas berhasil dilepas dari kelas.");
+      await loadData();
+    } catch (err) {
+      console.error(
+        "[DetailWaliKelas] Gagal melepas wali kelas:",
+        err
+      );
+      setError(
+        err?.message || "Gagal melepas wali kelas."
+      );
+      setConfirmRelease(false);
+    } finally {
+      setReleasing(false);
+    }
   }
 
   return (
@@ -243,7 +195,6 @@ export default function DetailWaliKelasPage() {
 
         <main className="flex-1 overflow-y-auto">
           <div className="p-4 sm:p-6 lg:p-8 space-y-6">
-            {/* HEADER */}
             <div className="flex items-center gap-3">
               <button
                 type="button"
@@ -282,8 +233,32 @@ export default function DetailWaliKelasPage() {
               </div>
             </div>
 
-            {/* NOT FOUND */}
-            {!data && (
+            {notice && (
+              <div className="flex items-start gap-3 p-4 rounded-xl border theme-border theme-success">
+                <CheckCircle2
+                  size={20}
+                  className="mt-0.5 shrink-0"
+                />
+
+                <p className="text-sm font-medium">
+                  {notice}
+                </p>
+              </div>
+            )}
+
+            {loading && (
+              <div className="theme-card rounded-xl border theme-border p-10">
+                <div className="flex items-center justify-center gap-2 text-sm theme-text-muted">
+                  <Loader2
+                    size={18}
+                    className="animate-spin"
+                  />
+                  Memuat detail wali kelas...
+                </div>
+              </div>
+            )}
+
+            {!loading && error && (
               <div className="flex items-start gap-3 p-4 rounded-xl border theme-border theme-danger">
                 <AlertCircle
                   size={20}
@@ -292,13 +267,10 @@ export default function DetailWaliKelasPage() {
 
                 <div className="flex-1">
                   <p className="text-sm font-semibold">
-                    Data wali kelas tidak ditemukan
+                    Data wali kelas tidak dapat ditampilkan
                   </p>
 
-                  <p className="text-sm mt-1">
-                    Wali kelas dengan id "{id}" tidak ada atau sudah
-                    dihapus.
-                  </p>
+                  <p className="text-sm mt-1">{error}</p>
                 </div>
 
                 <button
@@ -318,9 +290,8 @@ export default function DetailWaliKelasPage() {
               </div>
             )}
 
-            {data && (
+            {!loading && !error && data && (
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-                {/* KARTU UTAMA */}
                 <div className="lg:col-span-2 theme-card rounded-xl border theme-border shadow-sm overflow-hidden">
                   <div className="bg-[image:var(--color-brand-logo-bg)] px-6 py-6 flex items-center gap-4">
                     <div
@@ -344,7 +315,7 @@ export default function DetailWaliKelasPage() {
                       </p>
 
                       <p className="font-bold text-[var(--color-card)] text-xl leading-tight truncate">
-                        {data.waliKelas}
+                        {data.waliKelas || "Belum ditugaskan"}
                       </p>
 
                       <div className="mt-1.5">
@@ -354,7 +325,6 @@ export default function DetailWaliKelasPage() {
                   </div>
 
                   <div className="p-6 space-y-6">
-                    {/* INFO DASAR */}
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
                       <div>
                         <p className="flex items-center gap-1.5 text-[11px] font-medium theme-text-muted uppercase tracking-wide">
@@ -363,7 +333,7 @@ export default function DetailWaliKelasPage() {
                         </p>
 
                         <p className="font-mono text-sm theme-text mt-1">
-                          {data.nip}
+                          {data.nip || "-"}
                         </p>
                       </div>
 
@@ -386,36 +356,45 @@ export default function DetailWaliKelasPage() {
 
                         <p className="text-sm theme-text mt-1">
                           {data.tahunAjaran}
+                          {data.semester
+                            ? ` (${data.semester})`
+                            : ""}
                         </p>
                       </div>
                     </div>
 
-                    {/* KONTAK */}
                     <div className="border-t theme-border-soft pt-5 space-y-2.5">
                       <p className="text-xs font-semibold theme-text-muted uppercase tracking-wide mb-2">
-                        Kontak
+                        Kontak Wali Kelas
                       </p>
 
-                      <div className="flex items-center gap-2.5 text-sm theme-text-secondary">
-                        <Phone
-                          size={14}
-                          className="text-[var(--color-primary)] flex-shrink-0"
-                        />
+                      {data.waliKelasId ? (
+                        <>
+                          <div className="flex items-center gap-2.5 text-sm theme-text-secondary">
+                            <Phone
+                              size={14}
+                              className="text-[var(--color-primary)] flex-shrink-0"
+                            />
 
-                        {data.telp}
-                      </div>
+                            {data.telp || "-"}
+                          </div>
 
-                      <div className="flex items-center gap-2.5 text-sm theme-text-secondary">
-                        <Mail
-                          size={14}
-                          className="text-[var(--color-primary)] flex-shrink-0"
-                        />
+                          <div className="flex items-center gap-2.5 text-sm theme-text-secondary">
+                            <Mail
+                              size={14}
+                              className="text-[var(--color-primary)] flex-shrink-0"
+                            />
 
-                        {data.email}
-                      </div>
+                            {data.email || "-"}
+                          </div>
+                        </>
+                      ) : (
+                        <p className="text-sm theme-text-muted">
+                          Kelas ini belum memiliki wali kelas.
+                        </p>
+                      )}
                     </div>
 
-                    {/* SISWA BINAAN */}
                     <div className="border-t theme-border-soft pt-5">
                       <div className="flex items-center justify-between mb-2.5">
                         <p className="text-sm font-semibold theme-text-secondary flex items-center gap-1.5">
@@ -427,15 +406,19 @@ export default function DetailWaliKelasPage() {
                           Siswa Binaan
                         </p>
 
-                        <span className="text-xs font-medium theme-text-muted">
+                        <span className="text-xs font-medium theme-text-muted inline-flex items-center gap-1.5">
+                          <Users size={12} />
                           {data.jumlahSiswa} siswa
                         </span>
                       </div>
 
                       <div className="space-y-1.5">
-                        {data.siswa.map((nama, i) => (
+                        {data.siswa.map((siswa, index) => (
                           <div
-                            key={nama}
+                            key={
+                              siswa.id ||
+                              `${siswa.nama}-${index}`
+                            }
                             className="
                               flex items-center gap-2.5
                               px-3 py-2
@@ -458,30 +441,28 @@ export default function DetailWaliKelasPage() {
                                 flex-shrink-0
                               "
                             >
-                              {i + 1}
+                              {index + 1}
                             </span>
 
-                            {nama}
+                            <span className="flex-1 truncate">
+                              {siswa.nama}
+                            </span>
+
+                            <span className="text-[11px] theme-text-muted font-mono shrink-0">
+                              {siswa.nisn || siswa.nis || "-"}
+                            </span>
                           </div>
                         ))}
 
                         {data.siswa.length === 0 && (
                           <p className="text-xs theme-text-muted text-center py-2">
-                            Belum ada data siswa binaan.
-                          </p>
-                        )}
-
-                        {data.jumlahSiswa > data.siswa.length && (
-                          <p className="text-xs theme-text-muted text-center pt-1">
-                            +{data.jumlahSiswa - data.siswa.length} siswa
-                            lainnya
+                            Belum ada data siswa pada kelas ini.
                           </p>
                         )}
                       </div>
                     </div>
                   </div>
 
-                  {/* ACTIONS */}
                   <div className="flex flex-wrap items-center gap-3 px-6 py-4 border-t theme-border-soft theme-card-soft">
                     <button
                       type="button"
@@ -502,51 +483,36 @@ export default function DetailWaliKelasPage() {
                       "
                     >
                       <Pencil size={16} />
-                      Ubah Data
+                      {data.waliKelasId
+                        ? "Ganti Wali Kelas"
+                        : "Tugaskan Wali Kelas"}
                     </button>
 
-                    <button
-                      type="button"
-                      onClick={handleToggleStatus}
-                      className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold border transition-colors ${
-                        data.status === "aktif"
-                          ? "theme-warning theme-border hover:opacity-80"
-                          : "theme-success theme-border hover:opacity-80"
-                      }`}
-                    >
-                      {data.status === "aktif" ? (
-                        <PowerOff size={16} />
-                      ) : (
-                        <Power size={16} />
-                      )}
-
-                      {data.status === "aktif"
-                        ? "Nonaktifkan"
-                        : "Aktifkan"}
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => setConfirmDelete(true)}
-                      className="
-                        inline-flex items-center gap-2
-                        px-5 py-2.5
-                        rounded-xl
-                        text-sm
-                        font-semibold
-                        theme-danger
-                        border theme-border
-                        hover:opacity-80
-                        transition-colors
-                      "
-                    >
-                      <Trash2 size={16} />
-                      Hapus
-                    </button>
+                    {data.waliKelasId && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setConfirmRelease(true)
+                        }
+                        className="
+                          inline-flex items-center gap-2
+                          px-5 py-2.5
+                          rounded-xl
+                          text-sm
+                          font-semibold
+                          theme-danger
+                          border theme-border
+                          hover:opacity-80
+                          transition-colors
+                        "
+                      >
+                        <Unlink size={16} />
+                        Lepas Wali Kelas
+                      </button>
+                    )}
                   </div>
                 </div>
 
-                {/* PANEL KANAN: RINGKASAN */}
                 <div className="space-y-6">
                   <div className="theme-card rounded-xl border theme-border shadow-sm p-5">
                     <p className="text-xs font-semibold theme-text-muted uppercase tracking-wide mb-3">
@@ -576,6 +542,26 @@ export default function DetailWaliKelasPage() {
 
                       <div className="flex items-center justify-between">
                         <span className="theme-text-muted text-xs">
+                          Kapasitas
+                        </span>
+
+                        <span className="font-semibold theme-text">
+                          {data.kapasitas || "-"}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <span className="theme-text-muted text-xs">
+                          Tahun Ajaran
+                        </span>
+
+                        <span className="font-semibold theme-text">
+                          {data.tahunAjaran}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <span className="theme-text-muted text-xs">
                           Status
                         </span>
 
@@ -590,8 +576,7 @@ export default function DetailWaliKelasPage() {
         </main>
       </div>
 
-      {/* MODAL KONFIRMASI HAPUS */}
-      {confirmDelete && data && (
+      {confirmRelease && data && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="theme-card rounded-2xl shadow-xl max-w-sm w-full p-5">
             <div className="flex items-center gap-3 mb-3">
@@ -600,26 +585,26 @@ export default function DetailWaliKelasPage() {
               </div>
 
               <p className="font-bold theme-text">
-                Hapus Wali Kelas?
+                Lepas Wali Kelas?
               </p>
             </div>
 
             <p className="text-sm theme-text-muted mb-5">
-              Data wali kelas{" "}
+              Wali kelas{" "}
               <span className="font-semibold theme-text-secondary">
                 {data.waliKelas}
               </span>{" "}
-              untuk kelas{" "}
+              akan dilepas dari kelas{" "}
               <span className="font-semibold theme-text-secondary">
                 {data.kelas}
-              </span>{" "}
-              akan dihapus secara permanen. Tindakan ini tidak dapat
-              dibatalkan.
+              </span>
+              . Data kelas dan akun guru tidak dihapus.
             </p>
 
             <div className="flex gap-2">
               <button
-                onClick={() => setConfirmDelete(false)}
+                onClick={() => setConfirmRelease(false)}
+                disabled={releasing}
                 className="
                   flex-1
                   px-4 py-2.5
@@ -631,13 +616,15 @@ export default function DetailWaliKelasPage() {
                   border theme-border
                   hover:bg-[var(--color-input-hover)]
                   transition-colors
+                  disabled:opacity-60
                 "
               >
                 Batal
               </button>
 
               <button
-                onClick={handleDelete}
+                onClick={handleRelease}
+                disabled={releasing}
                 className="
                   flex-1
                   px-4 py-2.5
@@ -648,9 +635,10 @@ export default function DetailWaliKelasPage() {
                   border theme-border
                   hover:opacity-80
                   transition-colors
+                  disabled:opacity-60
                 "
               >
-                Ya, Hapus
+                {releasing ? "Melepas..." : "Ya, Lepas"}
               </button>
             </div>
           </div>

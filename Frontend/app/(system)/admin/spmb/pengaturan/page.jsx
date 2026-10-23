@@ -84,7 +84,6 @@ export default function PengaturanSpmbPage() {
   }, []);
 
   useEffect(() => {
-    // Memuat pengaturan dari API saat halaman dibuka.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     loadPengaturan();
   }, [loadPengaturan]);
@@ -262,7 +261,6 @@ export default function PengaturanSpmbPage() {
                 </div>
               ) : (
                 <div className="divide-y divide-[color-mix(in_srgb,var(--color-text)_8%,transparent)]">
-                  {/* STATUS PENERIMAAN */}
                   <div className="p-5 sm:p-6">
                     <div className="flex items-start gap-3">
                       <div
@@ -307,7 +305,6 @@ export default function PengaturanSpmbPage() {
                     </div>
                   </div>
 
-                  {/* PREFIX NOMOR */}
                   <div className="p-5 sm:p-6">
                     <div className="flex items-start gap-3">
                       <div
@@ -355,7 +352,6 @@ export default function PengaturanSpmbPage() {
                     </div>
                   </div>
 
-                  {/* VERIFIKASI BERKAS */}
                   <div className="p-5 sm:p-6">
                     <div className="flex items-start gap-3">
                       <div

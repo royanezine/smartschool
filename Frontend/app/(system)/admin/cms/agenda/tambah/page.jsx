@@ -1,4 +1,3 @@
-// app/cmsAdmin/agenda/tambah/page.jsx
 "use client";
 
 import { useState } from "react";
@@ -24,15 +23,9 @@ import {
 export default function TambahAgendaPage() {
   const router = useRouter();
 
-  // =====================================================
-  // SIDEBAR
-  // =====================================================
   const [active, setActive] = useState("agenda");
   const [collapsed, setCollapsed] = useState(false);
 
-  // =====================================================
-  // FORM
-  // =====================================================
   const [form, setForm] = useState({
     judul: "",
     kategori: "",
@@ -45,9 +38,6 @@ export default function TambahAgendaPage() {
 
   const [loading, setLoading] = useState(false);
 
-  // =====================================================
-  // HANDLE CHANGE
-  // =====================================================
   const handleChange = (field, value) => {
     setForm((prev) => ({
       ...prev,
@@ -55,9 +45,6 @@ export default function TambahAgendaPage() {
     }));
   };
 
-  // =====================================================
-  // SUBMIT
-  // =====================================================
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -92,9 +79,6 @@ export default function TambahAgendaPage() {
     }, 1200);
   };
 
-  // =====================================================
-  // STATUS CONFIG
-  // =====================================================
   const statusOptions = [
     {
       value: "draft",
@@ -122,17 +106,11 @@ export default function TambahAgendaPage() {
     },
   ];
 
-  // =====================================================
-  // INPUT CLASS
-  // =====================================================
   const inputClass =
     "theme-input w-full min-w-0 rounded-xl border px-4 py-3 text-sm font-medium shadow-sm outline-none transition-all duration-200 focus:border-[var(--color-primary)]";
 
   return (
     <div className="theme-page flex min-h-screen w-full">
-      {/* =====================================================
-          SIDEBAR
-      ====================================================== */}
       <aside className="shrink-0">
         <Sidebar
           active={active}
@@ -142,9 +120,6 @@ export default function TambahAgendaPage() {
         />
       </aside>
 
-      {/* =====================================================
-          MAIN
-      ====================================================== */}
       <main
         className="
           theme-page
@@ -156,15 +131,11 @@ export default function TambahAgendaPage() {
           duration-300
         "
       >
-        {/* HEADER */}
         <Header
           title="Tambah Agenda"
           user={{ name: "Admin" }}
         />
 
-        {/* =====================================================
-            CONTENT
-        ====================================================== */}
         <div
           className="
             w-full
@@ -182,9 +153,6 @@ export default function TambahAgendaPage() {
         >
           <div className="w-full min-w-0 space-y-6">
 
-            {/* =================================================
-                BREADCRUMB
-            ================================================== */}
             <div
               className="
                 flex
@@ -268,9 +236,6 @@ export default function TambahAgendaPage() {
               </button>
             </div>
 
-            {/* =================================================
-                PAGE INTRO
-            ================================================== */}
             <section
               className="
                 theme-card
@@ -284,7 +249,6 @@ export default function TambahAgendaPage() {
                 shadow-sm
               "
             >
-              {/* Decorative background */}
               <div
                 className="
                   pointer-events-none
@@ -363,9 +327,6 @@ export default function TambahAgendaPage() {
               </div>
             </section>
 
-            {/* =================================================
-                FORM
-            ================================================== */}
             <form
               onSubmit={handleSubmit}
               className="
@@ -379,9 +340,6 @@ export default function TambahAgendaPage() {
                 shadow-sm
               "
             >
-              {/* =================================================
-                  FORM HEADER
-              ================================================== */}
               <div
                 className="
                   theme-card-soft
@@ -411,9 +369,6 @@ export default function TambahAgendaPage() {
                 </div>
               </div>
 
-              {/* =================================================
-                  FORM BODY
-              ================================================== */}
               <div
                 className="
                   w-full
@@ -424,9 +379,6 @@ export default function TambahAgendaPage() {
                   lg:p-8
                 "
               >
-                {/* =================================================
-                    JUDUL
-                ================================================== */}
                 <div className="w-full min-w-0">
                   <label
                     htmlFor="judul"
@@ -463,9 +415,6 @@ export default function TambahAgendaPage() {
                   </div>
                 </div>
 
-                {/* =================================================
-                    GRID 2 COLUMN
-                ================================================== */}
                 <div
                   className="
                     grid
@@ -477,7 +426,6 @@ export default function TambahAgendaPage() {
                     lg:gap-6
                   "
                 >
-                  {/* KATEGORI */}
                   <div className="min-w-0">
                     <label
                       htmlFor="kategori"
@@ -516,7 +464,6 @@ export default function TambahAgendaPage() {
                     </div>
                   </div>
 
-                  {/* LOKASI */}
                   <div className="min-w-0">
                     <label
                       htmlFor="lokasi"
@@ -544,7 +491,6 @@ export default function TambahAgendaPage() {
                     </div>
                   </div>
 
-                  {/* TANGGAL MULAI */}
                   <div className="min-w-0">
                     <label
                       htmlFor="tanggalMulai"
@@ -589,7 +535,6 @@ export default function TambahAgendaPage() {
                     </div>
                   </div>
 
-                  {/* TANGGAL SELESAI */}
                   <div className="min-w-0">
                     <label
                       htmlFor="tanggalSelesai"
@@ -625,9 +570,6 @@ export default function TambahAgendaPage() {
                   </div>
                 </div>
 
-                {/* =================================================
-                    DESKRIPSI
-                ================================================== */}
                 <div className="w-full min-w-0">
                   <label
                     htmlFor="deskripsi"
@@ -655,9 +597,6 @@ export default function TambahAgendaPage() {
                   </div>
                 </div>
 
-                {/* =================================================
-                    STATUS
-                ================================================== */}
                 <div className="w-full min-w-0">
                   <div className="mb-3">
                     <label className="theme-text-secondary block text-sm font-semibold">
@@ -753,9 +692,6 @@ export default function TambahAgendaPage() {
                 </div>
               </div>
 
-              {/* =================================================
-                  ACTION FOOTER
-              ================================================== */}
               <div
                 className="
                   theme-card-soft
@@ -853,9 +789,6 @@ export default function TambahAgendaPage() {
               </div>
             </form>
 
-            {/* =================================================
-                INFO FOOTER
-            ================================================== */}
             <div
               className="
                 theme-card

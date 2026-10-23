@@ -20,9 +20,9 @@ export default function Solutions() {
     },
     {
       number: "02",
-      color: "text-violet-600",
-      bg: "bg-violet-50",
-      line: "bg-violet-600",
+      color: "text-sky-600",
+      bg: "bg-sky-50",
+      line: "bg-sky-600",
       icon: <Database size={34} />,
       title: "Data Terintegrasi dalam Satu Sistem",
       desc: "Seluruh data siswa, guru, dan akademik terpusat dalam satu sistem yang aman dan mudah diakses.",
@@ -69,7 +69,6 @@ export default function Solutions() {
     <section className="bg-white py-24">
       <div className="max-w-7xl mx-auto px-6">
 
-        {/* Header */}
         <div className="text-center">
 
           <span className="inline-flex items-center rounded-full bg-blue-50 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-blue-600">
@@ -87,7 +86,6 @@ export default function Solutions() {
 
         </div>
 
-        {/* Grid */}
         <div className="mt-16 grid gap-7 md:grid-cols-2 lg:grid-cols-3">
 
           {solutions.map((item) => (
@@ -95,27 +93,22 @@ export default function Solutions() {
               key={item.number}
               className="rounded-2xl border border-slate-100 bg-white p-8 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
             >
-              {/* Number */}
               <div
                 className={`flex h-10 w-10 items-center justify-center rounded-full ${item.bg} ${item.color} text-sm font-bold`}
               >
                 {item.number}
               </div>
 
-              {/* Icon */}
               <div className={`mt-6 ${item.color}`}>
                 {item.icon}
               </div>
 
-              {/* Title */}
               <h3 className="mt-5 text-lg font-bold leading-7 text-slate-900">
                 {item.title}
               </h3>
 
-              {/* Line */}
               <div className={`mt-3 h-1 w-12 rounded-full ${item.line}`}></div>
 
-              {/* Description */}
               <p className="mt-5 text-sm leading-7 text-gray-500">
                 {item.desc}
               </p>

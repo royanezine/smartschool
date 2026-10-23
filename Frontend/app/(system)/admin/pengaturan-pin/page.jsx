@@ -26,9 +26,6 @@ const ENDPOINT_SISWA = "/api/siswa";
 const ENDPOINT_RESET_PIN = (userId) =>
   `/api/auth/pin/admin-reset/${encodeURIComponent(userId)}`;
 
-/* =====================================================
-   MEMBACA STRUKTUR RESPONS BACKEND
-===================================================== */
 
 function unwrapResponse(response) {
   let result = response;
@@ -129,8 +126,6 @@ function pesanResponse(response, pesanDefault) {
 }
 
 function merupakanSiswa(siswa) {
-  // Endpoint /api/siswa biasanya memang sudah berisi data siswa.
-  // Jika role dikirim, pastikan data tersebut memang milik siswa.
   const role = String(
     siswa?.peran?.nama ||
       siswa?.role ||
@@ -145,9 +140,6 @@ function merupakanSiswa(siswa) {
   return !role || role === "siswa";
 }
 
-/* =====================================================
-   HALAMAN PENGATURAN PIN
-===================================================== */
 
 export default function PengaturanPinPage() {
   const [siswa, setSiswa] = useState([]);
@@ -164,9 +156,6 @@ export default function PengaturanPinPage() {
   const [roleDiizinkan, setRoleDiizinkan] = useState(false);
   const [siapPeriksaRole, setSiapPeriksaRole] = useState(false);
 
-  /* =====================================================
-     MEMUAT DATA SISWA DAN KELAS
-  ===================================================== */
 
   const muatSiswa = useCallback(async (refresh = false) => {
     setError("");
@@ -191,8 +180,6 @@ export default function PengaturanPinPage() {
 
       const daftarKhususSiswa = daftarSiswa.filter(merupakanSiswa);
 
-      // Ambil kelas dari data siswa jika tersedia.
-      // Jika belum ada, coba cari melalui service kelas yang kamu kirim.
       const daftarDenganKelas = await Promise.all(
         daftarKhususSiswa.map(async (item) => {
           const siswaId = item?.id || item?.userId;
@@ -255,9 +242,6 @@ export default function PengaturanPinPage() {
     }
   }, []);
 
-  /* =====================================================
-     PEMERIKSAAN AKSES ADMIN
-  ===================================================== */
 
   useEffect(() => {
     try {
@@ -298,9 +282,6 @@ export default function PengaturanPinPage() {
     }
   }, [siapPeriksaRole, roleDiizinkan, muatSiswa]);
 
-  /* =====================================================
-     PENCARIAN
-  ===================================================== */
 
   const siswaTerfilter = useMemo(() => {
     const keyword = pencarian.trim().toLowerCase();
@@ -324,9 +305,6 @@ export default function PengaturanPinPage() {
     });
   }, [siswa, pencarian]);
 
-  /* =====================================================
-     RINGKASAN STATUS PIN
-  ===================================================== */
 
   const totalSudahAtur = siswa.filter(
     (item) => statusPinSiswa(item) === "Sudah diatur"
@@ -340,9 +318,6 @@ export default function PengaturanPinPage() {
     (item) => statusPinSiswa(item) === "Belum diketahui"
   ).length;
 
-  /* =====================================================
-     RESET PIN OLEH ADMIN
-  ===================================================== */
 
   async function handleResetPin() {
     if (!siswaDipilih?.id && !siswaDipilih?.userId) {
@@ -388,7 +363,6 @@ export default function PengaturanPinPage() {
         )
       );
 
-      // Sinkronkan lagi dengan data Backend.
       await muatSiswa(true);
     } catch (err) {
       setError(
@@ -400,9 +374,6 @@ export default function PengaturanPinPage() {
     }
   }
 
-  /* =====================================================
-     LOADING / AKSES
-  ===================================================== */
 
   if (!siapPeriksaRole) {
     return (
@@ -432,9 +403,6 @@ export default function PengaturanPinPage() {
     );
   }
 
-  /* =====================================================
-     TAMPILAN UTAMA
-  ===================================================== */
 
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50 text-slate-800">
@@ -447,7 +415,6 @@ export default function PengaturanPinPage() {
 
         <main className="flex-1 overflow-y-auto">
           <div className="mx-auto w-full max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8">
-            {/* JUDUL HALAMAN */}
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <div className="mb-2 flex items-center gap-2 text-sm font-medium text-blue-700">
@@ -480,7 +447,6 @@ export default function PengaturanPinPage() {
               </button>
             </div>
 
-            {/* KARTU RINGKASAN */}
             <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
               <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
                 <div className="flex items-center justify-between">
@@ -552,7 +518,6 @@ export default function PengaturanPinPage() {
               </div>
             )}
 
-            {/* PESAN ERROR */}
             {error && (
               <div
                 role="alert"
@@ -572,7 +537,6 @@ export default function PengaturanPinPage() {
               </div>
             )}
 
-            {/* PESAN SUKSES */}
             {sukses && (
               <div
                 role="status"
@@ -592,7 +556,6 @@ export default function PengaturanPinPage() {
               </div>
             )}
 
-            {/* TABEL SISWA */}
             <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
               <div className="flex flex-col gap-4 border-b border-slate-200 p-5 sm:flex-row sm:items-center sm:justify-between">
                 <div>
@@ -755,7 +718,6 @@ export default function PengaturanPinPage() {
               </div>
             </section>
 
-            {/* INFORMASI KEAMANAN */}
             <div className="mb-6 mt-5 flex items-start gap-3 rounded-xl border border-blue-100 bg-blue-50/70 p-4">
               <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-blue-700" />
 
@@ -775,7 +737,6 @@ export default function PengaturanPinPage() {
         </main>
       </div>
 
-      {/* MODAL KONFIRMASI RESET */}
       {siswaDipilih && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4"

@@ -18,9 +18,6 @@ import {
   CalendarClock,
 } from "lucide-react";
 
-// ============================================================
-// THEME HELPERS
-// ============================================================
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -58,9 +55,6 @@ const themeWarningSurface =
 const themeWarningBorder =
   "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
 
-// ============================================================
-// MAIN COMPONENT
-// ============================================================
 
 export default function DetailSekolahPage() {
   const { id } = useParams();
@@ -97,9 +91,6 @@ export default function DetailSekolahPage() {
       <div className="w-full max-w-[1500px] mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
         <div className="w-full space-y-6">
 
-          {/* ================================================== */}
-          {/* BACK LINK */}
-          {/* ================================================== */}
 
           <Link
             href="/yayasan/sekolah"
@@ -115,9 +106,6 @@ export default function DetailSekolahPage() {
             Kembali ke Daftar Sekolah
           </Link>
 
-          {/* ================================================== */}
-          {/* ERROR */}
-          {/* ================================================== */}
 
           {error && (
             <div
@@ -135,13 +123,9 @@ export default function DetailSekolahPage() {
             </div>
           )}
 
-          {/* ================================================== */}
-          {/* LOADING */}
-          {/* ================================================== */}
 
           {loading && (
             <div className="space-y-6">
-              {/* Header skeleton */}
               <div
                 className={`
                   h-28
@@ -153,7 +137,6 @@ export default function DetailSekolahPage() {
                 `}
               />
 
-              {/* Stats skeleton */}
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                 {[1, 2, 3].map((i) => (
                   <div
@@ -170,7 +153,6 @@ export default function DetailSekolahPage() {
                 ))}
               </div>
 
-              {/* Content skeleton */}
               <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
                 {[1, 2].map((i) => (
                   <div
@@ -189,9 +171,6 @@ export default function DetailSekolahPage() {
             </div>
           )}
 
-          {/* ================================================== */}
-          {/* NOT FOUND */}
-          {/* ================================================== */}
 
           {!loading && !error && !data && (
             <div
@@ -253,9 +232,6 @@ export default function DetailSekolahPage() {
             </div>
           )}
 
-          {/* ================================================== */}
-          {/* CONTENT */}
-          {/* ================================================== */}
 
           {!loading &&
             !error &&
@@ -266,9 +242,6 @@ export default function DetailSekolahPage() {
 
               return (
                 <>
-                  {/* ========================================== */}
-                  {/* PAGE HEADER */}
-                  {/* ========================================== */}
 
                   <div
                     className={`
@@ -283,7 +256,6 @@ export default function DetailSekolahPage() {
                   >
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                       <div className="flex min-w-0 items-start gap-3.5">
-                        {/* School Icon */}
                         <div
                           className={`
                             flex
@@ -302,7 +274,6 @@ export default function DetailSekolahPage() {
                           <School size={26} />
                         </div>
 
-                        {/* School Identity */}
                         <div className="min-w-0">
                           <h1 className="truncate text-xl font-semibold theme-text sm:text-2xl">
                             {profil.nama}
@@ -313,7 +284,6 @@ export default function DetailSekolahPage() {
                           </p>
 
                           <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                            {/* Status */}
                             <span
                               className={`
                                 inline-flex
@@ -335,7 +305,6 @@ export default function DetailSekolahPage() {
                               {profil.status}
                             </span>
 
-                            {/* Package */}
                             {langganan?.paket?.nama && (
                               <span
                                 className={`
@@ -361,9 +330,6 @@ export default function DetailSekolahPage() {
                     </div>
                   </div>
 
-                  {/* ========================================== */}
-                  {/* STATISTIK */}
-                  {/* ========================================== */}
 
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                     <StatCard
@@ -388,13 +354,9 @@ export default function DetailSekolahPage() {
                     />
                   </div>
 
-                  {/* ========================================== */}
-                  {/* INFO SEKOLAH + LANGGANAN */}
-                  {/* ========================================== */}
 
                   <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
 
-                    {/* INFO SEKOLAH */}
                     <div
                       className={`
                         theme-card
@@ -454,7 +416,6 @@ export default function DetailSekolahPage() {
                       </div>
                     </div>
 
-                    {/* LANGGANAN */}
                     <div
                       className={`
                         theme-card
@@ -560,9 +521,6 @@ export default function DetailSekolahPage() {
   );
 }
 
-// ============================================================
-// STAT CARD
-// ============================================================
 
 function StatCard({
   icon: Icon,
@@ -641,9 +599,6 @@ function StatCard({
   );
 }
 
-// ============================================================
-// INFO ROW
-// ============================================================
 
 function InfoRow({
   icon: Icon,

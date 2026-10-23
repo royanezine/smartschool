@@ -12,9 +12,6 @@ import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 import { ChevronRight, ChevronDown, ChevronUp, Menu, X } from "lucide-react";
 
-/* =========================================================
-   NAVIGATION CONFIG
-========================================================= */
 import { guruSidebarConfig } from "../../configs/navigation/guru";
 import { superadminSidebarConfig } from "../../configs/navigation/superAdmin";
 import { yayasanSidebarConfig } from "../../configs/navigation/yayasan";
@@ -29,9 +26,6 @@ import {
   subscribeAuth,
 } from "../../lib/auth";
 
-/* =========================================================
-   CONFIG BY ROLE
-========================================================= */
 const configByRole = {
   guru: guruSidebarConfig,
   "super-admin": superadminSidebarConfig,
@@ -40,24 +34,15 @@ const configByRole = {
   siswa: siswaSidebarConfig,
 };
 
-/* =========================================================
-   CONSTANTS
-========================================================= */
 const SIDEBAR_COLLAPSED_KEY = "sidebar-collapsed";
 const SIDEBAR_SCROLL_KEY = "sidebar-scroll-top";
 
 const SIDEBAR_EXPANDED_WIDTH = "w-64";
 const SIDEBAR_COLLAPSED_WIDTH = "w-[72px]";
 
-/* =========================================================
-   ACTIVE STYLE
-========================================================= */
 const ACTIVE_SOLID = "sidebar-active";
 const CHILD_ACTIVE_COLLAPSED = "sidebar-child-active-collapsed";
 
-/* =========================================================
-   ROLE HELPERS
-========================================================= */
 function normalizeRole(role) {
   if (!role) return "";
 
@@ -85,9 +70,6 @@ function getSidebarRole(role) {
   return "";
 }
 
-/* =========================================================
-   RESOLVE ROLE FROM URL
-========================================================= */
 function resolveRole(pathname = "") {
   const path = String(pathname || "").trim().toLowerCase();
 
@@ -101,9 +83,6 @@ function resolveRole(pathname = "") {
   return "";
 }
 
-/* =========================================================
-   ROLE ACCESS
-========================================================= */
 function isRoleAllowed(menuRole, currentRole) {
   if (!menuRole) return true;
 
@@ -116,9 +95,6 @@ function isRoleAllowed(menuRole, currentRole) {
   return getSidebarRole(menuRole) === current;
 }
 
-/* =========================================================
-   PERMISSION / MODULE
-========================================================= */
 function canViewMenu(item, permissions, modules) {
   if (!item) return false;
 
@@ -128,9 +104,6 @@ function canViewMenu(item, permissions, modules) {
   return permissionAllowed && moduleAllowed;
 }
 
-/* =========================================================
-   FILTER MENU
-========================================================= */
 function filterMenuItems(items, permissions, modules, currentRole) {
   if (!Array.isArray(items)) return [];
 
@@ -138,15 +111,12 @@ function filterMenuItems(items, permissions, modules, currentRole) {
     .map((item) => {
       if (!item) return null;
 
-      /* HEADER */
       if (item.type === "header") {
         return { ...item, __header: true };
       }
 
-      /* ROLE */
       if (!isRoleAllowed(item.role, currentRole)) return null;
 
-      /* CHILDREN */
       if (Array.isArray(item.children)) {
         const filteredChildren = filterMenuItems(
           item.children,
@@ -172,7 +142,6 @@ function filterMenuItems(items, permissions, modules, currentRole) {
         return null;
       }
 
-      /* NORMAL ITEM */
       if (!canViewMenu(item, permissions, modules)) return null;
 
       return item;
@@ -180,9 +149,41 @@ function filterMenuItems(items, permissions, modules, currentRole) {
     .filter(Boolean);
 }
 
-/* =========================================================
-   REMOVE EMPTY HEADERS
-========================================================= */
+function normalizeMenuPath(value) {
+  const path = String(value || "").trim();
+
+  if (!path || path === "/") return path;
+
+  return path.replace(/\/+$/, "");
+}
+
+function matchesMenuPath(pathname, path) {
+  const current = normalizeMenuPath(pathname);
+  const target = normalizeMenuPath(path);
+
+  if (!current || !target) return false;
+
+  return current === target || current.startsWith(`${target}/`);
+}
+
+function isMenuPathActive(pathname, path, allPaths = []) {
+  if (!matchesMenuPath(pathname, path)) return false;
+
+  const current = normalizeMenuPath(pathname);
+  const target = normalizeMenuPath(path);
+
+  if (current === target) return true;
+
+  return !allPaths.some((candidate) => {
+    const candidatePath = normalizeMenuPath(candidate);
+
+    return (
+      candidatePath.length > target.length &&
+      matchesMenuPath(current, candidatePath)
+    );
+  });
+}
+
 function removeEmptyHeaders(sections) {
   if (!Array.isArray(sections)) return [];
 
@@ -219,9 +220,6 @@ function removeEmptyHeaders(sections) {
   return result;
 }
 
-/* =========================================================
-   COMPONENT
-========================================================= */
 export default function Sidebar({
   active,
   setActive,
@@ -229,13 +227,11 @@ export default function Sidebar({
   setCollapsed: setCollapsedProp,
   role: roleProp,
   onClose,
+  isOpen,
 }) {
   const router = useRouter();
   const pathname = usePathname();
 
-  /* =======================================================
-     STATE
-  ======================================================= */
   const [collapsed, setCollapsedInternal] = useState(() => collapsedProp ?? false);
   const [isMobile, setIsMobile] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -244,13 +240,8 @@ export default function Sidebar({
   const [permissions, setPermissions] = useState([]);
   const [modules, setModules] = useState([]);
 
-  // Versi sesi: dinaikkan setiap token/user berubah agar role
-  // dihitung ulang dari sumber kebenaran.
   const [authTick, setAuthTick] = useState(0);
 
-  /* =======================================================
-     REFS
-  ======================================================= */
   const sidebarNavRef = useRef(null);
   const flyoutPanelRef = useRef(null);
   const closeTimeoutRef = useRef(null);
@@ -258,23 +249,28 @@ export default function Sidebar({
   const logoTooltipTimeoutRef = useRef(null);
   const itemTooltipTimeoutRef = useRef(null);
 
-  /* =======================================================
-     FLYOUT / TOOLTIP STATE
-  ======================================================= */
   const [flyoutState, setFlyoutState] = useState(null);
   const [logoTooltip, setLogoTooltip] = useState(null);
   const [itemTooltip, setItemTooltip] = useState(null);
 
-  /* =======================================================
-     MOUNT
-  ======================================================= */
   useEffect(() => {
-    setMounted(true);
+    const timer = setTimeout(() => {
+      setMounted(true);
+    }, 0);
+
+    return () => clearTimeout(timer);
   }, []);
 
-  /* =======================================================
-     SET COLLAPSED
-  ======================================================= */
+  useEffect(() => {
+    if (isOpen !== undefined) {
+      const timer = setTimeout(() => {
+        setMobileOpen(Boolean(isOpen));
+      }, 0);
+
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen]);
+
   const setCollapsed = (value) => {
     setCollapsedInternal((prev) => {
       const next = typeof value === "function" ? value(prev) : value;
@@ -282,24 +278,17 @@ export default function Sidebar({
       try {
         localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(next));
       } catch (e) {
-        /* ignore */
       }
 
       return next;
     });
   };
 
-  /* =======================================================
-     SYNC PARENT
-  ======================================================= */
   useEffect(() => {
     setCollapsedProp?.(collapsed);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [collapsed]);
 
-  /* =======================================================
-     LOAD AUTH DATA
-  ======================================================= */
   useEffect(() => {
     if (!mounted) return;
 
@@ -316,14 +305,11 @@ export default function Sidebar({
         setModules([]);
       }
 
-      // Naikkan versi sesi agar role dihitung ulang dari token.
       setAuthTick((value) => value + 1);
     };
 
     loadAuthData();
 
-    // Sesi produksi dibagi satu browser (localStorage). `subscribeAuth`
-    // bereaksi pada perubahan sesi tab ini maupun tab lain.
     const unsubscribe = subscribeAuth(loadAuthData);
 
     return () => {
@@ -331,45 +317,28 @@ export default function Sidebar({
     };
   }, [mounted]);
 
-  /* =======================================================
-     ROLE (PENGGABUNGAN)
-     -------------------------------------------------------
-     Sumber kebenaran utama = role dari token sesi. URL dan prop
-     hanya fallback. Ini mencegah menu tertukar saat identitas
-     sesi berubah (mis. setelah reload / berpindah akun).
-  ======================================================= */
   const role = useMemo(() => {
     const pathnameRole = resolveRole(pathname);
 
-    /* URL (Diprioritaskan untuk memastikan halaman yang dibuka sesuai) */
     if (pathnameRole) return pathnameRole;
 
-    /* TOKEN (Sumber kebenaran utama) */
     const tokenRole = getAuthRole();
     if (tokenRole) {
       const normalizedTokenRole = getSidebarRole(tokenRole);
       if (normalizedTokenRole) return normalizedTokenRole;
     }
 
-    /* PROP */
     if (roleProp) {
       const propRole = getSidebarRole(roleProp);
       if (propRole) return propRole;
     }
 
     return "";
-    // authTick sengaja dipakai agar role dihitung ulang saat sesi berubah.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname, roleProp, authTick]);
 
-  /* =======================================================
-     CONFIG
-  ======================================================= */
   const config = role && configByRole[role] ? configByRole[role] : null;
 
-  /* =======================================================
-     MENU
-  ======================================================= */
   const menuSections = useMemo(() => {
     if (!config || !Array.isArray(config.menuSections)) return [];
 
@@ -378,9 +347,26 @@ export default function Sidebar({
     return removeEmptyHeaders(filtered);
   }, [config, permissions, modules, role]);
 
-  /* =======================================================
-     RESPONSIVE
-  ======================================================= */
+  const menuPaths = useMemo(() => {
+    const paths = [];
+
+    const collectPaths = (items) => {
+      if (!Array.isArray(items)) return;
+
+      items.forEach((item) => {
+        if (item?.path) paths.push(item.path);
+
+        if (Array.isArray(item?.children)) {
+          collectPaths(item.children);
+        }
+      });
+    };
+
+    collectPaths(menuSections);
+
+    return paths;
+  }, [menuSections]);
+
   useLayoutEffect(() => {
     const mediaQuery = window.matchMedia("(max-width: 1023px)");
 
@@ -402,7 +388,6 @@ export default function Sidebar({
         try {
           localStorage.setItem(SIDEBAR_COLLAPSED_KEY, "true");
         } catch (e) {
-          /* ignore */
         }
       }
     };
@@ -427,12 +412,8 @@ export default function Sidebar({
       mediaQuery.removeEventListener("change", handleMediaChange);
       cancelAnimationFrame(raf);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  /* =======================================================
-     RESTORE SCROLL
-  ======================================================= */
   useLayoutEffect(() => {
     const nav = sidebarNavRef.current;
     if (!nav) return;
@@ -466,9 +447,6 @@ export default function Sidebar({
     };
   }, [pathname, role]);
 
-  /* =======================================================
-     SAVE SCROLL
-  ======================================================= */
   useEffect(() => {
     const nav = sidebarNavRef.current;
     if (!nav) return;
@@ -477,7 +455,6 @@ export default function Sidebar({
       try {
         sessionStorage.setItem(SIDEBAR_SCROLL_KEY, String(nav.scrollTop));
       } catch (e) {
-        /* ignore */
       }
     };
 
@@ -490,9 +467,6 @@ export default function Sidebar({
     };
   }, [pathname, role]);
 
-  /* =======================================================
-     BODY LOCK MOBILE
-  ======================================================= */
   useEffect(() => {
     if (isMobile && mobileOpen) {
       document.body.style.overflow = "hidden";
@@ -505,9 +479,6 @@ export default function Sidebar({
     };
   }, [isMobile, mobileOpen]);
 
-  /* =======================================================
-     SUBMENU STATE
-  ======================================================= */
   const [openMenus, setOpenMenus] = useState(() => {
     const initial = {};
     menuSections.forEach((item) => {
@@ -526,15 +497,16 @@ export default function Sidebar({
       }
     });
 
-    setOpenMenus((prev) => ({
-      ...next,
-      ...prev,
-    }));
+    const timer = setTimeout(() => {
+      setOpenMenus((prev) => ({
+        ...next,
+        ...prev,
+      }));
+    }, 0);
+
+    return () => clearTimeout(timer);
   }, [menuSections, role]);
 
-  /* =======================================================
-     FLYOUT LOGIC
-  ======================================================= */
   const clearCloseTimeout = () => {
     if (closeTimeoutRef.current) {
       clearTimeout(closeTimeoutRef.current);
@@ -580,7 +552,6 @@ export default function Sidebar({
     });
   };
 
-  /* CLOSE FLYOUT ON OUTSIDE CLICK */
   useEffect(() => {
     if (!flyoutState) return;
 
@@ -608,12 +579,15 @@ export default function Sidebar({
   }, [flyoutState]);
 
   useEffect(() => {
-    if (!collapsed) setFlyoutState(null);
+    if (!collapsed) {
+      const timer = setTimeout(() => {
+        setFlyoutState(null);
+      }, 0);
+
+      return () => clearTimeout(timer);
+    }
   }, [collapsed]);
 
-  /* =======================================================
-     LOGO TOOLTIP LOGIC
-  ======================================================= */
   const clearLogoTooltipTimeout = () => {
     if (logoTooltipTimeoutRef.current) {
       clearTimeout(logoTooltipTimeoutRef.current);
@@ -653,9 +627,6 @@ export default function Sidebar({
     };
   }, [logoTooltip]);
 
-  /* =======================================================
-     ITEM TOOLTIP LOGIC
-  ======================================================= */
   const clearItemTooltipTimeout = () => {
     if (itemTooltipTimeoutRef.current) {
       clearTimeout(itemTooltipTimeoutRef.current);
@@ -701,16 +672,25 @@ export default function Sidebar({
   }, [itemTooltip]);
 
   useEffect(() => {
-    if (!collapsed) setItemTooltip(null);
+    if (!collapsed) {
+      const timer = setTimeout(() => {
+        setItemTooltip(null);
+      }, 0);
+
+      return () => clearTimeout(timer);
+    }
   }, [collapsed]);
 
   useEffect(() => {
-    if (flyoutState) setItemTooltip(null);
+    if (flyoutState) {
+      const timer = setTimeout(() => {
+        setItemTooltip(null);
+      }, 0);
+
+      return () => clearTimeout(timer);
+    }
   }, [flyoutState]);
 
-  /* =======================================================
-     ACTIONS
-  ======================================================= */
   const toggleSidebar = () => {
     setCollapsed((prev) => !prev);
   };
@@ -723,7 +703,6 @@ export default function Sidebar({
   };
 
   const handleMenuClick = (item, collapsedIconMode, triggerElement) => {
-    /* COLLAPSED + CHILDREN */
     if (collapsedIconMode && Array.isArray(item.children) && item.children.length > 0) {
       if (isMobile) {
         if (item.path) {
@@ -743,13 +722,11 @@ export default function Sidebar({
     const alreadyOnThisPage = pathname === item.path;
     setActive?.(item.key);
 
-    /* SUBMENU */
     if (Array.isArray(item.children) && alreadyOnThisPage) {
       toggleSubmenu(item.key);
       return;
     }
 
-    /* NAVIGATE */
     if (item.path) {
       router.push(item.path);
       if (isMobile) setMobileOpen(false);
@@ -761,7 +738,6 @@ export default function Sidebar({
       try {
         sessionStorage.setItem(SIDEBAR_SCROLL_KEY, String(sidebarNavRef.current.scrollTop));
       } catch (e) {
-        /* ignore */
       }
     }
 
@@ -774,12 +750,8 @@ export default function Sidebar({
     if (onClose) onClose();
   };
 
-  /* =======================================================
-     LOGOUT
-  ======================================================= */
   const handleLogout = () => {
     try {
-      // Hapus sesi aktif secara lengkap (token + user + key lama).
       clearSession();
 
       localStorage.removeItem(SIDEBAR_COLLAPSED_KEY);
@@ -790,9 +762,6 @@ export default function Sidebar({
     router.push("/login");
   };
 
-  /* =======================================================
-     DERIVED CLASSES
-  ======================================================= */
   const showLabels = !collapsed || isMobile;
   const transitionClass = allowTransition
     ? "transition-[width,transform] duration-300 ease-in-out"
@@ -837,15 +806,14 @@ export default function Sidebar({
         ${transitionClass}
       `;
 
-  /* =======================================================
-     RENDER
-  ======================================================= */
   return (
     <>
-      {/* MOBILE BACKDROP */}
       {isMobile && mobileOpen && (
         <div
-          onClick={() => setMobileOpen(false)}
+          onClick={() => {
+            setMobileOpen(false);
+            onClose?.();
+          }}
           className="
             fixed inset-0 z-40
             bg-slate-900/40 dark:bg-black/70
@@ -855,7 +823,6 @@ export default function Sidebar({
         />
       )}
 
-      {/* MOBILE OPEN BUTTON (BURGER) */}
       {isMobile && !mobileOpen && (
         <button
           type="button"
@@ -876,7 +843,6 @@ export default function Sidebar({
         </button>
       )}
 
-      {/* SIDEBAR WRAPPER */}
       <div className={wrapperClasses}>
         <aside className={asideClasses}>
           <div
@@ -885,9 +851,7 @@ export default function Sidebar({
               bg-[#f4f8ff] dark:bg-[#0b1220]
             "
           >
-            {/* HEADER */}
             <div className="sidebar-header relative h-[112px] shrink-0 overflow-visible">
-              {/* LOGO + BRAND */}
               <div
                 ref={logoWrapRef}
                 onMouseEnter={collapsed && !isMobile ? showLogoTooltip : undefined}
@@ -940,11 +904,13 @@ export default function Sidebar({
                 )}
               </div>
 
-              {/* MOBILE CLOSE */}
               {isMobile && mobileOpen && (
                 <button
                   type="button"
-                  onClick={() => setMobileOpen(false)}
+                  onClick={() => {
+                    setMobileOpen(false);
+                    onClose?.();
+                  }}
                   aria-label="Tutup sidebar"
                   className="
                     absolute right-3 top-4 z-20
@@ -959,7 +925,6 @@ export default function Sidebar({
                 </button>
               )}
 
-              {/* CURVE SVG */}
               <svg
                 className="
                   absolute left-0 bottom-[-1px] w-full h-[42px] z-10
@@ -976,7 +941,6 @@ export default function Sidebar({
               </svg>
             </div>
 
-            {/* NAVIGATION */}
             <nav
               ref={sidebarNavRef}
               className="
@@ -988,7 +952,6 @@ export default function Sidebar({
             >
               {menuSections.length > 0 ? (
                 menuSections.map((item, index) => {
-                  /* HEADER ITEM */
                   if (item.type === "header") {
                     if (!showLabels) {
                       return (
@@ -1016,14 +979,16 @@ export default function Sidebar({
                     );
                   }
 
-                  /* NORMAL MENU ITEM */
                   const hasChildren = Array.isArray(item.children) && item.children.length > 0;
-                  const isChildActive = hasChildren && item.children.some((child) => pathname === child.path);
-                  const isLeafActive = !hasChildren && pathname === item.path;
+                  const isChildActive =
+                    hasChildren &&
+                    item.children.some((child) =>
+                      isMenuPathActive(pathname, child.path, menuPaths)
+                    );
+                  const isLeafActive = !hasChildren && isMenuPathActive(pathname, item.path, menuPaths);
                   const isOpen = !!openMenus[item.key];
                   const collapsedIconMode = collapsed && !isMobile;
 
-                  /* MENU STATE CLASSES */
                   let stateClass = "text-slate-700 dark:text-slate-300 sidebar-hover";
 
                   if (isLeafActive) {
@@ -1036,7 +1001,6 @@ export default function Sidebar({
 
                   return (
                     <div key={item.key} className="relative">
-                      {/* MAIN MENU BUTTON */}
                       <div
                         onClick={(event) =>
                           handleMenuClick(item, collapsedIconMode, event.currentTarget)
@@ -1075,7 +1039,6 @@ export default function Sidebar({
                           ${collapsedIconMode ? "justify-center px-2" : ""}
                         `}
                       >
-                        {/* ACTIVE INDICATOR */}
                         {isLeafActive && !collapsedIconMode && (
                           <div
                             className="
@@ -1085,7 +1048,6 @@ export default function Sidebar({
                           />
                         )}
 
-                        {/* ICON */}
                         <div
                           className={`
                             relative flex items-center justify-center shrink-0
@@ -1102,14 +1064,12 @@ export default function Sidebar({
                           )}
                         </div>
 
-                        {/* LABEL */}
                         {showLabels && (
                           <span className="flex-1 min-w-0 text-left truncate">
                             {item.label}
                           </span>
                         )}
 
-                        {/* SUBMENU ARROW */}
                         {showLabels && hasChildren && (
                           <button
                             type="button"
@@ -1130,7 +1090,6 @@ export default function Sidebar({
                         )}
                       </div>
 
-                      {/* SUBMENU CHILDREN */}
                       {hasChildren && showLabels && (
                         <div
                           className={`
@@ -1144,7 +1103,7 @@ export default function Sidebar({
                             "
                           >
                             {item.children.map((child) => {
-                              const isChildItemActive = pathname === child.path;
+                              const isChildItemActive = isMenuPathActive(pathname, child.path, menuPaths);
 
                               return (
                                 <button
@@ -1207,7 +1166,6 @@ export default function Sidebar({
             </nav>
           </div>
 
-          {/* DESKTOP TOGGLE BUTTON */}
           {!isMobile && (
             <button
               type="button"
@@ -1237,9 +1195,6 @@ export default function Sidebar({
           )}
         </aside>
 
-        {/* ===================================================
-            FLYOUT SUBMENU (PORTAL)
-        =================================================== */}
         {mounted &&
           flyoutState &&
           !isMobile &&
@@ -1261,7 +1216,6 @@ export default function Sidebar({
                 border border-blue-100 dark:border-slate-700
               "
             >
-              {/* ARROW */}
               <div
                 className="
                   absolute -left-1.5 top-5 w-3 h-3
@@ -1271,7 +1225,6 @@ export default function Sidebar({
                 "
               />
 
-              {/* TITLE */}
               <div
                 className="
                   px-2 pt-1 pb-2 text-[10px] font-semibold uppercase tracking-wider
@@ -1281,10 +1234,9 @@ export default function Sidebar({
                 {flyoutState.item.label}
               </div>
 
-              {/* CHILDREN */}
               <div className="space-y-0.5">
                 {flyoutState.item.children.map((child) => {
-                  const isChildItemActive = pathname === child.path;
+                  const isChildItemActive = isMenuPathActive(pathname, child.path, menuPaths);
 
                   return (
                     <button
@@ -1320,12 +1272,9 @@ export default function Sidebar({
                 })}
               </div>
             </div>,
-            document.body
+            (typeof document !== "undefined" && document.getElementById("system-theme-root")) || document.body
           )}
 
-        {/* ===================================================
-            LOGO TOOLTIP (PORTAL)
-        =================================================== */}
         {mounted &&
           logoTooltip &&
           createPortal(
@@ -1352,12 +1301,9 @@ export default function Sidebar({
                 "
               />
             </div>,
-            document.body
+            (typeof document !== "undefined" && document.getElementById("system-theme-root")) || document.body
           )}
 
-        {/* ===================================================
-            MENU TOOLTIP (PORTAL)
-        =================================================== */}
         {mounted &&
           itemTooltip &&
           createPortal(
@@ -1384,7 +1330,7 @@ export default function Sidebar({
                 "
               />
             </div>,
-            document.body
+            (typeof document !== "undefined" && document.getElementById("system-theme-root")) || document.body
           )}
       </div>
     </>

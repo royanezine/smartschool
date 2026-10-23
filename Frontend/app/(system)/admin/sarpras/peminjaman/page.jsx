@@ -29,9 +29,6 @@ import {
 
 import { getDaftarPeminjaman } from "@/services/sarpras.service";
 
-/* =========================================================
-   CONSTANT
-========================================================= */
 
 const STATUS = {
   MENUNGGU: "menunggu_persetujuan",
@@ -41,9 +38,6 @@ const STATUS = {
   DIKEMBALIKAN: "dikembalikan",
 };
 
-/* =========================================================
-   THEME HELPERS
-========================================================= */
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -90,9 +84,6 @@ const themeDangerSurface =
 const themeDangerBorder =
   "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
 
-/* =========================================================
-   STATUS CONFIG
-========================================================= */
 
 const getStatusConfig = (status) => {
   switch (status) {
@@ -152,9 +143,6 @@ const getStatusConfig = (status) => {
   }
 };
 
-/* =========================================================
-   HELPERS
-========================================================= */
 
 const formatTanggal = (value) => {
   if (!value) return "-";
@@ -191,9 +179,6 @@ const getPaginationData = (response) => {
   };
 };
 
-/* =========================================================
-   PAGE
-========================================================= */
 
 export default function AdminSarprasPeminjamanPage() {
   const router = useRouter();
@@ -222,9 +207,6 @@ export default function AdminSarprasPeminjamanPage() {
     },
   ];
 
-  /* =========================================================
-     LOAD DATA
-  ========================================================= */
 
   const loadPeminjaman = useCallback(
     async (isRefresh = false) => {
@@ -268,9 +250,6 @@ export default function AdminSarprasPeminjamanPage() {
     loadPeminjaman(false);
   }, [loadPeminjaman]);
 
-  /* =========================================================
-     SEARCH DEBOUNCE
-  ========================================================= */
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -286,9 +265,6 @@ export default function AdminSarprasPeminjamanPage() {
     loadPeminjaman(true);
   };
 
-  /* =========================================================
-     SUMMARY
-  ========================================================= */
 
   const summary = useMemo(() => {
     return {
@@ -317,9 +293,6 @@ export default function AdminSarprasPeminjamanPage() {
     Math.ceil(totalData / limit)
   );
 
-  /* =========================================================
-     NAVIGATE
-  ========================================================= */
 
   const bukaDetail = (item) => {
     if (!item?.id) return;
@@ -364,9 +337,6 @@ export default function AdminSarprasPeminjamanPage() {
         <main className="theme-page flex-1 overflow-y-auto">
           <div className="mx-auto w-full max-w-[1600px] space-y-6 p-4 sm:p-6 lg:p-8">
 
-            {/* =================================================
-                PAGE HEADER
-            ================================================= */}
 
             <section className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
               <div className="flex min-w-0 items-start gap-4">
@@ -420,9 +390,6 @@ export default function AdminSarprasPeminjamanPage() {
               </button>
             </section>
 
-            {/* =================================================
-                SUMMARY
-            ================================================= */}
 
             <section className="grid grid-cols-2 gap-3 lg:grid-cols-5">
               <SummaryCard
@@ -461,9 +428,6 @@ export default function AdminSarprasPeminjamanPage() {
               />
             </section>
 
-            {/* =================================================
-                FILTER
-            ================================================= */}
 
             <section
               className={`theme-card rounded-xl border ${themePrimaryBorder} p-4 ${themeCardShadow}`}
@@ -543,9 +507,6 @@ export default function AdminSarprasPeminjamanPage() {
               </div>
             </section>
 
-            {/* =================================================
-                ERROR
-            ================================================= */}
 
             {error && (
               <div
@@ -569,9 +530,6 @@ export default function AdminSarprasPeminjamanPage() {
               </div>
             )}
 
-            {/* =================================================
-                TABLE
-            ================================================= */}
 
             <section
               className={`theme-card overflow-hidden rounded-xl border ${themePrimaryBorder} ${themeCardShadow} transition-opacity duration-200 ${
@@ -646,12 +604,10 @@ export default function AdminSarprasPeminjamanPage() {
                               key={item.id}
                               className={`border-b ${themeDivider} transition-colors ${themeNeutralHover}`}
                             >
-                              {/* NO */}
                               <td className="theme-text-muted px-4 py-4 text-center text-xs font-semibold">
                                 {nomor}
                               </td>
 
-                              {/* PEMINJAMAN */}
                               <td className="px-4 py-4">
                                 <div className="flex items-start gap-3">
                                   <div
@@ -674,7 +630,6 @@ export default function AdminSarprasPeminjamanPage() {
                                 </div>
                               </td>
 
-                              {/* PEMINJAM */}
                               <td className="px-4 py-4">
                                 <div className="flex items-center gap-2.5">
                                   <div
@@ -699,7 +654,6 @@ export default function AdminSarprasPeminjamanPage() {
                                 </div>
                               </td>
 
-                              {/* ASET */}
                               <td className="px-4 py-4">
                                 <div className="space-y-1">
                                   {item.detailPeminjaman
@@ -739,7 +693,6 @@ export default function AdminSarprasPeminjamanPage() {
                                 </div>
                               </td>
 
-                              {/* TANGGAL */}
                               <td className="px-4 py-4">
                                 <div className="flex items-center gap-2">
                                   <CalendarDays
@@ -755,18 +708,15 @@ export default function AdminSarprasPeminjamanPage() {
                                 </div>
                               </td>
 
-                              {/* STATUS */}
                               <td className="px-4 py-4">
                                 <StatusBadge
                                   status={item.status}
                                 />
                               </td>
 
-                              {/* AKSI */}
                               <td className="px-4 py-4">
                                 <div className="flex items-center justify-end gap-1.5">
 
-                                  {/* DETAIL */}
                                   <button
                                     type="button"
                                     onClick={() =>
@@ -778,7 +728,6 @@ export default function AdminSarprasPeminjamanPage() {
                                     Detail
                                   </button>
 
-                                  {/* MENUNGGU */}
                                   {item.status ===
                                     STATUS.MENUNGGU && (
                                     <>
@@ -812,7 +761,6 @@ export default function AdminSarprasPeminjamanPage() {
                                     </>
                                   )}
 
-                                  {/* DISETUJUI */}
                                   {item.status ===
                                     STATUS.DISETUJUI && (
                                     <button
@@ -830,7 +778,6 @@ export default function AdminSarprasPeminjamanPage() {
                                     </button>
                                   )}
 
-                                  {/* DIPINJAM */}
                                   {item.status ===
                                     STATUS.DIPINJAM && (
                                     <button
@@ -858,9 +805,6 @@ export default function AdminSarprasPeminjamanPage() {
                 </div>
               )}
 
-              {/* =================================================
-                  PAGINATION
-              ================================================= */}
 
               {!loading &&
                 daftarPeminjaman.length > 0 && (
@@ -933,9 +877,6 @@ export default function AdminSarprasPeminjamanPage() {
   );
 }
 
-/* =========================================================
-   SUB COMPONENTS
-========================================================= */
 
 function SummaryCard({
   icon: Icon,

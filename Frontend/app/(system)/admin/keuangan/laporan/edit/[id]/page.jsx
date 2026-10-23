@@ -18,8 +18,6 @@ import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
 import { THEME_CLASSES } from "@/lib/constants/theme";
 
-// Data dummy (sama dengan data di halaman utama)
-// Dalam aplikasi nyata, ini akan diambil dari API / database
 const DUMMY_DATA = [
   {
     id: 1,
@@ -110,9 +108,6 @@ export default function EditLaporanPage() {
 
   const toggleSidebar = () => setIsCollapsed((prev) => !prev);
 
-  // =============================================================
-  // LOAD DATA
-  // =============================================================
   useEffect(() => {
     const found = DUMMY_DATA.find((item) => item.id === id);
 
@@ -135,9 +130,6 @@ export default function EditLaporanPage() {
     }
   }, [id]);
 
-  // =============================================================
-  // HANDLER: Perubahan form
-  // =============================================================
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -150,9 +142,6 @@ export default function EditLaporanPage() {
     setSuccess("");
   };
 
-  // =============================================================
-  // HANDLER: Submit / Update
-  // =============================================================
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -205,9 +194,6 @@ export default function EditLaporanPage() {
     }, 1000);
   };
 
-  // =============================================================
-  // HANDLER: Hapus transaksi
-  // =============================================================
   const handleDelete = () => {
     if (
       window.confirm(
@@ -226,16 +212,10 @@ export default function EditLaporanPage() {
     }
   };
 
-  // =============================================================
-  // HANDLER: Batal / Kembali
-  // =============================================================
   const handleCancel = () => {
     router.push("/keuangan");
   };
 
-  // =============================================================
-  // RENDER: Loading
-  // =============================================================
   if (loading) {
     return (
       <div className={`${THEME_CLASSES.page} flex h-screen w-full items-center justify-center`}>
@@ -252,9 +232,6 @@ export default function EditLaporanPage() {
     );
   }
 
-  // =============================================================
-  // RENDER: Error
-  // =============================================================
   if (error && !originalData) {
     return (
       <div className={`${THEME_CLASSES.page} flex h-screen w-full items-center justify-center`}>
@@ -288,9 +265,6 @@ export default function EditLaporanPage() {
     );
   }
 
-  // =============================================================
-  // RENDER: FORM EDIT
-  // =============================================================
   return (
     <div className={`${THEME_CLASSES.page} flex h-screen w-full overflow-hidden`}>
 
@@ -317,9 +291,6 @@ export default function EditLaporanPage() {
 
           <div className="mx-auto w-full max-w-3xl px-4 py-6 sm:px-6 lg:px-8">
 
-            {/* =========================================================
-                HEADER
-            ========================================================= */}
             <div className="theme-header-panel mb-6 flex flex-col gap-4 rounded-2xl p-6 sm:p-8">
 
               <div className="flex items-center gap-4">
@@ -350,12 +321,8 @@ export default function EditLaporanPage() {
               </div>
             </div>
 
-            {/* =========================================================
-                FORM
-            ========================================================= */}
             <form onSubmit={handleSubmit} className="space-y-6">
 
-              {/* NOTIFIKASI ERROR */}
               {error && (
                 <div className={`${THEME_CLASSES.danger} flex items-start gap-3 rounded-xl border p-4`}>
 
@@ -371,7 +338,6 @@ export default function EditLaporanPage() {
                 </div>
               )}
 
-              {/* NOTIFIKASI SUCCESS */}
               {success && (
                 <div className={`${THEME_CLASSES.success} flex items-start gap-3 rounded-xl border p-4`}>
 
@@ -387,12 +353,8 @@ export default function EditLaporanPage() {
                 </div>
               )}
 
-              {/* =========================================================
-                  GRID FORM
-              ========================================================= */}
               <div className={`${THEME_CLASSES.card} grid grid-cols-1 gap-5 rounded-2xl border p-6 shadow-sm sm:p-8`}>
 
-                {/* TANGGAL */}
                 <div>
 
                   <label className={`${THEME_CLASSES.textSecondary} mb-1.5 block text-sm font-medium`}>
@@ -421,7 +383,6 @@ export default function EditLaporanPage() {
                   </div>
                 </div>
 
-                {/* DESKRIPSI */}
                 <div>
 
                   <label className={`${THEME_CLASSES.textSecondary} mb-1.5 block text-sm font-medium`}>
@@ -451,7 +412,6 @@ export default function EditLaporanPage() {
                   </div>
                 </div>
 
-                {/* KATEGORI & JUMLAH */}
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
 
                   <div>
@@ -511,7 +471,6 @@ export default function EditLaporanPage() {
 
                 </div>
 
-                {/* METODE & STATUS */}
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
 
                   <div>
@@ -582,7 +541,6 @@ export default function EditLaporanPage() {
 
                 </div>
 
-                {/* INFORMASI TAMBAHAN */}
                 <div className={`${THEME_CLASSES.cardSoft} rounded-xl border p-4 text-sm`}>
 
                   <p className={THEME_CLASSES.textSecondary}>
@@ -600,9 +558,6 @@ export default function EditLaporanPage() {
 
               </div>
 
-              {/* =========================================================
-                  BUTTONS
-              ========================================================= */}
               <div className="flex flex-wrap items-center justify-between gap-3">
 
                 <div className="flex gap-3">
@@ -648,9 +603,6 @@ export default function EditLaporanPage() {
               </div>
             </form>
 
-            {/* =========================================================
-                FOOTER
-            ========================================================= */}
             <footer className="theme-border mt-8 border-t pt-6 text-center text-xs">
               <span className="theme-text-muted">
                 © 2026 SmartSchool • Edit Laporan Keuangan

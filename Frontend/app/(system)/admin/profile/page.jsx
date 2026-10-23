@@ -72,7 +72,6 @@ function getInitials(name) {
 }
 
 function normalizeProfile(response) {
-  // Controller profile mengembalikan { success, message, data }.
   const user = response?.data;
 
   if (!response?.success || !user || !user.id) {
@@ -192,7 +191,6 @@ export default function AdminProfilePage() {
   const handleLogout = () => {
     if (!window.confirm("Yakin ingin logout?")) return;
 
-    // Gunakan fungsi pembersihan sesi yang sama dengan apiFetch.
     import("@/lib/auth")
       .then(({ clearSession }) => {
         clearSession();
@@ -245,7 +243,6 @@ export default function AdminProfilePage() {
 
         <main className="min-h-0 flex-1 overflow-y-auto">
           <div className="mx-auto w-full max-w-[1400px] space-y-5 p-4 sm:p-6 lg:p-8">
-            {/* HEADER */}
             <section className="theme-card theme-border flex flex-col gap-4 rounded-2xl border p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
               <div className="flex min-w-0 items-center gap-3">
                 <div className="theme-primary flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-500/10">
@@ -296,7 +293,6 @@ export default function AdminProfilePage() {
               </div>
             </section>
 
-            {/* ERROR */}
             {error && (
               <section className="theme-card theme-border rounded-2xl border p-5">
                 <div className="flex items-start gap-3">
@@ -326,7 +322,6 @@ export default function AdminProfilePage() {
 
             {profile && (
               <>
-                {/* PROFIL UTAMA */}
                 <section className="theme-card theme-border overflow-hidden rounded-2xl border">
                   <div
                     className="h-24 sm:h-32"
@@ -338,7 +333,6 @@ export default function AdminProfilePage() {
 
                   <div className="relative -mt-12 p-5 sm:p-7">
                     <div className="flex flex-col gap-6 lg:flex-row">
-                      {/* IDENTITAS */}
                       <div className="flex flex-col items-center gap-3 lg:w-52 lg:shrink-0">
                         <div className="relative">
                           {avatarUrl ? (
@@ -388,7 +382,6 @@ export default function AdminProfilePage() {
                         </div>
                       </div>
 
-                      {/* DATA PRIBADI */}
                       <div className="theme-border min-w-0 flex-1 border-t pt-5 lg:border-l lg:border-t-0 lg:pl-7 lg:pt-1">
                         <h2 className="theme-text mb-5 text-sm font-semibold">
                           Informasi Pribadi
@@ -486,7 +479,6 @@ export default function AdminProfilePage() {
                   </div>
                 </section>
 
-                {/* INFORMASI SEKOLAH */}
                 <section className="theme-card theme-border rounded-2xl border p-5 sm:p-6">
                   <h2 className="theme-text mb-5 flex items-center gap-2 text-sm font-semibold">
                     <Building2 size={18} />
@@ -545,7 +537,6 @@ export default function AdminProfilePage() {
                   )}
                 </section>
 
-                {/* INFORMASI ROLE */}
                 <section className="theme-card theme-border rounded-2xl border p-5 sm:p-6">
                   <h2 className="theme-text mb-5 flex items-center gap-2 text-sm font-semibold">
                     <BadgeCheck size={18} />
@@ -574,7 +565,6 @@ export default function AdminProfilePage() {
                   </div>
                 </section>
 
-                {/* RINGKASAN AKUN: DATA DARI API */}
                 <section className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                   <div className="theme-card theme-border rounded-2xl border p-5">
                     <div className="theme-primary mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10">
@@ -615,7 +605,6 @@ export default function AdminProfilePage() {
               </>
             )}
 
-            {/* AKSI */}
             <section className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               <QuickAction
                 icon={Edit}

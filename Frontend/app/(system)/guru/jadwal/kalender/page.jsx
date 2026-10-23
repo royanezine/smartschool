@@ -1,4 +1,3 @@
-// app/guru/jadwal/kalender/page.jsx
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -36,11 +35,7 @@ import Header from "@/app/components/Header";
 
 import { getJadwalMengajar } from "@/services/jadwalMengajar.service";
 
-// ============================================================
-// THEME HELPERS
-// ============================================================
 
-// FIX: themeCard sebelumnya belum didefinisikan
 const themeCard = "theme-card";
 
 const themePrimaryGradient =
@@ -103,9 +98,6 @@ const themeDangerBorder =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-// ============================================================
-// CONSTANT
-// ============================================================
 
 const monthNames = [
   "Januari",
@@ -149,9 +141,6 @@ const getDayName = (dayIndex) => {
   return dayNames[dayIndex] ?? "";
 };
 
-// ============================================================
-// NORMALIZER
-// ============================================================
 
 function normalizeText(value) {
   return String(value ?? "")
@@ -167,9 +156,6 @@ function normalizeEmail(value) {
   return normalizeText(value);
 }
 
-// ============================================================
-// TOKEN / USER
-// ============================================================
 
 function getToken() {
   if (typeof window === "undefined") {
@@ -268,9 +254,6 @@ function getCurrentUserFromToken() {
   }
 }
 
-// ============================================================
-// SUBJECT COLOR
-// ============================================================
 
 function getSubjectColor(
   subjectId,
@@ -297,9 +280,6 @@ function getSubjectColor(
   return subjectColors[index];
 }
 
-// ============================================================
-// NORMALIZE BACKEND SCHEDULE
-// ============================================================
 
 function normalizeSchedule(schedule) {
   const kelasMapel =
@@ -397,9 +377,6 @@ function normalizeSchedule(schedule) {
   };
 }
 
-// ============================================================
-// TIME HELPERS
-// ============================================================
 
 function timeToMinutes(time) {
   if (
@@ -456,9 +433,6 @@ function formatDuration(
   return `${hours}j ${minutes}m`;
 }
 
-// ============================================================
-// DATE HELPERS
-// ============================================================
 
 function isSameDate(
   dateA,
@@ -513,9 +487,6 @@ function getWeekDays(
   );
 }
 
-// ============================================================
-// COMPONENT
-// ============================================================
 
 export default function KalenderGuruPage() {
   const router = useRouter();
@@ -1193,7 +1164,6 @@ export default function KalenderGuruPage() {
           <div className="w-full min-w-0 p-3 sm:p-4 lg:p-6 xl:p-8">
             <div className="mx-auto w-full min-w-0 max-w-none space-y-4 sm:space-y-5 lg:space-y-6">
 
-              {/* HEADER */}
 
               <section
                 className={`${themeCard} relative w-full min-w-0 overflow-hidden rounded-2xl border ${themeNeutralBorder} p-4 ${themeCardShadow} sm:rounded-3xl sm:p-5 lg:p-7`}
@@ -1339,7 +1309,6 @@ export default function KalenderGuruPage() {
                 </div>
               </section>
 
-              {/* ERROR */}
 
               {error && (
                 <section
@@ -1371,7 +1340,6 @@ export default function KalenderGuruPage() {
                 </section>
               )}
 
-              {/* FILTER */}
 
               <section
                 className={`${themeCard} w-full min-w-0 rounded-2xl border ${themeNeutralBorder} p-3 ${themeCardShadow} sm:p-4`}
@@ -1515,15 +1483,12 @@ export default function KalenderGuruPage() {
                 </div>
               </section>
 
-              {/* MAIN */}
 
               <div className="grid w-full min-w-0 grid-cols-1 gap-4 lg:grid-cols-[280px_minmax(0,1fr)] lg:gap-5 xl:grid-cols-[300px_minmax(0,1fr)]">
 
-                {/* LEFT */}
 
                 <aside className="min-w-0 space-y-4 sm:space-y-5">
 
-                  {/* CALENDAR */}
 
                   <div
                     className={`${themeCard} w-full min-w-0 rounded-2xl border ${themeNeutralBorder} p-4 ${themeCardShadow} sm:p-5`}
@@ -1714,7 +1679,6 @@ export default function KalenderGuruPage() {
                     </div>
                   </div>
 
-                  {/* RINGKASAN */}
 
                   <div
                     className={`${themeCard} w-full min-w-0 rounded-2xl border ${themeNeutralBorder} p-4 ${themeCardShadow} sm:p-5`}
@@ -1816,11 +1780,9 @@ export default function KalenderGuruPage() {
                   </div>
                 </aside>
 
-                {/* RIGHT */}
 
                 <section className="min-w-0 space-y-4 sm:space-y-5">
 
-                  {/* JADWAL */}
 
                   <div
                     className={`${themeCard} w-full min-w-0 rounded-2xl border ${themeNeutralBorder} p-4 ${themeCardShadow} sm:p-5 lg:p-6`}
@@ -2045,11 +2007,9 @@ export default function KalenderGuruPage() {
                     )}
                   </div>
 
-                  {/* BOTTOM */}
 
                   <div className="grid min-w-0 grid-cols-1 gap-4 xl:grid-cols-2">
 
-                    {/* AGENDA */}
 
                     <div
                       className={`${themeCard} min-w-0 rounded-2xl border ${themeNeutralBorder} p-4 ${themeCardShadow} sm:p-5`}
@@ -2088,7 +2048,6 @@ export default function KalenderGuruPage() {
                       </button>
                     </div>
 
-                    {/* NEXT */}
 
                     <div
                       className={`${themeCard} min-w-0 rounded-2xl border ${themeNeutralBorder} p-4 ${themeCardShadow} sm:p-5`}
@@ -2169,9 +2128,6 @@ export default function KalenderGuruPage() {
   );
 }
 
-// ============================================================
-// MOON ICON
-// ============================================================
 
 function Moon(props) {
   return (

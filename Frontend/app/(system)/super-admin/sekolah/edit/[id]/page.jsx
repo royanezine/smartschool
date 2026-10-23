@@ -106,19 +106,12 @@ export default function EditSekolahPage() {
         ? params.id[0]
         : params?.id;
 
-    /*
-     * Data lama menggunakan numeric ID.
-     * Tetap dipertahankan agar halaman existing tidak berubah.
-     */
     const id = Number(rawId);
 
     const school = sekolahData.find(
         (item) => item.id === id
     );
 
-    // =========================================================
-    // SEKOLAH TIDAK DITEMUKAN
-    // =========================================================
 
     if (!school) {
         return (
@@ -163,9 +156,6 @@ export default function EditSekolahPage() {
     return (
         <div className="theme-page theme-text min-h-full">
             <div className="w-full max-w-[1100px] mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
-                {/* =====================================================
-                    HEADER FORM
-                ===================================================== */}
 
                 <div
                     className={`flex items-center justify-between ${themeDivider} border-b pb-4 mb-6`}
@@ -202,9 +192,6 @@ export default function EditSekolahPage() {
                 </div>
 
                 <form className="space-y-7">
-                    {/* =================================================
-                        INFORMASI SEKOLAH
-                    ================================================= */}
 
                     <section>
                         <h3 className="text-sm font-semibold theme-text-secondary mb-4 flex items-center gap-2.5">
@@ -219,7 +206,6 @@ export default function EditSekolahPage() {
                             className={`theme-card rounded-xl border theme-border p-4 sm:p-5 ${themeCardShadow} space-y-4`}
                         >
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                {/* NAMA SEKOLAH */}
                                 <div>
                                     <label className="block text-xs font-medium theme-text-secondary mb-1.5">
                                         Nama Sekolah{" "}
@@ -245,7 +231,6 @@ export default function EditSekolahPage() {
                                     </div>
                                 </div>
 
-                                {/* NPSN */}
                                 <div>
                                     <label className="block text-xs font-medium theme-text-secondary mb-1.5">
                                         NPSN{" "}
@@ -271,7 +256,6 @@ export default function EditSekolahPage() {
                                     </div>
                                 </div>
 
-                                {/* JENJANG */}
                                 <div>
                                     <label className="block text-xs font-medium theme-text-secondary mb-1.5">
                                         Jenjang{" "}
@@ -301,7 +285,6 @@ export default function EditSekolahPage() {
                                     </select>
                                 </div>
 
-                                {/* STATUS SEKOLAH */}
                                 <div>
                                     <label className="block text-xs font-medium theme-text-secondary mb-1.5">
                                         Status Sekolah
@@ -322,7 +305,6 @@ export default function EditSekolahPage() {
                                     </select>
                                 </div>
 
-                                {/* EMAIL */}
                                 <div>
                                     <label className="block text-xs font-medium theme-text-secondary mb-1.5">
                                         Email
@@ -345,7 +327,6 @@ export default function EditSekolahPage() {
                                     </div>
                                 </div>
 
-                                {/* TELEPON */}
                                 <div>
                                     <label className="block text-xs font-medium theme-text-secondary mb-1.5">
                                         No Telepon
@@ -368,7 +349,6 @@ export default function EditSekolahPage() {
                                     </div>
                                 </div>
 
-                                {/* WEBSITE */}
                                 <div>
                                     <label className="block text-xs font-medium theme-text-secondary mb-1.5">
                                         Website
@@ -391,7 +371,6 @@ export default function EditSekolahPage() {
                                     </div>
                                 </div>
 
-                                {/* LOGO */}
                                 <div>
                                     <label className="block text-xs font-medium theme-text-secondary mb-1.5">
                                         Logo
@@ -430,9 +409,6 @@ export default function EditSekolahPage() {
                         </div>
                     </section>
 
-                    {/* =================================================
-                        ALAMAT
-                    ================================================= */}
 
                     <section>
                         <h3 className="text-sm font-semibold theme-text-secondary mb-4 flex items-center gap-2.5">
@@ -447,7 +423,6 @@ export default function EditSekolahPage() {
                             className={`theme-card rounded-xl border theme-border p-4 sm:p-5 ${themeCardShadow} space-y-4`}
                         >
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                {/* PROVINSI */}
                                 <div>
                                     <label className="block text-xs font-medium theme-text-secondary mb-1.5">
                                         Provinsi{" "}
@@ -474,7 +449,6 @@ export default function EditSekolahPage() {
                                     </select>
                                 </div>
 
-                                {/* KOTA */}
                                 <div>
                                     <label className="block text-xs font-medium theme-text-secondary mb-1.5">
                                         Kabupaten/Kota{" "}
@@ -510,7 +484,6 @@ export default function EditSekolahPage() {
                                     </select>
                                 </div>
 
-                                {/* KECAMATAN */}
                                 <div>
                                     <label className="block text-xs font-medium theme-text-secondary mb-1.5">
                                         Kecamatan
@@ -526,7 +499,6 @@ export default function EditSekolahPage() {
                                     />
                                 </div>
 
-                                {/* KELURAHAN */}
                                 <div>
                                     <label className="block text-xs font-medium theme-text-secondary mb-1.5">
                                         Kelurahan
@@ -542,7 +514,6 @@ export default function EditSekolahPage() {
                                     />
                                 </div>
 
-                                {/* KODE POS */}
                                 <div>
                                     <label className="block text-xs font-medium theme-text-secondary mb-1.5">
                                         Kode Pos
@@ -558,7 +529,6 @@ export default function EditSekolahPage() {
                                     />
                                 </div>
 
-                                {/* ALAMAT LENGKAP */}
                                 <div className="sm:col-span-2">
                                     <label className="block text-xs font-medium theme-text-secondary mb-1.5">
                                         Alamat Lengkap{" "}
@@ -587,9 +557,6 @@ export default function EditSekolahPage() {
                         </div>
                     </section>
 
-                    {/* =================================================
-                        YAYASAN & PAKET
-                    ================================================= */}
 
                     <section>
                         <h3 className="text-sm font-semibold theme-text-secondary mb-4 flex items-center gap-2.5">
@@ -604,7 +571,6 @@ export default function EditSekolahPage() {
                             className={`theme-card rounded-xl border theme-border p-4 sm:p-5 ${themeCardShadow} space-y-4`}
                         >
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                {/* YAYASAN */}
                                 <div>
                                     <label className="block text-xs font-medium theme-text-secondary mb-1.5">
                                         Yayasan
@@ -643,7 +609,6 @@ export default function EditSekolahPage() {
                                     </select>
                                 </div>
 
-                                {/* PAKET */}
                                 <div>
                                     <label className="block text-xs font-medium theme-text-secondary mb-1.5">
                                         Paket Langganan{" "}
@@ -672,7 +637,6 @@ export default function EditSekolahPage() {
                                     </select>
                                 </div>
 
-                                {/* TANGGAL MULAI */}
                                 <div>
                                     <label className="block text-xs font-medium theme-text-secondary mb-1.5">
                                         Tanggal Mulai
@@ -694,7 +658,6 @@ export default function EditSekolahPage() {
                                     </div>
                                 </div>
 
-                                {/* TANGGAL BERAKHIR */}
                                 <div>
                                     <label className="block text-xs font-medium theme-text-secondary mb-1.5">
                                         Tanggal Berakhir
@@ -716,7 +679,6 @@ export default function EditSekolahPage() {
                                     </div>
                                 </div>
 
-                                {/* STATUS */}
                                 <div>
                                     <label className="block text-xs font-medium theme-text-secondary mb-1.5">
                                         Status{" "}
@@ -748,9 +710,6 @@ export default function EditSekolahPage() {
                         </div>
                     </section>
 
-                    {/* =================================================
-                        TOMBOL AKSI
-                    ================================================= */}
 
                     <div
                         className={`flex flex-col-reverse sm:flex-row items-center justify-end gap-3 pt-4 border-t ${themeDivider}`}

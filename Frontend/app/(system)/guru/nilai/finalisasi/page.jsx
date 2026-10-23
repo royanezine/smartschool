@@ -275,7 +275,6 @@ export default function FinalisasiNilaiPage() {
 
         <main className="theme-page flex-1">
           <div className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 lg:px-9 lg:py-8">
-            {/* Page heading */}
             <div className="mb-7 border-b border-[color-mix(in_srgb,var(--color-text)_10%,transparent)] pb-6">
               <button
                 type="button"
@@ -316,7 +315,6 @@ export default function FinalisasiNilaiPage() {
               </div>
             </div>
 
-            {/* API error */}
             {error && (
               <div className="mb-6 flex flex-col gap-3 rounded-xl border border-[color-mix(in_srgb,var(--color-danger)_25%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_8%,transparent)] p-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-start gap-3">
@@ -340,7 +338,6 @@ export default function FinalisasiNilaiPage() {
               </div>
             )}
 
-            {/* Overview */}
             <section className="mb-7 grid grid-cols-1 gap-4 sm:grid-cols-3">
               <article className="theme-card rounded-xl border border-[color-mix(in_srgb,var(--color-text)_10%,transparent)] p-5">
                 <div className="flex items-start justify-between">
@@ -400,7 +397,6 @@ export default function FinalisasiNilaiPage() {
               </article>
             </section>
 
-            {/* Main content */}
             <section className="theme-card overflow-hidden rounded-xl border border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]">
               <div className="flex flex-col gap-4 border-b border-[color-mix(in_srgb,var(--color-text)_9%,transparent)] p-5 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
                 <div>
@@ -419,7 +415,6 @@ export default function FinalisasiNilaiPage() {
                 </div>
               </div>
 
-              {/* Filters */}
               <div className="grid grid-cols-1 gap-4 border-b border-[color-mix(in_srgb,var(--color-text)_8%,transparent)] p-5 sm:px-6 md:grid-cols-[minmax(0,1fr)_minmax(220px,0.8fr)]">
                 <div>
                   <label
@@ -498,7 +493,6 @@ export default function FinalisasiNilaiPage() {
                 </div>
               </div>
 
-              {/* Class summary */}
               {selectedClass && (
                 <div className="flex flex-col gap-3 border-b border-[color-mix(in_srgb,var(--color-text)_8%,transparent)] bg-[color-mix(in_srgb,var(--color-text)_2%,transparent)] p-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
                   <div>
@@ -543,7 +537,6 @@ export default function FinalisasiNilaiPage() {
                 </div>
               )}
 
-              {/* Score table */}
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[760px] text-left text-sm">
                   <thead>
@@ -707,7 +700,6 @@ export default function FinalisasiNilaiPage() {
                 </table>
               </div>
 
-              {/* Finalize footer */}
               <div className="flex flex-col gap-4 border-t border-[color-mix(in_srgb,var(--color-text)_8%,transparent)] p-5 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
                 <div className="flex items-start gap-2">
                   <LockKeyhole
@@ -788,7 +780,6 @@ export default function FinalisasiNilaiPage() {
         </main>
       </div>
 
-      {/* Confirmation dialog */}
       {showConfirmation && selectedClass && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"

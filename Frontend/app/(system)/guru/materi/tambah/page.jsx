@@ -32,9 +32,6 @@ import {
   getKelasMapel,
 } from "@/services/materiPembelajaran.service";
 
-// ============================================================
-// THEME HELPERS
-// ============================================================
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -96,16 +93,10 @@ const themeDangerBorder =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-// ============================================================
-// MAIN
-// ============================================================
 
 export default function UploadMateriPage() {
   const router = useRouter();
 
-  // ============================================================
-  // STATE
-  // ============================================================
 
   const [isSidebarCollapsed, setIsSidebarCollapsed] =
     useState(false);
@@ -140,9 +131,6 @@ export default function UploadMateriPage() {
   const [success, setSuccess] =
     useState("");
 
-  // ============================================================
-  // FILE CONFIG
-  // ============================================================
 
   const MAX_FILE_SIZE =
     100 * 1024 * 1024;
@@ -158,9 +146,6 @@ export default function UploadMateriPage() {
   const allowedExtensions =
     ".pdf,.mp4,.mpeg,.webm,.mov";
 
-  // ============================================================
-  // LOAD USER
-  // ============================================================
 
   const loadCurrentUser = useCallback(() => {
     try {
@@ -206,9 +191,6 @@ export default function UploadMateriPage() {
     });
   }, [loadCurrentUser]);
 
-  // ============================================================
-  // CURRENT USER ID
-  // ============================================================
 
   const currentUserId = useMemo(() => {
     if (!currentUser) {
@@ -225,9 +207,6 @@ export default function UploadMateriPage() {
     );
   }, [currentUser]);
 
-  // ============================================================
-  // CURRENT USER NAME
-  // ============================================================
 
   const currentUserName = useMemo(() => {
     return (
@@ -239,9 +218,6 @@ export default function UploadMateriPage() {
     );
   }, [currentUser]);
 
-  // ============================================================
-  // CURRENT USER EMAIL
-  // ============================================================
 
   const currentUserEmail = useMemo(() => {
     return (
@@ -251,9 +227,6 @@ export default function UploadMateriPage() {
     );
   }, [currentUser]);
 
-  // ============================================================
-  // AVATAR
-  // ============================================================
 
   const currentUserAvatar = useMemo(() => {
     const name =
@@ -268,9 +241,6 @@ export default function UploadMateriPage() {
       .toUpperCase();
   }, [currentUserName]);
 
-  // ============================================================
-  // LOAD KELAS MAPEL
-  // ============================================================
 
   const loadKelasMapel = useCallback(async () => {
     try {
@@ -387,9 +357,6 @@ export default function UploadMateriPage() {
     }
   }, [currentUser, loadKelasMapel]);
 
-  // ============================================================
-  // HANDLE INPUT
-  // ============================================================
 
   const handleChange = (e) => {
     const {
@@ -406,9 +373,6 @@ export default function UploadMateriPage() {
     setSuccess("");
   };
 
-  // ============================================================
-  // HANDLE SOURCE
-  // ============================================================
 
   const handleSourceChange = (
     source
@@ -437,9 +401,6 @@ export default function UploadMateriPage() {
     setSuccess("");
   };
 
-  // ============================================================
-  // HANDLE FILE
-  // ============================================================
 
   const handleFileChange = (
     e
@@ -489,9 +450,6 @@ export default function UploadMateriPage() {
     );
   };
 
-  // ============================================================
-  // REMOVE FILE
-  // ============================================================
 
   const removeFile = () => {
     setFile(null);
@@ -509,9 +467,6 @@ export default function UploadMateriPage() {
     setSuccess("");
   };
 
-  // ============================================================
-  // FORMAT FILE SIZE
-  // ============================================================
 
   const formatFileSize = (
     bytes
@@ -541,9 +496,6 @@ export default function UploadMateriPage() {
     }`;
   };
 
-  // ============================================================
-  // GET KELAS NAME
-  // ============================================================
 
   const getKelasName = (
     item
@@ -557,9 +509,6 @@ export default function UploadMateriPage() {
     );
   };
 
-  // ============================================================
-  // GET MAPEL NAME
-  // ============================================================
 
   const getMapelName = (
     item
@@ -579,9 +528,6 @@ export default function UploadMateriPage() {
     );
   };
 
-  // ============================================================
-  // GET GURU NAME
-  // ============================================================
 
   const getGuruName = (
     item
@@ -596,9 +542,6 @@ export default function UploadMateriPage() {
     );
   };
 
-  // ============================================================
-  // SELECTED CLASS MAPEL
-  // ============================================================
 
   const selectedClassMapel =
     kelasMapelList.find(
@@ -609,9 +552,6 @@ export default function UploadMateriPage() {
         )
     );
 
-  // ============================================================
-  // VALIDATE
-  // ============================================================
 
   const validateForm = () => {
     if (
@@ -662,9 +602,6 @@ export default function UploadMateriPage() {
     return "";
   };
 
-  // ============================================================
-  // SUBMIT
-  // ============================================================
 
   const handleSubmit = async (
     e
@@ -790,16 +727,10 @@ export default function UploadMateriPage() {
     }
   };
 
-  // ============================================================
-  // RETURN
-  // ============================================================
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
 
-      {/* ======================================================
-          SIDEBAR GURU
-      ====================================================== */}
 
       <Sidebar
         active="materi"
@@ -813,15 +744,9 @@ export default function UploadMateriPage() {
         role="guru"
       />
 
-      {/* ======================================================
-          CONTENT
-      ====================================================== */}
 
       <div className="flex h-full min-w-0 flex-1 flex-col overflow-hidden">
 
-        {/* ====================================================
-            HEADER GURU
-        ==================================================== */}
 
         <Header
           toggleSidebar={() =>
@@ -840,17 +765,11 @@ export default function UploadMateriPage() {
           }}
         />
 
-        {/* ====================================================
-            MAIN
-        ==================================================== */}
 
         <main className="flex-1 overflow-x-hidden overflow-y-auto">
 
           <div className="mx-auto w-full max-w-[1600px] p-4 sm:p-6 lg:p-8">
 
-            {/* ==================================================
-                PAGE HEADER
-            ================================================== */}
 
             <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
 
@@ -897,9 +816,6 @@ export default function UploadMateriPage() {
               </div>
             </div>
 
-            {/* ==================================================
-                ERROR
-            ================================================== */}
 
             {error && (
               <div
@@ -934,9 +850,6 @@ export default function UploadMateriPage() {
               </div>
             )}
 
-            {/* ==================================================
-                SUCCESS
-            ================================================== */}
 
             {success && (
               <div
@@ -961,9 +874,6 @@ export default function UploadMateriPage() {
               </div>
             )}
 
-            {/* ==================================================
-                FORM
-            ================================================== */}
 
             <form
               onSubmit={
@@ -972,15 +882,9 @@ export default function UploadMateriPage() {
             >
               <div className="grid min-w-0 grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
 
-                {/* ==================================================
-                    LEFT
-                ================================================== */}
 
                 <div className="min-w-0 space-y-6">
 
-                  {/* ==================================================
-                      INFORMASI DASAR
-                  ================================================== */}
 
                   <section
                     className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
@@ -1015,7 +919,6 @@ export default function UploadMateriPage() {
 
                     <div className="space-y-5 p-5 sm:p-6">
 
-                      {/* KELAS MAPEL */}
 
                       <div>
                         <label
@@ -1085,7 +988,6 @@ export default function UploadMateriPage() {
                         </p>
                       </div>
 
-                      {/* SELECTED */}
 
                       {selectedClassMapel && (
                         <div
@@ -1130,7 +1032,6 @@ export default function UploadMateriPage() {
                         </div>
                       )}
 
-                      {/* JUDUL */}
 
                       <div>
                         <div className="mb-2 flex items-center justify-between gap-4">
@@ -1180,7 +1081,6 @@ export default function UploadMateriPage() {
                         </p>
                       </div>
 
-                      {/* KATEGORI */}
 
                       <div>
                         <label
@@ -1211,7 +1111,6 @@ export default function UploadMateriPage() {
                         </p>
                       </div>
 
-                      {/* DESKRIPSI */}
 
                       <div>
                         <label
@@ -1244,9 +1143,6 @@ export default function UploadMateriPage() {
                     </div>
                   </section>
 
-                  {/* ==================================================
-                      SUMBER MATERI
-                  ================================================== */}
 
                   <section
                     className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
@@ -1280,11 +1176,9 @@ export default function UploadMateriPage() {
 
                     <div className="p-5 sm:p-6">
 
-                      {/* SOURCE SWITCH */}
 
                       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
 
-                        {/* FILE */}
 
                         <button
                           type="button"
@@ -1330,7 +1224,6 @@ export default function UploadMateriPage() {
                           </div>
                         </button>
 
-                        {/* LINK */}
 
                         <button
                           type="button"
@@ -1377,7 +1270,6 @@ export default function UploadMateriPage() {
                         </button>
                       </div>
 
-                      {/* FILE UPLOAD */}
 
                       {form.sumber ===
                         "file" && (
@@ -1505,7 +1397,6 @@ export default function UploadMateriPage() {
                         </div>
                       )}
 
-                      {/* LINK */}
 
                       {form.sumber ===
                         "link" && (
@@ -1554,15 +1445,9 @@ export default function UploadMateriPage() {
                   </section>
                 </div>
 
-                {/* ==================================================
-                    RIGHT SIDEBAR
-                ================================================== */}
 
                 <aside className="min-w-0 space-y-6">
 
-                  {/* ==================================================
-                      RINGKASAN
-                  ================================================== */}
 
                   <section
                     className={`theme-card rounded-2xl border p-5 ${themeNeutralBorder} ${themeCardShadow}`}
@@ -1683,9 +1568,6 @@ export default function UploadMateriPage() {
                     </div>
                   </section>
 
-                  {/* ==================================================
-                      KETENTUAN FILE
-                  ================================================== */}
 
                   <section
                     className={`theme-card rounded-2xl border p-5 ${themeNeutralBorder} ${themeCardShadow}`}
@@ -1715,7 +1597,6 @@ export default function UploadMateriPage() {
 
                     <div className="mt-5 space-y-3">
 
-                      {/* PDF */}
 
                       <div
                         className={`flex items-center gap-3 rounded-xl p-3 ${themeNeutralSurface}`}
@@ -1736,7 +1617,6 @@ export default function UploadMateriPage() {
                         </div>
                       </div>
 
-                      {/* VIDEO */}
 
                       <div
                         className={`flex items-center gap-3 rounded-xl p-3 ${themeNeutralSurface}`}
@@ -1757,7 +1637,6 @@ export default function UploadMateriPage() {
                         </div>
                       </div>
 
-                      {/* SIZE */}
 
                       <div
                         className={`flex items-center gap-3 rounded-xl p-3 ${themeNeutralSurface}`}
@@ -1780,9 +1659,6 @@ export default function UploadMateriPage() {
                     </div>
                   </section>
 
-                  {/* ==================================================
-                      TIPS
-                  ================================================== */}
 
                   <section
                     className={`theme-card rounded-2xl border p-5 ${themeNeutralBorder} ${themeCardShadow}`}
@@ -1851,16 +1727,12 @@ export default function UploadMateriPage() {
                 </aside>
               </div>
 
-              {/* ==================================================
-                  FOOTER ACTION
-              ================================================== */}
 
               <div
                 className={`mt-6 theme-card rounded-2xl border p-4 sm:p-5 ${themeNeutralBorder} ${themeCardShadow}`}
               >
                 <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
 
-                  {/* BATAL */}
 
                   <button
                     type="button"
@@ -1880,7 +1752,6 @@ export default function UploadMateriPage() {
                     Batal
                   </button>
 
-                  {/* SIMPAN */}
 
                   <button
                     type="submit"

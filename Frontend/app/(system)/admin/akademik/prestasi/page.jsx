@@ -12,19 +12,6 @@ import {
   X,
 } from "lucide-react";
 
-/**
- * app/admin/akademik/prestasi/page.jsx
- *
- * Halaman Prestasi — mencatat pencapaian siswa dalam perlombaan.
- *
- * Theme:
- * Menggunakan global Light/Dark theme SmartSchool melalui
- * class theme-* dari globals.css.
- *
- * CATATAN DATA:
- * MOCK_PRESTASI masih dummy. Kalau backend/API sudah siap,
- * tinggal ganti useState(MOCK_PRESTASI) dengan fetch endpoint.
- */
 
 const TINGKAT_OPTIONS = [
   "Kabupaten/Kota",
@@ -336,7 +323,6 @@ export default function PrestasiPage() {
     tahunFilter,
   ]);
 
-  // ===== Statistik ringkas =====
   const totalPrestasi = data.length;
 
   const totalJuara1 = data.filter(
@@ -350,7 +336,6 @@ export default function PrestasiPage() {
   const handleSimpan = () => {
     if (!form.namaSiswa || !form.namaLomba) return;
 
-    // TODO: ganti dengan POST ke API saat backend tersedia.
     setData((prev) => [
       {
         id: Date.now(),
@@ -366,7 +351,6 @@ export default function PrestasiPage() {
 
   return (
     <div className="flex h-screen w-full theme-page overflow-hidden">
-      {/* SIDEBAR */}
       <Sidebar
         active="akademikPrestasi"
         setActive={() => {}}
@@ -376,7 +360,6 @@ export default function PrestasiPage() {
       />
 
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
-        {/* HEADER */}
         <Header
           toggleSidebar={toggleSidebar}
           notifications={[]}
@@ -389,7 +372,6 @@ export default function PrestasiPage() {
 
         <main className="flex-1 overflow-y-auto">
           <div className="p-4 sm:p-6 lg:p-8 space-y-6">
-            {/* HEADER HALAMAN */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div className="flex items-center gap-3">
                 <div className="p-2.5 rounded-xl theme-primary shadow-lg">
@@ -426,9 +408,7 @@ export default function PrestasiPage() {
               </button>
             </div>
 
-            {/* STATISTIK RINGKAS */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {/* TOTAL PRESTASI */}
               <div className="theme-card rounded-xl border theme-border p-4 shadow-sm">
                 <div className="flex items-center gap-2">
                   <div className="p-1.5 rounded-lg theme-warning">
@@ -445,7 +425,6 @@ export default function PrestasiPage() {
                 </p>
               </div>
 
-              {/* JUARA 1 */}
               <div className="theme-card rounded-xl border theme-border p-4 shadow-sm">
                 <div className="flex items-center gap-2">
                   <div className="p-1.5 rounded-lg theme-success">
@@ -462,7 +441,6 @@ export default function PrestasiPage() {
                 </p>
               </div>
 
-              {/* SISWA BERPRESTASI */}
               <div className="theme-card rounded-xl border theme-border p-4 shadow-sm">
                 <div className="flex items-center gap-2">
                   <div className="p-1.5 rounded-lg theme-info">
@@ -480,9 +458,7 @@ export default function PrestasiPage() {
               </div>
             </div>
 
-            {/* FILTER BAR */}
             <div className="theme-card rounded-xl border theme-border p-4 shadow-sm flex flex-col lg:flex-row gap-3">
-              {/* SEARCH */}
               <div className="relative flex-1">
                 <Search
                   size={16}
@@ -512,14 +488,12 @@ export default function PrestasiPage() {
                 />
               </div>
 
-              {/* FILTER */}
               <div className="flex flex-wrap items-center gap-2">
                 <Filter
                   size={15}
                   className="theme-text-muted hidden lg:block"
                 />
 
-                {/* KELAS */}
                 <select
                   value={kelasFilter}
                   onChange={(e) =>
@@ -542,7 +516,6 @@ export default function PrestasiPage() {
                   ))}
                 </select>
 
-                {/* TINGKAT */}
                 <select
                   value={tingkatFilter}
                   onChange={(e) =>
@@ -568,7 +541,6 @@ export default function PrestasiPage() {
                   ))}
                 </select>
 
-                {/* TAHUN */}
                 <select
                   value={tahunFilter}
                   onChange={(e) =>
@@ -597,7 +569,6 @@ export default function PrestasiPage() {
               </div>
             </div>
 
-            {/* TABEL PRESTASI */}
             <div className="theme-card rounded-xl border theme-border shadow-sm overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
@@ -641,7 +612,6 @@ export default function PrestasiPage() {
                           theme-table-hover
                         "
                       >
-                        {/* SISWA */}
                         <td className="px-4 py-3">
                           <p className="font-semibold theme-text">
                             {p.namaSiswa}
@@ -652,17 +622,14 @@ export default function PrestasiPage() {
                           </p>
                         </td>
 
-                        {/* NAMA LOMBA */}
                         <td className="px-4 py-3 theme-text-secondary font-medium max-w-[240px]">
                           {p.namaLomba}
                         </td>
 
-                        {/* TINGKAT */}
                         <td className="px-4 py-3 theme-text-secondary font-medium whitespace-nowrap">
                           {p.tingkat}
                         </td>
 
-                        {/* JUARA */}
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-1.5 theme-text-secondary font-semibold">
                             <Trophy
@@ -673,19 +640,16 @@ export default function PrestasiPage() {
                           </div>
                         </td>
 
-                        {/* TANGGAL */}
                         <td className="px-4 py-3 theme-text-secondary font-medium whitespace-nowrap">
                           {p.bulan} {p.tahun}
                         </td>
 
-                        {/* PENYELENGGARA */}
                         <td className="px-4 py-3 theme-text-muted text-xs max-w-[200px]">
                           {p.penyelenggara}
                         </td>
                       </tr>
                     ))}
 
-                    {/* EMPTY STATE */}
                     {filteredData.length === 0 && (
                       <tr>
                         <td
@@ -710,10 +674,8 @@ export default function PrestasiPage() {
         </main>
       </div>
 
-      {/* MODAL TAMBAH PRESTASI */}
       {showForm && (
         <>
-          {/* OVERLAY */}
           <div
             onClick={() => setShowForm(false)}
             className="
@@ -723,7 +685,6 @@ export default function PrestasiPage() {
             "
           />
 
-          {/* MODAL WRAPPER */}
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div
               className="
@@ -736,7 +697,6 @@ export default function PrestasiPage() {
                 overflow-y-auto
               "
             >
-              {/* MODAL HEADER */}
               <div
                 className="
                   flex items-center justify-between
@@ -766,9 +726,7 @@ export default function PrestasiPage() {
                 </button>
               </div>
 
-              {/* FORM */}
               <div className="p-5 space-y-4">
-                {/* NAMA SISWA */}
                 <div>
                   <label className="text-xs font-semibold theme-text-secondary mb-1.5 block">
                     Nama Siswa
@@ -796,7 +754,6 @@ export default function PrestasiPage() {
                   />
                 </div>
 
-                {/* KELAS */}
                 <div>
                   <label className="text-xs font-semibold theme-text-secondary mb-1.5 block">
                     Kelas
@@ -824,7 +781,6 @@ export default function PrestasiPage() {
                   />
                 </div>
 
-                {/* NAMA LOMBA */}
                 <div>
                   <label className="text-xs font-semibold theme-text-secondary mb-1.5 block">
                     Nama Lomba
@@ -852,7 +808,6 @@ export default function PrestasiPage() {
                   />
                 </div>
 
-                {/* TINGKAT + JUARA */}
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="text-xs font-semibold theme-text-secondary mb-1.5 block">
@@ -924,7 +879,6 @@ export default function PrestasiPage() {
                   </div>
                 </div>
 
-                {/* BULAN + TAHUN */}
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="text-xs font-semibold theme-text-secondary mb-1.5 block">
@@ -984,7 +938,6 @@ export default function PrestasiPage() {
                   </div>
                 </div>
 
-                {/* PENYELENGGARA */}
                 <div>
                   <label className="text-xs font-semibold theme-text-secondary mb-1.5 block">
                     Penyelenggara
@@ -1013,7 +966,6 @@ export default function PrestasiPage() {
                 </div>
               </div>
 
-              {/* MODAL FOOTER */}
               <div
                 className="
                   flex items-center justify-end gap-2

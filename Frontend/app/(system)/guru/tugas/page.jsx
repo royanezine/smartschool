@@ -31,9 +31,6 @@ import {
 
 import { getTugasGuru } from "@/services/tugas.service";
 
-/* =========================================================
-   THEME HELPERS
-========================================================= */
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -89,9 +86,6 @@ const themeDangerBorder =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-/* =========================================================
-   HELPERS
-========================================================= */
 
 const formatTanggal = (tanggal) => {
   if (!tanggal) return "-";
@@ -251,9 +245,6 @@ const getTugasId = (tugas) =>
   tugas?.uuid ||
   tugas?._id;
 
-/* =========================================================
-   SEARCHABLE CLASS DROPDOWN
-========================================================= */
 
 function KelasSearchDropdown({ value, options, onChange }) {
   const [open, setOpen] = useState(false);
@@ -368,9 +359,6 @@ function KelasSearchDropdown({ value, options, onChange }) {
   );
 }
 
-/* =========================================================
-   SKELETON
-========================================================= */
 
 function TaskSkeleton() {
   return (
@@ -403,9 +391,6 @@ function TaskSkeleton() {
   );
 }
 
-/* =========================================================
-   MAIN PAGE
-========================================================= */
 
 export default function GuruTugasPage() {
   const router = useRouter();
@@ -539,14 +524,10 @@ export default function GuruTugasPage() {
   };
 
   return (
-    // ROOT: flex row, tinggi penuh, tidak bisa scroll
     <div className="theme-page flex h-screen w-full overflow-hidden">
-      {/* SIDEBAR: shrink-0, scroll sendiri */}
       <Sidebar active="tugas" role="guru" />
 
-      {/* BODY: flex column, min-w-0 penting untuk main scroll */}
       <div className="flex h-full min-w-0 flex-1 flex-col overflow-hidden">
-        {/* HEADER: shrink-0 */}
         <div className="shrink-0">
           <Header
             user={{
@@ -558,16 +539,8 @@ export default function GuruTugasPage() {
           />
         </div>
 
-        {/* MAIN: overflow-y-auto, konten FULL WIDTH */}
         <main className="theme-page min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
-          {/* 
-            ⚡ PERUBAHAN UTAMA: 
-            - Hapus max-w-7xl → ganti jadi max-w-full
-            - Atau bisa pakai w-full tanpa max-width sama sekali
-            - Padding tetap untuk breathing room
-          */}
           <div className="w-full space-y-6 p-4 sm:p-6 lg:p-8">
-            {/* HERO */}
             <section
               className={`relative overflow-hidden rounded-2xl border p-6 sm:p-8 ${themePrimaryGradient} ${themePrimaryShadow} ${themePrimarySoftBorder}`}
             >
@@ -633,7 +606,6 @@ export default function GuruTugasPage() {
                   </div>
                 </div>
 
-                {/* STATISTICS — auto responsif, 2xl jadi 4 kolom */}
                 <div className="mt-8 grid grid-cols-2 gap-3 lg:grid-cols-4">
                   <div className="rounded-xl border border-[color-mix(in_srgb,var(--color-card)_12%,transparent)] bg-[color-mix(in_srgb,var(--color-card)_9%,transparent)] p-4 backdrop-blur-sm">
                     <div className="flex items-center gap-2 text-[color-mix(in_srgb,var(--color-card)_70%,transparent)]">
@@ -680,7 +652,6 @@ export default function GuruTugasPage() {
               </div>
             </section>
 
-            {/* ERROR */}
             {error && (
               <div
                 className={`flex items-start gap-3 rounded-xl border p-4 ${themeDangerSurface} ${themeDangerBorder} theme-danger`}
@@ -704,7 +675,6 @@ export default function GuruTugasPage() {
               </div>
             )}
 
-            {/* SUCCESS */}
             {success && (
               <div
                 className={`flex items-start gap-3 rounded-xl border p-4 ${themeSuccessSurface} text-[var(--color-success)] ${themeSuccessBorder}`}
@@ -721,7 +691,6 @@ export default function GuruTugasPage() {
               </div>
             )}
 
-            {/* FILTER */}
             <section
               className={`theme-card rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
             >
@@ -757,12 +726,6 @@ export default function GuruTugasPage() {
               </div>
 
               <div className="p-5 sm:p-6">
-                {/* 
-                  Filter grid: 
-                  - Mobile: 1 kolom
-                  - Tablet: 2 kolom
-                  - Desktop besar: 3 kolom
-                */}
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
                   <div>
                     <label className="theme-text-secondary mb-2 block text-xs font-semibold">
@@ -843,7 +806,6 @@ export default function GuruTugasPage() {
               </div>
             </section>
 
-            {/* LIST HEADER */}
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <div className="flex items-center gap-2">
@@ -874,7 +836,6 @@ export default function GuruTugasPage() {
               )}
             </div>
 
-            {/* LOADING / EMPTY / GRID */}
             {loading ? (
               <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
                 {Array.from({ length: 8 }).map((_, index) => (
@@ -922,9 +883,6 @@ export default function GuruTugasPage() {
                 </div>
               </section>
             ) : (
-              // 
-              // ⚡ GRID UTAMA: tambah 2xl:grid-cols-4 untuk layar lebar
-              // 
               <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
                 {filteredTugas.map((item, index) => {
                   const id = getTugasId(item);
@@ -1118,7 +1076,6 @@ export default function GuruTugasPage() {
               </div>
             )}
 
-            {/* FOOTER SUMMARY */}
             {!loading && tugas.length > 0 && (
               <section
                 className={`theme-card rounded-2xl border p-5 sm:p-6 ${themeNeutralBorder} ${themeCardShadow}`}

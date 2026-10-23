@@ -176,16 +176,9 @@ export async function getPendaftarPpdb(
   const qs = query.toString();
   const endpoint = `${ENDPOINT}/pendaftar${qs ? `?${qs}` : ""}`;
 
-  try {
-    return await apiFetch(endpoint, {
-      method: "GET",
-    });
-  } catch (err: any) {
-    if (err?.status === 404) {
-      throw new Error("Endpoint daftar pendaftar PPDB belum tersedia di backend.");
-    }
-    throw err;
-  }
+  return apiFetch(endpoint, {
+    method: "GET",
+  });
 }
 
 export async function getPendaftarPpdbById(id: string): Promise<any> {
@@ -193,23 +186,34 @@ export async function getPendaftarPpdbById(id: string): Promise<any> {
     throw new Error("ID pendaftaran tidak ditemukan.");
   }
 
-  /*
-   * Kontrak admin PPDB memakai namespace /pendaftar (sama dengan daftar
-   * pendaftar pada getPendaftarPpdb). Backend/src belum menyediakan route
-   * GET /api/ppdb/pendaftar/:id sehingga, selama endpoint itu belum ada,
-   * panggilan ini akan berakhir 404 dan halaman menampilkan status tidak
-   * tersedia.
-   */
-  try {
-    return await apiFetch(`${ENDPOINT}/pendaftar/${encodeURIComponent(id)}`, {
-      method: "GET",
-    });
-  } catch (err: any) {
-    if (err?.status === 404) {
-      throw new Error("Endpoint detail pendaftar PPDB belum tersedia di backend.");
-    }
-    throw err;
+  return apiFetch(`${ENDPOINT}/pendaftar/${encodeURIComponent(id)}`, {
+    method: "GET",
+  });
+}
+
+export function isPpdbEndpointMissing(error: unknown): boolean {
+  const err = error as {
+    status?: number;
+    raw?: unknown;
+  };
+
+  if (err?.status !== 404) {
+    return false;
   }
+
+  if (typeof err.raw === "string") {
+    return true;
+  }
+
+  if (
+    err.raw &&
+    typeof err.raw === "object" &&
+    "errorCode" in err.raw
+  ) {
+    return false;
+  }
+
+  return true;
 }
 
 export async function getProfilSekolahPublik(subdomain: string): Promise<any> {
@@ -231,11 +235,6 @@ export async function getPengaturanSpmb(): Promise<{
     verifikasiBerkasWajib: boolean;
   };
 }> {
-  /*
-   * Jangan mengembalikan nilai default saat request gagal. Nilai default
-   * akan membuat halaman tampak berhasil terhubung padahal sesi/endpoint
-   * bermasalah. Error diteruskan agar halaman menampilkan kegagalan nyata.
-   */
   const response = await apiFetch("/api/pengaturan", { method: "GET" });
 
   const list = Array.isArray(response?.data) ? response.data : null;
@@ -360,11 +359,6 @@ export async function uploadBerkasPpdb(
     process.env.NEXT_PUBLIC_API_URL ||
     "http://localhost:5000";
 
-  /*
-   * ENDPOINT sudah memuat "/api". Buang suffix /api atau /api/v1 dari
-   * NEXT_PUBLIC_API_URL agar URL akhir tidak menjadi /api/api atau
-   * /api/v1/api.
-   */
   const baseUrl = API_URL.replace(/\/+$/, "").replace(
     /\/api(?:\/v\d+)?$/,
     ""
@@ -410,7 +404,6 @@ export async function uploadBerkasPpdb(
         uploadToken = String(sp.get("token") || sp.get("tokenPendaftaran") || "").trim();
       }
     } catch {
-      // storage error ignored
     }
   }
 

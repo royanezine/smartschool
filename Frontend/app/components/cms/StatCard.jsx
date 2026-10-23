@@ -1,4 +1,3 @@
-// app/cmsAdmin/components/StatCard.jsx
 
 const StatCard = ({ title, value, icon, color = 'blue' }) => {
   const colorClasses = {

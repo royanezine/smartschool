@@ -54,6 +54,7 @@ import {
   Clock,
   Activity,
   Route,
+  Undo2,
 } from "lucide-react";
 
 export const adminSidebarConfig = {
@@ -63,9 +64,6 @@ export const adminSidebarConfig = {
   email: "admin@smartschool.com",
 
   menuSections: [
-    // =====================================================
-    // DASHBOARD
-    // =====================================================
     {
       type: "item",
       key: "dashboard",
@@ -74,9 +72,6 @@ export const adminSidebarConfig = {
       path: "/admin/dashboard",
     },
 
-    // =====================================================
-    // SHIFT & PENUGASAN
-    // =====================================================
     {
       type: "item",
       key: "manajemenShift",
@@ -100,9 +95,6 @@ export const adminSidebarConfig = {
       ],
     },
 
-    // =====================================================
-    // PRESENSI & KEHADIRAN
-    // =====================================================
     {
       type: "item",
       key: "presensi",
@@ -130,7 +122,6 @@ export const adminSidebarConfig = {
           path: "/admin/presensi/izin-guru",
         },
 
-        // ✅ MENU BARU: Rekap Absensi Shift
         {
           key: "rekapAbsensiShift",
           icon: Clock,
@@ -138,7 +129,6 @@ export const adminSidebarConfig = {
           path: "/admin/presensi/rekap-absensi-shift",
         },
 
-        // ✅ MENU BARU: Monitoring Kehadiran Guru
         {
           key: "monitoringKehadiranGuru",
           icon: Activity,
@@ -161,9 +151,6 @@ export const adminSidebarConfig = {
       ],
     },
 
-    // =====================================================
-    // KEUANGAN & KAS
-    // =====================================================
     {
       type: "item",
       key: "keuangan",
@@ -223,17 +210,11 @@ export const adminSidebarConfig = {
       ],
     },
 
-    // =====================================================
-    // MASTER DATA
-    // =====================================================
     {
       type: "header",
       label: "MASTER DATA",
     },
 
-    // =====================================================
-    // PENGGUNA
-    // =====================================================
     {
       type: "item",
       key: "pengguna",
@@ -275,9 +256,6 @@ export const adminSidebarConfig = {
       ],
     },
 
-    // =====================================================
-    // AKADEMIK
-    // =====================================================
     {
       type: "item",
       key: "akademik",
@@ -297,6 +275,12 @@ export const adminSidebarConfig = {
           icon: School,
           label: "Kelas",
           path: "/admin/akademik/kelas",
+        },
+        {
+          key: "guruWaliKelas",
+          icon: UserCheck,
+          label: "Wali Kelas",
+          path: "/admin/guru/wali-kelas",
         },
         {
           key: "jurusan",
@@ -319,9 +303,6 @@ export const adminSidebarConfig = {
       ],
     },
 
-    // =====================================================
-    // LMS & CBT
-    // =====================================================
     {
       type: "item",
       key: "lmsCbt",
@@ -354,18 +335,9 @@ export const adminSidebarConfig = {
           label: "Ujian CBT Online",
           path: "/admin/lms-cbt/ujian",
         },
-        {
-          key: "kapasitasServerCbt",
-          icon: Server,
-          label: "Kapasitas & Server CBT",
-          path: "/admin/lms-cbt/server",
-        },
       ],
     },
 
-    // =====================================================
-    // E-RAPORT
-    // =====================================================
     {
       type: "item",
       key: "eraport",
@@ -395,9 +367,6 @@ export const adminSidebarConfig = {
       ],
     },
 
-    // =====================================================
-    // BIMBINGAN KONSELING
-    // =====================================================
     {
       type: "item",
       key: "bk",
@@ -427,9 +396,6 @@ export const adminSidebarConfig = {
       ],
     },
 
-    // =====================================================
-    // PERPUSTAKAAN
-    // =====================================================
     {
       type: "item",
       key: "perpustakaan",
@@ -465,9 +431,6 @@ export const adminSidebarConfig = {
       ],
     },
 
-    // =====================================================
-    // SARPRAS
-    // =====================================================
     {
       type: "item",
       key: "sarpras",
@@ -501,10 +464,10 @@ export const adminSidebarConfig = {
           path: "/admin/sarpras/kategori",
         },
         {
-          key: "daftarAset",
+          key: "inventaris",
           icon: Package,
-          label: "Daftar Aset",
-          path: "/admin/sarpras/gudang",
+          label: "Inventaris",
+          path: "/admin/sarpras/iventaris",
         },
         {
           key: "peminjaman",
@@ -512,12 +475,21 @@ export const adminSidebarConfig = {
           label: "Peminjaman",
           path: "/admin/sarpras/peminjaman",
         },
+        {
+          key: "pengembalian",
+          icon: Undo2,
+          label: "Pengembalian",
+          path: "/admin/sarpras/pengembalian",
+        },
+        {
+          key: "riwayatSarpras",
+          icon: History,
+          label: "Riwayat",
+          path: "/admin/sarpras/riwayat",
+        },
       ],
     },
 
-    // =====================================================
-    // SPMB
-    // =====================================================
     {
       type: "item",
       key: "spmb",
@@ -553,9 +525,6 @@ export const adminSidebarConfig = {
       ],
     },
 
-    // =====================================================
-    // CMS
-    // =====================================================
     {
       type: "item",
       key: "cms",
@@ -585,9 +554,6 @@ export const adminSidebarConfig = {
       ],
     },
 
-    // =====================================================
-    // LANGGANAN
-    // =====================================================
     {
       type: "item",
       key: "langganan",

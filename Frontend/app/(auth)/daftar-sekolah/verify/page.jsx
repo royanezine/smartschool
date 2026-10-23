@@ -107,7 +107,6 @@ function VerifyTenantPageContent() {
     try {
       setLoading(true);
 
-      // Service mengirim email, kodeOtp, dan bank ke POST /api/tenant/verify.
       const result = await verifyTenant(
         normalizedEmail,
         normalizedOtp,
@@ -118,7 +117,6 @@ function VerifyTenantPageContent() {
         throw new Error(result?.message || "Verifikasi gagal.");
       }
 
-      // Menangani respons normal dan respons yang terbungkus data.data.
       const data = result?.data?.data ?? result?.data ?? {};
 
       if (data.is_trial === true) {
@@ -153,7 +151,6 @@ function VerifyTenantPageContent() {
           );
         }
 
-        // Sesuai respons verifyAndPay: tidak menggunakan redirect_url/snap_token.
         const paymentData = {
           order_id: data.order_id,
           gross_amount: data.gross_amount,

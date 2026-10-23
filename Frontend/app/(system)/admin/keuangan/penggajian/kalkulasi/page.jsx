@@ -182,7 +182,6 @@ export default function KalkulasiPenggajianPage() {
 
         <main className="min-w-0 flex-1 overflow-y-auto theme-page theme-text">
           <div className="mx-auto w-full max-w-5xl px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
-            {/* BACK */}
             <button
               type="button"
               onClick={() => router.push("/admin/keuangan/penggajian")}
@@ -192,7 +191,6 @@ export default function KalkulasiPenggajianPage() {
               Kembali ke daftar penggajian
             </button>
 
-            {/* HEADER */}
             <div className="mb-6">
               <h1 className="text-2xl font-bold tracking-tight theme-text sm:text-3xl">
                 Kalkulasi Penggajian
@@ -204,7 +202,6 @@ export default function KalkulasiPenggajianPage() {
               </p>
             </div>
 
-            {/* ALERT */}
             {error && (
               <AlertBox
                 type="error"
@@ -221,7 +218,6 @@ export default function KalkulasiPenggajianPage() {
             )}
 
             <div className="grid grid-cols-1 gap-5 lg:grid-cols-5">
-              {/* FORM */}
               <section className="theme-card rounded-xl border theme-border p-5 shadow-sm lg:col-span-2">
                 <div className="mb-4 flex items-center gap-2">
                   <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
@@ -318,7 +314,6 @@ export default function KalkulasiPenggajianPage() {
                 </form>
               </section>
 
-              {/* RESULT */}
               <section className="lg:col-span-3">
                 {!calcResult && !calculating && (
                   <div className="theme-card flex min-h-72 flex-col items-center justify-center rounded-xl border theme-border p-6 text-center shadow-sm">
@@ -352,7 +347,6 @@ export default function KalkulasiPenggajianPage() {
 
                 {calcResult && !calculating && (
                   <div className="space-y-4">
-                    {/* SUMMARY */}
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                       <ResultCard
                         title="Data Diproses"
@@ -370,7 +364,6 @@ export default function KalkulasiPenggajianPage() {
                       />
                     </div>
 
-                    {/* PERIODE */}
                     <div className="theme-card rounded-xl border theme-border p-4 shadow-sm">
                       <div className="flex items-center gap-2">
                         <Clock3
@@ -395,7 +388,6 @@ export default function KalkulasiPenggajianPage() {
                       </div>
                     </div>
 
-                    {/* DILEWATI */}
                     {dilewatiList.length > 0 && (
                       <div className="theme-card rounded-xl border theme-border shadow-sm">
                         <div className="border-b theme-border p-4">
@@ -460,9 +452,6 @@ export default function KalkulasiPenggajianPage() {
   );
 }
 
-/* =========================================================
-   RESULT CARD
-========================================================= */
 
 function ResultCard({ title, value, description, icon: Icon, tone = "blue" }) {
   const toneClasses = {
@@ -495,9 +484,6 @@ function ResultCard({ title, value, description, icon: Icon, tone = "blue" }) {
   );
 }
 
-/* =========================================================
-   ALERT BOX
-========================================================= */
 
 function AlertBox({ type, message, onClose }) {
   const success = type === "success";
@@ -526,9 +512,6 @@ function AlertBox({ type, message, onClose }) {
   );
 }
 
-/* =========================================================
-   FORM FIELD
-========================================================= */
 
 function FormField({ label, children }) {
   return (

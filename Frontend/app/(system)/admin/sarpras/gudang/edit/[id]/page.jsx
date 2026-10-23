@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 
 import Header from "@/app/components/Header";
@@ -37,9 +37,6 @@ import {
   updateAset,
 } from "@/services/sarpras.service";
 
-/* =========================================================
-   GLOBAL THEME HELPERS
-========================================================= */
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -98,11 +95,6 @@ const themeWarningSurface =
 const themeWarningBorder =
   "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
 
-/*
-  --color-danger belum dipastikan tersedia di global theme.
-  Karena itu background/border danger dibuat dari --color-text,
-  sementara warna teks tetap memakai class global theme-danger.
-*/
 const themeDangerSurface =
   "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
 
@@ -111,9 +103,6 @@ const themeDangerBorder =
 
 const themeFocus = themePrimaryFocus;
 
-/* =========================================================
-   HELPERS
-========================================================= */
 
 function getArray(response) {
   if (Array.isArray(response)) return response;
@@ -170,9 +159,6 @@ function formatCondition(value) {
   }
 }
 
-/* =========================================================
-   COMPONENT
-========================================================= */
 
 export default function EditAsetPage() {
   const router = useRouter();
@@ -216,17 +202,8 @@ export default function EditAsetPage() {
     catatan: "",
   });
 
-  /* =========================================================
-     LOAD DATA
-  ========================================================= */
 
-  useEffect(() => {
-    if (!id) return;
-
-    loadData();
-  }, [id]);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
       setLoadingMaster(true);
@@ -315,11 +292,18 @@ export default function EditAsetPage() {
       setLoading(false);
       setLoadingMaster(false);
     }
-  };
+  }, [id]);
 
-  /* =========================================================
-     HANDLE CHANGE
-  ========================================================= */
+  useEffect(() => {
+    if (!id) return;
+
+    const timer = setTimeout(() => {
+      loadData();
+    }, 0);
+
+    return () => clearTimeout(timer);
+  }, [loadData, id]);
+
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -338,9 +322,6 @@ export default function EditAsetPage() {
     }
   };
 
-  /* =========================================================
-     VALIDATION
-  ========================================================= */
 
   const validateForm = () => {
     if (!form.nama.trim()) {
@@ -403,9 +384,6 @@ export default function EditAsetPage() {
     return "";
   };
 
-  /* =========================================================
-     SUBMIT
-  ========================================================= */
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -492,17 +470,11 @@ export default function EditAsetPage() {
     }
   };
 
-  /* =========================================================
-     CANCEL
-  ========================================================= */
 
   const handleCancel = () => {
     router.push("/admin/sarpras/gudang");
   };
 
-  /* =========================================================
-     PREVIEW
-  ========================================================= */
 
   const selectedGudang = useMemo(() => {
     return gudangList.find(
@@ -588,9 +560,6 @@ export default function EditAsetPage() {
     form.jumlahStok,
   ]);
 
-  /* =========================================================
-     LOADING
-  ========================================================= */
 
   if (loading) {
     return (
@@ -658,13 +627,9 @@ export default function EditAsetPage() {
     );
   }
 
-  /* =========================================================
-     MAIN
-  ========================================================= */
 
   return (
     <div className="theme-page h-screen w-full overflow-hidden">
-      {/* SIDEBAR */}
 
       <div className="fixed inset-y-0 left-0 z-50">
         <Sidebar
@@ -675,7 +640,6 @@ export default function EditAsetPage() {
         />
       </div>
 
-      {/* CONTENT */}
 
       <div
         className={`flex h-screen min-w-0 flex-col overflow-hidden transition-[margin] duration-300 ${
@@ -684,7 +648,6 @@ export default function EditAsetPage() {
             : "lg:ml-[260px]"
         }`}
       >
-        {/* HEADER */}
 
         <div className="shrink-0">
           <Header
@@ -703,13 +666,11 @@ export default function EditAsetPage() {
           />
         </div>
 
-        {/* MAIN */}
 
         <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
           <div className="w-full px-4 pb-8 pt-5 sm:px-6 sm:pt-6 lg:px-8 lg:pt-7">
             <div className="mx-auto w-full max-w-[1380px]">
 
-              {/* PAGE HEADER */}
 
               <div className="mb-6">
                 <button
@@ -791,7 +752,6 @@ export default function EditAsetPage() {
                 </div>
               </div>
 
-              {/* ERROR */}
 
               {error && (
                 <div
@@ -825,7 +785,6 @@ export default function EditAsetPage() {
                 </div>
               )}
 
-              {/* SUCCESS */}
 
               {success && (
                 <div
@@ -849,11 +808,9 @@ export default function EditAsetPage() {
                 </div>
               )}
 
-              {/* GRID */}
 
               <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_380px]">
 
-                {/* FORM */}
 
                 <form
                   onSubmit={handleSubmit}
@@ -863,7 +820,6 @@ export default function EditAsetPage() {
                     className={`theme-card overflow-hidden rounded-3xl border ${themeBorderClass} ${themeCardShadow}`}
                   >
 
-                    {/* FORM HEADER */}
 
                     <div
                       className={`border-b ${themeDivider} ${themePrimarySoft} px-5 py-5 sm:px-7`}
@@ -897,11 +853,9 @@ export default function EditAsetPage() {
                       </div>
                     </div>
 
-                    {/* FORM BODY */}
 
                     <div className="space-y-8 p-5 sm:p-7">
 
-                      {/* INFORMASI DASAR */}
 
                       <section>
                         <div className="mb-5">
@@ -923,7 +877,6 @@ export default function EditAsetPage() {
 
                         <div className="grid gap-5 md:grid-cols-2">
 
-                          {/* NAMA */}
 
                           <div className="md:col-span-2">
                             <label
@@ -965,7 +918,6 @@ export default function EditAsetPage() {
                             </div>
                           </div>
 
-                          {/* KODE */}
 
                           <div>
                             <label
@@ -1005,7 +957,6 @@ export default function EditAsetPage() {
                             </p>
                           </div>
 
-                          {/* KONDISI */}
 
                           <div>
                             <label
@@ -1046,7 +997,6 @@ export default function EditAsetPage() {
                         </div>
                       </section>
 
-                      {/* STOK */}
 
                       <section
                         className={`border-t ${themeDivider} pt-7`}
@@ -1071,7 +1021,6 @@ export default function EditAsetPage() {
 
                         <div className="grid gap-5 sm:grid-cols-3">
 
-                          {/* JUMLAH */}
 
                           <div>
                             <label
@@ -1107,7 +1056,6 @@ export default function EditAsetPage() {
                             </div>
                           </div>
 
-                          {/* STOK */}
 
                           <div>
                             <label
@@ -1143,7 +1091,6 @@ export default function EditAsetPage() {
                             </div>
                           </div>
 
-                          {/* MINIMUM */}
 
                           <div>
                             <label
@@ -1181,7 +1128,6 @@ export default function EditAsetPage() {
                         </div>
                       </section>
 
-                      {/* PENEMPATAN */}
 
                       <section
                         className={`border-t ${themeDivider} pt-7`}
@@ -1205,7 +1151,6 @@ export default function EditAsetPage() {
 
                         <div className="grid gap-5 md:grid-cols-2">
 
-                          {/* KATEGORI */}
 
                           <div>
                             <label
@@ -1268,7 +1213,6 @@ export default function EditAsetPage() {
                             </div>
                           </div>
 
-                          {/* GUDANG */}
 
                           <div>
                             <label
@@ -1332,7 +1276,6 @@ export default function EditAsetPage() {
                             </div>
                           </div>
 
-                          {/* LOKASI */}
 
                           <div className="md:col-span-2">
                             <label
@@ -1368,7 +1311,6 @@ export default function EditAsetPage() {
                         </div>
                       </section>
 
-                      {/* PEMBELIAN & PERAWATAN */}
 
                       <section
                         className={`border-t ${themeDivider} pt-7`}
@@ -1393,7 +1335,6 @@ export default function EditAsetPage() {
 
                         <div className="grid gap-5 md:grid-cols-2">
 
-                          {/* TANGGAL PEMBELIAN */}
 
                           <div>
                             <label
@@ -1425,7 +1366,6 @@ export default function EditAsetPage() {
                             </div>
                           </div>
 
-                          {/* PERAWATAN */}
 
                           <div>
                             <label
@@ -1459,7 +1399,6 @@ export default function EditAsetPage() {
                         </div>
                       </section>
 
-                      {/* KERUSAKAN */}
 
                       <section
                         className={`border-t ${themeDivider} pt-7`}
@@ -1485,7 +1424,6 @@ export default function EditAsetPage() {
 
                         <div className="grid gap-5 md:grid-cols-2">
 
-                          {/* TANGGAL RUSAK */}
 
                           <div>
                             <label
@@ -1517,7 +1455,6 @@ export default function EditAsetPage() {
                             </div>
                           </div>
 
-                          {/* STATUS PERBAIKAN */}
 
                           <div>
                             <label
@@ -1564,7 +1501,6 @@ export default function EditAsetPage() {
                             </div>
                           </div>
 
-                          {/* DESKRIPSI KERUSAKAN */}
 
                           <div className="md:col-span-2">
                             <label
@@ -1604,7 +1540,6 @@ export default function EditAsetPage() {
                         </div>
                       </section>
 
-                      {/* CATATAN */}
 
                       <section
                         className={`border-t ${themeDivider} pt-7`}
@@ -1646,6 +1581,10 @@ export default function EditAsetPage() {
                             placeholder="Contoh: Aset digunakan untuk kegiatan laboratorium..."
                             className={`theme-input w-full resize-none rounded-xl border ${themeBorderClass} py-3 pl-11 pr-4 text-sm font-medium outline-none transition ${themeFocus}`}
                           />
+
+                          <p className="theme-text-muted mt-2 text-[11px]">
+                            Catatan atau keterangan tambahan terkait aset.
+                          </p>
                         </div>
 
                         <div className="mt-1.5 flex justify-end">
@@ -1656,7 +1595,6 @@ export default function EditAsetPage() {
                         </div>
                       </section>
 
-                      {/* STATUS */}
 
                       <section
                         className={`border-t ${themeDivider} pt-7`}
@@ -1705,7 +1643,6 @@ export default function EditAsetPage() {
                         </div>
                       </section>
 
-                      {/* INFO */}
 
                       <div
                         className={`rounded-2xl border ${themeInfoBorder} ${themeInfoSurface} p-4`}
@@ -1735,7 +1672,6 @@ export default function EditAsetPage() {
                       </div>
                     </div>
 
-                    {/* FOOTER */}
 
                     <div
                       className={`flex flex-col-reverse gap-3 border-t ${themeDivider} ${themeNeutralSurface} px-5 py-4 sm:flex-row sm:justify-end sm:px-7`}
@@ -1776,14 +1712,12 @@ export default function EditAsetPage() {
                   </div>
                 </form>
 
-                {/* PREVIEW */}
 
                 <aside className="min-w-0 xl:sticky xl:top-5">
                   <div
                     className={`theme-card overflow-hidden rounded-3xl border ${themeBorderClass} ${themeCardShadow}`}
                   >
 
-                    {/* PREVIEW HEADER */}
 
                     <div
                       className={`border-b ${themeDivider} px-5 py-5`}
@@ -1818,11 +1752,9 @@ export default function EditAsetPage() {
                       </div>
                     </div>
 
-                    {/* PREVIEW BODY */}
 
                     <div className="p-5">
 
-                      {/* MAIN CARD */}
 
                       <div
                         className={`relative overflow-hidden rounded-2xl p-5 ${themePrimaryGradient}`}
@@ -1871,7 +1803,6 @@ export default function EditAsetPage() {
                         </div>
                       </div>
 
-                      {/* STOCK */}
 
                       <div
                         className={`mt-4 rounded-2xl border p-4 ${stockStatus.bg} ${stockStatus.border}`}
@@ -1940,7 +1871,6 @@ export default function EditAsetPage() {
                         </div>
                       </div>
 
-                      {/* SUMMARY */}
 
                       <div className="mt-4 grid grid-cols-2 gap-3">
                         <div
@@ -1990,13 +1920,11 @@ export default function EditAsetPage() {
                         </div>
                       </div>
 
-                      {/* DETAIL */}
 
                       <div
                         className={`theme-card mt-4 overflow-hidden rounded-2xl border ${themeBorderClass}`}
                       >
 
-                        {/* KATEGORI */}
 
                         <div
                           className={`flex items-center gap-3 border-b ${themeDivider} px-4 py-3.5`}
@@ -2019,7 +1947,6 @@ export default function EditAsetPage() {
                           </div>
                         </div>
 
-                        {/* GUDANG */}
 
                         <div
                           className={`flex items-center gap-3 border-b ${themeDivider} px-4 py-3.5`}
@@ -2042,7 +1969,6 @@ export default function EditAsetPage() {
                           </div>
                         </div>
 
-                        {/* LOKASI */}
 
                         <div
                           className={`flex items-center gap-3 border-b ${themeDivider} px-4 py-3.5`}
@@ -2065,7 +1991,6 @@ export default function EditAsetPage() {
                           </div>
                         </div>
 
-                        {/* KONDISI */}
 
                         <div
                           className={`flex items-center gap-3 border-b ${themeDivider} px-4 py-3.5`}
@@ -2089,7 +2014,6 @@ export default function EditAsetPage() {
                           </div>
                         </div>
 
-                        {/* PEMBELIAN */}
 
                         <div
                           className={`flex items-center gap-3 border-b ${themeDivider} px-4 py-3.5`}
@@ -2112,7 +2036,6 @@ export default function EditAsetPage() {
                           </div>
                         </div>
 
-                        {/* PERAWATAN */}
 
                         <div
                           className={`flex items-center gap-3 border-b ${themeDivider} px-4 py-3.5`}
@@ -2135,7 +2058,6 @@ export default function EditAsetPage() {
                           </div>
                         </div>
 
-                        {/* PERBAIKAN */}
 
                         <div className="flex items-center gap-3 px-4 py-3.5">
                           <div
@@ -2162,7 +2084,6 @@ export default function EditAsetPage() {
                         </div>
                       </div>
 
-                      {/* DAMAGE INFO */}
 
                       {(form.deskripsiKerusakan ||
                         form.catatan) && (
@@ -2200,7 +2121,6 @@ export default function EditAsetPage() {
                       )}
                     </div>
 
-                    {/* PREVIEW FOOTER */}
 
                     <div
                       className={`border-t ${themeDivider} ${themeNeutralSurface} px-5 py-4`}
@@ -2223,7 +2143,6 @@ export default function EditAsetPage() {
                 </aside>
               </div>
 
-              {/* FOOTER */}
 
               <div
                 className={`mt-7 border-t ${themeDivider} pt-5 text-center`}
@@ -2241,8 +2160,5 @@ export default function EditAsetPage() {
   );
 }
 
-/* =========================================================
-   GLOBAL THEME BORDER
-========================================================= */
 
 const themeBorderClass = "theme-border";

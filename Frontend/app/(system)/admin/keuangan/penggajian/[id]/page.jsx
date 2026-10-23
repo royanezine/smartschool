@@ -229,9 +229,6 @@ export default function DetailPenggajianPage() {
         <main className="min-w-0 flex-1 overflow-y-auto theme-page theme-text">
           <div className="w-full px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
             <div className="mx-auto w-full max-w-[1500px]">
-              {/* ============================================
-                  PAGE HEADER
-              ============================================ */}
               <div className="mb-6">
                 <button
                   type="button"
@@ -289,7 +286,6 @@ export default function DetailPenggajianPage() {
                 </div>
               </div>
 
-              {/* ALERT */}
               {error && (
                 <AlertBox
                   type="error"
@@ -306,7 +302,6 @@ export default function DetailPenggajianPage() {
                 />
               )}
 
-              {/* LOADING / NOT FOUND / DETAIL */}
               {loading ? (
                 <div className="flex min-h-80 flex-col items-center justify-center gap-3 theme-card rounded-xl border theme-border">
                   <LoaderCircle
@@ -343,9 +338,6 @@ export default function DetailPenggajianPage() {
                 </div>
               ) : (
                 <>
-                  {/* ============================================
-                      KARTU PEGAWAI
-                  ============================================ */}
                   <section className="mb-6 theme-card rounded-xl border theme-border p-5 shadow-sm sm:p-6">
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                       <div className="flex items-start gap-4">
@@ -400,9 +392,6 @@ export default function DetailPenggajianPage() {
                     </div>
                   </section>
 
-                  {/* ============================================
-                      RINGKASAN PENGGAJIAN
-                  ============================================ */}
                   <section className="mb-6">
                     <div className="mb-4">
                       <h2 className="text-lg font-bold theme-text">
@@ -441,9 +430,6 @@ export default function DetailPenggajianPage() {
                     </div>
                   </section>
 
-                  {/* ============================================
-                      RINCIAN ABSENSI
-                  ============================================ */}
                   <section className="mb-6 theme-card overflow-hidden rounded-xl border theme-border shadow-sm">
                     <div className="border-b theme-border p-5">
                       <div className="flex items-start gap-3">
@@ -541,9 +527,6 @@ export default function DetailPenggajianPage() {
                     )}
                   </section>
 
-                  {/* ============================================
-                      INFORMASI TAMBAHAN
-                  ============================================ */}
                   <section className="mb-6 theme-card rounded-xl border theme-border p-5 shadow-sm sm:p-6">
                     <div className="flex items-center gap-3">
                       <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)] theme-text-secondary">
@@ -596,9 +579,6 @@ export default function DetailPenggajianPage() {
   );
 }
 
-/* =========================================================
-   SUMMARY CARD
-========================================================= */
 
 function SummaryCard({ icon: Icon, label, value, tone = "blue" }) {
   const toneClasses = {
@@ -646,9 +626,6 @@ function SummaryCard({ icon: Icon, label, value, tone = "blue" }) {
   );
 }
 
-/* =========================================================
-   INFO ITEM
-========================================================= */
 
 function InfoItem({ icon: Icon, label, value }) {
   return (
@@ -668,9 +645,6 @@ function InfoItem({ icon: Icon, label, value }) {
   );
 }
 
-/* =========================================================
-   ALERT BOX
-========================================================= */
 
 function AlertBox({ type, message, onClose }) {
   const success = type === "success";

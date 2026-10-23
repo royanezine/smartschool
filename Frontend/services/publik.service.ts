@@ -80,11 +80,6 @@ type ApiError = Error & {
   status?: number;
 };
 
-/**
- * Membuka pembungkus respons API secara bertahap.
- * Mendukung { data: [...] }, { success, data: [...] },
- * dan { data: { data: [...] } }.
- */
 function unwrapResponse(value: any): any {
   let result = value;
 
@@ -104,9 +99,6 @@ function unwrapResponse(value: any): any {
   return result;
 }
 
-/**
- * Memastikan hasil endpoint daftar artikel selalu berupa array.
- */
 function normalizeArticles(value: any): PublicArtikel[] {
   let result = unwrapResponse(value);
 

@@ -20,12 +20,6 @@ export interface NotifikasiResponse {
   list: Notifikasi[];
 }
 
-/**
- * ============================================================
- * GET NOTIFIKASI
- * GET /api/notifikasi
- * ============================================================
- */
 export async function getNotifikasi(): Promise<NotifikasiResponse> {
   const result = await apiFetch("/api/notifikasi", {
     method: "GET",
@@ -42,12 +36,6 @@ export async function getNotifikasi(): Promise<NotifikasiResponse> {
   };
 }
 
-/**
- * ============================================================
- * MARK NOTIFIKASI AS READ
- * PATCH /api/notifikasi/:id/read
- * ============================================================
- */
 export async function markNotifikasiAsRead(
   id: string
 ) {
@@ -65,12 +53,6 @@ export async function markNotifikasiAsRead(
   );
 }
 
-/**
- * ============================================================
- * MARK ALL NOTIFIKASI AS READ
- * PATCH /api/notifikasi/read-all
- * ============================================================
- */
 export async function markAllNotifikasiAsRead() {
   return apiFetch(
     "/api/notifikasi/read-all",

@@ -24,9 +24,6 @@ import {
   createTugas,
 } from "@/services/tugas.service";
 
-// ======================================================
-// THEME HELPERS
-// ======================================================
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -85,9 +82,6 @@ const themeDangerBorder =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-// ======================================================
-// MAIN
-// ======================================================
 
 export default function TambahTugasPage() {
   const router = useRouter();
@@ -107,9 +101,6 @@ export default function TambahTugasPage() {
     waktu: "23:59",
   });
 
-  // ======================================================
-  // LOAD KELAS MAPEL
-  // ======================================================
 
   useEffect(() => {
     loadKelasMapel();
@@ -120,8 +111,6 @@ export default function TambahTugasPage() {
       setLoading(true);
       setError("");
 
-      // Identitas berasal dari sesi aktif (lib/auth) dan sudah berupa
-      // objek. Tidak perlu di-JSON.parse ulang.
       const currentUser = getSessionUser();
 
       console.log("USER LOGIN:", {
@@ -180,9 +169,6 @@ export default function TambahTugasPage() {
     }
   };
 
-  // ======================================================
-  // HANDLE CHANGE
-  // ======================================================
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -196,9 +182,6 @@ export default function TambahTugasPage() {
     setSuccess("");
   };
 
-  // ======================================================
-  // SUBMIT
-  // ======================================================
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -312,9 +295,6 @@ export default function TambahTugasPage() {
     }
   };
 
-  // ======================================================
-  // DATA TERPILIH
-  // ======================================================
 
   const selectedKelasMapel =
     kelasMapel.find(
@@ -333,28 +313,18 @@ export default function TambahTugasPage() {
       ?.nama_mata_pelajaran ||
     "-";
 
-  // ======================================================
-  // RENDER
-  // ======================================================
 
   return (
     <div className="theme-page fixed inset-0 flex overflow-hidden">
 
-      {/* ==================================================
-          SIDEBAR
-      ================================================== */}
 
       <div className="h-full flex-shrink-0">
         <Sidebar />
       </div>
 
-      {/* ==================================================
-          MAIN CONTENT
-      ================================================== */}
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
 
-        {/* HEADER */}
 
         <div className="flex-shrink-0">
           <Header
@@ -365,17 +335,11 @@ export default function TambahTugasPage() {
           />
         </div>
 
-        {/* ==================================================
-            SCROLLABLE CONTENT
-        ================================================== */}
 
         <main className="theme-page flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
 
           <div className="mx-auto w-full max-w-5xl">
 
-            {/* ==================================================
-                HEADER
-            ================================================== */}
 
             <div className="mb-6">
 
@@ -399,9 +363,6 @@ export default function TambahTugasPage() {
               </p>
             </div>
 
-            {/* ==================================================
-                ERROR
-            ================================================== */}
 
             {error && (
               <div
@@ -428,9 +389,6 @@ export default function TambahTugasPage() {
               </div>
             )}
 
-            {/* ==================================================
-                SUCCESS
-            ================================================== */}
 
             {success && (
               <div
@@ -458,9 +416,6 @@ export default function TambahTugasPage() {
 
               <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
 
-                {/* ==================================================
-                    FORM
-                ================================================== */}
 
                 <div className="lg:col-span-2">
 
@@ -494,9 +449,6 @@ export default function TambahTugasPage() {
 
                     <div className="space-y-6 p-5 sm:p-6">
 
-                      {/* ==================================================
-                          KELAS MAPEL
-                      ================================================== */}
 
                       <div>
 
@@ -579,9 +531,6 @@ export default function TambahTugasPage() {
                           )}
                       </div>
 
-                      {/* ==================================================
-                          JUDUL
-                      ================================================== */}
 
                       <div>
 
@@ -616,9 +565,6 @@ export default function TambahTugasPage() {
 
                       </div>
 
-                      {/* ==================================================
-                          DESKRIPSI
-                      ================================================== */}
 
                       <div>
 
@@ -647,9 +593,6 @@ export default function TambahTugasPage() {
 
                       </div>
 
-                      {/* ==================================================
-                          DEADLINE
-                      ================================================== */}
 
                       <div>
 
@@ -663,7 +606,6 @@ export default function TambahTugasPage() {
 
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
 
-                          {/* TANGGAL */}
 
                           <div>
 
@@ -694,7 +636,6 @@ export default function TambahTugasPage() {
                             </div>
                           </div>
 
-                          {/* WAKTU */}
 
                           <div>
 
@@ -732,15 +673,11 @@ export default function TambahTugasPage() {
                   </div>
                 </div>
 
-                {/* ==================================================
-                    RINGKASAN
-                ================================================== */}
 
                 <div className="lg:col-span-1">
 
                   <div className="space-y-5 lg:sticky lg:top-6">
 
-                    {/* SUMMARY CARD */}
 
                     <div
                       className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
@@ -760,7 +697,6 @@ export default function TambahTugasPage() {
 
                       <div className="space-y-5 p-5">
 
-                        {/* KELAS */}
 
                         <div className="flex gap-3">
 
@@ -787,7 +723,6 @@ export default function TambahTugasPage() {
                           </div>
                         </div>
 
-                        {/* JUDUL */}
 
                         <div className="flex gap-3">
 
@@ -811,7 +746,6 @@ export default function TambahTugasPage() {
                           </div>
                         </div>
 
-                        {/* DEADLINE */}
 
                         <div className="flex gap-3">
 
@@ -847,7 +781,6 @@ export default function TambahTugasPage() {
                           </div>
                         </div>
 
-                        {/* INFO SISWA */}
 
                         <div
                           className={`rounded-xl border p-4 ${themeInfoSurface} ${themeInfoBorder}`}
@@ -879,9 +812,6 @@ export default function TambahTugasPage() {
                       </div>
                     </div>
 
-                    {/* ==================================================
-                        BUTTON
-                    ================================================== */}
 
                     <div
                       className={`theme-card rounded-2xl border p-4 ${themeNeutralBorder} ${themeCardShadow}`}
@@ -889,7 +819,6 @@ export default function TambahTugasPage() {
 
                       <div className="flex flex-col gap-3">
 
-                        {/* SIMPAN */}
 
                         <button
                           type="submit"
@@ -916,7 +845,6 @@ export default function TambahTugasPage() {
                           )}
                         </button>
 
-                        {/* BATAL */}
 
                         <button
                           type="button"

@@ -5,29 +5,26 @@ import Image from "next/image";
 import { ArrowRight, Play } from "lucide-react";
 
 export default function Hero() {
-  // 🎬 ANIMASI INFINITE YANG LEBIH TERLIHAT (Background zoom & geser)
   const bgAnimation = {
-    scale: [1, 1.08, 1], // Zoom in/out lebih terasa
-    x: [0, 30, 0],       // Geser ke kanan-kiri lebih jelas
-    y: [0, -20, 0],      // Geser naik-turun lebih jelas
+    scale: [1, 1.08, 1], 
+    x: [0, 30, 0],       
+    y: [0, -20, 0],      
     transition: {
-      duration: 14,      // Lebih cepat dari sebelumnya (28 -> 14 detik)
+      duration: 14,      
       repeat: Infinity,
       ease: "easeInOut",
     },
   };
 
-  // 🎬 BADGE MELAYANG (Lebih cepat dan naik turunnya lebih tinggi)
   const badgeAnimation = {
     y: [0, -10, 0],
     transition: {
-      duration: 3,       // 3 detik sekali putaran
+      duration: 3,       
       repeat: Infinity,
       ease: "easeInOut",
     },
   };
 
-  // Animasi masuk bertahap dengan efek "Spring" ringan agar terasa hidup
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -45,7 +42,7 @@ export default function Hero() {
       y: 0, 
       opacity: 1, 
       transition: { 
-        type: "spring", // Efek membal alami, sangat terlihat tapi halus
+        type: "spring", 
         stiffness: 80, 
         damping: 12 
       } 
@@ -57,7 +54,6 @@ export default function Hero() {
       id="beranda"
       className="relative min-h-[calc(100vh-80px)] overflow-hidden bg-white"
     >
-      {/* 🎬 Background Image dengan Slow Cinematic Loop */}
       <motion.div
         className="absolute inset-0"
         animate={bgAnimation}
@@ -71,7 +67,6 @@ export default function Hero() {
           className="object-cover object-center"
         />
 
-        {/* Fade putih dari kiri */}
         <div
           className="absolute inset-0"
           style={{
@@ -80,7 +75,6 @@ export default function Hero() {
           }}
         />
 
-        {/* Fade bawah */}
         <div
           className="absolute inset-0"
           style={{
@@ -90,24 +84,6 @@ export default function Hero() {
         />
       </motion.div>
 
-      {/* Content */}
-      {/*
-        FIX RESPONSIVE — kenapa dulu ada ruang kosong gede di kiri:
-        Container lama pakai `max-w-7xl mx-auto` (maks 1280px, dipusatkan).
-        Begitu lebar layar > 1280px (laptop/monitor biasa udah 1440-1920px),
-        sisa lebar itu otomatis jadi margin kosong simetris kiri-kanan.
-        Karena teks di dalamnya cuma `max-w-xl` dan nempel ke kiri container,
-        hasilnya keliatan seperti "bolong" lebar banget sebelum teks mulai.
-
-        Solusinya di sini:
-        1. Ganti breakpoint max-width jadi lebih lebar (max-w-[1800px]) supaya
-           baru "berhenti melebar" di layar SANGAT lebar (ultrawide),
-           bukan di 1280px.
-        2. Padding kiri-kanan dibikin fluid/bertahap per breakpoint
-           (px-6 di HP sampai xl:px-28 di layar besar) supaya jarak teks ke
-           tepi layar terasa proporsional di semua ukuran, bukan cuma
-           andalan margin otomatis dari mx-auto.
-      */}
       <div className="relative z-10 min-h-[calc(100vh-80px)] flex items-center">
         <div className="w-full max-w-[1800px] mx-auto px-6 sm:px-8 md:px-12 lg:px-16 xl:px-24 2xl:px-32">
           <motion.div
@@ -116,7 +92,6 @@ export default function Hero() {
             animate="visible"
             className="max-w-xl py-20 lg:py-28"
           >
-            {/* Badge dengan Floating Loop */}
             <motion.div
               variants={itemVariants}
               animate={badgeAnimation}
@@ -128,31 +103,16 @@ export default function Hero() {
               </span>
             </motion.div>
 
-            {/* Title */}
             <motion.h1
               variants={itemVariants}
               className="mt-6 text-4xl md:text-5xl lg:text-6xl font-extrabold leading-[1.1] tracking-tight text-slate-900"
             >
               Kelola Sekolah Lebih Cerdas, Bersama{" "}
-              <motion.span
-                className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600"
-                animate={{
-                  backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
-                }}
-                transition={{
-                  duration: 5, // Lebih cepat berpindahnya
-                  repeat: Infinity,
-                  ease: "linear",
-                }}
-                style={{
-                  backgroundSize: "200% 200%",
-                }}
-              >
+              <span className="text-blue-600 inline-block">
                 SmartSchool
-              </motion.span>
+              </span>
             </motion.h1>
 
-            {/* Description */}
             <motion.p
               variants={itemVariants}
               className="mt-6 max-w-lg text-base md:text-lg leading-8 text-slate-600"
@@ -163,12 +123,10 @@ export default function Hero() {
               digunakan.
             </motion.p>
 
-            {/* Buttons */}
             <motion.div
               variants={itemVariants}
               className="mt-8 flex flex-wrap items-center gap-4"
             >
-              {/* Tombol Daftar - Dengan Glow Looping */}
               <motion.button
                 whileHover={{
                   scale: 1.05,
@@ -176,37 +134,34 @@ export default function Hero() {
                 }}
                 whileTap={{ scale: 0.95 }}
                 animate={{
-                  // Shadownya berdenyut lebih cepat dan jelas
                   boxShadow: [
                     "0 10px 20px -8px rgba(37, 99, 235, 0.2)",
-                    "0 25px 45px -8px rgba(37, 99, 235, 0.5)", // Cahaya lebih besar
+                    "0 25px 45px -8px rgba(37, 99, 235, 0.5)", 
                     "0 10px 20px -8px rgba(37, 99, 235, 0.2)",
                   ],
                 }}
                 transition={{
-                  duration: 2.5, // 2.5 detik
+                  duration: 2.5, 
                   repeat: Infinity,
                   ease: "easeInOut",
                 }}
                 className="
                   inline-flex items-center gap-3
-                  bg-gradient-to-r from-blue-600 to-indigo-600
-                  hover:from-blue-700 hover:to-indigo-700
+                  bg-blue-600 hover:bg-blue-700
                   text-white
                   px-7 py-3.5
                   rounded-xl
                   font-semibold
-                  shadow-lg shadow-blue-600/25
+                  shadow-md shadow-blue-600/20 hover:shadow-lg hover:shadow-blue-600/30
                   transition-all duration-300
                 "
               >
                 Daftar Sekarang
-                {/* Panah bergerak maju mundur lebih jauh */}
                 <motion.span
                   animate={{ x: [0, 12, 0] }}
                   transition={{
                     repeat: Infinity,
-                    duration: 2, // 2 detik sekali bolak-balik
+                    duration: 2, 
                     repeatType: "mirror",
                     ease: "easeInOut"
                   }}
@@ -215,7 +170,6 @@ export default function Hero() {
                 </motion.span>
               </motion.button>
 
-              {/* Tombol Demo */}
               <motion.button
                 whileHover={{ 
                   scale: 1.05,

@@ -21,9 +21,6 @@ import {
 
 import { getDaftarIzin } from "@/services/izin.service";
 
-/* ============================================================
-   THEME HELPERS
-============================================================ */
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -82,9 +79,6 @@ const themeDangerSurface =
 const themeDangerBorder =
   "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
 
-/* ============================================================
-   STATUS
-============================================================ */
 
 const STATUS_STYLE = {
   disetujui: {
@@ -112,9 +106,6 @@ const STATUS_STYLE = {
   },
 };
 
-/* ============================================================
-   JENIS
-============================================================ */
 
 const JENIS_IZIN = [
   {
@@ -127,9 +118,6 @@ const JENIS_IZIN = [
   },
 ];
 
-/* ============================================================
-   DATE
-============================================================ */
 
 function normalizeDateOnly(value) {
   if (!value) return null;
@@ -184,9 +172,6 @@ function formatTanggal(tanggal) {
   );
 }
 
-/* ============================================================
-   JENIS FORMAT
-============================================================ */
 
 function formatJenis(jenis) {
   if (!jenis) return "-";
@@ -203,9 +188,6 @@ function formatJenis(jenis) {
     : jenis;
 }
 
-/* ============================================================
-   RESPONSE
-============================================================ */
 
 function normalizeResponseData(response) {
   if (Array.isArray(response)) {
@@ -227,9 +209,6 @@ function normalizeResponseData(response) {
   return [];
 }
 
-/* ============================================================
-   PAGE
-============================================================ */
 
 export default function GuruIzinPage() {
   const router = useRouter();
@@ -251,9 +230,6 @@ export default function GuruIzinPage() {
 
   const notifications = [];
 
-  /* ============================================================
-     LOAD DATA
-  ============================================================ */
 
   async function loadRiwayatIzin(
     showLoading = true
@@ -296,9 +272,6 @@ export default function GuruIzinPage() {
     loadRiwayatIzin(true);
   }, []);
 
-  /* ============================================================
-     SUMMARY
-  ============================================================ */
 
   const summary = {
     total: riwayatIzin.length,
@@ -325,15 +298,9 @@ export default function GuruIzinPage() {
       ).length,
   };
 
-  /* ============================================================
-     RENDER
-  ============================================================ */
 
   return (
     <div className="flex h-screen theme-page overflow-hidden">
-      {/* ======================================================
-          SIDEBAR
-      ====================================================== */}
 
       <Sidebar
         active="izin"
@@ -346,9 +313,6 @@ export default function GuruIzinPage() {
         }
       />
 
-      {/* ======================================================
-          MAIN
-      ====================================================== */}
 
       <div className="flex-1 flex flex-col min-w-0 theme-page">
         <Header
@@ -368,9 +332,6 @@ export default function GuruIzinPage() {
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 theme-page">
           <div className="w-full space-y-6">
 
-            {/* ==================================================
-                HEADER
-            ================================================== */}
 
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div className="min-w-0">
@@ -403,7 +364,6 @@ export default function GuruIzinPage() {
 
               <div className="flex items-center gap-2">
 
-                {/* REFRESH */}
 
                 <button
                   type="button"
@@ -427,7 +387,6 @@ export default function GuruIzinPage() {
                   </span>
                 </button>
 
-                {/* AJUKAN */}
 
                 <button
                   type="button"
@@ -444,9 +403,6 @@ export default function GuruIzinPage() {
               </div>
             </div>
 
-            {/* ==================================================
-                ERROR
-            ================================================== */}
 
             {pageError && (
               <div
@@ -474,9 +430,6 @@ export default function GuruIzinPage() {
               </div>
             )}
 
-            {/* ==================================================
-                SUMMARY
-            ================================================== */}
 
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
 
@@ -525,9 +478,6 @@ export default function GuruIzinPage() {
               />
             </div>
 
-            {/* ==================================================
-                RIWAYAT
-            ================================================== */}
 
             <div
               className={`theme-card rounded-xl ${themeNeutralBorder} ${themeCardShadow} overflow-hidden`}
@@ -556,9 +506,6 @@ export default function GuruIzinPage() {
                 className={`divide-y ${themeDivider}`}
               >
 
-                {/* ==================================================
-                    LOADING
-                ================================================== */}
 
                 {loading && (
                   <div className="p-10 text-center">
@@ -573,9 +520,6 @@ export default function GuruIzinPage() {
                   </div>
                 )}
 
-                {/* ==================================================
-                    EMPTY
-                ================================================== */}
 
                 {!loading &&
                   riwayatIzin.length ===
@@ -609,9 +553,6 @@ export default function GuruIzinPage() {
                     </div>
                   )}
 
-                {/* ==================================================
-                    DATA
-                ================================================== */}
 
                 {!loading &&
                   riwayatIzin.map(
@@ -644,7 +585,6 @@ export default function GuruIzinPage() {
                           className={`p-4 sm:p-5 flex flex-col sm:flex-row sm:items-start gap-4 ${themeNeutralHover} transition-colors`}
                         >
 
-                          {/* ICON */}
 
                           <div
                             className={`w-10 h-10 rounded-lg ${themePrimarySoft} ${themePrimaryText} border ${themePrimarySoftBorder} flex items-center justify-center flex-shrink-0`}
@@ -654,11 +594,9 @@ export default function GuruIzinPage() {
                             />
                           </div>
 
-                          {/* CONTENT */}
 
                           <div className="min-w-0 flex-1">
 
-                            {/* JENIS + ROLE + STATUS */}
 
                             <div className="flex items-center gap-2 flex-wrap">
 
@@ -687,7 +625,6 @@ export default function GuruIzinPage() {
                               </span>
                             </div>
 
-                            {/* TANGGAL */}
 
                             <p className="text-xs theme-text-secondary mt-1.5 flex items-center gap-1.5">
                               <CalendarDays
@@ -701,14 +638,12 @@ export default function GuruIzinPage() {
                                 : `${tanggalMulai} - ${tanggalSelesai}`}
                             </p>
 
-                            {/* ALASAN */}
 
                             <p className="text-sm theme-text-secondary mt-2 leading-relaxed">
                               {item.alasan ||
                                 "-"}
                             </p>
 
-                            {/* CATATAN ADMIN */}
 
                             {item.catatan && (
                               <div
@@ -738,7 +673,6 @@ export default function GuruIzinPage() {
                               </div>
                             )}
 
-                            {/* BUKTI */}
 
                             {item.urlBukti && (
                               <a
@@ -770,9 +704,6 @@ export default function GuruIzinPage() {
   );
 }
 
-/* ============================================================
-   SUMMARY CARD
-============================================================ */
 
 function SummaryCard({
   icon: Icon,
@@ -803,9 +734,6 @@ function SummaryCard({
   );
 }
 
-/* ============================================================
-   UPLOAD URL
-============================================================ */
 
 function buildUploadUrl(path) {
   if (!path) return "#";

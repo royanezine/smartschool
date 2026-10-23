@@ -27,7 +27,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 
-import { getPendaftarPpdb } from "@/services/ppdb.service";
+import { getPendaftarPpdb, isPpdbEndpointMissing } from "@/services/ppdb.service";
 import { getJalurPpdb } from "@/services/jalurPpdb.service";
 
 const LIMIT_PENDAFTAR = 10;
@@ -50,9 +50,15 @@ function keStatusApi(label) {
   return undefined;
 }
 
-// ============================================================
-// THEME HELPERS
-// ============================================================
+async function hitungStatistikPpdb() {
+  return {
+    total: null,
+    menunggu: null,
+    lulus: null,
+    ditolak: null,
+  };
+}
+
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -87,9 +93,6 @@ const themeSmallShadow =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-// ============================================================
-// HELPERS
-// ============================================================
 
 function normalizeStatus(status) {
   const value = String(status || "").toLowerCase();
@@ -153,9 +156,6 @@ function StatusBadge({ status }) {
   );
 }
 
-// ============================================================
-// PAGE
-// ============================================================
 
 export default function PendaftaranPage() {
   const router = useRouter();
@@ -176,25 +176,24 @@ export default function PendaftaranPage() {
     hasPrev: false,
   });
   const [statistik, setStatistik] = useState({
-    total: 0,
-    menunggu: 0,
-    lulus: 0,
-    ditolak: 0,
+    total: null,
+    menunggu: null,
+    lulus: null,
+    ditolak: null,
   });
   const [page, setPage] = useState(1);
   const [jalurList, setJalurList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
+  const [endpointUnavailable, setEndpointUnavailable] = useState(false);
 
-  // ============================================================
-  // LOAD DATA
-  // ============================================================
 
   const loadData = useCallback(
     async (isRefresh = false) => {
       try {
         setError("");
+        setEndpointUnavailable(false);
 
         if (isRefresh) {
           setRefreshing(true);
@@ -202,17 +201,20 @@ export default function PendaftaranPage() {
           setLoading(true);
         }
 
-        const response = await getPendaftarPpdb({
-          search: search.trim() || undefined,
-          jalurPpdbId:
-            jalur === "Semua" ? undefined : jalur,
-          status:
-            status === "Semua"
-              ? undefined
-              : keStatusApi(status),
-          page,
-          limit: LIMIT_PENDAFTAR,
-        });
+        const [response, statistikBackend] = await Promise.all([
+          getPendaftarPpdb({
+            search: search.trim() || undefined,
+            jalurPpdbId:
+              jalur === "Semua" ? undefined : jalur,
+            status:
+              status === "Semua"
+                ? undefined
+                : keStatusApi(status),
+            page,
+            limit: LIMIT_PENDAFTAR,
+          }),
+          hitungStatistikPpdb(),
+        ]);
 
         setData(
           Array.isArray(response?.data)
@@ -220,26 +222,35 @@ export default function PendaftaranPage() {
             : []
         );
 
-        setMeta(
-          response?.meta || {
-            page,
-            limit: LIMIT_PENDAFTAR,
-            total: 0,
-            totalData: 0,
-            totalPages: 0,
-            hasNext: false,
-            hasPrev: false,
-          }
-        );
+        const pagination =
+          response?.pagination ||
+          response?.meta ||
+          {};
+        const total =
+          pagination.totalData ??
+          pagination.total ??
+          (Array.isArray(response?.data)
+            ? response.data.length
+            : 0);
+        const totalPages =
+          pagination.totalPages ??
+          Math.ceil(total / LIMIT_PENDAFTAR) ??
+          1;
 
-        setStatistik(
-          response?.statistik || {
-            total: 0,
-            menunggu: 0,
-            lulus: 0,
-            ditolak: 0,
-          }
-        );
+        setMeta({
+          page: pagination.page ?? page,
+          limit: pagination.limit ?? LIMIT_PENDAFTAR,
+          total,
+          totalData: total,
+          totalPages,
+          hasNext:
+            pagination.hasNext ??
+            page < totalPages,
+          hasPrev:
+            pagination.hasPrev ?? page > 1,
+        });
+
+        setStatistik(statistikBackend);
       } catch (err) {
         setData([]);
         setMeta({
@@ -252,11 +263,20 @@ export default function PendaftaranPage() {
           hasPrev: false,
         });
 
+        setStatistik({
+          total: null,
+          menunggu: null,
+          lulus: null,
+          ditolak: null,
+        });
+
         setError(
           err instanceof Error
             ? err.message
             : "Gagal memuat data pendaftar PPDB."
         );
+
+        setEndpointUnavailable(isPpdbEndpointMissing(err));
       } finally {
         setLoading(false);
         setRefreshing(false);
@@ -302,9 +322,6 @@ export default function PendaftaranPage() {
     setPage(1);
   }
 
-  // ============================================================
-  // NORMALIZE DATA
-  // ============================================================
 
   const normalizedData = useMemo(() => {
     return data.map((item) => ({
@@ -322,9 +339,6 @@ export default function PendaftaranPage() {
     }));
   }, [data]);
 
-  // ============================================================
-  // JALUR
-  // ============================================================
 
   const daftarJalur = useMemo(() => {
     return [...jalurList].sort((a, b) =>
@@ -335,35 +349,23 @@ export default function PendaftaranPage() {
     );
   }, [jalurList]);
 
-  /*
-   * Pencarian, filter, dan pagination dikerjakan oleh Backend
-   * (GET /api/ppdb/pendaftar), sehingga data yang ditampilkan sudah
-   * merupakan halaman yang diminta. Tidak ada filter ganda di client.
-   */
   const filtered = normalizedData;
 
-  // ============================================================
-  // STATISTICS
-  // ============================================================
 
-  const isEndpointUnavailable = Boolean(
-    error &&
-      (error.toLowerCase().includes("belum tersedia") ||
-        error.toLowerCase().includes("cannot get") ||
-        error.toLowerCase().includes("404"))
-  );
+  const isEndpointUnavailable = endpointUnavailable;
 
-  const totalPendaftar = isEndpointUnavailable || error ? "-" : statistik.total;
+  const totalPendaftar =
+    isEndpointUnavailable || error ? "-" : statistik.total ?? "-";
 
-  const totalTerverifikasi = isEndpointUnavailable || error ? "-" : statistik.lulus;
+  const totalTerverifikasi =
+    isEndpointUnavailable || error ? "-" : statistik.lulus ?? "-";
 
-  const totalMenunggu = isEndpointUnavailable || error ? "-" : statistik.menunggu;
+  const totalMenunggu =
+    isEndpointUnavailable || error ? "-" : statistik.menunggu ?? "-";
 
-  const totalDitolak = isEndpointUnavailable || error ? "-" : statistik.ditolak;
+  const totalDitolak =
+    isEndpointUnavailable || error ? "-" : statistik.ditolak ?? "-";
 
-  // ============================================================
-  // EXPORT CSV
-  // ============================================================
 
   const exportData = () => {
     if (!filtered.length) {
@@ -428,9 +430,6 @@ export default function PendaftaranPage() {
     URL.revokeObjectURL(url);
   };
 
-  // ============================================================
-  // DETAIL
-  // ============================================================
 
   const handleDetail = (id) => {
     if (!id) {
@@ -444,9 +443,6 @@ export default function PendaftaranPage() {
     );
   };
 
-  // ============================================================
-  // RENDER
-  // ============================================================
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
@@ -476,9 +472,6 @@ export default function PendaftaranPage() {
         <main className="min-h-0 flex-1 overflow-hidden">
           <div className="flex h-full min-h-0 flex-col p-4 sm:p-5 lg:p-6">
 
-            {/* ==================================================
-                HEADER
-            ================================================== */}
 
             <div className="mb-4 flex shrink-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-3">
@@ -497,7 +490,7 @@ export default function PendaftaranPage() {
                   </h1>
 
                   <p className="theme-text-muted text-xs">
-                    Kelola seluruh data calon siswa SPMB
+                    Formulir pendaftaran tersedia; daftar pendaftar belum dapat dimuat.
                   </p>
                 </div>
               </div>
@@ -531,9 +524,6 @@ export default function PendaftaranPage() {
               </div>
             </div>
 
-            {/* ==================================================
-                ERROR
-            ================================================== */}
 
             {error && (
               <div className="mb-4 flex shrink-0 items-start gap-3 rounded-xl border border-[color-mix(in_srgb,var(--color-danger)_24%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_9%,transparent)] px-4 py-3 text-sm">
@@ -550,21 +540,20 @@ export default function PendaftaranPage() {
                   </p>
 
                   <p className="theme-text-secondary mt-0.5 text-xs">
-                    {error}
+                    {isEndpointUnavailable
+                      ? "Endpoint baca daftar pendaftar belum tersedia di Backend, sehingga data tidak ditampilkan."
+                      : error}
                   </p>
 
                   {isEndpointUnavailable && (
                     <p className="mt-1 text-[11px] theme-text-muted">
-                      Backend saat ini belum menyediakan endpoint untuk memuat daftar pendaftar (GET /api/ppdb/pendaftar). Penambahan calon siswa baru tetap dapat dilakukan melalui tombol Tambah Pendaftar.
+                      Backend saat ini belum menyediakan rute GET /api/ppdb/pendaftar. Penambahan calon siswa baru tetap dapat dilakukan melalui tombol Tambah Pendaftar.
                     </p>
                   )}
                 </div>
               </div>
             )}
 
-            {/* ==================================================
-                STATISTICS
-            ================================================== */}
 
             <div className="mb-4 grid shrink-0 grid-cols-2 gap-3 lg:grid-cols-4">
               <Stat
@@ -595,17 +584,11 @@ export default function PendaftaranPage() {
               />
             </div>
 
-            {/* ==================================================
-                MAIN CARD
-            ================================================== */}
 
             <div
               className={`theme-card ${themeNeutralBorder} flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border ${themeCardShadow}`}
             >
 
-              {/* ==================================================
-                  FILTER BAR
-              ================================================== */}
 
               <div
                 className={`flex shrink-0 flex-col gap-3 border-b ${themeDivider} p-4 xl:flex-row`}
@@ -723,9 +706,6 @@ export default function PendaftaranPage() {
                 </button>
               </div>
 
-              {/* ==================================================
-                  TABLE / STATES
-              ================================================== */}
 
               <div className="min-h-0 flex-1 overflow-auto">
                 {loading ? (
@@ -755,7 +735,7 @@ export default function PendaftaranPage() {
                       </h3>
 
                       <p className="theme-text-secondary mt-1 text-xs leading-5">
-                        {error}
+                        Endpoint baca daftar pendaftar belum tersedia di Backend.
                       </p>
 
                       <p className="theme-text-muted mt-2 text-[11px] leading-4">
@@ -848,7 +828,6 @@ export default function PendaftaranPage() {
                           key={item.id}
                           className={`border-b ${themeDivider} transition ${themeNeutralHover}`}
                         >
-                          {/* PENDAFTAR */}
                           <td className="px-4 py-3">
                             <div className="flex items-center gap-3">
                               <div
@@ -877,7 +856,6 @@ export default function PendaftaranPage() {
                             </div>
                           </td>
 
-                          {/* ASAL SEKOLAH */}
                           <td className="px-4 py-3">
                             <p className="theme-text-secondary max-w-[200px] truncate text-xs font-medium">
                               {item.asalSekolah ||
@@ -891,7 +869,6 @@ export default function PendaftaranPage() {
                             </p>
                           </td>
 
-                          {/* JALUR */}
                           <td className="px-4 py-3">
                             <span
                               className={`inline-flex items-center gap-1.5 rounded-md border ${themePrimarySoftBorder} ${themePrimarySoft} ${themePrimaryText} px-2.5 py-1 text-[10px] font-semibold`}
@@ -902,12 +879,10 @@ export default function PendaftaranPage() {
                             </span>
                           </td>
 
-                          {/* TANGGAL */}
                           <td className="theme-text-secondary px-4 py-3 text-xs">
                             {item.tanggal}
                           </td>
 
-                          {/* STATUS */}
                           <td className="px-4 py-3">
                             <StatusBadge
                               status={
@@ -916,7 +891,6 @@ export default function PendaftaranPage() {
                             />
                           </td>
 
-                          {/* AKSI */}
                           <td className="px-4 py-3">
                             <div className="flex justify-end">
                               <button
@@ -940,18 +914,15 @@ export default function PendaftaranPage() {
                 )}
               </div>
 
-              {/* ==================================================
-                  FOOTER / PAGINATION
-              ================================================== */}
 
               <div
                 className={`flex shrink-0 items-center justify-between border-t ${themeDivider} px-4 py-3`}
               >
                 <p className="theme-text-muted text-xs">
-                  Menampilkan{" "}
-                  {filtered.length} dari{" "}
-                  {meta.total} data
-                  {meta.totalPages > 0 && (
+                  {isEndpointUnavailable
+                    ? "Data pendaftar belum tersedia"
+                    : `Menampilkan ${filtered.length} dari ${meta.total} data`}
+                  {!isEndpointUnavailable && meta.totalPages > 0 && (
                     <>
                       {" "}
                       • Halaman {meta.page}/
@@ -1000,9 +971,6 @@ export default function PendaftaranPage() {
   );
 }
 
-// ============================================================
-// STAT
-// ============================================================
 
 function Stat({
   title,
@@ -1074,9 +1042,6 @@ function Stat({
   );
 }
 
-// ============================================================
-// TABLE HEADER
-// ============================================================
 
 function Th({ children }) {
   return (

@@ -192,13 +192,10 @@ export default function AdminKelasTambahPage() {
     lantaiId: "",
   });
 
-  // Dideklarasikan sebelum useEffect agar tidak memicu peringatan
-  // react-hooks/immutability (fungsi dipakai sebelum dideklarasikan).
   async function loadGuru() {
     try {
       setLoadingGuru(true);
 
-      // Ambil data guru dari API (bukan data dummy/hardcode).
       const response = await getUsers({
         page: 1,
         limit: 200,
@@ -485,7 +482,6 @@ export default function AdminKelasTambahPage() {
           <div className="w-full px-4 py-5 sm:px-5 sm:py-6 md:px-6 lg:px-8 xl:px-10">
             <div className="mx-auto w-full max-w-[1200px]">
 
-              {/* BACK */}
 
               <div className="mb-5">
                 <button
@@ -508,7 +504,6 @@ export default function AdminKelasTambahPage() {
                 </button>
               </div>
 
-              {/* HEADER */}
 
               <div className="mb-6 flex min-w-0 items-center gap-3 sm:gap-4">
                 <div className="theme-primary flex h-11 w-11 shrink-0 items-center justify-center rounded-xl shadow-md sm:h-12 sm:w-12">
@@ -527,7 +522,6 @@ export default function AdminKelasTambahPage() {
                 </div>
               </div>
 
-              {/* ERROR */}
 
               {error && (
                 <div className="theme-danger mb-5 flex items-start gap-3 rounded-xl border p-4">
@@ -555,7 +549,6 @@ export default function AdminKelasTambahPage() {
                 </div>
               )}
 
-              {/* SUCCESS */}
 
               {success && (
                 <div className="theme-success mb-5 flex items-start gap-3 rounded-xl border p-4">
@@ -575,7 +568,6 @@ export default function AdminKelasTambahPage() {
                 </div>
               )}
 
-              {/* FORM */}
 
               <form
                 onSubmit={handleSubmit}
@@ -600,7 +592,6 @@ export default function AdminKelasTambahPage() {
                 <div className="w-full p-5 sm:p-6 md:p-7 lg:p-8">
                   <div className="grid w-full grid-cols-1 gap-x-6 gap-y-5 md:grid-cols-2 lg:gap-x-8">
 
-                    {/* NAMA KELAS */}
 
                     <FormInput
                       label="Nama Kelas"
@@ -612,7 +603,6 @@ export default function AdminKelasTambahPage() {
                       required
                     />
 
-                    {/* TINGKAT */}
 
                     <FormSelect
                       label="Tingkat"
@@ -638,7 +628,6 @@ export default function AdminKelasTambahPage() {
                       )}
                     </FormSelect>
 
-                    {/* TAHUN AJARAN */}
 
                     <FormSelect
                       label="Tahun Ajaran"
@@ -672,7 +661,6 @@ export default function AdminKelasTambahPage() {
                       )}
                     </FormSelect>
 
-                    {/* KAPASITAS */}
 
                     <FormInput
                       label="Kapasitas Kelas"
@@ -686,7 +674,6 @@ export default function AdminKelasTambahPage() {
                       required
                     />
 
-                    {/* WALI KELAS */}
 
                     <FormSelect
                       label="Wali Kelas"
@@ -717,7 +704,6 @@ export default function AdminKelasTambahPage() {
                       ))}
                     </FormSelect>
 
-                    {/* GEDUNG */}
 
                     <FormSelect
                       label="Gedung"
@@ -748,7 +734,6 @@ export default function AdminKelasTambahPage() {
                       )}
                     </FormSelect>
 
-                    {/* LANTAI */}
 
                     <FormSelect
                       label="Lantai"
@@ -784,7 +769,6 @@ export default function AdminKelasTambahPage() {
                     </FormSelect>
                   </div>
 
-                  {/* LOCATION INFO */}
 
                   <div className="theme-info mt-7 flex items-start gap-3 rounded-xl border p-4">
                     <div className="theme-info flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
@@ -807,11 +791,9 @@ export default function AdminKelasTambahPage() {
                     </div>
                   </div>
 
-                  {/* SUMMARY */}
 
                   <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
 
-                    {/* TINGKAT */}
 
                     <div className="theme-card-soft theme-border flex items-center gap-3 rounded-xl border p-4">
                       <div className="theme-card theme-border flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border">
@@ -832,7 +814,6 @@ export default function AdminKelasTambahPage() {
                       </div>
                     </div>
 
-                    {/* GEDUNG */}
 
                     <div className="theme-card-soft theme-border flex items-center gap-3 rounded-xl border p-4">
                       <div className="theme-card theme-border flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border">
@@ -860,7 +841,6 @@ export default function AdminKelasTambahPage() {
                       </div>
                     </div>
 
-                    {/* BACKEND */}
 
                     <div className="theme-success flex items-center gap-3 rounded-xl border p-4">
                       <div className="theme-card theme-border flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border">
@@ -879,7 +859,6 @@ export default function AdminKelasTambahPage() {
                     </div>
                   </div>
 
-                  {/* ACTION */}
 
                   <div className="theme-border-soft mt-7 flex w-full flex-col-reverse gap-3 border-t pt-6 sm:flex-row sm:items-center sm:justify-end">
                     <button
@@ -924,7 +903,6 @@ export default function AdminKelasTambahPage() {
                 </div>
               </form>
 
-              {/* FOOTER */}
 
               <div className="pb-5 pt-6 text-center">
                 <p className="theme-text-muted text-sm">

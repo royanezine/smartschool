@@ -123,7 +123,6 @@ export default function VerifyPage() {
     try {
       setLoading(true);
 
-      // Bank yang dipilih sekarang ikut dikirim ke Backend.
       const result = await verifyTenant(email, kodeOtp, bank);
 
       if (!result?.success) {
@@ -145,8 +144,6 @@ export default function VerifyPage() {
         return;
       }
 
-      // Backend yang kamu kirim mengembalikan VA,
-      // bukan payment_url.
       if (data.va_number) {
         sessionStorage.setItem("onboarding_order_id", data.order_id || "");
         sessionStorage.setItem("onboarding_va_number", data.va_number);
@@ -162,7 +159,6 @@ export default function VerifyPage() {
         return;
       }
 
-      // Mendukung respons lama yang memang menyediakan payment_url.
       if (data.payment_url) {
         sessionStorage.setItem("onboarding_payment_url", data.payment_url);
 
@@ -175,7 +171,6 @@ export default function VerifyPage() {
         return;
       }
 
-      // Mendukung alur verifikasi email sukses lalu memilih bank di halaman pembayaran
       if (data.email_verified || data.status === "menunggu_pembayaran") {
         setSuccess("Verifikasi berhasil. Mengarahkan ke pemilihan pembayaran...");
 

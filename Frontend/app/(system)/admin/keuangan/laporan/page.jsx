@@ -24,9 +24,6 @@ import { useRouter } from "next/navigation";
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
 
-// =============================================================
-// DATA DUMMY AWAL
-// =============================================================
 const initialTransactions = [
   {
     id: 1,
@@ -93,9 +90,6 @@ const initialTransactions = [
   },
 ];
 
-// =============================================================
-// PAGE
-// =============================================================
 export default function LaporanKeuanganPage() {
   const router = useRouter();
 
@@ -107,16 +101,10 @@ export default function LaporanKeuanganPage() {
 
   const [transactions, setTransactions] = useState(initialTransactions);
 
-  // =============================================================
-  // SIDEBAR
-  // =============================================================
   const toggleSidebar = () => {
     setIsCollapsed((prev) => !prev);
   };
 
-  // =============================================================
-  // STATISTIK
-  // =============================================================
   const totalPemasukan = transactions
     .filter((transaction) => transaction.kategori === "Pemasukan")
     .reduce((total, transaction) => total + transaction.jumlah, 0);
@@ -127,9 +115,6 @@ export default function LaporanKeuanganPage() {
 
   const saldo = totalPemasukan - totalPengeluaran;
 
-  // =============================================================
-  // FILTER
-  // =============================================================
   const filtered = transactions.filter((transaction) => {
     const keyword = search.trim().toLowerCase();
 
@@ -144,9 +129,6 @@ export default function LaporanKeuanganPage() {
     return matchSearch && matchFilter;
   });
 
-  // =============================================================
-  // PAGINATION
-  // =============================================================
   const totalPages = Math.ceil(filtered.length / entriesPerPage);
 
   const safeCurrentPage =
@@ -157,16 +139,10 @@ export default function LaporanKeuanganPage() {
 
   const currentEntries = filtered.slice(indexOfFirst, indexOfLast);
 
-  // =============================================================
-  // HANDLER EDIT
-  // =============================================================
   const handleEdit = (id) => {
     router.push(`/laporan-keuangan/edit/${id}`);
   };
 
-  // =============================================================
-  // HANDLER DELETE
-  // =============================================================
   const handleDelete = (id) => {
     const confirmed = window.confirm(
       "Apakah Anda yakin ingin menghapus transaksi ini?"
@@ -183,9 +159,6 @@ export default function LaporanKeuanganPage() {
     }
   };
 
-  // =============================================================
-  // HANDLER DETAIL
-  // =============================================================
   const handleView = (id) => {
     const transaction = transactions.find(
       (item) => item.id === id
@@ -204,9 +177,6 @@ export default function LaporanKeuanganPage() {
     );
   };
 
-  // =============================================================
-  // RESET PAGE SAAT SEARCH / FILTER
-  // =============================================================
   const handleSearchChange = (event) => {
     setSearch(event.target.value);
     setCurrentPage(1);
@@ -217,14 +187,8 @@ export default function LaporanKeuanganPage() {
     setCurrentPage(1);
   };
 
-  // =============================================================
-  // RENDER
-  // =============================================================
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
-      {/* =========================================================
-          SIDEBAR
-      ========================================================= */}
       <Sidebar
         active="laporanKeuangan"
         setActive={() => {}}
@@ -232,13 +196,7 @@ export default function LaporanKeuanganPage() {
         setCollapsed={setIsCollapsed}
       />
 
-      {/* =========================================================
-          CONTENT WRAPPER
-      ========================================================= */}
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        {/* =======================================================
-            HEADER
-        ======================================================= */}
         <Header
           toggleSidebar={toggleSidebar}
           notifications={[]}
@@ -249,14 +207,8 @@ export default function LaporanKeuanganPage() {
           }}
         />
 
-        {/* =======================================================
-            MAIN
-        ======================================================= */}
         <main className="theme-page min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
           <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8 xl:px-10">
-            {/* ===================================================
-                PAGE HEADER
-            =================================================== */}
             <section
               className="
                 theme-card
@@ -271,7 +223,6 @@ export default function LaporanKeuanganPage() {
               "
             >
               <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-                {/* TITLE */}
                 <div className="flex min-w-0 items-center gap-4">
                   <div
                     className="
@@ -306,9 +257,7 @@ export default function LaporanKeuanganPage() {
                   </div>
                 </div>
 
-                {/* ACTION BUTTONS */}
                 <div className="flex flex-wrap gap-2">
-                  {/* CETAK */}
                   <button
                     type="button"
                     className="
@@ -333,7 +282,6 @@ export default function LaporanKeuanganPage() {
                     Cetak
                   </button>
 
-                  {/* EXPORT */}
                   <button
                     type="button"
                     className="
@@ -358,7 +306,6 @@ export default function LaporanKeuanganPage() {
                     Ekspor
                   </button>
 
-                  {/* TAMBAH */}
                   <button
                     type="button"
                     onClick={() => router.push("/laporan/tambah")}
@@ -384,9 +331,6 @@ export default function LaporanKeuanganPage() {
               </div>
             </section>
 
-            {/* ===================================================
-                STATISTIK
-            =================================================== */}
             <section className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <StatCard
                 icon={<TrendingUp size={22} />}
@@ -415,11 +359,7 @@ export default function LaporanKeuanganPage() {
               />
             </section>
 
-            {/* ===================================================
-                SEARCH & FILTER
-            =================================================== */}
             <section className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
-              {/* SEARCH */}
               <div className="relative flex-1">
                 <Search
                   size={18}
@@ -458,7 +398,6 @@ export default function LaporanKeuanganPage() {
                 />
               </div>
 
-              {/* FILTER */}
               <div className="flex gap-2">
                 <select
                   value={filter}
@@ -510,9 +449,6 @@ export default function LaporanKeuanganPage() {
               </div>
             </section>
 
-            {/* ===================================================
-                TABLE
-            =================================================== */}
             <section
               className="
                 theme-card
@@ -525,7 +461,6 @@ export default function LaporanKeuanganPage() {
             >
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
-                  {/* TABLE HEADER */}
                   <thead>
                     <tr className="bg-[color-mix(in_srgb,var(--color-primary)_4%,var(--color-card))]">
                       <TableHead>Tanggal</TableHead>
@@ -538,7 +473,6 @@ export default function LaporanKeuanganPage() {
                     </tr>
                   </thead>
 
-                  {/* TABLE BODY */}
                   <tbody className="divide-y divide-[var(--color-border-soft)]">
                     {currentEntries.length === 0 ? (
                       <tr>
@@ -572,7 +506,6 @@ export default function LaporanKeuanganPage() {
                             hover:bg-[color-mix(in_srgb,var(--color-primary)_4%,var(--color-card))]
                           "
                         >
-                          {/* TANGGAL */}
                           <td className="theme-text-secondary px-4 py-3.5 text-sm">
                             <div className="flex items-center gap-2">
                               <Clock
@@ -584,19 +517,16 @@ export default function LaporanKeuanganPage() {
                             </div>
                           </td>
 
-                          {/* DESKRIPSI */}
                           <td className="theme-text px-4 py-3.5 font-medium">
                             {transaction.deskripsi}
                           </td>
 
-                          {/* KATEGORI */}
                           <td className="px-4 py-3.5">
                             <CategoryBadge
                               kategori={transaction.kategori}
                             />
                           </td>
 
-                          {/* JUMLAH */}
                           <td className="px-4 py-3.5 text-right font-bold">
                             <span
                               className={
@@ -612,22 +542,18 @@ export default function LaporanKeuanganPage() {
                             </span>
                           </td>
 
-                          {/* METODE */}
                           <td className="theme-text-secondary px-4 py-3.5">
                             {transaction.metode}
                           </td>
 
-                          {/* STATUS */}
                           <td className="px-4 py-3.5">
                             <StatusBadge
                               status={transaction.status}
                             />
                           </td>
 
-                          {/* AKSI */}
                           <td className="px-4 py-3.5 text-center">
                             <div className="flex items-center justify-center gap-1">
-                              {/* VIEW */}
                               <button
                                 type="button"
                                 onClick={() =>
@@ -646,7 +572,6 @@ export default function LaporanKeuanganPage() {
                                 <Eye size={16} />
                               </button>
 
-                              {/* EDIT */}
                               <button
                                 type="button"
                                 onClick={() =>
@@ -665,7 +590,6 @@ export default function LaporanKeuanganPage() {
                                 <Edit size={16} />
                               </button>
 
-                              {/* DELETE */}
                               <button
                                 type="button"
                                 onClick={() =>
@@ -692,9 +616,6 @@ export default function LaporanKeuanganPage() {
                 </table>
               </div>
 
-              {/* =================================================
-                  PAGINATION
-              ================================================= */}
               {filtered.length > 0 && (
                 <div
                   className="
@@ -718,7 +639,6 @@ export default function LaporanKeuanganPage() {
                   </p>
 
                   <div className="flex items-center gap-1">
-                    {/* PREVIOUS */}
                     <button
                       type="button"
                       onClick={() =>
@@ -744,7 +664,6 @@ export default function LaporanKeuanganPage() {
                       <ChevronLeft size={16} />
                     </button>
 
-                    {/* PAGE NUMBERS */}
                     {Array.from(
                       { length: totalPages },
                       (_, index) => {
@@ -779,7 +698,6 @@ export default function LaporanKeuanganPage() {
                       }
                     )}
 
-                    {/* NEXT */}
                     <button
                       type="button"
                       onClick={() =>
@@ -811,9 +729,6 @@ export default function LaporanKeuanganPage() {
               )}
             </section>
 
-            {/* ===================================================
-                FOOTER
-            =================================================== */}
             <footer
               className="
                 theme-border-soft
@@ -834,9 +749,6 @@ export default function LaporanKeuanganPage() {
   );
 }
 
-// =============================================================
-// TABLE HEAD
-// =============================================================
 function TableHead({ children, align = "left" }) {
   const alignmentClass =
     {
@@ -863,9 +775,6 @@ function TableHead({ children, align = "left" }) {
   );
 }
 
-// =============================================================
-// CATEGORY BADGE
-// =============================================================
 function CategoryBadge({ kategori }) {
   const isIncome = kategori === "Pemasukan";
 
@@ -899,9 +808,6 @@ function CategoryBadge({ kategori }) {
   );
 }
 
-// =============================================================
-// STATUS BADGE
-// =============================================================
 function StatusBadge({ status }) {
   const isPaid = status === "Lunas";
 
@@ -935,9 +841,6 @@ function StatusBadge({ status }) {
   );
 }
 
-// =============================================================
-// STAT CARD
-// =============================================================
 function StatCard({
   icon,
   label,
@@ -984,7 +887,6 @@ function StatCard({
       `}
     >
       <div className="flex items-start gap-4">
-        {/* ICON */}
         <div
           className={`
             flex
@@ -1003,7 +905,6 @@ function StatCard({
           {icon}
         </div>
 
-        {/* CONTENT */}
         <div className="min-w-0 flex-1">
           <p className="theme-text-muted text-xs font-medium">
             {label}

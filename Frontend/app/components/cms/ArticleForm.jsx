@@ -1,4 +1,4 @@
-"use client"; // <--- PENTING! Agar bisa menggunakan state
+"use client"; 
 
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
@@ -18,19 +18,16 @@ export default function ImporSiswaPage() {
   const router = useRouter();
   const fileInputRef = useRef(null);
 
-  // State untuk File & Preview Data
   const [file, setFile] = useState(null);
   const [previewData, setPreviewData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
-  // Simulasi Data Preview (Mockup, nanti diganti dengan parser CSV/Excel asli)
   const handleFileChange = (e) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
       setFile(selectedFile);
       
-      // Simulasi data hasil parsing (nanti akan dari library seperti xlsx atau papaparse)
       setPreviewData([
         { nis: "20241001", nama: "Ahmad Fauzi", email: "ahmad@sekolah.id", kelas: "XII IPA 1" },
         { nis: "20241002", nama: "Budi Santoso", email: "budi@sekolah.id", kelas: "XII IPA 1" },
@@ -51,16 +48,14 @@ export default function ImporSiswaPage() {
     e.preventDefault();
     setIsLoading(true);
     
-    // Simulasi proses insert ke pengguna & siswa_kelas
     setTimeout(() => {
       setIsLoading(false);
       setIsSuccess(true);
-      setTimeout(() => setIsSuccess(false), 4000); // Hilang setelah 4 detik
+      setTimeout(() => setIsSuccess(false), 4000); 
     }, 2000);
   };
 
   const downloadTemplate = () => {
-    // Simulasi download file template
     alert("Mendownload Template Excel/CSV... (Mockup)");
   };
 
@@ -68,7 +63,6 @@ export default function ImporSiswaPage() {
     <div className="min-h-screen bg-slate-50 p-6 md:p-8">
       <div className="max-w-5xl mx-auto space-y-8">
         
-        {/* 1. BREADCRUMB & BACK */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <nav className="flex text-sm font-medium text-gray-500 tracking-wide">
             <ol className="inline-flex items-center space-x-2 md:space-x-3">
@@ -84,7 +78,6 @@ export default function ImporSiswaPage() {
           </button>
         </div>
 
-        {/* 2. HEADER SECTION */}
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
           <div className="flex items-center gap-4">
             <div className="p-3 bg-indigo-50 rounded-2xl border border-indigo-100">
@@ -105,7 +98,6 @@ export default function ImporSiswaPage() {
           </button>
         </div>
 
-        {/* 3. STATISTIK RINGKASAN */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
             { label: "Total Siswa", value: "1.247", icon: Users, color: "blue" },
@@ -127,10 +119,8 @@ export default function ImporSiswaPage() {
           ))}
         </div>
 
-        {/* 4. KARTU UPLOAD & PREVIEW */}
         <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden">
           
-          {/* Bagian Upload File */}
           <div className="p-6 md:p-8 border-b border-gray-100">
             <h2 className="text-lg font-bold text-gray-900 mb-2">Upload Berkas</h2>
             <p className="text-sm text-gray-500 mb-4">File harus berekstensi .xlsx, .xls, atau .csv. Kolom wajib: NIS, Nama, Email, Kelas.</p>
@@ -166,7 +156,6 @@ export default function ImporSiswaPage() {
             </div>
           </div>
 
-          {/* Bagian Preview Data (Hanya muncul jika data ada) */}
           {previewData.length > 0 && (
             <div className="p-6 md:p-8 bg-slate-50/50">
               <div className="flex items-center justify-between mb-4">
@@ -176,7 +165,6 @@ export default function ImporSiswaPage() {
                 </span>
               </div>
               
-              {/* Tabel Responsif (Scroll horizontal di mobile) */}
               <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm bg-white">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
@@ -207,7 +195,6 @@ export default function ImporSiswaPage() {
             </div>
           )}
 
-          {/* Footer / Action Buttons */}
           <div className="p-6 bg-gray-50/50 border-t border-gray-100 flex flex-col sm:flex-row gap-3 justify-end items-center">
             {isSuccess ? (
               <div className="w-full sm:w-auto flex items-center gap-3 px-6 py-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 font-medium">

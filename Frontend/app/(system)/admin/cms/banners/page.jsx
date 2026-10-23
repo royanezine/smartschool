@@ -86,9 +86,6 @@ export default function BannersPage() {
 
   return (
     <div className="flex min-h-screen w-full theme-page">
-      {/* =====================================================
-          SIDEBAR
-      ====================================================== */}
 
       <Sidebar
         active={active}
@@ -98,9 +95,6 @@ export default function BannersPage() {
       />
 
       <div className="flex min-w-0 flex-1 flex-col theme-page">
-        {/* =====================================================
-            HEADER
-        ====================================================== */}
 
         <Header
           user={{
@@ -126,9 +120,6 @@ export default function BannersPage() {
             "
           >
             <div className="mx-auto w-full max-w-[1800px]">
-              {/* =================================================
-                  TOP BAR
-              ================================================= */}
 
               <div
                 className="
@@ -227,12 +218,8 @@ export default function BannersPage() {
                 </Link>
               </div>
 
-              {/* =================================================
-                  STATISTICS
-              ================================================= */}
 
               <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-3 sm:gap-4 lg:mb-8">
-                {/* TOTAL */}
 
                 <div
                   className="
@@ -283,7 +270,6 @@ export default function BannersPage() {
                   </div>
                 </div>
 
-                {/* ACTIVE */}
 
                 <div
                   className="
@@ -339,7 +325,6 @@ export default function BannersPage() {
                   </div>
                 </div>
 
-                {/* DRAFT */}
 
                 <div
                   className="
@@ -391,9 +376,6 @@ export default function BannersPage() {
                 </div>
               </div>
 
-              {/* =================================================
-                  SEARCH
-              ================================================= */}
 
               <section
                 className="
@@ -494,9 +476,6 @@ export default function BannersPage() {
                 </div>
               </section>
 
-              {/* =================================================
-                  BANNER LIST
-              ================================================= */}
 
               {filteredBanners.length === 0 ? (
                 <div
@@ -598,9 +577,6 @@ export default function BannersPage() {
                     shadow-sm
                   "
                 >
-                  {/* =================================================
-                      DESKTOP TABLE
-                  ================================================= */}
 
                   <div className="hidden w-full overflow-x-auto sm:block">
                     <table className="w-full min-w-[720px] text-left">
@@ -644,7 +620,6 @@ export default function BannersPage() {
                             key={banner.id}
                             className="group transition-colors theme-table-hover"
                           >
-                            {/* IMAGE */}
 
                             <td className="px-5 py-4 sm:px-6">
                               <div
@@ -681,7 +656,6 @@ export default function BannersPage() {
                               </div>
                             </td>
 
-                            {/* TITLE */}
 
                             <td className="px-5 py-4 sm:px-6">
                               <div className="min-w-0">
@@ -754,7 +728,6 @@ export default function BannersPage() {
                               </div>
                             </td>
 
-                            {/* POSITION */}
 
                             <td className="hidden px-5 py-4 md:table-cell sm:px-6">
                               <span
@@ -778,7 +751,6 @@ export default function BannersPage() {
                               </span>
                             </td>
 
-                            {/* STATUS */}
 
                             <td className="hidden px-5 py-4 lg:table-cell sm:px-6">
                               <span
@@ -812,7 +784,6 @@ export default function BannersPage() {
                               </span>
                             </td>
 
-                            {/* ACTION */}
 
                             <td className="px-5 py-4 text-right sm:px-6">
                               <div className="flex items-center justify-end gap-1">
@@ -881,9 +852,6 @@ export default function BannersPage() {
                     </table>
                   </div>
 
-                  {/* =================================================
-                      MOBILE VIEW
-                  ================================================= */}
 
                   <div className="divide-y sm:hidden">
                     {filteredBanners.map((banner) => (
@@ -896,7 +864,6 @@ export default function BannersPage() {
                         "
                       >
                         <div className="flex items-start gap-3">
-                          {/* IMAGE */}
 
                           <div
                             className="
@@ -923,7 +890,6 @@ export default function BannersPage() {
                             )}
                           </div>
 
-                          {/* INFO */}
 
                           <div className="min-w-0 flex-1">
                             <p className="truncate text-sm font-semibold theme-text">
@@ -979,7 +945,6 @@ export default function BannersPage() {
                             </div>
                           </div>
 
-                          {/* ACTION */}
 
                           <div className="flex shrink-0 items-center gap-1">
                             <Link
@@ -1024,9 +989,6 @@ export default function BannersPage() {
                     ))}
                   </div>
 
-                  {/* =================================================
-                      TABLE FOOTER
-                  ================================================= */}
 
                   <div
                     className="
@@ -1113,9 +1075,6 @@ export default function BannersPage() {
                 </section>
               )}
 
-              {/* =================================================
-                  FOOTER
-              ================================================= */}
 
               <footer className="py-8 text-center">
                 <p className="text-[10px] font-medium theme-text-muted sm:text-xs">

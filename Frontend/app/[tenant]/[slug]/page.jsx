@@ -17,9 +17,6 @@ import {
   TrendingUp,
 } from "lucide-react";
 
-/* =========================================================
-   API
-========================================================= */
 
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
@@ -31,9 +28,6 @@ function getApiBaseUrl() {
     .replace(/\/api$/, "");
 }
 
-/* =========================================================
-   SUBDOMAIN
-========================================================= */
 
 function getSubdomain() {
   if (typeof window === "undefined") {
@@ -47,7 +41,6 @@ function getSubdomain() {
   console.log("HOSTNAME:", hostname);
   console.log("=================================");
 
-  // smart.localhost -> smart
   if (hostname.endsWith(".localhost")) {
     const subdomain = hostname.split(".")[0];
 
@@ -56,7 +49,6 @@ function getSubdomain() {
     }
   }
 
-  // localhost biasa
   if (
     hostname === "localhost" ||
     hostname === "127.0.0.1"
@@ -67,9 +59,6 @@ function getSubdomain() {
   return "smart";
 }
 
-/* =========================================================
-   PAGE
-========================================================= */
 
 export default function WebsiteHomePage() {
   const [subdomain, setSubdomain] = useState("smart");
@@ -80,9 +69,6 @@ export default function WebsiteHomePage() {
   const [loadingArticles, setLoadingArticles] = useState(true);
   const [errorArticles, setErrorArticles] = useState("");
 
-  /* =======================================================
-     DETECT SUBDOMAIN
-  ======================================================= */
 
   useEffect(() => {
     const detected = getSubdomain();
@@ -92,9 +78,6 @@ export default function WebsiteHomePage() {
     setSubdomain(detected);
   }, []);
 
-  /* =======================================================
-     FETCH ARTICLES
-  ======================================================= */
 
   useEffect(() => {
     if (!subdomain) {
@@ -215,9 +198,6 @@ export default function WebsiteHomePage() {
     };
   }, [subdomain]);
 
-  /* =======================================================
-     WEBSITE URL
-  ======================================================= */
 
   const websiteUrl = (path = "") => {
     if (!path) {
@@ -231,9 +211,6 @@ export default function WebsiteHomePage() {
     return path;
   };
 
-  /* =======================================================
-     IMAGE URL
-  ======================================================= */
 
   const getImageUrl = (image) => {
     if (!image) {
@@ -256,9 +233,6 @@ export default function WebsiteHomePage() {
     }`;
   };
 
-  /* =======================================================
-     DATE
-  ======================================================= */
 
   const formatDate = (date) => {
     if (!date) {
@@ -289,16 +263,10 @@ export default function WebsiteHomePage() {
     }
   };
 
-  /* =======================================================
-     RETURN
-  ======================================================= */
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-[#0F172A]">
 
-      {/* =====================================================
-          NAVBAR
-      ===================================================== */}
 
       <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/80 backdrop-blur-md">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 lg:px-8">
@@ -450,9 +418,6 @@ export default function WebsiteHomePage() {
         )}
       </header>
 
-      {/* =====================================================
-          HERO
-      ===================================================== */}
 
       <section className="relative overflow-hidden">
 
@@ -578,9 +543,6 @@ export default function WebsiteHomePage() {
         </div>
       </section>
 
-      {/* =====================================================
-          ARTICLES
-      ===================================================== */}
 
       <section className="mx-auto max-w-7xl px-5 py-20 lg:px-8">
 
@@ -614,9 +576,6 @@ export default function WebsiteHomePage() {
 
         </div>
 
-        {/* =================================================
-            LOADING
-        ================================================= */}
 
         {loadingArticles && (
           <div className="grid gap-6 md:grid-cols-3">
@@ -628,9 +587,6 @@ export default function WebsiteHomePage() {
           </div>
         )}
 
-        {/* =================================================
-            ERROR
-        ================================================= */}
 
         {!loadingArticles &&
           errorArticles && (
@@ -654,9 +610,6 @@ export default function WebsiteHomePage() {
             </div>
           )}
 
-        {/* =================================================
-            EMPTY
-        ================================================= */}
 
         {!loadingArticles &&
           !errorArticles &&
@@ -679,9 +632,6 @@ export default function WebsiteHomePage() {
             </div>
           )}
 
-        {/* =================================================
-            ARTICLES
-        ================================================= */}
 
         {!loadingArticles &&
           !errorArticles &&
@@ -696,7 +646,6 @@ export default function WebsiteHomePage() {
                     className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-blue-100 hover:shadow-md"
                   >
 
-                    {/* IMAGE */}
 
                     <div className="relative aspect-[16/10] w-full overflow-hidden bg-slate-100">
 
@@ -736,7 +685,6 @@ export default function WebsiteHomePage() {
 
                     </div>
 
-                    {/* CONTENT */}
 
                     <div className="flex flex-1 flex-col p-6">
 
@@ -778,9 +726,6 @@ export default function WebsiteHomePage() {
             </div>
           )}
 
-        {/* =================================================
-            MOBILE
-        ================================================= */}
 
         {!loadingArticles &&
           !errorArticles &&
@@ -800,9 +745,6 @@ export default function WebsiteHomePage() {
 
       </section>
 
-      {/* =====================================================
-          CTA
-      ===================================================== */}
 
       <section className="mx-auto max-w-7xl px-5 pb-20 lg:px-8">
 
@@ -840,9 +782,6 @@ export default function WebsiteHomePage() {
         </div>
       </section>
 
-      {/* =====================================================
-          FOOTER
-      ===================================================== */}
 
       <footer className="bg-[#0F172A] px-5 py-12 text-white lg:px-8">
 
@@ -986,9 +925,6 @@ export default function WebsiteHomePage() {
   );
 }
 
-/* =========================================================
-   FEATURE CARD
-========================================================= */
 
 function FeatureCard({
   icon: Icon,
@@ -1019,9 +955,6 @@ function FeatureCard({
   );
 }
 
-/* =========================================================
-   ARTICLE SKELETON
-========================================================= */
 
 function ArticleSkeleton() {
   return (

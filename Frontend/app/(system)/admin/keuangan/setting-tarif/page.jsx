@@ -38,9 +38,6 @@ import {
 import { getTahunAjaran } from "@/services/tahunAjaran.service";
 import { getKelas } from "@/services/kelas.service";
 
-/* =========================================================
-   CONSTANTS
-========================================================= */
 
 const ENTRIES_PER_PAGE = 8;
 
@@ -80,9 +77,6 @@ const INITIAL_TARIF_FORM = {
   status: "aktif",
 };
 
-/* =========================================================
-   HELPERS
-========================================================= */
 
 function unwrapList(result) {
   if (Array.isArray(result)) return result;
@@ -132,23 +126,14 @@ function tahunAjaranLabel(item) {
   );
 }
 
-/* =========================================================
-   PAGE
-========================================================= */
 
 export default function SettingTarifPage() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [tab, setTab] = useState("kategori");
 
-  /* ---------------------------------------------------------
-     MASTER DATA
-  --------------------------------------------------------- */
   const [tahunAjaranList, setTahunAjaranList] = useState([]);
   const [kelasList, setKelasList] = useState([]);
 
-  /* ---------------------------------------------------------
-     KATEGORI STATE
-  --------------------------------------------------------- */
   const [kategoriList, setKategoriList] = useState([]);
   const [kategoriMeta, setKategoriMeta] = useState({
     page: 1,
@@ -160,9 +145,6 @@ export default function SettingTarifPage() {
   const [kategoriStatus, setKategoriStatus] = useState("");
   const [kategoriPage, setKategoriPage] = useState(1);
 
-  /* ---------------------------------------------------------
-     TARIF STATE
-  --------------------------------------------------------- */
   const [tarifList, setTarifList] = useState([]);
   const [tarifMeta, setTarifMeta] = useState({
     page: 1,
@@ -176,9 +158,6 @@ export default function SettingTarifPage() {
   const [tarifFilterStatus, setTarifFilterStatus] = useState("");
   const [tarifPage, setTarifPage] = useState(1);
 
-  /* ---------------------------------------------------------
-     UI STATE
-  --------------------------------------------------------- */
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -200,9 +179,6 @@ export default function SettingTarifPage() {
 
   const toggleSidebar = () => setIsCollapsed((prev) => !prev);
 
-  /* =======================================================
-     MASTER DATA
-  ======================================================= */
 
   const loadMaster = useCallback(async () => {
     try {
@@ -239,9 +215,6 @@ export default function SettingTarifPage() {
     }
   }, []);
 
-  /* =======================================================
-     KATEGORI
-  ======================================================= */
 
   const loadKategori = useCallback(async () => {
     try {
@@ -272,9 +245,6 @@ export default function SettingTarifPage() {
     }
   }, [kategoriPage, kategoriSearch, kategoriStatus]);
 
-  /* =======================================================
-     TARIF
-  ======================================================= */
 
   const loadTarif = useCallback(async () => {
     try {
@@ -323,9 +293,6 @@ export default function SettingTarifPage() {
     loadTarif();
   }, [loadTarif]);
 
-  /* =======================================================
-     AUTO HILANG NOTIFIKASI
-  ======================================================= */
 
   useEffect(() => {
     if (!info) return undefined;
@@ -333,9 +300,6 @@ export default function SettingTarifPage() {
     return () => clearTimeout(timer);
   }, [info]);
 
-  /* =======================================================
-     KATEGORI FORM HANDLERS
-  ======================================================= */
 
   const openTambahKategori = () => {
     setKategoriModalMode("tambah");
@@ -400,9 +364,6 @@ export default function SettingTarifPage() {
     }
   };
 
-  /* =======================================================
-     TARIF FORM HANDLERS
-  ======================================================= */
 
   const openTambahTarif = () => {
     setTarifModalMode("tambah");
@@ -487,9 +448,6 @@ export default function SettingTarifPage() {
     }
   };
 
-  /* =======================================================
-     DELETE
-  ======================================================= */
 
   const confirmDelete = (type, item) => {
     setDeleteType(type);
@@ -526,9 +484,6 @@ export default function SettingTarifPage() {
     }
   };
 
-  /* =======================================================
-     STATISTIK
-  ======================================================= */
 
   const stats = useMemo(() => {
     const tarifAktif = tarifList.filter((item) => isAktif(item?.status));
@@ -545,12 +500,8 @@ export default function SettingTarifPage() {
     };
   }, [kategoriList, kategoriMeta, tarifList, tarifMeta]);
 
-  /* =======================================================
-     RENDER
-  ======================================================= */
 
   return (
-    // 1. ROOT: flex h-screen overflow-hidden agar halaman tidak bisa di-scroll
     <div className="theme-page flex h-screen w-full overflow-hidden">
       <Sidebar
         active="settingTarif"
@@ -559,10 +510,8 @@ export default function SettingTarifPage() {
         setCollapsed={setIsCollapsed}
       />
 
-      {/* 2. BODY: flex min-h-0 flex-1 untuk sidebar + main sejajar */}
       <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
         
-        {/* 3. HEADER: dibungkus shrink-0 agar tetap di atas */}
         <div className="shrink-0">
           <Header
             toggleSidebar={toggleSidebar}
@@ -575,13 +524,10 @@ export default function SettingTarifPage() {
           />
         </div>
 
-        {/* 4. MAIN: min-w-0 flex-1 overflow-y-auto agar hanya area ini yang scroll */}
         <main className="theme-page min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
           
-          {/* 5. KONTEN: w-full (bukan max-w-7xl) agar card melebar saat zoom out */}
           <div className="w-full px-4 py-6 sm:px-6 lg:px-8 xl:px-10">
             
-            {/* PAGE HEADER */}
             <div className="theme-card theme-border mb-6 overflow-hidden rounded-2xl border p-6 shadow-[0_10px_30px_color-mix(in_srgb,var(--color-text)_8%,transparent)] sm:p-8">
               <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-4">
@@ -639,7 +585,6 @@ export default function SettingTarifPage() {
               </div>
             </div>
 
-            {/* NOTIFIKASI */}
             {error && (
               <div className="theme-danger mb-4 flex items-start gap-3 rounded-xl border px-4 py-3 text-sm">
                 <AlertCircle size={18} className="mt-0.5 shrink-0" />
@@ -664,7 +609,6 @@ export default function SettingTarifPage() {
               </div>
             )}
 
-            {/* 6. STATISTIK: Grid responsif hingga 2xl:grid-cols-6 */}
             <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6">
               <StatCard
                 icon={<Layers size={22} />}
@@ -696,7 +640,6 @@ export default function SettingTarifPage() {
               />
             </div>
 
-            {/* TABS */}
             <div className="theme-border theme-card mb-4 flex gap-1 rounded-xl border p-1">
               <TabButton
                 activeTab={tab === "kategori"}
@@ -770,7 +713,6 @@ export default function SettingTarifPage() {
         </main>
       </div>
 
-      {/* MODAL KATEGORI */}
       {showKategoriModal && (
         <Modal
           title={
@@ -840,7 +782,6 @@ export default function SettingTarifPage() {
         </Modal>
       )}
 
-      {/* MODAL TARIF */}
       {showTarifModal && (
         <Modal
           title={
@@ -981,7 +922,6 @@ export default function SettingTarifPage() {
         </Modal>
       )}
 
-      {/* MODAL DELETE */}
       {showDeleteModal && deleteTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
           <div className="theme-card theme-border w-full max-w-md rounded-2xl border shadow-[0_20px_60px_color-mix(in_srgb,var(--color-text)_20%,transparent)]">
@@ -1035,9 +975,6 @@ export default function SettingTarifPage() {
   );
 }
 
-/* =========================================================
-   TAB BUTTON
-========================================================= */
 
 function TabButton({ activeTab, onClick, icon, label }) {
   return (
@@ -1056,9 +993,6 @@ function TabButton({ activeTab, onClick, icon, label }) {
   );
 }
 
-/* =========================================================
-   KATEGORI TAB
-========================================================= */
 
 function KategoriTab({
   loading,
@@ -1210,9 +1144,6 @@ function KategoriTab({
   );
 }
 
-/* =========================================================
-   TARIF TAB
-========================================================= */
 
 function TarifTab({
   loading,
@@ -1392,9 +1323,6 @@ function TarifTab({
   );
 }
 
-/* =========================================================
-   SHARED COMPONENTS
-========================================================= */
 
 function EmptyState({ title, hint, colSpan = 6 }) {
   return (

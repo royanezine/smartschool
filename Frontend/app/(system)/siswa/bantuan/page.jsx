@@ -56,7 +56,6 @@ export default function BantuanSiswaPage() {
   return (
     <main className="theme-page min-h-full flex-1 overflow-y-auto">
       <div className="mx-auto w-full max-w-[1000px] p-4 sm:p-6 lg:p-8">
-        {/* HEADER */}
         <header className="mb-6">
           <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-primary)]">
             Pusat Bantuan
@@ -71,7 +70,6 @@ export default function BantuanSiswaPage() {
           </p>
         </header>
 
-        {/* SEARCH */}
         <div className="relative mb-6">
           <Search
             size={17}
@@ -86,7 +84,6 @@ export default function BantuanSiswaPage() {
         </div>
 
         <div className="space-y-6">
-          {/* KATEGORI BANTUAN */}
           <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <HelpCard
               icon={BookOpen}
@@ -105,7 +102,6 @@ export default function BantuanSiswaPage() {
             />
           </section>
 
-          {/* FAQ */}
           <section className="theme-card overflow-hidden rounded-2xl border shadow-sm">
             <div className="flex items-center gap-3 border-b theme-border-soft px-5 py-4 sm:px-6">
               <div className="theme-info flex h-9 w-9 shrink-0 items-center justify-center rounded-xl">
@@ -144,7 +140,6 @@ export default function BantuanSiswaPage() {
             </div>
           </section>
 
-          {/* KONTAK DUKUNGAN */}
           <section className="theme-card overflow-hidden rounded-2xl border shadow-sm">
             <div className="flex items-center gap-3 border-b theme-border-soft px-5 py-4 sm:px-6">
               <div className="theme-info flex h-9 w-9 shrink-0 items-center justify-center rounded-xl">
@@ -176,7 +171,6 @@ export default function BantuanSiswaPage() {
             </div>
           </section>
 
-          {/* INFO JAM LAYANAN */}
           <div className="theme-info flex items-start gap-3 rounded-2xl p-4">
             <Clock
               size={19}
@@ -193,7 +187,6 @@ export default function BantuanSiswaPage() {
             </div>
           </div>
 
-          {/* TIPS KEAMANAN */}
           <div className="theme-info flex items-start gap-3 rounded-2xl p-4">
             <ShieldCheck
               size={19}
@@ -215,9 +208,6 @@ export default function BantuanSiswaPage() {
   );
 }
 
-/* =========================================================
-   KOMPONEN
-========================================================= */
 
 function HelpCard({ icon: Icon, title, desc }) {
   return (

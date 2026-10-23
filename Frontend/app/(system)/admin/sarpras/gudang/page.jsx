@@ -38,9 +38,6 @@ import {
   deleteAset,
 } from "@/services/sarpras.service";
 
-/* =====================================================
-   THEME
-===================================================== */
 
 const primaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -78,9 +75,6 @@ const warningSoft =
 const focusStyle =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-/* =====================================================
-   HELPERS
-===================================================== */
 
 function extractData(response) {
   if (Array.isArray(response)) return response;
@@ -120,9 +114,6 @@ function formatText(value) {
     .replace(/\b\w/g, (l) => l.toUpperCase());
 }
 
-/* =====================================================
-   STOK CONFIG
-===================================================== */
 
 const stokConfig = {
   aman: {
@@ -145,9 +136,6 @@ const stokConfig = {
   },
 };
 
-/* =====================================================
-   PAGE
-===================================================== */
 
 export default function DataAsetPage() {
   const router = useRouter();
@@ -171,9 +159,6 @@ export default function DataAsetPage() {
   const [deletingId, setDeletingId] = useState(null);
   const [updatingStockId, setUpdatingStockId] = useState(null);
 
-  /* ===================================================
-     LOAD
-  =================================================== */
 
   const loadData = async (showRefresh = false) => {
     try {
@@ -207,9 +192,6 @@ export default function DataAsetPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  /* ===================================================
-     FILTER
-  =================================================== */
 
   const filtered = useMemo(() => {
     const keyword = search.trim().toLowerCase();
@@ -251,9 +233,6 @@ export default function DataAsetPage() {
       );
   }, [aset, search, kategoriFilter, gudangFilter, stokFilter]);
 
-  /* ===================================================
-     STATISTIK
-  =================================================== */
 
   const totalAset = aset.length;
   const totalUnit = aset.reduce(
@@ -274,9 +253,6 @@ export default function DataAsetPage() {
     stokFilter !== "Semua",
   ].filter(Boolean).length;
 
-  /* ===================================================
-     ACTIONS
-  =================================================== */
 
   const handleResetFilter = () => {
     setSearch("");
@@ -371,9 +347,6 @@ export default function DataAsetPage() {
     }
   };
 
-  /* ===================================================
-     RENDER
-  =================================================== */
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
@@ -399,7 +372,6 @@ export default function DataAsetPage() {
 
         <main className="min-w-0 flex-1 overflow-y-auto">
           <div className="w-full px-4 py-5 sm:px-6 lg:px-8">
-            {/* HEADER */}
             <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex min-w-0 items-center gap-3">
                 <div
@@ -452,7 +424,6 @@ export default function DataAsetPage() {
               </div>
             </div>
 
-            {/* ERROR */}
             {error && (
               <div
                 className={`mb-5 flex items-start gap-3 rounded-xl border ${neutralBorder} ${neutralSurface} p-4`}
@@ -478,7 +449,6 @@ export default function DataAsetPage() {
               </div>
             )}
 
-            {/* STATISTIK */}
             <div className="mb-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
               <StatCard
                 icon={Boxes}
@@ -510,7 +480,6 @@ export default function DataAsetPage() {
               />
             </div>
 
-            {/* TOOLBAR */}
             <div
               className={`theme-card rounded-2xl border ${neutralBorder} ${cardShadow}`}
             >
@@ -622,7 +591,6 @@ export default function DataAsetPage() {
               )}
             </div>
 
-            {/* DAFTAR ASET — DESKTOP TABLE */}
             <div
               className={`theme-card mt-4 overflow-hidden rounded-2xl border ${neutralBorder} ${cardShadow}`}
             >
@@ -688,7 +656,6 @@ export default function DataAsetPage() {
                 </div>
               ) : (
                 <>
-                  {/* DESKTOP TABLE */}
                   <div className="hidden overflow-x-auto md:block">
                     <table className="w-full min-w-[980px] text-left text-sm">
                       <thead>
@@ -748,7 +715,6 @@ export default function DataAsetPage() {
                               key={item.id}
                               className="transition theme-table-hover"
                             >
-                              {/* ASET */}
                               <td className="px-5 py-4">
                                 <div className="flex items-center gap-3">
                                   <div
@@ -767,7 +733,6 @@ export default function DataAsetPage() {
                                 </div>
                               </td>
 
-                              {/* KATEGORI / GUDANG */}
                               <td className="px-4 py-4">
                                 <div className="space-y-1.5">
                                   <div className="flex items-center gap-2">
@@ -791,7 +756,6 @@ export default function DataAsetPage() {
                                 </div>
                               </td>
 
-                              {/* KONDISI */}
                               <td className="px-4 py-4">
                                 <span
                                   className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-semibold ${
@@ -809,7 +773,6 @@ export default function DataAsetPage() {
                                 </span>
                               </td>
 
-                              {/* STOK */}
                               <td className="px-4 py-4">
                                 <div className="w-full max-w-[180px]">
                                   <div className="flex items-baseline justify-between gap-2">
@@ -842,7 +805,6 @@ export default function DataAsetPage() {
                                 </div>
                               </td>
 
-                              {/* AKSI */}
                               <td className="px-5 py-4">
                                 <div className="flex items-center justify-end gap-1">
                                   <button
@@ -943,7 +905,6 @@ export default function DataAsetPage() {
                     </table>
                   </div>
 
-                  {/* MOBILE LIST */}
                   <div className="divide-y divide-[var(--color-border)] md:hidden">
                     {filtered.map((item) => {
                       const status = getStokStatus(
@@ -1098,7 +1059,6 @@ export default function DataAsetPage() {
                     })}
                   </div>
 
-                  {/* FOOTER */}
                   <div
                     className={`flex flex-col gap-1 border-t ${neutralBorder} ${neutralSurface} px-5 py-3 text-xs theme-text-muted sm:flex-row sm:items-center sm:justify-between`}
                   >
@@ -1122,7 +1082,6 @@ export default function DataAsetPage() {
               )}
             </div>
 
-            {/* FOOTER */}
             <div className="mt-6 text-center">
               <p className="theme-text-muted text-[11px]">
                 © 2026 SmartSchool • Sarana & Prasarana
@@ -1135,9 +1094,6 @@ export default function DataAsetPage() {
   );
 }
 
-/* =====================================================
-   STAT CARD
-===================================================== */
 
 function StatCard({ icon: Icon, label, value, description, tone = "primary" }) {
   const toneMap = {

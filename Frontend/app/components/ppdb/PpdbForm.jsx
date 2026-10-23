@@ -30,17 +30,6 @@ import {
   getProfilSekolahPublik,
 } from "@/services/ppdb.service";
 
-// ============================================================================
-// KONTRAK BACKEND
-// ============================================================================
-// Field wajib sesuai Backend/src/validations/ppdb.validation.ts:
-// sekolahId (uuid), jalurPpdbId (uuid), namaLengkap (2-100),
-// nisn (10-20), tempatLahir (2-50), tanggalLahir, jenisKelamin (1-10),
-// alamat (min 5).
-//
-// Field opsional: telepon (maks 20), email (format email),
-// namaAyah/namaIbu/asalSekolah (maks 100), nilaiRapor (0-100).
-// ============================================================================
 
 const UUID_REGEX =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -203,24 +192,11 @@ export default function PpdbForm({
   const [submitError, setSubmitError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  // --------------------------------------------------------------------------
-  // ID SEKOLAH & JALUR
-  //
-  // Sumber yang diterima hanya ID berbentuk UUID. Nilai yang tidak valid
-  // tidak pernah diteruskan ke Backend dan tidak menimpa nilai yang sah.
-  // --------------------------------------------------------------------------
   useEffect(() => {
     if (typeof window === "undefined") {
       return;
     }
 
-    /*
-     * URL adalah sumber utama. Parameter yang ada di URL TIDAK pernah
-     * ditimpa nilai lain: bila tidak valid, formulir ditandai bermasalah
-     * dan pengiriman diblokir. sessionStorage hanya dipakai sebagai
-     * kelanjutan navigasi di dalam alur PPDB (mis. kembali dari halaman
-     * upload) dan nilainya tetap wajib berbentuk UUID.
-     */
     const masalah = [];
 
     const bacaSesi = (kunci) => {
@@ -237,7 +213,6 @@ export default function PpdbForm({
       try {
         sessionStorage.removeItem(kunci);
       } catch {
-        /* storage dapat diblokir browser */
       }
     };
 
@@ -245,16 +220,9 @@ export default function PpdbForm({
       try {
         sessionStorage.setItem(kunci, nilai);
       } catch {
-        /* storage dapat diblokir browser */
       }
     };
 
-    /*
-     * Bila URL membawa salah satu parameter pendaftaran, URL dianggap
-     * sebagai sumber lengkap. Nilai dari sessionStorage TIDAK dipakai
-     * untuk melengkapi kekurangannya agar sekolah dan jalur dari dua
-     * tautan berbeda tidak pernah tercampur.
-     */
     const adaParameterUrl =
       searchParams.has("sekolahId") ||
       searchParams.has("sekolah_id") ||
@@ -339,19 +307,11 @@ export default function PpdbForm({
     }
   }, [searchParams]);
 
-  // --------------------------------------------------------------------------
-  // RESOLVE SEKOLAH DARI SUBDOMAIN TENANT (ENDPOINT PUBLIK YANG TERSEDIA)
-  // --------------------------------------------------------------------------
   useEffect(() => {
     if (!tenantSubdomain || typeof window === "undefined") {
       return;
     }
 
-    /*
-     * Tunggu parameter selesai dibaca dan jangan menimpa tautan yang
-     * sudah ditandai tidak valid. Dengan begitu sekolahId dari URL yang
-     * salah tidak diam-diam diganti menjadi sekolah tenant.
-     */
     if (!parameterSiap || galatParameter) {
       return;
     }
@@ -401,7 +361,6 @@ export default function PpdbForm({
         try {
           sessionStorage.setItem(SESI_SEKOLAH, sekolah.id);
         } catch {
-          /* storage dapat diblokir browser */
         }
       } catch (error) {
         if (!aktif) {
@@ -439,9 +398,6 @@ export default function PpdbForm({
     setSubmitError("");
   };
 
-  // --------------------------------------------------------------------------
-  // VALIDASI (MENGIKUTI KONTRAK BACKEND, TIDAK MENGGANTIKANNYA)
-  // --------------------------------------------------------------------------
   const validateForm = () => {
     const newErrors = {};
 
@@ -633,7 +589,6 @@ export default function PpdbForm({
 
       sessionStorage.setItem(SESI_PENDAFTARAN, pendaftaranId);
 
-      // Nomor lama tidak boleh terbawa ke pendaftaran baru.
       if (nomorPendaftaran) {
         sessionStorage.setItem(SESI_NOMOR, nomorPendaftaran);
       } else {
@@ -663,14 +618,8 @@ export default function PpdbForm({
         })
       );
 
-      // Penanda lama tidak lagi dipakai sebagai bukti upload.
       sessionStorage.removeItem("ppdb_berkas_uploaded");
 
-      /*
-       * Bawa sekolahId/jalurPpdbId ke halaman berikutnya agar konteks
-       * pendaftaran tidak hilang bila pengguna kembali ke formulir.
-       * Halaman upload tetap memakai parameter `id` sebagai acuan utama.
-       */
       const queryUpload = new URLSearchParams({
         id: pendaftaranId,
         sekolahId,

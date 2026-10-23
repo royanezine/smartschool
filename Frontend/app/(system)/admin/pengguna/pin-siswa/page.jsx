@@ -150,9 +150,6 @@ function merupakanSiswa(siswa) {
   return !role || role === "siswa";
 }
 
-/* =====================================================
-   THEME HELPERS
-===================================================== */
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]";
@@ -166,9 +163,6 @@ const themeCardShadow =
 const themeHover =
   "hover:bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
 
-/* =====================================================
-   STAT CARD
-===================================================== */
 
 function StatCard({
   title,
@@ -223,9 +217,6 @@ function StatCard({
   );
 }
 
-/* =====================================================
-   PIN STATUS BADGE
-===================================================== */
 
 function PinStatusBadge({ status }) {
   const config =
@@ -262,9 +253,6 @@ function PinStatusBadge({ status }) {
   );
 }
 
-/* =====================================================
-   PAGE
-===================================================== */
 
 export default function PengaturanPinPage() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -283,9 +271,6 @@ export default function PengaturanPinPage() {
   const [roleDiizinkan, setRoleDiizinkan] = useState(false);
   const [siapPeriksaRole, setSiapPeriksaRole] = useState(false);
 
-  /* =====================================================
-     LOAD STUDENTS
-  ===================================================== */
 
   const muatSiswa = useCallback(async (refresh = false) => {
     setError("");
@@ -366,9 +351,6 @@ export default function PengaturanPinPage() {
     }
   }, []);
 
-  /* =====================================================
-     ACCESS CHECK
-  ===================================================== */
 
   useEffect(() => {
     try {
@@ -404,9 +386,6 @@ export default function PengaturanPinPage() {
     }
   }, [siapPeriksaRole, roleDiizinkan, muatSiswa]);
 
-  /* =====================================================
-     SEARCH
-  ===================================================== */
 
   const siswaTerfilter = useMemo(() => {
     const keyword = pencarian.trim().toLowerCase();
@@ -430,9 +409,6 @@ export default function PengaturanPinPage() {
     });
   }, [siswa, pencarian]);
 
-  /* =====================================================
-     STATISTICS
-  ===================================================== */
 
   const totalSudahAtur = siswa.filter(
     (item) => statusPinSiswa(item) === "Sudah diatur"
@@ -446,9 +422,6 @@ export default function PengaturanPinPage() {
     (item) => statusPinSiswa(item) === "Belum diketahui"
   ).length;
 
-  /* =====================================================
-     RESET PIN
-  ===================================================== */
 
   async function handleResetPin() {
     if (!siswaDipilih?.id && !siswaDipilih?.userId) {
@@ -502,9 +475,6 @@ export default function PengaturanPinPage() {
     }
   }
 
-  /* =====================================================
-     LOADING / ACCESS
-  ===================================================== */
 
   if (!siapPeriksaRole) {
     return (
@@ -542,9 +512,6 @@ export default function PengaturanPinPage() {
     );
   }
 
-  /* =====================================================
-     MAIN RENDER
-  ===================================================== */
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
@@ -563,7 +530,6 @@ export default function PengaturanPinPage() {
 
         <main className="flex-1 overflow-y-auto">
           <div className="space-y-5 p-4 sm:space-y-6 sm:p-6 lg:p-8">
-            {/* PAGE HEADER */}
 
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex items-center gap-3">
@@ -608,7 +574,6 @@ export default function PengaturanPinPage() {
               </button>
             </div>
 
-            {/* STATISTICS */}
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3 sm:gap-4">
               <StatCard
@@ -639,7 +604,6 @@ export default function PengaturanPinPage() {
               />
             </div>
 
-            {/* UNKNOWN STATUS */}
 
             {totalBelumDiketahui > 0 && (
               <div className="flex items-start gap-3 rounded-xl border theme-border theme-card p-4">
@@ -663,7 +627,6 @@ export default function PengaturanPinPage() {
               </div>
             )}
 
-            {/* ERROR */}
 
             {error && (
               <div className="flex items-start gap-3 rounded-xl border theme-danger p-4">
@@ -685,7 +648,6 @@ export default function PengaturanPinPage() {
               </div>
             )}
 
-            {/* SUCCESS */}
 
             {sukses && (
               <div className="flex items-start gap-3 rounded-xl border theme-success p-4">
@@ -704,7 +666,6 @@ export default function PengaturanPinPage() {
               </div>
             )}
 
-            {/* TABLE SECTION */}
 
             <section
               className={`theme-card overflow-hidden rounded-2xl border theme-border ${themeCardShadow}`}
@@ -750,7 +711,6 @@ export default function PengaturanPinPage() {
                 </div>
               </div>
 
-              {/* TABLE */}
 
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[850px] border-collapse text-sm">
@@ -921,7 +881,6 @@ export default function PengaturanPinPage() {
               </div>
             </section>
 
-            {/* SECURITY INFO */}
 
             <div
               className={`flex items-start gap-3 rounded-xl border ${themePrimarySoftBorder} ${themePrimarySoft} p-4`}
@@ -947,7 +906,6 @@ export default function PengaturanPinPage() {
         </main>
       </div>
 
-      {/* RESET CONFIRMATION MODAL */}
 
       {siswaDipilih && (
         <div

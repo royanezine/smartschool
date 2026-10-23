@@ -187,8 +187,6 @@ function applyCmsTheme(input) {
     return tema;
   }
 
-  // Terapkan setiap warna secara independen.
-  // Warna yang masih default tidak mengubah CSS Light/Dark Mode.
   for (const [key, variables] of Object.entries(CORE_MAP)) {
     const value = tema.tema[key];
     const defaultValue = DEFAULT_TEMA.tema[key];
@@ -218,7 +216,6 @@ function applyCmsTheme(input) {
     root.style.removeProperty("--school-primary-rgb");
   }
 
-  // Warna badge status.
   Object.entries(tema.badgeStatus).forEach(([key, value]) => {
     const variable = `--school-status-${key}`;
 
@@ -229,7 +226,6 @@ function applyCmsTheme(input) {
     }
   });
 
-  // Warna label role.
   Object.entries(tema.labelRole).forEach(([key, value]) => {
     const variable = `--school-role-${key}`;
 
@@ -240,7 +236,6 @@ function applyCmsTheme(input) {
     }
   });
 
-  // Warna shift kerja.
   Object.entries(tema.shiftKerja).forEach(([key, value]) => {
     const variable = `--school-shift-${key}`;
 
@@ -315,38 +310,26 @@ const refreshTema = useCallback(async () => {
       cache: "no-store",
     });
 
-    /* =====================================================
-       TOKEN EXPIRED / INVALID (401 / 403)
-       - Jangan throw (biar tidak jadi uncaught error)
-       - Bersihkan token
-       - Redirect ke login
-    ===================================================== */
 
     if (response.status === 401 || response.status === 403) {
       const result = await response.json().catch(() => null);
 
-      // Bersihkan token di semua key
       TOKEN_KEYS.forEach((key) => {
         try {
           window.localStorage.removeItem(key);
         } catch (e) {
-          /* ignore */
         }
       });
 
-      // Hapus cache tema (opsional, biar tidak nyangkut)
       try {
         window.localStorage.removeItem(THEME_CACHE_KEY);
       } catch (e) {
-        /* ignore */
       }
 
-      // Set error (bukan throw)
       setErrorTema(
         result?.message || "Sesi login telah berakhir. Silakan login ulang."
       );
 
-      // Redirect ke login (hindari loop jika sudah di /login)
       if (
         typeof window !== "undefined" &&
         window.location.pathname !== "/login"
@@ -357,14 +340,10 @@ const refreshTema = useCallback(async () => {
       return;
     }
 
-    /* =====================================================
-       ERROR LAIN (5xx, network, dsb)
-    ===================================================== */
 
     const result = await response.json().catch(() => null);
 
     if (!response.ok || result?.success === false) {
-      // Jangan throw — cukup log & set error
       console.warn(
         "[CMS THEME] Gagal ambil tema:",
         result?.message || response.statusText
@@ -377,9 +356,6 @@ const refreshTema = useCallback(async () => {
       return;
     }
 
-    /* =====================================================
-       SUKSES
-    ===================================================== */
 
     const normalized = normalizeTheme(result);
 
@@ -387,7 +363,6 @@ const refreshTema = useCallback(async () => {
     applyCmsTheme(normalized);
     saveThemeCache(normalized);
   } catch (error) {
-    // Error network / fetch abort — jangan bikin uncaught error
     console.warn("[CMS THEME] Network error:", error?.message);
 
     setErrorTema(

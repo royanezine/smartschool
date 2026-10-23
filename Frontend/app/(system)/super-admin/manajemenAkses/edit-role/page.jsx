@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { Suspense, useState, useEffect, useMemo } from "react";
+import { Suspense, useState, useEffect, useMemo, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import {
@@ -211,16 +211,13 @@ function EditRolePageContent() {
     };
   }, []);
 
-  useEffect(() => {
+  const loadData = useCallback(async () => {
     if (!roleId) {
       setLoading(false);
       setError("ID role tidak ditemukan.");
       return;
     }
-    loadData();
-  }, [roleId]);
 
-  const loadData = async () => {
     try {
       setLoading(true);
       setError("");
@@ -259,7 +256,15 @@ function EditRolePageContent() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [roleId]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      loadData();
+    }, 0);
+
+    return () => clearTimeout(timer);
+  }, [loadData]);
 
   const jumlahPengguna = roleListData?._count?.pengguna || 0;
 
@@ -358,8 +363,27 @@ function EditRolePageContent() {
 
   const validasi = () => {
     const errorBaru = {};
-    if (!form.nama.trim()) errorBaru.nama = "Nama peran wajib diisi.";
-    if (!form.namaTampilan.trim()) errorBaru.namaTampilan = "Nama tampilan wajib diisi.";
+    const namaBersih = form.nama.trim();
+    if (!namaBersih) {
+      errorBaru.nama = "Nama peran wajib diisi.";
+    } else if (namaBersih.length < 3) {
+      errorBaru.nama = "Nama peran minimal 3 karakter.";
+    } else if (namaBersih.length > 50) {
+      errorBaru.nama = "Nama peran maksimal 50 karakter.";
+    } else if (!/^[a-z_]+$/.test(namaBersih)) {
+      errorBaru.nama =
+        "Nama hanya boleh memakai huruf kecil dan underscore (contoh: staf_sarpras).";
+    }
+
+    const namaTampilanBersih = form.namaTampilan.trim();
+    if (!namaTampilanBersih) {
+      errorBaru.namaTampilan = "Nama tampilan wajib diisi.";
+    } else if (namaTampilanBersih.length < 3) {
+      errorBaru.namaTampilan = "Nama tampilan minimal 3 karakter.";
+    } else if (namaTampilanBersih.length > 100) {
+      errorBaru.namaTampilan = "Nama tampilan maksimal 100 karakter.";
+    }
+
     setErrors(errorBaru);
     return Object.keys(errorBaru).length === 0;
   };
@@ -376,12 +400,17 @@ function EditRolePageContent() {
       setError("");
       setSaved(false);
 
+      const deskripsi = form.deskripsi.trim();
+
       const payload = {
         nama: form.nama.trim(),
         namaTampilan: form.namaTampilan.trim(),
-        deskripsi: form.deskripsi.trim() || null,
         izinIds: Array.from(selectedPermissions),
       };
+
+      if (deskripsi) {
+        payload.deskripsi = deskripsi;
+      }
 
       await updateRole(roleId, payload);
       setSaved(true);
@@ -446,10 +475,8 @@ function EditRolePageContent() {
   }
 
   return (
-    // 1. Kunci tinggi layar murni, tanpa overflow, biarkan sistem layout utama yang mengatur
     <div className="theme-page theme-text flex min-h-screen">
       
-      {/* 2. Area konten kanan: Gunakan flex-1 dan biarkan scroll di handle body utama aplikasi */}
       <main className="flex-1 w-full px-3 py-4 sm:px-5 sm:py-5 lg:px-7 lg:py-7 xl:px-8">
         <div className="mx-auto w-full max-w-[1500px] space-y-5 lg:space-y-6">
           
@@ -629,6 +656,12 @@ function EditRolePageContent() {
                     placeholder="Jelaskan tanggung jawab dan cakupan akses peran ini..."
                     className="theme-input theme-text theme-focus w-full resize-none rounded-xl border px-3 py-3 text-sm leading-6 outline-none transition-all placeholder:theme-text-placeholder theme-border"
                   />
+                  {role?.deskripsi && !form.deskripsi.trim() && (
+                    <p className="mt-1.5 flex items-start gap-1 text-xs leading-5 text-[var(--color-warning)]">
+                      <AlertCircle size={12} className="mt-0.5 shrink-0" />
+                      Mengosongkan kolom ini tidak menghapus deskripsi lama. Backend belum mendukung penghapusan deskripsi, jadi deskripsi yang sudah ada akan dipertahankan.
+                    </p>
+                  )}
                 </div>
 
                 <div className={`rounded-xl border ${themeInfoBorder} ${themeInfoSurface} p-4`}>

@@ -1,35 +1,28 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { AlertCircle, RefreshCw } from "lucide-react";
 
-import { getSession, getRoleHome, clearSession, subscribeAuth } from "@/lib/auth";
+import {
+  getRoleHome,
+  clearSession,
+  subscribeAuth,
+  verifySessionProfile,
+  getAuthRole,
+} from "@/lib/auth";
 
-/*
- * ============================================================
- * AUTH GUARD
- * ============================================================
- *
- * Penjaga sesi + role untuk area terproteksi.
- *
- * - Wajib ada token dan user sesi yang valid.
- * - Role diambil dari token (sumber kebenaran), bukan dari URL.
- * - Bila role sesi tidak diizinkan untuk area ini, pengguna
- *   dikembalikan ke beranda role-nya sendiri.
- * - Sinkron antar-tab: perubahan token/user pada tab lain
- *   otomatis memicu pemeriksaan ulang.
- *
- * Set `NEXT_PUBLIC_SKIP_AUTH_GUARD=true` untuk melewati guard.
- */
 
 export default function AuthGuard({ allowedRoles = [], children }) {
   const router = useRouter();
 
-  // Dibaca sekali (env variable di-inline saat build).
-  const skipGuard =
-    process.env.NEXT_PUBLIC_SKIP_AUTH_GUARD === "true";
+  const skipGuard = process.env.NEXT_PUBLIC_SKIP_AUTH_GUARD === "true";
 
   const [checked, setChecked] = useState(skipGuard);
+  const [tempError, setTempError] = useState(null);
+  const [isRetrying, setIsRetrying] = useState(false);
+
+  const isRedirectingRef = useRef(false);
 
   const allowedKey = useMemo(
     () =>
@@ -39,74 +32,143 @@ export default function AuthGuard({ allowedRoles = [], children }) {
     [allowedRoles]
   );
 
+  const verify = useCallback(
+    async (force = false) => {
+      if (skipGuard || isRedirectingRef.current) {
+        return;
+      }
+
+      const allowed = allowedKey
+        ? allowedKey.split(",").filter(Boolean)
+        : [];
+
+      const result = await verifySessionProfile(force);
+
+      if (result.valid) {
+        const role = result.role || getAuthRole();
+
+        if (allowed.length > 0 && role && !allowed.includes(role)) {
+          const home = getRoleHome(role);
+
+          if (!home || home === "/login") {
+            setTempError(null);
+            setChecked(true);
+            return;
+          }
+
+          if (!isRedirectingRef.current) {
+            isRedirectingRef.current = true;
+            router.replace(home);
+          }
+          return;
+        }
+
+        setTempError(null);
+        setChecked(true);
+        return;
+      }
+
+      if (result.isTemporaryError) {
+        setTempError({
+          message: result.message,
+          status: result.status,
+          isNetwork: result.isNetworkError,
+        });
+        setChecked(false);
+        return;
+      }
+
+      clearSession();
+
+      if (!isRedirectingRef.current) {
+        isRedirectingRef.current = true;
+        const isExpired =
+          result.reason === "TOKEN_EXPIRED" ||
+          result.reason === "UNAUTHORIZED";
+        router.replace(isExpired ? "/login?sessionExpired=1" : "/login");
+      }
+    },
+    [allowedKey, router, skipGuard]
+  );
+
   useEffect(() => {
     if (skipGuard) {
       return;
     }
 
-    const allowed = allowedKey
-      ? allowedKey.split(",").filter(Boolean)
-      : [];
+    let active = true;
 
-    let cancelled = false;
-
-    const verify = () => {
-      const session = getSession();
-
-      // 1. Tidak ada sesi -> kembali ke login.
-      if (!session || !session.token) {
-        router.replace("/login");
-        return;
+    const timer = setTimeout(() => {
+      if (active) {
+        verify(false);
       }
+    }, 0);
 
-      // 2. Token tanpa role yang dikenali -> jangan menebak role.
-      if (!session.role) {
-        clearSession();
-        router.replace("/login");
-        return;
+    const unsubscribe = subscribeAuth(() => {
+      if (active) {
+        verify(false);
       }
-
-      // 3. Role sesi bukan untuk area ini.
-      if (
-        allowed.length > 0 &&
-        !allowed.includes(session.role)
-      ) {
-        const home = getRoleHome(session.role);
-
-        // Role di luar peta yang dikenali (mis. role kustom yang dibuat
-        // lewat manajemen akses): jangan menebak dan jangan mengunci
-        // pengguna. Backend tetap menegakkan izin per-endpoint.
-        if (!home || home === "/login") {
-          if (!cancelled) {
-            setChecked(true);
-          }
-
-          return;
-        }
-
-        // Sesi milik role lain -> kembalikan ke beranda role tersebut.
-        router.replace(home);
-        return;
-      }
-
-      if (!cancelled) {
-        setChecked(true);
-      }
-    };
-
-    verify();
-
-    // Perilaku antar-tab dinyatakan eksplisit: sesi produksi dibagi satu
-    // browser (localStorage). `subscribeAuth` memicu `verify` baik saat
-    // sesi berubah di tab ini maupun di tab lain, sehingga guard selalu
-    // menilai token yang aktif dan tidak tertinggal identitas lama.
-    const unsubscribe = subscribeAuth(verify);
+    });
 
     return () => {
-      cancelled = true;
+      active = false;
+      clearTimeout(timer);
       unsubscribe();
     };
-  }, [router, allowedKey, skipGuard]);
+  }, [skipGuard, verify]);
+
+  const handleRetry = async () => {
+    setIsRetrying(true);
+    await verify(true);
+    setIsRetrying(false);
+  };
+
+  if (tempError) {
+    return (
+      <div className="theme-page flex h-screen w-full items-center justify-center p-4">
+        <div className="theme-card theme-border w-full max-w-md rounded-2xl border p-6 text-center shadow-lg">
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-amber-50 text-amber-600 dark:bg-amber-950/50 dark:text-amber-400">
+            <AlertCircle size={24} />
+          </div>
+
+          <h2 className="theme-text text-base font-bold">
+            Gangguan Koneksi atau Server
+          </h2>
+
+          <p className="theme-text-muted mt-2 text-xs leading-5">
+            {tempError.message ||
+              "Tidak dapat memverifikasi sesi karena server sedang mengalami gangguan sementara atau koneksi terputus. Sesi login Anda tetap tersimpan."}
+          </p>
+
+          <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:justify-center">
+            <button
+              type="button"
+              onClick={handleRetry}
+              disabled={isRetrying}
+              className="theme-primary inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-xs font-semibold text-white hover:opacity-90 transition disabled:opacity-60"
+            >
+              <RefreshCw
+                size={14}
+                className={isRetrying ? "animate-spin" : ""}
+              />
+              {isRetrying ? "Memeriksa..." : "Coba Lagi"}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                isRedirectingRef.current = true;
+                router.replace("/login");
+              }}
+              className="theme-card theme-border theme-text-secondary inline-flex items-center justify-center gap-2 rounded-xl border px-4 py-2.5 text-xs font-semibold hover:bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)] transition"
+            >
+              Ke Halaman Login
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!checked) {
     return (

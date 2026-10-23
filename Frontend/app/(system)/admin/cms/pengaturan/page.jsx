@@ -69,7 +69,6 @@ export default function PengaturanPage() {
       />
 
       <div className="flex-1 min-w-0 flex flex-col">
-        {/* ===== HEADER ===== */}
         <Header
           title="Pengaturan CMS"
           user={{
@@ -82,7 +81,6 @@ export default function PengaturanPage() {
 
         <main className="flex-1 min-w-0 overflow-y-auto p-4 md:p-6 lg:p-8 theme-page">
           <div className="w-full min-w-0 max-w-6xl mx-auto space-y-7">
-            {/* Breadcrumb */}
             <nav className="flex items-center gap-2 text-sm">
               <a
                 href="/admin/cms"
@@ -98,7 +96,6 @@ export default function PengaturanPage() {
               </span>
             </nav>
 
-            {/* Header */}
             <div className="flex items-start gap-4">
               <div className="shrink-0 p-3 rounded-xl theme-info border">
                 <Settings className="w-6 h-6" />
@@ -116,7 +113,6 @@ export default function PengaturanPage() {
               </div>
             </div>
 
-            {/* Ringkasan */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {menuItems.map((item) => {
                 const Icon = item.icon;
@@ -162,7 +158,6 @@ export default function PengaturanPage() {
               })}
             </div>
 
-            {/* Kartu Pengaturan Utama */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {menuItems.map((item) => {
                 const Icon = item.icon;
@@ -230,7 +225,6 @@ export default function PengaturanPage() {
               })}
             </div>
 
-            {/* Tips */}
             <div className="theme-info border rounded-xl p-5 flex items-start gap-4">
               <div
                 className="
@@ -263,7 +257,6 @@ export default function PengaturanPage() {
               </div>
             </div>
 
-            {/* Footer */}
             <footer className="pt-4 border-t theme-border text-center text-xs theme-text-muted">
               © 2026 SmartSchool CMS • Pengaturan
             </footer>

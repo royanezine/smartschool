@@ -1,8 +1,5 @@
 import { apiFetch } from "../lib/api";
 
-// ============================================================
-// TYPES
-// ============================================================
 
 export type SiklusPenagihan = "monthly" | "annual";
 
@@ -20,11 +17,6 @@ export interface CreatePaymentData {
 }
 
 export interface CreatePaymentResult {
-  /**
-   * Backend saat ini TIDAK mengembalikan order_id pada respons
-   * POST /api/langganan/sekolah/bayar. Nilai ini opsional dan bisa
-   * diresolusi dari endpoint /pending (lihat getPendingPayments).
-   */
   order_id?: string | null;
   payment_url: string | null;
   token?: string | null;
@@ -89,9 +81,6 @@ export interface PaymentStatusData {
   paket?: PaketRingkas | null;
 }
 
-// ============================================================
-// NORMALIZERS
-// ============================================================
 
 function unwrapData(response: any) {
   if (response && typeof response === "object" && "data" in response) {
@@ -163,11 +152,6 @@ function normalizeRiwayat(item: any): RiwayatPembayaranData {
   };
 }
 
-/**
- * Memetakan status pembayaran pada tabel langganan_sekolah
- * (pending | success | expired) ke status transaksi
- * (pending | success | failed) yang dipakai UI.
- */
 export function mapStatusPembayaran(
   status?: string | null
 ): "pending" | "success" | "failed" {
@@ -184,10 +168,6 @@ export function mapStatusPembayaran(
   }
 }
 
-/**
- * Menyusun satu baris riwayat/transaksi dari data langganan sekolah.
- * Dipakai karena backend tidak memiliki endpoint riwayat pembayaran.
- */
 function toRiwayatFromLangganan(
   item: LanggananData
 ): RiwayatPembayaranData {
@@ -225,10 +205,6 @@ function toArray(response: any): any[] {
   return [];
 }
 
-// ============================================================
-// CREATE PAYMENT (Pembelian paket baru)
-// POST /api/langganan/sekolah/bayar
-// ============================================================
 
 export async function createPayment(
   data: CreatePaymentData
@@ -254,9 +230,6 @@ export async function createPayment(
 
   const payload = unwrapData(response) ?? {};
 
-  // Backend (POST /api/langganan/sekolah/bayar) hanya mengembalikan
-  // { payment_url, token }. Tautan pembayaran adalah artefak yang
-  // benar-benar dibutuhkan untuk melanjutkan transaksi.
   const paymentUrl = payload.payment_url ?? null;
 
   if (!paymentUrl) {
@@ -278,10 +251,6 @@ export async function createPayment(
   };
 }
 
-// ============================================================
-// EXTEND SUBSCRIPTION (Perpanjangan)
-// POST /api/langganan/sekolah/perpanjang
-// ============================================================
 
 export async function extendSubscription(
   data: CreatePaymentData
@@ -307,8 +276,6 @@ export async function extendSubscription(
 
   const payload = unwrapData(response) ?? {};
 
-  // Backend (POST /api/langganan/sekolah/perpanjang) hanya
-  // mengembalikan { payment_url, token, langganan, pembayaran, ... }.
   const paymentUrl = payload.payment_url ?? null;
 
   if (!paymentUrl) {
@@ -341,10 +308,6 @@ export async function extendSubscription(
   };
 }
 
-// ============================================================
-// GET PENDING PAYMENTS
-// GET /api/langganan/sekolah/pending
-// ============================================================
 
 export async function getPendingPayments(): Promise<
   RiwayatPembayaranData[]
@@ -357,13 +320,6 @@ export async function getPendingPayments(): Promise<
   return toArray(response).map(normalizeRiwayat);
 }
 
-// ============================================================
-// GET RIWAYAT PEMBAYARAN (semua transaksi sekolah)
-//
-// CATATAN: Backend tidak menyediakan GET /api/langganan/sekolah/riwayat.
-// Data riwayat diturunkan dari endpoint yang benar-benar tersedia:
-//   GET /api/langganan/sekolah  (satu baris per transaksi langganan)
-// ============================================================
 
 export async function getRiwayatPembayaran(): Promise<
   RiwayatPembayaranData[]
@@ -373,10 +329,6 @@ export async function getRiwayatPembayaran(): Promise<
   return langganan.map(toRiwayatFromLangganan);
 }
 
-// ============================================================
-// GET ALL LANGGANAN
-// GET /api/langganan/sekolah
-// ============================================================
 
 export async function getAllLangganan(): Promise<LanggananData[]> {
   const response = await apiFetch("/api/langganan/sekolah", {
@@ -387,17 +339,6 @@ export async function getAllLangganan(): Promise<LanggananData[]> {
   return toArray(response).map(normalizeLangganan);
 }
 
-// ============================================================
-// GET PAYMENT STATUS
-//
-// CATATAN: Backend tidak menyediakan
-// GET /api/langganan/sekolah/status/:orderId. Status transaksi
-// diresolusi dari endpoint yang benar-benar tersedia:
-//   1. GET /api/langganan/sekolah/pending  (transaksi yang masih pending)
-//   2. GET /api/langganan/sekolah          (status pembayaran tersimpan)
-// Verifikasi pembayaran sebenarnya terjadi lewat webhook Midtrans
-// yang memperbarui database di backend.
-// ============================================================
 
 export async function getPaymentStatus(
   orderId: string
@@ -406,7 +347,6 @@ export async function getPaymentStatus(
     throw new Error("Order ID tidak ditemukan.");
   }
 
-  // 1. Coba dari daftar pembayaran pending.
   try {
     const pending = await getPendingPayments();
     const pembayaran = pending.find(
@@ -419,10 +359,8 @@ export async function getPaymentStatus(
       return buildStatusFromRiwayat(pembayaran);
     }
   } catch {
-    // Endpoint pending bisa ditolak izin/tenant; lanjut ke sumber berikutnya.
   }
 
-  // 2. Coba dari data langganan sekolah.
   try {
     const langganan = await getAllLangganan();
     const cocok = langganan.find(
@@ -433,7 +371,6 @@ export async function getPaymentStatus(
       return buildStatusFromLangganan(cocok);
     }
   } catch {
-    // Abaikan, lempar error di bawah.
   }
 
   throw new Error("Status pembayaran tidak ditemukan.");
@@ -487,9 +424,6 @@ function buildStatusFromLangganan(
   };
 }
 
-// ============================================================
-// HELPERS
-// ============================================================
 
 export function findActiveLangganan(
   list: LanggananData[]
@@ -504,7 +438,6 @@ export function findActiveLangganan(
   );
 
   if (aktif.length === 0) {
-    // Fallback: langganan aktif terbaru walaupun periode belum terisi.
     return (
       list.find((item) => item.statusLangganan === "active") ?? null
     );

@@ -27,9 +27,6 @@ import {
   Info,
 } from "lucide-react";
 
-/* =========================================================
-   HELPERS
-========================================================= */
 
 function formatRupiah(value) {
   return new Intl.NumberFormat("id-ID", {
@@ -59,9 +56,6 @@ function getErrorMessage(error) {
     : "Terjadi kesalahan. Silakan coba kembali.";
 }
 
-/* =========================================================
-   KOMPONEN
-========================================================= */
 
 const inputClass =
   "theme-input w-full rounded-xl border px-3.5 py-2.5 text-sm outline-none transition disabled:cursor-not-allowed disabled:opacity-60";
@@ -107,9 +101,6 @@ function InfoRow({ label, value, icon: Icon }) {
   );
 }
 
-/* =========================================================
-   HALAMAN DETAIL
-========================================================= */
 
 export default function DetailKategoriJabatanPage() {
   const params = useParams();
@@ -123,7 +114,6 @@ export default function DetailKategoriJabatanPage() {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
 
-  // Form tambah tarif (inline, bukan modal)
   const [showTarifForm, setShowTarifForm] = useState(false);
   const [tarifForm, setTarifForm] = useState({
     tarifPerJam: "",
@@ -225,9 +215,6 @@ export default function DetailKategoriJabatanPage() {
         <main className="min-w-0 flex-1 overflow-y-auto theme-page theme-text">
           <div className="w-full px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
             <div className="mx-auto w-full max-w-5xl space-y-6">
-              {/* ============================================
-                  PAGE HEADER
-              ============================================ */}
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div className="flex items-start gap-3">
                   <button
@@ -292,9 +279,6 @@ export default function DetailKategoriJabatanPage() {
                 </div>
               </div>
 
-              {/* ============================================
-                  NOTICE
-              ============================================ */}
               {notice && (
                 <div
                   role="status"
@@ -313,9 +297,6 @@ export default function DetailKategoriJabatanPage() {
                 </div>
               )}
 
-              {/* ============================================
-                  ERROR
-              ============================================ */}
               {error && (
                 <div
                   role="alert"
@@ -337,9 +318,6 @@ export default function DetailKategoriJabatanPage() {
                 </div>
               )}
 
-              {/* ============================================
-                  LOADING / NOT FOUND / DETAIL
-              ============================================ */}
               {loading ? (
                 <div className="flex min-h-[300px] flex-col items-center justify-center gap-3 theme-card rounded-xl border theme-border">
                   <LoaderCircle
@@ -377,9 +355,6 @@ export default function DetailKategoriJabatanPage() {
                 </div>
               ) : (
                 <>
-                  {/* ============================================
-                      KARTU IDENTITAS
-                  ============================================ */}
                   <section className="theme-card overflow-hidden rounded-xl border theme-border shadow-sm">
                     <div className="flex flex-col justify-between gap-3 border-b theme-border p-5 sm:flex-row sm:items-start sm:p-6">
                       <div className="flex items-start gap-4">
@@ -443,9 +418,6 @@ export default function DetailKategoriJabatanPage() {
                     </div>
                   </section>
 
-                  {/* ============================================
-                      INFORMASI DETAIL
-                  ============================================ */}
                   <section className="theme-card overflow-hidden rounded-xl border theme-border shadow-sm">
                     <div className="border-b theme-border p-5 sm:p-6">
                       <div className="flex items-center gap-3">
@@ -486,9 +458,6 @@ export default function DetailKategoriJabatanPage() {
                     </div>
                   </section>
 
-                  {/* ============================================
-                      RIWAYAT TARIF
-                  ============================================ */}
                   <section className="theme-card overflow-hidden rounded-xl border theme-border shadow-sm">
                     <div className="flex flex-col justify-between gap-3 border-b theme-border p-5 sm:flex-row sm:items-center sm:p-6">
                       <div className="flex items-center gap-3">
@@ -515,7 +484,6 @@ export default function DetailKategoriJabatanPage() {
                       </button>
                     </div>
 
-                    {/* FORM TAMBAH TARIF INLINE */}
                     {showTarifForm && (
                       <div className="border-b theme-border bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] p-5 sm:p-6">
                         <form
@@ -615,7 +583,6 @@ export default function DetailKategoriJabatanPage() {
                       </div>
                     )}
 
-                    {/* TABEL RIWAYAT */}
                     <div className="p-5 sm:p-6">
                       {!item.tarifRiwayat?.length ? (
                         <div className="rounded-lg border border-dashed theme-border p-8 text-center text-sm theme-text-muted">
@@ -680,9 +647,6 @@ export default function DetailKategoriJabatanPage() {
                     </div>
                   </section>
 
-                  {/* ============================================
-                      INFO
-                  ============================================ */}
                   <div className="flex items-start gap-2 rounded-lg border border-blue-200 bg-blue-50/70 p-4 text-sm text-blue-900 dark:border-blue-900/60 dark:bg-blue-950/30 dark:text-blue-200">
                     <Info size={18} className="mt-0.5 shrink-0" />
                     <p className="leading-6">

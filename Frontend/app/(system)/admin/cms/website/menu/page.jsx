@@ -1,4 +1,3 @@
-// app/cmsAdmin/website/menu/page.jsx
 "use client";
 
 import { useState } from "react";
@@ -23,9 +22,6 @@ import {
   XCircle,
 } from "lucide-react";
 
-// =========================================================
-// DUMMY DATA MENU
-// =========================================================
 const dummyMenus = [
   {
     id: 1,
@@ -120,7 +116,6 @@ export default function MenuPage() {
 
   return (
     <div className="theme-page flex min-h-screen w-full">
-      {/* SIDEBAR */}
       <Sidebar
         active={active}
         setActive={setActive}
@@ -128,7 +123,6 @@ export default function MenuPage() {
         setCollapsed={setCollapsed}
       />
 
-      {/* MAIN AREA */}
       <div className="flex-1 min-w-0 flex flex-col">
         <Header
           title="Menu Website"
@@ -138,7 +132,6 @@ export default function MenuPage() {
 
         <main className="theme-page flex-1 min-w-0 overflow-y-auto p-4 md:p-6 lg:p-8">
           <div className="w-full min-w-0 space-y-6">
-            {/* BREADCRUMB */}
             <nav
               className="
                 flex
@@ -179,7 +172,6 @@ export default function MenuPage() {
               </span>
             </nav>
 
-            {/* PAGE HEADER */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div className="flex items-center gap-3 min-w-0">
                 <div
@@ -259,7 +251,6 @@ export default function MenuPage() {
               </div>
             </div>
 
-            {/* STATISTIK */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
               <StatCard
                 icon={<List className="w-5 h-5" />}
@@ -294,7 +285,6 @@ export default function MenuPage() {
               />
             </div>
 
-            {/* SEARCH & FILTER */}
             <div
               className="
                 flex
@@ -387,7 +377,6 @@ export default function MenuPage() {
               </button>
             </div>
 
-            {/* MENU LIST - TABEL */}
             <div
               className="
                 theme-card
@@ -658,7 +647,6 @@ export default function MenuPage() {
               </div>
             </div>
 
-            {/* TIPS */}
             <div
               className="
                 theme-info
@@ -709,7 +697,6 @@ export default function MenuPage() {
               </div>
             </div>
 
-            {/* FOOTER */}
             <div
               className="
                 pt-4
@@ -729,9 +716,6 @@ export default function MenuPage() {
   );
 }
 
-/* =========================================================
-   STAT CARD
-========================================================= */
 function StatCard({
   icon,
   iconBg,

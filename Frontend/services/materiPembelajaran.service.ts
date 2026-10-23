@@ -67,9 +67,6 @@ export interface MateriPembelajaran {
 }
 
 
-/* =========================================================
-   KELAS MAPEL
-========================================================= */
 
 export interface KelasMapel {
   id: string;
@@ -105,9 +102,6 @@ export interface KelasMapel {
 }
 
 
-/* =========================================================
-   CREATE DATA
-========================================================= */
 
 export interface MateriCreateData {
   kelasMapelId: string;
@@ -122,9 +116,6 @@ export interface MateriCreateData {
 }
 
 
-/* =========================================================
-   UPDATE DATA
-========================================================= */
 
 export interface MateriUpdateData {
   kelasMapelId: string;
@@ -179,6 +170,7 @@ function getToken(): string | null {
 
   for (const key of tokenKeys) {
     const value =
+      sessionStorage.getItem(key) ||
       localStorage.getItem(key);
 
     if (value && value.trim()) {
@@ -236,9 +228,6 @@ async function parseResponse(
     }
   );
 
-  /*
-    Kalau response kosong.
-  */
   if (!rawText.trim()) {
     return null;
   }
@@ -377,10 +366,6 @@ async function request<T>(
       options.headers
     );
 
-  /*
-    Content-Type JSON hanya jika
-    body bukan FormData.
-  */
   if (
     options.body &&
     !(options.body instanceof FormData) &&
@@ -476,13 +461,6 @@ async function requestFormData<T>(
     );
   }
 
-  /*
-    Jangan set Content-Type manual.
-
-    Browser akan otomatis membuat:
-    multipart/form-data;
-    boundary=...
-  */
   const headers =
     new Headers();
 
@@ -706,9 +684,6 @@ export async function createMateriDenganFile(
     );
   }
 
-  /*
-    Backend menerima maksimal 100 MB.
-  */
   const maxSize =
     100 * 1024 * 1024;
 
@@ -722,10 +697,6 @@ export async function createMateriDenganFile(
     );
   }
 
-  /*
-    Sama dengan fileFilter
-    di backend.
-  */
   const allowedMimeTypes = [
     "application/pdf",
 
@@ -1118,9 +1089,6 @@ export async function updateMateriTanpaSumber(
 }
 
 
-/* =========================================================
-   DELETE MATERI
-========================================================= */
 
 export async function deleteMateriPembelajaran(
   id: string

@@ -29,9 +29,6 @@ function VerifyRegisterPageContent() {
 
   const [countdown, setCountdown] = useState(0);
 
-  // ==========================================
-  // AMBIL EMAIL DARI URL
-  // ==========================================
   useEffect(() => {
     const emailFromUrl = searchParams.get("email");
 
@@ -41,10 +38,6 @@ function VerifyRegisterPageContent() {
       return;
     }
 
-    // Halaman register mengarah ke sini tanpa query string. Ambil email
-    // pendaftaran dari sessionStorage tab ini (di-set halaman register
-    // setelah pendaftaran berhasil) agar verifikasi OTP dapat dilanjutkan
-    // tanpa memakai identitas/sesi akun lain.
     try {
       const savedEmail = sessionStorage.getItem("register_email");
 
@@ -52,16 +45,11 @@ function VerifyRegisterPageContent() {
         setEmail(savedEmail);
       }
     } catch {
-      /* sessionStorage bisa diblokir; pengguna masih dapat mengisi manual */
     }
   }, [searchParams]);
 
-  // Request ID untuk mencegah response API lama menimpa sesi baru.
   const requestIdRef = useRef(0);
 
-  // ==========================================
-  // COUNTDOWN KIRIM ULANG OTP
-  // ==========================================
   useEffect(() => {
     if (countdown <= 0) return;
 
@@ -72,9 +60,6 @@ function VerifyRegisterPageContent() {
     return () => clearInterval(timer);
   }, [countdown]);
 
-  // ==========================================
-  // VERIFIKASI OTP
-  // ==========================================
   const handleVerify = async (e) => {
     e.preventDefault();
 
@@ -99,7 +84,6 @@ function VerifyRegisterPageContent() {
     try {
       setLoading(true);
 
-      // Increment request ID untuk membatalkan response sebelumnya
       const currentRequestId = ++requestIdRef.current;
 
       const API_URL =
@@ -129,7 +113,6 @@ function VerifyRegisterPageContent() {
         );
       }
 
-      // Abaikan response ini jika request baru sudah dimulai
       if (currentRequestId !== requestIdRef.current) {
         return;
       }
@@ -140,9 +123,6 @@ function VerifyRegisterPageContent() {
         );
       }
 
-      // ==========================================
-      // SISWA BELUM MEMILIKI PIN
-      // ==========================================
       if (result?.requiresPinSetup === true) {
         if (!result.setupToken) {
           throw new Error(
@@ -150,9 +130,6 @@ function VerifyRegisterPageContent() {
           );
         }
 
-        // Simpan token setup PIN tanpa menghapus sesi aktif.
-        // Jika user sudah login dengan akun lain, sesi tersebut tetap terjaga
-        // hingga PIN berhasil dibuat dan token akses diterima.
         sessionStorage.setItem(
           "pin_setup_token",
           result.setupToken
@@ -170,13 +147,9 @@ function VerifyRegisterPageContent() {
         return;
       }
 
-      // ==========================================
-      // SIMPAN SESI (TOKEN + IDENTITAS) SECARA ATOMIK
-      // ==========================================
       let sessionHome = "/login";
 
       if (result?.token) {
-        // Satu sumber kebenaran: token + user dari respons autentikasi.
         const sessionUser = setSession(
           result.token,
           result.user ?? null
@@ -184,18 +157,14 @@ function VerifyRegisterPageContent() {
 
         sessionHome = getRoleHome(sessionUser?.role) || "/login";
       } else {
-        // Tanpa token: jangan menghapus sesi yang sudah ada (mis. user
-        // sedang login dengan akun lain). Biarkan sesi aktif tetap terjaga.
         console.warn(
           "[AUTH] Verifikasi register berhasil tetapi tidak mengembalikan token."
         );
       }
 
-      // Email pendaftaran sudah tidak diperlukan setelah verifikasi.
       try {
         sessionStorage.removeItem("register_email");
       } catch {
-        /* abaikan */
       }
 
       setSuccess(
@@ -203,9 +172,6 @@ function VerifyRegisterPageContent() {
           "Verifikasi berhasil. Akun Anda sudah aktif."
       );
 
-      // ==========================================
-      // REDIRECT
-      // ==========================================
       setTimeout(() => {
         router.replace(sessionHome);
       }, 1500);
@@ -222,9 +188,6 @@ function VerifyRegisterPageContent() {
     }
   };
 
-  // ==========================================
-  // KIRIM ULANG OTP
-  // ==========================================
   const handleResendOtp = async () => {
     if (!email) {
       setError("Email tidak ditemukan.");
@@ -241,13 +204,6 @@ function VerifyRegisterPageContent() {
     try {
       setResendLoading(true);
 
-      /*
-       * Backend saat ini belum menyediakan endpoint
-       * khusus untuk resend OTP.
-       *
-       * Karena itu jangan memanggil endpoint palsu
-       * dari frontend.
-       */
 
       setError(
         "Untuk mengirim ulang OTP, fitur resend OTP belum tersedia."
@@ -265,18 +221,12 @@ function VerifyRegisterPageContent() {
     }
   };
 
-  // ==========================================
-  // KEMBALI KE LOGIN
-  // ==========================================
   const handleBackToLogin = () => {
     router.push("/login");
   };
 
   return (
     <main className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* ==========================================
-          BACKGROUND
-      ========================================== */}
       <Image
         src="/hero/hero.png"
         alt="Smart School"
@@ -285,7 +235,6 @@ function VerifyRegisterPageContent() {
         className="object-cover"
       />
 
-      {/* Overlay */}
       <div
         className="absolute inset-0"
         style={{
@@ -294,19 +243,11 @@ function VerifyRegisterPageContent() {
         }}
       />
 
-      {/* Top accent */}
       <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-400 via-blue-600 to-blue-400" />
 
-      {/* ==========================================
-          CONTENT
-      ========================================== */}
       <div className="relative z-10 w-full max-w-6xl mx-auto px-6 py-10">
         <div className="grid lg:grid-cols-2 items-center gap-10">
-          {/* ======================================
-              LEFT CONTENT
-          ====================================== */}
           <div className="hidden lg:block">
-            {/* Logo */}
             <div className="flex items-center gap-2 mb-6">
               <div className="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center shadow-md">
                 <GraduationCap
@@ -323,7 +264,6 @@ function VerifyRegisterPageContent() {
               </span>
             </div>
 
-            {/* Heading */}
             <h1 className="text-4xl font-extrabold leading-tight text-slate-900">
               Verifikasi Akun
               <br />
@@ -332,14 +272,12 @@ function VerifyRegisterPageContent() {
               </span>
             </h1>
 
-            {/* Description */}
             <p className="mt-4 text-gray-600 leading-6 text-sm max-w-md">
               Satu langkah lagi untuk mengaktifkan akun
               Smart School Anda. Masukkan kode OTP yang
               telah dikirimkan ke email Anda.
             </p>
 
-            {/* Features */}
             <div className="mt-6 flex flex-wrap gap-2">
               <div className="flex items-center gap-1.5 bg-white/70 backdrop-blur-sm border border-white/80 rounded-lg px-3 py-1.5">
                 <ShieldCheck
@@ -376,12 +314,8 @@ function VerifyRegisterPageContent() {
             </div>
           </div>
 
-          {/* ======================================
-              VERIFY CARD
-          ====================================== */}
           <div className="lg:justify-self-end w-full max-w-sm">
             <div className="bg-white rounded-2xl shadow-xl p-6">
-              {/* Header */}
               <div className="flex flex-col items-center text-center mb-5">
                 <div className="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center mb-3 shadow-md">
                   <ShieldCheck
@@ -399,7 +333,6 @@ function VerifyRegisterPageContent() {
                 </p>
               </div>
 
-              {/* Error */}
               {error && (
                 <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5">
                   <p className="text-xs text-red-600">
@@ -408,7 +341,6 @@ function VerifyRegisterPageContent() {
                 </div>
               )}
 
-              {/* Success */}
               {success && (
                 <div className="mb-4 rounded-lg border border-green-200 bg-green-50 px-3 py-2.5">
                   <p className="text-xs text-green-600">
@@ -417,14 +349,10 @@ function VerifyRegisterPageContent() {
                 </div>
               )}
 
-              {/* ==========================================
-                  FORM
-              ========================================== */}
               <form
                 onSubmit={handleVerify}
                 className="space-y-4"
               >
-                {/* Email */}
                 <div>
                   <label className="block text-xs font-semibold text-slate-800 mb-1">
                     Email
@@ -450,7 +378,6 @@ function VerifyRegisterPageContent() {
                   </div>
                 </div>
 
-                {/* OTP */}
                 <div>
                   <label className="block text-xs font-semibold text-slate-800 mb-1">
                     Kode OTP
@@ -481,7 +408,6 @@ function VerifyRegisterPageContent() {
                   </p>
                 </div>
 
-                {/* Verify Button */}
                 <button
                   type="submit"
                   disabled={
@@ -508,9 +434,6 @@ function VerifyRegisterPageContent() {
                 </button>
               </form>
 
-              {/* ==========================================
-                  RESEND OTP
-              ========================================== */}
               <div className="text-center mt-5">
                 <p className="text-xs text-gray-500">
                   Tidak menerima kode?
@@ -534,9 +457,6 @@ function VerifyRegisterPageContent() {
                 </button>
               </div>
 
-              {/* ==========================================
-                  BACK LOGIN
-              ========================================== */}
               <div className="border-t border-gray-100 mt-5 pt-4">
                 <button
                   type="button"

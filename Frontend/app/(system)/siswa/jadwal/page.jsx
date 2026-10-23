@@ -21,10 +21,6 @@ import {
 
 import { getJadwalMengajar } from "@/services/jadwalMengajar.service";
 
-/* =========================================================
-   THEME HELPERS
-   Menggunakan global theme yang sudah ada.
-========================================================= */
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -88,9 +84,6 @@ const themeDangerSurface =
 const themeDangerBorder =
   "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
 
-/* =========================================================
-   HARI
-========================================================= */
 
 const hariList = [
   "Senin",
@@ -101,9 +94,6 @@ const hariList = [
   "Sabtu",
 ];
 
-/* =========================================================
-   FORMAT TANGGAL
-========================================================= */
 
 function formatTanggalHari(hari) {
   const sekarang = new Date();
@@ -141,9 +131,6 @@ function formatTanggalHari(hari) {
   });
 }
 
-/* =========================================================
-   HARI SEKARANG
-========================================================= */
 
 function getHariSekarang() {
   const namaHari = [
@@ -159,9 +146,6 @@ function getHariSekarang() {
   return namaHari[new Date().getDay()];
 }
 
-/* =========================================================
-   FORMAT JAM
-========================================================= */
 
 function formatJam(jam) {
   if (!jam) return "-";
@@ -175,9 +159,6 @@ function formatJam(jam) {
   return value;
 }
 
-/* =========================================================
-   HELPER NAMA KELAS
-========================================================= */
 
 function getNamaKelas(kelas) {
   if (!kelas) {
@@ -206,9 +187,6 @@ function getNamaKelas(kelas) {
   return String(kelas);
 }
 
-/* =========================================================
-   HELPER NAMA RUANGAN
-========================================================= */
 
 function getNamaRuangan(ruangan) {
   if (!ruangan) {
@@ -260,9 +238,6 @@ function getNamaGuru(item) {
   );
 }
 
-/* =========================================================
-   ACCENT PALETTE
-========================================================= */
 
 const accentPalette = [
   {
@@ -307,9 +282,6 @@ const accentPalette = [
   },
 ];
 
-/* =========================================================
-   PAGE
-========================================================= */
 
 export default function JadwalSiswaPage() {
   const [hariAktif, setHariAktif] = useState(getHariSekarang());
@@ -320,9 +292,6 @@ export default function JadwalSiswaPage() {
 
   const [error, setError] = useState("");
 
-  /* =======================================================
-     LOAD JADWAL
-  ======================================================= */
 
   const loadJadwal = async () => {
     try {
@@ -362,9 +331,6 @@ export default function JadwalSiswaPage() {
     loadJadwal();
   }, []);
 
-  /* =======================================================
-     JADWAL HARI AKTIF
-  ======================================================= */
 
   const jadwalHariIni = useMemo(() => {
     return jadwalData
@@ -382,9 +348,6 @@ export default function JadwalSiswaPage() {
       });
   }, [jadwalData, hariAktif]);
 
-  /* =======================================================
-     KELAS SISWA
-  ======================================================= */
 
   const kelasSiswa = useMemo(() => {
     const daftarKelas = jadwalData
@@ -406,9 +369,6 @@ export default function JadwalSiswaPage() {
     return [...new Set(daftarKelas)];
   }, [jadwalData]);
 
-  /* =======================================================
-     NAMA KELAS
-  ======================================================= */
 
   const namaKelas = useMemo(() => {
     if (kelasSiswa.length === 0) {
@@ -418,9 +378,6 @@ export default function JadwalSiswaPage() {
     return kelasSiswa.join(", ");
   }, [kelasSiswa]);
 
-  /* =======================================================
-     STATISTIK
-  ======================================================= */
 
   const statistik = useMemo(() => {
     const mapelUnik = new Set();
@@ -459,9 +416,6 @@ export default function JadwalSiswaPage() {
     };
   }, [jadwalData, jadwalHariIni, kelasSiswa]);
 
-  /* =======================================================
-     PINDAH HARI
-  ======================================================= */
 
   const pindahHari = (direction) => {
     const currentIndex = hariList.indexOf(hariAktif);
@@ -484,18 +438,11 @@ export default function JadwalSiswaPage() {
     setHariAktif(hariList[nextIndex]);
   };
 
-  /* =========================================================
-     RENDER
-  ========================================================= */
 
   return (
     <main className="min-w-0 flex-1 overflow-y-auto theme-page theme-text">
-      {/* Konten w-full: melebar saat zoom out, tidak dibatasi max-width */}
       <div className="w-full px-4 py-5 sm:px-6 lg:px-8">
 
-        {/* =================================================
-            HERO
-        ================================================= */}
 
         <section
           className={`relative mb-6 overflow-hidden rounded-2xl ${themePrimaryGradient} ${themePrimaryShadow}`}
@@ -519,7 +466,6 @@ export default function JadwalSiswaPage() {
           <div className="relative px-5 py-6 sm:px-7 sm:py-7">
             <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
 
-              {/* LEFT */}
 
               <div className="flex items-start gap-4">
                 <div
@@ -562,7 +508,6 @@ export default function JadwalSiswaPage() {
                 </div>
               </div>
 
-              {/* RIGHT */}
 
               <div
                 className="flex items-center gap-3 rounded-xl px-4 py-3"
@@ -595,9 +540,6 @@ export default function JadwalSiswaPage() {
           </div>
         </section>
 
-        {/* =================================================
-            STAT CARDS — grid responsif dengan 2xl:grid-cols-6
-        ================================================= */}
 
         <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-6">
           <div className={`theme-card ${themeNeutralBorder} ${themeSmallShadow} rounded-xl px-4 py-4`}>
@@ -685,9 +627,6 @@ export default function JadwalSiswaPage() {
           </div>
         </div>
 
-        {/* =================================================
-            ERROR
-        ================================================= */}
 
         {error && (
           <div
@@ -718,9 +657,6 @@ export default function JadwalSiswaPage() {
           </div>
         )}
 
-        {/* =================================================
-            DAY SELECTOR
-        ================================================= */}
 
         <section
           className={`mb-6 theme-card rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
@@ -757,7 +693,6 @@ export default function JadwalSiswaPage() {
             </div>
           </div>
 
-          {/* overflow-x-auto agar day selector tidak merusak layout di layar kecil */}
           <div className="overflow-x-auto p-3 sm:p-4">
             <div className="grid grid-cols-3 gap-2 sm:grid-cols-6 min-w-[420px] sm:min-w-0">
               {hariList.map((hari) => {
@@ -782,9 +717,6 @@ export default function JadwalSiswaPage() {
           </div>
         </section>
 
-        {/* =================================================
-            DAY INFO
-        ================================================= */}
 
         <section
           className={`mb-6 flex flex-col gap-4 rounded-2xl border ${themeInfoBorder} ${themeInfoSurface} p-4 sm:flex-row sm:items-center sm:justify-between`}
@@ -834,9 +766,6 @@ export default function JadwalSiswaPage() {
           </div>
         </section>
 
-        {/* =================================================
-            LOADING
-        ================================================= */}
 
         {loading ? (
           <section
@@ -858,14 +787,10 @@ export default function JadwalSiswaPage() {
           </section>
         ) : jadwalHariIni.length > 0 ? (
           <>
-            {/* =================================================
-                DESKTOP TABLE
-            ================================================= */}
 
             <section
               className={`hidden overflow-hidden rounded-2xl border ${themeNeutralBorder} theme-card ${themeCardShadow} md:block`}
             >
-              {/* overflow-x-auto agar tabel tidak merusak layout di layar kecil */}
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[760px] border-collapse">
                   <thead>
@@ -919,7 +844,6 @@ export default function JadwalSiswaPage() {
                           key={item?.id || `${hariAktif}-${index}`}
                           className={`border-b ${themeDivider} last:border-b-0 transition-colors ${themeNeutralHover}`}
                         >
-                          {/* WAKTU */}
                           <td className="px-5 py-4">
                             <div className="flex items-center gap-2">
                               <div
@@ -940,7 +864,6 @@ export default function JadwalSiswaPage() {
                             </div>
                           </td>
 
-                          {/* MATA PELAJARAN */}
                           <td className="px-5 py-4">
                             <div className="flex items-center gap-3">
                               <div
@@ -961,7 +884,6 @@ export default function JadwalSiswaPage() {
                             </div>
                           </td>
 
-                          {/* GURU */}
                           <td className="px-5 py-4">
                             <div className="flex items-center gap-2.5">
                               <div
@@ -976,7 +898,6 @@ export default function JadwalSiswaPage() {
                             </div>
                           </td>
 
-                          {/* RUANGAN */}
                           <td className="px-5 py-4">
                             <div
                               className={`inline-flex items-center gap-1.5 rounded-lg border ${themeNeutralBorder} ${themeNeutralSurface} px-2.5 py-1.5`}
@@ -996,9 +917,6 @@ export default function JadwalSiswaPage() {
               </div>
             </section>
 
-            {/* =================================================
-                MOBILE CARDS
-            ================================================= */}
 
             <section className="space-y-3 md:hidden">
               {jadwalHariIni.map((item, index) => {
@@ -1130,9 +1048,6 @@ export default function JadwalSiswaPage() {
             </section>
           </>
         ) : (
-          /* =================================================
-             EMPTY STATE
-          ================================================= */
 
           <section
             className={`theme-card flex min-h-[330px] flex-col items-center justify-center rounded-2xl border border-dashed ${themeNeutralBorder} px-6 text-center ${themeCardShadow}`}
@@ -1166,9 +1081,6 @@ export default function JadwalSiswaPage() {
           </section>
         )}
 
-        {/* =================================================
-            FOOTER INFO
-        ================================================= */}
 
         <div
           className={`mt-6 flex items-start gap-3 rounded-xl border ${themeInfoBorder} ${themeInfoSurface} px-4 py-3.5`}

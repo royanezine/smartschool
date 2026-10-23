@@ -149,9 +149,6 @@ export default function TambahKategoriJabatanPage() {
         <main className="min-w-0 flex-1 overflow-y-auto theme-page theme-text">
           <div className="w-full px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
             <div className="mx-auto w-full max-w-5xl space-y-6">
-              {/* ============================================
-                  PAGE HEADER
-              ============================================ */}
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div className="flex items-start gap-3">
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
@@ -189,9 +186,6 @@ export default function TambahKategoriJabatanPage() {
                 </button>
               </div>
 
-              {/* ============================================
-                  ALERT ERROR
-              ============================================ */}
               {error && (
                 <div
                   role="alert"
@@ -214,9 +208,6 @@ export default function TambahKategoriJabatanPage() {
               )}
 
               <form onSubmit={handleSubmit} className="space-y-6">
-                {/* ============================================
-                    IDENTITAS KATEGORI
-                ============================================ */}
                 <section className="theme-card overflow-hidden rounded-xl border theme-border shadow-sm">
                   <div className="flex items-start gap-3 border-b theme-border p-5 sm:p-6">
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
@@ -297,9 +288,6 @@ export default function TambahKategoriJabatanPage() {
                   </div>
                 </section>
 
-                {/* ============================================
-                    TARIF AWAL
-                ============================================ */}
                 <section className="theme-card overflow-hidden rounded-xl border theme-border shadow-sm">
                   <div className="flex items-start gap-3 border-b theme-border p-5 sm:p-6">
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300">
@@ -385,9 +373,6 @@ export default function TambahKategoriJabatanPage() {
                   </div>
                 </section>
 
-                {/* ============================================
-                    ACTION BUTTONS
-                ============================================ */}
                 <div className="flex flex-col-reverse gap-3 border-t theme-border pt-5 sm:flex-row sm:justify-end">
                   <button
                     type="button"

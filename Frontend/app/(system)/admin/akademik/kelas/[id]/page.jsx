@@ -160,9 +160,6 @@ export default function DetailKelasPage() {
 
   const [newJadwal, setNewJadwal] = useState(EMPTY_JADWAL);
 
-  // =========================================================
-  // LOAD DETAIL KELAS
-  // =========================================================
 
   const loadDetail = async () => {
     if (!id) return;
@@ -223,9 +220,6 @@ export default function DetailKelasPage() {
     }
   };
 
-  // =========================================================
-  // LOAD JADWAL DARI BACKEND
-  // =========================================================
 
   const loadJadwal = async () => {
     if (!id) return;
@@ -298,9 +292,6 @@ export default function DetailKelasPage() {
     }
   };
 
-  // =========================================================
-  // LOAD DETAIL + JADWAL
-  // =========================================================
 
   useEffect(() => {
     if (!id) return;
@@ -309,9 +300,6 @@ export default function DetailKelasPage() {
     loadJadwal();
   }, [id]);
 
-  // =========================================================
-  // DATA GURU & MAPEL
-  // =========================================================
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -347,9 +335,6 @@ export default function DetailKelasPage() {
     }
   }, []);
 
-  // =========================================================
-  // JUMLAH SISWA
-  // =========================================================
 
   const jumlahSiswa = useMemo(() => {
     if (Array.isArray(kelas?.anggota)) {
@@ -364,9 +349,6 @@ export default function DetailKelasPage() {
     );
   }, [kelas]);
 
-  // =========================================================
-  // DATA ANGGOTA
-  // =========================================================
 
   const daftarSiswa = useMemo(() => {
     return Array.isArray(kelas?.anggota)
@@ -374,9 +356,6 @@ export default function DetailKelasPage() {
       : [];
   }, [kelas]);
 
-  // =========================================================
-  // AMBIL DATA SISWA
-  // =========================================================
 
   const getSiswaData = (anggota) => {
     return (
@@ -391,9 +370,6 @@ export default function DetailKelasPage() {
     );
   };
 
-  // =========================================================
-  // NAMA SISWA
-  // =========================================================
 
   const getNamaSiswa = (anggota) => {
     const siswa = getSiswaData(anggota);
@@ -410,9 +386,6 @@ export default function DetailKelasPage() {
     );
   };
 
-  // =========================================================
-  // NIS
-  // =========================================================
 
   const getNisSiswa = (anggota) => {
     const siswa = getSiswaData(anggota);
@@ -428,9 +401,6 @@ export default function DetailKelasPage() {
     );
   };
 
-  // =========================================================
-  // NISN
-  // =========================================================
 
   const getNisnSiswa = (anggota) => {
     const siswa = getSiswaData(anggota);
@@ -444,9 +414,6 @@ export default function DetailKelasPage() {
     );
   };
 
-  // =========================================================
-  // LABEL GURU
-  // =========================================================
 
   const getGuruLabel = (value) => {
     if (!value) return "-";
@@ -461,9 +428,6 @@ export default function DetailKelasPage() {
     return found ? getNama(found) : value;
   };
 
-  // =========================================================
-  // HITUNG JAM GURU
-  // =========================================================
 
   const jamPerGuru = useMemo(() => {
     const counts = {};
@@ -482,9 +446,6 @@ export default function DetailKelasPage() {
     return counts;
   }, [jadwal]);
 
-  // =========================================================
-  // TAMBAH JADWAL
-  // =========================================================
 
   const handleAddJadwal = () => {
     if (
@@ -532,9 +493,6 @@ export default function DetailKelasPage() {
     setShowAddJadwal(false);
   };
 
-  // =========================================================
-  // DELETE JADWAL
-  // =========================================================
 
   const handleDeleteJadwal = (
     jadwalId
@@ -556,9 +514,6 @@ export default function DetailKelasPage() {
     );
   };
 
-  // =========================================================
-  // TINGKAT
-  // =========================================================
 
   const getTingkatLabel = (
     tingkat,
@@ -594,9 +549,6 @@ export default function DetailKelasPage() {
     return tingkat || "-";
   };
 
-  // =========================================================
-  // LOADING
-  // =========================================================
 
   if (loading) {
     return (
@@ -641,9 +593,6 @@ export default function DetailKelasPage() {
     );
   }
 
-  // =========================================================
-  // ERROR
-  // =========================================================
 
   if (error || !kelas) {
     return (
@@ -705,13 +654,9 @@ export default function DetailKelasPage() {
     );
   }
 
-  // =========================================================
-  // RENDER
-  // =========================================================
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
-      {/* SIDEBAR */}
 
       <Sidebar
         active="kelas"
@@ -720,10 +665,8 @@ export default function DetailKelasPage() {
         setCollapsed={setIsCollapsed}
       />
 
-      {/* MAIN */}
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        {/* HEADER */}
 
         <Header
           toggleSidebar={() =>
@@ -740,13 +683,11 @@ export default function DetailKelasPage() {
           }}
         />
 
-        {/* CONTENT */}
 
         <main className="theme-page min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
           <div className="w-full px-4 py-5 sm:px-5 md:px-7 lg:px-8 xl:px-10">
             <div className="mx-auto w-full max-w-[1600px] space-y-6">
 
-              {/* HEADER */}
 
               <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 <div className="min-w-0">
@@ -800,7 +741,6 @@ export default function DetailKelasPage() {
                   </p>
                 </div>
 
-                {/* EDIT */}
 
                 <button
                   type="button"
@@ -816,12 +756,10 @@ export default function DetailKelasPage() {
                 </button>
               </div>
 
-              {/* OVERVIEW */}
 
               <section className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
                 <div className="grid grid-cols-1 divide-y divide-[var(--color-border-soft)] sm:grid-cols-2 sm:divide-x sm:divide-y-0 lg:grid-cols-4">
                   
-                  {/* WALI */}
 
                   <div className="flex min-w-0 items-center gap-4 p-5">
                     <div className="theme-info flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
@@ -841,7 +779,6 @@ export default function DetailKelasPage() {
                     </div>
                   </div>
 
-                  {/* TAHUN */}
 
                   <div className="flex min-w-0 items-center gap-4 p-5">
                     <div className="theme-info flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
@@ -868,7 +805,6 @@ export default function DetailKelasPage() {
                     </div>
                   </div>
 
-                  {/* JUMLAH SISWA */}
 
                   <div className="flex min-w-0 items-center gap-4 p-5">
                     <div className="theme-info flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
@@ -886,7 +822,6 @@ export default function DetailKelasPage() {
                     </div>
                   </div>
 
-                  {/* KAPASITAS */}
 
                   <div className="flex min-w-0 items-center gap-4 p-5">
                     <div className="theme-info flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
@@ -906,13 +841,11 @@ export default function DetailKelasPage() {
                 </div>
               </section>
 
-              {/* TABS */}
 
               <div className="theme-border border-b">
                 <div className="overflow-x-auto">
                   <nav className="flex min-w-max gap-1">
 
-                    {/* INFORMASI */}
 
                     <button
                       type="button"
@@ -929,7 +862,6 @@ export default function DetailKelasPage() {
                       Informasi Kelas
                     </button>
 
-                    {/* SISWA */}
 
                     <button
                       type="button"
@@ -946,7 +878,6 @@ export default function DetailKelasPage() {
                       Siswa
                     </button>
 
-                    {/* GURU */}
 
                     <button
                       type="button"
@@ -963,7 +894,6 @@ export default function DetailKelasPage() {
                       Guru / Wali Kelas
                     </button>
 
-                    {/* JADWAL */}
 
                     <button
                       type="button"
@@ -983,13 +913,9 @@ export default function DetailKelasPage() {
                 </div>
               </div>
 
-              {/* CONTENT CARD */}
 
               <section className="theme-card theme-border min-w-0 overflow-hidden rounded-2xl border shadow-sm">
 
-                {/* =================================================
-                    TAB KELAS
-                ================================================= */}
 
                 {activeTab === "kelas" && (
                   <div>
@@ -1005,7 +931,6 @@ export default function DetailKelasPage() {
 
                     <div className="grid grid-cols-1 gap-x-8 md:grid-cols-2">
 
-                      {/* NAMA */}
 
                       <div className="theme-border-soft border-b px-5 py-5 sm:px-6">
                         <p className="theme-text-muted mb-1.5 text-xs font-medium">
@@ -1017,7 +942,6 @@ export default function DetailKelasPage() {
                         </p>
                       </div>
 
-                      {/* TINGKAT */}
 
                       <div className="theme-border-soft border-b px-5 py-5 sm:px-6">
                         <p className="theme-text-muted mb-1.5 text-xs font-medium">
@@ -1031,7 +955,6 @@ export default function DetailKelasPage() {
                         </p>
                       </div>
 
-                      {/* TAHUN */}
 
                       <div className="theme-border-soft border-b px-5 py-5 sm:px-6">
                         <p className="theme-text-muted mb-1.5 text-xs font-medium">
@@ -1052,7 +975,6 @@ export default function DetailKelasPage() {
                         )}
                       </div>
 
-                      {/* WALI */}
 
                       <div className="theme-border-soft border-b px-5 py-5 sm:px-6">
                         <p className="theme-text-muted mb-1.5 text-xs font-medium">
@@ -1066,7 +988,6 @@ export default function DetailKelasPage() {
                         </p>
                       </div>
 
-                      {/* JUMLAH SISWA */}
 
                       <div className="theme-border-soft border-b px-5 py-5 sm:px-6">
                         <p className="theme-text-muted mb-1.5 text-xs font-medium">
@@ -1078,7 +999,6 @@ export default function DetailKelasPage() {
                         </p>
                       </div>
 
-                      {/* KAPASITAS */}
 
                       <div className="theme-border-soft border-b px-5 py-5 sm:px-6">
                         <p className="theme-text-muted mb-1.5 text-xs font-medium">
@@ -1090,7 +1010,6 @@ export default function DetailKelasPage() {
                         </p>
                       </div>
 
-                      {/* RUANGAN */}
 
                       <div className="theme-border-soft border-b px-5 py-5 sm:px-6">
                         <p className="theme-text-muted mb-1.5 text-xs font-medium">
@@ -1106,7 +1025,6 @@ export default function DetailKelasPage() {
                         </p>
                       </div>
 
-                      {/* STATUS */}
 
                       <div className="theme-border-soft border-b px-5 py-5 sm:px-6">
                         <p className="theme-text-muted mb-2 text-xs font-medium">
@@ -1131,9 +1049,6 @@ export default function DetailKelasPage() {
                   </div>
                 )}
 
-                {/* =================================================
-                    TAB SISWA
-                ================================================= */}
 
                 {activeTab === "siswa" && (
                   <div>
@@ -1302,9 +1217,6 @@ export default function DetailKelasPage() {
                   </div>
                 )}
 
-                {/* =================================================
-                    TAB GURU
-                ================================================= */}
 
                 {activeTab === "guru" && (
                   <div>
@@ -1460,14 +1372,10 @@ export default function DetailKelasPage() {
                   </div>
                 )}
 
-                {/* =================================================
-                    TAB JADWAL
-                ================================================= */}
 
                 {activeTab === "jadwal" && (
                   <div>
 
-                    {/* HEADER */}
 
                     <div className="theme-border-soft flex flex-col gap-4 border-b px-5 py-5 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
                       <div>
@@ -1520,7 +1428,6 @@ export default function DetailKelasPage() {
                       </div>
                     </div>
 
-                    {/* ERROR JADWAL */}
 
                     {jadwalError && (
                       <div className="theme-warning theme-border border-b px-5 py-3.5 sm:px-6">
@@ -1543,13 +1450,11 @@ export default function DetailKelasPage() {
                       </div>
                     )}
 
-                    {/* FORM TAMBAH */}
 
                     {showAddJadwal && (
                       <div className="theme-card-soft theme-border border-b p-5 sm:p-6">
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
 
-                          {/* HARI */}
 
                           <div>
                             <label className="theme-text-secondary mb-1.5 block text-xs font-semibold">
@@ -1581,7 +1486,6 @@ export default function DetailKelasPage() {
                             </select>
                           </div>
 
-                          {/* JAM MULAI */}
 
                           <div>
                             <label className="theme-text-secondary mb-1.5 block text-xs font-semibold">
@@ -1606,7 +1510,6 @@ export default function DetailKelasPage() {
                             />
                           </div>
 
-                          {/* JAM SELESAI */}
 
                           <div>
                             <label className="theme-text-secondary mb-1.5 block text-xs font-semibold">
@@ -1631,7 +1534,6 @@ export default function DetailKelasPage() {
                             />
                           </div>
 
-                          {/* MAPEL */}
 
                           <div>
                             <label className="theme-text-secondary mb-1.5 block text-xs font-semibold">
@@ -1670,7 +1572,6 @@ export default function DetailKelasPage() {
                             </select>
                           </div>
 
-                          {/* GURU */}
 
                           <div>
                             <label className="theme-text-secondary mb-1.5 block text-xs font-semibold">
@@ -1709,7 +1610,6 @@ export default function DetailKelasPage() {
                             </select>
                           </div>
 
-                          {/* RUANGAN */}
 
                           <div>
                             <label className="theme-text-secondary mb-1.5 block text-xs font-semibold">
@@ -1764,7 +1664,6 @@ export default function DetailKelasPage() {
                       </div>
                     )}
 
-                    {/* LOADING JADWAL */}
 
                     {loadingJadwal ? (
                       <div className="flex min-h-[280px] flex-col items-center justify-center">
@@ -1779,7 +1678,6 @@ export default function DetailKelasPage() {
                       </div>
                     ) : (
                       <>
-                        {/* TABLE */}
 
                         <div className="w-full overflow-x-auto">
                           <table className="w-full min-w-[1000px] text-sm">
@@ -1929,7 +1827,6 @@ export default function DetailKelasPage() {
                           </table>
                         </div>
 
-                        {/* TOTAL */}
 
                         {jadwal.length > 0 && (
                           <div className="theme-card-soft theme-border-soft border-t px-5 py-3.5 sm:px-6">

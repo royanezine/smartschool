@@ -24,9 +24,6 @@ import {
 
 import { getDetailPeminjaman } from "@/services/sarpras.service";
 
-// =========================================================
-// THEME HELPERS
-// =========================================================
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -91,9 +88,6 @@ const themeDangerBorder =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-// =========================================================
-// STATUS CONFIG
-// =========================================================
 
 const hasilConfig = {
   dikembalikan: {
@@ -143,9 +137,6 @@ function getHasil(peminjaman) {
   return null;
 }
 
-// =========================================================
-// HELPERS
-// =========================================================
 
 function formatTanggal(value) {
   if (!value) return "-";
@@ -261,9 +252,6 @@ function getJumlah(peminjaman) {
   );
 }
 
-// =========================================================
-// PAGE
-// =========================================================
 
 export default function DetailRiwayatPage() {
   const router = useRouter();
@@ -360,9 +348,6 @@ export default function DetailRiwayatPage() {
         <main className="theme-page flex-1 overflow-y-auto">
           <div className="mx-auto w-full max-w-[1400px] space-y-5 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
 
-            {/* =================================================
-                BACK
-            ================================================= */}
 
             <button
               type="button"
@@ -378,9 +363,6 @@ export default function DetailRiwayatPage() {
               Kembali ke Riwayat
             </button>
 
-            {/* =================================================
-                LOADING
-            ================================================= */}
 
             {loading && (
               <div
@@ -397,9 +379,6 @@ export default function DetailRiwayatPage() {
               </div>
             )}
 
-            {/* =================================================
-                ERROR
-            ================================================= */}
 
             {!loading && error && (
               <div
@@ -435,9 +414,6 @@ export default function DetailRiwayatPage() {
               </div>
             )}
 
-            {/* =================================================
-                NOT FOUND
-            ================================================= */}
 
             {!loading && !error && !detail && (
               <div
@@ -467,16 +443,10 @@ export default function DetailRiwayatPage() {
               </div>
             )}
 
-            {/* =================================================
-                DETAIL CONTENT
-            ================================================= */}
 
             {!loading && !error && detail && (
               <div className="space-y-5">
 
-                {/* =================================================
-                    HEADER CARD
-                ================================================= */}
 
                 <div
                   className={`overflow-hidden rounded-xl ${themePrimaryGradient} ${themePrimaryShadow}`}
@@ -522,9 +492,6 @@ export default function DetailRiwayatPage() {
                   </div>
                 </div>
 
-                {/* =================================================
-                    QUICK STATS
-                ================================================= */}
 
                 <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
                   <StatCard
@@ -556,19 +523,12 @@ export default function DetailRiwayatPage() {
                   />
                 </div>
 
-                {/* =================================================
-                    MAIN GRID
-                ================================================= */}
 
                 <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
 
-                  {/* =================================================
-                      LEFT COLUMN
-                  ================================================= */}
 
                   <div className="space-y-5">
 
-                    {/* DAFTAR ASET */}
 
                     <div
                       className={`theme-card ${themeNeutralBorder} ${themeCardShadow} overflow-hidden rounded-xl border`}
@@ -647,7 +607,6 @@ export default function DetailRiwayatPage() {
                       </div>
                     </div>
 
-                    {/* KEPERLUAN */}
 
                     <InfoBlock
                       icon={<ClipboardList size={15} />}
@@ -655,7 +614,6 @@ export default function DetailRiwayatPage() {
                       content={detail.keperluan || "-"}
                     />
 
-                    {/* CATATAN */}
 
                     {detail.catatanPeminjaman && (
                       <InfoBlock
@@ -665,7 +623,6 @@ export default function DetailRiwayatPage() {
                       />
                     )}
 
-                    {/* DIKEMBALIKAN / TERLAMBAT */}
 
                     {(hasil === "dikembalikan" ||
                       hasil === "terlambat") && (
@@ -727,7 +684,6 @@ export default function DetailRiwayatPage() {
                       </div>
                     )}
 
-                    {/* DITOLAK */}
 
                     {detail.status === "ditolak" &&
                       detail.catatanPenolakan && (
@@ -765,13 +721,9 @@ export default function DetailRiwayatPage() {
                       )}
                   </div>
 
-                  {/* =================================================
-                      RIGHT COLUMN
-                  ================================================= */}
 
                   <aside className="space-y-5 lg:sticky lg:top-6">
 
-                    {/* INFO CARD */}
 
                     <div
                       className={`theme-card ${themeNeutralBorder} ${themeCardShadow} overflow-hidden rounded-xl border`}
@@ -844,7 +796,6 @@ export default function DetailRiwayatPage() {
                       </div>
                     </div>
 
-                    {/* NAMA ASET */}
 
                     <div
                       className={`theme-card ${themeNeutralBorder} ${themeCardShadow} overflow-hidden rounded-xl border`}
@@ -870,7 +821,6 @@ export default function DetailRiwayatPage() {
                       </div>
                     </div>
 
-                    {/* ACTION */}
 
                     <button
                       type="button"
@@ -890,9 +840,6 @@ export default function DetailRiwayatPage() {
   );
 }
 
-// =========================================================
-// SUB COMPONENTS
-// =========================================================
 
 function StatCard({ icon, label, value }) {
   return (

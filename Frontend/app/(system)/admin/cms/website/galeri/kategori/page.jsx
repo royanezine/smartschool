@@ -17,11 +17,9 @@ import {
 export default function KategoriPage() {
   const router = useRouter();
 
-  // State Sidebar
   const [active, setActive] = useState("galeri");
   const [collapsed, setCollapsed] = useState(false);
 
-  // State Data & Pencarian
   const [searchTerm, setSearchTerm] = useState("");
   const [kategoriList, setKategoriList] = useState([
     { id: 1, name: "Dokumentasi", count: 15, color: "blue" },
@@ -31,12 +29,10 @@ export default function KategoriPage() {
     { id: 5, name: "Kegiatan Sosial", count: 3, color: "orange" },
   ]);
 
-  // Filter Logic
   const filteredKategori = kategoriList.filter((item) =>
     item.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Warna kategori
   const colorMap = {
     blue: {
       wrapper: "theme-info",
@@ -69,7 +65,6 @@ export default function KategoriPage() {
 
   return (
     <div className="flex min-h-screen w-full overflow-hidden theme-page">
-      {/* SIDEBAR */}
       <Sidebar
         active={active}
         setActive={setActive}
@@ -77,7 +72,6 @@ export default function KategoriPage() {
         setCollapsed={setCollapsed}
       />
 
-      {/* MAIN CONTENT */}
       <main
         className="
           flex-1
@@ -89,13 +83,10 @@ export default function KategoriPage() {
           duration-300
         "
       >
-        {/* HEADER */}
         <Header title="Kategori Galeri" user={{ name: "Admin" }} />
 
-        {/* KONTEN UTAMA */}
         <div className="w-full min-w-0 px-4 py-8 md:px-8 lg:px-10 lg:py-10">
           <div className="w-full max-w-7xl mx-auto min-w-0 space-y-8">
-            {/* 1. BREADCRUMB */}
             <nav
               className="flex text-sm font-medium theme-text-muted"
               aria-label="Breadcrumb"
@@ -132,7 +123,6 @@ export default function KategoriPage() {
               </ol>
             </nav>
 
-            {/* 2. HEADER & ACTION BUTTONS */}
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div className="flex items-center gap-4">
                 <div className="p-3 theme-info rounded-2xl shadow-sm">
@@ -150,7 +140,6 @@ export default function KategoriPage() {
                 </div>
               </div>
 
-              {/* Tombol Tambah Kategori */}
               <button
                 onClick={() =>
                   alert("Fitur Tambah Kategori dibuka! (Mockup)")
@@ -178,9 +167,7 @@ export default function KategoriPage() {
               </button>
             </div>
 
-            {/* 3. STATISTIK RINGKASAN */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {/* TOTAL KATEGORI */}
               <div
                 className="
                   theme-card
@@ -211,7 +198,6 @@ export default function KategoriPage() {
                 </div>
               </div>
 
-              {/* TOTAL FOTO */}
               <div
                 className="
                   theme-card
@@ -242,7 +228,6 @@ export default function KategoriPage() {
                 </div>
               </div>
 
-              {/* KATEGORI UTAMA */}
               <div
                 className="
                   theme-card
@@ -274,7 +259,6 @@ export default function KategoriPage() {
                 </div>
               </div>
 
-              {/* TERAKHIR EDIT */}
               <div
                 className="
                   theme-card
@@ -307,7 +291,6 @@ export default function KategoriPage() {
               </div>
             </div>
 
-            {/* 4. SEARCH BAR */}
             <div
               className="
                 theme-card
@@ -345,7 +328,6 @@ export default function KategoriPage() {
               </div>
             </div>
 
-            {/* 5. GRID KATEGORI INTERAKTIF */}
             {filteredKategori.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
                 {filteredKategori.map((item) => {
@@ -372,7 +354,6 @@ export default function KategoriPage() {
                         p-5
                       "
                     >
-                      {/* Icon Kategori */}
                       <div
                         className={`
                           flex-shrink-0
@@ -394,7 +375,6 @@ export default function KategoriPage() {
                         />
                       </div>
 
-                      {/* Detail Kategori */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2">
                           <div className="min-w-0 flex-1">
@@ -407,7 +387,6 @@ export default function KategoriPage() {
                             </p>
                           </div>
 
-                          {/* Action Buttons */}
                           <div className="flex gap-1 flex-shrink-0">
                             <button
                               className="
@@ -469,7 +448,6 @@ export default function KategoriPage() {
                 })}
               </div>
             ) : (
-              /* Empty State */
               <div
                 className="
                   theme-card

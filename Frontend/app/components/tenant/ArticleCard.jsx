@@ -58,12 +58,10 @@ export default function ArticleCard({ artikel, subdomain }) {
         backgroundColor: "var(--warna-netral-putih, #FFFFFF)",
       }}
     >
-      {/* BAGIAN GAMBAR */}
       <div
         className="relative aspect-[4/3] w-full overflow-hidden"
         style={{ backgroundColor: "var(--warna-netral-garis, #E2E8F0)" }}
       >
-        {/* Badge Kategori Melayang */}
         {kategori && (
           <div className="absolute left-4 top-4 z-10">
             <span
@@ -89,7 +87,6 @@ export default function ArticleCard({ artikel, subdomain }) {
                 className="object-cover transition-transform duration-500 group-hover:scale-110"
                 unoptimized
               />
-              {/* Overlay Gelap Saat Hover */}
               <div className="absolute inset-0 bg-black/10 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
             </Link>
           ) : (
@@ -112,7 +109,6 @@ export default function ArticleCard({ artikel, subdomain }) {
         )}
       </div>
 
-      {/* BAGIAN TEKS */}
       <div className="flex flex-1 flex-col p-5">
         <h3 className="mb-3 line-clamp-2 text-lg font-bold leading-snug transition-colors group-hover:text-[var(--warna-primer-utama)]" style={{ color: "var(--warna-netral-teks, #0F172A)" }}>
           {href ? (
@@ -130,7 +126,6 @@ export default function ArticleCard({ artikel, subdomain }) {
           </p>
         )}
 
-        {/* FOOTER KARTU */}
         <div className="mt-auto flex items-center justify-between border-t pt-4" style={{ borderColor: "var(--warna-netral-garis, #E2E8F0)" }}>
           <div className="flex items-center gap-2 text-xs font-medium" style={{ color: "var(--warna-netral-teksLembut)" }}>
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

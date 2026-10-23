@@ -26,7 +26,6 @@ import {
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
 
-/* helpers ... (normalizeBook, getErrorMessage, getDipinjam, formatTipe, formatStatus) — sama seperti sebelumnya */
 
 const themeCardShadow =
   "shadow-[0_6px_24px_color-mix(in_srgb,var(--color-text)_6%,transparent)]";
@@ -225,7 +224,6 @@ export default function DataBukuPage() {
 
         <main className="min-w-0 flex-1 overflow-y-auto">
           <div className="w-full px-4 py-5 sm:px-6 lg:px-8">
-            {/* HEADER */}
             <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex items-center gap-3">
                 <div className="theme-primary-soft flex h-12 w-12 items-center justify-center rounded-xl">
@@ -275,7 +273,6 @@ export default function DataBukuPage() {
               </div>
             </div>
 
-            {/* ERROR */}
             {error && (
               <div className="theme-danger mb-5 flex items-start gap-3 rounded-xl border theme-border p-4">
                 <AlertCircle size={18} className="mt-0.5 shrink-0" />
@@ -293,7 +290,6 @@ export default function DataBukuPage() {
               </div>
             )}
 
-            {/* STATS */}
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
               <StatCard icon={BookOpen} label="Total Buku" value={totalJudul} type="blue" />
               <StatCard icon={CheckCircle2} label="Buku Aktif" value={totalAktif} type="green" />
@@ -301,7 +297,6 @@ export default function DataBukuPage() {
               <StatCard icon={Archive} label="Sedang Dipinjam" value={totalDipinjam} type="orange" />
             </div>
 
-            {/* FILTER */}
             <div
               className={`theme-card theme-border mt-5 rounded-xl border p-4 ${themeCardShadow}`}
             >
@@ -386,7 +381,6 @@ export default function DataBukuPage() {
               </div>
             </div>
 
-            {/* TABLE */}
             <div
               className={`theme-card theme-border mt-5 overflow-hidden rounded-xl border ${themeCardShadow}`}
             >
@@ -602,7 +596,6 @@ export default function DataBukuPage() {
         </main>
       </div>
 
-      {/* DELETE MODAL — tetap modal, karena konfirmasi */}
       {deleteBook && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/40 p-4 backdrop-blur-[2px]">
           <div

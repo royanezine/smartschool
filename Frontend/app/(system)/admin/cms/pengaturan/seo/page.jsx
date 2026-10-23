@@ -1,4 +1,3 @@
-// app/cmsAdmin/pengaturan/seo/page.jsx
 "use client";
 
 import { useState } from "react";
@@ -61,7 +60,6 @@ export default function SeoPage() {
       />
 
       <div className="flex-1 min-w-0 flex flex-col">
-        {/* ===== HEADER ===== */}
         <Header
           title="SEO"
           user={{
@@ -74,7 +72,6 @@ export default function SeoPage() {
 
         <main className="flex-1 min-w-0 overflow-y-auto p-4 md:p-6 lg:p-8 theme-page">
           <div className="w-full min-w-0 max-w-6xl mx-auto space-y-6">
-            {/* Breadcrumb */}
             <nav className="flex items-center gap-2 text-sm">
               <a
                 href="/cmsAdmin"
@@ -99,7 +96,6 @@ export default function SeoPage() {
               </span>
             </nav>
 
-            {/* Header */}
             <div className="flex items-start gap-4">
               <div className="shrink-0 p-3 rounded-xl theme-info border">
                 <Search className="w-6 h-6" />
@@ -122,9 +118,7 @@ export default function SeoPage() {
               </div>
             </div>
 
-            {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Meta Tags Card */}
               <div className="theme-card rounded-xl border theme-border shadow-sm overflow-hidden">
                 <div className="px-5 py-4 border-b theme-border theme-card-soft flex items-center justify-between">
                   <div>
@@ -144,7 +138,6 @@ export default function SeoPage() {
                 </div>
 
                 <div className="p-5 space-y-4">
-                  {/* Meta Title */}
                   <div>
                     <label className="text-xs font-medium theme-text-secondary block mb-1.5">
                       Meta Title{" "}
@@ -164,7 +157,6 @@ export default function SeoPage() {
                     </p>
                   </div>
 
-                  {/* Meta Description */}
                   <div>
                     <label className="text-xs font-medium theme-text-secondary block mb-1.5">
                       Meta Description{" "}
@@ -186,7 +178,6 @@ export default function SeoPage() {
                     </p>
                   </div>
 
-                  {/* Keywords + Canonical */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="text-xs font-medium theme-text-secondary block mb-1.5 flex items-center gap-1.5">
@@ -219,7 +210,6 @@ export default function SeoPage() {
                 </div>
               </div>
 
-              {/* Analytics Card */}
               <div className="theme-card rounded-xl border theme-border shadow-sm overflow-hidden">
                 <div className="px-5 py-4 border-b theme-border theme-card-soft flex items-center justify-between">
                   <div>
@@ -261,7 +251,6 @@ export default function SeoPage() {
                 </div>
               </div>
 
-              {/* Custom Scripts Card */}
               <div className="theme-card rounded-xl border theme-border shadow-sm overflow-hidden">
                 <div className="px-5 py-4 border-b theme-border theme-card-soft flex items-center justify-between">
                   <div>
@@ -281,7 +270,6 @@ export default function SeoPage() {
                 </div>
 
                 <div className="p-5 space-y-4">
-                  {/* Custom Header */}
                   <div>
                     <label className="text-xs font-medium theme-text-secondary block mb-1.5">
                       Custom Header Script
@@ -301,7 +289,6 @@ export default function SeoPage() {
                     </p>
                   </div>
 
-                  {/* Custom Footer */}
                   <div>
                     <label className="text-xs font-medium theme-text-secondary block mb-1.5">
                       Custom Footer Script
@@ -323,9 +310,7 @@ export default function SeoPage() {
                 </div>
               </div>
 
-              {/* Actions */}
               <div className="flex flex-col sm:flex-row justify-end gap-3 pt-2">
-                {/* Batal */}
                 <button
                   type="button"
                   onClick={() => window.history.back()}
@@ -346,7 +331,6 @@ export default function SeoPage() {
                   Batal
                 </button>
 
-                {/* Simpan */}
                 <button
                   type="submit"
                   disabled={loading}
@@ -375,7 +359,6 @@ export default function SeoPage() {
               </div>
             </form>
 
-            {/* Footer */}
             <footer className="pt-4 border-t theme-border text-center text-xs theme-text-muted">
               © 2026 SmartSchool CMS • Pengaturan SEO
             </footer>

@@ -23,7 +23,6 @@ import {
     ChevronUp,
 } from "lucide-react";
 
-// ========== Komponen Metode Pembayaran ==========
 const PaymentMethod = ({
     icon: Icon,
     label,
@@ -66,7 +65,6 @@ const PaymentMethod = ({
     </button>
 );
 
-// ========== Komponen Utama ==========
 export default function CheckoutPage() {
     const [selectedMethod, setSelectedMethod] = useState("va");
     const [isProcessing, setIsProcessing] = useState(false);
@@ -142,7 +140,6 @@ export default function CheckoutPage() {
     return (
         <div className="min-h-screen bg-white">
             <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
-                {/* Header */}
                 <div className="flex items-center justify-between mb-8">
                     <div className="flex items-center gap-3">
                         <Link href="/pelanggan" className="p-2 rounded-lg hover:bg-slate-50 transition-colors">
@@ -174,9 +171,7 @@ export default function CheckoutPage() {
 
                 {!isSuccess ? (
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        {/* Kolom Kiri & Tengah - Form Pembayaran */}
                         <div className="lg:col-span-2 space-y-6">
-                            {/* Ringkasan Pesanan */}
                             <div className="bg-white rounded-2xl shadow-lg shadow-slate-200/50 border border-slate-200/60 p-6">
                                 <h2 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
                                     <FileText className="w-5 h-5 text-blue-600" />
@@ -228,7 +223,6 @@ export default function CheckoutPage() {
                                 </div>
                             </div>
 
-                            {/* Metode Pembayaran */}
                             <div className="bg-white rounded-2xl shadow-lg shadow-slate-200/50 border border-slate-200/60 p-6">
                                 <h2 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
                                     <CreditCard className="w-5 h-5 text-blue-600" />
@@ -253,7 +247,6 @@ export default function CheckoutPage() {
                                 </div>
                             </div>
 
-                            {/* Data Diri */}
                             <div className="bg-white rounded-2xl shadow-lg shadow-slate-200/50 border border-slate-200/60 p-6">
                                 <h2 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
                                     <HelpCircle className="w-5 h-5 text-blue-600" />
@@ -300,7 +293,6 @@ export default function CheckoutPage() {
                             </div>
                         </div>
 
-                        {/* Kolom Kanan - Ringkasan & Tombol Bayar */}
                         <div className="lg:col-span-1">
                             <div className="bg-white rounded-2xl shadow-lg shadow-slate-200/50 border border-slate-200/60 p-6 sticky top-6">
                                 <div className="flex items-center gap-2 mb-4">
@@ -361,7 +353,6 @@ export default function CheckoutPage() {
                         </div>
                     </div>
                 ) : (
-                    // ========== Halaman Sukses ==========
                     <div className="max-w-2xl mx-auto">
                         <div className="bg-white rounded-2xl shadow-lg shadow-slate-200/50 border border-slate-200/60 p-8 sm:p-10 text-center">
                             <div className="w-20 h-20 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-6">

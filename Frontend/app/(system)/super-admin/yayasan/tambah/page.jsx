@@ -28,9 +28,6 @@ export default function TambahYayasanPage() {
   return (
     <div className="theme-page theme-text min-h-full">
       <div className="mx-auto w-full max-w-[1400px] px-4 py-5 sm:px-6 sm:py-7 lg:px-8 xl:px-10">
-        {/* ===================================================
-            BREADCRUMB
-        =================================================== */}
         <div className="mb-5 flex items-center gap-2 text-xs">
           <button
             type="button"
@@ -50,13 +47,8 @@ export default function TambahYayasanPage() {
           </span>
         </div>
 
-        {/* ===================================================
-            PAGE HEADER
-        =================================================== */}
         <div className="mb-7 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-          {/* LEFT */}
           <div className="flex min-w-0 items-center gap-3">
-            {/* BACK */}
             <button
               type="button"
               onClick={goBack}
@@ -66,7 +58,6 @@ export default function TambahYayasanPage() {
               <ArrowLeft size={19} />
             </button>
 
-            {/* TITLE */}
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
                 <h1 className="text-xl font-bold tracking-tight theme-text sm:text-2xl">
@@ -87,7 +78,6 @@ export default function TambahYayasanPage() {
             </div>
           </div>
 
-          {/* INFO CARD */}
           <div
             className={`hidden shrink-0 items-center gap-2.5 rounded-xl border theme-border theme-card px-3 py-2.5 md:flex ${themeSmallShadow}`}
           >
@@ -109,22 +99,15 @@ export default function TambahYayasanPage() {
           </div>
         </div>
 
-        {/* ===================================================
-            FORM
-        =================================================== */}
         <form
           className="space-y-6"
           onSubmit={(event) => {
             event.preventDefault();
           }}
         >
-          {/* =================================================
-              INFORMASI YAYASAN
-          ================================================= */}
           <section
             className={`overflow-hidden rounded-2xl border theme-border theme-card ${themeCardShadow}`}
           >
-            {/* SECTION HEADER */}
             <div className={`border-b ${themeDivider} px-4 py-4 sm:px-6`}>
               <div className="flex items-center gap-3">
                 <div
@@ -145,10 +128,8 @@ export default function TambahYayasanPage() {
               </div>
             </div>
 
-            {/* SECTION CONTENT */}
             <div className="p-4 sm:p-6">
               <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                {/* NAMA YAYASAN */}
                 <FormField
                   label="Nama Yayasan"
                   required
@@ -161,7 +142,6 @@ export default function TambahYayasanPage() {
                   />
                 </FormField>
 
-                {/* KODE YAYASAN */}
                 <FormField
                   label="Kode Yayasan"
                   required
@@ -174,7 +154,6 @@ export default function TambahYayasanPage() {
                   />
                 </FormField>
 
-                {/* KETUA */}
                 <FormField
                   label="Ketua Yayasan"
                   required
@@ -187,7 +166,6 @@ export default function TambahYayasanPage() {
                   />
                 </FormField>
 
-                {/* STATUS */}
                 <FormField label="Status">
                   <select
                     className={selectClass}
@@ -199,7 +177,6 @@ export default function TambahYayasanPage() {
                   </select>
                 </FormField>
 
-                {/* EMAIL */}
                 <FormField
                   label="Email"
                   icon={<Mail size={15} />}
@@ -211,7 +188,6 @@ export default function TambahYayasanPage() {
                   />
                 </FormField>
 
-                {/* TELEPON */}
                 <FormField
                   label="No. Telepon"
                   icon={<Phone size={15} />}
@@ -223,7 +199,6 @@ export default function TambahYayasanPage() {
                   />
                 </FormField>
 
-                {/* WEBSITE */}
                 <FormField
                   label="Website"
                   icon={<Globe size={15} />}
@@ -235,7 +210,6 @@ export default function TambahYayasanPage() {
                   />
                 </FormField>
 
-                {/* LOGO */}
                 <FormField label="Logo Yayasan">
                   <div className="relative">
                     <input
@@ -258,13 +232,9 @@ export default function TambahYayasanPage() {
             </div>
           </section>
 
-          {/* =================================================
-              ALAMAT YAYASAN
-          ================================================= */}
           <section
             className={`overflow-hidden rounded-2xl border theme-border theme-card ${themeCardShadow}`}
           >
-            {/* SECTION HEADER */}
             <div className={`border-b ${themeDivider} px-4 py-4 sm:px-6`}>
               <div className="flex items-center gap-3">
                 <div
@@ -285,10 +255,8 @@ export default function TambahYayasanPage() {
               </div>
             </div>
 
-            {/* SECTION CONTENT */}
             <div className="p-4 sm:p-6">
               <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                {/* PROVINSI */}
                 <FormField
                   label="Provinsi"
                   required
@@ -327,7 +295,6 @@ export default function TambahYayasanPage() {
                   </select>
                 </FormField>
 
-                {/* KABUPATEN */}
                 <FormField
                   label="Kabupaten / Kota"
                   required
@@ -365,7 +332,6 @@ export default function TambahYayasanPage() {
                   </select>
                 </FormField>
 
-                {/* KECAMATAN */}
                 <FormField label="Kecamatan">
                   <input
                     type="text"
@@ -374,7 +340,6 @@ export default function TambahYayasanPage() {
                   />
                 </FormField>
 
-                {/* KELURAHAN */}
                 <FormField label="Kelurahan">
                   <input
                     type="text"
@@ -383,7 +348,6 @@ export default function TambahYayasanPage() {
                   />
                 </FormField>
 
-                {/* KODE POS */}
                 <FormField label="Kode Pos">
                   <input
                     type="text"
@@ -393,7 +357,6 @@ export default function TambahYayasanPage() {
                   />
                 </FormField>
 
-                {/* ALAMAT LENGKAP */}
                 <FormField
                   label="Alamat Lengkap"
                   required
@@ -416,12 +379,8 @@ export default function TambahYayasanPage() {
             </div>
           </section>
 
-          {/* =================================================
-              AKSI
-          ================================================= */}
           <div className={`border-t ${themeDivider} pt-5`}>
             <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
-              {/* INFO */}
               <p className="hidden text-xs theme-text-muted sm:block">
                 <span className="font-bold text-[var(--color-primary)]">
                   *
@@ -429,9 +388,7 @@ export default function TambahYayasanPage() {
                 Field wajib diisi
               </p>
 
-              {/* BUTTON */}
               <div className="flex w-full flex-col-reverse gap-2 sm:w-auto sm:flex-row">
-                {/* BATAL */}
                 <button
                   type="button"
                   onClick={goBack}
@@ -440,7 +397,6 @@ export default function TambahYayasanPage() {
                   Batal
                 </button>
 
-                {/* SIMPAN */}
                 <button
                   type="submit"
                   className={`flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-6 py-2.5 text-sm font-semibold text-[var(--color-card)] ${themeSmallShadow} transition-all duration-200 hover:opacity-90 hover:shadow-md active:scale-[0.98] sm:w-auto`}
@@ -457,9 +413,6 @@ export default function TambahYayasanPage() {
   );
 }
 
-/* ================================================================
-   FORM FIELD COMPONENT
-================================================================ */
 
 function FormField({
   label,
@@ -491,9 +444,6 @@ function FormField({
   );
 }
 
-/* ================================================================
-   THEME HELPERS
-================================================================ */
 
 const themeCardShadow =
   "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
@@ -516,9 +466,6 @@ const themeInfoSurface =
 const themeDivider =
   "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
 
-/* ================================================================
-   INPUT STYLE
-================================================================ */
 
 const inputClass = `
   w-full
@@ -538,9 +485,6 @@ const inputClass = `
   ${themeFocus}
 `.replace(/\s+/g, " ").trim();
 
-/* ================================================================
-   SELECT STYLE
-================================================================ */
 
 const selectClass = `
   w-full

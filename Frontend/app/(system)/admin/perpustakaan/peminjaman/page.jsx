@@ -28,9 +28,6 @@ import {
   kembalikanBuku,
 } from "@/services/perpustakaan.service";
 
-/* =========================================================
-   THEME HELPERS
-========================================================= */
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]";
@@ -45,9 +42,6 @@ const themeCardShadow =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]";
 
-/* =========================================================
-   HELPERS
-========================================================= */
 
 function unwrapValue(response) {
   if (response?.data !== undefined) return response.data;
@@ -199,9 +193,6 @@ function getErrorMessage(error, fallback) {
   return error?.message || error?.error || fallback;
 }
 
-/* =========================================================
-   BADGES
-========================================================= */
 
 function StatusBadge({ status }) {
   if (status === "Dipinjam") {
@@ -258,9 +249,6 @@ function StatCard({ icon: Icon, label, value, tone = "primary" }) {
   );
 }
 
-/* =========================================================
-   RETURN CONFIRMATION — tetap modal
-========================================================= */
 
 function ReturnModal({ loan, onClose, onConfirm, saving }) {
   if (!loan) return null;
@@ -317,9 +305,6 @@ function ReturnModal({ loan, onClose, onConfirm, saving }) {
   );
 }
 
-/* =========================================================
-   MAIN PAGE
-========================================================= */
 
 export default function PeminjamanPage() {
   const router = useRouter();
@@ -434,7 +419,6 @@ export default function PeminjamanPage() {
 
         <main className="min-w-0 flex-1 overflow-y-auto">
           <div className="w-full px-4 py-5 sm:px-6 lg:px-8">
-            {/* HEADER */}
             <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex items-center gap-3">
                 <div className="theme-primary flex h-12 w-12 items-center justify-center rounded-xl">
@@ -498,7 +482,6 @@ export default function PeminjamanPage() {
               </div>
             )}
 
-            {/* STATISTIK */}
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
               <StatCard
                 icon={Library}
@@ -526,7 +509,6 @@ export default function PeminjamanPage() {
               />
             </div>
 
-            {/* FILTER */}
             <div className="theme-card mt-5 rounded-xl border theme-border p-4 shadow-sm">
               <div className="relative">
                 <Search
@@ -594,7 +576,6 @@ export default function PeminjamanPage() {
               </div>
             </div>
 
-            {/* TABLE */}
             <div className="theme-card mt-5 overflow-hidden rounded-xl border theme-border shadow-sm">
               <div className="flex flex-col gap-1 border-b theme-border px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
@@ -805,7 +786,6 @@ export default function PeminjamanPage() {
         </main>
       </div>
 
-      {/* KONFIRMASI PENGEMBALIAN — tetap modal */}
       <ReturnModal
         loan={returnLoan}
         onClose={() => {

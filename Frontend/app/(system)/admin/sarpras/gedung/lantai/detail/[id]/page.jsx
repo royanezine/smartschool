@@ -23,9 +23,6 @@ import {
   getLantaiByGedung,
 } from "@/services/infrastruktur.service";
 
-// ============================================================
-// THEME HELPERS
-// ============================================================
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -164,9 +161,6 @@ export default function DetailLantaiPage() {
     });
   }
 
-  // ============================================================
-  // LOADING
-  // ============================================================
 
   if (loading) {
     return (
@@ -206,9 +200,6 @@ export default function DetailLantaiPage() {
     );
   }
 
-  // ============================================================
-  // ERROR / DATA TIDAK DITEMUKAN
-  // ============================================================
 
   if (error || !data) {
     return (
@@ -278,7 +269,6 @@ export default function DetailLantaiPage() {
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
-      {/* SIDEBAR */}
       <Sidebar
         active="sarpras"
         setActive={() => {}}
@@ -287,7 +277,6 @@ export default function DetailLantaiPage() {
       />
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        {/* HEADER */}
         <Header
           toggleSidebar={() => {}}
           notifications={[]}
@@ -302,9 +291,6 @@ export default function DetailLantaiPage() {
           <div className="w-full p-4 sm:p-6 lg:p-8">
             <div className="mx-auto w-full max-w-6xl space-y-6">
 
-              {/* ============================================================
-                  HEADER SECTION
-              ============================================================ */}
 
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div>
@@ -338,13 +324,9 @@ export default function DetailLantaiPage() {
                 </button>
               </div>
 
-              {/* ============================================================
-                  OVERVIEW CARDS
-              ============================================================ */}
 
               <div className="grid gap-4 sm:grid-cols-3">
 
-                {/* NAMA */}
                 <div
                   className={`theme-card theme-border group rounded-2xl border p-5 transition-all hover:-translate-y-0.5 ${themeCardShadow} ${themeCardHoverShadow}`}
                 >
@@ -363,7 +345,6 @@ export default function DetailLantaiPage() {
                   </h2>
                 </div>
 
-                {/* GEDUNG */}
                 <div
                   className={`theme-card theme-border group rounded-2xl border p-5 transition-all hover:-translate-y-0.5 ${themeCardShadow} ${themeCardHoverShadow}`}
                 >
@@ -388,7 +369,6 @@ export default function DetailLantaiPage() {
                   )}
                 </div>
 
-                {/* JUMLAH KELAS */}
                 <div
                   className={`theme-card theme-border group rounded-2xl border p-5 transition-all hover:-translate-y-0.5 ${themeCardShadow} ${themeCardHoverShadow}`}
                 >
@@ -412,9 +392,6 @@ export default function DetailLantaiPage() {
                 </div>
               </div>
 
-              {/* ============================================================
-                  DETAIL INFORMATION
-              ============================================================ */}
 
               <div
                 className={`theme-card theme-border overflow-hidden rounded-2xl border ${themeCardShadow}`}
@@ -433,7 +410,6 @@ export default function DetailLantaiPage() {
 
                 <div className="grid sm:grid-cols-2">
 
-                  {/* ID */}
                   <div className="theme-border flex gap-4 border-b p-5 sm:border-r">
                     <div
                       className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${themeSoftSurface} theme-text-secondary`}
@@ -452,7 +428,6 @@ export default function DetailLantaiPage() {
                     </div>
                   </div>
 
-                  {/* GEDUNG ID */}
                   <div className="theme-border flex gap-4 border-b p-5">
                     <div
                       className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${themePrimarySoft} text-[var(--color-primary)]`}
@@ -471,7 +446,6 @@ export default function DetailLantaiPage() {
                     </div>
                   </div>
 
-                  {/* TANGGAL */}
                   <div className="theme-border flex gap-4 border-b p-5 sm:border-r sm:border-b-0">
                     <div
                       className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${themeInfoSurface} theme-info`}
@@ -490,7 +464,6 @@ export default function DetailLantaiPage() {
                     </div>
                   </div>
 
-                  {/* TOTAL KELAS */}
                   <div className="flex gap-4 p-5">
                     <div
                       className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${themeSuccessSurface} theme-success`}
@@ -511,9 +484,6 @@ export default function DetailLantaiPage() {
                 </div>
               </div>
 
-              {/* ============================================================
-                  KELAS TABLE
-              ============================================================ */}
 
               <div
                 className={`theme-card theme-border overflow-hidden rounded-2xl border ${themeCardShadow}`}

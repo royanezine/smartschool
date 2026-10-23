@@ -31,9 +31,6 @@ import {
   X,
 } from "lucide-react";
 
-/* =========================================================
-   THEME HELPERS
-========================================================= */
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -95,9 +92,6 @@ const themeDangerBorder =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-/* =========================================================
-   HELPERS
-========================================================= */
 
 function normalizeObjectResponse(response) {
   if (!response) return null;
@@ -161,9 +155,6 @@ function formatDecimal(value) {
   return Number.isNaN(number) ? 0 : number;
 }
 
-/* =========================================================
-   API
-========================================================= */
 
 async function getUjianById(id) {
   if (!id) throw new Error("ID ujian tidak ditemukan.");
@@ -209,9 +200,6 @@ async function submitUjian(sesiId, jawaban) {
   });
 }
 
-/* =========================================================
-   STORAGE
-========================================================= */
 
 function saveHasilUjian(
   ujianId,
@@ -324,9 +312,6 @@ function saveHasilUjian(
   return payload;
 }
 
-/* =========================================================
-   PAGE
-========================================================= */
 
 export default function UjianPage() {
   const router = useRouter();
@@ -368,9 +353,6 @@ export default function UjianPage() {
   const timerRef = useRef(null);
   const autoSubmitRef = useRef(false);
 
-  /* -------------------------------------------------------
-     LOAD UJIAN
-  ------------------------------------------------------- */
 
   const loadUjian = useCallback(async () => {
     if (!id) {
@@ -454,9 +436,6 @@ export default function UjianPage() {
   };
 }, [loadUjian]);
 
-  /* -------------------------------------------------------
-     START UJIAN
-  ------------------------------------------------------- */
 
   const handleOpenStart = () => {
     setToken("");
@@ -517,9 +496,6 @@ export default function UjianPage() {
     }
   };
 
-  /* -------------------------------------------------------
-     BUILD PAYLOAD
-  ------------------------------------------------------- */
 
   const buildSubmitPayload = useCallback(() => {
     return soal.map((item) => {
@@ -537,9 +513,6 @@ export default function UjianPage() {
     });
   }, [soal, jawaban]);
 
-  /* -------------------------------------------------------
-     AUTO SUBMIT
-  ------------------------------------------------------- */
 
   const handleAutoSubmit = useCallback(
     async () => {
@@ -604,9 +577,6 @@ export default function UjianPage() {
     ]
   );
 
-  /* -------------------------------------------------------
-     TIMER
-  ------------------------------------------------------- */
 
   useEffect(() => {
     if (
@@ -675,9 +645,6 @@ export default function UjianPage() {
     handleAutoSubmit,
   ]);
 
-  /* -------------------------------------------------------
-     ANSWER & NAV
-  ------------------------------------------------------- */
 
   const pilihJawaban = (
     soalId,
@@ -723,9 +690,6 @@ export default function UjianPage() {
     }, 50);
   };
 
-  /* -------------------------------------------------------
-     SUBMIT
-  ------------------------------------------------------- */
 
   const handleSubmit = () => {
     if (
@@ -797,9 +761,6 @@ export default function UjianPage() {
     }
   };
 
-  /* -------------------------------------------------------
-     STATS
-  ------------------------------------------------------- */
 
   const answeredCount = useMemo(
     () =>
@@ -846,9 +807,6 @@ export default function UjianPage() {
         ? `${themeWarningSurface} ${themeWarningBorder} text-[var(--color-warning)]`
         : `${themeInfoSurface} ${themeInfoBorder} text-[var(--color-info)]`;
 
-  /* =======================================================
-     LOADING
-  ======================================================= */
 
   if (loading) {
     return (
@@ -875,9 +833,6 @@ export default function UjianPage() {
     );
   }
 
-  /* =======================================================
-     ERROR PAGE
-  ======================================================= */
 
   if (error && !ujian) {
     return (
@@ -911,15 +866,11 @@ export default function UjianPage() {
     );
   }
 
-  /* =======================================================
-     MAIN
-  ======================================================= */
 
   return (
     <div className="theme-page theme-text min-h-full">
       <div className="mx-auto w-full max-w-[1500px] p-3 sm:p-4 md:p-6 lg:p-8">
         <div className="space-y-4">
-          {/* GLOBAL ERROR */}
           {error && (
             <div
               className={`flex items-start gap-3 rounded-xl border ${themeDangerBorder} ${themeDangerSurface} p-3 text-sm`}
@@ -943,7 +894,6 @@ export default function UjianPage() {
             </div>
           )}
 
-          {/* HEADER UJIAN */}
           <section
             className={`theme-card ${themeCardShadow} rounded-2xl border ${themeNeutralBorder}`}
           >
@@ -1022,7 +972,6 @@ export default function UjianPage() {
             </div>
           </section>
 
-          {/* BEFORE START */}
           {!sesi && (
             <section
               className={`theme-card ${themeCardShadow} overflow-hidden rounded-2xl border ${themeNeutralBorder}`}
@@ -1089,10 +1038,8 @@ export default function UjianPage() {
             </section>
           )}
 
-          {/* ONGOING */}
           {sesi && !isFinished && (
             <>
-              {/* STICKY HEADER */}
               <section
                 className={`theme-card sticky top-0 z-30 rounded-2xl border ${themeNeutralBorder} bg-[color-mix(in_srgb,var(--color-card)_95%,transparent)] ${themeSmallShadow} backdrop-blur`}
               >
@@ -1181,7 +1128,6 @@ export default function UjianPage() {
                 </div>
               </section>
 
-              {/* WARNING */}
               {showTimeWarning && (
                 <div
                   className={`flex items-center gap-3 rounded-xl border ${themeWarningBorder} ${themeWarningSurface} p-3 text-[var(--color-warning)]`}
@@ -1199,15 +1145,12 @@ export default function UjianPage() {
                 </div>
               )}
 
-              {/* CONTENT GRID */}
               <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
-                {/* SOAL */}
                 <div className="min-w-0 lg:col-span-4">
                   {currentSoal && (
                     <section
                       className={`soal-container theme-card ${themeCardShadow} rounded-2xl border ${themeNeutralBorder} p-4 sm:p-5 md:p-6`}
                     >
-                      {/* HEAD */}
                       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
                         <div className="flex items-center gap-2">
                           <div
@@ -1260,7 +1203,6 @@ export default function UjianPage() {
                         </div>
                       </div>
 
-                      {/* QUESTION */}
                       <div className="mb-6">
                         <div className="mb-2 flex flex-wrap items-center gap-2">
                           <span className="theme-text-muted text-[10px] font-semibold uppercase tracking-wider">
@@ -1295,7 +1237,6 @@ export default function UjianPage() {
                         </p>
                       </div>
 
-                      {/* PILIHAN GANDA */}
                       {currentSoal?.jenisSoal ===
                         "pilihan_ganda" && (
                         <div className="space-y-2.5">
@@ -1379,7 +1320,6 @@ export default function UjianPage() {
                         </div>
                       )}
 
-                      {/* BENAR SALAH */}
                       {currentSoal?.jenisSoal ===
                         "benar_salah" && (
                         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -1439,7 +1379,6 @@ export default function UjianPage() {
                         </div>
                       )}
 
-                      {/* ESAI */}
                       {currentSoal?.jenisSoal ===
                         "esai" && (
                         <div>
@@ -1481,7 +1420,6 @@ export default function UjianPage() {
                         </div>
                       )}
 
-                      {/* NAV */}
                       <div
                         className={`mt-6 flex items-center justify-between gap-2 border-t ${themeDivider} pt-4`}
                       >
@@ -1527,7 +1465,6 @@ export default function UjianPage() {
                   )}
                 </div>
 
-                {/* SIDE NAV */}
                 <aside className="min-w-0 lg:col-span-1">
                   <div
                     className={`theme-card ${themeSmallShadow} sticky top-24 rounded-2xl border ${themeNeutralBorder} p-3 sm:p-4`}
@@ -1654,9 +1591,6 @@ export default function UjianPage() {
         </div>
       </div>
 
-      {/* ===================================================
-          MODAL TOKEN
-      =================================================== */}
 
       {showTokenModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[color-mix(in_srgb,var(--color-text)_55%,transparent)] p-4 backdrop-blur-sm">
@@ -1800,9 +1734,6 @@ export default function UjianPage() {
         </div>
       )}
 
-      {/* ===================================================
-          MODAL KONFIRMASI
-      =================================================== */}
 
       {showConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[color-mix(in_srgb,var(--color-text)_55%,transparent)] p-4 backdrop-blur-sm">
@@ -1898,9 +1829,6 @@ export default function UjianPage() {
   );
 }
 
-/* =========================================================
-   SUB-COMPONENTS
-========================================================= */
 
 function StatChip({
   icon: Icon,

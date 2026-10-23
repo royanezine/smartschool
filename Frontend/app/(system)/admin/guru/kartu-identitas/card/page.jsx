@@ -20,11 +20,8 @@ import {
 
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
+import { getUserById } from "@/services/user.service";
 
-/* =========================================================
-   DATA GURU
-   Nanti tinggal diganti dengan data dari API
-========================================================= */
 
 const DEFAULT_GURU = [
   {
@@ -64,9 +61,6 @@ const DEFAULT_GURU = [
 ];
 
 
-/* =========================================================
-   INITIAL
-========================================================= */
 
 function getInitials(nama) {
   return nama
@@ -79,9 +73,6 @@ function getInitials(nama) {
 }
 
 
-/* =========================================================
-   QR CODE PLACEHOLDER
-========================================================= */
 
 function QRCodePlaceholder() {
   const patterns = [
@@ -108,9 +99,6 @@ function QRCodePlaceholder() {
 }
 
 
-/* =========================================================
-   CARD DEPAN GURU
-========================================================= */
 
 function TeacherCard({ guru }) {
   return (
@@ -119,7 +107,6 @@ function TeacherCard({ guru }) {
       className="relative w-[430px] max-w-full aspect-[1.586/1] rounded-2xl overflow-hidden theme-card shadow-[0_10px_30px_color-mix(in_srgb,var(--color-text)_14%,transparent)] theme-border print:shadow-none print:border-0"
     >
 
-      {/* BACKGROUND */}
 
       <div className="absolute inset-0 overflow-hidden">
 
@@ -136,12 +123,10 @@ function TeacherCard({ guru }) {
       </div>
 
 
-      {/* CONTENT */}
 
       <div className="relative z-10 h-full flex flex-col p-5">
 
 
-        {/* HEADER */}
 
         <div className="flex items-center gap-3">
 
@@ -158,7 +143,7 @@ function TeacherCard({ guru }) {
           <div>
 
             <p className="text-[9px] font-bold uppercase tracking-[0.18em] theme-text-muted">
-              SMARTSCHOOL
+              {guru.sekolahNama || "SMARTSCHOOL"}
             </p>
 
             <h3 className="text-sm font-extrabold theme-text">
@@ -174,12 +159,10 @@ function TeacherCard({ guru }) {
         </div>
 
 
-        {/* MAIN */}
 
         <div className="flex-1 flex items-center gap-4 mt-2">
 
 
-          {/* FOTO */}
 
           <div className="relative w-[92px] h-[115px] rounded-xl overflow-hidden border-4 border-[var(--color-card)] shadow-lg bg-gradient-to-br from-[var(--color-border-soft)] to-[var(--color-card-soft)] flex-shrink-0">
 
@@ -194,7 +177,6 @@ function TeacherCard({ guru }) {
           </div>
 
 
-          {/* DATA GURU */}
 
           <div className="min-w-0">
 
@@ -255,7 +237,6 @@ function TeacherCard({ guru }) {
         </div>
 
 
-        {/* FOOTER */}
 
         <div className="flex items-end justify-between">
 
@@ -273,13 +254,10 @@ function TeacherCard({ guru }) {
 
 
           <div className="flex flex-col items-center">
-
             <QRCodePlaceholder />
-
             <span className="text-[6px] theme-text-muted mt-1">
-              SCAN TO VERIFY
+              {guru.nip !== "-" ? guru.nip : "IDENTITAS GURU"}
             </span>
-
           </div>
 
         </div>
@@ -287,7 +265,6 @@ function TeacherCard({ guru }) {
       </div>
 
 
-      {/* OFFICIAL */}
 
       <div className="absolute right-4 top-4 z-20">
 
@@ -306,9 +283,6 @@ function TeacherCard({ guru }) {
 }
 
 
-/* =========================================================
-   CARD BELAKANG GURU
-========================================================= */
 
 function TeacherCardBack({ guru }) {
   return (
@@ -317,7 +291,6 @@ function TeacherCardBack({ guru }) {
       className="relative w-[430px] max-w-full aspect-[1.586/1] rounded-2xl overflow-hidden theme-card shadow-[0_10px_30px_color-mix(in_srgb,var(--color-text)_14%,transparent)] theme-border print:shadow-none print:border-0"
     >
 
-      {/* HEADER */}
 
       <div className="h-[30%] theme-primary relative overflow-hidden">
 
@@ -338,12 +311,10 @@ function TeacherCardBack({ guru }) {
       </div>
 
 
-      {/* STRIPE */}
 
       <div className="h-7 bg-[var(--color-text)] mt-3" />
 
 
-      {/* DATA */}
 
       <div className="p-5">
 
@@ -457,7 +428,6 @@ function TeacherCardBack({ guru }) {
         </div>
 
 
-        {/* FOOTER */}
 
         <div className="mt-4 pt-3 border-t theme-border-soft flex items-center justify-between">
 
@@ -491,9 +461,6 @@ function TeacherCardBack({ guru }) {
 }
 
 
-/* =========================================================
-   INFO ITEM
-========================================================= */
 
 function InfoItem({ icon, label, value }) {
   return (
@@ -520,9 +487,6 @@ function InfoItem({ icon, label, value }) {
 }
 
 
-/* =========================================================
-   MAIN PAGE
-========================================================= */
 
 function GuruCardPageContent() {
 
@@ -538,59 +502,64 @@ function GuruCardPageContent() {
   const [loading, setLoading] = useState(true);
 
 
-  /* =======================================================
-     LOAD GURU
-  ======================================================= */
 
   useEffect(() => {
+    let isMounted = true;
 
-    if (!id) {
+    const timer = setTimeout(async () => {
+      if (!id) {
+        if (isMounted) setLoading(false);
+        return;
+      }
 
-      setLoading(false);
+      try {
+        if (isMounted) setLoading(true);
+        const res = await getUserById(id);
+        const data = res?.data ?? res;
 
-      return;
+        if (data && isMounted) {
+          const mapelNama =
+            data.mataPelajaran?.nama ??
+            data.guruMapel?.[0]?.mataPelajaran?.nama ??
+            data.mapel ??
+            "-";
 
-    }
+          setGuru({
+            id: data.id,
+            nama: data.namaLengkap || data.nama || "Tanpa Nama",
+            nip: data.nip || "-",
+            nuptk: data.nuptk || "-",
+            jenisKelamin: data.jenisKelamin || "-",
+            tempatLahir: data.tempatLahir || "-",
+            tanggalLahir: data.tanggalLahir
+              ? new Date(data.tanggalLahir).toLocaleDateString("id-ID")
+              : "-",
+            agama: data.agama || "-",
+            noTelepon: data.noTelepon || "-",
+            email: data.email || "-",
+            alamat: data.alamat || data.alamatDomisili || "-",
+            mapel: mapelNama,
+            jabatan: data.jabatan || "Tenaga Pendidik",
+            status: data.status || "aktif",
+            avatar: data.avatar || null,
+            sekolahNama: data.sekolah?.nama || "SMARTSCHOOL",
+          });
+        }
+      } catch (error) {
+        console.error("Gagal mengambil data guru dari API:", error);
+        if (isMounted) setGuru(null);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    }, 0);
 
-
-    try {
-
-      const savedData =
-        localStorage.getItem("smartschool_guru");
-
-      const guruList = savedData
-        ? JSON.parse(savedData)
-        : DEFAULT_GURU;
-
-
-      const found = guruList.find(
-        (item) =>
-          String(item.id) === String(id)
-      );
-
-
-      setGuru(found || null);
-
-    } catch (error) {
-
-      console.error(
-        "Gagal mengambil data guru:",
-        error
-      );
-
-      setGuru(null);
-
-    }
-
-
-    setLoading(false);
-
+    return () => {
+      isMounted = false;
+      clearTimeout(timer);
+    };
   }, [id]);
 
 
-  /* =======================================================
-     PRINT
-  ======================================================= */
 
   const handlePrint = () => {
 
@@ -599,9 +568,6 @@ function GuruCardPageContent() {
   };
 
 
-  /* =======================================================
-     LOADING
-  ======================================================= */
 
   if (loading) {
 
@@ -651,9 +617,6 @@ function GuruCardPageContent() {
   }
 
 
-  /* =======================================================
-     NOT FOUND
-  ======================================================= */
 
   if (!guru) {
 
@@ -735,16 +698,12 @@ function GuruCardPageContent() {
   }
 
 
-  /* =======================================================
-     PAGE
-  ======================================================= */
 
   return (
 
     <div className="flex h-screen w-full theme-page overflow-hidden">
 
 
-      {/* SIDEBAR */}
 
       <Sidebar
         active="guru"
@@ -755,12 +714,10 @@ function GuruCardPageContent() {
       />
 
 
-      {/* CONTENT */}
 
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
 
 
-        {/* HEADER */}
 
         <div className="print:hidden">
 
@@ -779,16 +736,12 @@ function GuruCardPageContent() {
         </div>
 
 
-        {/* MAIN */}
 
         <main className="flex-1 overflow-y-auto">
 
           <div className="p-4 sm:p-6 lg:p-8">
 
 
-            {/* =================================================
-                PAGE HEADER
-            ================================================= */}
 
             <div className="print:hidden flex items-center justify-between gap-4 flex-wrap mb-7">
 
@@ -852,14 +805,10 @@ function GuruCardPageContent() {
             </div>
 
 
-            {/* =================================================
-                CARD PREVIEW
-            ================================================= */}
 
             <div className="bg-[var(--color-card)] rounded-2xl border theme-border shadow-[0_1px_3px_color-mix(in_srgb,var(--color-text)_8%,transparent)] overflow-hidden">
 
 
-              {/* HEADER PREVIEW */}
 
               <div className="print:hidden px-5 py-4 border-b theme-border-soft">
 
@@ -884,14 +833,12 @@ function GuruCardPageContent() {
               </div>
 
 
-              {/* CARDS */}
 
               <div className="p-5 sm:p-8 lg:p-10">
 
                 <div className="flex flex-col xl:flex-row items-center justify-center gap-8 xl:gap-12">
 
 
-                  {/* DEPAN */}
 
                   <div className="w-full flex flex-col items-center gap-3">
 
@@ -913,7 +860,6 @@ function GuruCardPageContent() {
                   </div>
 
 
-                  {/* BELAKANG */}
 
                   <div className="w-full flex flex-col items-center gap-3">
 
@@ -941,9 +887,6 @@ function GuruCardPageContent() {
             </div>
 
 
-            {/* =================================================
-                INFORMASI GURU
-            ================================================= */}
 
             <div className="print:hidden mt-5 bg-[var(--color-card)] rounded-xl border theme-border shadow-[0_1px_3px_color-mix(in_srgb,var(--color-text)_8%,transparent)] overflow-hidden">
 
@@ -1042,9 +985,6 @@ function GuruCardPageContent() {
             </div>
 
 
-            {/* =================================================
-                FOOTER BUTTON
-            ================================================= */}
 
             <div className="print:hidden flex items-center justify-between mt-5 pb-4">
 
@@ -1078,9 +1018,6 @@ function GuruCardPageContent() {
       </div>
 
 
-      {/* =====================================================
-          PRINT
-      ===================================================== */}
 
       <style jsx global>{`
 

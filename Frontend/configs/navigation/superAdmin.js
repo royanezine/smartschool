@@ -13,11 +13,6 @@ import {
   UserCog,
 } from "lucide-react";
 
-/**
- * Konfigurasi menu untuk role "super-admin".
- * Tinggal edit array `menuSections` di sini kalau mau nambah/kurang menu,
- * tanpa nyentuh SidebarView.jsx atau Sidebar.jsx sama sekali.
- */
 export const superadminSidebarConfig = {
   basePath: "/super-admin",
   brandName: "Super Admin",

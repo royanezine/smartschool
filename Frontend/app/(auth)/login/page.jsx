@@ -33,10 +33,11 @@ const features = [
   { icon: ICONS.kolaborasi, label: "Kolaborasi", secondLine: "Sekolah", width: undefined, padLeft: 54 },
 ];
 
+const glow = "[text-shadow:0_0_14px_rgba(255,255,255,0.95),0_0_4px_rgba(255,255,255,0.9)]";
+
 export default function LoginPage() {
   return (
     <main className={`${jakarta.className} relative isolate min-h-screen overflow-hidden bg-[#EAF3FF]`}>
-      
       <style>{`
         :root { --u: 1px; }
         @media (min-width: 1024px) {
@@ -47,7 +48,6 @@ export default function LoginPage() {
         }
       `}</style>
 
-      {/* 1. BACKGROUND SEKOLAH (Tanpa overlay apapun) */}
       <div className="absolute inset-0 -z-30">
         <Image
           src="/hero/hero.png"
@@ -59,22 +59,22 @@ export default function LoginPage() {
         />
       </div>
 
-      {/* ================= HEADER KIRI ATAS ================= */}
-      <div 
+      <div className="absolute inset-0 -z-20 bg-gradient-to-r from-white/80 via-white/50 to-white/0 lg:via-white/55" />
+      <div className="absolute inset-x-0 top-0 -z-20 h-44 bg-gradient-to-b from-white/70 to-transparent" />
+
+      <div
         className="ss-logo absolute z-10 flex items-center"
         style={{ left: 20, top: 20, gap: u(16) }}
       >
-        {/* Tombol Back: Dibuat putih solid agar sangat kelihatan */}
         <Link
           href="/"
           aria-label="Kembali"
-          className="flex items-center justify-center rounded-full bg-white text-[#0F2A66] shadow-md transition-all hover:bg-gray-100"
+          className="flex items-center justify-center rounded-full bg-white text-[#0F2A66] shadow-lg shadow-[#0F2A66]/15 ring-1 ring-[#0F2A66]/10 transition-all hover:bg-[#0F2A66] hover:text-white"
           style={{ width: u(48), height: u(48) }}
         >
           <ArrowLeft style={{ width: u(24), height: u(24) }} strokeWidth={2.5} />
         </Link>
 
-        {/* Logo */}
         <Link
           href="/"
           aria-label="Smart School Beranda"
@@ -86,29 +86,25 @@ export default function LoginPage() {
             width={48}
             height={48}
             priority
-            className="object-contain"
+            className="object-contain drop-shadow-[0_2px_6px_rgba(255,255,255,0.9)]"
             style={{ width: u(48), height: u(48) }}
           />
           <span
-            className="font-extrabold text-[#0F2A66]"
+            className={`font-extrabold text-[#0B1F4F] ${glow}`}
             style={{ fontSize: u(24), letterSpacing: "-0.01em", lineHeight: 1 }}
           >
-            SMART <span className="text-[#2878F0]">SCHOOL</span>
+            SMART <span className="text-[#1F6AE0]">SCHOOL</span>
           </span>
         </Link>
       </div>
 
-      {/* 4. KONTEN UTAMA */}
       <div className="relative flex min-h-screen w-full items-center justify-center px-5 pb-8 pt-24 lg:justify-start lg:p-0">
-        
-        {/* ================= KIRI ================= */}
         <section
           className="ss-left hidden shrink-0 flex-col lg:flex"
           style={{ width: "58.8%", paddingLeft: "9.1%" }}
         >
-          {/* Badge: Dibuat Putih Solid dengan teks biru agar sangat jelas */}
           <div
-            className="flex w-fit items-center rounded-full bg-white font-bold text-[#0F2A66] shadow-sm"
+            className="flex w-fit items-center rounded-full bg-white font-bold text-[#0B1F4F] shadow-lg shadow-[#0F2A66]/15 ring-1 ring-[#0F2A66]/10"
             style={{
               height: u(42),
               padding: `0 ${u(20)}`,
@@ -116,13 +112,16 @@ export default function LoginPage() {
               fontSize: u(16),
             }}
           >
-            <GraduationCap strokeWidth={2.5} style={{ width: u(22), height: u(22) }} className="text-[#2878F0]"/>
+            <GraduationCap
+              strokeWidth={2.5}
+              style={{ width: u(22), height: u(22) }}
+              className="text-[#1F6AE0]"
+            />
             <span>Sistem Informasi Sekolah</span>
           </div>
 
-          {/* Judul: Shadow hitam tipis agar terpisah dari jendela gedung */}
           <h1
-            className="font-extrabold text-[#0F2A66] drop-shadow-[0_2px_4px_rgba(0,0,0,0.15)]"
+            className={`font-extrabold text-[#0B1F4F] ${glow}`}
             style={{
               marginTop: u(16),
               fontSize: `clamp(40px, ${u(64)}, 64px)`,
@@ -132,16 +131,15 @@ export default function LoginPage() {
           >
             Selamat Datang
             <br />
-            <span className="text-[#2878F0]">Kembali!</span>
+            <span className="text-[#1F6AE0]">Kembali!</span>
           </h1>
 
-          {/* Deskripsi: Warna gelap dan bold */}
           <p
-            className="font-bold text-[#0F2A66] drop-shadow-[0_1px_3px_rgba(0,0,0,0.1)]"
-            style={{ 
-              marginTop: u(8), 
-              fontSize: `clamp(14px, ${u(18)}, 18px)`, 
-              lineHeight: `clamp(24px, ${u(30)}, 30px)` 
+            className={`font-bold text-[#0B1F4F] ${glow}`}
+            style={{
+              marginTop: u(8),
+              fontSize: `clamp(14px, ${u(18)}, 18px)`,
+              lineHeight: `clamp(24px, ${u(30)}, 30px)`,
             }}
           >
             Masuk ke akun Anda untuk mengelola seluruh aktivitas
@@ -149,68 +147,61 @@ export default function LoginPage() {
             sekolah dengan mudah, aman, dan efisien.
           </p>
 
-          {/* Fitur */}
           <div className="flex items-start" style={{ marginTop: u(35) }}>
             {features.map(({ icon, label, secondLine, width, padLeft }, index) => (
+              <div
+                key={label}
+                className="relative shrink-0"
+                style={{
+                  width: width ? u(width) : "auto",
+                  paddingLeft: u(padLeft),
+                }}
+              >
+                {index !== 0 && (
+                  <div
+                    className="absolute left-0 bg-[#0B1F4F]/40"
+                    style={{ top: u(11), width: 1, height: u(88) }}
+                  />
+                )}
+
                 <div
-                  key={label}
-                  className="relative shrink-0"
+                  className="flex items-center justify-center bg-white text-[#1F6AE0] shadow-lg shadow-[#0F2A66]/15 ring-1 ring-[#0F2A66]/10"
                   style={{
-                    width: width ? u(width) : "auto",
-                    paddingLeft: u(padLeft),
+                    width: u(52),
+                    height: u(52),
+                    borderRadius: u(14),
                   }}
                 >
-                  {/* Garis Pemisah: Lebih Gelap */}
-                  {index !== 0 && (
-                    <div
-                      className="absolute left-0 bg-[#0F2A66]/30"
-                      style={{ top: u(11), width: 1, height: u(88) }}
-                    />
-                  )}
-
-                  {/* Kotak Ikon: Putih Solid (Sangat kontras, tidak membaur) */}
-                  <div
-                    className="flex items-center justify-center bg-white text-[#2878F0] shadow-md"
-                    style={{
-                      width: u(52),
-                      height: u(52),
-                      borderRadius: u(14),
-                    }}
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    aria-hidden="true"
+                    style={{ width: u(28), height: u(28) }}
                   >
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                      aria-hidden="true"
-                      style={{ width: u(28), height: u(28) }}
-                    >
-                      <path d={icon} />
-                    </svg>
-                  </div>
-
-                  {/* Teks Fitur: Bold dan tegas */}
-                  <p
-                    className="font-bold text-[#0F2A66] drop-shadow-[0_1px_2px_rgba(0,0,0,0.1)]"
-                    style={{
-                      marginTop: u(10),
-                      fontSize: u(15),
-                      lineHeight: u(20),
-                    }}
-                  >
-                    {label}
-                    <br />
-                    {secondLine}
-                  </p>
+                    <path d={icon} />
+                  </svg>
                 </div>
-              )
-            )}
+
+                <p
+                  className={`font-bold text-[#0B1F4F] ${glow}`}
+                  style={{
+                    marginTop: u(10),
+                    fontSize: u(15),
+                    lineHeight: u(20),
+                  }}
+                >
+                  {label}
+                  <br />
+                  {secondLine}
+                </p>
+              </div>
+            ))}
           </div>
         </section>
 
-        {/* ================= KANAN ================= */}
         <section className="ss-right flex w-full justify-center lg:w-[41.2%] lg:justify-start">
           <LoginForm />
         </section>
-        
       </div>
     </main>
   );

@@ -8,9 +8,6 @@ import Header from "@/app/components/Header";
 import AuthGuard from "@/app/components/auth/AuthGuard";
 import { getSessionUser, subscribeAuth } from "@/lib/auth";
 
-/* =========================================================
-   USER HELPER
-========================================================= */
 
 function getUsername(user) {
   if (!user) {
@@ -43,9 +40,6 @@ function getUsername(user) {
   return "Siswa";
 }
 
-/* =========================================================
-   INITIAL AVATAR
-========================================================= */
 
 function getInitials(name) {
   if (!name) {
@@ -73,9 +67,6 @@ function getInitials(name) {
   ).toUpperCase();
 }
 
-/* =========================================================
-   ACTIVE MENU
-========================================================= */
 
 function getActiveMenu(pathname = "") {
   const path = pathname.toLowerCase();
@@ -127,9 +118,6 @@ function getActiveMenu(pathname = "") {
   return "dashboard";
 }
 
-/* =========================================================
-   LAYOUT
-========================================================= */
 
 export default function SiswaLayout({
   children,
@@ -144,15 +132,10 @@ export default function SiswaLayout({
     email: "Akun siswa",
   });
 
-  /* =======================================================
-     LOAD USER
-  ======================================================= */
 
   useEffect(() => {
     setMounted(true);
 
-    // Sinkronkan identitas dari sesi aktif setiap kali berubah
-    // (tab ini maupun tab lain), agar tidak menampilkan data lama.
     const loadUser = () => {
       const sessionUser = getSessionUser();
 
@@ -179,8 +162,6 @@ export default function SiswaLayout({
 
     loadUser();
 
-    // Sinkronkan pada perubahan sesi tab ini maupun tab lain (satu sesi
-    // per browser pada produksi), agar nama/email tidak tertinggal.
     const unsubscribe = subscribeAuth(loadUser);
 
     return () => {
@@ -188,18 +169,12 @@ export default function SiswaLayout({
     };
   }, []);
 
-  /* =======================================================
-     ACTIVE MENU
-  ======================================================= */
 
   const activeMenu = useMemo(
     () => getActiveMenu(pathname),
     [pathname]
   );
 
-  /* =======================================================
-     AVATAR
-  ======================================================= */
 
   const avatar = getInitials(
     user.username
@@ -208,23 +183,14 @@ export default function SiswaLayout({
   return (
     <AuthGuard allowedRoles={["siswa"]}>
       <div className="theme-page flex h-screen w-full overflow-hidden">
-        {/* ===================================================
-            SIDEBAR
-        =================================================== */}
 
         <Sidebar
           role="siswa"
           activeMenu={activeMenu}
         />
 
-        {/* ===================================================
-            MAIN
-        =================================================== */}
 
         <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-          {/* =================================================
-              HEADER
-          ================================================= */}
 
           <div className="shrink-0">
             <Header
@@ -236,9 +202,6 @@ export default function SiswaLayout({
             />
           </div>
 
-          {/* =================================================
-              PAGE CONTENT
-          ================================================= */}
 
           <main
             className={`

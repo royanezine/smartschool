@@ -29,9 +29,6 @@ import {
   deleteShiftKerja,
 } from "@/services/shiftKerja.service";
 
-/* =========================================================
-   HELPERS
-========================================================= */
 
 function formatTime(value) {
   if (!value) return "--:--";
@@ -86,10 +83,6 @@ function getLateLimit(shift) {
   ).padStart(2, "0")}`;
 }
 
-/* =========================================================
-   NORMALIZE DATA
-   Mengikuti field ShiftKerja dari service dan BE.
-========================================================= */
 
 function normalizeShift(data) {
   if (!data || typeof data !== "object" || Array.isArray(data)) {
@@ -128,9 +121,6 @@ function normalizeShift(data) {
   };
 }
 
-/* =========================================================
-   PAGE
-========================================================= */
 
 export default function MasterShiftDetailPage() {
   const router = useRouter();
@@ -147,9 +137,6 @@ export default function MasterShiftDetailPage() {
 
   const listUrl = "/admin/presensi/master-shift";
 
-  /* =======================================================
-     LOAD DETAIL
-  ======================================================= */
 
   const loadShift = useCallback(async () => {
     if (!shiftId) {
@@ -163,7 +150,6 @@ export default function MasterShiftDetailPage() {
     setErrorMessage("");
 
     try {
-      // Service sudah membuka response.data dan menormalisasi data.
       const response = await getShiftKerjaById(shiftId);
       const mappedShift = normalizeShift(response);
 
@@ -194,9 +180,6 @@ export default function MasterShiftDetailPage() {
     loadShift();
   }, [loadShift]);
 
-  /* =======================================================
-     DELETE
-  ======================================================= */
 
   const handleDelete = async () => {
     if (!shift || deleting) return;
@@ -228,9 +211,6 @@ export default function MasterShiftDetailPage() {
     }
   };
 
-  /* =======================================================
-     LOADING
-  ======================================================= */
 
   if (loading) {
     return (
@@ -253,9 +233,6 @@ export default function MasterShiftDetailPage() {
     );
   }
 
-  /* =======================================================
-     NOT FOUND
-  ======================================================= */
 
   if (!shift) {
     return (
@@ -299,16 +276,10 @@ export default function MasterShiftDetailPage() {
     );
   }
 
-  /* =======================================================
-     DERIVED DATA
-  ======================================================= */
 
   const isActive = shift.status === "Aktif";
   const lateLimit = getLateLimit(shift);
 
-  /* =======================================================
-     RENDER
-  ======================================================= */
 
   return (
     <PageShell>
@@ -342,7 +313,6 @@ export default function MasterShiftDetailPage() {
             </div>
           )}
 
-          {/* HEADER */}
 
           <div className="mb-6 flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
             <div className="flex min-w-0 items-start gap-4">
@@ -418,7 +388,6 @@ export default function MasterShiftDetailPage() {
             </div>
           </div>
 
-          {/* STATISTICS */}
 
           <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5 xl:gap-4">
             <StatCard
@@ -453,11 +422,9 @@ export default function MasterShiftDetailPage() {
             />
           </div>
 
-          {/* CONTENT */}
 
           <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_340px] 2xl:gap-6">
             <div className="space-y-5">
-              {/* SHIFT DETAILS */}
 
               <section className="theme-card overflow-hidden rounded-xl border theme-border shadow-sm">
                 <SectionHeader
@@ -499,7 +466,6 @@ export default function MasterShiftDetailPage() {
                 </div>
               </section>
 
-              {/* JOB CATEGORIES */}
 
               <section className="theme-card overflow-hidden rounded-xl border theme-border shadow-sm">
                 <SectionHeader
@@ -511,7 +477,6 @@ export default function MasterShiftDetailPage() {
                 <EmptyInfo message="Endpoint GET /api/shift-kerja/:id tidak mengembalikan daftar kategori jabatan. Kategori jabatan tidak dapat ditampilkan dari data shift ini." />
               </section>
 
-              {/* CONNECTED USERS */}
 
               <section className="theme-card overflow-hidden rounded-xl border theme-border shadow-sm">
                 <div className="flex items-center justify-between gap-4 border-b theme-border theme-card-soft px-5 py-4">
@@ -557,7 +522,6 @@ export default function MasterShiftDetailPage() {
               </section>
             </div>
 
-            {/* RIGHT COLUMN */}
 
             <aside className="space-y-5 xl:sticky xl:top-6 xl:self-start">
               <section className="theme-card overflow-hidden rounded-xl border theme-border shadow-sm">
@@ -640,9 +604,6 @@ export default function MasterShiftDetailPage() {
   );
 }
 
-/* =========================================================
-   LAYOUT
-========================================================= */
 
 function PageShell({ children }) {
   return (
@@ -657,9 +618,6 @@ function PageShell({ children }) {
   );
 }
 
-/* =========================================================
-   SUB COMPONENTS
-========================================================= */
 
 function SectionHeader({ icon, title, description }) {
   return (

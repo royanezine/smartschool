@@ -1,9 +1,6 @@
 
 import { apiFetch } from "../lib/api";
 
-/* =====================================================
-   HELPER
-===================================================== */
 
 function normalizeJenisSoal(jenisSoal) {
   const jenis = String(jenisSoal ?? "").trim();
@@ -48,12 +45,6 @@ function validateAngka(poin, nomorUrut) {
   };
 }
 
-/**
- * Menyiapkan pilihan dan kunci jawaban berdasarkan jenis soal.
- *
- * Format jawaban benar/salah yang dikirim ke backend:
- * jawabanBenar: "benar" atau "salah"
- */
 function normalizeJawaban(jenisSoal, pilihanInput, jawabanInput) {
   const jenis = normalizeJenisSoal(jenisSoal);
 
@@ -118,17 +109,12 @@ function normalizeJawaban(jenisSoal, pilihanInput, jawabanInput) {
     };
   }
 
-  // Soal esai tidak memerlukan pilihan atau kunci jawaban.
   return {
     pilihan: [],
     jawabanBenar: undefined,
   };
 }
 
-/* =====================================================
-   GET SOAL BY UJIAN
-   GET /api/soal-ujian/ujian/:ujianId
-===================================================== */
 
 export async function getSoalByUjian(ujianId) {
   if (!ujianId) {
@@ -143,10 +129,6 @@ export async function getSoalByUjian(ujianId) {
   );
 }
 
-/* =====================================================
-   GET SOAL BY ID
-   GET /api/soal-ujian/:id
-===================================================== */
 
 export async function getSoalById(id) {
   if (!id) {
@@ -161,10 +143,6 @@ export async function getSoalById(id) {
   );
 }
 
-/* =====================================================
-   CREATE SOAL
-   POST /api/soal-ujian
-===================================================== */
 
 export async function createSoal(payload) {
   if (!payload?.ujianId) {
@@ -206,10 +184,6 @@ export async function createSoal(payload) {
   });
 }
 
-/* =====================================================
-   UPDATE SOAL
-   PUT /api/soal-ujian/:id
-===================================================== */
 
 export async function updateSoal(id, payload) {
   if (!id) {
@@ -232,10 +206,6 @@ export async function updateSoal(id, payload) {
     body.teksSoal = teksSoal;
   }
 
-  /*
-   * Jika jenis soal dikirim, siapkan pilihan dan jawaban
-   * berdasarkan jenis tersebut.
-   */
   if (payload.jenisSoal !== undefined) {
     const jenisSoal = normalizeJenisSoal(payload.jenisSoal);
 
@@ -252,10 +222,6 @@ export async function updateSoal(id, payload) {
       body.jawabanBenar = jawabanBenar;
     }
   } else {
-    /*
-     * Jika jenis soal tidak diubah, kirim hanya properti
-     * yang memang diberikan.
-     */
     if (payload.pilihan !== undefined) {
       body.pilihan = normalizePilihan(payload.pilihan);
     }
@@ -299,10 +265,6 @@ export async function updateSoal(id, payload) {
   );
 }
 
-/* =====================================================
-   DELETE SOAL
-   DELETE /api/soal-ujian/:id
-===================================================== */
 
 export async function deleteSoal(id) {
   if (!id) {

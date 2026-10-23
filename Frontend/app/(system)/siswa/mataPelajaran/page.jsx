@@ -25,9 +25,6 @@ import {
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
-// ============================================================
-// THEME HELPERS
-// ============================================================
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -134,9 +131,6 @@ const themeTextMuted =
 const themeTextPlaceholder =
   "theme-text-placeholder";
 
-// ============================================================
-// ICON MAP
-// ============================================================
 
 const iconMap = {
   matematika: Calculator,
@@ -156,9 +150,6 @@ const iconMap = {
   inggris: Languages,
 };
 
-// ============================================================
-// HELPER
-// ============================================================
 
 function normalizeText(value) {
   return String(value || "")
@@ -167,9 +158,6 @@ function normalizeText(value) {
     .replace(/\s+/g, " ");
 }
 
-// ============================================================
-// EXTRACT ARRAY
-// ============================================================
 
 function extractArray(result) {
   if (Array.isArray(result)) {
@@ -195,9 +183,6 @@ function extractArray(result) {
   return [];
 }
 
-// ============================================================
-// EXTRACT OBJECT
-// ============================================================
 
 function extractObject(result) {
   if (!result) {
@@ -238,9 +223,6 @@ function extractObject(result) {
   return null;
 }
 
-// ============================================================
-// GET CURRENT USER
-// ============================================================
 
 function getCurrentUser() {
   if (typeof window === "undefined") {
@@ -248,10 +230,6 @@ function getCurrentUser() {
   }
 
   try {
-    // Identitas selalu diambil dari sesi aktif (lib/auth), yang
-    // merekonstruksi user dari klaim token bila salinan storage
-    // kosong/rusak/tidak cocok. Nilai "[object Object]" tidak
-    // pernah dianggap sebagai pengguna valid.
     const user = getSessionUser();
 
     if (
@@ -262,7 +240,6 @@ function getCurrentUser() {
       return null;
     }
 
-    // Identitas siswa wajib ada sebelum dipakai memanggil API.
     if (!getUserId(user)) {
       return null;
     }
@@ -278,15 +255,8 @@ function getCurrentUser() {
   }
 }
 
-// ============================================================
-// GET TOKEN
-// ============================================================
 
-// getToken diimpor dari @/lib/auth (single source of truth)
 
-// ============================================================
-// GET HEADERS
-// ============================================================
 
 function getHeaders() {
   const token = getToken();
@@ -303,9 +273,6 @@ function getHeaders() {
   };
 }
 
-// ============================================================
-// GET USER ID
-// ============================================================
 
 function getUserId(user) {
   if (!user) {
@@ -325,9 +292,6 @@ function getUserId(user) {
   );
 }
 
-// ============================================================
-// GET USER KELAS ID
-// ============================================================
 
 function getUserKelasId(user) {
   if (!user) {
@@ -346,9 +310,6 @@ function getUserKelasId(user) {
   );
 }
 
-// ============================================================
-// PAGE
-// ============================================================
 
 export default function MataPelajaranPage() {
   const router = useRouter();
@@ -380,9 +341,6 @@ export default function MataPelajaranPage() {
   const [notificationLoading, setNotificationLoading] =
     useState(true);
 
-  // ==========================================================
-  // FIND KELAS SISWA
-  // ==========================================================
 
   const findKelasSiswa = useCallback(
     async (user) => {
@@ -562,9 +520,6 @@ export default function MataPelajaranPage() {
     []
   );
 
-  // ==========================================================
-  // FETCH NOTIFICATIONS
-  // ==========================================================
 
   const fetchNotifications =
     useCallback(async () => {
@@ -631,9 +586,6 @@ export default function MataPelajaranPage() {
       }
     }, []);
 
-  // ==========================================================
-  // AUTO REFRESH NOTIFICATION
-  // ==========================================================
 
   useEffect(() => {
     fetchNotifications();
@@ -648,9 +600,6 @@ export default function MataPelajaranPage() {
     };
   }, [fetchNotifications]);
 
-  // ==========================================================
-  // FETCH TUGAS
-  // ==========================================================
 
   const fetchJumlahTugas =
     useCallback(
@@ -704,9 +653,6 @@ export default function MataPelajaranPage() {
       []
     );
 
-  // ==========================================================
-  // FETCH JUMLAH TUGAS SEMUA MAPEL
-  // ==========================================================
 
   const fetchJumlahTugasSemuaMapel =
     useCallback(
@@ -737,9 +683,6 @@ export default function MataPelajaranPage() {
       [fetchJumlahTugas]
     );
 
-  // ==========================================================
-  // FETCH MATERI
-  // ==========================================================
 
   const fetchSemuaMateri =
     useCallback(async () => {
@@ -785,9 +728,6 @@ export default function MataPelajaranPage() {
       }
     }, []);
 
-  // ==========================================================
-  // FETCH MATA PELAJARAN
-  // ==========================================================
 
   const fetchMataPelajaran =
     useCallback(async () => {
@@ -1007,9 +947,6 @@ export default function MataPelajaranPage() {
       fetchJumlahTugasSemuaMapel,
     ]);
 
-  // ==========================================================
-  // LOAD USER
-  // ==========================================================
 
   useEffect(() => {
     const user =
@@ -1019,9 +956,6 @@ export default function MataPelajaranPage() {
     setUserLoaded(true);
   }, []);
 
-  // ==========================================================
-  // INITIAL LOAD
-  // ==========================================================
 
   useEffect(() => {
     if (
@@ -1047,9 +981,6 @@ export default function MataPelajaranPage() {
     fetchMataPelajaran,
   ]);
 
-  // ==========================================================
-  // SELECTED MAPEL
-  // ==========================================================
 
   const selected =
     useMemo(
@@ -1065,9 +996,6 @@ export default function MataPelajaranPage() {
       ]
     );
 
-  // ==========================================================
-  // TOTAL
-  // ==========================================================
 
   const totalMateri =
     useMemo(
@@ -1097,9 +1025,6 @@ export default function MataPelajaranPage() {
       [mataPelajaranList]
     );
 
-  // ==========================================================
-  // GO TO SECTION
-  // ==========================================================
 
   const goTo = (section) => {
     if (
@@ -1123,17 +1048,11 @@ export default function MataPelajaranPage() {
     router.push(url);
   };
 
-  // ==========================================================
-  // BACK
-  // ==========================================================
 
   const backToList = () => {
     setSelectedId(null);
   };
 
-  // ==========================================================
-  // LOADING
-  // ==========================================================
 
   if (loading) {
     return (
@@ -1187,15 +1106,11 @@ export default function MataPelajaranPage() {
     );
   }
 
-  // ==========================================================
-  // MAIN
-  // ==========================================================
 
   return (
     <div className="theme-page theme-text min-h-full">
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
 
-        {/* PAGE TITLE */}
 
         <div className="flex items-start gap-3 mb-7">
           {selected && (
@@ -1288,7 +1203,6 @@ export default function MataPelajaranPage() {
           </button>
         </div>
 
-        {/* ERROR */}
 
         {error && (
           <div
@@ -1382,12 +1296,10 @@ export default function MataPelajaranPage() {
           </div>
         )}
 
-        {/* DETAIL MAPEL */}
 
         {selected ? (
           <div className="space-y-6">
 
-            {/* DETAIL HEADER */}
 
             <div
               className={`
@@ -1485,7 +1397,6 @@ export default function MataPelajaranPage() {
               </div>
             </div>
 
-            {/* SUMMARY */}
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <MiniStat
@@ -1510,7 +1421,6 @@ export default function MataPelajaranPage() {
               />
             </div>
 
-            {/* AKTIVITAS */}
 
             <div>
               <div className="mb-4">
@@ -1567,7 +1477,6 @@ export default function MataPelajaranPage() {
               </div>
             </div>
 
-            {/* INFO PEMBELAJARAN */}
 
             <div
               className={`
@@ -1623,7 +1532,6 @@ export default function MataPelajaranPage() {
               </div>
             </div>
 
-            {/* AKTIVITAS TERBARU */}
 
             <div
               className={`
@@ -1674,7 +1582,6 @@ export default function MataPelajaranPage() {
         ) : (
           <div className="space-y-6">
 
-            {/* OVERVIEW */}
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <OverviewCard
@@ -1702,11 +1609,9 @@ export default function MataPelajaranPage() {
               />
             </div>
 
-            {/* CONTENT */}
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-              {/* MAPEL */}
 
               <section
                 className={`
@@ -1933,11 +1838,9 @@ export default function MataPelajaranPage() {
                 )}
               </section>
 
-              {/* RIGHT SIDEBAR */}
 
               <aside className="space-y-4">
 
-                {/* INFO */}
 
                 <div
                   className={`
@@ -2013,7 +1916,6 @@ export default function MataPelajaranPage() {
                   </div>
                 </div>
 
-                {/* QUICK NOTE */}
 
                 <div
                   className={`
@@ -2063,7 +1965,6 @@ export default function MataPelajaranPage() {
                   </div>
                 </div>
 
-                {/* INFO TERBARU */}
 
                 <div
                   className={`
@@ -2398,9 +2299,6 @@ export default function MataPelajaranPage() {
   );
 }
 
-// ============================================================
-// OVERVIEW CARD
-// ============================================================
 
 function OverviewCard({
   icon: Icon,
@@ -2494,9 +2392,6 @@ function OverviewCard({
   );
 }
 
-// ============================================================
-// MINI STAT
-// ============================================================
 
 function MiniStat({
   icon: Icon,
@@ -2560,9 +2455,6 @@ function MiniStat({
   );
 }
 
-// ============================================================
-// SECTION CARD
-// ============================================================
 
 function SectionCard({
   icon: Icon,
@@ -2685,9 +2577,6 @@ function SectionCard({
   );
 }
 
-// ============================================================
-// CONTENT BADGE
-// ============================================================
 
 function ContentBadge({
   icon: Icon,
@@ -2716,9 +2605,6 @@ function ContentBadge({
   );
 }
 
-// ============================================================
-// INFO ROW
-// ============================================================
 
 function InfoRow({
   label,
@@ -2741,9 +2627,6 @@ function InfoRow({
   );
 }
 
-// ============================================================
-// EMPTY SUBJECT
-// ============================================================
 
 function EmptySubjects({
   onRefresh,
@@ -2808,9 +2691,6 @@ function EmptySubjects({
   );
 }
 
-// ============================================================
-// EMPTY ACTIVITY
-// ============================================================
 
 function EmptyActivity() {
   return (

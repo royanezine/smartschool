@@ -26,9 +26,6 @@ import {
   Mail,
 } from "lucide-react";
 
-/* =========================================================
-   API CONFIG
-========================================================= */
 
 const API_URL = (
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
@@ -37,10 +34,6 @@ const API_URL = (
 const HERO_IMAGE =
   "https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=2000&q=85";
 
-/* =========================================================
-   DEFAULT THEME
-   Dipakai jika theme dari CMS belum tersedia / gagal diambil
-========================================================= */
 
 const DEFAULT_THEME = {
   primary: "#2563EB",
@@ -52,9 +45,6 @@ const DEFAULT_THEME = {
   border: "#E2E8F0",
 };
 
-/* =========================================================
-   HELPER API
-========================================================= */
 
 function getPublicApiBase() {
   if (API_URL.endsWith("/api")) {
@@ -64,17 +54,11 @@ function getPublicApiBase() {
   return `${API_URL}/api/publik`;
 }
 
-/* =========================================================
-   HELPER HEX
-========================================================= */
 
 function getThemeColor(theme, key) {
   return theme?.[key] || DEFAULT_THEME[key];
 }
 
-/* =========================================================
-   MAIN PAGE
-========================================================= */
 
 export default function WebsiteHomePage() {
   const params = useParams();
@@ -95,9 +79,6 @@ export default function WebsiteHomePage() {
 
   const [mobileMenu, setMobileMenu] = useState(false);
 
-  /* =======================================================
-     URL TENANT
-  ======================================================= */
 
   const homeUrl = `/${tenant}`;
   const tentangUrl = `/${tenant}/tentang`;
@@ -106,9 +87,6 @@ export default function WebsiteHomePage() {
   const kontakUrl = `/${tenant}/kontak`;
   const loginUrl = "/login";
 
-  /* =======================================================
-     FETCH THEME DARI CMS
-  ======================================================= */
 
   useEffect(() => {
     let mounted = true;
@@ -131,10 +109,6 @@ export default function WebsiteHomePage() {
           }
         );
 
-        /*
-         * Kalau endpoint theme belum ada / error,
-         * jangan bikin website rusak.
-         */
         if (!response.ok) {
           console.warn(
             "Theme publik belum tersedia. Menggunakan warna default."
@@ -205,9 +179,6 @@ export default function WebsiteHomePage() {
     };
   }, [tenant]);
 
-  /* =======================================================
-     APPLY THEME KE CSS VARIABLE
-  ======================================================= */
 
   useEffect(() => {
     if (typeof document === "undefined") {
@@ -252,9 +223,6 @@ export default function WebsiteHomePage() {
     );
   }, [theme]);
 
-  /* =======================================================
-     FETCH ARTIKEL CMS
-  ======================================================= */
 
   useEffect(() => {
     let mounted = true;
@@ -329,9 +297,6 @@ export default function WebsiteHomePage() {
         color: "var(--school-text)",
       }}
     >
-      {/* ===================================================
-          HEADER
-      =================================================== */}
 
       <header
         className="sticky top-0 z-50 border-b backdrop-blur-xl"
@@ -341,7 +306,6 @@ export default function WebsiteHomePage() {
         }}
       >
         <div className="mx-auto flex h-[76px] max-w-7xl items-center justify-between px-5 sm:px-8">
-          {/* LOGO */}
 
           <Link
             href={homeUrl}
@@ -384,7 +348,6 @@ export default function WebsiteHomePage() {
             </div>
           </Link>
 
-          {/* DESKTOP NAV */}
 
           <nav className="hidden items-center gap-8 md:flex">
             <Link
@@ -425,7 +388,6 @@ export default function WebsiteHomePage() {
             />
           </nav>
 
-          {/* LOGIN DESKTOP */}
 
           <div className="hidden md:block">
             <Link
@@ -441,7 +403,6 @@ export default function WebsiteHomePage() {
             </Link>
           </div>
 
-          {/* MOBILE BUTTON */}
 
           <button
             type="button"
@@ -459,7 +420,6 @@ export default function WebsiteHomePage() {
           </button>
         </div>
 
-        {/* MOBILE MENU */}
 
         {mobileMenu && (
           <div
@@ -517,9 +477,6 @@ export default function WebsiteHomePage() {
         )}
       </header>
 
-      {/* ===================================================
-          HERO
-      =================================================== */}
 
       <section className="relative min-h-[680px] overflow-hidden">
         <div
@@ -563,7 +520,6 @@ export default function WebsiteHomePage() {
 
         <div className="relative mx-auto flex min-h-[680px] max-w-7xl items-center px-5 py-20 sm:px-8">
           <div className="grid w-full items-center gap-14 lg:grid-cols-[1.15fr_0.85fr]">
-            {/* HERO CONTENT */}
 
             <div className="max-w-3xl animate-fade-up">
               <div
@@ -669,7 +625,6 @@ export default function WebsiteHomePage() {
               </div>
             </div>
 
-            {/* HERO CARD */}
 
             <div className="hidden lg:block animate-fade-up-delay">
               <div className="rounded-3xl border border-white/15 bg-white/10 p-5 shadow-2xl backdrop-blur-xl">
@@ -732,9 +687,6 @@ export default function WebsiteHomePage() {
         </div>
       </section>
 
-      {/* ===================================================
-          QUICK INFO
-      =================================================== */}
 
       <section className="relative z-10 -mt-10 px-5 sm:px-8">
         <div className="mx-auto grid max-w-7xl gap-4 md:grid-cols-3">
@@ -758,9 +710,6 @@ export default function WebsiteHomePage() {
         </div>
       </section>
 
-      {/* ===================================================
-          PORTAL
-      =================================================== */}
 
       <section className="mx-auto max-w-7xl px-5 py-24 sm:px-8">
         <div className="mx-auto max-w-2xl text-center">
@@ -815,9 +764,6 @@ export default function WebsiteHomePage() {
         </div>
       </section>
 
-      {/* ===================================================
-          ARTIKEL
-      =================================================== */}
 
       <section
         className="border-y py-24"
@@ -871,7 +817,6 @@ export default function WebsiteHomePage() {
             </Link>
           </div>
 
-          {/* LOADING */}
 
           {loadingArtikel && (
             <div className="grid gap-6 md:grid-cols-3">
@@ -881,7 +826,6 @@ export default function WebsiteHomePage() {
             </div>
           )}
 
-          {/* ERROR */}
 
           {!loadingArtikel && errorArtikel && (
             <div className="rounded-2xl border border-red-100 bg-red-50 p-6">
@@ -895,7 +839,6 @@ export default function WebsiteHomePage() {
             </div>
           )}
 
-          {/* EMPTY */}
 
           {!loadingArtikel &&
             !errorArtikel &&
@@ -924,7 +867,6 @@ export default function WebsiteHomePage() {
               </div>
             )}
 
-          {/* ARTIKEL */}
 
           {!loadingArtikel &&
             !errorArtikel &&
@@ -942,9 +884,6 @@ export default function WebsiteHomePage() {
         </div>
       </section>
 
-      {/* ===================================================
-          ABOUT
-      =================================================== */}
 
       <section className="mx-auto max-w-7xl px-5 py-24 sm:px-8">
         <div
@@ -1055,9 +994,6 @@ export default function WebsiteHomePage() {
         </div>
       </section>
 
-      {/* ===================================================
-          FOOTER
-      =================================================== */}
 
       <footer
         style={{
@@ -1067,7 +1003,6 @@ export default function WebsiteHomePage() {
       >
         <div className="mx-auto max-w-7xl px-5 py-14 sm:px-8">
           <div className="grid gap-10 md:grid-cols-3">
-            {/* FOOTER BRAND */}
 
             <div>
               <div className="flex items-center gap-3">
@@ -1098,7 +1033,6 @@ export default function WebsiteHomePage() {
               </p>
             </div>
 
-            {/* NAVIGASI */}
 
             <div>
               <h3 className="text-sm font-bold text-white">
@@ -1133,7 +1067,6 @@ export default function WebsiteHomePage() {
               </div>
             </div>
 
-            {/* KONTAK */}
 
             <div>
               <h3 className="text-sm font-bold text-white">
@@ -1191,9 +1124,6 @@ export default function WebsiteHomePage() {
         </div>
       </footer>
 
-      {/* ===================================================
-          ANIMATION
-      =================================================== */}
 
       <style jsx>{`
         @keyframes fade-up {
@@ -1221,9 +1151,6 @@ export default function WebsiteHomePage() {
   );
 }
 
-/* =========================================================
-   NAV LINK
-========================================================= */
 
 function NavLink({ href, label }) {
   return (
@@ -1246,9 +1173,6 @@ function NavLink({ href, label }) {
   );
 }
 
-/* =========================================================
-   MOBILE NAV LINK
-========================================================= */
 
 function MobileNavLink({ href, label, onClick }) {
   return (
@@ -1265,9 +1189,6 @@ function MobileNavLink({ href, label, onClick }) {
   );
 }
 
-/* =========================================================
-   HERO MINI STAT
-========================================================= */
 
 function HeroMiniStat({ icon, value, label }) {
   return (
@@ -1292,9 +1213,6 @@ function HeroMiniStat({ icon, value, label }) {
   );
 }
 
-/* =========================================================
-   QUICK INFO
-========================================================= */
 
 function QuickInfo({ icon, title, description }) {
   return (
@@ -1334,9 +1252,6 @@ function QuickInfo({ icon, title, description }) {
   );
 }
 
-/* =========================================================
-   PORTAL CARD
-========================================================= */
 
 function PortalCard({
   icon,
@@ -1392,9 +1307,6 @@ function PortalCard({
   );
 }
 
-/* =========================================================
-   ARTICLE CARD
-========================================================= */
 
 function ArticleCard({ article, tenant }) {
   const articleSlug =
@@ -1411,7 +1323,6 @@ function ArticleCard({ article, tenant }) {
         backgroundColor: "var(--school-surface)",
       }}
     >
-      {/* IMAGE */}
 
       <div className="aspect-[16/9] overflow-hidden bg-slate-100">
         {article?.gambarUtama ? (
@@ -1435,7 +1346,6 @@ function ArticleCard({ article, tenant }) {
         )}
       </div>
 
-      {/* CONTENT */}
 
       <div className="p-6">
         <div className="flex flex-wrap items-center gap-2">
@@ -1488,9 +1398,6 @@ function ArticleCard({ article, tenant }) {
   );
 }
 
-/* =========================================================
-   FEATURE ITEM
-========================================================= */
 
 function FeatureItem({ icon, text }) {
   return (
@@ -1513,9 +1420,6 @@ function FeatureItem({ icon, text }) {
   );
 }
 
-/* =========================================================
-   FOOTER LINK
-========================================================= */
 
 function FooterLink({ href, label }) {
   return (
@@ -1528,9 +1432,6 @@ function FooterLink({ href, label }) {
   );
 }
 
-/* =========================================================
-   ARTICLE SKELETON
-========================================================= */
 
 function ArticleSkeleton() {
   return (
@@ -1557,9 +1458,6 @@ function ArticleSkeleton() {
   );
 }
 
-/* =========================================================
-   DATE FORMAT
-========================================================= */
 
 function formatDate(date) {
   if (!date) {

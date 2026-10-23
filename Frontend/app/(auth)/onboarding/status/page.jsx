@@ -13,52 +13,31 @@ import {
 } from "lucide-react";
 
 export default function WaitingActivationPage() {
-  // ==========================================
-  // STATE
-  // ==========================================
 
   const [status, setStatus] = useState("waiting");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [lastChecked, setLastChecked] = useState(null);
 
-  // ==========================================
-  // REF
-  // ==========================================
 
   const isMountedRef = useRef(true);
 
-  // ==========================================
-  // CHECK STATUS KE BACKEND
-  // ==========================================
 
   const checkStatus = () => {
     if (!isMountedRef.current) {
       return;
     }
 
-    /*
-     * Backend saat ini TIDAK menyediakan endpoint status tenant
-     * (GET /api/tenant/status tidak ada). Aktivasi sekolah hanya diproses
-     * oleh server melalui webhook Midtrans, sehingga Frontend tidak dapat
-     * memverifikasi status pembayaran sendiri. Halaman ini karena itu hanya
-     * menampilkan status menunggu dan TIDAK pernah mengarang status aktif.
-     */
     setError("");
     setLastChecked(new Date());
     setStatus("waiting");
     setLoading(false);
   };
 
-  // ==========================================
-  // POLLING
-  // ==========================================
 
   useEffect(() => {
     isMountedRef.current = true;
 
-    // Cek pertama kali. Tidak ada polling karena endpoint status tenant
-    // tidak tersedia di Backend.
     checkStatus();
 
     return () => {
@@ -66,17 +45,11 @@ export default function WaitingActivationPage() {
     };
   }, []);
 
-  // ==========================================
-  // MANUAL CHECK
-  // ==========================================
 
   const handleManualCheck = () => {
     checkStatus();
   };
 
-  // ==========================================
-  // FORMAT TIME
-  // ==========================================
 
   const formatTime = (date) => {
     if (!date) {
@@ -90,16 +63,12 @@ export default function WaitingActivationPage() {
     });
   };
 
-  // ==========================================
-  // FAILED STATE
-  // ==========================================
 
   if (status === "failed") {
     return (
       <main className="min-h-screen bg-slate-50 flex items-center justify-center px-6 py-10">
         <div className="w-full max-w-lg">
 
-          {/* LOGO */}
           <div className="flex items-center justify-center gap-3 mb-8">
             <div className="relative w-11 h-11 rounded-xl bg-white shadow-sm flex items-center justify-center overflow-hidden">
               <Image
@@ -119,7 +88,6 @@ export default function WaitingActivationPage() {
             </span>
           </div>
 
-          {/* CARD */}
           <div className="bg-white rounded-2xl shadow-xl border border-slate-100 p-8 text-center">
 
             <div className="flex justify-center mb-6">
@@ -170,16 +138,12 @@ export default function WaitingActivationPage() {
     );
   }
 
-  // ==========================================
-  // ACTIVE STATE
-  // ==========================================
 
   if (status === "active") {
     return (
       <main className="min-h-screen bg-slate-50 flex items-center justify-center px-6 py-10">
         <div className="w-full max-w-lg">
 
-          {/* LOGO */}
           <div className="flex items-center justify-center gap-3 mb-8">
             <div className="relative w-11 h-11 rounded-xl bg-white shadow-sm flex items-center justify-center overflow-hidden">
               <Image
@@ -199,10 +163,8 @@ export default function WaitingActivationPage() {
             </span>
           </div>
 
-          {/* CARD */}
           <div className="bg-white rounded-2xl shadow-xl border border-slate-100 p-8 text-center">
 
-            {/* ICON */}
             <div className="flex justify-center mb-6">
               <div className="w-20 h-20 rounded-full bg-green-50 flex items-center justify-center">
                 <CheckCircle2
@@ -212,7 +174,6 @@ export default function WaitingActivationPage() {
               </div>
             </div>
 
-            {/* TITLE */}
             <h1 className="text-2xl font-bold text-slate-900">
               Pembayaran Berhasil
             </h1>
@@ -223,7 +184,6 @@ export default function WaitingActivationPage() {
               sudah aktif.
             </p>
 
-            {/* STATUS */}
             <div className="mt-6 rounded-xl bg-green-50 border border-green-100 px-4 py-4">
               <div className="flex items-center justify-center gap-2 text-green-700">
                 <ShieldCheck size={18} />
@@ -238,7 +198,6 @@ export default function WaitingActivationPage() {
               </p>
             </div>
 
-            {/* BUTTON */}
             <button
               type="button"
               onClick={() => {
@@ -253,7 +212,6 @@ export default function WaitingActivationPage() {
             </button>
           </div>
 
-          {/* FOOTER */}
           <p className="text-center text-xs text-slate-400 mt-6">
             SmartSchool • Sistem Informasi Sekolah
           </p>
@@ -262,15 +220,11 @@ export default function WaitingActivationPage() {
     );
   }
 
-  // ==========================================
-  // WAITING STATE
-  // ==========================================
 
   return (
     <main className="min-h-screen bg-slate-50 flex items-center justify-center px-6 py-10">
       <div className="w-full max-w-lg">
 
-        {/* LOGO */}
 
         <div className="flex items-center justify-center gap-3 mb-8">
           <div className="relative w-11 h-11 rounded-xl bg-white shadow-sm flex items-center justify-center overflow-hidden">
@@ -291,11 +245,9 @@ export default function WaitingActivationPage() {
           </span>
         </div>
 
-        {/* MAIN CARD */}
 
         <div className="bg-white rounded-2xl shadow-xl border border-slate-100 p-8">
 
-          {/* ICON */}
 
           <div className="flex justify-center mb-6">
             <div className="relative w-20 h-20 rounded-full bg-blue-50 flex items-center justify-center">
@@ -313,7 +265,6 @@ export default function WaitingActivationPage() {
             </div>
           </div>
 
-          {/* TITLE */}
 
           <div className="text-center">
             <h1 className="text-2xl font-bold text-slate-900">
@@ -329,7 +280,6 @@ export default function WaitingActivationPage() {
             </p>
           </div>
 
-          {/* STATUS BOX */}
 
           <div className="mt-7 rounded-xl border border-blue-100 bg-blue-50 px-5 py-4">
             <div className="flex items-center gap-3">
@@ -354,7 +304,6 @@ export default function WaitingActivationPage() {
             </div>
           </div>
 
-          {/* ERROR */}
 
           {error && (
             <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3">
@@ -364,7 +313,6 @@ export default function WaitingActivationPage() {
             </div>
           )}
 
-          {/* LAST CHECK */}
 
           <div className="mt-6 text-center">
             <p className="text-xs text-slate-400">
@@ -376,7 +324,6 @@ export default function WaitingActivationPage() {
             </p>
           </div>
 
-          {/* MANUAL CHECK */}
 
           <button
             type="button"
@@ -399,7 +346,6 @@ export default function WaitingActivationPage() {
           </button>
         </div>
 
-        {/* INFORMATION */}
 
         <div className="mt-5 rounded-xl bg-white border border-slate-100 px-5 py-4 shadow-sm">
           <div className="flex gap-3">
@@ -427,7 +373,6 @@ export default function WaitingActivationPage() {
           </div>
         </div>
 
-        {/* FOOTER */}
 
         <p className="text-center text-xs text-slate-400 mt-6">
           SmartSchool • Sistem Informasi Sekolah

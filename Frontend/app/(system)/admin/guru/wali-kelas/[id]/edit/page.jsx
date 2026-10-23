@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
@@ -18,128 +18,23 @@ import {
   Users,
   School,
   Info,
+  Unlink,
+  AlertTriangle,
 } from "lucide-react";
+import {
+  assignWaliKelas,
+  getWaliKelasDetail,
+  releaseWaliKelas,
+} from "@/services/kelas.service";
+import {
+  getGuruWaliKelasDetail,
+  getGuruWaliKelasList,
+} from "@/services/user.service";
 
-/**
- * app/admin/guru/wali-kelas/[id]/edit/page.jsx
- *
- * Halaman Edit Wali Kelas
- */
-
-const MOCK_WALIKELAS = [
-  {
-    id: 1,
-    kelas: "7A",
-    jenjang: "VII",
-    waliKelas: "Siti Rahayu, S.Pd",
-    nip: "198501152010012001",
-    telp: "0812-3456-7890",
-    email: "sarah.amelia@smartschool.sch.id",
-    jumlahSiswa: 32,
-    tahunAjaran: "2025/2026",
-    status: "aktif",
-    siswa: [
-      "Alya Ramadhani",
-      "Bunga Citra Lestari",
-      "Cahyo Nugroho",
-      "Dimas Prasetyo",
-    ],
-  },
-  {
-    id: 2,
-    kelas: "7B",
-    jenjang: "VII",
-    waliKelas: "Andi Prasetyo, S.Pd",
-    nip: "198712052012011002",
-    telp: "0857-1122-3344",
-    email: "andi.prasetyo@smartschool.sch.id",
-    jumlahSiswa: 30,
-    tahunAjaran: "2025/2026",
-    status: "aktif",
-    siswa: [
-      "Eka Wulandari",
-      "Fajar Setiawan",
-      "Gilang Ramadhan",
-      "Hana Permatasari",
-    ],
-  },
-  {
-    id: 3,
-    kelas: "8A",
-    jenjang: "VIII",
-    waliKelas: "Dewi Anggraini, S.Si",
-    nip: "199002202015022004",
-    telp: "0821-9988-7766",
-    email: "dewi.anggraini@smartschool.sch.id",
-    jumlahSiswa: 31,
-    tahunAjaran: "2025/2026",
-    status: "aktif",
-    siswa: [
-      "Indra Kusuma",
-      "Julia Anggraeni",
-      "Krisna Aditya",
-      "Larasati Dewi",
-    ],
-  },
-  {
-    id: 4,
-    kelas: "8B",
-    jenjang: "VIII",
-    waliKelas: "Nina Kartika, S.Sn",
-    nip: "199105182018022005",
-    telp: "0878-5566-7788",
-    email: "nina.kartika@smartschool.sch.id",
-    jumlahSiswa: 29,
-    tahunAjaran: "2025/2026",
-    status: "aktif",
-    siswa: [
-      "Muhammad Fadli",
-      "Naila Zahra",
-      "Oka Wijaya",
-      "Putri Ayuningtyas",
-    ],
-  },
-  {
-    id: 5,
-    kelas: "9A",
-    jenjang: "IX",
-    waliKelas: "Budi Santoso, S.Pd",
-    nip: "197803102005011003",
-    telp: "0813-2233-4455",
-    email: "budi.santoso@smartschool.sch.id",
-    jumlahSiswa: 28,
-    tahunAjaran: "2025/2026",
-    status: "aktif",
-    siswa: [
-      "Reza Firmansyah",
-      "Salsabila Putri",
-      "Taufik Hidayat",
-      "Umi Kalsum",
-    ],
-  },
-  {
-    id: 6,
-    kelas: "9B",
-    jenjang: "IX",
-    waliKelas: "Rudi Hartono, S.Pd",
-    nip: "198309252008011006",
-    telp: "0896-4433-2211",
-    email: "rudi.hartono@smartschool.sch.id",
-    jumlahSiswa: 27,
-    tahunAjaran: "2024/2025",
-    status: "nonaktif",
-    siswa: [
-      "Vino Bastian",
-      "Wulan Sari",
-      "Yoga Pratama",
-      "Zahra Aulia",
-    ],
-  },
-];
-
-const JENJANG_LIST = ["VII", "VIII", "IX"];
 
 function getInitials(nama) {
+  if (!nama) return "WK";
+
   return nama
     .replace(/,.*/, "")
     .split(" ")
@@ -150,103 +45,205 @@ function getInitials(nama) {
     .toUpperCase();
 }
 
+function getGuruLabel(guru) {
+  const nip = guru.nip ? ` - ${guru.nip}` : "";
+  const nonaktif =
+    guru.status === "nonaktif" ? " (nonaktif)" : "";
+
+  return `${guru.nama}${nip}${nonaktif}`;
+}
+
 export default function EditWaliKelasPage() {
   const router = useRouter();
   const params = useParams();
-  const id = String(params?.id);
+
+  const rawId = params?.id;
+  const id = Array.isArray(rawId)
+    ? String(rawId[0] ?? "")
+    : String(rawId ?? "");
 
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const toggleSidebar = () => setIsCollapsed(!isCollapsed);
 
-  const original = useMemo(
-    () => MOCK_WALIKELAS.find((w) => String(w.id) === id) || null,
-    [id]
-  );
+  const [data, setData] = useState(null);
+  const [guruOptions, setGuruOptions] = useState([]);
+  const [guruId, setGuruId] = useState("");
+  const [guruDetail, setGuruDetail] = useState(null);
 
-  const [form, setForm] = useState({
-    kelas: "",
-    jenjang: "VII",
-    waliKelas: "",
-    nip: "",
-    telp: "",
-    email: "",
-    jumlahSiswa: "",
-    tahunAjaran: "",
-    status: "aktif",
-  });
-
-  useEffect(() => {
-    if (original) {
-      setForm({
-        kelas: original.kelas,
-        jenjang: original.jenjang,
-        waliKelas: original.waliKelas,
-        nip: original.nip,
-        telp: original.telp === "-" ? "" : original.telp,
-        email: original.email === "-" ? "" : original.email,
-        jumlahSiswa: String(original.jumlahSiswa ?? ""),
-        tahunAjaran: original.tahunAjaran,
-        status: original.status,
-      });
-    }
-  }, [original]);
-
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [confirmRelease, setConfirmRelease] = useState(false);
+  const [releasing, setReleasing] = useState(false);
 
-  const handleChange = (field) => (e) => {
-    setForm((prev) => ({
-      ...prev,
-      [field]: e.target.value,
-    }));
-  };
+  const fetchData = useCallback(async () => {
+    if (!id) {
+      throw new Error(
+        "ID kelas tidak ditemukan pada URL."
+      );
+    }
+
+    const [detail, guruList] = await Promise.all([
+      getWaliKelasDetail(id),
+      getGuruWaliKelasList(),
+    ]);
+
+    return { detail, guruList };
+  }, [id]);
+
+  useEffect(() => {
+    let active = true;
+
+    fetchData()
+      .then(({ detail, guruList }) => {
+        if (!active) return;
+
+        setData(detail);
+        setGuruOptions(guruList);
+        setGuruId(detail.waliKelasId || "");
+        setError("");
+      })
+      .catch((err) => {
+        if (!active) return;
+
+        console.error(
+          "[EditWaliKelas] Gagal memuat data:",
+          err
+        );
+        setData(null);
+        setError(
+          err?.message ||
+            "Data wali kelas tidak dapat dimuat."
+        );
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [fetchData]);
+
+  const pilihanGuru = useMemo(() => {
+    if (!data?.waliKelasId) return guruOptions;
+
+    const sudahAda = guruOptions.some(
+      (guru) => guru.id === data.waliKelasId
+    );
+
+    if (sudahAda) return guruOptions;
+
+    return [
+      {
+        id: data.waliKelasId,
+        nama: data.waliKelas,
+        nip: data.nip,
+        email: data.email,
+        telp: data.telp,
+        jabatan: "",
+        status: "",
+      },
+      ...guruOptions,
+    ];
+  }, [data, guruOptions]);
+
+  const selectedGuru = useMemo(
+    () =>
+      pilihanGuru.find((guru) => guru.id === guruId) ||
+      null,
+    [pilihanGuru, guruId]
+  );
+
+  const kontakGuru = guruDetail || selectedGuru;
+
+  useEffect(() => {
+    let active = true;
+
+    if (!guruId || !data) {
+      return undefined;
+    }
+
+    getGuruWaliKelasDetail(guruId)
+      .then((detail) => {
+        if (active) setGuruDetail(detail);
+      })
+      .catch((err) => {
+        console.warn(
+          "[EditWaliKelas] Gagal memuat detail guru:",
+          err
+        );
+        if (active) setGuruDetail(null);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [guruId, data]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!form.kelas.trim() || !form.waliKelas.trim() || !form.nip.trim()) {
-      setError("Kelas, nama wali kelas, dan NIP wajib diisi.");
+    if (!data) return;
+
+    if (!guruId) {
+      setError("Pilih guru yang akan menjadi wali kelas.");
       return;
     }
-
-    const payload = {
-      id,
-      kelas: form.kelas.trim(),
-      jenjang: form.jenjang,
-      waliKelas: form.waliKelas.trim(),
-      nip: form.nip.trim(),
-      telp: form.telp.trim() || "-",
-      email: form.email.trim() || "-",
-      jumlahSiswa: Number(form.jumlahSiswa) || 0,
-      tahunAjaran: form.tahunAjaran.trim() || "2025/2026",
-      status: form.status,
-    };
 
     try {
       setSaving(true);
       setError("");
+      setSuccess(false);
 
-      console.log("Update wali kelas:", payload);
-
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await assignWaliKelas(data.id, guruId);
 
       setSuccess(true);
 
       setTimeout(() => {
-        router.push(`/admin/guru/wali-kelas/${id}`);
+        router.push(`/admin/guru/wali-kelas/${data.id}`);
       }, 900);
     } catch (err) {
-      console.error("Error update wali kelas:", err);
-
+      console.error(
+        "[EditWaliKelas] Gagal menyimpan:",
+        err
+      );
       setError(
-        err?.message || "Gagal menyimpan perubahan wali kelas."
+        err?.message ||
+          "Gagal menyimpan perubahan wali kelas."
       );
     } finally {
       setSaving(false);
     }
   };
+
+  async function handleRelease() {
+    if (!data) return;
+
+    setReleasing(true);
+    setError("");
+    setSuccess(false);
+
+    try {
+      await releaseWaliKelas(data.id);
+      setConfirmRelease(false);
+
+      router.push(`/admin/guru/wali-kelas/${data.id}`);
+    } catch (err) {
+      console.error(
+        "[EditWaliKelas] Gagal melepas wali kelas:",
+        err
+      );
+      setError(
+        err?.message || "Gagal melepas wali kelas."
+      );
+      setConfirmRelease(false);
+    } finally {
+      setReleasing(false);
+    }
+  }
 
   return (
     <div className="flex h-screen w-full theme-page overflow-hidden">
@@ -271,7 +268,6 @@ export default function EditWaliKelasPage() {
 
         <main className="flex-1 overflow-y-auto">
           <div className="p-4 sm:p-6 lg:p-8 space-y-6">
-            {/* HEADER */}
             <div className="flex items-center gap-3">
               <button
                 type="button"
@@ -299,18 +295,31 @@ export default function EditWaliKelasPage() {
 
               <div>
                 <h1 className="text-2xl font-bold theme-text">
-                  Ubah Wali Kelas
+                  {data?.waliKelasId
+                    ? "Ganti Wali Kelas"
+                    : "Tugaskan Wali Kelas"}
                 </h1>
 
                 <p className="text-sm theme-text-muted">
-                  Perbarui data penugasan wali kelas
-                  {original ? ` untuk kelas ${original.kelas}` : ""}.
+                  Perbarui penugasan wali kelas
+                  {data ? ` untuk kelas ${data.kelas}` : ""}.
                 </p>
               </div>
             </div>
 
-            {/* NOT FOUND */}
-            {!original && (
+            {loading && (
+              <div className="theme-card rounded-xl border theme-border p-10">
+                <div className="flex items-center justify-center gap-2 text-sm theme-text-muted">
+                  <Loader2
+                    size={18}
+                    className="animate-spin"
+                  />
+                  Memuat data wali kelas...
+                </div>
+              </div>
+            )}
+
+            {!loading && !data && error && (
               <div className="flex items-start gap-3 p-4 rounded-xl border theme-border theme-danger">
                 <AlertCircle
                   size={20}
@@ -322,10 +331,7 @@ export default function EditWaliKelasPage() {
                     Data wali kelas tidak ditemukan
                   </p>
 
-                  <p className="text-sm mt-1">
-                    Wali kelas dengan id "{id}" tidak ada atau sudah
-                    dihapus.
-                  </p>
+                  <p className="text-sm mt-1">{error}</p>
                 </div>
 
                 <button
@@ -345,9 +351,8 @@ export default function EditWaliKelasPage() {
               </div>
             )}
 
-            {original && (
+            {!loading && data && (
               <>
-                {/* SUCCESS */}
                 {success && (
                   <div className="flex items-center gap-3 p-4 rounded-xl border theme-border theme-success">
                     <CheckCircle2
@@ -361,7 +366,6 @@ export default function EditWaliKelasPage() {
                   </div>
                 )}
 
-                {/* ERROR */}
                 {error && (
                   <div className="flex items-start gap-3 p-4 rounded-xl border theme-border theme-danger">
                     <AlertCircle
@@ -379,9 +383,7 @@ export default function EditWaliKelasPage() {
                   </div>
                 )}
 
-                {/* FORM + PREVIEW */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-                  {/* FORM */}
                   <form
                     onSubmit={handleSubmit}
                     className="
@@ -399,13 +401,12 @@ export default function EditWaliKelasPage() {
                       </h2>
 
                       <p className="text-xs theme-text-muted mt-0.5">
-                        Perbarui data kelas dan guru yang ditugaskan.
+                        Pilih guru pengganti untuk kelas ini.
                       </p>
                     </div>
 
                     <div className="p-6 space-y-5">
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                        {/* KELAS */}
                         <div>
                           <label
                             htmlFor="kelas"
@@ -422,19 +423,13 @@ export default function EditWaliKelasPage() {
                             />
 
                             Kelas
-
-                            <span className="text-[var(--color-danger)]">
-                              *
-                            </span>
                           </label>
 
                           <input
                             id="kelas"
                             type="text"
-                            value={form.kelas}
-                            onChange={handleChange("kelas")}
-                            placeholder="Contoh: 7C"
-                            disabled={saving}
+                            value={`${data.kelas} - ${data.tahunAjaran}`}
+                            disabled
                             className="
                               w-full
                               px-3.5 py-2.5
@@ -442,16 +437,11 @@ export default function EditWaliKelasPage() {
                               rounded-lg
                               border
                               theme-input
-                              focus:outline-none
-                              focus:ring-2
-                              focus:ring-[var(--color-primary)]/10
-                              focus:border-[var(--color-primary)]
                               disabled:opacity-60
                             "
                           />
                         </div>
 
-                        {/* JENJANG */}
                         <div>
                           <label
                             htmlFor="jenjang"
@@ -470,11 +460,11 @@ export default function EditWaliKelasPage() {
                             Jenjang
                           </label>
 
-                          <select
+                          <input
                             id="jenjang"
-                            value={form.jenjang}
-                            onChange={handleChange("jenjang")}
-                            disabled={saving}
+                            type="text"
+                            value={`Kelas ${data.jenjang}`}
+                            disabled
                             className="
                               w-full
                               px-3.5 py-2.5
@@ -482,23 +472,12 @@ export default function EditWaliKelasPage() {
                               rounded-lg
                               border
                               theme-input
-                              focus:outline-none
-                              focus:ring-2
-                              focus:ring-[var(--color-primary)]/10
-                              focus:border-[var(--color-primary)]
                               disabled:opacity-60
                             "
-                          >
-                            {JENJANG_LIST.map((j) => (
-                              <option key={j} value={j}>
-                                Kelas {j}
-                              </option>
-                            ))}
-                          </select>
+                          />
                         </div>
                       </div>
 
-                      {/* WALI KELAS */}
                       <div>
                         <label
                           htmlFor="waliKelas"
@@ -514,106 +493,21 @@ export default function EditWaliKelasPage() {
                             className="theme-text-placeholder"
                           />
 
-                          Nama Wali Kelas
+                          Wali Kelas
 
                           <span className="text-[var(--color-danger)]">
                             *
                           </span>
-                        </label>
-
-                        <input
-                          id="waliKelas"
-                          type="text"
-                          value={form.waliKelas}
-                          onChange={handleChange("waliKelas")}
-                          placeholder="Contoh: Rina Marlina, S.Pd"
-                          disabled={saving}
-                          className="
-                            w-full
-                            px-3.5 py-2.5
-                            text-sm
-                            rounded-lg
-                            border
-                            theme-input
-                            focus:outline-none
-                            focus:ring-2
-                            focus:ring-[var(--color-primary)]/10
-                            focus:border-[var(--color-primary)]
-                            disabled:opacity-60
-                          "
-                        />
-                      </div>
-
-                      {/* NIP */}
-                      <div>
-                        <label
-                          htmlFor="nip"
-                          className="
-                            flex items-center gap-1.5
-                            text-sm font-medium
-                            theme-text-secondary
-                            mb-1.5
-                          "
-                        >
-                          <Hash
-                            size={14}
-                            className="theme-text-placeholder"
-                          />
-
-                          NIP
-
-                          <span className="text-[var(--color-danger)]">
-                            *
-                          </span>
-                        </label>
-
-                        <input
-                          id="nip"
-                          type="text"
-                          value={form.nip}
-                          onChange={handleChange("nip")}
-                          placeholder="Contoh: 199001012015011001"
-                          disabled={saving}
-                          className="
-                            w-full
-                            px-3.5 py-2.5
-                            text-sm
-                            rounded-lg
-                            border
-                            theme-input
-                            focus:outline-none
-                            focus:ring-2
-                            focus:ring-[var(--color-primary)]/10
-                            focus:border-[var(--color-primary)]
-                            font-mono
-                            disabled:opacity-60
-                          "
-                        />
-                      </div>
-
-                      {/* STATUS */}
-                      <div>
-                        <label
-                          htmlFor="status"
-                          className="
-                            flex items-center gap-1.5
-                            text-sm font-medium
-                            theme-text-secondary
-                            mb-1.5
-                          "
-                        >
-                          <UserCheck
-                            size={14}
-                            className="theme-text-placeholder"
-                          />
-
-                          Status
                         </label>
 
                         <select
-                          id="status"
-                          value={form.status}
-                          onChange={handleChange("status")}
+                          id="waliKelas"
+                          value={guruId}
+                          onChange={(e) => {
+                            setGuruId(e.target.value);
+                            setGuruDetail(null);
+                            setError("");
+                          }}
                           disabled={saving}
                           className="
                             w-full
@@ -629,198 +523,116 @@ export default function EditWaliKelasPage() {
                             disabled:opacity-60
                           "
                         >
-                          <option value="aktif">Aktif</option>
-                          <option value="nonaktif">Nonaktif</option>
+                          <option value="">Pilih guru</option>
+
+                          {pilihanGuru.map((guru) => (
+                            <option
+                              key={guru.id}
+                              value={guru.id}
+                            >
+                              {getGuruLabel(guru)}
+                            </option>
+                          ))}
                         </select>
+                      </div>
+
+                      <div className="rounded-xl border theme-border-soft theme-card-soft p-4">
+                        <p className="text-xs font-semibold theme-text-muted uppercase tracking-wide mb-3">
+                          Data Kelas
+                        </p>
+
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+                          <div>
+                            <p className="text-[11px] theme-text-muted">
+                              Kelas
+                            </p>
+
+                            <p className="font-semibold theme-text mt-0.5">
+                              {data.kelas}
+                            </p>
+                          </div>
+
+                          <div>
+                            <p className="text-[11px] theme-text-muted">
+                              Jenjang
+                            </p>
+
+                            <p className="theme-text-secondary mt-0.5">
+                              Kelas {data.jenjang}
+                            </p>
+                          </div>
+
+                          <div>
+                            <p className="text-[11px] theme-text-muted">
+                              Tahun Ajaran
+                            </p>
+
+                            <p className="theme-text-secondary mt-0.5">
+                              {data.tahunAjaran}
+                            </p>
+                          </div>
+
+                          <div>
+                            <p className="text-[11px] theme-text-muted">
+                              Jumlah Siswa
+                            </p>
+
+                            <p className="theme-text-secondary mt-0.5">
+                              {data.jumlahSiswa} siswa
+                            </p>
+                          </div>
+                        </div>
                       </div>
                     </div>
 
-                    {/* KONTAK */}
                     <div className="px-6 py-4 border-t border-b theme-border-soft theme-card-soft">
                       <h2 className="text-sm font-semibold theme-text-secondary">
-                        Kontak & Data Tambahan
+                        Kontak Wali Kelas
                       </h2>
 
                       <p className="text-xs theme-text-muted mt-0.5">
-                        Perbarui informasi kontak dan jumlah siswa.
+                        Data kontak berasal dari akun guru yang dipilih.
                       </p>
                     </div>
 
-                    <div className="p-6 space-y-5">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                        {/* TELEPON */}
+                    <div className="p-6">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
                         <div>
-                          <label
-                            htmlFor="telp"
-                            className="
-                              flex items-center gap-1.5
-                              text-sm font-medium
-                              theme-text-secondary
-                              mb-1.5
-                            "
-                          >
-                            <Phone
-                              size={14}
-                              className="theme-text-placeholder"
-                            />
+                          <p className="flex items-center gap-1.5 text-[11px] font-medium theme-text-muted uppercase tracking-wide">
+                            <Hash size={12} />
+                            NIP
+                          </p>
 
+                          <p className="font-mono text-sm theme-text mt-1">
+                            {kontakGuru?.nip || "-"}
+                          </p>
+                        </div>
+
+                        <div>
+                          <p className="flex items-center gap-1.5 text-[11px] font-medium theme-text-muted uppercase tracking-wide">
+                            <Mail size={12} />
+                            Email
+                          </p>
+
+                          <p className="text-sm theme-text mt-1 break-all">
+                            {kontakGuru?.email || "-"}
+                          </p>
+                        </div>
+
+                        <div>
+                          <p className="flex items-center gap-1.5 text-[11px] font-medium theme-text-muted uppercase tracking-wide">
+                            <Phone size={12} />
                             No. Telepon
-                          </label>
+                          </p>
 
-                          <input
-                            id="telp"
-                            type="text"
-                            value={form.telp}
-                            onChange={handleChange("telp")}
-                            placeholder="0812-xxxx-xxxx"
-                            disabled={saving}
-                            className="
-                              w-full
-                              px-3.5 py-2.5
-                              text-sm
-                              rounded-lg
-                              border
-                              theme-input
-                              focus:outline-none
-                              focus:ring-2
-                              focus:ring-[var(--color-primary)]/10
-                              focus:border-[var(--color-primary)]
-                              disabled:opacity-60
-                            "
-                          />
+                          <p className="text-sm theme-text mt-1">
+                            {kontakGuru?.telp || "-"}
+                          </p>
                         </div>
-
-                        {/* JUMLAH SISWA */}
-                        <div>
-                          <label
-                            htmlFor="jumlahSiswa"
-                            className="
-                              flex items-center gap-1.5
-                              text-sm font-medium
-                              theme-text-secondary
-                              mb-1.5
-                            "
-                          >
-                            <Users
-                              size={14}
-                              className="theme-text-placeholder"
-                            />
-
-                            Jumlah Siswa
-                          </label>
-
-                          <input
-                            id="jumlahSiswa"
-                            type="number"
-                            min="0"
-                            value={form.jumlahSiswa}
-                            onChange={handleChange("jumlahSiswa")}
-                            placeholder="0"
-                            disabled={saving}
-                            className="
-                              w-full
-                              px-3.5 py-2.5
-                              text-sm
-                              rounded-lg
-                              border
-                              theme-input
-                              focus:outline-none
-                              focus:ring-2
-                              focus:ring-[var(--color-primary)]/10
-                              focus:border-[var(--color-primary)]
-                              disabled:opacity-60
-                            "
-                          />
-                        </div>
-                      </div>
-
-                      {/* EMAIL */}
-                      <div>
-                        <label
-                          htmlFor="email"
-                          className="
-                            flex items-center gap-1.5
-                            text-sm font-medium
-                            theme-text-secondary
-                            mb-1.5
-                          "
-                        >
-                          <Mail
-                            size={14}
-                            className="theme-text-placeholder"
-                          />
-
-                          Email
-                        </label>
-
-                        <input
-                          id="email"
-                          type="email"
-                          value={form.email}
-                          onChange={handleChange("email")}
-                          placeholder="nama@smartschool.sch.id"
-                          disabled={saving}
-                          className="
-                            w-full
-                            px-3.5 py-2.5
-                            text-sm
-                            rounded-lg
-                            border
-                            theme-input
-                            focus:outline-none
-                            focus:ring-2
-                            focus:ring-[var(--color-primary)]/10
-                            focus:border-[var(--color-primary)]
-                            disabled:opacity-60
-                          "
-                        />
-                      </div>
-
-                      {/* TAHUN AJARAN */}
-                      <div>
-                        <label
-                          htmlFor="tahunAjaran"
-                          className="
-                            flex items-center gap-1.5
-                            text-sm font-medium
-                            theme-text-secondary
-                            mb-1.5
-                          "
-                        >
-                          <School
-                            size={14}
-                            className="theme-text-placeholder"
-                          />
-
-                          Tahun Ajaran
-                        </label>
-
-                        <input
-                          id="tahunAjaran"
-                          type="text"
-                          value={form.tahunAjaran}
-                          onChange={handleChange("tahunAjaran")}
-                          placeholder="2025/2026"
-                          disabled={saving}
-                          className="
-                            w-full
-                            px-3.5 py-2.5
-                            text-sm
-                            rounded-lg
-                            border
-                            theme-input
-                            focus:outline-none
-                            focus:ring-2
-                            focus:ring-[var(--color-primary)]/10
-                            focus:border-[var(--color-primary)]
-                            disabled:opacity-60
-                          "
-                        />
                       </div>
                     </div>
 
-                    {/* ACTIONS */}
-                    <div className="flex items-center gap-3 px-6 py-4 border-t theme-border-soft theme-card-soft">
+                    <div className="flex flex-wrap items-center gap-3 px-6 py-4 border-t theme-border-soft theme-card-soft">
                       <button
                         type="submit"
                         disabled={saving}
@@ -856,7 +668,9 @@ export default function EditWaliKelasPage() {
                       <button
                         type="button"
                         onClick={() =>
-                          router.push(`/admin/guru/wali-kelas/${id}`)
+                          router.push(
+                            `/admin/guru/wali-kelas/${data.id}`
+                          )
                         }
                         disabled={saving}
                         className="
@@ -874,12 +688,36 @@ export default function EditWaliKelasPage() {
                       >
                         Batal
                       </button>
+
+                      {data.waliKelasId && (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setConfirmRelease(true)
+                          }
+                          disabled={saving}
+                          className="
+                            ml-auto
+                            inline-flex items-center gap-2
+                            px-4 py-2.5
+                            rounded-xl
+                            text-sm
+                            font-semibold
+                            theme-danger
+                            border theme-border
+                            hover:opacity-80
+                            transition-colors
+                            disabled:opacity-60
+                          "
+                        >
+                          <Unlink size={16} />
+                          Lepas
+                        </button>
+                      )}
                     </div>
                   </form>
 
-                  {/* PREVIEW + TIPS */}
                   <div className="space-y-6">
-                    {/* PREVIEW */}
                     <div className="theme-card rounded-xl border theme-border shadow-sm overflow-hidden">
                       <div className="px-5 py-4 border-b theme-border-soft theme-card-soft">
                         <h2 className="text-sm font-semibold theme-text-secondary">
@@ -904,18 +742,17 @@ export default function EditWaliKelasPage() {
                             text-[var(--color-card)]
                           "
                         >
-                          {form.waliKelas.trim()
-                            ? getInitials(form.waliKelas)
-                            : "WK"}
+                          {getInitials(selectedGuru?.nama)}
                         </div>
 
                         <div className="min-w-0">
                           <p className="text-xs text-[color-mix(in_srgb,var(--color-card)_80%,transparent)]">
-                            Wali Kelas {form.kelas.trim() || "-"}
+                            Wali Kelas {data.kelas}
                           </p>
 
                           <p className="font-bold text-sm leading-tight truncate text-[var(--color-card)]">
-                            {form.waliKelas.trim() || "Nama wali kelas"}
+                            {selectedGuru?.nama ||
+                              "Belum ditugaskan"}
                           </p>
                         </div>
                       </div>
@@ -927,7 +764,7 @@ export default function EditWaliKelasPage() {
                           </span>
 
                           <span className="font-mono text-xs theme-text-secondary">
-                            {form.nip.trim() || "-"}
+                            {kontakGuru?.nip || "-"}
                           </span>
                         </div>
 
@@ -937,7 +774,7 @@ export default function EditWaliKelasPage() {
                           </span>
 
                           <span className="theme-text-secondary font-medium">
-                            Kelas {form.jenjang}
+                            Kelas {data.jenjang}
                           </span>
                         </div>
 
@@ -946,8 +783,19 @@ export default function EditWaliKelasPage() {
                             Jumlah Siswa
                           </span>
 
+                          <span className="theme-text-secondary font-medium inline-flex items-center gap-1.5">
+                            <Users size={12} />
+                            {data.jumlahSiswa} siswa
+                          </span>
+                        </div>
+
+                        <div className="flex items-center justify-between">
+                          <span className="theme-text-muted text-xs">
+                            Tahun Ajaran
+                          </span>
+
                           <span className="theme-text-secondary font-medium">
-                            {form.jumlahSiswa || 0} siswa
+                            {data.tahunAjaran}
                           </span>
                         </div>
 
@@ -958,38 +806,43 @@ export default function EditWaliKelasPage() {
 
                           <span
                             className={
-                              form.status === "aktif"
+                              guruId
                                 ? "text-[var(--color-success)] text-xs font-semibold"
                                 : "theme-text-muted text-xs font-semibold"
                             }
                           >
-                            {form.status === "aktif"
-                              ? "Aktif"
-                              : "Nonaktif"}
+                            {guruId
+                              ? "Ditugaskan"
+                              : "Belum Ditugaskan"}
                           </span>
                         </div>
                       </div>
                     </div>
 
-                    {/* TIPS */}
                     <div className="theme-info rounded-xl border theme-border p-5">
                       <div className="flex items-center gap-2 mb-2.5">
                         <Info size={16} />
 
                         <h2 className="text-sm font-semibold">
-                          Tips
+                          Informasi
                         </h2>
                       </div>
 
                       <ul className="space-y-2 text-xs theme-text-secondary list-disc list-inside">
                         <li>
-                          Ubah status jadi "Nonaktif" kalau wali kelas ini
-                          sedang cuti/berhenti.
+                          Memilih guru lain akan mengganti wali kelas
+                          pada kelas ini.
                         </li>
 
                         <li>
-                          Pastikan email & telepon selalu yang terbaru untuk
-                          kebutuhan komunikasi orang tua.
+                          Gunakan tombol Lepas untuk menghapus
+                          penugasan tanpa menghapus kelas atau akun
+                          guru.
+                        </li>
+
+                        <li>
+                          Perubahan langsung tersimpan ke data kelas
+                          di server.
                         </li>
                       </ul>
                     </div>
@@ -1000,6 +853,75 @@ export default function EditWaliKelasPage() {
           </div>
         </main>
       </div>
+
+      {confirmRelease && data && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="theme-card rounded-2xl shadow-xl max-w-sm w-full p-5">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 rounded-full theme-danger flex items-center justify-center flex-shrink-0">
+                <AlertTriangle size={18} />
+              </div>
+
+              <p className="font-bold theme-text">
+                Lepas Wali Kelas?
+              </p>
+            </div>
+
+            <p className="text-sm theme-text-muted mb-5">
+              Wali kelas{" "}
+              <span className="font-semibold theme-text-secondary">
+                {data.waliKelas}
+              </span>{" "}
+              akan dilepas dari kelas{" "}
+              <span className="font-semibold theme-text-secondary">
+                {data.kelas}
+              </span>
+              . Data kelas dan akun guru tidak dihapus.
+            </p>
+
+            <div className="flex gap-2">
+              <button
+                onClick={() => setConfirmRelease(false)}
+                disabled={releasing}
+                className="
+                  flex-1
+                  px-4 py-2.5
+                  rounded-lg
+                  text-sm
+                  font-semibold
+                  theme-card-soft
+                  theme-text-secondary
+                  border theme-border
+                  hover:bg-[var(--color-input-hover)]
+                  transition-colors
+                  disabled:opacity-60
+                "
+              >
+                Batal
+              </button>
+
+              <button
+                onClick={handleRelease}
+                disabled={releasing}
+                className="
+                  flex-1
+                  px-4 py-2.5
+                  rounded-lg
+                  text-sm
+                  font-semibold
+                  theme-danger
+                  border theme-border
+                  hover:opacity-80
+                  transition-colors
+                  disabled:opacity-60
+                "
+              >
+                {releasing ? "Melepas..." : "Ya, Lepas"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

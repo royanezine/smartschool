@@ -27,9 +27,6 @@ import {
 
 const MASTER_SHIFT_PATH = "/admin/presensi/master-shift";
 
-/* =========================================================
-   HELPERS
-========================================================= */
 
 function formatTime(value) {
   if (!value) return "";
@@ -48,10 +45,6 @@ function normalizeStatus(value) {
   return "";
 }
 
-/**
- * getShiftKerjaById sudah mengembalikan objek ShiftKerja,
- * bukan response { success, message, data }.
- */
 function createFormFromApi(shift) {
   if (
     !shift ||
@@ -64,7 +57,6 @@ function createFormFromApi(shift) {
 
   const status = normalizeStatus(shift.status);
 
-  // Jangan mengasumsikan status yang tidak dikenal sebagai aktif.
   if (!status) {
     throw new Error(
       "Status shift dari backend tidak valid. Periksa nilai status pada data shift."
@@ -103,9 +95,6 @@ function getLateLimit(startTime, tolerance) {
   ).padStart(2, "0")}`;
 }
 
-/* =========================================================
-   PAGE
-========================================================= */
 
 export default function EditMasterShiftPage() {
   const router = useRouter();
@@ -120,9 +109,6 @@ export default function EditMasterShiftPage() {
   const [saving, setSaving] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
-  /* =======================================================
-     LOAD SHIFT
-  ======================================================= */
 
   const loadShift = useCallback(async () => {
     if (!shiftId) {
@@ -166,9 +152,6 @@ export default function EditMasterShiftPage() {
     loadShift();
   }, [loadShift]);
 
-  /* =======================================================
-     FORM HANDLER
-  ======================================================= */
 
   const handleChange = (field, value) => {
     setForm((current) => {
@@ -183,9 +166,6 @@ export default function EditMasterShiftPage() {
     setErrorMessage("");
   };
 
-  /* =======================================================
-     UPDATE SHIFT
-  ======================================================= */
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -244,14 +224,6 @@ export default function EditMasterShiftPage() {
       return;
     }
 
-    /**
-     * Payload mengikuti UpdateShiftKerjaPayload:
-     * nama, kode, jamMasuk, jamKeluar,
-     * toleransiTerlambatMenit, dan status.
-     *
-     * Tidak mengirim sekolahId karena update schema
-     * yang diberikan tidak menyediakan field tersebut.
-     */
     const payload = {
       nama,
       kode,
@@ -282,9 +254,6 @@ export default function EditMasterShiftPage() {
     }
   };
 
-  /* =======================================================
-     LOADING
-  ======================================================= */
 
   if (loading) {
     return (
@@ -309,9 +278,6 @@ export default function EditMasterShiftPage() {
     );
   }
 
-  /* =======================================================
-     NOT FOUND
-  ======================================================= */
 
   if (!form) {
     return (
@@ -361,9 +327,6 @@ export default function EditMasterShiftPage() {
     form.toleransiTerlambatMenit
   );
 
-  /* =======================================================
-     MAIN PAGE
-  ======================================================= */
 
   return (
     <PageShell>
@@ -382,7 +345,6 @@ export default function EditMasterShiftPage() {
             Kembali ke Detail Shift
           </button>
 
-          {/* HEADER */}
 
           <div className="mb-6 flex items-center gap-3">
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border theme-border theme-info">
@@ -399,7 +361,6 @@ export default function EditMasterShiftPage() {
             </div>
           </div>
 
-          {/* ERROR */}
 
           {errorMessage && (
             <div
@@ -425,7 +386,6 @@ export default function EditMasterShiftPage() {
 
           <form onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_310px]">
-              {/* FORM */}
 
               <section className="theme-card overflow-hidden rounded-xl border theme-border shadow-sm">
                 <div className="border-b theme-border theme-card-soft px-6 py-5">
@@ -439,7 +399,6 @@ export default function EditMasterShiftPage() {
                 </div>
 
                 <div className="space-y-5 p-6">
-                  {/* NAMA */}
 
                   <div>
                     <label
@@ -468,7 +427,6 @@ export default function EditMasterShiftPage() {
                     </p>
                   </div>
 
-                  {/* KODE */}
 
                   <div>
                     <label
@@ -496,7 +454,6 @@ export default function EditMasterShiftPage() {
                     </p>
                   </div>
 
-                  {/* JAM */}
 
                   <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                     <div>
@@ -550,7 +507,6 @@ export default function EditMasterShiftPage() {
                     </div>
                   </div>
 
-                  {/* TOLERANSI */}
 
                   <div>
                     <label
@@ -589,7 +545,6 @@ export default function EditMasterShiftPage() {
                     </p>
                   </div>
 
-                  {/* STATUS */}
 
                   <div>
                     <label
@@ -615,7 +570,6 @@ export default function EditMasterShiftPage() {
                 </div>
               </section>
 
-              {/* PREVIEW */}
 
               <aside className="space-y-5">
                 <section className="theme-card rounded-xl border theme-border shadow-sm">
@@ -708,7 +662,6 @@ export default function EditMasterShiftPage() {
               </aside>
             </div>
 
-            {/* ACTIONS */}
 
             <div className="mt-6 flex flex-wrap justify-end gap-3">
               <button
@@ -743,9 +696,6 @@ export default function EditMasterShiftPage() {
   );
 }
 
-/* =========================================================
-   LAYOUT
-========================================================= */
 
 function PageShell({ children }) {
   return (
@@ -760,9 +710,6 @@ function PageShell({ children }) {
   );
 }
 
-/* =========================================================
-   SUB COMPONENT
-========================================================= */
 
 function PreviewRow({ label, value }) {
   return (

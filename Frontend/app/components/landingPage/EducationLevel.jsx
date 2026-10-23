@@ -28,9 +28,9 @@ export default function EducationLevel() {
     },
     {
       title: "Sekolah Menengah Atas (SMA)",
-      color: "bg-purple-500",
-      bg: "bg-purple-50",
-      text: "text-purple-600",
+      color: "bg-blue-600",
+      bg: "bg-blue-50",
+      text: "text-blue-600",
       icon: <GraduationCap size={28} />,
       description:
         "Kelola seluruh aktivitas akademik dan administrasi sekolah dengan sistem yang terintegrasi.",
@@ -50,7 +50,6 @@ export default function EducationLevel() {
     <section className="py-24 bg-[#F8FAFC]">
       <div className="max-w-7xl mx-auto px-6">
 
-        {/* Header */}
         <div className="text-center max-w-3xl mx-auto">
           <span className="inline-flex rounded-full bg-blue-100 px-4 py-2 text-sm font-semibold text-blue-600">
             Jenjang Pendidikan
@@ -70,7 +69,6 @@ export default function EducationLevel() {
           </p>
         </div>
 
-        {/* Cards */}
         <div className="mt-16 grid gap-8 lg:grid-cols-2">
 
           {levels.map((item, index) => (

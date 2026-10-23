@@ -21,15 +21,17 @@ import {
   ArrowUp,
   ArrowDown,
   ArrowUpDown,
+  Download,
+  ChevronLeft,
+  ChevronRight,
+  Filter,
 } from "lucide-react";
 
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
-import { apiFetch } from "@/lib/api";
+import { getMonitoringKehadiranGuru } from "@/services/absensi.service";
+import { getShiftKerja } from "@/services/shiftKerja.service";
 
-/* =========================================================
-   HELPER
-========================================================= */
 
 function getLocalDate() {
   const now = new Date();
@@ -40,19 +42,6 @@ function getLocalDate() {
   return `${year}-${month}-${day}`;
 }
 
-/**
- * Endpoint BE mengembalikan daftar catatan absensi secara langsung:
- * {
- *   success: true,
- *   message: "...",
- *   data: [{
- *     id, penggunaId, waktuMasuk, waktuKeluar, metode,
- *     status, statusShift, terlambatMenit,
- *     pengguna: { id, namaLengkap, nip, nuptk, email, shiftKerja },
- *     shiftKerja: { ... }
- *   }]
- * }
- */
 function unwrapMonitoringResponse(response, tanggal) {
   const root = response && typeof response === "object" ? response : {};
 
@@ -71,8 +60,6 @@ function unwrapMonitoringResponse(response, tanggal) {
   const data = rows.map((item, index) => {
     const pengguna = item?.pengguna || {};
 
-    // Mendukung respons BE saat ini dan struktur bersarang
-    // jika suatu saat endpoint mengembalikan item.absensi.
     const rawAbsensi =
       item?.absensi ??
       item?.catatanAbsensi ??
@@ -112,7 +99,6 @@ function unwrapMonitoringResponse(response, tanggal) {
 
   return {
     tanggal,
-    // Endpoint ini hanya mengembalikan catatan absensi yang ditemukan.
     totalGuru: data.length,
     sudahAbsen: data.filter((item) => Boolean(item.absensi)).length,
     data,
@@ -321,18 +307,21 @@ function compareValues(a, b, direction) {
   return direction === "asc" ? result : -result;
 }
 
-/* =========================================================
-   PAGE
-========================================================= */
 
 export default function MonitoringKehadiranGuruPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [tanggal, setTanggal] = useState(getLocalDate);
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("semua");
+  const [filterShift, setFilterShift] = useState("semua");
 
   const [sortKey, setSortKey] = useState("nama");
   const [sortDir, setSortDir] = useState("asc");
+
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+
+  const [daftarShift, setDaftarShift] = useState([]);
 
   const [monitoring, setMonitoring] = useState({
     tanggal: getLocalDate(),
@@ -344,6 +333,31 @@ export default function MonitoringKehadiranGuruPage() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    let active = true;
+
+    async function fetchShifts() {
+      try {
+        const res = await getShiftKerja();
+        const list = Array.isArray(res) ? res : Array.isArray(res?.data) ? res.data : [];
+        if (active) {
+          setDaftarShift(list);
+        }
+      } catch (err) {
+        console.error("Gagal memuat daftar shift:", err);
+      }
+    }
+
+    const timer = setTimeout(() => {
+      fetchShifts();
+    }, 0);
+
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
+  }, []);
 
   const loadData = useCallback(
     async (showRefresh = false, silent = false) => {
@@ -362,10 +376,12 @@ export default function MonitoringKehadiranGuruPage() {
       if (!silent) setError("");
 
       try {
-        const response = await apiFetch(
-          `/api/absensi/monitoring-guru?tanggal=${encodeURIComponent(tanggal)}`,
-          { method: "GET" }
-        );
+        const response = await getMonitoringKehadiranGuru({
+          tanggal,
+          status: filterStatus !== "semua" ? filterStatus : undefined,
+          search: search.trim() || undefined,
+          shiftKerjaId: filterShift !== "semua" ? filterShift : undefined,
+        });
 
         const result = unwrapMonitoringResponse(response, tanggal);
         setMonitoring(result);
@@ -390,11 +406,15 @@ export default function MonitoringKehadiranGuruPage() {
         if (showRefresh) setRefreshing(false);
       }
     },
-    [tanggal]
+    [tanggal, filterStatus, search, filterShift]
   );
 
   useEffect(() => {
-    loadData();
+    const timer = setTimeout(() => {
+      loadData();
+    }, 0);
+
+    return () => clearTimeout(timer);
   }, [loadData]);
 
   useEffect(() => {
@@ -407,6 +427,14 @@ export default function MonitoringKehadiranGuruPage() {
     return () => clearInterval(intervalId);
   }, [loadData]);
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setPage(1);
+    }, 0);
+
+    return () => clearTimeout(timer);
+  }, [tanggal, search, filterStatus, filterShift, limit]);
+
   const filteredData = useMemo(() => {
     const keyword = search.trim().toLowerCase();
 
@@ -414,36 +442,43 @@ export default function MonitoringKehadiranGuruPage() {
       const nama = String(item.namaLengkap || "").toLowerCase();
       const nip = String(item.nip || "").toLowerCase();
       const email = String(item.email || "").toLowerCase();
-      const shift = getShiftName(item.shiftKerja).toLowerCase();
+      const shiftName = getShiftName(item.shiftKerja).toLowerCase();
 
       const matchesSearch =
         !keyword ||
         nama.includes(keyword) ||
         nip.includes(keyword) ||
         email.includes(keyword) ||
-        shift.includes(keyword);
+        shiftName.includes(keyword);
 
       const sudahAbsen = Boolean(item.absensi);
       const status = String(getStatusGuru(item)).toLowerCase();
 
       let matchesStatus = true;
-
-      if (filterStatus === "sudah") {
-        matchesStatus = sudahAbsen;
-      } else if (filterStatus === "belum") {
-        // Endpoint saat ini tidak mengembalikan daftar seluruh guru,
-        // sehingga data guru yang belum absen tidak bisa difilter di sini.
-        matchesStatus = !sudahAbsen;
+      if (filterStatus === "hadir") {
+        matchesStatus = sudahAbsen && (status === "hadir" || status === "tepat_waktu");
       } else if (filterStatus === "terlambat") {
         matchesStatus =
           sudahAbsen &&
           (status.includes("terlambat") ||
             Number(item.absensi?.terlambatMenit || 0) > 0);
+      } else if (filterStatus === "izin") {
+        matchesStatus = status === "izin";
+      } else if (filterStatus === "sakit") {
+        matchesStatus = status === "sakit";
+      } else if (filterStatus === "alpa" || filterStatus === "alpha") {
+        matchesStatus = status === "alpa" || status === "alpha";
       }
 
-      return matchesSearch && matchesStatus;
+      let matchesShift = true;
+      if (filterShift !== "semua") {
+        const itemShiftId = item.shiftKerjaId || item.shiftKerja?.id;
+        matchesShift = itemShiftId === filterShift;
+      }
+
+      return matchesSearch && matchesStatus && matchesShift;
     });
-  }, [monitoring.data, search, filterStatus]);
+  }, [monitoring.data, search, filterStatus, filterShift]);
 
   const sortedData = useMemo(() => {
     const accessor = SORT_ACCESSORS[sortKey];
@@ -454,19 +489,42 @@ export default function MonitoringKehadiranGuruPage() {
     );
   }, [filteredData, sortKey, sortDir]);
 
-  const totalTerlambat = useMemo(
-    () =>
-      monitoring.data.filter((item) => {
-        const absensi = item.absensi;
+  const stats = useMemo(() => {
+    if (loading || error) {
+      return {
+        total: "—",
+        hadir: "—",
+        terlambat: "—",
+        izinSakit: "—",
+      };
+    }
 
-        return (
-          Boolean(absensi) &&
-          (String(getStatusGuru(item)).toLowerCase().includes("terlambat") ||
-            Number(absensi?.terlambatMenit || 0) > 0)
-        );
-      }).length,
-    [monitoring.data]
-  );
+    const total = filteredData.length;
+    let hadir = 0;
+    let terlambat = 0;
+    let izinSakit = 0;
+
+    for (const item of filteredData) {
+      const status = String(getStatusGuru(item)).toLowerCase();
+      const terlambatMenit = Number(item.absensi?.terlambatMenit || 0);
+
+      if (terlambatMenit > 0 || status.includes("terlambat")) {
+        terlambat += 1;
+      } else if (status === "hadir" || status === "tepat_waktu") {
+        hadir += 1;
+      } else if (status === "izin" || status === "sakit") {
+        izinSakit += 1;
+      }
+    }
+
+    return { total, hadir, terlambat, izinSakit };
+  }, [filteredData, loading, error]);
+
+  const totalPages = Math.max(1, Math.ceil(sortedData.length / limit));
+  const paginatedData = useMemo(() => {
+    const start = (page - 1) * limit;
+    return sortedData.slice(start, start + limit);
+  }, [sortedData, page, limit]);
 
   const isToday = tanggal === getLocalDate();
 
@@ -477,6 +535,59 @@ export default function MonitoringKehadiranGuruPage() {
       setSortKey(key);
       setSortDir("asc");
     }
+  }
+
+  function handleExportCsv() {
+    if (sortedData.length === 0) return;
+
+    const headers = [
+      "No",
+      "Nama Guru",
+      "NIP/NUPTK",
+      "Email",
+      "Shift",
+      "Jam Masuk",
+      "Jam Pulang",
+      "Durasi (Jam)",
+      "Keterlambatan (Menit)",
+      "Metode",
+      "Status",
+    ];
+
+    const rows = sortedData.map((item, index) => {
+      const absensi = item.absensi;
+      const status = getStatusGuru(item);
+      const terlambatMenit = Number(absensi?.terlambatMenit || 0);
+
+      return [
+        index + 1,
+        `"${(item.namaLengkap || "-").replace(/"/g, '""')}"`,
+        `"${item.nip || "-"}"`,
+        `"${item.email || "-"}"`,
+        `"${getShiftName(item.shiftKerja).replace(/"/g, '""')}"`,
+        formatWaktu(absensi?.waktuMasuk),
+        formatWaktu(absensi?.waktuKeluar),
+        formatDurasi(absensi?.durasiJamKerja),
+        terlambatMenit,
+        absensi?.metode ? formatStatus(absensi.metode) : "-",
+        formatStatus(status),
+      ].join(",");
+    });
+
+    const newline = String.fromCharCode(13, 10);
+    const csvContent = "\uFEFF" + [headers.join(","), ...rows].join(newline);
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute(
+      "download",
+      `monitoring-kehadiran-guru-${tanggal || "semua"}.csv`
+    );
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   }
 
   return (
@@ -504,18 +615,31 @@ export default function MonitoringKehadiranGuruPage() {
                 </p>
               </div>
 
-              <button
-                type="button"
-                onClick={() => loadData(true)}
-                disabled={loading || refreshing}
-                className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border theme-border theme-card px-4 text-sm font-medium theme-text-secondary transition hover:bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                <RefreshCw
-                  size={16}
-                  className={refreshing ? "animate-spin" : ""}
-                />
-                {refreshing ? "Memuat..." : "Muat Ulang"}
-              </button>
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleExportCsv}
+                  disabled={loading || sortedData.length === 0}
+                  className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border theme-border theme-card px-3.5 text-sm font-medium theme-text-secondary transition hover:bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] disabled:cursor-not-allowed disabled:opacity-50"
+                  title="Ekspor data hasil filter ke CSV"
+                >
+                  <Download size={15} />
+                  Ekspor CSV
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => loadData(true)}
+                  disabled={loading || refreshing}
+                  className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border theme-border theme-card px-4 text-sm font-medium theme-text-secondary transition hover:bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  <RefreshCw
+                    size={16}
+                    className={refreshing ? "animate-spin" : ""}
+                  />
+                  {refreshing ? "Memuat..." : "Muat Ulang"}
+                </button>
+              </div>
             </div>
 
             <div className="mb-6 flex items-start gap-3 rounded-lg border theme-border theme-card p-4">
@@ -534,15 +658,15 @@ export default function MonitoringKehadiranGuruPage() {
             </div>
 
             <section className="mb-6 rounded-xl border theme-border theme-card p-4 shadow-sm sm:p-5">
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:gap-4">
-                  <div className="w-full sm:w-auto">
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 lg:gap-4 flex-1">
+                  <div>
                     <label
                       htmlFor="tanggal-monitoring"
-                      className="mb-2 flex items-center gap-1.5 text-sm font-medium theme-text"
+                      className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold theme-text-secondary"
                     >
-                      <CalendarRange size={15} />
-                      Tanggal monitoring
+                      <CalendarRange size={14} />
+                      Tanggal Monitoring
                     </label>
                     <input
                       id="tanggal-monitoring"
@@ -550,10 +674,76 @@ export default function MonitoringKehadiranGuruPage() {
                       value={tanggal}
                       max={getLocalDate()}
                       onChange={(event) => setTanggal(event.target.value)}
-                      className="theme-input h-10 w-full rounded-lg border px-3 text-sm outline-none transition sm:w-auto"
+                      className="theme-input h-10 w-full rounded-lg border px-3 text-sm outline-none transition"
                     />
                   </div>
 
+                  <div>
+                    <label
+                      htmlFor="pencarian-guru"
+                      className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold theme-text-secondary"
+                    >
+                      <Search size={14} />
+                      Cari Guru
+                    </label>
+                    <input
+                      id="pencarian-guru"
+                      type="search"
+                      value={search}
+                      onChange={(event) => setSearch(event.target.value)}
+                      placeholder="Nama, NIP, atau email..."
+                      className="theme-input h-10 w-full rounded-lg border px-3 text-sm outline-none transition"
+                    />
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="filter-status"
+                      className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold theme-text-secondary"
+                    >
+                      <Filter size={14} />
+                      Status Kehadiran
+                    </label>
+                    <select
+                      id="filter-status"
+                      value={filterStatus}
+                      onChange={(event) => setFilterStatus(event.target.value)}
+                      className="theme-input h-10 w-full rounded-lg border px-3 text-sm outline-none transition"
+                    >
+                      <option value="semua">Semua Status</option>
+                      <option value="hadir">Hadir / Tepat Waktu</option>
+                      <option value="terlambat">Terlambat</option>
+                      <option value="izin">Izin</option>
+                      <option value="sakit">Sakit</option>
+                      <option value="alpa">Alpa</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label
+                      htmlFor="filter-shift"
+                      className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold theme-text-secondary"
+                    >
+                      <Clock3 size={14} />
+                      Shift Kerja
+                    </label>
+                    <select
+                      id="filter-shift"
+                      value={filterShift}
+                      onChange={(event) => setFilterShift(event.target.value)}
+                      className="theme-input h-10 w-full rounded-lg border px-3 text-sm outline-none transition"
+                    >
+                      <option value="semua">Semua Shift</option>
+                      {daftarShift.map((s) => (
+                        <option key={s.id} value={s.id}>
+                          {s.nama || s.namaShift || s.kode} ({String(s.jamMasuk || "").slice(0, 5)} - {String(s.jamKeluar || "").slice(0, 5)})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3 self-end">
                   {!isToday && (
                     <button
                       type="button"
@@ -564,15 +754,15 @@ export default function MonitoringKehadiranGuruPage() {
                       Hari ini
                     </button>
                   )}
-                </div>
 
-                <div className="flex flex-col items-start gap-1 sm:items-end">
-                  <span className="inline-flex items-center gap-1.5 rounded-md bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] px-2.5 py-1 text-xs font-semibold theme-primary-text">
-                    {isToday ? "Hari ini" : "Riwayat"}
-                  </span>
-                  <p className="text-sm font-medium theme-text">
-                    {formatTanggal(tanggal)}
-                  </p>
+                  <div className="text-right">
+                    <span className="inline-flex items-center gap-1.5 rounded-md bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] px-2.5 py-1 text-xs font-semibold theme-primary-text">
+                      {isToday ? "Hari ini" : "Riwayat"}
+                    </span>
+                    <p className="mt-1 text-xs font-medium theme-text">
+                      {formatTanggal(tanggal)}
+                    </p>
+                  </div>
                 </div>
               </div>
             </section>
@@ -605,91 +795,62 @@ export default function MonitoringKehadiranGuruPage() {
               </div>
             )}
 
-            <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
               <SummaryCard
-                title="Catatan Absensi"
-                value={monitoring.totalGuru}
-                description="Catatan yang dikembalikan BE"
+                title="Total Catatan"
+                value={stats.total}
+                description="Catatan absensi sesuai filter"
                 icon={Users}
                 tone="blue"
               />
               <SummaryCard
-                title="Sudah Absen"
-                value={monitoring.sudahAbsen}
-                description="Catatan absensi yang ditemukan"
+                title="Hadir Tepat Waktu"
+                value={stats.hadir}
+                description="Hadir sesuai jam shift"
                 icon={UserCheck}
                 tone="emerald"
               />
               <SummaryCard
                 title="Terlambat"
-                value={totalTerlambat}
-                description="Berdasarkan status atau menit keterlambatan"
+                value={stats.terlambat}
+                description="Melewati toleransi jam masuk"
                 icon={Clock3}
                 tone="amber"
               />
+              <SummaryCard
+                title="Izin / Sakit"
+                value={stats.izinSakit}
+                description="Dispensasi ketidakhadiran"
+                icon={Info}
+                tone="slate"
+              />
             </div>
-
-            <section className="mb-6 rounded-xl border theme-border theme-card p-5 shadow-sm">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div className="flex items-start gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
-                    <Clock3 size={19} />
-                  </div>
-                  <div>
-                    <h2 className="font-semibold theme-text">
-                      Ringkasan kehadiran
-                    </h2>
-                    <p className="mt-1 text-sm theme-text-muted">
-                      Ditemukan {monitoring.sudahAbsen} catatan absensi pada{" "}
-                      {formatTanggal(tanggal)}.
-                    </p>
-                  </div>
-                </div>
-                <p className="max-w-sm text-sm theme-text-muted">
-                  Persentase kehadiran dan jumlah guru yang belum absen
-                  memerlukan data seluruh guru dari BE.
-                </p>
-              </div>
-            </section>
 
             <section className="overflow-hidden rounded-xl border theme-border theme-card shadow-sm">
               <div className="border-b theme-border p-4 sm:p-5">
-                <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div>
-                    <h2 className="font-semibold theme-text">
+                    <h2 className="font-semibold theme-text text-base">
                       Daftar Kehadiran Guru
                     </h2>
-                    <p className="mt-1 text-sm theme-text-muted">
-                      {sortedData.length} dari {monitoring.data.length} catatan
-                      absensi ditampilkan
+                    <p className="mt-1 text-xs theme-text-muted">
+                      Menampilkan {sortedData.length > 0 ? (page - 1) * limit + 1 : 0} -{" "}
+                      {Math.min(page * limit, sortedData.length)} dari {sortedData.length} catatan
+                      {monitoring.data.length !== sortedData.length &&
+                        ` (difilter dari ${monitoring.data.length} total)`}
                     </p>
                   </div>
 
-                  <div className="flex flex-col gap-3 sm:flex-row">
-                    <div className="relative min-w-0 sm:w-64">
-                      <Search
-                        size={17}
-                        className="absolute left-3 top-1/2 -translate-y-1/2 theme-text-muted"
-                      />
-                      <input
-                        type="search"
-                        value={search}
-                        onChange={(event) => setSearch(event.target.value)}
-                        placeholder="Cari nama, NIP, atau email..."
-                        className="theme-input h-10 w-full rounded-lg border pl-10 pr-3 text-sm outline-none transition"
-                      />
-                    </div>
-
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs theme-text-muted">Baris:</span>
                     <select
-                      value={filterStatus}
-                      onChange={(event) => setFilterStatus(event.target.value)}
-                      aria-label="Filter status kehadiran"
-                      className="theme-input h-10 rounded-lg border px-3 text-sm outline-none sm:w-44"
+                      value={limit}
+                      onChange={(e) => setLimit(Number(e.target.value))}
+                      className="theme-input h-8 rounded-lg border px-2 text-xs outline-none"
                     >
-                      <option value="semua">Semua status</option>
-                      <option value="sudah">Sudah absen</option>
-                      <option value="belum">Belum absen</option>
-                      <option value="terlambat">Terlambat</option>
+                      <option value={10}>10</option>
+                      <option value={25}>25</option>
+                      <option value={50}>50</option>
                     </select>
                   </div>
                 </div>
@@ -706,7 +867,7 @@ export default function MonitoringKehadiranGuruPage() {
                       Memuat data kehadiran guru...
                     </p>
                     <p className="mt-1 text-xs theme-text-muted">
-                      Mohon tunggu sebentar
+                      Menghubungi endpoint absensi server
                     </p>
                   </div>
                 ) : error && monitoring.data.length === 0 ? (
@@ -714,46 +875,47 @@ export default function MonitoringKehadiranGuruPage() {
                     <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-red-50 text-red-600 dark:bg-red-950/50 dark:text-red-400">
                       <AlertCircle size={23} />
                     </div>
-                    <p className="mt-4 font-semibold theme-text">
-                      Data belum bisa dimuat
+                    <p className="mt-4 font-semibold theme-text text-base">
+                      Data Kehadiran Gagal Dimuat
                     </p>
-                    <p className="mt-1 max-w-md text-sm theme-text-muted">
-                      Periksa koneksi dan konfigurasi API, lalu coba muat ulang.
+                    <p className="mt-1 max-w-md text-xs leading-5 theme-text-muted">
+                      {error}
                     </p>
                     <button
                       type="button"
                       onClick={() => loadData(true)}
-                      className="mt-4 inline-flex h-9 items-center gap-2 rounded-lg theme-primary px-3 text-sm font-medium text-white hover:opacity-90"
+                      className="mt-4 inline-flex h-9 items-center gap-2 rounded-lg theme-primary px-3 text-xs font-semibold text-white hover:opacity-90 transition"
                     >
-                      <RefreshCw size={15} />
-                      Muat Ulang
+                      <RefreshCw size={14} />
+                      Coba Lagi
                     </button>
                   </div>
-                ) : sortedData.length === 0 ? (
+                ) : paginatedData.length === 0 ? (
                   <div className="flex min-h-64 flex-col items-center justify-center px-4 text-center">
                     <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] theme-text-muted">
                       <Users size={23} />
                     </div>
-                    <p className="mt-4 font-semibold theme-text">
+                    <p className="mt-4 font-semibold theme-text text-base">
                       {monitoring.data.length === 0
-                        ? "Belum ada catatan absensi"
-                        : "Tidak ada data yang cocok"}
+                        ? "Belum Ada Catatan Kehadiran"
+                        : "Tidak Ada Data yang Sesuai Filter"}
                     </p>
-                    <p className="mt-1 max-w-sm text-sm theme-text-muted">
+                    <p className="mt-1 max-w-sm text-xs theme-text-muted">
                       {monitoring.data.length === 0
-                        ? "Tidak ada catatan yang dikembalikan untuk tanggal ini."
-                        : "Ubah kata pencarian atau filter untuk melihat data lain."}
+                        ? `Tidak ada catatan absensi guru yang tercatat pada ${formatTanggal(tanggal)}.`
+                        : "Ubah kata kunci pencarian, filter status, atau shift untuk melihat data lain."}
                     </p>
-                    {(search || filterStatus !== "semua") && (
+                    {(search || filterStatus !== "semua" || filterShift !== "semua") && (
                       <button
                         type="button"
                         onClick={() => {
                           setSearch("");
                           setFilterStatus("semua");
+                          setFilterShift("semua");
                         }}
-                        className="mt-3 text-sm font-semibold theme-primary-text hover:underline"
+                        className="mt-3 text-xs font-semibold theme-primary-text hover:underline"
                       >
-                        Hapus filter
+                        Reset Filter
                       </button>
                     )}
                   </div>
@@ -819,12 +981,13 @@ export default function MonitoringKehadiranGuruPage() {
                       </thead>
 
                       <tbody className="divide-y divide-[color-mix(in_srgb,var(--color-text)_5%,transparent)]">
-                        {sortedData.map((item, index) => {
+                        {paginatedData.map((item, index) => {
                           const absensi = item.absensi;
                           const status = getStatusGuru(item);
                           const terlambatMenit = Number(
                             absensi?.terlambatMenit || 0
                           );
+                          const nomorUrut = (page - 1) * limit + index + 1;
 
                           return (
                             <tr
@@ -832,7 +995,7 @@ export default function MonitoringKehadiranGuruPage() {
                               className="transition hover:bg-[color-mix(in_srgb,var(--color-text)_2%,transparent)]"
                             >
                               <td className="px-4 py-4 text-center text-sm tabular-nums theme-text-muted">
-                                {index + 1}
+                                {nomorUrut}
                               </td>
 
                               <td className="px-5 py-4">
@@ -932,6 +1095,64 @@ export default function MonitoringKehadiranGuruPage() {
                 )}
               </div>
 
+              {!loading && !error && sortedData.length > 0 && (
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-t theme-border px-5 py-3.5">
+                  <p className="text-xs theme-text-muted">
+                    Halaman <strong className="theme-text">{page}</strong> dari{" "}
+                    <strong className="theme-text">{totalPages}</strong> ({sortedData.length} data ditemukan)
+                  </p>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      disabled={page <= 1}
+                      onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-lg border theme-border theme-card theme-text-secondary transition hover:bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)] disabled:cursor-not-allowed disabled:opacity-40"
+                      aria-label="Halaman sebelumnya"
+                    >
+                      <ChevronLeft size={16} />
+                    </button>
+
+                    <div className="flex items-center gap-1">
+                      {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                        let pageNum = i + 1;
+                        if (totalPages > 5 && page > 3) {
+                          pageNum = page - 3 + i;
+                          if (pageNum > totalPages) pageNum = totalPages - (4 - i);
+                        }
+
+                        const active = page === pageNum;
+
+                        return (
+                          <button
+                            key={pageNum}
+                            type="button"
+                            onClick={() => setPage(pageNum)}
+                            className={`inline-flex h-8 w-8 items-center justify-center rounded-lg text-xs font-semibold transition ${
+                              active
+                                ? "theme-primary text-white"
+                                : "border theme-border theme-card theme-text-secondary hover:bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]"
+                            }`}
+                          >
+                            {pageNum}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    <button
+                      type="button"
+                      disabled={page >= totalPages}
+                      onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-lg border theme-border theme-card theme-text-secondary transition hover:bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)] disabled:cursor-not-allowed disabled:opacity-40"
+                      aria-label="Halaman berikutnya"
+                    >
+                      <ChevronRight size={16} />
+                    </button>
+                  </div>
+                </div>
+              )}
+
               <div className="border-t theme-border px-5 py-3 text-xs theme-text-muted">
                 Data kehadiran diambil dari endpoint monitoring absensi dan
                 diperbarui otomatis.{" "}
@@ -947,9 +1168,6 @@ export default function MonitoringKehadiranGuruPage() {
   );
 }
 
-/* =========================================================
-   SORTABLE TABLE HEADER
-========================================================= */
 
 function SortableTh({
   label,
@@ -962,18 +1180,20 @@ function SortableTh({
   const isActive = currentKey === sortKey;
 
   return (
-    <th className={`px-5 py-4 font-semibold ${className}`}>
+    <th
+      className={`px-5 py-4 font-semibold ${className}`}
+      aria-sort={
+        isActive
+          ? currentDir === "asc"
+            ? "ascending"
+            : "descending"
+          : "none"
+      }
+    >
       <button
         type="button"
         onClick={() => onSort(sortKey)}
         className="group inline-flex items-center gap-1.5 rounded transition hover:text-[var(--color-primary)]"
-        aria-sort={
-          isActive
-            ? currentDir === "asc"
-              ? "ascending"
-              : "descending"
-            : "none"
-        }
       >
         <span>{label}</span>
         <span
@@ -998,9 +1218,6 @@ function SortableTh({
   );
 }
 
-/* =========================================================
-   SUMMARY CARD
-========================================================= */
 
 function SummaryCard({ title, value, description, icon: Icon, tone = "blue" }) {
   const toneClasses = {
@@ -1019,7 +1236,9 @@ function SummaryCard({ title, value, description, icon: Icon, tone = "blue" }) {
         <div className="min-w-0">
           <p className="text-sm font-medium theme-text-muted">{title}</p>
           <p className="mt-3 text-2xl font-bold tracking-tight tabular-nums theme-text">
-            {Number(value || 0).toLocaleString("id-ID")}
+            {typeof value === "number"
+              ? value.toLocaleString("id-ID")
+              : value}
           </p>
           <p className="mt-1 text-xs theme-text-muted">{description}</p>
         </div>
@@ -1034,9 +1253,6 @@ function SummaryCard({ title, value, description, icon: Icon, tone = "blue" }) {
   );
 }
 
-/* =========================================================
-   SORT LABEL HELPER
-========================================================= */
 
 function getSortLabel(key) {
   const labels = {

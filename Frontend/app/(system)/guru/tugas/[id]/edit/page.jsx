@@ -33,9 +33,6 @@ import {
   UserCheck,
 } from "lucide-react";
 
-/* =========================================================
-   THEME HELPERS
-========================================================= */
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -97,9 +94,6 @@ const themeDangerBorder =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-/* =========================================================
-   STATUS THEME
-========================================================= */
 
 const deadlineStatusClasses = {
   danger: `${themeDangerSurface} theme-danger ${themeDangerBorder}`,
@@ -108,9 +102,6 @@ const deadlineStatusClasses = {
   normal: `${themeNeutralSurface} theme-text-secondary ${themeNeutralBorder}`,
 };
 
-/* =========================================================
-   HELPERS
-========================================================= */
 
 function formatTanggalInput(date) {
   if (!date) return "";
@@ -255,9 +246,6 @@ function getDeadlineStatus(date) {
   };
 }
 
-/* =========================================================
-   MAIN
-========================================================= */
 
 export default function EditTugasPage() {
   const params = useParams();
@@ -283,9 +271,6 @@ export default function EditTugasPage() {
     batasWaktu: "",
   });
 
-  /* =======================================================
-     NOTIFICATIONS
-  ======================================================= */
 
   const notifications = [
     {
@@ -302,9 +287,6 @@ export default function EditTugasPage() {
     },
   ];
 
-  /* =======================================================
-     LOAD DETAIL
-  ======================================================= */
 
   useEffect(() => {
     if (!id) return;
@@ -414,9 +396,6 @@ export default function EditTugasPage() {
     loadTugas();
   }, [id]);
 
-  /* =======================================================
-     HANDLE CHANGE
-  ======================================================= */
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -435,9 +414,6 @@ export default function EditTugasPage() {
     }
   };
 
-  /* =======================================================
-     HANDLE SUBMIT
-  ======================================================= */
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -496,9 +472,6 @@ export default function EditTugasPage() {
     }
   };
 
-  /* =======================================================
-     DATA RELATION
-  ======================================================= */
 
   const kelasNama =
     tugas?.kelasMapel?.kelas?.nama ||
@@ -525,9 +498,6 @@ export default function EditTugasPage() {
 
   const deadlineStatus = getDeadlineStatus(tugas?.batasWaktu);
 
-  /* =======================================================
-     LOADING
-  ======================================================= */
 
   if (loading) {
     return (
@@ -576,9 +546,6 @@ export default function EditTugasPage() {
     );
   }
 
-  /* =======================================================
-     ERROR LOAD
-  ======================================================= */
 
   if (error && !tugas) {
     return (
@@ -636,13 +603,9 @@ export default function EditTugasPage() {
     );
   }
 
-  /* =======================================================
-     MAIN PAGE
-  ======================================================= */
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
-      {/* SIDEBAR */}
 
       <Sidebar
         active="tugas"
@@ -651,10 +614,8 @@ export default function EditTugasPage() {
         setCollapsed={() => setSidebarOpen(!sidebarOpen)}
       />
 
-      {/* CONTENT */}
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        {/* HEADER */}
 
         <div className="shrink-0">
           <Header
@@ -668,11 +629,9 @@ export default function EditTugasPage() {
           />
         </div>
 
-        {/* MAIN */}
 
         <main className="theme-page min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
           <div className="mx-auto w-full max-w-7xl px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
-            {/* BACK */}
 
             <button
               type="button"
@@ -683,7 +642,6 @@ export default function EditTugasPage() {
               Kembali ke Detail Tugas
             </button>
 
-            {/* TITLE */}
 
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex min-w-0 items-center gap-3">
@@ -718,17 +676,12 @@ export default function EditTugasPage() {
               </div>
             </div>
 
-            {/* TWO COLUMN LAYOUT */}
 
             <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
-              {/* =================================================
-                  LEFT - FORM
-              ================================================== */}
 
               <section
                 className={`theme-card min-w-0 overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
               >
-                {/* FORM HEADER */}
 
                 <div
                   className={`border-b px-5 py-5 sm:px-6 ${themeDivider}`}
@@ -755,11 +708,9 @@ export default function EditTugasPage() {
                   </div>
                 </div>
 
-                {/* FORM */}
 
                 <form onSubmit={handleSubmit}>
                   <div className="space-y-6 p-5 sm:p-6">
-                    {/* ERROR */}
 
                     {error && (
                       <div
@@ -786,7 +737,6 @@ export default function EditTugasPage() {
                       </div>
                     )}
 
-                    {/* SUCCESS */}
 
                     {success && (
                       <div
@@ -813,7 +763,6 @@ export default function EditTugasPage() {
                       </div>
                     )}
 
-                    {/* JUDUL */}
 
                     <div>
                       <label
@@ -840,7 +789,6 @@ export default function EditTugasPage() {
                       </p>
                     </div>
 
-                    {/* DESKRIPSI */}
 
                     <div>
                       <label
@@ -872,7 +820,6 @@ export default function EditTugasPage() {
                       </div>
                     </div>
 
-                    {/* DEADLINE */}
 
                     <div>
                       <label
@@ -904,7 +851,6 @@ export default function EditTugasPage() {
                       </p>
                     </div>
 
-                    {/* INFO READ ONLY */}
 
                     <div
                       className={`rounded-xl border ${themeNeutralBorder} ${themeNeutralSurface}`}
@@ -930,7 +876,6 @@ export default function EditTugasPage() {
                       </div>
 
                       <div className="grid grid-cols-1 sm:grid-cols-2">
-                        {/* KELAS */}
 
                         <div
                           className={`flex items-start gap-3 border-b p-4 sm:border-r ${themeDivider}`}
@@ -955,7 +900,6 @@ export default function EditTugasPage() {
                           </div>
                         </div>
 
-                        {/* MAPEL */}
 
                         <div
                           className={`flex items-start gap-3 border-b p-4 sm:border-b-0 ${themeDivider}`}
@@ -980,7 +924,6 @@ export default function EditTugasPage() {
                           </div>
                         </div>
 
-                        {/* GURU */}
 
                         <div
                           className={`flex items-start gap-3 p-4 sm:border-r ${themeDivider}`}
@@ -1005,7 +948,6 @@ export default function EditTugasPage() {
                           </div>
                         </div>
 
-                        {/* DEADLINE */}
 
                         <div
                           className={`flex items-start gap-3 border-t p-4 ${themeDivider}`}
@@ -1037,7 +979,6 @@ export default function EditTugasPage() {
                     </div>
                   </div>
 
-                  {/* FORM FOOTER */}
 
                   <div
                     className={`border-t px-5 py-4 sm:px-6 ${themeDivider} ${themeNeutralSurface}`}
@@ -1080,12 +1021,8 @@ export default function EditTugasPage() {
                 </form>
               </section>
 
-              {/* =================================================
-                  RIGHT - PREVIEW / SUMMARY
-              ================================================== */}
 
               <aside className="space-y-5">
-                {/* PREVIEW CARD */}
 
                 <section
                   className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
@@ -1161,10 +1098,8 @@ export default function EditTugasPage() {
                     </div>
                   </div>
 
-                  {/* PREVIEW META */}
 
                   <div>
-                    {/* KELAS */}
 
                     <div
                       className={`flex items-center gap-3 border-b px-5 py-4 ${themeDivider}`}
@@ -1189,7 +1124,6 @@ export default function EditTugasPage() {
                       </div>
                     </div>
 
-                    {/* MAPEL */}
 
                     <div
                       className={`flex items-center gap-3 border-b px-5 py-4 ${themeDivider}`}
@@ -1214,7 +1148,6 @@ export default function EditTugasPage() {
                       </div>
                     </div>
 
-                    {/* DEADLINE */}
 
                     <div className="flex items-center gap-3 px-5 py-4">
                       <div
@@ -1247,7 +1180,6 @@ export default function EditTugasPage() {
                   </div>
                 </section>
 
-                {/* DEADLINE STATUS */}
 
                 <section
                   className={`theme-card rounded-2xl border p-5 ${themeNeutralBorder} ${themeCardShadow}`}
@@ -1314,7 +1246,6 @@ export default function EditTugasPage() {
                   </div>
                 </section>
 
-                {/* SUBMISSION SUMMARY */}
 
                 <section
                   className={`theme-card rounded-2xl border p-5 ${themeNeutralBorder} ${themeCardShadow}`}
@@ -1418,7 +1349,6 @@ export default function EditTugasPage() {
                   ) : null}
                 </section>
 
-                {/* INFO */}
 
                 <div
                   className={`flex items-start gap-3 rounded-xl border p-4 ${themeInfoSurface} ${themeInfoBorder}`}

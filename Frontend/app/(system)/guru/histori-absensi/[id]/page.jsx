@@ -22,9 +22,6 @@ import {
   Clock,
 } from "lucide-react";
 
-/* ============================================================
-   THEME HELPERS
-============================================================ */
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -86,9 +83,6 @@ const themeDangerBorder =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-/* ============================================================
-   DATA DUMMY – SISWA & ABSENSI
-============================================================ */
 
 const SISWA_LIST = [
   {
@@ -216,9 +210,6 @@ const MAPEL_LIST = [
   "Seni Budaya",
 ];
 
-/* ============================================================
-   GENERATE DATA ABSENSI
-============================================================ */
 
 const generateAttendanceForStudent = (siswaId) => {
   const data = [];
@@ -312,9 +303,6 @@ const generateAttendanceForStudent = (siswaId) => {
   return data;
 };
 
-/* ============================================================
-   PAGE
-============================================================ */
 
 export default function DetailSiswaPage() {
   const router = useRouter();
@@ -329,9 +317,6 @@ export default function DetailSiswaPage() {
   const [selectedMapel, setSelectedMapel] =
     useState("Semua Mapel");
 
-  /* ==========================================================
-     LOAD SISWA
-  ========================================================== */
 
   useEffect(() => {
     const found = SISWA_LIST.find(
@@ -348,9 +333,6 @@ export default function DetailSiswaPage() {
     }
   }, [id, router]);
 
-  /* ==========================================================
-     FILTER DATA PER MAPEL
-  ========================================================== */
 
   const filteredData = useMemo(() => {
     if (selectedMapel === "Semua Mapel") {
@@ -362,9 +344,6 @@ export default function DetailSiswaPage() {
     );
   }, [attendanceData, selectedMapel]);
 
-  /* ==========================================================
-     STATISTIK PER MAPEL
-  ========================================================== */
 
   const mapelStats = useMemo(() => {
     const stats = {};
@@ -410,9 +389,6 @@ export default function DetailSiswaPage() {
     return stats;
   }, [attendanceData]);
 
-  /* ==========================================================
-     TOTAL STATISTIK
-  ========================================================== */
 
   const totalStats = useMemo(() => {
     const total = attendanceData.length;
@@ -448,9 +424,6 @@ export default function DetailSiswaPage() {
     };
   }, [attendanceData]);
 
-  /* ==========================================================
-     UNIQUE MAPEL
-  ========================================================== */
 
   const uniqueMapel = useMemo(() => {
     const set = new Set(
@@ -465,9 +438,6 @@ export default function DetailSiswaPage() {
     ];
   }, [attendanceData]);
 
-  /* ==========================================================
-     LOADING
-  ========================================================== */
 
   if (!siswa) {
     return (
@@ -479,9 +449,6 @@ export default function DetailSiswaPage() {
     );
   }
 
-  /* ==========================================================
-     HELPERS
-  ========================================================== */
 
   const getInitials = (nama) => {
     const parts = nama.split(" ");
@@ -560,9 +527,6 @@ export default function DetailSiswaPage() {
     });
   };
 
-  /* ==========================================================
-     RENDER
-  ========================================================== */
 
   return (
     <div className="flex h-screen theme-page overflow-hidden">
@@ -573,9 +537,6 @@ export default function DetailSiswaPage() {
 
         <main className="flex-1 overflow-y-auto theme-page p-4 sm:p-6 lg:p-8">
           <div className="w-full max-w-6xl mx-auto space-y-6">
-            {/* =================================================
-                BACK BUTTON
-            ================================================= */}
 
             <button
               type="button"
@@ -587,15 +548,11 @@ export default function DetailSiswaPage() {
               Kembali ke Histori Absensi
             </button>
 
-            {/* =================================================
-                PROFIL SISWA
-            ================================================= */}
 
             <div
               className={`theme-card rounded-xl border ${themeNeutralBorder} ${themeCardShadow} p-6 sm:p-8`}
             >
               <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
-                {/* AVATAR */}
 
                 <div
                   className={`w-20 h-20 rounded-full ${themePrimarySoft} ${themePrimaryText} border ${themePrimarySoftBorder} flex items-center justify-center text-3xl font-bold ${themeSmallShadow} flex-shrink-0`}
@@ -603,7 +560,6 @@ export default function DetailSiswaPage() {
                   {getInitials(siswa.nama)}
                 </div>
 
-                {/* INFO */}
 
                 <div className="flex-1 min-w-0">
                   <h1 className="text-2xl font-bold theme-text">
@@ -629,7 +585,6 @@ export default function DetailSiswaPage() {
                   </div>
                 </div>
 
-                {/* ACTION */}
 
                 <div className="flex items-center gap-2 flex-shrink-0">
                   <button
@@ -646,12 +601,10 @@ export default function DetailSiswaPage() {
                 </div>
               </div>
 
-              {/* DETAIL INFO */}
 
               <div
                 className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6 pt-6 border-t ${themeDivider}`}
               >
-                {/* EMAIL */}
 
                 <div className="flex items-center gap-3">
                   <Mail
@@ -670,7 +623,6 @@ export default function DetailSiswaPage() {
                   </div>
                 </div>
 
-                {/* TELEPON */}
 
                 <div className="flex items-center gap-3">
                   <Phone
@@ -689,7 +641,6 @@ export default function DetailSiswaPage() {
                   </div>
                 </div>
 
-                {/* ALAMAT */}
 
                 <div className="flex items-center gap-3">
                   <MapPin
@@ -708,7 +659,6 @@ export default function DetailSiswaPage() {
                   </div>
                 </div>
 
-                {/* TANGGAL LAHIR */}
 
                 <div className="flex items-center gap-3">
                   <Calendar
@@ -733,12 +683,8 @@ export default function DetailSiswaPage() {
               </div>
             </div>
 
-            {/* =================================================
-                STATISTIK TOTAL
-            ================================================= */}
 
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-              {/* TOTAL */}
 
               <div
                 className={`theme-card rounded-xl border ${themeNeutralBorder} ${themeCardShadow} p-3 text-center ${themeNeutralHover} transition-all`}
@@ -752,7 +698,6 @@ export default function DetailSiswaPage() {
                 </p>
               </div>
 
-              {/* HADIR */}
 
               <div
                 className={`theme-card rounded-xl border ${themeNeutralBorder} ${themeCardShadow} p-3 text-center ${themeNeutralHover} transition-all`}
@@ -766,7 +711,6 @@ export default function DetailSiswaPage() {
                 </p>
               </div>
 
-              {/* SAKIT */}
 
               <div
                 className={`theme-card rounded-xl border ${themeNeutralBorder} ${themeCardShadow} p-3 text-center ${themeNeutralHover} transition-all`}
@@ -780,7 +724,6 @@ export default function DetailSiswaPage() {
                 </p>
               </div>
 
-              {/* IZIN */}
 
               <div
                 className={`theme-card rounded-xl border ${themeNeutralBorder} ${themeCardShadow} p-3 text-center ${themeNeutralHover} transition-all`}
@@ -794,7 +737,6 @@ export default function DetailSiswaPage() {
                 </p>
               </div>
 
-              {/* ALPA */}
 
               <div
                 className={`theme-card rounded-xl border ${themeNeutralBorder} ${themeCardShadow} p-3 text-center ${themeNeutralHover} transition-all`}
@@ -808,7 +750,6 @@ export default function DetailSiswaPage() {
                 </p>
               </div>
 
-              {/* KEHADIRAN */}
 
               <div
                 className={`rounded-xl border ${themePrimarySoftBorder} ${themePrimarySoft} ${themeCardShadow} p-3 text-center ${themeNeutralHover} transition-all`}
@@ -842,9 +783,6 @@ export default function DetailSiswaPage() {
               </div>
             </div>
 
-            {/* =================================================
-                STATISTIK PER MAPEL
-            ================================================= */}
 
             <div
               className={`theme-card rounded-xl border ${themeNeutralBorder} ${themeCardShadow} p-5`}
@@ -909,7 +847,6 @@ export default function DetailSiswaPage() {
                         </span>
                       </div>
 
-                      {/* PROGRESS */}
 
                       <div
                         className={`w-full h-1.5 ${themeNeutralSurface} rounded-full mt-1.5 overflow-hidden`}
@@ -932,14 +869,10 @@ export default function DetailSiswaPage() {
               </div>
             </div>
 
-            {/* =================================================
-                RIWAYAT ABSENSI DETAIL
-            ================================================= */}
 
             <div
               className={`theme-card rounded-xl border ${themeNeutralBorder} ${themeCardShadow} overflow-hidden`}
             >
-              {/* HEADER */}
 
               <div
                 className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 sm:p-5 border-b ${themeDivider}`}
@@ -979,7 +912,6 @@ export default function DetailSiswaPage() {
                 </div>
               </div>
 
-              {/* TABLE */}
 
               <div className="overflow-x-auto">
                 <table className="w-full table-auto">
@@ -1029,13 +961,11 @@ export default function DetailSiswaPage() {
                             key={item.id}
                             className={`border-b ${themeDivider} ${themeNeutralHover} transition-colors duration-150`}
                           >
-                            {/* NUMBER */}
 
                             <td className="px-4 py-3 text-xs theme-text-muted">
                               {idx + 1}
                             </td>
 
-                            {/* MAPEL */}
 
                             <td className="px-4 py-3">
                               <span
@@ -1045,7 +975,6 @@ export default function DetailSiswaPage() {
                               </span>
                             </td>
 
-                            {/* TANGGAL */}
 
                             <td className="px-4 py-3 text-sm theme-text-secondary">
                               {formatDate(
@@ -1053,7 +982,6 @@ export default function DetailSiswaPage() {
                               )}
                             </td>
 
-                            {/* STATUS */}
 
                             <td className="px-4 py-3">
                               <span
@@ -1069,7 +997,6 @@ export default function DetailSiswaPage() {
                               </span>
                             </td>
 
-                            {/* CATATAN */}
 
                             <td className="px-4 py-3 text-sm theme-text-secondary">
                               {item.catatan !==
@@ -1086,9 +1013,6 @@ export default function DetailSiswaPage() {
               </div>
             </div>
 
-            {/* =================================================
-                FOOTER
-            ================================================= */}
 
             <footer
               className={`text-center text-xs theme-text-muted py-4 border-t ${themeDivider}`}

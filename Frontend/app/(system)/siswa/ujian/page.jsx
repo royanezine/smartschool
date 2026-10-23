@@ -31,9 +31,6 @@ import {
 } from "@/services/kelasMapel.service";
 import { getUjianByKelasMapel } from "@/services/ujian.service";
 
-// =========================================================
-// THEME HELPERS
-// =========================================================
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -97,9 +94,6 @@ const themeDangerBorder =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-// =========================================================
-// JENIS UJIAN
-// =========================================================
 
 function getJenisUjian(ujian) {
   const kandidat = [
@@ -251,9 +245,6 @@ function getStatusUjian(ujian) {
   return "sedang";
 }
 
-// =========================================================
-// NORMALIZER
-// =========================================================
 
 function normalizeArrayResponse(response) {
   if (Array.isArray(response)) return response;
@@ -313,9 +304,6 @@ function normalizeObjectResponse(response) {
   return null;
 }
 
-// =========================================================
-// GET USER ID
-// =========================================================
 
 function parseUserSafely(input) {
   if (!input) return null;
@@ -346,11 +334,9 @@ function parseUserSafely(input) {
 
 function getLoggedInUser() {
   try {
-    // 1. Sumber utama: getSessionUser() dari lib/auth (mendecode klaim token JWT aktif)
     const sessionUser = getSessionUser();
     const parsedSession = parseUserSafely(sessionUser);
     if (parsedSession) {
-      // Perbaiki storage jika pernah tersimpan literal string "[object Object]"
       if (
         typeof window !== "undefined" &&
         window.localStorage?.getItem("user") === "[object Object]"
@@ -358,20 +344,17 @@ function getLoggedInUser() {
         try {
           window.localStorage.setItem("user", JSON.stringify(parsedSession));
         } catch {
-          /* ignore */
         }
       }
       return parsedSession;
     }
 
-    // 2. Fallback: getStoredUser() dari storage
     const storedUser = getStoredUser();
     const parsedStored = parseUserSafely(storedUser);
     if (parsedStored) {
       return parsedStored;
     }
 
-    // 3. Fallback: membaca langsung storage secara aman tanpa crash
     if (typeof window !== "undefined") {
       const rawLocal = window.localStorage?.getItem("user");
       const parsedLocal = parseUserSafely(rawLocal);
@@ -408,9 +391,6 @@ function getLoggedInUserId() {
   return userId ? String(userId) : null;
 }
 
-// =========================================================
-// CHECK STUDENT MEMBER
-// =========================================================
 
 function isStudentMemberOfClass(anggota, userId) {
   if (!anggota || !userId) return false;
@@ -429,9 +409,6 @@ function isStudentMemberOfClass(anggota, userId) {
   return String(anggotaUserId) === String(userId);
 }
 
-// =========================================================
-// FIND STUDENT CLASS
-// =========================================================
 
 async function findStudentClass() {
   const userId = getLoggedInUserId();
@@ -442,8 +419,6 @@ async function findStudentClass() {
     );
   }
 
-  // 1. Sumber data utama: API resmi siswa (GET /api/kelas-mapel/siswa)
-  // Backend memfilter keanggotaan kelas siswa terdaftar secara otomatis
   try {
     const mapelSiswaResponse = await getKelasMapelSiswa();
     const listMapel = normalizeArrayResponse(mapelSiswaResponse);
@@ -461,8 +436,6 @@ async function findStudentClass() {
     console.warn("Gagal mengambil kelas melalui getKelasMapelSiswa:", err);
   }
 
-  // 2. Fallback: jika siswa terdaftar di kelas namun belum memiliki mata pelajaran
-  // atau saat pengujian berbasis akun administratif
   try {
     const kelasResponse = await getKelas({
       page: 1,
@@ -520,9 +493,6 @@ async function findStudentClass() {
   );
 }
 
-// =========================================================
-// STATUS CONFIG
-// =========================================================
 
 const STATUS_CONFIG = {
   semua: {
@@ -546,9 +516,6 @@ const STATUS_CONFIG = {
   },
 };
 
-// =========================================================
-// PAGE
-// =========================================================
 
 export default function DaftarUjianPage() {
   const router = useRouter();
@@ -559,9 +526,6 @@ export default function DaftarUjianPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // =======================================================
-  // LOAD UJIAN
-  // =======================================================
 
   const loadUjian = useCallback(async () => {
     try {
@@ -585,7 +549,6 @@ export default function DaftarUjianPage() {
           const mapelSiswaRes = await getKelasMapelSiswa();
           kelasMapelData = normalizeArrayResponse(mapelSiswaRes);
         } catch {
-          /* ignore */
         }
       }
 
@@ -605,7 +568,6 @@ export default function DaftarUjianPage() {
             );
           });
         } catch {
-          /* ignore */
         }
       }
 
@@ -793,17 +755,11 @@ export default function DaftarUjianPage() {
     }
   }, []);
 
-  // =======================================================
-  // EFFECT
-  // =======================================================
 
   useEffect(() => {
     loadUjian();
   }, [loadUjian]);
 
-  // =======================================================
-  // FILTER
-  // =======================================================
 
   const filtered = useMemo(() => {
     const keyword = search.toLowerCase().trim();
@@ -833,9 +789,6 @@ export default function DaftarUjianPage() {
     });
   }, [daftarUjian, search, filterStatus]);
 
-  // =======================================================
-  // STATISTIK
-  // =======================================================
 
   const stats = useMemo(
     () => ({
@@ -864,9 +817,6 @@ export default function DaftarUjianPage() {
     [daftarUjian]
   );
 
-  // =======================================================
-  // FORMAT DATE
-  // =======================================================
 
   const formatDate = (dateStr) => {
     if (!dateStr) return "-";
@@ -896,9 +846,6 @@ export default function DaftarUjianPage() {
     });
   };
 
-  // =======================================================
-  // CARD CLICK
-  // =======================================================
 
   const handleCardClick = (ujianId) => {
     if (!ujianId) return;
@@ -906,15 +853,10 @@ export default function DaftarUjianPage() {
     router.push(`/siswa/ujian/${ujianId}`);
   };
 
-  // =======================================================
-  // RENDER
-  // =======================================================
 
   return (
     <main className="min-w-0 flex-1 overflow-y-auto theme-page theme-text">
-      {/* Konten w-full: melebar saat zoom out, tidak dibatasi max-width */}
       <div className="w-full space-y-6 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 xl:px-10">
-        {/* HERO */}
         <section
           className={`relative overflow-hidden rounded-[24px] ${themePrimaryGradient} ${themePrimaryShadow}`}
         >
@@ -954,7 +896,6 @@ export default function DaftarUjianPage() {
           </div>
         </section>
 
-        {/* STAT CARDS — grid responsif dengan 2xl:grid-cols-6 */}
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-6">
           <div className={`theme-card ${themeNeutralBorder} ${themeSmallShadow} rounded-xl px-4 py-4`}>
             <div className="flex items-center justify-between gap-3">
@@ -1041,7 +982,6 @@ export default function DaftarUjianPage() {
           </div>
         </div>
 
-        {/* TOOLBAR */}
         <section
           className={`theme-card theme-border ${themeCardShadow} rounded-2xl p-4 sm:p-5`}
         >
@@ -1061,7 +1001,6 @@ export default function DaftarUjianPage() {
               />
             </div>
 
-            {/* overflow-x-auto agar filter tidak merusak layout di layar kecil */}
             <div
               className={`flex min-w-0 overflow-x-auto rounded-xl ${themeNeutralSurface} p-1`}
             >
@@ -1137,7 +1076,6 @@ export default function DaftarUjianPage() {
           </div>
         </section>
 
-        {/* CONTENT */}
         {loading ? (
           <LoadingState />
         ) : error ? (
@@ -1163,7 +1101,6 @@ export default function DaftarUjianPage() {
               </div>
             </div>
 
-            {/* Grid ujian diperluas ke 2xl:grid-cols-6 agar card tidak terlalu besar saat layar lebar */}
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6">
               {filtered.map((ujian) => {
                 const jenisTheme = getThemeByJenis(ujian.jenis);
@@ -1315,7 +1252,6 @@ export default function DaftarUjianPage() {
           </section>
         )}
 
-        {/* FOOTER */}
         <footer className={`border-t ${themeDivider} py-5`}>
           <div className="flex flex-col items-center justify-between gap-2 text-center sm:flex-row sm:text-left">
             <p className="theme-text-muted text-[11px]">
@@ -1331,9 +1267,6 @@ export default function DaftarUjianPage() {
   );
 }
 
-// =========================================================
-// HERO STAT
-// =========================================================
 
 function HeroStat({ value, label, highlight = false }) {
   return (
@@ -1355,9 +1288,6 @@ function HeroStat({ value, label, highlight = false }) {
   );
 }
 
-// =========================================================
-// INFO ITEM
-// =========================================================
 
 function InfoItem({ icon: Icon, label, value }) {
   return (
@@ -1381,9 +1311,6 @@ function InfoItem({ icon: Icon, label, value }) {
   );
 }
 
-// =========================================================
-// STATUS BADGE
-// =========================================================
 
 function getStatusBadge(status) {
   const map = {
@@ -1418,9 +1345,6 @@ function getStatusBadge(status) {
   return map[status] || map.belum;
 }
 
-// =========================================================
-// LOADING
-// =========================================================
 
 function LoadingState() {
   return (
@@ -1458,9 +1382,6 @@ function LoadingState() {
   );
 }
 
-// =========================================================
-// ERROR
-// =========================================================
 
 function ErrorState({ error, onRetry }) {
   return (
@@ -1494,9 +1415,6 @@ function ErrorState({ error, onRetry }) {
   );
 }
 
-// =========================================================
-// EMPTY
-// =========================================================
 
 function EmptyState({ search, onReset }) {
   return (

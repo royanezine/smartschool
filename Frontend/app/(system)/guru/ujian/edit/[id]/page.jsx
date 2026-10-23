@@ -25,9 +25,6 @@ import {
   updateUjian,
 } from "@/services/ujian.service";
 
-/* =========================================================
-   THEME HELPERS
-========================================================= */
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -86,9 +83,6 @@ const themeInfoBorder =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-/* =========================================================
-   HELPER
-========================================================= */
 
 function parseObjectResponse(response) {
   if (!response) return null;
@@ -168,9 +162,6 @@ function normalizeJenisUjian(value) {
   return legacyMap[normalized] || "Kuis";
 }
 
-/* =========================================================
-   PAGE
-========================================================= */
 
 export default function EditUjianPage() {
   const params = useParams();
@@ -180,9 +171,6 @@ export default function EditUjianPage() {
     ? params.id[0]
     : params?.id;
 
-  /* =======================================================
-     STATE
-  ======================================================= */
 
   const [loading, setLoading] =
     useState(true);
@@ -217,9 +205,6 @@ export default function EditUjianPage() {
     penilaianOtomatis: true,
   });
 
-  /* =======================================================
-     LOAD DATA
-  ======================================================= */
 
   const loadUjian = useCallback(
     async () => {
@@ -317,9 +302,6 @@ export default function EditUjianPage() {
     loadUjian();
   }, [loadUjian]);
 
-  /* =======================================================
-     HANDLE FORM
-  ======================================================= */
 
   function handleChange(e) {
     const {
@@ -342,9 +324,6 @@ export default function EditUjianPage() {
     setSuccess("");
   }
 
-  /* =======================================================
-     SUBMIT
-  ======================================================= */
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -488,9 +467,6 @@ export default function EditUjianPage() {
     }
   }
 
-  /* =======================================================
-     LOADING
-  ======================================================= */
 
   if (loading) {
     return (
@@ -539,13 +515,9 @@ export default function EditUjianPage() {
     );
   }
 
-  /* =======================================================
-     MAIN
-  ======================================================= */
 
   return (
     <div className="theme-page flex min-h-screen">
-      {/* SIDEBAR */}
 
       <Sidebar
         role="guru"
@@ -558,7 +530,6 @@ export default function EditUjianPage() {
         }
       />
 
-      {/* CONTENT */}
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <Header
@@ -579,9 +550,6 @@ export default function EditUjianPage() {
         <main className="theme-page flex-1 overflow-y-auto">
           <div className="mx-auto w-full max-w-5xl p-4 sm:p-6 lg:p-8">
 
-            {/* =================================================
-                HEADER
-            ================================================= */}
 
             <div className="mb-6">
               <button
@@ -640,9 +608,6 @@ export default function EditUjianPage() {
               </div>
             </div>
 
-            {/* =================================================
-                ALERT
-            ================================================= */}
 
             {error && (
               <div
@@ -686,15 +651,9 @@ export default function EditUjianPage() {
               </div>
             )}
 
-            {/* =================================================
-                FORM
-            ================================================= */}
 
             <form onSubmit={handleSubmit}>
 
-              {/* =================================================
-                  INFORMASI DASAR
-              ================================================= */}
 
               <section
                 className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
@@ -723,7 +682,6 @@ export default function EditUjianPage() {
 
                 <div className="grid gap-5 p-5 sm:p-6">
 
-                  {/* JUDUL */}
 
                   <div>
                     <label className="theme-text-secondary mb-2 block text-sm font-semibold">
@@ -743,7 +701,6 @@ export default function EditUjianPage() {
                     />
                   </div>
 
-                  {/* DESKRIPSI */}
 
                   <div>
                     <label className="theme-text-secondary mb-2 block text-sm font-semibold">
@@ -760,7 +717,6 @@ export default function EditUjianPage() {
                     />
                   </div>
 
-                  {/* GRID */}
 
                   <div className="grid gap-5 sm:grid-cols-2">
 
@@ -812,9 +768,6 @@ export default function EditUjianPage() {
                 </div>
               </section>
 
-              {/* =================================================
-                  WAKTU & NILAI
-              ================================================= */}
 
               <section
                 className={`theme-card mt-5 overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
@@ -843,7 +796,6 @@ export default function EditUjianPage() {
 
                 <div className="grid gap-5 p-5 sm:grid-cols-2 lg:grid-cols-4">
 
-                  {/* DURASI */}
 
                   <div>
                     <label className="theme-text-secondary mb-2 block text-sm font-semibold">
@@ -866,7 +818,6 @@ export default function EditUjianPage() {
                     </div>
                   </div>
 
-                  {/* NILAI */}
 
                   <div>
                     <label className="theme-text-secondary mb-2 block text-sm font-semibold">
@@ -892,7 +843,6 @@ export default function EditUjianPage() {
                     </div>
                   </div>
 
-                  {/* MULAI */}
 
                   <div>
                     <label className="theme-text-secondary mb-2 block text-sm font-semibold">
@@ -910,7 +860,6 @@ export default function EditUjianPage() {
                     />
                   </div>
 
-                  {/* SELESAI */}
 
                   <div>
                     <label className="theme-text-secondary mb-2 block text-sm font-semibold">
@@ -930,9 +879,6 @@ export default function EditUjianPage() {
                 </div>
               </section>
 
-              {/* =================================================
-                  PENGATURAN
-              ================================================= */}
 
               <section
                 className={`theme-card mt-5 overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
@@ -961,7 +907,6 @@ export default function EditUjianPage() {
 
                 <div className="space-y-4 p-5 sm:p-6">
 
-                  {/* AUTO GRADING */}
 
                   <label
                     className={`theme-card flex cursor-pointer items-start gap-4 rounded-xl border ${themeNeutralBorder} p-4 transition ${themeNeutralHover} hover:border-[color-mix(in_srgb,var(--color-primary)_24%,transparent)]`}
@@ -998,7 +943,6 @@ export default function EditUjianPage() {
                     </div>
                   </label>
 
-                  {/* PUBLISH */}
 
                   <label
                     className={`theme-card flex cursor-pointer items-start gap-4 rounded-xl border ${themeNeutralBorder} p-4 transition ${themeNeutralHover} hover:border-[color-mix(in_srgb,var(--color-primary)_24%,transparent)]`}
@@ -1028,9 +972,6 @@ export default function EditUjianPage() {
                 </div>
               </section>
 
-              {/* =================================================
-                  INFO
-              ================================================= */}
 
               <div
                 className={`mt-5 rounded-xl border ${themeInfoBorder} ${themeInfoSurface} p-4`}
@@ -1061,9 +1002,6 @@ export default function EditUjianPage() {
                 </div>
               </div>
 
-              {/* =================================================
-                  BUTTON
-              ================================================= */}
 
               <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
 
@@ -1103,9 +1041,6 @@ export default function EditUjianPage() {
               </div>
             </form>
 
-            {/* =================================================
-                FOOTER
-            ================================================= */}
 
             <footer className="theme-text-muted py-8 text-center text-xs">
               © 2026 SmartSchool • Guru Ujian

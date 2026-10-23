@@ -222,14 +222,10 @@ export default function RichTextEditor({
   return (
     <div className="overflow-hidden rounded-xl border border-slate-200 bg-white focus-within:border-blue-400 focus-within:ring-4 focus-within:ring-blue-50">
 
-      {/* =========================
-          TOOLBAR
-      ========================== */}
       <div className="border-b border-slate-200 bg-slate-50/80 p-3">
 
         <div className="flex flex-wrap items-center gap-1.5">
 
-          {/* TEXT */}
           <ToolbarButton
             onClick={handleBold}
             active={activeFormats.bold}
@@ -262,7 +258,6 @@ export default function RichTextEditor({
 
           <div className="mx-1 hidden h-6 w-px bg-slate-200 sm:block" />
 
-          {/* LIST */}
           <ToolbarButton
             onClick={handleBulletList}
             active={activeFormats.unorderedList}
@@ -288,7 +283,6 @@ export default function RichTextEditor({
 
           <div className="mx-1 hidden h-6 w-px bg-slate-200 sm:block" />
 
-          {/* LINK & IMAGE */}
           <ToolbarButton
             onClick={handleLinkOpen}
             title="Tambah Link"
@@ -305,7 +299,6 @@ export default function RichTextEditor({
 
           <div className="mx-1 hidden h-6 w-px bg-slate-200 sm:block" />
 
-          {/* HISTORY */}
           <ToolbarButton
             onClick={handleUndo}
             title="Undo"
@@ -328,7 +321,6 @@ export default function RichTextEditor({
           </ToolbarButton>
         </div>
 
-        {/* LINK INPUT */}
         {showLinkInput && (
           <div className="mt-3 flex flex-col gap-2 rounded-xl border border-blue-100 bg-white p-3 sm:flex-row">
             <input
@@ -375,9 +367,6 @@ export default function RichTextEditor({
         )}
       </div>
 
-      {/* =========================
-          EDITOR
-      ========================== */}
       <div
         ref={editorRef}
         contentEditable
@@ -391,9 +380,6 @@ export default function RichTextEditor({
         className="cms-editor min-h-[380px] w-full bg-white px-5 py-5 text-[15px] leading-7 text-slate-800 outline-none sm:px-6 sm:py-6"
       />
 
-      {/* =========================
-          FOOTER
-      ========================== */}
       <div className="flex items-center justify-between border-t border-slate-100 bg-slate-50/60 px-4 py-2.5">
         <span className="text-xs text-slate-400">
           Editor konten halaman
@@ -404,9 +390,6 @@ export default function RichTextEditor({
         </span>
       </div>
 
-      {/* =========================
-          EDITOR STYLE
-      ========================== */}
       <style jsx>{`
         .cms-editor:empty:before {
           content: attr(data-placeholder);

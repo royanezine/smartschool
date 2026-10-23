@@ -25,9 +25,6 @@ import {
   Clock3,
 } from "lucide-react";
 
-/* =========================================================
-   HELPERS
-========================================================= */
 
 function getErrorMessage(error) {
   return error instanceof Error
@@ -138,9 +135,6 @@ function getShiftTime(user) {
   return `${start || "-"} - ${end || "-"}`;
 }
 
-/* =========================================================
-   REUSABLE COMPONENTS
-========================================================= */
 
 function InfoItem({ icon: Icon, label, value }) {
   return (
@@ -177,9 +171,6 @@ function Section({ title, description, children }) {
   );
 }
 
-/* =========================================================
-   PAGE
-========================================================= */
 
 export default function DetailUserPage() {
   const params = useParams();
@@ -242,7 +233,6 @@ export default function DetailUserPage() {
 
         <main className="min-w-0 flex-1 overflow-y-auto">
           <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
-            {/* BACK */}
             <button
               type="button"
               onClick={() => router.push("/admin/pengguna/kelola-user")}
@@ -252,7 +242,6 @@ export default function DetailUserPage() {
               Kembali ke Kelola User
             </button>
 
-            {/* PAGE HEADER */}
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wide theme-primary-text">
@@ -280,7 +269,6 @@ export default function DetailUserPage() {
               )}
             </div>
 
-            {/* ERROR */}
             {error && (
               <div
                 role="alert"
@@ -299,7 +287,6 @@ export default function DetailUserPage() {
               </div>
             )}
 
-            {/* LOADING */}
             {loading ? (
               <div className="theme-card flex min-h-64 items-center justify-center rounded-2xl border theme-border">
                 <Loader2 size={20} className="animate-spin theme-primary-text" />
@@ -309,7 +296,6 @@ export default function DetailUserPage() {
               </div>
             ) : user ? (
               <div className="space-y-5">
-                {/* PROFIL UTAMA */}
                 <section className="theme-card overflow-hidden rounded-2xl border theme-border shadow-sm">
                   <div className="h-1.5 bg-[var(--color-primary)]" />
 
@@ -356,7 +342,6 @@ export default function DetailUserPage() {
                   </div>
                 </section>
 
-                {/* INFORMASI AKUN */}
                 <Section
                   title="Informasi Akun"
                   description="Identitas dasar dan informasi kontak pengguna."
@@ -369,7 +354,6 @@ export default function DetailUserPage() {
                   <InfoItem icon={School} label="Sekolah" value={user.sekolah?.nama} />
                 </Section>
 
-                {/* IDENTITAS & KEPEGAWAIAN */}
                 <Section
                   title="Identitas dan Kepegawaian"
                   description="Data administratif dan penempatan kerja."
@@ -395,19 +379,16 @@ export default function DetailUserPage() {
                   <InfoItem icon={CalendarDays} label="Tanggal lahir" value={formatDate(user.tanggalLahir)} />
                 </Section>
 
-                {/* ALAMAT */}
                 <Section title="Alamat" description="Informasi alamat pengguna.">
                   <InfoItem icon={MapPin} label="Alamat" value={user.alamat} />
                   <InfoItem icon={MapPin} label="Alamat domisili" value={user.alamatDomisili} />
                 </Section>
 
-                {/* INFORMASI SISTEM */}
                 <Section title="Informasi Sistem" description="Waktu pencatatan akun.">
                   <InfoItem icon={CalendarDays} label="Dibuat pada" value={formatDateTime(user.dibuatPada)} />
                   <InfoItem icon={CalendarDays} label="Diperbarui pada" value={formatDateTime(user.diperbaruiPada)} />
                 </Section>
 
-                {/* FOOTER ACTION */}
                 <div className="flex justify-end pt-2">
                   <button
                     type="button"

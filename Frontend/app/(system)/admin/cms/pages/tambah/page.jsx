@@ -29,9 +29,6 @@ import Header from "@/app/components/Header";
 import RichTextEditor from "@/app/components/cms/RichTextEditor";
 import { apiFetch } from "../../../../../../lib/api";
 
-/* ============================================================
-   VALIDATION
-============================================================ */
 
 const pageSchema = z.object({
   judul: z
@@ -45,9 +42,6 @@ const pageSchema = z.object({
   status: z.enum(["draft", "dipublikasikan"]),
 });
 
-/* ============================================================
-   PAGE
-============================================================ */
 
 export default function CreatePagePage() {
   const router = useRouter();
@@ -61,9 +55,6 @@ export default function CreatePagePage() {
 
   const [content, setContent] = useState("");
 
-  /* ==========================================================
-     FORM
-  ========================================================== */
 
   const {
     register,
@@ -86,9 +77,6 @@ export default function CreatePagePage() {
 
   const isPublished = statusValue === "dipublikasikan";
 
-  /* ==========================================================
-     CONTENT
-  ========================================================== */
 
   const handleContentChange = (html) => {
     setContent(html || "");
@@ -99,9 +87,6 @@ export default function CreatePagePage() {
     });
   };
 
-  /* ==========================================================
-     CONTENT LENGTH
-  ========================================================== */
 
   const getContentLength = () => {
     if (!content) return 0;
@@ -118,9 +103,6 @@ export default function CreatePagePage() {
 
   const contentLength = getContentLength();
 
-  /* ==========================================================
-     SUBMIT
-  ========================================================== */
 
   const onSubmit = async (data) => {
     try {
@@ -158,9 +140,6 @@ export default function CreatePagePage() {
     }
   };
 
-  /* ==========================================================
-     FIELD ERROR
-  ========================================================== */
 
   const FieldError = ({ message }) => {
     if (!message) return null;
@@ -173,15 +152,9 @@ export default function CreatePagePage() {
     );
   };
 
-  /* ==========================================================
-     RETURN
-  ========================================================== */
 
   return (
     <div className="theme-page flex min-h-screen w-full">
-      {/* ======================================================
-          SIDEBAR
-      ====================================================== */}
 
       <Sidebar
         active={active}
@@ -190,9 +163,6 @@ export default function CreatePagePage() {
         setCollapsed={setCollapsed}
       />
 
-      {/* ======================================================
-          CONTENT
-      ====================================================== */}
 
       <div className="flex min-w-0 flex-1 flex-col lg:ml-0">
         <Header
@@ -208,9 +178,6 @@ export default function CreatePagePage() {
           <div className="w-full px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
             <div className="mx-auto w-full max-w-[1450px]">
 
-              {/* ==================================================
-                  TOP NAVIGATION
-              ================================================== */}
 
               <div className="mb-6 flex flex-col gap-4 sm:mb-7 lg:flex-row lg:items-center lg:justify-between">
                 <div className="flex min-w-0 flex-wrap items-center gap-2 text-sm">
@@ -254,9 +221,6 @@ export default function CreatePagePage() {
                 </Link>
               </div>
 
-              {/* ==================================================
-                  SUCCESS
-              ================================================== */}
 
               {successMessage && (
                 <div className="theme-success mb-5 flex items-start gap-3 rounded-xl border px-4 py-3.5">
@@ -274,9 +238,6 @@ export default function CreatePagePage() {
                 </div>
               )}
 
-              {/* ==================================================
-                  ERROR
-              ================================================== */}
 
               {submitError && (
                 <div className="theme-danger mb-5 flex items-start gap-3 rounded-xl border px-4 py-3.5">
@@ -303,9 +264,6 @@ export default function CreatePagePage() {
                 </div>
               )}
 
-              {/* ==================================================
-                  HEADER CARD
-              ================================================== */}
 
               <section className="theme-card theme-border mb-6 overflow-hidden rounded-2xl border shadow-sm">
                 <div className="theme-border border-b px-5 py-5 sm:px-6">
@@ -362,22 +320,13 @@ export default function CreatePagePage() {
                 </div>
               </section>
 
-              {/* ==================================================
-                  FORM
-              ================================================== */}
 
               <form onSubmit={handleSubmit(onSubmit)}>
                 <div className="grid min-w-0 grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_310px]">
 
-                  {/* =================================================
-                      LEFT CONTENT
-                  ================================================= */}
 
                   <div className="min-w-0 space-y-6">
 
-                    {/* =================================================
-                        INFORMASI DASAR
-                    ================================================= */}
 
                     <section className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
 
@@ -403,7 +352,6 @@ export default function CreatePagePage() {
 
                       <div className="space-y-6 p-5 sm:p-6">
 
-                        {/* JUDUL */}
 
                         <div>
                           <label
@@ -448,7 +396,6 @@ export default function CreatePagePage() {
                           </div>
                         </div>
 
-                        {/* STATUS */}
 
                         <div>
                           <label
@@ -486,9 +433,6 @@ export default function CreatePagePage() {
                       </div>
                     </section>
 
-                    {/* =================================================
-                        KONTEN
-                    ================================================= */}
 
                     <section className="theme-card theme-border min-w-0 overflow-hidden rounded-2xl border shadow-sm">
 
@@ -555,15 +499,9 @@ export default function CreatePagePage() {
                     </section>
                   </div>
 
-                  {/* =================================================
-                      RIGHT SIDEBAR
-                  ================================================= */}
 
                   <aside className="min-w-0 space-y-6">
 
-                    {/* =================================================
-                        PUBLIKASI
-                    ================================================= */}
 
                     <section className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
 
@@ -666,9 +604,6 @@ export default function CreatePagePage() {
                       </div>
                     </section>
 
-                    {/* =================================================
-                        PREVIEW
-                    ================================================= */}
 
                     <section className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
 
@@ -748,9 +683,6 @@ export default function CreatePagePage() {
                       </div>
                     </section>
 
-                    {/* =================================================
-                        URL
-                    ================================================= */}
 
                     <section className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
 
@@ -803,9 +735,6 @@ export default function CreatePagePage() {
                       </div>
                     </section>
 
-                    {/* =================================================
-                        INFORMASI
-                    ================================================= */}
 
                     <section className="theme-card theme-border rounded-2xl border p-5 shadow-sm">
 
@@ -844,9 +773,6 @@ export default function CreatePagePage() {
                   </aside>
                 </div>
 
-                {/* ==================================================
-                    ACTION BAR
-                ================================================== */}
 
                 <div className="mt-6">
                   <div className="theme-card theme-border rounded-2xl border p-4 shadow-sm sm:p-5">
@@ -906,9 +832,6 @@ export default function CreatePagePage() {
                 </div>
               </form>
 
-              {/* ==================================================
-                  FOOTER
-              ================================================== */}
 
               <footer className="py-8 text-center">
                 <p className="theme-text-muted text-xs">

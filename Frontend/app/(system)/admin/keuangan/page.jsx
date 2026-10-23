@@ -30,9 +30,6 @@ import {
   Loader2,
 } from "lucide-react";
 
-/* ============================================================
-   THEME HELPERS
-============================================================ */
 
 const themeCardShadow =
   "shadow-[0_1px_3px_color-mix(in_srgb,var(--color-text)_6%,transparent)]";
@@ -57,9 +54,6 @@ const themePrimarySurface =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]";
 
-/* ============================================================
-   FORMATTER
-============================================================ */
 
 function formatRupiah(value) {
   const amount = Number(value ?? 0);
@@ -81,9 +75,6 @@ function formatTanggal(value) {
   }).format(date);
 }
 
-/* ============================================================
-   DUMMY DATA
-============================================================ */
 
 const DUMMY_LAPORAN = {
   totalPemasukan: 45250000,
@@ -202,9 +193,6 @@ const DUMMY_AKUN = [
   },
 ];
 
-/* ============================================================
-   PAGE
-============================================================ */
 
 export default function KeuanganPage() {
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -292,7 +280,6 @@ export default function KeuanganPage() {
   const toggleSidebar = () => setIsCollapsed((v) => !v);
 
   return (
-    // ✅ Root flex row — sidebar + konten sejajar full height
     <div className="theme-page flex h-screen w-full overflow-hidden">
       <Sidebar
         active="keuangan"
@@ -302,9 +289,7 @@ export default function KeuanganPage() {
         role="admin"
       />
 
-      {/* ✅ Kolom kanan: header di atas + main scroll */}
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        {/* ✅ Header shrink-0 → tetap di atas */}
         <div className="shrink-0">
           <Header
             toggleSidebar={toggleSidebar}
@@ -317,13 +302,9 @@ export default function KeuanganPage() {
           />
         </div>
 
-        {/* ✅ Main min-w-0 flex-1 overflow-y-auto → hanya ini scroll */}
         <main className="min-w-0 flex-1 overflow-y-auto">
           <div className="w-full space-y-5 p-4 sm:p-6 lg:p-8">
 
-            {/* ==================================================
-                PAGE HEADER
-            ================================================== */}
 
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-3">
@@ -375,9 +356,6 @@ export default function KeuanganPage() {
               </div>
             </div>
 
-            {/* ==================================================
-                STAT CARDS
-            ================================================== */}
 
             <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
               <StatCard
@@ -429,9 +407,6 @@ export default function KeuanganPage() {
               />
             </section>
 
-            {/* ==================================================
-                AKUN KAS
-            ================================================== */}
 
             <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {DUMMY_AKUN.map((akun) => (
@@ -439,7 +414,6 @@ export default function KeuanganPage() {
                   key={akun.id}
                   className={`group relative overflow-hidden rounded-2xl border ${themeNeutralBorder} theme-card p-4 ${themeCardShadow} transition hover:-translate-y-0.5 hover:shadow-md`}
                 >
-                  {/* Accent bar tipis */}
                   <div
                     className={`absolute inset-x-0 top-0 h-0.5 ${
                       akun.jenis === "bank"
@@ -507,9 +481,6 @@ export default function KeuanganPage() {
               </div>
             </section>
 
-            {/* ==================================================
-                TABEL TRANSAKSI
-            ================================================== */}
 
             <section
               className={`overflow-hidden rounded-2xl border ${themeNeutralBorder} theme-card ${themeCardShadow}`}
@@ -546,7 +517,6 @@ export default function KeuanganPage() {
                 </div>
               </div>
 
-              {/* Filter bar */}
               <div
                 className={`flex flex-col gap-3 border-b ${themeDivider} p-4 sm:flex-row sm:items-center`}
               >
@@ -607,7 +577,6 @@ export default function KeuanganPage() {
                 </div>
               </div>
 
-              {/* Table */}
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[850px] text-left text-sm">
                   <thead>
@@ -725,7 +694,6 @@ export default function KeuanganPage() {
                 </table>
               </div>
 
-              {/* Pagination */}
               <div
                 className={`flex flex-col gap-3 border-t ${themeDivider} px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5`}
               >
@@ -775,9 +743,6 @@ export default function KeuanganPage() {
               </div>
             </section>
 
-            {/* ==================================================
-                LAPORAN SINGKAT
-            ================================================== */}
 
             <section className="grid grid-cols-1 gap-4 lg:grid-cols-2">
               <div
@@ -889,9 +854,6 @@ export default function KeuanganPage() {
         </main>
       </div>
 
-      {/* =================================================
-          MODAL DETAIL TRANSAKSI
-      ================================================== */}
 
       {detailOpen && selectedTransaksi && (
         <div
@@ -1022,9 +984,6 @@ export default function KeuanganPage() {
         </div>
       )}
 
-      {/* =================================================
-          MODAL FORM TRANSAKSI
-      ================================================== */}
 
       {formOpen && (
         <div
@@ -1197,9 +1156,6 @@ export default function KeuanganPage() {
   );
 }
 
-/* ============================================================
-   COMPONENTS
-============================================================ */
 
 function StatCard({ icon: Icon, label, value, description, accent = "primary" }) {
   const accentConfig = {

@@ -1,25 +1,3 @@
-/* =========================================================
-   RAPORT SERVICE
-   Backend : Backend/src/routes/raport.routes.ts
-   Mount   : /api/raport
-   Auth    : Bearer token (middleware authenticate)
-
-   Endpoint yang dipakai:
-   - Guru / Wali Kelas
-     GET  /api/raport/wali-kelas/kelas-saya
-     GET  /api/raport/wali-kelas/kelas/:kelasId
-     POST /api/raport/wali-kelas/kelas/:kelasId/generate
-     PUT  /api/raport/wali-kelas/rapot/:rapotId/catatan
-     PUT  /api/raport/wali-kelas/rapot/:rapotId/publish
-   - Siswa
-     GET  /api/raport/siswa
-     GET  /api/raport/siswa/:rapotId
-   - Pendukung nilai (dipakai halaman e-Raport)
-     GET  /api/tahun-ajaran
-     GET  /api/kelas
-     GET  /api/kelas/:kelasId
-     GET  /api/raport/:siswaId/tahun-ajaran/:tahunAjaranId
-========================================================= */
 
 const RAW_API_BASE =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
@@ -34,15 +12,9 @@ const API_BASE = (() => {
   return `${base}/api`;
 })();
 
-/* =========================================================
-   AUTH
-========================================================= */
 
 import { getToken } from "../lib/auth";
 
-/* =========================================================
-   FETCH HELPER
-========================================================= */
 
 const apiFetch = async (
   endpoint: string,
@@ -83,7 +55,6 @@ const apiFetch = async (
     let message =
       result?.message || result?.error || `Request gagal (${response.status})`;
 
-    // Jika pesan tentang finalisasi nilai yang belum lengkap, sertakan daftar mata pelajaran
     if (
       message.includes("belum difinalisasi") &&
       Array.isArray(result?.data) &&
@@ -98,7 +69,6 @@ const apiFetch = async (
       }
     }
 
-    // Sensor informasi sensitif
     message = message
       .replace(/bearer\s+[a-zA-Z0-9._-]+/gi, "bearer [REDACTED]")
       .replace(/(?:password|token|otp)\s*[:=]\s*[^\s,]+/gi, "[REDACTED]");
@@ -113,17 +83,11 @@ const apiFetch = async (
   return result;
 };
 
-/* =========================================================
-   TAHUN AJARAN
-========================================================= */
 
 export const getTahunAjaran = async () => {
   return apiFetch("tahun-ajaran");
 };
 
-/* =========================================================
-   KELAS
-========================================================= */
 
 export const getKelas = async (
   params: {
@@ -152,9 +116,6 @@ export const getKelas = async (
   return apiFetch(`kelas?${query.toString()}`);
 };
 
-/* =========================================================
-   DETAIL KELAS
-========================================================= */
 
 export const getDetailKelas = async (
   kelasId: string,
@@ -168,9 +129,6 @@ export const getDetailKelas = async (
   );
 };
 
-/* =========================================================
-   RAPORT SISWA (agregasi nilai)
-========================================================= */
 
 export const getRaportSiswa = async (
   siswaId: string,
@@ -195,22 +153,11 @@ export const getRaportSiswa = async (
   );
 };
 
-/* =========================================================
-   GURU / WALI KELAS
-========================================================= */
 
-/**
- * GET /api/raport/wali-kelas/kelas-saya
- * Daftar kelas yang diwalikan oleh guru yang login.
- */
 export const getKelasWali = async () => {
   return apiFetch("raport/wali-kelas/kelas-saya");
 };
 
-/**
- * GET /api/raport/wali-kelas/kelas/:kelasId
- * Daftar rapot (draft/published) pada kelas yang diwalikan.
- */
 export const getRapotKelas = async (
   kelasId: string,
   params: { jenisRapot?: string } = {},
@@ -234,10 +181,6 @@ export const getRapotKelas = async (
   );
 };
 
-/**
- * POST /api/raport/wali-kelas/kelas/:kelasId/generate
- * Generate rapot (status draft) untuk semua siswa di kelas.
- */
 export const generateRapotKelas = async (
   kelasId: string,
   payload: {
@@ -267,10 +210,6 @@ export const generateRapotKelas = async (
   );
 };
 
-/**
- * PUT /api/raport/wali-kelas/rapot/:rapotId/catatan
- * Simpan catatan wali kelas / keterangan.
- */
 export const isiCatatanRapot = async (
   rapotId: string,
   payload: {
@@ -312,10 +251,6 @@ export const isiCatatanRapot = async (
   );
 };
 
-/**
- * PUT /api/raport/wali-kelas/rapot/:rapotId/publish
- * aksi: "publish" | "unpublish"
- */
 export const setPublishRapot = async (
   rapotId: string,
   aksi: "publish" | "unpublish" = "publish",
@@ -339,22 +274,11 @@ export const setPublishRapot = async (
   );
 };
 
-/* =========================================================
-   SISWA
-========================================================= */
 
-/**
- * GET /api/raport/siswa
- * Daftar rapot yang sudah dipublish milik siswa yang login.
- */
 export const getRapotSaya = async () => {
   return apiFetch("raport/siswa");
 };
 
-/**
- * GET /api/raport/siswa/:rapotId
- * Detail rapot (nilai, kehadiran, catatan wali kelas).
- */
 export const getDetailRapotSaya = async (
   rapotId: string,
 ) => {

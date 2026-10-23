@@ -266,9 +266,6 @@ export default function EditPenggajianPage() {
 
         <main className="min-w-0 flex-1 overflow-y-auto theme-page theme-text">
           <div className="w-full px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
-            {/* ============================================
-                PAGE HEADER
-            ============================================ */}
             <div className="mb-6">
               <div className="mb-2 flex flex-wrap items-center gap-2 text-sm theme-text-muted">
                 <button
@@ -312,7 +309,6 @@ export default function EditPenggajianPage() {
               </div>
             </div>
 
-            {/* ALERT */}
             {error && (
               <AlertBox
                 type="error"
@@ -329,7 +325,6 @@ export default function EditPenggajianPage() {
               />
             )}
 
-            {/* LOADING / NOT FOUND / FORM */}
             {loading ? (
               <div className="flex min-h-72 flex-col items-center justify-center gap-3 theme-card rounded-xl border theme-border">
                 <LoaderCircle
@@ -367,9 +362,6 @@ export default function EditPenggajianPage() {
               <form onSubmit={handleSubmit}>
                 <div className="grid grid-cols-1 gap-5 xl:grid-cols-3">
                   <div className="space-y-5 xl:col-span-2">
-                    {/* ============================================
-                        INFORMASI PEGAWAI
-                    ============================================ */}
                     <section className="theme-card overflow-hidden rounded-xl border theme-border shadow-sm">
                       <div className="border-b theme-border p-4 sm:p-5">
                         <div className="flex items-center gap-3">
@@ -424,9 +416,6 @@ export default function EditPenggajianPage() {
                       </div>
                     </section>
 
-                    {/* ============================================
-                        RINCIAN PENGGAJIAN
-                    ============================================ */}
                     <section className="theme-card overflow-hidden rounded-xl border theme-border shadow-sm">
                       <div className="border-b theme-border p-4 sm:p-5">
                         <div className="flex items-center gap-3">
@@ -486,9 +475,6 @@ export default function EditPenggajianPage() {
                     </section>
                   </div>
 
-                  {/* ============================================
-                      PENGATURAN PENGGAJIAN
-                  ============================================ */}
                   <div className="space-y-5">
                     <section className="theme-card overflow-hidden rounded-xl border theme-border shadow-sm">
                       <div className="border-b theme-border p-4 sm:p-5">
@@ -599,9 +585,6 @@ export default function EditPenggajianPage() {
                       </div>
                     </section>
 
-                    {/* ============================================
-                        INFORMASI DATA
-                    ============================================ */}
                     <section className="theme-card rounded-xl border theme-border p-4 shadow-sm sm:p-5">
                       <div className="flex items-start gap-3">
                         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)] theme-text-secondary">
@@ -637,9 +620,6 @@ export default function EditPenggajianPage() {
   );
 }
 
-/* =========================================================
-   READ ONLY FIELD
-========================================================= */
 
 function ReadOnlyField({ label, value, icon: Icon }) {
   return (
@@ -656,9 +636,6 @@ function ReadOnlyField({ label, value, icon: Icon }) {
   );
 }
 
-/* =========================================================
-   ALERT BOX
-========================================================= */
 
 function AlertBox({ type, message, onClose }) {
   const success = type === "success";

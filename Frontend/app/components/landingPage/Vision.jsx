@@ -39,14 +39,12 @@ export default function Vision() {
     <section className="bg-white py-20">
       <div className="max-w-7xl mx-auto px-6">
 
-        {/* Heading */}
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold text-slate-900">
             Tujuan Hadirnya Smart School
           </h2>
         </div>
 
-        {/* Content */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5">
 
           {items.map((item, index) => (

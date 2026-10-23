@@ -174,9 +174,6 @@ export default function PengaturanSiswaPage() {
   );
 }
 
-/* =========================================================
-   SETTINGS CARD
-========================================================= */
 
 function SettingsCard({
   icon: Icon,
@@ -211,9 +208,6 @@ function SettingsCard({
   );
 }
 
-/* =========================================================
-   SAVE BUTTON
-========================================================= */
 
 function SaveButton({
   saved,
@@ -248,9 +242,6 @@ function SaveButton({
   );
 }
 
-/* =========================================================
-   STUDENT CARD
-========================================================= */
 
 function StudentCard({
   profile,
@@ -421,9 +412,6 @@ function StudentInfo({
   );
 }
 
-/* =========================================================
-   DATA PRIBADI
-========================================================= */
 
 function DataPribadiSection({
   profile,

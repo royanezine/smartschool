@@ -99,7 +99,6 @@ export default function DetailSesiKonselingPage() {
         <main className="flex-1 overflow-y-auto p-5 md:p-6 lg:p-7">
           <div className="mx-auto w-full max-w-[1200px]">
 
-            {/* PAGE HEADER */}
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div className="flex items-start gap-3">
                 <button
@@ -194,14 +193,12 @@ export default function DetailSesiKonselingPage() {
               </button>
             </div>
 
-            {/* ERROR */}
             {error && (
               <div className="theme-danger mb-5 rounded-lg border px-4 py-3 text-sm font-semibold">
                 {error}
               </div>
             )}
 
-            {/* LOADING */}
             {loading ? (
               <div className="theme-card theme-border rounded-xl border p-12 text-center shadow-sm">
                 <div className="theme-text-muted inline-flex items-center gap-2 text-sm font-medium">
@@ -212,10 +209,8 @@ export default function DetailSesiKonselingPage() {
             ) : data ? (
               <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_320px]">
 
-                {/* KONTEN UTAMA */}
                 <div className="space-y-5">
 
-                  {/* RINGKASAN */}
                   <div className="theme-card theme-border rounded-xl border p-6 shadow-sm">
                     <div className="theme-border-soft flex items-start justify-between gap-4 border-b pb-5">
                       <div className="flex items-center gap-3">
@@ -278,28 +273,24 @@ export default function DetailSesiKonselingPage() {
                     </div>
                   </div>
 
-                  {/* MASALAH */}
                   <SectionCard title="Masalah">
                     <p className="theme-text-secondary text-sm leading-6">
                       {data.masalah || "-"}
                     </p>
                   </SectionCard>
 
-                  {/* HASIL */}
                   <SectionCard title="Hasil">
                     <p className="theme-text-secondary text-sm leading-6">
                       {data.hasil || "-"}
                     </p>
                   </SectionCard>
 
-                  {/* TINDAK LANJUT */}
                   <SectionCard title="Tindak Lanjut">
                     <p className="theme-text-secondary text-sm leading-6">
                       {data.tindakLanjut || "-"}
                     </p>
                   </SectionCard>
 
-                  {/* CATATAN */}
                   <SectionCard title="Catatan">
                     <p className="theme-text-secondary text-sm leading-6">
                       {data.catatan || "-"}
@@ -307,10 +298,8 @@ export default function DetailSesiKonselingPage() {
                   </SectionCard>
                 </div>
 
-                {/* SIDE CARD */}
                 <aside className="space-y-5">
 
-                  {/* INFO CARD */}
                   <div className="theme-card theme-border rounded-xl border p-5 shadow-sm">
                     <h3 className="theme-text-muted mb-4 text-sm font-bold uppercase tracking-wider">
                       Info Sesi
@@ -355,7 +344,6 @@ export default function DetailSesiKonselingPage() {
                     </div>
                   </div>
 
-                  {/* STATUS CARD */}
                   <div className="theme-card theme-border rounded-xl border p-5 shadow-sm">
                     <h3 className="theme-text-muted mb-3 text-sm font-bold uppercase tracking-wider">
                       Status Sesi
@@ -384,7 +372,6 @@ export default function DetailSesiKonselingPage() {
                     </p>
                   </div>
 
-                  {/* AKSI CARD */}
                   <div className="theme-card theme-border rounded-xl border p-5 shadow-sm">
                     <h3 className="theme-text-muted mb-3 text-sm font-bold uppercase tracking-wider">
                       Aksi Cepat
@@ -452,9 +439,6 @@ export default function DetailSesiKonselingPage() {
   );
 }
 
-/* =========================================================
-   DETAIL BOX
-========================================================= */
 
 function DetailBox({ label, value }) {
   return (
@@ -470,9 +454,6 @@ function DetailBox({ label, value }) {
   );
 }
 
-/* =========================================================
-   SECTION CARD
-========================================================= */
 
 function SectionCard({ title, children }) {
   return (
@@ -486,9 +467,6 @@ function SectionCard({ title, children }) {
   );
 }
 
-/* =========================================================
-   INFO ROW
-========================================================= */
 
 function InfoRow({ icon, label, value }) {
   const icons = {

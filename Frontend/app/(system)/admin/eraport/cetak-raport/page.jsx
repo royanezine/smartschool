@@ -40,15 +40,9 @@ import {
   getNilaiUjianUntukKelas,
 } from "@/services/ujian.service";
 
-/* =========================================================
-   CONSTANT
-========================================================= */
 
 const ITEMS_PER_PAGE = 10;
 
-/* =========================================================
-   GENERIC RESPONSE HELPER
-========================================================= */
 
 const getRows = (result) => {
   if (Array.isArray(result)) {
@@ -86,9 +80,6 @@ const getRows = (result) => {
   return [];
 };
 
-/* =========================================================
-   HELPER NILAI UJIAN
-========================================================= */
 
 const getExamRows = (result) => {
   if (Array.isArray(result)) {
@@ -126,9 +117,6 @@ const getExamRows = (result) => {
   return [];
 };
 
-/* =========================================================
-   AMBIL ID SISWA DARI DATA UJIAN
-========================================================= */
 
 const getExamStudentId = (item) => {
   if (!item || typeof item !== "object") {
@@ -174,9 +162,6 @@ const getExamStudentId = (item) => {
   return null;
 };
 
-/* =========================================================
-   AMBIL NILAI UJIAN
-========================================================= */
 
 const getExamScore = (item) => {
   const candidates = [
@@ -203,9 +188,6 @@ const getExamScore = (item) => {
   return null;
 };
 
-/* =========================================================
-   STATUS UJIAN
-========================================================= */
 
 const getExamStatus = (item) => {
   const rawStatus = String(
@@ -226,9 +208,6 @@ const getExamStatus = (item) => {
   return item?.status || "";
 };
 
-/* =========================================================
-   PARSE NILAI UJIAN
-========================================================= */
 
 const getExamDataFromRows = (rows) => {
   const result = {};
@@ -288,9 +267,6 @@ const getExamDataFromRows = (rows) => {
   return result;
 };
 
-/* =========================================================
-   PARSE DETAIL NILAI UJIAN
-========================================================= */
 
 const getExamDataFromDetail = (detail) => {
   if (!detail || typeof detail !== "object") {
@@ -313,9 +289,6 @@ const getExamDataFromDetail = (detail) => {
   return getExamDataFromRows(rows);
 };
 
-/* =========================================================
-   NORMALIZE SISWA
-========================================================= */
 
 const normalizeStudent = (
   student,
@@ -406,9 +379,6 @@ const normalizeStudent = (
   };
 };
 
-/* =========================================================
-   REPORT SUMMARY
-========================================================= */
 
 const getReportSummary = (report) => {
   if (!report) {
@@ -475,9 +445,6 @@ const getReportSummary = (report) => {
   };
 };
 
-/* =========================================================
-   STATUS CLASS
-========================================================= */
 
 const getStatusClass = (status) => {
   if (status === "Siap Dicetak") {
@@ -491,9 +458,6 @@ const getStatusClass = (status) => {
   return "theme-card-soft theme-text-muted";
 };
 
-/* =========================================================
-   STAT CARD
-========================================================= */
 
 function StatCard({
   icon: Icon,
@@ -540,16 +504,10 @@ function StatCard({
   );
 }
 
-/* =========================================================
-   PAGE
-========================================================= */
 
 export default function CetakRaportPage() {
   const router = useRouter();
 
-  /* =======================================================
-     STATE
-  ======================================================= */
 
   const [students, setStudents] =
     useState([]);
@@ -599,14 +557,8 @@ export default function CetakRaportPage() {
   const [currentPage, setCurrentPage] =
     useState(1);
 
-  // Menyimpan id permintaan terbaru agar hasil dari permintaan lama
-  // tidak menimpa state (menghindari race condition saat filter
-  // diganti dengan cepat).
   const examRequestIdRef = useRef(0);
 
-  /* =======================================================
-     LOAD TAHUN AJARAN
-  ======================================================= */
 
   const loadTahunAjaran =
     useCallback(async () => {
@@ -686,9 +638,6 @@ export default function CetakRaportPage() {
       }
     }, []);
 
-  /* =======================================================
-     LOAD SISWA
-  ======================================================= */
 
   const loadStudents =
     useCallback(async () => {
@@ -845,9 +794,6 @@ export default function CetakRaportPage() {
       }
     }, [selectedYearId]);
 
-  /* =======================================================
-     LOAD RAPORT
-  ======================================================= */
 
   const loadReports =
     useCallback(
@@ -926,9 +872,6 @@ export default function CetakRaportPage() {
       []
     );
 
-  /* =======================================================
-     LOAD NILAI UJIAN
-  ======================================================= */
 
   const loadExamScores =
     useCallback(
@@ -993,8 +936,6 @@ export default function CetakRaportPage() {
               )
             );
 
-          // Abaikan hasil permintaan lama jika
-          // sudah ada permintaan yang lebih baru.
           if (
             requestId !==
             examRequestIdRef.current
@@ -1134,9 +1075,6 @@ export default function CetakRaportPage() {
       []
     );
 
-  /* =======================================================
-     EFFECTS
-  ======================================================= */
 
   useEffect(() => {
     loadTahunAjaran();
@@ -1187,9 +1125,6 @@ export default function CetakRaportPage() {
     selectedYearId,
   ]);
 
-  /* =======================================================
-     FILTER OPTIONS
-  ======================================================= */
 
   const kelasOptions =
     useMemo(() => {
@@ -1213,9 +1148,6 @@ export default function CetakRaportPage() {
       ];
     }, [students]);
 
-  /* =======================================================
-     REPORT KEY
-  ======================================================= */
 
   const getReportKey =
     useCallback(
@@ -1224,9 +1156,6 @@ export default function CetakRaportPage() {
       [selectedYearId]
     );
 
-  /* =======================================================
-     FILTER STUDENTS
-  ======================================================= */
 
   const filteredStudents =
     useMemo(() => {
@@ -1289,9 +1218,6 @@ export default function CetakRaportPage() {
       statusFilter,
     ]);
 
-  /* =======================================================
-     PAGINATION
-  ======================================================= */
 
   const totalPages =
     Math.max(
@@ -1316,9 +1242,6 @@ export default function CetakRaportPage() {
         ITEMS_PER_PAGE
     );
 
-  /* =======================================================
-     STATISTICS
-  ======================================================= */
 
   const statistics =
     useMemo(() => {
@@ -1391,9 +1314,6 @@ export default function CetakRaportPage() {
       getReportKey,
     ]);
 
-  /* =======================================================
-     SELECT
-  ======================================================= */
 
   const toggleStudent = (
     studentId
@@ -1455,9 +1375,6 @@ export default function CetakRaportPage() {
     }
   };
 
-  /* =======================================================
-     RESET FILTER
-  ======================================================= */
 
   const resetFilter = () => {
     setSearch("");
@@ -1471,9 +1388,6 @@ export default function CetakRaportPage() {
     setCurrentPage(1);
   };
 
-  /* =======================================================
-     NAVIGASI DETAIL
-  ======================================================= */
 
   const goToDetail = (
     student,
@@ -1572,9 +1486,6 @@ export default function CetakRaportPage() {
       }
     };
 
-  /* =======================================================
-     REFRESH
-  ======================================================= */
 
   const handleRefresh =
     async () => {
@@ -1584,22 +1495,13 @@ export default function CetakRaportPage() {
       await loadStudents();
     };
 
-  /* =======================================================
-     LOADING
-  ======================================================= */
 
   const isLoading =
     loadingStudents ||
     loadingYears;
 
-  // Nilai ujian online bersifat OPSIONAL: ketidaktersediaannya tidak
-  // boleh memblokir tampilan data raport maupun proses cetak. Karena
-  // itu nilai ujian tidak ikut menentukan status loading tabel utama.
   const isProcessing = loadingReports;
 
-  /* =======================================================
-     RENDER
-  ======================================================= */
 
   return (
     <div className="theme-page flex min-h-screen w-full print:block print:min-h-0 print:overflow-visible print:bg-white">
@@ -1615,9 +1517,6 @@ export default function CetakRaportPage() {
         <main className="flex-1 overflow-y-auto print:overflow-visible">
           <div className="mx-auto w-full max-w-[1400px] space-y-6 p-4 sm:p-6 lg:p-8 print:max-w-full print:p-0">
 
-            {/* =================================================
-                HEADER
-            ================================================= */}
 
             <div className="print:hidden flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex items-start gap-3">
@@ -1706,9 +1605,6 @@ export default function CetakRaportPage() {
               </div>
             </div>
 
-            {/* =================================================
-                ERROR
-            ================================================= */}
 
             {error ? (
               <div className="print:hidden theme-danger flex items-start justify-between gap-4 rounded-lg border px-4 py-3 text-sm">
@@ -1734,9 +1630,6 @@ export default function CetakRaportPage() {
               </div>
             ) : null}
 
-            {/* =================================================
-                INFO
-            ================================================= */}
 
             <div className="print:hidden theme-info rounded-xl border px-4 py-4">
               <div className="flex items-start gap-3">
@@ -1763,9 +1656,6 @@ export default function CetakRaportPage() {
               </div>
             </div>
 
-            {/* =================================================
-                STATISTICS
-            ================================================= */}
 
             <div className="print:hidden grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
               <StatCard
@@ -1812,9 +1702,6 @@ export default function CetakRaportPage() {
               />
             </div>
 
-            {/* =================================================
-                FILTER
-            ================================================= */}
 
             <div className="print:hidden theme-card rounded-xl border p-4 shadow-sm sm:p-5">
               <div className="mb-4 flex items-center gap-2">
@@ -1830,7 +1717,6 @@ export default function CetakRaportPage() {
 
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5">
 
-                {/* TAHUN AJARAN */}
                 <div>
                   <label className="theme-text-secondary mb-1.5 block text-xs font-semibold">
                     Tahun Ajaran
@@ -1868,7 +1754,6 @@ export default function CetakRaportPage() {
                   </select>
                 </div>
 
-                {/* SEMESTER */}
                 <div>
                   <label className="theme-text-secondary mb-1.5 block text-xs font-semibold">
                     Semester
@@ -1897,7 +1782,6 @@ export default function CetakRaportPage() {
                   </select>
                 </div>
 
-                {/* KELAS */}
                 <div>
                   <label className="theme-text-secondary mb-1.5 block text-xs font-semibold">
                     Kelas
@@ -1927,7 +1811,6 @@ export default function CetakRaportPage() {
                   </select>
                 </div>
 
-                {/* STATUS */}
                 <div>
                   <label className="theme-text-secondary mb-1.5 block text-xs font-semibold">
                     Status Raport
@@ -1962,7 +1845,6 @@ export default function CetakRaportPage() {
                   </select>
                 </div>
 
-                {/* SEARCH */}
                 <div>
                   <label className="theme-text-secondary mb-1.5 block text-xs font-semibold">
                     Cari Siswa
@@ -2002,9 +1884,6 @@ export default function CetakRaportPage() {
               </div>
             </div>
 
-            {/* =================================================
-                TABLE
-            ================================================= */}
 
             <div className="theme-card overflow-hidden rounded-xl border shadow-sm print:overflow-visible print:border-0 print:shadow-none">
               <div className="print:hidden theme-card-soft flex flex-col gap-2 border-b px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
@@ -2180,7 +2059,6 @@ export default function CetakRaportPage() {
                                     : ""
                                 }`}
                               >
-                                {/* CHECKBOX */}
                                 <td className="print:hidden px-4 py-4 text-center">
                                   <input
                                     type="checkbox"
@@ -2196,7 +2074,6 @@ export default function CetakRaportPage() {
                                   />
                                 </td>
 
-                                {/* NO */}
                                 <td className="theme-text-secondary px-4 py-4 text-center text-sm">
                                   {(safeCurrentPage -
                                     1) *
@@ -2205,7 +2082,6 @@ export default function CetakRaportPage() {
                                     1}
                                 </td>
 
-                                {/* SISWA */}
                                 <td className="px-4 py-4">
                                   <div className="flex items-center gap-3">
                                     <div className="theme-info flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-xs font-bold">
@@ -2233,7 +2109,6 @@ export default function CetakRaportPage() {
                                   </div>
                                 </td>
 
-                                {/* NIS / NISN */}
                                 <td className="px-4 py-4">
                                   <p className="theme-text-secondary text-sm font-medium">
                                     {
@@ -2249,14 +2124,12 @@ export default function CetakRaportPage() {
                                   </p>
                                 </td>
 
-                                {/* KELAS */}
                                 <td className="theme-text-secondary px-4 py-4 text-sm font-medium">
                                   {
                                     student.kelas
                                   }
                                 </td>
 
-                                {/* NILAI UJIAN */}
                                 <td className="px-4 py-4 text-center">
                                   {examScore !==
                                     undefined &&
@@ -2284,7 +2157,6 @@ export default function CetakRaportPage() {
                                   )}
                                 </td>
 
-                                {/* RATA-RATA */}
                                 <td className="px-4 py-4 text-center">
                                   <span className="theme-text text-sm font-bold">
                                     {summary.rataRata ||
@@ -2292,7 +2164,6 @@ export default function CetakRaportPage() {
                                   </span>
                                 </td>
 
-                                {/* STATUS */}
                                 <td className="px-4 py-4 text-center">
                                   <span
                                     className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold ${getStatusClass(
@@ -2305,7 +2176,6 @@ export default function CetakRaportPage() {
                                   </span>
                                 </td>
 
-                                {/* AKSI */}
                                 <td className="print:hidden px-5 py-4">
                                   <div className="flex justify-end gap-2">
                                     <button
@@ -2356,9 +2226,6 @@ export default function CetakRaportPage() {
                     </table>
                   </div>
 
-                  {/* =================================================
-                      PAGINATION
-                  ================================================= */}
 
                   <div className="print:hidden theme-card-soft flex flex-col gap-3 border-t px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
                     <p className="theme-text-muted text-sm">
@@ -2445,9 +2312,6 @@ export default function CetakRaportPage() {
               )}
             </div>
 
-            {/* =================================================
-                FOOTER INFO
-            ================================================= */}
 
             <div className="print:hidden theme-card-soft rounded-xl border p-4">
               <div className="flex gap-3">

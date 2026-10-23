@@ -11,11 +11,6 @@ import {
   X,
 } from "lucide-react";
 
-/*
-|--------------------------------------------------------------------------
-| THEME HELPERS
-|--------------------------------------------------------------------------
-*/
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -47,21 +42,7 @@ const themeDivider =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-/*
-|--------------------------------------------------------------------------
-| CONFIG
-|--------------------------------------------------------------------------
-*/
 
-/**
- * app/admin/siswa/kartu-identitas/tambah/page.jsx
- *
- * Halaman tambah siswa baru.
- *
- * Data baru dititipkan sementara ke localStorage menggunakan
- * key "ki_new_siswa_queue", kemudian diarahkan kembali ke
- * halaman daftar kartu identitas siswa.
- */
 
 const QUEUE_KEY = "ki_new_siswa_queue";
 
@@ -130,11 +111,6 @@ const REQUIRED_FIELDS = [
   "namaOrtu",
 ];
 
-/*
-|--------------------------------------------------------------------------
-| FIELD
-|--------------------------------------------------------------------------
-*/
 
 function Field({
   label,
@@ -158,11 +134,6 @@ function Field({
   );
 }
 
-/*
-|--------------------------------------------------------------------------
-| INPUT STYLE
-|--------------------------------------------------------------------------
-*/
 
 const inputClass = `
   mt-1 w-full
@@ -177,11 +148,6 @@ const inputClass = `
   transition-colors
 `;
 
-/*
-|--------------------------------------------------------------------------
-| PAGE
-|--------------------------------------------------------------------------
-*/
 
 export default function TambahSiswaPage() {
   const router = useRouter();
@@ -199,11 +165,6 @@ export default function TambahSiswaPage() {
     setIsCollapsed(!isCollapsed);
   };
 
-  /*
-  |--------------------------------------------------------------------------
-  | HANDLE CHANGE
-  |--------------------------------------------------------------------------
-  */
 
   const handleChange = (field) => (e) => {
     const value = e.target.value;
@@ -221,11 +182,6 @@ export default function TambahSiswaPage() {
     }
   };
 
-  /*
-  |--------------------------------------------------------------------------
-  | SUBMIT
-  |--------------------------------------------------------------------------
-  */
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -263,10 +219,8 @@ export default function TambahSiswaPage() {
       const newSiswa = {
         ...form,
 
-        // Tambahkan ID sementara
         id: `siswa-${Date.now()}`,
 
-        // Waktu dibuat
         createdAt:
           new Date().toISOString(),
       };
@@ -291,9 +245,6 @@ export default function TambahSiswaPage() {
 
   return (
     <div className="flex h-screen w-full theme-page overflow-hidden">
-      {/* =====================================================
-          SIDEBAR
-      ===================================================== */}
 
       <Sidebar
         active="siswaKartuIdentitas"
@@ -303,12 +254,8 @@ export default function TambahSiswaPage() {
         role="admin"
       />
 
-      {/* =====================================================
-          CONTENT
-      ===================================================== */}
 
       <div className="flex-1 flex flex-col min-w-0 w-full h-full overflow-hidden">
-        {/* HEADER */}
 
         <Header
           toggleSidebar={toggleSidebar}
@@ -320,15 +267,9 @@ export default function TambahSiswaPage() {
           }}
         />
 
-        {/* ===================================================
-            MAIN
-        =================================================== */}
 
         <main className="flex-1 w-full overflow-y-auto">
           <div className="w-full max-w-none p-4 sm:p-6 lg:p-8 space-y-6">
-            {/* =================================================
-                HEADER
-            ================================================= */}
 
             <div className="flex items-center gap-3">
               <button
@@ -376,9 +317,6 @@ export default function TambahSiswaPage() {
               </div>
             </div>
 
-            {/* =================================================
-                FORM
-            ================================================= */}
 
             <div
               className={`
@@ -393,9 +331,6 @@ export default function TambahSiswaPage() {
                 onSubmit={handleSubmit}
                 className="space-y-6"
               >
-                {/* =================================================
-                    DATA IDENTITAS
-                ================================================= */}
 
                 <div>
                   <div className="mb-4">
@@ -409,7 +344,6 @@ export default function TambahSiswaPage() {
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-                    {/* NAMA */}
 
                     <Field
                       label="Nama lengkap"
@@ -432,7 +366,6 @@ export default function TambahSiswaPage() {
                       )}
                     </Field>
 
-                    {/* NISN */}
 
                     <Field
                       label="NISN"
@@ -455,7 +388,6 @@ export default function TambahSiswaPage() {
                       )}
                     </Field>
 
-                    {/* NIK */}
 
                     <Field label="NIK">
                       <input
@@ -469,7 +401,6 @@ export default function TambahSiswaPage() {
                       />
                     </Field>
 
-                    {/* JENIS KELAMIN */}
 
                     <Field
                       label="Jenis kelamin"
@@ -509,7 +440,6 @@ export default function TambahSiswaPage() {
                       )}
                     </Field>
 
-                    {/* TEMPAT LAHIR */}
 
                     <Field label="Tempat lahir">
                       <input
@@ -525,7 +455,6 @@ export default function TambahSiswaPage() {
                       />
                     </Field>
 
-                    {/* TANGGAL LAHIR */}
 
                     <Field label="Tanggal lahir">
                       <input
@@ -540,7 +469,6 @@ export default function TambahSiswaPage() {
                       />
                     </Field>
 
-                    {/* AGAMA */}
 
                     <Field label="Agama">
                       <select
@@ -567,7 +495,6 @@ export default function TambahSiswaPage() {
                       </select>
                     </Field>
 
-                    {/* TELEPON */}
 
                     <Field label="Nomor telepon">
                       <input
@@ -583,7 +510,6 @@ export default function TambahSiswaPage() {
                       />
                     </Field>
 
-                    {/* EMAIL */}
 
                     <Field label="Email">
                       <input
@@ -597,7 +523,6 @@ export default function TambahSiswaPage() {
                       />
                     </Field>
 
-                    {/* ALAMAT */}
 
                     <div className="sm:col-span-2 xl:col-span-3">
                       <Field label="Alamat">
@@ -615,9 +540,6 @@ export default function TambahSiswaPage() {
                   </div>
                 </div>
 
-                {/* =================================================
-                    DATA AKADEMIK
-                ================================================= */}
 
                 <div
                   className={`
@@ -636,7 +558,6 @@ export default function TambahSiswaPage() {
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-                    {/* KELAS */}
 
                     <Field
                       label="Kelas"
@@ -672,7 +593,6 @@ export default function TambahSiswaPage() {
                       )}
                     </Field>
 
-                    {/* TAHUN MASUK */}
 
                     <Field label="Tahun masuk">
                       <input
@@ -688,7 +608,6 @@ export default function TambahSiswaPage() {
                       />
                     </Field>
 
-                    {/* STATUS */}
 
                     <Field label="Status">
                       <select
@@ -716,9 +635,6 @@ export default function TambahSiswaPage() {
                   </div>
                 </div>
 
-                {/* =================================================
-                    DATA ORANG TUA
-                ================================================= */}
 
                 <div
                   className={`
@@ -737,7 +653,6 @@ export default function TambahSiswaPage() {
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-                    {/* NAMA ORTU */}
 
                     <Field
                       label="Nama orang tua / wali"
@@ -762,7 +677,6 @@ export default function TambahSiswaPage() {
                       )}
                     </Field>
 
-                    {/* HUBUNGAN */}
 
                     <Field label="Hubungan">
                       <select
@@ -791,7 +705,6 @@ export default function TambahSiswaPage() {
                       </select>
                     </Field>
 
-                    {/* TELEPON ORTU */}
 
                     <Field label="Nomor telepon orang tua / wali">
                       <input
@@ -807,7 +720,6 @@ export default function TambahSiswaPage() {
                       />
                     </Field>
 
-                    {/* ALAMAT ORTU */}
 
                     <div className="sm:col-span-2 xl:col-span-3">
                       <Field label="Alamat orang tua / wali">
@@ -827,9 +739,6 @@ export default function TambahSiswaPage() {
                   </div>
                 </div>
 
-                {/* =================================================
-                    BUTTON
-                ================================================= */}
 
                 <div className="flex items-center gap-2 pt-2 max-w-md ml-auto">
                   <button

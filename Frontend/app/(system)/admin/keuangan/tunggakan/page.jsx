@@ -254,7 +254,6 @@ export default function TrackingTunggakanPage() {
         <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden theme-page">
           <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8 xl:px-10">
 
-            {/* BREADCRUMB */}
             <div className="mb-6 flex items-center gap-2 text-sm">
               <button
                 onClick={() => window.history.back()}
@@ -288,7 +287,6 @@ export default function TrackingTunggakanPage() {
               </span>
             </div>
 
-            {/* HEADER */}
             <div className="mb-6 rounded-2xl theme-header p-6 sm:p-8">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-4">
@@ -374,7 +372,6 @@ export default function TrackingTunggakanPage() {
               </div>
             </div>
 
-            {/* STATISTIK */}
             <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <StatCard
                 icon={<AlertCircle size={22} />}
@@ -409,7 +406,6 @@ export default function TrackingTunggakanPage() {
               />
             </div>
 
-            {/* FILTER & SEARCH */}
             <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
               <div className="relative flex-1">
                 <Search
@@ -489,7 +485,6 @@ export default function TrackingTunggakanPage() {
               </div>
             </div>
 
-            {/* TABEL */}
             <div
               className="
                 overflow-hidden rounded-2xl
@@ -659,7 +654,6 @@ export default function TrackingTunggakanPage() {
                 </table>
               </div>
 
-              {/* PAGINATION */}
               {filtered.length > 0 && (
                 <div
                   className="
@@ -743,7 +737,6 @@ export default function TrackingTunggakanPage() {
               )}
             </div>
 
-            {/* FOOTER */}
             <footer className="mt-8 border-t theme-border-soft pt-6 text-center text-xs theme-text-muted">
               © 2026 SmartSchool • Tracking Tunggakan
             </footer>
@@ -751,9 +744,6 @@ export default function TrackingTunggakanPage() {
         </main>
       </div>
 
-      {/* =========================================================
-          MODAL DETAIL
-      ========================================================= */}
       {showDetailModal && selectedTunggakan && (
         <Modal
           title="Detail Tunggakan"
@@ -862,9 +852,6 @@ export default function TrackingTunggakanPage() {
         </Modal>
       )}
 
-      {/* =========================================================
-          MODAL EDIT
-      ========================================================= */}
       {showEditModal && selectedTunggakan && (
         <Modal
           title="Edit Tunggakan"
@@ -935,9 +922,6 @@ export default function TrackingTunggakanPage() {
         </Modal>
       )}
 
-      {/* =========================================================
-          MODAL DELETE
-      ========================================================= */}
       {showDeleteModal && selectedTunggakan && (
         <Modal
           title="Konfirmasi Hapus"
@@ -1010,9 +994,6 @@ export default function TrackingTunggakanPage() {
         </Modal>
       )}
 
-      {/* =========================================================
-          MODAL ADD PAYMENT
-      ========================================================= */}
       {showAddModal && (
         <Modal
           title="Tambah Pembayaran"
@@ -1068,9 +1049,6 @@ export default function TrackingTunggakanPage() {
   );
 }
 
-/* =========================================================
-   TABLE HEAD
-========================================================= */
 
 function TableHead({ children, align = "left" }) {
   const alignment = {
@@ -1094,9 +1072,6 @@ function TableHead({ children, align = "left" }) {
   );
 }
 
-/* =========================================================
-   STATUS BADGE
-========================================================= */
 
 function StatusBadge({ status }) {
   const isLunas = status === "Lunas";
@@ -1126,9 +1101,6 @@ function StatusBadge({ status }) {
   );
 }
 
-/* =========================================================
-   ACTION BUTTON
-========================================================= */
 
 function ActionButton({
   children,
@@ -1164,9 +1136,6 @@ function ActionButton({
   );
 }
 
-/* =========================================================
-   DETAIL ITEM
-========================================================= */
 
 function DetailItem({
   label,
@@ -1191,9 +1160,6 @@ function DetailItem({
   );
 }
 
-/* =========================================================
-   FORM FIELD
-========================================================= */
 
 function FormField({
   label,
@@ -1235,9 +1201,6 @@ function FormField({
   );
 }
 
-/* =========================================================
-   FORM SELECT
-========================================================= */
 
 function FormSelect({
   label,
@@ -1277,9 +1240,6 @@ function FormSelect({
   );
 }
 
-/* =========================================================
-   MODAL ACTIONS
-========================================================= */
 
 function ModalActions({
   onCancel,
@@ -1319,9 +1279,6 @@ function ModalActions({
   );
 }
 
-/* =========================================================
-   STAT CARD
-========================================================= */
 
 function StatCard({
   icon,
@@ -1398,9 +1355,6 @@ function StatCard({
   );
 }
 
-/* =========================================================
-   MODAL
-========================================================= */
 
 function Modal({
   title,

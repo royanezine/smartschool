@@ -79,7 +79,6 @@ export default function CreateSesiKonselingPage() {
         <main className="flex-1 overflow-y-auto p-5 md:p-6 lg:p-8">
           <div className="mx-auto w-full max-w-[1200px]">
 
-            {/* PAGE HEADER */}
             <div className="mb-7 flex items-start gap-4">
               <button
                 onClick={() => router.back()}
@@ -170,7 +169,6 @@ export default function CreateSesiKonselingPage() {
               </div>
             </div>
 
-            {/* ERROR */}
             {error && (
               <div className="theme-danger mb-6 flex items-start gap-3 rounded-xl border px-4 py-3.5 text-sm font-semibold shadow-sm">
                 <svg
@@ -193,7 +191,6 @@ export default function CreateSesiKonselingPage() {
 
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_340px]">
 
-              {/* FORM CARD */}
               <form
                 onSubmit={handleSubmit}
                 className="
@@ -202,7 +199,6 @@ export default function CreateSesiKonselingPage() {
                   shadow-xl
                 "
               >
-                {/* FORM HEADER */}
                 <div
                   className="
                     theme-card-soft
@@ -237,10 +233,8 @@ export default function CreateSesiKonselingPage() {
                   </div>
                 </div>
 
-                {/* FORM BODY */}
                 <div className="grid gap-5 p-6 md:grid-cols-2">
 
-                  {/* SISWA */}
                   <Field label="Siswa ID" required>
                     <input
                       required
@@ -256,7 +250,6 @@ export default function CreateSesiKonselingPage() {
                     />
                   </Field>
 
-                  {/* KONSELOR */}
                   <Field label="Konselor ID">
                     <input
                       value={form.konselorId}
@@ -271,7 +264,6 @@ export default function CreateSesiKonselingPage() {
                     />
                   </Field>
 
-                  {/* TANGGAL */}
                   <Field label="Tanggal" required>
                     <input
                       required
@@ -287,7 +279,6 @@ export default function CreateSesiKonselingPage() {
                     />
                   </Field>
 
-                  {/* STATUS */}
                   <Field label="Status">
                     <select
                       value={form.status}
@@ -317,7 +308,6 @@ export default function CreateSesiKonselingPage() {
                     </select>
                   </Field>
 
-                  {/* WAKTU MULAI */}
                   <Field label="Waktu Mulai">
                     <input
                       type="time"
@@ -332,7 +322,6 @@ export default function CreateSesiKonselingPage() {
                     />
                   </Field>
 
-                  {/* WAKTU SELESAI */}
                   <Field label="Waktu Selesai">
                     <input
                       type="time"
@@ -347,7 +336,6 @@ export default function CreateSesiKonselingPage() {
                     />
                   </Field>
 
-                  {/* TOPIK */}
                   <div className="md:col-span-2">
                     <Field label="Topik" required>
                       <input
@@ -365,7 +353,6 @@ export default function CreateSesiKonselingPage() {
                     </Field>
                   </div>
 
-                  {/* MASALAH */}
                   <div className="md:col-span-2">
                     <Field label="Masalah">
                       <textarea
@@ -383,7 +370,6 @@ export default function CreateSesiKonselingPage() {
                     </Field>
                   </div>
 
-                  {/* HASIL */}
                   <div className="md:col-span-2">
                     <Field label="Hasil">
                       <textarea
@@ -401,7 +387,6 @@ export default function CreateSesiKonselingPage() {
                     </Field>
                   </div>
 
-                  {/* TINDAK LANJUT */}
                   <div className="md:col-span-2">
                     <Field label="Tindak Lanjut">
                       <textarea
@@ -419,7 +404,6 @@ export default function CreateSesiKonselingPage() {
                     </Field>
                   </div>
 
-                  {/* CATATAN */}
                   <div className="md:col-span-2">
                     <Field label="Catatan">
                       <textarea
@@ -438,7 +422,6 @@ export default function CreateSesiKonselingPage() {
                   </div>
                 </div>
 
-                {/* FORM ACTION */}
                 <div
                   className="
                     theme-card-soft
@@ -509,10 +492,8 @@ export default function CreateSesiKonselingPage() {
                 </div>
               </form>
 
-              {/* SIDE */}
               <aside className="space-y-5">
 
-                {/* LIVE PREVIEW */}
                 <div className="theme-card relative overflow-hidden rounded-2xl border p-6 shadow-xl">
                   <div
                     className="
@@ -555,7 +536,6 @@ export default function CreateSesiKonselingPage() {
                       </h3>
                     </div>
 
-                    {/* SISWA PREVIEW */}
                     <div className="theme-border-soft flex items-center gap-3 border-b pb-4">
                       <div className="theme-primary flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-base font-bold shadow-md">
                         {form.siswaId
@@ -577,7 +557,6 @@ export default function CreateSesiKonselingPage() {
                       </div>
                     </div>
 
-                    {/* PREVIEW DATA */}
                     <div className="space-y-3 pt-4">
                       <PreviewRow
                         label="Topik"
@@ -614,7 +593,6 @@ export default function CreateSesiKonselingPage() {
                   </div>
                 </div>
 
-                {/* TIPS */}
                 <div className="theme-info relative overflow-hidden rounded-2xl border p-5 shadow-sm">
                   <div className="flex items-start gap-3">
                     <div className="theme-card flex h-9 w-9 shrink-0 items-center justify-center rounded-xl shadow-sm">

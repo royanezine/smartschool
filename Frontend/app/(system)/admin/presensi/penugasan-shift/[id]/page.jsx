@@ -10,7 +10,6 @@ import {
   Save,
   LoaderCircle,
   AlertCircle,
-  CheckCircle2,
   X,
   Mail,
   CalendarClock,
@@ -21,14 +20,13 @@ import {
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
 import { apiFetch } from "@/lib/api";
-import { getUsers } from "@/services/user.service";
+import { getUsers, getUserById, verifyUserAssignment } from "@/services/user.service";
 import {
   getShiftKerja,
   assignUserShiftAndJabatan,
 } from "@/services/shiftKerja.service";
 
 const JABATAN_ENDPOINT = "/api/kategori-jabatan";
-const CACHE_KEY = "smartschool-penugasan-shift-cache";
 
 function getArray(response, keys = []) {
   let current = response;
@@ -55,33 +53,6 @@ function getId(value) {
   return value == null ? "" : String(value);
 }
 
-function getCache() {
-  try {
-    const parsed = JSON.parse(
-      localStorage.getItem(CACHE_KEY) || "{}"
-    );
-    return parsed && typeof parsed === "object" ? parsed : {};
-  } catch {
-    return {};
-  }
-}
-
-function saveCache(id, assignment) {
-  try {
-    const cache = getCache();
-
-    cache[getId(id)] = {
-      ...(cache[getId(id)] || {}),
-      ...assignment,
-      updatedAt: new Date().toISOString(),
-    };
-
-    localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
-  } catch {
-    // Cache hanya untuk membantu tampilan FE; bukan penyimpanan utama.
-  }
-}
-
 function getNamaJabatan(value) {
   if (typeof value === "string") return value;
 
@@ -94,42 +65,73 @@ function getNamaJabatan(value) {
   );
 }
 
-function getNamaShift(pegawai, shiftList, cached) {
-  const relation =
+function getShiftRelation(pegawai) {
+  return (
     pegawai?.shiftKerjaMaster ??
-    (typeof pegawai?.shiftKerja === "object"
+    (pegawai?.shiftKerja != null &&
+    typeof pegawai.shiftKerja === "object"
       ? pegawai.shiftKerja
-      : null);
+      : null)
+  );
+}
 
-  const id = pegawai?.shiftKerjaId ?? relation?.id;
+function getCategoryRelation(pegawai) {
+  return pegawai?.kategoriJabatan ?? null;
+}
 
-  if (id) {
-    const found = shiftList.find((x) => getId(x.id) === getId(id));
-    if (found) return found;
-    if (relation?.nama) return relation.nama;
+function resolveCurrentShift(
+  pegawai,
+  shiftList,
+  assignmentKnown,
+  shiftListLoaded
+) {
+  if (!assignmentKnown) {
+    return { id: "", shift: null, status: "unknown" };
   }
 
-  if (cached?.shiftKerjaId) {
-    const found = shiftList.find(
-      (x) => getId(x.id) === getId(cached.shiftKerjaId)
-    );
-    if (found) return found;
+  const relation = getShiftRelation(pegawai);
+  const id = getId(pegawai?.shiftKerjaId ?? relation?.id ?? "");
+
+  if (!id) {
+    return { id: "", shift: null, status: "none" };
   }
 
-  if (typeof pegawai?.shiftKerja === "string" && pegawai.shiftKerja.trim()) {
-    const legacy = pegawai.shiftKerja.trim();
-    const found = shiftList.find((shift) => {
-      const value = legacy.toLowerCase();
-      return (
-        String(shift.nama ?? "").trim().toLowerCase() === value ||
-        String(shift.kode ?? "").trim().toLowerCase() === value
-      );
-    });
+  const found = shiftList.find((x) => getId(x.id) === id);
 
-    return found?.nama || legacy;
+  if (found) return { id, shift: found, status: "assigned" };
+  if (!shiftListLoaded) {
+    return { id, shift: relation ?? null, status: "unverified" };
   }
 
-  return "";
+  return { id, shift: relation ?? null, status: "unresolved" };
+}
+
+function resolveCurrentCategory(pegawai, jabatanList, assignmentKnown) {
+  if (!assignmentKnown) {
+    return { id: "", value: null, status: "unknown" };
+  }
+
+  const relation = getCategoryRelation(pegawai);
+  const id = getId(pegawai?.kategoriJabatanId ?? relation?.id ?? "");
+
+  if (!id) {
+    return {
+      id: "",
+      value: relation,
+      status: relation ? "assigned" : "none",
+    };
+  }
+
+  const found = jabatanList.find((x) => getId(x.id) === id);
+
+  if (found) return { id, value: found, status: "assigned" };
+  if (relation) return { id, value: relation, status: "assigned" };
+
+  return { id, value: null, status: "unresolved" };
+}
+
+function getErrorMessage(err, fallback) {
+  return err instanceof Error && err.message ? err.message : fallback;
 }
 
 function formatJam(value) {
@@ -155,9 +157,6 @@ function formatJam(value) {
   return text;
 }
 
-/* =========================================================
-   STYLE HELPERS — pakai token tema
-========================================================= */
 
 const inputClass =
   "theme-input h-11 w-full rounded-xl border px-3.5 text-sm outline-none transition disabled:opacity-50";
@@ -201,11 +200,21 @@ export default function AturShiftPegawaiPage() {
   const [pegawai, setPegawai] = useState(null);
   const [shiftList, setShiftList] = useState([]);
   const [jabatanList, setJabatanList] = useState([]);
-  const [cache, setCache] = useState({});
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [loadWarnings, setLoadWarnings] = useState([]);
+  const [categoryTouched, setCategoryTouched] = useState(false);
+
+  const [verification, setVerification] = useState({
+    userLoaded: false,
+    shiftAssignmentKnown: false,
+    categoryAssignmentKnown: false,
+    shiftListLoaded: false,
+    categoryListLoaded: false,
+    usedFallback: false,
+  });
 
   const [form, setForm] = useState({
     shiftKerjaId: "",
@@ -221,77 +230,178 @@ export default function AturShiftPegawaiPage() {
 
     setLoading(true);
     setError("");
+    setLoadWarnings([]);
+    setCategoryTouched(false);
+    setPegawai(null);
+    setShiftList([]);
+    setJabatanList([]);
+    setForm({ shiftKerjaId: "", kategoriJabatanId: "" });
+    setVerification({
+      userLoaded: false,
+      shiftAssignmentKnown: false,
+      categoryAssignmentKnown: false,
+      shiftListLoaded: false,
+      categoryListLoaded: false,
+      usedFallback: false,
+    });
+
+    const userPromise = getUserById(id).catch(async (directError) => {
+      try {
+        const list = await getUsers({ page: 1, limit: 200 });
+        const all = getArray(list, ["users", "pengguna", "pegawai"]);
+        const match = all.find((x) => getId(x?.id) === getId(id));
+
+        if (match) {
+          return { data: match, __fallback: true };
+        }
+      } catch {
+      }
+
+      throw directError;
+    });
+
+    const [userResult, shiftsResult, jabatanResult] =
+      await Promise.allSettled([
+        userPromise,
+        getShiftKerja({
+          page: 1,
+          limit: 100,
+          status: "aktif",
+        }),
+        apiFetch(`${JABATAN_ENDPOINT}?limit=100`, { method: "GET" }),
+      ]);
 
     try {
-      const [usersResponse, shiftsResponse, jabatanResponse] =
-        await Promise.all([
-          getUsers({ page: 1, limit: 200 }),
-          getShiftKerja({
-            page: 1,
-            limit: 100,
-            status: "aktif",
-          }),
-          apiFetch(JABATAN_ENDPOINT, { method: "GET" }),
-        ]);
+      if (userResult.status === "rejected") {
+        throw userResult.reason;
+      }
 
-      const users = getArray(usersResponse, [
-        "users",
-        "pengguna",
-        "pegawai",
-      ]);
+      const userResponse = userResult.value;
+      const found =
+        userResponse?.data?.data ?? userResponse?.data ?? userResponse;
 
-      const shifts = getArray(shiftsResponse, [
-        "shifts",
-        "shiftKerja",
-      ]);
-
-      const jabatan = getArray(jabatanResponse, [
-        "kategoriJabatan",
-        "kategoriJabatans",
-        "jabatan",
-      ]);
-
-      const found = users.find((x) => getId(x?.id) === getId(id));
-
-      if (!found) {
+      if (!found?.id) {
         throw new Error(
           "Pegawai tidak ditemukan dalam data pengguna. Pastikan akun sudah terdaftar di sistem."
         );
       }
 
-      const savedCache = getCache();
-      const cached = savedCache[getId(found.id)] || {};
+      if (found.peran?.nama?.trim().toLowerCase() === "siswa") {
+        throw new Error(
+          "Penugasan shift kerja dan kategori jabatan tidak berlaku untuk akun dengan peran siswa."
+        );
+      }
 
-      const shiftRelation =
-        found.shiftKerjaMaster ??
-        (typeof found.shiftKerja === "object" ? found.shiftKerja : null);
+      const warnings = [];
+      const usedFallback = Boolean(userResponse?.__fallback);
 
-      const shiftId =
-        found.shiftKerjaId ??
-        shiftRelation?.id ??
-        cached.shiftKerjaId ??
-        "";
+      if (usedFallback) {
+        warnings.push(
+          "Detail pegawai diambil dari daftar pengguna karena endpoint detail gagal diakses. Daftar pengguna tidak memuat informasi penugasan, jadi status penugasan tidak dapat diverifikasi."
+        );
+      }
 
-      const categoryId =
-        found.kategoriJabatanId ??
-        found.kategoriJabatan?.id ??
-        cached.kategoriJabatanId ??
-        "";
+      const shifts =
+        shiftsResult.status === "fulfilled"
+          ? getArray(shiftsResult.value, ["shifts", "shiftKerja"])
+          : [];
+
+      const jabatan =
+        jabatanResult.status === "fulfilled"
+          ? getArray(jabatanResult.value, [
+              "kategoriJabatan",
+              "kategoriJabatans",
+              "jabatan",
+            ])
+          : [];
+
+      if (shiftsResult.status === "rejected") {
+        warnings.push(
+          `Daftar shift aktif gagal dimuat: ${getErrorMessage(
+            shiftsResult.reason,
+            "terjadi kesalahan yang tidak diketahui"
+          )}.`
+        );
+      }
+
+      if (jabatanResult.status === "rejected") {
+        warnings.push(
+          `Daftar kategori jabatan gagal dimuat: ${getErrorMessage(
+            jabatanResult.reason,
+            "terjadi kesalahan yang tidak diketahui"
+          )}.`
+        );
+      }
+
+      const assignmentFields = verifyUserAssignment(found);
+
+      if (!assignmentFields.shift) {
+        warnings.push(
+          "Response data pegawai tidak memuat shiftKerjaId atau shiftKerjaMaster, sehingga shift yang sedang terpasang tidak dapat dipastikan."
+        );
+      }
+
+      if (!assignmentFields.category) {
+        warnings.push(
+          "Response data pegawai tidak memuat kategoriJabatanId atau kategoriJabatan, sehingga kategori jabatan yang sedang terpasang tidak dapat dipastikan."
+        );
+      }
+
+      const shiftRelation = getShiftRelation(found);
+      const categoryRelation = getCategoryRelation(found);
+
+      const shiftId = assignmentFields.shift
+        ? getId(found.shiftKerjaId ?? shiftRelation?.id ?? "")
+        : "";
+
+      const categoryId = assignmentFields.category
+        ? getId(found.kategoriJabatanId ?? categoryRelation?.id ?? "")
+        : "";
+
+      if (
+        assignmentFields.shift &&
+        shiftId &&
+        shiftsResult.status === "fulfilled" &&
+        !shifts.some((x) => getId(x.id) === shiftId)
+      ) {
+        warnings.push(
+          "Shift yang saat ini terpasang tidak ditemukan pada daftar shift aktif. Pilih shift aktif lain untuk menggantinya."
+        );
+      }
+
+      if (
+        assignmentFields.category &&
+        categoryId &&
+        !jabatan.some((x) => getId(x.id) === categoryId) &&
+        !categoryRelation
+      ) {
+        warnings.push(
+          "Kategori jabatan yang saat ini terpasang tidak ditemukan pada daftar kategori yang dimuat. Nilainya akan dipertahankan kecuali Anda memilih kategori lain atau mengosongkannya."
+        );
+      }
 
       setPegawai(found);
       setShiftList(shifts);
       setJabatanList(jabatan);
-      setCache(cached);
-
       setForm({
-        shiftKerjaId: getId(shiftId),
-        kategoriJabatanId: getId(categoryId),
+        shiftKerjaId: shiftId,
+        kategoriJabatanId: categoryId,
+      });
+      setLoadWarnings(warnings);
+      setVerification({
+        userLoaded: true,
+        shiftAssignmentKnown: assignmentFields.shift,
+        categoryAssignmentKnown: assignmentFields.category,
+        shiftListLoaded: shiftsResult.status === "fulfilled",
+        categoryListLoaded: jabatanResult.status === "fulfilled",
+        usedFallback,
       });
     } catch (err) {
       setError(
-        err instanceof Error
-          ? err.message
-          : "Data pegawai belum bisa dimuat. Silakan coba lagi."
+        getErrorMessage(
+          err,
+          "Data pegawai belum bisa dimuat. Silakan coba lagi."
+        )
       );
     } finally {
       setLoading(false);
@@ -299,8 +409,99 @@ export default function AturShiftPegawaiPage() {
   }, [id]);
 
   useEffect(() => {
-    loadData();
+    Promise.resolve().then(() => {
+      loadData();
+    });
   }, [loadData]);
+
+  const assignmentVerified =
+    verification.userLoaded &&
+    verification.shiftAssignmentKnown &&
+    verification.categoryAssignmentKnown;
+
+  const listsLoaded =
+    verification.shiftListLoaded && verification.categoryListLoaded;
+
+  const currentShift = resolveCurrentShift(
+    pegawai,
+    shiftList,
+    verification.shiftAssignmentKnown,
+    verification.shiftListLoaded
+  );
+
+  const currentCategory = resolveCurrentCategory(
+    pegawai,
+    jabatanList,
+    verification.categoryAssignmentKnown
+  );
+
+  const categoryOptions = [...jabatanList];
+
+  if (
+    currentCategory.id &&
+    !categoryOptions.some(
+      (x) => getId(x.id) === getId(currentCategory.id)
+    )
+  ) {
+    categoryOptions.unshift({
+      id: currentCategory.id,
+      nama:
+        getNamaJabatan(currentCategory.value) ||
+        "Kategori jabatan saat ini",
+    });
+  }
+
+  const shiftOptions = [...shiftList];
+
+  if (
+    currentShift.id &&
+    !shiftOptions.some(
+      (x) => getId(x.id) === getId(currentShift.id)
+    )
+  ) {
+    shiftOptions.unshift({
+      id: currentShift.id,
+      nama: currentShift.shift?.nama || "Shift saat ini",
+      jamMasuk: currentShift.shift?.jamMasuk ?? null,
+      jamKeluar: currentShift.shift?.jamKeluar ?? null,
+    });
+  }
+
+  const isSelectedShiftActive = Boolean(
+    form.shiftKerjaId &&
+      shiftList.some((x) => getId(x.id) === getId(form.shiftKerjaId))
+  );
+
+  const canSave =
+    Boolean(pegawai?.id) &&
+    assignmentVerified &&
+    listsLoaded &&
+    shiftList.length > 0 &&
+    isSelectedShiftActive &&
+    !loading &&
+    !saving;
+
+  let saveBlockedMessage = "";
+
+  if (!assignmentVerified) {
+    saveBlockedMessage =
+      "Penyimpanan dinonaktifkan karena data penugasan yang tersimpan belum dapat diverifikasi dari API. Memuat ulang halaman tidak akan mengubah data; hubungi administrator sistem jika masalah berlanjut.";
+  } else if (!verification.shiftListLoaded) {
+    saveBlockedMessage =
+      "Penyimpanan dinonaktifkan karena daftar shift aktif gagal dimuat. Muat ulang halaman.";
+  } else if (!verification.categoryListLoaded) {
+    saveBlockedMessage =
+      "Penyimpanan dinonaktifkan karena daftar kategori jabatan gagal dimuat. Muat ulang halaman.";
+  } else if (shiftList.length === 0) {
+    saveBlockedMessage =
+      "Penyimpanan dinonaktifkan karena belum ada shift aktif. Tambahkan shift aktif terlebih dahulu di Master Shift.";
+  } else if (!form.shiftKerjaId) {
+    saveBlockedMessage =
+      "Penyimpanan dinonaktifkan karena shift kerja belum dipilih. Pilih salah satu shift aktif.";
+  } else if (!isSelectedShiftActive) {
+    saveBlockedMessage =
+      "Penyimpanan dinonaktifkan karena shift yang dipilih tidak ada dalam daftar shift aktif. Pilih shift aktif untuk menyimpan penugasan.";
+  }
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -311,18 +512,34 @@ export default function AturShiftPegawaiPage() {
       return;
     }
 
+    if (!canSave) {
+      setError(
+        saveBlockedMessage ||
+          "Data yang diperlukan belum berhasil dimuat. Muat ulang halaman."
+      );
+      return;
+    }
+
     if (!form.shiftKerjaId) {
       setError("Silakan pilih shift kerja terlebih dahulu.");
       return;
     }
 
-    const selectedShift = shiftList.find(
-      (x) => getId(x.id) === getId(form.shiftKerjaId)
-    );
-
-    if (!selectedShift) {
+    if (!isSelectedShiftActive) {
       setError(
-        "Shift yang dipilih tidak ditemukan pada daftar shift aktif. Muat ulang halaman."
+        "Shift yang dipilih tidak ada dalam daftar shift aktif. Silakan pilih shift yang aktif sebelum menyimpan."
+      );
+      return;
+    }
+
+    if (
+      form.kategoriJabatanId &&
+      !categoryOptions.some(
+        (x) => getId(x.id) === getId(form.kategoriJabatanId)
+      )
+    ) {
+      setError(
+        "Kategori jabatan yang dipilih tidak ditemukan pada daftar kategori. Muat ulang halaman."
       );
       return;
     }
@@ -337,29 +554,26 @@ export default function AturShiftPegawaiPage() {
 
       if (form.kategoriJabatanId) {
         payload.kategoriJabatanId = form.kategoriJabatanId;
+      } else if (categoryTouched && verification.categoryAssignmentKnown) {
+        payload.kategoriJabatanId = null;
       }
 
       await assignUserShiftAndJabatan(payload);
 
-      saveCache(pegawai.id, {
-        shiftKerjaId: form.shiftKerjaId,
-        kategoriJabatanId:
-          form.kategoriJabatanId || cache?.kategoriJabatanId || "",
-      });
-
       try {
         sessionStorage.setItem(
           "penugasan-notice",
-          `Penugasan untuk ${pegawai.namaLengkap || "pegawai"} berhasil diperbarui.`
+          `Penugasan untuk ${pegawai.namaLengkap || "pegawai"} berhasil disimpan.`
         );
       } catch {}
 
       router.push("/admin/presensi/penugasan-shift");
     } catch (err) {
       setError(
-        err instanceof Error
-          ? err.message
-          : "Penugasan gagal disimpan. Silakan coba lagi."
+        getErrorMessage(
+          err,
+          "Penugasan gagal disimpan. Silakan coba lagi."
+        )
       );
     } finally {
       setSaving(false);
@@ -369,23 +583,6 @@ export default function AturShiftPegawaiPage() {
   function handleBack() {
     if (!saving) router.push("/admin/presensi/penugasan-shift");
   }
-
-  const currentShiftName = getNamaShift(pegawai, shiftList, cache);
-
-  const currentCategoryId =
-    pegawai?.kategoriJabatanId ??
-    pegawai?.kategoriJabatan?.id ??
-    cache?.kategoriJabatanId ??
-    "";
-
-  const currentCategory =
-    jabatanList.find(
-      (x) => getId(x.id) === getId(currentCategoryId)
-    ) ?? pegawai?.kategoriJabatan;
-
-  const selectedShift = shiftList.find(
-    (x) => getId(x.id) === getId(form.shiftKerjaId)
-  );
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
@@ -403,9 +600,6 @@ export default function AturShiftPegawaiPage() {
         <main className="min-w-0 flex-1 overflow-y-auto theme-page theme-text">
           <div className="w-full px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
             <div className="mx-auto w-full max-w-4xl space-y-6">
-              {/* ============================================
-                  PAGE HEADER
-              ============================================ */}
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div className="flex items-start gap-3">
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
@@ -439,9 +633,6 @@ export default function AturShiftPegawaiPage() {
                 </button>
               </div>
 
-              {/* ============================================
-                  ALERT ERROR
-              ============================================ */}
               {error && (
                 <div
                   role="alert"
@@ -463,9 +654,30 @@ export default function AturShiftPegawaiPage() {
                 </div>
               )}
 
-              {/* ============================================
-                  LOADING / NOT FOUND / FORM
-              ============================================ */}
+              {loadWarnings.length > 0 && (
+                <div
+                  role="status"
+                  className="flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-200"
+                >
+                  <AlertCircle size={19} className="mt-0.5 shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <p className="font-semibold">
+                      Data penugasan belum dapat diverifikasi sepenuhnya
+                    </p>
+                    <ul className="mt-1 list-disc space-y-1 pl-4 text-xs leading-5">
+                      {loadWarnings.map((warning) => (
+                        <li key={warning}>{warning}</li>
+                      ))}
+                    </ul>
+                    <p className="mt-2 text-xs leading-5">
+                      {canSave
+                        ? "Periksa kembali data penugasan sebelum menyimpan. Nilai yang tidak dapat dipastikan tidak diisi secara otomatis."
+                        : "Tombol Simpan dinonaktifkan selama data penting belum berhasil dimuat atau divalidasi. Muat ulang halaman setelah koneksi atau izin akses diperbaiki. Jika masalah berlanjut, laporkan kepada administrator sistem."}
+                    </p>
+                  </div>
+                </div>
+              )}
+
               {loading ? (
                 <div className="flex min-h-[300px] flex-col items-center justify-center gap-3 theme-card rounded-xl border theme-border">
                   <LoaderCircle
@@ -501,9 +713,6 @@ export default function AturShiftPegawaiPage() {
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-6">
-                  {/* ============================================
-                      KARTU PEGAWAI
-                  ============================================ */}
                   <section className="theme-card overflow-hidden rounded-xl border theme-border shadow-sm">
                     <div className="flex items-start gap-4 border-b theme-border p-5 sm:p-6">
                       <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
@@ -525,34 +734,88 @@ export default function AturShiftPegawaiPage() {
                         <p className="text-xs theme-text-muted">
                           Shift saat ini
                         </p>
-                        <p className="mt-2 text-sm font-semibold theme-text">
-                          {currentShiftName ||
-                            "Belum tersedia pada data pegawai"}
-                        </p>
-                        {selectedShift && (
-                          <p className="mt-1 flex items-center gap-1.5 text-xs theme-text-muted">
-                            <Clock3 size={12} />
-                            {formatJam(selectedShift.jamMasuk)} –{" "}
-                            {formatJam(selectedShift.jamKeluar)}
+                        {currentShift.status === "unknown" ? (
+                          <>
+                            <p className="mt-2 text-sm font-semibold theme-text">
+                              Data penugasan belum dapat diverifikasi
+                            </p>
+                            <p className="mt-1 text-xs leading-5 theme-text-muted">
+                              Response data pegawai belum memuat ID shift
+                              kerja. Status ini bukan berarti pegawai belum
+                              ditugaskan.
+                            </p>
+                          </>
+                        ) : currentShift.status === "none" ? (
+                          <p className="mt-2 text-sm font-semibold theme-text">
+                            Belum ditugaskan
                           </p>
+                        ) : currentShift.shift?.nama ? (
+                          <>
+                            <p className="mt-2 text-sm font-semibold theme-text">
+                              {currentShift.shift.nama}
+                            </p>
+                            {(currentShift.shift.jamMasuk ||
+                              currentShift.shift.jamKeluar) && (
+                              <p className="mt-1 flex items-center gap-1.5 text-xs theme-text-muted">
+                                <Clock3 size={12} />
+                                {formatJam(currentShift.shift.jamMasuk)} –{" "}
+                                {formatJam(currentShift.shift.jamKeluar)}
+                              </p>
+                            )}
+                            {currentShift.status === "unresolved" && (
+                              <p className="mt-1 text-xs text-amber-600 dark:text-amber-400">
+                                Shift ini tidak ditemukan pada daftar shift
+                                aktif.
+                              </p>
+                            )}
+                          </>
+                        ) : (
+                          <>
+                            <p className="mt-2 text-sm font-semibold theme-text">
+                              Shift saat ini tidak dapat ditampilkan
+                            </p>
+                            <p className="mt-1 break-all text-xs theme-text-muted">
+                              ID shift: {currentShift.id}
+                            </p>
+                          </>
                         )}
                       </div>
 
                       <div className="rounded-xl bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] border theme-border p-4">
                         <p className="text-xs theme-text-muted">
-                          Kategori jabatan
+                          Kategori jabatan saat ini
                         </p>
-                        <p className="mt-2 text-sm font-semibold theme-text">
-                          {getNamaJabatan(currentCategory) ||
-                            "Belum tersedia"}
-                        </p>
+                        {currentCategory.status === "unknown" ? (
+                          <>
+                            <p className="mt-2 text-sm font-semibold theme-text">
+                              Data penugasan belum dapat diverifikasi
+                            </p>
+                            <p className="mt-1 text-xs leading-5 theme-text-muted">
+                              Response data pegawai belum memuat ID kategori
+                              jabatan. Status ini bukan berarti kategori belum
+                              ditentukan.
+                            </p>
+                          </>
+                        ) : (
+                          <>
+                            <p className="mt-2 text-sm font-semibold theme-text">
+                              {getNamaJabatan(currentCategory.value) ||
+                                (currentCategory.id
+                                  ? `Kategori jabatan saat ini (ID: ${currentCategory.id})`
+                                  : "Belum ditentukan")}
+                            </p>
+                            {currentCategory.status === "unresolved" && (
+                              <p className="mt-1 text-xs text-amber-600 dark:text-amber-400">
+                                Kategori ini tidak ditemukan pada daftar
+                                kategori yang dimuat; nilainya dipertahankan.
+                              </p>
+                            )}
+                          </>
+                        )}
                       </div>
                     </div>
                   </section>
 
-                  {/* ============================================
-                      FORM PENUGASAN
-                  ============================================ */}
                   <section className="theme-card overflow-hidden rounded-xl border theme-border shadow-sm">
                     <div className="flex items-start gap-3 border-b theme-border p-5 sm:p-6">
                       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
@@ -572,7 +835,13 @@ export default function AturShiftPegawaiPage() {
                       <Field
                         label="Shift Kerja"
                         required
-                        hint="Pilih shift aktif yang digunakan pada presensi pegawai."
+                        hint={
+                          !verification.shiftAssignmentKnown
+                            ? "Shift yang sedang terpasang belum dapat diverifikasi dari API. Pilihan dan penyimpanan dinonaktifkan."
+                            : !verification.shiftListLoaded
+                              ? "Daftar shift aktif gagal dimuat. Muat ulang halaman."
+                              : "Pilih shift aktif yang digunakan pada presensi pegawai."
+                        }
                       >
                         <select
                           required
@@ -584,50 +853,101 @@ export default function AturShiftPegawaiPage() {
                             }))
                           }
                           className={inputClass}
-                          disabled={saving}
+                          disabled={
+                            saving ||
+                            !verification.shiftAssignmentKnown ||
+                            !verification.shiftListLoaded
+                          }
                         >
                           <option value="">Pilih shift kerja</option>
-                          {shiftList.map((shift) => (
-                            <option key={shift.id} value={getId(shift.id)}>
-                              {shift.nama} ({formatJam(shift.jamMasuk)}–
-                              {formatJam(shift.jamKeluar)})
-                            </option>
-                          ))}
+                          {shiftOptions.map((shift) => {
+                            const isActive = shiftList.some(
+                              (x) => getId(x.id) === getId(shift.id)
+                            );
+
+                            return (
+                              <option
+                                key={shift.id}
+                                value={getId(shift.id)}
+                              >
+                                {shift.nama} (
+                                {formatJam(shift.jamMasuk)}–
+                                {formatJam(shift.jamKeluar)})
+                                {isActive
+                                  ? ""
+                                  : " — tidak ada di daftar shift aktif"}
+                              </option>
+                            );
+                          })}
                         </select>
-                        {shiftList.length === 0 && (
-                          <span className="block text-xs text-amber-600 dark:text-amber-400">
-                            Tidak ada shift aktif. Periksa data master shift.
-                          </span>
-                        )}
+                        {form.shiftKerjaId &&
+                          verification.shiftListLoaded &&
+                          !isSelectedShiftActive && (
+                            <span className="mt-1.5 flex items-start gap-1.5 rounded-lg border border-amber-200 bg-amber-50/70 px-3 py-2 text-xs leading-5 text-amber-700 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-300">
+                              <AlertCircle size={14} className="mt-0.5 shrink-0" />
+                              Shift yang saat ini dipilih tidak ada dalam daftar shift aktif. Silakan pilih shift yang aktif untuk dapat menyimpan penugasan.
+                            </span>
+                          )}
+                        {verification.shiftListLoaded &&
+                          shiftList.length === 0 && (
+                            <span className="block text-xs text-amber-600 dark:text-amber-400">
+                              Tidak ada shift aktif. Periksa data master
+                              shift.
+                            </span>
+                          )}
                       </Field>
 
                       <Field
                         label="Kategori Jabatan"
-                        hint="Kosongkan jika kategori jabatan sebelumnya tidak ingin diubah."
+                        hint={
+                          !verification.categoryAssignmentKnown
+                            ? "Kategori jabatan yang sedang terpasang belum dapat diverifikasi dari API. Pilihan dan penyimpanan dinonaktifkan."
+                            : "Pilih kategori jabatan pegawai. Pilih opsi kosong hanya jika Anda benar-benar ingin menghapus kategori yang sedang terpasang."
+                        }
                       >
                         <select
                           value={form.kategoriJabatanId}
-                          onChange={(e) =>
+                          onChange={(e) => {
+                            setCategoryTouched(true);
                             setForm((prev) => ({
                               ...prev,
                               kategoriJabatanId: e.target.value,
-                            }))
-                          }
+                            }));
+                          }}
                           className={inputClass}
-                          disabled={saving}
+                          disabled={
+                            saving ||
+                            !verification.categoryAssignmentKnown ||
+                            !verification.categoryListLoaded
+                          }
                         >
                           <option value="">
-                            Tidak mengubah kategori jabatan
+                            {verification.categoryAssignmentKnown
+                              ? "Kosongkan kategori jabatan (hapus)"
+                              : "Data kategori belum dapat diverifikasi"}
                           </option>
-                          {jabatanList.map((jabatan) => (
+                          {categoryOptions.map((jabatan) => (
                             <option
                               key={jabatan.id}
                               value={getId(jabatan.id)}
                             >
-                              {getNamaJabatan(jabatan) || jabatan.id}
+                              {getNamaJabatan(jabatan) ||
+                                (getId(jabatan.id) === currentCategory.id
+                                  ? "Kategori jabatan saat ini"
+                                  : jabatan.id)}
                             </option>
                           ))}
                         </select>
+                        {verification.categoryAssignmentKnown &&
+                          currentCategory.id &&
+                          !form.kategoriJabatanId &&
+                          categoryTouched && (
+                            <span className="mt-1.5 flex items-start gap-1.5 rounded-lg border border-amber-200 bg-amber-50/70 px-3 py-2 text-xs leading-5 text-amber-700 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-300">
+                              <Info size={14} className="mt-0.5 shrink-0" />
+                              Kategori jabatan saat ini akan dihapus saat
+                              penugasan disimpan.
+                            </span>
+                          )}
                       </Field>
 
                       <div className="flex items-start gap-2 rounded-lg border border-blue-200 bg-blue-50/70 p-4 text-sm text-blue-900 dark:border-blue-900/60 dark:bg-blue-950/30 dark:text-blue-200">
@@ -640,30 +960,39 @@ export default function AturShiftPegawaiPage() {
                     </div>
                   </section>
 
-                  {/* ============================================
-                      ACTION BUTTONS
-                  ============================================ */}
-                  <div className="flex flex-col-reverse gap-3 border-t theme-border pt-5 sm:flex-row sm:justify-end">
-                    <button
-                      type="button"
-                      onClick={handleBack}
-                      disabled={saving}
-                      className={buttonSecondary}
-                    >
-                      Batal
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={saving || shiftList.length === 0}
-                      className={buttonPrimary}
-                    >
-                      {saving ? (
-                        <LoaderCircle size={17} className="animate-spin" />
-                      ) : (
-                        <Save size={17} />
-                      )}
-                      {saving ? "Menyimpan..." : "Simpan Penugasan"}
-                    </button>
+                  <div className="border-t theme-border pt-5">
+                    {!canSave && saveBlockedMessage && (
+                      <p className="mb-3 flex items-start gap-2 text-xs leading-5 text-amber-700 dark:text-amber-300">
+                        <AlertCircle size={15} className="mt-0.5 shrink-0" />
+                        <span>{saveBlockedMessage}</span>
+                      </p>
+                    )}
+
+                    <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                      <button
+                        type="button"
+                        onClick={handleBack}
+                        disabled={saving}
+                        className={buttonSecondary}
+                      >
+                        Batal
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={!canSave}
+                        title={
+                          !canSave ? saveBlockedMessage || undefined : undefined
+                        }
+                        className={buttonPrimary}
+                      >
+                        {saving ? (
+                          <LoaderCircle size={17} className="animate-spin" />
+                        ) : (
+                          <Save size={17} />
+                        )}
+                        {saving ? "Menyimpan..." : "Simpan Penugasan"}
+                      </button>
+                    </div>
                   </div>
                 </form>
               )}

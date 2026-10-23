@@ -171,7 +171,6 @@ export default function InvoicePage() {
 
         <main className="flex-1 overflow-y-auto theme-page">
           <div className="p-4 sm:p-6 lg:p-8 space-y-6">
-            {/* HEADER */}
             <div className="flex items-center justify-between gap-4 flex-wrap">
               <div className="flex items-center gap-3">
                 <div
@@ -226,7 +225,6 @@ export default function InvoicePage() {
 
             {!loading && !error && (
               <>
-                {/* SUMMARY */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                   <StatCard
                     title="Total Tagihan"
@@ -260,7 +258,6 @@ export default function InvoicePage() {
                   />
                 </div>
 
-                {/* LATEST INVOICE */}
                 {latestInvoice && (
                   <section className="theme-card rounded-xl border theme-border shadow-sm overflow-hidden">
                     <div className="p-5 sm:p-6">
@@ -351,7 +348,6 @@ export default function InvoicePage() {
                   </section>
                 )}
 
-                {/* FILTER */}
                 <section className="theme-card rounded-xl border theme-border shadow-sm p-4">
                   <div className="flex flex-col lg:flex-row gap-3">
                     <div className="relative flex-1">
@@ -381,7 +377,6 @@ export default function InvoicePage() {
                   </div>
                 </section>
 
-                {/* TABLE */}
                 <section className="theme-card rounded-xl border theme-border shadow-sm overflow-hidden">
                   <div className="overflow-x-auto">
                     <table className="w-full min-w-[950px] text-sm border-collapse">

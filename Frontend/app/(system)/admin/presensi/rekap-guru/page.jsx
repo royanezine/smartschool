@@ -20,8 +20,8 @@ import {
 
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
+import { getToken } from "@/lib/auth";
 
-// Mendukung NEXT_PUBLIC_API_URL dengan atau tanpa akhiran /api.
 const API_BASE = (
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
 )
@@ -37,23 +37,6 @@ function todayLocal() {
   const day = String(now.getDate()).padStart(2, "0");
 
   return `${year}-${month}-${day}`;
-}
-
-function getToken() {
-  if (typeof window === "undefined") return "";
-
-  for (const key of [
-    "token",
-    "accessToken",
-    "access_token",
-    "authToken",
-    "jwt",
-  ]) {
-    const value = window.localStorage.getItem(key);
-    if (value) return value;
-  }
-
-  return "";
 }
 
 async function apiRequest(path) {
@@ -96,7 +79,6 @@ async function apiRequest(path) {
   return body;
 }
 
-// Mengambil array dari format respons API yang umum digunakan.
 function unwrapList(response) {
   if (Array.isArray(response)) return response;
 
@@ -118,7 +100,6 @@ function unwrapList(response) {
   return candidates.find(Array.isArray) || [];
 }
 
-// Backend monitoring guru mengembalikan ringkasan dan array data guru.
 function unwrapMonitoring(response) {
   let current = response;
 
@@ -238,7 +219,6 @@ function formatTime(value) {
 function formatDate(value) {
   if (!value) return "-";
 
-  // Hindari pergeseran tanggal akibat konversi UTC.
   const date = new Date(`${value}T00:00:00`);
 
   if (Number.isNaN(date.getTime())) return String(value);
@@ -434,9 +414,6 @@ export default function RekapGuruPage() {
           ]),
         );
 
-        // Jika BE mengirim ringkasan monitoring, gunakan data monitoring
-        // sebagai sumber utama, termasuk ketika jumlah guru adalah nol.
-        // Endpoint users hanya menjadi fallback bila ringkasan tidak tersedia.
         const hasMonitoringSummary =
           Number.isFinite(Number(monitoringPayload.totalGuru));
 
@@ -538,7 +515,11 @@ export default function RekapGuruPage() {
   );
 
   useEffect(() => {
-    loadData();
+    const timer = setTimeout(() => {
+      loadData();
+    }, 0);
+
+    return () => clearTimeout(timer);
   }, [loadData]);
 
   const filteredTeachers = useMemo(() => {
@@ -614,7 +595,6 @@ export default function RekapGuruPage() {
 
         <main className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain">
           <div className="mx-auto w-full max-w-[1600px] space-y-6 px-4 py-6 sm:px-6 lg:px-8">
-            {/* JUDUL */}
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <div className="mb-2 flex flex-wrap items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
@@ -650,7 +630,6 @@ export default function RekapGuruPage() {
               </button>
             </div>
 
-            {/* TANGGAL */}
             <div className="flex flex-col gap-3 rounded-xl border border-blue-100 bg-blue-50/70 p-4 sm:flex-row sm:items-center sm:justify-between dark:border-blue-900/60 dark:bg-blue-950/30">
               <div className="flex items-start gap-3">
                 <div className="mt-0.5 rounded-lg bg-white p-2 text-blue-700 dark:bg-slate-900 dark:text-blue-300">
@@ -688,7 +667,6 @@ export default function RekapGuruPage() {
               </div>
             </div>
 
-            {/* RINGKASAN */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
               <StatCard
                 icon={Users}
@@ -719,7 +697,6 @@ export default function RekapGuruPage() {
               />
             </div>
 
-            {/* INFORMASI */}
             <div className="flex items-start gap-3 rounded-xl border border-blue-100 bg-blue-50/70 p-4 dark:border-blue-900/60 dark:bg-blue-950/30">
               <CalendarDays
                 size={20}
@@ -740,7 +717,6 @@ export default function RekapGuruPage() {
               </div>
             </div>
 
-            {/* ERROR */}
             {error && (
               <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 dark:border-red-900/60 dark:bg-red-950/20">
                 <AlertCircle
@@ -768,7 +744,6 @@ export default function RekapGuruPage() {
               </div>
             )}
 
-            {/* TABEL */}
             <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
               <div className="border-b border-slate-200 p-5 dark:border-slate-800">
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -984,7 +959,6 @@ export default function RekapGuruPage() {
                     </table>
                   </div>
 
-                  {/* PAGINATION */}
                   <div className="flex flex-col gap-3 border-t border-slate-200 px-5 py-4 sm:flex-row sm:items-center sm:justify-between dark:border-slate-800">
                     <p className="text-sm text-slate-500 dark:text-slate-400">
                       Menampilkan{" "}
@@ -1046,7 +1020,6 @@ export default function RekapGuruPage() {
         </main>
       </div>
 
-      {/* MODAL DETAIL */}
       {selectedTeacher && (
         <div
           className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-slate-950/50 p-4 backdrop-blur-[2px]"

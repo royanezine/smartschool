@@ -50,9 +50,6 @@ export default function ForgotPinPage() {
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
-  /* =======================================================
-     STEP 1 — REQUEST OTP
-  ======================================================= */
 
   async function handleRequestOtp(event) {
     event.preventDefault();
@@ -87,9 +84,6 @@ export default function ForgotPinPage() {
     }
   }
 
-  /* =======================================================
-     STEP 2 — RESET PIN
-  ======================================================= */
 
   async function handleResetPin(event) {
     event.preventDefault();
@@ -139,9 +133,6 @@ export default function ForgotPinPage() {
     }
   }
 
-  /* =======================================================
-     NAVIGASI
-  ======================================================= */
 
   function goBack() {
     if (step === 2) {
@@ -153,14 +144,10 @@ export default function ForgotPinPage() {
     router.push("/login");
   }
 
-  /* =======================================================
-     RENDER
-  ======================================================= */
 
   return (
     <div className="relative flex min-h-screen items-center justify-center bg-white px-4 py-8">
       <div className="relative z-10 w-full max-w-sm overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        {/* Header — logo + badge */}
         <div className="flex flex-col items-center px-6 pt-8 pb-5 sm:px-8 sm:pt-9">
           <div className="relative flex h-24 w-24 items-center justify-center sm:h-28 sm:w-28">
             <Image
@@ -191,11 +178,7 @@ export default function ForgotPinPage() {
           </p>
         </div>
 
-        {/* Form */}
         <div className="px-6 pb-6 sm:px-8">
-          {/* ===============================================
-              STEP 1
-          =============================================== */}
           {step === 1 && (
             <form onSubmit={handleRequestOtp} className="space-y-4">
               <div>
@@ -258,12 +241,8 @@ export default function ForgotPinPage() {
             </form>
           )}
 
-          {/* ===============================================
-              STEP 2
-          =============================================== */}
           {step === 2 && (
             <form onSubmit={handleResetPin} className="space-y-4">
-              {/* Info akun */}
               <div className="flex items-center gap-2.5 rounded-lg border border-blue-100 bg-blue-50/60 px-3.5 py-2.5">
                 <Mail size={15} className="shrink-0 text-blue-600" />
                 <span className="text-[11px] text-slate-600">
@@ -283,7 +262,6 @@ export default function ForgotPinPage() {
                 </div>
               )}
 
-              {/* OTP */}
               <div>
                 <label
                   htmlFor="otp"
@@ -311,7 +289,6 @@ export default function ForgotPinPage() {
                 />
               </div>
 
-              {/* PIN Baru */}
               <div>
                 <div className="mb-1.5 flex items-center justify-between">
                   <label
@@ -353,7 +330,6 @@ export default function ForgotPinPage() {
                 </div>
               </div>
 
-              {/* Konfirmasi PIN */}
               <div>
                 <div className="mb-1.5 flex items-center justify-between">
                   <label
@@ -438,9 +414,6 @@ export default function ForgotPinPage() {
             </form>
           )}
 
-          {/* ===============================================
-              STEP 3 — SUKSES
-          =============================================== */}
           {step === 3 && (
             <div className="space-y-4">
               <div className="flex items-start gap-2.5 rounded-lg border border-emerald-100 bg-emerald-50 px-3.5 py-3">
@@ -464,7 +437,6 @@ export default function ForgotPinPage() {
           )}
         </div>
 
-        {/* Footer card */}
         <div className="border-t border-slate-100 px-6 py-4 sm:px-8">
           <div className="flex items-center justify-between gap-2">
             {step !== 3 ? (

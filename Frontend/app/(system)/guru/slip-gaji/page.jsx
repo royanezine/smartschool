@@ -212,8 +212,6 @@ export default function SlipGajiPage() {
     loadSlips();
   }, [loadSlips]);
 
-  // Tutup detail saat periode berubah agar tidak menampilkan
-  // slip dari periode sebelumnya.
   useEffect(() => {
     setSelected(null);
     setDetailOpen(false);
@@ -236,7 +234,6 @@ export default function SlipGajiPage() {
     });
   }, [slips, search]);
 
-  // Detail hanya muncul setelah pengguna menekan tombol Lihat.
   const selectedSlip = detailOpen ? selected : null;
 
   const totalGaji = filteredSlips.reduce(
@@ -306,7 +303,6 @@ export default function SlipGajiPage() {
 
         <main className="flex-1 overflow-y-auto print:overflow-visible">
           <div className="mx-auto max-w-[1500px] space-y-5 p-4 sm:p-6 lg:p-8 print:p-0">
-            {/* Header halaman */}
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between print:hidden">
               <div className="flex items-center gap-3">
                 <div className="theme-primary flex h-11 w-11 shrink-0 items-center justify-center rounded-xl">
@@ -335,7 +331,6 @@ export default function SlipGajiPage() {
               </button>
             </div>
 
-            {/* Notifikasi */}
             {(error || notice) && (
               <div
                 className={`print:hidden flex items-start gap-3 rounded-xl border p-4 ${
@@ -364,7 +359,6 @@ export default function SlipGajiPage() {
               </div>
             )}
 
-            {/* Filter periode */}
             <section className="theme-card rounded-2xl border p-4 shadow-sm sm:p-5 print:hidden">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                 <div>
@@ -421,7 +415,6 @@ export default function SlipGajiPage() {
               </div>
             </section>
 
-            {/* Statistik */}
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3 print:hidden">
               <StatCard
                 title="Total Gaji Periode"
@@ -448,7 +441,6 @@ export default function SlipGajiPage() {
               />
             </div>
 
-            {/* Riwayat slip */}
             <section className="theme-card overflow-hidden rounded-2xl border shadow-sm print:hidden">
               <div className="theme-border flex flex-col gap-2 border-b px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
                 <div>
@@ -606,7 +598,6 @@ export default function SlipGajiPage() {
               </div>
             </section>
 
-            {/* Detail slip yang dipilih */}
             {selectedSlip && (
               <section className="theme-card overflow-hidden rounded-2xl border shadow-sm print:overflow-visible print:rounded-none print:border-0 print:shadow-none">
                 <div className="theme-border flex flex-col gap-3 border-b p-5 sm:flex-row sm:items-start sm:justify-between sm:p-7">

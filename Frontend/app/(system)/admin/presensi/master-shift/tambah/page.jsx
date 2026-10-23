@@ -111,11 +111,6 @@ function validateForm(form) {
     return "Format jam keluar tidak valid.";
   }
 
-  /*
-   * Validasi ini mengikuti asumsi halaman bahwa shift harus
-   * selesai pada hari yang sama. Backend saat ini hanya
-   * memvalidasi format HH:mm, bukan urutan jam masuk/keluar.
-   */
   if (form.jamMasuk >= form.jamKeluar) {
     return "Jam keluar harus lebih besar dari jam masuk. Shift lintas tengah malam belum didukung halaman ini.";
   }
@@ -136,11 +131,6 @@ function validateForm(form) {
 }
 
 function getCreatedShiftId(response) {
-  /*
-   * Service createShiftKerja yang sudah dibahas melakukan
-   * unwrap terhadap properti data. Bentuk ini juga aman jika
-   * service mengembalikan respons mentah Backend.
-   */
   const candidates = [
     response?.id,
     response?.data?.id,
@@ -197,13 +187,6 @@ export default function TambahMasterShiftPage() {
     setSaving(true);
 
     try {
-      /*
-       * Field dan tipe data disesuaikan dengan
-       * createShiftKerjaSchema Backend.
-       *
-       * sekolahId tidak dikirim secara manual karena tenant
-       * ditentukan oleh middleware/controller Backend.
-       */
       const payload = {
         nama: form.nama.trim(),
         jamMasuk: form.jamMasuk,
@@ -220,12 +203,6 @@ export default function TambahMasterShiftPage() {
 
       const response = await createShiftKerja(payload);
 
-      /*
-       * createShiftKerja pada service saat ini melakukan
-       * unwrap respons. ID dipakai hanya jika tersedia.
-       * Respons sukses tidak perlu ditolak hanya karena
-       * service tidak mengembalikan ID secara langsung.
-       */
       const createdId = getCreatedShiftId(response);
 
       setSuccess(true);
@@ -236,10 +213,6 @@ export default function TambahMasterShiftPage() {
         return;
       }
 
-      /*
-       * Endpoint berhasil dipanggil. Kembali ke daftar
-       * agar data terbaru dimuat dari Backend.
-       */
       router.replace("/admin/presensi/master-shift");
       router.refresh();
     } catch (err) {
@@ -269,7 +242,6 @@ export default function TambahMasterShiftPage() {
               Kembali ke Master Shift
             </button>
 
-            {/* HEADER */}
             <div className="mb-7 flex items-start gap-4">
               <div className="theme-primary flex h-12 w-12 shrink-0 items-center justify-center rounded-xl">
                 <Clock3 size={21} />
@@ -292,7 +264,6 @@ export default function TambahMasterShiftPage() {
               </div>
             </div>
 
-            {/* ERROR */}
             {error && (
               <div
                 role="alert"
@@ -324,7 +295,6 @@ export default function TambahMasterShiftPage() {
               </div>
             )}
 
-            {/* SUCCESS */}
             {success && (
               <div
                 role="status"
@@ -349,7 +319,6 @@ export default function TambahMasterShiftPage() {
 
             <form onSubmit={handleSubmit}>
               <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_350px]">
-                {/* FORM */}
                 <section className="theme-card theme-border overflow-hidden rounded-xl border shadow-sm">
                   <div className="theme-card-soft theme-border flex items-center gap-3 border-b px-5 py-4 md:px-6">
                     <div className="theme-info flex h-9 w-9 items-center justify-center rounded-lg border">
@@ -368,7 +337,6 @@ export default function TambahMasterShiftPage() {
                   </div>
 
                   <div className="grid grid-cols-1 gap-5 p-5 md:grid-cols-2 md:p-6">
-                    {/* NAMA */}
                     <div className="md:col-span-2">
                       <FieldLabel required>Nama Shift</FieldLabel>
 
@@ -392,7 +360,6 @@ export default function TambahMasterShiftPage() {
                       </p>
                     </div>
 
-                    {/* KODE */}
                     <div>
                       <FieldLabel>Kode Shift</FieldLabel>
 
@@ -418,7 +385,6 @@ export default function TambahMasterShiftPage() {
                       </p>
                     </div>
 
-                    {/* STATUS */}
                     <div>
                       <FieldLabel required>Status Shift</FieldLabel>
 
@@ -436,7 +402,6 @@ export default function TambahMasterShiftPage() {
                       </select>
                     </div>
 
-                    {/* JAM MASUK */}
                     <div>
                       <FieldLabel required>Jam Masuk</FieldLabel>
 
@@ -453,7 +418,6 @@ export default function TambahMasterShiftPage() {
                       />
                     </div>
 
-                    {/* JAM KELUAR */}
                     <div>
                       <FieldLabel required>Jam Keluar</FieldLabel>
 
@@ -470,7 +434,6 @@ export default function TambahMasterShiftPage() {
                       />
                     </div>
 
-                    {/* TOLERANSI */}
                     <div className="md:col-span-2">
                       <FieldLabel required>
                         Toleransi Keterlambatan
@@ -505,7 +468,6 @@ export default function TambahMasterShiftPage() {
                     </div>
                   </div>
 
-                  {/* ACTIONS */}
                   <div className="theme-card-soft theme-border flex flex-col-reverse gap-3 border-t px-5 py-4 sm:flex-row sm:justify-end md:px-6">
                     <button
                       type="button"
@@ -539,7 +501,6 @@ export default function TambahMasterShiftPage() {
                   </div>
                 </section>
 
-                {/* PREVIEW */}
                 <aside className="space-y-5">
                   <section className="theme-card theme-border overflow-hidden rounded-xl border shadow-sm">
                     <div className="theme-card-soft theme-border border-b px-5 py-4">

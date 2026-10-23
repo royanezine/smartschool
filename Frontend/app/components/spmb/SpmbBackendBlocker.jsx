@@ -29,10 +29,6 @@ const themeCardShadow =
 const themeDivider =
   "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
 
-/**
- * Halaman state untuk modul SPMB yang membutuhkan endpoint Backend yang
- * belum tersedia. Komponen ini sengaja tidak menampilkan data contoh.
- */
 export default function SpmbBackendBlocker({
   title,
   description,
@@ -204,11 +200,17 @@ export default function SpmbBackendBlocker({
               <p className="theme-text-secondary text-xs leading-5">
                 Modul SPMB yang sudah terhubung ke
                 Backend: <strong>Jalur Pendaftaran</strong>{" "}
-                (GET/POST/PUT/DELETE /api/jalur-ppdb) dan{" "}
+                (GET/POST/PUT/DELETE /api/jalur-ppdb),{" "}
                 <strong>pendaftaran publik</strong>{" "}
-                (POST /api/ppdb/daftar, unggah berkas,
-                verifikasi). Gunakan menu Jalur
-                Pendaftaran untuk mengelola data jalur.
+                (POST /api/ppdb/daftar dan POST
+                /api/ppdb/:id/berkas), verifikasi{" "}
+                (PATCH /api/ppdb/:id/verifikasi), dan{" "}
+                <strong>pengaturan</strong> (GET/POST
+                /api/pengaturan). Endpoint baca daftar dan
+                detail pendaftar (GET /api/ppdb/pendaftar
+                serta GET /api/ppdb/pendaftar/:id) belum
+                tersedia, sehingga menu Data Pendaftaran
+                hanya menyediakan formulir pendaftaran.
               </p>
             </div>
           </div>

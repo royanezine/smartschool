@@ -29,12 +29,8 @@ import {
   Building2,
 } from "lucide-react";
 
-// Sesuaikan path dengan lokasi user.service.ts/js milikmu.
 import { getProfile, updateProfile } from "@/services/user.service";
 
-// ============================================================
-// THEME HELPERS
-// ============================================================
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -95,9 +91,6 @@ const themeDangerBorder =
 const themeFocus =
   "focus:outline-none focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-// ============================================================
-// UTILITIES
-// ============================================================
 
 const emptyProfile = {
   id: "",
@@ -204,11 +197,8 @@ function getStatusName(status) {
 function getAvatarUrl(avatar) {
   if (!avatar || typeof avatar !== "string") return null;
 
-  // URL absolut dapat digunakan langsung.
   if (/^https?:\/\//i.test(avatar)) return avatar;
 
-  // Path relatif dari BE memerlukan host API.
-  // NEXT_PUBLIC_API_URL harus sesuai dengan konfigurasi project.
   const baseUrl = (
     process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
   ).replace(/\/+$/, "");
@@ -216,9 +206,6 @@ function getAvatarUrl(avatar) {
   return `${baseUrl}/${avatar.replace(/^\/+/, "")}`;
 }
 
-// ============================================================
-// MAIN COMPONENT
-// ============================================================
 
 export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState("profile");
@@ -290,7 +277,6 @@ export default function ProfilePage() {
     setSaveSuccess(false);
 
     try {
-      // Hanya mengirim field yang didukung updateProfile di BE.
       const payload = {
         namaLengkap: form.namaLengkap.trim(),
         noTelepon: form.noTelepon.trim() || null,
@@ -308,8 +294,6 @@ export default function ProfilePage() {
         );
       }
 
-      // Response BE menjadi sumber data terbaru.
-      // Field yang tidak dikembalikan oleh updateProfile tetap dipertahankan.
       const updatedProfile = normalizeProfile({
         ...profile,
         ...response.data,
@@ -376,7 +360,6 @@ export default function ProfilePage() {
     <div className="theme-page theme-text min-h-full">
       <div className="w-full max-w-[1500px] mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
         <div className="space-y-6">
-          {/* PAGE HEADER */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-center gap-3">
               <div
@@ -471,7 +454,6 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          {/* NOTIFICATIONS */}
           {errorMessage && (
             <div
               role="alert"
@@ -516,7 +498,6 @@ export default function ProfilePage() {
             </div>
           )}
 
-          {/* STATS */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {stats.map((stat) => {
               const Icon = stat.icon;
@@ -556,7 +537,6 @@ export default function ProfilePage() {
             })}
           </div>
 
-          {/* PROFILE HEADER CARD */}
           <div
             className={`theme-card rounded-xl border theme-border ${themeCardShadow} p-4 sm:p-6`}
           >
@@ -673,7 +653,6 @@ export default function ProfilePage() {
             )}
           </div>
 
-          {/* TABS */}
           <div className="overflow-x-auto theme-card rounded-t-xl border theme-border border-b-0">
             <nav className="flex gap-0.5 min-w-max px-2">
               {tabs.map((tab) => {
@@ -712,7 +691,6 @@ export default function ProfilePage() {
             </nav>
           </div>
 
-          {/* TAB CONTENT */}
           <div
             className={`theme-card rounded-b-xl border theme-border ${themeCardShadow} p-4 sm:p-6`}
           >
@@ -732,7 +710,6 @@ export default function ProfilePage() {
             {activeTab === "sessions" && <SessionsTab />}
           </div>
 
-          {/* FOOTER */}
           <div
             className={`text-center text-xs theme-text-muted py-2 border-t ${themeDivider}`}
           >
@@ -744,9 +721,6 @@ export default function ProfilePage() {
   );
 }
 
-// ============================================================
-// PROFILE TAB
-// ============================================================
 
 function ProfileTab({
   profile,
@@ -934,9 +908,6 @@ function ProfileTab({
   );
 }
 
-// ============================================================
-// SECURITY TAB
-// ============================================================
 
 function SecurityTab() {
   return (
@@ -1032,9 +1003,6 @@ function SecurityTab() {
   );
 }
 
-// ============================================================
-// ACTIVITY TAB
-// ============================================================
 
 function ActivityTab() {
   return (
@@ -1072,9 +1040,6 @@ function ActivityTab() {
   );
 }
 
-// ============================================================
-// SESSIONS TAB
-// ============================================================
 
 function SessionsTab() {
   return (

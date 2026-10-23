@@ -24,9 +24,6 @@ import {
   getMonitoringKehadiranGuru,
 } from "@/services/absensi.service";
 
-/* =========================================================
-   HELPERS
-========================================================= */
 
 function formatTanggal(tanggal) {
   if (!tanggal) return "-";
@@ -78,9 +75,6 @@ const STATUS_CONFIG = {
   "Tidak Hadir": "theme-danger",
 };
 
-/* =========================================================
-   PAGE
-========================================================= */
 
 export default function DetailPresensiPage() {
   const params = useParams();
@@ -98,7 +92,6 @@ export default function DetailPresensiPage() {
     setError("");
 
     try {
-      // Workaround: Mencari data berdasarkan ID dari endpoint monitoring
       const today = new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Jakarta" });
       const guruRes = await getMonitoringKehadiranGuru(today);
       const guruData = Array.isArray(guruRes?.data) ? guruRes.data : [];
@@ -156,7 +149,6 @@ export default function DetailPresensiPage() {
         <main className="min-h-0 flex-1 overflow-y-auto">
           <div className="mx-auto w-full max-w-4xl space-y-6 p-4 sm:p-6 lg:p-8">
             
-            {/* TOMBOL KEMBALI */}
             <div>
               <button
                 type="button"
@@ -168,7 +160,6 @@ export default function DetailPresensiPage() {
               </button>
             </div>
 
-            {/* ERROR */}
             {error && (
               <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-red-700 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-300">
                 <AlertCircle size={19} className="mt-0.5 shrink-0" />
@@ -179,7 +170,6 @@ export default function DetailPresensiPage() {
               </div>
             )}
 
-            {/* KONTEN */}
             {loading ? (
               <div className="flex min-h-[300px] flex-col items-center justify-center gap-3 theme-card rounded-2xl border theme-border">
                 <Loader2 size={28} className="animate-spin text-[var(--color-primary)]" />
@@ -187,7 +177,6 @@ export default function DetailPresensiPage() {
               </div>
             ) : data ? (
               <div className="space-y-6">
-                {/* HEADER PROFIL */}
                 <section className="theme-card overflow-hidden rounded-2xl border shadow-sm">
                   <div className="theme-primary h-24 w-full opacity-20" />
                   <div className="px-6 pb-6 relative">
@@ -208,7 +197,6 @@ export default function DetailPresensiPage() {
                   </div>
                 </section>
 
-                {/* GRID INFORMASI */}
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div className="theme-card rounded-xl border p-4 shadow-sm">
                     <div className="flex items-center gap-3 mb-1">
@@ -259,7 +247,6 @@ export default function DetailPresensiPage() {
                   </div>
                 </div>
 
-                {/* LOKASI & KETERANGAN */}
                 <div className="theme-card rounded-xl border p-5 shadow-sm space-y-4">
                   <div>
                     <div className="flex items-center gap-3 mb-2">

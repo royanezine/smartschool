@@ -24,15 +24,9 @@ import {
   downloadRekapNilai,
 } from "@/services/nilai.service";
 
-/* =========================================================
-   CONFIG
-========================================================= */
 
 const MATA_PELAJARAN = "Matematika";
 
-/* =========================================================
-   MODULE UI
-========================================================= */
 
 const subHalaman = [
   {
@@ -87,9 +81,6 @@ const subHalaman = [
   },
 ];
 
-/* =========================================================
-   THEME HELPERS
-========================================================= */
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -148,9 +139,6 @@ const themeDangerSurface =
 const themeDangerBorder =
   "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
 
-/* =========================================================
-   COLOR CONFIG
-========================================================= */
 
 const colorConfig = {
   blue: {
@@ -172,9 +160,6 @@ const colorConfig = {
   },
 };
 
-/* =========================================================
-   PAGE
-========================================================= */
 
 export default function GuruNilaiIndexPage() {
   const router = useRouter();
@@ -198,9 +183,6 @@ export default function GuruNilaiIndexPage() {
     },
   ];
 
-  /* =======================================================
-     EXPORT REKAP NILAI
-  ======================================================= */
 
   const handleExportNilai = async () => {
     try {
@@ -233,9 +215,6 @@ export default function GuruNilaiIndexPage() {
   return (
     <div className="flex h-screen overflow-hidden theme-page">
 
-      {/* =====================================================
-          SIDEBAR GURU
-      ====================================================== */}
 
       <Sidebar
         active="nilai"
@@ -246,9 +225,6 @@ export default function GuruNilaiIndexPage() {
         }
       />
 
-      {/* =====================================================
-          MAIN
-      ====================================================== */}
 
       <div className="flex min-w-0 flex-1 flex-col theme-page">
 
@@ -270,9 +246,6 @@ export default function GuruNilaiIndexPage() {
 
             <div className="space-y-6">
 
-              {/* =================================================
-                  HERO
-              ================================================== */}
 
               <section
                 className={`
@@ -283,7 +256,6 @@ export default function GuruNilaiIndexPage() {
                 `}
               >
 
-                {/* Decorative surfaces */}
 
                 <div
                   className="
@@ -309,7 +281,6 @@ export default function GuruNilaiIndexPage() {
 
                   <div className="flex flex-col gap-7 lg:flex-row lg:items-center lg:justify-between">
 
-                    {/* LEFT */}
 
                     <div className="min-w-0">
 
@@ -436,11 +407,9 @@ export default function GuruNilaiIndexPage() {
 
                     </div>
 
-                    {/* RIGHT */}
 
                     <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:w-[430px]">
 
-                      {/* REKAP */}
 
                       <div
                         className="
@@ -483,7 +452,6 @@ export default function GuruNilaiIndexPage() {
 
                       </div>
 
-                      {/* SUMBER */}
 
                       <div
                         className="
@@ -526,7 +494,6 @@ export default function GuruNilaiIndexPage() {
 
                       </div>
 
-                      {/* MODUL */}
 
                       <div
                         className="
@@ -578,9 +545,6 @@ export default function GuruNilaiIndexPage() {
 
               </section>
 
-              {/* =================================================
-                  SUCCESS
-              ================================================== */}
 
               {exportSuccess && (
                 <div
@@ -613,9 +577,6 @@ export default function GuruNilaiIndexPage() {
                 </div>
               )}
 
-              {/* =================================================
-                  ERROR
-              ================================================== */}
 
               {exportError && (
                 <div
@@ -656,9 +617,6 @@ export default function GuruNilaiIndexPage() {
                 </div>
               )}
 
-              {/* =================================================
-                  MENU PENILAIAN
-              ================================================== */}
 
               <section>
 
@@ -824,9 +782,6 @@ export default function GuruNilaiIndexPage() {
 
               </section>
 
-              {/* =================================================
-                  BACKEND STATUS
-              ================================================== */}
 
               <section
                 className={`
@@ -877,7 +832,6 @@ export default function GuruNilaiIndexPage() {
 
                 <div className="grid gap-4 p-5 sm:p-6 md:grid-cols-2">
 
-                  {/* EXPORT */}
 
                   <div
                     className={`
@@ -943,7 +897,6 @@ export default function GuruNilaiIndexPage() {
 
                   </div>
 
-                  {/* ENDPOINT */}
 
                   <div
                     className={`
@@ -1005,9 +958,6 @@ export default function GuruNilaiIndexPage() {
 
               </section>
 
-              {/* =================================================
-                  EXPORT CARD
-              ================================================== */}
 
               <section
                 className={`
@@ -1106,9 +1056,6 @@ export default function GuruNilaiIndexPage() {
 
               </section>
 
-              {/* =================================================
-                  FOOTER
-              ================================================== */}
 
               <div
                 className={`

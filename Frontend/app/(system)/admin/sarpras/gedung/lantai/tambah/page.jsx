@@ -20,9 +20,6 @@ import {
   createLantai,
 } from "@/services/infrastruktur.service";
 
-// ============================================================
-// THEME HELPERS
-// ============================================================
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -57,9 +54,6 @@ const themePrimaryGradientHover =
 const themeSoftSurface =
   "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
 
-// ============================================================
-// COMPONENT
-// ============================================================
 
 export default function TambahLantaiPage() {
   const router = useRouter();
@@ -76,9 +70,6 @@ export default function TambahLantaiPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  // ============================================================
-  // LOAD GEDUNG
-  // ============================================================
 
   useEffect(() => {
     loadGedung();
@@ -109,9 +100,6 @@ export default function TambahLantaiPage() {
     }
   }
 
-  // ============================================================
-  // HANDLE CHANGE
-  // ============================================================
 
   function handleChange(e) {
     const { name, value } = e.target;
@@ -124,9 +112,6 @@ export default function TambahLantaiPage() {
     setError("");
   }
 
-  // ============================================================
-  // SUBMIT
-  // ============================================================
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -174,15 +159,9 @@ export default function TambahLantaiPage() {
     }
   }
 
-  // ============================================================
-  // RENDER
-  // ============================================================
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
-      {/* ======================================================
-          SIDEBAR
-      ====================================================== */}
 
       <Sidebar
         active="sarpras"
@@ -192,9 +171,6 @@ export default function TambahLantaiPage() {
       />
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        {/* ====================================================
-            HEADER
-        ==================================================== */}
 
         <Header
           toggleSidebar={() => {}}
@@ -206,17 +182,11 @@ export default function TambahLantaiPage() {
           }}
         />
 
-        {/* ====================================================
-            MAIN
-        ==================================================== */}
 
         <main className="theme-page min-h-0 flex-1 overflow-y-auto">
           <div className="w-full p-4 sm:p-6 lg:p-8">
             <div className="mx-auto w-full max-w-4xl space-y-6">
 
-              {/* =================================================
-                  HEADER SECTION
-              ================================================= */}
 
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
@@ -242,9 +212,6 @@ export default function TambahLantaiPage() {
                 </div>
               </div>
 
-              {/* =================================================
-                  ERROR
-              ================================================= */}
 
               {error && (
                 <div
@@ -283,9 +250,6 @@ export default function TambahLantaiPage() {
                 </div>
               )}
 
-              {/* =================================================
-                  SUCCESS
-              ================================================= */}
 
               {success && (
                 <div
@@ -324,9 +288,6 @@ export default function TambahLantaiPage() {
                 </div>
               )}
 
-              {/* =================================================
-                  FORM
-              ================================================= */}
 
               <form onSubmit={handleSubmit}>
                 <div
@@ -338,9 +299,6 @@ export default function TambahLantaiPage() {
                     ${themeCardShadow}
                   `}
                 >
-                  {/* =================================================
-                      FORM HEADER
-                  ================================================= */}
 
                   <div
                     className="
@@ -376,15 +334,9 @@ export default function TambahLantaiPage() {
                     </div>
                   </div>
 
-                  {/* =================================================
-                      FORM BODY
-                  ================================================= */}
 
                   <div className="grid gap-6 p-6 sm:p-8 md:grid-cols-2">
 
-                    {/* =================================================
-                        GEDUNG
-                    ================================================= */}
 
                     <div>
                       <label className="theme-text-secondary mb-2 block text-sm font-semibold">
@@ -448,7 +400,6 @@ export default function TambahLantaiPage() {
                           ))}
                         </select>
 
-                        {/* CUSTOM ARROW */}
 
                         <div
                           className="
@@ -489,9 +440,6 @@ export default function TambahLantaiPage() {
                         )}
                     </div>
 
-                    {/* =================================================
-                        NAMA LANTAI
-                    ================================================= */}
 
                     <div>
                       <label className="theme-text-secondary mb-2 block text-sm font-semibold">
@@ -545,9 +493,6 @@ export default function TambahLantaiPage() {
                     </div>
                   </div>
 
-                  {/* =================================================
-                      FORM FOOTER
-                  ================================================= */}
 
                   <div
                     className="
@@ -560,7 +505,6 @@ export default function TambahLantaiPage() {
                       sm:px-8
                     "
                   >
-                    {/* BATAL */}
 
                     <button
                       type="button"
@@ -593,7 +537,6 @@ export default function TambahLantaiPage() {
                       Batal
                     </button>
 
-                    {/* SIMPAN */}
 
                     <button
                       type="submit"

@@ -1,18 +1,8 @@
 import { apiFetch } from "@/lib/api";
 
-/* =========================================================
-   TARIF TAGIHAN SERVICE
-   Base backend : /api/keuangan  (Backend/src/routes/tarif.routes.ts)
-   Auth         : Bearer token (dilampirkan oleh lib/api)
-   Role         : admin_sekolah, bendahara, kepala_sekolah (read)
-                  admin_sekolah, bendahara (write)
-========================================================= */
 
 const BASE_PATH = "/api/keuangan";
 
-/* =========================================================
-   TYPES
-========================================================= */
 
 export type SiklusTagihan = "bulanan" | "tahunan" | "sekali";
 
@@ -127,9 +117,6 @@ export interface UpdateTarifPayload {
   status?: StatusAktif;
 }
 
-/* =========================================================
-   HELPERS
-========================================================= */
 
 function buildQuery(
   params: Record<string, string | number | undefined>
@@ -147,10 +134,6 @@ function buildQuery(
   return query ? `?${query}` : "";
 }
 
-/* =========================================================
-   KATEGORI TAGIHAN
-   GET /api/keuangan/kategori-tagihan
-========================================================= */
 
 export async function getKategoriTagihan(
   params: KategoriQuery = {}
@@ -167,9 +150,6 @@ export async function getKategoriTagihan(
   });
 }
 
-/* =========================================================
-   POST /api/keuangan/kategori-tagihan
-========================================================= */
 
 export async function createKategoriTagihan(
   payload: CreateKategoriPayload
@@ -193,9 +173,6 @@ export async function createKategoriTagihan(
   });
 }
 
-/* =========================================================
-   PUT /api/keuangan/kategori-tagihan/:id
-========================================================= */
 
 export async function updateKategoriTagihan(
   id: string,
@@ -224,9 +201,6 @@ export async function updateKategoriTagihan(
   );
 }
 
-/* =========================================================
-   DELETE /api/keuangan/kategori-tagihan/:id
-========================================================= */
 
 export async function deleteKategoriTagihan(id: string) {
   if (!id) {
@@ -241,10 +215,6 @@ export async function deleteKategoriTagihan(id: string) {
   );
 }
 
-/* =========================================================
-   TARIF
-   GET /api/keuangan/tarif
-========================================================= */
 
 export async function getTarif(
   params: TarifQuery = {}
@@ -264,9 +234,6 @@ export async function getTarif(
   });
 }
 
-/* =========================================================
-   POST /api/keuangan/tarif
-========================================================= */
 
 export async function createTarif(
   payload: CreateTarifPayload
@@ -299,9 +266,6 @@ export async function createTarif(
   });
 }
 
-/* =========================================================
-   PUT /api/keuangan/tarif/:id
-========================================================= */
 
 export async function updateTarif(
   id: string,
@@ -335,9 +299,6 @@ export async function updateTarif(
   });
 }
 
-/* =========================================================
-   DELETE /api/keuangan/tarif/:id
-========================================================= */
 
 export async function deleteTarif(id: string) {
   if (!id) {

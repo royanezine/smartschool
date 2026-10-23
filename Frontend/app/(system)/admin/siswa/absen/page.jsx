@@ -33,9 +33,6 @@ import {
 import { getAbsensiKelas } from "@/services/absensi.service";
 import { getKelas } from "@/services/kelas.service";
 
-/* =========================================================
-   API CONFIG
-========================================================= */
 
 const RAW_API_URL =
   process.env.NEXT_PUBLIC_API_URL ||
@@ -47,9 +44,6 @@ const API_BASE = API_URL.endsWith("/api")
   ? API_URL
   : `${API_URL}/api`;
 
-/* =========================================================
-   BACKEND HELPERS
-========================================================= */
 
 function normalizeArray(response) {
   if (Array.isArray(response)) return response;
@@ -283,9 +277,6 @@ function mapAbsensi(item, kelas) {
   };
 }
 
-/* =========================================================
-   UI HELPERS
-========================================================= */
 
 const STATUS_OPTIONS = [
   "Semua Status",
@@ -377,9 +368,6 @@ function StatCard({
   );
 }
 
-/* =========================================================
-   EXPORT HELPERS
-========================================================= */
 
 function getFileNameFromResponse(
   response,
@@ -492,7 +480,6 @@ async function downloadExcel({
           message;
       }
     } catch {
-      // Abaikan error parsing.
     }
 
     throw new Error(message);
@@ -537,9 +524,6 @@ async function downloadExcel({
   window.URL.revokeObjectURL(blobUrl);
 }
 
-/* =========================================================
-   MAIN PAGE
-========================================================= */
 
 export default function AbsenSiswaPage() {
   const router = useRouter();
@@ -599,9 +583,6 @@ export default function AbsenSiswaPage() {
     setTanggalFilter,
   ] = useState("");
 
-  /* =========================================================
-     LOAD DATA
-  ========================================================= */
 
   const loadData =
     useCallback(async () => {
@@ -690,9 +671,6 @@ export default function AbsenSiswaPage() {
     loadData();
   }, [loadData]);
 
-  /* =========================================================
-     KELAS OPTIONS
-  ========================================================= */
 
   const kelasOptions =
     useMemo(() => {
@@ -737,9 +715,6 @@ export default function AbsenSiswaPage() {
       kelasFilter,
     ]);
 
-  /* =========================================================
-     FILTER DATA
-  ========================================================= */
 
   const filteredAbsensi =
     useMemo(() => {
@@ -812,9 +787,6 @@ export default function AbsenSiswaPage() {
       tanggalFilter,
     ]);
 
-  /* =========================================================
-     STATISTICS
-  ========================================================= */
 
   const totalSiswa =
     filteredAbsensi.length;
@@ -862,9 +834,6 @@ export default function AbsenSiswaPage() {
         )
       : 0;
 
-  /* =========================================================
-     DETAIL — PINDAH HALAMAN
-  ========================================================= */
 
   const handleDetail =
     (item) => {
@@ -890,9 +859,6 @@ export default function AbsenSiswaPage() {
       );
     };
 
-  /* =========================================================
-     RESET FILTER
-  ========================================================= */
 
   const resetFilter =
     () => {
@@ -911,9 +877,6 @@ export default function AbsenSiswaPage() {
       setExportError("");
     };
 
-  /* =========================================================
-     EXPORT EXCEL
-  ========================================================= */
 
   const handleExport =
     async () => {
@@ -946,13 +909,9 @@ export default function AbsenSiswaPage() {
       }
     };
 
-  /* =========================================================
-     RENDER
-  ========================================================= */
 
   return (
     <div className="flex h-screen w-full theme-page overflow-hidden">
-      {/* SIDEBAR */}
 
       <Sidebar
         active="siswaAbsen"
@@ -981,7 +940,6 @@ export default function AbsenSiswaPage() {
         <main className="flex-1 overflow-y-auto">
           <div className="p-4 sm:p-6 lg:p-8 space-y-6">
 
-            {/* PAGE HEADER */}
 
             <div className="flex items-center justify-between gap-3 flex-wrap">
               <div className="flex items-center gap-3">
@@ -1006,7 +964,6 @@ export default function AbsenSiswaPage() {
 
               <div className="flex items-center gap-2 flex-wrap">
 
-                {/* EXPORT */}
 
                 <button
                   type="button"
@@ -1078,7 +1035,6 @@ export default function AbsenSiswaPage() {
               </div>
             </div>
 
-            {/* EXPORT ERROR */}
 
             {exportError && (
               <div className="flex items-start gap-3 rounded-xl border theme-border theme-danger p-4">
@@ -1099,7 +1055,6 @@ export default function AbsenSiswaPage() {
               </div>
             )}
 
-            {/* ERROR */}
 
             {error && (
               <div className="flex items-start gap-3 rounded-xl border theme-border theme-danger p-4">
@@ -1121,7 +1076,6 @@ export default function AbsenSiswaPage() {
               </div>
             )}
 
-            {/* STATISTICS */}
 
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
               <StatCard
@@ -1185,7 +1139,6 @@ export default function AbsenSiswaPage() {
               />
             </div>
 
-            {/* SUMMARY */}
 
             <div className="theme-card rounded-xl border theme-border p-4 shadow-sm">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -1233,7 +1186,6 @@ export default function AbsenSiswaPage() {
               </div>
             </div>
 
-            {/* FILTER */}
 
             <div className="theme-card rounded-xl border theme-border p-4 shadow-sm flex flex-col lg:flex-row gap-3">
 
@@ -1383,7 +1335,6 @@ export default function AbsenSiswaPage() {
               </div>
             </div>
 
-            {/* TABLE */}
 
             <div className="theme-card rounded-xl border theme-border shadow-sm overflow-hidden">
               <div className="overflow-x-auto">
@@ -1660,7 +1611,6 @@ export default function AbsenSiswaPage() {
                 </table>
               </div>
 
-              {/* TABLE FOOTER */}
 
               <div className="px-4 py-3 border-t theme-border theme-card-soft flex items-center justify-between">
                 <p className="text-xs theme-text-muted">

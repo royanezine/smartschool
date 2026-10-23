@@ -1,4 +1,3 @@
-// app/cmsAdmin/components/PageTable.jsx
 
 "use client";
 
@@ -28,7 +27,6 @@ const PageTable = ({ pages: initialPages }) => {
 
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-      {/* Table untuk desktop & tablet */}
       <div className="hidden sm:block overflow-x-auto">
         <table className="w-full">
           <thead>
@@ -56,7 +54,6 @@ const PageTable = ({ pages: initialPages }) => {
                 key={page.id}
                 className="group transition-all duration-200 hover:bg-blue-50/40"
               >
-                {/* Judul */}
                 <td className="px-5 py-4">
                   <div className="flex items-center gap-3">
                     <div className="flex-shrink-0 w-9 h-9 rounded-xl bg-gradient-to-br from-purple-100 to-purple-200 flex items-center justify-center text-purple-700 font-semibold text-xs">
@@ -79,12 +76,10 @@ const PageTable = ({ pages: initialPages }) => {
                   </div>
                 </td>
 
-                {/* Slug - Desktop */}
                 <td className="px-5 py-4 hidden sm:table-cell">
                   <span className="text-sm text-gray-500 font-mono">/{page.slug}</span>
                 </td>
 
-                {/* Homepage - Desktop */}
                 <td className="px-5 py-4 hidden md:table-cell">
                   {page.is_homepage ? (
                     <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700">
@@ -96,7 +91,6 @@ const PageTable = ({ pages: initialPages }) => {
                   )}
                 </td>
 
-                {/* Tanggal - Desktop */}
                 <td className="px-5 py-4 hidden lg:table-cell">
                   <div className="flex items-center gap-1.5 text-xs text-gray-500">
                     <Calendar className="w-3.5 h-3.5 text-gray-400" />
@@ -108,7 +102,6 @@ const PageTable = ({ pages: initialPages }) => {
                   </div>
                 </td>
 
-                {/* Aksi */}
                 <td className="px-5 py-4 text-right">
                   <div className="flex items-center justify-end gap-1">
                     <Link
@@ -133,7 +126,6 @@ const PageTable = ({ pages: initialPages }) => {
         </table>
       </div>
 
-      {/* Mobile: Card View */}
       <div className="sm:hidden divide-y divide-gray-100">
         {pages.map((page) => (
           <div key={page.id} className="px-4 py-4 hover:bg-purple-50/40 transition-colors">
@@ -176,7 +168,6 @@ const PageTable = ({ pages: initialPages }) => {
         ))}
       </div>
 
-      {/* Footer */}
       <div className="px-5 py-3 bg-gray-50/50 border-t border-gray-100 flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-4 text-xs text-gray-400">
           <span>Total <span className="font-medium text-gray-600">{pages.length}</span> halaman</span>

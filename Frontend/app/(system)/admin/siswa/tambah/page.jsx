@@ -73,20 +73,12 @@ function extractRows(response) {
   return candidates.find(Array.isArray) ?? [];
 }
 
-/* ============================================================
-   STYLE CONSTANTS — didefinisikan di LUAR komponen
-   ============================================================ */
 
 const inputClass =
   "w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-100";
 
 const labelClass = "block text-sm font-medium text-slate-700 mb-1.5";
 
-/* ============================================================
-   FIELD COMPONENTS — didefinisikan di LUAR komponen utama
-   Inilah kunci perbaikan: kalau di dalam, React akan
-   unmount-remount tiap ketik, sehingga input tidak bisa diketik.
-   ============================================================ */
 
 function Field({
   label,
@@ -181,9 +173,6 @@ function Section({ icon: Icon, title, description, children }) {
   );
 }
 
-/* ============================================================
-   PAGE
-   ============================================================ */
 
 export default function TambahSiswaPage() {
   const router = useRouter();
@@ -363,7 +352,6 @@ export default function TambahSiswaPage() {
 
         <main className="min-w-0 flex-1 overflow-y-auto">
           <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
-            {/* BACK */}
             <button
               type="button"
               onClick={() => router.push("/admin/siswa")}
@@ -373,7 +361,6 @@ export default function TambahSiswaPage() {
               Kembali ke Data Siswa
             </button>
 
-            {/* HEADER */}
             <div className="mb-6">
               <h1 className="text-2xl font-bold tracking-tight text-slate-900">
                 Tambah Siswa
@@ -384,7 +371,6 @@ export default function TambahSiswaPage() {
               </p>
             </div>
 
-            {/* ALERTS */}
             {error && (
               <div
                 role="alert"
@@ -405,7 +391,6 @@ export default function TambahSiswaPage() {
               </div>
             )}
 
-            {/* INFO BANNER */}
             <div className="mb-6 flex items-start gap-3 rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900">
               <Info size={20} className="mt-0.5 shrink-0" />
               <div>
@@ -421,7 +406,6 @@ export default function TambahSiswaPage() {
               </div>
             </div>
 
-            {/* FORM */}
             <form onSubmit={handleSubmit} className="space-y-6">
               <Section
                 icon={UserRound}

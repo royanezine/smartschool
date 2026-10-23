@@ -23,9 +23,6 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 
-// =============================================================
-// THEME HELPERS
-// =============================================================
 const themeCardShadow =
     "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
 
@@ -77,30 +74,18 @@ const themeDangerSurface =
 const themeDangerBorder =
     "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
 
-// =============================================================
-// DETAIL YAYASAN
-// =============================================================
 export default function DetailYayasanPage() {
     const params = useParams();
     const router = useRouter();
 
-    // =========================================================
-    // ID DARI URL
-    // =========================================================
     const id = Array.isArray(params?.id)
         ? params.id[0]
         : params?.id;
 
-    // =========================================================
-    // STATE
-    // =========================================================
     const [yayasan, setYayasan] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
-    // =========================================================
-    // LOAD DETAIL YAYASAN
-    // =========================================================
     useEffect(() => {
         if (!id) {
             setError("ID yayasan tidak ditemukan.");
@@ -127,9 +112,6 @@ export default function DetailYayasanPage() {
                     );
                 }
 
-                // =================================================
-                // REQUEST KE BACKEND
-                // =================================================
                 const response = await fetch(
                     `${API_URL}/api/yayasan/${id}`,
                     {
@@ -173,9 +155,6 @@ export default function DetailYayasanPage() {
 
                 if (cancelled) return;
 
-                // =================================================
-                // UNWRAP RESPONSE
-                // =================================================
                 const data = unwrapResponse(result);
 
                 console.log(
@@ -183,9 +162,6 @@ export default function DetailYayasanPage() {
                     data
                 );
 
-                // =================================================
-                // CARI OBJECT YAYASAN
-                // =================================================
                 const rawYayasan =
                     data?.yayasan ||
                     data?.profil ||
@@ -202,9 +178,6 @@ export default function DetailYayasanPage() {
                     );
                 }
 
-                // =================================================
-                // STATISTIK
-                // =================================================
                 const statistik =
                     data?.statistik ||
                     data?.statistics ||
@@ -212,9 +185,6 @@ export default function DetailYayasanPage() {
                     rawYayasan?.statistics ||
                     {};
 
-                // =================================================
-                // DAFTAR SEKOLAH
-                // =================================================
                 const rawSekolah =
                     rawYayasan?.sekolah ||
                     rawYayasan?.sekolahs ||
@@ -228,9 +198,6 @@ export default function DetailYayasanPage() {
                         ? rawSekolah
                         : [];
 
-                // =================================================
-                // NORMALIZE DATA
-                // =================================================
                 const normalized = {
                     id:
                         rawYayasan?.id ||
@@ -313,9 +280,6 @@ export default function DetailYayasanPage() {
                         rawYayasan?.tanggalDaftar ||
                         null,
 
-                    // =================================================
-                    // JUMLAH SEKOLAH
-                    // =================================================
                     jumlahSekolah:
                         Number(
                             statistik?.jumlahSekolah ??
@@ -326,9 +290,6 @@ export default function DetailYayasanPage() {
                                 0
                         ) || 0,
 
-                    // =================================================
-                    // GURU
-                    // =================================================
                     totalGuru:
                         Number(
                             statistik?.totalGuru ??
@@ -338,9 +299,6 @@ export default function DetailYayasanPage() {
                                 0
                         ) || 0,
 
-                    // =================================================
-                    // SISWA
-                    // =================================================
                     totalSiswa:
                         Number(
                             statistik?.totalSiswa ??
@@ -350,9 +308,6 @@ export default function DetailYayasanPage() {
                                 0
                         ) || 0,
 
-                    // =================================================
-                    // ADMIN
-                    // =================================================
                     totalAdmin:
                         Number(
                             statistik?.totalAdmin ??
@@ -399,9 +354,6 @@ export default function DetailYayasanPage() {
         };
     }, [id]);
 
-    // =========================================================
-    // LOADING
-    // =========================================================
     if (loading) {
         return (
             <div className="theme-page theme-text min-h-full">
@@ -429,9 +381,6 @@ export default function DetailYayasanPage() {
         );
     }
 
-    // =========================================================
-    // ERROR / DATA TIDAK ADA
-    // =========================================================
     if (!yayasan) {
         return (
             <div className="theme-page theme-text min-h-full">
@@ -473,9 +422,6 @@ export default function DetailYayasanPage() {
         );
     }
 
-    // =========================================================
-    // STATUS
-    // =========================================================
     const statusThemeMap = {
         Aktif: {
             bg: themeSuccessSurface,
@@ -508,23 +454,14 @@ export default function DetailYayasanPage() {
 
     const StatusIcon = statusStyle.icon;
 
-    // =========================================================
-    // TOTAL PENGGUNA
-    // =========================================================
     const totalPengguna =
         Number(yayasan.totalGuru || 0) +
         Number(yayasan.totalSiswa || 0) +
         Number(yayasan.totalAdmin || 0);
 
-    // =========================================================
-    // RENDER
-    // =========================================================
     return (
         <div className="theme-page theme-text min-h-full">
             <div className="w-full max-w-[1100px] mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
-                {/* =================================================
-                    KEMBALI
-                ================================================= */}
                 <button
                     onClick={() => router.back()}
                     className="flex items-center gap-2 text-sm theme-text-secondary hover:text-[var(--color-primary)] transition-colors mb-5 group"
@@ -537,15 +474,11 @@ export default function DetailYayasanPage() {
                     Kembali
                 </button>
 
-                {/* =================================================
-                    HEADER DETAIL
-                ================================================= */}
                 <div
                     className={`theme-card rounded-xl border theme-border p-5 sm:p-6 ${themeCardShadow} mb-6`}
                 >
                     <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                         <div className="flex items-center gap-4 min-w-0">
-                            {/* LOGO */}
                             <div
                                 className={`w-16 h-16 rounded-xl ${themeNeutralSurface} border ${themeNeutralBorder} flex items-center justify-center ${themeSmallShadow} flex-shrink-0 overflow-hidden`}
                             >
@@ -567,7 +500,6 @@ export default function DetailYayasanPage() {
                                 )}
                             </div>
 
-                            {/* NAMA */}
                             <div className="min-w-0">
                                 <h1 className="text-xl sm:text-2xl font-semibold theme-text truncate">
                                     {yayasan.nama}
@@ -593,7 +525,6 @@ export default function DetailYayasanPage() {
                             </div>
                         </div>
 
-                        {/* EDIT */}
                         <div className="flex items-center gap-2 ml-auto sm:ml-0">
                             <button
                                 onClick={() =>
@@ -612,7 +543,6 @@ export default function DetailYayasanPage() {
                         </div>
                     </div>
 
-                    {/* INFO */}
                     <div
                         className={`flex flex-wrap items-center gap-3 mt-3 pt-3 border-t ${themeDivider} text-sm theme-text-secondary`}
                     >
@@ -644,9 +574,6 @@ export default function DetailYayasanPage() {
                     </div>
                 </div>
 
-                {/* =================================================
-                    GRID INFO UTAMA
-                ================================================= */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                     <InfoBox
                         icon={User}
@@ -670,11 +597,7 @@ export default function DetailYayasanPage() {
                     />
                 </div>
 
-                {/* =================================================
-                    DETAIL 2 KOLOM
-                ================================================= */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                    {/* KONTAK */}
                     <div
                         className={`theme-card rounded-xl border theme-border p-5 ${themeCardShadow}`}
                     >
@@ -705,7 +628,6 @@ export default function DetailYayasanPage() {
                         </div>
                     </div>
 
-                    {/* ALAMAT */}
                     <div
                         className={`theme-card rounded-xl border theme-border p-5 ${themeCardShadow}`}
                     >
@@ -743,9 +665,6 @@ export default function DetailYayasanPage() {
                     </div>
                 </div>
 
-                {/* =================================================
-                    STATISTIK
-                ================================================= */}
                 <div className="grid grid-cols-3 gap-4 mb-6">
                     <StatCard
                         icon={Users}
@@ -769,9 +688,6 @@ export default function DetailYayasanPage() {
                     />
                 </div>
 
-                {/* =================================================
-                    SEKOLAH DI BAWAH NAUNGAN
-                ================================================= */}
                 <div
                     className={`theme-card rounded-xl border theme-border p-5 ${themeCardShadow} mb-6`}
                 >
@@ -836,9 +752,6 @@ export default function DetailYayasanPage() {
                     )}
                 </div>
 
-                {/* =================================================
-                    TOMBOL AKSI
-                ================================================= */}
                 <div
                     className={`flex flex-col-reverse sm:flex-row items-center justify-end gap-3 pt-4 border-t ${themeDivider}`}
                 >
@@ -867,9 +780,6 @@ export default function DetailYayasanPage() {
     );
 }
 
-// =============================================================
-// UNWRAP RESPONSE BACKEND
-// =============================================================
 function unwrapResponse(response) {
     if (!response) {
         return null;
@@ -900,9 +810,6 @@ function unwrapResponse(response) {
     return response;
 }
 
-// =============================================================
-// NORMALIZE STATUS
-// =============================================================
 function normalizeStatus(status) {
     if (!status) {
         return "Nonaktif";
@@ -941,9 +848,6 @@ function normalizeStatus(status) {
     );
 }
 
-// =============================================================
-// FORMAT DATE
-// =============================================================
 function formatDate(date) {
     if (!date) {
         return "-";
@@ -969,9 +873,6 @@ function formatDate(date) {
     );
 }
 
-// =============================================================
-// BUILD ADDRESS
-// =============================================================
 function buildAddress(yayasan) {
     const parts = [
         yayasan?.kelurahan,
@@ -989,9 +890,6 @@ function buildAddress(yayasan) {
         : "-";
 }
 
-// =============================================================
-// INFO BOX
-// =============================================================
 function InfoBox({
     icon: Icon,
     color,
@@ -1047,9 +945,6 @@ function InfoBox({
     );
 }
 
-// =============================================================
-// CONTACT ROW
-// =============================================================
 function ContactRow({
     icon: Icon,
     value,
@@ -1070,9 +965,6 @@ function ContactRow({
     );
 }
 
-// =============================================================
-// STAT CARD
-// =============================================================
 function StatCard({
     icon: Icon,
     value,

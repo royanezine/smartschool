@@ -1,8 +1,5 @@
 import { apiFetch } from "../lib/api";
 
-/**
- * Ambil kelas-mapel yang diampu guru login
- */
 export async function getKelasMapelGuru() {
   try {
     const res = await apiFetch("/api/kelas-mapel/diampu");
@@ -12,7 +9,6 @@ export async function getKelasMapelGuru() {
     }
     if (res) return res;
   } catch {
-    // Fallback ke /api/kelas-mapel jika role adalah admin_sekolah
   }
   return apiFetch("/api/kelas-mapel");
 }
@@ -43,9 +39,6 @@ export async function createTugas(data) {
   });
 }
 
-/**
- * Ambil tugas berdasarkan kelas-mapel
- */
 export async function getTugasByKelasMapel(
   kelasMapelId
 ) {
@@ -273,9 +266,6 @@ export async function getTugasGuru() {
   return hasil.flat();
 }
 
-/**
- * Ambil tugas untuk siswa (berdasarkan kelas-mapel yang diikuti)
- */
 export async function getTugasSiswa(kelasMapelId?: string) {
   let kelasMapelIds: string[] = [];
 
@@ -307,3 +297,66 @@ export async function getTugasSiswa(kelasMapelId?: string) {
 
   return taskResponses.flat();
 }
+
+export async function getKelasMapelAdmin() {
+  return apiFetch("/api/kelas-mapel");
+}
+
+export async function getAllTugasAdmin() {
+  const kmRes = await apiFetch("/api/kelas-mapel");
+  const kmList = Array.isArray(kmRes?.data)
+    ? kmRes.data
+    : Array.isArray(kmRes)
+    ? kmRes
+    : [];
+
+  if (kmList.length === 0) return [];
+
+  const taskResponses = await Promise.all(
+    kmList.map(async (km: any) => {
+      try {
+        const res = await apiFetch(`/api/tugas/kelas-mapel/${km.id}`);
+        const data = Array.isArray(res?.data)
+          ? res.data
+          : Array.isArray(res)
+          ? res
+          : [];
+
+        return data.map((tugas: any) => ({
+          ...tugas,
+          kelasMapelId: km.id,
+          kelasMapel: km,
+          kelas: km.kelas ?? tugas.kelasMapel?.kelas ?? null,
+          mataPelajaran:
+            km.mataPelajaran ?? tugas.kelasMapel?.mataPelajaran ?? null,
+          guruPengajar:
+            km.guruPengajar ?? tugas.kelasMapel?.guruPengajar ?? null,
+          kelasNama:
+            km.kelas?.nama ??
+            km.kelas?.namaKelas ??
+            tugas.kelasMapel?.kelas?.nama ??
+            "-",
+          mapelNama:
+            km.mataPelajaran?.nama ??
+            km.mataPelajaran?.namaMapel ??
+            tugas.kelasMapel?.mataPelajaran?.nama ??
+            "-",
+          guruNama:
+            km.guruPengajar?.namaLengkap ??
+            tugas.kelasMapel?.guruPengajar?.namaLengkap ??
+            "-",
+          jumlahPengumpulan:
+            tugas._count?.pengumpulanTugasSiswa ??
+            tugas.jumlahPengumpulan ??
+            0,
+        }));
+      } catch (error) {
+        console.error(`Gagal mengambil tugas kelas-mapel ${km.id}:`, error);
+        return [];
+      }
+    })
+  );
+
+  return taskResponses.flat();
+}
+

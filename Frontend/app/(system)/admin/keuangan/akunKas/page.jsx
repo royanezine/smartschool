@@ -93,9 +93,6 @@ export default function AkunKasPage() {
     loadAkun();
   }, [loadAkun]);
 
-  /* =========================================================
-     HANDLE SORT
-  ========================================================= */
 
   function handleSort(key) {
     setSortConfig((previous) => {
@@ -110,9 +107,6 @@ export default function AkunKasPage() {
     });
   }
 
-  /* =========================================================
-     FILTER + SORT
-  ========================================================= */
 
   const filteredAkun = useMemo(() => {
     const keyword = search.trim().toLowerCase();
@@ -135,7 +129,6 @@ export default function AkunKasPage() {
       let valA = a?.[key];
       let valB = b?.[key];
 
-      // Kolom angka
       if (
         [
           "saldoAwal",
@@ -149,7 +142,6 @@ export default function AkunKasPage() {
         return direction === "asc" ? valA - valB : valB - valA;
       }
 
-      // Kolom teks
       valA = String(valA ?? "").toLowerCase();
       valB = String(valB ?? "").toLowerCase();
 
@@ -234,7 +226,6 @@ export default function AkunKasPage() {
           <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
             <div className="w-full space-y-6">
 
-              {/* HEADER PAGE */}
               <section className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
                 <div>
                   <div className="flex items-center gap-3">
@@ -283,7 +274,6 @@ export default function AkunKasPage() {
                 </div>
               </section>
 
-              {/* ERROR */}
               {error && (
                 <div className="flex items-start gap-3 rounded-xl border border-[var(--color-danger)] p-4 text-sm">
                   <AlertCircle
@@ -305,7 +295,6 @@ export default function AkunKasPage() {
                 </div>
               )}
 
-              {/* STAT CARDS */}
               <section className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-6">
                 <SummaryCard
                   title="Jumlah Akun"
@@ -351,7 +340,6 @@ export default function AkunKasPage() {
                 />
               </section>
 
-              {/* TABEL AKUN KAS */}
               <section className="theme-card overflow-hidden rounded-2xl border shadow-sm">
                 <div className="theme-border flex flex-col gap-3 border-b p-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
                   <div>
@@ -399,12 +387,10 @@ export default function AkunKasPage() {
                   <table className="w-full min-w-[1000px] text-left text-sm">
                     <thead className="theme-table-header">
                       <tr className="theme-border border-b">
-                        {/* NO */}
                         <th className="w-14 whitespace-nowrap px-4 py-3.5 text-center text-[10px] font-bold uppercase tracking-[0.1em]">
                           No
                         </th>
 
-                        {/* KODE */}
                         <SortableHeader
                           label="Kode"
                           sortKey="kode"
@@ -413,7 +399,6 @@ export default function AkunKasPage() {
                           align="left"
                         />
 
-                        {/* NAMA */}
                         <SortableHeader
                           label="Nama Akun"
                           sortKey="nama"
@@ -422,7 +407,6 @@ export default function AkunKasPage() {
                           align="left"
                         />
 
-                        {/* JENIS */}
                         <SortableHeader
                           label="Jenis"
                           sortKey="tipe"
@@ -431,7 +415,6 @@ export default function AkunKasPage() {
                           align="left"
                         />
 
-                        {/* SALDO AWAL */}
                         <SortableHeader
                           label="Saldo Awal"
                           sortKey="saldoAwal"
@@ -440,7 +423,6 @@ export default function AkunKasPage() {
                           align="right"
                         />
 
-                        {/* TOTAL MASUK */}
                         <SortableHeader
                           label="Total Masuk"
                           sortKey="totalMasuk"
@@ -449,7 +431,6 @@ export default function AkunKasPage() {
                           align="right"
                         />
 
-                        {/* TOTAL KELUAR */}
                         <SortableHeader
                           label="Total Keluar"
                           sortKey="totalKeluar"
@@ -458,7 +439,6 @@ export default function AkunKasPage() {
                           align="right"
                         />
 
-                        {/* SALDO */}
                         <SortableHeader
                           label="Saldo"
                           sortKey="saldo"
@@ -467,7 +447,6 @@ export default function AkunKasPage() {
                           align="right"
                         />
 
-                        {/* STATUS */}
                         <SortableHeader
                           label="Status"
                           sortKey="status"
@@ -476,7 +455,6 @@ export default function AkunKasPage() {
                           align="center"
                         />
 
-                        {/* AKSI */}
                         <th className="whitespace-nowrap px-4 py-3.5 text-center text-[10px] font-bold uppercase tracking-[0.1em]">
                           Aksi
                         </th>
@@ -530,7 +508,6 @@ export default function AkunKasPage() {
                             key={item.id}
                             className="theme-table-hover transition"
                           >
-                            {/* NO URUT */}
                             <td className="px-4 py-4 text-center text-xs font-semibold tabular-nums theme-text-secondary">
                               {index + 1}
                             </td>
@@ -654,9 +631,6 @@ export default function AkunKasPage() {
   );
 }
 
-/* =========================================================
-   SORTABLE HEADER
-========================================================= */
 
 function SortableHeader({
   label,
@@ -729,9 +703,6 @@ function SortableHeader({
   );
 }
 
-/* =========================================================
-   SUMMARY CARD
-========================================================= */
 
 function SummaryCard({
   title,

@@ -37,9 +37,6 @@ import {
   getNilaiUjianUntukKelas,
 } from "@/services/ujian.service";
 
-/* =========================================================
-   HELPER
-========================================================= */
 
 const getResultData = (result) => {
   if (result?.data?.data) {
@@ -112,9 +109,6 @@ const formatNumber = (value) => {
   return Number(number.toFixed(2));
 };
 
-/* =========================================================
-   STATUS / BADGE THEME
-========================================================= */
 
 const getPredikatClass = (predikat) => {
   switch (predikat) {
@@ -148,9 +142,6 @@ const getExamStatusClass = (status) => {
   }
 };
 
-/* =========================================================
-   NORMALIZE NILAI UJIAN
-========================================================= */
 
 const getStudentIdFromNilai = (item) => {
   return normalizeId(
@@ -313,9 +304,6 @@ const extractNilaiUjian = (result) => {
   return output;
 };
 
-/* =========================================================
-   PAGE
-========================================================= */
 
 export default function DetailRaportPage() {
   const router = useRouter();
@@ -354,9 +342,6 @@ export default function DetailRaportPage() {
   const [error, setError] =
     useState("");
 
-  /* =======================================================
-     LOAD RAPORT
-  ======================================================= */
 
   const loadReport = useCallback(async () => {
     if (!siswaId) {
@@ -408,9 +393,6 @@ export default function DetailRaportPage() {
     }
   }, [siswaId, tahunAjaranId]);
 
-  /* =======================================================
-     LOAD TAHUN AJARAN
-  ======================================================= */
 
   const loadTahunAjaran =
     useCallback(async () => {
@@ -441,9 +423,6 @@ export default function DetailRaportPage() {
       }
     }, [tahunAjaranId]);
 
-  /* =======================================================
-     LOAD NILAI UJIAN
-  ======================================================= */
 
   const loadNilaiUjian =
     useCallback(async () => {
@@ -694,9 +673,6 @@ export default function DetailRaportPage() {
       }
     }, [siswaId, tahunAjaranId]);
 
-  /* =======================================================
-     EFFECT
-  ======================================================= */
 
   useEffect(() => {
     loadReport();
@@ -710,9 +686,6 @@ export default function DetailRaportPage() {
     loadNilaiUjian();
   }, [loadNilaiUjian]);
 
-  /* =======================================================
-     AUTO PRINT
-  ======================================================= */
 
   useEffect(() => {
     if (
@@ -743,9 +716,6 @@ export default function DetailRaportPage() {
     report,
   ]);
 
-  /* =======================================================
-     MANUAL PRINT
-  ======================================================= */
 
   const handlePrint = () => {
     if (!report) {
@@ -763,9 +733,6 @@ export default function DetailRaportPage() {
     }, 200);
   };
 
-  /* =======================================================
-     BACK
-  ======================================================= */
 
   const handleBack = () => {
     router.push(
@@ -773,9 +740,6 @@ export default function DetailRaportPage() {
     );
   };
 
-  /* =======================================================
-     DATA
-  ======================================================= */
 
   const identitas =
     report?.identitas || {};
@@ -796,9 +760,6 @@ export default function DetailRaportPage() {
     tahunAjaran?.semester ||
     "";
 
-  /* =======================================================
-     NILAI UJIAN SISWA
-  ======================================================= */
 
   const nilaiUjianSiswa =
     useMemo(() => {
@@ -825,9 +786,6 @@ export default function DetailRaportPage() {
       );
     }, [nilaiUjian, siswaId]);
 
-  /* =======================================================
-     NILAI UJIAN SELESAI
-  ======================================================= */
 
   const nilaiUjianSelesai =
     useMemo(() => {
@@ -851,9 +809,6 @@ export default function DetailRaportPage() {
       );
     }, [nilaiUjianSiswa]);
 
-  /* =======================================================
-     NILAI UJIAN TERAKHIR
-  ======================================================= */
 
   const nilaiUjianTerakhir =
     useMemo(() => {
@@ -897,9 +852,6 @@ export default function DetailRaportPage() {
         )
       : null;
 
-  /* =======================================================
-     NILAI AKADEMIK
-  ======================================================= */
 
   const totalNilai =
     akademik.reduce(
@@ -923,9 +875,6 @@ export default function DetailRaportPage() {
         )
       : 0;
 
-  /* =======================================================
-     RATA-RATA NILAI UJIAN
-  ======================================================= */
 
   const rataRataUjian =
     nilaiUjianSelesai.length > 0
@@ -948,9 +897,6 @@ export default function DetailRaportPage() {
         )
       : null;
 
-  /* =======================================================
-     LOADING
-  ======================================================= */
 
   if (loading) {
     return (
@@ -981,9 +927,6 @@ export default function DetailRaportPage() {
     );
   }
 
-  /* =======================================================
-     ERROR
-  ======================================================= */
 
   if (error || !report) {
     return (
@@ -1023,9 +966,6 @@ export default function DetailRaportPage() {
     );
   }
 
-  /* =======================================================
-     RENDER
-  ======================================================= */
 
   return (
     <>
@@ -1124,13 +1064,11 @@ export default function DetailRaportPage() {
       `}</style>
 
       <div className="theme-page flex h-screen w-full overflow-hidden print:block print:h-auto print:overflow-visible">
-        {/* SIDEBAR */}
         <div className="no-print print:hidden">
           <Sidebar />
         </div>
 
         <div className="flex h-full min-w-0 flex-1 flex-col overflow-hidden print:block print:h-auto print:overflow-visible">
-          {/* HEADER */}
           <div className="no-print print:hidden">
             <Header />
           </div>
@@ -1138,7 +1076,6 @@ export default function DetailRaportPage() {
           <main className="flex-1 overflow-y-auto print:overflow-visible">
             <div className="print-page mx-auto w-full max-w-[1100px] space-y-6 p-4 sm:p-6 lg:p-8 print:max-w-full print:p-0">
 
-              {/* PAGE HEADER */}
               <div className="no-print print:hidden flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-start gap-3">
                   <button
@@ -1179,10 +1116,8 @@ export default function DetailRaportPage() {
                 </button>
               </div>
 
-              {/* RAPORT */}
               <div className="print-card theme-card rounded-xl border p-5 shadow-sm sm:p-8">
 
-                {/* HEADER RAPORT */}
                 <div className="print-section theme-border border-b pb-6 text-center">
                   <h1 className="theme-text text-xl font-bold uppercase tracking-wide sm:text-2xl">
                     RAPORT HASIL BELAJAR
@@ -1215,7 +1150,6 @@ export default function DetailRaportPage() {
                   </div>
                 </div>
 
-                {/* IDENTITAS */}
                 <div className="print-section mt-6">
                   <div className="mb-3 flex items-center gap-2">
                     <User
@@ -1275,7 +1209,6 @@ export default function DetailRaportPage() {
                   </div>
                 </div>
 
-                {/* NILAI AKADEMIK */}
                 <div className="print-section mt-8">
                   <div className="mb-3 flex items-center gap-2">
                     <BookOpen
@@ -1393,7 +1326,6 @@ export default function DetailRaportPage() {
                   </div>
                 </div>
 
-                {/* NILAI UJIAN ONLINE */}
                 <div
                   className={`print-section mt-8 ${
                     nilaiUjianSiswa.length === 0
@@ -1534,7 +1466,6 @@ export default function DetailRaportPage() {
                     )}
                   </div>
 
-                  {/* RINGKASAN NILAI UJIAN */}
                   {nilaiUjianSelesai.length >
                     0 && (
                     <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -1566,7 +1497,6 @@ export default function DetailRaportPage() {
                   )}
                 </div>
 
-                {/* KEHADIRAN */}
                 <div className="print-section mt-8">
                   <div className="mb-3 flex items-center gap-2">
                     <CheckCircle2
@@ -1626,7 +1556,6 @@ export default function DetailRaportPage() {
                   </div>
                 </div>
 
-                {/* CATATAN WALI KELAS */}
                 <div className="print-section mt-8">
                   <h2 className="theme-text mb-3 font-bold">
                     Catatan Wali Kelas
@@ -1639,7 +1568,6 @@ export default function DetailRaportPage() {
                   </div>
                 </div>
 
-                {/* TANDA TANGAN */}
                 <div className="print-section mt-12 grid grid-cols-1 gap-10 text-center sm:grid-cols-2">
                   <div>
                     <p className="theme-text-secondary text-sm">

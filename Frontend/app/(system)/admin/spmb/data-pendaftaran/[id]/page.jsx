@@ -27,13 +27,11 @@ import {
 } from "lucide-react";
 import {
   getPendaftarPpdbById,
+  isPpdbEndpointMissing,
   verifikasiPpdb,
 } from "@/services/ppdb.service";
 import { getKelas } from "@/services/kelas.service";
 
-// =========================================================
-// THEME HELPERS
-// =========================================================
 
 const themeCardShadow =
   "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
@@ -86,9 +84,6 @@ const themeDivider =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-// =========================================================
-// STATUS
-// =========================================================
 
 function normalizeStatus(status) {
   const value = String(status || "").toLowerCase();
@@ -116,9 +111,6 @@ function normalizeStatus(status) {
   };
 }
 
-// =========================================================
-// FORMATTERS
-// =========================================================
 
 function formatTanggal(value) {
   if (!value) {
@@ -169,9 +161,6 @@ function getInitials(nama) {
     .toUpperCase();
 }
 
-// =========================================================
-// FOTO URL
-// =========================================================
 
 function getFotoUrl(item) {
   const rawUrl =
@@ -205,9 +194,6 @@ function getFotoUrl(item) {
   return `${baseUrl.replace(/\/+$/, "")}/${value.replace(/^\/+/, "")}`;
 }
 
-// =========================================================
-// DETAIL ITEM
-// =========================================================
 
 function DetailItem({
   icon: Icon,
@@ -254,9 +240,6 @@ function DetailItem({
   );
 }
 
-// =========================================================
-// SECTION
-// =========================================================
 
 function Section({
   title,
@@ -306,9 +289,6 @@ function Section({
   );
 }
 
-// =========================================================
-// MAIN PAGE
-// =========================================================
 
 export default function DetailPendaftaranPage() {
   const router = useRouter();
@@ -322,6 +302,7 @@ export default function DetailPendaftaranPage() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [endpointUnavailable, setEndpointUnavailable] = useState(false);
 
   const [kelasList, setKelasList] = useState([]);
   const [kelasId, setKelasId] = useState("");
@@ -329,9 +310,6 @@ export default function DetailPendaftaranPage() {
   const [actionError, setActionError] = useState("");
   const [actionSuccess, setActionSuccess] = useState("");
 
-  // =======================================================
-  // LOAD DETAIL
-  // =======================================================
 
   const loadDetail = useCallback(async () => {
     if (!id) {
@@ -343,6 +321,7 @@ export default function DetailPendaftaranPage() {
     try {
       setLoading(true);
       setError("");
+      setEndpointUnavailable(false);
 
       const response = await getPendaftarPpdbById(id);
 
@@ -354,6 +333,8 @@ export default function DetailPendaftaranPage() {
           ? err.message
           : "Gagal memuat detail pendaftar."
       );
+
+      setEndpointUnavailable(isPpdbEndpointMissing(err));
     } finally {
       setLoading(false);
     }
@@ -365,9 +346,6 @@ export default function DetailPendaftaranPage() {
     });
   }, [loadDetail]);
 
-  // =======================================================
-  // KELAS UNTUK VERIFIKASI KELULUSAN
-  // =======================================================
 
   useEffect(() => {
     let aktif = true;
@@ -438,9 +416,6 @@ export default function DetailPendaftaranPage() {
     }
   }
 
-  // =======================================================
-  // DATA TURUNAN
-  // =======================================================
 
   const statusInfo = normalizeStatus(
     data?.status
@@ -473,15 +448,9 @@ export default function DetailPendaftaranPage() {
     )}/${value.replace(/^\/+/, "")}`;
   };
 
-  // =======================================================
-  // RENDER
-  // =======================================================
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
-      {/* =================================================
-          SIDEBAR
-      ================================================= */}
 
       <Sidebar
         collapsed={collapsed}
@@ -489,9 +458,6 @@ export default function DetailPendaftaranPage() {
         activeMenu="spmb"
       />
 
-      {/* =================================================
-          CONTENT
-      ================================================= */}
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <Header
@@ -510,7 +476,6 @@ export default function DetailPendaftaranPage() {
           <div className="w-full p-4 sm:p-6 lg:p-8">
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                {/* KEMBALI */}
                 <button
                   type="button"
                   onClick={() =>
@@ -531,7 +496,6 @@ export default function DetailPendaftaranPage() {
                   Kembali ke Data Pendaftaran
                 </button>
 
-                {/* BREADCRUMB */}
                 <div className="flex items-center gap-2 text-sm theme-text-muted">
                   <span>SPMB</span>
                   <span>/</span>
@@ -544,7 +508,6 @@ export default function DetailPendaftaranPage() {
                   </span>
                 </div>
 
-                {/* TITLE */}
                 <h1 className="mt-2 text-2xl font-bold tracking-tight theme-text md:text-3xl">
                   Detail Pendaftar
                 </h1>
@@ -556,9 +519,6 @@ export default function DetailPendaftaranPage() {
               </div>
             </div>
 
-            {/* =================================================
-                LOADING
-            ================================================= */}
 
             {loading ? (
               <div
@@ -593,9 +553,6 @@ export default function DetailPendaftaranPage() {
                 </div>
               </div>
             ) : error ? (
-              /* =================================================
-                 ERROR
-              ================================================= */
 
               <div
                 className={`
@@ -613,12 +570,22 @@ export default function DetailPendaftaranPage() {
 
                   <div>
                     <h2 className="text-sm font-bold theme-text">
-                      Gagal memuat data
+                      {endpointUnavailable
+                        ? "Detail Pendaftar Belum Tersedia"
+                        : "Gagal memuat data"}
                     </h2>
 
                     <p className="mt-1 text-sm theme-text-secondary">
-                      {error}
+                      {endpointUnavailable
+                        ? "Endpoint baca detail pendaftar (GET /api/ppdb/pendaftar/:id) belum tersedia di Backend, sehingga detail tidak dapat ditampilkan."
+                        : error}
                     </p>
+
+                    {endpointUnavailable && (
+                      <p className="mt-1 text-xs theme-text-muted">
+                        Tidak ada data contoh yang ditampilkan. Formulir pendaftaran calon siswa baru tetap tersedia melalui menu Data Pendaftaran.
+                      </p>
+                    )}
 
                     <button
                       type="button"
@@ -647,9 +614,6 @@ export default function DetailPendaftaranPage() {
               </div>
             ) : (
               <>
-                {/* =================================================
-                    PROFILE HEADER
-                ================================================= */}
 
                 <div
                   className={`
@@ -669,7 +633,6 @@ export default function DetailPendaftaranPage() {
                     `}
                   >
                     <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
-                      {/* FOTO */}
                       <div
                         className="
                           h-24 w-24 shrink-0
@@ -706,7 +669,6 @@ export default function DetailPendaftaranPage() {
                         )}
                       </div>
 
-                      {/* INFORMASI */}
                       <div className="min-w-0 flex-1 text-[var(--color-card)]">
                         <div className="flex flex-wrap items-center gap-2">
                           <h2 className="text-xl font-bold sm:text-2xl">
@@ -767,7 +729,6 @@ export default function DetailPendaftaranPage() {
                     </div>
                   </div>
 
-                  {/* SUMMARY */}
                   <div
                     className={`
                       grid grid-cols-1
@@ -806,17 +767,10 @@ export default function DetailPendaftaranPage() {
                   </div>
                 </div>
 
-                {/* =================================================
-                    MAIN GRID
-                ================================================= */}
 
                 <div className="grid grid-cols-1 gap-5 xl:grid-cols-3">
-                  {/* =================================================
-                      LEFT
-                  ================================================= */}
 
                   <div className="space-y-5 xl:col-span-2">
-                    {/* DATA CALON SISWA */}
 
                     <Section
                       title="Data Calon Siswa"
@@ -892,7 +846,6 @@ export default function DetailPendaftaranPage() {
                       </div>
                     </Section>
 
-                    {/* DATA ORANG TUA */}
 
                     <Section
                       title="Data Orang Tua / Wali"
@@ -925,7 +878,6 @@ export default function DetailPendaftaranPage() {
                       </div>
                     </Section>
 
-                    {/* INFORMASI PPDB */}
 
                     <Section
                       title="Informasi PPDB"
@@ -997,12 +949,8 @@ export default function DetailPendaftaranPage() {
                     </Section>
                   </div>
 
-                  {/* =================================================
-                      RIGHT
-                  ================================================= */}
 
                   <div className="space-y-5">
-                    {/* VERIFIKASI */}
                     <Section
                       title="Verifikasi Pendaftar"
                       icon={CheckCircle2}
@@ -1118,7 +1066,6 @@ export default function DetailPendaftaranPage() {
                       </div>
                     </Section>
 
-                    {/* FOTO PENDAFTAR */}
 
                     <Section
                       title="Foto Pendaftar"
@@ -1180,7 +1127,6 @@ export default function DetailPendaftaranPage() {
                       </div>
                     </Section>
 
-                    {/* BERKAS */}
 
                     <Section
                       title="Berkas Pendaftaran"
@@ -1285,7 +1231,6 @@ export default function DetailPendaftaranPage() {
                       </div>
                     </Section>
 
-                    {/* INFORMASI SISTEM */}
 
                     <Section
                       title="Informasi Sistem"
@@ -1336,9 +1281,6 @@ export default function DetailPendaftaranPage() {
   );
 }
 
-// =========================================================
-// SUMMARY ITEM
-// =========================================================
 
 function SummaryItem({ label, value }) {
   return (

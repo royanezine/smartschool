@@ -31,9 +31,6 @@ import {
 
 import { getDetailPeminjaman } from "@/services/sarpras.service";
 
-// =========================================================
-// THEME HELPERS
-// =========================================================
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -95,9 +92,6 @@ const themeDangerBorder =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-// =========================================================
-// STATUS CONFIG
-// =========================================================
 
 const statusConfig = {
   menunggu_persetujuan: {
@@ -153,9 +147,6 @@ function getStatusConfig(status) {
   );
 }
 
-// =========================================================
-// HELPERS
-// =========================================================
 
 function formatTanggal(value) {
   if (!value) return "-";
@@ -229,9 +220,6 @@ function getAssetIcon(nama = "") {
   return Wrench;
 }
 
-// =========================================================
-// PAGE
-// =========================================================
 
 export default function DetailPeminjamanPage() {
   const router = useRouter();
@@ -320,7 +308,6 @@ export default function DetailPeminjamanPage() {
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
-      {/* SIDEBAR */}
       <Sidebar
         active="sarpras"
         setActive={() => {}}
@@ -330,7 +317,6 @@ export default function DetailPeminjamanPage() {
         }
       />
 
-      {/* MAIN */}
       <div className="flex min-w-0 flex-1 flex-col">
         <Header
           toggleSidebar={() =>
@@ -347,9 +333,6 @@ export default function DetailPeminjamanPage() {
         <main className="theme-page flex-1 overflow-y-auto">
           <div className="mx-auto w-full max-w-[1400px] space-y-5 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
 
-            {/* =================================================
-                BACK BUTTON
-            ================================================= */}
 
             <button
               type="button"
@@ -365,9 +348,6 @@ export default function DetailPeminjamanPage() {
               Kembali ke Peminjaman Saya
             </button>
 
-            {/* =================================================
-                LOADING
-            ================================================= */}
 
             {loading && (
               <div
@@ -384,9 +364,6 @@ export default function DetailPeminjamanPage() {
               </div>
             )}
 
-            {/* =================================================
-                ERROR
-            ================================================= */}
 
             {!loading && error && (
               <div
@@ -422,9 +399,6 @@ export default function DetailPeminjamanPage() {
               </div>
             )}
 
-            {/* =================================================
-                NOT FOUND
-            ================================================= */}
 
             {!loading && !error && !detail && (
               <div
@@ -455,16 +429,10 @@ export default function DetailPeminjamanPage() {
               </div>
             )}
 
-            {/* =================================================
-                DETAIL CONTENT
-            ================================================= */}
 
             {!loading && !error && detail && (
               <div className="space-y-5">
 
-                {/* ==========================================
-                    HEADER
-                ========================================== */}
 
                 <div
                   className={`relative overflow-hidden rounded-xl ${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow}`}
@@ -514,7 +482,6 @@ export default function DetailPeminjamanPage() {
                       )}
                     </div>
 
-                    {/* STATUS NOTE */}
 
                     {status?.desc && (
                       <div
@@ -533,9 +500,6 @@ export default function DetailPeminjamanPage() {
                   </div>
                 </div>
 
-                {/* ==========================================
-                    QUICK STATS
-                ========================================== */}
 
                 <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
                   <StatCard
@@ -569,17 +533,12 @@ export default function DetailPeminjamanPage() {
                   />
                 </div>
 
-                {/* ==========================================
-                    MAIN GRID
-                ========================================== */}
 
                 <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
 
-                  {/* LEFT COLUMN */}
 
                   <div className="space-y-5">
 
-                    {/* DAFTAR ASET */}
 
                     <div
                       className={`theme-card ${themeNeutralBorder} ${themeCardShadow} overflow-hidden rounded-xl border`}
@@ -675,7 +634,6 @@ export default function DetailPeminjamanPage() {
                       </div>
                     </div>
 
-                    {/* KEPERLUAN */}
 
                     <InfoBlock
                       icon={<FileText size={15} />}
@@ -685,7 +643,6 @@ export default function DetailPeminjamanPage() {
                       }
                     />
 
-                    {/* CATATAN */}
 
                     {detail.catatanPeminjaman && (
                       <InfoBlock
@@ -699,7 +656,6 @@ export default function DetailPeminjamanPage() {
                       />
                     )}
 
-                    {/* ALASAN PENOLAKAN */}
 
                     {detail.status === "ditolak" &&
                       detail.catatanPenolakan && (
@@ -740,11 +696,9 @@ export default function DetailPeminjamanPage() {
                       )}
                   </div>
 
-                  {/* RIGHT COLUMN */}
 
                   <aside className="space-y-5 lg:sticky lg:top-6">
 
-                    {/* INFORMASI PEMINJAMAN */}
 
                     <div
                       className={`theme-card ${themeNeutralBorder} ${themeCardShadow} overflow-hidden rounded-xl border`}
@@ -807,7 +761,6 @@ export default function DetailPeminjamanPage() {
                       </div>
                     </div>
 
-                    {/* SISWA TERKAIT */}
 
                     {(detail.siswaPengambilId ||
                       detail.siswaPengembaliId) && (
@@ -866,7 +819,6 @@ export default function DetailPeminjamanPage() {
                       </div>
                     )}
 
-                    {/* ACTION BUTTON */}
 
                     <button
                       type="button"
@@ -886,9 +838,6 @@ export default function DetailPeminjamanPage() {
   );
 }
 
-// =========================================================
-// SUB COMPONENTS
-// =========================================================
 
 function StatCard({ icon, label, value }) {
   return (

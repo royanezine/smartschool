@@ -105,7 +105,6 @@ export default function LogAktivitasPage() {
   const [sortOrder, setSortOrder] = useState("desc");
   const [currentPage, setCurrentPage] = useState(1);
 
-  // BE search supports aksi and modul. Fetch a larger first page, then apply UI-only filters locally.
   const loadAuditLogs = useCallback(async () => {
     setIsLoading(true);
     setErrorMessage("");
@@ -230,7 +229,6 @@ export default function LogAktivitasPage() {
       ...sortedLogs.map(log => [log.user, log.role, log.module, log.action, statusLabel(log.status), formatDateTime(log.timestamp), log.ip]),
     ];
     const csv = rows.map(row => row.map(value => {
-      // Prevent spreadsheet formula injection for untrusted server text.
       let text = String(value ?? "");
       if (/^[=+\-@]/.test(text)) text = `'${text}`;
       return `"${text.replace(/"/g, '""')}"`;

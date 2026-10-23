@@ -9,24 +9,6 @@ import {
   ClipboardCheck,
 } from "lucide-react";
 
-/**
- * Konfigurasi menu untuk role "adminPPDB".
- *
- * Struktur folder aktual (app/adminPPDB):
- * - page.jsx                          -> Beranda (/adminPPDB)
- * - gelombang/page.jsx                -> Gelombang Pendaftaran (/adminPPDB/gelombang)
- * - jalur/page.jsx                    -> Jalur Pendaftaran (/adminPPDB/jalur)
- * - kuota/page.jsx                    -> Kuota (/adminPPDB/kuota)
- * - laporan/page.jsx                  -> Laporan (/adminPPDB/laporan)
- * - pendaftar/page.jsx                -> Data Pendaftar (/adminPPDB/pendaftar)
- * - pengumuman/page.jsx               -> Pengumuman (/adminPPDB/pengumuman)
- * - seleksi/page.jsx                  -> Seleksi (/adminPPDB/seleksi)
- *
- * Kalau nanti ada sub-halaman baru (misal /adminPPDB/pendaftar/tambah atau
- * detail dinamis [id]/page.jsx), tinggal tambahkan lewat properti `children`
- * pada item terkait — ikuti pola yang dipakai di config role lain
- * (contoh: children pada "iventaris" di adminSarprasSidebarConfig).
- */
 export const adminPPDBSidebarConfig = {
   basePath: "/adminPPDB",
   brandName: "Portal PPDB",

@@ -35,9 +35,6 @@ import {
   ShieldCheck,
 } from "lucide-react";
 
-/* =========================================================
-   MOCK DATA
-========================================================= */
 
 const KONSELING_DATA = [
   {
@@ -223,9 +220,6 @@ const PRESTASI_DATA = [
   },
 ];
 
-/* =========================================================
-   CONFIG
-========================================================= */
 
 const KONSELING_STATUS = {
   Selesai: {
@@ -249,9 +243,6 @@ const PRIORITY_CONFIG = {
   Rendah: "theme-card-soft theme-text-muted",
 };
 
-/* =========================================================
-   STATUS BADGE
-========================================================= */
 
 function KonselingStatus({ status }) {
   const config =
@@ -281,9 +272,6 @@ function PriorityBadge({ priority }) {
   );
 }
 
-/* =========================================================
-   STAT CARD
-========================================================= */
 
 function StatCard({
   title,
@@ -340,9 +328,6 @@ function StatCard({
   );
 }
 
-/* =========================================================
-   SECTION CARD
-========================================================= */
 
 function SectionCard({
   title,
@@ -388,9 +373,6 @@ function SectionCard({
   );
 }
 
-/* =========================================================
-   PAGE
-========================================================= */
 
 export default function BKPage() {
   const router = useRouter();
@@ -422,9 +404,6 @@ export default function BKPage() {
 
   const itemsPerPage = 5;
 
-  /* =========================================================
-     FILTER KONSELING
-  ========================================================= */
 
   const filteredKonseling = useMemo(() => {
     return KONSELING_DATA.filter((item) => {
@@ -470,9 +449,6 @@ export default function BKPage() {
     safeCurrentPage * itemsPerPage
   );
 
-  /* =========================================================
-     RESET FILTER
-  ========================================================= */
 
   const resetFilters = () => {
     setSearchQuery("");
@@ -481,9 +457,6 @@ export default function BKPage() {
     setCurrentPage(1);
   };
 
-  /* =========================================================
-     TAB
-  ========================================================= */
 
   const tabs = [
     {
@@ -508,9 +481,6 @@ export default function BKPage() {
     },
   ];
 
-  /* =========================================================
-     SIDEBAR
-  ========================================================= */
 
   const toggleSidebar = () => {
     setIsCollapsed((prev) => !prev);
@@ -518,9 +488,6 @@ export default function BKPage() {
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
-      {/* =====================================================
-          SIDEBAR
-      ===================================================== */}
 
       <Sidebar
         active="bk"
@@ -530,12 +497,8 @@ export default function BKPage() {
         role="admin"
       />
 
-      {/* =====================================================
-          MAIN
-      ===================================================== */}
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        {/* HEADER */}
 
         <div className="sticky top-0 z-40 shrink-0">
           <Header
@@ -549,15 +512,9 @@ export default function BKPage() {
           />
         </div>
 
-        {/* ===================================================
-            CONTENT
-        =================================================== */}
 
         <main className="theme-page min-h-0 flex-1 overflow-hidden">
           <div className="flex h-full min-h-0 flex-col px-4 py-4 sm:px-5 lg:px-6">
-            {/* =================================================
-                PAGE HEADER
-            ================================================= */}
 
             <div className="mb-4 shrink-0">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -592,9 +549,6 @@ export default function BKPage() {
               </div>
             </div>
 
-            {/* =================================================
-                SUMMARY
-            ================================================= */}
 
             <div className="mb-4 grid shrink-0 grid-cols-2 gap-3 xl:grid-cols-4">
               <StatCard
@@ -646,9 +600,6 @@ export default function BKPage() {
               />
             </div>
 
-            {/* =================================================
-                QUICK SUMMARY
-            ================================================= */}
 
             <div className="mb-4 grid shrink-0 grid-cols-2 gap-3 md:grid-cols-4">
               <QuickSummary
@@ -680,9 +631,6 @@ export default function BKPage() {
               />
             </div>
 
-            {/* =================================================
-                TABS
-            ================================================= */}
 
             <div className="theme-card theme-border mb-4 shrink-0 overflow-x-auto rounded-xl border shadow-sm">
               <div className="flex min-w-max">
@@ -716,14 +664,10 @@ export default function BKPage() {
               </div>
             </div>
 
-            {/* =================================================
-                CONTENT AREA
-            ================================================= */}
 
             <div className="min-h-0 flex-1">
               {activeTab === "konseling" && (
                 <div className="theme-card theme-border flex h-full min-h-0 flex-col rounded-xl border shadow-sm">
-                  {/* FILTER */}
 
                   <div className="theme-border-soft shrink-0 border-b p-3 sm:p-4">
                     <div className="flex flex-col gap-3 xl:flex-row xl:items-center">
@@ -816,7 +760,6 @@ export default function BKPage() {
                     </div>
                   </div>
 
-                  {/* TABLE */}
 
                   <div className="min-h-0 flex-1 overflow-auto">
                     <table className="w-full min-w-[950px] border-collapse">
@@ -953,7 +896,6 @@ export default function BKPage() {
                     </table>
                   </div>
 
-                  {/* PAGINATION */}
 
                   <div className="theme-border-soft flex shrink-0 flex-col gap-2 border-t px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
                     <p className="theme-text-muted text-xs">
@@ -1035,9 +977,6 @@ export default function BKPage() {
                 </div>
               )}
 
-              {/* =================================================
-                  PELANGGARAN
-              ================================================= */}
 
               {activeTab === "pelanggaran" && (
                 <SectionCard
@@ -1154,9 +1093,6 @@ export default function BKPage() {
                 </SectionCard>
               )}
 
-              {/* =================================================
-                  PRESTASI
-              ================================================= */}
 
               {activeTab === "prestasi" && (
                 <SectionCard
@@ -1264,13 +1200,9 @@ export default function BKPage() {
                 </SectionCard>
               )}
 
-              {/* =================================================
-                  ASESMEN
-              ================================================= */}
 
               {activeTab === "asesmen" && (
                 <div className="grid h-full min-h-0 gap-4 lg:grid-cols-3">
-                  {/* OVERVIEW */}
 
                   <div className="theme-card theme-border rounded-xl border p-5 shadow-sm">
                     <div className="flex items-center gap-3">
@@ -1340,7 +1272,6 @@ export default function BKPage() {
                     </div>
                   </div>
 
-                  {/* MINAT BAKAT */}
 
                   <div className="theme-card theme-border rounded-xl border p-5 shadow-sm">
                     <div className="flex items-center justify-between">
@@ -1388,7 +1319,6 @@ export default function BKPage() {
                     </div>
                   </div>
 
-                  {/* QUICK ACTION */}
 
                   <div className="theme-card theme-border rounded-xl border p-5 shadow-sm">
                     <div>
@@ -1465,9 +1395,6 @@ export default function BKPage() {
         </main>
       </div>
 
-      {/* =========================================================
-          DETAIL KONSELING MODAL
-      ========================================================= */}
 
       {selectedKonseling && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-[2px]">
@@ -1583,9 +1510,6 @@ export default function BKPage() {
         </div>
       )}
 
-      {/* =========================================================
-          DETAIL PELANGGARAN MODAL
-      ========================================================= */}
 
       {selectedPelanggaran && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-[2px]">
@@ -1674,9 +1598,6 @@ export default function BKPage() {
         </div>
       )}
 
-      {/* =========================================================
-          DETAIL PRESTASI MODAL
-      ========================================================= */}
 
       {selectedPrestasi && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-[2px]">
@@ -1767,9 +1688,6 @@ export default function BKPage() {
   );
 }
 
-/* =========================================================
-   QUICK SUMMARY
-========================================================= */
 
 function QuickSummary({
   icon: Icon,
@@ -1807,9 +1725,6 @@ function QuickSummary({
   );
 }
 
-/* =========================================================
-   DETAIL ITEM
-========================================================= */
 
 function DetailItem({
   icon: Icon,
@@ -1840,9 +1755,6 @@ function DetailItem({
   );
 }
 
-/* =========================================================
-   PROGRESS ROW
-========================================================= */
 
 function ProgressRow({ label, value }) {
   return (
@@ -1869,9 +1781,6 @@ function ProgressRow({ label, value }) {
   );
 }
 
-/* =========================================================
-   INTEREST ROW
-========================================================= */
 
 function InterestRow({ label, value }) {
   return (
@@ -1898,9 +1807,6 @@ function InterestRow({ label, value }) {
   );
 }
 
-/* =========================================================
-   QUICK ACTION
-========================================================= */
 
 function QuickAction({
   icon: Icon,

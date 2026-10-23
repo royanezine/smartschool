@@ -3,7 +3,6 @@
 export function normalizePublicConfig(response) {
   let data = response;
 
-  // Buka pembungkus response API, misalnya { success, message, data }
   for (let i = 0; i < 5; i += 1) {
     if (
       data &&
@@ -32,7 +31,6 @@ export function normalizePublicConfig(response) {
       continue;
     }
 
-    // Mendukung konfigurasi yang sudah berupa satu item
     if ("section" in sections) {
       result.push({
         ...sections,

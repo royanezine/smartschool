@@ -18,10 +18,6 @@ import {
 import { getKelasMapelSiswa } from "@/services/kelasMapel.service";
 import { getUjianByKelasMapel } from "@/services/ujian.service";
 
-/* =========================================================
-   THEME HELPERS
-   Mengikuti token global theme
-========================================================= */
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -98,9 +94,6 @@ const themeTextSecondary =
 const themeTextMuted =
   "theme-text-muted";
 
-/* =========================================================
-   STATUS UJIAN
-========================================================= */
 
 const STATUS_STYLE = {
   mendatang: {
@@ -128,9 +121,6 @@ const STATUS_STYLE = {
   },
 };
 
-/* =========================================================
-   HELPERS
-========================================================= */
 
 function parseList(response) {
   if (Array.isArray(response)) return response;
@@ -183,9 +173,6 @@ function formatTanggal(value) {
   });
 }
 
-/* =========================================================
-   HALAMAN UJIAN
-========================================================= */
 
 function UjianPageInner() {
   const router = useRouter();
@@ -203,16 +190,12 @@ function UjianPageInner() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  /* =======================================================
-     LOAD DATA
-  ======================================================= */
 
   async function loadData() {
     try {
       setLoading(true);
       setError("");
 
-      // Kelas-mapel milik siswa.
       const kelasMapel = await getKelasMapelSiswa();
 
       setKelasMapelList(kelasMapel);
@@ -222,8 +205,6 @@ function UjianPageInner() {
         return;
       }
 
-      // Ujian per kelas-mapel. Backend hanya mengembalikan ujian
-      // yang sudah dipublikasikan untuk role siswa.
       const hasil = await Promise.allSettled(
         kelasMapel.map(async (km) => {
           const response = await getUjianByKelasMapel(
@@ -256,10 +237,6 @@ function UjianPageInner() {
                 : "-",
               status: getStatusUjian(ujian),
 
-              /*
-               * Endpoint daftar ujian tidak menyertakan hasil
-               * siswa, jadi jangan menampilkan nilai palsu.
-               */
               nilai: null,
             }));
         })
@@ -299,9 +276,6 @@ function UjianPageInner() {
     loadData();
   }, []);
 
-  /* =======================================================
-     DAFTAR MAPEL UNTUK FILTER
-  ======================================================= */
 
   const daftarMapel = useMemo(() => {
     return kelasMapelList
@@ -318,9 +292,6 @@ function UjianPageInner() {
     (m) => m.id === activeMapel
   );
 
-  /* =======================================================
-     FILTER UJIAN
-  ======================================================= */
 
   const filteredUjian = useMemo(() => {
     return ujianList
@@ -336,9 +307,6 @@ function UjianPageInner() {
       );
   }, [ujianList, activeMapel, activeFilter]);
 
-  /* =======================================================
-     STATISTIK
-  ======================================================= */
 
   const jumlahMendatang = ujianList.filter(
     (u) =>
@@ -350,24 +318,17 @@ function UjianPageInner() {
     (u) => u.status === "selesai"
   ).length;
 
-  /* =======================================================
-     AKSI
-  ======================================================= */
 
   function bukaUjian(ujianId) {
     if (!ujianId) return;
     router.push(`/siswa/ujian/${encodeURIComponent(ujianId)}`);
   }
 
-  /* =======================================================
-     RENDER
-  ======================================================= */
 
   return (
     <div className={`${themeText} theme-page min-h-full`}>
       <div className="mx-auto w-full max-w-5xl space-y-6 px-4 py-6 sm:px-6 lg:px-8">
 
-        {/* HEADER */}
 
         <div className="flex items-center gap-3">
           <button
@@ -405,7 +366,6 @@ function UjianPageInner() {
           </div>
         </div>
 
-        {/* STATISTIK */}
 
         <div className="grid grid-cols-2 gap-4">
           <div
@@ -457,7 +417,6 @@ function UjianPageInner() {
           </div>
         </div>
 
-        {/* FILTER MAPEL */}
 
         <div className="flex gap-2 overflow-x-auto pb-1">
           <button
@@ -497,7 +456,6 @@ function UjianPageInner() {
           })}
         </div>
 
-        {/* FILTER STATUS */}
 
         <div className="flex gap-2 overflow-x-auto pb-1">
           {[
@@ -537,7 +495,6 @@ function UjianPageInner() {
           })}
         </div>
 
-        {/* ERROR */}
 
         {error && (
           <div
@@ -578,7 +535,6 @@ function UjianPageInner() {
           </div>
         )}
 
-        {/* LIST UJIAN */}
 
         <div className="space-y-3">
           {loading ? (
@@ -615,7 +571,6 @@ function UjianPageInner() {
                 >
                   <div className="flex items-start gap-3.5">
 
-                    {/* ICON */}
 
                     <div
                       className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${status.surface} ${status.text}`}
@@ -623,7 +578,6 @@ function UjianPageInner() {
                       <GraduationCap size={19} />
                     </div>
 
-                    {/* INFORMASI */}
 
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-1.5">
@@ -667,7 +621,6 @@ function UjianPageInner() {
                       </p>
                     </div>
 
-                    {/* AKSI / NILAI */}
 
                     {ujian.status ===
                     "selesai" ? (
@@ -744,9 +697,6 @@ function UjianPageInner() {
   );
 }
 
-/* =========================================================
-   EXPORT
-========================================================= */
 
 export default function UjianPage() {
   return (

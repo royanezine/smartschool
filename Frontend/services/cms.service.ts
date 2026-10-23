@@ -82,9 +82,6 @@ export const cmsService = {
     );
   },
 
-  // =========================================
-  // ARTIKEL CMS
-  // =========================================
 
   getArtikel() {
     return apiFetch(`${BASE}/artikel`);
@@ -119,9 +116,6 @@ export const cmsService = {
     );
   },
 
-  // =========================================
-  // HALAMAN CMS
-  // =========================================
 
   getHalaman() {
     return apiFetch(`${BASE}/halaman`);
@@ -156,9 +150,6 @@ export const cmsService = {
     );
   },
 
-  // =========================================
-  // TEMA WARNA
-  // =========================================
 
   getTema() {
     return apiFetch(`${BASE}/tema`);
@@ -177,9 +168,6 @@ export const cmsService = {
     });
   },
 
-  // =========================================
-  // MENU KONFIGURASI
-  // =========================================
 
   getMenuKonfigurasi() {
     return apiFetch(`${BASE}/menu-konfigurasi`);

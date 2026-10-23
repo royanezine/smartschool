@@ -53,15 +53,6 @@ export async function getKelasMapel(): Promise<KelasMapel[]> {
     method: "GET",
   });
 
-  /*
-    BE mengembalikan:
-
-    {
-      success: true,
-      message: "...",
-      data: [...]
-    }
-  */
 
   return Array.isArray(result?.data)
     ? result.data
@@ -71,11 +62,16 @@ export async function getKelasMapel(): Promise<KelasMapel[]> {
 export async function getKelasMapelById(
   id: string
 ): Promise<KelasMapel | null> {
-  const data = await getKelasMapel();
+  try {
+    const result = await apiFetch(`/api/kelas-mapel/detail/${id}`, {
+      method: "GET",
+    });
+    if (result?.data) return result.data;
+  } catch {
+  }
 
-  return (
-    data.find((item) => item.id === id) || null
-  );
+  const data = await getKelasMapel();
+  return data.find((item) => item.id === id) || null;
 }
 
 export async function createKelasMapel(

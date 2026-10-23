@@ -17,9 +17,6 @@ import {
   CheckCircle2,
 } from "lucide-react";
 
-// ============================================================
-// DUMMY DATA FASILITAS
-// ============================================================
 const fasilitasData = {
   "fs-001": {
     nama: "Lapangan Basket",
@@ -88,9 +85,6 @@ const fasilitasData = {
   },
 };
 
-// ============================================================
-// THEME CONFIG
-// ============================================================
 const kondisiStyle = {
   Baik: {
     text: "theme-success",
@@ -140,9 +134,6 @@ const riwayatKondisi = [
   },
 ];
 
-// ============================================================
-// RIWAYAT STATUS
-// ============================================================
 const statusIcon = {
   pending: {
     icon: AlertTriangle,
@@ -166,9 +157,6 @@ const statusIcon = {
   },
 };
 
-// ============================================================
-// THEME HELPERS
-// ============================================================
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)]";
 
@@ -196,9 +184,6 @@ const themeDangerHover =
 const themeSoftSurface =
   "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
 
-// ============================================================
-// PAGE
-// ============================================================
 export default function FasilitasDetailPage() {
   const router = useRouter();
   const params = useParams();
@@ -217,9 +202,6 @@ export default function FasilitasDetailPage() {
     },
   ];
 
-  // ============================================================
-  // NOT FOUND
-  // ============================================================
   if (!fasilitas) {
     return (
       <div className="theme-page flex min-h-screen">
@@ -272,9 +254,6 @@ export default function FasilitasDetailPage() {
     kondisiStyle[fasilitas.kondisi] ||
     kondisiStyle.Baik;
 
-  // ============================================================
-  // MAIN
-  // ============================================================
   return (
     <div className="theme-page flex min-h-screen">
       <Sidebar
@@ -303,9 +282,6 @@ export default function FasilitasDetailPage() {
         <main className="theme-page flex-1 p-4 sm:p-6 lg:p-8">
           <div className="w-full space-y-6">
 
-            {/* ====================================================
-                BACK + PAGE HEADER
-            ==================================================== */}
             <div>
               <button
                 onClick={() =>
@@ -342,7 +318,6 @@ export default function FasilitasDetailPage() {
 
                 <div className="flex flex-shrink-0 items-center gap-2">
 
-                  {/* EDIT */}
                   <button
                     className={`theme-text-secondary theme-border ${themeNeutralHover} inline-flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-medium transition-colors`}
                   >
@@ -350,7 +325,6 @@ export default function FasilitasDetailPage() {
                     Edit
                   </button>
 
-                  {/* HAPUS */}
                   <button
                     className={`theme-danger border-[color-mix(in_srgb,var(--color-text)_18%,transparent)] ${themeDangerHover} inline-flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-medium transition-colors`}
                   >
@@ -362,14 +336,10 @@ export default function FasilitasDetailPage() {
               </div>
             </div>
 
-            {/* ====================================================
-                INFO CARD
-            ==================================================== */}
             <div
               className={`theme-card theme-border overflow-hidden rounded-2xl border ${themeCardShadow}`}
             >
 
-              {/* COVER */}
               <div
                 className={`flex h-40 items-center justify-center sm:h-52 ${themePrimarySoft}`}
               >
@@ -383,7 +353,6 @@ export default function FasilitasDetailPage() {
                 </div>
               </div>
 
-              {/* CONTENT */}
               <div className="space-y-5 p-5">
 
                 <p className="theme-text-secondary text-sm leading-relaxed">
@@ -392,7 +361,6 @@ export default function FasilitasDetailPage() {
 
                 <div className="grid grid-cols-2 gap-4 pt-1 sm:grid-cols-4">
 
-                  {/* KATEGORI */}
                   <div className="flex items-start gap-2.5">
                     <div
                       className={`theme-text-muted flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg ${themeSoftSurface}`}
@@ -411,7 +379,6 @@ export default function FasilitasDetailPage() {
                     </div>
                   </div>
 
-                  {/* KAPASITAS */}
                   <div className="flex items-start gap-2.5">
                     <div
                       className={`theme-text-muted flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg ${themeSoftSurface}`}
@@ -430,7 +397,6 @@ export default function FasilitasDetailPage() {
                     </div>
                   </div>
 
-                  {/* TERDAFTAR */}
                   <div className="flex items-start gap-2.5">
                     <div
                       className={`theme-text-muted flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg ${themeSoftSurface}`}
@@ -449,7 +415,6 @@ export default function FasilitasDetailPage() {
                     </div>
                   </div>
 
-                  {/* KONDISI */}
                   <div className="flex items-start gap-2.5">
                     <div
                       className={`theme-text-muted flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg ${themeSoftSurface}`}
@@ -474,14 +439,10 @@ export default function FasilitasDetailPage() {
               </div>
             </div>
 
-            {/* ====================================================
-                RIWAYAT KONDISI
-            ==================================================== */}
             <div
               className={`theme-card theme-border overflow-hidden rounded-2xl border ${themeCardShadow}`}
             >
 
-              {/* HEADER */}
               <div className="theme-border border-b px-5 py-4">
                 <h3 className="theme-text text-sm font-semibold">
                   Riwayat Kondisi
@@ -492,7 +453,6 @@ export default function FasilitasDetailPage() {
                 </p>
               </div>
 
-              {/* LIST */}
               <div className="divide-y divide-[var(--color-border-soft)]">
                 {riwayatKondisi.map((item) => {
                   const s =

@@ -25,9 +25,6 @@ import {
 
 import { createUser } from "@/services/user.service";
 
-// ============================================================
-// THEME HELPERS
-// ============================================================
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -86,9 +83,6 @@ const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-4 focus:ring-[color-mix(in_srgb,var(--color-primary)_12%,transparent)]";
 
 
-// ============================================================
-// PAGE
-// ============================================================
 
 export default function TambahUserPage() {
   const router = useRouter();
@@ -116,9 +110,6 @@ export default function TambahUserPage() {
     status: "aktif",
   });
 
-  // ==========================================================
-  // FORM HANDLERS
-  // ==========================================================
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -219,22 +210,15 @@ export default function TambahUserPage() {
     }
   };
 
-  // ==========================================================
-  // RENDER
-  // ==========================================================
 
   return (
     <div className="theme-page theme-text min-h-full">
       <div className="mx-auto w-full max-w-[1400px] px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
 
-        {/* ================================================== */}
-        {/* HERO */}
-        {/* ================================================== */}
 
         <section
           className={`relative mb-6 overflow-hidden rounded-3xl ${themePrimaryGradient} p-6 ${themePrimaryShadow} md:p-8`}
         >
-          {/* Decorative background */}
           <div
             className="absolute -right-20 -top-28 h-72 w-72 rounded-full blur-2xl"
             style={{
@@ -296,9 +280,6 @@ export default function TambahUserPage() {
           </div>
         </section>
 
-        {/* ================================================== */}
-        {/* ERROR */}
-        {/* ================================================== */}
 
         {error && (
           <div
@@ -332,9 +313,6 @@ export default function TambahUserPage() {
           </div>
         )}
 
-        {/* ================================================== */}
-        {/* SUCCESS */}
-        {/* ================================================== */}
 
         {success && (
           <div
@@ -358,22 +336,13 @@ export default function TambahUserPage() {
           </div>
         )}
 
-        {/* ================================================== */}
-        {/* FORM */}
-        {/* ================================================== */}
 
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_360px]">
 
-            {/* ================================================= */}
-            {/* LEFT */}
-            {/* ================================================= */}
 
             <div className="space-y-6">
 
-              {/* =============================================== */}
-              {/* INFORMASI DASAR */}
-              {/* =============================================== */}
 
               <section
                 className={`overflow-hidden rounded-2xl border theme-border theme-card ${themeCardShadow}`}
@@ -439,9 +408,6 @@ export default function TambahUserPage() {
                 </div>
               </section>
 
-              {/* =============================================== */}
-              {/* AKSES AKUN */}
-              {/* =============================================== */}
 
               <section
                 className={`overflow-hidden rounded-2xl border theme-border theme-card ${themeCardShadow}`}
@@ -535,9 +501,6 @@ export default function TambahUserPage() {
                 </div>
               </section>
 
-              {/* =============================================== */}
-              {/* ORGANISASI */}
-              {/* =============================================== */}
 
               <section
                 className={`overflow-hidden rounded-2xl border theme-border theme-card ${themeCardShadow}`}
@@ -572,9 +535,6 @@ export default function TambahUserPage() {
                 </div>
               </section>
 
-              {/* =============================================== */}
-              {/* AKADEMIK & KEPEGAWAIAN */}
-              {/* =============================================== */}
 
               <section
                 className={`overflow-hidden rounded-2xl border theme-border theme-card ${themeCardShadow}`}
@@ -637,9 +597,6 @@ export default function TambahUserPage() {
               </section>
             </div>
 
-            {/* ================================================= */}
-            {/* RIGHT SIDEBAR */}
-            {/* ================================================= */}
 
             <aside className="xl:sticky xl:top-0 xl:self-start">
               <div className="space-y-4">
@@ -648,9 +605,6 @@ export default function TambahUserPage() {
 
                 <TipsCard />
 
-                {/* ============================================= */}
-                {/* SAVE CARD */}
-                {/* ============================================= */}
 
                 <div
                   className={`overflow-hidden rounded-2xl ${themePrimaryGradient} p-5 ${themePrimaryShadow}`}
@@ -710,9 +664,6 @@ export default function TambahUserPage() {
 }
 
 
-// ============================================================
-// SECTION HEADER
-// ============================================================
 
 function SectionHeader({
   icon: Icon,
@@ -778,9 +729,6 @@ function SectionHeader({
 }
 
 
-// ============================================================
-// INPUT FIELD
-// ============================================================
 
 function InputField({
   label,
@@ -828,9 +776,6 @@ function InputField({
 }
 
 
-// ============================================================
-// SELECT FIELD
-// ============================================================
 
 function SelectField({
   label,
@@ -876,9 +821,6 @@ function SelectField({
 }
 
 
-// ============================================================
-// PASSWORD FIELD
-// ============================================================
 
 function PasswordField({
   label,
@@ -939,9 +881,6 @@ function PasswordField({
 }
 
 
-// ============================================================
-// PREVIEW CARD
-// ============================================================
 
 function PreviewCard({ form }) {
   const name =
@@ -1045,9 +984,6 @@ function PreviewCard({ form }) {
 }
 
 
-// ============================================================
-// PREVIEW ROW
-// ============================================================
 
 function PreviewRow({ label, value }) {
   return (
@@ -1064,9 +1000,6 @@ function PreviewRow({ label, value }) {
 }
 
 
-// ============================================================
-// TIPS CARD
-// ============================================================
 
 function TipsCard() {
   const items = [
@@ -1113,9 +1046,6 @@ function TipsCard() {
 }
 
 
-// ============================================================
-// HELPERS
-// ============================================================
 
 function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);

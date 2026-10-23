@@ -16,9 +16,6 @@ import {
   CheckCircle2,
 } from "lucide-react";
 
-// ============================================================
-// THEME HELPERS
-// ============================================================
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -71,9 +68,6 @@ const themeWarningSurface =
 const themeWarningBorder =
   "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
 
-// ============================================================
-// DUMMY DATA
-// ============================================================
 
 const SEMESTER_OPTIONS = [
   "Ganjil 2025/2026",
@@ -147,15 +141,9 @@ const unitAkademik = [
   },
 ];
 
-// ============================================================
-// HELPERS
-// ============================================================
 
 const round1 = (n) => Math.round(n * 10) / 10;
 
-// ============================================================
-// MAIN COMPONENT
-// ============================================================
 
 export default function LaporanAkademikPage() {
   const router = useRouter();
@@ -170,9 +158,6 @@ export default function LaporanAkademikPage() {
 
   const [search, setSearch] = useState("");
 
-  // ============================================================
-  // FILTER
-  // ============================================================
 
   const filteredUnits = useMemo(() => {
     const keyword = search.trim().toLowerCase();
@@ -190,9 +175,6 @@ export default function LaporanAkademikPage() {
     });
   }, [jenjang, search]);
 
-  // ============================================================
-  // SUMMARY
-  // ============================================================
 
   const summary = useMemo(() => {
     if (filteredUnits.length === 0) {
@@ -236,9 +218,6 @@ export default function LaporanAkademikPage() {
     };
   }, [filteredUnits]);
 
-  // ============================================================
-  // DOWNLOAD
-  // ============================================================
 
   const handleDownload = () => {
     const header = [
@@ -301,23 +280,16 @@ export default function LaporanAkademikPage() {
     URL.revokeObjectURL(url);
   };
 
-  // ============================================================
-  // RENDER
-  // ============================================================
 
   return (
     <div className="theme-page theme-text min-h-full">
       <div className="w-full max-w-[1800px] mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
         <div className="space-y-6">
 
-          {/* ==================================================
-              PAGE HEADER
-          ================================================== */}
 
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="min-w-0">
 
-              {/* BACK */}
               <button
                 type="button"
                 onClick={() =>
@@ -329,7 +301,6 @@ export default function LaporanAkademikPage() {
                 Laporan & Analitik
               </button>
 
-              {/* TITLE */}
               <div className="flex items-center gap-2.5">
                 <div
                   className={`p-2 rounded-lg ${themePrimaryGradient} text-[var(--color-card)] ${themeSmallShadow} flex-shrink-0`}
@@ -342,7 +313,6 @@ export default function LaporanAkademikPage() {
                 </h1>
               </div>
 
-              {/* DESCRIPTION */}
               <p className="theme-text-secondary text-sm mt-1 ml-[42px] flex items-center gap-1.5">
                 <Sparkles
                   size={14}
@@ -355,7 +325,6 @@ export default function LaporanAkademikPage() {
               </p>
             </div>
 
-            {/* DOWNLOAD */}
             <button
               type="button"
               onClick={handleDownload}
@@ -366,16 +335,12 @@ export default function LaporanAkademikPage() {
             </button>
           </div>
 
-          {/* ==================================================
-              FILTER BAR
-          ================================================== */}
 
           <div
             className={`theme-card rounded-xl border theme-border p-4 ${themeCardShadow}`}
           >
             <div className="flex flex-col sm:flex-row flex-wrap gap-3">
 
-              {/* SEMESTER */}
               <div className="relative flex-1 min-w-[160px]">
                 <select
                   value={semester}
@@ -400,7 +365,6 @@ export default function LaporanAkademikPage() {
                 />
               </div>
 
-              {/* JENJANG */}
               <div className="relative flex-1 min-w-[140px]">
                 <select
                   value={jenjang}
@@ -425,7 +389,6 @@ export default function LaporanAkademikPage() {
                 />
               </div>
 
-              {/* SEARCH */}
               <div className="relative flex-1 min-w-[200px]">
                 <Search
                   size={15}
@@ -445,13 +408,9 @@ export default function LaporanAkademikPage() {
             </div>
           </div>
 
-          {/* ==================================================
-              SUMMARY CARDS
-          ================================================== */}
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
 
-            {/* RATA NILAI */}
             <div
               className={`theme-card rounded-xl border theme-border p-3.5 ${themeSmallShadow} flex items-center gap-3 min-w-0`}
             >
@@ -472,7 +431,6 @@ export default function LaporanAkademikPage() {
               </div>
             </div>
 
-            {/* RATA KEHADIRAN */}
             <div
               className={`theme-card rounded-xl border theme-border p-3.5 ${themeSmallShadow} flex items-center gap-3 min-w-0`}
             >
@@ -493,7 +451,6 @@ export default function LaporanAkademikPage() {
               </div>
             </div>
 
-            {/* TOTAL SISWA */}
             <div
               className={`theme-card rounded-xl border theme-border p-3.5 ${themeSmallShadow} flex items-center gap-3 min-w-0`}
             >
@@ -514,7 +471,6 @@ export default function LaporanAkademikPage() {
               </div>
             </div>
 
-            {/* TUNTAS */}
             <div
               className={`theme-card rounded-xl border theme-border p-3.5 ${themeSmallShadow} flex items-center gap-3 min-w-0`}
             >
@@ -536,15 +492,11 @@ export default function LaporanAkademikPage() {
             </div>
           </div>
 
-          {/* ==================================================
-              TABLE
-          ================================================== */}
 
           <div
             className={`theme-card rounded-xl border theme-border ${themeCardShadow} overflow-hidden`}
           >
 
-            {/* TABLE HEADER */}
             <div
               className={`p-4 sm:p-5 border-b ${themeDivider} flex items-center justify-between gap-2`}
             >
@@ -557,11 +509,9 @@ export default function LaporanAkademikPage() {
               </span>
             </div>
 
-            {/* TABLE */}
             <div className="overflow-x-auto w-full">
               <table className="w-full min-w-[720px] text-sm border-collapse">
 
-                {/* THEAD */}
                 <thead>
                   <tr
                     className={themeNeutralSurface}
@@ -604,9 +554,7 @@ export default function LaporanAkademikPage() {
                   </tr>
                 </thead>
 
-                {/* TBODY */}
                 <tbody>
-                  {/* EMPTY */}
                   {filteredUnits.length === 0 && (
                     <tr>
                       <td
@@ -625,7 +573,6 @@ export default function LaporanAkademikPage() {
                     </tr>
                   )}
 
-                  {/* DATA */}
                   {filteredUnits.map((unit) => {
                     const persenTuntas = round1(
                       (unit.tuntas / unit.siswa) * 100
@@ -641,14 +588,12 @@ export default function LaporanAkademikPage() {
                         key={unit.id}
                         className={`${themeNeutralHover} transition-colors`}
                       >
-                        {/* UNIT */}
                         <td className="border theme-border px-4 sm:px-5 py-3 whitespace-nowrap">
                           <span className="text-sm font-medium theme-text">
                             {unit.nama}
                           </span>
                         </td>
 
-                        {/* JENJANG */}
                         <td className="border theme-border px-3 py-3 text-center whitespace-nowrap">
                           <span
                             className={`text-[11px] font-medium px-2 py-0.5 rounded-full border ${themeNeutralSurface} text-[var(--color-text-muted)] ${themeNeutralBorder}`}
@@ -657,24 +602,20 @@ export default function LaporanAkademikPage() {
                           </span>
                         </td>
 
-                        {/* SISWA */}
                         <td className="border theme-border px-3 py-3 text-center theme-text-secondary whitespace-nowrap">
                           {unit.siswa.toLocaleString("id-ID")}
                         </td>
 
-                        {/* RATA NILAI */}
                         <td className="border theme-border px-3 py-3 text-center whitespace-nowrap">
                           <span className="text-sm font-semibold theme-text">
                             {unit.rataNilai}
                           </span>
                         </td>
 
-                        {/* KEHADIRAN */}
                         <td className="border theme-border px-3 py-3 text-center theme-text-secondary whitespace-nowrap">
                           {unit.kehadiran}%
                         </td>
 
-                        {/* TUNTAS */}
                         <td className="border theme-border px-3 py-3 text-center whitespace-nowrap">
                           <span
                             className={`text-[11px] font-medium px-2 py-0.5 rounded-full border ${tuntasStyle}`}

@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { useTheme } from "next-themes";
+import { useTheme } from "@/app/components/ThemeProvider";
 import {
   Bell,
   Search,
@@ -37,9 +37,6 @@ export default function Header({ notifications = [], user: userProp = null }) {
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
 
-  /* ============================================================
-     MOUNT & THEME
-  ============================================================ */
 
   const [mounted, setMounted] = useState(false);
 
@@ -47,9 +44,6 @@ export default function Header({ notifications = [], user: userProp = null }) {
     setMounted(true);
   }, []);
 
-  /* ============================================================
-     STATE PROFIL PENGGUNA
-  ============================================================ */
  
   const [currentUser, setCurrentUser] = useState(null);
   const [authRole, setAuthRole] = useState(null);
@@ -57,7 +51,6 @@ export default function Header({ notifications = [], user: userProp = null }) {
   const [isNotifOpen, setIsNotifOpen] = useState(false);
 
   useEffect(() => {
-    // Satu sumber kebenaran: token + user dari lib/auth.
     const syncSession = () => {
       try {
         setCurrentUser(getSessionUser());
@@ -71,10 +64,6 @@ export default function Header({ notifications = [], user: userProp = null }) {
 
     syncSession();
 
-    // `subscribeAuth` menangani perubahan sesi pada TAB INI (`user-updated`)
-    // maupun TAB LAIN pada origin yang sama (`storage`). Sesi produksi
-    // memang dibagi satu browser, jadi profil yang tampil selalu mengikuti
-    // token aktif dan tidak pernah tertinggal akun sebelumnya.
     const unsubscribe = subscribeAuth(syncSession);
 
     return () => {
@@ -99,9 +88,6 @@ export default function Header({ notifications = [], user: userProp = null }) {
       ? profileUser.avatar.toUpperCase()
       : displayName.charAt(0).toUpperCase();
 
-  /* ============================================================
-     ROLE DARI PATHNAME
-  ============================================================ */
 
   const resolveRoleFromPath = (currentPathname) => {
     if (currentPathname?.startsWith("/super-admin")) {
@@ -131,7 +117,6 @@ export default function Header({ notifications = [], user: userProp = null }) {
     return "";
   };
 
-  // Petakan role kanonik (dari token) ke key tampilan Header.
   const AUTH_ROLE_TO_HEADER_ROLE = {
     super_admin: "super-admin",
     cms_admin: "cms-admin",
@@ -143,9 +128,6 @@ export default function Header({ notifications = [], user: userProp = null }) {
     siswa: "siswa",
   };
 
-  // Role utama berasal dari sesi terautentikasi (token). URL hanya
-  // fallback bila token tidak memuat role yang dikenali. Tidak ada
-  // lagi default "super-admin" yang salah.
   const role =
     AUTH_ROLE_TO_HEADER_ROLE[authRole] ||
     resolveRoleFromPath(pathname) ||
@@ -213,9 +195,6 @@ export default function Header({ notifications = [], user: userProp = null }) {
       user: "text-slate-600 bg-slate-100",
     }[role] || "text-slate-600 bg-slate-100";
 
-  /* ============================================================
-     STATE NOTIFIKASI
-  ============================================================ */
 
   const [notifList, setNotifList] = useState(
     Array.isArray(notifications) ? notifications : []
@@ -224,9 +203,6 @@ export default function Header({ notifications = [], user: userProp = null }) {
   const [loadingNotif, setLoadingNotif] = useState(false);
   const [notifError, setNotifError] = useState("");
 
-  /* ============================================================
-     LOAD NOTIFIKASI
-  ============================================================ */
 
   const loadNotifications = useCallback(async (showLoading = false) => {
     try {
@@ -290,9 +266,6 @@ export default function Header({ notifications = [], user: userProp = null }) {
     }
   }, [isNotifOpen, loadNotifications]);
 
-  /* ============================================================
-     FORMAT WAKTU
-  ============================================================ */
 
   const formatNotificationTime = (dateString) => {
     if (!dateString) return "";
@@ -321,9 +294,6 @@ export default function Header({ notifications = [], user: userProp = null }) {
     });
   };
 
-  /* ============================================================
-     KLIK NOTIFIKASI
-  ============================================================ */
 
   const handleNotificationClick = async (notif) => {
     try {
@@ -357,9 +327,6 @@ export default function Header({ notifications = [], user: userProp = null }) {
     }
   };
 
-  /* ============================================================
-     TANDAI SEMUA DIBACA
-  ============================================================ */
 
   const handleMarkAllAsRead = async () => {
     if (unreadCount === 0) return;
@@ -386,14 +353,10 @@ export default function Header({ notifications = [], user: userProp = null }) {
     if (path) router.push(path);
   };
 
-  /* ============================================================
-     LOGOUT
-  ============================================================ */
 
   const handleLogout = () => {
     setIsProfileOpen(false);
 
-    // Hapus sesi aktif (token + user + key token lama) secara lengkap.
     clearSession();
 
     router.push("/login");
@@ -423,9 +386,6 @@ export default function Header({ notifications = [], user: userProp = null }) {
     },
   ];
 
-  /* ============================================================
-     RENDER
-  ============================================================ */
 
   return (
     <header
@@ -438,7 +398,6 @@ export default function Header({ notifications = [], user: userProp = null }) {
       "
     >
       <div className="h-full flex items-center justify-between px-4 md:px-6 lg:px-8">
-        {/* KIRI: PENCARIAN */}
         <div className="flex items-center gap-3 md:gap-5 min-w-0">
           <div className="relative hidden lg:block">
             <Search
@@ -487,9 +446,7 @@ export default function Header({ notifications = [], user: userProp = null }) {
           </button>
         </div>
 
-        {/* KANAN */}
         <div className="flex items-center gap-1 md:gap-2">
-          {/* DARK / LIGHT MODE */}
           {mounted ? (
             <button
               type="button"
@@ -527,7 +484,6 @@ export default function Header({ notifications = [], user: userProp = null }) {
             <div className="p-2 rounded-xl w-9 h-9" aria-hidden="true" />
           )}
 
-          {/* NOTIFIKASI */}
           <div className="relative">
             <button
               type="button"
@@ -756,7 +712,6 @@ export default function Header({ notifications = [], user: userProp = null }) {
             )}
           </div>
 
-          {/* PROFIL PENGGUNA */}
           <div className="relative">
             <button
               type="button"
@@ -807,7 +762,6 @@ export default function Header({ notifications = [], user: userProp = null }) {
 
             {isProfileOpen && (
               <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200/60 dark:border-slate-700 py-1 z-40 overflow-hidden">
-                {/* ROLE */}
                 <div className="px-4 py-2 border-b border-slate-100 dark:border-slate-700 flex items-center gap-1.5 text-[10px] font-medium text-slate-500 dark:text-slate-400">
                   <Crown size={11} className="text-yellow-500" />
                   <span>Role:</span>
@@ -818,7 +772,6 @@ export default function Header({ notifications = [], user: userProp = null }) {
                   </span>
                 </div>
 
-                {/* MENU */}
                 <div className="py-1">
                   {menuItems.map((item) => {
                     const Icon = item.icon;
@@ -848,7 +801,6 @@ export default function Header({ notifications = [], user: userProp = null }) {
                   })}
                 </div>
 
-                {/* LOGOUT */}
                 <div className="border-t border-slate-100 dark:border-slate-700 pt-1">
                   <button
                     type="button"
@@ -869,7 +821,6 @@ export default function Header({ notifications = [], user: userProp = null }) {
                   </button>
                 </div>
 
-                {/* VERSION */}
                 <div className="px-4 py-2 border-t border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50">
                   <p className="text-[10px] text-slate-400 text-center tracking-widest">
                     v2.0.0 • 2026

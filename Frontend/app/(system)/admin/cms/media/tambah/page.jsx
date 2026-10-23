@@ -76,9 +76,6 @@ export default function UploadMediaPage() {
 
   return (
     <div className="theme-page flex min-h-screen w-full">
-      {/* =====================================================
-          SIDEBAR
-      ===================================================== */}
       <div className="shrink-0">
         <Sidebar
           active={active}
@@ -88,17 +85,11 @@ export default function UploadMediaPage() {
         />
       </div>
 
-      {/* =====================================================
-          MAIN CONTENT
-      ===================================================== */}
       <main className="min-w-0 flex-1">
         <div className="w-full min-w-0">
           <div className="w-full px-3 py-4 sm:px-5 sm:py-6 md:px-7 lg:px-8 xl:px-10">
             <div className="mx-auto w-full max-w-[1500px]">
 
-              {/* =================================================
-                  TOP BAR
-              ================================================= */}
               <div className="mb-5 flex items-center">
                 <button
                   type="button"
@@ -128,9 +119,6 @@ export default function UploadMediaPage() {
                 </button>
               </div>
 
-              {/* =================================================
-                  HEADER
-              ================================================= */}
               <section
                 className="
                   relative
@@ -143,7 +131,6 @@ export default function UploadMediaPage() {
                   shadow-sm
                 "
               >
-                {/* Decorative */}
                 <div
                   className="
                     pointer-events-none
@@ -177,7 +164,6 @@ export default function UploadMediaPage() {
                 <div className="relative p-5 sm:p-6 md:p-8">
                   <div className="flex items-start gap-4">
 
-                    {/* ICON */}
                     <div
                       className="
                         flex
@@ -195,7 +181,6 @@ export default function UploadMediaPage() {
                       <Upload className="h-6 w-6 sm:h-7 sm:w-7" />
                     </div>
 
-                    {/* TEXT */}
                     <div className="min-w-0">
                       <p
                         className="
@@ -242,14 +227,8 @@ export default function UploadMediaPage() {
                 </div>
               </section>
 
-              {/* =================================================
-                  CONTENT
-              ================================================= */}
               <div className="grid w-full gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
 
-                {/* =================================================
-                    FORM
-                ================================================= */}
                 <form
                   onSubmit={handleSubmit}
                   className="
@@ -262,7 +241,6 @@ export default function UploadMediaPage() {
                     shadow-sm
                   "
                 >
-                  {/* FORM HEADER */}
                   <div
                     className="
                       border-b
@@ -307,10 +285,8 @@ export default function UploadMediaPage() {
                     </div>
                   </div>
 
-                  {/* FORM BODY */}
                   <div className="p-5 sm:p-6">
 
-                    {/* UPLOAD AREA */}
                     <div
                       className="
                         relative
@@ -408,7 +384,6 @@ export default function UploadMediaPage() {
                       </label>
                     </div>
 
-                    {/* SELECTED FILE */}
                     {file && (
                       <div
                         className="
@@ -512,7 +487,6 @@ export default function UploadMediaPage() {
                       </div>
                     )}
 
-                    {/* ACTION */}
                     <div
                       className="
                         mt-6
@@ -523,7 +497,6 @@ export default function UploadMediaPage() {
                         sm:justify-end
                       "
                     >
-                      {/* CANCEL */}
                       <button
                         type="button"
                         onClick={() => router.back()}
@@ -551,7 +524,6 @@ export default function UploadMediaPage() {
                         Batal
                       </button>
 
-                      {/* SUBMIT */}
                       <button
                         type="submit"
                         disabled={!file || loading}
@@ -603,12 +575,8 @@ export default function UploadMediaPage() {
                   </div>
                 </form>
 
-                {/* =================================================
-                    INFO PANEL
-                ================================================= */}
                 <aside className="min-w-0">
 
-                  {/* PANDUAN */}
                   <div
                     className="
                       rounded-2xl
@@ -724,7 +692,6 @@ export default function UploadMediaPage() {
                     </div>
                   </div>
 
-                  {/* SUPPORTED FILE */}
                   <div
                     className="
                       mt-4
@@ -750,7 +717,6 @@ export default function UploadMediaPage() {
 
                     <div className="mt-4 grid grid-cols-3 gap-2">
 
-                      {/* IMAGE */}
                       <div className="rounded-xl theme-info p-3 text-center">
                         <ImageIcon className="mx-auto h-5 w-5" />
 
@@ -759,7 +725,6 @@ export default function UploadMediaPage() {
                         </p>
                       </div>
 
-                      {/* VIDEO */}
                       <div className="rounded-xl theme-card-soft p-3 text-center">
                         <Video
                           className="
@@ -782,7 +747,6 @@ export default function UploadMediaPage() {
                         </p>
                       </div>
 
-                      {/* PDF */}
                       <div className="rounded-xl theme-danger p-3 text-center">
                         <FileText className="mx-auto h-5 w-5" />
 
@@ -795,9 +759,6 @@ export default function UploadMediaPage() {
                 </aside>
               </div>
 
-              {/* =================================================
-                  FOOTER
-              ================================================= */}
               <footer className="py-8 text-center">
                 <p
                   className="

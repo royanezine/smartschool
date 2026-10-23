@@ -11,16 +11,6 @@ import {
   X,
 } from "lucide-react";
 
-/**
- * app/admin/akademik/sikapPerilaku/page.jsx
- *
- * Halaman Sikap & Perilaku — mencatat catatan sikap/perilaku siswa
- * (positif maupun negatif) dalam satu tabel.
- *
- * CATATAN DATA:
- * MOCK_CATATAN masih dummy. Kalau nanti nyambung ke API, tinggal ganti
- * useState(MOCK_CATATAN) dengan hasil fetch.
- */
 
 const JENIS_OPTIONS = ["Positif", "Negatif"];
 
@@ -219,7 +209,6 @@ export default function SikapPerilakuPage() {
 
   return (
     <div className="flex h-screen w-full theme-page overflow-hidden">
-      {/* SIDEBAR */}
       <Sidebar
         active="akademikSikapPerilaku"
         setActive={() => {}}
@@ -229,7 +218,6 @@ export default function SikapPerilakuPage() {
       />
 
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
-        {/* HEADER */}
         <Header
           toggleSidebar={toggleSidebar}
           notifications={[]}
@@ -243,9 +231,6 @@ export default function SikapPerilakuPage() {
         <main className="flex-1 overflow-y-auto theme-page">
           <div className="p-4 sm:p-6 lg:p-8 space-y-6">
 
-            {/* ======================================================
-                HEADER
-                ====================================================== */}
 
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div className="flex items-center gap-3">
@@ -281,9 +266,6 @@ export default function SikapPerilakuPage() {
               </button>
             </div>
 
-            {/* ======================================================
-                FILTER BAR
-                ====================================================== */}
 
             <div
               className="
@@ -327,7 +309,6 @@ export default function SikapPerilakuPage() {
                   "
                 />
 
-                {/* FILTER KELAS */}
                 <select
                   value={kelasFilter}
                   onChange={(e) =>
@@ -349,7 +330,6 @@ export default function SikapPerilakuPage() {
                   ))}
                 </select>
 
-                {/* FILTER JENIS */}
                 <select
                   value={jenisFilter}
                   onChange={(e) =>
@@ -376,9 +356,6 @@ export default function SikapPerilakuPage() {
               </div>
             </div>
 
-            {/* ======================================================
-                TABEL SIKAP & PERILAKU
-                ====================================================== */}
 
             <div
               className="
@@ -528,13 +505,9 @@ export default function SikapPerilakuPage() {
         </main>
       </div>
 
-      {/* ============================================================
-          MODAL TAMBAH CATATAN
-          ============================================================ */}
 
       {showForm && (
         <>
-          {/* OVERLAY */}
           <div
             onClick={() => setShowForm(false)}
             className="
@@ -544,7 +517,6 @@ export default function SikapPerilakuPage() {
             "
           />
 
-          {/* MODAL CONTAINER */}
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div
               className="
@@ -556,7 +528,6 @@ export default function SikapPerilakuPage() {
                 overflow-y-auto
               "
             >
-              {/* MODAL HEADER */}
               <div
                 className="
                   flex items-center justify-between
@@ -584,10 +555,8 @@ export default function SikapPerilakuPage() {
                 </button>
               </div>
 
-              {/* MODAL FORM */}
               <div className="p-5 space-y-4">
 
-                {/* NAMA SISWA */}
                 <div>
                   <label
                     className="
@@ -619,7 +588,6 @@ export default function SikapPerilakuPage() {
                   />
                 </div>
 
-                {/* KELAS */}
                 <div>
                   <label
                     className="
@@ -651,9 +619,7 @@ export default function SikapPerilakuPage() {
                   />
                 </div>
 
-                {/* JENIS + POIN */}
                 <div className="grid grid-cols-2 gap-3">
-                  {/* JENIS */}
                   <div>
                     <label
                       className="
@@ -689,7 +655,6 @@ export default function SikapPerilakuPage() {
                     </select>
                   </div>
 
-                  {/* POIN */}
                   <div>
                     <label
                       className="
@@ -722,7 +687,6 @@ export default function SikapPerilakuPage() {
                   </div>
                 </div>
 
-                {/* CATATAN */}
                 <div>
                   <label
                     className="
@@ -755,7 +719,6 @@ export default function SikapPerilakuPage() {
                   />
                 </div>
 
-                {/* TANGGAL */}
                 <div>
                   <label
                     className="
@@ -787,7 +750,6 @@ export default function SikapPerilakuPage() {
                 </div>
               </div>
 
-              {/* MODAL FOOTER */}
               <div
                 className="
                   flex items-center justify-end gap-2

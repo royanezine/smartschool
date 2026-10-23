@@ -122,9 +122,6 @@ export default function TabunganSiswaPage() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
 
-  /* =====================================================
-     LOAD DATA
-  ===================================================== */
 
   const loadTabungan = useCallback(async () => {
     setLoading(true);
@@ -200,9 +197,6 @@ export default function TabunganSiswaPage() {
     setPage(1);
   }
 
-  /* =====================================================
-     NAVIGASI
-  ===================================================== */
 
   function openDetail(item) {
     if (!item?.siswaId) {
@@ -259,7 +253,6 @@ export default function TabunganSiswaPage() {
         <main className="min-w-0 flex-1 overflow-y-auto theme-page theme-text">
           <div className="w-full px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
             <div className="mx-auto w-full max-w-[1500px] space-y-5">
-              {/* HEADER */}
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div className="flex items-center gap-3">
                   <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
@@ -292,7 +285,6 @@ export default function TabunganSiswaPage() {
                 </button>
               </div>
 
-              {/* ALERT */}
               {error && (
                 <div
                   role="alert"
@@ -314,7 +306,6 @@ export default function TabunganSiswaPage() {
                 </div>
               )}
 
-              {/* STATISTIK */}
               <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
                 <StatCard
                   title="Total Saldo"
@@ -362,7 +353,6 @@ export default function TabunganSiswaPage() {
                 />
               </section>
 
-              {/* TABEL */}
               <section className="theme-card overflow-hidden rounded-xl border theme-border shadow-sm">
                 <div className="flex flex-col gap-4 border-b theme-border p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
                   <div>
@@ -394,7 +384,6 @@ export default function TabunganSiswaPage() {
                   </div>
                 </div>
 
-                {/* SEARCH */}
                 <form
                   onSubmit={handleSearch}
                   className="flex flex-col gap-3 border-b theme-border p-4 sm:flex-row sm:p-5"
@@ -433,7 +422,6 @@ export default function TabunganSiswaPage() {
                   )}
                 </form>
 
-                {/* DATA */}
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[760px] text-left text-sm">
                     <thead className="bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] text-xs uppercase tracking-wide theme-text-muted border-b theme-border">
@@ -536,7 +524,6 @@ export default function TabunganSiswaPage() {
                   </table>
                 </div>
 
-                {/* PAGINATION */}
                 <div className="flex flex-col gap-3 border-t theme-border px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
                   <p className="text-xs theme-text-muted">
                     Total{" "}
@@ -573,7 +560,6 @@ export default function TabunganSiswaPage() {
                 </div>
               </section>
 
-              {/* RINGKASAN LAPORAN */}
               <div className="flex items-start gap-3 rounded-lg border border-blue-200 bg-blue-50/70 p-5 text-sm text-blue-900 dark:border-blue-900/60 dark:bg-blue-950/30 dark:text-blue-200">
                 <Receipt size={20} className="mt-0.5 shrink-0" />
                 <div>

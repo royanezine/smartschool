@@ -32,10 +32,6 @@ export default function EditArticlePage() {
 
   const [categories, setCategories] = useState([]);
 
-  /*
-   * State sidebar.
-   * Default true (expanded).
-   */
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const [form, setForm] = useState({
@@ -47,9 +43,6 @@ export default function EditArticlePage() {
     status: "draft",
   });
 
-  /* =========================================================
-     HANDLE INPUT
-  ========================================================= */
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -60,9 +53,6 @@ export default function EditArticlePage() {
     }));
   };
 
-  /* =========================================================
-     LOAD DATA
-  ========================================================= */
 
   useEffect(() => {
     if (!id) return;
@@ -75,9 +65,6 @@ export default function EditArticlePage() {
       setLoading(true);
       setError("");
 
-      /* =====================================================
-         AMBIL ARTIKEL
-      ===================================================== */
 
       const artikelResponse = await apiFetch(
         "/api/cms/artikel"
@@ -113,9 +100,6 @@ export default function EditArticlePage() {
         );
       }
 
-      /* =====================================================
-         AMBIL KATEGORI
-      ===================================================== */
 
       const kategoriResponse = await apiFetch(
         "/api/cms/kategori-artikel"
@@ -145,9 +129,6 @@ export default function EditArticlePage() {
 
       setCategories(kategoriList);
 
-      /* =====================================================
-         SET FORM
-      ===================================================== */
 
       setForm({
         judul: selectedArticle?.judul || "",
@@ -183,9 +164,6 @@ export default function EditArticlePage() {
     }
   };
 
-  /* =========================================================
-     SUBMIT
-  ========================================================= */
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -257,9 +235,6 @@ export default function EditArticlePage() {
     }
   };
 
-  /* =========================================================
-     LOADING STATE
-  ========================================================= */
 
   if (loading) {
     return (
@@ -305,15 +280,9 @@ export default function EditArticlePage() {
     );
   }
 
-  /* =========================================================
-     MAIN
-  ========================================================= */
 
   return (
     <div className="theme-page flex h-screen overflow-hidden">
-      {/* =====================================================
-          SIDEBAR
-      ===================================================== */}
 
       <Sidebar
         role="cms"
@@ -328,14 +297,8 @@ export default function EditArticlePage() {
         }}
       />
 
-      {/* =====================================================
-          CONTENT
-      ===================================================== */}
 
       <div className="theme-page flex h-screen min-w-0 flex-1 flex-col overflow-hidden">
-        {/* ===================================================
-            HEADER
-        =================================================== */}
 
         <div className="theme-header sticky top-0 z-30 shrink-0 border-b">
           <Header
@@ -345,15 +308,9 @@ export default function EditArticlePage() {
           />
         </div>
 
-        {/* ===================================================
-            MAIN
-        =================================================== */}
 
         <main className="theme-page flex-1 overflow-y-auto p-4 sm:p-6">
           <div className="mx-auto max-w-5xl">
-            {/* =================================================
-                TOP BAR
-            ================================================= */}
 
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
@@ -385,9 +342,6 @@ export default function EditArticlePage() {
               </div>
             </div>
 
-            {/* =================================================
-                ALERT ERROR
-            ================================================= */}
 
             {error && (
               <div className="theme-danger mb-5 flex items-start gap-3 rounded-xl border p-4">
@@ -405,9 +359,6 @@ export default function EditArticlePage() {
               </div>
             )}
 
-            {/* =================================================
-                ALERT SUCCESS
-            ================================================= */}
 
             {success && (
               <div className="theme-success mb-5 flex items-start gap-3 rounded-xl border p-4">
@@ -425,17 +376,11 @@ export default function EditArticlePage() {
               </div>
             )}
 
-            {/* =================================================
-                FORM
-            ================================================= */}
 
             <form
               onSubmit={handleSubmit}
               className="space-y-6"
             >
-              {/* =================================================
-                  INFORMASI ARTIKEL
-              ================================================= */}
 
               <section className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
                 <div className="theme-card-soft theme-border-soft border-b px-6 py-5">
@@ -457,7 +402,6 @@ export default function EditArticlePage() {
                 </div>
 
                 <div className="space-y-5 p-6">
-                  {/* JUDUL */}
 
                   <div>
                     <label
@@ -497,7 +441,6 @@ export default function EditArticlePage() {
                     />
                   </div>
 
-                  {/* KATEGORI */}
 
                   <div>
                     <label
@@ -548,7 +491,6 @@ export default function EditArticlePage() {
                     </select>
                   </div>
 
-                  {/* RINGKASAN */}
 
                   <div>
                     <label
@@ -582,7 +524,6 @@ export default function EditArticlePage() {
                     />
                   </div>
 
-                  {/* GAMBAR */}
 
                   <div>
                     <label
@@ -632,9 +573,6 @@ export default function EditArticlePage() {
                 </div>
               </section>
 
-              {/* =================================================
-                  KONTEN
-              ================================================= */}
 
               <section className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
                 <div className="theme-card-soft theme-border-soft border-b px-6 py-5">
@@ -694,9 +632,6 @@ export default function EditArticlePage() {
                 </div>
               </section>
 
-              {/* =================================================
-                  STATUS
-              ================================================= */}
 
               <section className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
                 <div className="theme-card-soft theme-border-soft border-b px-6 py-5">
@@ -712,7 +647,6 @@ export default function EditArticlePage() {
 
                 <div className="p-6">
                   <div className="grid gap-3 sm:grid-cols-2">
-                    {/* DRAFT */}
 
                     <button
                       type="button"
@@ -763,7 +697,6 @@ export default function EditArticlePage() {
                       </div>
                     </button>
 
-                    {/* PUBLISHED */}
 
                     <button
                       type="button"
@@ -820,9 +753,6 @@ export default function EditArticlePage() {
                 </div>
               </section>
 
-              {/* =================================================
-                  BUTTON
-              ================================================= */}
 
               <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
                 <Link

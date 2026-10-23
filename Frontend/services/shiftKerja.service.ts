@@ -1,9 +1,6 @@
 
 import { apiFetch } from "../lib/api";
 
-/* =========================================================
-   TYPES
-========================================================= */
 
 export type StatusShiftKerja = "aktif" | "nonaktif";
 
@@ -81,9 +78,6 @@ export interface AssignedUserShift {
   kategoriJabatan?: unknown;
 }
 
-/* =========================================================
-   RESPONSE HELPERS
-========================================================= */
 
 type ApiResponse<T> = {
   success?: boolean;
@@ -107,7 +101,6 @@ type ApiResponse<T> = {
 function unwrapData<T>(response: unknown): T {
   let result: unknown = response;
 
-  // Membuka maksimal 2 lapisan response.data
   for (let i = 0; i < 2; i++) {
     if (
       result !== null &&
@@ -167,9 +160,6 @@ function buildQuery(params: ShiftKerjaQuery = {}): string {
   return query ? `?${query}` : "";
 }
 
-/* =========================================================
-   GET ALL SHIFT KERJA
-========================================================= */
 
 export async function getShiftKerja(
   params: ShiftKerjaQuery = {},
@@ -187,7 +177,6 @@ export async function getShiftKerja(
 
   const result = response as ApiResponse<unknown>;
 
-  // Format paginatedResponse BE umumnya menaruh daftar pada data.
   const rawData = unwrapData<unknown>(response);
 
   let items: ShiftKerja[] = [];
@@ -234,9 +223,6 @@ export async function getShiftKerja(
   };
 }
 
-/* =========================================================
-   GET SHIFT KERJA BY ID
-========================================================= */
 
 export async function getShiftKerjaById(
   id: string,
@@ -255,9 +241,6 @@ export async function getShiftKerjaById(
   return normalizeShift(unwrapData<ShiftKerja>(response));
 }
 
-/* =========================================================
-   CREATE SHIFT KERJA
-========================================================= */
 
 export async function createShiftKerja(
   payload: ShiftKerjaPayload,
@@ -283,9 +266,6 @@ export async function createShiftKerja(
   return unwrapData<ShiftKerja>(response);
 }
 
-/* =========================================================
-   UPDATE SHIFT KERJA
-========================================================= */
 
 export async function updateShiftKerja(
   id: string,
@@ -333,9 +313,6 @@ export async function updateShiftKerja(
   return unwrapData<ShiftKerja>(response);
 }
 
-/* =========================================================
-   DELETE / NONAKTIFKAN SHIFT KERJA
-========================================================= */
 
 export async function deleteShiftKerja(
   id: string,
@@ -352,9 +329,6 @@ export async function deleteShiftKerja(
   );
 }
 
-/* =========================================================
-   ASSIGN SHIFT KERJA + KATEGORI JABATAN
-========================================================= */
 
 export async function assignUserShiftAndJabatan(
   payload: AssignUserShiftPayload,

@@ -251,7 +251,6 @@ export default function DetailJurnalKasPage() {
     >
       <div className="mx-auto max-w-[1250px]">
 
-        {/* BREADCRUMB */}
         <div className="mb-5 flex items-center gap-2 text-sm">
           <Link
             href="/admin/keuangan/jurnalKas"
@@ -267,7 +266,6 @@ export default function DetailJurnalKasPage() {
           </span>
         </div>
 
-        {/* PAGE HEADER */}
         <div className="mb-6 flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-center gap-4">
 
@@ -323,7 +321,6 @@ export default function DetailJurnalKasPage() {
           </div>
         </div>
 
-        {/* STATUS + AMOUNT */}
         <div className="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-[1fr_320px]">
 
           <div
@@ -386,7 +383,6 @@ export default function DetailJurnalKasPage() {
             </div>
           </div>
 
-          {/* SALDO */}
           <div className="theme-card rounded-2xl border p-6 shadow-sm">
 
             <div className="flex items-center gap-3">
@@ -433,10 +429,8 @@ export default function DetailJurnalKasPage() {
 
         </div>
 
-        {/* MAIN CONTENT */}
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_350px]">
 
-          {/* DETAIL */}
           <div className="theme-card overflow-hidden rounded-2xl border shadow-sm">
 
             <div className="theme-border border-b px-6 py-5">
@@ -541,10 +535,8 @@ export default function DetailJurnalKasPage() {
             </div>
           </div>
 
-          {/* SIDEBAR DETAIL */}
           <div className="space-y-5">
 
-            {/* INFORMASI PENCATATAN */}
             <div className="theme-card overflow-hidden rounded-2xl border shadow-sm">
 
               <div className="theme-border border-b px-5 py-4">
@@ -585,7 +577,6 @@ export default function DetailJurnalKasPage() {
               </div>
             </div>
 
-            {/* CATATAN */}
             <div className="theme-card rounded-2xl border p-5 shadow-sm">
 
               <div className="flex items-center gap-3">
@@ -618,7 +609,6 @@ export default function DetailJurnalKasPage() {
               </div>
             </div>
 
-            {/* DANGER ACTION */}
             <div className="theme-danger rounded-2xl border p-5">
 
               <p className="text-sm font-bold">

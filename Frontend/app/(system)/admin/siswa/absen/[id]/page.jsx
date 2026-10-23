@@ -24,9 +24,6 @@ import {
 import { getAbsensiKelas } from "@/services/absensi.service";
 import { getKelas } from "@/services/kelas.service";
 
-/* =========================================================
-   API & HELPERS
-========================================================= */
 
 function normalizeArray(response) {
   if (Array.isArray(response)) return response;
@@ -158,7 +155,6 @@ function resolveFotoUrl(foto) {
 
   const value = foto.trim();
 
-  // URL gambar data/blob tidak perlu diubah.
   if (/^(data:image\/|blob:)/i.test(value)) {
     return value;
   }
@@ -171,11 +167,8 @@ function resolveFotoUrl(foto) {
 
   try {
     const base = configuredBase.replace(/\/+$/, "");
-    // Hilangkan suffix /api agar URL file tetap menuju root Backend.
     const origin = base.replace(/\/api$/i, "");
 
-    // Jika API mengirim URL localhost, sesuaikan host-nya
-    // dengan Backend yang dikonfigurasi untuk Frontend.
     if (/^https?:\/\//i.test(value)) {
       const url = new URL(value);
 
@@ -265,9 +258,6 @@ function mapAbsensi(item, kelas) {
   };
 }
 
-/* =========================================================
-   UI HELPERS
-========================================================= */
 
 function StatusBadge({ status }) {
   const styles = {
@@ -316,9 +306,6 @@ function DetailBox({ icon: Icon, label, value }) {
   );
 }
 
-/* =========================================================
-   FOTO WAJAH
-========================================================= */
 
 function FotoKehadiran({ foto, nama }) {
   const [gagal, setGagal] = useState(false);
@@ -390,9 +377,6 @@ function FotoKehadiran({ foto, nama }) {
   );
 }
 
-/* =========================================================
-   PAGE
-========================================================= */
 
 export default function DetailAbsenSiswaPage() {
   const router = useRouter();
@@ -520,7 +504,6 @@ export default function DetailAbsenSiswaPage() {
 
         <main className="flex-1 overflow-y-auto">
           <div className="p-4 sm:p-6 lg:p-8 space-y-6">
-            {/* HEADER */}
             <div className="flex items-center justify-between gap-3 flex-wrap">
               <div className="flex items-center gap-3">
                 <button
@@ -560,7 +543,6 @@ export default function DetailAbsenSiswaPage() {
               </button>
             </div>
 
-            {/* ERROR */}
             {error && !loading && (
               <div className="flex items-start gap-3 rounded-xl border theme-danger p-4">
                 <AlertCircle
@@ -576,7 +558,6 @@ export default function DetailAbsenSiswaPage() {
               </div>
             )}
 
-            {/* LOADING */}
             {loading && (
               <div className="theme-card rounded-xl border theme-border p-14 shadow-sm">
                 <div className="flex flex-col items-center">
@@ -594,10 +575,8 @@ export default function DetailAbsenSiswaPage() {
               </div>
             )}
 
-            {/* CONTENT */}
             {!loading && absensi && (
               <>
-                {/* PROFIL SISWA */}
                 <div className="theme-card rounded-2xl border theme-border p-5 shadow-sm">
                   <div className="flex items-center gap-4 flex-wrap">
                     <div className="w-16 h-16 rounded-full theme-primary text-white flex items-center justify-center font-bold text-lg shadow-sm">
@@ -622,7 +601,6 @@ export default function DetailAbsenSiswaPage() {
                   </div>
                 </div>
 
-                {/* DETAIL */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                   <DetailBox
                     icon={CalendarDays}
@@ -646,14 +624,12 @@ export default function DetailAbsenSiswaPage() {
                   />
                 </div>
 
-                {/* FOTO WAJAH + GPS */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FotoKehadiran
                     foto={absensi.foto}
                     nama={absensi.nama}
                   />
 
-                  {/* GPS */}
                   <div className="theme-card border theme-border rounded-2xl overflow-hidden shadow-sm">
                     <div className="px-4 py-3 theme-card-soft border-b theme-border">
                       <div className="flex items-center gap-2">
@@ -739,7 +715,6 @@ export default function DetailAbsenSiswaPage() {
                   </div>
                 </div>
 
-                {/* KETERANGAN */}
                 <div className="p-4 rounded-2xl theme-card border theme-border shadow-sm">
                   <p className="text-[10px] uppercase tracking-wide font-bold theme-text-placeholder">
                     Keterangan

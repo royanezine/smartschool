@@ -23,9 +23,6 @@ import {
   Save,
 } from "lucide-react";
 
-// ============================================================
-// THEME HELPERS
-// ============================================================
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -87,9 +84,6 @@ const themeDangerBorder =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-// ============================================================
-// DATA DUMMY
-// ============================================================
 
 const dummyNotifications = [
   {
@@ -196,9 +190,6 @@ const dummyAnnouncements = [
   },
 ];
 
-// ============================================================
-// UTILITY
-// ============================================================
 
 const formatTanggal = (dateString) => {
   if (!dateString) return "-";
@@ -273,9 +264,6 @@ const getStatusBadge = (status) => {
   return map[status] || map.draft;
 };
 
-// ============================================================
-// MAIN COMPONENT
-// ============================================================
 
 export default function NotifikasiPengumumanPage() {
   const router = useRouter();
@@ -317,9 +305,6 @@ export default function NotifikasiPengumumanPage() {
     prioritas: "medium",
   });
 
-  // ============================================================
-  // FILTER NOTIFIKASI
-  // ============================================================
 
   const filteredNotifs = notifications.filter((n) => {
     const matchSearch =
@@ -338,9 +323,6 @@ export default function NotifikasiPengumumanPage() {
     return matchSearch && matchKategori && matchDibaca;
   });
 
-  // ============================================================
-  // FILTER PENGUMUMAN
-  // ============================================================
 
   const filteredAnnounces = announcements.filter((a) => {
     const matchSearch =
@@ -358,9 +340,6 @@ export default function NotifikasiPengumumanPage() {
     (n) => !n.dibaca
   ).length;
 
-  // ============================================================
-  // HANDLERS
-  // ============================================================
 
   const handleMarkRead = (id) => {
     setNotifications((prev) =>
@@ -445,9 +424,6 @@ export default function NotifikasiPengumumanPage() {
     });
   };
 
-  // ============================================================
-  // PAGINATION
-  // ============================================================
 
   const totalPagesNotif = Math.ceil(
     filteredNotifs.length / 5
@@ -470,18 +446,12 @@ export default function NotifikasiPengumumanPage() {
     "Kebijakan",
   ];
 
-  // ============================================================
-  // RENDER
-  // ============================================================
 
   return (
     <div className="theme-page theme-text min-h-full">
       <div className="mx-auto w-full max-w-[1600px] px-4 py-5 sm:px-6 sm:py-7 lg:px-8 lg:py-8">
         <div className="space-y-5 lg:space-y-6">
 
-          {/* ==================================================
-              HEADER
-          ================================================== */}
 
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
@@ -541,9 +511,6 @@ export default function NotifikasiPengumumanPage() {
             </div>
           </div>
 
-          {/* ==================================================
-              TABS
-          ================================================== */}
 
           <div
             className={`border-b ${themeDivider} overflow-x-auto`}
@@ -614,9 +581,6 @@ export default function NotifikasiPengumumanPage() {
             </nav>
           </div>
 
-          {/* ==================================================
-              SEARCH & FILTER
-          ================================================== */}
 
           <div
             className={`theme-card rounded-xl border theme-border p-4 ${themeCardShadow}`}
@@ -701,9 +665,6 @@ export default function NotifikasiPengumumanPage() {
             </div>
           </div>
 
-          {/* ==================================================
-              CONTENT
-          ================================================== */}
 
           <div
             className={`theme-card rounded-xl border theme-border ${themeCardShadow} overflow-hidden`}
@@ -863,7 +824,6 @@ export default function NotifikasiPengumumanPage() {
                   </div>
                 )}
 
-                {/* PAGINATION */}
 
                 {totalPagesNotif > 1 && (
                   <div
@@ -1141,9 +1101,6 @@ export default function NotifikasiPengumumanPage() {
             )}
           </div>
 
-          {/* ==================================================
-              FOOTER
-          ================================================== */}
 
           <div
             className={`text-center text-xs theme-text-muted py-2 border-t ${themeDivider}`}
@@ -1157,9 +1114,6 @@ export default function NotifikasiPengumumanPage() {
         </div>
       </div>
 
-      {/* ======================================================
-          MODAL BUAT PENGUMUMAN
-      ====================================================== */}
 
       {showNewAnnouncement && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[color-mix(in_srgb,var(--color-text)_42%,transparent)] backdrop-blur-sm p-4">
@@ -1168,7 +1122,6 @@ export default function NotifikasiPengumumanPage() {
             className={`theme-card rounded-xl ${themeCardShadow} w-full max-w-lg max-h-[90vh] overflow-y-auto border theme-border`}
           >
 
-            {/* MODAL HEADER */}
 
             <div
               className={`flex items-center justify-between px-5 py-4 border-b ${themeDivider} sticky top-0 theme-card z-10`}
@@ -1196,11 +1149,9 @@ export default function NotifikasiPengumumanPage() {
               </button>
             </div>
 
-            {/* MODAL BODY */}
 
             <div className="p-5 space-y-4">
 
-              {/* JUDUL */}
 
               <div>
                 <label className="block text-xs font-medium theme-text-secondary mb-1.5">
@@ -1224,7 +1175,6 @@ export default function NotifikasiPengumumanPage() {
                 />
               </div>
 
-              {/* ISI */}
 
               <div>
                 <label className="block text-xs font-medium theme-text-secondary mb-1.5">
@@ -1248,7 +1198,6 @@ export default function NotifikasiPengumumanPage() {
                 />
               </div>
 
-              {/* KATEGORI + PRIORITAS */}
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
@@ -1310,7 +1259,6 @@ export default function NotifikasiPengumumanPage() {
                 </div>
               </div>
 
-              {/* MODAL ACTION */}
 
               <div
                 className={`flex flex-col-reverse sm:flex-row items-center gap-3 pt-2 border-t ${themeDivider}`}

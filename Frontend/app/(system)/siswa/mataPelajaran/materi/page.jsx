@@ -39,9 +39,6 @@ import {
   getKelasMapel,
 } from "@/services/materiPembelajaran.service";
 
-/* =========================================================
-   THEME
-========================================================= */
 
 const themePrimarySurface =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -108,9 +105,6 @@ const themeDangerBorder =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-/* =========================================================
-   FILE TYPE STYLE
-========================================================= */
 
 const FILE_TYPE_STYLE = {
   pdf: {
@@ -178,9 +172,6 @@ const FILE_TYPE_STYLE = {
   },
 };
 
-/* =========================================================
-   HELPER
-========================================================= */
 
 function normalizeText(value) {
   return String(value ?? "").toLowerCase().trim();
@@ -341,12 +332,10 @@ function getCurrentUser() {
 
     if (!rawUser) return null;
 
-    // Jika sudah berupa object, tidak perlu JSON.parse()
     if (typeof rawUser === "object") {
       return rawUser;
     }
 
-    // Jika berupa string JSON, parse seperti biasa
     if (typeof rawUser === "string") {
       return JSON.parse(rawUser);
     }
@@ -359,9 +348,6 @@ function getCurrentUser() {
 }
 
 
-/* =========================================================
-   LOADING
-========================================================= */
 
 function PageLoading() {
   return (
@@ -381,9 +367,6 @@ function PageLoading() {
   );
 }
 
-/* =========================================================
-   INNER PAGE
-========================================================= */
 
 function MateriPageInner() {
   const router = useRouter();
@@ -403,17 +386,11 @@ function MateriPageInner() {
   const [error, setError] = useState("");
   const [currentUser, setCurrentUser] = useState(null);
 
-  /* =======================================================
-     USER
-  ======================================================= */
 
   useEffect(() => {
     setCurrentUser(getCurrentUser());
   }, []);
 
-  /* =======================================================
-     LOAD DATA
-  ======================================================= */
 
   async function loadData() {
     try {
@@ -460,13 +437,9 @@ function MateriPageInner() {
 
   useEffect(() => {
     loadData();
-    // Muat data saat halaman pertama kali dibuka.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  /* =======================================================
-     KELAS SISWA
-  ======================================================= */
 
   const userKelasId =
     currentUser?.kelasId ??
@@ -477,23 +450,18 @@ function MateriPageInner() {
     currentUser?.data?.kelasId ??
     null;
 
-  /* =======================================================
-     KELAS MAPEL SISWA
-  ======================================================= */
 
   const kelasMapelSiswa = useMemo(() => {
     if (!currentUser) return [];
 
     let data = kelasMapelList;
 
-    // Jika URL menyertakan kelasMapelId, tampilkan relasi tersebut saja.
     if (kelasMapelParam) {
       return data.filter(
         (item) => String(item?.id) === String(kelasMapelParam)
       );
     }
 
-    // Filter berdasarkan kelas yang tersimpan pada user.
     if (userKelasId != null) {
       data = data.filter(
         (item) =>
@@ -509,9 +477,6 @@ function MateriPageInner() {
     userKelasId,
   ]);
 
-  /* =======================================================
-     MATA PELAJARAN DINAMIS DARI DATABASE
-  ======================================================= */
 
   const mataPelajaranList = useMemo(() => {
     const mapelUnik = new Map();
@@ -538,9 +503,6 @@ function MateriPageInner() {
     );
   }, [kelasMapelSiswa]);
 
-  /* =======================================================
-     SINKRONKAN FILTER DENGAN DATA AKTUAL
-  ======================================================= */
 
   useEffect(() => {
     if (activeMapel === "semua") return;
@@ -558,9 +520,6 @@ function MateriPageInner() {
     }
   }, [activeMapel, mataPelajaranList, kelasMapelSiswa]);
 
-  /* =======================================================
-     SELECTED MAPEL
-  ======================================================= */
 
   const selectedMapel = mataPelajaranList.find(
     (item) => item.id === String(activeMapel)
@@ -568,9 +527,6 @@ function MateriPageInner() {
 
   const SelectedMapelIcon = selectedMapel?.icon;
 
-  /* =======================================================
-     KELAS MAPEL AKTIF
-  ======================================================= */
 
   const kelasMapelAktif = useMemo(() => {
     if (activeMapel === "semua") {
@@ -585,14 +541,10 @@ function MateriPageInner() {
     });
   }, [activeMapel, kelasMapelSiswa]);
 
-  /* =======================================================
-     FILTER MATERI
-  ======================================================= */
 
   const filteredMateri = useMemo(() => {
     let data = materiList;
 
-    // Hanya tampilkan materi yang terhubung dengan kelas-mapel siswa.
     const allowedIds = new Set(
       kelasMapelSiswa.map((item) => String(item.id))
     );
@@ -660,9 +612,6 @@ function MateriPageInner() {
     query,
   ]);
 
-  /* =======================================================
-     STATISTICS
-  ======================================================= */
 
   const totalMateri = filteredMateri.length;
 
@@ -700,9 +649,6 @@ function MateriPageInner() {
     [filteredMateri]
   );
 
-  /* =======================================================
-     GET KELAS MAPEL
-  ======================================================= */
 
   function getKelasMapelFromMateri(materi) {
     const kelasMapelId =
@@ -715,9 +661,6 @@ function MateriPageInner() {
     );
   }
 
-  /* =======================================================
-     OPEN FILE
-  ======================================================= */
 
   function handleOpenFile(item) {
     const url = item?.urlFile
@@ -732,9 +675,6 @@ function MateriPageInner() {
     window.open(url, "_blank", "noopener,noreferrer");
   }
 
-  /* =======================================================
-     DOWNLOAD
-  ======================================================= */
 
 async function handleDownload(item) {
   const url = item?.urlFile
@@ -773,7 +713,6 @@ async function handleDownload(item) {
       throw new Error("File yang diterima kosong.");
     }
 
-    // 1. Cari nama file asli dari data materi.
     const namaAsli =
       item?.namaFileAsli ||
       item?.namaFile ||
@@ -785,7 +724,6 @@ async function handleDownload(item) {
       item?.judulFile ||
       "";
 
-    // 2. Cari nama file dari header server.
     const disposition =
       response.headers.get("Content-Disposition") || "";
 
@@ -811,7 +749,6 @@ async function handleDownload(item) {
       namaHeader = normalMatch[1].trim();
     }
 
-    // 3. Jika belum ada, ambil nama file dari URL.
     let namaUrl = "";
 
     try {
@@ -823,12 +760,10 @@ async function handleDownload(item) {
       namaUrl = "";
     }
 
-    // Prioritas: nama asli > header server > URL.
     let filename = String(
       namaAsli || namaHeader || namaUrl || "materi"
     ).trim();
 
-    // Hindari karakter yang tidak valid pada nama file.
     filename = filename
       .replace(/^["']|["']$/g, "")
       .replace(/[<>:"/\\|?*\x00-\x1F]/g, "_")
@@ -838,7 +773,6 @@ async function handleDownload(item) {
       filename = "materi";
     }
 
-    // Jika belum memiliki ekstensi, coba gunakan ekstensi URL.
     if (!/\.[a-z0-9]{1,10}$/i.test(filename)) {
       const extensionMatch = namaUrl.match(
         /\.([a-z0-9]{1,10})$/i
@@ -879,7 +813,6 @@ async function handleDownload(item) {
       }
     }
 
-    // Buat file sementara untuk memulai download.
     const blobUrl = URL.createObjectURL(blob);
     const link = document.createElement("a");
 
@@ -891,7 +824,6 @@ async function handleDownload(item) {
     link.click();
     link.remove();
 
-    // Bersihkan URL sementara.
     setTimeout(() => {
       URL.revokeObjectURL(blobUrl);
     }, 2000);
@@ -909,15 +841,11 @@ async function handleDownload(item) {
 
 
 
-  /* =======================================================
-     RENDER
-  ======================================================= */
 
   return (
     <div className="theme-page theme-text min-h-full">
       <div className="w-full max-w-[1280px] mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
 
-        {/* TOP NAV */}
 
         <button
           onClick={() => router.push("/siswa/mataPelajaran")}
@@ -931,7 +859,6 @@ async function handleDownload(item) {
           Kembali ke mata pelajaran
         </button>
 
-        {/* HERO */}
 
         <section
           className={`relative overflow-hidden rounded-2xl ${themePrimaryGradient} p-5 sm:p-6 lg:p-7 ${themePrimaryShadow} mb-6`}
@@ -1022,7 +949,6 @@ async function handleDownload(item) {
           </div>
         </section>
 
-        {/* STAT CARDS */}
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
           <div className={`theme-card ${themeNeutralBorder} ${themeSmallShadow} rounded-xl px-4 py-4`}>
@@ -1082,7 +1008,6 @@ async function handleDownload(item) {
           </div>
         </div>
 
-        {/* FILTER AREA */}
 
         <section className={`theme-card ${themeNeutralBorder} rounded-2xl p-4 sm:p-5 ${themeCardShadow} mb-5`}>
           <div className="flex flex-col lg:flex-row lg:items-center gap-4">
@@ -1164,7 +1089,6 @@ async function handleDownload(item) {
           </div>
         </section>
 
-        {/* ERROR */}
 
         {error && (
           <div className={`mb-5 ${themeDangerSurface} ${themeDangerBorder} rounded-xl p-4`}>
@@ -1191,7 +1115,6 @@ async function handleDownload(item) {
           </div>
         )}
 
-        {/* CLASS INFO */}
 
         {!loading && activeMapel !== "semua" && kelasMapelAktif.length > 0 && (
           <div className={`mb-5 ${themeInfoSurface} ${themeInfoBorder} rounded-xl p-4`}>
@@ -1219,7 +1142,6 @@ async function handleDownload(item) {
           </div>
         )}
 
-        {/* RESULT HEADER */}
 
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3 px-1">
           <div>
@@ -1242,7 +1164,6 @@ async function handleDownload(item) {
           )}
         </div>
 
-        {/* MATERIAL LIST */}
 
         <section className={`theme-card ${themeNeutralBorder} rounded-2xl ${themeCardShadow} overflow-hidden`}>
           {loading ? (
@@ -1422,7 +1343,6 @@ async function handleDownload(item) {
           )}
         </section>
 
-        {/* FOOTER INFO */}
 
         {!loading && filteredMateri.length > 0 && (
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 px-1 pt-1 pb-5">
@@ -1443,9 +1363,6 @@ async function handleDownload(item) {
   );
 }
 
-/* =========================================================
-   PAGE
-========================================================= */
 
 export default function MateriPage() {
   return (

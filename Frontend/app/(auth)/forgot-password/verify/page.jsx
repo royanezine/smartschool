@@ -108,14 +108,9 @@ export default function VerifikasiPage() {
         );
       }
 
-      // Tujuan redirect ditentukan dari sesi hasil autentikasi (role pada
-      // token), bukan dari nama halaman. Tanpa token tidak ada sesi yang
-      // dibuat dan pengguna diarahkan ke halaman login.
       let redirectPath = "/login";
 
       if (data?.token) {
-        // Simpan sesi secara ATOMIK melalui satu sumber kebenaran
-        // (lib/auth) lalu arahkan sesuai role token.
         const sessionUser = setSession(
           data.token,
           data.user ?? null,
@@ -154,7 +149,6 @@ export default function VerifikasiPage() {
 
   return (
     <section className="relative flex min-h-screen items-center justify-center overflow-hidden bg-slate-950">
-      {/* BACKGROUND */}
       <div className="absolute inset-0">
         <Image
           src="/images/auth-bg.jpg"
@@ -169,12 +163,9 @@ export default function VerifikasiPage() {
         <div className="absolute inset-0 bg-gradient-to-br from-blue-950/80 via-slate-950/60 to-indigo-950/80" />
       </div>
 
-      {/* TOP ACCENT */}
       <div className="absolute left-0 right-0 top-0 h-1 bg-gradient-to-r from-blue-400 via-blue-500 to-indigo-500" />
 
-      {/* CONTENT */}
       <div className="relative z-10 w-full max-w-md px-6 py-10">
-        {/* LOGO */}
         <div className="mb-6 flex justify-center">
           <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl border border-white/20 bg-white shadow-xl">
             <Image
@@ -187,9 +178,7 @@ export default function VerifikasiPage() {
           </div>
         </div>
 
-        {/* CARD */}
         <div className="rounded-3xl bg-white p-7 shadow-2xl">
-          {/* HEADER */}
           <div className="mb-7 text-center">
             <div className="mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50">
               <ShieldCheck
@@ -209,7 +198,6 @@ export default function VerifikasiPage() {
             </p>
           </div>
 
-          {/* ERROR */}
           {error && (
             <div className="mb-5 flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3">
               <AlertCircle
@@ -223,7 +211,6 @@ export default function VerifikasiPage() {
             </div>
           )}
 
-          {/* SUCCESS */}
           {success && (
             <div className="mb-5 flex items-start gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
               <CheckCircle2
@@ -241,7 +228,6 @@ export default function VerifikasiPage() {
             onSubmit={handleVerify}
             className="space-y-5"
           >
-            {/* EMAIL */}
             <div>
               <label className="mb-2 block text-xs font-semibold text-slate-700">
                 Email
@@ -268,7 +254,6 @@ export default function VerifikasiPage() {
               </div>
             </div>
 
-            {/* OTP */}
             <div>
               <label className="mb-2 block text-xs font-semibold text-slate-700">
                 Kode OTP
@@ -297,7 +282,6 @@ export default function VerifikasiPage() {
               </p>
             </div>
 
-            {/* BUTTON */}
             <button
               type="submit"
               disabled={loading}
@@ -322,7 +306,6 @@ export default function VerifikasiPage() {
             </button>
           </form>
 
-          {/* FOOTER LINK */}
           <div className="mt-6 border-t border-slate-100 pt-5">
             <Link
               href="/login"
@@ -336,7 +319,6 @@ export default function VerifikasiPage() {
           </div>
         </div>
 
-        {/* FOOTER */}
         <p className="mt-5 text-center text-[11px] text-white/50">
           © 2026 Smart School. Semua hak
           dilindungi.

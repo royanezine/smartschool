@@ -33,9 +33,6 @@ import {
 
 import { getSessionUser } from "@/lib/auth";
 
-/* =========================================================
-   THEME HELPERS
-========================================================= */
 
 const themeCardShadow =
   "shadow-[0_8px_30px_color-mix(in_srgb,var(--color-text)_6%,transparent)]";
@@ -70,9 +67,6 @@ const themeWarningSoft =
 const themeDangerSoft =
   "bg-[color-mix(in_srgb,var(--color-danger)_10%,transparent)]";
 
-/* =========================================================
-   HELPERS
-========================================================= */
 
 function unwrapValue(response) {
   if (response?.data !== undefined) {
@@ -134,11 +128,8 @@ function getErrorMessage(error, fallback) {
   );
 }
 
-// getToken diimpor dari @/lib/auth (single source of truth)
 
 function getStoredUser() {
-  // Identitas selalu berasal dari sesi aktif (lib/auth). Membaca
-  // localStorage("user") langsung berisiko menampilkan akun lain.
   return getSessionUser();
 }
 
@@ -493,9 +484,6 @@ function isOverdue(loan) {
   );
 }
 
-/* =========================================================
-   STATUS BADGE
-========================================================= */
 
 function LoanStatusBadge({
   loan,
@@ -536,9 +524,6 @@ function LoanStatusBadge({
   );
 }
 
-/* =========================================================
-   INFO ITEM
-========================================================= */
 
 function InfoItem({
   icon: Icon,
@@ -570,9 +555,6 @@ function InfoItem({
   );
 }
 
-/* =========================================================
-   MAIN PAGE
-========================================================= */
 
 export default function BukuDetailSiswaPage() {
   const params = useParams();
@@ -1027,9 +1009,6 @@ export default function BukuDetailSiswaPage() {
   return (
     <div className="theme-page min-h-full w-full">
       <div className="mx-auto w-full max-w-[1400px] space-y-6 p-4 sm:p-6 lg:p-8">
-        {/* =====================================================
-            TOP NAVIGATION
-        ====================================================== */}
 
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <Link
@@ -1062,9 +1041,6 @@ export default function BukuDetailSiswaPage() {
           </button>
         </div>
 
-        {/* =====================================================
-            ERROR
-        ====================================================== */}
 
         {error && (
           <div className="theme-danger flex items-start gap-3 rounded-xl border p-4">
@@ -1085,9 +1061,6 @@ export default function BukuDetailSiswaPage() {
           </div>
         )}
 
-        {/* =====================================================
-            SUCCESS
-        ====================================================== */}
 
         {success && (
           <div className="theme-success flex items-start gap-3 rounded-xl border p-4">
@@ -1108,9 +1081,6 @@ export default function BukuDetailSiswaPage() {
           </div>
         )}
 
-        {/* =====================================================
-            BREADCRUMB
-        ====================================================== */}
 
         <div className="flex flex-wrap items-center gap-2 text-xs">
           <Link
@@ -1139,9 +1109,6 @@ export default function BukuDetailSiswaPage() {
           </span>
         </div>
 
-        {/* =====================================================
-            MAIN BOOK DETAIL
-        ====================================================== */}
 
         <section
           className={`theme-card overflow-hidden rounded-[28px] border ${themeNeutralBorder} ${themeCardShadow}`}
@@ -1154,7 +1121,6 @@ export default function BukuDetailSiswaPage() {
             <div className="absolute -bottom-32 left-[30%] h-72 w-72 rounded-full bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)] blur-3xl" />
 
             <div className="relative grid gap-8 p-5 sm:p-7 lg:grid-cols-[300px_1fr] lg:p-10">
-              {/* COVER */}
 
               <div className="flex justify-center lg:justify-start">
                 <div
@@ -1205,7 +1171,6 @@ export default function BukuDetailSiswaPage() {
                 </div>
               </div>
 
-              {/* INFORMATION */}
 
               <div className="flex min-w-0 flex-col justify-center">
                 <div className="flex flex-wrap items-center gap-2">
@@ -1237,7 +1202,6 @@ export default function BukuDetailSiswaPage() {
                     "Tidak ada deskripsi buku yang tersedia."}
                 </p>
 
-                {/* ACTION AREA */}
 
                 <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                   {isEbook ? (
@@ -1340,7 +1304,6 @@ export default function BukuDetailSiswaPage() {
                   </Link>
                 </div>
 
-                {/* ACTIVE LOAN NOTICE */}
 
                 {activeLoan && (
                   <div
@@ -1393,9 +1356,6 @@ export default function BukuDetailSiswaPage() {
             </div>
           </div>
 
-          {/* =====================================================
-              BOOK INFORMATION
-          ====================================================== */}
 
           <div className="p-5 sm:p-7 lg:p-10">
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -1443,9 +1403,6 @@ export default function BukuDetailSiswaPage() {
           </div>
         </section>
 
-        {/* =====================================================
-            LOAN INFORMATION
-        ====================================================== */}
 
         <section className="grid gap-5 xl:grid-cols-[1fr_360px]">
           <div
@@ -1669,9 +1626,6 @@ export default function BukuDetailSiswaPage() {
             </div>
           </div>
 
-          {/* =====================================================
-              QUICK SUMMARY
-          ====================================================== */}
 
           <div
             className={`theme-card rounded-2xl border ${themeNeutralBorder} ${themeCardShadow} p-5 sm:p-6`}
@@ -1812,9 +1766,6 @@ export default function BukuDetailSiswaPage() {
           </div>
         </section>
 
-        {/* =====================================================
-            FOOTER
-        ====================================================== */}
 
         <div
           className={`flex flex-col gap-3 border-t ${themeDivider} py-5 text-xs theme-text-muted sm:flex-row sm:items-center sm:justify-between`}

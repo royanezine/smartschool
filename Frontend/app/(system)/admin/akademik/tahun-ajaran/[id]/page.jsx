@@ -43,9 +43,6 @@ export default function DetailTahunAjaranPage() {
 
   const [error, setError] = useState("");
 
-  // =========================================================
-  // Helper mengambil array kelas dari berbagai bentuk response
-  // =========================================================
   const extractKelas = (response) => {
     if (Array.isArray(response)) {
       return response;
@@ -70,9 +67,6 @@ export default function DetailTahunAjaranPage() {
     return [];
   };
 
-  // =========================================================
-  // Helper mengambil list tahun ajaran
-  // =========================================================
   const extractTahunAjaran = (response) => {
     if (Array.isArray(response)) {
       return response;
@@ -97,9 +91,6 @@ export default function DetailTahunAjaranPage() {
     return [];
   };
 
-  // =========================================================
-  // Load detail
-  // =========================================================
   const loadDetail = async (isRefresh = false) => {
     try {
       setError("");
@@ -111,9 +102,6 @@ export default function DetailTahunAjaranPage() {
         setLoadingKelas(true);
       }
 
-      // -------------------------------------------------------
-      // Ambil data tahun ajaran
-      // -------------------------------------------------------
       const response = await getTahunAjaran();
       const list = extractTahunAjaran(response);
 
@@ -130,9 +118,6 @@ export default function DetailTahunAjaranPage() {
 
       setData(found);
 
-      // -------------------------------------------------------
-      // Ambil data kelas berdasarkan tahun ajaran
-      // -------------------------------------------------------
       try {
         const kelasResponse = await getKelas({
           tahunAjaranId: id,
@@ -170,34 +155,22 @@ export default function DetailTahunAjaranPage() {
     }
   };
 
-  // =========================================================
-  // Load saat ID tersedia
-  // =========================================================
   useEffect(() => {
     if (id) {
       loadDetail(false);
     }
   }, [id]);
 
-  // =========================================================
-  // Sidebar
-  // =========================================================
   const toggleSidebar = () => {
     setIsCollapsed((prev) => !prev);
   };
 
-  // =========================================================
-  // Status
-  // =========================================================
   const isActive = data?.status === "aktif";
 
   const statusLabel = isActive
     ? "Aktif"
     : "Tidak Aktif";
 
-  // =========================================================
-  // Format tanggal
-  // =========================================================
   const formatDateTime = (value) => {
     if (!value) {
       return "-";
@@ -218,9 +191,6 @@ export default function DetailTahunAjaranPage() {
     });
   };
 
-  // =========================================================
-  // Deskripsi semester
-  // =========================================================
   const semesterDescription = useMemo(() => {
     if (data?.semester === "Ganjil") {
       return "Semester pertama pada tahun ajaran.";
@@ -233,9 +203,6 @@ export default function DetailTahunAjaranPage() {
     return "Periode semester akademik.";
   }, [data]);
 
-  // =========================================================
-  // LOADING
-  // =========================================================
   if (loading) {
     return (
       <div className="theme-page flex h-screen w-full overflow-hidden">
@@ -271,12 +238,8 @@ export default function DetailTahunAjaranPage() {
     );
   }
 
-  // =========================================================
-  // MAIN
-  // =========================================================
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
-      {/* SIDEBAR */}
       <Sidebar
         active="tahunAjaran"
         setActive={() => {}}
@@ -284,9 +247,7 @@ export default function DetailTahunAjaranPage() {
         setCollapsed={setIsCollapsed}
       />
 
-      {/* CONTENT */}
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        {/* HEADER */}
         <Header
           toggleSidebar={toggleSidebar}
           notifications={[]}
@@ -297,14 +258,10 @@ export default function DetailTahunAjaranPage() {
           }}
         />
 
-        {/* MAIN */}
         <main className="theme-page min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
           <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8 xl:px-10">
             <div className="space-y-7">
 
-              {/* =================================================
-                  BREADCRUMB
-              ================================================= */}
               <div className="flex items-center gap-2 text-sm">
                 <button
                   type="button"
@@ -329,9 +286,6 @@ export default function DetailTahunAjaranPage() {
                 </span>
               </div>
 
-              {/* =================================================
-                  ERROR
-              ================================================= */}
               {error && (
                 <div className="theme-danger rounded-xl border p-5">
                   <div className="flex items-start gap-4">
@@ -366,19 +320,12 @@ export default function DetailTahunAjaranPage() {
                 </div>
               )}
 
-              {/* =================================================
-                  DATA
-              ================================================= */}
               {data && (
                 <>
-                  {/* =================================================
-                      HERO
-                  ================================================= */}
                   <div className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
                     <div className="theme-primary px-6 py-6 sm:px-8 sm:py-7">
                       <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
 
-                        {/* TITLE */}
                         <div className="flex items-center gap-4">
                           <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-white/20 bg-white/10 text-white">
                             <CalendarDays size={28} />
@@ -400,10 +347,8 @@ export default function DetailTahunAjaranPage() {
                           </div>
                         </div>
 
-                        {/* ACTION */}
                         <div className="flex flex-wrap items-center gap-3">
 
-                          {/* STATUS */}
                           <span
                             className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-semibold ${
                               isActive
@@ -420,7 +365,6 @@ export default function DetailTahunAjaranPage() {
                             {statusLabel}
                           </span>
 
-                          {/* REFRESH */}
                           <button
                             type="button"
                             onClick={() =>
@@ -441,7 +385,6 @@ export default function DetailTahunAjaranPage() {
                             Refresh
                           </button>
 
-                          {/* EDIT */}
                           <Link
                             href={`/admin/akademik/tahun-ajaran/edit/${data.id}`}
                             className="theme-card inline-flex items-center gap-2 rounded-lg border border-white/20 bg-white px-5 py-2.5 text-sm font-semibold theme-text transition hover:bg-white/90"
@@ -454,7 +397,6 @@ export default function DetailTahunAjaranPage() {
                       </div>
                     </div>
 
-                    {/* STATS */}
                     <div className="grid grid-cols-1 divide-y sm:grid-cols-4 sm:divide-x sm:divide-y-0 divide-[var(--color-border-soft)]">
                       <StatItem
                         icon={
@@ -514,12 +456,8 @@ export default function DetailTahunAjaranPage() {
                     </div>
                   </div>
 
-                  {/* =================================================
-                      DETAIL CARDS
-                  ================================================= */}
                   <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
 
-                    {/* INFORMASI PERIODE */}
                     <DetailCard
                       title="Informasi Periode"
                       icon={
@@ -602,7 +540,6 @@ export default function DetailTahunAjaranPage() {
                       />
                     </DetailCard>
 
-                    {/* INFORMASI SISTEM */}
                     <DetailCard
                       title="Informasi Sistem"
                       icon={
@@ -657,12 +594,8 @@ export default function DetailTahunAjaranPage() {
                     </DetailCard>
                   </div>
 
-                  {/* =================================================
-                      KELAS
-                  ================================================= */}
                   <div className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
 
-                    {/* HEADER KELAS */}
                     <div className="theme-card-soft theme-border-soft flex flex-col gap-4 border-b px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
                       <div className="flex items-center gap-3">
                         <div className="theme-info flex h-11 w-11 shrink-0 items-center justify-center rounded-xl">
@@ -702,10 +635,8 @@ export default function DetailTahunAjaranPage() {
                       </div>
                     </div>
 
-                    {/* CONTENT KELAS */}
                     <div className="p-5 sm:p-6">
 
-                      {/* LOADING KELAS */}
                       {loadingKelas ? (
                         <div className="flex min-h-[160px] items-center justify-center">
                           <div className="flex flex-col items-center gap-3">
@@ -718,7 +649,6 @@ export default function DetailTahunAjaranPage() {
                         </div>
                       ) : kelas.length === 0 ? (
 
-                        /* EMPTY STATE */
                         <div className="theme-card-soft theme-border rounded-xl border border-dashed px-5 py-10 text-center">
                           <div className="theme-card mx-auto flex h-12 w-12 items-center justify-center rounded-xl theme-text-placeholder shadow-sm">
                             <Layers3 size={24} />
@@ -752,7 +682,6 @@ export default function DetailTahunAjaranPage() {
                         </div>
                       ) : (
 
-                        /* TABLE */
                         <div className="overflow-x-auto">
                           <table className="w-full min-w-[700px] text-left">
                             <thead>
@@ -792,12 +721,10 @@ export default function DetailTahunAjaranPage() {
                                     }
                                     className="theme-table-hover transition"
                                   >
-                                    {/* NO */}
                                     <td className="px-4 py-4 text-sm theme-text-muted">
                                       {index + 1}
                                     </td>
 
-                                    {/* NAMA */}
                                     <td className="px-4 py-4">
                                       <div className="flex items-center gap-3">
                                         <div className="theme-info flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
@@ -821,7 +748,6 @@ export default function DetailTahunAjaranPage() {
                                       </div>
                                     </td>
 
-                                    {/* TINGKAT */}
                                     <td className="px-4 py-4">
                                       <span className="theme-info inline-flex rounded-md px-2.5 py-1 text-xs font-semibold">
                                         Tingkat{" "}
@@ -829,13 +755,11 @@ export default function DetailTahunAjaranPage() {
                                       </span>
                                     </td>
 
-                                    {/* KAPASITAS */}
                                     <td className="px-4 py-4 text-sm theme-text-secondary">
                                       {item.kapasitas ?? "-"}{" "}
                                       siswa
                                     </td>
 
-                                    {/* WALI KELAS */}
                                     <td className="px-4 py-4 text-sm font-medium theme-text-secondary">
                                       {item
                                         ?.waliKelas
@@ -856,9 +780,6 @@ export default function DetailTahunAjaranPage() {
                     </div>
                   </div>
 
-                  {/* =================================================
-                      STATUS INFORMATION
-                  ================================================= */}
                   <div
                     className={
                       isActive
@@ -915,9 +836,6 @@ export default function DetailTahunAjaranPage() {
                     </div>
                   </div>
 
-                  {/* =================================================
-                      FOOTER ACTION
-                  ================================================= */}
                   <div className="theme-border-soft flex flex-col gap-3 border-t pt-6 sm:flex-row sm:justify-between">
                     <button
                       type="button"
@@ -943,9 +861,6 @@ export default function DetailTahunAjaranPage() {
                     </Link>
                   </div>
 
-                  {/* =================================================
-                      FOOTER
-                  ================================================= */}
                   <footer className="pt-6 text-center text-xs theme-text-muted">
                     © 2026 SmartSchool • Detail Tahun Ajaran
                   </footer>
@@ -959,18 +874,12 @@ export default function DetailTahunAjaranPage() {
   );
 }
 
-// =============================================================
-// LOADER
-// =============================================================
 function Loader() {
   return (
     <div className="h-8 w-8 animate-spin rounded-full border-4 border-[var(--color-primary)] border-t-transparent" />
   );
 }
 
-// =============================================================
-// STAT ITEM
-// =============================================================
 function StatItem({
   icon,
   label,
@@ -1001,9 +910,6 @@ function StatItem({
   );
 }
 
-// =============================================================
-// DETAIL CARD
-// =============================================================
 function DetailCard({
   title,
   icon,
@@ -1039,9 +945,6 @@ function DetailCard({
   );
 }
 
-// =============================================================
-// DETAIL ROW
-// =============================================================
 function DetailRow({
   label,
   value,

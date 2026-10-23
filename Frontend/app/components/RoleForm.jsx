@@ -56,7 +56,6 @@ export default function RoleForm({ initialData = null, isEdit = false }) {
 
   return (
     <div className="max-w-3xl mx-auto">
-      {/* Header Form */}
       <div className="flex items-center justify-between border-b border-slate-200/80 pb-4 mb-6">
         <div>
           <h1 className="text-xl sm:text-2xl font-semibold text-slate-800 flex items-center gap-2.5">
@@ -78,7 +77,6 @@ export default function RoleForm({ initialData = null, isEdit = false }) {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-7">
-        {/* Informasi Role */}
         <section>
           <h3 className="text-sm font-semibold text-slate-700 mb-4 flex items-center gap-2.5">
             <span className="p-1.5 rounded-lg bg-blue-50 text-blue-600">
@@ -133,7 +131,6 @@ export default function RoleForm({ initialData = null, isEdit = false }) {
           </div>
         </section>
 
-        {/* Ikon & Status */}
         <section>
           <h3 className="text-sm font-semibold text-slate-700 mb-4 flex items-center gap-2.5">
             <span className="p-1.5 rounded-lg bg-purple-50 text-purple-600">
@@ -183,7 +180,6 @@ export default function RoleForm({ initialData = null, isEdit = false }) {
           </div>
         </section>
 
-        {/* Tombol Aksi */}
         <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 pt-4 border-t border-slate-200/80">
           <button
             type="button"

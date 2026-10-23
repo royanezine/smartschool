@@ -4,10 +4,6 @@ import { Megaphone, Info } from "lucide-react";
 
 import PpdbNavbar from "@/app/components/ppdb/PpdbNavbar";
 
-/*
- * Backend belum memiliki model/route pengumuman PPDB. Halaman ini
- * menampilkan empty state yang jujur, bukan daftar pengumuman contoh.
- */
 export const PENGUMUMAN_PPDB_UNAVAILABLE =
   "Belum ada pengumuman yang dapat ditampilkan. Backend belum " +
   "menyediakan endpoint pengumuman PPDB, sehingga pengumuman resmi " +

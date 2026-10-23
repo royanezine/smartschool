@@ -33,6 +33,7 @@ import {
   AlertCircle,
   Loader2,
   Clock3,
+  IdCard,
 } from "lucide-react";
 
 import { getUsers, deleteUser } from "@/services/user.service";
@@ -44,30 +45,24 @@ export default function AdminGuruPage() {
 
   const [isCollapsed, setIsCollapsed] = useState(false);
 
-  // DATA
   const [guru, setGuru] = useState([]);
   const [shiftKerjaList, setShiftKerjaList] = useState([]);
   const [totalMapel, setTotalMapel] = useState(0);
 
-  // LOADING
   const [loading, setLoading] = useState(true);
   const [loadingMapel, setLoadingMapel] = useState(true);
   const [loadingShift, setLoadingShift] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
 
-  // ERROR
   const [error, setError] = useState("");
   const [shiftError, setShiftError] = useState("");
 
-  // FILTER
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("semua");
 
-  // SORT
   const [sortBy, setSortBy] = useState("namaLengkap");
   const [sortOrder, setSortOrder] = useState("asc");
 
-  // PAGINATION
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [pagination, setPagination] = useState({
@@ -77,12 +72,8 @@ export default function AdminGuruPage() {
     totalPages: 0,
   });
 
-  // MODAL
   const [showModal, setShowModal] = useState(false);
 
-  // =======================================================
-  // HELPER RESPONSE
-  // =======================================================
 
   const getResponseData = (response) => {
     if (Array.isArray(response)) return response;
@@ -117,9 +108,6 @@ export default function AdminGuruPage() {
     };
   };
 
-  // =======================================================
-  // FETCH GURU
-  // =======================================================
 
   const fetchGuru = useCallback(
     async (showLoading = true) => {
@@ -174,9 +162,6 @@ export default function AdminGuruPage() {
     ]
   );
 
-  // =======================================================
-  // FETCH MASTER SHIFT DARI BACKEND
-  // =======================================================
 
   const fetchShiftKerja = useCallback(async () => {
     try {
@@ -212,9 +197,6 @@ export default function AdminGuruPage() {
     }
   }, []);
 
-  // =======================================================
-  // FETCH MATA PELAJARAN
-  // =======================================================
 
   const fetchMapel = useCallback(async () => {
     try {
@@ -241,9 +223,6 @@ export default function AdminGuruPage() {
     }
   }, []);
 
-  // =======================================================
-  // LOAD DATA
-  // =======================================================
 
   useEffect(() => {
     fetchGuru();
@@ -254,9 +233,6 @@ export default function AdminGuruPage() {
     fetchMapel();
   }, [fetchShiftKerja, fetchMapel]);
 
-  // =======================================================
-  // FORMAT JAM
-  // =======================================================
 
   const formatJam = (value) => {
     if (value === null || value === undefined || value === "") {
@@ -265,7 +241,6 @@ export default function AdminGuruPage() {
 
     const text = String(value).trim();
 
-    // Mendukung HH:mm, HH:mm:ss, serta nilai ISO datetime.
     const match = text.match(/(?:T|\s)?(\d{1,2}):(\d{2})(?::\d{2})?/);
 
     if (match) {
@@ -275,15 +250,11 @@ export default function AdminGuruPage() {
     return text;
   };
 
-  // =======================================================
-  // COCOKKAN SHIFT GURU DENGAN MASTER SHIFT BACKEND
-  // =======================================================
 
   const getShiftFromUser = useCallback(
     (item) => {
       if (!item) return null;
 
-      // 1. Prioritaskan relasi shift yang dikirim Backend.
       const relation =
         item.shiftKerjaMaster ??
         item.shiftKerjaUser?.shiftKerjaMaster ??
@@ -295,7 +266,6 @@ export default function AdminGuruPage() {
         return relation;
       }
 
-      // 2. Jika shiftKerja berupa objek langsung.
       if (
         item.shiftKerja &&
         typeof item.shiftKerja === "object" &&
@@ -309,7 +279,6 @@ export default function AdminGuruPage() {
         return item.shiftKerja;
       }
 
-      // 3. Jika Backend hanya mengirim ID shift.
       const shiftId =
         item.shiftKerjaId ??
         item.shiftKerjaUser?.shiftKerjaId ??
@@ -324,7 +293,6 @@ export default function AdminGuruPage() {
         if (found) return found;
       }
 
-      // 4. Jika Backend mengirim nama shift.
       if (
         typeof item.shiftKerja === "string" &&
         item.shiftKerja.trim()
@@ -378,9 +346,6 @@ export default function AdminGuruPage() {
     return `${masuk || "--:--"} - ${keluar || "--:--"}`;
   };
 
-  // =======================================================
-  // REFRESH
-  // =======================================================
 
   const handleRefresh = async () => {
     await Promise.all([
@@ -390,9 +355,6 @@ export default function AdminGuruPage() {
     ]);
   };
 
-  // =======================================================
-  // SEARCH DAN FILTER
-  // =======================================================
 
   const handleSearchChange = (value) => {
     setSearch(value);
@@ -404,9 +366,6 @@ export default function AdminGuruPage() {
     setCurrentPage(1);
   };
 
-  // =======================================================
-  // SORT
-  // =======================================================
 
   const handleSortChange = (value) => {
     const options = {
@@ -438,9 +397,6 @@ export default function AdminGuruPage() {
     return sortOrder === "asc" ? "status_asc" : "status_desc";
   }, [sortBy, sortOrder]);
 
-  // =======================================================
-  // NONAKTIFKAN GURU
-  // =======================================================
 
   const handleDelete = async (id, nama) => {
     if (!id) return;
@@ -482,9 +438,6 @@ export default function AdminGuruPage() {
     }
   };
 
-  // =======================================================
-  // PAGINATION
-  // =======================================================
 
   const totalPages = pagination.totalPages || 0;
   const totalData = pagination.totalData || 0;
@@ -536,14 +489,9 @@ export default function AdminGuruPage() {
     ];
   }, [currentPage, totalPages]);
 
-  // =======================================================
-  // STATISTIK
-  // =======================================================
 
   const totalGuru = totalData;
 
-  // Jumlah aktif/nonaktif dihitung dari halaman yang sedang tampil.
-  // Ini menghindari klaim total global yang tidak dikirim Backend.
   const totalAktif = guru.filter(
     (item) =>
       ["aktif", "active"].includes(
@@ -566,9 +514,6 @@ export default function AdminGuruPage() {
       : "Nonaktif";
   };
 
-  // =======================================================
-  // HELPER TAMPILAN
-  // =======================================================
 
   const getInitials = (nama) => {
     if (!nama) return "GU";
@@ -586,9 +531,6 @@ export default function AdminGuruPage() {
   const getAvatarColor = () =>
     "bg-[image:var(--color-brand-logo-bg)]";
 
-  // =======================================================
-  // DATA EKSPOR
-  // =======================================================
 
   const escapeHTML = (value) =>
     String(value ?? "").replace(/[&<>"']/g, (char) => {
@@ -629,9 +571,6 @@ export default function AdminGuruPage() {
       };
     });
 
-  // =======================================================
-  // EXPORT CSV
-  // =======================================================
 
   const exportCSV = () => {
     if (!guru.length) {
@@ -699,9 +638,6 @@ export default function AdminGuruPage() {
     URL.revokeObjectURL(url);
   };
 
-  // =======================================================
-  // EXPORT EXCEL
-  // =======================================================
 
   const exportExcel = () => {
     if (!guru.length) {
@@ -804,9 +740,6 @@ export default function AdminGuruPage() {
     URL.revokeObjectURL(url);
   };
 
-  // =======================================================
-  // PRINT / PDF
-  // =======================================================
 
   const exportPDF = () => {
     if (!guru.length) {
@@ -898,9 +831,6 @@ export default function AdminGuruPage() {
     printWindow.print();
   };
 
-  // =======================================================
-  // RENDER
-  // =======================================================
 
   return (
     <div className="flex h-screen w-full theme-page overflow-hidden">
@@ -926,7 +856,6 @@ export default function AdminGuruPage() {
           <div className="w-full p-4 md:p-6 lg:p-8">
             <div className="w-full space-y-5">
 
-              {/* HEADER */}
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div className="flex items-center gap-3">
                   <div className="w-11 h-11 rounded-xl bg-[image:var(--color-brand-logo-bg)] text-white flex items-center justify-center shadow-md">
@@ -944,7 +873,6 @@ export default function AdminGuruPage() {
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2">
-                  {/* EXPORT */}
                   <div className="relative group">
                     <button
                       type="button"
@@ -984,7 +912,6 @@ export default function AdminGuruPage() {
                     </div>
                   </div>
 
-                  {/* REFRESH */}
                   <button
                     type="button"
                     onClick={handleRefresh}
@@ -1000,7 +927,6 @@ export default function AdminGuruPage() {
                     />
                   </button>
 
-                  {/* TAMBAH GURU */}
                   <button
                     type="button"
                     onClick={() => setShowModal(true)}
@@ -1012,7 +938,6 @@ export default function AdminGuruPage() {
                 </div>
               </div>
 
-              {/* MASTER SHIFT */}
               <div className="theme-card rounded-xl border theme-border shadow-sm p-4">
                 <div className="flex flex-col gap-4">
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
@@ -1077,7 +1002,6 @@ export default function AdminGuruPage() {
                 </div>
               </div>
 
-              {/* ERROR */}
               {error && (
                 <div className="flex items-start gap-3 p-4 rounded-xl border theme-danger">
                   <AlertCircle size={20} className="mt-0.5 shrink-0" />
@@ -1099,7 +1023,6 @@ export default function AdminGuruPage() {
                 </div>
               )}
 
-              {/* STATISTIK */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <div className="theme-card rounded-xl border theme-border p-4 shadow-sm">
                   <div className="flex items-center gap-2">
@@ -1161,7 +1084,6 @@ export default function AdminGuruPage() {
                 </div>
               </div>
 
-              {/* FILTER */}
               <div className="theme-card rounded-xl border theme-border p-4 shadow-sm">
                 <div className="flex flex-col sm:flex-row gap-3">
                   <div className="relative flex-1">
@@ -1224,7 +1146,6 @@ export default function AdminGuruPage() {
                 </div>
               </div>
 
-              {/* TABEL GURU */}
               <div className="theme-card rounded-xl border theme-border shadow-sm overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[1300px]">
@@ -1349,7 +1270,6 @@ export default function AdminGuruPage() {
                                 </span>
                               </td>
 
-                              {/* SHIFT DARI BACKEND */}
                               <td className="px-4 py-4 align-middle">
                                 {shift ? (
                                   <div className="flex flex-col gap-1">
@@ -1371,7 +1291,6 @@ export default function AdminGuruPage() {
                                 )}
                               </td>
 
-                              {/* JAM KERJA DARI BACKEND */}
                               <td className="px-4 py-4 align-middle">
                                 <div className="flex flex-col gap-1">
                                   <span className="text-sm font-medium theme-text-secondary whitespace-nowrap">
@@ -1386,7 +1305,6 @@ export default function AdminGuruPage() {
                                 </div>
                               </td>
 
-                              {/* STATUS */}
                               <td className="px-4 py-4 align-middle">
                                 <span
                                   className={
@@ -1400,7 +1318,6 @@ export default function AdminGuruPage() {
                                 </span>
                               </td>
 
-                              {/* AKSI */}
                               <td className="px-4 py-4 align-middle">
                                 <div className="flex justify-center gap-1.5">
                                   <button
@@ -1412,6 +1329,19 @@ export default function AdminGuruPage() {
                                     title="Lihat Profil"
                                   >
                                     <Eye size={17} />
+                                  </button>
+
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      router.push(
+                                        `/admin/guru/kartu-identitas/card?id=${item.id}`
+                                      )
+                                    }
+                                    className="p-2 rounded-lg theme-text-muted hover:bg-[var(--color-primary-background)] hover:text-[var(--color-primary)] transition-all"
+                                    title="Cetak Kartu Identitas"
+                                  >
+                                    <IdCard size={17} />
                                   </button>
 
                                   <button
@@ -1454,7 +1384,6 @@ export default function AdminGuruPage() {
                   </table>
                 </div>
 
-                {/* EMPTY STATE */}
                 {!loading && guru.length === 0 && (
                   <div className="p-12 text-center">
                     <div className="w-12 h-12 rounded-full theme-info flex items-center justify-center mx-auto mb-3">
@@ -1488,7 +1417,6 @@ export default function AdminGuruPage() {
                   </div>
                 )}
 
-                {/* PAGINATION */}
                 {!loading && totalData > 0 && (
                   <div className="flex flex-col lg:flex-row items-center justify-between px-4 py-3 border-t theme-border theme-card-soft gap-3">
                     <div className="flex flex-wrap items-center justify-center gap-3 text-sm theme-text-secondary">
@@ -1588,7 +1516,6 @@ export default function AdminGuruPage() {
                 )}
               </div>
 
-              {/* FOOTER */}
               <footer className="text-center text-sm theme-text-muted py-3 border-t theme-border">
                 © 2026 SmartSchool • Data Guru
               </footer>
@@ -1597,7 +1524,6 @@ export default function AdminGuruPage() {
         </main>
       </div>
 
-      {/* MODAL TAMBAH GURU */}
       {showModal && (
         <div
           className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"

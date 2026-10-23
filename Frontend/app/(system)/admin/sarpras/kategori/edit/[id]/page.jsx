@@ -29,9 +29,6 @@ import {
   updateKategoriAset,
 } from "@/services/sarpras.service";
 
-/* ============================================================
-   HELPERS
-============================================================ */
 
 function extractArray(response) {
   if (Array.isArray(response)) return response;
@@ -42,9 +39,6 @@ function extractArray(response) {
   return [];
 }
 
-/* ============================================================
-   THEME
-============================================================ */
 
 const primaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -85,9 +79,6 @@ const cardShadow =
 const focusStyle =
   "focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]";
 
-/* ============================================================
-   PAGE
-============================================================ */
 
 export default function EditKategoriPage() {
   const router = useRouter();
@@ -109,9 +100,6 @@ export default function EditKategoriPage() {
 
   const [originalData, setOriginalData] = useState(null);
 
-  /* ==========================================================
-     LOAD DETAIL
-  ========================================================== */
 
   const loadKategori = useCallback(async () => {
     if (!id) {
@@ -154,9 +142,6 @@ export default function EditKategoriPage() {
     loadKategori();
   }, [loadKategori]);
 
-  /* ==========================================================
-     INPUT
-  ========================================================== */
 
   function handleChange(event) {
     const { name, value } = event.target;
@@ -171,9 +156,6 @@ export default function EditKategoriPage() {
     setSuccess("");
   }
 
-  /* ==========================================================
-     SUBMIT
-  ========================================================== */
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -221,9 +203,6 @@ export default function EditKategoriPage() {
     }
   }
 
-  /* ==========================================================
-     RENDER
-  ========================================================== */
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
@@ -249,9 +228,6 @@ export default function EditKategoriPage() {
 
         <main className="min-w-0 flex-1 overflow-y-auto">
           <div className="w-full px-4 py-5 sm:px-6 lg:px-8">
-            {/* =================================================
-                BREADCRUMB
-            ================================================= */}
 
             <div className="theme-text-muted mb-4 flex items-center gap-2 text-xs">
               <Link
@@ -266,9 +242,6 @@ export default function EditKategoriPage() {
               </span>
             </div>
 
-            {/* =================================================
-                HEADER
-            ================================================= */}
 
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center">
               <div
@@ -299,9 +272,6 @@ export default function EditKategoriPage() {
               </Link>
             </div>
 
-            {/* =================================================
-                ALERT
-            ================================================= */}
 
             {error && (
               <div
@@ -347,19 +317,12 @@ export default function EditKategoriPage() {
               </div>
             )}
 
-            {/* =================================================
-                MAIN GRID
-            ================================================= */}
 
             <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
-              {/* =================================================
-                  FORM CARD
-              ================================================= */}
 
               <section
                 className={`theme-card overflow-hidden rounded-2xl border ${primaryBorder} ${cardShadow}`}
               >
-                {/* FORM HEADER */}
                 <div
                   className={`flex items-center gap-3 border-b ${neutralBorder} px-5 py-4 sm:px-6`}
                 >
@@ -379,7 +342,6 @@ export default function EditKategoriPage() {
                 </div>
 
                 {loading ? (
-                  /* LOADING */
                   <div className="flex min-h-[300px] flex-col items-center justify-center p-6 text-center">
                     <div
                       className={`flex h-14 w-14 items-center justify-center rounded-2xl ${primarySoft} text-[var(--color-primary)]`}
@@ -394,7 +356,6 @@ export default function EditKategoriPage() {
                     </p>
                   </div>
                 ) : !originalData ? (
-                  /* NOT FOUND */
                   <div className="flex min-h-[260px] flex-col items-center justify-center p-6 text-center">
                     <div
                       className={`flex h-14 w-14 items-center justify-center rounded-2xl ${neutralSurface} theme-text-muted`}
@@ -419,7 +380,6 @@ export default function EditKategoriPage() {
                 ) : (
                   <form onSubmit={handleSubmit}>
                     <div className="space-y-5 px-5 py-6 sm:px-6 sm:py-7">
-                      {/* ID */}
                       <div>
                         <label className="theme-text-secondary mb-2 block text-xs font-semibold">
                           ID Kategori
@@ -435,7 +395,6 @@ export default function EditKategoriPage() {
                         </p>
                       </div>
 
-                      {/* NAMA */}
                       <div>
                         <label
                           htmlFor="nama"
@@ -475,7 +434,6 @@ export default function EditKategoriPage() {
                         </div>
                       </div>
 
-                      {/* STATUS */}
                       <div>
                         <label className="theme-text-secondary mb-2 block text-xs font-semibold">
                           Status Kategori{" "}
@@ -505,7 +463,6 @@ export default function EditKategoriPage() {
                       </div>
                     </div>
 
-                    {/* FOOTER ACTIONS */}
                     <div
                       className={`flex flex-col-reverse gap-2 border-t ${neutralBorder} ${neutralSurface} px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6`}
                     >
@@ -544,15 +501,11 @@ export default function EditKategoriPage() {
                 )}
               </section>
 
-              {/* =================================================
-                  PREVIEW PANEL
-              ================================================= */}
 
               <aside className="min-w-0">
                 <div
                   className={`theme-card overflow-hidden rounded-2xl border ${neutralBorder} ${cardShadow} xl:sticky xl:top-5`}
                 >
-                  {/* HEADER */}
                   <div
                     className={`flex items-center justify-between border-b ${neutralBorder} px-5 py-4`}
                   >
@@ -577,7 +530,6 @@ export default function EditKategoriPage() {
                     />
                   </div>
 
-                  {/* CARD PREVIEW */}
                   <div className="p-4">
                     <div
                       className={`rounded-xl border ${neutralBorder} ${neutralSurface} p-4`}
@@ -631,7 +583,6 @@ export default function EditKategoriPage() {
                     </div>
                   </div>
 
-                  {/* FOOTER */}
                   <div
                     className={`border-t ${neutralBorder} ${neutralSurface} px-5 py-3.5`}
                   >
@@ -644,9 +595,6 @@ export default function EditKategoriPage() {
               </aside>
             </div>
 
-            {/* =================================================
-                FOOTER
-            ================================================= */}
 
             <div className="mt-6 text-center">
               <p className="theme-text-muted text-[11px]">
@@ -660,9 +608,6 @@ export default function EditKategoriPage() {
   );
 }
 
-/* ============================================================
-   STATUS OPTION (radio card)
-============================================================ */
 
 function StatusOption({
   active,

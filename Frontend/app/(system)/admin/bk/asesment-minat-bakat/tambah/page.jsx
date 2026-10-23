@@ -8,16 +8,10 @@ import Sidebar from "@/app/components/Sidebar";
 
 import { createAsesmenMinatBakat } from "@/services/bk.service";
 
-/* =========================================================
-   GLOBAL THEME INPUT
-========================================================= */
 
 const inputClass =
   "theme-input w-full rounded-xl border px-4 py-2.5 text-sm font-medium shadow-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[color:var(--color-primary)/.12]";
 
-/* =========================================================
-   PAGE
-========================================================= */
 
 export default function CreateAsesmenPage() {
   const router = useRouter();
@@ -38,9 +32,6 @@ export default function CreateAsesmenPage() {
     catatan: "",
   });
 
-  /* =========================================================
-     SUBMIT
-  ========================================================= */
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -78,9 +69,6 @@ export default function CreateAsesmenPage() {
     }
   }
 
-  /* =========================================================
-     RENDER
-  ========================================================= */
 
   return (
     <div className="theme-page flex h-screen overflow-hidden">
@@ -95,13 +83,9 @@ export default function CreateAsesmenPage() {
         <main className="theme-page flex-1 overflow-y-auto p-5 md:p-6 lg:p-8">
           <div className="mx-auto w-full max-w-[1200px]">
 
-            {/* =================================================
-                PAGE HEADER
-            ================================================= */}
 
             <div className="mb-7 flex items-start gap-4">
 
-              {/* BACK BUTTON */}
 
               <button
                 type="button"
@@ -125,7 +109,6 @@ export default function CreateAsesmenPage() {
 
               <div className="flex items-start gap-4">
 
-                {/* PAGE ICON */}
 
                 <div className="theme-primary relative flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl shadow-lg">
                   <svg
@@ -160,9 +143,6 @@ export default function CreateAsesmenPage() {
               </div>
             </div>
 
-            {/* =================================================
-                ERROR
-            ================================================= */}
 
             {error && (
               <div className="theme-danger theme-border mb-6 flex items-start gap-3 rounded-xl border px-4 py-3.5 text-sm font-semibold shadow-sm">
@@ -184,22 +164,15 @@ export default function CreateAsesmenPage() {
               </div>
             )}
 
-            {/* =================================================
-                MAIN GRID
-            ================================================= */}
 
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_340px]">
 
-              {/* =================================================
-                  FORM
-              ================================================= */}
 
               <form
                 onSubmit={handleSubmit}
                 className="theme-card theme-border overflow-hidden rounded-2xl border shadow-xl"
               >
 
-                {/* FORM HEADER */}
 
                 <div className="theme-table-header theme-border-soft flex items-center gap-3 border-b px-6 py-5">
 
@@ -230,11 +203,9 @@ export default function CreateAsesmenPage() {
                   </div>
                 </div>
 
-                {/* FORM BODY */}
 
                 <div className="grid gap-5 p-6 md:grid-cols-2">
 
-                  {/* SISWA ID */}
 
                   <Field
                     label="Siswa ID"
@@ -255,7 +226,6 @@ export default function CreateAsesmenPage() {
                     />
                   </Field>
 
-                  {/* TANGGAL */}
 
                   <Field
                     label="Tanggal"
@@ -276,7 +246,6 @@ export default function CreateAsesmenPage() {
                     />
                   </Field>
 
-                  {/* JENIS */}
 
                   <Field
                     label="Jenis Asesmen"
@@ -297,7 +266,6 @@ export default function CreateAsesmenPage() {
                     />
                   </Field>
 
-                  {/* SKOR */}
 
                   <Field label="Skor">
                     <input
@@ -315,7 +283,6 @@ export default function CreateAsesmenPage() {
                     />
                   </Field>
 
-                  {/* MINAT */}
 
                   <div className="md:col-span-2">
                     <Field label="Minat">
@@ -335,7 +302,6 @@ export default function CreateAsesmenPage() {
                     </Field>
                   </div>
 
-                  {/* BAKAT */}
 
                   <div className="md:col-span-2">
                     <Field label="Bakat">
@@ -355,7 +321,6 @@ export default function CreateAsesmenPage() {
                     </Field>
                   </div>
 
-                  {/* HASIL */}
 
                   <div className="md:col-span-2">
                     <Field label="Hasil">
@@ -375,7 +340,6 @@ export default function CreateAsesmenPage() {
                     </Field>
                   </div>
 
-                  {/* REKOMENDASI */}
 
                   <div className="md:col-span-2">
                     <Field label="Rekomendasi">
@@ -395,7 +359,6 @@ export default function CreateAsesmenPage() {
                     </Field>
                   </div>
 
-                  {/* STATUS */}
 
                   <Field label="Status">
                     <select
@@ -423,7 +386,6 @@ export default function CreateAsesmenPage() {
                     </select>
                   </Field>
 
-                  {/* CATATAN */}
 
                   <div className="md:col-span-2">
                     <Field label="Catatan">
@@ -444,13 +406,9 @@ export default function CreateAsesmenPage() {
                   </div>
                 </div>
 
-                {/* =================================================
-                    FORM FOOTER
-                ================================================= */}
 
                 <div className="theme-table-header theme-border-soft flex justify-end gap-3 border-t px-6 py-4">
 
-                  {/* BATAL */}
 
                   <button
                     type="button"
@@ -462,7 +420,6 @@ export default function CreateAsesmenPage() {
                     Batal
                   </button>
 
-                  {/* SIMPAN */}
 
                   <button
                     type="submit"
@@ -498,25 +455,17 @@ export default function CreateAsesmenPage() {
                 </div>
               </form>
 
-              {/* =================================================
-                  SIDE PANEL
-              ================================================= */}
 
               <aside className="space-y-5">
 
-                {/* =================================================
-                    LIVE PREVIEW
-                ================================================= */}
 
                 <div className="theme-card theme-border relative overflow-hidden rounded-2xl border p-6 shadow-xl">
 
-                  {/* DECORATION */}
 
                   <div className="theme-info absolute -right-8 -top-8 h-24 w-24 rounded-full opacity-60" />
 
                   <div className="relative">
 
-                    {/* TITLE */}
 
                     <div className="mb-4 flex items-center gap-2">
 
@@ -547,7 +496,6 @@ export default function CreateAsesmenPage() {
                       </h3>
                     </div>
 
-                    {/* STUDENT PREVIEW */}
 
                     <div className="theme-border-soft flex items-center gap-3 border-b pb-4">
 
@@ -572,7 +520,6 @@ export default function CreateAsesmenPage() {
                       </div>
                     </div>
 
-                    {/* PREVIEW DATA */}
 
                     <div className="space-y-3 pt-4">
 
@@ -602,9 +549,6 @@ export default function CreateAsesmenPage() {
                   </div>
                 </div>
 
-                {/* =================================================
-                    TIPS
-                ================================================= */}
 
                 <div className="theme-info relative overflow-hidden rounded-2xl border p-5">
 
@@ -647,9 +591,6 @@ export default function CreateAsesmenPage() {
   );
 }
 
-/* =========================================================
-   FIELD
-========================================================= */
 
 function Field({
   label,
@@ -673,9 +614,6 @@ function Field({
   );
 }
 
-/* =========================================================
-   PREVIEW ROW
-========================================================= */
 
 function PreviewRow({
   label,

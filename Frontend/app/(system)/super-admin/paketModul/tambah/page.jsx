@@ -24,9 +24,6 @@ import {
   createPaket,
 } from "@/services/paket.service";
 
-/* =========================================================
-   THEME HELPERS
-========================================================= */
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -88,9 +85,6 @@ const themeDangerBorder =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-/* =========================================================
-   ICON MAP
-========================================================= */
 
 const ICON_MAP = {
   akademik: Layers,
@@ -103,9 +97,6 @@ const ICON_MAP = {
   inventaris: Layers,
 };
 
-/* =========================================================
-   HELPER
-========================================================= */
 
 function getFeatureId(item) {
   if (!item) return null;
@@ -216,9 +207,6 @@ function formatRupiah(value) {
   return `Rp${number.toLocaleString("id-ID")}`;
 }
 
-/* =========================================================
-   DURASI
-========================================================= */
 
 function getDurasiFromSiklus(value) {
   switch (value) {
@@ -250,9 +238,6 @@ function getSiklusFromDurasi(durasi) {
   return "bulan";
 }
 
-/* =========================================================
-   MAIN PAGE
-========================================================= */
 
 function TambahPaketPageContent() {
   const router = useRouter();
@@ -261,9 +246,6 @@ function TambahPaketPageContent() {
   const isDuplikat =
     searchParams.get("duplikat") === "true";
 
-  /* =======================================================
-     STATE
-  ======================================================= */
 
   const [fiturList, setFiturList] = useState([]);
   const [loadingFitur, setLoadingFitur] = useState(true);
@@ -280,9 +262,6 @@ function TambahPaketPageContent() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
-  /* =======================================================
-     LOAD FITUR
-  ======================================================= */
 
   useEffect(() => {
     let mounted = true;
@@ -329,9 +308,6 @@ function TambahPaketPageContent() {
     };
   }, []);
 
-  /* =======================================================
-     LOAD DATA DUPLIKAT
-  ======================================================= */
 
   useEffect(() => {
     if (!isDuplikat) {
@@ -397,9 +373,6 @@ function TambahPaketPageContent() {
     }
   }, [isDuplikat]);
 
-  /* =======================================================
-     TOGGLE FITUR
-  ======================================================= */
 
   function toggleFitur(id) {
     if (!id) return;
@@ -421,9 +394,6 @@ function TambahPaketPageContent() {
     });
   }
 
-  /* =======================================================
-     SUBMIT
-  ======================================================= */
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -516,9 +486,6 @@ function TambahPaketPageContent() {
     }
   }
 
-  /* =======================================================
-     BACK
-  ======================================================= */
 
   function goBack() {
     if (saving) return;
@@ -528,9 +495,6 @@ function TambahPaketPageContent() {
     );
   }
 
-  /* =======================================================
-     SELECTED FEATURES
-  ======================================================= */
 
   const selectedFeatures =
     useMemo(() => {
@@ -547,17 +511,11 @@ function TambahPaketPageContent() {
       fiturTerpilih,
     ]);
 
-  /* =======================================================
-     RENDER
-  ======================================================= */
 
   return (
     <div className="theme-page theme-text min-h-full">
       <div className="w-full max-w-[1600px] mx-auto px-4 py-5 sm:px-6 sm:py-7 lg:px-8 lg:py-8">
 
-        {/* =================================================
-            PAGE HEADER
-        ================================================= */}
 
         <div className="flex flex-col xl:flex-row xl:items-end xl:justify-between gap-5 mb-7">
           <div className="min-w-0">
@@ -601,9 +559,6 @@ function TambahPaketPageContent() {
           </div>
         </div>
 
-        {/* =================================================
-            ERROR
-        ================================================= */}
 
         {error && (
           <div
@@ -635,15 +590,9 @@ function TambahPaketPageContent() {
           </div>
         )}
 
-        {/* =================================================
-            CONTENT GRID
-        ================================================= */}
 
         <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_360px] gap-6 items-start">
 
-          {/* =================================================
-              FORM
-          ================================================= */}
 
           <form
             onSubmit={handleSubmit}
@@ -653,7 +602,6 @@ function TambahPaketPageContent() {
               className={`overflow-hidden rounded-2xl border ${themeNeutralBorder} theme-card ${themeCardShadow}`}
             >
 
-              {/* FORM HEADER */}
 
               <div
                 className={`border-b ${themeDivider} px-5 py-5 sm:px-7`}
@@ -679,13 +627,9 @@ function TambahPaketPageContent() {
                 </div>
               </div>
 
-              {/* FORM BODY */}
 
               <div className="space-y-6 p-5 sm:p-7">
 
-                {/* =================================================
-                    NAMA
-                ================================================= */}
 
                 <div>
                   <label className="block text-sm font-semibold theme-text">
@@ -710,9 +654,6 @@ function TambahPaketPageContent() {
                   />
                 </div>
 
-                {/* =================================================
-                    DESKRIPSI
-                ================================================= */}
 
                 <div>
                   <label className="block text-sm font-semibold theme-text">
@@ -736,13 +677,9 @@ function TambahPaketPageContent() {
                   />
                 </div>
 
-                {/* =================================================
-                    HARGA + SIKLUS
-                ================================================= */}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
 
-                  {/* HARGA */}
 
                   <div>
                     <label className="block text-sm font-semibold theme-text">
@@ -774,7 +711,6 @@ function TambahPaketPageContent() {
                     </div>
                   </div>
 
-                  {/* SIKLUS */}
 
                   <div>
                     <label className="block text-sm font-semibold theme-text">
@@ -828,9 +764,6 @@ function TambahPaketPageContent() {
                   </div>
                 </div>
 
-                {/* =================================================
-                    STATUS
-                ================================================= */}
 
                 <div>
                   <label className="block text-sm font-semibold theme-text">
@@ -843,7 +776,6 @@ function TambahPaketPageContent() {
 
                   <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
 
-                    {/* AKTIF */}
 
                     <button
                       type="button"
@@ -884,7 +816,6 @@ function TambahPaketPageContent() {
                       )}
                     </button>
 
-                    {/* NONAKTIF */}
 
                     <button
                       type="button"
@@ -935,9 +866,6 @@ function TambahPaketPageContent() {
                   )}
                 </div>
 
-                {/* =================================================
-                    MODUL / FITUR
-                ================================================= */}
 
                 <div>
                   <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2">
@@ -961,7 +889,6 @@ function TambahPaketPageContent() {
 
                   </div>
 
-                  {/* LOADING */}
 
                   {loadingFitur ? (
                     <div
@@ -1013,7 +940,6 @@ function TambahPaketPageContent() {
                             }`}
                           >
 
-                            {/* CHECKBOX */}
 
                             <span
                               className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border transition-all ${
@@ -1031,7 +957,6 @@ function TambahPaketPageContent() {
                               )}
                             </span>
 
-                            {/* ICON */}
 
                             <span
                               className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
@@ -1043,7 +968,6 @@ function TambahPaketPageContent() {
                               <Icon size={16} />
                             </span>
 
-                            {/* TEXT */}
 
                             <span className="min-w-0 flex-1">
 
@@ -1094,9 +1018,6 @@ function TambahPaketPageContent() {
 
               </div>
 
-              {/* =================================================
-                  FOOTER
-              ================================================= */}
 
               <div
                 className={`border-t ${themeDivider} ${themeNeutralSurface} px-5 py-5 sm:px-7`}
@@ -1142,9 +1063,6 @@ function TambahPaketPageContent() {
             </div>
           </form>
 
-          {/* =================================================
-              PREVIEW
-          ================================================= */}
 
           <aside className="xl:sticky xl:top-6 min-w-0">
 
@@ -1152,7 +1070,6 @@ function TambahPaketPageContent() {
               className={`overflow-hidden rounded-2xl border ${themeNeutralBorder} theme-card ${themeCardShadow}`}
             >
 
-              {/* PREVIEW HEADER */}
 
               <div
                 className={`${themePrimaryGradient} px-5 py-5 text-[var(--color-card)]`}
@@ -1180,7 +1097,6 @@ function TambahPaketPageContent() {
                 </p>
               </div>
 
-              {/* PREVIEW BODY */}
 
               <div className="p-5">
 
@@ -1252,7 +1168,6 @@ function TambahPaketPageContent() {
                   </div>
                 </div>
 
-                {/* PREVIEW MODULE */}
 
                 <div className="mt-5">
 
@@ -1333,7 +1248,6 @@ function TambahPaketPageContent() {
                   </div>
                 </div>
 
-                {/* INFO */}
 
                 <div
                   className={`mt-5 flex gap-2.5 rounded-xl border ${themeInfoBorder} ${themeInfoSurface} p-3.5`}

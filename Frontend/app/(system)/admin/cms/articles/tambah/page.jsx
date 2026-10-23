@@ -111,12 +111,6 @@ export default function TambahArtikelPage() {
         gambarUtama:
           form.gambarUtama.trim() || undefined,
 
-        /*
-         * STATUS MENGIKUTI BACKEND
-         *
-         * draft
-         * dipublikasikan
-         */
         status: form.status,
 
         kategoriArtikelId:
@@ -167,15 +161,9 @@ export default function TambahArtikelPage() {
   return (
     <div className="theme-page fixed inset-0 overflow-hidden">
 
-      {/* =====================================================
-          SIDEBAR
-      ===================================================== */}
 
       <Sidebar />
 
-      {/* =====================================================
-          MAIN
-      ===================================================== */}
 
       <div
         className="
@@ -192,15 +180,9 @@ export default function TambahArtikelPage() {
         "
       >
 
-        {/* =================================================
-            HEADER
-        ================================================= */}
 
         <Header />
 
-        {/* =================================================
-            CONTENT
-        ================================================= */}
 
         <main className="min-h-0 flex-1 overflow-hidden">
           <div className="h-full overflow-auto">
@@ -219,9 +201,6 @@ export default function TambahArtikelPage() {
               "
             >
 
-              {/* =================================================
-                  TOP NAVIGATION
-              ================================================= */}
 
               <div className="mb-6 flex items-center justify-between">
 
@@ -276,9 +255,6 @@ export default function TambahArtikelPage() {
 
               </div>
 
-              {/* =================================================
-                  PAGE TITLE
-              ================================================= */}
 
               <div className="mb-7">
 
@@ -350,9 +326,6 @@ export default function TambahArtikelPage() {
 
               </div>
 
-              {/* =================================================
-                  FORM
-              ================================================= */}
 
               <form onSubmit={handleSubmit}>
 
@@ -365,9 +338,6 @@ export default function TambahArtikelPage() {
                   "
                 >
 
-                  {/* =================================================
-                      LEFT CONTENT
-                  ================================================= */}
 
                   <div
                     className="
@@ -381,7 +351,6 @@ export default function TambahArtikelPage() {
                     "
                   >
 
-                    {/* HEADER CARD */}
 
                     <div
                       className="
@@ -417,13 +386,9 @@ export default function TambahArtikelPage() {
 
                     </div>
 
-                    {/* BODY */}
 
                     <div className="p-5 sm:p-6">
 
-                      {/* =================================================
-                          JUDUL
-                      ================================================= */}
 
                       <div className="mb-6">
 
@@ -489,9 +454,6 @@ export default function TambahArtikelPage() {
 
                       </div>
 
-                      {/* =================================================
-                          RINGKASAN
-                      ================================================= */}
 
                       <div className="mb-6">
 
@@ -566,9 +528,6 @@ export default function TambahArtikelPage() {
 
                       </div>
 
-                      {/* =================================================
-                          KONTEN
-                      ================================================= */}
 
                       <div className="mb-6">
 
@@ -676,9 +635,6 @@ export default function TambahArtikelPage() {
 
                       </div>
 
-                      {/* =================================================
-                          IMAGE
-                      ================================================= */}
 
                       <div>
 
@@ -796,7 +752,6 @@ export default function TambahArtikelPage() {
                           gambar CMS.
                         </p>
 
-                        {/* IMAGE PREVIEW */}
 
                         {form.gambarUtama && (
                           <div
@@ -864,9 +819,6 @@ export default function TambahArtikelPage() {
 
                   </div>
 
-                  {/* =================================================
-                      RIGHT SETTINGS
-                  ================================================= */}
 
                   <div
                     className="
@@ -883,7 +835,6 @@ export default function TambahArtikelPage() {
                     "
                   >
 
-                    {/* HEADER */}
 
                     <div
                       className="
@@ -920,9 +871,6 @@ export default function TambahArtikelPage() {
 
                     <div className="p-5">
 
-                      {/* =================================================
-                          CATEGORY
-                      ================================================= */}
 
                       <div>
 
@@ -1024,13 +972,9 @@ export default function TambahArtikelPage() {
 
                       </div>
 
-                      {/* DIVIDER */}
 
                       <div className="theme-border-soft my-6 border-t" />
 
-                      {/* =================================================
-                          STATUS
-                      ================================================= */}
 
                       <div>
 
@@ -1070,7 +1014,6 @@ export default function TambahArtikelPage() {
                           "
                         >
 
-                          {/* STATUS SESUAI BE */}
 
                           <option value="draft">
                             Draft
@@ -1097,9 +1040,6 @@ export default function TambahArtikelPage() {
 
                       </div>
 
-                      {/* =================================================
-                          STATUS INFO
-                      ================================================= */}
 
                       <div
                         className="
@@ -1193,9 +1133,6 @@ export default function TambahArtikelPage() {
 
                       </div>
 
-                      {/* =================================================
-                          ACTION
-                      ================================================= */}
 
                       <div
                         className="
@@ -1285,9 +1222,6 @@ export default function TambahArtikelPage() {
 
               </form>
 
-              {/* =================================================
-                  FOOTER
-              ================================================= */}
 
               <div
                 className="

@@ -358,6 +358,243 @@ export async function deleteKelas(
   return response;
 }
 
+
+export interface WaliKelasSiswa {
+  id: string;
+  nama: string;
+  nisn: string;
+  nis: string;
+  jenisKelamin: string;
+  avatar: string;
+}
+
+export interface WaliKelasRecord {
+  id: string;
+  kelas: string;
+  tingkat: string;
+  jenjang: string;
+  waliKelasId: string | null;
+  waliKelas: string;
+  nip: string;
+  email: string;
+  telp: string;
+  jumlahSiswa: number;
+  kapasitas: number;
+  tahunAjaranId: string;
+  tahunAjaran: string;
+  semester: string;
+  siswa: WaliKelasSiswa[];
+  status: "ditugaskan" | "belum_ditugaskan";
+}
+
+function extractList(response: any): any[] {
+  if (Array.isArray(response)) return response;
+  if (Array.isArray(response?.data)) return response.data;
+  if (Array.isArray(response?.data?.data)) return response.data.data;
+  if (Array.isArray(response?.items)) return response.items;
+  return [];
+}
+
+function extractDetail(response: any): any {
+  if (!response) return null;
+  if (response.data !== undefined) {
+    return response.data?.data ?? response.data;
+  }
+  return response;
+}
+
+function formatJenjang(tingkat: unknown): string {
+  const value = String(tingkat ?? "").trim();
+  if (!value) return "";
+
+  const romawi: Record<string, string> = {
+    "1": "I",
+    "2": "II",
+    "3": "III",
+    "4": "IV",
+    "5": "V",
+    "6": "VI",
+    "7": "VII",
+    "8": "VIII",
+    "9": "IX",
+    "10": "X",
+    "11": "XI",
+    "12": "XII",
+  };
+
+  return romawi[value] ?? value;
+}
+
+function normalizeSiswa(anggota: any[]): WaliKelasSiswa[] {
+  return anggota
+    .map((entry) => {
+      const siswa = entry?.siswa ?? entry;
+
+      return {
+        id: String(siswa?.id ?? entry?.penggunaId ?? ""),
+        nama: String(
+          siswa?.namaLengkap ??
+            siswa?.nama ??
+            entry?.namaLengkap ??
+            ""
+        ),
+        nisn: String(siswa?.nisn ?? ""),
+        nis: String(siswa?.nis ?? ""),
+        jenisKelamin: String(siswa?.jenisKelamin ?? ""),
+        avatar: String(siswa?.avatar ?? ""),
+      };
+    })
+    .filter((siswa) => siswa.nama);
+}
+
+function normalizeKelas(item: any): WaliKelasRecord {
+  const wali = item?.waliKelas ?? item?.wali_kelas ?? null;
+  const tahunAjaran =
+    item?.tahunAjaran ?? item?.tahun_ajaran ?? null;
+  const anggota = Array.isArray(item?.anggota)
+    ? item.anggota
+    : [];
+
+  const waliKelasId =
+    item?.waliKelasId ??
+    item?.wali_kelas_id ??
+    wali?.id ??
+    null;
+
+  const jumlahSiswa = Number(
+    item?._count?.anggota ??
+      item?.jumlahSiswa ??
+      anggota.length ??
+      0
+  );
+
+  return {
+    id: String(item?.id ?? ""),
+    kelas: String(item?.nama ?? item?.kelas ?? "-"),
+    tingkat:
+      item?.tingkat !== undefined && item?.tingkat !== null
+        ? String(item.tingkat)
+        : "",
+    jenjang: formatJenjang(item?.tingkat) || "-",
+    waliKelasId: waliKelasId ? String(waliKelasId) : null,
+    waliKelas: String(
+      wali?.namaLengkap ?? wali?.nama ?? ""
+    ),
+    nip: String(wali?.nip ?? ""),
+    email: String(wali?.email ?? ""),
+    telp: String(wali?.noTelepon ?? ""),
+    jumlahSiswa: Number.isFinite(jumlahSiswa)
+      ? jumlahSiswa
+      : 0,
+    kapasitas: Number(item?.kapasitas ?? 0) || 0,
+    tahunAjaranId: String(
+      item?.tahunAjaranId ?? tahunAjaran?.id ?? ""
+    ),
+    tahunAjaran: String(
+      tahunAjaran?.tahunAjaran ??
+        tahunAjaran?.nama ??
+        "-"
+    ),
+    semester: String(tahunAjaran?.semester ?? ""),
+    siswa: normalizeSiswa(anggota),
+    status: waliKelasId
+      ? "ditugaskan"
+      : "belum_ditugaskan",
+  };
+}
+
+export async function getWaliKelasList(): Promise<
+  WaliKelasRecord[]
+> {
+  const rows: any[] = [];
+  let page = 1;
+  let totalPages = 1;
+
+  do {
+    const response = await getKelas({
+      page,
+      limit: 100,
+      sortBy: "nama",
+      sortOrder: "asc",
+    });
+
+    rows.push(...extractList(response));
+
+    const nextTotal = Number(
+      response?.meta?.totalPages ??
+        response?.pagination?.totalPages ??
+        1
+    );
+
+    totalPages =
+      Number.isFinite(nextTotal) && nextTotal > 0
+        ? nextTotal
+        : 1;
+
+    page += 1;
+  } while (page <= totalPages && page <= 50);
+
+  return rows.map(normalizeKelas);
+}
+
+export async function getWaliKelasDetail(
+  id: string
+): Promise<WaliKelasRecord> {
+  if (!id) {
+    throw new Error("ID kelas wajib diisi.");
+  }
+
+  const response = await getKelasById(id);
+  const data = extractDetail(response);
+
+  if (!data?.id) {
+    throw new Error("Data kelas tidak ditemukan.");
+  }
+
+  return normalizeKelas(data);
+}
+
+async function updateWaliKelas(
+  kelasId: string,
+  waliKelasId: string | null
+) {
+  const detailResponse = await getKelasById(kelasId);
+  const current = extractDetail(detailResponse);
+  const kapasitas = Number(current?.kapasitas);
+
+  return updateKelas(kelasId, {
+    waliKelasId,
+    ...(Number.isFinite(kapasitas) && kapasitas > 0
+      ? { kapasitas }
+      : {}),
+  });
+}
+
+export async function assignWaliKelas(
+  kelasId: string,
+  waliKelasId: string
+) {
+  if (!kelasId) {
+    throw new Error("ID kelas wajib diisi.");
+  }
+
+  if (!waliKelasId) {
+    throw new Error("Wali kelas wajib dipilih.");
+  }
+
+  return updateWaliKelas(kelasId, waliKelasId);
+}
+
+export async function releaseWaliKelas(
+  kelasId: string
+) {
+  if (!kelasId) {
+    throw new Error("ID kelas wajib diisi.");
+  }
+
+  return updateWaliKelas(kelasId, null);
+}
+
 export async function getKelasSayaDariAnggota(siswaId) {
   if (!siswaId) {
     throw new Error("ID siswa wajib diisi.");

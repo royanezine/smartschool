@@ -37,7 +37,6 @@ export default function FAQ() {
 
   return (
     <section className="relative bg-white overflow-hidden py-24">
-      {/* 🌟 Background Dekoratif Premium (Sama seperti komponen lain) */}
       <div
         className="absolute inset-0 opacity-[0.03] pointer-events-none"
         style={{
@@ -49,7 +48,6 @@ export default function FAQ() {
       <div className="absolute -bottom-16 -left-16 w-[400px] h-[400px] bg-blue-100/40 rounded-full blur-[100px] pointer-events-none" />
 
       <div className="relative max-w-4xl mx-auto px-6 z-10">
-        {/* Heading */}
         <div className="text-center mb-16">
           <span className="inline-flex items-center gap-2 rounded-full bg-blue-50/80 border border-blue-200/60 px-4 py-1.5 text-xs font-semibold text-blue-600 shadow-sm mb-4">
             <HelpCircle size={15} className="text-blue-500" />
@@ -58,7 +56,7 @@ export default function FAQ() {
 
           <h2 className="text-4xl md:text-5xl font-bold text-slate-900 leading-tight">
             Pertanyaan yang{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
+            <span className="text-blue-600">
               Sering Ditanyakan
             </span>
           </h2>
@@ -68,7 +66,6 @@ export default function FAQ() {
           </p>
         </div>
 
-        {/* Accordion */}
         <div className="max-w-3xl mx-auto space-y-4">
           {faqs.map((faq, index) => {
             const isOpen = open === index;
@@ -89,13 +86,12 @@ export default function FAQ() {
                   onClick={() => setOpen(isOpen ? -1 : index)}
                   className="flex w-full items-center gap-4 p-4 md:p-6 text-left"
                 >
-                  {/* Nomor urut dengan animasi */}
                   <motion.div
                     className={`
                       flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300
                       ${isOpen 
-                        ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/30' 
-                        : 'bg-slate-100 text-slate-400 group-hover:bg-slate-200 group-hover:text-slate-600'
+                        ? 'bg-blue-600 text-white shadow-sm shadow-blue-600/30' 
+                        : 'bg-slate-100 text-slate-500 group-hover:bg-slate-200 group-hover:text-slate-700'
                       }
                     `}
                   >
@@ -109,7 +105,6 @@ export default function FAQ() {
                     {faq.question}
                   </span>
 
-                  {/* Animasi Chevron Halus */}
                   <motion.div
                     animate={{ rotate: isOpen ? 180 : 0 }}
                     transition={{ duration: 0.3, ease: "easeInOut" }}
@@ -123,7 +118,6 @@ export default function FAQ() {
                   </motion.div>
                 </button>
 
-                {/* Jawaban dengan Smooth Height Transition */}
                 <AnimatePresence initial={false}>
                   {isOpen && (
                     <motion.div
@@ -148,7 +142,6 @@ export default function FAQ() {
           })}
         </div>
 
-        {/* Footer dengan sentuhan lebih interaktif */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}

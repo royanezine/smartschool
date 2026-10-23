@@ -116,7 +116,6 @@ export default function TambahAkunKasPage() {
           <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
             <div className="w-full space-y-6">
 
-              {/* HEADER PAGE */}
               <section className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
                 <div>
                   <Link
@@ -150,7 +149,6 @@ export default function TambahAkunKasPage() {
                 </div>
               </section>
 
-              {/* ERROR */}
               {error && (
                 <div className="flex items-start gap-3 rounded-xl border border-[var(--color-danger)] p-4 text-sm">
                   <AlertCircle
@@ -172,7 +170,6 @@ export default function TambahAkunKasPage() {
                 </div>
               )}
 
-              {/* FORM */}
               <section className="theme-card rounded-2xl border shadow-sm">
                 <div className="theme-border border-b px-5 py-4 sm:px-6">
                   <h2 className="theme-text text-sm font-bold">

@@ -1,4 +1,3 @@
-// app/cmsAdmin/pengaturan/sosial-media/page.jsx
 "use client";
 
 import { useState } from "react";
@@ -135,7 +134,6 @@ export default function SosialMediaPage() {
       />
 
       <div className="flex-1 min-w-0 flex flex-col">
-        {/* ===== HEADER ===== */}
         <Header
           title="Sosial Media"
           user={{
@@ -148,7 +146,6 @@ export default function SosialMediaPage() {
 
         <main className="flex-1 min-w-0 overflow-y-auto p-4 md:p-6 lg:p-8 theme-page">
           <div className="w-full min-w-0 max-w-6xl mx-auto space-y-6">
-            {/* Breadcrumb */}
             <nav className="flex items-center gap-2 text-sm">
               <a
                 href="/cmsAdmin"
@@ -173,7 +170,6 @@ export default function SosialMediaPage() {
               </span>
             </nav>
 
-            {/* Header */}
             <div className="flex items-start gap-4">
               <div className="shrink-0 p-3 rounded-xl theme-info border">
                 <Share2 className="w-6 h-6" />
@@ -195,7 +191,6 @@ export default function SosialMediaPage() {
               </div>
             </div>
 
-            {/* Stats */}
             <div className="flex flex-wrap items-center gap-3 theme-card-soft border theme-border rounded-xl px-4 py-3">
               <span className="text-xs font-medium theme-text-secondary">
                 Status:
@@ -218,7 +213,6 @@ export default function SosialMediaPage() {
               </span>
             </div>
 
-            {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
               {platforms.map((platform) => (
                 <div
@@ -230,7 +224,6 @@ export default function SosialMediaPage() {
                   }`}
                 >
                   <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-4">
-                    {/* Icon & Label */}
                     <div className="flex items-center gap-3 shrink-0">
                       <div
                         className={`
@@ -255,7 +248,6 @@ export default function SosialMediaPage() {
                       </span>
                     </div>
 
-                    {/* URL Input */}
                     <div className="flex-1 min-w-0">
                       <div className="relative">
                         {platform.enabled && (
@@ -285,7 +277,6 @@ export default function SosialMediaPage() {
                       </div>
                     </div>
 
-                    {/* Toggle */}
                     <label className="relative inline-flex items-center cursor-pointer shrink-0">
                       <input
                         type="checkbox"
@@ -324,9 +315,7 @@ export default function SosialMediaPage() {
                 </div>
               ))}
 
-              {/* Actions */}
               <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t theme-border">
-                {/* Batal */}
                 <button
                   type="button"
                   onClick={() => window.history.back()}
@@ -347,7 +336,6 @@ export default function SosialMediaPage() {
                   Batal
                 </button>
 
-                {/* Simpan */}
                 <button
                   type="submit"
                   disabled={loading}
@@ -376,7 +364,6 @@ export default function SosialMediaPage() {
               </div>
             </form>
 
-            {/* Live Preview */}
             <div
               className="
                 rounded-xl border p-6
@@ -432,7 +419,6 @@ export default function SosialMediaPage() {
               </div>
             </div>
 
-            {/* Footer */}
             <footer className="pt-4 border-t theme-border text-center text-xs theme-text-muted">
               © 2026 SmartSchool CMS • Sosial Media
             </footer>

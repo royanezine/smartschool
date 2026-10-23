@@ -16,10 +16,6 @@ import {
   Minus,
 } from "lucide-react";
 
-// ============================================================
-// DUMMY DATA
-// Catatan: ganti dengan data asli dari API/DB begitu tersedia.
-// ============================================================
 
 const categories = [
   {
@@ -91,9 +87,6 @@ const recentReports = [
   },
 ];
 
-// ============================================================
-// THEME HELPERS
-// ============================================================
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -140,9 +133,6 @@ const themeCardShadow =
 const themePrimaryShadow =
   "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
 
-// ============================================================
-// CATEGORY THEME
-// ============================================================
 
 const categoryTheme = {
   primary: {
@@ -194,9 +184,6 @@ const categoryTheme = {
   },
 };
 
-// ============================================================
-// TREND ICON
-// ============================================================
 
 const TrendIcon = ({ trend }) => {
   if (trend === "up") {
@@ -225,9 +212,6 @@ const TrendIcon = ({ trend }) => {
   );
 };
 
-// ============================================================
-// MAIN COMPONENT
-// ============================================================
 
 export default function LaporanYayasanPage() {
   const router = useRouter();
@@ -236,9 +220,6 @@ export default function LaporanYayasanPage() {
     <div className="theme-page theme-text min-h-full">
       <div className="w-full max-w-[1800px] mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 space-y-6">
 
-        {/* =====================================================
-            PAGE HEADER
-        ===================================================== */}
 
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="min-w-0">
@@ -273,9 +254,6 @@ export default function LaporanYayasanPage() {
           </div>
         </div>
 
-        {/* =====================================================
-            CATEGORY CARDS
-        ===================================================== */}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {categories.map((item) => {
@@ -304,7 +282,6 @@ export default function LaporanYayasanPage() {
                   min-w-0
                 `}
               >
-                {/* Decorative background */}
                 <div
                   className={`
                     absolute
@@ -320,7 +297,6 @@ export default function LaporanYayasanPage() {
 
                 <div className="relative min-w-0">
                   <div className="flex items-start justify-between">
-                    {/* Icon */}
                     <div
                       className={`
                         p-3
@@ -339,7 +315,6 @@ export default function LaporanYayasanPage() {
                       <Icon size={22} />
                     </div>
 
-                    {/* Arrow */}
                     <ChevronRight
                       size={20}
                       className="
@@ -354,17 +329,14 @@ export default function LaporanYayasanPage() {
                     />
                   </div>
 
-                  {/* Title */}
                   <h3 className="mt-4 sm:mt-5 text-base sm:text-lg font-semibold theme-text truncate">
                     {item.title}
                   </h3>
 
-                  {/* Description */}
                   <p className="mt-1.5 theme-text-secondary text-sm leading-relaxed line-clamp-2">
                     {item.desc}
                   </p>
 
-                  {/* Stat */}
                   <div
                     className={`
                       mt-4
@@ -389,9 +361,6 @@ export default function LaporanYayasanPage() {
           })}
         </div>
 
-        {/* =====================================================
-            RECENT REPORTS
-        ===================================================== */}
 
         <div
           className={`
@@ -403,7 +372,6 @@ export default function LaporanYayasanPage() {
             overflow-hidden
           `}
         >
-          {/* Header */}
           <div
             className={`
               flex
@@ -435,7 +403,6 @@ export default function LaporanYayasanPage() {
             </div>
           </div>
 
-          {/* List */}
           <div>
             {recentReports.map((r, index) => (
               <div
@@ -455,7 +422,6 @@ export default function LaporanYayasanPage() {
                   }
                 `}
               >
-                {/* Report info */}
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium theme-text truncate">
                     {r.title}
@@ -484,10 +450,8 @@ export default function LaporanYayasanPage() {
                   </div>
                 </div>
 
-                {/* Trend */}
                 <TrendIcon trend={r.trend} />
 
-                {/* Download */}
                 <button
                   className="
                     p-2

@@ -67,10 +67,6 @@ function getLocalDateString(date = new Date()) {
   return `${year}-${month}-${day}`;
 }
 
-/**
- * Tanggal dalam zona waktu Jakarta (WIB).
- * Dipakai untuk mencocokkan catatan absensi dengan hari ini.
- */
 function getJakartaDateString(value = new Date()) {
   const date = value instanceof Date ? value : new Date(value);
 
@@ -106,7 +102,6 @@ function formatTime(value) {
     return "-";
   }
 
-  // Format jam langsung dari Backend, misalnya "07:30" atau "07:30:00".
   if (typeof value === "string") {
     const timeMatch = value.match(
       /^([01]?\d|2[0-3]):([0-5]\d)(?::([0-5]\d))?$/
@@ -192,9 +187,6 @@ function getInitials(name, email) {
 }
 
 function getUserFromStorage() {
-  // Satu sumber kebenaran: identitas dari sesi aktif (lib/auth).
-  // Membaca localStorage("user") langsung berisiko menampilkan data akun
-  // lain ketika sesi pada origin yang sama berubah.
   const sessionUser = getSessionUser();
 
   if (!sessionUser || typeof sessionUser !== "object") {
@@ -243,22 +235,12 @@ function StatCard({ title, value, subtitle, Icon }) {
   );
 }
 
-/* =========================================================
-   ABSENSI GURU — REVISI
-========================================================= */
 
-/**
- * Menentukan tanggal absensi dengan prioritas:
- * 1. Waktu masuk/keluar (paling akurat).
- * 2. DibuatPada.
- * 3. Tanggal shift (fallback terakhir).
- */
 function getAttendanceDate(item) {
   if (!item) return "";
 
   const todayKey = getJakartaDateString(new Date());
 
-  // Waktu masuk/keluar lebih akurat daripada tanggal shift.
   const timestamps = [
     item.waktuMasuk,
     item.waktuKeluar,
@@ -281,7 +263,6 @@ function getAttendanceDate(item) {
         !Number.isNaN(item.timestamp)
     );
 
-  // Jika salah satu waktu absensi terjadi hari ini, tampilkan catatannya.
   if (timestamps.some((item) => item.date === todayKey)) {
     return todayKey;
   }
@@ -291,7 +272,6 @@ function getAttendanceDate(item) {
     return timestamps[0].date;
   }
 
-  // Gunakan tanggal shift hanya jika tidak ada timestamp absensi.
   return item.tanggal ? getJakartaDateString(item.tanggal) : "";
 }
 
@@ -335,7 +315,6 @@ function getAttendanceTime(item, type) {
     }
   }
 
-  // Periksa juga kemungkinan data tersimpan dalam objek relasi.
   const nestedObjects = [
     item.absensi,
     item.data,
@@ -358,9 +337,6 @@ function getAttendanceTime(item, type) {
   return null;
 }
 
-/* =========================================================
-   HALAMAN
-========================================================= */
 
 export default function GuruDashboardPage() {
   const router = useRouter();
@@ -384,9 +360,6 @@ export default function GuruDashboardPage() {
   const today = useMemo(() => new Date(), []);
   const todayString = getLocalDateString();
 
-  /* =======================================================
-     LOAD ATTENDANCE TODAY (REVISI)
-  ======================================================= */
 
   const loadAttendanceToday = useCallback(async () => {
     try {
@@ -429,9 +402,6 @@ export default function GuruDashboardPage() {
     }
   }, []);
 
-  /* =======================================================
-     LOAD DASHBOARD (REVISI bagian filter absensi)
-  ======================================================= */
 
   const loadDashboard = useCallback(
     async (isRefresh = false) => {
@@ -487,10 +457,6 @@ export default function GuruDashboardPage() {
         setNotifikasi(notifList);
         setUnreadCount(Number(notificationPayload?.unreadCount || 0));
 
-        // ===================================================
-        // Ambil catatan absensi shift hari ini berdasarkan
-        // waktu Jakarta (REVISI).
-        // ===================================================
         if (attendanceResult.status === "fulfilled") {
           const attendanceRecords = getArrayPayload(
             attendanceResult.value
@@ -686,16 +652,9 @@ export default function GuruDashboardPage() {
     loadDashboard();
   }, [loadDashboard]);
 
-  /*
-   * Sinkronkan identitas pengguna bila sesi berubah
-   * (pada tab ini atau tab lain), agar nama profil di dashboard
-   * tidak tertinggal data akun sebelumnya.
-   */
   useEffect(() => {
     const syncUser = () => setUser(getUserFromStorage());
 
-    // Sinkronkan pada perubahan sesi tab ini maupun tab lain (satu sesi
-    // per browser pada produksi), agar profil tidak tertinggal.
     const unsubscribe = subscribeAuth(syncUser);
 
     return () => {
@@ -871,7 +830,6 @@ export default function GuruDashboardPage() {
                 />
               </section>
 
-              {/* KEHADIRAN GURU: waktu aktual dari Backend */}
               <section className={`${themeCard} min-w-0 overflow-hidden`}>
                 <div className="flex items-center gap-3 border-b border-[color-mix(in_srgb,var(--color-text)_8%,transparent)] p-4 sm:p-5">
                   <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${themeSoft} ${themePrimary}`}>
@@ -944,7 +902,6 @@ export default function GuruDashboardPage() {
                 )}
               </section>
 
-              {/* AKSES CEPAT */}
               <section>
                 <div className="mb-3">
                   <h2 className="text-sm font-bold theme-text sm:text-base">Akses Cepat</h2>
@@ -976,7 +933,6 @@ export default function GuruDashboardPage() {
                 </div>
               </section>
 
-              {/* JADWAL DAN NOTIFIKASI */}
               <section className="grid min-w-0 grid-cols-1 gap-5 xl:grid-cols-3">
                 <div className={`${themeCard} min-w-0 overflow-hidden xl:col-span-2`}>
                   <div className="flex items-center justify-between gap-3 border-b border-[color-mix(in_srgb,var(--color-text)_8%,transparent)] p-4 sm:p-5">
@@ -1089,7 +1045,6 @@ export default function GuruDashboardPage() {
                 </div>
               </section>
 
-              {/* REKAP KEHADIRAN SISWA PER KELAS */}
               <section className={`${themeCard} min-w-0 overflow-hidden`}>
                 <div className="flex items-center justify-between gap-3 border-b border-[color-mix(in_srgb,var(--color-text)_8%,transparent)] p-4 sm:p-5">
                   <div className="flex items-center gap-3">
@@ -1155,7 +1110,6 @@ export default function GuruDashboardPage() {
                 )}
               </section>
 
-              {/* PENGINGAT */}
               <section className="rounded-2xl border border-[color-mix(in_srgb,var(--color-info)_22%,transparent)] bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)] p-4 sm:p-5">
                 <div className="flex items-start gap-3">
                   <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[color-mix(in_srgb,var(--color-info)_22%,transparent)] theme-card">
@@ -1178,7 +1132,6 @@ export default function GuruDashboardPage() {
                 </button>
               </section>
 
-              {/* AKTIVITAS */}
               <section className={`${themeCard} p-4 sm:p-5`}>
                 <div className="flex items-center gap-3">
                   <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${themeSoft} ${themePrimary}`}>

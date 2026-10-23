@@ -14,19 +14,6 @@ import {
   Eye,
 } from "lucide-react";
 
-/**
- * app/admin/akademik/rapor/page.jsx
- *
- * Halaman Rapor — dua tingkat tampilan:
- * 1) Grid kartu kelas (RPL/TKJ, X-XII) — menampilkan jumlah siswa & wali kelas.
- * 2) Klik salah satu kartu kelas -> tampil daftar siswa di kelas itu,
- *    lengkap dengan tombol untuk melihat/mencetak rapor per siswa.
- *
- * CATATAN DATA:
- * MOCK_SISWA masih dummy, strukturnya sama dengan yang dipakai di halaman
- * Nilai supaya konsisten. Kalau nanti nyambung ke API, tinggal ganti
- * MOCK_SISWA dengan hasil fetch dan WALI_KELAS dengan data guru wali.
- */
 
 const WALI_KELAS = {
   "X RPL 1": "Dewi Anggraini, S.Kom.",
@@ -210,7 +197,6 @@ export default function RaporPage() {
 
   return (
     <div className="flex h-screen w-full theme-page overflow-hidden">
-      {/* SIDEBAR */}
       <Sidebar
         active="akademikRapor"
         setActive={() => {}}
@@ -220,7 +206,6 @@ export default function RaporPage() {
       />
 
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
-        {/* HEADER */}
         <Header
           toggleSidebar={toggleSidebar}
           notifications={[]}
@@ -233,7 +218,6 @@ export default function RaporPage() {
 
         <main className="flex-1 overflow-y-auto theme-page">
           <div className="p-4 sm:p-6 lg:p-8 space-y-6">
-            {/* HEADER */}
             <div className="flex items-center gap-3">
               <div className="p-2.5 rounded-xl theme-primary shadow-lg">
                 <FileText size={20} />
@@ -254,7 +238,6 @@ export default function RaporPage() {
 
             {selectedKelas === null ? (
               <>
-                {/* CARI KELAS */}
                 <div className="theme-card rounded-xl border theme-border p-4 shadow-sm">
                   <div className="relative">
                     <Search
@@ -276,7 +259,6 @@ export default function RaporPage() {
                   </div>
                 </div>
 
-                {/* GRID KELAS */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {filteredKelas.map((kelas) => {
                     const jumlahSiswa = MOCK_SISWA.filter(
@@ -340,7 +322,6 @@ export default function RaporPage() {
               </>
             ) : (
               <>
-                {/* NAV KEMBALI + CARI SISWA */}
                 <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                   <button
                     onClick={() => setSelectedKelas(null)}
@@ -377,7 +358,6 @@ export default function RaporPage() {
                   </div>
                 </div>
 
-                {/* INFO KELAS */}
                 <div
                   className="
                     theme-card rounded-xl border theme-border
@@ -421,7 +401,6 @@ export default function RaporPage() {
                   </span>
                 </div>
 
-                {/* TABEL SISWA */}
                 <div
                   className="
                     theme-card rounded-xl border theme-border
@@ -499,7 +478,6 @@ export default function RaporPage() {
 
                             <td className="px-4 py-2.5">
                               <div className="flex items-center justify-center gap-1.5">
-                                {/* LIHAT */}
                                 <button
                                   onClick={() => handleLihatRapor(s)}
                                   title="Lihat rapor"
@@ -515,7 +493,6 @@ export default function RaporPage() {
                                   Lihat
                                 </button>
 
-                                {/* CETAK */}
                                 <button
                                   onClick={() => handleCetakRapor(s)}
                                   title="Cetak rapor"

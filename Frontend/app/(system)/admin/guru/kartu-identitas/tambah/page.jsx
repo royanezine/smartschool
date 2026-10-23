@@ -6,14 +6,6 @@ import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
 import { ArrowLeft, IdCard, Save, X } from "lucide-react";
 
-/**
- * app/admin/guru/kartu-identitas/tambah/page.jsx
- *
- * Halaman tambah pegawai (guru/staff) baru. Setelah disimpan, data
- * dititipkan sebentar lewat localStorage (key "ki_new_pegawai_queue") lalu
- * admin diarahkan kembali ke daftar — di sana data baru ini otomatis
- * digabung ke tabel. Lihat catatan di page.jsx daftar untuk detailnya.
- */
 
 const QUEUE_KEY = "ki_new_pegawai_queue";
 
@@ -117,7 +109,6 @@ export default function TambahPegawaiPage() {
 
         <main className="flex-1 w-full overflow-y-auto">
           <div className="w-full max-w-none p-4 sm:p-6 lg:p-8 space-y-6">
-            {/* HEADER */}
             <div className="flex items-center gap-3">
               <button
                 onClick={() =>
@@ -160,7 +151,6 @@ export default function TambahPegawaiPage() {
               </div>
             </div>
 
-            {/* FORM */}
             <div
               className="
                 w-full

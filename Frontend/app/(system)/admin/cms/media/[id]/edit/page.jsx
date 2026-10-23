@@ -17,7 +17,6 @@ export default function MediaEditPage({ params }) {
 
   return (
     <div className="theme-page flex min-h-screen w-full">
-      {/* SIDEBAR */}
       <div className="shrink-0">
         <Sidebar
           active={"media"}
@@ -27,7 +26,6 @@ export default function MediaEditPage({ params }) {
         />
       </div>
 
-      {/* MAIN */}
       <div className="flex min-w-0 flex-1 flex-col">
         <Header
           user={{
@@ -41,7 +39,6 @@ export default function MediaEditPage({ params }) {
           <div className="w-full px-3 py-4 sm:px-5 sm:py-6 md:px-7 lg:px-8 xl:px-10">
             <div className="mx-auto w-full max-w-[1500px]">
 
-              {/* BACK BUTTON */}
               <div className="mb-5 flex items-center">
                 <button
                   type="button"
@@ -72,7 +69,6 @@ export default function MediaEditPage({ params }) {
                 </button>
               </div>
 
-              {/* HERO */}
               <section
                 className="
                   relative
@@ -85,7 +81,6 @@ export default function MediaEditPage({ params }) {
                   shadow-sm
                 "
               >
-                {/* Decorative background */}
                 <div
                   className="
                     pointer-events-none
@@ -104,7 +99,6 @@ export default function MediaEditPage({ params }) {
                 <div className="relative p-5 sm:p-6 md:p-8">
                   <div className="flex items-start gap-4">
 
-                    {/* ICON */}
                     <div
                       className="
                         flex
@@ -122,7 +116,6 @@ export default function MediaEditPage({ params }) {
                       <PencilLine className="h-6 w-6 sm:h-7 sm:w-7" />
                     </div>
 
-                    {/* TITLE */}
                     <div className="min-w-0">
                       <p
                         className="
@@ -168,7 +161,6 @@ export default function MediaEditPage({ params }) {
                 </div>
               </section>
 
-              {/* DEVELOPMENT CARD */}
               <div
                 className="
                   flex
@@ -185,7 +177,6 @@ export default function MediaEditPage({ params }) {
                   shadow-sm
                 "
               >
-                {/* ICON */}
                 <div
                   className="
                     flex
@@ -200,7 +191,6 @@ export default function MediaEditPage({ params }) {
                   <Construction className="h-6 w-6" />
                 </div>
 
-                {/* TITLE */}
                 <h3
                   className="
                     mt-4
@@ -212,7 +202,6 @@ export default function MediaEditPage({ params }) {
                   Halaman dalam pengembangan
                 </h3>
 
-                {/* DESCRIPTION */}
                 <p
                   className="
                     mt-1
@@ -225,7 +214,6 @@ export default function MediaEditPage({ params }) {
                   Fitur edit media belum tersedia di sini.
                 </p>
 
-                {/* BACK */}
                 <button
                   type="button"
                   onClick={() =>

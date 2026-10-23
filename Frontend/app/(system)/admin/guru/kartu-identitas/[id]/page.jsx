@@ -4,6 +4,7 @@ import { useState, useMemo, useRef, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
+import { getUserById } from "@/services/user.service";
 import {
   ArrowLeft,
   CreditCard,
@@ -26,29 +27,6 @@ import {
   Fingerprint,
 } from "lucide-react";
 
-/**
- * app/admin/guru/kartu-identitas/[id]/page.jsx
- *
- * Halaman Detail Pegawai — menggantikan modal "Detail" yang sebelumnya
- * dipakai di halaman list Kartu Identitas. Tombol Detail di list mengarah
- * ke sini, id dikirim lewat path (dynamic segment), dibaca pakai useParams().
- *
- * UPDATE FOTO PROFIL:
- * Sekarang ada foto profil di kartu utama, bukan cuma avatar inisial.
- * Kalau pegawai belum punya foto, tampil placeholder abu-abu bergaya
- * silhouette generik (mirip foto profil default kebanyakan aplikasi).
- * Admin bisa klik ikon kamera di pojok foto untuk upload foto baru — foto
- * disimpan sebagai data URL di localStorage per-id (key
- * "ki_foto_{id}") supaya tetap muncul kalau halaman dibuka ulang. Kalau
- * nanti nyambung ke API, ganti mekanisme localStorage ini dengan upload
- * file ke endpoint/storage sungguhan dan simpan URL-nya di data pegawai.
- *
- * UPDATE DETAIL LEBIH LENGKAP:
- * Ditambahkan field: tempat/tanggal lahir, jenis kelamin, agama, status
- * pernikahan, pendidikan terakhir, dan NIK (selain NIP yang sudah ada).
- * Field tambahan ini juga masih dummy di MOCK_PEGAWAI, menyesuaikan
- * dengan pola data yang sudah ada.
- */
 
 const MOCK_PEGAWAI = [
   {
@@ -229,9 +207,6 @@ function StatusBadge({ status }) {
   );
 }
 
-// Placeholder foto profil generik (silhouette abu-abu) untuk pegawai yang
-// belum punya foto — gayanya disamakan dengan placeholder foto profil pada
-// umumnya: latar abu-abu muda, siluet kepala & bahu putih di tengah.
 function FotoPlaceholder() {
   return (
     <svg viewBox="0 0 200 200" className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
@@ -248,14 +223,18 @@ function FotoProfil({ pegawaiId, editable = false }) {
   const fileInputRef = useRef(null);
 
   useEffect(() => {
-    try {
-      const saved = window.localStorage.getItem(`${PHOTO_KEY_PREFIX}${pegawaiId}`);
-      if (saved) setFoto(saved);
-    } catch (err) {
-      console.error("Gagal memuat foto pegawai:", err);
-    } finally {
-      setLoaded(true);
-    }
+    const timer = setTimeout(() => {
+      try {
+        const saved = window.localStorage.getItem(`${PHOTO_KEY_PREFIX}${pegawaiId}`);
+        if (saved) setFoto(saved);
+      } catch (err) {
+        console.error("Gagal memuat foto pegawai:", err);
+      } finally {
+        setLoading(false);
+      }
+    }, 0);
+
+    return () => clearTimeout(timer);
   }, [pegawaiId]);
 
   const handlePilihFoto = () => {
@@ -315,24 +294,86 @@ export default function DetailPegawaiPage() {
   const router = useRouter();
   const params = useParams();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [pegawai, setPegawai] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const toggleSidebar = () => setIsCollapsed(!isCollapsed);
 
-  const pegawai = useMemo(() => {
-    const id = Number(params?.id);
-    return MOCK_PEGAWAI.find((p) => p.id === id);
-  }, [params]);
+  useEffect(() => {
+    let isMounted = true;
+
+    const timer = setTimeout(async () => {
+      const id = params?.id;
+      if (!id) {
+        if (isMounted) setLoading(false);
+        return;
+      }
+
+      try {
+        if (isMounted) setLoading(true);
+        const res = await getUserById(id);
+        const data = res?.data ?? res;
+
+        if (data && isMounted) {
+          const mapelNama =
+            data.mataPelajaran?.nama ??
+            data.guruMapel?.[0]?.mataPelajaran?.nama ??
+            data.mapel ??
+            "-";
+
+          setPegawai({
+            id: data.id,
+            nama: data.namaLengkap || data.nama || "Tanpa Nama",
+            nip: data.nip || "-",
+            nuptk: data.nuptk || "-",
+            nik: data.nik || "-",
+            tipe: data.jabatan ? (data.jabatan.toLowerCase().includes("guru") ? "Guru" : "Staff") : "Guru",
+            jabatan: data.jabatan || "Tenaga Pendidik",
+            status: data.status || "aktif",
+            email: data.email || "-",
+            telp: data.noTelepon || "-",
+            alamat: data.alamat || data.alamatDomisili || "-",
+            jenisKelamin: data.jenisKelamin === "L" || data.jenisKelamin === "Laki-laki" ? "Laki-laki" : "Perempuan",
+            tempatLahir: data.tempatLahir || "-",
+            tglLahir: data.tanggalLahir ? new Date(data.tanggalLahir).toLocaleDateString("id-ID") : "-",
+            agama: data.agama || "-",
+            statusNikah: "-",
+            pendidikanTerakhir: "-",
+            unit: "Unit Pendidikan",
+            golongan: data.golongan || "-",
+            level: "-",
+            tglMasuk: data.dibuatPada ? new Date(data.dibuatPada).toLocaleDateString("id-ID") : "-",
+            avatar: data.avatar || null,
+          });
+        }
+      } catch (err) {
+        console.error("Gagal mengambil data pegawai dari API:", err);
+        if (isMounted) setPegawai(null);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    }, 0);
+
+    return () => {
+      isMounted = false;
+      clearTimeout(timer);
+    };
+  }, [params?.id]);
 
   const handleBack = () => {
     router.push("/admin/guru/kartu-identitas");
   };
 
   const handleEdit = () => {
-    router.push(`/admin/guru/kartu-identitas/edit?id=${pegawai.id}`);
+    if (pegawai?.id) {
+      router.push(`/admin/guru/edit/${pegawai.id}`);
+    }
   };
 
   const handleIdCard = () => {
-    router.push(`/admin/guru/kartu-identitas?card=${pegawai.id}`);
+    if (pegawai?.id) {
+      router.push(`/admin/guru/kartu-identitas/card?id=${pegawai.id}`);
+    }
   };
 
   if (!pegawai) {
@@ -388,7 +429,6 @@ export default function DetailPegawaiPage() {
         />
         <main className="flex-1 overflow-y-auto">
           <div className="p-4 sm:p-6 lg:p-8 space-y-6">
-            {/* BACK & AKSI */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <button
                 type="button"
@@ -419,7 +459,6 @@ export default function DetailPegawaiPage() {
               </div>
             </div>
 
-            {/* PROFIL PEGAWAI */}
             <div className="theme-card theme-border rounded-xl border shadow-[0_1px_3px_color-mix(in_srgb,var(--color-text)_8%,transparent)] p-5 sm:p-6">
               <div className="flex flex-col sm:flex-row sm:items-center gap-5">
                 <FotoProfil pegawaiId={pegawai.id} editable />
@@ -467,7 +506,6 @@ export default function DetailPegawaiPage() {
               </div>
             </div>
 
-            {/* DATA DIRI */}
             <div className="theme-card theme-border rounded-xl border shadow-[0_1px_3px_color-mix(in_srgb,var(--color-text)_8%,transparent)] overflow-hidden">
               <div className="px-5 sm:px-6 py-4 border-b theme-border-soft flex items-center gap-2.5">
                 <User size={16} className="text-[var(--color-primary)]" />
@@ -525,7 +563,6 @@ export default function DetailPegawaiPage() {
               </div>
             </div>
 
-            {/* INFO KEPEGAWAIAN */}
             <div className="theme-card theme-border rounded-xl border shadow-[0_1px_3px_color-mix(in_srgb,var(--color-text)_8%,transparent)] overflow-hidden">
               <div className="px-5 sm:px-6 py-4 border-b theme-border-soft flex items-center gap-2.5">
                 <BadgeCheck size={16} className="text-[var(--color-primary)]" />

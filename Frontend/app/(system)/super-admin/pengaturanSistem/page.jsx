@@ -17,9 +17,6 @@ import {
   Search,
 } from "lucide-react";
 
-// ============================================================
-// THEME HELPERS
-// ============================================================
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -94,9 +91,6 @@ const themeCheckbox =
   "accent-[var(--color-primary)] focus:ring-[var(--color-primary)]";
 
 
-// ============================================================
-// MAIN PAGE
-// ============================================================
 
 export default function PengaturanSistemPage() {
   const [activeTab, setActiveTab] = useState("umum");
@@ -104,9 +98,6 @@ export default function PengaturanSistemPage() {
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  // ============================================================
-  // GENERAL
-  // ============================================================
 
   const [general, setGeneral] = useState({
     namaSistem: "SmartSchool",
@@ -121,9 +112,6 @@ export default function PengaturanSistemPage() {
       "Kami sedang melakukan pemeliharaan. Kembali lagi nanti.",
   });
 
-  // ============================================================
-  // SECURITY
-  // ============================================================
 
   const [security, setSecurity] = useState({
     authMethod: "email_password",
@@ -139,9 +127,6 @@ export default function PengaturanSistemPage() {
     twoFactorMethod: "email",
   });
 
-  // ============================================================
-  // INTEGRATIONS
-  // ============================================================
 
   const [integrations, setIntegrations] = useState({
     xendit: {
@@ -168,9 +153,6 @@ export default function PengaturanSistemPage() {
     },
   });
 
-  // ============================================================
-  // NOTIFICATIONS
-  // ============================================================
 
   const [notifications, setNotifications] = useState({
     emailEnabled: true,
@@ -185,9 +167,6 @@ export default function PengaturanSistemPage() {
     emailReplyTo: "support@smartschool.com",
   });
 
-  // ============================================================
-  // ACTIVITY LOG
-  // ============================================================
 
   const [activityLogs] = useState([
     {
@@ -215,9 +194,6 @@ export default function PengaturanSistemPage() {
 
   const [filterLog, setFilterLog] = useState("");
 
-  // ============================================================
-  // HANDLERS
-  // ============================================================
 
   const handleGeneralChange = (field, value) => {
     setGeneral((prev) => ({
@@ -306,17 +282,11 @@ export default function PengaturanSistemPage() {
     },
   ];
 
-  // ============================================================
-  // RENDER
-  // ============================================================
 
   return (
     <div className="theme-page theme-text min-h-full">
       <div className="w-full max-w-[1500px] mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 space-y-5 sm:space-y-6">
 
-        {/* ======================================================
-            HEADER
-        ====================================================== */}
 
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
@@ -363,9 +333,6 @@ export default function PengaturanSistemPage() {
           </button>
         </div>
 
-        {/* ======================================================
-            SUCCESS MESSAGE
-        ====================================================== */}
 
         {saveSuccess && (
           <div
@@ -392,14 +359,10 @@ export default function PengaturanSistemPage() {
           </div>
         )}
 
-        {/* ======================================================
-            TABS + CONTENT
-        ====================================================== */}
 
         <div
           className={`${themeCard} rounded-xl ${themeCardShadow} overflow-hidden`}
         >
-          {/* TABS */}
 
           <div className={`border-b ${themeDivider} overflow-x-auto`}>
             <div className="flex min-w-max">
@@ -426,7 +389,6 @@ export default function PengaturanSistemPage() {
             </div>
           </div>
 
-          {/* CONTENT */}
 
           <div className="p-4 sm:p-6">
             {activeTab === "umum" && (
@@ -469,9 +431,6 @@ export default function PengaturanSistemPage() {
           </div>
         </div>
 
-        {/* ======================================================
-            FOOTER
-        ====================================================== */}
 
         <div
           className={`text-center text-xs theme-text-muted py-3 border-t ${themeDivider}`}
@@ -484,16 +443,12 @@ export default function PengaturanSistemPage() {
 }
 
 
-// ============================================================
-// GENERAL TAB
-// ============================================================
 
 function GeneralTab({ general, handleChange }) {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-        {/* Nama Sistem */}
 
         <div>
           <label className={themeLabel}>
@@ -510,7 +465,6 @@ function GeneralTab({ general, handleChange }) {
           />
         </div>
 
-        {/* Subdomain */}
 
         <div>
           <label className={themeLabel}>
@@ -527,7 +481,6 @@ function GeneralTab({ general, handleChange }) {
           />
         </div>
 
-        {/* Timezone */}
 
         <div>
           <label className={themeLabel}>
@@ -556,7 +509,6 @@ function GeneralTab({ general, handleChange }) {
           </select>
         </div>
 
-        {/* Format tanggal */}
 
         <div>
           <label className={themeLabel}>
@@ -584,7 +536,6 @@ function GeneralTab({ general, handleChange }) {
           </select>
         </div>
 
-        {/* Bahasa */}
 
         <div>
           <label className={themeLabel}>
@@ -608,7 +559,6 @@ function GeneralTab({ general, handleChange }) {
           </select>
         </div>
 
-        {/* Logo */}
 
         <div>
           <label className={themeLabel}>
@@ -622,7 +572,6 @@ function GeneralTab({ general, handleChange }) {
           />
         </div>
 
-        {/* Favicon */}
 
         <div>
           <label className={themeLabel}>
@@ -637,7 +586,6 @@ function GeneralTab({ general, handleChange }) {
         </div>
       </div>
 
-      {/* Maintenance */}
 
       <div className={`border-t ${themeDivider} pt-4`}>
         <div className="flex items-center gap-3">
@@ -679,9 +627,6 @@ function GeneralTab({ general, handleChange }) {
 }
 
 
-// ============================================================
-// SECURITY TAB
-// ============================================================
 
 function SecurityTab({ security, handleChange }) {
   return (
@@ -734,7 +679,6 @@ function SecurityTab({ security, handleChange }) {
         </div>
       </div>
 
-      {/* Password Rules */}
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
 
@@ -771,7 +715,6 @@ function SecurityTab({ security, handleChange }) {
         />
       </div>
 
-      {/* Session */}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 
@@ -830,7 +773,6 @@ function SecurityTab({ security, handleChange }) {
         </div>
       </div>
 
-      {/* 2FA */}
 
       <div className={`border-t ${themeDivider} pt-4 space-y-3`}>
 
@@ -884,9 +826,6 @@ function SecurityTab({ security, handleChange }) {
 }
 
 
-// ============================================================
-// INTEGRATION TAB
-// ============================================================
 
 function IntegrationTab({
   integrations,
@@ -897,7 +836,6 @@ function IntegrationTab({
   return (
     <div className="space-y-8">
 
-      {/* XENDIT */}
 
       <div>
         <h4 className="text-sm font-semibold theme-text flex items-center gap-2 mb-3">
@@ -996,7 +934,6 @@ function IntegrationTab({
         </div>
       </div>
 
-      {/* EMAIL */}
 
       <div className={`border-t ${themeDivider} pt-4`}>
 
@@ -1155,9 +1092,6 @@ function IntegrationTab({
 }
 
 
-// ============================================================
-// NOTIFICATION TAB
-// ============================================================
 
 function NotificationTab({
   notifications,
@@ -1166,7 +1100,6 @@ function NotificationTab({
   return (
     <div className="space-y-6">
 
-      {/* CHANNELS */}
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
 
@@ -1210,7 +1143,6 @@ function NotificationTab({
         </div>
       </div>
 
-      {/* EVENT NOTIFICATIONS */}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
 
@@ -1278,7 +1210,6 @@ function NotificationTab({
         </div>
       </div>
 
-      {/* EMAIL */}
 
       <div
         className={`border-t ${themeDivider} pt-4 grid grid-cols-1 sm:grid-cols-2 gap-4`}
@@ -1325,9 +1256,6 @@ function NotificationTab({
 }
 
 
-// ============================================================
-// ACTIVITY TAB
-// ============================================================
 
 function ActivityTab({
   logs,
@@ -1430,9 +1358,6 @@ function ActivityTab({
 }
 
 
-// ============================================================
-// REUSABLE THEME TOGGLE
-// ============================================================
 
 function ThemeToggle({ checked, onChange }) {
   return (
@@ -1477,9 +1402,6 @@ function ThemeToggle({ checked, onChange }) {
 }
 
 
-// ============================================================
-// REUSABLE THEME CHECKBOX
-// ============================================================
 
 function ThemeCheckbox({
   checked,
@@ -1503,9 +1425,6 @@ function ThemeCheckbox({
 }
 
 
-// ============================================================
-// PASSWORD INPUT
-// ============================================================
 
 function PasswordInput({
   value,

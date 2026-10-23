@@ -31,9 +31,6 @@ import {
   statusLanggananInfo,
 } from "@/lib/langganan";
 
-// ============================================================
-// THEME HELPERS
-// ============================================================
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]";
@@ -50,9 +47,6 @@ const themeTextHover =
 const themePrimaryShadow =
   "shadow-[0_10px_25px_color-mix(in_srgb,var(--color-primary)_20%,transparent)]";
 
-// ============================================================
-// STATUS INVOICE (dibaca dari status pembayaran backend)
-// ============================================================
 
 function invoiceStatusInfo(status) {
   switch (status) {
@@ -97,16 +91,12 @@ function InvoiceStatus({ status }) {
   );
 }
 
-// ============================================================
-// DETAIL ITEM
-// ============================================================
 
 function DetailItem({ icon: Icon, label, value, copy = false }) {
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(String(value));
     } catch (error) {
-      /* diabaikan bila clipboard tidak tersedia */
     }
   };
 
@@ -140,9 +130,6 @@ function DetailItem({ icon: Icon, label, value, copy = false }) {
   );
 }
 
-// ============================================================
-// PAGE
-// ============================================================
 
 export default function DetailInvoicePage() {
   const router = useRouter();
@@ -208,9 +195,6 @@ export default function DetailInvoicePage() {
 
   return (
     <div className="flex h-screen w-full theme-page overflow-hidden">
-      {/* =====================================================
-          SIDEBAR
-      ====================================================== */}
       <Sidebar
         active="invoice"
         setActive={() => {}}
@@ -219,15 +203,11 @@ export default function DetailInvoicePage() {
         role="admin"
       />
 
-      {/* =====================================================
-          CONTENT
-      ====================================================== */}
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
         <Header notifications={[]} />
 
         <main className="flex-1 overflow-y-auto theme-page">
           <div className="p-4 sm:p-6 lg:p-8 space-y-6">
-            {/* HEADER */}
             <div className="flex flex-col gap-4">
               <button
                 type="button"
@@ -283,7 +263,6 @@ export default function DetailInvoicePage() {
               </div>
             </div>
 
-            {/* LOADING */}
             {loading && (
               <div className="theme-card theme-border rounded-xl border p-14 flex flex-col items-center gap-3">
                 <Loader2
@@ -296,7 +275,6 @@ export default function DetailInvoicePage() {
               </div>
             )}
 
-            {/* ERROR */}
             {!loading && error && (
               <div className="theme-danger rounded-xl border p-5 flex items-start gap-3">
                 <AlertCircle size={18} className="mt-0.5 shrink-0" />
@@ -309,10 +287,8 @@ export default function DetailInvoicePage() {
               </div>
             )}
 
-            {/* CONTENT */}
             {!loading && !error && invoice && (
               <>
-                {/* HERO */}
                 <section className="theme-card rounded-xl border theme-border shadow-sm">
                   <div className="p-5 sm:p-6">
                     <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
@@ -377,7 +353,6 @@ export default function DetailInvoicePage() {
                   </div>
                 </section>
 
-                {/* WARNING PENDING */}
                 {invoice.status === "pending" && (
                   <section
                     className={`theme-card rounded-xl border ${themePrimarySoftBorder} shadow-sm p-5`}
@@ -424,7 +399,6 @@ export default function DetailInvoicePage() {
                   </section>
                 )}
 
-                {/* WARNING GAGAL */}
                 {invoice.status === "failed" && (
                   <section className="rounded-xl border theme-danger shadow-sm p-5">
                     <div className="flex items-start gap-3">
@@ -447,9 +421,7 @@ export default function DetailInvoicePage() {
                   </section>
                 )}
 
-                {/* INFORMATION */}
                 <section className="grid grid-cols-1 xl:grid-cols-2 gap-5">
-                  {/* INVOICE INFO */}
                   <div className="theme-card rounded-xl border theme-border shadow-sm p-5 sm:p-6">
                     <div className="flex items-center gap-3 mb-5">
                       <div
@@ -513,7 +485,6 @@ export default function DetailInvoicePage() {
                     </div>
                   </div>
 
-                  {/* SCHOOL INFO */}
                   <div className="theme-card rounded-xl border theme-border shadow-sm p-5 sm:p-6">
                     <div className="flex items-center gap-3 mb-5">
                       <div
@@ -566,7 +537,6 @@ export default function DetailInvoicePage() {
                   </div>
                 </section>
 
-                {/* BILLING DETAIL */}
                 <section className="theme-card rounded-xl border theme-border shadow-sm">
                   <div className="p-5 sm:p-6">
                     <div className="flex items-center gap-3 mb-6">
@@ -618,7 +588,6 @@ export default function DetailInvoicePage() {
                   </div>
                 </section>
 
-                {/* STATUS */}
                 <section className="theme-card rounded-xl border theme-border shadow-sm p-5 sm:p-6">
                   <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
                     <div>
@@ -643,7 +612,6 @@ export default function DetailInvoicePage() {
                   </div>
                 </section>
 
-                {/* CATATAN */}
                 <section className="theme-card rounded-xl border theme-border shadow-sm p-5">
                   <div className="flex items-start gap-3">
                     <div className="w-9 h-9 rounded-lg theme-success flex items-center justify-center shrink-0">
@@ -669,7 +637,6 @@ export default function DetailInvoicePage() {
                   </div>
                 </section>
 
-                {/* ACTION */}
                 <div className="flex flex-col sm:flex-row gap-3">
                   <button
                     type="button"

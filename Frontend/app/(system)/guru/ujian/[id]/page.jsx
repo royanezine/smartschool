@@ -29,9 +29,6 @@ import {
   deleteSoal,
 } from "@/services/soalUjian.service";
 
-/* =====================================================
-   HELPER
-===================================================== */
 
 function parseData(response) {
   if (Array.isArray(response)) return response;
@@ -62,9 +59,6 @@ function getChoiceLetter(index) {
   return String.fromCharCode(65 + index);
 }
 
-/* =====================================================
-   PAGE
-===================================================== */
 
 export default function KelolaSoalUjianPage() {
   const router = useRouter();
@@ -80,9 +74,6 @@ export default function KelolaSoalUjianPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  /* =====================================================
-     LOAD DATA
-  ===================================================== */
 
   useEffect(() => {
     if (!ujianId) return;
@@ -123,9 +114,6 @@ export default function KelolaSoalUjianPage() {
     }
   }
 
-  /* =====================================================
-     STATISTICS
-  ===================================================== */
 
   const stats = useMemo(() => {
     const total = soal.length;
@@ -160,9 +148,6 @@ export default function KelolaSoalUjianPage() {
     };
   }, [soal]);
 
-  /* =====================================================
-     NAVIGASI
-  ===================================================== */
 
   function handleOpenCreate() {
     if (!ujianId) return;
@@ -180,9 +165,6 @@ export default function KelolaSoalUjianPage() {
     );
   }
 
-  /* =====================================================
-     DELETE
-  ===================================================== */
 
   async function handleDelete(item) {
     const confirmed = window.confirm(
@@ -218,9 +200,6 @@ export default function KelolaSoalUjianPage() {
     }
   }
 
-  /* =====================================================
-     LOADING
-  ===================================================== */
 
   if (loading) {
     return (
@@ -265,9 +244,6 @@ export default function KelolaSoalUjianPage() {
     );
   }
 
-  /* =====================================================
-     RENDER
-  ===================================================== */
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-[var(--color-page)] text-[var(--color-text)]">
@@ -297,9 +273,6 @@ export default function KelolaSoalUjianPage() {
         <main className="flex-1 overflow-y-auto bg-[var(--color-page)]">
           <div className="mx-auto w-full max-w-[1500px] space-y-6 p-4 sm:p-6 lg:p-8">
 
-            {/* =================================================
-                HEADER
-            ================================================= */}
 
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
 
@@ -350,9 +323,6 @@ export default function KelolaSoalUjianPage() {
               </button>
             </div>
 
-            {/* =================================================
-                ERROR
-            ================================================= */}
 
             {error && (
               <div
@@ -392,9 +362,6 @@ export default function KelolaSoalUjianPage() {
               </div>
             )}
 
-            {/* =================================================
-                SUCCESS
-            ================================================= */}
 
             {success && (
               <div
@@ -434,9 +401,6 @@ export default function KelolaSoalUjianPage() {
               </div>
             )}
 
-            {/* =================================================
-                UJIAN INFO
-            ================================================= */}
 
             {ujian && (
               <section className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] p-5 shadow-sm sm:p-6">
@@ -524,9 +488,6 @@ export default function KelolaSoalUjianPage() {
               </section>
             )}
 
-            {/* =================================================
-                STATS
-            ================================================= */}
 
             <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
 
@@ -600,9 +561,6 @@ export default function KelolaSoalUjianPage() {
 
             </div>
 
-            {/* =================================================
-                SOAL LIST
-            ================================================= */}
 
             <section className="overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-card)] shadow-sm">
 
@@ -667,7 +625,6 @@ export default function KelolaSoalUjianPage() {
 
                       <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
 
-                        {/* NOMOR */}
 
                         <div className="flex shrink-0 items-center gap-3 lg:w-16 lg:flex-col lg:items-center">
 
@@ -690,7 +647,6 @@ export default function KelolaSoalUjianPage() {
 
                         </div>
 
-                        {/* CONTENT */}
 
                         <div className="min-w-0 flex-1">
 
@@ -728,7 +684,6 @@ export default function KelolaSoalUjianPage() {
                             {item.teksSoal}
                           </p>
 
-                          {/* PILIHAN GANDA */}
 
                           {item.jenisSoal ===
                             "pilihan_ganda" &&
@@ -808,7 +763,6 @@ export default function KelolaSoalUjianPage() {
                               </div>
                             )}
 
-                          {/* ESAI */}
 
                           {item.jenisSoal ===
                             "esai" && (
@@ -840,7 +794,6 @@ export default function KelolaSoalUjianPage() {
 
                         </div>
 
-                        {/* ACTION */}
 
                         <div className="flex shrink-0 items-center gap-2 lg:ml-4">
 

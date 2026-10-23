@@ -25,9 +25,6 @@ import {
   kembalikanBuku,
 } from "@/services/perpustakaan.service";
 
-/* =========================================================
-   HELPERS
-========================================================= */
 
 function unwrapValue(response) {
   if (response?.data !== undefined) return response.data;
@@ -118,9 +115,6 @@ function getErrorMessage(error, fallback) {
   return error?.message || error?.error || fallback;
 }
 
-/* =========================================================
-   PAGE
-========================================================= */
 
 export default function PengembalianBukuPage() {
   const router = useRouter();
@@ -137,9 +131,6 @@ export default function PengembalianBukuPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  /* =========================================================
-     LOAD DATA DARI BE
-  ========================================================= */
 
   const loadPeminjaman = useCallback(async (refresh = false) => {
     if (refresh) {
@@ -151,14 +142,12 @@ export default function PengembalianBukuPage() {
     setError("");
 
     try {
-      // Filter status dikirim ke service BE.
       const response = await getPeminjaman({
         status: "dipinjam",
       });
 
       const rows = toArray(response);
 
-      // Hanya transaksi aktif yang dapat diproses kembali.
       setPeminjaman(
         rows.filter(
           (item) =>
@@ -184,9 +173,6 @@ export default function PengembalianBukuPage() {
     loadPeminjaman();
   }, [loadPeminjaman]);
 
-  /* =========================================================
-     FILTER DAN PENCARIAN
-  ========================================================= */
 
   const daftarPeminjaman = useMemo(() => {
     const keyword = search.trim().toLowerCase();
@@ -235,9 +221,6 @@ export default function PengembalianBukuPage() {
     [peminjaman]
   );
 
-  /* =========================================================
-     PROSES PENGEMBALIAN
-  ========================================================= */
 
 
 const handlePengembalian = async () => {
@@ -259,7 +242,6 @@ const handlePengembalian = async () => {
 
     setSuccess("Buku berhasil dikembalikan.");
 
-    // Muat ulang daftar setelah BE berhasil memproses pengembalian.
     await loadPeminjaman(true);
 
     setSelectedItem(null);
@@ -277,9 +259,6 @@ const handlePengembalian = async () => {
 };
 
 
-  /* =========================================================
-     STYLING
-  ========================================================= */
 
   const inputClass =
     "theme-input theme-border theme-text h-11 w-full rounded-lg border px-3.5 text-sm outline-none transition placeholder:text-[var(--color-text-placeholder)] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]";
@@ -287,9 +266,6 @@ const handlePengembalian = async () => {
   const selectClass =
     "theme-input theme-border theme-text h-11 w-full rounded-lg border px-3 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_15%,transparent)] sm:w-48";
 
-  /* =========================================================
-     RENDER
-  ========================================================= */
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
@@ -302,7 +278,6 @@ const handlePengembalian = async () => {
 
         <main className="min-w-0 flex-1 overflow-y-auto">
           <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
-            {/* HEADER */}
            
 
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -336,7 +311,6 @@ const handlePengembalian = async () => {
               </button>
             </div>
 
-            {/* ERROR */}
             {error && (
               <div
                 role="alert"
@@ -362,7 +336,6 @@ const handlePengembalian = async () => {
               </div>
             )}
 
-            {/* SUCCESS */}
             {success && (
               <div
                 role="status"
@@ -388,7 +361,6 @@ const handlePengembalian = async () => {
               </div>
             )}
 
-            {/* SUMMARY */}
             <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
               <section className="theme-card rounded-xl border theme-border p-5">
                 <div className="flex items-center justify-between gap-3">
@@ -435,7 +407,6 @@ const handlePengembalian = async () => {
               </section>
             </div>
 
-            {/* TABLE CARD */}
             <section className="theme-card overflow-hidden rounded-2xl border theme-border shadow-sm">
               <div className="border-b theme-border p-4 sm:p-5">
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -490,7 +461,6 @@ const handlePengembalian = async () => {
                 </div>
               </div>
 
-              {/* LOADING */}
               {loading ? (
                 <div className="flex min-h-64 flex-col items-center justify-center gap-3">
                   <Loader2
@@ -502,7 +472,6 @@ const handlePengembalian = async () => {
                   </p>
                 </div>
               ) : daftarPeminjaman.length === 0 ? (
-                /* EMPTY STATE */
                 <div className="flex min-h-64 flex-col items-center justify-center px-6 py-12 text-center">
                   <div className="theme-card-soft rounded-full p-4">
                     <BookOpen
@@ -538,7 +507,6 @@ const handlePengembalian = async () => {
                 </div>
               ) : (
                 <>
-                  {/* DESKTOP TABLE */}
                   <div className="hidden overflow-x-auto md:block">
                     <table className="w-full min-w-[850px] text-left text-sm">
                       <thead className="theme-card-soft theme-text-secondary text-xs">
@@ -668,7 +636,6 @@ const handlePengembalian = async () => {
                     </table>
                   </div>
 
-                  {/* MOBILE LIST */}
                   <div className="divide-y theme-border md:hidden">
                     {daftarPeminjaman.map((item) => {
                       const terlambat = hitungTerlambat(
@@ -791,9 +758,6 @@ const handlePengembalian = async () => {
         </main>
       </div>
 
-      {/* =====================================================
-          DIALOG KONFIRMASI
-      ===================================================== */}
 
       {selectedItem && (
         <div

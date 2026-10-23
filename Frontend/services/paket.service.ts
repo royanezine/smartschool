@@ -1,8 +1,5 @@
 import { apiFetch } from "../lib/api";
 
-// ============================================================
-// TYPES
-// ============================================================
 
 export interface PaketFitur {
   id: string;
@@ -66,9 +63,6 @@ export interface UpdatePaketPayload {
   status?: string;
 }
 
-// ============================================================
-// HELPER
-// ============================================================
 
 function normalizeArray<T = any>(
   response: any
@@ -120,10 +114,6 @@ function normalizeObject<T = any>(
   return response;
 }
 
-// ============================================================
-// GET SEMUA PAKET
-// GET /api/paket
-// ============================================================
 
 export async function getPaket(): Promise<PaketResponse> {
   const response = await apiFetch(
@@ -149,10 +139,6 @@ export async function getPaket(): Promise<PaketResponse> {
   };
 }
 
-// ============================================================
-// GET PAKET BY ID
-// GET /api/paket/:id
-// ============================================================
 
 export async function getPaketById(
   id: string
@@ -189,10 +175,6 @@ export async function getPaketById(
   };
 }
 
-// ============================================================
-// GET SEMUA MODUL / FITUR
-// GET /api/paket/fitur/list
-// ============================================================
 
 export async function getFitur(): Promise<ModulResponse> {
   const response = await apiFetch(
@@ -219,10 +201,6 @@ export async function getFitur(): Promise<ModulResponse> {
   };
 }
 
-// ============================================================
-// CREATE PAKET
-// POST /api/paket
-// ============================================================
 
 export async function createPaket(
   data: CreatePaketPayload
@@ -282,10 +260,6 @@ export async function createPaket(
   return response;
 }
 
-// ============================================================
-// UPDATE PAKET
-// PUT /api/paket/:id
-// ============================================================
 
 export async function updatePaket(
   id: string,
@@ -359,10 +333,6 @@ export async function updatePaket(
   return response;
 }
 
-// ============================================================
-// DELETE PAKET
-// DELETE /api/paket/:id
-// ============================================================
 
 export async function deletePaket(
   id: string
@@ -383,9 +353,6 @@ export async function deletePaket(
   return response;
 }
 
-// ============================================================
-// NORMALIZE PAKET
-// ============================================================
 
 function normalizePaket(
   paket: any
@@ -475,9 +442,6 @@ function normalizePaket(
   };
 }
 
-// ============================================================
-// NORMALIZE MODUL
-// ============================================================
 
 function normalizeModul(
   modul: any

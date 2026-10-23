@@ -29,9 +29,6 @@ import Sidebar from "@/app/components/Sidebar";
 import { getKelasMapelDiampu } from "@/services/kelasMapel.service";
 import { createUjian } from "@/services/ujian.service";
 
-/* =========================================================
-   THEME HELPERS
-========================================================= */
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -92,9 +89,6 @@ const themeInfoBorder =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-/* =========================================================
-   HELPERS
-========================================================= */
 
 function getCreatedUjianId(response) {
   const candidates = [
@@ -159,9 +153,6 @@ function toLocalDateTime(value) {
   return localDate.toISOString().slice(0, 16);
 }
 
-/* =========================================================
-   PAGE
-========================================================= */
 
 export default function TambahUjianPage() {
   const router = useRouter();
@@ -186,9 +177,6 @@ export default function TambahUjianPage() {
     penilaianOtomatis: true,
   });
 
-  /* =========================================================
-     LOAD KELAS MAPEL
-  ========================================================= */
 
   useEffect(() => {
     let cancelled = false;
@@ -231,9 +219,6 @@ export default function TambahUjianPage() {
     };
   }, []);
 
-  /* =========================================================
-     SELECTED KELAS MAPEL
-  ========================================================= */
 
   const selectedKelasMapel = useMemo(
     () =>
@@ -252,9 +237,6 @@ export default function TambahUjianPage() {
   const selectedGuruName =
     selectedKelasMapel?.guruPengajar?.namaLengkap || "Guru";
 
-  /* =========================================================
-     HANDLERS
-  ========================================================= */
 
   function handleChange(event) {
     const { name, value, type, checked } = event.target;
@@ -299,9 +281,6 @@ export default function TambahUjianPage() {
     }
   }
 
-  /* =========================================================
-     VALIDASI
-  ========================================================= */
 
   function validateForm() {
     if (!form.kelasMapelId) {
@@ -366,10 +345,6 @@ export default function TambahUjianPage() {
     return null;
   }
 
-  /* =========================================================
-     SUBMIT
-     action: "draft" | "questions"
-  ========================================================= */
 
   async function handleSubmit(event, action = "draft") {
     event?.preventDefault();
@@ -404,7 +379,6 @@ export default function TambahUjianPage() {
           : null,
       modeUjian: form.modeUjian || "online",
 
-      // Ujian baru selalu disimpan sebagai draf.
       dipublikasikan: false,
 
       penilaianOtomatis: Boolean(form.penilaianOtomatis),
@@ -442,9 +416,6 @@ export default function TambahUjianPage() {
     }
   }
 
-  /* =========================================================
-     RENDER
-  ========================================================= */
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
@@ -469,7 +440,6 @@ export default function TambahUjianPage() {
 
         <main className="theme-page min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
           <div className="mx-auto w-full max-w-[1400px] px-3 py-5 sm:px-5 sm:py-6 lg:px-7 lg:py-8">
-            {/* PAGE HEADER */}
             <div className="mb-6 flex items-start justify-between gap-4">
               <div className="flex min-w-0 items-start gap-3 sm:gap-4">
                 <button
@@ -519,7 +489,6 @@ export default function TambahUjianPage() {
               </div>
             </div>
 
-            {/* ALERT */}
             {error && (
               <div
                 role="alert"
@@ -551,13 +520,11 @@ export default function TambahUjianPage() {
             )}
 
             <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
-              {/* FORM */}
               <div className="min-w-0">
                 <form
                   onSubmit={(event) => handleSubmit(event, "draft")}
                   className="space-y-5"
                 >
-                  {/* INFORMASI DASAR */}
                   <section
                     className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
                   >
@@ -581,7 +548,6 @@ export default function TambahUjianPage() {
                     </div>
 
                     <div className="grid gap-5 p-4 sm:p-6 md:grid-cols-2">
-                      {/* KELAS MAPEL */}
                       <div className="md:col-span-2">
                         <label
                           htmlFor="kelasMapelId"
@@ -690,7 +656,6 @@ export default function TambahUjianPage() {
                         )}
                       </div>
 
-                      {/* JUDUL */}
                       <div className="md:col-span-2">
                         <label
                           htmlFor="judul"
@@ -724,7 +689,6 @@ export default function TambahUjianPage() {
                         </div>
                       </div>
 
-                      {/* DESKRIPSI */}
                       <div className="md:col-span-2">
                         <label
                           htmlFor="deskripsi"
@@ -749,7 +713,6 @@ export default function TambahUjianPage() {
                         </p>
                       </div>
 
-                      {/* JENIS */}
                       <div>
                         <label
                           htmlFor="jenis"
@@ -776,7 +739,6 @@ export default function TambahUjianPage() {
                         </select>
                       </div>
 
-                      {/* DURASI */}
                       <div>
                         <label
                           htmlFor="durasi"
@@ -810,7 +772,6 @@ export default function TambahUjianPage() {
                         </div>
                       </div>
 
-                      {/* NILAI */}
                       <div>
                         <label
                           htmlFor="nilaiKelulusan"
@@ -838,7 +799,6 @@ export default function TambahUjianPage() {
                         </p>
                       </div>
 
-                      {/* MODE */}
                       <div>
                         <label
                           htmlFor="modeUjian"
@@ -868,7 +828,6 @@ export default function TambahUjianPage() {
                         </div>
                       </div>
 
-                      {/* WAKTU MULAI */}
                       <div>
                         <label
                           htmlFor="waktuMulai"
@@ -892,7 +851,6 @@ export default function TambahUjianPage() {
                         </p>
                       </div>
 
-                      {/* WAKTU SELESAI */}
                       <div>
                         <label
                           htmlFor="waktuSelesai"
@@ -918,7 +876,6 @@ export default function TambahUjianPage() {
                     </div>
                   </section>
 
-                  {/* PENGATURAN */}
                   <section
                     className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
                   >
@@ -984,7 +941,6 @@ export default function TambahUjianPage() {
                     </div>
                   </section>
 
-                  {/* ACTIONS */}
                   <div
                     className={`flex flex-col-reverse gap-3 border-t ${themeDivider} pt-5 sm:flex-row sm:flex-wrap sm:justify-end`}
                   >
@@ -1041,9 +997,7 @@ export default function TambahUjianPage() {
                 </form>
               </div>
 
-              {/* SIDEBAR SUMMARY */}
               <aside className="min-w-0 space-y-4 xl:sticky xl:top-5">
-                {/* PREVIEW */}
                 <section
                   className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
                 >
@@ -1101,7 +1055,6 @@ export default function TambahUjianPage() {
                   </div>
                 </section>
 
-                {/* DETAIL */}
                 <section
                   className={`theme-card rounded-2xl border ${themeNeutralBorder} p-5 ${themeCardShadow}`}
                 >
@@ -1160,7 +1113,6 @@ export default function TambahUjianPage() {
                   </div>
                 </section>
 
-                {/* JADWAL */}
                 <section
                   className={`theme-card rounded-2xl border ${themeNeutralBorder} p-5 ${themeCardShadow}`}
                 >
@@ -1202,7 +1154,6 @@ export default function TambahUjianPage() {
                   </div>
                 </section>
 
-                {/* CHECKLIST */}
                 <section
                   className={`rounded-2xl border ${themePrimarySoftBorder} ${themePrimarySoft} p-5`}
                 >
@@ -1259,9 +1210,6 @@ export default function TambahUjianPage() {
   );
 }
 
-/* =========================================================
-   SUMMARY COMPONENTS
-========================================================= */
 
 function SummaryItem({ icon, label, value, iconClass = "" }) {
   return (

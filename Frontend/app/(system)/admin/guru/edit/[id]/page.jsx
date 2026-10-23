@@ -54,9 +54,6 @@ export default function AdminGuruEditPage() {
 
   const toggleSidebar = () => setIsCollapsed((v) => !v);
 
-  // =======================================================
-  // LOAD MASTER SHIFT
-  // =======================================================
   const fetchShift = useCallback(async () => {
     try {
       setLoadingShift(true);
@@ -78,9 +75,6 @@ export default function AdminGuruEditPage() {
     }
   }, []);
 
-  // =======================================================
-  // LOAD GURU
-  // =======================================================
   const fetchGuru = useCallback(async () => {
     if (!id) {
       setNotFound(true);
@@ -149,17 +143,11 @@ export default function AdminGuruEditPage() {
     fetchShift();
   }, [fetchGuru, fetchShift]);
 
-  // =======================================================
-  // HANDLE CHANGE
-  // =======================================================
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  // =======================================================
-  // VALIDASI
-  // =======================================================
   const validate = () => {
     if (!form.namaLengkap.trim()) return "Nama lengkap wajib diisi.";
     if (!form.namaPengguna.trim()) return "Username wajib diisi.";
@@ -172,9 +160,6 @@ export default function AdminGuruEditPage() {
     return null;
   };
 
-  // =======================================================
-  // SUBMIT
-  // =======================================================
   const handleSubmit = async () => {
     const validationError = validate();
     if (validationError) {
@@ -235,9 +220,6 @@ export default function AdminGuruEditPage() {
     }
   };
 
-  // =======================================================
-  // LOADING
-  // =======================================================
   if (loading) {
     return (
       <div className="flex h-screen w-full theme-page overflow-hidden">
@@ -255,9 +237,6 @@ export default function AdminGuruEditPage() {
     );
   }
 
-  // =======================================================
-  // NOT FOUND
-  // =======================================================
   if (notFound) {
     return (
       <div className="flex h-screen w-full theme-page overflow-hidden">
@@ -281,9 +260,6 @@ export default function AdminGuruEditPage() {
     );
   }
 
-  // =======================================================
-  // RENDER
-  // =======================================================
   return (
     <div className="flex h-screen w-full theme-page overflow-hidden">
       <Sidebar active="guru" setActive={() => {}} collapsed={isCollapsed} setCollapsed={setIsCollapsed} />
@@ -294,7 +270,6 @@ export default function AdminGuruEditPage() {
         <main className="flex-1 overflow-y-auto">
           <div className="w-full max-w-4xl mx-auto p-4 md:p-6 lg:p-8">
             <div className="theme-card rounded-2xl border theme-border shadow-sm p-6 space-y-6">
-              {/* HEADER */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <button onClick={() => router.push("/admin/guru")} className="p-2 rounded-lg theme-text-muted theme-sidebar-hover hover:text-[var(--color-text)]" title="Kembali">
@@ -313,7 +288,6 @@ export default function AdminGuruEditPage() {
                 </div>
               </div>
 
-              {/* ALERT ERROR */}
               {error && (
                 <div className="flex items-start gap-2 p-3 rounded-lg theme-danger text-sm">
                   <AlertCircle size={16} className="mt-0.5 shrink-0" />
@@ -328,7 +302,6 @@ export default function AdminGuruEditPage() {
                 </div>
               )}
 
-              {/* FORM */}
               <div className="space-y-4">
                 <Field label="Nama Lengkap" required icon={<User size={17} />}>
                   <input type="text" name="namaLengkap" value={form.namaLengkap} onChange={handleChange}
@@ -400,7 +373,6 @@ export default function AdminGuruEditPage() {
                   </Field>
                 </div>
 
-                {/* SHIFT KERJA SECTION */}
                 <div className="rounded-xl border theme-border theme-card-soft p-4 space-y-4">
                   <div className="flex items-start gap-2">
                     <Clock3 size={16} className="mt-0.5 theme-text-muted" />
@@ -519,9 +491,6 @@ export default function AdminGuruEditPage() {
   );
 }
 
-/* =========================================================
-   HELPER FIELD
-========================================================= */
 function Field({ label, required, icon, children }) {
   return (
     <div>

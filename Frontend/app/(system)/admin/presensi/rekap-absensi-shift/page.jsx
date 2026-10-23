@@ -17,15 +17,15 @@ import {
   Info,
   CalendarRange,
   TrendingUp,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
-import { apiFetch } from "@/lib/api";
+import { getMonitoringKehadiranGuru } from "@/services/absensi.service";
+import { getShiftKerja } from "@/services/shiftKerja.service";
 
-/* =========================================================
-   HELPER
-========================================================= */
 
 function getLocalDate() {
   const now = new Date();
@@ -52,7 +52,6 @@ function unwrapMonitoringResponse(response, tanggal) {
       nip: pengguna.nip || pengguna.nuptk || "-",
       shiftKerja: shift,
 
-      // Sesuaikan struktur BE menjadi struktur yang dibaca komponen FE.
       absensi: {
         id: item.id,
         waktuMasuk: item.waktuMasuk,
@@ -68,8 +67,6 @@ function unwrapMonitoringResponse(response, tanggal) {
 
   return {
     tanggal,
-    // Endpoint ini hanya mengembalikan catatan absensi yang ditemukan,
-    // bukan seluruh guru di sekolah.
     totalGuru: normalizedData.length,
     sudahAbsen: normalizedData.length,
     belumAbsen: 0,
@@ -202,9 +199,6 @@ function getInitials(name) {
     .toUpperCase();
 }
 
-/* =========================================================
-   PAGE
-========================================================= */
 
 export default function RekapAbsensiShiftPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -212,6 +206,11 @@ export default function RekapAbsensiShiftPage() {
   const [search, setSearch] = useState("");
   const [filterShift, setFilterShift] = useState("semua");
   const [filterStatus, setFilterStatus] = useState("semua");
+
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+
+  const [daftarShiftMaster, setDaftarShiftMaster] = useState([]);
 
   const [monitoring, setMonitoring] = useState({
     tanggal: getLocalDate(),
@@ -224,6 +223,31 @@ export default function RekapAbsensiShiftPage() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    let active = true;
+
+    async function fetchShifts() {
+      try {
+        const res = await getShiftKerja();
+        const list = Array.isArray(res) ? res : Array.isArray(res?.data) ? res.data : [];
+        if (active) {
+          setDaftarShiftMaster(list);
+        }
+      } catch (err) {
+        console.error("Gagal memuat daftar shift:", err);
+      }
+    }
+
+    const timer = setTimeout(() => {
+      fetchShifts();
+    }, 0);
+
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
+  }, []);
 
   const loadData = useCallback(
     async (showRefresh = false, silent = false) => {
@@ -242,12 +266,12 @@ export default function RekapAbsensiShiftPage() {
       if (!silent) setError("");
 
       try {
-        const response = await apiFetch(
-          `/api/absensi/monitoring-guru?tanggal=${encodeURIComponent(
-            tanggal
-          )}`,
-          { method: "GET" }
-        );
+        const response = await getMonitoringKehadiranGuru({
+          tanggal,
+          status: filterStatus !== "semua" ? filterStatus : undefined,
+          search: search.trim() || undefined,
+          shiftKerjaId: filterShift !== "semua" ? filterShift : undefined,
+        });
 
         setMonitoring(unwrapMonitoringResponse(response, tanggal));
       } catch (err) {
@@ -270,12 +294,24 @@ export default function RekapAbsensiShiftPage() {
         if (showRefresh) setRefreshing(false);
       }
     },
-    [tanggal]
+    [tanggal, filterStatus, search, filterShift]
   );
 
   useEffect(() => {
-    loadData();
+    const timer = setTimeout(() => {
+      loadData();
+    }, 0);
+
+    return () => clearTimeout(timer);
   }, [loadData]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setPage(1);
+    }, 0);
+
+    return () => clearTimeout(timer);
+  }, [tanggal, search, filterShift, filterStatus, limit]);
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -287,16 +323,33 @@ export default function RekapAbsensiShiftPage() {
     return () => clearInterval(intervalId);
   }, [loadData]);
 
-  /* =======================================================
-     GROUP BY SHIFT
-  ======================================================= */
 
   const rekapShift = useMemo(() => {
     const groups = new Map();
 
+    if (Array.isArray(daftarShiftMaster) && daftarShiftMaster.length > 0) {
+      for (const master of daftarShiftMaster) {
+        if (master?.id) {
+          groups.set(String(master.id), {
+            key: String(master.id),
+            nama: master.nama || master.namaShift || master.kode || "Shift",
+            jam: `${String(master.jamMasuk || "-").slice(0, 5)} - ${String(
+              master.jamKeluar || "-"
+            ).slice(0, 5)}`,
+            totalGuru: 0,
+            sudahAbsen: 0,
+            tepatWaktu: 0,
+            terlambat: 0,
+            belumPulang: 0,
+            guru: [],
+          });
+        }
+      }
+    }
+
     for (const item of monitoring.data) {
       const shift = item.shiftKerja || null;
-      const key = String(getShiftKey(shift));
+      const key = String(shift?.id || getShiftKey(shift));
 
       if (!groups.has(key)) {
         groups.set(key, {
@@ -305,7 +358,7 @@ export default function RekapAbsensiShiftPage() {
           jam: getShiftJam(shift),
           totalGuru: 0,
           sudahAbsen: 0,
-          belumAbsen: 0,
+          tepatWaktu: 0,
           terlambat: 0,
           belumPulang: 0,
           guru: [],
@@ -320,11 +373,13 @@ export default function RekapAbsensiShiftPage() {
       if (absensi) {
         group.sudahAbsen += 1;
 
-        if (isLate(item)) group.terlambat += 1;
+        if (isLate(item)) {
+          group.terlambat += 1;
+        } else {
+          group.tepatWaktu += 1;
+        }
 
         if (!absensi.waktuKeluar) group.belumPulang += 1;
-      } else {
-        group.belumAbsen += 1;
       }
 
       group.guru.push(item);
@@ -336,7 +391,7 @@ export default function RekapAbsensiShiftPage() {
 
       return a.nama.localeCompare(b.nama, "id");
     });
-  }, [monitoring.data]);
+  }, [monitoring.data, daftarShiftMaster]);
 
   const filteredShift = useMemo(() => {
     const keyword = search.trim().toLowerCase();
@@ -383,8 +438,8 @@ export default function RekapAbsensiShiftPage() {
 
           if (filterStatus === "sudah") {
             matchesStatus = sudahAbsen;
-          } else if (filterStatus === "belum") {
-            matchesStatus = !sudahAbsen;
+          } else if (filterStatus === "hadir" || filterStatus === "tepat-waktu") {
+            matchesStatus = sudahAbsen && !terlambat;
           } else if (filterStatus === "terlambat") {
             matchesStatus = terlambat;
           } else if (filterStatus === "belum-pulang") {
@@ -405,14 +460,47 @@ export default function RekapAbsensiShiftPage() {
     );
   }, [rekapShift, search, filterStatus, filterShift]);
 
-  const totalTerlambat = monitoring.data.filter(isLate).length;
+  const stats = useMemo(() => {
+    if (loading || error) {
+      return {
+        total: "—",
+        sudahAbsen: "—",
+        belumPulang: "—",
+        terlambat: "—",
+        persentaseHadir: "—",
+      };
+    }
 
-  const persentaseHadir =
-    monitoring.totalGuru > 0
-      ? Math.round(
-          (monitoring.sudahAbsen / monitoring.totalGuru) * 100
-        )
-      : 0;
+    const total = filteredGuru.length;
+    let sudahAbsen = 0;
+    let terlambat = 0;
+    let belumPulang = 0;
+
+    for (const item of filteredGuru) {
+      if (item.absensi) {
+        sudahAbsen += 1;
+        if (isLate(item)) terlambat += 1;
+        if (!item.absensi.waktuKeluar) belumPulang += 1;
+      }
+    }
+
+    const persentaseHadir =
+      total > 0 ? Math.round((sudahAbsen / total) * 100) : 0;
+
+    return {
+      total,
+      sudahAbsen,
+      belumPulang,
+      terlambat,
+      persentaseHadir,
+    };
+  }, [filteredGuru, loading, error]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredGuru.length / limit));
+  const paginatedGuru = useMemo(() => {
+    const start = (page - 1) * limit;
+    return filteredGuru.slice(start, start + limit);
+  }, [filteredGuru, page, limit]);
 
   const isToday = tanggal === getLocalDate();
 
@@ -475,9 +563,6 @@ export default function RekapAbsensiShiftPage() {
     URL.revokeObjectURL(url);
   };
 
-  /* =======================================================
-     RENDER
-  ======================================================= */
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
@@ -494,9 +579,6 @@ export default function RekapAbsensiShiftPage() {
 
         <main className="min-w-0 flex-1 overflow-y-auto theme-page theme-text">
           <div className="w-full px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
-            {/* ============================================
-                PAGE HEADER
-            ============================================ */}
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div>
                
@@ -537,9 +619,6 @@ export default function RekapAbsensiShiftPage() {
               </div>
             </div>
 
-            {/* ============================================
-                INFO BANNER
-            ============================================ */}
             <div className="mb-6 flex items-start gap-3 rounded-lg border theme-border theme-card p-4">
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                 <Info size={18} />
@@ -555,9 +634,6 @@ export default function RekapAbsensiShiftPage() {
               </div>
             </div>
 
-            {/* ============================================
-                FILTER
-            ============================================ */}
             <section className="mb-6 theme-card rounded-xl border theme-border p-4 sm:p-5 shadow-sm">
               <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                 <div>
@@ -646,9 +722,6 @@ export default function RekapAbsensiShiftPage() {
               </div>
             </section>
 
-            {/* ============================================
-                ALERT ERROR
-            ============================================ */}
             {error && (
               <div
                 role="alert"
@@ -669,43 +742,41 @@ export default function RekapAbsensiShiftPage() {
               </div>
             )}
 
-            {/* ============================================
-                SUMMARY CARDS
-            ============================================ */}
             <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
               <SummaryCard
-                title="Total Guru"
-                value={monitoring.totalGuru}
-                description="Seluruh guru yang terdaftar"
+                title="Total Catatan"
+                value={stats.total}
+                description="Catatan kehadiran sesuai filter"
                 icon={Users}
                 tone="blue"
               />
               <SummaryCard
                 title="Sudah Absen"
-                value={monitoring.sudahAbsen}
-                description={`${persentaseHadir}% dari total guru`}
+                value={stats.sudahAbsen}
+                description={
+                  typeof stats.persentaseHadir === "number"
+                    ? `${stats.persentaseHadir}% dari data kehadiran`
+                    : "Kehadiran tercatat"
+                }
                 icon={UserCheck}
                 tone="emerald"
               />
               <SummaryCard
-                title="Belum Absen"
-                value={monitoring.belumAbsen}
-                description="Belum memiliki catatan absensi"
-                icon={UserX}
+                title="Belum Pulang"
+                value={stats.belumPulang}
+                description="Waktu keluar belum tercatat"
+                icon={Clock3}
                 tone="slate"
               />
               <SummaryCard
                 title="Terlambat"
-                value={totalTerlambat}
+                value={stats.terlambat}
                 description="Masuk setelah jam toleransi"
-                icon={Clock3}
+                icon={AlertCircle}
                 tone="amber"
               />
             </div>
 
-            {/* ============================================
-                PROGRESS KEHADIRAN
-            ============================================ */}
             <section className="mb-6 theme-card rounded-xl border theme-border p-5 shadow-sm">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="flex items-start gap-3">
@@ -714,55 +785,58 @@ export default function RekapAbsensiShiftPage() {
                   </div>
                   <div>
                     <h2 className="font-semibold theme-text">
-                      Tingkat kehadiran
+                      Tingkat Kehadiran
                     </h2>
                     <p className="mt-1 text-sm theme-text-muted">
-                      {monitoring.sudahAbsen} dari {monitoring.totalGuru} guru sudah absen
+                      {loading || error
+                        ? "Memeriksa catatan kehadiran..."
+                        : `${stats.sudahAbsen} dari ${stats.total} guru tercatat hadir`}
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-baseline gap-1">
                   <span className="text-3xl font-bold tabular-nums theme-primary-text">
-                    {persentaseHadir}
+                    {stats.persentaseHadir}
                   </span>
-                  <span className="text-lg font-semibold theme-primary-text">%</span>
+                  {typeof stats.persentaseHadir === "number" && (
+                    <span className="text-lg font-semibold theme-primary-text">%</span>
+                  )}
                 </div>
               </div>
 
               <div
                 className="mt-4 h-3 overflow-hidden rounded-full bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)]"
                 role="progressbar"
-                aria-valuenow={persentaseHadir}
+                aria-valuenow={typeof stats.persentaseHadir === "number" ? stats.persentaseHadir : 0}
                 aria-valuemin={0}
                 aria-valuemax={100}
                 aria-label="Persentase kehadiran guru"
               >
                 <div
                   className="h-full rounded-full theme-primary transition-all duration-500"
-                  style={{ width: `${persentaseHadir}%` }}
+                  style={{
+                    width: `${typeof stats.persentaseHadir === "number" ? stats.persentaseHadir : 0}%`,
+                  }}
                 />
               </div>
 
               <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs theme-text-muted">
                 <span className="inline-flex items-center gap-1.5">
                   <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                  Sudah absen: {monitoring.sudahAbsen}
+                  Sudah absen: {stats.sudahAbsen}
                 </span>
                 <span className="inline-flex items-center gap-1.5">
-                  <span className="h-2 w-2 rounded-full bg-slate-400" />
-                  Belum absen: {monitoring.belumAbsen}
+                  <span className="h-2 w-2 rounded-full bg-blue-500" />
+                  Belum pulang: {stats.belumPulang}
                 </span>
                 <span className="inline-flex items-center gap-1.5">
                   <span className="h-2 w-2 rounded-full bg-amber-500" />
-                  Terlambat: {totalTerlambat}
+                  Terlambat: {stats.terlambat}
                 </span>
               </div>
             </section>
 
-            {/* ============================================
-                RINGKASAN PER SHIFT
-            ============================================ */}
             <section className="mb-6 space-y-4">
               <div>
                 <h2 className="text-lg font-bold theme-text">
@@ -832,9 +906,9 @@ export default function RekapAbsensiShiftPage() {
                             valueClass="text-emerald-700 dark:text-emerald-300"
                           />
                           <MiniStat
-                            label="Belum absen"
-                            value={shift.belumAbsen}
-                            valueClass="theme-text-secondary"
+                            label="Tepat waktu"
+                            value={shift.tepatWaktu}
+                            valueClass="text-emerald-600 dark:text-emerald-400"
                           />
                           <MiniStat
                             label="Terlambat"
@@ -871,9 +945,6 @@ export default function RekapAbsensiShiftPage() {
               )}
             </section>
 
-            {/* ============================================
-                DETAIL TABLE
-            ============================================ */}
             <section className="theme-card overflow-hidden rounded-xl border theme-border shadow-sm">
               <div className="border-b theme-border p-4 sm:p-5">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -882,22 +953,40 @@ export default function RekapAbsensiShiftPage() {
                       Detail Rekap Guru
                     </h2>
                     <p className="mt-1 text-sm theme-text-muted">
-                      {filteredGuru.length} dari {monitoring.totalGuru} guru ditampilkan
+                      Menampilkan {filteredGuru.length > 0 ? (page - 1) * limit + 1 : 0} -{" "}
+                      {Math.min(page * limit, filteredGuru.length)} dari {filteredGuru.length} guru
+                      {monitoring.totalGuru !== filteredGuru.length &&
+                        ` (difilter dari ${monitoring.totalGuru} total)`}
                     </p>
                   </div>
 
-                  <select
-                    value={filterStatus}
-                    onChange={(event) => setFilterStatus(event.target.value)}
-                    aria-label="Filter status rekap"
-                    className="theme-input h-10 rounded-lg border px-3 text-sm outline-none sm:w-44"
-                  >
-                    <option value="semua">Semua status</option>
-                    <option value="sudah">Sudah absen</option>
-                    <option value="belum">Belum absen</option>
-                    <option value="terlambat">Terlambat</option>
-                    <option value="belum-pulang">Belum pulang</option>
-                  </select>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs theme-text-muted">Baris:</span>
+                      <select
+                        value={limit}
+                        onChange={(e) => setLimit(Number(e.target.value))}
+                        className="theme-input h-8 rounded-lg border px-2 text-xs outline-none"
+                      >
+                        <option value={10}>10</option>
+                        <option value={25}>25</option>
+                        <option value={50}>50</option>
+                      </select>
+                    </div>
+
+                    <select
+                      value={filterStatus}
+                      onChange={(event) => setFilterStatus(event.target.value)}
+                      aria-label="Filter status rekap"
+                      className="theme-input h-10 rounded-lg border px-3 text-sm outline-none sm:w-44"
+                    >
+                      <option value="semua">Semua status</option>
+                      <option value="sudah">Semua kehadiran</option>
+                      <option value="hadir">Tepat waktu</option>
+                      <option value="terlambat">Terlambat</option>
+                      <option value="belum-pulang">Belum pulang</option>
+                    </select>
+                  </div>
                 </div>
               </div>
 
@@ -948,7 +1037,7 @@ export default function RekapAbsensiShiftPage() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-[color-mix(in_srgb,var(--color-text)_5%,transparent)]">
-                        {filteredGuru.map((item) => {
+                        {paginatedGuru.map((item) => {
                           const status = getStatusGuru(item);
                           const lateMinutes = Number(
                             item.absensi?.terlambatMenit || 0
@@ -1022,6 +1111,64 @@ export default function RekapAbsensiShiftPage() {
                 )}
               </div>
 
+              {!loading && !error && filteredGuru.length > 0 && (
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-t theme-border px-5 py-3.5">
+                  <p className="text-xs theme-text-muted">
+                    Halaman <strong className="theme-text">{page}</strong> dari{" "}
+                    <strong className="theme-text">{totalPages}</strong> ({filteredGuru.length} guru)
+                  </p>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      disabled={page <= 1}
+                      onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-lg border theme-border theme-card theme-text-secondary transition hover:bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)] disabled:cursor-not-allowed disabled:opacity-40"
+                      aria-label="Halaman sebelumnya"
+                    >
+                      <ChevronLeft size={16} />
+                    </button>
+
+                    <div className="flex items-center gap-1">
+                      {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                        let pageNum = i + 1;
+                        if (totalPages > 5 && page > 3) {
+                          pageNum = page - 3 + i;
+                          if (pageNum > totalPages) pageNum = totalPages - (4 - i);
+                        }
+
+                        const active = page === pageNum;
+
+                        return (
+                          <button
+                            key={pageNum}
+                            type="button"
+                            onClick={() => setPage(pageNum)}
+                            className={`inline-flex h-8 w-8 items-center justify-center rounded-lg text-xs font-semibold transition ${
+                              active
+                                ? "theme-primary text-white"
+                                : "border theme-border theme-card theme-text-secondary hover:bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]"
+                            }`}
+                          >
+                            {pageNum}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    <button
+                      type="button"
+                      disabled={page >= totalPages}
+                      onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
+                      className="inline-flex h-8 w-8 items-center justify-center rounded-lg border theme-border theme-card theme-text-secondary transition hover:bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)] disabled:cursor-not-allowed disabled:opacity-40"
+                      aria-label="Halaman berikutnya"
+                    >
+                      <ChevronRight size={16} />
+                    </button>
+                  </div>
+                </div>
+              )}
+
               <div className="border-t theme-border px-5 py-3 text-xs leading-5 theme-text-muted">
                 Rekap mengikuti data sistem untuk tanggal terpilih.
                 Status belum pulang berarti waktu keluar masih kosong.
@@ -1034,9 +1181,6 @@ export default function RekapAbsensiShiftPage() {
   );
 }
 
-/* =========================================================
-   COMPONENTS
-========================================================= */
 
 function SummaryCard({ title, value, description, icon: Icon, tone = "blue" }) {
   const toneClasses = {
@@ -1055,7 +1199,7 @@ function SummaryCard({ title, value, description, icon: Icon, tone = "blue" }) {
         <div className="min-w-0">
           <p className="text-sm font-medium theme-text-muted">{title}</p>
           <p className="mt-3 text-2xl font-bold tracking-tight tabular-nums theme-text">
-            {value.toLocaleString("id-ID")}
+            {typeof value === "number" ? value.toLocaleString("id-ID") : value}
           </p>
           <p className="mt-1 text-xs theme-text-muted">{description}</p>
         </div>

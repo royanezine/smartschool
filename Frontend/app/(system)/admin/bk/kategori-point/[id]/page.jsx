@@ -75,10 +75,8 @@ export default function DetailKategoriPage() {
 
         <main className="flex-1 overflow-y-auto p-5 md:p-6 lg:p-8">
           <div className="mx-auto w-full max-w-[1200px]">
-            {/* PAGE HEADER */}
             <div className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div className="flex items-start gap-4">
-                {/* BACK BUTTON */}
                 <button
                   type="button"
                   onClick={() => router.back()}
@@ -109,7 +107,6 @@ export default function DetailKategoriPage() {
                 </button>
 
                 <div className="flex items-start gap-4">
-                  {/* HEADER ICON */}
                   <div className="theme-primary flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl shadow-lg">
                     <svg
                       className="h-6 w-6"
@@ -144,7 +141,6 @@ export default function DetailKategoriPage() {
                 </div>
               </div>
 
-              {/* EDIT BUTTON */}
               <button
                 type="button"
                 onClick={() =>
@@ -175,14 +171,12 @@ export default function DetailKategoriPage() {
               </button>
             </div>
 
-            {/* ERROR */}
             {error && (
               <div className="theme-danger mb-6 rounded-xl border px-4 py-3.5 text-sm font-semibold shadow-sm">
                 {error}
               </div>
             )}
 
-            {/* LOADING */}
             {loading ? (
               <div className="theme-card theme-border rounded-2xl border p-12 text-center shadow-xl">
                 <div className="theme-text-muted inline-flex items-center gap-2 text-sm font-medium">
@@ -200,14 +194,12 @@ export default function DetailKategoriPage() {
             ) : data ? (
               <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_340px]">
                 <div className="space-y-5">
-                  {/* HERO CARD */}
                   <div className="theme-card theme-border overflow-hidden rounded-2xl border shadow-xl">
                     <div className="theme-primary h-1.5 w-full" />
 
                     <div className="p-6">
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex items-center gap-4">
-                          {/* INITIAL */}
                           <div className="theme-primary flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl text-lg font-bold shadow-lg">
                             {initials(data.nama)}
                           </div>
@@ -223,7 +215,6 @@ export default function DetailKategoriPage() {
                           </div>
                         </div>
 
-                        {/* STATUS */}
                         <span
                           className={`inline-flex rounded-full px-3 py-1.5 text-xs font-bold ${statusClass(
                             data.status
@@ -233,7 +224,6 @@ export default function DetailKategoriPage() {
                         </span>
                       </div>
 
-                      {/* DETAIL GRID */}
                       <div className="mt-6 grid gap-4 md:grid-cols-2">
                         <DetailBox
                           icon="star"
@@ -262,7 +252,6 @@ export default function DetailKategoriPage() {
                     </div>
                   </div>
 
-                  {/* DESCRIPTION */}
                   <SectionCard
                     icon="note"
                     tone="neutral"
@@ -274,9 +263,7 @@ export default function DetailKategoriPage() {
                   </SectionCard>
                 </div>
 
-                {/* SIDEBAR */}
                 <aside className="space-y-5">
-                  {/* INFO CATEGORY */}
                   <div className="theme-card theme-border relative overflow-hidden rounded-2xl border p-6 shadow-xl">
                     <div className="mb-4 flex items-center gap-2">
                       <div className="theme-info flex h-7 w-7 items-center justify-center rounded-lg">
@@ -321,14 +308,12 @@ export default function DetailKategoriPage() {
                     </div>
                   </div>
 
-                  {/* QUICK ACTION */}
                   <div className="theme-card theme-border rounded-2xl border p-6 shadow-xl">
                     <h3 className="theme-text-muted mb-4 text-xs font-bold uppercase tracking-wider">
                       Aksi Cepat
                     </h3>
 
                     <div className="space-y-2">
-                      {/* EDIT */}
                       <button
                         type="button"
                         onClick={() =>
@@ -361,7 +346,6 @@ export default function DetailKategoriPage() {
                         Edit
                       </button>
 
-                      {/* BACK TO LIST */}
                       <button
                         type="button"
                         onClick={() =>
@@ -406,9 +390,6 @@ export default function DetailKategoriPage() {
   );
 }
 
-/* =========================================================
-   DETAIL BOX
-========================================================= */
 
 function DetailBox({ icon, label, value }) {
   const icons = {
@@ -472,9 +453,6 @@ function DetailBox({ icon, label, value }) {
   );
 }
 
-/* =========================================================
-   SECTION CARD
-========================================================= */
 
 function SectionCard({
   icon,
@@ -528,9 +506,6 @@ function SectionCard({
   );
 }
 
-/* =========================================================
-   INFO ROW
-========================================================= */
 
 function InfoRow({ icon, label, value }) {
   const icons = {

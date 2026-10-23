@@ -139,7 +139,6 @@ export default function DetailTabunganPage() {
         <main className="min-w-0 flex-1 overflow-y-auto theme-page theme-text">
           <div className="w-full px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
             <div className="mx-auto w-full max-w-5xl space-y-6">
-              {/* HEADER */}
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div className="flex items-start gap-3">
                   <button
@@ -196,7 +195,6 @@ export default function DetailTabunganPage() {
                 </div>
               </div>
 
-              {/* ERROR */}
               {error && (
                 <div
                   role="alert"
@@ -207,7 +205,6 @@ export default function DetailTabunganPage() {
                 </div>
               )}
 
-              {/* LOADING */}
               {loading ? (
                 <div className="flex min-h-[300px] flex-col items-center justify-center gap-3 theme-card rounded-xl border theme-border">
                   <Loader2
@@ -223,7 +220,6 @@ export default function DetailTabunganPage() {
                 </div>
               ) : (
                 <>
-                  {/* KARTU RINGKASAN */}
                   <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
                     <div className="theme-card rounded-xl border theme-border p-4">
                       <div className="flex items-center gap-2">
@@ -265,7 +261,6 @@ export default function DetailTabunganPage() {
                     </div>
                   </div>
 
-                  {/* RIWAYAT MUTASI */}
                   <div className="theme-card overflow-hidden rounded-xl border theme-border shadow-sm">
                     <div className="border-b theme-border p-5">
                       <div className="flex items-center gap-2">

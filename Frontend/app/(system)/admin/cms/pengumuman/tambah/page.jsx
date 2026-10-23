@@ -92,7 +92,6 @@ export default function TambahPengumumanPage() {
 
   return (
     <div className="flex min-h-screen w-full theme-page">
-      {/* SIDEBAR */}
       <Sidebar
         active={active}
         setActive={setActive}
@@ -100,7 +99,6 @@ export default function TambahPengumumanPage() {
         setCollapsed={setCollapsed}
       />
 
-      {/* MAIN CONTENT */}
       <div className="flex-1 min-w-0 flex flex-col">
         <Header
           title="Tambah Pengumuman"
@@ -110,7 +108,6 @@ export default function TambahPengumumanPage() {
 
         <main className="flex-1 min-w-0 overflow-y-auto p-4 md:p-6 lg:p-8 theme-page">
           <div className="w-full min-w-0 max-w-6xl mx-auto space-y-6">
-            {/* BREADCRUMB */}
             <nav className="flex items-center gap-2 text-xs sm:text-sm theme-text-muted">
               <a
                 href="/cmsAdmin"
@@ -135,7 +132,6 @@ export default function TambahPengumumanPage() {
               </span>
             </nav>
 
-            {/* BACK BUTTON */}
             <button
               type="button"
               onClick={() => router.back()}
@@ -152,7 +148,6 @@ export default function TambahPengumumanPage() {
               Kembali
             </button>
 
-            {/* PAGE HEADER */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div className="flex items-start gap-4 min-w-0">
                 <div className="shrink-0 p-3 rounded-2xl theme-primary shadow-lg">
@@ -176,12 +171,9 @@ export default function TambahPengumumanPage() {
               </div>
             </div>
 
-            {/* FORM */}
             <form onSubmit={handleSubmit} className="w-full min-w-0">
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-                {/* MAIN FORM - 2/3 width */}
                 <div className="lg:col-span-2 w-full min-w-0 space-y-5">
-                  {/* JUDUL */}
                   <div className="theme-card rounded-2xl border theme-border shadow-sm p-5 sm:p-6">
                     <label className="block text-xs font-semibold theme-text-secondary uppercase tracking-wider mb-2">
                       Judul Pengumuman{" "}
@@ -225,7 +217,6 @@ export default function TambahPengumumanPage() {
                     )}
                   </div>
 
-                  {/* KONTEN */}
                   <div className="theme-card rounded-2xl border theme-border shadow-sm p-5 sm:p-6">
                     <label className="block text-xs font-semibold theme-text-secondary uppercase tracking-wider mb-2">
                       Konten Pengumuman{" "}
@@ -276,9 +267,7 @@ export default function TambahPengumumanPage() {
                   </div>
                 </div>
 
-                {/* SIDEBAR FORM - 1/3 width */}
                 <div className="lg:col-span-1 w-full min-w-0 space-y-5">
-                  {/* KATEGORI */}
                   <div className="theme-card rounded-2xl border theme-border shadow-sm p-5 sm:p-6">
                     <label className="block text-xs font-semibold theme-text-secondary uppercase tracking-wider mb-2">
                       Kategori
@@ -318,7 +307,6 @@ export default function TambahPengumumanPage() {
                     </select>
                   </div>
 
-                  {/* STATUS */}
                   <div className="theme-card rounded-2xl border theme-border shadow-sm p-5 sm:p-6">
                     <label className="block text-xs font-semibold theme-text-secondary uppercase tracking-wider mb-2">
                       Status
@@ -387,7 +375,6 @@ export default function TambahPengumumanPage() {
                     </div>
                   </div>
 
-                  {/* TANGGAL (jika scheduled) */}
                   {form.status === "scheduled" && (
                     <div className="theme-card rounded-2xl border theme-border shadow-sm p-5 sm:p-6 animate-in fade-in slide-in-from-top-2 duration-200">
                       <label className="block text-xs font-semibold theme-text-secondary uppercase tracking-wider mb-2">
@@ -439,7 +426,6 @@ export default function TambahPengumumanPage() {
                 </div>
               </div>
 
-              {/* ACTION BUTTONS */}
               <div className="w-full min-w-0 mt-6 pt-6 border-t theme-border flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
                 <button
                   type="button"
@@ -514,7 +500,6 @@ export default function TambahPengumumanPage() {
               </div>
             </form>
 
-            {/* FOOTER */}
             <footer className="pt-4 border-t theme-border-soft text-center text-xs theme-text-muted">
               © 2026 SmartSchool CMS • Pengumuman
             </footer>

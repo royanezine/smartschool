@@ -26,9 +26,6 @@ export default function PricingSection() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // ============================================================
-  // AMBIL DATA PAKET
-  // ============================================================
 
   useEffect(() => {
     let mounted = true;
@@ -128,9 +125,6 @@ export default function PricingSection() {
     };
   }, []);
 
-  // ============================================================
-  // FORMAT RUPIAH
-  // ============================================================
 
   function formatRupiah(value) {
     if (
@@ -158,9 +152,6 @@ export default function PricingSection() {
     }).format(number);
   }
 
-  // ============================================================
-  // PILIH PAKET
-  // ============================================================
 
   function handlePilihPaket(item) {
     try {
@@ -177,15 +168,15 @@ export default function PricingSection() {
       console.error("Gagal menyimpan paket:", err);
     }
 
-    window.location.href =
-      `/onboarding/school?paketId=${encodeURIComponent(
-        item.id
-      )}`;
+    if (typeof window !== "undefined") {
+      router.push(
+        `/onboarding/school?paketId=${encodeURIComponent(
+          item.id
+        )}`
+      );
+    }
   }
 
-  // ============================================================
-  // THEME CARD
-  // ============================================================
 
   const cardThemes = [
     {
@@ -250,13 +241,10 @@ export default function PricingSection() {
       glow:
         "bg-blue-800/35",
       accent:
-        "from-blue-300 to-indigo-300",
+        "from-blue-300 to-sky-300",
     },
   ];
 
-  // ============================================================
-  // MAIN
-  // ============================================================
 
   return (
     <section
@@ -269,12 +257,8 @@ export default function PricingSection() {
         lg:py-32
       "
     >
-      {/* ========================================================
-          GLOBAL BACKGROUND
-          ======================================================== */}
 
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        {/* Main blue glow */}
         <div
           className="
             absolute
@@ -297,7 +281,7 @@ export default function PricingSection() {
             h-[620px]
             w-[620px]
             rounded-full
-            bg-indigo-300/20
+            bg-blue-400/20
             blur-[140px]
             animate-pulse
           "
@@ -317,7 +301,6 @@ export default function PricingSection() {
           "
         />
 
-        {/* White top light */}
         <div
           className="
             absolute
@@ -332,7 +315,6 @@ export default function PricingSection() {
           "
         />
 
-        {/* Decorative circles */}
         <div
           className="
             absolute
@@ -384,12 +366,11 @@ export default function PricingSection() {
             w-20
             rounded-full
             border
-            border-indigo-200/40
-            bg-indigo-100/20
+            border-blue-200/40
+            bg-blue-100/20
           "
         />
 
-        {/* Grid */}
         <div
           className="
             absolute
@@ -401,9 +382,6 @@ export default function PricingSection() {
         />
       </div>
 
-      {/* ========================================================
-          CONTENT
-          ======================================================== */}
 
       <div
         className="
@@ -416,12 +394,8 @@ export default function PricingSection() {
           lg:px-8
         "
       >
-        {/* ======================================================
-            HEADER
-            ====================================================== */}
 
         <div className="mx-auto max-w-4xl text-center">
-          {/* Badge */}
 
           <div className="mb-7 flex justify-center">
             <div
@@ -469,7 +443,6 @@ export default function PricingSection() {
             </div>
           </div>
 
-          {/* Heading */}
 
           <h2
             className="
@@ -520,9 +493,6 @@ export default function PricingSection() {
           </p>
         </div>
 
-        {/* ======================================================
-            MINI FEATURES
-            ====================================================== */}
 
         <div
           className="
@@ -614,9 +584,6 @@ export default function PricingSection() {
           })}
         </div>
 
-        {/* ======================================================
-            LOADING
-            ====================================================== */}
 
         {loading && (
           <div className="mt-16 flex justify-center">
@@ -658,9 +625,6 @@ export default function PricingSection() {
           </div>
         )}
 
-        {/* ======================================================
-            ERROR
-            ====================================================== */}
 
         {!loading && error && (
           <div
@@ -715,9 +679,6 @@ export default function PricingSection() {
           </div>
         )}
 
-        {/* ======================================================
-            PRICING CARDS
-            ====================================================== */}
 
         {!loading && !error && paket.length > 0 && (
           <div
@@ -755,9 +716,6 @@ export default function PricingSection() {
                     ${isFeatured ? "lg:-translate-y-5" : ""}
                   `}
                 >
-                  {/* ==================================================
-                      OUTER GLOW
-                      ================================================== */}
 
                   <div
                     className={`
@@ -775,9 +733,6 @@ export default function PricingSection() {
                     `}
                   />
 
-                  {/* ==================================================
-                      POPULAR BADGE
-                      ================================================== */}
 
                   {isFeatured && (
                     <>
@@ -818,7 +773,6 @@ export default function PricingSection() {
                         </div>
                       </div>
 
-                      {/* Floating stars */}
 
                       <Star
                         size={18}
@@ -847,9 +801,6 @@ export default function PricingSection() {
                     </>
                   )}
 
-                  {/* ==================================================
-                      CARD
-                      ================================================== */}
 
                   <div
                     className={`
@@ -874,9 +825,6 @@ export default function PricingSection() {
                       sm:p-8
                     `}
                   >
-                    {/* ==================================================
-                        CARD DECORATION
-                        ================================================== */}
 
                     <div
                       className="
@@ -950,7 +898,6 @@ export default function PricingSection() {
                       "
                     />
 
-                    {/* Shine */}
 
                     <div
                       className="
@@ -971,9 +918,6 @@ export default function PricingSection() {
                       "
                     />
 
-                    {/* ==================================================
-                        CARD HEADER
-                        ================================================== */}
 
                     <div
                       className="
@@ -1045,9 +989,6 @@ export default function PricingSection() {
                       </div>
                     </div>
 
-                    {/* ==================================================
-                        PRICE
-                        ================================================== */}
 
                     <div
                       className="
@@ -1097,9 +1038,6 @@ export default function PricingSection() {
                       )}
                     </div>
 
-                    {/* ==================================================
-                        DESCRIPTION
-                        ================================================== */}
 
                     <p
                       className="
@@ -1116,9 +1054,6 @@ export default function PricingSection() {
                         "Paket digitalisasi sekolah untuk mendukung kebutuhan akademik dan operasional secara terintegrasi."}
                     </p>
 
-                    {/* ==================================================
-                        BUTTON
-                        ================================================== */}
 
                     <button
                       type="button"
@@ -1183,9 +1118,6 @@ export default function PricingSection() {
                       />
                     </button>
 
-                    {/* ==================================================
-                        DIVIDER
-                        ================================================== */}
 
                     <div
                       className="
@@ -1200,9 +1132,6 @@ export default function PricingSection() {
                       "
                     />
 
-                    {/* ==================================================
-                        FEATURES HEADER
-                        ================================================== */}
 
                     <div className="relative z-10">
                       <div
@@ -1246,9 +1175,6 @@ export default function PricingSection() {
                         </div>
                       </div>
 
-                      {/* ==================================================
-                          FEATURES
-                          ================================================== */}
 
                       <div className="mt-5 space-y-3.5">
                         {fitur.length > 0 ? (
@@ -1316,9 +1242,6 @@ export default function PricingSection() {
                       </div>
                     </div>
 
-                    {/* ==================================================
-                        BOTTOM INFO
-                        ================================================== */}
 
                     <div
                       className="
@@ -1376,9 +1299,6 @@ export default function PricingSection() {
           </div>
         )}
 
-        {/* ======================================================
-            BOTTOM TRUST STRIP
-            ====================================================== */}
 
         {!loading && !error && paket.length > 0 && (
           <div
@@ -1520,9 +1440,6 @@ export default function PricingSection() {
           </div>
         )}
 
-        {/* ======================================================
-            CONSULTATION
-            ====================================================== */}
 
         <div className="mt-16 text-center sm:mt-20">
           <p className="text-sm text-slate-500">

@@ -218,11 +218,7 @@ export default function TampilanPage() {
     shiftKerja: true,
   });
 
-  /* ==========================================================
-     TOKEN & HEADERS
-  ========================================================== */
   
-  // Mempertahankan perubahan temanmu (menggunakan lib auth)
   const getToken = useCallback(() => {
     if (typeof window === "undefined") {
       return null;
@@ -248,9 +244,6 @@ export default function TampilanPage() {
     [getToken]
   );
 
-  /* ==========================================================
-     GET TEMA
-  ========================================================== */
   const fetchTema = useCallback(async () => {
     try {
       setLoading(true);
@@ -288,9 +281,6 @@ export default function TampilanPage() {
     fetchTema();
   }, [fetchTema]);
 
-  /* ==========================================================
-     HANDLERS
-  ========================================================== */
   const handleColorChange = (group, key, value) => {
     const nextTema = {
       ...tema,

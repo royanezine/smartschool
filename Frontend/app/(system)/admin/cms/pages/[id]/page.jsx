@@ -45,9 +45,6 @@ export default function PageDetail() {
   const [deleteTarget, setDeleteTarget] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
-  // ============================================================
-  // FETCH DETAIL
-  // ============================================================
 
   const fetchPage = async (showRefresh = false) => {
     if (!id) return;
@@ -105,9 +102,6 @@ export default function PageDetail() {
     fetchPage();
   }, [id]);
 
-  // ============================================================
-  // HELPERS
-  // ============================================================
 
   const getTitle = () => {
     return page?.judul || "Tanpa Judul";
@@ -231,9 +225,6 @@ export default function PageDetail() {
     return `/website/${page.slug}`;
   };
 
-  // ============================================================
-  // DELETE
-  // ============================================================
 
   const handleDelete = async () => {
     if (!page?.id) return;
@@ -264,9 +255,6 @@ export default function PageDetail() {
     }
   };
 
-  // ============================================================
-  // LOADING
-  // ============================================================
 
   if (loading) {
     return (
@@ -308,9 +296,6 @@ export default function PageDetail() {
     );
   }
 
-  // ============================================================
-  // ERROR / NOT FOUND
-  // ============================================================
 
   if (!page) {
     return (
@@ -372,17 +357,11 @@ export default function PageDetail() {
     );
   }
 
-  // ============================================================
-  // MAIN
-  // ============================================================
 
   const statusStyle = getStatusStyle();
 
   return (
     <div className="theme-page flex min-h-screen w-full">
-      {/* ========================================================
-          SIDEBAR
-      ======================================================== */}
 
       <Sidebar
         active={active}
@@ -391,14 +370,8 @@ export default function PageDetail() {
         setCollapsed={setCollapsed}
       />
 
-      {/* ========================================================
-          MAIN AREA
-      ======================================================== */}
 
       <div className="flex min-w-0 flex-1 flex-col">
-        {/* ======================================================
-            HEADER
-        ====================================================== */}
 
         <Header
           title="Detail Halaman"
@@ -409,17 +382,11 @@ export default function PageDetail() {
           }}
         />
 
-        {/* ======================================================
-            CONTENT
-        ====================================================== */}
 
         <main className="min-w-0 flex-1 overflow-y-auto">
           <div className="w-full px-3 py-4 sm:px-5 sm:py-6 md:px-7 lg:px-9 xl:px-10">
             <div className="mx-auto w-full max-w-[1500px]">
 
-              {/* ==================================================
-                  BREADCRUMB / BACK
-              ================================================== */}
 
               <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <Link
@@ -446,9 +413,6 @@ export default function PageDetail() {
                 </button>
               </div>
 
-              {/* ==================================================
-                  ERROR
-              ================================================== */}
 
               {error && (
                 <div className="theme-danger mb-5 flex items-start gap-3 rounded-2xl border p-4">
@@ -476,9 +440,6 @@ export default function PageDetail() {
                 </div>
               )}
 
-              {/* ==================================================
-                  PAGE HEADER
-              ================================================== */}
 
               <section className="theme-card theme-border mb-6 overflow-hidden rounded-3xl border shadow-sm">
                 <div className="relative overflow-hidden bg-gradient-to-br from-[var(--color-sidebar)] via-[var(--color-sidebar-active)] to-[var(--color-card-soft)] px-5 py-7 sm:px-7 sm:py-8 lg:px-9">
@@ -561,9 +522,6 @@ export default function PageDetail() {
                   </div>
                 </div>
 
-                {/* ==================================================
-                    META
-                ================================================== */}
 
                 <div className="theme-card grid grid-cols-1 divide-y divide-[var(--color-border-soft)] sm:grid-cols-3 sm:divide-x sm:divide-y-0">
                   <div className="flex items-center gap-3 px-5 py-4 sm:px-6">
@@ -616,15 +574,9 @@ export default function PageDetail() {
                 </div>
               </section>
 
-              {/* ==================================================
-                  MAIN GRID
-              ================================================== */}
 
               <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_330px]">
 
-                {/* ==================================================
-                    CONTENT
-                ================================================== */}
 
                 <section className="theme-card theme-border min-w-0 overflow-hidden rounded-2xl border shadow-sm">
                   <div className="theme-border flex items-center justify-between border-b px-5 py-4 sm:px-6">
@@ -772,13 +724,9 @@ export default function PageDetail() {
                   </div>
                 </section>
 
-                {/* ==================================================
-                    SIDEBAR DETAIL
-                ================================================== */}
 
                 <aside className="space-y-5">
 
-                  {/* STATUS CARD */}
 
                   <section className="theme-card theme-border rounded-2xl border p-5 shadow-sm">
                     <div className="flex items-center gap-3">
@@ -818,7 +766,6 @@ export default function PageDetail() {
                     </div>
                   </section>
 
-                  {/* URL CARD */}
 
                   <section className="theme-card theme-border rounded-2xl border p-5 shadow-sm">
                     <div className="flex items-center gap-3">
@@ -853,7 +800,6 @@ export default function PageDetail() {
                     </Link>
                   </section>
 
-                  {/* INFORMATION CARD */}
 
                   <section className="theme-card theme-border rounded-2xl border p-5 shadow-sm">
                     <div className="flex items-center gap-3">
@@ -905,7 +851,6 @@ export default function PageDetail() {
                     </div>
                   </section>
 
-                  {/* ACTION CARD */}
 
                   <section className="theme-card theme-border rounded-2xl border p-5 shadow-sm">
                     <div className="flex items-center gap-3">
@@ -941,9 +886,6 @@ export default function PageDetail() {
                 </aside>
               </div>
 
-              {/* ==================================================
-                  FOOTER
-              ================================================== */}
 
               <footer className="py-8 text-center">
                 <p className="theme-text-muted text-[11px]">
@@ -955,9 +897,6 @@ export default function PageDetail() {
         </main>
       </div>
 
-      {/* ========================================================
-          DELETE MODAL
-      ======================================================== */}
 
       {deleteTarget && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm">

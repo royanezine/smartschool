@@ -34,9 +34,6 @@ import {
   updateSoal,
 } from "@/services/soalUjian.service";
 
-/* =====================================================
-   THEME HELPERS
-===================================================== */
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -97,9 +94,6 @@ const themeDangerBorder =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-/* =====================================================
-   HELPERS
-===================================================== */
 
 function parseData(response) {
   if (Array.isArray(response)) return response;
@@ -134,9 +128,6 @@ const emptyForm = {
   nomorUrut: "1",
 };
 
-/* =====================================================
-   PAGE
-===================================================== */
 
 export default function FormSoalUjianPage() {
   const router = useRouter();
@@ -161,9 +152,6 @@ export default function FormSoalUjianPage() {
   const [form, setForm] = useState(emptyForm);
   const [totalSoal, setTotalSoal] = useState(0);
 
-  /* =====================================================
-     LOAD DATA
-  ===================================================== */
 
   useEffect(() => {
     if (!ujianId) {
@@ -264,9 +252,6 @@ export default function FormSoalUjianPage() {
     };
   }, [ujianId, soalId, isEdit]);
 
-  /* =====================================================
-     CHANGE HANDLERS
-  ===================================================== */
 
   function handleChange(event) {
     const { name, value } = event.target;
@@ -350,9 +335,6 @@ export default function FormSoalUjianPage() {
     }));
   }
 
-  /* =====================================================
-     SUBMIT
-  ===================================================== */
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -372,7 +354,6 @@ export default function FormSoalUjianPage() {
       return;
     }
 
-    // Validasi poin: harus berupa angka positif.
     const poinText = String(form.poin ?? "").trim();
     const poin = Number(poinText);
 
@@ -385,7 +366,6 @@ export default function FormSoalUjianPage() {
       return;
     }
 
-    // Validasi nomor urut sebelum dikirim ke backend.
     const nomorUrutText = String(form.nomorUrut ?? "").trim();
     const nomorUrut = Number(nomorUrutText);
 
@@ -498,9 +478,6 @@ export default function FormSoalUjianPage() {
     else router.back();
   }
 
-  /* =====================================================
-     LOADING
-  ===================================================== */
 
   if (loading) {
     return (
@@ -540,9 +517,6 @@ export default function FormSoalUjianPage() {
     );
   }
 
-  /* =====================================================
-     MAIN RENDER
-  ===================================================== */
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
@@ -567,7 +541,6 @@ export default function FormSoalUjianPage() {
 
         <main className="theme-page flex-1 overflow-y-auto">
           <div className="mx-auto w-full max-w-[1600px] space-y-5 p-4 sm:p-6 lg:p-8">
-            {/* HERO HEADER */}
             <section
               className={`theme-card relative overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
             >
@@ -660,7 +633,6 @@ export default function FormSoalUjianPage() {
               </div>
             </section>
 
-            {/* ERROR */}
             {error && (
               <div
                 role="alert"
@@ -684,7 +656,6 @@ export default function FormSoalUjianPage() {
               </div>
             )}
 
-            {/* SUCCESS */}
             {success && (
               <div
                 role="status"
@@ -698,14 +669,11 @@ export default function FormSoalUjianPage() {
               </div>
             )}
 
-            {/* MAIN GRID */}
             <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(0,360px)] 2xl:grid-cols-[minmax(0,1fr)_400px]">
-              {/* FORM */}
               <form
                 onSubmit={handleSubmit}
                 className={`theme-card space-y-5 rounded-2xl border ${themeNeutralBorder} p-5 ${themeCardShadow} sm:p-6`}
               >
-                {/* PERTANYAAN */}
                 <div>
                   <div className="mb-2 flex items-center justify-between gap-3">
                     <label
@@ -738,7 +706,6 @@ export default function FormSoalUjianPage() {
                   />
                 </div>
 
-                {/* TYPE + POIN + NOMOR */}
                 <div className="grid gap-4 sm:grid-cols-3">
                   <div>
                     <label
@@ -811,7 +778,6 @@ export default function FormSoalUjianPage() {
                   </div>
                 </div>
 
-                {/* PILIHAN GANDA */}
                 {form.jenisSoal === "pilihan_ganda" && (
                   <div
                     className={`rounded-2xl border ${themeNeutralBorder} ${themeNeutralSurface} p-4 sm:p-5`}
@@ -950,7 +916,6 @@ export default function FormSoalUjianPage() {
                   </div>
                 )}
 
-                {/* BENAR / SALAH */}
                 {form.jenisSoal === "benar_salah" && (
                   <div
                     className={`rounded-2xl border ${themeInfoBorder} ${themeInfoSurface} p-4 sm:p-5`}
@@ -1000,7 +965,6 @@ export default function FormSoalUjianPage() {
                   </div>
                 )}
 
-                {/* ESAI */}
                 {form.jenisSoal === "esai" && (
                   <div
                     className={`rounded-2xl border ${themeInfoBorder} ${themeInfoSurface} p-4 sm:p-5`}
@@ -1025,7 +989,6 @@ export default function FormSoalUjianPage() {
                   </div>
                 )}
 
-                {/* ACTIONS */}
                 <div
                   className={`flex flex-col-reverse gap-3 border-t ${themeDivider} pt-5 sm:flex-row sm:justify-end`}
                 >
@@ -1058,9 +1021,7 @@ export default function FormSoalUjianPage() {
                 </div>
               </form>
 
-              {/* PANEL KANAN */}
               <aside className="space-y-5">
-                {/* INFO UJIAN */}
                 <div
                   className={`theme-card rounded-2xl border ${themeNeutralBorder} p-5 ${themeCardShadow}`}
                 >
@@ -1171,7 +1132,6 @@ export default function FormSoalUjianPage() {
                   </div>
                 </div>
 
-                {/* TIPS */}
                 <div
                   className={`rounded-2xl border ${themeWarningBorder} ${themeWarningSurface} p-5 ${themeCardShadow}`}
                 >
@@ -1200,7 +1160,6 @@ export default function FormSoalUjianPage() {
                   </ul>
                 </div>
 
-                {/* VALIDASI */}
                 <div
                   className={`rounded-2xl border ${themeSuccessBorder} ${themeSuccessSurface} p-5 ${themeCardShadow}`}
                 >
@@ -1245,7 +1204,6 @@ export default function FormSoalUjianPage() {
                   </ul>
                 </div>
 
-                {/* QUICK HELP */}
                 <div
                   className={`theme-card rounded-2xl border ${themeNeutralBorder} p-5 ${themeCardShadow}`}
                 >

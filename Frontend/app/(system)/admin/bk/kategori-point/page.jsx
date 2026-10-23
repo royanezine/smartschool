@@ -167,12 +167,8 @@ export default function KategoriPelanggaranPage() {
 
         <main className="flex-1 overflow-y-auto p-5 md:p-6 lg:p-8">
           <div className="mx-auto w-full max-w-[1600px]">
-            {/* =====================================================
-                PAGE HEADER
-            ====================================================== */}
             <div className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div className="flex items-start gap-4">
-                {/* ICON */}
                 <div className="theme-primary flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl shadow-lg">
                   <svg
                     className="h-6 w-6"
@@ -200,7 +196,6 @@ export default function KategoriPelanggaranPage() {
                 </div>
               </div>
 
-              {/* ACTIONS */}
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                 <button
                   type="button"
@@ -271,18 +266,12 @@ export default function KategoriPelanggaranPage() {
               </div>
             </div>
 
-            {/* =====================================================
-                ERROR
-            ====================================================== */}
             {error && (
               <div className="theme-danger mb-6 rounded-xl border px-4 py-3.5 text-sm font-semibold shadow-sm">
                 {error}
               </div>
             )}
 
-            {/* =====================================================
-                STATS
-            ====================================================== */}
             <div className="mb-7 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <Stat
                 label="Total Kategori"
@@ -317,12 +306,8 @@ export default function KategoriPelanggaranPage() {
               />
             </div>
 
-            {/* =====================================================
-                FILTER
-            ====================================================== */}
             <div className="theme-card theme-border mb-5 rounded-2xl border p-4 shadow-sm">
               <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
-                {/* SEARCH */}
                 <div className="relative w-full lg:flex-1">
                   <svg
                     className="theme-text-placeholder pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2"
@@ -352,7 +337,6 @@ export default function KategoriPelanggaranPage() {
                   />
                 </div>
 
-                {/* SORT */}
                 <div className="relative">
                   <svg
                     className="theme-text-placeholder pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2"
@@ -397,7 +381,6 @@ export default function KategoriPelanggaranPage() {
                   </select>
                 </div>
 
-                {/* RESET */}
                 <button
                   type="button"
                   onClick={resetFilter}
@@ -430,7 +413,6 @@ export default function KategoriPelanggaranPage() {
                 </button>
               </div>
 
-              {/* ACTIVE SORT */}
               <div className="theme-border-soft mt-3 flex flex-wrap items-center gap-2 border-t pt-3">
                 <span className="theme-text-muted text-xs font-medium">
                   Urutan:
@@ -459,9 +441,6 @@ export default function KategoriPelanggaranPage() {
               </div>
             </div>
 
-            {/* =====================================================
-                TABLE
-            ====================================================== */}
             <div className="theme-card theme-border overflow-hidden rounded-2xl border shadow-xl">
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[900px] text-left text-sm">
@@ -525,7 +504,6 @@ export default function KategoriPelanggaranPage() {
                           key={item.id}
                           className="theme-table-hover theme-border-soft border-b transition"
                         >
-                          {/* NAMA */}
                           <td className="px-5 py-4">
                             <div className="flex items-center gap-3">
                               <div className="theme-primary flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-xs font-bold shadow-md">
@@ -540,21 +518,18 @@ export default function KategoriPelanggaranPage() {
                             </div>
                           </td>
 
-                          {/* DESKRIPSI */}
                           <td className="theme-text-secondary px-5 py-4 font-medium">
                             <div className="max-w-[300px] truncate">
                               {item.deskripsi || "-"}
                             </div>
                           </td>
 
-                          {/* POIN */}
                           <td className="px-5 py-4">
                             <span className="theme-card-soft theme-text inline-flex items-center rounded-lg px-2.5 py-1 text-xs font-bold">
                               {item.poin ?? 0} poin
                             </span>
                           </td>
 
-                          {/* STATUS */}
                           <td className="px-5 py-4">
                             <span
                               className={`inline-flex rounded-full px-2.5 py-1 text-xs font-bold ${statusClass(
@@ -565,10 +540,8 @@ export default function KategoriPelanggaranPage() {
                             </span>
                           </td>
 
-                          {/* ACTION */}
                           <td className="px-5 py-4">
                             <div className="flex items-center justify-end gap-1">
-                              {/* DETAIL */}
                               <button
                                 type="button"
                                 onClick={() =>
@@ -605,7 +578,6 @@ export default function KategoriPelanggaranPage() {
                                 </svg>
                               </button>
 
-                              {/* EDIT */}
                               <button
                                 type="button"
                                 onClick={() =>
@@ -637,7 +609,6 @@ export default function KategoriPelanggaranPage() {
                                 </svg>
                               </button>
 
-                              {/* DELETE */}
                               <button
                                 type="button"
                                 onClick={() =>
@@ -675,9 +646,6 @@ export default function KategoriPelanggaranPage() {
                 </table>
               </div>
 
-              {/* =================================================
-                  PAGINATION
-              ================================================== */}
               {!loading && filteredData.length > 0 && (
                 <div className="theme-border flex flex-col items-center justify-between gap-3 border-t px-5 py-4 sm:flex-row">
                   <p className="theme-text-secondary text-sm font-medium">
@@ -697,7 +665,6 @@ export default function KategoriPelanggaranPage() {
                   </p>
 
                   <div className="flex items-center gap-1.5">
-                    {/* PREVIOUS */}
                     <button
                       type="button"
                       onClick={() =>
@@ -731,7 +698,6 @@ export default function KategoriPelanggaranPage() {
                       </svg>
                     </button>
 
-                    {/* PAGE NUMBERS */}
                     {Array.from({ length: totalPage }).map(
                       (_, i) => {
                         const p = i + 1;
@@ -754,7 +720,6 @@ export default function KategoriPelanggaranPage() {
                       }
                     )}
 
-                    {/* NEXT */}
                     <button
                       type="button"
                       onClick={() =>
@@ -800,9 +765,6 @@ export default function KategoriPelanggaranPage() {
   );
 }
 
-/* =========================================================
-   STAT CARD
-========================================================= */
 
 function Stat({
   label,

@@ -14,20 +14,11 @@ import {
 } from "lucide-react";
 
 export default function AlbumPage() {
-  // ==============================
-  // SIDEBAR STATE
-  // ==============================
   const [active, setActive] = useState("galeri");
   const [collapsed, setCollapsed] = useState(false);
 
-  // ==============================
-  // SEARCH STATE
-  // ==============================
   const [searchTerm, setSearchTerm] = useState("");
 
-  // ==============================
-  // ALBUM DATA
-  // ==============================
   const [albums] = useState([
     {
       id: 1,
@@ -55,16 +46,10 @@ export default function AlbumPage() {
     },
   ]);
 
-  // ==============================
-  // FILTER
-  // ==============================
   const filteredAlbums = albums.filter((album) =>
     album.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // ==============================
-  // COLOR MAP
-  // ==============================
   const colorMap = {
     blue: {
       wrapper: "theme-info",
@@ -85,9 +70,6 @@ export default function AlbumPage() {
     },
   };
 
-  // ==============================
-  // TOTAL FOTO
-  // ==============================
   const totalPhotos = albums.reduce(
     (total, album) => total + album.count,
     0
@@ -95,9 +77,6 @@ export default function AlbumPage() {
 
   return (
     <div className="flex min-h-screen w-full overflow-x-hidden theme-page">
-      {/* =====================================================
-          SIDEBAR
-      ===================================================== */}
       <Sidebar
         active={active}
         setActive={setActive}
@@ -105,9 +84,6 @@ export default function AlbumPage() {
         setCollapsed={setCollapsed}
       />
 
-      {/* =====================================================
-          MAIN CONTENT
-      ===================================================== */}
       <main
         className="
           min-w-0
@@ -120,17 +96,11 @@ export default function AlbumPage() {
           duration-300
         "
       >
-        {/* ===================================================
-            HEADER
-        =================================================== */}
         <Header
           title="Album Galeri"
           user={{ name: "Admin" }}
         />
 
-        {/* ===================================================
-            CONTENT WRAPPER
-        =================================================== */}
         <div
           className="
             w-full
@@ -146,9 +116,6 @@ export default function AlbumPage() {
           "
         >
           <div className="w-full min-w-0 space-y-5 sm:space-y-6">
-            {/* =================================================
-                BREADCRUMB
-            ================================================= */}
             <nav
               className="
                 w-full
@@ -211,9 +178,6 @@ export default function AlbumPage() {
               </ol>
             </nav>
 
-            {/* =================================================
-                PAGE HEADER
-            ================================================= */}
             <div
               className="
                 flex
@@ -226,7 +190,6 @@ export default function AlbumPage() {
                 lg:justify-between
               "
             >
-              {/* LEFT */}
               <div className="flex min-w-0 items-center gap-3">
                 <div
                   className="
@@ -275,7 +238,6 @@ export default function AlbumPage() {
                 </div>
               </div>
 
-              {/* BUTTON */}
               <button
                 onClick={() =>
                   alert("Fitur Tambah Album dibuka! (Mockup)")
@@ -308,9 +270,6 @@ export default function AlbumPage() {
               </button>
             </div>
 
-            {/* =================================================
-                STATISTICS
-            ================================================= */}
             <div
               className="
                 grid
@@ -321,7 +280,6 @@ export default function AlbumPage() {
                 lg:grid-cols-4
               "
             >
-              {/* TOTAL ALBUM */}
               <div
                 className="
                   min-w-0
@@ -363,7 +321,6 @@ export default function AlbumPage() {
                 </div>
               </div>
 
-              {/* TOTAL FOTO */}
               <div
                 className="
                   min-w-0
@@ -405,7 +362,6 @@ export default function AlbumPage() {
                 </div>
               </div>
 
-              {/* ALBUM UTAMA */}
               <div
                 className="
                   min-w-0
@@ -447,7 +403,6 @@ export default function AlbumPage() {
                 </div>
               </div>
 
-              {/* LAST EDIT */}
               <div
                 className="
                   min-w-0
@@ -490,9 +445,6 @@ export default function AlbumPage() {
               </div>
             </div>
 
-            {/* =================================================
-                SEARCH
-            ================================================= */}
             <div
               className="
                 w-full
@@ -542,9 +494,6 @@ export default function AlbumPage() {
               </div>
             </div>
 
-            {/* =================================================
-                ALBUM GRID
-            ================================================= */}
             {filteredAlbums.length > 0 ? (
               <div
                 className="
@@ -581,7 +530,6 @@ export default function AlbumPage() {
                         hover:shadow-lg
                       "
                     >
-                      {/* FOLDER HEADER */}
                       <div
                         className={`
                           flex
@@ -606,10 +554,8 @@ export default function AlbumPage() {
                         />
                       </div>
 
-                      {/* CARD BODY */}
                       <div className="p-4 sm:p-5">
                         <div className="flex min-w-0 items-start justify-between gap-2">
-                          {/* INFO */}
                           <div className="min-w-0 flex-1">
                             <h3
                               className="
@@ -627,7 +573,6 @@ export default function AlbumPage() {
                             </p>
                           </div>
 
-                          {/* ACTION */}
                           <div
                             className="
                               flex
@@ -668,7 +613,6 @@ export default function AlbumPage() {
                           </div>
                         </div>
 
-                        {/* FOOTER */}
                         <div
                           className="
                             mt-4
@@ -720,9 +664,6 @@ export default function AlbumPage() {
                 })}
               </div>
             ) : (
-              /* =================================================
-                  EMPTY STATE
-              ================================================= */
               <div
                 className="
                   flex

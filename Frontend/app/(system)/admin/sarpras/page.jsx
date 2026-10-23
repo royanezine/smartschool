@@ -23,6 +23,8 @@ import {
   TrendingUp,
   MapPin,
   FileText,
+  History,
+  FolderPlus,
 } from "lucide-react";
 
 import Header from "@/app/components/Header";
@@ -30,9 +32,6 @@ import Sidebar from "@/app/components/Sidebar";
 
 import { getGedung } from "@/services/infrastruktur.service";
 
-// ============================================================
-// GLOBAL THEME HELPERS
-// ============================================================
 
 const themePrimarySurface =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -100,9 +99,6 @@ const themeDangerBorder =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-// ============================================================
-// PAGE
-// ============================================================
 
 export default function SarprasPage() {
   const router = useRouter();
@@ -164,7 +160,11 @@ export default function SarprasPage() {
   };
 
   useEffect(() => {
-    loadData();
+    const timer = setTimeout(() => {
+      loadData();
+    }, 0);
+
+    return () => clearTimeout(timer);
   }, []);
 
   const filteredGedung = useMemo(() => {
@@ -235,7 +235,7 @@ export default function SarprasPage() {
       description:
         "Kelola barang dan aset inventaris sekolah",
       icon: Package,
-      href: "/admin/sarpras/gudang",
+      href: "/admin/sarpras/iventaris",
       stat: "Kelola Aset",
       iconClass: `${themePrimarySurface} ${themePrimaryText}`,
     },
@@ -258,22 +258,22 @@ export default function SarprasPage() {
       iconClass: `${themeWarningSurface} text-[var(--color-warning)]`,
     },
     {
-      title: "Pemeliharaan",
+      title: "Pengembalian",
       description:
-        "Kelola perawatan dan pemeliharaan fasilitas",
-      icon: Wrench,
-      href: "/admin/sarpras/pemeliharaan",
-      stat: "Kelola Perawatan",
+        "Kelola pengembalian dan kondisi aset",
+      icon: RefreshCw,
+      href: "/admin/sarpras/pengembalian",
+      stat: "Pengembalian",
       iconClass: `${themeInfoSurface} text-[var(--color-info)]`,
     },
     {
-      title: "Laporan Kerusakan",
+      title: "Riwayat Peminjaman",
       description:
-        "Catat dan tindak lanjuti laporan kerusakan",
-      icon: AlertTriangle,
-      href: "/admin/sarpras/kerusakan",
-      stat: "Lihat Laporan",
-      iconClass: `${themeDangerSurface} theme-danger`,
+        "Pantau catatan dan riwayat sirkulasi aset",
+      icon: History,
+      href: "/admin/sarpras/riwayat",
+      stat: "Riwayat",
+      iconClass: `${themeSuccessSurface} text-[var(--color-success)]`,
     },
   ];
 
@@ -288,19 +288,19 @@ export default function SarprasPage() {
       title: "Tambah Inventaris",
       description: "Tambahkan aset inventaris",
       icon: Package,
-      href: "/admin/sarpras/gudang/tambah",
+      href: "/admin/sarpras/iventaris/tambah",
     },
     {
-      title: "Ajukan Peminjaman",
-      description: "Buat data peminjaman",
+      title: "Kelola Peminjaman",
+      description: "Akses sirkulasi peminjaman",
       icon: ClipboardList,
-      href: "/admin/sarpras/peminjaman/tambah",
+      href: "/admin/sarpras/peminjaman",
     },
     {
-      title: "Laporan Kerusakan",
-      description: "Buat laporan kerusakan",
-      icon: CircleAlert,
-      href: "/admin/sarpras/kerusakan/tambah",
+      title: "Tambah Kategori",
+      description: "Buat kategori aset baru",
+      icon: FolderPlus,
+      href: "/admin/sarpras/kategori/tambah",
     },
   ];
 
@@ -322,7 +322,6 @@ export default function SarprasPage() {
 
   return (
     <div className="theme-page h-screen overflow-hidden">
-      {/* SIDEBAR */}
       <div className="fixed inset-y-0 left-0 z-50">
         <Sidebar
           active="sarpras"
@@ -332,7 +331,6 @@ export default function SarprasPage() {
         />
       </div>
 
-      {/* AREA KANAN */}
       <div
         className={`flex h-screen min-w-0 flex-col transition-[margin] duration-300 ${
           isCollapsed
@@ -340,7 +338,6 @@ export default function SarprasPage() {
             : "lg:ml-[260px]"
         }`}
       >
-        {/* HEADER */}
         <div className="shrink-0">
           <Header
             toggleSidebar={toggleSidebar}
@@ -353,12 +350,10 @@ export default function SarprasPage() {
           />
         </div>
 
-        {/* CONTENT */}
         <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
           <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
             <div className="mx-auto w-full max-w-[1600px]">
 
-              {/* PAGE HEADER */}
               <div className="mb-6 flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
                 <div className="min-w-0">
                   
@@ -409,7 +404,6 @@ export default function SarprasPage() {
                 </div>
               </div>
 
-              {/* STATISTICS */}
               <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
                 <StatCard
                   title="Total Gedung"
@@ -464,7 +458,6 @@ export default function SarprasPage() {
                 />
               </div>
 
-              {/* ERROR */}
               {error && (
                 <div
                   className={`mb-6 flex flex-col gap-3 rounded-xl border ${themeWarningBorder} ${themeWarningSurface} p-4 sm:flex-row sm:items-center sm:justify-between`}
@@ -498,7 +491,6 @@ export default function SarprasPage() {
                 </div>
               )}
 
-              {/* AKSI CEPAT */}
               <section className="mb-6">
                 <div className="mb-4">
                   <h2 className="text-lg font-bold theme-text">
@@ -549,10 +541,8 @@ export default function SarprasPage() {
                 </div>
               </section>
 
-              {/* MAIN CONTENT */}
               <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.65fr)_minmax(300px,0.8fr)]">
 
-                {/* MODUL SARPRAS */}
                 <section
                   className={`min-w-0 overflow-hidden rounded-xl border ${themeNeutralBorder} theme-card ${themeCardShadow}`}
                 >
@@ -638,7 +628,6 @@ export default function SarprasPage() {
                   </div>
                 </section>
 
-                {/* RINGKASAN */}
                 <div className="space-y-6">
                   <section
                     className={`overflow-hidden rounded-xl border ${themeNeutralBorder} theme-card ${themeCardShadow}`}
@@ -694,7 +683,6 @@ export default function SarprasPage() {
                     </div>
                   </section>
 
-                  {/* INFO CARD */}
                   <section
                     className={`relative overflow-hidden rounded-xl border ${themeNeutralBorder} theme-card ${themeCardShadow}`}
                   >
@@ -743,7 +731,6 @@ export default function SarprasPage() {
                 </div>
               </div>
 
-              {/* GEDUNG TERDAFTAR */}
               <section
                 className={`mt-6 overflow-hidden rounded-xl border ${themeNeutralBorder} theme-card ${themeCardShadow}`}
               >
@@ -890,7 +877,7 @@ export default function SarprasPage() {
                             onClick={() => {
                               if (id) {
                                 router.push(
-                                  `/admin/sarpras/gedung/${id}`
+                                  `/admin/sarpras/gedung/detail/${id}`
                                 );
                               } else {
                                 router.push(
@@ -972,7 +959,6 @@ export default function SarprasPage() {
                 )}
               </section>
 
-              {/* FOOTER */}
               <div
                 className={`mt-6 flex flex-col gap-2 border-t ${themeDivider} py-5 text-xs theme-text-muted sm:flex-row sm:items-center sm:justify-between`}
               >
@@ -1002,9 +988,6 @@ export default function SarprasPage() {
   );
 }
 
-// ============================================================
-// STAT CARD
-// ============================================================
 
 function StatCard({
   title,
@@ -1050,9 +1033,6 @@ function StatCard({
   );
 }
 
-// ============================================================
-// SUMMARY ROW
-// ============================================================
 
 function SummaryRow({
   icon: Icon,

@@ -497,7 +497,6 @@ async function handleSubmit(event) {
               onSubmit={handleSubmit}
               className="space-y-5"
             >
-              {/* AKUN PENGGUNA */}
               <section className="theme-card theme-border rounded-2xl border p-6 shadow-sm">
                 <SectionTitle
                   icon={Lock}
@@ -618,7 +617,6 @@ async function handleSubmit(event) {
                 </div>
               </section>
 
-              {/* DATA KEPEGAWAIAN */}
               <section className="theme-card theme-border rounded-2xl border p-6 shadow-sm">
                 <SectionTitle
                   icon={BriefcaseBusiness}
@@ -741,7 +739,6 @@ async function handleSubmit(event) {
                 </div>
               </section>
 
-              {/* DATA PRIBADI */}
               <section className="theme-card theme-border rounded-2xl border p-6 shadow-sm">
                 <SectionTitle
                   icon={User}
@@ -793,7 +790,6 @@ async function handleSubmit(event) {
                 </div>
               </section>
 
-              {/* ALAMAT */}
               <section className="theme-card theme-border rounded-2xl border p-6 shadow-sm">
                 <SectionTitle
                   icon={MapPin}
@@ -888,7 +884,6 @@ async function handleSubmit(event) {
                 </div>
               </section>
 
-              {/* PENUGASAN MATA PELAJARAN */}
               <section className="theme-warning theme-border rounded-2xl border p-5">
                 <div className="flex items-start gap-3">
                   <div className="theme-warning theme-border flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border">
@@ -905,7 +900,6 @@ async function handleSubmit(event) {
                 </div>
               </section>
 
-              {/* TOMBOL FORM */}
               <div className="theme-border flex flex-col-reverse gap-3 border-t pt-5 sm:flex-row sm:justify-end">
                 <button
                   type="button"

@@ -24,9 +24,6 @@ export default function AsesmenMinatBakatPage() {
   const [page, setPage] = useState(1);
   const perPage = 7;
 
-  /* =========================================================
-     LOAD DATA
-  ========================================================= */
 
   async function loadData() {
     try {
@@ -46,9 +43,6 @@ export default function AsesmenMinatBakatPage() {
     }
   }
 
-  /* =========================================================
-     REFRESH
-  ========================================================= */
 
   async function handleRefresh() {
     try {
@@ -73,17 +67,11 @@ export default function AsesmenMinatBakatPage() {
     }
   }
 
-  /* =========================================================
-     INITIAL LOAD
-  ========================================================= */
 
   useEffect(() => {
     loadData();
   }, []);
 
-  /* =========================================================
-     FILTER + SORT
-  ========================================================= */
 
   const filteredData = useMemo(() => {
     const keyword = search
@@ -157,17 +145,11 @@ export default function AsesmenMinatBakatPage() {
     return sorted;
   }, [data, search, sortBy]);
 
-  /* =========================================================
-     RESET PAGE
-  ========================================================= */
 
   useEffect(() => {
     setPage(1);
   }, [search, sortBy]);
 
-  /* =========================================================
-     PAGINATION
-  ========================================================= */
 
   const totalPage = Math.max(
     1,
@@ -185,9 +167,6 @@ export default function AsesmenMinatBakatPage() {
       startIndex + perPage
     );
 
-  /* =========================================================
-     STATS
-  ========================================================= */
 
   const stats = useMemo(() => {
     const totalSiswa = new Set(
@@ -226,9 +205,6 @@ export default function AsesmenMinatBakatPage() {
     };
   }, [data]);
 
-  /* =========================================================
-     DELETE
-  ========================================================= */
 
   async function handleDelete(id) {
     if (
@@ -250,9 +226,6 @@ export default function AsesmenMinatBakatPage() {
     }
   }
 
-  /* =========================================================
-     HELPERS
-  ========================================================= */
 
   function formatTanggal(value) {
     if (!value) return "-";
@@ -291,9 +264,6 @@ export default function AsesmenMinatBakatPage() {
     setSortBy("tanggal_desc");
   }
 
-  /* =========================================================
-     RENDER
-  ========================================================= */
 
   return (
     <div className="theme-page flex h-screen overflow-hidden">
@@ -308,15 +278,11 @@ export default function AsesmenMinatBakatPage() {
         <main className="theme-page flex-1 overflow-y-auto p-5 md:p-6 lg:p-8">
           <div className="mx-auto w-full max-w-[1600px]">
 
-            {/* =================================================
-                PAGE HEADER
-            ================================================= */}
 
             <div className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
 
               <div className="flex items-start gap-4">
 
-                {/* ICON */}
 
                 <div className="theme-primary flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl shadow-lg">
                   <svg
@@ -345,11 +311,9 @@ export default function AsesmenMinatBakatPage() {
                 </div>
               </div>
 
-              {/* ACTIONS */}
 
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
 
-                {/* REFRESH */}
 
                 <button
                   type="button"
@@ -381,7 +345,6 @@ export default function AsesmenMinatBakatPage() {
                     : "Refresh"}
                 </button>
 
-                {/* TAMBAH */}
 
                 <button
                   type="button"
@@ -411,9 +374,6 @@ export default function AsesmenMinatBakatPage() {
               </div>
             </div>
 
-            {/* =================================================
-                ERROR
-            ================================================= */}
 
             {error && (
               <div className="theme-danger theme-border mb-6 rounded-xl border px-4 py-3.5 text-sm font-semibold shadow-sm">
@@ -421,9 +381,6 @@ export default function AsesmenMinatBakatPage() {
               </div>
             )}
 
-            {/* =================================================
-                STATS
-            ================================================= */}
 
             <div className="mb-7 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
 
@@ -460,15 +417,11 @@ export default function AsesmenMinatBakatPage() {
               />
             </div>
 
-            {/* =================================================
-                FILTER
-            ================================================= */}
 
             <div className="theme-card theme-border mb-5 rounded-2xl border p-4 shadow-sm">
 
               <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
 
-                {/* SEARCH */}
 
                 <div className="relative w-full lg:flex-1">
 
@@ -498,7 +451,6 @@ export default function AsesmenMinatBakatPage() {
                   />
                 </div>
 
-                {/* SORT */}
 
                 <div className="relative">
 
@@ -551,7 +503,6 @@ export default function AsesmenMinatBakatPage() {
                   </select>
                 </div>
 
-                {/* RESET */}
 
                 <button
                   type="button"
@@ -576,7 +527,6 @@ export default function AsesmenMinatBakatPage() {
                 </button>
               </div>
 
-              {/* ACTIVE SORT */}
 
               <div className="theme-border-soft mt-3 flex flex-wrap items-center gap-2 border-t pt-3">
 
@@ -627,9 +577,6 @@ export default function AsesmenMinatBakatPage() {
               </div>
             </div>
 
-            {/* =================================================
-                TABLE
-            ================================================= */}
 
             <div className="theme-card theme-border overflow-hidden rounded-2xl border shadow-xl">
 
@@ -637,7 +584,6 @@ export default function AsesmenMinatBakatPage() {
 
                 <table className="w-full min-w-[1050px] text-left text-sm">
 
-                  {/* TABLE HEADER */}
 
                   <thead className="theme-table-header theme-border-soft border-b">
                     <tr>
@@ -672,7 +618,6 @@ export default function AsesmenMinatBakatPage() {
                     </tr>
                   </thead>
 
-                  {/* TABLE BODY */}
 
                   <tbody>
                     {loading ? (
@@ -706,7 +651,6 @@ export default function AsesmenMinatBakatPage() {
                             className="theme-table-hover theme-border-soft border-b transition"
                           >
 
-                            {/* SISWA */}
 
                             <td className="px-5 py-4">
                               <div className="flex items-center gap-3">
@@ -737,7 +681,6 @@ export default function AsesmenMinatBakatPage() {
                               </div>
                             </td>
 
-                            {/* TANGGAL */}
 
                             <td className="theme-text-secondary px-5 py-4 font-medium">
                               {formatTanggal(
@@ -745,14 +688,12 @@ export default function AsesmenMinatBakatPage() {
                               )}
                             </td>
 
-                            {/* JENIS */}
 
                             <td className="theme-text px-5 py-4 font-semibold">
                               {item.jenis ||
                                 "-"}
                             </td>
 
-                            {/* MINAT */}
 
                             <td className="theme-text-secondary px-5 py-4 font-medium">
                               <div className="max-w-[150px] truncate">
@@ -761,7 +702,6 @@ export default function AsesmenMinatBakatPage() {
                               </div>
                             </td>
 
-                            {/* BAKAT */}
 
                             <td className="theme-text-secondary px-5 py-4 font-medium">
                               <div className="max-w-[150px] truncate">
@@ -770,7 +710,6 @@ export default function AsesmenMinatBakatPage() {
                               </div>
                             </td>
 
-                            {/* SKOR */}
 
                             <td className="px-5 py-4">
                               <span className="theme-card-soft theme-text inline-flex items-center rounded-lg border px-2.5 py-1 text-xs font-bold">
@@ -779,13 +718,11 @@ export default function AsesmenMinatBakatPage() {
                               </span>
                             </td>
 
-                            {/* AKSI */}
 
                             <td className="px-5 py-4">
 
                               <div className="flex items-center justify-end gap-1">
 
-                                {/* DETAIL */}
 
                                 <button
                                   type="button"
@@ -818,7 +755,6 @@ export default function AsesmenMinatBakatPage() {
                                   </svg>
                                 </button>
 
-                                {/* EDIT */}
 
                                 <button
                                   type="button"
@@ -845,7 +781,6 @@ export default function AsesmenMinatBakatPage() {
                                   </svg>
                                 </button>
 
-                                {/* DELETE */}
 
                                 <button
                                   type="button"
@@ -881,9 +816,6 @@ export default function AsesmenMinatBakatPage() {
                 </table>
               </div>
 
-              {/* =================================================
-                  PAGINATION
-              ================================================= */}
 
               {!loading &&
                 filteredData.length > 0 && (
@@ -908,7 +840,6 @@ export default function AsesmenMinatBakatPage() {
 
                     <div className="flex items-center gap-1.5">
 
-                      {/* PREVIOUS */}
 
                       <button
                         type="button"
@@ -938,7 +869,6 @@ export default function AsesmenMinatBakatPage() {
                         </svg>
                       </button>
 
-                      {/* PAGE NUMBERS */}
 
                       {Array.from({
                         length: totalPage,
@@ -965,7 +895,6 @@ export default function AsesmenMinatBakatPage() {
                         );
                       })}
 
-                      {/* NEXT */}
 
                       <button
                         type="button"
@@ -1007,9 +936,6 @@ export default function AsesmenMinatBakatPage() {
   );
 }
 
-/* =========================================================
-   STAT CARD
-========================================================= */
 
 function Stat({
   label,

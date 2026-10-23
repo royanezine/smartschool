@@ -1,6 +1,3 @@
-// ============================================================
-// Helper bersama halaman Langganan (Admin Sekolah)
-// ============================================================
 
 export const SIKLUS_LABEL = {
   monthly: "Bulanan",

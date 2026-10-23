@@ -18,10 +18,6 @@ import {
   CalendarDays,
 } from "lucide-react";
 
-// ============================================================
-// DUMMY DATA
-// Catatan: ganti dengan data asli dari API/DB begitu tersedia.
-// ============================================================
 
 const JENJANG_OPTIONS = ["Semua Jenjang", "SD", "SMP", "SMA"];
 
@@ -119,9 +115,6 @@ const dataSekolah = [
   },
 ];
 
-// ============================================================
-// THEME HELPERS
-// ============================================================
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -156,9 +149,6 @@ const themeDivider =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-// ============================================================
-// STATUS STYLE
-// ============================================================
 
 function statusStyle(status) {
   switch (status) {
@@ -192,9 +182,6 @@ function statusStyle(status) {
   }
 }
 
-// ============================================================
-// BAR STYLE
-// ============================================================
 
 function barColor(value) {
   if (value >= 90) {
@@ -208,9 +195,6 @@ function barColor(value) {
   return "bg-[var(--color-primary)]";
 }
 
-// ============================================================
-// TREND ICON
-// ============================================================
 
 function TrendIcon({ trend }) {
   if (trend === "up") {
@@ -239,9 +223,6 @@ function TrendIcon({ trend }) {
   );
 }
 
-// ============================================================
-// MAIN COMPONENT
-// ============================================================
 
 export default function MonitoringKehadiranPage() {
   const [jenjang, setJenjang] = useState(JENJANG_OPTIONS[0]);
@@ -249,9 +230,6 @@ export default function MonitoringKehadiranPage() {
   const [status, setStatus] = useState(STATUS_OPTIONS[0]);
   const [search, setSearch] = useState("");
 
-  // ==========================================================
-  // FILTER + SORT
-  // ==========================================================
 
   const filteredSekolah = useMemo(() => {
     return dataSekolah
@@ -283,9 +261,6 @@ export default function MonitoringKehadiranPage() {
       );
   }, [jenjang, status, search]);
 
-  // ==========================================================
-  // SUMMARY
-  // ==========================================================
 
   const summary = useMemo(() => {
     const total = filteredSekolah.length;
@@ -338,9 +313,6 @@ export default function MonitoringKehadiranPage() {
     <div className="theme-page theme-text min-h-full">
       <div className="w-full max-w-[1800px] mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 space-y-6">
 
-        {/* =====================================================
-            PAGE HEADER
-        ===================================================== */}
 
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="min-w-0">
@@ -380,7 +352,6 @@ export default function MonitoringKehadiranPage() {
             </p>
           </div>
 
-          {/* Download */}
           <button
             type="button"
             className={`
@@ -407,9 +378,6 @@ export default function MonitoringKehadiranPage() {
           </button>
         </div>
 
-        {/* =====================================================
-            FILTER BAR
-        ===================================================== */}
 
         <div
           className={`
@@ -423,7 +391,6 @@ export default function MonitoringKehadiranPage() {
         >
           <div className="flex flex-col sm:flex-row flex-wrap gap-3">
 
-            {/* Search */}
             <div className="relative flex-1 min-w-[200px]">
               <Search
                 size={15}
@@ -462,7 +429,6 @@ export default function MonitoringKehadiranPage() {
               />
             </div>
 
-            {/* Jenjang */}
             <div className="relative flex-1 min-w-[150px]">
               <select
                 value={jenjang}
@@ -516,7 +482,6 @@ export default function MonitoringKehadiranPage() {
               />
             </div>
 
-            {/* Periode */}
             <div className="relative flex-1 min-w-[170px]">
               <select
                 value={periode}
@@ -570,7 +535,6 @@ export default function MonitoringKehadiranPage() {
               />
             </div>
 
-            {/* Status */}
             <div className="relative flex-1 min-w-[160px]">
               <select
                 value={status}
@@ -626,13 +590,9 @@ export default function MonitoringKehadiranPage() {
           </div>
         </div>
 
-        {/* =====================================================
-            SUMMARY CARDS
-        ===================================================== */}
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
 
-          {/* Kehadiran Siswa */}
           <div
             className={`
               theme-card
@@ -672,7 +632,6 @@ export default function MonitoringKehadiranPage() {
             </div>
           </div>
 
-          {/* Kehadiran Guru */}
           <div
             className={`
               theme-card
@@ -712,7 +671,6 @@ export default function MonitoringKehadiranPage() {
             </div>
           </div>
 
-          {/* Total Alpa */}
           <div
             className={`
               theme-card
@@ -752,7 +710,6 @@ export default function MonitoringKehadiranPage() {
             </div>
           </div>
 
-          {/* Unit Perlu Perhatian */}
           <div
             className={`
               theme-card
@@ -793,9 +750,6 @@ export default function MonitoringKehadiranPage() {
           </div>
         </div>
 
-        {/* =====================================================
-            KEHADIRAN PER UNIT SEKOLAH
-        ===================================================== */}
 
         <div>
           <div className="flex items-center justify-between mb-3 gap-3">
@@ -810,7 +764,6 @@ export default function MonitoringKehadiranPage() {
             </span>
           </div>
 
-          {/* Empty */}
           {filteredSekolah.length === 0 ? (
             <div
               className={`
@@ -867,9 +820,6 @@ export default function MonitoringKehadiranPage() {
                       `}
                     >
 
-                      {/* =====================================
-                          IDENTITAS SEKOLAH
-                      ====================================== */}
 
                       <div className="flex items-center gap-3 lg:w-[220px] flex-shrink-0 min-w-0">
                         <div
@@ -899,9 +849,6 @@ export default function MonitoringKehadiranPage() {
                         </div>
                       </div>
 
-                      {/* =====================================
-                          KEHADIRAN SISWA
-                      ====================================== */}
 
                       <div className="flex-1 min-w-[150px]">
                         <div className="flex items-center justify-between mb-1 gap-2">
@@ -955,9 +902,6 @@ export default function MonitoringKehadiranPage() {
                         </div>
                       </div>
 
-                      {/* =====================================
-                          KEHADIRAN GURU
-                      ====================================== */}
 
                       <div className="flex-1 min-w-[150px]">
                         <div className="flex items-center justify-between mb-1 gap-2">
@@ -993,9 +937,6 @@ export default function MonitoringKehadiranPage() {
                         </div>
                       </div>
 
-                      {/* =====================================
-                          RINCIAN KETIDAKHADIRAN
-                      ====================================== */}
 
                       <div className="flex-shrink-0 lg:w-[220px] flex items-center gap-4">
 
@@ -1030,9 +971,6 @@ export default function MonitoringKehadiranPage() {
                         </div>
                       </div>
 
-                      {/* =====================================
-                          STATUS
-                      ====================================== */}
 
                       <div className="flex items-center justify-between gap-3 lg:w-[150px] flex-shrink-0">
 

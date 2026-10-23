@@ -50,9 +50,6 @@ export default function DetailAsesmenPage() {
     }
   }, [id]);
 
-  /* =========================================================
-     FORMAT TANGGAL
-  ========================================================= */
 
   function formatTanggal(value) {
     if (!value) return "-";
@@ -67,9 +64,6 @@ export default function DetailAsesmenPage() {
     );
   }
 
-  /* =========================================================
-     INITIALS
-  ========================================================= */
 
   function initials(name) {
     if (!name) return "?";
@@ -88,9 +82,6 @@ export default function DetailAsesmenPage() {
     ).toUpperCase();
   }
 
-  /* =========================================================
-     STATUS THEME
-  ========================================================= */
 
   function statusClass(status) {
     const s = (status || "").toLowerCase();
@@ -110,9 +101,6 @@ export default function DetailAsesmenPage() {
     return "theme-warning";
   }
 
-  /* =========================================================
-     RENDER
-  ========================================================= */
 
   return (
     <div className="theme-page flex h-screen overflow-hidden">
@@ -127,14 +115,10 @@ export default function DetailAsesmenPage() {
         <main className="theme-page flex-1 overflow-y-auto p-5 md:p-6 lg:p-8">
           <div className="mx-auto w-full max-w-[1200px]">
 
-            {/* =================================================
-                PAGE HEADER
-            ================================================= */}
 
             <div className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div className="flex items-start gap-4">
 
-                {/* BACK */}
 
                 <button
                   type="button"
@@ -158,7 +142,6 @@ export default function DetailAsesmenPage() {
 
                 <div className="flex items-start gap-4">
 
-                  {/* ICON */}
 
                   <div className="theme-primary flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl shadow-lg">
                     <svg
@@ -194,7 +177,6 @@ export default function DetailAsesmenPage() {
                 </div>
               </div>
 
-              {/* EDIT */}
 
               <button
                 type="button"
@@ -223,9 +205,6 @@ export default function DetailAsesmenPage() {
               </button>
             </div>
 
-            {/* =================================================
-                ERROR
-            ================================================= */}
 
             {error && (
               <div className="theme-danger theme-border mb-6 rounded-xl border px-4 py-3.5 text-sm font-semibold shadow-sm">
@@ -233,9 +212,6 @@ export default function DetailAsesmenPage() {
               </div>
             )}
 
-            {/* =================================================
-                LOADING
-            ================================================= */}
 
             {loading ? (
               <div className="theme-card theme-border rounded-2xl border p-12 text-center shadow-xl">
@@ -248,30 +224,21 @@ export default function DetailAsesmenPage() {
             ) : data ? (
               <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_340px]">
 
-                {/* =================================================
-                    LEFT CONTENT
-                ================================================= */}
 
                 <div className="space-y-5">
 
-                  {/* =================================================
-                      HERO CARD
-                  ================================================= */}
 
                   <div className="theme-card theme-border overflow-hidden rounded-2xl border shadow-xl">
 
-                    {/* TOP LINE */}
 
                     <div className="h-1.5 w-full bg-[var(--color-primary)]" />
 
                     <div className="p-6">
 
-                      {/* STUDENT HEADER */}
 
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex items-center gap-4">
 
-                          {/* AVATAR */}
 
                           <div className="theme-primary flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl text-lg font-bold shadow-lg">
                             {initials(
@@ -296,7 +263,6 @@ export default function DetailAsesmenPage() {
                           </div>
                         </div>
 
-                        {/* STATUS */}
 
                         <span
                           className={`inline-flex rounded-full border px-3 py-1.5 text-xs font-bold ${statusClass(
@@ -307,7 +273,6 @@ export default function DetailAsesmenPage() {
                         </span>
                       </div>
 
-                      {/* DETAIL BOXES */}
 
                       <div className="mt-6 grid gap-4 md:grid-cols-2">
                         <DetailBox
@@ -341,9 +306,6 @@ export default function DetailAsesmenPage() {
                     </div>
                   </div>
 
-                  {/* =================================================
-                      MINAT
-                  ================================================= */}
 
                   <SectionCard
                     icon="heart"
@@ -355,9 +317,6 @@ export default function DetailAsesmenPage() {
                     </p>
                   </SectionCard>
 
-                  {/* =================================================
-                      BAKAT
-                  ================================================= */}
 
                   <SectionCard
                     icon="star"
@@ -369,9 +328,6 @@ export default function DetailAsesmenPage() {
                     </p>
                   </SectionCard>
 
-                  {/* =================================================
-                      HASIL
-                  ================================================= */}
 
                   <SectionCard
                     icon="check"
@@ -383,9 +339,6 @@ export default function DetailAsesmenPage() {
                     </p>
                   </SectionCard>
 
-                  {/* =================================================
-                      REKOMENDASI
-                  ================================================= */}
 
                   <SectionCard
                     icon="arrow"
@@ -397,9 +350,6 @@ export default function DetailAsesmenPage() {
                     </p>
                   </SectionCard>
 
-                  {/* =================================================
-                      CATATAN
-                  ================================================= */}
 
                   <SectionCard
                     icon="note"
@@ -412,15 +362,9 @@ export default function DetailAsesmenPage() {
                   </SectionCard>
                 </div>
 
-                {/* =================================================
-                    RIGHT SIDEBAR
-                ================================================= */}
 
                 <aside className="space-y-5">
 
-                  {/* =================================================
-                      INFO ASESMEN
-                  ================================================= */}
 
                   <div className="theme-card theme-border relative overflow-hidden rounded-2xl border p-6 shadow-xl">
 
@@ -481,9 +425,6 @@ export default function DetailAsesmenPage() {
                     </div>
                   </div>
 
-                  {/* =================================================
-                      QUICK ACTION
-                  ================================================= */}
 
                   <div className="theme-card theme-border rounded-2xl border p-6 shadow-xl">
 
@@ -493,7 +434,6 @@ export default function DetailAsesmenPage() {
 
                     <div className="space-y-2">
 
-                      {/* EDIT */}
 
                       <button
                         type="button"
@@ -521,7 +461,6 @@ export default function DetailAsesmenPage() {
                         Edit
                       </button>
 
-                      {/* BACK TO LIST */}
 
                       <button
                         type="button"
@@ -560,9 +499,6 @@ export default function DetailAsesmenPage() {
   );
 }
 
-/* =========================================================
-   DETAIL BOX
-========================================================= */
 
 function DetailBox({
   icon,
@@ -630,9 +566,6 @@ function DetailBox({
   );
 }
 
-/* =========================================================
-   SECTION CARD
-========================================================= */
 
 function SectionCard({
   icon,
@@ -706,7 +639,6 @@ function SectionCard({
   return (
     <div className="theme-card theme-border overflow-hidden rounded-2xl border shadow-xl">
 
-      {/* HEADER */}
 
       <div className="theme-table-header theme-border-soft flex items-center gap-3 border-b px-6 py-4">
         <div
@@ -728,7 +660,6 @@ function SectionCard({
         </h3>
       </div>
 
-      {/* CONTENT */}
 
       <div className="px-6 py-5">
         {children}
@@ -737,9 +668,6 @@ function SectionCard({
   );
 }
 
-/* =========================================================
-   INFO ROW
-========================================================= */
 
 function InfoRow({
   icon,

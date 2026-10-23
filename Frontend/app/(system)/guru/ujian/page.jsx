@@ -34,9 +34,6 @@ import {
   updateUjian,
 } from "@/services/ujian.service";
 
-/* =========================================================
-   THEME HELPERS
-========================================================= */
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -97,9 +94,6 @@ const themeInfoBorder =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-/* =========================================================
-   HELPER
-========================================================= */
 
 function parseData(response) {
   if (Array.isArray(response)) return response;
@@ -146,13 +140,7 @@ function getJenisLabel(jenis) {
   );
 }
 
-/* =========================================================
-   PAGE
-========================================================= */
 
-// =========================================================
-// STAT CARD (COMPONENT LUAR RENDER)
-// =========================================================
 
 function StatCard({
   icon: Icon,
@@ -200,9 +188,6 @@ export default function GuruUjianPage() {
   const [deleteLoading, setDeleteLoading] = useState(null);
   const [publishLoading, setPublishLoading] = useState(null);
 
-  /* =======================================================
-     LOAD KELAS MAPEL
-  ======================================================= */
 
   useEffect(() => {
     loadKelasMapel();
@@ -235,9 +220,6 @@ export default function GuruUjianPage() {
     }
   }
 
-  /* =======================================================
-     LOAD UJIAN
-  ======================================================= */
 
   useEffect(() => {
     Promise.resolve().then(() => {
@@ -271,9 +253,6 @@ export default function GuruUjianPage() {
     }
   }
 
-  /* =======================================================
-     SELECTED KELAS MAPEL
-  ======================================================= */
 
   const selectedData = useMemo(() => {
     return kelasMapel.find(
@@ -281,9 +260,6 @@ export default function GuruUjianPage() {
     );
   }, [kelasMapel, selectedKelasMapel]);
 
-  /* =======================================================
-     FILTER SEARCH
-  ======================================================= */
 
   const filteredUjian = useMemo(() => {
     const keyword = search.trim().toLowerCase();
@@ -301,9 +277,6 @@ export default function GuruUjianPage() {
     });
   }, [ujian, search]);
 
-  /* =======================================================
-     STATISTICS
-  ======================================================= */
 
   const stats = useMemo(() => {
     const total = ujian.length;
@@ -331,9 +304,6 @@ export default function GuruUjianPage() {
     };
   }, [ujian]);
 
-  /* =======================================================
-     DELETE
-  ======================================================= */
 
   async function handleDelete(item) {
     const confirmed = window.confirm(
@@ -355,9 +325,6 @@ export default function GuruUjianPage() {
     }
   }
 
-  /* =======================================================
-     PUBLIKASI
-  ======================================================= */
 
   async function handleTogglePublikasi(item) {
     const nextPublished = item?.dipublikasikan !== true;
@@ -383,25 +350,16 @@ export default function GuruUjianPage() {
     }
   }
 
-  /* =======================================================
-     RETRY
-  ======================================================= */
 
   async function handleRetry() {
     setError("");
     await loadKelasMapel();
   }
 
-  // StatCard sudah dipindah ke luar fungsi GuruUjianPage (komponen statis)
 
-  /* =======================================================
-     RENDER
-  ======================================================= */
 
   return (
-    // ROOT: flex row, tinggi penuh viewport, tidak bisa scroll
     <div className="theme-page flex h-screen w-full overflow-hidden">
-      {/* SIDEBAR */}
       <Sidebar
         active="ujian"
         setActive={() => {}}
@@ -410,9 +368,7 @@ export default function GuruUjianPage() {
         role="guru"
       />
 
-      {/* BODY: flex column, min-w-0 agar main bisa scroll */}
       <div className="flex h-full min-w-0 flex-1 flex-col overflow-hidden">
-        {/* HEADER: shrink-0, tetap di atas */}
         <div className="shrink-0">
           <Header
             role="guru"
@@ -421,11 +377,8 @@ export default function GuruUjianPage() {
           />
         </div>
 
-        {/* MAIN: min-w-0 + overflow-y-auto, ini yang scroll */}
         <main className="theme-page min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
-          {/* KONTEN: w-full (bukan max-w) supaya melebar saat zoom out */}
           <div className="w-full space-y-6 p-4 sm:p-6 lg:p-8">
-            {/* PAGE HEADER */}
             <section
               className={`theme-card relative overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
             >
@@ -493,7 +446,6 @@ export default function GuruUjianPage() {
               </div>
             </section>
 
-            {/* ERROR */}
             {error && (
               <div
                 className={`flex flex-col gap-3 rounded-2xl border ${themeDangerBorder} ${themeDangerSurface} p-4 sm:flex-row sm:items-start sm:justify-between`}
@@ -529,7 +481,6 @@ export default function GuruUjianPage() {
               </div>
             )}
 
-            {/* KELAS MAPEL */}
             <section
               className={`theme-card rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
             >
@@ -636,7 +587,6 @@ export default function GuruUjianPage() {
               </div>
             </section>
 
-            {/* STATISTICS — auto melebar dengan breakpoint 2xl */}
             <section>
               <div className="mb-3">
                 <h2 className="theme-text text-sm font-bold">
@@ -691,7 +641,6 @@ export default function GuruUjianPage() {
               </div>
             </section>
 
-            {/* SEARCH */}
             <section
               className={`theme-card rounded-2xl border ${themeNeutralBorder} p-4 ${themeCardShadow} sm:p-5`}
             >
@@ -734,7 +683,6 @@ export default function GuruUjianPage() {
               </div>
             </section>
 
-            {/* TABLE */}
             <section
               className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
             >
@@ -835,7 +783,6 @@ export default function GuruUjianPage() {
                               isPublished ? "" : themeWarningSurface
                             }`}
                           >
-                            {/* NUMBER */}
                             <td className="relative px-4 py-4">
                               <div
                                 className={`absolute bottom-0 left-0 top-0 w-0.5 ${
@@ -849,7 +796,6 @@ export default function GuruUjianPage() {
                               </span>
                             </td>
 
-                            {/* TITLE */}
                             <td className="px-4 py-4">
                               <div className="flex min-w-0 items-start gap-3">
                                 <div
@@ -892,7 +838,6 @@ export default function GuruUjianPage() {
                               </div>
                             </td>
 
-                            {/* TYPE */}
                             <td className="px-4 py-4">
                               <span
                                 className={`inline-flex items-center rounded-lg border ${themeNeutralBorder} ${themeNeutralSurface} px-2.5 py-1.5 text-xs font-semibold theme-text-secondary`}
@@ -901,7 +846,6 @@ export default function GuruUjianPage() {
                               </span>
                             </td>
 
-                            {/* DURATION */}
                             <td className="px-4 py-4 text-center">
                               <span
                                 className={`inline-flex items-center gap-1.5 rounded-lg ${themeNeutralSurface} px-2.5 py-1.5 text-xs font-semibold theme-text-secondary`}
@@ -914,7 +858,6 @@ export default function GuruUjianPage() {
                               </span>
                             </td>
 
-                            {/* SCHEDULE */}
                             <td className="px-4 py-4">
                               {item?.waktuMulai ? (
                                 <div className="space-y-1.5">
@@ -952,7 +895,6 @@ export default function GuruUjianPage() {
                               )}
                             </td>
 
-                            {/* STATUS */}
                             <td className="px-4 py-4 text-center">
                               <div className="flex flex-col items-center gap-2">
                                 {isPublished ? (
@@ -992,7 +934,6 @@ export default function GuruUjianPage() {
                               </div>
                             </td>
 
-                            {/* QUESTIONS */}
                             <td className="px-4 py-4 text-center">
                               <span
                                 className={`inline-flex min-w-9 items-center justify-center rounded-lg px-2.5 py-1.5 text-xs font-bold ${
@@ -1005,7 +946,6 @@ export default function GuruUjianPage() {
                               </span>
                             </td>
 
-                            {/* ACTIONS */}
                             <td className="px-4 py-4">
                               <div className="flex items-center justify-center gap-1.5">
                                 <button
@@ -1087,7 +1027,6 @@ export default function GuruUjianPage() {
                         );
                       })}
 
-                      {/* EMPTY STATE */}
                       {filteredUjian.length === 0 && (
                         <tr>
                           <td colSpan={8} className="px-6 py-16 text-center">
@@ -1144,7 +1083,6 @@ export default function GuruUjianPage() {
                 </div>
               )}
 
-              {/* TABLE FOOTER */}
               {!loadingUjian && filteredUjian.length > 0 && (
                 <div
                   className={`flex flex-col gap-2 border-t ${themeDivider} ${themeNeutralSurface} px-5 py-3.5 text-xs theme-text-secondary sm:flex-row sm:items-center sm:justify-between sm:px-6`}

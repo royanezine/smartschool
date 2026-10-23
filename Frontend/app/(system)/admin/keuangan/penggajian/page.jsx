@@ -245,9 +245,6 @@ export default function PenggajianPage() {
   const [freezeYear, setFreezeYear] = useState(String(now.getFullYear()));
   const [freezing, setFreezing] = useState(false);
 
-  /* ============================================================
-     SORTING STATE
-  ============================================================ */
   const [sortBy, setSortBy] = useState("nama");
   const [sortOrder, setSortOrder] = useState("asc");
 
@@ -325,9 +322,6 @@ export default function PenggajianPage() {
     loadData();
   }, [loadData]);
 
-  /* ============================================================
-     SORTED DATA
-  ============================================================ */
   const sortedItems = useMemo(() => {
     const data = [...items];
 
@@ -575,9 +569,6 @@ export default function PenggajianPage() {
 
         <main className="min-w-0 flex-1 overflow-y-auto theme-page theme-text">
           <div className="w-full px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
-            {/* ============================================
-                PAGE HEADER
-            ============================================ */}
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div>
                
@@ -627,7 +618,6 @@ export default function PenggajianPage() {
               </div>
             </div>
 
-            {/* ALERT */}
             {error && (
               <AlertBox
                 type="error"
@@ -644,7 +634,6 @@ export default function PenggajianPage() {
               />
             )}
 
-            {/* CALC RESULT */}
             {calcResult && (
               <div className="mb-5 rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-900/60 dark:bg-blue-950/30">
                 <div className="flex items-start justify-between gap-3">
@@ -689,7 +678,6 @@ export default function PenggajianPage() {
               </div>
             )}
 
-            {/* SUMMARY */}
             <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
               <SummaryCard
                 title="Total Data Penggajian"
@@ -714,7 +702,6 @@ export default function PenggajianPage() {
               />
             </div>
 
-            {/* TABLE */}
             <section className="theme-card overflow-hidden rounded-xl border theme-border shadow-sm">
               <div className="border-b theme-border p-4 sm:p-5">
                 <div className="mb-4">
@@ -1110,7 +1097,6 @@ export default function PenggajianPage() {
         </main>
       </div>
 
-      {/* MODAL KALKULASI */}
       {showCalculation && (
         <Modal
           title="Kalkulasi Penggajian"
@@ -1189,7 +1175,6 @@ export default function PenggajianPage() {
         </Modal>
       )}
 
-      {/* MODAL FREEZE */}
       {showFreeze && (
         <Modal
           title="Bekukan Periode Penggajian"
@@ -1258,9 +1243,6 @@ export default function PenggajianPage() {
   );
 }
 
-/* =========================================================
-   SUMMARY CARD
-========================================================= */
 
 function SummaryCard({ title, value, description, icon: Icon, tone = "blue" }) {
   const toneClasses = {
@@ -1294,9 +1276,6 @@ function SummaryCard({ title, value, description, icon: Icon, tone = "blue" }) {
   );
 }
 
-/* =========================================================
-   ALERT BOX
-========================================================= */
 
 function AlertBox({ type, message, onClose }) {
   const success = type === "success";
@@ -1325,9 +1304,6 @@ function AlertBox({ type, message, onClose }) {
   );
 }
 
-/* =========================================================
-   FORM FIELD
-========================================================= */
 
 function FormField({ label, children }) {
   return (
@@ -1340,9 +1316,6 @@ function FormField({ label, children }) {
   );
 }
 
-/* =========================================================
-   MODAL
-========================================================= */
 
 function Modal({ title, description, onClose, children }) {
   return (

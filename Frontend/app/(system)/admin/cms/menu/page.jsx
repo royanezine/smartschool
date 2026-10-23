@@ -114,10 +114,6 @@ export default function CmsMenuPage() {
   const [previewItem, setPreviewItem] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
 
-  // ============================================================
-  // GET MENU CONFIGURATION
-  // GET /api/cms/menu-konfigurasi
-  // ============================================================
 
   const fetchItems = useCallback(async (showRefresh = false) => {
     try {
@@ -148,9 +144,6 @@ export default function CmsMenuPage() {
     fetchItems();
   }, [fetchItems]);
 
-  // ============================================================
-  // FILTER
-  // ============================================================
 
   const filteredItems = items.filter((item) => {
     const keyword = search.trim().toLowerCase();
@@ -174,9 +167,6 @@ export default function CmsMenuPage() {
     (item) => String(item?.status || "").toLowerCase() === "nonaktif"
   ).length;
 
-  // ============================================================
-  // FORM
-  // ============================================================
 
   const openCreateForm = () => {
     setEditingItem(null);
@@ -224,12 +214,6 @@ export default function CmsMenuPage() {
     }));
   };
 
-  // ============================================================
-  // CREATE / UPDATE
-  //
-  // POST /api/cms/menu-konfigurasi
-  // PUT  /api/cms/menu-konfigurasi/:id
-  // ============================================================
 
   const handleSave = async (event) => {
     event.preventDefault();
@@ -314,11 +298,6 @@ export default function CmsMenuPage() {
     }
   };
 
-  // ============================================================
-  // DELETE / DEACTIVATE
-  // DELETE /api/cms/menu-konfigurasi/:id
-  // Backend mengatur status menjadi nonaktif.
-  // ============================================================
 
   const handleDelete = async () => {
     if (!deleteTarget?.id) return;
@@ -347,9 +326,6 @@ export default function CmsMenuPage() {
     }
   };
 
-  // ============================================================
-  // LOADING
-  // ============================================================
 
   if (loading) {
     return (
@@ -384,9 +360,6 @@ export default function CmsMenuPage() {
     );
   }
 
-  // ============================================================
-  // MAIN PAGE
-  // ============================================================
 
   return (
     <div className="theme-page flex min-h-screen w-full">
@@ -409,7 +382,6 @@ export default function CmsMenuPage() {
 
         <main className="theme-page min-w-0 flex-1 overflow-y-auto">
           <div className="mx-auto w-full max-w-[1700px] px-3 py-5 sm:px-6 lg:px-9">
-            {/* HEADER */}
 
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-3">
@@ -451,7 +423,6 @@ export default function CmsMenuPage() {
               </div>
             </div>
 
-            {/* ALERTS */}
 
             {error && (
               <div className="theme-danger mb-4 flex items-start gap-3 rounded-xl border p-4">
@@ -473,7 +444,6 @@ export default function CmsMenuPage() {
               </div>
             )}
 
-            {/* SUMMARY */}
 
             <section className="theme-card theme-border mb-6 rounded-2xl border p-5">
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -500,7 +470,6 @@ export default function CmsMenuPage() {
               </div>
             </section>
 
-            {/* SEARCH */}
 
             <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
@@ -533,7 +502,6 @@ export default function CmsMenuPage() {
               </div>
             </div>
 
-            {/* TABLE */}
 
             <section className="theme-card theme-border overflow-hidden rounded-2xl border">
               <div className="theme-card-soft theme-border flex items-center justify-between border-b px-5 py-4">
@@ -677,7 +645,6 @@ export default function CmsMenuPage() {
                   </p>
 
                   {!search && (
-                    // ganti tombol Tambah Konfigurasi di page.jsx
 <button
   type="button"
   onClick={() => router.push("/admin/cms/menu/tambah")}
@@ -700,9 +667,6 @@ export default function CmsMenuPage() {
         </main>
       </div>
 
-      {/* ============================================================
-          FORM CREATE / EDIT
-      ============================================================ */}
 
       {formOpen && (
         <div className="fixed inset-0 z-[120] flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm">
@@ -937,9 +901,6 @@ export default function CmsMenuPage() {
         </div>
       )}
 
-      {/* ============================================================
-          PREVIEW
-      ============================================================ */}
 
       {previewItem && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm">
@@ -1048,9 +1009,6 @@ export default function CmsMenuPage() {
         </div>
       )}
 
-      {/* ============================================================
-          DELETE CONFIRMATION
-      ============================================================ */}
 
       {deleteTarget && (
         <div className="fixed inset-0 z-[130] flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm">

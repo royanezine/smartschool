@@ -34,9 +34,6 @@ import {
   statusLanggananInfo,
 } from "@/lib/langganan";
 
-// ============================================================
-// THEME HELPERS
-// ============================================================
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]";
@@ -50,9 +47,6 @@ const themeTextHover =
 const themePrimaryShadow =
   "shadow-[0_10px_25px_color-mix(in_srgb,var(--color-primary)_20%,transparent)]";
 
-// ============================================================
-// SMALL COMPONENTS
-// ============================================================
 
 function StatusBadge({ status }) {
   const info = statusLanggananInfo(status);
@@ -97,9 +91,6 @@ function StatCard({ title, value, description, icon: Icon, iconClass }) {
   );
 }
 
-// ============================================================
-// PAGE
-// ============================================================
 
 export default function PaketSayaPage() {
   const router = useRouter();
@@ -125,8 +116,6 @@ export default function PaketSayaPage() {
       getPaket(),
     ]);
 
-    // Daftar paket berasal dari GET /api/paket (endpoint tersedia).
-    // Bila gagal, halaman tidak dapat ditampilkan.
     if (paketRes.status === "rejected") {
       setPaketTersedia([]);
       setLanggananList([]);
@@ -140,8 +129,6 @@ export default function PaketSayaPage() {
 
     setPaketTersedia(paketRes.value?.data ?? []);
 
-    // Data langganan berasal dari GET /api/langganan/sekolah.
-    // Bila gagal, daftar paket tetap ditampilkan dengan peringatan.
     if (langgananRes.status === "rejected") {
       setLanggananList([]);
       setDetailAktif(null);
@@ -213,7 +200,6 @@ export default function PaketSayaPage() {
 
         <main className="flex-1 overflow-y-auto theme-page">
           <div className="p-4 sm:p-6 lg:p-8 space-y-6">
-            {/* PAGE HEADER */}
             <div className="flex items-center justify-between gap-4 flex-wrap">
               <div className="flex items-center gap-3">
                 <div
@@ -243,7 +229,6 @@ export default function PaketSayaPage() {
               </button>
             </div>
 
-            {/* LOADING */}
             {loading && (
               <div className="theme-card theme-border rounded-xl border p-14 flex flex-col items-center gap-3">
                 <Loader2
@@ -256,7 +241,6 @@ export default function PaketSayaPage() {
               </div>
             )}
 
-            {/* ERROR */}
             {!loading && error && (
               <div className="theme-danger rounded-xl border p-5 flex items-start gap-3">
                 <AlertCircle size={18} className="mt-0.5 shrink-0" />
@@ -271,7 +255,6 @@ export default function PaketSayaPage() {
 
             {!loading && !error && (
               <>
-                {/* PERINGATAN LANGGANAN */}
                 {langgananError && (
                   <div className="theme-warning rounded-xl border p-4 flex items-start gap-3">
                     <AlertCircle size={17} className="mt-0.5 shrink-0" />
@@ -287,7 +270,6 @@ export default function PaketSayaPage() {
                   </div>
                 )}
 
-                {/* SUMMARY */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
                   <StatCard
                     title="Paket Aktif"
@@ -335,7 +317,6 @@ export default function PaketSayaPage() {
                   />
                 </div>
 
-                {/* BELUM ADA LANGGANAN */}
                 {!aktif && (
                   <section className="theme-card theme-border rounded-xl border p-6 shadow-[0_1px_3px_color-mix(in_srgb,var(--color-text)_8%,transparent)]">
                     <div className="flex items-start gap-3">
@@ -359,7 +340,6 @@ export default function PaketSayaPage() {
                   </section>
                 )}
 
-                {/* DETAIL PAKET AKTIF */}
                 {aktif && (
                   <section className="theme-card theme-border rounded-xl border shadow-[0_1px_3px_color-mix(in_srgb,var(--color-text)_8%,transparent)] overflow-hidden">
                     <div className="p-5 sm:p-6">
@@ -411,7 +391,6 @@ export default function PaketSayaPage() {
                         </div>
                       </div>
 
-                      {/* BILLING */}
                       <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-4">
                         <div className="theme-card-soft theme-border rounded-xl border p-4">
                           <div className="flex items-center gap-2 theme-text-secondary">
@@ -487,7 +466,6 @@ export default function PaketSayaPage() {
                         </div>
                       </div>
 
-                      {/* FITUR */}
                       <div className="mt-7 theme-border-soft border-t pt-6">
                         <div className="flex items-center justify-between gap-3">
                           <h3 className="text-sm font-bold theme-text">
@@ -530,7 +508,6 @@ export default function PaketSayaPage() {
                   </section>
                 )}
 
-                {/* DAFTAR PAKET TERSEDIA */}
                 <section id="paket-tersedia" className="scroll-mt-24">
                   <div className="mb-4">
                     <h2 className="text-lg font-bold theme-text">
@@ -624,7 +601,6 @@ export default function PaketSayaPage() {
                   )}
                 </section>
 
-                {/* NOTICE */}
                 <section className="theme-card theme-border rounded-xl border p-4 shadow-[0_1px_3px_color-mix(in_srgb,var(--color-text)_8%,transparent)]">
                   <div className="flex items-start gap-3">
                     <div className="w-9 h-9 rounded-lg theme-warning flex items-center justify-center shrink-0">

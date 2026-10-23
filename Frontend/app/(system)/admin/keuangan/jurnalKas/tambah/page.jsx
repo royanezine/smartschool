@@ -248,15 +248,10 @@ export default function TambahJurnalKasPage() {
           }}
         />
 
-        {/* Hanya area ini yang scroll */}
         <main className="theme-page min-h-0 flex-1 overflow-y-auto">
-          {/* Konten w-full: melebar saat zoom out */}
           <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
             <div className="w-full space-y-6">
 
-              {/* =================================================
-                  HEADER PAGE
-              ================================================= */}
 
               <section>
                 <Link
@@ -286,9 +281,6 @@ export default function TambahJurnalKasPage() {
                 </div>
               </section>
 
-              {/* =================================================
-                  ERROR
-              ================================================= */}
 
               {pageError && (
                 <div
@@ -316,9 +308,6 @@ export default function TambahJurnalKasPage() {
                 </div>
               )}
 
-              {/* =================================================
-                  SUCCESS
-              ================================================= */}
 
               {successMessage && (
                 <div className="flex items-start gap-3 rounded-xl border border-[var(--color-success)] p-4 text-sm">
@@ -335,9 +324,6 @@ export default function TambahJurnalKasPage() {
                 </div>
               )}
 
-              {/* =================================================
-                  STAT CARDS — 6 kolom di 2xl
-              ================================================= */}
 
               <section className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-6">
                 <SummaryCard
@@ -398,9 +384,6 @@ export default function TambahJurnalKasPage() {
                 />
               </section>
 
-              {/* =================================================
-                  FORM
-              ================================================= */}
 
               <form onSubmit={handleSubmit}>
                 <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(320px,380px)]">
@@ -416,7 +399,6 @@ export default function TambahJurnalKasPage() {
                     </div>
 
                     <div className="space-y-6 p-6">
-                      {/* Akun Kas */}
                       <div>
                         <label className="theme-text-secondary mb-2 block text-xs font-bold">
                           Akun Kas{" "}
@@ -464,7 +446,6 @@ export default function TambahJurnalKasPage() {
                         )}
                       </div>
 
-                      {/* Jenis Transaksi */}
                       <div>
                         <label className="theme-text-secondary mb-2.5 block text-xs font-bold">
                           Jenis Transaksi
@@ -526,7 +507,6 @@ export default function TambahJurnalKasPage() {
                         </div>
                       </div>
 
-                      {/* Tanggal */}
                       <div>
                         <label className="theme-text-secondary mb-2 block text-xs font-bold">
                           Tanggal Transaksi{" "}
@@ -554,7 +534,6 @@ export default function TambahJurnalKasPage() {
                         )}
                       </div>
 
-                      {/* Kategori */}
                       <div>
                         <label className="theme-text-secondary mb-2 block text-xs font-bold">
                           Kategori{" "}
@@ -581,7 +560,6 @@ export default function TambahJurnalKasPage() {
                         )}
                       </div>
 
-                      {/* Keterangan */}
                       <div>
                         <label className="theme-text-secondary mb-2 block text-xs font-bold">
                           Keterangan Transaksi{" "}
@@ -610,7 +588,6 @@ export default function TambahJurnalKasPage() {
                         )}
                       </div>
 
-                      {/* Nominal */}
                       <div>
                         <label className="theme-text-secondary mb-2 block text-xs font-bold">
                           Nominal{" "}
@@ -647,7 +624,6 @@ export default function TambahJurnalKasPage() {
                     </div>
                   </section>
 
-                  {/* SIDEBAR FORM */}
                   <aside className="space-y-5">
                     <section className="theme-card overflow-hidden rounded-2xl border shadow-sm">
                       <div className="theme-border border-b px-5 py-4">
@@ -796,9 +772,6 @@ export default function TambahJurnalKasPage() {
   );
 }
 
-/* =========================================================
-   SUMMARY CARD
-========================================================= */
 
 function SummaryCard({
   title,
@@ -867,9 +840,6 @@ function SummaryCard({
   );
 }
 
-/* =========================================================
-   SUMMARY ROW
-========================================================= */
 
 function SummaryRow({ label, value }) {
   return (

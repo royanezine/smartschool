@@ -1,15 +1,9 @@
-// =========================================================
-// BK SERVICE
-// =========================================================
 
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 const BK_BASE_PATH = "/api/bk";
 
-// =========================================================
-// TYPES - SESI KONSELING
-// =========================================================
 
 export interface SesiKonseling {
   id: string;
@@ -53,9 +47,6 @@ export interface SesiKonseling {
   } | null;
 }
 
-// =========================================================
-// TYPES - KATEGORI PELANGGARAN
-// =========================================================
 
 export interface KategoriPelanggaran {
   id: string;
@@ -77,9 +68,6 @@ export interface KategoriPelanggaran {
   dihapusPada?: string | null;
 }
 
-// =========================================================
-// TYPES - PELANGGARAN SISWA
-// =========================================================
 
 export interface PelanggaranSiswa {
   id: string;
@@ -124,9 +112,6 @@ export interface PelanggaranSiswa {
   } | null;
 }
 
-// =========================================================
-// TYPES - ASESMEN MINAT BAKAT
-// =========================================================
 
 export interface AsesmenMinatBakat {
   id: string;
@@ -168,9 +153,6 @@ export interface AsesmenMinatBakat {
   } | null;
 }
 
-// =========================================================
-// REQUEST TYPES - KONSELING
-// =========================================================
 
 export interface CreateSesiKonselingPayload {
   siswaId: string;
@@ -212,9 +194,6 @@ export interface UpdateSesiKonselingPayload {
   catatan?: string | null;
 }
 
-// =========================================================
-// REQUEST TYPES - KATEGORI
-// =========================================================
 
 export interface CreateKategoriPelanggaranPayload {
   nama: string;
@@ -230,9 +209,6 @@ export interface UpdateKategoriPelanggaranPayload {
   status?: string | null;
 }
 
-// =========================================================
-// REQUEST TYPES - PELANGGARAN
-// =========================================================
 
 export interface CreatePelanggaranSiswaPayload {
   siswaId: string;
@@ -267,9 +243,6 @@ export interface UpdatePelanggaranSiswaPayload {
   catatan?: string | null;
 }
 
-// =========================================================
-// REQUEST TYPES - ASESMEN
-// =========================================================
 
 export interface CreateAsesmenMinatBakatPayload {
   siswaId: string;
@@ -315,9 +288,6 @@ export interface UpdateAsesmenMinatBakatPayload {
   catatan?: string | null;
 }
 
-// =========================================================
-// HELPER
-// =========================================================
 
 import { getToken } from "../lib/auth";
 
@@ -352,7 +322,10 @@ async function handleResponse<T>(
       result?.error ||
       `Request gagal dengan status ${response.status}`;
 
-    throw new Error(message);
+    const error = new Error(message) as Error & { status?: number };
+    error.status = response.status;
+
+    throw error;
   }
 
   if (
@@ -374,9 +347,6 @@ async function handleResponse<T>(
   return result as T;
 }
 
-// =========================================================
-// 1. SESI KONSELING
-// =========================================================
 
 const KONSELING_PATH =
   `${BK_BASE_PATH}/konseling`;
@@ -480,9 +450,6 @@ export async function deleteSesiKonseling(
   await handleResponse<any>(response);
 }
 
-// =========================================================
-// 2. KATEGORI PELANGGARAN
-// =========================================================
 
 const KATEGORI_PATH =
   `${BK_BASE_PATH}/kategori-pelanggaran`;
@@ -574,9 +541,6 @@ export async function deleteKategoriPelanggaran(
   await handleResponse<any>(response);
 }
 
-// =========================================================
-// 3. PELANGGARAN SISWA
-// =========================================================
 
 const PELANGGARAN_PATH =
   `${BK_BASE_PATH}/pelanggaran`;
@@ -671,9 +635,6 @@ export async function deletePelanggaranSiswa(
   await handleResponse<any>(response);
 }
 
-// =========================================================
-// 4. ASESMEN MINAT BAKAT
-// =========================================================
 
 const ASESMEN_PATH =
   `${BK_BASE_PATH}/asesmen-minat-bakat`;

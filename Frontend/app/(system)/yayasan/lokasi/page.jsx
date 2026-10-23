@@ -11,10 +11,6 @@ import {
   GraduationCap,
 } from "lucide-react";
 
-// ============================================================
-// DUMMY DATA
-// Catatan: ganti dengan data asli dari API/DB begitu tersedia.
-// ============================================================
 
 const dummySekolah = [
   {
@@ -59,9 +55,6 @@ const dummySekolah = [
   },
 ];
 
-// ============================================================
-// THEME HELPERS
-// ============================================================
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -99,17 +92,11 @@ const themeDivider =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-// ============================================================
-// MAIN COMPONENT
-// ============================================================
 
 export default function LokasiSekolahPage() {
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState(dummySekolah[0]);
 
-  // ==========================================================
-  // FILTER SEKOLAH
-  // ==========================================================
 
   const filtered = dummySekolah.filter(
     (s) =>
@@ -117,17 +104,11 @@ export default function LokasiSekolahPage() {
       s.alamat.toLowerCase().includes(search.toLowerCase())
   );
 
-  // ==========================================================
-  // GOOGLE MAPS
-  // ==========================================================
 
   const mapSrc = `https://www.google.com/maps?q=${selected.lat},${selected.lng}&z=15&output=embed`;
 
   const mapLink = `https://www.google.com/maps?q=${selected.lat},${selected.lng}`;
 
-  // ==========================================================
-  // SUMMARY
-  // ==========================================================
 
   const totalSiswa = dummySekolah.reduce(
     (total, sekolah) => total + sekolah.jumlahSiswa,
@@ -143,9 +124,6 @@ export default function LokasiSekolahPage() {
     <div className="theme-page theme-text min-h-full">
       <div className="w-full max-w-[1800px] mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 space-y-6">
 
-        {/* =====================================================
-            PAGE HEADER
-        ===================================================== */}
 
         <div>
           <div className="flex items-center gap-2.5">
@@ -172,13 +150,9 @@ export default function LokasiSekolahPage() {
           </p>
         </div>
 
-        {/* =====================================================
-            SUMMARY CARDS
-        ===================================================== */}
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
 
-          {/* Total Sekolah */}
           <div
             className={`
               theme-card
@@ -218,7 +192,6 @@ export default function LokasiSekolahPage() {
             </div>
           </div>
 
-          {/* Total Siswa */}
           <div
             className={`
               theme-card
@@ -258,7 +231,6 @@ export default function LokasiSekolahPage() {
             </div>
           </div>
 
-          {/* Total Guru */}
           <div
             className={`
               theme-card
@@ -299,19 +271,12 @@ export default function LokasiSekolahPage() {
           </div>
         </div>
 
-        {/* =====================================================
-            CONTENT
-        ===================================================== */}
 
         <div className="flex flex-col lg:flex-row gap-6">
 
-          {/* ===================================================
-              LIST SEKOLAH
-          =================================================== */}
 
           <div className="lg:w-80 shrink-0 space-y-3">
 
-            {/* Search */}
             <div className="relative">
               <Search
                 size={15}
@@ -348,7 +313,6 @@ export default function LokasiSekolahPage() {
               />
             </div>
 
-            {/* School List */}
             <div className="space-y-2 max-h-[520px] overflow-y-auto pr-1">
 
               {filtered.map((s) => {
@@ -376,7 +340,6 @@ export default function LokasiSekolahPage() {
                   >
                     <div className="flex items-start gap-2">
 
-                      {/* School Icon */}
                       <div
                         className={`
                           flex
@@ -396,7 +359,6 @@ export default function LokasiSekolahPage() {
                         <Building2 size={16} />
                       </div>
 
-                      {/* School Info */}
                       <div className="min-w-0">
                         <p
                           className={`
@@ -422,7 +384,6 @@ export default function LokasiSekolahPage() {
                 );
               })}
 
-              {/* Empty State */}
               {filtered.length === 0 && (
                 <div
                   className={`
@@ -459,13 +420,9 @@ export default function LokasiSekolahPage() {
             </div>
           </div>
 
-          {/* ===================================================
-              MAP & DETAIL
-          =================================================== */}
 
           <div className="flex-1 min-w-0 space-y-4">
 
-            {/* Map */}
             <div
               className={`
                 overflow-hidden
@@ -485,7 +442,6 @@ export default function LokasiSekolahPage() {
               />
             </div>
 
-            {/* Detail */}
             <div
               className={`
                 rounded-xl
@@ -498,7 +454,6 @@ export default function LokasiSekolahPage() {
             >
               <div className="flex items-start justify-between gap-3">
 
-                {/* School Detail */}
                 <div className="min-w-0">
                   <h2 className="text-lg font-semibold theme-text truncate">
                     {selected.nama}
@@ -514,7 +469,6 @@ export default function LokasiSekolahPage() {
                   </p>
                 </div>
 
-                {/* Google Maps */}
                 <a
                   href={mapLink}
                   target="_blank"
@@ -546,10 +500,8 @@ export default function LokasiSekolahPage() {
                 </a>
               </div>
 
-              {/* Detail Stats */}
               <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
 
-                {/* Telepon */}
                 <div
                   className={`
                     flex
@@ -578,7 +530,6 @@ export default function LokasiSekolahPage() {
                   </div>
                 </div>
 
-                {/* Jumlah Siswa */}
                 <div
                   className={`
                     flex
@@ -607,7 +558,6 @@ export default function LokasiSekolahPage() {
                   </div>
                 </div>
 
-                {/* Jumlah Guru */}
                 <div
                   className={`
                     flex

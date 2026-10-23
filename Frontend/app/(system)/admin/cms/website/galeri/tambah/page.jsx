@@ -44,13 +44,11 @@ export default function TambahGaleri() {
 
     if (!selectedFile) return;
 
-    // Validasi ukuran maksimal 2MB
     if (selectedFile.size > 2 * 1024 * 1024) {
       alert("Ukuran gambar maksimal 2MB.");
       return;
     }
 
-    // Hapus object URL sebelumnya jika ada
     if (preview) {
       URL.revokeObjectURL(preview);
     }
@@ -88,7 +86,6 @@ export default function TambahGaleri() {
 
   return (
     <div className="flex min-h-screen w-full theme-page overflow-x-hidden">
-      {/* ================= SIDEBAR ================= */}
       <Sidebar
         active={active}
         setActive={setActive}
@@ -96,7 +93,6 @@ export default function TambahGaleri() {
         setCollapsed={setCollapsed}
       />
 
-      {/* ================= MAIN ================= */}
       <main
         className="
           flex-1
@@ -109,10 +105,8 @@ export default function TambahGaleri() {
           duration-300
         "
       >
-        {/* ================= HEADER ================= */}
         <Header title="Tambah Galeri" user={{ name: "Admin" }} />
 
-        {/* ================= CONTENT ================= */}
         <div
           className="
             w-full
@@ -127,7 +121,6 @@ export default function TambahGaleri() {
             xl:px-10
           "
         >
-          {/* CONTAINER */}
           <div
             className="
               w-full
@@ -137,7 +130,6 @@ export default function TambahGaleri() {
               sm:space-y-6
             "
           >
-            {/* ================= BREADCRUMB ================= */}
             <div
               className="
                 flex
@@ -148,7 +140,6 @@ export default function TambahGaleri() {
                 sm:justify-between
               "
             >
-              {/* Breadcrumb */}
               <nav
                 className="min-w-0 overflow-x-auto"
                 aria-label="Breadcrumb"
@@ -201,7 +192,6 @@ export default function TambahGaleri() {
                 </ol>
               </nav>
 
-              {/* Back Button */}
               <button
                 type="button"
                 onClick={() => router.back()}
@@ -223,7 +213,6 @@ export default function TambahGaleri() {
               </button>
             </div>
 
-            {/* ================= FORM CARD ================= */}
             <div
               className="
                 w-full
@@ -236,7 +225,6 @@ export default function TambahGaleri() {
                 overflow-hidden
               "
             >
-              {/* ================= FORM HEADER ================= */}
               <div
                 className="
                   border-b
@@ -291,7 +279,6 @@ export default function TambahGaleri() {
                 </div>
               </div>
 
-              {/* ================= FORM ================= */}
               <form
                 onSubmit={handleSubmit}
                 className="
@@ -301,7 +288,6 @@ export default function TambahGaleri() {
                   space-y-6
                 "
               >
-                {/* ================= MAIN GRID ================= */}
                 <div
                   className="
                     grid
@@ -311,7 +297,6 @@ export default function TambahGaleri() {
                     lg:gap-8
                   "
                 >
-                  {/* ================= UPLOAD ================= */}
                   <div
                     className="
                       xl:col-span-2
@@ -338,7 +323,6 @@ export default function TambahGaleri() {
                       </p>
                     </div>
 
-                    {/* Upload Box */}
                     <div
                       className={`
                         relative
@@ -374,7 +358,6 @@ export default function TambahGaleri() {
                             "
                           />
 
-                          {/* Overlay */}
                           <div
                             className="
                               absolute
@@ -478,7 +461,6 @@ export default function TambahGaleri() {
                       )}
                     </div>
 
-                    {/* File Information */}
                     {file && (
                       <div
                         className="
@@ -530,7 +512,6 @@ export default function TambahGaleri() {
                     )}
                   </div>
 
-                  {/* ================= DETAIL ================= */}
                   <div
                     className="
                       xl:col-span-3
@@ -546,7 +527,6 @@ export default function TambahGaleri() {
                         gap-4
                       "
                     >
-                      {/* Judul */}
                       <div className="sm:col-span-2 min-w-0">
                         <label
                           htmlFor="judul"
@@ -588,7 +568,6 @@ export default function TambahGaleri() {
                         />
                       </div>
 
-                      {/* Album */}
                       <div className="min-w-0">
                         <label
                           htmlFor="album"
@@ -658,7 +637,6 @@ export default function TambahGaleri() {
                         </div>
                       </div>
 
-                      {/* Kategori */}
                       <div className="min-w-0">
                         <label
                           htmlFor="kategori"
@@ -728,7 +706,6 @@ export default function TambahGaleri() {
                         </div>
                       </div>
 
-                      {/* Deskripsi */}
                       <div className="sm:col-span-2 min-w-0">
                         <label
                           htmlFor="deskripsi"
@@ -772,7 +749,6 @@ export default function TambahGaleri() {
                   </div>
                 </div>
 
-                {/* ================= FOOTER ================= */}
                 <div
                   className="
                     border-t

@@ -18,9 +18,6 @@ import {
   KeyRound,
 } from "lucide-react";
 
-// ======================================================
-// THEME HELPERS
-// ======================================================
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -64,9 +61,6 @@ const themeFocus =
 const themeCardShadow =
   "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
 
-// ======================================================
-// PAGE
-// ======================================================
 
 export default function TambahStafPage() {
   const router = useRouter();
@@ -122,9 +116,6 @@ export default function TambahStafPage() {
   return (
     <div className="theme-page min-h-screen flex">
 
-      {/* ======================================================
-          SIDEBAR
-      ====================================================== */}
 
       <div className="shrink-0">
         <Sidebar
@@ -137,13 +128,9 @@ export default function TambahStafPage() {
         />
       </div>
 
-      {/* ======================================================
-          MAIN AREA
-      ====================================================== */}
 
       <div className="flex-1 min-w-0 w-0 flex flex-col">
 
-        {/* HEADER */}
 
         <Header
           toggleSidebar={() =>
@@ -157,21 +144,14 @@ export default function TambahStafPage() {
           }}
         />
 
-        {/* ====================================================
-            PAGE CONTENT
-        ==================================================== */}
 
         <main className="flex-1 min-w-0">
 
           <div className="w-full px-4 sm:px-5 lg:px-7 xl:px-8 py-5 sm:py-6 lg:py-7">
 
-            {/* ==================================================
-                PAGE HEADER
-            ================================================== */}
 
             <div className="mb-6">
 
-              {/* BACK BUTTON */}
 
               <button
                 type="button"
@@ -182,7 +162,6 @@ export default function TambahStafPage() {
                 <span>Kembali ke Daftar Staf</span>
               </button>
 
-              {/* TITLE */}
 
               <div className="flex items-start gap-3">
 
@@ -211,18 +190,12 @@ export default function TambahStafPage() {
               </div>
             </div>
 
-            {/* ==================================================
-                FORM CONTAINER
-            ================================================== */}
 
             <form
               onSubmit={handleSubmit}
               className={`w-full theme-card border ${themeNeutralBorder} rounded-xl ${themeCardShadow} overflow-hidden`}
             >
 
-              {/* ==================================================
-                  FORM HEADER
-              ================================================== */}
 
               <div
                 className={`px-5 sm:px-6 lg:px-7 py-5 border-b ${themeDivider} ${themeNeutralSurface}`}
@@ -255,15 +228,9 @@ export default function TambahStafPage() {
                 </div>
               </div>
 
-              {/* ==================================================
-                  FORM BODY
-              ================================================== */}
 
               <div className="p-5 sm:p-6 lg:p-7">
 
-                {/* ==================================================
-                    INFORMASI DASAR
-                ================================================== */}
 
                 <div className="mb-5">
 
@@ -286,15 +253,9 @@ export default function TambahStafPage() {
 
                 </div>
 
-                {/* ==================================================
-                    FORM GRID
-                ================================================== */}
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-6 gap-y-5">
 
-                  {/* ==================================================
-                      NAMA
-                  ================================================== */}
 
                   <FormField
                     label="Nama Lengkap"
@@ -313,9 +274,6 @@ export default function TambahStafPage() {
                     />
                   </FormField>
 
-                  {/* ==================================================
-                      EMAIL
-                  ================================================== */}
 
                   <FormField
                     label="Email"
@@ -334,9 +292,6 @@ export default function TambahStafPage() {
                     />
                   </FormField>
 
-                  {/* ==================================================
-                      TELEPON
-                  ================================================== */}
 
                   <FormField
                     label="Nomor Telepon"
@@ -353,9 +308,6 @@ export default function TambahStafPage() {
                     />
                   </FormField>
 
-                  {/* ==================================================
-                      STATUS
-                  ================================================== */}
 
                   <FormField
                     label="Status Akun"
@@ -385,9 +337,6 @@ export default function TambahStafPage() {
 
                 </div>
 
-                {/* ==================================================
-                    ACCESS SECTION
-                ================================================== */}
 
                 <div className={`mt-8 pt-7 border-t ${themeDivider}`}>
 
@@ -414,7 +363,6 @@ export default function TambahStafPage() {
 
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-6 gap-y-5">
 
-                    {/* ROLE */}
 
                     <FormField
                       label="Role"
@@ -454,7 +402,6 @@ export default function TambahStafPage() {
                       </select>
                     </FormField>
 
-                    {/* ROLE INFORMATION */}
 
                     <div
                       className={`flex items-start gap-3 p-3.5 rounded-lg border ${themeInfoBorder} ${themeInfoSurface} min-w-0`}
@@ -487,9 +434,6 @@ export default function TambahStafPage() {
                   </div>
                 </div>
 
-                {/* ==================================================
-                    SECURITY SECTION
-                ================================================== */}
 
                 <div className={`mt-8 pt-7 border-t ${themeDivider}`}>
 
@@ -545,9 +489,6 @@ export default function TambahStafPage() {
 
               </div>
 
-              {/* ==================================================
-                  FOOTER
-              ================================================== */}
 
               <div
                 className={`px-5 sm:px-6 lg:px-7 py-4 border-t ${themeDivider} ${themeNeutralSurface}`}
@@ -555,7 +496,6 @@ export default function TambahStafPage() {
 
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
 
-                  {/* INFORMATION */}
 
                   <div className="flex items-start gap-2 min-w-0">
 
@@ -570,7 +510,6 @@ export default function TambahStafPage() {
 
                   </div>
 
-                  {/* BUTTONS */}
 
                   <div className="flex flex-col sm:flex-row gap-2 shrink-0">
 
@@ -603,9 +542,6 @@ export default function TambahStafPage() {
   );
 }
 
-// ======================================================
-// FORM FIELD
-// ======================================================
 
 function FormField({
   label,
@@ -643,9 +579,6 @@ function FormField({
   );
 }
 
-// ======================================================
-// INPUT STYLE
-// ======================================================
 
 const inputClass = `
   block w-full min-w-0 h-11 pl-10 pr-3

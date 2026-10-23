@@ -8,16 +8,6 @@ const PaymentSuccessPage = () => {
   const router = useRouter();
 
   useEffect(() => {
-    /*
-     * Backend tidak menyediakan endpoint status pembayaran tenant
-     * (GET /api/tenant/status tidak ada), dan aktivasi sekolah hanya
-     * diproses melalui webhook Midtrans (POST /api/webhooks/midtrans).
-     * Karena itu halaman ini TIDAK dapat memverifikasi keberhasilan
-     * pembayaran dan TIDAK boleh menampilkan status "berhasil".
-     *
-     * Akses dialihkan kembali ke halaman pembayaran yang menampilkan
-     * informasi Virtual Account dan tautan login.
-     */
     const timer = window.setTimeout(() => {
       router.replace("/onboarding/payment");
     }, 800);

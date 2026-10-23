@@ -30,9 +30,6 @@ import {
   getSesiKonseling,
 } from "@/services/bk.service";
 
-/* =========================================================
-   GLOBAL THEME HELPERS
-========================================================= */
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -91,9 +88,6 @@ const themeDangerBorder =
 const themeDangerText =
   "text-[var(--color-danger)]";
 
-/* =========================================================
-   KONSTANTA
-========================================================= */
 
 const TOPIK_KONSELING = [
   "Akademik",
@@ -118,9 +112,6 @@ const SLOT_WAKTU = [
   { mulai: "14:30", selesai: "15:00" },
 ];
 
-/* =========================================================
-   STATUS CONFIG
-========================================================= */
 
 const STATUS_CONFIG = {
   diajukan: {
@@ -145,9 +136,6 @@ const STATUS_CONFIG = {
   },
 };
 
-/* =========================================================
-   HELPER TANGGAL
-========================================================= */
 
 function getTodayWib() {
   return new Date(
@@ -223,9 +211,6 @@ function getTanggalSesi(value) {
   return "";
 }
 
-/* =========================================================
-   HALAMAN
-========================================================= */
 
 export default function BookingKonselingPage() {
   const today = useMemo(() => getTodayWib(), []);
@@ -273,9 +258,6 @@ export default function BookingKonselingPage() {
 
   const tanggalHariIni = toDateKey(today);
 
-  /* =======================================================
-     KALENDER
-  ======================================================= */
 
   const calendarDays = useMemo(() => {
     const year = currentMonth.getFullYear();
@@ -401,9 +383,6 @@ export default function BookingKonselingPage() {
     });
   };
 
-  /* =======================================================
-     SUBMIT
-  ======================================================= */
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -482,18 +461,11 @@ export default function BookingKonselingPage() {
     }
   };
 
-  /* =======================================================
-     RENDER
-  ======================================================= */
 
   return (
     <main className="min-w-0 flex-1 overflow-y-auto theme-page theme-text">
-      {/* Konten w-full: melebar saat zoom out, tidak dibatasi max-width */}
       <div className="w-full space-y-6 px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
 
-        {/* =================================================
-            HEADER
-        ================================================= */}
         <section
           className={`
             theme-card
@@ -662,9 +634,6 @@ export default function BookingKonselingPage() {
           />
         </section>
 
-        {/* =================================================
-            STAT CARDS — grid responsif dengan 2xl:grid-cols-6
-        ================================================= */}
 
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-6">
           <div className={`theme-card ${themeNeutralBorder} ${themeSmallShadow} rounded-xl px-4 py-4`}>
@@ -752,9 +721,6 @@ export default function BookingKonselingPage() {
           </div>
         </div>
 
-        {/* =================================================
-            TABS
-        ================================================= */}
         <div
           className={`
             theme-card
@@ -841,18 +807,11 @@ export default function BookingKonselingPage() {
           </button>
         </div>
 
-        {/* =================================================
-            BOOKING TAB
-        ================================================= */}
         {activeTab === "booking" && (
           <section>
             <form onSubmit={handleSubmit}>
-              {/* Layout grid diperluas ke 2xl agar lebih lega saat zoom out */}
               <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(300px,0.8fr)] 2xl:grid-cols-[minmax(0,1.8fr)_minmax(380px,0.7fr)]">
                 <div className="space-y-6">
-                  {/* =========================================
-                      KALENDER
-                  ========================================= */}
                   <div
                     className={`
                       theme-card
@@ -1057,9 +1016,6 @@ export default function BookingKonselingPage() {
                     </div>
                   </div>
 
-                  {/* =========================================
-                      TIME SLOTS
-                  ========================================= */}
                   <div
                     className={`
                       theme-card
@@ -1097,7 +1053,6 @@ export default function BookingKonselingPage() {
                       </div>
                     </div>
 
-                    {/* Grid slot waktu: 2xl:grid-cols-4 agar lebih banyak kolom di layar lebar */}
                     <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 2xl:grid-cols-4">
                       {SLOT_WAKTU.map((slot) => {
                         const selected = selectedTime === slot.mulai;
@@ -1168,9 +1123,6 @@ export default function BookingKonselingPage() {
                   </div>
                 </div>
 
-                {/* =========================================
-                    FORM DETAIL
-                ========================================= */}
                 <div className="space-y-6">
                   <div
                     className={`
@@ -1392,9 +1344,6 @@ export default function BookingKonselingPage() {
                     </p>
                   </div>
 
-                  {/* =========================================
-                      RINGKASAN
-                  ========================================= */}
                   <div
                     className={`
                       theme-card
@@ -1463,9 +1412,6 @@ export default function BookingKonselingPage() {
           </section>
         )}
 
-        {/* =================================================
-            RIWAYAT TAB
-        ================================================= */}
         {activeTab === "riwayat" && (
           <section>
             <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
@@ -1509,7 +1455,6 @@ export default function BookingKonselingPage() {
               </button>
             </div>
 
-            {/* Filter toolbar: grid responsif dengan 2xl:grid-cols-6 */}
             <div
               className={`
                 theme-card
@@ -1733,7 +1678,6 @@ export default function BookingKonselingPage() {
                 )}
               </div>
             ) : (
-              /* overflow-x-auto agar riwayat tidak merusak layout di layar kecil */
               <div className="space-y-4 overflow-x-auto">
                 <div className="min-w-[560px] space-y-4">
                   {filteredHistory.map((sesi) => (
@@ -1749,9 +1693,6 @@ export default function BookingKonselingPage() {
   );
 }
 
-/* =========================================================
-   SUMMARY ROW
-========================================================= */
 
 function SummaryRow({ icon: Icon, label, value }) {
   return (
@@ -1777,9 +1718,6 @@ function SummaryRow({ icon: Icon, label, value }) {
   );
 }
 
-/* =========================================================
-   HISTORY CARD
-========================================================= */
 
 function HistoryCard({ sesi }) {
   const config = getStatusConfig(sesi.status);
@@ -1942,9 +1880,6 @@ function HistoryCard({ sesi }) {
   );
 }
 
-/* =========================================================
-   DETAIL BLOCK
-========================================================= */
 
 function DetailBlock({ title, value }) {
   return (

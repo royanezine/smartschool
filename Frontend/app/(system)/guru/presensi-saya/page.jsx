@@ -131,7 +131,6 @@ const formatTime = (value) => {
 };
 
 const getRecordDate = (record) => {
-  // waktuMasuk adalah timestamp presensi aktual.
   if (record?.waktuMasuk) {
     const date = new Date(record.waktuMasuk);
 
@@ -141,7 +140,6 @@ const getRecordDate = (record) => {
     }
   }
 
-  // tanggal merupakan tanggal kalender dari record Backend.
   if (
     typeof record?.tanggal === "string" &&
     /^\d{4}-\d{2}-\d{2}/.test(record.tanggal)
@@ -332,14 +330,11 @@ const getCurrentLocation = () =>
   });
 
 const normalizeAttendanceResponse = (response) => {
-  // Bentuk respons langsung berupa array.
   if (Array.isArray(response)) return response;
 
-  // Bentuk respons yang umum digunakan service.
   if (Array.isArray(response?.data)) return response.data;
   if (Array.isArray(response?.items)) return response.items;
 
-  // Bentuk successResponse/paginatedResponse bertingkat.
   if (Array.isArray(response?.data?.data)) {
     return response.data.data;
   }
@@ -394,7 +389,6 @@ export default function AbsensiGuruPage() {
     return () => clearInterval(intervalId);
   }, []);
 
-  /* RIWAYAT DARI BACKEND */
 
   const fetchHistory = useCallback(
     async (showLoading = true) => {
@@ -403,7 +397,6 @@ export default function AbsensiGuruPage() {
 
         setError("");
 
-        // Gunakan fungsi service yang sudah tersedia.
         const response = await getRiwayatShiftSaya(1, 100);
         const data = normalizeAttendanceResponse(response);
 
@@ -471,7 +464,6 @@ export default function AbsensiGuruPage() {
     };
   }, [fetchHistory]);
 
-  /* PRESENSI HARI INI */
 
   const todayRecords = useMemo(
     () =>
@@ -492,7 +484,6 @@ export default function AbsensiGuruPage() {
   const canCheckIn = !hasCheckedIn;
   const canCheckOut = hasCheckedIn && !hasCheckedOut;
 
-  /* STATISTIK */
 
   const summary = useMemo(() => {
     const hadir = records.filter((record) => {
@@ -529,7 +520,6 @@ export default function AbsensiGuruPage() {
     };
   }, [records]);
 
-  /* PAYLOAD CHECK-IN */
 
   const getMethodPayload = async () => {
     const payload = {
@@ -550,7 +540,6 @@ export default function AbsensiGuruPage() {
     return payload;
   };
 
-  /* CHECK-IN */
 
   const handleCheckIn = async () => {
     if (submitting || loading || !canCheckIn) return;
@@ -594,7 +583,6 @@ export default function AbsensiGuruPage() {
     }
   };
 
-  /* CHECK-OUT */
 
   const handleCheckOut = async () => {
     if (submitting || loading || !canCheckOut) return;
@@ -633,7 +621,6 @@ export default function AbsensiGuruPage() {
     }
   };
 
-  /* PAGINATION */
 
   const totalPages = Math.max(
     1,
@@ -670,7 +657,6 @@ export default function AbsensiGuruPage() {
     (item) => item.value === selectedMethod
   );
 
-  /* TAMPILAN */
 
   return (
     <div className="flex h-screen w-full theme-page overflow-hidden">
@@ -697,7 +683,6 @@ export default function AbsensiGuruPage() {
         <main className="flex-1 overflow-y-auto">
           <div className="w-full p-4 md:p-6 lg:p-8">
             <div className="max-w-[1500px] mx-auto space-y-6">
-              {/* HEADER */}
 
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div className="flex items-center gap-3">
@@ -731,7 +716,6 @@ export default function AbsensiGuruPage() {
                 </button>
               </div>
 
-              {/* TANGGAL */}
 
               <div className="theme-card border theme-border rounded-xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div className="flex items-center gap-3">
@@ -758,7 +742,6 @@ export default function AbsensiGuruPage() {
                 </span>
               </div>
 
-              {/* PESAN ERROR */}
 
               {error && (
                 <div className="flex items-start gap-3 p-4 rounded-xl border theme-danger">
@@ -788,7 +771,6 @@ export default function AbsensiGuruPage() {
                 </div>
               )}
 
-              {/* PESAN SUKSES */}
 
               {notice && (
                 <div className="flex items-start gap-3 p-4 rounded-xl border theme-success">
@@ -800,7 +782,6 @@ export default function AbsensiGuruPage() {
                 </div>
               )}
 
-              {/* PRESENSI DAN SHIFT */}
 
               <section className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                 <div className="theme-card border theme-border rounded-xl p-5 lg:col-span-2">
@@ -848,7 +829,6 @@ export default function AbsensiGuruPage() {
                     </div>
                   </div>
 
-                  {/* PILIH METODE */}
 
                   <div className="mt-6">
                     <p className="text-sm font-semibold theme-text">
@@ -918,7 +898,6 @@ export default function AbsensiGuruPage() {
                       })}
                     </div>
 
-                    {/* KETERANGAN */}
 
                     <div className="mt-4">
                       <label
@@ -960,7 +939,6 @@ export default function AbsensiGuruPage() {
                     </div>
                   </div>
 
-                  {/* TOMBOL CHECK-IN DAN CHECK-OUT */}
 
                   <div className="mt-5 flex flex-col sm:flex-row gap-3">
                     <button
@@ -1013,7 +991,6 @@ export default function AbsensiGuruPage() {
                   </div>
                 </div>
 
-                {/* INFORMASI SHIFT */}
 
                 <div className="theme-card border theme-border rounded-xl p-5">
                   <div className="flex items-start justify-between gap-3">
@@ -1076,7 +1053,6 @@ export default function AbsensiGuruPage() {
                 </div>
               </section>
 
-              {/* STATISTIK */}
 
               <section className="grid grid-cols-2 xl:grid-cols-4 gap-3">
                 <div className="theme-card border theme-border rounded-xl p-4">
@@ -1142,7 +1118,6 @@ export default function AbsensiGuruPage() {
                 </div>
               </section>
 
-              {/* TABEL RIWAYAT */}
 
               <section className="theme-card border theme-border rounded-xl overflow-hidden">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-5 border-b theme-border">
@@ -1337,7 +1312,6 @@ export default function AbsensiGuruPage() {
                 )}
               </section>
 
-              {/* INFORMASI */}
 
               <div className="flex items-start gap-3 p-4 rounded-xl border theme-border theme-card">
                 <ShieldCheck

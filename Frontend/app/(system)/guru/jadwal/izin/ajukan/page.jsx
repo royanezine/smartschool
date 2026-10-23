@@ -57,9 +57,6 @@ export default function AjukanIzinPage() {
 
   const [notifications] = useState([]);
 
-  /* ============================================================
-     THEME
-  ============================================================ */
 
   const themePrimary =
     "bg-[var(--color-primary)] text-white hover:opacity-90";
@@ -82,9 +79,6 @@ export default function AjukanIzinPage() {
   const themeInput =
     "border-[var(--color-border)] bg-[var(--color-card)] text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]";
 
-  /* ============================================================
-     HANDLE CHANGE
-  ============================================================ */
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -102,9 +96,6 @@ export default function AjukanIzinPage() {
     setSubmitError("");
   };
 
-  /* ============================================================
-     HANDLE FILE
-  ============================================================ */
 
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
@@ -146,9 +137,6 @@ export default function AjukanIzinPage() {
     }));
   };
 
-  /* ============================================================
-     REMOVE FILE
-  ============================================================ */
 
   const handleRemoveFile = () => {
     setForm((prev) => ({
@@ -162,9 +150,6 @@ export default function AjukanIzinPage() {
     }));
   };
 
-  /* ============================================================
-     VALIDATION
-  ============================================================ */
 
   const validate = () => {
     const newErrors = {};
@@ -199,9 +184,6 @@ export default function AjukanIzinPage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  /* ============================================================
-     SUBMIT
-  ============================================================ */
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -243,9 +225,6 @@ export default function AjukanIzinPage() {
     }
   };
 
-  /* ============================================================
-     FORMAT FILE SIZE
-  ============================================================ */
 
   const formatFileSize = (bytes) => {
     if (!bytes) {
@@ -259,15 +238,9 @@ export default function AjukanIzinPage() {
     return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
   };
 
-  /* ============================================================
-     RENDER
-  ============================================================ */
 
   return (
     <div className="flex h-screen overflow-hidden bg-[var(--color-background)]">
-      {/* ========================================================
-          SIDEBAR
-      ======================================================== */}
 
       <Sidebar
         isOpen={sidebarOpen}
@@ -275,14 +248,8 @@ export default function AjukanIzinPage() {
         role="guru"
       />
 
-      {/* ========================================================
-          CONTENT AREA
-      ======================================================== */}
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        {/* ======================================================
-            HEADER
-        ====================================================== */}
 
         <Header
           sidebarOpen={sidebarOpen}
@@ -294,16 +261,10 @@ export default function AjukanIzinPage() {
           }}
         />
 
-        {/* ======================================================
-            MAIN
-        ====================================================== */}
 
         <main className="flex-1 overflow-y-auto bg-[var(--color-background)]">
           <div className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
 
-            {/* ==================================================
-                HEADER PAGE
-            ================================================== */}
 
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-start gap-3">
@@ -343,9 +304,6 @@ export default function AjukanIzinPage() {
               </div>
             </div>
 
-            {/* ==================================================
-                SUCCESS
-            ================================================== */}
 
             {success && (
               <div className="mb-5 flex items-start gap-3 rounded-xl border border-[color-mix(in_srgb,var(--color-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)] p-4">
@@ -369,9 +327,6 @@ export default function AjukanIzinPage() {
               </div>
             )}
 
-            {/* ==================================================
-                ERROR
-            ================================================== */}
 
             {submitError && (
               <div className="mb-5 flex items-start gap-3 rounded-xl border border-[color-mix(in_srgb,var(--color-danger)_30%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_8%,transparent)] p-4">
@@ -394,16 +349,10 @@ export default function AjukanIzinPage() {
               </div>
             )}
 
-            {/* ==================================================
-                FORM CARD
-            ================================================== */}
 
             <form onSubmit={handleSubmit}>
               <div className={`overflow-hidden rounded-2xl shadow-sm ${themeCard}`}>
 
-                {/* ==================================================
-                    CARD HEADER
-                ================================================== */}
 
                 <div className="border-b border-[var(--color-border)] px-5 py-5 sm:px-6">
                   <div className="flex items-center gap-3">
@@ -429,15 +378,9 @@ export default function AjukanIzinPage() {
                   </div>
                 </div>
 
-                {/* ==================================================
-                    FORM BODY
-                ================================================== */}
 
                 <div className="space-y-6 px-5 py-6 sm:px-6">
 
-                  {/* ==================================================
-                      JENIS IZIN
-                  ================================================== */}
 
                   <div>
                     <label
@@ -476,13 +419,9 @@ export default function AjukanIzinPage() {
                     )}
                   </div>
 
-                  {/* ==================================================
-                      DATE
-                  ================================================== */}
 
                   <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
 
-                    {/* TANGGAL MULAI */}
 
                     <div>
                       <label
@@ -518,7 +457,6 @@ export default function AjukanIzinPage() {
                       )}
                     </div>
 
-                    {/* TANGGAL SELESAI */}
 
                     <div>
                       <label
@@ -555,9 +493,6 @@ export default function AjukanIzinPage() {
                     </div>
                   </div>
 
-                  {/* ==================================================
-                      ALASAN
-                  ================================================== */}
 
                   <div>
                     <label
@@ -597,9 +532,6 @@ export default function AjukanIzinPage() {
                     </div>
                   </div>
 
-                  {/* ==================================================
-                      BUKTI
-                  ================================================== */}
 
                   <div>
                     <label
@@ -690,9 +622,6 @@ export default function AjukanIzinPage() {
                     )}
                   </div>
 
-                  {/* ==================================================
-                      INFO
-                  ================================================== */}
 
                   <div
                     className={`rounded-xl border p-4 ${themePrimarySoft} border-[color-mix(in_srgb,var(--color-primary)_18%,var(--color-border))]`}
@@ -722,9 +651,6 @@ export default function AjukanIzinPage() {
                   </div>
                 </div>
 
-                {/* ==================================================
-                    FOOTER BUTTON
-                ================================================== */}
 
                 <div className="flex flex-col-reverse gap-3 border-t border-[var(--color-border)] px-5 py-5 sm:flex-row sm:justify-end sm:px-6">
                   <button

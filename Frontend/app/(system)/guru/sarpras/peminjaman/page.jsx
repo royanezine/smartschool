@@ -30,9 +30,6 @@ import {
 
 import { getDaftarPeminjaman } from "@/services/sarpras.service";
 
-// =========================================================
-// THEME HELPERS
-// =========================================================
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -94,9 +91,6 @@ const themeDangerBorder =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-// =========================================================
-// STATUS FILTER
-// =========================================================
 
 const STATUS_FILTER = [
   { label: "Semua", value: "" },
@@ -106,9 +100,6 @@ const STATUS_FILTER = [
   { label: "Ditolak", value: "ditolak" },
 ];
 
-// =========================================================
-// STATUS CONFIG
-// =========================================================
 
 const statusConfig = {
   menunggu_persetujuan: {
@@ -157,9 +148,6 @@ const statusConfig = {
   },
 };
 
-// =========================================================
-// HELPERS
-// =========================================================
 
 function getPaginationData(response) {
   const root = response?.data ?? response ?? {};
@@ -292,9 +280,6 @@ function getAssetIcon(nama = "") {
   return Wrench;
 }
 
-// =========================================================
-// ASSET THEME
-// =========================================================
 
 function getAssetTheme(nama = "") {
   const value = nama.toLowerCase();
@@ -362,9 +347,6 @@ function getAssetTheme(nama = "") {
   };
 }
 
-// =========================================================
-// PAGE
-// =========================================================
 
 export default function GuruSarprasPeminjamanPage() {
   const router = useRouter();
@@ -450,8 +432,11 @@ export default function GuruSarprasPeminjamanPage() {
   };
 
   useEffect(() => {
-    loadPeminjaman();
+    const timer = setTimeout(() => {
+      loadPeminjaman();
+    }, 0);
 
+    return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     page,
@@ -490,7 +475,6 @@ export default function GuruSarprasPeminjamanPage() {
 
   return (
     <div className="theme-page flex h-screen overflow-hidden">
-      {/* SIDEBAR */}
 
       <Sidebar
         active="sarpras"
@@ -504,7 +488,6 @@ export default function GuruSarprasPeminjamanPage() {
       />
 
       <div className="flex min-w-0 flex-1 flex-col">
-        {/* HEADER */}
 
         <Header
           toggleSidebar={() =>
@@ -521,7 +504,6 @@ export default function GuruSarprasPeminjamanPage() {
         />
 
         <main className="theme-page relative flex-1 overflow-y-auto">
-          {/* DECORATION */}
 
           <div
             aria-hidden="true"
@@ -534,9 +516,6 @@ export default function GuruSarprasPeminjamanPage() {
 
           <div className="relative mx-auto w-full max-w-[1700px] space-y-6 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
 
-            {/* =================================================
-                PAGE HEADER
-            ================================================= */}
 
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div className="flex min-w-0 items-start gap-4">
@@ -577,7 +556,6 @@ export default function GuruSarprasPeminjamanPage() {
                 </div>
               </div>
 
-              {/* REFRESH */}
 
               <button
                 type="button"
@@ -598,9 +576,6 @@ export default function GuruSarprasPeminjamanPage() {
               </button>
             </div>
 
-            {/* =================================================
-                SEARCH + FILTER
-            ================================================= */}
 
             <div
               className={`theme-card ${themeNeutralBorder} ${themeCardShadow} space-y-3 rounded-2xl border p-4`}
@@ -624,7 +599,6 @@ export default function GuruSarprasPeminjamanPage() {
                 />
               </div>
 
-              {/* FILTER */}
 
               <div className="flex gap-2 overflow-x-auto pb-1">
                 {STATUS_FILTER.map(
@@ -663,7 +637,7 @@ export default function GuruSarprasPeminjamanPage() {
                                 : `${themeNeutralSurface} theme-text-muted`
                             }`}
                           >
-                            {jumlahData}
+                            {error ? "—" : jumlahData}
                           </span>
                         )}
                       </button>
@@ -673,9 +647,6 @@ export default function GuruSarprasPeminjamanPage() {
               </div>
             </div>
 
-            {/* =================================================
-                ERROR
-            ================================================= */}
 
             {error && (
               <div
@@ -699,9 +670,6 @@ export default function GuruSarprasPeminjamanPage() {
               </div>
             )}
 
-            {/* =================================================
-                LOADING
-            ================================================= */}
 
             {loading && (
               <div
@@ -718,11 +686,39 @@ export default function GuruSarprasPeminjamanPage() {
               </div>
             )}
 
-            {/* =================================================
-                LIST
-            ================================================= */}
 
-            {!loading && (
+            {!loading && error && (
+              <div
+                className={`theme-card ${themeNeutralBorder} ${themeCardShadow} rounded-2xl border p-10 text-center`}
+              >
+                <div
+                  className={`mx-auto flex h-14 w-14 items-center justify-center rounded-2xl ${themeDangerSurface} ${themeDangerBorder} border text-[var(--color-danger,#ef4444)]`}
+                >
+                  <AlertTriangle size={24} />
+                </div>
+
+                <p className="theme-text mt-4 text-base font-bold">
+                  Gagal Memuat Data Peminjaman
+                </p>
+
+                <p className="theme-text-muted mx-auto mt-2 max-w-md text-xs leading-5">
+                  {error}
+                </p>
+
+                <div className="mt-5 flex justify-center">
+                  <button
+                    type="button"
+                    onClick={handleRefresh}
+                    className="theme-primary inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold text-white transition hover:opacity-90"
+                  >
+                    <RefreshCw size={14} />
+                    Coba Lagi
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {!loading && !error && (
               <div className="space-y-3">
                 {daftarPengajuan.map(
                   (peminjaman) => {
@@ -785,7 +781,6 @@ export default function GuruSarprasPeminjamanPage() {
                       >
                         <div className="flex items-center gap-3 p-4 sm:p-5">
 
-                          {/* ASSET ICON */}
 
                           <div
                             className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl border ${assetTheme.border || themePrimarySoftBorder} ${assetTheme.surface} ${assetTheme.icon || "text-[var(--color-card)]"} ${assetTheme.shadow || ""}`}
@@ -793,7 +788,6 @@ export default function GuruSarprasPeminjamanPage() {
                             <ItemIcon size={18} />
                           </div>
 
-                          {/* INFO */}
 
                           <div className="min-w-0 flex-1">
                             <div className="flex flex-wrap items-center gap-2">
@@ -836,7 +830,6 @@ export default function GuruSarprasPeminjamanPage() {
                             </div>
                           </div>
 
-                          {/* STATUS */}
 
                           <span
                             className={`inline-flex flex-shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold ${status.pill}`}
@@ -848,7 +841,6 @@ export default function GuruSarprasPeminjamanPage() {
                             {status.label}
                           </span>
 
-                          {/* ARROW */}
 
                           <ChevronRight
                             size={16}
@@ -860,7 +852,6 @@ export default function GuruSarprasPeminjamanPage() {
                   }
                 )}
 
-                {/* EMPTY */}
 
                 {daftarPengajuan.length ===
                   0 && (
@@ -891,9 +882,6 @@ export default function GuruSarprasPeminjamanPage() {
               </div>
             )}
 
-            {/* =================================================
-                PAGINATION
-            ================================================= */}
 
             {!loading &&
               totalPages > 1 && (

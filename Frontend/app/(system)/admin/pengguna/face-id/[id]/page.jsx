@@ -11,9 +11,6 @@ import {
 } from "lucide-react";
 import { apiFetch } from "../../../../../../lib/api";
 
-// =========================================================
-// THEME
-// =========================================================
 const themePrimarySoft = "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]";
 const themePrimarySoftBorder = "border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)]";
 const themePrimaryHover = "hover:bg-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]";
@@ -21,9 +18,6 @@ const themeTextHover = "hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transpa
 const themeCardShadow = "shadow-[0_6px_24px_color-mix(in_srgb,var(--color-text)_6%,transparent)]";
 const themePrimaryShadow = "shadow-[0_10px_25px_color-mix(in_srgb,var(--color-primary)_20%,transparent)]";
 
-// =========================================================
-// BACKEND URL HELPER
-// =========================================================
 function getBackendBaseUrl() {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
   return apiUrl.trim().replace(/\/api\/v1\/?$/i, "").replace(/\/api\/?$/i, "").replace(/\/+$/, "");
@@ -55,9 +49,6 @@ function getBackendFileUrl(filePath) {
   return `${backendBase}${value}`;
 }
 
-// =========================================================
-// HELPER DATA FOTO
-// =========================================================
 function getFacePhotoPath(data) {
   const user = data?.user || data?.data?.user || data?.data || data || {};
   const biometric = user?.biometrikWajah || data?.biometrikWajah || data?.data?.biometrikWajah || null;
@@ -76,9 +67,6 @@ function getFacePhotoPath(data) {
   return candidates.find((item) => typeof item === "string" && item.trim()) || "";
 }
 
-// =========================================================
-// ROLE & AVATAR
-// =========================================================
 const roleConfig = {
   Guru: { bg: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]", text: "text-[var(--color-primary)]", border: "border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]" },
   Siswa: { bg: "bg-[color-mix(in_srgb,var(--color-info)_10%,transparent)]", text: "text-[var(--color-info)]", border: "border-[color-mix(in_srgb,var(--color-info)_20%,transparent)]" },
@@ -102,9 +90,6 @@ function getInitials(name) {
   return (words[0][0] + words[1][0]).toUpperCase();
 }
 
-// =========================================================
-// FORMAT DATE
-// =========================================================
 function formatDate(value) {
   if (!value) return "—";
   const date = new Date(value);
@@ -119,9 +104,6 @@ function formatDateTime(value) {
   return date.toLocaleString("id-ID", { day: "2-digit", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" });
 }
 
-// =========================================================
-// UI COMPONENTS
-// =========================================================
 function RoleBadge({ role }) {
   const config = roleConfig[role] || roleConfig.Staff;
   return (
@@ -222,9 +204,6 @@ function FacePhoto({ filePath, registered }) {
   );
 }
 
-// =========================================================
-// PAGE
-// =========================================================
 export default function FaceIdDetailPage() {
   const router = useRouter();
   const params = useParams();
@@ -317,9 +296,6 @@ export default function FaceIdDetailPage() {
 
   function toggleSidebar() { setIsCollapsed((prev) => !prev); }
 
-  // ============================
-  // LOADING STATE
-  // ============================
   if (isLoading) {
     return (
       <div className="theme-page flex h-screen w-full overflow-hidden">
@@ -339,9 +315,6 @@ export default function FaceIdDetailPage() {
     );
   }
 
-  // ============================
-  // ERROR STATE
-  // ============================
   if (error || !user) {
     return (
       <div className="theme-page flex h-screen w-full overflow-hidden">
@@ -369,20 +342,15 @@ export default function FaceIdDetailPage() {
 
   const registered = user.faceStatus === "Terdaftar";
 
-  // ============================
-  // MAIN RENDER
-  // ============================
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
       <Sidebar active="faceId" setActive={() => {}} collapsed={isCollapsed} setCollapsed={setIsCollapsed} role="admin" />
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-        {/* Header sticky di atas, tidak ikut scroll */}
         <div className="shrink-0 sticky top-0 z-40">
           <Header toggleSidebar={toggleSidebar} notifications={[]} user={headerUser} />
         </div>
 
-        {/* Hanya area ini yang scroll */}
         <main className="min-h-0 min-w-0 flex-1 overflow-y-auto">
           <div className="w-full px-4 py-5 sm:px-6 lg:px-8 xl:px-10 2xl:px-12">
             <button type="button" onClick={() => router.push("/admin/pengguna/face-id")} className="theme-text-secondary mb-5 inline-flex items-center gap-2 text-sm font-medium transition hover:text-[var(--color-primary)]">
@@ -413,7 +381,6 @@ export default function FaceIdDetailPage() {
               </div>
             </div>
 
-            {/* PROFIL */}
             <section className={`theme-card ${themeCardShadow} mb-5 overflow-hidden rounded-2xl border`}>
               <div className="theme-card-soft border-b px-5 py-4 sm:px-6">
                 <p className="theme-text-muted text-xs font-semibold uppercase tracking-wider">Profil Pengguna</p>
@@ -440,7 +407,6 @@ export default function FaceIdDetailPage() {
               </div>
             </section>
 
-            {/* FACE ID */}
             <section className={`theme-card ${themeCardShadow} mb-5 rounded-2xl border`}>
               <div className="theme-border-soft border-b px-5 py-4 sm:px-6">
                 <div className="flex items-center gap-2">
@@ -488,7 +454,6 @@ export default function FaceIdDetailPage() {
               </div>
             </section>
 
-            {/* AKUN */}
             <section className={`theme-card ${themeCardShadow} mb-5 rounded-2xl border`}>
               <div className="theme-border-soft border-b px-5 py-4 sm:px-6">
                 <div className="flex items-center gap-2">

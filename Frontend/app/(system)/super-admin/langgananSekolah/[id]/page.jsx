@@ -18,9 +18,6 @@ import {
 } from "lucide-react";
 import { dummyLangganan } from "../../../../../lib/data";
 
-// ============================================================
-// THEME HELPERS
-// ============================================================
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -97,9 +94,6 @@ const themeTextSecondary =
 const themeTextMuted =
   "theme-text-muted";
 
-// ============================================================
-// PAGE
-// ============================================================
 
 export default function DetailLanggananPage() {
   const params = useParams();
@@ -111,9 +105,6 @@ export default function DetailLanggananPage() {
     (item) => item.id === id
   );
 
-  // ============================================================
-  // DATA NOT FOUND
-  // ============================================================
 
   if (!langganan) {
     return (
@@ -149,9 +140,6 @@ export default function DetailLanggananPage() {
     );
   }
 
-  // ============================================================
-  // STATUS STYLE
-  // ============================================================
 
   const statusLanggananStyleMap = {
     aktif: {
@@ -215,9 +203,6 @@ export default function DetailLanggananPage() {
   const StatusIcon =
     statusStyle.icon || CheckCircle;
 
-  // ============================================================
-  // FORMATTERS
-  // ============================================================
 
   const formatTanggal = (dateString) => {
     if (!dateString) return "-";
@@ -261,9 +246,6 @@ export default function DetailLanggananPage() {
     return map[status] || status;
   };
 
-  // ============================================================
-  // SISA HARI
-  // ============================================================
 
   const sisaHari = Math.ceil(
     (new Date(langganan.tanggalBerakhir) -
@@ -271,16 +253,10 @@ export default function DetailLanggananPage() {
       (1000 * 60 * 60 * 24)
   );
 
-  // ============================================================
-  // RENDER
-  // ============================================================
 
   return (
     <div className="theme-page theme-text min-h-full">
       <div className="mx-auto w-full max-w-[1400px] space-y-5 px-4 py-5 sm:space-y-6 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
-        {/* ================================================== */}
-        {/* KEMBALI */}
-        {/* ================================================== */}
 
         <button
           type="button"
@@ -295,9 +271,6 @@ export default function DetailLanggananPage() {
           Kembali
         </button>
 
-        {/* ================================================== */}
-        {/* HEADER DETAIL */}
-        {/* ================================================== */}
 
         <section
           className={`overflow-hidden rounded-2xl border ${themeBorder} ${themeCard} ${themeCardShadow}`}
@@ -305,14 +278,12 @@ export default function DetailLanggananPage() {
           <div className="p-4 sm:p-6">
             <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex min-w-0 items-center gap-4">
-                {/* Logo */}
                 <div
                   className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-xl ${themeNeutralSurface} text-3xl ${themeSmallShadow}`}
                 >
                   {langganan.sekolah.logo}
                 </div>
 
-                {/* School */}
                 <div className="min-w-0">
                   <h1
                     className={`truncate text-xl font-semibold sm:text-2xl ${themeText}`}
@@ -328,7 +299,6 @@ export default function DetailLanggananPage() {
                 </div>
               </div>
 
-              {/* Status */}
               <div className="flex flex-wrap items-center gap-2">
                 <span
                   className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium ${statusStyle.surface} ${statusStyle.text} ${statusStyle.border}`}
@@ -356,7 +326,6 @@ export default function DetailLanggananPage() {
               </div>
             </div>
 
-            {/* Metadata */}
             <div className="mt-4 flex flex-wrap items-center gap-3 text-sm">
               <span className={themeTextSecondary}>
                 Paket:{" "}
@@ -394,14 +363,8 @@ export default function DetailLanggananPage() {
           </div>
         </section>
 
-        {/* ================================================== */}
-        {/* GRID INFORMASI */}
-        {/* ================================================== */}
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          {/* ================================================== */}
-          {/* INFORMASI SEKOLAH */}
-          {/* ================================================== */}
 
           <section
             className={`rounded-2xl border ${themeBorder} ${themeCard} p-4 ${themeCardShadow}`}
@@ -446,9 +409,6 @@ export default function DetailLanggananPage() {
             </div>
           </section>
 
-          {/* ================================================== */}
-          {/* DETAIL PAKET */}
-          {/* ================================================== */}
 
           <section
             className={`rounded-2xl border ${themeBorder} ${themeCard} p-4 ${themeCardShadow}`}
@@ -554,9 +514,6 @@ export default function DetailLanggananPage() {
           </section>
         </div>
 
-        {/* ================================================== */}
-        {/* FITUR AKTIF */}
-        {/* ================================================== */}
 
         <section
           className={`rounded-2xl border ${themeBorder} ${themeCard} p-4 ${themeCardShadow}`}
@@ -590,9 +547,6 @@ export default function DetailLanggananPage() {
           </div>
         </section>
 
-        {/* ================================================== */}
-        {/* RIWAYAT PEMBAYARAN */}
-        {/* ================================================== */}
 
         <section
           className={`rounded-2xl border ${themeBorder} ${themeCard} p-4 ${themeCardShadow}`}
@@ -702,9 +656,6 @@ export default function DetailLanggananPage() {
           )}
         </section>
 
-        {/* ================================================== */}
-        {/* ACTION BUTTONS */}
-        {/* ================================================== */}
 
         <div
           className={`flex flex-col items-center justify-end gap-3 border-t ${themeDivider} pt-5 sm:flex-row`}
@@ -748,9 +699,6 @@ export default function DetailLanggananPage() {
   );
 }
 
-// ============================================================
-// SECTION TITLE
-// ============================================================
 
 function SectionTitle({
   icon: Icon,
@@ -806,9 +754,6 @@ function SectionTitle({
   );
 }
 
-// ============================================================
-// INFO ROW
-// ============================================================
 
 function InfoRow({
   icon: Icon,
@@ -828,9 +773,6 @@ function InfoRow({
   );
 }
 
-// ============================================================
-// PAYMENT STATUS
-// ============================================================
 
 function PaymentStatusBadge({ status }) {
   const normalized = String(

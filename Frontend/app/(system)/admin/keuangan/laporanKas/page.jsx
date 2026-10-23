@@ -27,7 +27,6 @@ const rupiah = (value) =>
     maximumFractionDigits: 0,
   }).format(Number(value) || 0);
 
-/* Format angka tanpa simbol untuk CSV */
 const rupiahPlain = (value) => Number(value) || 0;
 
 function tanggalHariIni() {
@@ -174,9 +173,6 @@ export default function LaporanKasPage() {
     setError("");
   };
 
-  /* =========================================================
-     EXPORT CSV
-  ========================================================= */
 
   const handleExport = () => {
     if (!laporan && perKategori.length === 0) {
@@ -191,7 +187,6 @@ export default function LaporanKasPage() {
       ? akunTerpilih.nama || akunTerpilih.kode
       : "Semua Akun Kas";
 
-    // ===== Bagian 1: Header & Ringkasan =====
     const summaryRows = [
       ["LAPORAN KAS SEKOLAH"],
       ["Periode", `${dari} s.d. ${sampai}`],
@@ -207,7 +202,6 @@ export default function LaporanKasPage() {
       [],
     ];
 
-    // ===== Bagian 2: Rincian per Kategori =====
     const kategoriHeaders = [
       "No",
       "Kategori",
@@ -229,7 +223,6 @@ export default function LaporanKasPage() {
       ];
     });
 
-    // ===== Gabungkan =====
     const csvLines = [
       ...summaryRows.map((row) => row.map(escapeCsv).join(",")),
       kategoriHeaders.map(escapeCsv).join(","),
@@ -258,9 +251,6 @@ export default function LaporanKasPage() {
     URL.revokeObjectURL(url);
   };
 
-  /* =========================================================
-     PRINT
-  ========================================================= */
 
   const handlePrint = () => {
     window.print();
@@ -289,13 +279,9 @@ export default function LaporanKasPage() {
         />
 
         <main className="theme-page min-h-0 flex-1 overflow-y-auto">
-          {/* Konten w-full: melebar saat zoom out */}
           <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
             <div className="w-full space-y-6">
 
-              {/* =================================================
-                  HEADER PAGE
-              ================================================= */}
 
               <section className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
                 <div>
@@ -349,9 +335,6 @@ export default function LaporanKasPage() {
                 </div>
               </section>
 
-              {/* =================================================
-                  ERROR
-              ================================================= */}
 
               {error && (
                 <div className="flex items-start gap-3 rounded-xl border border-[color-mix(in_srgb,var(--color-danger)_28%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_6%,transparent)] p-4 text-sm">
@@ -370,9 +353,6 @@ export default function LaporanKasPage() {
                 </div>
               )}
 
-              {/* =================================================
-                  FILTER
-              ================================================= */}
 
               <section className="theme-card overflow-hidden rounded-2xl border shadow-sm print:hidden">
                 <div className="theme-border flex items-center gap-2 border-b px-5 py-4">
@@ -506,9 +486,6 @@ export default function LaporanKasPage() {
                 </form>
               </section>
 
-              {/* =================================================
-                  STAT CARDS
-              ================================================= */}
 
               <section className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-6">
                 <MetricCard
@@ -560,9 +537,6 @@ export default function LaporanKasPage() {
                 />
               </section>
 
-              {/* =================================================
-                  TABEL PER KATEGORI
-              ================================================= */}
 
               <section className="theme-card overflow-hidden rounded-2xl border shadow-sm">
                 <div className="theme-border flex flex-col gap-3 border-b px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
@@ -589,7 +563,6 @@ export default function LaporanKasPage() {
                   </span>
                 </div>
 
-                {/* overflow-x-auto agar tabel tidak merusak layout di layar kecil */}
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[640px] text-left text-sm">
                     <thead className="theme-table-header">
@@ -718,9 +691,6 @@ export default function LaporanKasPage() {
   );
 }
 
-/* =========================================================
-   METRIC CARD
-========================================================= */
 
 function MetricCard({
   title,

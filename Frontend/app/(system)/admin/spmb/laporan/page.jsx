@@ -7,18 +7,14 @@ export default function LaporanSpmbPage() {
       description="Rekap dan ekspor data pendaftaran, verifikasi, serta hasil seleksi."
       blockers={[
         {
-          label: "GET /api/ppdb/pendaftar",
-          detail:
-            "Sumber data untuk rekap per jalur, per status, dan per sekolah belum tersedia.",
-        },
-        {
           label: "GET /api/ppdb/laporan",
           detail:
             "Endpoint laporan/agregat khusus belum tersedia di Backend.",
         },
       ]}
       notes={[
-        "Tombol ekspor CSV/Excel tidak diaktifkan karena tidak ada data nyata yang dapat diekspor.",
+        "Endpoint baca daftar pendaftar (GET /api/ppdb/pendaftar) maupun endpoint agregat laporan belum tersedia di Backend.",
+        "Halaman laporan khusus ini belum diaktifkan karena sumber datanya belum ada.",
         "Data contoh pada halaman laporan sudah dihapus.",
       ]}
     />

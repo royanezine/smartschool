@@ -28,9 +28,6 @@ import {
   XCircle,
 } from "lucide-react";
 
-// ============================================================
-// THEME HELPERS (sama persis dengan halaman list agar konsisten)
-// ============================================================
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -85,9 +82,6 @@ const themeDangerSurface =
 const themeDangerBorder =
   "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
 
-// ============================================================
-// HELPERS
-// ============================================================
 
 function parseObject(response) {
   if (!response) return null;
@@ -265,9 +259,6 @@ function getScoreLabel(score) {
   return "Perlu Perbaikan";
 }
 
-// ============================================================
-// PAGE
-// ============================================================
 
 export default function DetailNilaiSiswaPage() {
   const router = useRouter();
@@ -281,7 +272,6 @@ export default function DetailNilaiSiswaPage() {
   const ujianId = searchParams.get("ujianId");
   const siswaId = searchParams.get("siswaId");
 
-  // Ambil data dari sessionStorage
   useEffect(() => {
     try {
       const raw = sessionStorage.getItem("selectedNilaiDetail");
@@ -299,7 +289,6 @@ export default function DetailNilaiSiswaPage() {
     }
   }, []);
 
-  // Fallback: fetch detail ujian kalau tidak ada sessionStorage
   useEffect(() => {
     if (data || !ujianId) return;
 
@@ -374,9 +363,6 @@ export default function DetailNilaiSiswaPage() {
     return Math.max(0, Math.round((end - start) / 60000));
   }, [waktuMulai, waktuSelesai]);
 
-  // ==========================================================
-  // LOADING
-  // ==========================================================
 
   if (loading) {
     return (
@@ -413,9 +399,6 @@ export default function DetailNilaiSiswaPage() {
     );
   }
 
-  // ==========================================================
-  // ERROR
-  // ==========================================================
 
   if (error || !siswa || !ujian) {
     return (
@@ -465,9 +448,6 @@ export default function DetailNilaiSiswaPage() {
     );
   }
 
-  // ==========================================================
-  // MAIN RENDER
-  // ==========================================================
 
   return (
     <div className="theme-page flex h-screen overflow-hidden">
@@ -485,9 +465,6 @@ export default function DetailNilaiSiswaPage() {
 
         <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
           <div className="mx-auto w-full max-w-[1200px]">
-            {/* =====================================================
-                BREADCRUMB
-            ====================================================== */}
 
             <nav className="mb-5 flex items-center gap-2 text-xs">
               <button
@@ -501,9 +478,6 @@ export default function DetailNilaiSiswaPage() {
               <span className="theme-text font-semibold">Detail Siswa</span>
             </nav>
 
-            {/* =====================================================
-                HERO / PROFILE SISWA
-            ====================================================== */}
 
             <section
               className={`relative mb-6 overflow-hidden rounded-3xl ${themePrimaryGradient} ${themePrimaryShadow}`}
@@ -557,7 +531,6 @@ export default function DetailNilaiSiswaPage() {
                     </div>
                   </div>
 
-                  {/* SCORE CARD */}
                   <div className="w-full max-w-xs rounded-2xl border border-white/15 bg-white/10 p-5 backdrop-blur-md lg:w-auto">
                     <p className="text-xs font-semibold uppercase tracking-wider text-white/70">
                       Nilai Akhir
@@ -586,9 +559,6 @@ export default function DetailNilaiSiswaPage() {
               </div>
             </section>
 
-            {/* =====================================================
-                INFO UJIAN
-            ====================================================== */}
 
             <section
               className={`theme-card mb-6 rounded-2xl border ${themeNeutralBorder} p-5 ${themeCardShadow}`}
@@ -704,13 +674,9 @@ export default function DetailNilaiSiswaPage() {
               </div>
             </section>
 
-            {/* =====================================================
-                RINGKASAN JAWABAN
-            ====================================================== */}
 
             {status !== "belum_mengerjakan" && (
               <section className="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-3">
-                {/* BENAR */}
                 <div
                   className={`theme-card rounded-2xl border ${themeNeutralBorder} p-5 ${themeCardShadow}`}
                 >
@@ -743,7 +709,6 @@ export default function DetailNilaiSiswaPage() {
                   </div>
                 </div>
 
-                {/* SALAH */}
                 <div
                   className={`theme-card rounded-2xl border ${themeNeutralBorder} p-5 ${themeCardShadow}`}
                 >
@@ -783,7 +748,6 @@ export default function DetailNilaiSiswaPage() {
                   </div>
                 </div>
 
-                {/* LEWATI */}
                 <div
                   className={`theme-card rounded-2xl border ${themeNeutralBorder} p-5 ${themeCardShadow}`}
                 >
@@ -825,9 +789,6 @@ export default function DetailNilaiSiswaPage() {
               </section>
             )}
 
-            {/* =====================================================
-                WAKTU PENGERJAAN
-            ====================================================== */}
 
             <section
               className={`theme-card mb-6 rounded-2xl border ${themeNeutralBorder} p-5 ${themeCardShadow}`}
@@ -880,9 +841,6 @@ export default function DetailNilaiSiswaPage() {
               </div>
             </section>
 
-            {/* =====================================================
-                ANALISIS NILAI
-            ====================================================== */}
 
             {status !== "belum_mengerjakan" && (
               <section
@@ -950,9 +908,6 @@ export default function DetailNilaiSiswaPage() {
               </section>
             )}
 
-            {/* =====================================================
-                HASIL TERSIMPAN
-            ====================================================== */}
 
             {(siswa.hasilAsesmen || siswa.hasilUjian || siswa.hasil) && (
               <section
@@ -977,9 +932,6 @@ export default function DetailNilaiSiswaPage() {
               </section>
             )}
 
-            {/* =====================================================
-                ACTION BUTTONS
-            ====================================================== */}
 
             <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
               <button

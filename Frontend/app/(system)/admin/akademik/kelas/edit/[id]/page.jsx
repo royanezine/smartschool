@@ -108,9 +108,6 @@ export default function AdminKelasEditPage() {
 
   const [guruList, setGuruList] = useState([]);
 
-  // Menyimpan objek wali kelas yang sedang ditugaskan (dari detail kelas),
-  // agar tetap tampil pada dropdown walau statusnya tidak aktif / tidak
-  // lagi muncul pada daftar guru aktif.
   const [waliKelasAwal, setWaliKelasAwal] = useState(null);
 
   const [jumlahSiswa, setJumlahSiswa] = useState(0);
@@ -130,13 +127,10 @@ export default function AdminKelasEditPage() {
     fotoKelasUrl: null,
   });
 
-  // Dideklarasikan sebelum useEffect agar tidak memicu peringatan
-  // react-hooks/immutability (fungsi dipakai sebelum dideklarasikan).
   async function loadGuru() {
     try {
       setLoadingGuru(true);
 
-      // Ambil data guru dari API (bukan data dummy/hardcode).
       const response = await getUsers({
         page: 1,
         limit: 200,
@@ -164,9 +158,6 @@ export default function AdminKelasEditPage() {
     }
   }
 
-  // =========================================================
-  // LOAD SEMUA DATA
-  // =========================================================
 
   useEffect(() => {
     loadTahunAjaran();
@@ -174,9 +165,6 @@ export default function AdminKelasEditPage() {
     loadGuru();
   }, []);
 
-  // =========================================================
-  // LOAD DETAIL KELAS
-  // =========================================================
 
   useEffect(() => {
     if (!id) {
@@ -402,9 +390,6 @@ export default function AdminKelasEditPage() {
     }
   }
 
-  // =========================================================
-  // HANDLE CHANGE
-  // =========================================================
 
   function handleChange(e) {
     const {
@@ -440,9 +425,6 @@ export default function AdminKelasEditPage() {
     setSuccess("");
   }
 
-  // =========================================================
-  // SUBMIT
-  // =========================================================
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -591,9 +573,6 @@ export default function AdminKelasEditPage() {
     }
   }
 
-  // =========================================================
-  // LOADING PAGE
-  // =========================================================
 
   if (pageLoading) {
     return (
@@ -650,8 +629,6 @@ export default function AdminKelasEditPage() {
         item.id === form.lantaiId
     );
 
-  // Opsi wali kelas: gabungan guru aktif dari API + wali yang sedang
-  // ditugaskan (jika tidak ada pada daftar guru aktif).
   const opsiWali = (() => {
     const list = Array.isArray(guruList)
       ? [...guruList]
@@ -707,7 +684,6 @@ export default function AdminKelasEditPage() {
           <div className="w-full px-3 py-4 sm:px-5 sm:py-5 md:px-6 lg:px-8 xl:px-10">
             <div className="mx-auto w-full max-w-[1200px]">
 
-              {/* BACK */}
 
               <div className="mb-5">
                 <button
@@ -728,7 +704,6 @@ export default function AdminKelasEditPage() {
                 </button>
               </div>
 
-              {/* HEADER */}
 
               <div className="mb-6 flex min-w-0 items-center gap-3 sm:gap-4">
                 <div className="theme-primary flex h-11 w-11 shrink-0 items-center justify-center rounded-xl shadow-md sm:h-12 sm:w-12">
@@ -747,7 +722,6 @@ export default function AdminKelasEditPage() {
                 </div>
               </div>
 
-              {/* ERROR */}
 
               {error && (
                 <div className="theme-danger mb-5 flex items-start gap-3 rounded-2xl border p-4">
@@ -777,7 +751,6 @@ export default function AdminKelasEditPage() {
                 </div>
               )}
 
-              {/* SUCCESS */}
 
               {success && (
                 <div className="theme-success mb-5 flex items-start gap-3 rounded-2xl border p-4">
@@ -797,7 +770,6 @@ export default function AdminKelasEditPage() {
                 </div>
               )}
 
-              {/* FORM */}
 
               <form
                 onSubmit={handleSubmit}
@@ -825,7 +797,6 @@ export default function AdminKelasEditPage() {
                 <div className="w-full p-4 sm:p-6 md:p-7 lg:p-8">
                   <div className="grid w-full grid-cols-1 gap-x-6 gap-y-5 md:grid-cols-2">
 
-                    {/* NAMA */}
 
                     <div className="min-w-0 md:col-span-2">
                       <label className="theme-text-secondary mb-1.5 block text-xs font-semibold">
@@ -853,7 +824,6 @@ export default function AdminKelasEditPage() {
                       </div>
                     </div>
 
-                    {/* TINGKAT */}
 
                     <div>
                       <label className="theme-text-secondary mb-1.5 block text-xs font-semibold">
@@ -899,7 +869,6 @@ export default function AdminKelasEditPage() {
                       </div>
                     </div>
 
-                    {/* TAHUN AJARAN */}
 
                     <div>
                       <label className="theme-text-secondary mb-1.5 block text-xs font-semibold">
@@ -959,7 +928,6 @@ export default function AdminKelasEditPage() {
                       </div>
                     </div>
 
-                    {/* KAPASITAS */}
 
                     <div>
                       <label className="theme-text-secondary mb-1.5 block text-xs font-semibold">
@@ -991,7 +959,6 @@ export default function AdminKelasEditPage() {
                       </div>
                     </div>
 
-                    {/* JUMLAH SISWA */}
 
                     <div>
                       <label className="theme-text-secondary mb-1.5 block text-xs font-semibold">
@@ -1013,7 +980,6 @@ export default function AdminKelasEditPage() {
                       </div>
                     </div>
 
-                    {/* WALI KELAS */}
 
                     <div className="min-w-0 md:col-span-2">
                       <label className="theme-text-secondary mb-1.5 block text-xs font-semibold">
@@ -1077,7 +1043,6 @@ export default function AdminKelasEditPage() {
                       </p>
                     </div>
 
-                    {/* GEDUNG */}
 
                     <div>
                       <label className="theme-text-secondary mb-1.5 block text-xs font-semibold">
@@ -1132,7 +1097,6 @@ export default function AdminKelasEditPage() {
                       </div>
                     </div>
 
-                    {/* LANTAI */}
 
                     <div>
                       <label className="theme-text-secondary mb-1.5 block text-xs font-semibold">
@@ -1191,7 +1155,6 @@ export default function AdminKelasEditPage() {
                     </div>
                   </div>
 
-                  {/* LOCATION PREVIEW */}
 
                   <div className="theme-info mt-6 rounded-xl border p-4">
                     <div className="flex items-start gap-3">
@@ -1223,7 +1186,6 @@ export default function AdminKelasEditPage() {
                     </div>
                   </div>
 
-                  {/* INFO */}
 
                   <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
                     <div className="theme-card-soft theme-border flex min-w-0 items-center gap-3 rounded-xl border p-4">
@@ -1285,7 +1247,6 @@ export default function AdminKelasEditPage() {
                     </div>
                   </div>
 
-                  {/* ACTION */}
 
                   <div className="theme-border-soft mt-7 flex w-full flex-col-reverse gap-3 border-t pt-6 sm:flex-row sm:items-center sm:justify-end">
                     <button

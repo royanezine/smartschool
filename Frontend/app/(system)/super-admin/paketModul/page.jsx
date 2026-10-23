@@ -43,9 +43,6 @@ import {
   updatePaket,
 } from "@/services/paket.service";
 
-/* =========================================================
-   THEME HELPERS
-========================================================= */
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -110,9 +107,6 @@ const themeHeroSoft =
 const themeHeroSoftBorder =
   "border-[color-mix(in_srgb,var(--color-card)_22%,transparent)]";
 
-/* =========================================================
-   ICON MODULE
-========================================================= */
 
 const ICON_MAP = {
   akademik: BookOpen,
@@ -125,9 +119,6 @@ const ICON_MAP = {
   inventaris: Boxes,
 };
 
-/* =========================================================
-   PACKAGE THEMES
-========================================================= */
 
 const PACKAGE_THEMES = {
   primary: {
@@ -151,9 +142,6 @@ const PACKAGE_THEMES = {
   },
 };
 
-/* =========================================================
-   FORMAT RUPIAH
-========================================================= */
 
 function formatRupiah(value) {
   const angka = Number(value || 0);
@@ -165,9 +153,6 @@ function formatRupiah(value) {
   return "Rp" + angka.toLocaleString("id-ID");
 }
 
-/* =========================================================
-   RESPONSE HELPER
-========================================================= */
 
 function getResponseData(response) {
   if (!response) {
@@ -197,9 +182,6 @@ function getResponseData(response) {
   return [];
 }
 
-/* =========================================================
-   PACKAGE HELPERS
-========================================================= */
 
 function getPaketId(paket) {
   return (
@@ -240,9 +222,6 @@ function getPaketDescription(paket) {
   );
 }
 
-/* =========================================================
-   STATUS
-========================================================= */
 
 function getPaketStatus(paket) {
   const status = String(
@@ -255,9 +234,6 @@ function getPaketStatus(paket) {
   return status === "aktif" ? "aktif" : "nonaktif";
 }
 
-/* =========================================================
-   DURASI
-========================================================= */
 
 function getPaketDuration(paket) {
   const durasi = Number(paket?.durasi ?? 1);
@@ -269,9 +245,6 @@ function getPaketDuration(paket) {
   return durasi;
 }
 
-/* =========================================================
-   SUBSCRIBERS
-========================================================= */
 
 function getPaketSubscribers(paket) {
   return Number(
@@ -285,9 +258,6 @@ function getPaketSubscribers(paket) {
   );
 }
 
-/* =========================================================
-   GET FEATURE DARI PAKET
-========================================================= */
 
 function getPaketFeatures(paket) {
   if (!paket) {
@@ -312,9 +282,6 @@ function getPaketFeatures(paket) {
   return [];
 }
 
-/* =========================================================
-   NORMALIZE FEATURE
-========================================================= */
 
 function normalizeFeature(item, index) {
   if (!item) {
@@ -377,9 +344,6 @@ function normalizeFeature(item, index) {
   };
 }
 
-/* =========================================================
-   PACKAGE THEME
-========================================================= */
 
 function getPackageTheme(paket, index) {
   const name =
@@ -414,9 +378,6 @@ function getPackageTheme(paket, index) {
   return themes[index % themes.length];
 }
 
-/* =========================================================
-   PACKAGE ICON
-========================================================= */
 
 function getPackageIcon(paket, index) {
   const nama =
@@ -457,9 +418,6 @@ function getPackageIcon(paket, index) {
   return icons[index % icons.length];
 }
 
-/* =========================================================
-   MAIN PAGE
-========================================================= */
 
 export default function PaketModulPage() {
   const router = useRouter();
@@ -475,9 +433,6 @@ export default function PaketModulPage() {
     useState(null);
   const [search, setSearch] = useState("");
 
-  /* =======================================================
-     LOAD DATA
-  ======================================================= */
 
   async function loadData(showLoading = true) {
     try {
@@ -590,9 +545,6 @@ export default function PaketModulPage() {
     loadData();
   }, []);
 
-  /* =======================================================
-     NORMALIZED PACKAGE
-  ======================================================= */
 
   const normalizedPaket = useMemo(() => {
     return paketList.map(
@@ -644,9 +596,6 @@ export default function PaketModulPage() {
     );
   }, [paketList]);
 
-  /* =======================================================
-     STATISTICS
-  ======================================================= */
 
   const totalPaket =
     normalizedPaket.length;
@@ -678,9 +627,6 @@ export default function PaketModulPage() {
       0
     );
 
-  /* =======================================================
-     SEARCH
-  ======================================================= */
 
   const filteredPaket =
     normalizedPaket.filter(
@@ -694,9 +640,6 @@ export default function PaketModulPage() {
           )
     );
 
-  /* =======================================================
-     NAVIGATION
-  ======================================================= */
 
   function navigateToTambah() {
     router.push(
@@ -719,9 +662,6 @@ export default function PaketModulPage() {
     );
   }
 
-  /* =======================================================
-     DELETE
-  ======================================================= */
 
   async function hapusPaket(paket) {
     try {
@@ -759,9 +699,6 @@ export default function PaketModulPage() {
     }
   }
 
-  /* =======================================================
-     TOGGLE STATUS
-  ======================================================= */
 
   async function toggleStatus(paket) {
     try {
@@ -842,9 +779,6 @@ export default function PaketModulPage() {
     }
   }
 
-  /* =======================================================
-     DUPLICATE
-  ======================================================= */
 
   function duplikatPaket(paket) {
     const modulIds =
@@ -888,9 +822,6 @@ export default function PaketModulPage() {
     );
   }
 
-  /* =======================================================
-     LOADING
-  ======================================================= */
 
   if (loading) {
     return (
@@ -921,17 +852,11 @@ export default function PaketModulPage() {
     );
   }
 
-  /* =======================================================
-     RETURN
-  ======================================================= */
 
   return (
     <div className="theme-page theme-text min-h-full">
       <div className="w-full max-w-[1500px] mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 space-y-6">
 
-        {/* =================================================
-            PAGE HEADER
-        ================================================= */}
 
         <section
           className={`relative overflow-hidden rounded-2xl ${themePrimaryGradient} p-6 md:p-7 ${themePrimaryShadow}`}
@@ -1012,9 +937,6 @@ export default function PaketModulPage() {
           </div>
         </section>
 
-        {/* =================================================
-            ERROR
-        ================================================= */}
 
         {error && (
           <div
@@ -1046,9 +968,6 @@ export default function PaketModulPage() {
           </div>
         )}
 
-        {/* =================================================
-            STATS
-        ================================================= */}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
           <StatCard
@@ -1086,9 +1005,6 @@ export default function PaketModulPage() {
           />
         </div>
 
-        {/* =================================================
-            SEARCH
-        ================================================= */}
 
         <section className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           <div>
@@ -1131,9 +1047,6 @@ export default function PaketModulPage() {
           </div>
         </section>
 
-        {/* =================================================
-            PACKAGE GRID
-        ================================================= */}
 
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 items-stretch">
           {filteredPaket.map(
@@ -1191,9 +1104,6 @@ export default function PaketModulPage() {
           )}
         </div>
 
-        {/* =================================================
-            MODULE MATRIX
-        ================================================= */}
 
         <ModulMatrix
           paketList={normalizedPaket}
@@ -1201,9 +1111,6 @@ export default function PaketModulPage() {
         />
       </div>
 
-      {/* ===================================================
-          DELETE MODAL
-      =================================================== */}
 
       {confirmDelete && (
         <ConfirmDeleteModal
@@ -1222,9 +1129,6 @@ export default function PaketModulPage() {
   );
 }
 
-/* =========================================================
-   STAT CARD
-========================================================= */
 
 function StatCard({
   icon: Icon,
@@ -1287,9 +1191,6 @@ function StatCard({
   );
 }
 
-/* =========================================================
-   PACKAGE CARD
-========================================================= */
 
 function PaketCard({
   paket,
@@ -1319,7 +1220,6 @@ function PaketCard({
     <div
       className={`relative overflow-hidden rounded-2xl border theme-border theme-card ${themeCardShadow} hover:shadow-[0_10px_30px_color-mix(in_srgb,var(--color-text)_9%,transparent)] transition flex flex-col`}
     >
-      {/* HEADER */}
 
       <div
         className={`relative h-24 ${theme.card} overflow-hidden`}
@@ -1415,10 +1315,8 @@ function PaketCard({
         </div>
       </div>
 
-      {/* CONTENT */}
 
       <div className="flex flex-col flex-1 p-5">
-        {/* NAME */}
 
         <div>
           <div className="flex items-start justify-between gap-3">
@@ -1441,7 +1339,6 @@ function PaketCard({
           </p>
         </div>
 
-        {/* PRICE */}
 
         <div className="mt-5">
           <div className="flex items-end gap-1 flex-wrap">
@@ -1459,7 +1356,6 @@ function PaketCard({
           </div>
         </div>
 
-        {/* STATUS */}
 
         <div
           className={`flex flex-wrap items-center justify-between gap-2 mt-4 pb-4 border-b ${themeDivider}`}
@@ -1494,7 +1390,6 @@ function PaketCard({
           </span>
         </div>
 
-        {/* FITUR PAKET */}
 
         <div className="mt-4 flex-1">
           <div className="flex items-center justify-between mb-3">
@@ -1622,7 +1517,6 @@ function PaketCard({
           )}
         </div>
 
-        {/* BUTTON */}
 
         <button
           onClick={onEdit}
@@ -1640,9 +1534,6 @@ function PaketCard({
   );
 }
 
-/* =========================================================
-   MENU BUTTON
-========================================================= */
 
 function MenuButton({
   icon: Icon,
@@ -1666,9 +1557,6 @@ function MenuButton({
   );
 }
 
-/* =========================================================
-   MODULE MATRIX
-========================================================= */
 
 function ModulMatrix({
   paketList,
@@ -1678,7 +1566,6 @@ function ModulMatrix({
     <section
       className={`overflow-hidden rounded-2xl border theme-border theme-card ${themeCardShadow}`}
     >
-      {/* HEADER */}
 
       <div
         className={`px-5 md:px-6 py-5 border-b ${themeDivider} ${themeNeutralSurface}`}
@@ -1704,7 +1591,6 @@ function ModulMatrix({
         </div>
       </div>
 
-      {/* EMPTY */}
 
       {fiturList.length === 0 ? (
         <div className="py-12 text-center">
@@ -1769,7 +1655,6 @@ function ModulMatrix({
                       key={fitur.id}
                       className={`border-t ${themeDivider} hover:bg-[color-mix(in_srgb,var(--color-primary)_5%,transparent)] transition`}
                     >
-                      {/* FEATURE */}
 
                       <td
                         className={`px-5 py-3.5 sticky left-0 theme-card`}
@@ -1800,7 +1685,6 @@ function ModulMatrix({
                         </div>
                       </td>
 
-                      {/* PACKAGE CHECK */}
 
                       {paketList.map(
                         (paket) => {
@@ -1913,9 +1797,6 @@ function ModulMatrix({
   );
 }
 
-/* =========================================================
-   DELETE MODAL
-========================================================= */
 
 function ConfirmDeleteModal({
   paket,
@@ -1938,7 +1819,6 @@ function ConfirmDeleteModal({
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      {/* BACKDROP */}
 
       <div
         className="absolute inset-0 bg-[color-mix(in_srgb,var(--color-text)_48%,transparent)] backdrop-blur-sm"
@@ -1949,12 +1829,10 @@ function ConfirmDeleteModal({
         }
       />
 
-      {/* MODAL */}
 
       <div
         className={`relative w-full max-w-md overflow-hidden rounded-2xl theme-card ${themeCardShadow}`}
       >
-        {/* TOP */}
 
         <div
           className="bg-[var(--color-warning)] p-6 text-center"
@@ -1969,7 +1847,6 @@ function ConfirmDeleteModal({
           </div>
         </div>
 
-        {/* CONTENT */}
 
         <div className="p-6">
           <h3 className="text-center text-lg font-bold theme-text">

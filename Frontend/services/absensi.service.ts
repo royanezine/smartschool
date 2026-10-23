@@ -1,8 +1,5 @@
 import { apiFetch } from "../lib/api";
 
-/* =========================================================
-   TYPES ABSENSI
-========================================================= */
 
 export type AbsensiStatus = "hadir" | "izin" | "sakit" | "alpha";
 
@@ -77,9 +74,6 @@ export interface CreateAbsensiData {
   snapshot?: Blob | File | null;
 }
 
-/* =========================================================
-   TYPES SHIFT KERJA
-========================================================= */
 
 export interface CheckInShiftPayload {
   shiftKerjaId?: string;
@@ -107,9 +101,6 @@ export interface RiwayatShiftResponse {
   totalPages: number;
 }
 
-/* =========================================================
-   HELPER RESPONSE
-========================================================= */
 
 function unwrapArray<T>(value: unknown): T[] {
   if (Array.isArray(value)) {
@@ -141,10 +132,6 @@ function unwrapObject(value: unknown): Record<string, any> {
   return value as Record<string, any>;
 }
 
-/* =========================================================
-   GET ABSENSI SAYA
-   GET /api/absensi/saya
-========================================================= */
 
 export async function getAbsensiSaya(): Promise<Absensi[]> {
   const response = await apiFetch("/api/absensi/saya", {
@@ -154,10 +141,6 @@ export async function getAbsensiSaya(): Promise<Absensi[]> {
   return unwrapArray<Absensi>(response);
 }
 
-/* =========================================================
-   GET ABSENSI KELAS
-   GET /api/absensi/kelas/:kelasId
-========================================================= */
 
 export async function getAbsensiKelas(
   kelasId: string,
@@ -186,10 +169,6 @@ export async function getAbsensiKelas(
   return unwrapArray<Absensi>(response);
 }
 
-/* =========================================================
-   CREATE ABSENSI
-   POST /api/absensi
-========================================================= */
 
 export async function createAbsensi(
   data: CreateAbsensiData,
@@ -257,9 +236,6 @@ export async function createAbsensi(
   }) as Promise<Absensi>;
 }
 
-/* =========================================================
-   ABSEN DENGAN LOKASI
-========================================================= */
 
 function getCurrentPosition(): Promise<GeolocationPosition> {
   if (
@@ -304,9 +280,6 @@ export async function absenDenganLokasi(data: {
   });
 }
 
-/* =========================================================
-   ABSEN DENGAN BARCODE
-========================================================= */
 
 export async function absenDenganBarcode(data: {
   kelasId: string;
@@ -327,9 +300,6 @@ export async function absenDenganBarcode(data: {
   });
 }
 
-/* =========================================================
-   ABSEN DENGAN FACE
-========================================================= */
 
 export async function absenDenganFace(data: {
   kelasId: string;
@@ -350,9 +320,6 @@ export async function absenDenganFace(data: {
   });
 }
 
-/* =========================================================
-   ABSEN MANUAL
-========================================================= */
 
 export async function absenManual(data: {
   kelasId: string;
@@ -367,10 +334,6 @@ export async function absenManual(data: {
   });
 }
 
-/* =========================================================
-   KELAS SAYA
-   GET /api/siswa/me
-========================================================= */
 
 export interface KelasSaya {
   kelasId: string;
@@ -394,32 +357,16 @@ export async function getKelasSaya(): Promise<KelasSaya> {
   };
 }
 
-/* =========================================================
-   ABSENSI SISWA
-   GET /api/absensi/siswa/:siswaId
-
-   Gunakan hanya jika route ini tersedia di backend.
-========================================================= */
 
 export async function getAbsensiSiswa(
   siswaId: string,
 ): Promise<Absensi[]> {
-  if (!siswaId) {
-    throw new Error("ID siswa wajib diisi.");
-  }
-
-  const response = await apiFetch(
-    `/api/absensi/siswa/${encodeURIComponent(siswaId)}`,
-    { method: "GET" },
+  throw new Error(
+    "Backend tidak menyediakan riwayat absensi per siswa. " +
+      `Gunakan getAbsensiKelas(kelasId) lalu filter penggunaId = ${siswaId}.`
   );
-
-  return unwrapArray<Absensi>(response);
 }
 
-/* =========================================================
-   CHECK-IN SHIFT
-   POST /api/absensi/check-in
-========================================================= */
 
 export async function checkInShift(
   data: CheckInShiftPayload = {},
@@ -441,10 +388,6 @@ export async function checkInShift(
   }) as Promise<Absensi>;
 }
 
-/* =========================================================
-   CHECK-OUT SHIFT
-   POST /api/absensi/check-out
-========================================================= */
 
 export async function checkOutShift(
   data: CheckOutShiftPayload = {},
@@ -464,10 +407,6 @@ export async function checkOutShift(
   }) as Promise<Absensi>;
 }
 
-/* =========================================================
-   RIWAYAT SHIFT SAYA
-   GET /api/absensi/shift-saya
-========================================================= */
 
 
 export async function getRiwayatShiftSaya(
@@ -486,7 +425,6 @@ export async function getRiwayatShiftSaya(
 
   const result = unwrapObject(response);
 
-  // Mendukung response dengan atau tanpa pembungkus data.
   const payload = unwrapObject(result.data);
 
   const candidates = [
@@ -521,10 +459,6 @@ export async function getRiwayatShiftSaya(
 
 
 
-/* =========================================================
-   MONITORING KEHADIRAN GURU
-   GET /api/absensi/monitoring-guru?tanggal=YYYY-MM-DD
-========================================================= */
 
 export interface MonitoringKehadiranGuru {
   id: string;
@@ -546,22 +480,46 @@ export interface MonitoringGuruResponse {
   data: MonitoringKehadiranGuru[];
 }
 
+export interface MonitoringGuruParams {
+  tanggal: string;
+  status?: string;
+  search?: string;
+  shiftKerjaId?: string;
+}
+
 export async function getMonitoringKehadiranGuru(
-  tanggal: string,
+  params: string | MonitoringGuruParams,
 ): Promise<MonitoringGuruResponse> {
+  const queryParams = typeof params === "string" ? { tanggal: params } : params;
+  const { tanggal, status, search, shiftKerjaId } = queryParams || {};
+
   if (!tanggal) {
     throw new Error("Tanggal monitoring wajib diisi.");
   }
 
+  const query = new URLSearchParams();
+  query.set("tanggal", tanggal);
+
+  if (status && status !== "semua") {
+    query.set("status", status);
+  }
+
+  if (search?.trim()) {
+    query.set("search", search.trim());
+  }
+
+  if (shiftKerjaId && shiftKerjaId !== "semua") {
+    query.set("shiftKerjaId", shiftKerjaId);
+  }
+
   const response = await apiFetch(
-    `/api/absensi/monitoring-guru?tanggal=${encodeURIComponent(tanggal)}`,
+    `/api/absensi/monitoring-guru?${query.toString()}`,
     { method: "GET" },
   );
 
   const result = unwrapObject(response);
   const payload = unwrapObject(result.data);
 
-  // Menyesuaikan struktur response successResponse.
   const data = Array.isArray(payload.data)
     ? payload.data
     : Array.isArray(result.data)
@@ -594,9 +552,6 @@ export async function getMetodeAbsensiAktif(): Promise<string[]> {
 }
 
 
-/* =========================================================
-   DEFAULT EXPORT
-========================================================= */
 
 const absensiService = {
   getAbsensiSaya,

@@ -21,13 +21,10 @@ import {
 } from "lucide-react";
 
 import {
-  getAset,
+  getKetersediaanAset,
   ajukanPeminjaman,
 } from "@/services/sarpras.service";
 
-/* =========================================================
-   THEME HELPERS
-========================================================= */
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -92,9 +89,6 @@ const themeDangerBorder =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-/* =========================================================
-   PAGE
-========================================================= */
 
 function AjukanPeminjamanContent() {
   const router = useRouter();
@@ -103,12 +97,10 @@ function AjukanPeminjamanContent() {
 
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  /* DATA ASET */
   const [itemDipilih, setItemDipilih] = useState(null);
   const [loadingAset, setLoadingAset] = useState(true);
   const [errorAset, setErrorAset] = useState("");
 
-  /* FORM */
   const [tanggalKembaliRencana, setTanggalKembaliRencana] = useState("");
   const [keperluan, setKeperluan] = useState("");
   const [catatanPeminjaman, setCatatanPeminjaman] = useState("");
@@ -127,7 +119,6 @@ function AjukanPeminjamanContent() {
     },
   ];
 
-  /* LOAD ASET */
   useEffect(() => {
     let mounted = true;
 
@@ -142,7 +133,7 @@ function AjukanPeminjamanContent() {
           return;
         }
 
-        const response = await getAset();
+        const response = await getKetersediaanAset();
 
         if (!mounted) return;
 
@@ -191,13 +182,11 @@ function AjukanPeminjamanContent() {
 
   const getSisaStok = (item) => Number(item?.jumlahStok ?? 0);
 
-  /* KEMBALI */
   const handleBack = () => {
     if (submitting) return;
     router.push("/guru/sarpras/pinjam");
   };
 
-  /* SUBMIT */
   const kirimPengajuan = async (e) => {
     e.preventDefault();
 
@@ -285,7 +274,6 @@ function AjukanPeminjamanContent() {
         />
 
         <main className="theme-page relative flex-1 overflow-y-auto">
-          {/* BACKGROUND DECORATION */}
           <div
             aria-hidden="true"
             className="pointer-events-none absolute inset-0 overflow-hidden"
@@ -309,9 +297,6 @@ function AjukanPeminjamanContent() {
 
           <div className="relative mx-auto w-full max-w-[1100px] space-y-6 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
 
-            {/* =================================================
-                BACK BUTTON + PAGE HEADER
-            ================================================= */}
 
             <button
               type="button"
@@ -360,9 +345,6 @@ function AjukanPeminjamanContent() {
               </div>
             </div>
 
-            {/* =================================================
-                CONTENT
-            ================================================= */}
 
             {loadingAset ? (
               <div
@@ -398,9 +380,6 @@ function AjukanPeminjamanContent() {
                 </div>
               </div>
             ) : berhasilKirim ? (
-              /* =================================================
-                 SUCCESS STATE
-              ================================================= */
 
               <div
                 className={`theme-card overflow-hidden rounded-2xl border ${themeSuccessBorder} ${themeCardShadow}`}
@@ -524,15 +503,9 @@ function AjukanPeminjamanContent() {
                 </div>
               </div>
             ) : (
-              /* =================================================
-                 FORM + INFO ASET
-              ================================================= */
 
               <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
 
-                {/* =================================================
-                    FORM CARD
-                ================================================= */}
 
                 <form
                   onSubmit={kirimPengajuan}
@@ -560,7 +533,6 @@ function AjukanPeminjamanContent() {
 
                   <div className="space-y-5 p-5 sm:p-6">
 
-                    {/* JUMLAH */}
 
                     <div>
                       <label className="theme-text-secondary mb-1.5 flex items-center gap-1.5 text-xs font-semibold">
@@ -608,7 +580,6 @@ function AjukanPeminjamanContent() {
                       </p>
                     </div>
 
-                    {/* KEPERLUAN */}
 
                     <div>
                       <label className="theme-text-secondary mb-1.5 flex items-center gap-1.5 text-xs font-semibold">
@@ -639,7 +610,6 @@ function AjukanPeminjamanContent() {
                       </p>
                     </div>
 
-                    {/* TANGGAL */}
 
                     <div>
                       <label className="theme-text-secondary mb-1.5 flex items-center gap-1.5 text-xs font-semibold">
@@ -667,7 +637,6 @@ function AjukanPeminjamanContent() {
                       </p>
                     </div>
 
-                    {/* CATATAN */}
 
                     <div>
                       <label className="theme-text-secondary mb-1.5 block text-xs font-semibold">
@@ -688,7 +657,6 @@ function AjukanPeminjamanContent() {
                       />
                     </div>
 
-                    {/* ERROR */}
 
                     {submitError && (
                       <div
@@ -706,7 +674,6 @@ function AjukanPeminjamanContent() {
                     )}
                   </div>
 
-                  {/* FOOTER BUTTONS */}
 
                   <div
                     className={`flex flex-col-reverse gap-2 border-t px-5 py-4 sm:flex-row sm:justify-end sm:px-6 ${themeDivider} ${themeNeutralSurface}`}
@@ -743,13 +710,9 @@ function AjukanPeminjamanContent() {
                   </div>
                 </form>
 
-                {/* =================================================
-                    SIDEBAR INFO ASET
-                ================================================= */}
 
                 <aside className="space-y-4 lg:sticky lg:top-6">
 
-                  {/* INFO ASET */}
 
                   <div
                     className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
@@ -857,7 +820,6 @@ function AjukanPeminjamanContent() {
                     </div>
                   </div>
 
-                  {/* INFO PEMINJAM */}
 
                   <div
                     className={`theme-card rounded-2xl border p-5 ${themeNeutralBorder} ${themeCardShadow}`}
@@ -894,7 +856,6 @@ function AjukanPeminjamanContent() {
                     </div>
                   </div>
 
-                  {/* INFO NOTE */}
 
                   <div
                     className={`rounded-2xl border p-4 ${themeInfoSurface} ${themeInfoBorder}`}
@@ -928,9 +889,6 @@ function AjukanPeminjamanContent() {
   );
 }
 
-/* =========================================================
-   INFO ROW
-========================================================= */
 
 function InfoRow({
   icon,
@@ -957,9 +915,6 @@ function InfoRow({
   );
 }
 
-/* =========================================================
-   WRAPPER — Suspense
-========================================================= */
 
 export default function AjukanPeminjamanPage() {
   return (

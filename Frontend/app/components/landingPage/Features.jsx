@@ -85,7 +85,7 @@ export default function Features() {
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.08, // Muncul bergantian
+        staggerChildren: 0.08, 
         delayChildren: 0.2,
       },
     },
@@ -101,11 +101,9 @@ export default function Features() {
       id="fitur" 
       className="relative bg-blue-50 overflow-hidden py-24"
     >
-      {/* 🌟 Elemen Dekoratif Latar Belakang: Glowing Blobs */}
       <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-blue-200/40 rounded-full blur-[100px] -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
       <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-blue-300/30 rounded-full blur-[120px] translate-x-1/3 translate-y-1/3 pointer-events-none" />
       
-      {/* 🌟 Pola Grid Halus di Latar Belakang (Memberi tekstur) */}
       <div 
         className="absolute inset-0 opacity-[0.04] pointer-events-none"
         style={{
@@ -115,7 +113,6 @@ export default function Features() {
       />
 
       <div className="relative max-w-7xl mx-auto px-6 z-10">
-        {/* Heading */}
         <div className="text-center max-w-3xl mx-auto">
           <span className="inline-flex items-center gap-2 rounded-full bg-blue-100/70 border border-blue-200 px-4 py-1.5 text-xs font-semibold text-blue-600">
             <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
@@ -136,7 +133,6 @@ export default function Features() {
           </p>
         </div>
 
-        {/* Features Grid dengan Animasi */}
         <motion.div
           variants={containerVariants}
           initial="hidden"
@@ -151,20 +147,16 @@ export default function Features() {
               transition={{ duration: 0.4, ease: "easeOut" }}
               className="relative group rounded-2xl bg-white/80 backdrop-blur-sm border border-blue-100/60 p-6 shadow-sm hover:shadow-xl hover:shadow-blue-200/40 transition-all duration-300 hover:-translate-y-2 hover:border-blue-300"
             >
-              {/* Garis aksen warna di bagian atas kartu saat di-hover */}
               <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-blue-500 to-blue-300 rounded-t-2xl scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
 
-              {/* Icon Container */}
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-100/50 text-blue-600 shadow-sm group-hover:bg-blue-600 group-hover:text-white group-hover:shadow-md group-hover:shadow-blue-500/30 transition-all duration-300">
                 {item.icon}
               </div>
 
-              {/* Title */}
               <h3 className="mt-5 text-lg font-semibold text-slate-800 group-hover:text-slate-900 transition-colors">
                 {item.title}
               </h3>
 
-              {/* Desc */}
               <p className="mt-3 text-sm leading-relaxed text-slate-500 group-hover:text-slate-600 transition-colors">
                 {item.desc}
               </p>

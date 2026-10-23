@@ -41,15 +41,8 @@ export default function ArtikelPage() {
 
   const [error, setError] = useState("");
 
-  /*
-   * State sidebar.
-   * Default true (expanded).
-   */
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  /* =========================================================
-     STATUS HELPER
-  ========================================================= */
 
   function normalizeStatus(status) {
     return String(status || "").trim().toLowerCase();
@@ -85,9 +78,6 @@ export default function ArtikelPage() {
     };
   }
 
-  /* =========================================================
-     FETCH ARTIKEL
-  ========================================================= */
 
   const fetchArticles = useCallback(async () => {
     try {
@@ -117,9 +107,6 @@ export default function ArtikelPage() {
     }
   }, []);
 
-  /* =========================================================
-     FETCH KATEGORI
-  ========================================================= */
 
   const fetchCategories = useCallback(async () => {
     try {
@@ -150,18 +137,12 @@ export default function ArtikelPage() {
     }
   }, []);
 
-  /* =========================================================
-     INITIAL LOAD
-  ========================================================= */
 
   useEffect(() => {
     fetchArticles();
     fetchCategories();
   }, [fetchArticles, fetchCategories]);
 
-  /* =========================================================
-     DELETE
-  ========================================================= */
 
   async function handleDelete(id) {
     if (!id) return;
@@ -198,9 +179,6 @@ export default function ArtikelPage() {
     }
   }
 
-  /* =========================================================
-     FILTER ARTICLE
-  ========================================================= */
 
   const filteredArticles = useMemo(() => {
     const keyword = search
@@ -261,9 +239,6 @@ export default function ArtikelPage() {
     categoryFilter,
   ]);
 
-  /* =========================================================
-     STATISTICS
-  ========================================================= */
 
   const totalArticles = articles.length;
 
@@ -277,9 +252,6 @@ export default function ArtikelPage() {
       isDraftStatus(article?.status)
   ).length;
 
-  /* =========================================================
-     PAGINATION
-  ========================================================= */
 
   const totalPages = Math.max(
     1,
@@ -307,9 +279,6 @@ export default function ArtikelPage() {
     categoryFilter,
   ]);
 
-  /* =========================================================
-     FORMAT DATE
-  ========================================================= */
 
   function formatDate(date) {
     if (!date) return "-";
@@ -330,9 +299,6 @@ export default function ArtikelPage() {
     );
   }
 
-  /* =========================================================
-     GET ARTICLE DATA
-  ========================================================= */
 
   function getArticleTitle(article) {
     return (
@@ -368,16 +334,10 @@ export default function ArtikelPage() {
     );
   }
 
-  /* =========================================================
-     RENDER
-  ========================================================= */
 
   return (
     <div className="theme-page flex h-screen overflow-hidden">
 
-      {/* =====================================================
-          SIDEBAR
-      ===================================================== */}
 
       <Sidebar
         role="cms"
@@ -392,15 +352,9 @@ export default function ArtikelPage() {
         }}
       />
 
-      {/* =====================================================
-          CONTENT
-      ===================================================== */}
 
       <div className="theme-page flex h-screen min-w-0 flex-1 flex-col overflow-hidden">
 
-        {/* ===================================================
-            HEADER (STICKY)
-        =================================================== */}
 
         <div className="sticky top-0 z-30 shrink-0">
           <Header
@@ -410,15 +364,9 @@ export default function ArtikelPage() {
           />
         </div>
 
-        {/* ===================================================
-            MAIN
-        =================================================== */}
 
         <main className="theme-page flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
 
-          {/* =================================================
-              HEADER
-          ================================================= */}
 
           <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
 
@@ -462,9 +410,6 @@ export default function ArtikelPage() {
 
           </div>
 
-          {/* =================================================
-              ERROR
-          ================================================= */}
 
           {error && (
             <div
@@ -494,13 +439,9 @@ export default function ArtikelPage() {
             </div>
           )}
 
-          {/* =================================================
-              STATISTICS
-          ================================================= */}
 
           <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
 
-            {/* TOTAL */}
 
             <div
               className="
@@ -531,7 +472,6 @@ export default function ArtikelPage() {
               </div>
             </div>
 
-            {/* PUBLISHED */}
 
             <div
               className="
@@ -562,7 +502,6 @@ export default function ArtikelPage() {
               </div>
             </div>
 
-            {/* DRAFT */}
 
             <div
               className="
@@ -595,9 +534,6 @@ export default function ArtikelPage() {
 
           </div>
 
-          {/* =================================================
-              FILTER
-          ================================================= */}
 
           <div
             className="
@@ -629,7 +565,6 @@ export default function ArtikelPage() {
 
             <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
 
-              {/* SEARCH */}
 
               <div className="relative">
 
@@ -668,7 +603,6 @@ export default function ArtikelPage() {
 
               </div>
 
-              {/* STATUS */}
 
               <select
                 value={statusFilter}
@@ -701,7 +635,6 @@ export default function ArtikelPage() {
                 </option>
               </select>
 
-              {/* CATEGORY */}
 
               <select
                 value={categoryFilter}
@@ -742,9 +675,6 @@ export default function ArtikelPage() {
 
           </div>
 
-          {/* =================================================
-              ARTICLE TABLE
-          ================================================= */}
 
           <div
             className="
@@ -757,7 +687,6 @@ export default function ArtikelPage() {
             "
           >
 
-            {/* TABLE HEADER */}
 
             <div
               className="
@@ -824,7 +753,6 @@ export default function ArtikelPage() {
 
             </div>
 
-            {/* LOADING */}
 
             {loading ? (
               <div className="flex min-h-[300px] items-center justify-center">
@@ -849,7 +777,6 @@ export default function ArtikelPage() {
               </div>
             ) : paginatedArticles.length === 0 ? (
 
-              /* EMPTY */
 
               <div
                 className="
@@ -883,7 +810,6 @@ export default function ArtikelPage() {
 
               <>
 
-                {/* DESKTOP TABLE */}
 
                 <div className="hidden overflow-x-auto md:block">
 
@@ -1021,7 +947,6 @@ export default function ArtikelPage() {
 
                                 <div className="flex items-center justify-end gap-1">
 
-                                  {/* VIEW */}
 
                                   <button
                                     type="button"
@@ -1049,7 +974,6 @@ export default function ArtikelPage() {
                                     <Eye size={17} />
                                   </button>
 
-                                  {/* EDIT */}
 
                                   <button
                                     type="button"
@@ -1075,7 +999,6 @@ export default function ArtikelPage() {
                                     <Pencil size={17} />
                                   </button>
 
-                                  {/* DELETE */}
 
                                   <button
                                     type="button"
@@ -1126,7 +1049,6 @@ export default function ArtikelPage() {
 
                 </div>
 
-                {/* MOBILE CARD */}
 
                 <div className="divide-y">
 
@@ -1217,7 +1139,6 @@ export default function ArtikelPage() {
 
                           <div className="mt-4 flex items-center justify-end gap-2">
 
-                            {/* MOBILE VIEW */}
 
                             <button
                               type="button"
@@ -1247,7 +1168,6 @@ export default function ArtikelPage() {
                               Lihat
                             </button>
 
-                            {/* MOBILE EDIT */}
 
                             <button
                               type="button"
@@ -1276,7 +1196,6 @@ export default function ArtikelPage() {
                               Edit
                             </button>
 
-                            {/* MOBILE DELETE */}
 
                             <button
                               type="button"
@@ -1327,7 +1246,6 @@ export default function ArtikelPage() {
               </>
             )}
 
-            {/* PAGINATION */}
 
             {!loading &&
               filteredArticles.length > 0 && (

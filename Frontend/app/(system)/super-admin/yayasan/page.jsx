@@ -33,15 +33,9 @@ import {
   getSekolahBinaan,
 } from "@/services/yayasan.service";
 
-// =========================================================
-// CONSTANT
-// =========================================================
 
 const ITEMS_PER_PAGE = 5;
 
-// =========================================================
-// THEME HELPERS
-// =========================================================
 
 const themeCardShadow =
   "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
@@ -100,9 +94,6 @@ const themeFocus =
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
 
-// =========================================================
-// STATUS STYLE
-// =========================================================
 
 const statusColorMap = {
   Aktif: {
@@ -127,9 +118,6 @@ const statusColorMap = {
   },
 };
 
-// =========================================================
-// SORT OPTIONS
-// =========================================================
 
 const sortOptions = [
   {
@@ -170,9 +158,6 @@ const sortOptions = [
   },
 ];
 
-// =========================================================
-// NORMALIZE STATUS
-// =========================================================
 
 function normalizeStatus(status) {
   const value = String(status ?? "")
@@ -206,9 +191,6 @@ function normalizeStatus(status) {
   return status ? String(status) : "Nonaktif";
 }
 
-// =========================================================
-// NORMALIZE SEKOLAH
-// =========================================================
 
 function normalizeSekolah(item) {
   if (!item || typeof item !== "object") {
@@ -250,9 +232,6 @@ function normalizeSekolah(item) {
   };
 }
 
-// =========================================================
-// EXTRACT DATA
-// =========================================================
 
 function extractData(response) {
   if (!response) {
@@ -266,9 +245,6 @@ function extractData(response) {
   return response;
 }
 
-// =========================================================
-// EXTRACT LIST
-// =========================================================
 
 function extractSekolahList(response) {
   const data = extractData(response);
@@ -296,9 +272,6 @@ function extractSekolahList(response) {
   return [];
 }
 
-// =========================================================
-// EXTRACT SUMMARY
-// =========================================================
 
 function extractSummary(response) {
   const data = extractData(response);
@@ -314,9 +287,6 @@ function extractSummary(response) {
   return {};
 }
 
-// =========================================================
-// ERROR MESSAGE
-// =========================================================
 
 function extractErrorMessage(error) {
   if (!error) {
@@ -335,16 +305,10 @@ function extractErrorMessage(error) {
   );
 }
 
-// =========================================================
-// MAIN COMPONENT
-// =========================================================
 
 export default function DataYayasanPage() {
   const router = useRouter();
 
-  // =====================================================
-  // DATA
-  // =====================================================
 
   const [sekolahList, setSekolahList] =
     useState([]);
@@ -363,9 +327,6 @@ export default function DataYayasanPage() {
   const [error, setError] =
     useState("");
 
-  // =====================================================
-  // FILTER
-  // =====================================================
 
   const [searchQuery, setSearchQuery] =
     useState("");
@@ -373,9 +334,6 @@ export default function DataYayasanPage() {
   const [selectedStatus, setSelectedStatus] =
     useState("Semua");
 
-  // =====================================================
-  // PAGINATION
-  // =====================================================
 
   const [currentPage, setCurrentPage] =
     useState(1);
@@ -383,9 +341,6 @@ export default function DataYayasanPage() {
   const [isMobile, setIsMobile] =
     useState(false);
 
-  // =====================================================
-  // SORT
-  // =====================================================
 
   const [sortField, setSortField] =
     useState("nama");
@@ -396,9 +351,6 @@ export default function DataYayasanPage() {
   const [sortValue, setSortValue] =
     useState("nama-asc");
 
-  // =====================================================
-  // RESPONSIVE
-  // =====================================================
 
   useEffect(() => {
     const checkMobile = () => {
@@ -420,9 +372,6 @@ export default function DataYayasanPage() {
     };
   }, []);
 
-  // =====================================================
-  // FETCH BACKEND
-  // =====================================================
 
   const fetchYayasan = useCallback(
     async () => {
@@ -502,17 +451,11 @@ export default function DataYayasanPage() {
     []
   );
 
-  // =====================================================
-  // INITIAL LOAD
-  // =====================================================
 
   useEffect(() => {
     fetchYayasan();
   }, [fetchYayasan]);
 
-  // =====================================================
-  // RESET PAGE
-  // =====================================================
 
   useEffect(() => {
     setCurrentPage(1);
@@ -522,9 +465,6 @@ export default function DataYayasanPage() {
     sortValue,
   ]);
 
-  // =====================================================
-  // STATUS OPTIONS
-  // =====================================================
 
   const statusOptions = useMemo(
     () => [
@@ -536,9 +476,6 @@ export default function DataYayasanPage() {
     []
   );
 
-  // =====================================================
-  // STATISTICS
-  // =====================================================
 
   const stats = useMemo(() => {
     const total =
@@ -581,9 +518,6 @@ export default function DataYayasanPage() {
     sekolahList.length,
   ]);
 
-  // =====================================================
-  // FILTER + SORT
-  // =====================================================
 
   const sortedData = useMemo(() => {
     const search =
@@ -680,9 +614,6 @@ export default function DataYayasanPage() {
     sortOrder,
   ]);
 
-  // =====================================================
-  // PAGINATION
-  // =====================================================
 
   const totalPages = Math.ceil(
     sortedData.length /
@@ -708,9 +639,6 @@ export default function DataYayasanPage() {
         ITEMS_PER_PAGE
     );
 
-  // =====================================================
-  // SORT HANDLER
-  // =====================================================
 
   const handleSort = (field) => {
     if (
@@ -738,9 +666,6 @@ export default function DataYayasanPage() {
     }
   };
 
-  // =====================================================
-  // SORT SELECT
-  // =====================================================
 
   const handleSortChange = (
     value
@@ -765,9 +690,6 @@ export default function DataYayasanPage() {
     );
   };
 
-  // =====================================================
-  // SORT ICON
-  // =====================================================
 
   const renderSortIcon = (
     field
@@ -797,9 +719,6 @@ export default function DataYayasanPage() {
     );
   };
 
-  // =====================================================
-  // VIEW DETAIL
-  // =====================================================
 
   const handleViewDetail = (
     id
@@ -811,9 +730,6 @@ export default function DataYayasanPage() {
     );
   };
 
-  // =====================================================
-  // TAMBAH YAYASAN
-  // =====================================================
 
   const handleTambahYayasan = () => {
     router.push(
@@ -821,9 +737,6 @@ export default function DataYayasanPage() {
     );
   };
 
-  // =====================================================
-  // RESET FILTER
-  // =====================================================
 
   const resetFilters = () => {
     setSearchQuery("");
@@ -841,9 +754,6 @@ export default function DataYayasanPage() {
     setCurrentPage(1);
   };
 
-  // =====================================================
-  // ACTIVE FILTER COUNT
-  // =====================================================
 
   const activeFilterCount =
     selectedStatus !==
@@ -851,9 +761,6 @@ export default function DataYayasanPage() {
       ? 1
       : 0;
 
-  // =====================================================
-  // EXPORT CSV
-  // =====================================================
 
   const handleExport = () => {
     if (
@@ -967,18 +874,12 @@ export default function DataYayasanPage() {
     );
   };
 
-  // =====================================================
-  // RENDER
-  // =====================================================
 
   return (
     <div className="theme-page theme-text min-h-full">
       <main className="w-full">
         <div className="mx-auto w-full max-w-[1800px] space-y-6 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
 
-          {/* =================================================
-              PAGE HEADER
-          ================================================= */}
 
           <section
             className={`relative overflow-hidden rounded-2xl border theme-border theme-card ${themeCardShadow}`}
@@ -994,7 +895,6 @@ export default function DataYayasanPage() {
             <div className="relative p-5 sm:p-6 lg:p-7">
               <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
 
-                {/* TITLE */}
 
                 <div className="min-w-0">
                   <div className="flex items-center gap-3">
@@ -1028,7 +928,6 @@ export default function DataYayasanPage() {
                   </div>
                 </div>
 
-                {/* ACTION */}
 
                 <div className="flex items-center gap-2">
                   <button
@@ -1069,9 +968,6 @@ export default function DataYayasanPage() {
             </div>
           </section>
 
-          {/* =================================================
-              ERROR
-          ================================================= */}
 
           {error && (
             <section
@@ -1110,9 +1006,6 @@ export default function DataYayasanPage() {
             </section>
           )}
 
-          {/* =================================================
-              STATISTICS
-          ================================================= */}
 
           <section className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5">
             <StatCard
@@ -1171,9 +1064,6 @@ export default function DataYayasanPage() {
             />
           </section>
 
-          {/* =================================================
-              FILTER
-          ================================================= */}
 
           <section
             className={`overflow-hidden rounded-2xl border theme-border theme-card ${themeCardShadow}`}
@@ -1213,7 +1103,6 @@ export default function DataYayasanPage() {
             <div className="p-4 sm:p-5">
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-[minmax(260px,1.8fr)_1fr_auto]">
 
-                {/* SEARCH */}
 
                 <div className="relative">
                   <Search
@@ -1235,7 +1124,6 @@ export default function DataYayasanPage() {
                   />
                 </div>
 
-                {/* STATUS */}
 
                 <FilterSelect
                   value={
@@ -1253,7 +1141,6 @@ export default function DataYayasanPage() {
                   label="Status"
                 />
 
-                {/* SORT */}
 
                 <SortSelect
                   value={sortValue}
@@ -1327,14 +1214,10 @@ export default function DataYayasanPage() {
             </div>
           </section>
 
-          {/* =================================================
-              DATA TABLE
-          ================================================= */}
 
           <section
             className={`overflow-hidden rounded-2xl border theme-border theme-card ${themeCardShadow}`}
           >
-            {/* HEADER */}
 
             <div
               className={`flex flex-col gap-3 border-b ${themeDivider} px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5`}
@@ -1369,9 +1252,6 @@ export default function DataYayasanPage() {
               </div>
             </div>
 
-            {/* =================================================
-                MOBILE
-            ================================================= */}
 
             {isMobile ? (
               <div className={`divide-y ${themeDivider}`}>
@@ -1478,9 +1358,6 @@ export default function DataYayasanPage() {
                 )}
               </div>
             ) : (
-              /* =================================================
-                  DESKTOP
-              ================================================= */
 
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[900px] text-sm">
@@ -1591,7 +1468,6 @@ export default function DataYayasanPage() {
                               }
                               className={`group transition-colors ${themeNeutralHover}`}
                             >
-                              {/* NO */}
 
                               <td className="w-14 px-5 py-4 text-xs theme-text-muted">
                                 {rowNumber
@@ -1602,7 +1478,6 @@ export default function DataYayasanPage() {
                                   )}
                               </td>
 
-                              {/* SEKOLAH */}
 
                               <td className="px-5 py-4">
                                 <div className="flex min-w-[250px] items-center gap-3">
@@ -1633,7 +1508,6 @@ export default function DataYayasanPage() {
                                 </div>
                               </td>
 
-                              {/* KODE */}
 
                               <td className="px-5 py-4">
                                 <span
@@ -1645,7 +1519,6 @@ export default function DataYayasanPage() {
                                 </span>
                               </td>
 
-                              {/* PAKET */}
 
                               <td className="px-5 py-4">
                                 <div className="flex flex-col gap-1">
@@ -1666,7 +1539,6 @@ export default function DataYayasanPage() {
                                 </div>
                               </td>
 
-                              {/* STATUS */}
 
                               <td className="px-5 py-4">
                                 <StatusBadge
@@ -1676,7 +1548,6 @@ export default function DataYayasanPage() {
                                 />
                               </td>
 
-                              {/* KONTAK */}
 
                               <td className="px-5 py-4">
                                 <div className="min-w-[170px]">
@@ -1696,7 +1567,6 @@ export default function DataYayasanPage() {
                                 </div>
                               </td>
 
-                              {/* ACTION */}
 
                               <td className="px-5 py-4">
                                 <div className="flex items-center justify-end gap-1 opacity-80 transition-opacity group-hover:opacity-100">
@@ -1724,9 +1594,6 @@ export default function DataYayasanPage() {
               </div>
             )}
 
-            {/* =================================================
-                PAGINATION
-            ================================================= */}
 
             <div
               className={`flex flex-col items-center justify-between gap-3 border-t ${themeDivider} px-4 py-4 sm:flex-row sm:px-5`}
@@ -1850,9 +1717,6 @@ export default function DataYayasanPage() {
             </div>
           </section>
 
-          {/* =================================================
-              FOOTER
-          ================================================= */}
 
           <div
             className={`flex flex-col items-center justify-between gap-2 border-t ${themeDivider} py-2 sm:flex-row`}
@@ -1873,9 +1737,6 @@ export default function DataYayasanPage() {
   );
 }
 
-// =========================================================
-// FORMAT DATE
-// =========================================================
 
 function formatDate(value) {
   if (!value) {
@@ -1902,9 +1763,6 @@ function formatDate(value) {
   }
 }
 
-// =========================================================
-// STAT CARD
-// =========================================================
 
 function StatCard({
   label,
@@ -1980,9 +1838,6 @@ function StatCard({
   );
 }
 
-// =========================================================
-// FILTER SELECT
-// =========================================================
 
 function FilterSelect({
   value,
@@ -2028,9 +1883,6 @@ function FilterSelect({
   );
 }
 
-// =========================================================
-// SORT SELECT
-// =========================================================
 
 function SortSelect({
   value,
@@ -2075,9 +1927,6 @@ function SortSelect({
   );
 }
 
-// =========================================================
-// TABLE HEADER
-// =========================================================
 
 function TableHeader({
   children,
@@ -2104,9 +1953,6 @@ function TableHeader({
   );
 }
 
-// =========================================================
-// STATUS BADGE
-// =========================================================
 
 function StatusBadge({
   status,
@@ -2130,9 +1976,6 @@ function StatusBadge({
   );
 }
 
-// =========================================================
-// ACTION BUTTON
-// =========================================================
 
 function ActionButton({
   icon: Icon,
@@ -2169,9 +2012,6 @@ function ActionButton({
   );
 }
 
-// =========================================================
-// EMPTY STATE
-// =========================================================
 
 function EmptyState() {
   return (
@@ -2196,9 +2036,6 @@ function EmptyState() {
   );
 }
 
-// =========================================================
-// LOADING MOBILE
-// =========================================================
 
 function LoadingMobile() {
   return (
@@ -2243,9 +2080,6 @@ function LoadingMobile() {
   );
 }
 
-// =========================================================
-// LOADING TABLE
-// =========================================================
 
 function LoadingTable() {
   return (
@@ -2320,9 +2154,6 @@ function LoadingTable() {
   );
 }
 
-// =========================================================
-// INPUT STYLE
-// =========================================================
 
 const inputClass = `
   h-10
@@ -2341,9 +2172,6 @@ const inputClass = `
   ${themeFocus}
 `.replace(/\s+/g, " ").trim();
 
-// =========================================================
-// SELECT STYLE
-// =========================================================
 
 const selectClass = `
   h-10
@@ -2363,9 +2191,6 @@ const selectClass = `
   ${themeFocus}
 `.replace(/\s+/g, " ").trim();
 
-// =========================================================
-// PAGINATION
-// =========================================================
 
 function getPaginationPages(
   currentPage,

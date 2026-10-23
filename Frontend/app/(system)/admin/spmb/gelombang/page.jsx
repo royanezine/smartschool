@@ -27,6 +27,7 @@ import {
 import {
   deleteGelombangPpdb,
   getGelombangPpdb,
+  isGelombangEndpointMissing,
 } from "@/services/gelombangPpdb.service";
 
 const themePrimaryText = "text-[var(--color-primary)]";
@@ -111,21 +112,15 @@ export default function GelombangSpmbPage() {
           : "Gagal memuat gelombang PPDB.";
       setError(msg);
 
-      if (
-        msg.toLowerCase().includes("cannot get") ||
-        msg.toLowerCase().includes("404") ||
-        msg.toLowerCase().includes("not found") ||
-        msg.toLowerCase().includes("belum tersedia")
-      ) {
-        setApiUnavailable(true);
-      }
+      setApiUnavailable(
+        isGelombangEndpointMissing(err)
+      );
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    // Memuat data awal dari API saat halaman dibuka.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     loadData();
   }, [loadData]);
@@ -412,13 +407,12 @@ export default function GelombangSpmbPage() {
               className={`${themeNeutralBorder} mt-5 rounded-xl border ${themeNeutralSurface} p-4`}
             >
               <p className="theme-text-secondary text-xs leading-5">
-                Endpoint:{" "}
-                <code>GET/POST /api/gelombang-ppdb</code> dan{" "}
-                <code>
-                  GET/PUT/DELETE /api/gelombang-ppdb/:id
-                </code>
-                . Semua operasi dibatasi oleh{" "}
-                <code>sekolahId</code> dari sesi admin.
+                Rute <code>/api/gelombang-ppdb</code> belum dimount di
+                Backend, sehingga daftar, tambah, ubah, dan hapus
+                gelombang belum dapat digunakan. Halaman ini hanya
+                menampilkan state belum tersedia dan tidak memakai data
+                contoh. Pengaturan jadwal sementara dapat dilakukan pada
+                menu Jalur Pendaftaran.
               </p>
             </div>
           </div>

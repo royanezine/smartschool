@@ -25,9 +25,6 @@ import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
 import { getJalurPpdb } from "@/services/jalurPpdb.service";
 
-// ============================================================
-// THEME HELPERS
-// ============================================================
 
 const themePrimaryText = "text-[var(--color-primary)]";
 
@@ -76,9 +73,6 @@ const themeWarningSurface =
 const themeWarningBorder =
   "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
 
-// ============================================================
-// COLOR MAP
-// ============================================================
 
 const colorMap = {
   zonasi: {
@@ -143,9 +137,6 @@ function getColorByNama(nama) {
   return colorMap.default;
 }
 
-// ============================================================
-// HELPERS
-// ============================================================
 
 function formatTanggalLengkap(value) {
   if (!value) {
@@ -241,9 +232,6 @@ function isPeriodeAktif(item) {
   return now >= mulai;
 }
 
-// ============================================================
-// PAGE
-// ============================================================
 
 export default function JalurPendaftaranPage() {
   const router = useRouter();
@@ -260,9 +248,6 @@ export default function JalurPendaftaranPage() {
     setCollapsed((value) => !value);
   };
 
-  // ============================================================
-  // LOAD DATA
-  // ============================================================
 
   const loadData = useCallback(
     async (isRefresh = false) => {
@@ -326,9 +311,6 @@ export default function JalurPendaftaranPage() {
     });
   }, [loadData]);
 
-  // ============================================================
-  // FILTER
-  // ============================================================
 
   const filteredData = useMemo(() => {
     const keyword = search.trim().toLowerCase();
@@ -353,9 +335,6 @@ export default function JalurPendaftaranPage() {
     });
   }, [data, search]);
 
-  // ============================================================
-  // STATS
-  // ============================================================
 
   const totalJalur = data.length;
 
@@ -378,9 +357,6 @@ export default function JalurPendaftaranPage() {
       isPeriodeAktif(item)
   ).length;
 
-  // ============================================================
-  // RENDER
-  // ============================================================
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
@@ -404,9 +380,6 @@ export default function JalurPendaftaranPage() {
         <main className="theme-page flex-1 overflow-y-auto">
           <div className="w-full p-4 sm:p-6 lg:p-8">
 
-            {/* =====================================================
-                HEADER
-            ===================================================== */}
 
             <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
               <div>
@@ -450,9 +423,6 @@ export default function JalurPendaftaranPage() {
               </button>
             </div>
 
-            {/* =====================================================
-                ERROR
-            ===================================================== */}
 
             {error && (
               <div
@@ -475,9 +445,6 @@ export default function JalurPendaftaranPage() {
               </div>
             )}
 
-            {/* =====================================================
-                STATISTICS
-            ===================================================== */}
 
             <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
               <StatCard
@@ -509,9 +476,6 @@ export default function JalurPendaftaranPage() {
               />
             </div>
 
-            {/* =====================================================
-                SEARCH
-            ===================================================== */}
 
             <div
               className={`theme-card ${themeNeutralBorder} mb-5 overflow-hidden rounded-2xl border ${themeCardShadow}`}
@@ -546,9 +510,6 @@ export default function JalurPendaftaranPage() {
               </div>
             </div>
 
-            {/* =====================================================
-                LOADING
-            ===================================================== */}
 
             {loading ? (
               <div
@@ -566,9 +527,6 @@ export default function JalurPendaftaranPage() {
                 </div>
               </div>
             ) : filteredData.length === 0 ? (
-              /* =====================================================
-                 EMPTY STATE
-              ===================================================== */
 
               <div
                 className={`theme-card ${themeNeutralBorder} flex min-h-[380px] flex-col items-center justify-center rounded-2xl border px-6 text-center ${themeCardShadow}`}
@@ -605,9 +563,6 @@ export default function JalurPendaftaranPage() {
                 )}
               </div>
             ) : (
-              /* =====================================================
-                 LIST
-              ===================================================== */
 
               <div className="space-y-4">
                 {filteredData.map((item) => {
@@ -638,7 +593,6 @@ export default function JalurPendaftaranPage() {
                       key={item?.id}
                       className={`theme-card overflow-hidden rounded-2xl border ${style.border} ${themeCardShadow} transition`}
                     >
-                      {/* HEADER ACCORDION */}
 
                       <button
                         type="button"
@@ -702,13 +656,11 @@ export default function JalurPendaftaranPage() {
                         />
                       </button>
 
-                      {/* DETAIL */}
 
                       {isOpen && (
                         <div
                           className={`${themeDivider} border-t px-4 pb-5 pt-5 sm:px-5 sm:pb-6`}
                         >
-                          {/* INFO CARDS */}
 
                           <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                             <DetailCard
@@ -740,7 +692,6 @@ export default function JalurPendaftaranPage() {
                             />
                           </div>
 
-                          {/* PERIOD */}
 
                           <div className="mt-4">
                             <span
@@ -760,7 +711,6 @@ export default function JalurPendaftaranPage() {
                             </span>
                           </div>
 
-                          {/* DESCRIPTION */}
 
                           <div className="mt-6">
                             <p className="theme-text-muted mb-2 text-xs font-bold uppercase tracking-wide">
@@ -773,7 +723,6 @@ export default function JalurPendaftaranPage() {
                             </p>
                           </div>
 
-                          {/* DOCUMENT */}
 
                           <div className="mt-6">
                             <p className="theme-text-muted mb-3 text-xs font-bold uppercase tracking-wide">
@@ -806,7 +755,6 @@ export default function JalurPendaftaranPage() {
                             </div>
                           </div>
 
-                          {/* SYSTEM IDS */}
 
                           <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
                             <SystemInfo
@@ -822,7 +770,6 @@ export default function JalurPendaftaranPage() {
                             />
                           </div>
 
-                          {/* ACTION */}
 
                           <div
                             className={`${themeDivider} mt-6 flex flex-col gap-3 border-t pt-5 sm:flex-row sm:items-center sm:justify-between`}
@@ -860,9 +807,6 @@ export default function JalurPendaftaranPage() {
               </div>
             )}
 
-            {/* =====================================================
-                INFO
-            ===================================================== */}
 
             <div
               className={`theme-card ${themeNeutralBorder} mt-5 flex items-start gap-2.5 rounded-xl border p-4 text-xs ${themeCardShadow}`}
@@ -880,9 +824,6 @@ export default function JalurPendaftaranPage() {
               </p>
             </div>
 
-            {/* =====================================================
-                FOOTER
-            ===================================================== */}
 
             <footer
               className={`${themeDivider} mt-6 border-t py-4 text-center`}
@@ -908,9 +849,6 @@ export default function JalurPendaftaranPage() {
   );
 }
 
-// ============================================================
-// DETAIL CARD
-// ============================================================
 
 function DetailCard({
   icon: Icon,
@@ -939,9 +877,6 @@ function DetailCard({
   );
 }
 
-// ============================================================
-// STAT CARD
-// ============================================================
 
 function StatCard({
   title,
@@ -980,9 +915,6 @@ function StatCard({
   );
 }
 
-// ============================================================
-// SYSTEM INFO
-// ============================================================
 
 function SystemInfo({ label, value }) {
   return (

@@ -26,14 +26,6 @@ import { urlFormulirPendaftaran } from "@/app/components/ppdb/rutePpdb";
 
 import { uploadBerkasPpdb } from "@/services/ppdb.service";
 
-/* =========================================================
-   DOKUMEN SESUAI BACKEND
-
-   Backend menerima (POST /api/ppdb/:id/berkas):
-   KK
-   AKTE
-   IJAZAH
-========================================================= */
 
 const dokumenList = [
   {
@@ -58,13 +50,6 @@ const dokumenList = [
   },
 ];
 
-/* =========================================================
-   VALIDASI FRONTEND
-
-   Mengikuti middleware upload Backend
-   (Backend/src/middlewares/uploadPpdb.middleware.ts):
-   tipe PDF / JPG / PNG, maksimal 5MB per file.
-========================================================= */
 
 const ALLOWED_TYPES = [
   "image/jpeg",
@@ -258,9 +243,6 @@ export default function PpdbUploadBerkas({ basePath = "" }) {
   const [uploadingId, setUploadingId] = useState("");
   const [uploadingAll, setUploadingAll] = useState(false);
 
-  // --------------------------------------------------------------------------
-  // ID PENDAFTARAN & TOKEN
-  // --------------------------------------------------------------------------
   useEffect(() => {
     if (typeof window === "undefined") {
       return;
@@ -307,7 +289,6 @@ export default function PpdbUploadBerkas({ basePath = "" }) {
       try {
         sessionStorage.setItem("ppdb_token_pendaftaran", effectiveToken);
       } catch {
-        /* storage dapat diblokir */
       }
     } else {
       try {
@@ -315,7 +296,6 @@ export default function PpdbUploadBerkas({ basePath = "" }) {
           sessionStorage.getItem("ppdb_token_pendaftaran") || ""
         ).trim();
       } catch {
-        /* storage dapat diblokir */
       }
     }
 
@@ -359,9 +339,6 @@ export default function PpdbUploadBerkas({ basePath = "" }) {
     setIdError("");
   }, [queryId, searchParams]);
 
-  // --------------------------------------------------------------------------
-  // TURUNAN
-  // --------------------------------------------------------------------------
   const berhasilCount = useMemo(
     () =>
       dokumenList.filter(
@@ -387,9 +364,6 @@ export default function PpdbUploadBerkas({ basePath = "" }) {
     pendaftaranId
   )}`;
 
-  // --------------------------------------------------------------------------
-  // PILIH / HAPUS FILE
-  // --------------------------------------------------------------------------
   const handleFileChange = (documentId, file) => {
     if (!file || sedangSibuk) {
       return;
@@ -431,8 +405,6 @@ export default function PpdbUploadBerkas({ basePath = "" }) {
           file,
           status: "idle",
           error: "",
-          // Berkas lama yang sudah diterima server tetap dicatat agar
-          // pengguna tahu bahwa mengganti file akan membuat berkas baru.
           berkas: sebelumnya.berkas,
         },
       };
@@ -460,9 +432,6 @@ export default function PpdbUploadBerkas({ basePath = "" }) {
     setSubmitError("");
   };
 
-  // --------------------------------------------------------------------------
-  // UPLOAD SATU FILE
-  // --------------------------------------------------------------------------
   const unggahFile = async (documentId, file) => {
     setDokumen((current) => ({
       ...current,
@@ -551,9 +520,6 @@ export default function PpdbUploadBerkas({ basePath = "" }) {
     }
   };
 
-  // --------------------------------------------------------------------------
-  // UPLOAD SEMUA (HANYA YANG BELUM BERHASIL)
-  // --------------------------------------------------------------------------
   const handleUploadAll = async () => {
     if (
       uploadLockRef.current ||
@@ -609,9 +575,6 @@ export default function PpdbUploadBerkas({ basePath = "" }) {
     }
   };
 
-  // --------------------------------------------------------------------------
-  // RENDER: ID TIDAK VALID
-  // --------------------------------------------------------------------------
   if (idStatus === "invalid") {
     return (
       <div className="min-h-screen bg-slate-50">
@@ -670,9 +633,6 @@ export default function PpdbUploadBerkas({ basePath = "" }) {
     );
   }
 
-  // --------------------------------------------------------------------------
-  // RENDER: SEDANG MEMERIKSA ID
-  // --------------------------------------------------------------------------
   if (idStatus === "checking") {
     return (
       <div className="min-h-screen bg-slate-50">
@@ -686,9 +646,6 @@ export default function PpdbUploadBerkas({ basePath = "" }) {
     );
   }
 
-  // --------------------------------------------------------------------------
-  // RENDER: FORM UPLOAD
-  // --------------------------------------------------------------------------
   return (
     <div className="min-h-screen bg-slate-50">
       <main className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 lg:px-8">

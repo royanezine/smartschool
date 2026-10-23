@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import {
   BookOpenCheck,
   Plus,
@@ -13,14 +13,33 @@ import {
   Trash2,
   Eye,
   X,
+  FileText,
+  Video,
+  Link as LinkIcon,
+  Download,
+  ExternalLink,
+  RefreshCw,
+  AlertCircle,
+  Loader2,
+  ChevronLeft,
+  ChevronRight,
+  Filter,
+  Upload,
 } from "lucide-react";
 
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
+import {
+  getMateriPembelajaran,
+  getKelasMapel,
+  createMateriDenganFile,
+  createMateriDenganLink,
+  updateMateriDenganFile,
+  updateMateriDenganLink,
+  updateMateriTanpaSumber,
+  deleteMateriPembelajaran,
+} from "@/services/materiPembelajaran.service";
 
-/* ============================================================
-   THEME HELPERS
-============================================================ */
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]";
@@ -40,122 +59,214 @@ const themePrimaryShadow =
 const themeCardShadow =
   "shadow-[0_6px_24px_color-mix(in_srgb,var(--color-text)_6%,transparent)]";
 
-/* ============================================================
-   PAGE
-============================================================ */
+
+const API_URL = (
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"
+).replace(/\/+$/, "");
+
+const FILE_BASE_URL = API_URL.endsWith("/api")
+  ? API_URL.slice(0, -4)
+  : API_URL;
+
+function getFileUrl(url) {
+  if (!url) return "#";
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  const clean = url.startsWith("/") ? url : `/${url}`;
+  return `${FILE_BASE_URL}${clean}`;
+}
+
+function formatTanggal(isoString) {
+  if (!isoString) return "-";
+  try {
+    const d = new Date(isoString);
+    if (isNaN(d.getTime())) return "-";
+    return new Intl.DateTimeFormat("id-ID", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    }).format(d);
+  } catch {
+    return "-";
+  }
+}
+
+function getTipeBadge(tipe) {
+  const t = String(tipe || "").toLowerCase();
+  if (t === "pdf") {
+    return {
+      label: "PDF",
+      icon: FileText,
+      className: "theme-danger",
+    };
+  }
+  if (t === "video") {
+    return {
+      label: "Video",
+      icon: Video,
+      className: "theme-info",
+    };
+  }
+  if (t === "link") {
+    return {
+      label: "Tautan",
+      icon: LinkIcon,
+      className: "theme-warning",
+    };
+  }
+  return {
+    label: tipe || "Materi",
+    icon: BookOpenCheck,
+    className: "theme-card-soft",
+  };
+}
+
 
 export default function MateriModulAjarPage() {
+  const [materiList, setMateriList] = useState([]);
+  const [kelasMapelList, setKelasMapelList] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [pageError, setPageError] = useState(null);
+  const [feedback, setFeedback] = useState(null);
+
   const [search, setSearch] = useState("");
+  const [filterTipe, setFilterTipe] = useState("all");
+  const [filterKelas, setFilterKelas] = useState("all");
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
+
   const [showModal, setShowModal] = useState(false);
-  const [modalType, setModalType] = useState("add");
+  const [modalType, setModalType] = useState("add"); 
   const [selectedMateri, setSelectedMateri] = useState(null);
+  const [deleteConfirmItem, setDeleteConfirmItem] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [formError, setFormError] = useState("");
 
-  const [materi, setMateri] = useState([
-    {
-      id: 1,
-      judul: "Pemrograman Dasar",
-      mapel: "Pemrograman Dasar",
-      kelas: "X PPLG 1",
-      guru: "Budi Santoso, S.Kom",
-      bab: "Algoritma dan Pemrograman",
-      pertemuan: "Pertemuan 1",
-      deskripsi:
-        "Pengenalan dasar algoritma dan pemrograman.",
-      durasi: "90 Menit",
-      tanggal: "02 September 2026",
-      status: "Published",
-      tipe: "Modul Ajar",
-      jumlahSiswa: 32,
-    },
-    {
-      id: 2,
-      judul: "Pemrograman Web",
-      mapel: "Pemrograman Web",
-      kelas: "XI PPLG 1",
-      guru: "Andi Wijaya, S.Kom",
-      bab: "HTML & CSS",
-      pertemuan: "Pertemuan 3",
-      deskripsi:
-        "Materi dasar pembuatan halaman web menggunakan HTML dan CSS.",
-      durasi: "90 Menit",
-      tanggal: "01 September 2026",
-      status: "Published",
-      tipe: "Materi",
-      jumlahSiswa: 30,
-    },
-    {
-      id: 3,
-      judul: "Basis Data",
-      mapel: "Basis Data",
-      kelas: "XI PPLG 2",
-      guru: "Rina Maharani, S.Kom",
-      bab: "Database Relasional",
-      pertemuan: "Pertemuan 2",
-      deskripsi:
-        "Konsep database relasional dan penggunaan tabel.",
-      durasi: "90 Menit",
-      tanggal: "30 Agustus 2026",
-      status: "Published",
-      tipe: "Modul Ajar",
-      jumlahSiswa: 31,
-    },
-    {
-      id: 4,
-      judul: "Jaringan Komputer",
-      mapel: "Jaringan Komputer",
-      kelas: "XII TKJ 1",
-      guru: "Dedi Firmansyah, S.Kom",
-      bab: "Topologi Jaringan",
-      pertemuan: "Pertemuan 1",
-      deskripsi:
-        "Pengenalan berbagai jenis topologi jaringan komputer.",
-      durasi: "90 Menit",
-      tanggal: "28 Agustus 2026",
-      status: "Draft",
-      tipe: "Materi",
-      jumlahSiswa: 31,
-    },
-  ]);
+  const [formKelasMapelId, setFormKelasMapelId] = useState("");
+  const [formJudul, setFormJudul] = useState("");
+  const [formKategori, setFormKategori] = useState("Modul Ajar");
+  const [formDeskripsi, setFormDeskripsi] = useState("");
+  const [formSumberTipe, setFormSumberTipe] = useState("file"); 
+  const [formFile, setFormFile] = useState(null);
+  const [formUrlLink, setFormUrlLink] = useState("");
+  const [formEditModeSumber, setFormEditModeSumber] = useState("keep"); 
 
-  /* ============================================================
-     STATISTICS
-  ============================================================ */
 
-  const publishedCount = materi.filter(
-    (item) => item.status === "Published"
-  ).length;
+  const loadData = useCallback(async (isRefresh = false) => {
+    if (isRefresh) {
+      setRefreshing(true);
+    } else {
+      setLoading(true);
+    }
+    setPageError(null);
 
-  const draftCount = materi.filter(
-    (item) => item.status === "Draft"
-  ).length;
+    try {
+      const [materiRes, kmRes] = await Promise.allSettled([
+        getMateriPembelajaran(),
+        getKelasMapel(),
+      ]);
 
-  const totalSiswa = materi.reduce(
-    (total, item) => total + item.jumlahSiswa,
-    0
-  );
+      if (materiRes.status === "fulfilled" && materiRes.value?.success) {
+        setMateriList(Array.isArray(materiRes.value.data) ? materiRes.value.data : []);
+      } else {
+        const errMsg =
+          materiRes.status === "rejected"
+            ? materiRes.reason?.message || "Gagal memuat daftar materi"
+            : materiRes.value?.message || "Gagal memuat materi";
+        throw new Error(errMsg);
+      }
 
-  /* ============================================================
-     SEARCH
-  ============================================================ */
+      if (kmRes.status === "fulfilled" && kmRes.value?.success) {
+        setKelasMapelList(Array.isArray(kmRes.value.data) ? kmRes.value.data : []);
+      }
+    } catch (err) {
+      setPageError(err.message || "Gagal menghubungi server backend.");
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, []);
 
-  const filteredMateri = materi.filter((item) => {
-    const keyword = search.toLowerCase();
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      loadData();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [loadData]);
 
-    return (
-      item.judul.toLowerCase().includes(keyword) ||
-      item.mapel.toLowerCase().includes(keyword) ||
-      item.kelas.toLowerCase().includes(keyword) ||
-      item.guru.toLowerCase().includes(keyword)
-    );
-  });
 
-  /* ============================================================
-     MODAL ACTIONS
-  ============================================================ */
+  const totalMateri = materiList.length;
+  const pdfCount = materiList.filter((m) => m.tipe === "pdf").length;
+  const videoCount = materiList.filter((m) => m.tipe === "video").length;
+  const linkCount = materiList.filter((m) => m.tipe === "link").length;
+
+
+  const distinctKelas = useMemo(() => {
+    const map = new Map();
+    materiList.forEach((m) => {
+      const k = m.kelasMapel?.kelas;
+      if (k?.id && !map.has(k.id)) {
+        map.set(k.id, k.nama);
+      }
+    });
+    return Array.from(map.entries()).map(([id, nama]) => ({ id, nama }));
+  }, [materiList]);
+
+  const filteredMateri = useMemo(() => {
+    const keyword = search.trim().toLowerCase();
+
+    return materiList.filter((item) => {
+      if (filterTipe !== "all" && item.tipe !== filterTipe) {
+        return false;
+      }
+
+      if (filterKelas !== "all" && item.kelasMapel?.kelas?.id !== filterKelas) {
+        return false;
+      }
+
+      if (!keyword) return true;
+
+      const judul = (item.judul || "").toLowerCase();
+      const mapel = (item.kelasMapel?.mataPelajaran?.nama || "").toLowerCase();
+      const kelas = (item.kelasMapel?.kelas?.nama || "").toLowerCase();
+      const guru = (item.kelasMapel?.guruPengajar?.namaLengkap || "").toLowerCase();
+      const kategori = (item.kategori || "").toLowerCase();
+
+      return (
+        judul.includes(keyword) ||
+        mapel.includes(keyword) ||
+        kelas.includes(keyword) ||
+        guru.includes(keyword) ||
+        kategori.includes(keyword)
+      );
+    });
+  }, [materiList, search, filterTipe, filterKelas]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredMateri.length / pageSize));
+
+  const paginatedMateri = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredMateri.slice(start, start + pageSize);
+  }, [filteredMateri, currentPage]);
+
+  const handleFilterChange = (setter, val) => {
+    setter(val);
+    setCurrentPage(1);
+  };
+
 
   const openAddModal = () => {
     setModalType("add");
     setSelectedMateri(null);
+    setFormKelasMapelId(kelasMapelList[0]?.id || "");
+    setFormJudul("");
+    setFormKategori("Modul Ajar");
+    setFormDeskripsi("");
+    setFormSumberTipe("file");
+    setFormFile(null);
+    setFormUrlLink("");
+    setFormError("");
     setShowModal(true);
   };
 
@@ -168,62 +279,185 @@ export default function MateriModulAjarPage() {
   const openEditModal = (item) => {
     setModalType("edit");
     setSelectedMateri(item);
+    setFormKelasMapelId(item.kelasMapelId || item.kelasMapel?.id || "");
+    setFormJudul(item.judul || "");
+    setFormKategori(item.kategori || "Modul Ajar");
+    setFormDeskripsi(item.deskripsi || "");
+    setFormEditModeSumber("keep");
+    setFormSumberTipe(item.tipe === "link" ? "link" : "file");
+    setFormFile(null);
+    setFormUrlLink(item.urlLink || "");
+    setFormError("");
     setShowModal(true);
   };
 
-  const handleDelete = (id) => {
-    if (
-      confirm(
-        "Apakah Anda yakin ingin menghapus materi ini?"
-      )
-    ) {
-      setMateri((prev) =>
-        prev.filter((item) => item.id !== id)
-      );
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setFormError("");
+
+    if (!formKelasMapelId) {
+      setFormError("Silakan pilih Kelas dan Mata Pelajaran.");
+      return;
+    }
+    if (!formJudul.trim()) {
+      setFormError("Judul materi wajib diisi.");
+      return;
+    }
+    if (formJudul.trim().length > 100) {
+      setFormError("Judul materi maksimal 100 karakter.");
+      return;
+    }
+
+    setSubmitting(true);
+
+    try {
+      if (modalType === "add") {
+        if (formSumberTipe === "file") {
+          if (!formFile) {
+            setFormError("Pilih file materi (PDF atau Video) untuk diunggah.");
+            setSubmitting(false);
+            return;
+          }
+          await createMateriDenganFile(
+            {
+              kelasMapelId: formKelasMapelId,
+              judul: formJudul.trim(),
+              kategori: formKategori.trim() || undefined,
+              deskripsi: formDeskripsi.trim() || undefined,
+              file: formFile,
+            }
+          );
+        } else {
+          if (!formUrlLink.trim()) {
+            setFormError("Masukkan tautan link materi (URL).");
+            setSubmitting(false);
+            return;
+          }
+          if (!/^https?:\/\//i.test(formUrlLink.trim())) {
+            setFormError("Format URL tidak valid. Awali dengan http:// atau https://");
+            setSubmitting(false);
+            return;
+          }
+          await createMateriDenganLink({
+            kelasMapelId: formKelasMapelId,
+            judul: formJudul.trim(),
+            kategori: formKategori.trim() || undefined,
+            deskripsi: formDeskripsi.trim() || undefined,
+            urlLink: formUrlLink.trim(),
+          });
+        }
+
+        setFeedback({
+          type: "success",
+          message: "Materi pembelajaran berhasil ditambahkan.",
+        });
+      } else if (modalType === "edit" && selectedMateri) {
+        if (formEditModeSumber === "keep") {
+          if (selectedMateri.tipe === "link") {
+            await updateMateriDenganLink(selectedMateri.id, {
+              kelasMapelId: formKelasMapelId,
+              judul: formJudul.trim(),
+              kategori: formKategori.trim() || undefined,
+              deskripsi: formDeskripsi.trim() || undefined,
+              urlLink: selectedMateri.urlLink || formUrlLink.trim(),
+            });
+          } else {
+            await updateMateriTanpaSumber(selectedMateri.id, {
+              kelasMapelId: formKelasMapelId,
+              judul: formJudul.trim(),
+              kategori: formKategori.trim() || undefined,
+              deskripsi: formDeskripsi.trim() || undefined,
+            });
+          }
+        } else if (formEditModeSumber === "change-file") {
+          if (!formFile) {
+            setFormError("Pilih berkas baru (PDF atau Video) untuk diunggah.");
+            setSubmitting(false);
+            return;
+          }
+          await updateMateriDenganFile(selectedMateri.id, {
+            kelasMapelId: formKelasMapelId,
+            judul: formJudul.trim(),
+            kategori: formKategori.trim() || undefined,
+            deskripsi: formDeskripsi.trim() || undefined,
+            file: formFile,
+          });
+        } else if (formEditModeSumber === "change-link") {
+          if (!formUrlLink.trim()) {
+            setFormError("Masukkan URL tautan baru.");
+            setSubmitting(false);
+            return;
+          }
+          if (!/^https?:\/\//i.test(formUrlLink.trim())) {
+            setFormError("Format URL tidak valid. Awali dengan http:// atau https://");
+            setSubmitting(false);
+            return;
+          }
+          await updateMateriDenganLink(selectedMateri.id, {
+            kelasMapelId: formKelasMapelId,
+            judul: formJudul.trim(),
+            kategori: formKategori.trim() || undefined,
+            deskripsi: formDeskripsi.trim() || undefined,
+            urlLink: formUrlLink.trim(),
+          });
+        }
+
+        setFeedback({
+          type: "success",
+          message: "Materi pembelajaran berhasil diperbarui.",
+        });
+      }
+
+      setShowModal(false);
+      await loadData(true);
+    } catch (err) {
+      setFormError(err.message || "Gagal menyimpan data materi.");
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  /* ============================================================
-     RENDER
-  ============================================================ */
+
+  const confirmDelete = async () => {
+    if (!deleteConfirmItem) return;
+    setSubmitting(true);
+    try {
+      await deleteMateriPembelajaran(deleteConfirmItem.id);
+      setFeedback({
+        type: "success",
+        message: `Materi "${deleteConfirmItem.judul}" berhasil dihapus.`,
+      });
+      setDeleteConfirmItem(null);
+      await loadData(true);
+    } catch (err) {
+      setFeedback({
+        type: "error",
+        message: err.message || "Gagal menghapus materi.",
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
 
   return (
     <div className="min-h-screen flex theme-page">
-      {/* ======================================================
-          SIDEBAR
-      ====================================================== */}
-
       <Sidebar />
-
-      {/* ======================================================
-          AREA KANAN
-      ====================================================== */}
 
       <div className="flex-1 min-w-0 flex flex-col">
         <Header />
 
         <main className="flex-1 px-4 md:px-6 lg:px-8 py-6 theme-page">
-          {/* ==================================================
-              BREADCRUMB
-          ================================================== */}
-
           <div className="mb-3">
             <p className="text-sm theme-text-muted">
               LMS & CBT
-
-              <span className="mx-2 theme-text-placeholder">
-                /
-              </span>
-
+              <span className="mx-2 theme-text-placeholder">/</span>
               <span className="theme-text-secondary">
                 Materi dan Modul Ajar
               </span>
             </p>
           </div>
-
-          {/* ==================================================
-              TITLE
-          ================================================== */}
 
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-7">
             <div className="flex items-center gap-3">
@@ -238,57 +472,122 @@ export default function MateriModulAjarPage() {
                   ${themePrimaryShadow}
                 `}
               >
-                <BookOpenCheck
-                  size={24}
-                  className="text-white"
-                />
+                <BookOpenCheck size={24} className="text-white" />
               </div>
 
               <div>
                 <h1 className="text-2xl font-bold theme-text">
                   Materi dan Modul Ajar
                 </h1>
-
                 <p className="text-sm theme-text-muted mt-1">
-                  Kelola materi pembelajaran dan modul ajar
-                  untuk siswa.
+                  Kelola modul pembelajaran, berkas PDF, video, dan tautan belajar siswa.
                 </p>
               </div>
             </div>
 
-            {/* ADD BUTTON */}
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => loadData(true)}
+                disabled={loading || refreshing}
+                className={`
+                  inline-flex
+                  items-center
+                  gap-2
+                  px-4
+                  py-3
+                  rounded-xl
+                  theme-card
+                  theme-border
+                  border
+                  text-sm
+                  font-medium
+                  theme-text-secondary
+                  ${themeTextHover}
+                  transition-all
+                  ${themeCardShadow}
+                `}
+                title="Segarkan data dari server"
+              >
+                <RefreshCw
+                  size={16}
+                  className={refreshing ? "animate-spin" : ""}
+                />
+                <span className="hidden sm:inline">Segarkan</span>
+              </button>
 
-            <button
-              onClick={openAddModal}
-              className="
-                inline-flex
-                items-center
-                justify-center
-                gap-2
-                px-5
-                py-3
-                bg-[var(--color-primary)]
-                hover:brightness-95
-                text-white
-                text-sm
-                font-semibold
-                rounded-xl
-                transition-all
-                shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_20%,transparent)]
-              "
-            >
-              <Plus size={18} />
-              Tambah Materi
-            </button>
+              <button
+                type="button"
+                onClick={openAddModal}
+                className="
+                  inline-flex
+                  items-center
+                  justify-center
+                  gap-2
+                  px-5
+                  py-3
+                  bg-[var(--color-primary)]
+                  hover:brightness-95
+                  text-white
+                  text-sm
+                  font-semibold
+                  rounded-xl
+                  transition-all
+                  shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_20%,transparent)]
+                "
+              >
+                <Plus size={18} />
+                Tambah Materi
+              </button>
+            </div>
           </div>
 
-          {/* ==================================================
-              STATISTICS
-          ================================================== */}
+          {feedback && (
+            <div
+              className={`
+                mb-6 p-4 rounded-xl border flex items-center justify-between
+                ${
+                  feedback.type === "success"
+                    ? "theme-success border-[color-mix(in_srgb,var(--color-success)_30%,transparent)]"
+                    : "theme-danger border-[color-mix(in_srgb,var(--color-danger)_30%,transparent)]"
+                }
+              `}
+            >
+              <div className="flex items-center gap-3">
+                {feedback.type === "success" ? (
+                  <CheckCircle2 size={18} />
+                ) : (
+                  <AlertCircle size={18} />
+                )}
+                <p className="text-sm font-medium">{feedback.message}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setFeedback(null)}
+                className="p-1 rounded-lg hover:opacity-70 transition"
+              >
+                <X size={16} />
+              </button>
+            </div>
+          )}
+
+          {pageError && (
+            <div className="mb-6 p-4 rounded-xl border theme-danger border-[color-mix(in_srgb,var(--color-danger)_30%,transparent)] flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <AlertCircle size={18} />
+                <p className="text-sm font-medium">{pageError}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => loadData(true)}
+                className="text-xs underline font-semibold px-2 py-1"
+              >
+                Coba Lagi
+              </button>
+            </div>
+          )}
 
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
-            {/* TOTAL */}
-
             <div
               className={`
                 theme-card
@@ -301,28 +600,20 @@ export default function MateriModulAjarPage() {
             >
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-sm theme-text-muted">
-                    Total Materi
-                  </p>
-
+                  <p className="text-sm theme-text-muted">Total Materi</p>
                   <p className="text-3xl font-bold theme-text mt-2">
-                    {materi.length}
+                    {loading ? "..." : totalMateri}
                   </p>
-
                   <p className="text-xs theme-text-placeholder mt-2">
-                    Materi & modul ajar
+                    Seluruh materi & modul ajar
                   </p>
                 </div>
-
                 <div
                   className={`
-                    w-11
-                    h-11
+                    w-11 h-11
                     rounded-xl
                     ${themePrimarySoft}
-                    flex
-                    items-center
-                    justify-center
+                    flex items-center justify-center
                     text-[var(--color-primary)]
                   `}
                 >
@@ -331,8 +622,6 @@ export default function MateriModulAjarPage() {
               </div>
             </div>
 
-            {/* PUBLISHED */}
-
             <div
               className={`
                 theme-card
@@ -345,37 +634,20 @@ export default function MateriModulAjarPage() {
             >
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-sm theme-text-muted">
-                    Published
-                  </p>
-
+                  <p className="text-sm theme-text-muted">Dokumen PDF</p>
                   <p className="text-3xl font-bold theme-text mt-2">
-                    {publishedCount}
+                    {loading ? "..." : pdfCount}
                   </p>
-
                   <p className="text-xs theme-text-placeholder mt-2">
-                    Sudah diterbitkan
+                    Berkas teks & modul PDF
                   </p>
                 </div>
-
-                <div
-                  className="
-                    w-11
-                    h-11
-                    rounded-xl
-                    theme-success
-                    flex
-                    items-center
-                    justify-center
-                  "
-                >
-                  <CheckCircle2 size={21} />
+                <div className="w-11 h-11 rounded-xl theme-danger flex items-center justify-center">
+                  <FileText size={21} />
                 </div>
               </div>
             </div>
 
-            {/* DRAFT */}
-
             <div
               className={`
                 theme-card
@@ -388,37 +660,20 @@ export default function MateriModulAjarPage() {
             >
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-sm theme-text-muted">
-                    Draft
-                  </p>
-
+                  <p className="text-sm theme-text-muted">Video Belajar</p>
                   <p className="text-3xl font-bold theme-text mt-2">
-                    {draftCount}
+                    {loading ? "..." : videoCount}
                   </p>
-
                   <p className="text-xs theme-text-placeholder mt-2">
-                    Belum diterbitkan
+                    Media video pembelajaran
                   </p>
                 </div>
-
-                <div
-                  className="
-                    w-11
-                    h-11
-                    rounded-xl
-                    theme-warning
-                    flex
-                    items-center
-                    justify-center
-                  "
-                >
-                  <Clock3 size={21} />
+                <div className="w-11 h-11 rounded-xl theme-info flex items-center justify-center">
+                  <Video size={21} />
                 </div>
               </div>
             </div>
 
-            {/* SISWA */}
-
             <div
               className={`
                 theme-card
@@ -431,40 +686,20 @@ export default function MateriModulAjarPage() {
             >
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-sm theme-text-muted">
-                    Total Siswa
-                  </p>
-
+                  <p className="text-sm theme-text-muted">Tautan Web</p>
                   <p className="text-3xl font-bold theme-text mt-2">
-                    {totalSiswa}
+                    {loading ? "..." : linkCount}
                   </p>
-
                   <p className="text-xs theme-text-placeholder mt-2">
-                    Distribusi pembelajaran
+                    Link sumber eksternal
                   </p>
                 </div>
-
-                <div
-                  className={`
-                    w-11
-                    h-11
-                    rounded-xl
-                    ${themePrimarySoft}
-                    flex
-                    items-center
-                    justify-center
-                    text-[var(--color-primary)]
-                  `}
-                >
-                  <Users size={21} />
+                <div className="w-11 h-11 rounded-xl theme-warning flex items-center justify-center">
+                  <LinkIcon size={21} />
                 </div>
               </div>
             </div>
           </div>
-
-          {/* ==================================================
-              TABLE CARD
-          ================================================== */}
 
           <div
             className={`
@@ -476,87 +711,119 @@ export default function MateriModulAjarPage() {
               overflow-hidden
             `}
           >
-            {/* TOOLBAR */}
-
             <div className="p-5 theme-border-soft border-b">
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                 <div>
-                  <h2 className="font-semibold theme-text">
-                    Daftar Materi
-                  </h2>
-
+                  <h2 className="font-semibold theme-text">Daftar Materi</h2>
                   <p className="text-xs theme-text-placeholder mt-1">
-                    Daftar materi dan modul ajar yang tersedia.
+                    Daftar materi dan modul ajar terintegrasi server sekolah.
                   </p>
                 </div>
 
-                {/* SEARCH */}
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                  <div className="relative">
+                    <select
+                      value={filterTipe}
+                      onChange={(e) =>
+                        handleFilterChange(setFilterTipe, e.target.value)
+                      }
+                      className="
+                        theme-input
+                        px-3
+                        py-2.5
+                        rounded-xl
+                        text-xs
+                        focus:outline-none
+                      "
+                    >
+                      <option value="all">Semua Tipe</option>
+                      <option value="pdf">PDF</option>
+                      <option value="video">Video</option>
+                      <option value="link">Tautan Web</option>
+                    </select>
+                  </div>
 
-                <div className="relative w-full md:w-72">
-                  <Search
-                    size={17}
-                    className="
-                      absolute
-                      left-3
-                      top-1/2
-                      -translate-y-1/2
-                      theme-text-placeholder
-                    "
-                  />
+                  {distinctKelas.length > 0 && (
+                    <div className="relative">
+                      <select
+                        value={filterKelas}
+                        onChange={(e) =>
+                          handleFilterChange(setFilterKelas, e.target.value)
+                        }
+                        className="
+                          theme-input
+                          px-3
+                          py-2.5
+                          rounded-xl
+                          text-xs
+                          focus:outline-none
+                        "
+                      >
+                        <option value="all">Semua Kelas</option>
+                        {distinctKelas.map((k) => (
+                          <option key={k.id} value={k.id}>
+                            {k.nama}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
 
-                  <input
-                    value={search}
-                    onChange={(e) =>
-                      setSearch(e.target.value)
-                    }
-                    placeholder="Cari materi..."
-                    className="
-                      theme-input
-                      w-full
-                      pl-10
-                      pr-4
-                      py-2.5
-                      rounded-xl
-                      text-sm
-                      focus:outline-none
-                    "
-                  />
+                  <div className="relative w-full sm:w-64">
+                    <Search
+                      size={16}
+                      className="
+                        absolute
+                        left-3
+                        top-1/2
+                        -translate-y-1/2
+                        theme-text-placeholder
+                      "
+                    />
+                    <input
+                      value={search}
+                      onChange={(e) =>
+                        handleFilterChange(setSearch, e.target.value)
+                      }
+                      placeholder="Cari judul, mapel, guru..."
+                      className="
+                        theme-input
+                        w-full
+                        pl-9
+                        pr-4
+                        py-2.5
+                        rounded-xl
+                        text-sm
+                        focus:outline-none
+                      "
+                    />
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* ==================================================
-                TABLE
-            ================================================== */}
-
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[900px]">
+              <table className="w-full min-w-[950px]">
                 <thead>
                   <tr className="theme-card-soft theme-border-soft border-b">
                     <th className="text-left px-5 py-4 text-xs font-semibold theme-text-muted">
-                      Materi
+                      Materi & Kategori
                     </th>
-
                     <th className="text-left px-5 py-4 text-xs font-semibold theme-text-muted">
                       Mata Pelajaran
                     </th>
-
                     <th className="text-left px-5 py-4 text-xs font-semibold theme-text-muted">
                       Kelas
                     </th>
-
                     <th className="text-left px-5 py-4 text-xs font-semibold theme-text-muted">
-                      Guru
+                      Guru Pengajar
                     </th>
-
                     <th className="text-left px-5 py-4 text-xs font-semibold theme-text-muted">
-                      Status
+                      Tipe / Berkas
                     </th>
-
-                    <th className="text-center px-5 py-4 text-xs font-semibold theme-text-muted">
-                      Siswa
+                    <th className="text-left px-5 py-4 text-xs font-semibold theme-text-muted">
+                      Tanggal
                     </th>
-
                     <th className="text-right px-5 py-4 text-xs font-semibold theme-text-muted">
                       Aksi
                     </th>
@@ -564,179 +831,193 @@ export default function MateriModulAjarPage() {
                 </thead>
 
                 <tbody className="divide-y theme-border-soft">
-                  {filteredMateri.length > 0 ? (
-                    filteredMateri.map((item) => (
-                      <tr
-                        key={item.id}
-                        className={`
-                          transition-colors
-                          ${themePrimaryHover}
-                        `}
-                      >
-                        {/* MATERI */}
+                  {loading ? (
+                    <tr>
+                      <td colSpan={7} className="px-5 py-12 text-center">
+                        <Loader2
+                          size={28}
+                          className="mx-auto animate-spin text-[var(--color-primary)] mb-2"
+                        />
+                        <p className="text-sm font-medium theme-text-secondary">
+                          Memuat materi pembelajaran...
+                        </p>
+                      </td>
+                    </tr>
+                  ) : paginatedMateri.length > 0 ? (
+                    paginatedMateri.map((item) => {
+                      const tipeBadge = getTipeBadge(item.tipe);
+                      const IconComponent = tipeBadge.icon;
+                      const hasFile = Boolean(item.urlFile);
+                      const hasLink = Boolean(item.urlLink);
 
-                        <td className="px-5 py-4">
-                          <div>
-                            <p className="font-semibold text-sm theme-text">
-                              {item.judul}
-                            </p>
+                      return (
+                        <tr
+                          key={item.id}
+                          className={`
+                            transition-colors
+                            ${themePrimaryHover}
+                          `}
+                        >
+                          <td className="px-5 py-4">
+                            <div>
+                              <p className="font-semibold text-sm theme-text line-clamp-1">
+                                {item.judul}
+                              </p>
+                              <p className="text-xs theme-text-placeholder mt-0.5">
+                                {item.kategori || "Materi Umum"}
+                              </p>
+                            </div>
+                          </td>
 
-                            <p className="text-xs theme-text-placeholder mt-1">
-                              {item.tipe} • {item.pertemuan}
-                            </p>
-                          </div>
-                        </td>
+                          <td className="px-5 py-4">
+                            <span className="text-sm theme-text-secondary">
+                              {item.kelasMapel?.mataPelajaran?.nama || "-"}
+                            </span>
+                          </td>
 
-                        {/* MAPEL */}
+                          <td className="px-5 py-4">
+                            <span className="text-sm theme-text-secondary">
+                              {item.kelasMapel?.kelas?.nama || "-"}
+                            </span>
+                          </td>
 
-                        <td className="px-5 py-4">
-                          <span className="text-sm theme-text-secondary">
-                            {item.mapel}
-                          </span>
-                        </td>
+                          <td className="px-5 py-4">
+                            <span className="text-sm theme-text-secondary">
+                              {item.kelasMapel?.guruPengajar?.namaLengkap || "-"}
+                            </span>
+                          </td>
 
-                        {/* KELAS */}
+                          <td className="px-5 py-4">
+                            <div className="flex items-center gap-2">
+                              <span
+                                className={`
+                                  inline-flex
+                                  items-center
+                                  gap-1.5
+                                  px-2.5
+                                  py-1
+                                  rounded-full
+                                  text-xs
+                                  font-medium
+                                  ${tipeBadge.className}
+                                `}
+                              >
+                                <IconComponent size={12} />
+                                {tipeBadge.label}
+                              </span>
 
-                        <td className="px-5 py-4">
-                          <span className="text-sm theme-text-secondary">
-                            {item.kelas}
-                          </span>
-                        </td>
+                              {hasFile && (
+                                <a
+                                  href={getFileUrl(item.urlFile)}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="
+                                    p-1.5
+                                    rounded-lg
+                                    theme-card-soft
+                                    theme-text-secondary
+                                    hover:text-[var(--color-primary)]
+                                    transition
+                                  "
+                                  title="Unduh / Buka Berkas"
+                                >
+                                  <Download size={14} />
+                                </a>
+                              )}
 
-                        {/* GURU */}
+                              {hasLink && (
+                                <a
+                                  href={item.urlLink}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="
+                                    p-1.5
+                                    rounded-lg
+                                    theme-card-soft
+                                    theme-text-secondary
+                                    hover:text-[var(--color-primary)]
+                                    transition
+                                  "
+                                  title="Buka Tautan"
+                                >
+                                  <ExternalLink size={14} />
+                                </a>
+                              )}
+                            </div>
+                          </td>
 
-                        <td className="px-5 py-4">
-                          <span className="text-sm theme-text-secondary">
-                            {item.guru}
-                          </span>
-                        </td>
+                          <td className="px-5 py-4">
+                            <span className="text-xs theme-text-placeholder">
+                              {formatTanggal(item.dibuatPada)}
+                            </span>
+                          </td>
 
-                        {/* STATUS */}
+                          <td className="px-5 py-4 text-right">
+                            <div className="flex items-center justify-end gap-1">
+                              <button
+                                type="button"
+                                onClick={() => openDetailModal(item)}
+                                className={`
+                                  p-2
+                                  rounded-lg
+                                  theme-text-placeholder
+                                  transition
+                                  hover:text-[var(--color-primary)]
+                                  ${themePrimarySoft}
+                                `}
+                                title="Lihat Detail"
+                              >
+                                <Eye size={16} />
+                              </button>
 
-                        <td className="px-5 py-4">
-                          <span
-                            className={`
-                              inline-flex
-                              items-center
-                              px-2.5
-                              py-1
-                              rounded-full
-                              text-xs
-                              font-medium
-                              ${
-                                item.status === "Published"
-                                  ? "theme-success"
-                                  : "theme-warning"
-                              }
-                            `}
-                          >
-                            {item.status}
-                          </span>
-                        </td>
+                              <button
+                                type="button"
+                                onClick={() => openEditModal(item)}
+                                className="
+                                  p-2
+                                  rounded-lg
+                                  theme-text-placeholder
+                                  hover:theme-warning
+                                  transition
+                                "
+                                title="Edit Materi"
+                              >
+                                <Pencil size={16} />
+                              </button>
 
-                        {/* SISWA */}
-
-                        <td className="px-5 py-4 text-center">
-                          <span className="text-sm font-medium theme-text-secondary">
-                            {item.jumlahSiswa}
-                          </span>
-                        </td>
-
-                        {/* ACTION */}
-
-                        <td className="px-5 py-4">
-                          <div className="flex items-center justify-end gap-1">
-
-                            {/* DETAIL */}
-
-                            <button
-                              onClick={() =>
-                                openDetailModal(item)
-                              }
-                              className={`
-                                p-2
-                                rounded-lg
-                                theme-text-placeholder
-                                transition
-                                hover:text-[var(--color-primary)]
-                                ${themePrimarySoft}
-                              `}
-                              title="Detail"
-                            >
-                              <Eye size={16} />
-                            </button>
-
-                            {/* EDIT */}
-
-                            <button
-                              onClick={() =>
-                                openEditModal(item)
-                              }
-                              className="
-                                p-2
-                                rounded-lg
-                                theme-text-placeholder
-                                hover:theme-warning
-                                transition
-                              "
-                              title="Edit"
-                            >
-                              <Pencil size={16} />
-                            </button>
-
-                            {/* DELETE */}
-
-                            <button
-                              onClick={() =>
-                                handleDelete(item.id)
-                              }
-                              className="
-                                p-2
-                                rounded-lg
-                                theme-text-placeholder
-                                hover:theme-danger
-                                transition
-                              "
-                              title="Hapus"
-                            >
-                              <Trash2 size={16} />
-                            </button>
-
-                            {/* MORE */}
-
-                            <button
-                              className={`
-                                p-2
-                                rounded-lg
-                                theme-text-placeholder
-                                transition
-                                ${themeTextHover}
-                              `}
-                              title="Menu"
-                            >
-                              <MoreVertical size={16} />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))
+                              <button
+                                type="button"
+                                onClick={() => setDeleteConfirmItem(item)}
+                                className="
+                                  p-2
+                                  rounded-lg
+                                  theme-text-placeholder
+                                  hover:theme-danger
+                                  transition
+                                "
+                                title="Hapus Materi"
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
                   ) : (
                     <tr>
-                      <td
-                        colSpan={7}
-                        className="px-5 py-14 text-center"
-                      >
+                      <td colSpan={7} className="px-5 py-14 text-center">
                         <BookOpenCheck
                           size={38}
                           className="mx-auto theme-text-placeholder mb-3"
                         />
-
                         <p className="text-sm font-medium theme-text-secondary">
                           Materi tidak ditemukan
                         </p>
-
                         <p className="text-xs theme-text-placeholder mt-1">
-                          Coba gunakan kata kunci pencarian lain.
+                          {search || filterTipe !== "all" || filterKelas !== "all"
+                            ? "Coba gunakan kata kunci pencarian atau filter lain."
+                            : "Belum ada materi pembelajaran yang dibuat."}
                         </p>
                       </td>
                     </tr>
@@ -744,13 +1025,154 @@ export default function MateriModulAjarPage() {
                 </tbody>
               </table>
             </div>
+
+            {!loading && filteredMateri.length > 0 && (
+              <div className="px-5 py-4 theme-border-soft border-t flex flex-col sm:flex-row items-center justify-between gap-3">
+                <p className="text-xs theme-text-muted">
+                  Menampilkan{" "}
+                  <span className="font-semibold theme-text">
+                    {(currentPage - 1) * pageSize + 1}
+                  </span>{" "}
+                  sampai{" "}
+                  <span className="font-semibold theme-text">
+                    {Math.min(currentPage * pageSize, filteredMateri.length)}
+                  </span>{" "}
+                  dari{" "}
+                  <span className="font-semibold theme-text">
+                    {filteredMateri.length}
+                  </span>{" "}
+                  materi
+                </p>
+
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                    className="
+                      p-2
+                      rounded-lg
+                      theme-card
+                      theme-border
+                      border
+                      theme-text-secondary
+                      hover:brightness-95
+                      disabled:opacity-40
+                      disabled:cursor-not-allowed
+                      transition
+                    "
+                    title="Halaman Sebelumnya"
+                  >
+                    <ChevronLeft size={16} />
+                  </button>
+
+                  <span className="px-3 py-1 text-xs font-semibold theme-text">
+                    {currentPage} / {totalPages}
+                  </span>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setCurrentPage((p) => Math.min(totalPages, p + 1))
+                    }
+                    disabled={currentPage >= totalPages}
+                    className="
+                      p-2
+                      rounded-lg
+                      theme-card
+                      theme-border
+                      border
+                      theme-text-secondary
+                      hover:brightness-95
+                      disabled:opacity-40
+                      disabled:cursor-not-allowed
+                      transition
+                    "
+                    title="Halaman Selanjutnya"
+                  >
+                    <ChevronRight size={16} />
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </main>
       </div>
 
-      {/* ========================================================
-          MODAL
-      ======================================================== */}
+      {deleteConfirmItem && (
+        <div className="fixed inset-0 z-50 bg-[color-mix(in_srgb,var(--color-text)_45%,transparent)] backdrop-blur-sm flex items-center justify-center p-4">
+          <div
+            className={`
+              theme-card
+              theme-border
+              w-full
+              max-w-md
+              rounded-2xl
+              border
+              ${themeCardShadow}
+              p-6
+            `}
+          >
+            <div className="w-12 h-12 rounded-xl theme-danger flex items-center justify-center mb-4">
+              <Trash2 size={24} />
+            </div>
+
+            <h3 className="text-lg font-bold theme-text">Hapus Materi</h3>
+            <p className="text-sm theme-text-secondary mt-2">
+              Apakah Anda yakin ingin menghapus materi{" "}
+              <span className="font-semibold text-[var(--color-primary)]">
+                &ldquo;{deleteConfirmItem.judul}&rdquo;
+              </span>
+              ? Tindakan ini akan menghapus materi dari sistem.
+            </p>
+
+            <div className="flex justify-end gap-3 mt-6">
+              <button
+                type="button"
+                onClick={() => setDeleteConfirmItem(null)}
+                disabled={submitting}
+                className="
+                  px-4
+                  py-2.5
+                  rounded-xl
+                  theme-card-soft
+                  theme-text-secondary
+                  text-sm
+                  font-medium
+                  hover:brightness-95
+                  transition
+                "
+              >
+                Batal
+              </button>
+
+              <button
+                type="button"
+                onClick={confirmDelete}
+                disabled={submitting}
+                className="
+                  inline-flex
+                  items-center
+                  gap-2
+                  px-5
+                  py-2.5
+                  rounded-xl
+                  bg-[var(--color-danger,#ef4444)]
+                  text-white
+                  text-sm
+                  font-semibold
+                  hover:brightness-95
+                  disabled:opacity-60
+                  transition
+                "
+              >
+                {submitting && <Loader2 size={16} className="animate-spin" />}
+                {submitting ? "Menghapus..." : "Ya, Hapus"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {showModal && (
         <div
@@ -777,31 +1199,28 @@ export default function MateriModulAjarPage() {
               ${themeCardShadow}
               overflow-hidden
               max-h-[90vh]
-              overflow-y-auto
+              flex
+              flex-col
             `}
           >
-            {/* ==================================================
-                MODAL HEADER
-            ================================================== */}
-
-            <div className="px-6 py-4 theme-border-soft border-b flex items-center justify-between">
+            <div className="px-6 py-4 theme-border-soft border-b flex items-center justify-between shrink-0">
               <div>
-                <h3 className="font-semibold theme-text">
+                <h3 className="font-semibold theme-text text-lg">
                   {modalType === "add"
-                    ? "Tambah Materi"
+                    ? "Tambah Materi Pembelajaran"
                     : modalType === "edit"
-                    ? "Edit Materi"
-                    : "Detail Materi"}
+                    ? "Edit Materi Pembelajaran"
+                    : "Detail Materi Pembelajaran"}
                 </h3>
-
-                <p className="text-xs theme-text-placeholder mt-1">
+                <p className="text-xs theme-text-placeholder mt-0.5">
                   {modalType === "detail"
-                    ? "Informasi detail materi pembelajaran"
-                    : "Kelola informasi materi pembelajaran"}
+                    ? "Informasi lengkap materi pembelajaran dan modul ajar"
+                    : "Kelola rincian materi, kelas mapel, dan berkas ajar"}
                 </p>
               </div>
 
               <button
+                type="button"
                 onClick={() => setShowModal(false)}
                 className={`
                   p-2
@@ -816,140 +1235,187 @@ export default function MateriModulAjarPage() {
               </button>
             </div>
 
-            {/* ==================================================
-                DETAIL
-            ================================================== */}
-
-            {modalType === "detail" &&
-              selectedMateri && (
-                <div className="p-6 space-y-5">
-
-                  {/* JUDUL */}
-
+            <div className="p-6 overflow-y-auto flex-1">
+              {modalType === "detail" && selectedMateri && (
+                <div className="space-y-5">
                   <div>
                     <p className="text-xs theme-text-placeholder mb-1">
                       Judul Materi
                     </p>
-
-                    <p className="font-semibold theme-text">
+                    <p className="font-semibold theme-text text-base">
                       {selectedMateri.judul}
                     </p>
                   </div>
 
-                  {/* GRID DETAIL */}
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    {/* MAPEL */}
-
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <p className="text-xs theme-text-placeholder mb-1">
                         Mata Pelajaran
                       </p>
-
-                      <p className="text-sm theme-text-secondary">
-                        {selectedMateri.mapel}
+                      <p className="text-sm font-medium theme-text-secondary">
+                        {selectedMateri.kelasMapel?.mataPelajaran?.nama || "-"}
                       </p>
                     </div>
-
-                    {/* KELAS */}
 
                     <div>
                       <p className="text-xs theme-text-placeholder mb-1">
                         Kelas
                       </p>
-
-                      <p className="text-sm theme-text-secondary">
-                        {selectedMateri.kelas}
+                      <p className="text-sm font-medium theme-text-secondary">
+                        {selectedMateri.kelasMapel?.kelas?.nama || "-"}
                       </p>
                     </div>
 
-                    {/* GURU */}
-
                     <div>
                       <p className="text-xs theme-text-placeholder mb-1">
-                        Guru
+                        Guru Pengajar
                       </p>
-
-                      <p className="text-sm theme-text-secondary">
-                        {selectedMateri.guru}
+                      <p className="text-sm font-medium theme-text-secondary">
+                        {selectedMateri.kelasMapel?.guruPengajar?.namaLengkap || "-"}
                       </p>
                     </div>
 
-                    {/* PERTEMUAN */}
-
                     <div>
                       <p className="text-xs theme-text-placeholder mb-1">
-                        Pertemuan
+                        Kategori
                       </p>
-
-                      <p className="text-sm theme-text-secondary">
-                        {selectedMateri.pertemuan}
+                      <p className="text-sm font-medium theme-text-secondary">
+                        {selectedMateri.kategori || "-"}
                       </p>
                     </div>
 
-                    {/* DURASI */}
-
                     <div>
                       <p className="text-xs theme-text-placeholder mb-1">
-                        Durasi
+                        Tipe Sumber
                       </p>
-
-                      <p className="text-sm theme-text-secondary">
-                        {selectedMateri.durasi}
-                      </p>
+                      <div>
+                        {(() => {
+                          const badge = getTipeBadge(selectedMateri.tipe);
+                          const IconComp = badge.icon;
+                          return (
+                            <span
+                              className={`
+                                inline-flex
+                                items-center
+                                gap-1.5
+                                px-2.5
+                                py-1
+                                rounded-full
+                                text-xs
+                                font-medium
+                                ${badge.className}
+                              `}
+                            >
+                              <IconComp size={12} />
+                              {badge.label}
+                            </span>
+                          );
+                        })()}
+                      </div>
                     </div>
 
-                    {/* SISWA */}
-
                     <div>
                       <p className="text-xs theme-text-placeholder mb-1">
-                        Jumlah Siswa
+                        Tanggal Dibuat
                       </p>
-
-                      <p className="text-sm theme-text-secondary">
-                        {selectedMateri.jumlahSiswa} siswa
+                      <p className="text-sm font-medium theme-text-secondary">
+                        {formatTanggal(selectedMateri.dibuatPada)}
                       </p>
                     </div>
                   </div>
-
-                  {/* DESKRIPSI */}
 
                   <div>
                     <p className="text-xs theme-text-placeholder mb-1">
                       Deskripsi
                     </p>
-
-                    <p className="text-sm theme-text-secondary leading-relaxed">
-                      {selectedMateri.deskripsi}
+                    <p className="text-sm theme-text-secondary leading-relaxed bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] p-3 rounded-xl">
+                      {selectedMateri.deskripsi || "Tidak ada deskripsi."}
                     </p>
                   </div>
-
-                  {/* STATUS */}
 
                   <div>
                     <p className="text-xs theme-text-placeholder mb-2">
-                      Status
+                      Akses Berkas / Tautan
                     </p>
-
-                    <span
-                      className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
-                        selectedMateri.status ===
-                        "Published"
-                          ? "theme-success"
-                          : "theme-warning"
-                      }`}
-                    >
-                      {selectedMateri.status}
-                    </span>
+                    {selectedMateri.urlFile ? (
+                      <div className="flex items-center gap-3 p-3 rounded-xl border theme-border-soft theme-card-soft">
+                        <FileText size={20} className="text-[var(--color-primary)]" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-semibold theme-text truncate">
+                            {selectedMateri.urlFile.split("/").pop()}
+                          </p>
+                          <p className="text-[11px] theme-text-muted">
+                            Berkas tersimpan di server
+                          </p>
+                        </div>
+                        <a
+                          href={getFileUrl(selectedMateri.urlFile)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="
+                            inline-flex
+                            items-center
+                            gap-1.5
+                            px-3
+                            py-1.5
+                            rounded-lg
+                            bg-[var(--color-primary)]
+                            text-white
+                            text-xs
+                            font-semibold
+                            hover:brightness-95
+                            transition
+                          "
+                        >
+                          <Download size={14} />
+                          Unduh
+                        </a>
+                      </div>
+                    ) : selectedMateri.urlLink ? (
+                      <div className="flex items-center gap-3 p-3 rounded-xl border theme-border-soft theme-card-soft">
+                        <LinkIcon size={20} className="text-yellow-500" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-semibold theme-text truncate">
+                            {selectedMateri.urlLink}
+                          </p>
+                          <p className="text-[11px] theme-text-muted">
+                            Tautan materi eksternal
+                          </p>
+                        </div>
+                        <a
+                          href={selectedMateri.urlLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="
+                            inline-flex
+                            items-center
+                            gap-1.5
+                            px-3
+                            py-1.5
+                            rounded-lg
+                            bg-[var(--color-primary)]
+                            text-white
+                            text-xs
+                            font-semibold
+                            hover:brightness-95
+                            transition
+                          "
+                        >
+                          <ExternalLink size={14} />
+                          Buka Link
+                        </a>
+                      </div>
+                    ) : (
+                      <p className="text-xs theme-text-placeholder">
+                        Tidak ada berkas atau tautan terlampir.
+                      </p>
+                    )}
                   </div>
 
-                  {/* BUTTON */}
-
-                  <div className="flex justify-end">
+                  <div className="flex justify-end pt-2">
                     <button
-                      onClick={() =>
-                        setShowModal(false)
-                      }
+                      type="button"
+                      onClick={() => setShowModal(false)}
                       className="
                         px-4
                         py-2.5
@@ -968,181 +1434,23 @@ export default function MateriModulAjarPage() {
                 </div>
               )}
 
-            {/* ==================================================
-                ADD / EDIT
-            ================================================== */}
-
-            {(modalType === "add" ||
-              modalType === "edit") && (
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  setShowModal(false);
-                }}
-                className="p-6"
-              >
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-                  {/* JUDUL */}
-
-                  <div className="md:col-span-2">
-                    <label className="block text-xs font-medium theme-text-secondary mb-1.5">
-                      Judul Materi
-                    </label>
-
-                    <input
-                      defaultValue={
-                        selectedMateri?.judul || ""
-                      }
-                      required
-                      className="
-                        theme-input
-                        w-full
-                        px-3.5
-                        py-2.5
-                        rounded-xl
-                        text-sm
-                        focus:outline-none
-                      "
-                      placeholder="Masukkan judul materi"
-                    />
-                  </div>
-
-                  {/* MAPEL */}
+              {(modalType === "add" || modalType === "edit") && (
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  {formError && (
+                    <div className="p-3 rounded-xl theme-danger border border-[color-mix(in_srgb,var(--color-danger)_30%,transparent)] flex items-center gap-2 text-xs">
+                      <AlertCircle size={16} className="shrink-0" />
+                      <span>{formError}</span>
+                    </div>
+                  )}
 
                   <div>
                     <label className="block text-xs font-medium theme-text-secondary mb-1.5">
-                      Mata Pelajaran
+                      Kelas & Mata Pelajaran <span className="text-red-500">*</span>
                     </label>
-
-                    <input
-                      defaultValue={
-                        selectedMateri?.mapel || ""
-                      }
-                      required
-                      className="
-                        theme-input
-                        w-full
-                        px-3.5
-                        py-2.5
-                        rounded-xl
-                        text-sm
-                        focus:outline-none
-                      "
-                      placeholder="Mata pelajaran"
-                    />
-                  </div>
-
-                  {/* KELAS */}
-
-                  <div>
-                    <label className="block text-xs font-medium theme-text-secondary mb-1.5">
-                      Kelas
-                    </label>
-
-                    <input
-                      defaultValue={
-                        selectedMateri?.kelas || ""
-                      }
-                      required
-                      className="
-                        theme-input
-                        w-full
-                        px-3.5
-                        py-2.5
-                        rounded-xl
-                        text-sm
-                        focus:outline-none
-                      "
-                      placeholder="Contoh: X PPLG 1"
-                    />
-                  </div>
-
-                  {/* GURU */}
-
-                  <div>
-                    <label className="block text-xs font-medium theme-text-secondary mb-1.5">
-                      Guru
-                    </label>
-
-                    <input
-                      defaultValue={
-                        selectedMateri?.guru || ""
-                      }
-                      required
-                      className="
-                        theme-input
-                        w-full
-                        px-3.5
-                        py-2.5
-                        rounded-xl
-                        text-sm
-                        focus:outline-none
-                      "
-                      placeholder="Nama guru"
-                    />
-                  </div>
-
-                  {/* PERTEMUAN */}
-
-                  <div>
-                    <label className="block text-xs font-medium theme-text-secondary mb-1.5">
-                      Pertemuan
-                    </label>
-
-                    <input
-                      defaultValue={
-                        selectedMateri?.pertemuan || ""
-                      }
-                      className="
-                        theme-input
-                        w-full
-                        px-3.5
-                        py-2.5
-                        rounded-xl
-                        text-sm
-                        focus:outline-none
-                      "
-                      placeholder="Contoh: Pertemuan 1"
-                    />
-                  </div>
-
-                  {/* DURASI */}
-
-                  <div>
-                    <label className="block text-xs font-medium theme-text-secondary mb-1.5">
-                      Durasi
-                    </label>
-
-                    <input
-                      defaultValue={
-                        selectedMateri?.durasi || ""
-                      }
-                      className="
-                        theme-input
-                        w-full
-                        px-3.5
-                        py-2.5
-                        rounded-xl
-                        text-sm
-                        focus:outline-none
-                      "
-                      placeholder="Contoh: 90 Menit"
-                    />
-                  </div>
-
-                  {/* TIPE */}
-
-                  <div>
-                    <label className="block text-xs font-medium theme-text-secondary mb-1.5">
-                      Tipe
-                    </label>
-
                     <select
-                      defaultValue={
-                        selectedMateri?.tipe ||
-                        "Materi"
-                      }
+                      value={formKelasMapelId}
+                      onChange={(e) => setFormKelasMapelId(e.target.value)}
+                      required
                       className="
                         theme-input
                         w-full
@@ -1153,28 +1461,319 @@ export default function MateriModulAjarPage() {
                         focus:outline-none
                       "
                     >
-                      <option value="Materi">
-                        Materi
-                      </option>
-
-                      <option value="Modul Ajar">
-                        Modul Ajar
-                      </option>
+                      <option value="">Pilih Kelas dan Mata Pelajaran</option>
+                      {kelasMapelList.map((km) => (
+                        <option key={km.id} value={km.id}>
+                          {km.kelas?.nama || "Kelas"} -{" "}
+                          {km.mataPelajaran?.nama || "Mapel"}{" "}
+                          ({km.guruPengajar?.namaLengkap || "Guru"})
+                        </option>
+                      ))}
                     </select>
                   </div>
 
-                  {/* DESKRIPSI */}
+                  <div>
+                    <label className="block text-xs font-medium theme-text-secondary mb-1.5">
+                      Judul Materi <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={formJudul}
+                      onChange={(e) => setFormJudul(e.target.value)}
+                      required
+                      maxLength={100}
+                      placeholder="Masukkan judul materi pembelajaran"
+                      className="
+                        theme-input
+                        w-full
+                        px-3.5
+                        py-2.5
+                        rounded-xl
+                        text-sm
+                        focus:outline-none
+                      "
+                    />
+                  </div>
 
-                  <div className="md:col-span-2">
+                  <div>
+                    <label className="block text-xs font-medium theme-text-secondary mb-1.5">
+                      Kategori / Bab
+                    </label>
+                    <input
+                      type="text"
+                      value={formKategori}
+                      onChange={(e) => setFormKategori(e.target.value)}
+                      placeholder="Contoh: Modul Ajar, Bab 1, Teori Dasar"
+                      maxLength={50}
+                      className="
+                        theme-input
+                        w-full
+                        px-3.5
+                        py-2.5
+                        rounded-xl
+                        text-sm
+                        focus:outline-none
+                      "
+                    />
+                  </div>
+
+                  {modalType === "add" ? (
+                    <div>
+                      <label className="block text-xs font-medium theme-text-secondary mb-2">
+                        Tipe Sumber Materi <span className="text-red-500">*</span>
+                      </label>
+                      <div className="grid grid-cols-2 gap-3 mb-3">
+                        <button
+                          type="button"
+                          onClick={() => setFormSumberTipe("file")}
+                          className={`
+                            p-3
+                            rounded-xl
+                            border
+                            text-left
+                            flex
+                            items-center
+                            gap-2.5
+                            transition
+                            ${
+                              formSumberTipe === "file"
+                                ? "border-[var(--color-primary)] " + themePrimarySoft
+                                : "theme-border-soft theme-card-soft"
+                            }
+                          `}
+                        >
+                          <FileText
+                            size={18}
+                            className={
+                              formSumberTipe === "file"
+                                ? "text-[var(--color-primary)]"
+                                : "theme-text-muted"
+                            }
+                          />
+                          <div>
+                            <p className="text-xs font-semibold theme-text">
+                              Unggah Berkas
+                            </p>
+                            <p className="text-[10px] theme-text-muted">
+                              PDF atau Video
+                            </p>
+                          </div>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setFormSumberTipe("link")}
+                          className={`
+                            p-3
+                            rounded-xl
+                            border
+                            text-left
+                            flex
+                            items-center
+                            gap-2.5
+                            transition
+                            ${
+                              formSumberTipe === "link"
+                                ? "border-[var(--color-primary)] " + themePrimarySoft
+                                : "theme-border-soft theme-card-soft"
+                            }
+                          `}
+                        >
+                          <LinkIcon
+                            size={18}
+                            className={
+                              formSumberTipe === "link"
+                                ? "text-[var(--color-primary)]"
+                                : "theme-text-muted"
+                            }
+                          />
+                          <div>
+                            <p className="text-xs font-semibold theme-text">
+                              Tautan Web
+                            </p>
+                            <p className="text-[10px] theme-text-muted">
+                              URL Eksternal
+                            </p>
+                          </div>
+                        </button>
+                      </div>
+
+                      {formSumberTipe === "file" ? (
+                        <div>
+                          <label className="block text-xs font-medium theme-text-secondary mb-1.5">
+                            Pilih Berkas (PDF / Video, Maks 100MB){" "}
+                            <span className="text-red-500">*</span>
+                          </label>
+                          <input
+                            type="file"
+                            accept=".pdf,video/mp4,video/mpeg,video/webm,video/quicktime"
+                            onChange={(e) =>
+                              setFormFile(e.target.files?.[0] || null)
+                            }
+                            required
+                            className="
+                              theme-input
+                              w-full
+                              px-3.5
+                              py-2
+                              rounded-xl
+                              text-xs
+                              focus:outline-none
+                              file:mr-3
+                              file:py-1
+                              file:px-3
+                              file:rounded-lg
+                              file:border-0
+                              file:text-xs
+                              file:font-semibold
+                              file:bg-[var(--color-primary)]
+                              file:text-white
+                            "
+                          />
+                          {formFile && (
+                            <p className="text-[11px] theme-text-muted mt-1">
+                              Terpilih: {formFile.name} ({(formFile.size / (1024 * 1024)).toFixed(2)} MB)
+                            </p>
+                          )}
+                        </div>
+                      ) : (
+                        <div>
+                          <label className="block text-xs font-medium theme-text-secondary mb-1.5">
+                            URL Link Materi <span className="text-red-500">*</span>
+                          </label>
+                          <input
+                            type="url"
+                            value={formUrlLink}
+                            onChange={(e) => setFormUrlLink(e.target.value)}
+                            required
+                            placeholder="https://example.com/materi-ajar"
+                            className="
+                              theme-input
+                              w-full
+                              px-3.5
+                              py-2.5
+                              rounded-xl
+                              text-sm
+                              focus:outline-none
+                            "
+                          />
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div>
+                      <label className="block text-xs font-medium theme-text-secondary mb-2">
+                        Sumber Berkas / Link
+                      </label>
+                      <div className="space-y-2 mb-3">
+                        <label className="flex items-center gap-2 text-xs theme-text cursor-pointer">
+                          <input
+                            type="radio"
+                            name="editSumber"
+                            checked={formEditModeSumber === "keep"}
+                            onChange={() => setFormEditModeSumber("keep")}
+                          />
+                          <span>
+                            Pertahankan sumber saat ini (
+                            {selectedMateri?.urlFile
+                              ? `Berkas: ${selectedMateri.urlFile.split("/").pop()}`
+                              : selectedMateri?.urlLink
+                              ? `Tautan: ${selectedMateri.urlLink}`
+                              : "Tidak ada berkas"}
+                            )
+                          </span>
+                        </label>
+
+                        <label className="flex items-center gap-2 text-xs theme-text cursor-pointer">
+                          <input
+                            type="radio"
+                            name="editSumber"
+                            checked={formEditModeSumber === "change-file"}
+                            onChange={() => setFormEditModeSumber("change-file")}
+                          />
+                          <span>Ganti dengan berkas PDF / Video baru</span>
+                        </label>
+
+                        <label className="flex items-center gap-2 text-xs theme-text cursor-pointer">
+                          <input
+                            type="radio"
+                            name="editSumber"
+                            checked={formEditModeSumber === "change-link"}
+                            onChange={() => setFormEditModeSumber("change-link")}
+                          />
+                          <span>Ganti dengan tautan web (URL) baru</span>
+                        </label>
+                      </div>
+
+                      {formEditModeSumber === "change-file" && (
+                        <div>
+                          <label className="block text-xs font-medium theme-text-secondary mb-1.5">
+                            Unggah Berkas Baru (Maks 100MB)
+                          </label>
+                          <input
+                            type="file"
+                            accept=".pdf,video/mp4,video/mpeg,video/webm,video/quicktime"
+                            onChange={(e) =>
+                              setFormFile(e.target.files?.[0] || null)
+                            }
+                            required
+                            className="
+                              theme-input
+                              w-full
+                              px-3.5
+                              py-2
+                              rounded-xl
+                              text-xs
+                              focus:outline-none
+                              file:mr-3
+                              file:py-1
+                              file:px-3
+                              file:rounded-lg
+                              file:border-0
+                              file:text-xs
+                              file:font-semibold
+                              file:bg-[var(--color-primary)]
+                              file:text-white
+                            "
+                          />
+                        </div>
+                      )}
+
+                      {formEditModeSumber === "change-link" && (
+                        <div>
+                          <label className="block text-xs font-medium theme-text-secondary mb-1.5">
+                            Tautan URL Baru
+                          </label>
+                          <input
+                            type="url"
+                            value={formUrlLink}
+                            onChange={(e) => setFormUrlLink(e.target.value)}
+                            required
+                            placeholder="https://example.com/materi-ajar"
+                            className="
+                              theme-input
+                              w-full
+                              px-3.5
+                              py-2.5
+                              rounded-xl
+                              text-sm
+                              focus:outline-none
+                            "
+                          />
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  <div>
                     <label className="block text-xs font-medium theme-text-secondary mb-1.5">
                       Deskripsi
                     </label>
-
                     <textarea
-                      defaultValue={
-                        selectedMateri?.deskripsi || ""
-                      }
-                      rows={4}
+                      value={formDeskripsi}
+                      onChange={(e) => setFormDeskripsi(e.target.value)}
+                      rows={3}
+                      placeholder="Ringkasan penjelasan materi pembelajaran..."
                       className="
                         theme-input
                         w-full
@@ -1185,55 +1784,61 @@ export default function MateriModulAjarPage() {
                         resize-none
                         focus:outline-none
                       "
-                      placeholder="Deskripsi materi..."
                     />
                   </div>
-                </div>
 
-                {/* FORM ACTION */}
+                  <div className="flex justify-end gap-3 pt-3">
+                    <button
+                      type="button"
+                      onClick={() => setShowModal(false)}
+                      disabled={submitting}
+                      className="
+                        px-4
+                        py-2.5
+                        rounded-xl
+                        theme-card-soft
+                        theme-text-secondary
+                        text-sm
+                        font-medium
+                        transition
+                        hover:brightness-95
+                      "
+                    >
+                      Batal
+                    </button>
 
-                <div className="flex justify-end gap-3 mt-6">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setShowModal(false)
-                    }
-                    className="
-                      px-4
-                      py-2.5
-                      rounded-xl
-                      theme-card-soft
-                      theme-text-secondary
-                      text-sm
-                      font-medium
-                      transition
-                      hover:brightness-95
-                    "
-                  >
-                    Batal
-                  </button>
-
-                  <button
-                    type="submit"
-                    className="
-                      px-5
-                      py-2.5
-                      rounded-xl
-                      bg-[var(--color-primary)]
-                      hover:brightness-95
-                      text-white
-                      text-sm
-                      font-semibold
-                      transition
-                    "
-                  >
-                    {modalType === "edit"
-                      ? "Simpan Perubahan"
-                      : "Tambah Materi"}
-                  </button>
-                </div>
-              </form>
-            )}
+                    <button
+                      type="submit"
+                      disabled={submitting}
+                      className="
+                        inline-flex
+                        items-center
+                        gap-2
+                        px-5
+                        py-2.5
+                        rounded-xl
+                        bg-[var(--color-primary)]
+                        hover:brightness-95
+                        text-white
+                        text-sm
+                        font-semibold
+                        transition
+                        disabled:opacity-60
+                      "
+                    >
+                      {submitting && (
+                        <Loader2 size={16} className="animate-spin" />
+                      )}
+                      {submitting
+                        ? "Menyimpan..."
+                        : modalType === "edit"
+                        ? "Simpan Perubahan"
+                        : "Tambah Materi"}
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
           </div>
         </div>
       )}

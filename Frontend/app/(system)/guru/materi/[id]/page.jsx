@@ -27,9 +27,6 @@ import {
   deleteMateriPembelajaran,
 } from "@/services/materiPembelajaran.service";
 
-// ============================================================
-// API
-// ============================================================
 
 const API_URL = (
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"
@@ -37,9 +34,6 @@ const API_URL = (
 
 const FILE_BASE_URL = API_URL.replace(/\/api$/, "");
 
-// ============================================================
-// THEME HELPERS
-// ============================================================
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -98,9 +92,6 @@ const themeDangerSurface =
 const themeDangerBorder =
   "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
 
-// ============================================================
-// HELPERS
-// ============================================================
 
 function getKelasName(item) {
   return (
@@ -155,9 +146,6 @@ function formatWaktu(value) {
   });
 }
 
-// ============================================================
-// TIPE BADGE
-// ============================================================
 
 function getTipeBadge(tipe) {
   const map = {
@@ -197,9 +185,6 @@ function getTipeBadge(tipe) {
   );
 }
 
-// ============================================================
-// MAIN PAGE
-// ============================================================
 
 export default function MateriDetailPage() {
   const params = useParams();
@@ -212,9 +197,6 @@ export default function MateriDetailPage() {
   const [error, setError] = useState("");
   const [deleting, setDeleting] = useState(false);
 
-  // ============================================================
-  // LOAD DATA
-  // ============================================================
 
   useEffect(() => {
     if (!id) return;
@@ -241,9 +223,6 @@ export default function MateriDetailPage() {
     loadMateri();
   }, [id]);
 
-  // ============================================================
-  // DELETE
-  // ============================================================
 
   async function handleDelete() {
     if (!materi) return;
@@ -267,9 +246,6 @@ export default function MateriDetailPage() {
     }
   }
 
-  // ============================================================
-  // FILE URL
-  // ============================================================
 
   function getFileUrl(urlFile) {
     if (!urlFile) return "#";
@@ -281,9 +257,6 @@ export default function MateriDetailPage() {
     return `${FILE_BASE_URL}${urlFile}`;
   }
 
-  // ============================================================
-  // LOADING
-  // ============================================================
 
   if (loading) {
     return (
@@ -324,15 +297,9 @@ export default function MateriDetailPage() {
     );
   }
 
-  // ============================================================
-  // PAGE
-  // ============================================================
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
-      {/* ======================================================
-          SIDEBAR GURU
-      ====================================================== */}
 
       <Sidebar
         active="materi"
@@ -342,9 +309,6 @@ export default function MateriDetailPage() {
         role="guru"
       />
 
-      {/* ======================================================
-          CONTENT WRAPPER
-      ====================================================== */}
 
       <div className="flex h-full min-w-0 flex-1 flex-col overflow-hidden">
         <Header
@@ -361,9 +325,6 @@ export default function MateriDetailPage() {
           <div className="w-full p-4 sm:p-6 lg:p-8">
             <div className="mx-auto max-w-6xl space-y-6">
 
-              {/* ==================================================
-                  BACK BUTTON
-              ================================================== */}
 
               <button
                 type="button"
@@ -374,9 +335,6 @@ export default function MateriDetailPage() {
                 Kembali ke Daftar Materi
               </button>
 
-              {/* ==================================================
-                  ERROR
-              ================================================== */}
 
               {error && (
                 <div
@@ -393,9 +351,6 @@ export default function MateriDetailPage() {
                 </div>
               )}
 
-              {/* ==================================================
-                  EMPTY
-              ================================================== */}
 
               {!materi ? (
                 <div
@@ -412,25 +367,16 @@ export default function MateriDetailPage() {
                 </div>
               ) : (
                 <>
-                  {/* ==================================================
-                      MAIN CARD
-                  ================================================== */}
 
                   <div
                     className={`theme-card overflow-hidden rounded-xl border ${themeNeutralBorder} ${themeCardShadow}`}
                   >
-                    {/* ==================================================
-                        HEADER SECTION
-                    ================================================== */}
 
                     <div
                       className={`border-b p-6 sm:p-8 ${themeDivider}`}
                     >
                       <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
 
-                        {/* ==================================================
-                            TITLE
-                        ================================================== */}
 
                         <div className="flex min-w-0 items-start gap-4">
                           <div
@@ -466,7 +412,6 @@ export default function MateriDetailPage() {
                               })()}
                             </div>
 
-                            {/* MAPEL + KELAS */}
 
                             <div className="theme-text-secondary mt-1.5 flex items-center gap-2 text-sm">
                               <BookOpen
@@ -487,7 +432,6 @@ export default function MateriDetailPage() {
                               </span>
                             </div>
 
-                            {/* KATEGORI */}
 
                             {materi.kategori && (
                               <div className="mt-2">
@@ -503,12 +447,8 @@ export default function MateriDetailPage() {
                           </div>
                         </div>
 
-                        {/* ==================================================
-                            ACTION BUTTONS
-                        ================================================== */}
 
                         <div className="flex shrink-0 items-center gap-2">
-                          {/* EDIT */}
 
                           <button
                             type="button"
@@ -523,7 +463,6 @@ export default function MateriDetailPage() {
                             Edit
                           </button>
 
-                          {/* DELETE */}
 
                           <button
                             type="button"
@@ -545,13 +484,9 @@ export default function MateriDetailPage() {
                         </div>
                       </div>
 
-                      {/* ==================================================
-                          META INFO
-                      ================================================== */}
 
                       <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
 
-                        {/* TANGGAL */}
 
                         <div
                           className={`flex items-center gap-2 rounded-lg border p-3 ${themeNeutralSurface} ${themeNeutralBorder}`}
@@ -572,7 +507,6 @@ export default function MateriDetailPage() {
                           </div>
                         </div>
 
-                        {/* WAKTU */}
 
                         <div
                           className={`flex items-center gap-2 rounded-lg border p-3 ${themeNeutralSurface} ${themeNeutralBorder}`}
@@ -593,7 +527,6 @@ export default function MateriDetailPage() {
                           </div>
                         </div>
 
-                        {/* PENGAJAR */}
 
                         <div
                           className={`flex items-center gap-2 rounded-lg border p-3 ${themeNeutralSurface} ${themeNeutralBorder}`}
@@ -616,15 +549,9 @@ export default function MateriDetailPage() {
                       </div>
                     </div>
 
-                    {/* ==================================================
-                        BODY SECTION
-                    ================================================== */}
 
                     <div className="space-y-7 p-6 sm:p-8">
 
-                      {/* ==================================================
-                          DESKRIPSI
-                      ================================================== */}
 
                       <div>
                         <h2 className="theme-text-secondary mb-2 flex items-center gap-2 text-sm font-semibold">
@@ -646,9 +573,6 @@ export default function MateriDetailPage() {
                         </div>
                       </div>
 
-                      {/* ==================================================
-                          SUMBER MATERI
-                      ================================================== */}
 
                       <div>
                         <h2 className="theme-text-secondary mb-3 flex items-center gap-2 text-sm font-semibold">
@@ -660,9 +584,6 @@ export default function MateriDetailPage() {
                           Sumber Materi
                         </h2>
 
-                        {/* ==================================================
-                            LINK
-                        ================================================== */}
 
                         {materi.tipe === "link" &&
                         materi.urlLink ? (
@@ -679,7 +600,6 @@ export default function MateriDetailPage() {
                         ) : materi.urlFile ? (
                           <div className="flex flex-wrap items-center gap-3">
 
-                            {/* BUKA FILE */}
 
                             <a
                               href={getFileUrl(materi.urlFile)}
@@ -692,7 +612,6 @@ export default function MateriDetailPage() {
                               Buka File
                             </a>
 
-                            {/* DOWNLOAD */}
 
                             <a
                               href={getFileUrl(materi.urlFile)}
@@ -704,7 +623,6 @@ export default function MateriDetailPage() {
                               Download
                             </a>
 
-                            {/* FILE NAME */}
 
                             <span
                               className={`theme-text-muted rounded-full border px-3 py-1.5 text-xs ${themeNeutralSurface} ${themeNeutralBorder}`}
@@ -722,16 +640,12 @@ export default function MateriDetailPage() {
                         )}
                       </div>
 
-                      {/* ==================================================
-                          INFORMASI TAMBAHAN
-                      ================================================== */}
 
                       <div
                         className={`border-t pt-6 ${themeDivider}`}
                       >
                         <div className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
 
-                          {/* ID */}
 
                           <div>
                             <p className="theme-text-muted text-xs font-medium">
@@ -743,7 +657,6 @@ export default function MateriDetailPage() {
                             </p>
                           </div>
 
-                          {/* TIPE */}
 
                           <div>
                             <p className="theme-text-muted text-xs font-medium">
@@ -755,7 +668,6 @@ export default function MateriDetailPage() {
                             </p>
                           </div>
 
-                          {/* UPDATED */}
 
                           {materi.updatedAt &&
                             materi.updatedAt !==

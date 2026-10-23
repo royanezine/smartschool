@@ -23,9 +23,6 @@ import {
   Clock,
 } from "lucide-react";
 
-// ======================================================
-// THEME HELPERS
-// ======================================================
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -62,9 +59,6 @@ const themeDangerSurface =
 const themeDangerBorder =
   "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
 
-// ======================================================
-// HELPERS
-// ======================================================
 
 function formatTanggalWaktu(date) {
   if (!date) return "-";
@@ -109,7 +103,6 @@ function formatJam(date) {
   });
 }
 
-// Mendukung respons API yang dibungkus beberapa lapisan.
 function unwrapResponse(response) {
   let data = response;
 
@@ -130,8 +123,6 @@ function unwrapResponse(response) {
   return data;
 }
 
-// Status di sini menunjukkan kondisi batas waktu,
-// bukan status pengumpulan setiap siswa.
 function getStatusTugas(tugas) {
   if (!tugas?.batasWaktu) return "Tanpa Batas Waktu";
 
@@ -158,9 +149,6 @@ const statusIcon = {
   Berakhir: AlertCircle,
 };
 
-// ======================================================
-// MAIN PAGE
-// ======================================================
 
 export default function DetailTugasPage() {
   const params = useParams();
@@ -189,9 +177,6 @@ export default function DetailTugasPage() {
     },
   ];
 
-  // ======================================================
-  // LOAD DETAIL TUGAS
-  // ======================================================
 
   useEffect(() => {
     if (!tugasId) return;
@@ -271,9 +256,6 @@ export default function DetailTugasPage() {
     };
   }, [tugasId]);
 
-  // ======================================================
-  // DATA KELAS, MAPEL, GURU, PENGUMPULAN
-  // ======================================================
 
   const kelasMapel = tugas?.kelasMapel ?? {};
   const kelas = kelasMapel?.kelas ?? tugas?.kelas ?? {};
@@ -334,9 +316,6 @@ export default function DetailTugasPage() {
     ? statusIcon[status] || ClipboardList
     : ClipboardList;
 
-  // ======================================================
-  // SHARED LAYOUT
-  // ======================================================
 
   function renderLayout(content) {
     return (
@@ -376,9 +355,6 @@ export default function DetailTugasPage() {
     );
   }
 
-  // ======================================================
-  // LOADING
-  // ======================================================
 
   if (loading) {
     return renderLayout(
@@ -400,9 +376,6 @@ export default function DetailTugasPage() {
     );
   }
 
-  // ======================================================
-  // ERROR
-  // ======================================================
 
   if (error) {
     return renderLayout(
@@ -437,9 +410,6 @@ export default function DetailTugasPage() {
     );
   }
 
-  // ======================================================
-  // DATA TIDAK ADA
-  // ======================================================
 
   if (!tugas) {
     return renderLayout(
@@ -468,14 +438,10 @@ export default function DetailTugasPage() {
     );
   }
 
-  // ======================================================
-  // MAIN PAGE
-  // ======================================================
 
   return renderLayout(
     <main className="theme-page min-h-0 flex-1 overflow-y-auto">
       <div className="mx-auto w-full max-w-5xl px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
-        {/* BACK */}
         <button
           type="button"
           onClick={() => router.back()}
@@ -485,7 +451,6 @@ export default function DetailTugasPage() {
           Kembali
         </button>
 
-        {/* TITLE CARD */}
         <section
           className={`theme-card rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
         >
@@ -532,7 +497,6 @@ export default function DetailTugasPage() {
               </span>
             </div>
 
-            {/* INFO GRID */}
             <div className="mt-7 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
               <div
                 className={`rounded-xl border ${themeNeutralBorder} ${themeNeutralSurface} p-4`}
@@ -582,9 +546,7 @@ export default function DetailTugasPage() {
           </div>
         </section>
 
-        {/* CONTENT GRID */}
         <div className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1fr)_300px]">
-          {/* DESKRIPSI */}
           <section
             className={`theme-card rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
           >
@@ -613,7 +575,6 @@ export default function DetailTugasPage() {
             </div>
           </section>
 
-          {/* INFORMASI */}
           <section
             className={`theme-card rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
           >
@@ -626,7 +587,6 @@ export default function DetailTugasPage() {
             </div>
 
             <div>
-              {/* KELAS */}
               <div
                 className={`flex items-start gap-3 border-b ${themeDivider} px-5 py-4`}
               >
@@ -643,7 +603,6 @@ export default function DetailTugasPage() {
                 </div>
               </div>
 
-              {/* MAPEL */}
               <div
                 className={`flex items-start gap-3 border-b ${themeDivider} px-5 py-4`}
               >
@@ -662,7 +621,6 @@ export default function DetailTugasPage() {
                 </div>
               </div>
 
-              {/* DEADLINE */}
               <div
                 className={`flex items-start gap-3 border-b ${themeDivider} px-5 py-4`}
               >
@@ -681,7 +639,6 @@ export default function DetailTugasPage() {
                 </div>
               </div>
 
-              {/* JAM */}
               <div
                 className={`flex items-start gap-3 border-b ${themeDivider} px-5 py-4`}
               >
@@ -700,7 +657,6 @@ export default function DetailTugasPage() {
                 </div>
               </div>
 
-              {/* GURU */}
               <div className="flex items-start gap-3 px-5 py-4">
                 <Users
                   size={17}
@@ -720,7 +676,6 @@ export default function DetailTugasPage() {
           </section>
         </div>
 
-        {/* ACTION */}
         <section
           className={`theme-card mt-5 rounded-2xl border ${themeNeutralBorder} p-5 ${themeCardShadow} sm:p-6`}
         >
@@ -736,7 +691,6 @@ export default function DetailTugasPage() {
             </div>
 
             <div className="flex flex-col gap-2 sm:flex-row">
-              {/* EDIT */}
               <button
                 type="button"
                 onClick={() =>
@@ -748,7 +702,6 @@ export default function DetailTugasPage() {
                 Edit Tugas
               </button>
 
-              {/* NILAI */}
               <button
                 type="button"
                 onClick={() =>

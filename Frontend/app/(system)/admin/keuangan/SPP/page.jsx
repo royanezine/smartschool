@@ -43,9 +43,6 @@ import { getKategoriTagihan } from "@/services/tarif.service";
 import { getTahunAjaran } from "@/services/tahunAjaran.service";
 import { getKelas } from "@/services/kelas.service";
 
-/* =========================================================
-   CONSTANTS
-========================================================= */
 
 const ENTRIES_PER_PAGE = 10;
 
@@ -97,9 +94,6 @@ const INITIAL_BAYAR_FORM = {
   catatan: "",
 };
 
-/* =========================================================
-   HELPERS
-========================================================= */
 
 function unwrapList(result) {
   if (Array.isArray(result)) {
@@ -194,16 +188,10 @@ function isTunggakan(item) {
   return new Date(item.jatuhTempo).getTime() < Date.now();
 }
 
-/* =========================================================
-   PAGE
-========================================================= */
 
 export default function SPPPage() {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
-  /* ---------------------------------------------------------
-     DATA
-  --------------------------------------------------------- */
   const [tagihanList, setTagihanList] = useState([]);
   const [meta, setMeta] = useState({
     page: 1,
@@ -218,9 +206,6 @@ export default function SPPPage() {
   const [kelasList, setKelasList] = useState([]);
   const [akunKasList, setAkunKasList] = useState([]);
 
-  /* ---------------------------------------------------------
-     FILTER
-  --------------------------------------------------------- */
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
   const [filterKategori, setFilterKategori] = useState("");
@@ -228,9 +213,6 @@ export default function SPPPage() {
   const [filterTahunAjaran, setFilterTahunAjaran] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
-  /* ---------------------------------------------------------
-     UI STATE
-  --------------------------------------------------------- */
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -255,9 +237,6 @@ export default function SPPPage() {
 
   const toggleSidebar = () => setIsCollapsed((prev) => !prev);
 
-  /* =======================================================
-     MASTER DATA
-  ======================================================= */
 
   const loadMaster = useCallback(async () => {
     try {
@@ -327,9 +306,6 @@ export default function SPPPage() {
     }
   }, []);
 
-  /* =======================================================
-     LOAD TAGIHAN
-  ======================================================= */
 
   const loadTagihan = useCallback(async () => {
     try {
@@ -397,9 +373,6 @@ export default function SPPPage() {
     loadTagihan();
   }, [loadTagihan]);
 
-  /* =======================================================
-     AUTO HILANGKAN NOTIFIKASI
-  ======================================================= */
 
   useEffect(() => {
     if (!info) return undefined;
@@ -425,9 +398,6 @@ export default function SPPPage() {
     String(kategoriTerpilih?.siklus || "").toLowerCase() ===
     "bulanan";
 
-  /* =======================================================
-     FILTER RESET PAGE
-  ======================================================= */
 
   const handleFilterChange = (setter, value) => {
     setter(value);
@@ -438,9 +408,6 @@ export default function SPPPage() {
     loadTagihan();
   };
 
-  /* =======================================================
-     GENERATE TAGIHAN
-  ======================================================= */
 
   const handleGenerateChange = (event) => {
     const { name, value } = event.target;
@@ -493,9 +460,6 @@ export default function SPPPage() {
     }
   };
 
-  /* =======================================================
-     DETAIL TAGIHAN
-  ======================================================= */
 
   const handleViewDetail = async (item) => {
     setSelectedTagihan(item);
@@ -516,9 +480,6 @@ export default function SPPPage() {
     }
   };
 
-  /* =======================================================
-     BAYAR TAGIHAN
-  ======================================================= */
 
   const openBayarModal = (item) => {
     setBayarTarget(item);
@@ -580,9 +541,6 @@ export default function SPPPage() {
     }
   };
 
-  /* =======================================================
-     BATAL TAGIHAN
-  ======================================================= */
 
   const openBatalModal = (item) => {
     setBatalTarget(item);
@@ -620,9 +578,6 @@ export default function SPPPage() {
     }
   };
 
-  /* =======================================================
-     BADGE STATUS
-  ======================================================= */
 
   const getStatusBadge = (status, item) => {
     if (isTunggakan(item)) {
@@ -676,9 +631,6 @@ export default function SPPPage() {
     item?.status === "belum_bayar" &&
     Number(item?.totalDibayar || 0) === 0;
 
-  /* =======================================================
-     RENDER
-  ======================================================= */
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
@@ -702,7 +654,6 @@ export default function SPPPage() {
 
         <main className="theme-page min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
           <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8 xl:px-10">
-            {/* HEADER */}
             <div className="theme-card mb-6 overflow-hidden rounded-2xl border theme-border shadow-[0_10px_30px_color-mix(in_srgb,var(--color-text)_8%,transparent)]">
               <div className="flex flex-col gap-4 p-6 sm:p-8">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -760,7 +711,6 @@ export default function SPPPage() {
               </div>
             </div>
 
-            {/* NOTIFIKASI */}
             {error && (
               <div className="theme-danger mb-4 flex items-start gap-3 rounded-xl border px-4 py-3 text-sm">
                 <AlertCircle size={18} className="mt-0.5 shrink-0" />
@@ -788,7 +738,6 @@ export default function SPPPage() {
               </div>
             )}
 
-            {/* STATISTIK */}
             <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <StatCard
                 icon={<Receipt size={22} />}
@@ -847,7 +796,6 @@ export default function SPPPage() {
               />
             </div>
 
-            {/* FILTER */}
             <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center">
               <div className="relative flex-1">
                 <Search
@@ -948,7 +896,6 @@ export default function SPPPage() {
               </div>
             </div>
 
-            {/* TABLE */}
             <div className="theme-card overflow-hidden rounded-2xl border theme-border shadow-[0_1px_3px_color-mix(in_srgb,var(--color-text)_8%,transparent)]">
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[980px] text-sm">
@@ -1110,7 +1057,6 @@ export default function SPPPage() {
                 </table>
               </div>
 
-              {/* PAGINATION */}
               {!loading && tagihanList.length > 0 && (
                 <div className="theme-card-soft flex items-center justify-between border-t theme-border px-4 py-3">
                   <p className="theme-text-muted text-sm">
@@ -1176,7 +1122,6 @@ export default function SPPPage() {
         </main>
       </div>
 
-      {/* MODAL GENERATE */}
       {showGenerateModal && (
         <Modal
           title="Generate Tagihan"
@@ -1268,7 +1213,6 @@ export default function SPPPage() {
         </Modal>
       )}
 
-      {/* MODAL DETAIL */}
       {showDetailModal && selectedTagihan && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
           <div className="theme-card max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border theme-border shadow-[0_20px_60px_color-mix(in_srgb,var(--color-text)_20%,transparent)]">
@@ -1380,7 +1324,6 @@ export default function SPPPage() {
                     value={selectedTagihan.keterangan || "-"}
                   />
 
-                  {/* RIWAYAT PEMBAYARAN */}
                   <div className="pt-2">
                     <p className="theme-text-secondary mb-2 text-sm font-semibold">
                       Riwayat Pembayaran
@@ -1483,7 +1426,6 @@ export default function SPPPage() {
         </div>
       )}
 
-      {/* MODAL BAYAR */}
       {showBayarModal && bayarTarget && (
         <Modal
           title="Catat Pembayaran"
@@ -1558,7 +1500,6 @@ export default function SPPPage() {
         </Modal>
       )}
 
-      {/* MODAL BATAL */}
       {showBatalModal && batalTarget && (
         <Modal
           title="Batalkan Tagihan"
@@ -1595,9 +1536,6 @@ export default function SPPPage() {
   );
 }
 
-/* =========================================================
-   STAT CARD
-========================================================= */
 
 function StatCard({ icon, label, value, color, subtext }) {
   const colors = {
@@ -1637,9 +1575,6 @@ function StatCard({ icon, label, value, color, subtext }) {
   );
 }
 
-/* =========================================================
-   FILTER SELECT
-========================================================= */
 
 function FilterSelect({ value, onChange, children }) {
   return (
@@ -1653,9 +1588,6 @@ function FilterSelect({ value, onChange, children }) {
   );
 }
 
-/* =========================================================
-   ACTION BUTTON
-========================================================= */
 
 function ActionButton({ title, icon, onClick, type = "primary" }) {
   const styles =
@@ -1675,9 +1607,6 @@ function ActionButton({ title, icon, onClick, type = "primary" }) {
   );
 }
 
-/* =========================================================
-   PAGINATION BUTTON
-========================================================= */
 
 function PaginationButton({ children, disabled, onClick }) {
   return (
@@ -1692,9 +1621,6 @@ function PaginationButton({ children, disabled, onClick }) {
   );
 }
 
-/* =========================================================
-   MODAL
-========================================================= */
 
 function Modal({
   title,
@@ -1761,9 +1687,6 @@ function Modal({
   );
 }
 
-/* =========================================================
-   FORM INPUT
-========================================================= */
 
 function FormInput({
   label,
@@ -1791,9 +1714,6 @@ function FormInput({
   );
 }
 
-/* =========================================================
-   FORM SELECT
-========================================================= */
 
 function FormSelect({
   label,
@@ -1827,9 +1747,6 @@ function FormSelect({
   );
 }
 
-/* =========================================================
-   DETAIL ROW
-========================================================= */
 
 function DetailRow({ label, value, valueBadge }) {
   return (

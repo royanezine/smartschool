@@ -1,4 +1,3 @@
-// app/cmsAdmin/website/galeri/page.jsx
 "use client";
 
 import { useState } from "react";
@@ -21,23 +20,14 @@ import {
 } from "lucide-react";
 
 export default function GaleriPage() {
-  // =====================================================
-  // SIDEBAR
-  // =====================================================
 
   const [active, setActive] = useState("galeri");
   const [collapsed, setCollapsed] = useState(false);
 
-  // =====================================================
-  // SEARCH & FILTER
-  // =====================================================
 
   const [searchTerm, setSearchTerm] = useState("");
   const [filterAlbum, setFilterAlbum] = useState("Semua");
 
-  // =====================================================
-  // DATA GALERI
-  // =====================================================
 
   const [galeri] = useState([
     {
@@ -106,9 +96,6 @@ export default function GaleriPage() {
     },
   ]);
 
-  // =====================================================
-  // FILTER DATA
-  // =====================================================
 
   const filteredGaleri = galeri.filter((item) => {
     const matchSearch = item.judul
@@ -121,24 +108,15 @@ export default function GaleriPage() {
     return matchSearch && matchAlbum;
   });
 
-  // =====================================================
-  // ALBUM LIST
-  // =====================================================
 
   const albumList = [
     "Semua",
     ...new Set(galeri.map((item) => item.album)),
   ];
 
-  // =====================================================
-  // RETURN
-  // =====================================================
 
   return (
     <div className="flex min-h-screen w-full theme-page overflow-x-hidden">
-      {/* =================================================
-          SIDEBAR
-      ================================================= */}
 
       <Sidebar
         active={active}
@@ -147,23 +125,14 @@ export default function GaleriPage() {
         setCollapsed={setCollapsed}
       />
 
-      {/* =================================================
-          MAIN AREA
-      ================================================= */}
 
       <div className="flex-1 min-w-0 w-full theme-page">
-        {/* =================================================
-            HEADER
-        ================================================= */}
 
         <Header
           title="Galeri"
           user={{ name: "Admin" }}
         />
 
-        {/* =================================================
-            CONTENT
-        ================================================= */}
 
         <main className="w-full min-w-0 theme-page">
           <div
@@ -180,9 +149,6 @@ export default function GaleriPage() {
               lg:py-8
             "
           >
-            {/* =================================================
-                BREADCRUMB
-            ================================================= */}
 
             <nav
               className="
@@ -233,9 +199,6 @@ export default function GaleriPage() {
               </span>
             </nav>
 
-            {/* =================================================
-                PAGE HEADER
-            ================================================= */}
 
             <div
               className="
@@ -248,7 +211,6 @@ export default function GaleriPage() {
                 mb-6
               "
             >
-              {/* TITLE */}
 
               <div className="flex items-center gap-3 min-w-0">
                 <div
@@ -294,9 +256,6 @@ export default function GaleriPage() {
                 </div>
               </div>
 
-              {/* =================================================
-                  ACTION BUTTONS
-              ================================================= */}
 
               <div
                 className="
@@ -383,9 +342,6 @@ export default function GaleriPage() {
               </div>
             </div>
 
-            {/* =================================================
-                STATISTIK
-            ================================================= */}
 
             <div
               className="
@@ -435,9 +391,6 @@ export default function GaleriPage() {
               />
             </div>
 
-            {/* =================================================
-                SEARCH & FILTER
-            ================================================= */}
 
             <div
               className="
@@ -462,7 +415,6 @@ export default function GaleriPage() {
                   md:justify-between
                 "
               >
-                {/* SEARCH */}
 
                 <div
                   className="
@@ -524,7 +476,6 @@ export default function GaleriPage() {
                   )}
                 </div>
 
-                {/* FILTER */}
 
                 <div
                   className="
@@ -587,9 +538,6 @@ export default function GaleriPage() {
               </div>
             </div>
 
-            {/* =================================================
-                RESULT INFO
-            ================================================= */}
 
             <div
               className="
@@ -638,9 +586,6 @@ export default function GaleriPage() {
               </div>
             </div>
 
-            {/* =================================================
-                GALLERY GRID
-            ================================================= */}
 
             {filteredGaleri.length > 0 ? (
               <div
@@ -664,9 +609,6 @@ export default function GaleriPage() {
                 ))}
               </div>
             ) : (
-              /* =================================================
-                  EMPTY STATE
-              ================================================= */
 
               <div
                 className="
@@ -737,9 +679,6 @@ export default function GaleriPage() {
               </div>
             )}
 
-            {/* =================================================
-                FOOTER
-            ================================================= */}
 
             <div
               className="
@@ -762,9 +701,6 @@ export default function GaleriPage() {
   );
 }
 
-// =====================================================
-// STAT CARD
-// =====================================================
 
 function StatCard({
   icon,
@@ -837,9 +773,6 @@ function StatCard({
   );
 }
 
-// =====================================================
-// GALLERY CARD
-// =====================================================
 
 function GalleryCard({ item }) {
   return (
@@ -861,9 +794,6 @@ function GalleryCard({ item }) {
         duration-300
       "
     >
-      {/* =================================================
-          IMAGE
-      ================================================= */}
 
       <div
         className="
@@ -888,7 +818,6 @@ function GalleryCard({ item }) {
           "
         />
 
-        {/* ALBUM BADGE */}
 
         <div
           className="
@@ -913,9 +842,6 @@ function GalleryCard({ item }) {
           {item.album}
         </div>
 
-        {/* =================================================
-            HOVER OVERLAY
-        ================================================= */}
 
         <div
           className="
@@ -998,9 +924,6 @@ function GalleryCard({ item }) {
         </div>
       </div>
 
-      {/* =================================================
-          CARD BODY
-      ================================================= */}
 
       <div className="p-3 sm:p-4">
         <div className="flex items-start gap-2">

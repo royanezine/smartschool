@@ -18,9 +18,6 @@ import {
 
 import { getRapotSaya, getDetailRapotSaya } from "@/services/raport.service";
 
-/* =========================================================
-   HELPERS
-========================================================= */
 
 function unwrapList(result) {
   if (Array.isArray(result)) return result;
@@ -89,9 +86,6 @@ function statusRapot(item) {
     return { published: false, label: "Draft" };
   }
 
-  // Endpoint siswa hanya mengembalikan rapot berstatus published.
-  // Bila field status tidak disertakan pada payload, tentukan dari
-  // data yang tersedia (tanggal publikasi) — bukan hardcode.
   if (item?.dipublishPada) {
     return { published: true, label: "Published" };
   }
@@ -111,10 +105,6 @@ function predikatColor(predikat) {
   return "theme-danger";
 }
 
-/* =========================================================
-   PAGE RAPORT SISWA
-   Sidebar dan Header ditangani oleh layout induk.
-========================================================= */
 
 export default function SiswaRaportPage() {
   const [rapotList, setRapotList] = useState([]);
@@ -126,9 +116,6 @@ export default function SiswaRaportPage() {
   const [detail, setDetail] = useState(null);
   const [detailError, setDetailError] = useState("");
 
-  /* =======================================================
-     LOAD LIST RAPORT
-  ======================================================= */
 
   const loadRapot = useCallback(async () => {
     try {
@@ -150,9 +137,6 @@ export default function SiswaRaportPage() {
     loadRapot();
   }, [loadRapot]);
 
-  /* =======================================================
-     DETAIL RAPORT
-  ======================================================= */
 
   const handleViewDetail = async (item) => {
     if (!item?.id) {
@@ -195,15 +179,11 @@ export default function SiswaRaportPage() {
 
   const detailStatus = statusRapot(detail);
 
-  /* =======================================================
-     RENDER
-  ======================================================= */
 
   return (
     <div className="theme-page min-h-full w-full">
       <main className="theme-page min-h-full w-full overflow-x-hidden">
         <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:px-8 xl:px-10">
-          {/* HEADER HALAMAN */}
           <div className="theme-card theme-border mb-6 overflow-hidden rounded-2xl border p-6 shadow-[0_10px_30px_color-mix(in_srgb,var(--color-text)_8%,transparent)] sm:p-8">
             <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex min-w-0 items-center gap-4">
@@ -240,7 +220,6 @@ export default function SiswaRaportPage() {
             </div>
           </div>
 
-          {/* NOTIFIKASI ERROR */}
           {error && (
             <div
               role="alert"
@@ -261,7 +240,6 @@ export default function SiswaRaportPage() {
             </div>
           )}
 
-          {/* DAFTAR RAPORT */}
           {loading ? (
             <div className="theme-card theme-border flex items-center justify-center gap-2 rounded-2xl border py-16 text-sm theme-text-muted">
               <Loader2
@@ -399,7 +377,6 @@ export default function SiswaRaportPage() {
         </div>
       </main>
 
-      {/* MODAL DETAIL */}
       {showDetail && detail && (
         <div
           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
@@ -413,7 +390,6 @@ export default function SiswaRaportPage() {
             aria-labelledby="raport-detail-title"
             className="theme-card theme-border max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl border shadow-[0_20px_60px_color-mix(in_srgb,var(--color-text)_20%,transparent)]"
           >
-            {/* HEADER MODAL */}
             <div className="theme-border flex items-center justify-between border-b px-6 py-4">
               <div className="flex min-w-0 items-center gap-3">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] text-[var(--color-primary)]">
@@ -481,7 +457,6 @@ export default function SiswaRaportPage() {
               </div>
             ) : (
               <div className="space-y-6 p-4 sm:p-6">
-                {/* IDENTITAS SISWA */}
                 <div className="theme-card-soft grid grid-cols-2 gap-4 rounded-xl p-4 sm:grid-cols-4">
                   <InfoCell
                     label="Nama"
@@ -501,7 +476,6 @@ export default function SiswaRaportPage() {
                   />
                 </div>
 
-                {/* RINGKASAN */}
                 <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
                   <SummaryCell
                     label="Rata-rata"
@@ -521,7 +495,6 @@ export default function SiswaRaportPage() {
                   />
                 </div>
 
-                {/* NILAI AKADEMIK */}
                 <section>
                   <p className="theme-text-secondary mb-2 flex items-center gap-2 text-sm font-semibold">
                     <BookOpen size={15} />
@@ -587,7 +560,6 @@ export default function SiswaRaportPage() {
                   )}
                 </section>
 
-                {/* KEHADIRAN */}
                 <section>
                   <p className="theme-text-secondary mb-2 flex items-center gap-2 text-sm font-semibold">
                     <Clock size={15} />
@@ -614,7 +586,6 @@ export default function SiswaRaportPage() {
                   </div>
                 </section>
 
-                {/* CATATAN WALI KELAS */}
                 <section>
                   <p className="theme-text-secondary mb-2 flex items-center gap-2 text-sm font-semibold">
                     <Sparkles size={15} />
@@ -634,9 +605,6 @@ export default function SiswaRaportPage() {
   );
 }
 
-/* =========================================================
-   COMPONENTS
-========================================================= */
 
 function InfoCell({ label, value }) {
   return (

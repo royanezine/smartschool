@@ -2,57 +2,61 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { getToken } from "@/lib/auth";
 import { useParams, useRouter } from "next/navigation";
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
+import { getRoles } from "@/services/role.service";
+import { getAuthPayload, normalizeRole } from "@/lib/auth";
+import {
+  getUserById,
+  updateUser,
+} from "@/services/user.service";
 
-const API_URL = (
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
-).replace(/\/$/, "");
+const ROLE_LEVEL = {
+  super_admin: 100,
+  admin_yayasan: 80,
+  admin_sekolah: 60,
+  guru: 40,
+  siswa: 20,
+};
 
-// getToken diimpor dari @/lib/auth (single source of truth)
+function canAssignRole(actorRole, targetRole) {
+  const actor = normalizeRole(actorRole);
+  const target = normalizeRole(targetRole);
 
-async function apiRequest(path, options = {}) {
-  const token = getToken();
+  if (actor === "super_admin") return true;
+  if (!target || target === "super_admin") return false;
 
-  if (!token) {
-    throw new Error("Token login tidak ditemukan. Silakan login kembali.");
-  }
-
-  const response = await fetch(`${API_URL}${path}`, {
-    ...options,
-    headers: {
-      Accept: "application/json",
-      ...(options.body ? { "Content-Type": "application/json" } : {}),
-      Authorization: `Bearer ${token}`,
-      ...options.headers,
-    },
-  });
-
-  const result = await response.json().catch(() => ({}));
-
-  if (!response.ok) {
-    throw new Error(
-      result.message || result.error || `Request gagal (${response.status})`
-    );
-  }
-
-  return result;
+  return (
+    (ROLE_LEVEL[actor] ?? 0) > (ROLE_LEVEL[target] ?? 0)
+  );
 }
 
 function getUserData(result) {
-  // GET /api/users/:id mengembalikan { success, message, data: user }.
   return result?.data?.data ?? result?.data ?? result;
 }
 
-function extractList(result) {
+function extractRoles(result) {
   if (Array.isArray(result)) return result;
   if (Array.isArray(result?.data)) return result.data;
   if (Array.isArray(result?.data?.data)) return result.data.data;
-  if (Array.isArray(result?.data?.items)) return result.data.items;
   if (Array.isArray(result?.items)) return result.items;
   return [];
+}
+
+function getRoleLabel(role) {
+  return (
+    role?.namaTampilan ??
+    role?.nama ??
+    role?.name ??
+    "Peran"
+  );
+}
+
+function normalizeRoleName(value) {
+  return String(value ?? "")
+    .toLowerCase()
+    .replace(/[\s-]+/g, "_");
 }
 
 function FormInput({
@@ -92,6 +96,7 @@ function FormSelect({
   required = false,
   placeholder = "Pilih opsi",
   disabled = false,
+  hint = "",
 }) {
   return (
     <label className="block space-y-2">
@@ -110,11 +115,21 @@ function FormSelect({
         <option value="">{placeholder}</option>
 
         {options.map((option) => (
-          <option key={option.value} value={option.value}>
+          <option
+            key={option.value}
+            value={option.value}
+            disabled={option.disabled}
+          >
             {option.label}
           </option>
         ))}
       </select>
+
+      {hint && (
+        <p className="text-xs text-slate-500 dark:text-slate-400">
+          {hint}
+        </p>
+      )}
     </label>
   );
 }
@@ -165,6 +180,7 @@ export default function EditPenggunaPage() {
   });
 
   const [roleOptions, setRoleOptions] = useState([]);
+  const [roleHint, setRoleHint] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -189,12 +205,16 @@ export default function EditPenggunaPage() {
     setNotice("");
 
     try {
-      const userResult = await apiRequest(`/api/users/${id}`);
+      const userResult = await getUserById(id);
       const user = getUserData(userResult);
 
       if (!user?.id) {
         throw new Error("Data pengguna tidak ditemukan.");
       }
+
+      const currentRoleId = String(
+        user.peran?.id ?? user.peranId ?? user.roleId ?? ""
+      );
 
       setForm({
         namaLengkap: user.namaLengkap ?? "",
@@ -204,46 +224,83 @@ export default function EditPenggunaPage() {
         jabatan: user.jabatan ?? "",
         golongan: user.golongan ?? "",
         status: user.status ?? "aktif",
-        peranId: String(user.peran?.id ?? user.peranId ?? user.roleId ?? ""),
+        peranId: currentRoleId,
         shiftKerja: String(user.shiftKerja ?? "").toLowerCase(),
       });
 
-      // Jika peran saat ini tersedia, tampilkan agar tetap bisa dipilih
-      // meskipun endpoint daftar peran tidak tersedia.
-      const currentRole = user.peran;
+      let roles = [];
 
-      if (currentRole?.id) {
-        setRoleOptions([
-          {
-            value: String(currentRole.id),
-            label:
-              currentRole.namaTampilan ??
-              currentRole.nama ??
-              "Peran saat ini",
-          },
-        ]);
+      try {
+        const roleResult = await getRoles();
+        roles = extractRoles(roleResult);
+      } catch (roleError) {
+        console.warn(
+          "Daftar peran tidak dapat dimuat:",
+          roleError.message
+        );
       }
 
-      // Coba ambil seluruh daftar peran dari endpoint yang digunakan FE.
-      // Jika gagal, halaman tetap dapat menampilkan peran saat ini.
-      try {
-        const roleResult = await apiRequest("/api/roles");
-        const roles = extractList(roleResult);
+      const authPayload = getAuthPayload();
+      const actorRole = normalizeRole(
+        authPayload?.role ?? authPayload?.peran
+      );
+      const actorSekolahId =
+        authPayload?.sekolahId ?? null;
 
-        if (roles.length > 0) {
-          setRoleOptions(
-            roles.map((role) => ({
-              value: String(role.id),
-              label:
-                role.namaTampilan ??
-                role.nama ??
-                role.name ??
-                "Peran",
-            }))
-          );
-        }
-      } catch (roleError) {
-        console.warn("Daftar peran tidak dapat dimuat:", roleError.message);
+      const mappedRoles = roles
+        .filter((role) => role?.id)
+        .filter((role) => {
+          if (actorRole === "super_admin") return true;
+
+          if (
+            role.sekolahId &&
+            actorSekolahId &&
+            String(role.sekolahId) !== String(actorSekolahId)
+          ) {
+            return false;
+          }
+
+          return canAssignRole(actorRole, role.nama);
+        })
+        .map((role) => ({
+          value: String(role.id),
+          label: getRoleLabel(role),
+          disabled: false,
+        }));
+
+      if (
+        currentRoleId &&
+        !mappedRoles.some(
+          (role) => role.value === currentRoleId
+        )
+      ) {
+        mappedRoles.unshift({
+          value: currentRoleId,
+          label: getRoleLabel(user.peran),
+          disabled: true,
+        });
+      }
+
+      setRoleOptions(mappedRoles);
+
+      if (actorRole === "super_admin") {
+        setRoleHint(
+          "Sebagai super admin, seluruh role dapat dipilih."
+        );
+      } else if (
+        currentRoleId &&
+        mappedRoles.some(
+          (role) =>
+            role.value === currentRoleId && role.disabled
+        )
+      ) {
+        setRoleHint(
+          "Peran saat ini di luar kewenangan akun Anda sehingga tidak dapat diubah."
+        );
+      } else {
+        setRoleHint(
+          "Pilihan dibatasi pada role yang boleh dikelola oleh akun Anda."
+        );
       }
     } catch (err) {
       setError(err.message || "Gagal memuat data pengguna.");
@@ -253,11 +310,21 @@ export default function EditPenggunaPage() {
   }, [id]);
 
   useEffect(() => {
-    loadData();
+    const timer = setTimeout(() => {
+      loadData();
+    }, 0);
+
+    return () => clearTimeout(timer);
   }, [loadData]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+
+    if (!form.peranId) {
+      setNotice("");
+      setError("Peran pengguna wajib dipilih.");
+      return;
+    }
 
     setSaving(true);
     setError("");
@@ -272,30 +339,20 @@ export default function EditPenggunaPage() {
         jabatan: form.jabatan.trim() || null,
         golongan: form.golongan.trim() || null,
         status: form.status,
+        peranId: form.peranId,
       };
 
-      // Shift mengikuti kontrak updateUser di BE: "pagi" atau "siang".
-      // Jangan mengirim shiftKerjaId karena detail pengguna tidak
-      // mengembalikan ID relasi shift master.
       if (form.shiftKerja) {
         payload.shiftKerja = form.shiftKerja;
       }
 
-      if (form.peranId) {
-        payload.peranId = form.peranId;
-      }
-
-      await apiRequest(`/api/users/${id}`, {
-        method: "PUT",
-        body: JSON.stringify(payload),
-      });
+      await updateUser(id, payload);
 
       setNotice("Data pengguna berhasil diperbarui.");
-
       router.push(`/admin/pengguna/${id}`);
       router.refresh();
     } catch (err) {
-      setError(err.message || "Gagal menyimpan perubahan pengguna.");
+      setError(err?.message || "Gagal menyimpan perubahan pengguna.");
     } finally {
       setSaving(false);
     }
@@ -426,6 +483,8 @@ export default function EditPenggunaPage() {
                     onChange={(value) => updateField("peranId", value)}
                     options={roleOptions}
                     placeholder="Pilih peran"
+                    required
+                    hint={roleHint}
                   />
 
                   <FormSelect
@@ -447,11 +506,12 @@ export default function EditPenggunaPage() {
               >
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                   <FormSelect
-                    label="Shift Kerja"
+                    label="Jadwal Kerja (shiftKerja)"
                     value={form.shiftKerja}
                     onChange={(value) => updateField("shiftKerja", value)}
                     options={SHIFT_OPTIONS}
-                    placeholder="Pilih shift kerja"
+                    placeholder="Pilih jadwal kerja"
+                    hint="Jadwal kerja guru (pagi/siang) yang didukung API Pengguna."
                   />
 
                   <FormInput
@@ -469,10 +529,19 @@ export default function EditPenggunaPage() {
                   />
                 </div>
 
-                <p className="mt-4 text-xs text-slate-500 dark:text-slate-400">
-                  Pilihan shift ini mengikuti field shiftKerja pada backend,
-                  dengan nilai yang didukung berupa pagi dan siang.
-                </p>
+                <div className="mt-5 rounded-lg border border-blue-100 bg-blue-50/70 p-4 text-xs text-blue-800 dark:border-blue-900/50 dark:bg-blue-950/30 dark:text-blue-300">
+                  <p className="font-semibold">Catatan Master Shift & Kategori Jabatan</p>
+                  <p className="mt-1 leading-5">
+                    Penugasan relasi Master Shift Kerja dan Kategori Jabatan dikelola secara terpisah melalui menu Presensi &gt; Penugasan Shift menggunakan endpoint server <code>POST /api/shift-kerja/assign-user</code>.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => router.push(`/admin/presensi/penugasan-shift/${id}`)}
+                    className="mt-2 font-semibold text-blue-700 underline hover:text-blue-800 dark:text-blue-300"
+                  >
+                    Buka Penugasan Shift Pegawai &rarr;
+                  </button>
+                </div>
               </Section>
 
               <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">

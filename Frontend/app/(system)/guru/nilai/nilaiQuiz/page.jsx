@@ -22,9 +22,6 @@ import {
 } from "@/services/nilai.service";
 import { getUjianByKelasMapel } from "@/services/ujian.service";
 
-// ============================================================
-// THEME HELPERS
-// ============================================================
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -339,9 +336,6 @@ export default function GuruNilaiQuizPage() {
 
   return (
     <div className="theme-page flex h-screen overflow-hidden">
-      {/* =====================================================
-          SIDEBAR GURU
-      ===================================================== */}
 
       <Sidebar
         active="nilaiQuiz"
@@ -351,9 +345,6 @@ export default function GuruNilaiQuizPage() {
       />
 
       <div className="flex min-w-0 flex-1 flex-col">
-        {/* ===================================================
-            HEADER GURU
-        =================================================== */}
 
         <Header
           toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
@@ -365,15 +356,9 @@ export default function GuruNilaiQuizPage() {
           }}
         />
 
-        {/* ===================================================
-            MAIN
-        =================================================== */}
 
         <main className="theme-page flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           <div className="w-full space-y-6">
-            {/* =================================================
-                PAGE HEADER
-            ================================================= */}
 
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="min-w-0">
@@ -402,9 +387,6 @@ export default function GuruNilaiQuizPage() {
               </div>
             </div>
 
-            {/* =================================================
-                API ERROR
-            ================================================= */}
 
             {error && (
               <div
@@ -429,9 +411,6 @@ export default function GuruNilaiQuizPage() {
               </div>
             )}
 
-            {/* =================================================
-                FEEDBACK
-            ================================================= */}
 
             {feedback && (
               <div
@@ -466,15 +445,11 @@ export default function GuruNilaiQuizPage() {
               </div>
             )}
 
-            {/* =================================================
-                SELECTOR
-            ================================================= */}
 
             <div
               className={`theme-card rounded-xl border p-4 ${themeNeutralBorder} ${themeCardShadow}`}
             >
               <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:flex-wrap sm:items-end">
-                {/* KELAS */}
 
                 <div className="w-full sm:w-56">
                   <label
@@ -521,7 +496,6 @@ export default function GuruNilaiQuizPage() {
                   </div>
                 </div>
 
-                {/* KOMPONEN */}
 
                 <div className="w-full sm:w-56">
                   <label
@@ -562,7 +536,6 @@ export default function GuruNilaiQuizPage() {
                   </div>
                 </div>
 
-                {/* STATUS */}
 
                 <span
                   className={`flex flex-shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-2 text-[11px] font-medium ${
@@ -578,9 +551,6 @@ export default function GuruNilaiQuizPage() {
               </div>
             </div>
 
-            {/* =================================================
-                SUMMARY CARDS
-            ================================================= */}
 
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               <div
@@ -662,12 +632,8 @@ export default function GuruNilaiQuizPage() {
               </div>
             </div>
 
-            {/* =================================================
-                MAIN CONTENT
-            ================================================= */}
 
             <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
-              {/* DAFTAR KUIS */}
 
               <div
                 className={`theme-card overflow-hidden rounded-xl border lg:col-span-2 ${themeNeutralBorder} ${themeCardShadow}`}
@@ -789,7 +755,6 @@ export default function GuruNilaiQuizPage() {
                 )}
               </div>
 
-              {/* PANEL KANAN */}
 
               <div className="space-y-6 lg:col-span-1">
                 <div

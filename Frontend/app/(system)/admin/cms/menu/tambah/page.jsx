@@ -102,9 +102,7 @@ export default function TambahMenuPage() {
   };
 
   return (
-    // ROOT: halaman tidak bisa scroll
     <div className="theme-page flex h-screen w-full overflow-hidden">
-      {/* SIDEBAR */}
       <Sidebar
         active={active}
         setActive={setActive}
@@ -112,9 +110,7 @@ export default function TambahMenuPage() {
         setCollapsed={setCollapsed}
       />
 
-      {/* BODY: sidebar + main sejajar */}
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-        {/* HEADER: tetap di atas */}
         <div className="shrink-0">
           <Header
             title="Tambah Konfigurasi Menu"
@@ -126,10 +122,8 @@ export default function TambahMenuPage() {
           />
         </div>
 
-        {/* MAIN: hanya area ini yang scroll */}
         <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto">
           <div className="w-full px-3 py-5 sm:px-6 lg:px-9">
-            {/* PAGE HEADER */}
             <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-3">
                 <button
@@ -156,7 +150,6 @@ export default function TambahMenuPage() {
               </div>
             </div>
 
-            {/* ALERT ERROR */}
             {error && (
               <div className="theme-danger mb-4 flex items-start gap-3 rounded-xl border p-4">
                 <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
@@ -167,14 +160,11 @@ export default function TambahMenuPage() {
               </div>
             )}
 
-            {/* FORM CARD */}
             <form
               onSubmit={handleSubmit}
               className="theme-card theme-border rounded-2xl border"
             >
-              {/* BODY FORM */}
               <div className="space-y-5 p-5 sm:p-6">
-                {/* ROW 1: Halaman & Section */}
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div>
                     <label className="theme-text mb-2 block text-sm font-semibold">
@@ -211,7 +201,6 @@ export default function TambahMenuPage() {
                   </div>
                 </div>
 
-                {/* ROW 2: Judul */}
                 <div>
                   <label className="theme-text mb-2 block text-sm font-semibold">
                     Judul <span className="text-red-500">*</span>
@@ -226,7 +215,6 @@ export default function TambahMenuPage() {
                   />
                 </div>
 
-                {/* ROW 3: Subjudul */}
                 <div>
                   <label className="theme-text mb-2 block text-sm font-semibold">
                     Subjudul
@@ -240,7 +228,6 @@ export default function TambahMenuPage() {
                   />
                 </div>
 
-                {/* ROW 4: Konten */}
                 <div>
                   <label className="theme-text mb-2 block text-sm font-semibold">
                     Konten
@@ -255,7 +242,6 @@ export default function TambahMenuPage() {
                   />
                 </div>
 
-                {/* ROW 5: Gambar */}
                 <div>
                   <label className="theme-text mb-2 block text-sm font-semibold">
                     URL Gambar
@@ -290,7 +276,6 @@ export default function TambahMenuPage() {
                   )}
                 </div>
 
-                {/* ROW 6: CTA */}
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div>
                     <label className="theme-text mb-2 block text-sm font-semibold">
@@ -319,7 +304,6 @@ export default function TambahMenuPage() {
                   </div>
                 </div>
 
-                {/* ROW 7: Urutan & Status */}
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 2xl:grid-cols-4">
                   <div>
                     <label className="theme-text mb-2 block text-sm font-semibold">
@@ -358,7 +342,6 @@ export default function TambahMenuPage() {
                 </div>
               </div>
 
-              {/* FOOTER ACTIONS */}
               <div className="theme-card-soft theme-border flex flex-col-reverse gap-2 rounded-b-2xl border-t p-4 sm:flex-row sm:justify-end">
                 <button
                   type="button"

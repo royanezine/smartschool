@@ -21,10 +21,6 @@ import {
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
 
-/* =========================================================
-   API CONFIG
-   Mendukung NEXT_PUBLIC_API_URL dengan atau tanpa suffix /api
-========================================================= */
 
 const API_URL = (
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
@@ -32,9 +28,6 @@ const API_URL = (
   .replace(/\/+$/, "")
   .replace(/\/api$/, "");
 
-/* =========================================================
-   THEME HELPERS
-========================================================= */
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -76,9 +69,6 @@ const themeDangerSurface =
 const themeDangerBorder =
   "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
 
-/* =========================================================
-   RESPONSE HELPERS
-========================================================= */
 
 async function parseResponse(response) {
   const text = await response.text();
@@ -128,9 +118,6 @@ function getAbsensiList(response) {
   return [];
 }
 
-/* =========================================================
-   DATE HELPERS
-========================================================= */
 
 function getTodayDate() {
   const now = new Date();
@@ -186,9 +173,6 @@ function formatJam(value) {
   }
 }
 
-/* =========================================================
-   STATUS HELPERS
-========================================================= */
 
 function getStatusLabel(status) {
   const value = String(status || "").toLowerCase();
@@ -224,13 +208,6 @@ function getStatusClass(status) {
   return `${themeNeutralSurface} ${themeNeutralBorder} theme-text-secondary`;
 }
 
-/* =========================================================
-   SCHEDULE HELPERS
-   Struktur BE:
-   jadwal[].kelasMapel.kelas
-   jadwal[].kelasMapel.mataPelajaran
-   jadwal[].kelasMapel.guruPengajar
-========================================================= */
 
 function getKelasIdFromSchedule(schedule) {
   return (
@@ -330,7 +307,6 @@ function isTodaySchedule(schedule) {
   const currentDay = getCurrentDayName().toLowerCase();
   const scheduleDay = getScheduleDay(schedule);
 
-  // Jangan menganggap jadwal tanpa informasi hari sebagai jadwal hari ini.
   if (!scheduleDay) return false;
 
   return (
@@ -360,9 +336,6 @@ function isScheduleCurrentlyActive(schedule) {
   return current >= start && current <= end;
 }
 
-/* =========================================================
-   PAGE
-========================================================= */
 
 export default function PresensiGuruPage() {
   const videoRef = useRef(null);
@@ -392,9 +365,6 @@ export default function PresensiGuruPage() {
 
   const [jadwalAktif, setJadwalAktif] = useState(null);
 
-  /* =======================================================
-     LOAD DATA
-  ======================================================= */
 
   const loadData = useCallback(async () => {
     const token = getToken();
@@ -484,9 +454,6 @@ export default function PresensiGuruPage() {
     loadData();
   }, [loadData]);
 
-  /* =======================================================
-     CAMERA CLEANUP
-  ======================================================= */
 
   useEffect(() => {
     return () => {
@@ -500,9 +467,6 @@ export default function PresensiGuruPage() {
     };
   }, [capturedPhoto]);
 
-  /* =======================================================
-     GPS
-  ======================================================= */
 
   const getCurrentLocation = () => {
     return new Promise((resolve, reject) => {
@@ -560,9 +524,6 @@ export default function PresensiGuruPage() {
     }
   };
 
-  /* =======================================================
-     CAMERA
-  ======================================================= */
 
   const startCamera = async () => {
     try {
@@ -690,9 +651,6 @@ export default function PresensiGuruPage() {
     setCameraError("");
   };
 
-  /* =======================================================
-     SELECTED SCHEDULE
-  ======================================================= */
 
   const getSelectedSchedule = () => {
     if (jadwalAktif) return jadwalAktif;
@@ -706,9 +664,6 @@ export default function PresensiGuruPage() {
     );
   };
 
-  /* =======================================================
-     CHECK-IN
-  ======================================================= */
 
   const handleCheckin = async () => {
     try {
@@ -794,9 +749,6 @@ export default function PresensiGuruPage() {
     }
   };
 
-  /* =======================================================
-     DERIVED DATA
-  ======================================================= */
 
   const today = getTodayDate();
 
@@ -827,9 +779,6 @@ export default function PresensiGuruPage() {
   const todaySchedules = jadwal.filter(isTodaySchedule);
   const selectedSchedule = getSelectedSchedule();
 
-  /* =======================================================
-     RENDER
-  ======================================================= */
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
@@ -849,7 +798,6 @@ export default function PresensiGuruPage() {
 
         <main className="flex-1 overflow-y-auto">
           <div className="space-y-5 p-4 sm:space-y-6 sm:p-6 lg:p-8">
-            {/* PAGE HEADER */}
 
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex min-w-0 items-center gap-3">
@@ -886,7 +834,6 @@ export default function PresensiGuruPage() {
               </div>
             </div>
 
-            {/* ERROR */}
 
             {error && (
               <div
@@ -915,7 +862,6 @@ export default function PresensiGuruPage() {
               </div>
             )}
 
-            {/* SUCCESS */}
 
             {success && (
               <div
@@ -944,7 +890,6 @@ export default function PresensiGuruPage() {
               </div>
             )}
 
-            {/* STATISTICS */}
 
             <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
               <StatCard
@@ -977,10 +922,8 @@ export default function PresensiGuruPage() {
               />
             </div>
 
-            {/* MAIN GRID */}
 
             <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.4fr)_minmax(360px,0.8fr)]">
-              {/* CHECK-IN */}
 
               <section
                 className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
@@ -992,7 +935,6 @@ export default function PresensiGuruPage() {
                 />
 
                 <div className="space-y-4 p-4 sm:p-6">
-                  {/* JADWAL AKTIF */}
 
                   <div
                     className={`rounded-xl border ${themeInfoBorder} ${themeInfoSurface} p-4`}
@@ -1039,7 +981,6 @@ export default function PresensiGuruPage() {
                     </div>
                   </div>
 
-                  {/* STATUS */}
 
                   <div
                     className={`theme-card rounded-xl border ${themeNeutralBorder} p-4`}
@@ -1068,7 +1009,6 @@ export default function PresensiGuruPage() {
                     </div>
                   </div>
 
-                  {/* GPS */}
 
                   <div
                     className={`rounded-xl border ${themeNeutralBorder} ${themeNeutralSurface} p-4`}
@@ -1122,7 +1062,6 @@ export default function PresensiGuruPage() {
                     </div>
                   </div>
 
-                  {/* CAMERA BUTTON */}
 
                   <button
                     type="button"
@@ -1159,7 +1098,6 @@ export default function PresensiGuruPage() {
                 </div>
               </section>
 
-              {/* SUMMARY */}
 
               <section
                 className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
@@ -1208,7 +1146,6 @@ export default function PresensiGuruPage() {
               </section>
             </div>
 
-            {/* JADWAL HARI INI */}
 
             <section
               className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
@@ -1281,7 +1218,6 @@ export default function PresensiGuruPage() {
               </div>
             </section>
 
-            {/* RIWAYAT PRESENSI */}
 
             <section
               className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
@@ -1375,14 +1311,12 @@ export default function PresensiGuruPage() {
         </main>
       </div>
 
-      {/* CAMERA MODAL */}
 
       {cameraOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[color-mix(in_srgb,var(--color-text)_78%,transparent)] p-4 backdrop-blur-sm">
           <div
             className={`theme-card w-full max-w-2xl overflow-hidden rounded-2xl ${themeCardShadow}`}
           >
-            {/* MODAL HEADER */}
 
             <div
               className={`flex items-center justify-between border-b ${themeDivider} px-5 py-4`}
@@ -1414,7 +1348,6 @@ export default function PresensiGuruPage() {
               </button>
             </div>
 
-            {/* CAMERA PREVIEW */}
 
             <div className="bg-[color-mix(in_srgb,var(--color-text)_92%,var(--color-card))] p-4 sm:p-6">
               <div className="relative mx-auto w-full max-w-[620px] overflow-hidden rounded-2xl bg-[color-mix(in_srgb,var(--color-text)_96%,var(--color-card))]">
@@ -1478,7 +1411,6 @@ export default function PresensiGuruPage() {
               </div>
             </div>
 
-            {/* MODAL FOOTER */}
 
             <div
               className={`flex flex-col gap-3 border-t ${themeDivider} theme-card p-5 sm:flex-row sm:justify-end`}
@@ -1540,9 +1472,6 @@ export default function PresensiGuruPage() {
   );
 }
 
-/* =========================================================
-   SECTION HEADER
-========================================================= */
 
 function SectionHeader({ icon: Icon, title, description }) {
   return (
@@ -1560,9 +1489,6 @@ function SectionHeader({ icon: Icon, title, description }) {
   );
 }
 
-/* =========================================================
-   SUMMARY ITEM
-========================================================= */
 
 function SummaryItem({ label, value, surface, border, text }) {
   return (
@@ -1573,9 +1499,6 @@ function SummaryItem({ label, value, surface, border, text }) {
   );
 }
 
-/* =========================================================
-   STAT CARD
-========================================================= */
 
 function StatCard({ title, value, description, icon: Icon, iconClass }) {
   return (

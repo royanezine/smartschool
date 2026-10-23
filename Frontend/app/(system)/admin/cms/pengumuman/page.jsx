@@ -1,4 +1,3 @@
-// app/cmsAdmin/pengumuman/page.jsx
 "use client";
 
 import { useState } from "react";
@@ -119,7 +118,6 @@ export default function PengumumanPage() {
 
   return (
     <div className="flex min-h-screen w-full theme-page">
-      {/* SIDEBAR */}
       <Sidebar
         active={active}
         setActive={setActive}
@@ -127,9 +125,7 @@ export default function PengumumanPage() {
         setCollapsed={setCollapsed}
       />
 
-      {/* MAIN CONTENT */}
       <div className="flex-1 min-w-0 flex flex-col">
-        {/* HEADER */}
         <Header
           title="Pengumuman"
           user={{
@@ -142,7 +138,6 @@ export default function PengumumanPage() {
 
         <main className="flex-1 min-w-0 overflow-y-auto p-4 md:p-6 lg:p-8 theme-page">
           <div className="w-full min-w-0 max-w-7xl mx-auto space-y-6">
-            {/* BREADCRUMB */}
             <nav className="flex items-center gap-2 text-xs sm:text-sm theme-text-muted">
               <a
                 href="/cmsAdmin"
@@ -158,7 +153,6 @@ export default function PengumumanPage() {
               </span>
             </nav>
 
-            {/* HEADER CARD */}
             <div className="theme-card rounded-2xl border theme-border shadow-sm p-6 lg:p-8">
               <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
                 <div className="flex items-start gap-4 min-w-0">
@@ -204,9 +198,7 @@ export default function PengumumanPage() {
                 </button>
               </div>
 
-              {/* STATISTICS */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-6 border-t theme-border">
-                {/* TOTAL */}
                 <div
                   className="
                     theme-card-soft
@@ -235,7 +227,6 @@ export default function PengumumanPage() {
                   </div>
                 </div>
 
-                {/* PUBLISHED */}
                 <div
                   className="
                     theme-card-soft
@@ -264,7 +255,6 @@ export default function PengumumanPage() {
                   </div>
                 </div>
 
-                {/* SCHEDULED */}
                 <div
                   className="
                     theme-card-soft
@@ -293,7 +283,6 @@ export default function PengumumanPage() {
                   </div>
                 </div>
 
-                {/* DRAFT */}
                 <div
                   className="
                     theme-card-soft
@@ -324,7 +313,6 @@ export default function PengumumanPage() {
               </div>
             </div>
 
-            {/* SEARCH & FILTER */}
             <div
               className="
                 theme-card
@@ -391,7 +379,6 @@ export default function PengumumanPage() {
               </div>
             </div>
 
-            {/* TABLE */}
             <div className="theme-card rounded-2xl border theme-border shadow-sm overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[680px] border-collapse">
@@ -444,7 +431,6 @@ export default function PengumumanPage() {
                               transition-colors duration-200
                             "
                           >
-                            {/* JUDUL */}
                             <td className="px-4 py-4 align-middle">
                               <div className="flex items-center gap-3 min-w-0">
                                 <div
@@ -509,12 +495,10 @@ export default function PengumumanPage() {
                               </div>
                             </td>
 
-                            {/* KATEGORI */}
                             <td className="px-4 py-4 text-sm theme-text-secondary whitespace-nowrap">
                               {item.category}
                             </td>
 
-                            {/* STATUS */}
                             <td className="px-4 py-4">
                               <span
                                 className={`
@@ -540,12 +524,10 @@ export default function PengumumanPage() {
                               </span>
                             </td>
 
-                            {/* TANGGAL */}
                             <td className="px-4 py-4 text-xs theme-text-secondary whitespace-nowrap">
                               {item.date}
                             </td>
 
-                            {/* AKSI */}
                             <td className="px-4 py-4">
                               <div className="flex items-center justify-end gap-0.5 sm:gap-1">
                                 <button
@@ -619,7 +601,6 @@ export default function PengumumanPage() {
                 </table>
               </div>
 
-              {/* TABLE FOOTER */}
               <div
                 className="
                   px-4 py-3
@@ -652,7 +633,6 @@ export default function PengumumanPage() {
               </div>
             </div>
 
-            {/* FOOTER */}
             <footer className="pt-4 border-t theme-border-soft text-center text-xs theme-text-muted">
               © 2026 SmartSchool CMS • Pengumuman
             </footer>

@@ -24,9 +24,6 @@ import {
   CheckCircle2,
 } from "lucide-react";
 
-/* =========================================================
-   CONSTANTS
-========================================================= */
 
 const initialForm = {
   namaLengkap: "",
@@ -54,9 +51,6 @@ const inputClass =
 
 const labelClass = "mb-1.5 block text-sm font-medium theme-text-secondary";
 
-/* =========================================================
-   HELPERS
-========================================================= */
 
 function getErrorMessage(error) {
   return error instanceof Error
@@ -115,9 +109,6 @@ function getShiftLabel(item) {
   );
 }
 
-/* =========================================================
-   PAGE
-========================================================= */
 
 export default function EditUserPage() {
   const params = useParams();
@@ -137,9 +128,6 @@ export default function EditUserPage() {
   const isGuru = userRole === "guru";
   const isSiswa = userRole === "siswa";
 
-  /* =======================================================
-     LOAD
-  ======================================================= */
   const loadUser = useCallback(async () => {
     if (!id) {
       setError("ID pengguna tidak ditemukan.");
@@ -238,9 +226,6 @@ export default function EditUserPage() {
     loadUser();
   }, [loadUser]);
 
-  /* =======================================================
-     HANDLERS
-  ======================================================= */
   function handleChange(event) {
     const { name, value } = event.target;
     setForm((previous) => ({ ...previous, [name]: value }));
@@ -334,9 +319,6 @@ export default function EditUserPage() {
     }
   }
 
-  /* =======================================================
-     FIELD RENDERER
-  ======================================================= */
   function field(name, label, options = {}) {
     return (
       <div key={name}>
@@ -388,9 +370,6 @@ export default function EditUserPage() {
     );
   }
 
-  /* =======================================================
-     OPTIONS
-  ======================================================= */
   const kategoriSelectOptions = [
     { value: "", label: "Pilih kategori jabatan" },
     ...kategoriOptions.map((item) => ({
@@ -411,9 +390,6 @@ export default function EditUserPage() {
     })),
   ];
 
-  /* =======================================================
-     RENDER
-  ======================================================= */
   return (
     <div className="flex h-screen w-full overflow-hidden theme-page">
       <Sidebar />
@@ -425,7 +401,6 @@ export default function EditUserPage() {
 
         <main className="min-w-0 flex-1 overflow-y-auto">
           <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
-            {/* BACK */}
             <button
               type="button"
               onClick={() =>
@@ -436,7 +411,6 @@ export default function EditUserPage() {
               <ArrowLeft size={17} /> Kembali ke detail pengguna
             </button>
 
-            {/* HEADER */}
             <div className="mb-6">
               <p className="text-xs font-semibold uppercase tracking-wide theme-primary-text">
                 Manajemen Pengguna
@@ -449,7 +423,6 @@ export default function EditUserPage() {
               </p>
             </div>
 
-            {/* ALERTS */}
             {error && (
               <div
                 role="alert"
@@ -470,7 +443,6 @@ export default function EditUserPage() {
               </div>
             )}
 
-            {/* LOADING */}
             {loading ? (
               <div className="theme-card flex min-h-64 items-center justify-center rounded-2xl border theme-border">
                 <Loader2 size={20} className="animate-spin theme-primary-text" />
@@ -480,7 +452,6 @@ export default function EditUserPage() {
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-5">
-                {/* SECTION: INFORMASI AKUN */}
                 <section className="theme-card overflow-hidden rounded-2xl border theme-border shadow-sm">
                   <div className="flex items-center gap-3 border-b theme-border px-5 py-4 sm:px-6">
                     <div className="theme-primary-soft flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
@@ -542,7 +513,6 @@ export default function EditUserPage() {
                   </div>
                 </section>
 
-                {/* SECTION: KEPEGAWAIAN */}
                 <section className="theme-card overflow-hidden rounded-2xl border theme-border shadow-sm">
                   <div className="flex items-center gap-3 border-b theme-border px-5 py-4 sm:px-6">
                     <div className="theme-info flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
@@ -637,7 +607,6 @@ export default function EditUserPage() {
                   </div>
                 </section>
 
-                {/* SECTION: ALAMAT */}
                 <section className="theme-card overflow-hidden rounded-2xl border theme-border shadow-sm">
                   <div className="flex items-center gap-3 border-b theme-border px-5 py-4 sm:px-6">
                     <div className="theme-success flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
@@ -657,7 +626,6 @@ export default function EditUserPage() {
                   </div>
                 </section>
 
-                {/* ACTIONS */}
                 <div className="flex flex-col-reverse gap-3 pb-2 sm:flex-row sm:justify-end">
                   <button
                     type="button"

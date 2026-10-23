@@ -15,7 +15,6 @@ import {
   buatTautanPendaftaran,
 } from "@/app/components/spmb/tautanPendaftaran";
 
-// Tetap diekspor agar pemanggil lama tidak kehilangan API yang sama.
 export {
   alasanTautanTidakTersedia,
   buatTautanPendaftaran,

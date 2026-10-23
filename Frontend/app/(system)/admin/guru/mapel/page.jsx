@@ -33,9 +33,6 @@ import {
 
 import { getKelasMapel } from "@/services/kelasMapel.service";
 
-/* =========================================================
-   STATUS BADGE
-========================================================= */
 
 function StatusBadge({ status }) {
   const isActive =
@@ -62,9 +59,6 @@ function StatusBadge({ status }) {
   );
 }
 
-/* =========================================================
-   STAT CARD
-========================================================= */
 
 function StatCard({
   icon: Icon,
@@ -100,9 +94,6 @@ function StatCard({
   );
 }
 
-/* =========================================================
-   EMPTY STATE
-========================================================= */
 
 function EmptyState({ search, onReset }) {
   return (
@@ -136,9 +127,6 @@ function EmptyState({ search, onReset }) {
   );
 }
 
-/* =========================================================
-   GURU LIST
-========================================================= */
 
 function GuruList({ assignments = [] }) {
   const guruMap = new Map();
@@ -195,9 +183,6 @@ function GuruList({ assignments = [] }) {
   );
 }
 
-/* =========================================================
-   MAIN PAGE
-========================================================= */
 
 export default function MapelPage() {
   const router = useRouter();
@@ -214,17 +199,11 @@ export default function MapelPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("semua");
 
-  /* =========================================================
-     SIDEBAR
-  ========================================================= */
 
   const toggleSidebar = () => {
     setIsCollapsed((prev) => !prev);
   };
 
-  /* =========================================================
-     FETCH DATA
-  ========================================================= */
 
   const fetchData = useCallback(
     async (showLoading = true) => {
@@ -300,25 +279,16 @@ export default function MapelPage() {
     fetchData();
   }, [fetchData]);
 
-  /* =========================================================
-     REFRESH
-  ========================================================= */
 
   const handleRefresh = async () => {
     await fetchData();
   };
 
-  /* =========================================================
-     TAMBAH
-  ========================================================= */
 
   const handleTambah = () => {
     router.push("/admin/guru/mapel/tambah");
   };
 
-  /* =========================================================
-     EDIT
-  ========================================================= */
 
   const handleEdit = (item) => {
     if (!item?.id) {
@@ -333,9 +303,6 @@ export default function MapelPage() {
     );
   };
 
-  /* =========================================================
-     DELETE
-  ========================================================= */
 
   const handleDelete = async (item) => {
     if (!item?.id) {
@@ -385,9 +352,6 @@ export default function MapelPage() {
     }
   };
 
-  /* =========================================================
-     GABUNGKAN MAPEL + KELAS + GURU
-  ========================================================= */
 
   const mapelWithKelas = useMemo(() => {
     return mapel.map((item) => {
@@ -433,9 +397,6 @@ export default function MapelPage() {
     });
   }, [mapel, kelasMapel]);
 
-  /* =========================================================
-     FILTER
-  ========================================================= */
 
   const filteredMapel = useMemo(() => {
     const keyword = search
@@ -507,9 +468,6 @@ export default function MapelPage() {
     mapelWithKelas,
   ]);
 
-  /* =========================================================
-     STATISTIK
-  ========================================================= */
 
   const totalMapel = mapel.length;
 
@@ -540,25 +498,16 @@ export default function MapelPage() {
     return guruMap.size;
   }, [kelasMapel]);
 
-  /* =========================================================
-     RESET FILTER
-  ========================================================= */
 
   const resetFilter = () => {
     setSearch("");
     setStatusFilter("semua");
   };
 
-  /* =========================================================
-     RENDER
-  ========================================================= */
 
   return (
     <div className="flex h-screen w-full theme-page overflow-hidden">
 
-      {/* =====================================================
-          SIDEBAR
-      ===================================================== */}
 
       <Sidebar
         active="guruMapel"
@@ -568,9 +517,6 @@ export default function MapelPage() {
         role="admin"
       />
 
-      {/* =====================================================
-          CONTENT
-      ===================================================== */}
 
       <div className="flex-1 min-w-0 h-full flex flex-col overflow-hidden">
 
@@ -588,9 +534,6 @@ export default function MapelPage() {
 
           <div className="max-w-[1600px] mx-auto w-full p-4 sm:p-6 lg:p-8">
 
-            {/* =================================================
-                PAGE HEADER
-            ================================================= */}
 
             <section className="mb-6">
 
@@ -677,9 +620,6 @@ export default function MapelPage() {
 
             </section>
 
-            {/* =================================================
-                ERROR
-            ================================================= */}
 
             {error && (
               <div className="mb-6 flex items-start gap-3 p-4 rounded-2xl theme-danger border">
@@ -713,9 +653,6 @@ export default function MapelPage() {
               </div>
             )}
 
-            {/* =================================================
-                STATISTICS
-            ================================================= */}
 
             <section className="grid grid-cols-2 xl:grid-cols-5 gap-3.5 mb-6">
 
@@ -781,15 +718,9 @@ export default function MapelPage() {
 
             </section>
 
-            {/* =================================================
-                MAIN CONTENT
-            ================================================= */}
 
             <section className="theme-card rounded-2xl border shadow-sm overflow-hidden">
 
-              {/* =================================================
-                  CARD HEADER
-              ================================================= */}
 
               <div className="px-4 sm:px-5 lg:px-6 py-4 sm:py-5 theme-border border-b">
 
@@ -817,7 +748,6 @@ export default function MapelPage() {
 
                   </div>
 
-                  {/* FILTER */}
 
                   <div className="flex flex-col sm:flex-row gap-2">
 
@@ -879,9 +809,6 @@ export default function MapelPage() {
 
               </div>
 
-              {/* =================================================
-                  RESULT BAR
-              ================================================= */}
 
               {!loading && !error && (
                 <div className="px-4 sm:px-5 lg:px-6 py-2.5 theme-card-soft theme-border border-b flex items-center justify-between gap-3">
@@ -909,9 +836,6 @@ export default function MapelPage() {
                 </div>
               )}
 
-              {/* =================================================
-                  LOADING
-              ================================================= */}
 
               {loading ? (
                 <div className="py-20 flex flex-col items-center justify-center">
@@ -945,9 +869,6 @@ export default function MapelPage() {
               ) : (
                 <>
 
-                  {/* =================================================
-                      DESKTOP TABLE
-                  ================================================= */}
 
                   <div className="hidden lg:block overflow-x-auto">
 
@@ -994,7 +915,6 @@ export default function MapelPage() {
                               className="group border-b last:border-0 theme-table-hover transition-colors"
                             >
 
-                              {/* KODE */}
 
                               <td className="px-5 lg:px-6 py-5 align-top">
 
@@ -1004,7 +924,6 @@ export default function MapelPage() {
 
                               </td>
 
-                              {/* MAPEL */}
 
                               <td className="px-5 lg:px-6 py-5 align-top">
 
@@ -1037,7 +956,6 @@ export default function MapelPage() {
 
                               </td>
 
-                              {/* GURU */}
 
                               <td className="px-5 lg:px-6 py-5 align-top">
 
@@ -1049,7 +967,6 @@ export default function MapelPage() {
 
                               </td>
 
-                              {/* KELAS */}
 
                               <td className="px-5 lg:px-6 py-5 align-top">
 
@@ -1091,7 +1008,6 @@ export default function MapelPage() {
 
                               </td>
 
-                              {/* STATUS */}
 
                               <td className="px-5 lg:px-6 py-5 text-center align-top">
 
@@ -1103,7 +1019,6 @@ export default function MapelPage() {
 
                               </td>
 
-                              {/* AKSI */}
 
                               <td className="px-5 lg:px-6 py-5 align-top">
 
@@ -1169,9 +1084,6 @@ export default function MapelPage() {
 
                   </div>
 
-                  {/* =================================================
-                      TABLE MEDIUM
-                  ================================================= */}
 
                   <div className="hidden md:block lg:hidden overflow-x-auto">
 
@@ -1355,9 +1267,6 @@ export default function MapelPage() {
 
                   </div>
 
-                  {/* =================================================
-                      MOBILE
-                  ================================================= */}
 
                   <div className="md:hidden divide-y theme-border">
 
@@ -1402,7 +1311,6 @@ export default function MapelPage() {
 
                               </div>
 
-                              {/* GURU */}
 
                               <div className="mt-4">
 
@@ -1418,7 +1326,6 @@ export default function MapelPage() {
 
                               </div>
 
-                              {/* KELAS */}
 
                               <div className="mt-4">
 
@@ -1473,7 +1380,6 @@ export default function MapelPage() {
 
                               </div>
 
-                              {/* SUMMARY */}
 
                               <div className="mt-4 p-3 rounded-xl theme-card-soft border">
 
@@ -1511,7 +1417,6 @@ export default function MapelPage() {
 
                               </div>
 
-                              {/* ACTION */}
 
                               <div className="flex items-center justify-end gap-2 mt-4">
 
@@ -1577,9 +1482,6 @@ export default function MapelPage() {
                 </>
               )}
 
-              {/* =================================================
-                  BOTTOM SUMMARY
-              ================================================= */}
 
               {!loading &&
                 filteredMapel.length >
@@ -1616,9 +1518,6 @@ export default function MapelPage() {
 
             </section>
 
-            {/* =================================================
-                FOOTER
-            ================================================= */}
 
             <div className="flex items-center justify-between px-1 mt-4">
 

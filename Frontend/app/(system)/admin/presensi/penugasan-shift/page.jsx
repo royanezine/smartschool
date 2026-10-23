@@ -22,12 +22,11 @@ import {
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
 import { apiFetch } from "@/lib/api";
-import { getUsers } from "@/services/user.service";
+import { getUsers, verifyUserAssignment } from "@/services/user.service";
 import { getShiftKerja } from "@/services/shiftKerja.service";
 
 const PAGE_SIZE = 10;
 const JABATAN_ENDPOINT = "/api/kategori-jabatan";
-const CACHE_KEY = "smartschool-penugasan-shift-cache";
 
 function getArray(response, keys = []) {
   let current = response;
@@ -50,16 +49,6 @@ function getArray(response, keys = []) {
   return Array.isArray(current) ? current : [];
 }
 
-function getCache() {
-  try {
-    const value = localStorage.getItem(CACHE_KEY);
-    const parsed = value ? JSON.parse(value) : {};
-    return parsed && typeof parsed === "object" ? parsed : {};
-  } catch {
-    return {};
-  }
-}
-
 function getId(value) {
   return value == null ? "" : String(value);
 }
@@ -76,73 +65,78 @@ function getNamaJabatan(value) {
   );
 }
 
-function getJabatanName(item, jabatanList, cache) {
-  const id =
-    item?.kategoriJabatanId ??
-    item?.kategoriJabatan?.id ??
-    cache?.kategoriJabatanId;
-
-  const relation = item?.kategoriJabatan;
-
-  if (typeof relation === "string" && relation.trim()) {
-    return relation;
-  }
-
-  const relationName = getNamaJabatan(relation);
-  if (relationName) return relationName;
-
-  if (!id) return "";
-
-  const found = jabatanList.find((x) => getId(x.id) === getId(id));
-  return getNamaJabatan(found);
+function getShiftRelation(item) {
+  return (
+    item?.shiftKerjaMaster ??
+    (item?.shiftKerja != null &&
+    typeof item.shiftKerja === "object"
+      ? item.shiftKerja
+      : null)
+  );
 }
 
-function getShiftForPegawai(item, shiftList, cache) {
-  if (!item) return null;
+function getCategoryRelation(item) {
+  return item?.kategoriJabatan ?? null;
+}
 
-  const masterRelation =
-    item.shiftKerjaMaster ??
-    (typeof item.shiftKerja === "object" ? item.shiftKerja : null);
+function resolveShiftAssignment(item, shiftList, shiftListLoaded) {
+  const fields = verifyUserAssignment(item);
 
-  const id = item.shiftKerjaId ?? masterRelation?.id;
-
-  if (id) {
-    const found = shiftList.find((x) => getId(x.id) === getId(id));
-    if (found) return found;
-
-    if (masterRelation) return masterRelation;
+  if (!fields.shift) {
+    return { status: "unknown", shift: null, id: "" };
   }
 
-  const cachedId = cache?.shiftKerjaId;
+  const relation = getShiftRelation(item);
+  const id = getId(item?.shiftKerjaId ?? relation?.id ?? "");
 
-  if (cachedId) {
-    const found = shiftList.find((x) => getId(x.id) === getId(cachedId));
-    if (found) return found;
+  if (!id) {
+    return { status: "none", shift: null, id: "" };
   }
 
-  const legacy =
-    typeof item.shiftKerja === "string" ? item.shiftKerja.trim() : "";
+  const found = shiftList.find((x) => getId(x.id) === getId(id));
 
-  if (legacy) {
-    const found = shiftList.find((shift) => {
-      const nama = String(shift.nama ?? "").trim().toLowerCase();
-      const kode = String(shift.kode ?? "").trim().toLowerCase();
-      const value = legacy.toLowerCase();
+  if (found) return { status: "assigned", shift: found, id };
+  if (!shiftListLoaded) return { status: "unverified", shift: relation ?? null, id };
 
-      return nama === value || kode === value;
-    });
+  return { status: "unresolved", shift: relation ?? null, id };
+}
 
-    if (found) return found;
+function resolveCategoryAssignment(item, jabatanList, jabatanListLoaded) {
+  const fields = verifyUserAssignment(item);
 
+  if (!fields.category) {
+    return { status: "unknown", name: "", id: "" };
+  }
+
+  const relation = getCategoryRelation(item);
+  const id = getId(item?.kategoriJabatanId ?? relation?.id ?? "");
+  const relationName = getNamaJabatan(relation);
+
+  if (!id) {
+    return relationName
+      ? { status: "assigned", name: relationName, id: "" }
+      : { status: "none", name: "", id: "" };
+  }
+
+  const found = jabatanList.find((x) => getId(x.id) === getId(id));
+
+  if (found) {
     return {
-      nama: legacy,
-      kode: "",
-      jamMasuk: null,
-      jamKeluar: null,
+      status: "assigned",
+      name: getNamaJabatan(found),
+      id,
     };
   }
 
-  return null;
+  if (relationName) {
+    return { status: "assigned", name: relationName, id };
+  }
+
+  if (!jabatanListLoaded) {
+    return { status: "unverified", name: "", id };
+  }
+
+  return { status: "unresolved", name: "", id };
 }
 
 function formatJam(value) {
@@ -166,6 +160,10 @@ function formatJam(value) {
   }
 
   return text;
+}
+
+function getErrorMessage(err, fallback) {
+  return err instanceof Error && err.message ? err.message : fallback;
 }
 
 function StatCard({ title, value, description, icon: Icon, tone = "blue" }) {
@@ -210,54 +208,130 @@ export default function PenugasanShiftPage() {
   const [pegawai, setPegawai] = useState([]);
   const [shiftList, setShiftList] = useState([]);
   const [jabatanList, setJabatanList] = useState([]);
-  const [cache, setCache] = useState({});
-
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [warnings, setWarnings] = useState([]);
   const [notice, setNotice] = useState("");
   const [search, setSearch] = useState("");
   const [filterShift, setFilterShift] = useState("semua");
   const [page, setPage] = useState(1);
+  const [shiftListLoaded, setShiftListLoaded] = useState(false);
+  const [jabatanListLoaded, setJabatanListLoaded] = useState(false);
 
   const loadData = useCallback(async () => {
     setLoading(true);
     setError("");
+    setWarnings([]);
+    setShiftListLoaded(false);
+    setJabatanListLoaded(false);
 
     try {
-      const [usersResponse, shiftsResponse, jabatanResponse] =
-        await Promise.all([
+      const [usersResult, shiftsResult, jabatanResult] =
+        await Promise.allSettled([
           getUsers({ page: 1, limit: 100 }),
           getShiftKerja({
             page: 1,
             limit: 100,
             status: "aktif",
           }),
-          apiFetch(JABATAN_ENDPOINT, { method: "GET" }),
+          apiFetch(`${JABATAN_ENDPOINT}?limit=100`, { method: "GET" }),
         ]);
 
-      const users = getArray(usersResponse, [
+      if (usersResult.status === "rejected") {
+        throw usersResult.reason;
+      }
+
+      const users = getArray(usersResult.value, [
         "users",
         "pengguna",
         "pegawai",
-      ]).filter((x) => x?.id);
+      ])
+        .filter((x) => x?.id)
+        .filter((x) => {
+          const roleName = String(
+            x?.peran?.nama || x?.role || ""
+          )
+            .trim()
+            .toLowerCase();
+          return roleName !== "siswa";
+        });
 
-      const shifts = getArray(shiftsResponse, ["shifts", "shiftKerja"]);
+      const shifts =
+        shiftsResult.status === "fulfilled"
+          ? getArray(shiftsResult.value, ["shifts", "shiftKerja"])
+          : [];
 
-      const jabatan = getArray(jabatanResponse, [
-        "kategoriJabatan",
-        "kategoriJabatans",
-        "jabatan",
-      ]);
+      const jabatan =
+        jabatanResult.status === "fulfilled"
+          ? getArray(jabatanResult.value, [
+              "kategoriJabatan",
+              "kategoriJabatans",
+              "jabatan",
+            ])
+          : [];
+
+      const nextWarnings = [];
+      const shiftsLoaded = shiftsResult.status === "fulfilled";
+      const jabatanLoaded = jabatanResult.status === "fulfilled";
+
+      if (!shiftsLoaded) {
+        nextWarnings.push(
+          `Daftar shift aktif gagal dimuat: ${getErrorMessage(
+            shiftsResult.reason,
+            "terjadi kesalahan yang tidak diketahui"
+          )}. Status shift pegawai tidak dapat dipastikan.`
+        );
+      }
+
+      if (!jabatanLoaded) {
+        nextWarnings.push(
+          `Daftar kategori jabatan gagal dimuat: ${getErrorMessage(
+            jabatanResult.reason,
+            "terjadi kesalahan yang tidak diketahui"
+          )}. Status kategori jabatan tidak dapat dipastikan.`
+        );
+      }
+
+      const assignmentFields = users.map((item) =>
+        verifyUserAssignment(item)
+      );
+
+      const allShiftKnown = assignmentFields.every(
+        (item) => item.shift
+      );
+
+      const allCategoryKnown = assignmentFields.every(
+        (item) => item.category
+      );
+
+      if (users.length > 0 && !allShiftKnown) {
+        nextWarnings.push(
+          "Daftar pengguna dari API tidak memuat shiftKerjaId atau shiftKerjaMaster. Status shift tidak ditampilkan sebagai 'Belum ditugaskan' karena data penugasan belum dapat diverifikasi."
+        );
+      }
+
+      if (users.length > 0 && !allCategoryKnown) {
+        nextWarnings.push(
+          "Daftar pengguna dari API tidak memuat kategoriJabatanId atau kategoriJabatan. Status kategori jabatan belum dapat diverifikasi."
+        );
+      }
 
       setPegawai(users);
       setShiftList(shifts);
       setJabatanList(jabatan);
-      setCache(getCache());
+      setWarnings(nextWarnings);
+      setShiftListLoaded(shiftsLoaded);
+      setJabatanListLoaded(jabatanLoaded);
+
+      if (!allShiftKnown || !shiftsLoaded) {
+        setFilterShift("semua");
+      }
     } catch (err) {
       setError(
-        err instanceof Error
-          ? err.message
-          : "Data penugasan belum bisa dimuat. Silakan coba lagi."
+        getErrorMessage(
+          err,
+          "Data penugasan belum bisa dimuat. Silakan coba lagi."
+        )
       );
     } finally {
       setLoading(false);
@@ -265,15 +339,17 @@ export default function PenugasanShiftPage() {
   }, []);
 
   useEffect(() => {
-    loadData();
+    Promise.resolve().then(() => {
+      loadData();
 
-    try {
-      const savedNotice = sessionStorage.getItem("penugasan-notice");
-      if (savedNotice) {
-        setNotice(savedNotice);
-        sessionStorage.removeItem("penugasan-notice");
-      }
-    } catch {}
+      try {
+        const savedNotice = sessionStorage.getItem("penugasan-notice");
+        if (savedNotice) {
+          setNotice(savedNotice);
+          sessionStorage.removeItem("penugasan-notice");
+        }
+      } catch {}
+    });
   }, [loadData]);
 
   useEffect(() => {
@@ -284,14 +360,32 @@ export default function PenugasanShiftPage() {
 
   const enrichedPegawai = useMemo(() => {
     return pegawai.map((item) => {
-      const saved = cache[getId(item.id)] ?? {};
+      const shiftState = resolveShiftAssignment(
+        item,
+        shiftList,
+        shiftListLoaded
+      );
+      const jabatanState = resolveCategoryAssignment(
+        item,
+        jabatanList,
+        jabatanListLoaded
+      );
+
       return {
         ...item,
-        _shift: getShiftForPegawai(item, shiftList, saved),
-        _jabatan: getJabatanName(item, jabatanList, saved),
+        _shift: shiftState.shift,
+        _shiftState: shiftState,
+        _jabatan: jabatanState.name,
+        _jabatanState: jabatanState,
       };
     });
-  }, [pegawai, shiftList, jabatanList, cache]);
+  }, [
+    pegawai,
+    shiftList,
+    jabatanList,
+    shiftListLoaded,
+    jabatanListLoaded,
+  ]);
 
   const filteredPegawai = useMemo(() => {
     const keyword = search.trim().toLowerCase();
@@ -305,9 +399,11 @@ export default function PenugasanShiftPage() {
       let matchShift = true;
 
       if (filterShift === "belum") {
-        matchShift = !item._shift;
+        matchShift = item._shiftState.status === "none";
       } else if (filterShift !== "semua") {
-        matchShift = getId(item._shift?.id) === getId(filterShift);
+        matchShift =
+          getId(item._shift?.id ?? item._shiftState.id) ===
+          getId(filterShift);
       }
 
       return matchSearch && matchShift;
@@ -326,11 +422,24 @@ export default function PenugasanShiftPage() {
     currentPage * PAGE_SIZE
   );
 
+  const shiftStatsAvailable =
+    shiftListLoaded &&
+    (enrichedPegawai.length === 0 ||
+      enrichedPegawai.every(
+        (item) =>
+          item._shiftState.status !== "unknown" &&
+          item._shiftState.status !== "unverified"
+      ));
+
   const totalSudahDitugaskan = enrichedPegawai.filter(
-    (item) => Boolean(item._shift)
+    (item) =>
+      item._shiftState.status === "assigned" ||
+      item._shiftState.status === "unresolved"
   ).length;
 
-  const totalBelumDitugaskan = pegawai.length - totalSudahDitugaskan;
+  const totalBelumDitugaskan = enrichedPegawai.filter(
+    (item) => item._shiftState.status === "none"
+  ).length;
 
   function openAssignment(item) {
     if (!item?.id) {
@@ -356,9 +465,6 @@ export default function PenugasanShiftPage() {
 
         <main className="min-w-0 flex-1 overflow-y-auto theme-page theme-text">
           <div className="w-full px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
-            {/* ============================================
-                PAGE HEADER
-            ============================================ */}
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 
@@ -375,6 +481,15 @@ export default function PenugasanShiftPage() {
               <div className="flex flex-wrap items-center gap-2">
                 <button
                   type="button"
+                  onClick={() => router.push("/admin/presensi/master-shift")}
+                  className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border theme-border theme-card px-3.5 text-sm font-semibold theme-text hover:bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)] transition"
+                >
+                  <CalendarClock size={16} />
+                  Master Shift
+                </button>
+
+                <button
+                  type="button"
                   onClick={loadData}
                   disabled={loading}
                   className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border theme-border theme-card px-3 text-sm font-medium theme-text-secondary hover:bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] disabled:cursor-not-allowed disabled:opacity-60 transition"
@@ -388,27 +503,20 @@ export default function PenugasanShiftPage() {
               </div>
             </div>
 
-            {/* ============================================
-                INFO BANNER
-            ============================================ */}
             <div className="mb-6 flex items-start gap-3 rounded-lg border theme-border theme-card p-4">
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                 <Info size={18} />
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-medium theme-text">
-                  Atur shift dan jabatan pegawai di sini
+                  Penugasan Master Shift &amp; Kategori Jabatan Pegawai
                 </p>
                 <p className="mt-1 text-xs leading-5 theme-text-muted">
-                  Klik <strong>"Atur shift"</strong> pada baris pegawai untuk
-                  menetapkan atau mengubah shift kerja dan kategori jabatannya.
+                  Kelola dan tetapkan jadwal kerja Master Shift dan Kategori Jabatan untuk seluruh pegawai sekolah. Klik <strong>&ldquo;Atur shift&rdquo;</strong> pada baris pegawai untuk menetapkan atau mengubah penugasan.
                 </p>
               </div>
             </div>
 
-            {/* ============================================
-                ALERTS
-            ============================================ */}
             {error && (
               <div
                 role="alert"
@@ -430,6 +538,30 @@ export default function PenugasanShiftPage() {
               </div>
             )}
 
+            {warnings.length > 0 && (
+              <div
+                role="status"
+                className="mb-5 flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-200"
+              >
+                <AlertCircle size={19} className="mt-0.5 shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <p className="font-semibold">
+                    Data penugasan belum dapat diverifikasi sepenuhnya
+                  </p>
+                  <ul className="mt-1 list-disc space-y-1 pl-4 text-xs leading-5">
+                    {warnings.map((warning) => (
+                      <li key={warning}>{warning}</li>
+                    ))}
+                  </ul>
+                  <p className="mt-2 text-xs leading-5">
+                    Status yang tidak dapat dipastikan tidak akan ditampilkan
+                    sebagai &ldquo;Belum ditugaskan&rdquo;. Muat ulang halaman
+                    setelah koneksi atau izin akses diperbaiki.
+                  </p>
+                </div>
+              </div>
+            )}
+
             {notice && (
               <div
                 role="status"
@@ -448,9 +580,6 @@ export default function PenugasanShiftPage() {
               </div>
             )}
 
-            {/* ============================================
-                STAT CARDS
-            ============================================ */}
             <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
               <StatCard
                 title="Total Pegawai"
@@ -460,24 +589,37 @@ export default function PenugasanShiftPage() {
                 tone="blue"
               />
               <StatCard
-                title="Sudah Memiliki Shift"
-                value={loading ? "—" : totalSudahDitugaskan}
-                description="Pegawai yang sudah di-assign shift"
+                title="Sudah Ditugaskan"
+                value={
+                  loading || !shiftStatsAvailable ? "—" : totalSudahDitugaskan
+                }
+                description={
+                  shiftStatsAvailable
+                    ? "Pegawai yang sudah memiliki jadwal shift"
+                    : "Data penugasan belum dapat diverifikasi"
+                }
                 icon={CheckCircle2}
                 tone="emerald"
               />
               <StatCard
-                title="Belum Memiliki Shift"
-                value={loading ? "—" : totalBelumDitugaskan}
-                description="Perlu ditugaskan shift kerja"
+                title={
+                  shiftStatsAvailable
+                    ? "Belum Ditugaskan"
+                    : "Belum Dapat Diverifikasi"
+                }
+                value={
+                  loading || !shiftStatsAvailable ? "—" : totalBelumDitugaskan
+                }
+                description={
+                  shiftStatsAvailable
+                    ? "Pegawai yang belum memiliki shift"
+                    : "Jumlah pegawai tanpa shift belum dapat dipastikan"
+                }
                 icon={CalendarClock}
                 tone="amber"
               />
             </div>
 
-            {/* ============================================
-                TABLE SECTION
-            ============================================ */}
             <section className="theme-card overflow-hidden rounded-xl border theme-border shadow-sm">
               <div className="border-b theme-border p-4 sm:p-5">
                 <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -517,7 +659,12 @@ export default function PenugasanShiftPage() {
                       className="theme-input h-10 rounded-lg border px-3 text-sm outline-none sm:w-52"
                     >
                       <option value="semua">Semua penugasan</option>
-                      <option value="belum">Belum memiliki shift</option>
+                      <option value="belum" disabled={!shiftStatsAvailable}>
+                        Belum memiliki shift
+                        {!shiftStatsAvailable
+                          ? " (data belum terverifikasi)"
+                          : ""}
+                      </option>
                       {shiftList.map((shift) => (
                         <option key={shift.id} value={getId(shift.id)}>
                           {shift.nama}
@@ -536,7 +683,6 @@ export default function PenugasanShiftPage() {
                 </div>
               </div>
 
-              {/* TABLE AREA */}
               <div className="relative">
                 {loading ? (
                   <div className="flex min-h-64 flex-col items-center justify-center px-4 text-center">
@@ -652,28 +798,66 @@ export default function PenugasanShiftPage() {
                               </td>
 
                               <td className="px-5 py-4 theme-text">
-                                {item._jabatan || (
+                                {item._jabatanState.status === "unknown" ||
+                                item._jabatanState.status === "unverified" ? (
+                                  <span className="theme-text-muted">
+                                    Belum dapat diverifikasi
+                                  </span>
+                                ) : item._jabatanState.status === "none" ? (
                                   <span className="theme-text-muted">
                                     Belum ditentukan
                                   </span>
+                                ) : item._jabatanState.status ===
+                                  "unresolved" ? (
+                                  <span className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700 dark:bg-amber-950/50 dark:text-amber-300">
+                                    Tidak ditemukan di daftar
+                                  </span>
+                                ) : (
+                                  item._jabatan || (
+                                    <span className="theme-text-muted">
+                                      Kategori tanpa nama
+                                    </span>
+                                  )
                                 )}
                               </td>
 
                               <td className="px-5 py-4">
-                                {shift ? (
-                                  <>
-                                    <p className="font-medium theme-text">
-                                      {shift.nama || "Shift"}
-                                    </p>
-                                    {shift.kode && (
-                                      <p className="mt-1 text-xs theme-text-muted">
-                                        {shift.kode}
+                                {item._shiftState.status === "assigned" ||
+                                item._shiftState.status === "unresolved" ? (
+                                  shift ? (
+                                    <>
+                                      <p className="font-medium theme-text">
+                                        {shift.nama || "Shift"}
                                       </p>
-                                    )}
-                                  </>
-                                ) : (
+                                      {shift.kode && (
+                                        <p className="mt-1 text-xs theme-text-muted">
+                                          {shift.kode}
+                                        </p>
+                                      )}
+                                      {item._shiftState.status ===
+                                        "unresolved" && (
+                                        <p className="mt-1 text-xs text-amber-600 dark:text-amber-400">
+                                          Tidak ada di daftar shift aktif
+                                        </p>
+                                      )}
+                                    </>
+                                  ) : (
+                                    <>
+                                      <span className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700 dark:bg-amber-950/50 dark:text-amber-300">
+                                        Shift tidak ditemukan
+                                      </span>
+                                      <p className="mt-1 break-all text-xs theme-text-muted">
+                                        ID: {item._shiftState.id}
+                                      </p>
+                                    </>
+                                  )
+                                ) : item._shiftState.status === "none" ? (
                                   <span className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700 dark:bg-amber-950/50 dark:text-amber-300">
                                     Belum ditugaskan
+                                  </span>
+                                ) : (
+                                  <span className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)] px-2.5 py-1 text-xs font-semibold theme-text-muted">
+                                    Belum dapat diverifikasi
                                   </span>
                                 )}
                               </td>
@@ -709,7 +893,6 @@ export default function PenugasanShiftPage() {
                 )}
               </div>
 
-              {/* PAGINATION */}
               {!loading && filteredPegawai.length > 0 && (
                 <div className="flex flex-col gap-3 border-t theme-border px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
                   <p className="text-sm theme-text-muted">

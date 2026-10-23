@@ -1,4 +1,3 @@
-// app/cmsAdmin/banners/tambah/page.jsx
 
 "use client";
 
@@ -36,9 +35,6 @@ export default function CreateBannerPage() {
 
   const [errors, setErrors] = useState({});
 
-  // =========================================================
-  // CHANGE
-  // =========================================================
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -56,9 +52,6 @@ export default function CreateBannerPage() {
     }
   };
 
-  // =========================================================
-  // VALIDATION
-  // =========================================================
 
   const validate = () => {
     const newErrors = {};
@@ -80,9 +73,6 @@ export default function CreateBannerPage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  // =========================================================
-  // SUBMIT
-  // =========================================================
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -106,15 +96,9 @@ export default function CreateBannerPage() {
     }, 1200);
   };
 
-  // =========================================================
-  // RETURN
-  // =========================================================
 
   return (
     <div className="flex min-h-screen w-full theme-page">
-      {/* =====================================================
-          SIDEBAR
-      ====================================================== */}
 
       <Sidebar
         active={active}
@@ -123,9 +107,6 @@ export default function CreateBannerPage() {
         setCollapsed={setCollapsed}
       />
 
-      {/* =====================================================
-          MAIN
-      ====================================================== */}
 
       <main className="min-w-0 flex-1 theme-page">
         <div
@@ -142,9 +123,6 @@ export default function CreateBannerPage() {
           "
         >
           <div className="w-full">
-            {/* =================================================
-                BREADCRUMB
-            ================================================= */}
 
             <div className="mb-5 flex flex-wrap items-center gap-2 text-xs sm:text-sm">
               <Link
@@ -170,9 +148,6 @@ export default function CreateBannerPage() {
               </span>
             </div>
 
-            {/* =================================================
-                HEADER
-            ================================================= */}
 
             <div
               className="
@@ -186,7 +161,6 @@ export default function CreateBannerPage() {
                 lg:justify-between
               "
             >
-              {/* TITLE */}
 
               <div className="flex min-w-0 items-center gap-3">
                 <div
@@ -250,7 +224,6 @@ export default function CreateBannerPage() {
                 </div>
               </div>
 
-              {/* BACK */}
 
               <Link
                 href="/cmsAdmin/banners"
@@ -280,9 +253,6 @@ export default function CreateBannerPage() {
               </Link>
             </div>
 
-            {/* =================================================
-                CONTENT GRID
-            ================================================= */}
 
             <div
               className="
@@ -294,9 +264,6 @@ export default function CreateBannerPage() {
                 2xl:grid-cols-[minmax(0,1fr)_320px]
               "
             >
-              {/* =================================================
-                  FORM
-              ================================================= */}
 
               <div
                 className="
@@ -308,7 +275,6 @@ export default function CreateBannerPage() {
                   shadow-sm
                 "
               >
-                {/* FORM HEADER */}
 
                 <div
                   className="
@@ -364,16 +330,12 @@ export default function CreateBannerPage() {
                   </span>
                 </div>
 
-                {/* FORM BODY */}
 
                 <div className="p-5 sm:p-6 lg:p-8">
                   <form
                     onSubmit={handleSubmit}
                     className="space-y-6"
                   >
-                    {/* =================================================
-                        TITLE
-                    ================================================= */}
 
                     <div>
                       <label
@@ -438,9 +400,6 @@ export default function CreateBannerPage() {
                       )}
                     </div>
 
-                    {/* =================================================
-                        IMAGE
-                    ================================================= */}
 
                     <div>
                       <label
@@ -519,9 +478,6 @@ export default function CreateBannerPage() {
                       )}
                     </div>
 
-                    {/* =================================================
-                        LINK
-                    ================================================= */}
 
                     <div>
                       <label
@@ -600,9 +556,6 @@ export default function CreateBannerPage() {
                       )}
                     </div>
 
-                    {/* =================================================
-                        POSITION + STATUS
-                    ================================================= */}
 
                     <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                       <div>
@@ -684,9 +637,6 @@ export default function CreateBannerPage() {
                       </div>
                     </div>
 
-                    {/* =================================================
-                        PREVIEW
-                    ================================================= */}
 
                     {bannerData.image && (
                       <div>
@@ -752,9 +702,6 @@ export default function CreateBannerPage() {
                       </div>
                     )}
 
-                    {/* =================================================
-                        ACTION
-                    ================================================= */}
 
                     <div
                       className="
@@ -851,12 +798,8 @@ export default function CreateBannerPage() {
                 </div>
               </div>
 
-              {/* =================================================
-                  RIGHT INFO
-              ================================================= */}
 
               <div className="min-w-0 space-y-5">
-                {/* TIPS */}
 
                 <div
                   className="
@@ -913,7 +856,6 @@ export default function CreateBannerPage() {
                   </div>
                 </div>
 
-                {/* RECOMMENDATION */}
 
                 <div
                   className="
@@ -1014,7 +956,6 @@ export default function CreateBannerPage() {
                   </div>
                 </div>
 
-                {/* STATUS */}
 
                 <div
                   className="
@@ -1059,7 +1000,6 @@ export default function CreateBannerPage() {
               </div>
             </div>
 
-            {/* FOOTER */}
 
             <div className="py-6 text-center">
               <p className="text-[11px] theme-text-muted">

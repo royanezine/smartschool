@@ -70,7 +70,6 @@ const PageForm = ({
   const onSubmit = async (data) => {
     setLoading(true);
 
-    // Simulasi proses simpan
     await new Promise((resolve) =>
       setTimeout(resolve, 1500)
     );
@@ -93,9 +92,6 @@ const PageForm = ({
       className="w-full min-w-0 space-y-6 sm:space-y-7"
     >
 
-      {/* ================================================= */}
-      {/* JUDUL */}
-      {/* ================================================= */}
       <div className="w-full">
 
         <label
@@ -162,9 +158,6 @@ const PageForm = ({
 
       </div>
 
-      {/* ================================================= */}
-      {/* SLUG */}
-      {/* ================================================= */}
       <div className="w-full">
 
         <label
@@ -184,7 +177,6 @@ const PageForm = ({
 
         <div className="relative w-full">
 
-          {/* PREFIX / */}
           <span
             className="
               pointer-events-none
@@ -265,9 +257,6 @@ const PageForm = ({
 
       </div>
 
-      {/* ================================================= */}
-      {/* KONTEN */}
-      {/* ================================================= */}
       <div className="w-full min-w-0">
 
         <label
@@ -326,9 +315,6 @@ const PageForm = ({
 
       </div>
 
-      {/* ================================================= */}
-      {/* HOMEPAGE */}
-      {/* ================================================= */}
       <div
         className="
           w-full
@@ -344,7 +330,6 @@ const PageForm = ({
       >
         <div className="flex items-start gap-3">
 
-          {/* CHECKBOX */}
           <div className="flex shrink-0 items-center pt-1">
 
             <input
@@ -365,7 +350,6 @@ const PageForm = ({
 
           </div>
 
-          {/* TEXT */}
           <div className="min-w-0">
 
             <label
@@ -416,9 +400,6 @@ const PageForm = ({
         </div>
       </div>
 
-      {/* ================================================= */}
-      {/* ACTION BUTTON */}
-      {/* ================================================= */}
       <div
         className="
           flex
@@ -433,7 +414,6 @@ const PageForm = ({
         "
       >
 
-        {/* SIMPAN */}
         <button
           type="submit"
           disabled={loading}
@@ -499,7 +479,6 @@ const PageForm = ({
           )}
         </button>
 
-        {/* BATAL */}
         <button
           type="button"
           onClick={() => router.back()}

@@ -102,16 +102,9 @@ export default function AlurPendaftaranPage() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* ====================================================================
-          NAVBAR
-      ==================================================================== */}
       <PpdbNavbar />
 
-      {/* ====================================================================
-          CONTENT
-      ==================================================================== */}
       <main className="mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-10">
-        {/* PAGE TITLE */}
         <div className="mb-8">
           <div className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-600">
             <Clock size={13} />
@@ -128,9 +121,6 @@ export default function AlurPendaftaranPage() {
           </p>
         </div>
 
-        {/* ==================================================================
-            TIMELINE
-        ================================================================== */}
         <div className="space-y-0">
           {langkahPendaftaran.map((l, idx) => {
             const Icon = l.icon;
@@ -143,7 +133,6 @@ export default function AlurPendaftaranPage() {
                 key={l.id}
                 className="flex gap-4 sm:gap-5"
               >
-                {/* RAIL */}
                 <div className="flex shrink-0 flex-col items-center">
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-600 text-white shadow-sm">
                     <Icon size={17} />
@@ -154,14 +143,12 @@ export default function AlurPendaftaranPage() {
                   )}
                 </div>
 
-                {/* CONTENT */}
                 <div
                   className={`min-w-0 flex-1 ${
                     isLast ? "pb-0" : "pb-6"
                   }`}
                 >
                   <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm sm:p-5">
-                    {/* TITLE + DATE */}
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <p className="text-sm font-semibold text-slate-800">
                         Langkah {l.id} — {l.title}
@@ -172,12 +159,10 @@ export default function AlurPendaftaranPage() {
                       </span>
                     </div>
 
-                    {/* DESCRIPTION */}
                     <p className="mt-1.5 text-sm leading-relaxed text-slate-500">
                       {l.desc}
                     </p>
 
-                    {/* DETAILS */}
                     <ul className="mt-3 space-y-2">
                       {l.detail.map((d, i) => (
                         <li
@@ -194,7 +179,6 @@ export default function AlurPendaftaranPage() {
                       ))}
                     </ul>
 
-                    {/* TIP */}
                     <div className="mt-4 flex items-start gap-2 rounded-lg bg-slate-50 p-3 text-xs text-slate-500">
                       <AlertCircle
                         size={14}
@@ -210,9 +194,6 @@ export default function AlurPendaftaranPage() {
           })}
         </div>
 
-        {/* ==================================================================
-            CTA
-        ================================================================== */}
         <div className="mt-8 flex flex-col gap-4 rounded-2xl bg-blue-600 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
           <div>
             <p className="text-sm font-semibold text-white">

@@ -46,9 +46,6 @@ import {
   statusPembayaranInfo,
 } from "@/lib/langganan";
 
-/* =========================================================
-   THEME HELPERS
-========================================================= */
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]";
@@ -65,9 +62,6 @@ const themeCardShadow =
 const themeCardHoverShadow =
   "hover:shadow-[0_15px_40px_color-mix(in_srgb,var(--color-primary)_10%,transparent)]";
 
-/* =========================================================
-   STATUS BADGE
-========================================================= */
 
 function StatusBadge({ status }) {
   const info = statusLanggananInfo(status);
@@ -95,9 +89,6 @@ function RiwayatStatusBadge({ status }) {
   );
 }
 
-/* =========================================================
-   PAGE
-========================================================= */
 
 export default function LanggananPage() {
   const router = useRouter();
@@ -168,7 +159,6 @@ export default function LanggananPage() {
 
         <main className="min-h-0 flex-1 overflow-y-auto theme-page">
           <div className="mx-auto w-full max-w-[1600px] px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
-            {/* LOADING */}
             {loading && (
               <div className="theme-card theme-border rounded-2xl border p-16 flex flex-col items-center gap-3">
                 <Loader2
@@ -181,7 +171,6 @@ export default function LanggananPage() {
               </div>
             )}
 
-            {/* ERROR */}
             {!loading && error && (
               <div className="theme-danger rounded-2xl border p-5 flex items-start gap-3">
                 <AlertCircle size={18} className="mt-0.5 shrink-0" />
@@ -196,7 +185,6 @@ export default function LanggananPage() {
 
             {!loading && !error && (
               <>
-                {/* HERO */}
                 <section className="relative mb-6 overflow-hidden rounded-[28px] bg-[var(--color-primary)] shadow-[0_20px_55px_color-mix(in_srgb,var(--color-primary)_20%,transparent)]">
                   <div className="absolute -right-20 -top-28 h-80 w-80 rounded-full bg-white/10 blur-3xl" />
                   <div className="absolute -bottom-40 left-1/3 h-96 w-96 rounded-full bg-white/5 blur-3xl" />
@@ -236,7 +224,6 @@ export default function LanggananPage() {
                       </div>
                     </div>
 
-                    {/* CURRENT PLAN */}
                     <div className="rounded-2xl border border-white/10 bg-white/[0.07] p-5 backdrop-blur-md">
                       <div className="flex items-start justify-between">
                         <div>
@@ -312,7 +299,6 @@ export default function LanggananPage() {
                   </div>
                 </section>
 
-                {/* QUICK NAVIGATION */}
                 <section className="mb-7 grid gap-4 sm:grid-cols-3">
                   <Link
                     href="/admin/langganan/paket"
@@ -384,7 +370,6 @@ export default function LanggananPage() {
                   </Link>
                 </section>
 
-                {/* PLAN STATUS */}
                 <section className="mb-7">
                   <div
                     className={`overflow-hidden theme-card theme-border rounded-2xl border ${themeCardShadow}`}
@@ -523,7 +508,6 @@ export default function LanggananPage() {
                   </div>
                 </section>
 
-                {/* FITUR */}
                 <section className="mb-7 grid gap-5 lg:grid-cols-[.8fr_1.2fr]">
                   <div className="relative overflow-hidden rounded-2xl bg-[var(--color-primary)] p-6 text-white shadow-[0_16px_45px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]">
                     <div className="absolute -right-16 -top-16 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
@@ -624,7 +608,6 @@ export default function LanggananPage() {
                   </div>
                 </section>
 
-                {/* PAYMENT HISTORY */}
                 <section
                   className={`mb-7 theme-card theme-border rounded-2xl border ${themeCardShadow}`}
                 >
@@ -670,7 +653,6 @@ export default function LanggananPage() {
                     </div>
                   ) : (
                     <>
-                      {/* DESKTOP */}
                       <div className="hidden overflow-x-auto md:block">
                         <table className="w-full min-w-[700px]">
                           <thead>
@@ -746,7 +728,6 @@ export default function LanggananPage() {
                         </table>
                       </div>
 
-                      {/* MOBILE */}
                       <div className="theme-border-soft divide-y md:hidden">
                         {riwayatTerbaru.map((item) => (
                           <div key={item.id} className="p-5">
@@ -802,7 +783,6 @@ export default function LanggananPage() {
                   )}
                 </section>
 
-                {/* PLAN COMPARISON */}
                 <section className="mb-7">
                   <div className="mb-5">
                     <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--color-primary)]">
@@ -919,7 +899,6 @@ export default function LanggananPage() {
                   )}
                 </section>
 
-                {/* INFORMATION */}
                 <section className="mb-7 grid gap-5 md:grid-cols-3">
                   <div
                     className={`theme-card theme-border rounded-2xl border p-5 ${themeCardShadow}`}
@@ -973,7 +952,6 @@ export default function LanggananPage() {
                   </div>
                 </section>
 
-                {/* FOOTER */}
                 <div className="theme-border-soft flex flex-col gap-3 border-t py-5 text-xs theme-text-muted sm:flex-row sm:items-center sm:justify-between">
                   <div className="flex items-center gap-2">
                     <WalletCards size={15} />

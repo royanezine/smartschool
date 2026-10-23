@@ -42,9 +42,6 @@ export interface CreateSoalPayload {
 
 export type UpdateSoalPayload = Partial<CreateSoalPayload>;
 
-// ==================================================
-// HELPER: NORMALISASI RESPONSE API
-// ==================================================
 
 function getData<T>(response: unknown): T {
   if (
@@ -58,10 +55,6 @@ function getData<T>(response: unknown): T {
   return response as T;
 }
 
-// ==================================================
-// UJIAN: DETAIL BERDASARKAN ID
-// Backend: GET /api/ujian/:id
-// ==================================================
 
 export async function getUjianById(id: string): Promise<Ujian> {
   if (!id) {
@@ -75,16 +68,10 @@ export async function getUjianById(id: string): Promise<Ujian> {
   return getData<Ujian>(response);
 }
 
-// Alias untuk halaman yang menggunakan getDetailUjian.
-// Endpoint tetap sama dengan getUjianById.
 export async function getDetailUjian(id: string): Promise<Ujian> {
   return getUjianById(id);
 }
 
-// ==================================================
-// DAFTAR SOAL BERDASARKAN UJIAN
-// Backend: GET /api/soal-ujian/ujian/:ujianId
-// ==================================================
 
 export async function getSoalUjian(
   ujianId: string
@@ -106,7 +93,6 @@ export async function getSoalUjian(
     return data as SoalUjian[];
   }
 
-  // Mengantisipasi response berbentuk { soal: [...] }
   if (
     data &&
     typeof data === "object" &&
@@ -119,10 +105,6 @@ export async function getSoalUjian(
   return [];
 }
 
-// ==================================================
-// TAMBAH SOAL
-// Backend: POST /api/soal-ujian
-// ==================================================
 
 export async function createSoalUjian(
   ujianId: string,
@@ -154,10 +136,6 @@ export async function createSoalUjian(
   return getData<SoalUjian>(response);
 }
 
-// ==================================================
-// DETAIL SOAL
-// Backend: GET /api/soal-ujian/:id
-// ==================================================
 
 export async function getSoalById(
   soalId: string
@@ -173,10 +151,6 @@ export async function getSoalById(
   return getData<SoalUjian>(response);
 }
 
-// ==================================================
-// EDIT SOAL
-// Backend: PUT /api/soal-ujian/:id
-// ==================================================
 
 export async function updateSoalUjian(
   soalId: string,
@@ -220,10 +194,6 @@ export async function updateSoalUjian(
   return getData<SoalUjian>(response);
 }
 
-// ==================================================
-// HAPUS SOAL
-// Backend: DELETE /api/soal-ujian/:id
-// ==================================================
 
 export async function deleteSoalUjian(
   soalId: string
@@ -237,10 +207,6 @@ export async function deleteSoalUjian(
   });
 }
 
-// ==================================================
-// HAPUS UJIAN
-// Backend: DELETE /api/ujian/:id
-// ==================================================
 
 export async function deleteUjian(
   ujianId: string
@@ -254,10 +220,6 @@ export async function deleteUjian(
   });
 }
 
-// ==================================================
-// DAFTAR UJIAN BERDASARKAN KELAS DAN MAPEL
-// Backend: GET /api/ujian/kelas-mapel/:kelasMapelId
-// ==================================================
 
 export async function getUjianByKelasMapel(
   kelasMapelId: string
@@ -276,10 +238,6 @@ export async function getUjianByKelasMapel(
   return getData<unknown>(response);
 }
 
-// ==================================================
-// BUAT UJIAN
-// Backend: POST /api/ujian
-// ==================================================
 
 export async function createUjian(
   payload: Record<string, unknown>
@@ -292,9 +250,6 @@ export async function createUjian(
   return getData<unknown>(response);
 }
 
-// ==================================================
-// VALIDASI NOMOR URUT SOAL
-// ==================================================
 
 function validasiNomorUrut(value: number): number {
   const nomorUrut = Number(value);
@@ -308,10 +263,6 @@ function validasiNomorUrut(value: number): number {
   return nomorUrut;
 }
 
-// ==================================================
-// EDIT UJIAN
-// Backend: PUT /api/ujian/:id
-// ==================================================
 
 export async function updateUjian(
   ujianId: string,
@@ -329,10 +280,6 @@ export async function updateUjian(
   return getData<unknown>(response);
 }
 
-// ==================================================
-// PUBLIKASI UJIAN
-// Backend: PUT /api/ujian/:id
-// ==================================================
 
 export async function publishUjian(
   ujianId: string,
@@ -344,17 +291,6 @@ export async function publishUjian(
 export const PESAN_NILAI_UJIAN_TIDAK_TERSEDIA =
   "Nilai ujian untuk kelas ini belum tersedia.";
 
-/*
- * Backend/src belum menyediakan endpoint nilai ujian per kelas-mapel.
- * Route yang ada hanya:
- *   GET  /api/ujian/kelas-mapel/:kelasMapelId  -> daftar ujian (metadata),
- *   GET  /api/ujian/:id                        -> detail ujian + soal.
- * Nilai per siswa tersimpan di percobaanAsesmen.nilai/totalNilai tetapi
- * tidak diekspos oleh route GET mana pun. Karena itu fungsi ini TIDAK
- * boleh mengembalikan daftar ujian sebagai nilai (itu akan dilaporkan
- * sebagai skor siswa yang keliru). Selama endpoint nilai belum ada,
- * kembalikan status tidak tersedia agar pemanggil melewati bagian ini.
- */
 export async function getNilaiUjianUntukKelas(
   kelasMapelId: string,
 ): Promise<{ tersedia: boolean; pesan?: string; data: any[] }> {
@@ -373,10 +309,6 @@ export async function getNilaiUjianUntukKelas(
   };
 }
 
-// ==================================================
-// SISWA: MULAI PERCOBAAN UJIAN
-// Backend: POST /api/ujian/:id/mulai
-// ==================================================
 
 export async function mulaiPercobaanUjian(
   ujianId: string,
@@ -402,10 +334,6 @@ export async function mulaiPercobaanUjian(
 
 export const mulaiUjian = mulaiPercobaanUjian;
 
-// ==================================================
-// SISWA: SUBMIT JAWABAN & SELESAIKAN UJIAN
-// Backend: POST /api/ujian/sesi/:sesiId/submit
-// ==================================================
 
 export interface JawabanItemPayload {
   soalId: string;
@@ -432,8 +360,61 @@ export async function submitJawabanDanSelesai(
 
 export const submitUjian = submitJawabanDanSelesai;
 
-// Alias soal ujian agar kompatibel dengan pemanggilan dari berbagai halaman
 export const getSoalByUjian = getSoalUjian;
 export const createSoal = createSoalUjian;
 export const updateSoal = updateSoalUjian;
 export const deleteSoal = deleteSoalUjian;
+
+
+export async function getKelasMapelAdmin(): Promise<any[]> {
+  const res = await apiFetch("/api/kelas-mapel");
+  const data = res?.data ?? res;
+  return Array.isArray(data) ? data : [];
+}
+
+export async function getAllUjianAdmin(): Promise<any[]> {
+  const kmList = await getKelasMapelAdmin();
+  if (kmList.length === 0) return [];
+
+  const responses = await Promise.all(
+    kmList.map(async (km: any) => {
+      try {
+        const res = await apiFetch(`/api/ujian/kelas-mapel/${km.id}`);
+        const data = Array.isArray(res?.data)
+          ? res.data
+          : Array.isArray(res)
+          ? res
+          : [];
+
+        return data.map((item: any) => ({
+          ...item,
+          kelasMapelId: km.id,
+          kelasMapel: km,
+          kelas: km.kelas ?? null,
+          mataPelajaran: km.mataPelajaran ?? null,
+          guruPengajar: km.guruPengajar ?? null,
+          nama: item.judul || "Ujian Tanpa Judul",
+          judul: item.judul || "Ujian Tanpa Judul",
+          mapel:
+            km.mataPelajaran?.nama ??
+            km.mataPelajaran?.namaMapel ??
+            "-",
+          kelasNama:
+            km.kelas?.nama ??
+            km.kelas?.namaKelas ??
+            "-",
+          guru:
+            km.guruPengajar?.namaLengkap ??
+            "-",
+          jumlahSoal: item._count?.soalAsesmen ?? 0,
+          peserta: item._count?.percobaanAsesmen ?? 0,
+        }));
+      } catch (err) {
+        console.error(`Gagal memuat ujian kelas-mapel ${km.id}:`, err);
+        return [];
+      }
+    })
+  );
+
+  return responses.flat();
+}

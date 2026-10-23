@@ -172,9 +172,6 @@ export default function TambahTahunAjaranPage() {
           <div className="w-full px-3 py-4 sm:px-5 sm:py-6 md:px-6 lg:px-8 xl:px-10">
             <div className="mx-auto w-full max-w-[1200px]">
 
-              {/* ================================================= */}
-              {/* BACK */}
-              {/* ================================================= */}
 
               <div className="mb-5">
                 <Link
@@ -190,9 +187,6 @@ export default function TambahTahunAjaranPage() {
                 </Link>
               </div>
 
-              {/* ================================================= */}
-              {/* HEADER */}
-              {/* ================================================= */}
 
               <div className="mb-6 flex items-center gap-4">
 
@@ -220,9 +214,6 @@ export default function TambahTahunAjaranPage() {
 
               </div>
 
-              {/* ================================================= */}
-              {/* ERROR */}
-              {/* ================================================= */}
 
               {error && (
                 <div className="theme-danger mb-5 flex items-start gap-3 rounded-2xl border p-4">
@@ -254,9 +245,6 @@ export default function TambahTahunAjaranPage() {
                 </div>
               )}
 
-              {/* ================================================= */}
-              {/* SUCCESS */}
-              {/* ================================================= */}
 
               {success && (
                 <div className="theme-success mb-5 flex items-start gap-3 rounded-2xl border p-4">
@@ -280,22 +268,15 @@ export default function TambahTahunAjaranPage() {
                 </div>
               )}
 
-              {/* ================================================= */}
-              {/* CONTENT */}
-              {/* ================================================= */}
 
               <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
 
-                {/* ================================================= */}
-                {/* FORM */}
-                {/* ================================================= */}
 
                 <form
                   onSubmit={handleSubmit}
                   className="theme-card theme-border min-w-0 overflow-hidden rounded-2xl border shadow-sm"
                 >
 
-                  {/* FORM HEADER */}
 
                   <div className="theme-card-soft theme-border-soft border-b px-5 py-5 sm:px-6 lg:px-7">
 
@@ -321,13 +302,11 @@ export default function TambahTahunAjaranPage() {
 
                   </div>
 
-                  {/* FORM BODY */}
 
                   <div className="p-5 sm:p-6 lg:p-7">
 
                     <div className="space-y-5">
 
-                      {/* NAMA */}
 
                       <div>
 
@@ -372,7 +351,6 @@ export default function TambahTahunAjaranPage() {
 
                       </div>
 
-                      {/* SEMESTER */}
 
                       <div>
 
@@ -420,7 +398,6 @@ export default function TambahTahunAjaranPage() {
 
                       </div>
 
-                      {/* STATUS */}
 
                       <div>
 
@@ -470,9 +447,6 @@ export default function TambahTahunAjaranPage() {
 
                     </div>
 
-                    {/* ================================================= */}
-                    {/* INFO RELASI */}
-                    {/* ================================================= */}
 
                     <div className="theme-info mt-6 flex items-start gap-3 rounded-xl border p-4">
 
@@ -497,9 +471,6 @@ export default function TambahTahunAjaranPage() {
 
                     </div>
 
-                    {/* ================================================= */}
-                    {/* INFO CARDS */}
-                    {/* ================================================= */}
 
                     <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
 
@@ -550,9 +521,6 @@ export default function TambahTahunAjaranPage() {
 
                   </div>
 
-                  {/* ================================================= */}
-                  {/* FORM FOOTER */}
-                  {/* ================================================= */}
 
                   <div className="theme-card-soft theme-border-soft flex flex-col-reverse gap-3 border-t px-5 py-4 sm:flex-row sm:justify-end sm:px-6 lg:px-7">
 
@@ -588,15 +556,11 @@ export default function TambahTahunAjaranPage() {
 
                 </form>
 
-                {/* ================================================= */}
-                {/* DESKTOP SIDEBAR */}
-                {/* ================================================= */}
 
                 <aside className="hidden xl:block">
 
                   <div className="theme-card theme-border sticky top-6 overflow-hidden rounded-2xl border shadow-sm">
 
-                    {/* SIDEBAR HEADER */}
 
                     <div className="theme-card-soft theme-border-soft border-b px-5 py-4">
 
@@ -622,7 +586,6 @@ export default function TambahTahunAjaranPage() {
 
                     </div>
 
-                    {/* GUIDE */}
 
                     <div className="space-y-5 p-5">
 
@@ -652,7 +615,6 @@ export default function TambahTahunAjaranPage() {
 
                     </div>
 
-                    {/* SIDEBAR FOOTER */}
 
                     <div className="theme-card-soft theme-border-soft border-t px-5 py-4">
 
@@ -679,9 +641,6 @@ export default function TambahTahunAjaranPage() {
 
               </div>
 
-              {/* ================================================= */}
-              {/* MOBILE RELATION INFO */}
-              {/* ================================================= */}
 
               <div className="mt-6 xl:hidden">
 
@@ -713,9 +672,6 @@ export default function TambahTahunAjaranPage() {
 
               </div>
 
-              {/* ================================================= */}
-              {/* FOOTER */}
-              {/* ================================================= */}
 
               <footer className="theme-text-muted py-6 text-center">
                 <p className="text-[11px]">

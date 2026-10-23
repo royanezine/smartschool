@@ -2,9 +2,6 @@ import { apiFetch } from "../lib/api";
 
 const API_ENDPOINT = "/api/sarpras";
 
-// =====================================================
-// GUDANG
-// =====================================================
 
 export async function getGudang() {
   return apiFetch(`${API_ENDPOINT}/gudang`, {
@@ -48,9 +45,6 @@ export async function deleteGudang(id) {
   });
 }
 
-// =====================================================
-// KATEGORI ASET
-// =====================================================
 
 export async function getKategoriAset() {
   return apiFetch(`${API_ENDPOINT}/kategori`, {
@@ -92,14 +86,72 @@ export async function deleteKategoriAset(id) {
   });
 }
 
-// =====================================================
-// ASET
-// =====================================================
 
 export async function getAset() {
   return apiFetch(`${API_ENDPOINT}/aset`, {
     method: "GET",
   });
+}
+
+export async function getKetersediaanAset() {
+  return apiFetch(`${API_ENDPOINT}/peminjaman/ketersediaan`, {
+    method: "GET",
+  });
+}
+
+function extractAsetList(response) {
+  if (Array.isArray(response)) return response;
+  if (Array.isArray(response?.data)) return response.data;
+  if (Array.isArray(response?.data?.data)) return response.data.data;
+  return [];
+}
+
+function isAsetDetailRouteMissing(error: unknown) {
+  const err = error as {
+    status?: number;
+    raw?: unknown;
+  };
+
+  if (err?.status === 405) {
+    return true;
+  }
+
+  if (err?.status !== 404) {
+    return false;
+  }
+
+  return typeof err.raw === "string";
+}
+
+export async function getAsetById(id) {
+  if (!id) {
+    throw new Error("ID aset tidak ditemukan.");
+  }
+
+  try {
+    return await apiFetch(`${API_ENDPOINT}/aset/${encodeURIComponent(id)}`, {
+      method: "GET",
+    });
+  } catch (err) {
+    if (!isAsetDetailRouteMissing(err)) {
+      throw err;
+    }
+
+    const response = await getAset();
+    const aset = extractAsetList(response).find(
+      (item) => String(item?.id) === String(id)
+    );
+
+    if (!aset) {
+      throw err;
+    }
+
+    return {
+      success: true,
+      message: "Detail aset",
+      data: aset,
+    };
+  }
 }
 
 export async function createAset(data) {
@@ -247,13 +299,6 @@ export async function ajukanPeminjaman(data) {
   });
 }
 
-// =====================================================
-// PEMINJAMAN
-// GET DAFTAR
-//
-// Dipakai Guru maupun Admin.
-// BE menentukan data berdasarkan user/izin.
-// =====================================================
 
 export async function getDaftarPeminjaman({
   page = 1,
@@ -295,10 +340,6 @@ export async function getDaftarPeminjaman({
   );
 }
 
-// =====================================================
-// PEMINJAMAN
-// GET DETAIL
-// =====================================================
 
 export async function getDetailPeminjaman(id) {
   if (!id) {

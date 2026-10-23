@@ -37,9 +37,6 @@ import {
 
 import { apiFetch } from "../../../../../lib/api";
 
-/* =========================================================
-   HELPER RESPONSE
-========================================================= */
 
 function normalizeResponseData(response) {
   if (!response) return [];
@@ -55,9 +52,6 @@ function normalizeResponseData(response) {
   return [];
 }
 
-/* =========================================================
-   FORMAT
-========================================================= */
 
 function formatTanggal(value) {
   if (!value) return "-";
@@ -140,9 +134,6 @@ function getStatusLabel(status) {
   return status || "-";
 }
 
-/* =========================================================
-   STYLE WARNA (MENGGUNAKAN TEMA CMS)
-========================================================= */
 
 function getStatusStyle(status) {
   if (status === "menunggu") {
@@ -197,9 +188,6 @@ function getUploadUrl(url) {
   return `${baseUrl.replace(/\/$/, "")}/${url.replace(/^\//, "")}`;
 }
 
-/* =========================================================
-   MAP IZIN
-========================================================= */
 
 function mapIzinToAdminData(item) {
   return {
@@ -255,9 +243,6 @@ function normalizeGuru(item) {
   };
 }
 
-/* =========================================================
-   PAGE
-========================================================= */
 
 export default function PermohonanIzinGuruPage() {
   const [data, setData] = useState([]);
@@ -283,9 +268,6 @@ export default function PermohonanIzinGuruPage() {
   const [selectedGuruPenggantiId, setSelectedGuruPenggantiId] = useState("");
   const [rejectCatatan, setRejectCatatan] = useState("");
 
-  /* =========================================================
-     LOAD DATA IZIN
-  ========================================================= */
 
   const loadData = useCallback(
     async (showRefresh = false) => {
@@ -324,9 +306,6 @@ export default function PermohonanIzinGuruPage() {
     [selectedId]
   );
 
-  /* =========================================================
-     LOAD DAFTAR GURU
-  ========================================================= */
 
   const loadGuru = useCallback(async () => {
     try {
@@ -365,9 +344,6 @@ export default function PermohonanIzinGuruPage() {
     loadGuru();
   }, [loadData, loadGuru]);
 
-  /* =========================================================
-     DATA TERPILIH
-  ========================================================= */
 
   const selectedData = useMemo(() => {
     if (!selectedId) return null;
@@ -414,9 +390,6 @@ export default function PermohonanIzinGuruPage() {
     );
   }, [selectedData, guruList]);
 
-  /* =========================================================
-     FILTER
-  ========================================================= */
 
   const filteredData = useMemo(() => {
     const keyword = search.trim().toLowerCase();
@@ -435,9 +408,6 @@ export default function PermohonanIzinGuruPage() {
     });
   }, [data, search, statusFilter, jenisFilter]);
 
-  /* =========================================================
-     STATISTIK
-  ========================================================= */
 
   const statistics = useMemo(() => {
     return {
@@ -448,9 +418,6 @@ export default function PermohonanIzinGuruPage() {
     };
   }, [data]);
 
-  /* =========================================================
-     ACTIONS
-  ========================================================= */
 
   const handleSelectData = (item) => {
     setSelectedId(item.id);
@@ -546,9 +513,6 @@ export default function PermohonanIzinGuruPage() {
     }
   };
 
-  /* =========================================================
-     RENDER
-  ========================================================= */
 
   return (
     <div className="flex h-screen w-full overflow-hidden theme-page">
@@ -561,7 +525,6 @@ export default function PermohonanIzinGuruPage() {
 
         <main className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto theme-page">
           <div className="w-full space-y-6 p-4 sm:p-6 lg:p-8">
-            {/* HEADER PAGE */}
             <div className="relative overflow-hidden rounded-2xl border theme-border theme-card shadow-sm">
               <div className="p-5 sm:p-6">
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -607,7 +570,6 @@ export default function PermohonanIzinGuruPage() {
               </div>
             </div>
 
-            {/* ERROR */}
             {error && (
               <div className="flex items-start gap-3 rounded-xl border p-4 text-sm theme-danger shadow-sm">
                 <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
@@ -625,7 +587,6 @@ export default function PermohonanIzinGuruPage() {
               </div>
             )}
 
-            {/* STATISTICS */}
             <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
               <StatCard
                 label="Total Pengajuan"
@@ -653,9 +614,7 @@ export default function PermohonanIzinGuruPage() {
               />
             </div>
 
-            {/* MAIN GRID */}
             <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_440px]">
-              {/* TABLE */}
               <div className="overflow-hidden rounded-2xl border theme-border theme-card shadow-sm">
                 <div className="border-b theme-border theme-card-soft p-4">
                   <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
@@ -845,7 +804,6 @@ export default function PermohonanIzinGuruPage() {
                 )}
               </div>
 
-              {/* DETAIL PANEL */}
               <div className="overflow-hidden rounded-2xl border theme-border theme-card shadow-sm">
                 {!selectedData ? (
                   <div className="flex min-h-[560px] flex-col items-center justify-center px-6 text-center">
@@ -983,7 +941,6 @@ export default function PermohonanIzinGuruPage() {
                         </div>
                       )}
 
-                      {/* GURU PENGGANTI */}
                       <div className="overflow-hidden rounded-xl border theme-border theme-card-soft p-4">
                         <div className="mb-3 flex items-center gap-2">
                           <div className="flex h-9 w-9 items-center justify-center rounded-xl theme-primary text-white shadow-sm">
@@ -1105,7 +1062,6 @@ export default function PermohonanIzinGuruPage() {
         </main>
       </div>
 
-      {/* MODAL APPROVE */}
       {showApproveModal && selectedData && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[color-mix(in_srgb,var(--color-text)_50%,transparent)] p-4 backdrop-blur-sm">
           <div className="w-full max-w-lg overflow-hidden rounded-2xl theme-card shadow-2xl">
@@ -1291,7 +1247,6 @@ export default function PermohonanIzinGuruPage() {
         </div>
       )}
 
-      {/* MODAL REJECT */}
       {showRejectModal && selectedData && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[color-mix(in_srgb,var(--color-text)_50%,transparent)] p-4 backdrop-blur-sm">
           <div className="w-full max-w-md overflow-hidden rounded-2xl theme-card shadow-2xl">
@@ -1388,9 +1343,6 @@ export default function PermohonanIzinGuruPage() {
   );
 }
 
-/* =========================================================
-   STAT CARD
-========================================================= */
 
 function StatCard({ label, value, icon: Icon, color }) {
   return (

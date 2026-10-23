@@ -13,17 +13,13 @@ export default function Footer() {
   return (
     <footer className="relative bg-slate-950 text-slate-300 overflow-hidden">
       
-      {/* 🌟 Background Glowing Blob Profesional (Hanya Biru) */}
       <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute top-0 left-0 w-[400px] h-[400px] bg-blue-600/10 rounded-full blur-[100px] pointer-events-none" />
 
-      {/* 🔥 Garis Aksen Biru Tipis di Bagian Paling Atas */}
       <div className="relative z-10 w-full h-[1px] bg-gradient-to-r from-transparent via-blue-500 to-transparent" />
 
-      {/* Top Section */}
       <div className="relative z-10 max-w-7xl mx-auto px-6 py-16 lg:py-20 grid gap-10 md:grid-cols-2 lg:grid-cols-4">
         
-        {/* 1. Logo & Deskripsi */}
         <div className="flex flex-col">
           <div className="flex items-center gap-3">
             <div className="bg-white p-1 rounded-full shadow-lg shadow-blue-500/20">
@@ -49,7 +45,6 @@ export default function Footer() {
             Platform digital terpadu untuk membantu sekolah mengelola administrasi, akademik, keuangan, absensi, dan komunikasi dalam satu sistem.
           </p>
 
-          {/* 🌟 Sosial Media dengan Warna Biru Profesional */}
           <div className="mt-6 flex gap-3">
             <a
               href="#"
@@ -86,7 +81,6 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* 2. Navigasi */}
         <div>
           <h4 className="text-base font-bold text-white tracking-wide relative inline-block pb-2">
             Navigasi
@@ -101,7 +95,6 @@ export default function Footer() {
           </ul>
         </div>
 
-        {/* 3. Modul */}
         <div>
           <h4 className="text-base font-bold text-white tracking-wide relative inline-block pb-2">
             Modul
@@ -116,7 +109,6 @@ export default function Footer() {
           </ul>
         </div>
 
-        {/* 4. Kontak - Card Glassmorphism dengan Aksen Biru */}
         <div>
           <h4 className="text-base font-bold text-white tracking-wide relative inline-block pb-2">
             Hubungi Kami
@@ -151,7 +143,6 @@ export default function Footer() {
 
       </div>
 
-      {/* Bottom Section */}
       <div className="relative z-10 border-t border-white/5">
         <div className="max-w-7xl mx-auto px-6 py-6 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-xs text-slate-500">

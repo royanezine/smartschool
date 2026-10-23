@@ -13,15 +13,6 @@ import {
   MapPin,
 } from "lucide-react";
 
-/**
- * Konfigurasi menu untuk role "yayasan".
- * Persis mengikuti struktur folder app/yayasan/:
- * - laporan/            -> submenu: akademik, guru, iventaris, siswa
- * - lokasi/             -> halaman tunggal (peta lokasi sekolah)
- * - monitoringAkademik/ -> submenu: kehadiran, lms
- * - pengaturan/         -> halaman tunggal
- * - sekolah/            -> halaman tunggal
- */
 export const yayasanSidebarConfig = {
   basePath: "/yayasan",
   brandName: "Yayasan",

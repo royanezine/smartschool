@@ -23,9 +23,6 @@ import {
   absenDenganFace,
 } from "@/services/absensi.service";
 
-// =====================================================
-// THEME HELPERS
-// =====================================================
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -87,9 +84,6 @@ const themeDangerBorder =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-// =====================================================
-// METODE ABSENSI
-// =====================================================
 
 const metodeConfig = {
   lokasi: {
@@ -133,9 +127,6 @@ const metodeConfig = {
   },
 };
 
-// =====================================================
-// MAIN CONTENT
-// =====================================================
 
 function TambahAbsensiPageContent() {
   const router = useRouter();
@@ -155,9 +146,6 @@ function TambahAbsensiPageContent() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  // =====================================================
-  // SUBMIT
-  // =====================================================
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -230,9 +218,6 @@ function TambahAbsensiPageContent() {
     }
   };
 
-  // =====================================================
-  // SNAPSHOT
-  // =====================================================
 
   const handleSnapshotChange = (e) => {
     const file = e.target.files?.[0];
@@ -245,9 +230,6 @@ function TambahAbsensiPageContent() {
     setSnapshot(file);
   };
 
-  // =====================================================
-  // RENDER
-  // =====================================================
 
   return (
     <div className="theme-page min-h-screen">
@@ -259,9 +241,6 @@ function TambahAbsensiPageContent() {
         <main className="min-w-0 flex-1 p-4 sm:p-6 lg:p-8">
           <div className="mx-auto max-w-4xl">
 
-            {/* =================================================
-                PAGE HEADER
-            ================================================= */}
 
             <div className="mb-6 flex items-center gap-4">
               <button
@@ -292,9 +271,6 @@ function TambahAbsensiPageContent() {
               </div>
             </div>
 
-            {/* =================================================
-                INFO BACKEND
-            ================================================= */}
 
             <div
               className={`
@@ -324,9 +300,6 @@ function TambahAbsensiPageContent() {
               </div>
             </div>
 
-            {/* =================================================
-                ERROR
-            ================================================= */}
 
             {error && (
               <div
@@ -348,9 +321,6 @@ function TambahAbsensiPageContent() {
               </div>
             )}
 
-            {/* =================================================
-                SUCCESS
-            ================================================= */}
 
             {success && (
               <div
@@ -372,9 +342,6 @@ function TambahAbsensiPageContent() {
               </div>
             )}
 
-            {/* =================================================
-                FORM
-            ================================================= */}
 
             <form onSubmit={handleSubmit}>
               <div
@@ -385,9 +352,6 @@ function TambahAbsensiPageContent() {
                   overflow-hidden rounded-2xl border
                 `}
               >
-                {/* =================================================
-                    FORM HEADER
-                ================================================= */}
 
                 <div
                   className={`
@@ -405,15 +369,9 @@ function TambahAbsensiPageContent() {
                   </p>
                 </div>
 
-                {/* =================================================
-                    FORM BODY
-                ================================================= */}
 
                 <div className="space-y-6 p-5 sm:p-6">
 
-                  {/* =================================================
-                      KELAS
-                  ================================================= */}
 
                   <div>
                     <label className="theme-text mb-2 block text-sm font-semibold">
@@ -452,9 +410,6 @@ function TambahAbsensiPageContent() {
                     </p>
                   </div>
 
-                  {/* =================================================
-                      STATUS
-                  ================================================= */}
 
                   <div>
                     <label className="theme-text mb-2 block text-sm font-semibold">
@@ -493,9 +448,6 @@ function TambahAbsensiPageContent() {
                     </select>
                   </div>
 
-                  {/* =================================================
-                      METODE ABSENSI
-                  ================================================= */}
 
                   <div>
                     <label className="theme-text mb-3 block text-sm font-semibold">
@@ -555,9 +507,6 @@ function TambahAbsensiPageContent() {
                     </div>
                   </div>
 
-                  {/* =================================================
-                      BARCODE
-                  ================================================= */}
 
                   {metode === "barcode" && (
                     <div>
@@ -591,9 +540,6 @@ function TambahAbsensiPageContent() {
                     </div>
                   )}
 
-                  {/* =================================================
-                      FACE
-                  ================================================= */}
 
                   {metode === "face" && (
                     <div>
@@ -667,9 +613,6 @@ function TambahAbsensiPageContent() {
                     </div>
                   )}
 
-                  {/* =================================================
-                      KETERANGAN
-                  ================================================= */}
 
                   <div>
                     <label className="theme-text mb-2 block text-sm font-semibold">
@@ -698,9 +641,6 @@ function TambahAbsensiPageContent() {
                   </div>
                 </div>
 
-                {/* =================================================
-                    FOOTER
-                ================================================= */}
 
                 <div
                   className={`
@@ -711,7 +651,6 @@ function TambahAbsensiPageContent() {
                     sm:flex-row sm:justify-end sm:px-6
                   `}
                 >
-                  {/* BATAL */}
 
                   <button
                     type="button"
@@ -732,7 +671,6 @@ function TambahAbsensiPageContent() {
                     Batal
                   </button>
 
-                  {/* SIMPAN */}
 
                   <button
                     type="submit"
@@ -778,9 +716,6 @@ function TambahAbsensiPageContent() {
   );
 }
 
-// =====================================================
-// SUSPENSE WRAPPER
-// =====================================================
 
 export default function TambahAbsensiPage() {
   return (

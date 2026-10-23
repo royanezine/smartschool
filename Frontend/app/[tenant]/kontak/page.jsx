@@ -163,7 +163,6 @@ export default function KontakPage() {
         color: THEME.text,
       }}
     >
-      {/* HEADER */}
       <header
         className="sticky top-0 z-50 border-b backdrop-blur-xl"
         style={{
@@ -276,7 +275,6 @@ export default function KontakPage() {
         )}
       </header>
 
-      {/* HERO */}
       <section
         className="relative overflow-hidden"
         style={{ backgroundColor: THEME.hero }}
@@ -405,7 +403,6 @@ export default function KontakPage() {
         </div>
       </section>
 
-      {/* KARTU INFORMASI */}
       <section
         id="informasi-kontak"
         className="relative z-10 -mt-8 px-6 lg:px-8"
@@ -434,7 +431,6 @@ export default function KontakPage() {
         </div>
       </section>
 
-      {/* KONTEN KONTAK */}
       <section className="mx-auto max-w-7xl px-6 py-20 lg:px-8 lg:py-24">
         <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_330px] lg:gap-16">
           <div>
@@ -610,7 +606,6 @@ export default function KontakPage() {
             )}
           </div>
 
-          {/* SIDEBAR */}
           <aside className="space-y-5">
             <div
               className="rounded-3xl p-7 text-white shadow-lg"
@@ -715,7 +710,6 @@ export default function KontakPage() {
         </div>
       </section>
 
-      {/* CTA */}
       <section
         className="py-20"
         style={{ backgroundColor: THEME.surface }}
@@ -766,7 +760,6 @@ export default function KontakPage() {
         </div>
       </section>
 
-      {/* FOOTER */}
       <footer
         className="text-white"
         style={{ backgroundColor: THEME.hero }}

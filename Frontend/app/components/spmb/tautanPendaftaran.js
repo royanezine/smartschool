@@ -1,22 +1,9 @@
-/**
- * Pembuat tautan pendaftaran PPDB.
- *
- * Modul ini sengaja bebas dari React/DOM agar aturan pembentukan URL dapat
- * diuji langsung. Tautan hanya dibuat dari ID yang benar-benar dikembalikan
- * Backend:
- * - jalur.id        -> jalurPpdbId
- * - jalur.sekolahId -> sekolahId
- */
 
 const UUID_REGEX =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const NIL_UUID = "00000000-0000-0000-0000-000000000000";
 
-/**
- * Segmen path yang bukan nama sekolah/tenant. Dipakai saat halaman admin
- * diakses memakai prefix tenant (mis. /sekolah-a/admin/spmb/jalur).
- */
 const SEGMEN_BUKAN_TENANT = new Set([
   "",
   "admin",
@@ -58,15 +45,6 @@ export function normalisasiBasePath(basePath) {
   return denganSlash.replace(/\/+$/, "");
 }
 
-/**
- * Mendeteksi prefix tenant dari pathname halaman admin.
- *
- * - /admin/spmb/jalur           -> "" (tidak ada prefix tenant)
- * - /sekolah-a/admin/spmb/jalur -> "/sekolah-a"
- *
- * Untuk deployment berbasis subdomain, origin sudah memuat subdomain sekolah
- * sehingga prefix path tidak diperlukan.
- */
 export function deteksiPrefixTenant(pathname) {
   if (typeof pathname !== "string" || !pathname.startsWith("/")) {
     return "";
@@ -93,9 +71,6 @@ export function deteksiPrefixTenant(pathname) {
   return `/${segmen[0]}`;
 }
 
-/**
- * Menjelaskan mengapa tautan belum dapat dibuat.
- */
 export function alasanTautanTidakTersedia(jalur) {
   if (!jalur) {
     return "Data jalur belum dipilih.";
@@ -112,12 +87,6 @@ export function alasanTautanTidakTersedia(jalur) {
   return "";
 }
 
-/**
- * Membuat URL formulir PPDB publik.
- *
- * @param {{ id?: string, sekolahId?: string }} jalur
- * @param {{ origin?: string, basePath?: string }} [options]
- */
 export function buatTautanPendaftaran(jalur, options = {}) {
   const alasan = alasanTautanTidakTersedia(jalur);
 

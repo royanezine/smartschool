@@ -11,16 +11,10 @@ import {
   updateAsesmenMinatBakat,
 } from "@/services/bk.service";
 
-/* =========================================================
-   GLOBAL THEME INPUT
-========================================================= */
 
 const inputClass =
   "theme-input w-full rounded-xl border px-4 py-2.5 text-sm font-medium shadow-sm outline-none transition hover:border-[var(--color-primary)] focus:border-[var(--color-primary)]";
 
-/* =========================================================
-   PAGE
-========================================================= */
 
 export default function EditAsesmenPage() {
   const router = useRouter();
@@ -44,9 +38,6 @@ export default function EditAsesmenPage() {
     catatan: "",
   });
 
-  /* =========================================================
-     LOAD DATA
-  ========================================================= */
 
   useEffect(() => {
     async function load() {
@@ -97,9 +88,6 @@ export default function EditAsesmenPage() {
     }
   }, [id]);
 
-  /* =========================================================
-     SUBMIT
-  ========================================================= */
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -137,24 +125,15 @@ export default function EditAsesmenPage() {
     }
   }
 
-  /* =========================================================
-     RENDER
-  ========================================================= */
 
   return (
     <div className="theme-page flex h-screen overflow-hidden">
-      {/* =====================================================
-          SIDEBAR
-      ===================================================== */}
 
       <Sidebar
         role="admin"
         active="bk"
       />
 
-      {/* =====================================================
-          MAIN
-      ===================================================== */}
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <Header />
@@ -162,9 +141,6 @@ export default function EditAsesmenPage() {
         <main className="theme-page flex-1 overflow-y-auto p-5 md:p-6 lg:p-8">
           <div className="mx-auto w-full max-w-[1200px]">
 
-            {/* =================================================
-                PAGE HEADER
-            ================================================= */}
 
             <div className="mb-7 flex items-start gap-4">
               <button
@@ -216,9 +192,6 @@ export default function EditAsesmenPage() {
               </div>
             </div>
 
-            {/* =================================================
-                ERROR
-            ================================================= */}
 
             {error && (
               <div className="theme-danger theme-border mb-6 flex items-start gap-3 rounded-xl border px-4 py-3.5 text-sm font-semibold shadow-sm">
@@ -240,9 +213,6 @@ export default function EditAsesmenPage() {
               </div>
             )}
 
-            {/* =================================================
-                LOADING
-            ================================================= */}
 
             {loading ? (
               <div className="theme-card theme-border rounded-2xl border p-12 text-center shadow-xl">
@@ -255,15 +225,11 @@ export default function EditAsesmenPage() {
             ) : (
               <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_340px]">
 
-                {/* =================================================
-                    FORM
-                ================================================= */}
 
                 <form
                   onSubmit={handleSubmit}
                   className="theme-card theme-border overflow-hidden rounded-2xl border shadow-xl"
                 >
-                  {/* FORM HEADER */}
 
                   <div className="theme-table-header theme-border-soft flex items-center gap-3 border-b px-6 py-5">
                     <div className="theme-info flex h-9 w-9 items-center justify-center rounded-lg">
@@ -293,11 +259,9 @@ export default function EditAsesmenPage() {
                     </div>
                   </div>
 
-                  {/* FORM BODY */}
 
                   <div className="grid gap-5 p-6 md:grid-cols-2">
 
-                    {/* SISWA ID */}
 
                     <Field
                       label="Siswa ID"
@@ -317,7 +281,6 @@ export default function EditAsesmenPage() {
                       />
                     </Field>
 
-                    {/* TANGGAL */}
 
                     <Field
                       label="Tanggal"
@@ -338,7 +301,6 @@ export default function EditAsesmenPage() {
                       />
                     </Field>
 
-                    {/* JENIS */}
 
                     <Field
                       label="Jenis Asesmen"
@@ -358,7 +320,6 @@ export default function EditAsesmenPage() {
                       />
                     </Field>
 
-                    {/* SKOR */}
 
                     <Field label="Skor">
                       <input
@@ -375,7 +336,6 @@ export default function EditAsesmenPage() {
                       />
                     </Field>
 
-                    {/* MINAT */}
 
                     <div className="md:col-span-2">
                       <Field label="Minat">
@@ -394,7 +354,6 @@ export default function EditAsesmenPage() {
                       </Field>
                     </div>
 
-                    {/* BAKAT */}
 
                     <div className="md:col-span-2">
                       <Field label="Bakat">
@@ -413,7 +372,6 @@ export default function EditAsesmenPage() {
                       </Field>
                     </div>
 
-                    {/* HASIL */}
 
                     <div className="md:col-span-2">
                       <Field label="Hasil">
@@ -432,7 +390,6 @@ export default function EditAsesmenPage() {
                       </Field>
                     </div>
 
-                    {/* REKOMENDASI */}
 
                     <div className="md:col-span-2">
                       <Field label="Rekomendasi">
@@ -451,7 +408,6 @@ export default function EditAsesmenPage() {
                       </Field>
                     </div>
 
-                    {/* STATUS */}
 
                     <Field label="Status">
                       <select
@@ -479,7 +435,6 @@ export default function EditAsesmenPage() {
                       </select>
                     </Field>
 
-                    {/* CATATAN */}
 
                     <div className="md:col-span-2">
                       <Field label="Catatan">
@@ -499,7 +454,6 @@ export default function EditAsesmenPage() {
                     </div>
                   </div>
 
-                  {/* FORM FOOTER */}
 
                   <div className="theme-table-header theme-border-soft flex justify-end gap-3 border-t px-6 py-4">
                     <button
@@ -546,20 +500,15 @@ export default function EditAsesmenPage() {
                   </div>
                 </form>
 
-                {/* =================================================
-                    SIDE
-                ================================================= */}
 
                 <aside className="space-y-5">
 
-                  {/* LIVE PREVIEW */}
 
                   <div className="theme-card theme-border relative overflow-hidden rounded-2xl border p-6 shadow-xl">
                     <div className="theme-info pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full opacity-40" />
 
                     <div className="relative">
 
-                      {/* TITLE */}
 
                       <div className="mb-4 flex items-center gap-2">
                         <div className="theme-info flex h-7 w-7 items-center justify-center rounded-lg">
@@ -589,7 +538,6 @@ export default function EditAsesmenPage() {
                         </h3>
                       </div>
 
-                      {/* STUDENT */}
 
                       <div className="theme-border-soft flex items-center gap-3 border-b pb-4">
                         <div className="theme-primary flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-base font-bold shadow-md">
@@ -610,7 +558,6 @@ export default function EditAsesmenPage() {
                         </div>
                       </div>
 
-                      {/* PREVIEW DATA */}
 
                       <div className="space-y-3 pt-4">
                         <PreviewRow
@@ -638,7 +585,6 @@ export default function EditAsesmenPage() {
                     </div>
                   </div>
 
-                  {/* WARNING */}
 
                   <div className="theme-warning theme-border relative overflow-hidden rounded-2xl border p-5">
                     <div className="flex items-start gap-3">
@@ -681,9 +627,6 @@ export default function EditAsesmenPage() {
   );
 }
 
-/* =========================================================
-   FIELD
-========================================================= */
 
 function Field({
   label,
@@ -707,9 +650,6 @@ function Field({
   );
 }
 
-/* =========================================================
-   PREVIEW ROW
-========================================================= */
 
 function PreviewRow({
   label,

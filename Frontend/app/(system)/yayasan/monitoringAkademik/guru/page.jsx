@@ -9,10 +9,6 @@ import {
   Phone,
 } from "lucide-react";
 
-// ============================================================
-// DUMMY DATA
-// Catatan: ganti dengan data asli dari API/DB begitu tersedia.
-// ============================================================
 
 const dummyGuru = [
   {
@@ -57,9 +53,6 @@ const dummyGuru = [
   },
 ];
 
-// ============================================================
-// THEME HELPERS
-// ============================================================
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -97,16 +90,10 @@ const themeDivider =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-// ============================================================
-// MAIN COMPONENT
-// ============================================================
 
 export default function LaporanGuruPage() {
   const [search, setSearch] = useState("");
 
-  // ==========================================================
-  // FILTER
-  // ==========================================================
 
   const filteredGuru = dummyGuru.filter(
     (g) =>
@@ -115,9 +102,6 @@ export default function LaporanGuruPage() {
       g.sekolah.toLowerCase().includes(search.toLowerCase())
   );
 
-  // ==========================================================
-  // SUMMARY
-  // ==========================================================
 
   const totalGuru = dummyGuru.length;
 
@@ -133,9 +117,6 @@ export default function LaporanGuruPage() {
     <div className="theme-page theme-text min-h-full">
       <div className="w-full max-w-[1800px] mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 space-y-6">
 
-        {/* =====================================================
-            HEADER
-        ===================================================== */}
 
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="min-w-0">
@@ -163,7 +144,6 @@ export default function LaporanGuruPage() {
             </p>
           </div>
 
-          {/* Export */}
           <button
             type="button"
             className={`
@@ -189,13 +169,9 @@ export default function LaporanGuruPage() {
           </button>
         </div>
 
-        {/* =====================================================
-            SUMMARY
-        ===================================================== */}
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
 
-          {/* Total Guru */}
           <div
             className={`
               theme-card
@@ -235,7 +211,6 @@ export default function LaporanGuruPage() {
             </div>
           </div>
 
-          {/* Guru Aktif */}
           <div
             className={`
               theme-card
@@ -275,7 +250,6 @@ export default function LaporanGuruPage() {
             </div>
           </div>
 
-          {/* Guru Cuti */}
           <div
             className={`
               theme-card
@@ -316,9 +290,6 @@ export default function LaporanGuruPage() {
           </div>
         </div>
 
-        {/* =====================================================
-            SEARCH
-        ===================================================== */}
 
         <div className="relative max-w-sm">
           <Search
@@ -357,9 +328,6 @@ export default function LaporanGuruPage() {
           />
         </div>
 
-        {/* =====================================================
-            TABLE
-        ===================================================== */}
 
         <div
           className={`
@@ -374,7 +342,6 @@ export default function LaporanGuruPage() {
           <div className="overflow-x-auto">
             <table className="w-full min-w-[900px] text-left text-sm">
 
-              {/* Table Header */}
               <thead
                 className={`
                   ${themeNeutralSurface}
@@ -410,7 +377,6 @@ export default function LaporanGuruPage() {
                 </tr>
               </thead>
 
-              {/* Table Body */}
               <tbody>
                 {filteredGuru.map((g, index) => (
                   <tr
@@ -425,7 +391,6 @@ export default function LaporanGuruPage() {
                       }
                     `}
                   >
-                    {/* Nama */}
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
 
@@ -451,22 +416,18 @@ export default function LaporanGuruPage() {
                       </div>
                     </td>
 
-                    {/* NIP */}
                     <td className="px-4 py-3 theme-text-secondary">
                       {g.nip}
                     </td>
 
-                    {/* Mapel */}
                     <td className="px-4 py-3 theme-text-secondary">
                       {g.mapel}
                     </td>
 
-                    {/* Sekolah */}
                     <td className="px-4 py-3 theme-text-secondary">
                       {g.sekolah}
                     </td>
 
-                    {/* Kontak */}
                     <td className="px-4 py-3 theme-text-secondary">
                       <div className="flex flex-col gap-1 text-xs">
 
@@ -503,7 +464,6 @@ export default function LaporanGuruPage() {
                       </div>
                     </td>
 
-                    {/* Status */}
                     <td className="px-4 py-3">
                       <span
                         className={`
@@ -532,7 +492,6 @@ export default function LaporanGuruPage() {
                   </tr>
                 ))}
 
-                {/* Empty State */}
                 {filteredGuru.length === 0 && (
                   <tr>
                     <td

@@ -35,9 +35,6 @@ import {
 import { getAbsensiKelas } from "@/services/absensi.service";
 import { getKelas } from "@/services/kelas.service";
 
-/* =========================================================
-   DATE HELPERS
-========================================================= */
 
 function formatTanggal(tanggal) {
   if (!tanggal) return "-";
@@ -96,9 +93,6 @@ function getTodayInputValue() {
   return `${yyyy}-${mm}-${dd}`;
 }
 
-/* =========================================================
-   RESPONSE HELPERS
-========================================================= */
 
 function normalizeListResponse(response) {
   if (Array.isArray(response)) return response;
@@ -122,9 +116,6 @@ function normalizeListResponse(response) {
   return [];
 }
 
-/* =========================================================
-   ROLE HELPERS
-========================================================= */
 
 function normalizeRole(value) {
   if (!value) return null;
@@ -160,10 +151,6 @@ function normalizeRole(value) {
   return null;
 }
 
-/*
- * ROLE HARUS DIAMBIL DARI DATA PENGGUNA.
- * Jangan menentukan Guru/Siswa berdasarkan kelas.
- */
 function getRoleFromUser(user) {
   if (!user) return null;
 
@@ -188,9 +175,6 @@ function getRoleFromUser(user) {
   return null;
 }
 
-/* =========================================================
-   STATUS
-========================================================= */
 
 function normalizeStatus(status) {
   const value = String(status || "")
@@ -227,9 +211,6 @@ function normalizeStatus(status) {
   return "Tidak Hadir";
 }
 
-/* =========================================================
-   METHOD
-========================================================= */
 
 function normalizeMetode(metode) {
   const value = String(metode || "")
@@ -255,9 +236,6 @@ function normalizeMetode(metode) {
   return metode || "-";
 }
 
-/* =========================================================
-   AUTH FETCH
-========================================================= */
 
 async function fetchUserById(userId) {
   if (!userId) return null;
@@ -315,9 +293,6 @@ async function fetchUserById(userId) {
   }
 }
 
-/* =========================================================
-   NORMALIZE ABSENSI
-========================================================= */
 
 function normalizeAbsensiItem(
   item,
@@ -431,10 +406,6 @@ function normalizeAbsensiItem(
   };
 }
 
-/* =========================================================
-   STATUS CONFIG
-   SEMUA MENGIKUTI GLOBAL THEME
-========================================================= */
 
 const STATUS_CONFIG = {
   Hadir: {
@@ -468,9 +439,6 @@ const STATUS_CONFIG = {
   },
 };
 
-/* =========================================================
-   STATUS BADGE
-========================================================= */
 
 function StatusBadge({ status }) {
   const config =
@@ -489,9 +457,6 @@ function StatusBadge({ status }) {
   );
 }
 
-/* =========================================================
-   ROLE BADGE
-========================================================= */
 
 function RoleBadge({ role }) {
   let className =
@@ -516,9 +481,6 @@ function RoleBadge({ role }) {
   );
 }
 
-/* =========================================================
-   STAT CARD
-========================================================= */
 
 function StatCard({
   title,
@@ -560,9 +522,6 @@ function StatCard({
   );
 }
 
-/* =========================================================
-   INFO ITEM
-========================================================= */
 
 function InfoItem({
   icon: Icon,
@@ -593,9 +552,6 @@ function InfoItem({
   );
 }
 
-/* =========================================================
-   MINI SUMMARY
-========================================================= */
 
 function MiniSummary({
   label,
@@ -614,9 +570,6 @@ function MiniSummary({
   );
 }
 
-/* =========================================================
-   PAGE
-========================================================= */
 
 export default function PresensiPage() {
   const router = useRouter();
@@ -676,9 +629,6 @@ export default function PresensiPage() {
 
   const itemsPerPage = 7;
 
-  /* =======================================================
-     FETCH KELAS
-  ======================================================= */
 
   const fetchKelas = useCallback(
     async () => {
@@ -716,9 +666,6 @@ export default function PresensiPage() {
     [],
   );
 
-  /* =======================================================
-     FETCH ABSENSI
-  ======================================================= */
 
   const fetchAbsensi = useCallback(
     async () => {
@@ -857,9 +804,6 @@ export default function PresensiPage() {
     ],
   );
 
-  /* =======================================================
-     EFFECT
-  ======================================================= */
 
   useEffect(() => {
     fetchKelas();
@@ -869,9 +813,6 @@ export default function PresensiPage() {
     fetchAbsensi();
   }, [fetchAbsensi]);
 
-  /* =======================================================
-     FILTER
-  ======================================================= */
 
   const filteredData = useMemo(() => {
     return absensi.filter((item) => {
@@ -920,9 +861,6 @@ export default function PresensiPage() {
     classFilter,
   ]);
 
-  /* =======================================================
-     PAGINATION
-  ======================================================= */
 
   const totalPages = Math.max(
     1,
@@ -946,9 +884,6 @@ export default function PresensiPage() {
         itemsPerPage,
     );
 
-  /* =======================================================
-     STATISTICS
-  ======================================================= */
 
   const totalPresensi =
     absensi.length;
@@ -984,9 +919,6 @@ export default function PresensiPage() {
         )
       : 0;
 
-  /* =======================================================
-     RESET
-  ======================================================= */
 
   const resetFilters = () => {
     setSearchQuery("");
@@ -999,9 +931,6 @@ export default function PresensiPage() {
     setCurrentPage(1);
   };
 
-  /* =======================================================
-     DETAIL
-  ======================================================= */
 
   const handleOpenDetail = (item) => {
     if (
@@ -1018,9 +947,6 @@ export default function PresensiPage() {
     setSelectedPresensi(item);
   };
 
-  /* =======================================================
-     EDIT
-  ======================================================= */
 
   const handleOpenEdit = (item) => {
     setSelectedPresensi(null);
@@ -1036,9 +962,6 @@ export default function PresensiPage() {
     );
   };
 
-  /* =======================================================
-     SAVE EDIT
-  ======================================================= */
 
   const handleSaveEdit = async () => {
     if (!editPresensi) return;
@@ -1054,9 +977,6 @@ export default function PresensiPage() {
     setEditPresensi(null);
   };
 
-  /* =======================================================
-     EXPORT
-  ======================================================= */
 
   const handleExport = () => {
     if (
@@ -1148,9 +1068,6 @@ export default function PresensiPage() {
     URL.revokeObjectURL(url);
   };
 
-  /* =======================================================
-     RENDER
-  ======================================================= */
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
@@ -1178,7 +1095,6 @@ export default function PresensiPage() {
         <main className="flex-1 overflow-y-auto">
           <div className="space-y-5 p-4 sm:space-y-6 sm:p-6 lg:p-8">
 
-            {/* HEADER */}
 
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex items-center gap-3">
@@ -1210,7 +1126,6 @@ export default function PresensiPage() {
               </button>
             </div>
 
-            {/* ERROR */}
 
             {(errorKelas ||
               errorAbsensi) && (
@@ -1244,7 +1159,6 @@ export default function PresensiPage() {
               </div>
             )}
 
-            {/* DATE */}
 
             <section className="theme-card overflow-hidden rounded-2xl border shadow-sm">
               <div className="p-4 sm:p-5">
@@ -1294,7 +1208,6 @@ export default function PresensiPage() {
               </div>
             </section>
 
-            {/* STAT */}
 
             <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
               <StatCard
@@ -1334,7 +1247,6 @@ export default function PresensiPage() {
               />
             </div>
 
-            {/* FILTER */}
 
             <section className="theme-card rounded-2xl border p-4 shadow-sm">
               <div className="flex flex-col gap-3 lg:flex-row">
@@ -1477,7 +1389,6 @@ export default function PresensiPage() {
               </div>
             </section>
 
-            {/* TABLE */}
 
             <section className="theme-card overflow-hidden rounded-2xl border shadow-sm">
               <div className="theme-border flex flex-col gap-3 border-b px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5 lg:px-6">
@@ -1807,7 +1718,6 @@ export default function PresensiPage() {
                 </table>
               </div>
 
-              {/* PAGINATION */}
 
               {!loadingAbsensi &&
                 filteredData.length >
@@ -1918,9 +1828,6 @@ export default function PresensiPage() {
         </main>
       </div>
 
-      {/* =====================================================
-          DETAIL MODAL
-      ===================================================== */}
 
       {selectedPresensi && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
@@ -2072,9 +1979,6 @@ export default function PresensiPage() {
         </div>
       )}
 
-      {/* =====================================================
-          EDIT MODAL
-      ===================================================== */}
 
       {editPresensi && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">

@@ -34,11 +34,7 @@ const API_URL = (
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
 ).replace(/\/$/, "");
 
-// getToken diimpor dari @/lib/auth (single source of truth)
 
-/* =========================================================
-   THEME HELPERS
-========================================================= */
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]";
@@ -55,9 +51,6 @@ const themeCardShadow =
 const themePrimaryShadow =
   "shadow-[0_10px_25px_color-mix(in_srgb,var(--color-primary)_20%,transparent)]";
 
-/* =========================================================
-   RESPONSE HELPERS
-========================================================= */
 
 function unwrapUserResponse(result) {
   let value = result;
@@ -67,12 +60,10 @@ function unwrapUserResponse(result) {
       break;
     }
 
-    // Objek pengguna langsung.
     if (value.id && (value.email || value.namaLengkap || value.namaPengguna)) {
       return value;
     }
 
-    // Beberapa endpoint membungkus objek dengan key user/pengguna.
     if (value.user && typeof value.user === "object") {
       value = value.user;
       continue;
@@ -141,9 +132,6 @@ function getAssignedCategoryId(user) {
   );
 }
 
-/* =========================================================
-   DISPLAY HELPERS
-========================================================= */
 
 const formatDate = (value) => {
   if (!value) return "-";
@@ -272,9 +260,6 @@ function getCategoryLabel(user, matchedCategory) {
   return "-";
 }
 
-/* =========================================================
-   INFO ITEM
-========================================================= */
 
 function InfoItem({ icon: Icon, label, value }) {
   const displayValue =
@@ -317,9 +302,6 @@ function InfoItem({ icon: Icon, label, value }) {
   );
 }
 
-/* =========================================================
-   STATUS BADGE
-========================================================= */
 
 function StatusBadge({ status }) {
   const active = String(status || "").toLowerCase() === "aktif";
@@ -342,9 +324,6 @@ function StatusBadge({ status }) {
   );
 }
 
-/* =========================================================
-   SECTION HEADER
-========================================================= */
 
 function SectionHeader({ icon: Icon, title, description }) {
   return (
@@ -368,9 +347,6 @@ function SectionHeader({ icon: Icon, title, description }) {
   );
 }
 
-/* =========================================================
-   PAGE
-========================================================= */
 
 export default function DetailPenggunaPage() {
   const params = useParams();
@@ -563,9 +539,6 @@ export default function DetailPenggunaPage() {
     );
   }
 
-  /* =========================================================
-     DERIVED DATA
-  ========================================================= */
 
   const fullName = firstValue(
     user.namaLengkap,
@@ -583,10 +556,6 @@ export default function DetailPenggunaPage() {
   const email = firstValue(user.email, "-");
   const phone = firstValue(user.noTelepon, user.nomorTelepon, "-");
 
-  /*
-   * Cocokkan hanya dengan ID penugasan pengguna.
-   * Jangan memilih shift/kategori pertama jika ID tidak tersedia.
-   */
   const assignedShiftId = getAssignedShiftId(user);
   const assignedCategoryId = getAssignedCategoryId(user);
 
@@ -617,14 +586,10 @@ export default function DetailPenggunaPage() {
     Boolean(user.kategoriJabatan?.nama) ||
     Boolean(user.kategoriJabatanMaster?.nama);
 
-  /* =========================================================
-     RENDER
-  ========================================================= */
 
   return pageLayout(
     <main className="flex-1 overflow-y-auto">
       <div className="space-y-5 p-4 sm:space-y-6 sm:p-6 lg:p-8">
-        {/* PAGE HEADER */}
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-center gap-3">
             <div
@@ -670,7 +635,6 @@ export default function DetailPenggunaPage() {
           </div>
         </div>
 
-        {/* PROFILE CARD */}
         <section
           className={`theme-card theme-border overflow-hidden rounded-2xl ${themeCardShadow}`}
         >
@@ -725,7 +689,6 @@ export default function DetailPenggunaPage() {
           </div>
         </section>
 
-        {/* INFORMASI AKUN */}
         <section
           className={`theme-card theme-border overflow-hidden rounded-2xl ${themeCardShadow}`}
         >
@@ -761,7 +724,6 @@ export default function DetailPenggunaPage() {
           </div>
         </section>
 
-        {/* INFORMASI KEPEGAWAIAN */}
         <section
           className={`theme-card theme-border overflow-hidden rounded-2xl ${themeCardShadow}`}
         >
@@ -834,7 +796,6 @@ export default function DetailPenggunaPage() {
           )}
         </section>
 
-        {/* DATA PRIBADI */}
         <section
           className={`theme-card theme-border overflow-hidden rounded-2xl ${themeCardShadow}`}
         >
@@ -870,7 +831,6 @@ export default function DetailPenggunaPage() {
           </div>
         </section>
 
-        {/* SEKOLAH */}
         <section
           className={`theme-card theme-border overflow-hidden rounded-2xl ${themeCardShadow}`}
         >
@@ -899,7 +859,6 @@ export default function DetailPenggunaPage() {
           </div>
         </section>
 
-        {/* FACE ID */}
         <section
           className={`theme-card theme-border overflow-hidden rounded-2xl ${themeCardShadow}`}
         >

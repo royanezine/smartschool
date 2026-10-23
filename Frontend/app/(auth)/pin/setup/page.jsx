@@ -13,7 +13,6 @@ import {
   ArrowLeft,
 } from "lucide-react";
 
-/* -------------------- INPUT PIN 6 KOTAK -------------------- */
 function PinInput({ value, onChange, disabled, show, idPrefix, autoFocus }) {
   const refs = useRef([]);
 
@@ -99,7 +98,6 @@ function PinInput({ value, onChange, disabled, show, idPrefix, autoFocus }) {
   );
 }
 
-/* -------------------- HALAMAN -------------------- */
 export default function SetupPinPage() {
   const router = useRouter();
 
@@ -152,7 +150,6 @@ export default function SetupPinPage() {
         throw new Error("Data pengguna tidak diterima dari server.");
       }
 
-      // Simpan token + identitas sesi secara atomik.
       const sessionUser = setSession(result.token, user);
 
       sessionStorage.removeItem("pin_setup_token");
@@ -169,9 +166,7 @@ export default function SetupPinPage() {
 
   return (
     <div className="relative flex min-h-screen items-center justify-center bg-white px-4 py-8">
-      {/* Kartu utama */}
       <div className="relative z-10 w-full max-w-sm overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        {/* Logo + judul */}
         <div className="flex flex-col items-center px-6 pt-8 pb-5 sm:px-8 sm:pt-9">
           <div className="flex h-24 w-24 items-center justify-center sm:h-28 sm:w-28">
             <Image
@@ -192,9 +187,7 @@ export default function SetupPinPage() {
           </p>
         </div>
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="px-6 pb-6 sm:px-8">
-          {/* PIN baru */}
           <div>
             <div className="mb-2 flex items-center justify-between">
               <label className="text-xs font-medium text-slate-700">
@@ -220,7 +213,6 @@ export default function SetupPinPage() {
             />
           </div>
 
-          {/* Konfirmasi */}
           <div className="mt-4">
             <div className="mb-2 flex items-center justify-between">
               <label className="text-xs font-medium text-slate-700">
@@ -257,7 +249,6 @@ export default function SetupPinPage() {
             )}
           </div>
 
-          {/* Error / sukses */}
           {error && (
             <div
               role="alert"
@@ -276,7 +267,6 @@ export default function SetupPinPage() {
             </div>
           )}
 
-          {/* Tombol utama */}
           <button
             type="submit"
             disabled={loading || !cocok}
@@ -297,7 +287,6 @@ export default function SetupPinPage() {
           </p>
         </form>
 
-        {/* Footer kartu */}
         <div className="border-t border-slate-100 px-6 py-4 sm:px-8">
           <div className="flex items-center justify-between gap-2">
             <button

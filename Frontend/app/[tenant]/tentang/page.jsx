@@ -50,7 +50,6 @@ function getSubdomain() {
 
   const parts = hostname.split(".");
 
-  // Contoh: sma-abc.domain.com -> sma-abc
   if (parts.length >= 3) {
     return parts[0];
   }
@@ -80,8 +79,6 @@ function getThemeColor(theme, key) {
 }
 
 function getPublicApiBase() {
-  // Mendukung NEXT_PUBLIC_API_URL=http://localhost:5000
-  // maupun NEXT_PUBLIC_API_URL=http://localhost:5000/api
   if (API_URL.endsWith("/api")) {
     return `${API_URL}/publik`;
   }
@@ -153,8 +150,6 @@ export default function TentangPage() {
     };
   }, []);
 
-  // PublicTheme memasang warna CMS sebagai variabel CSS
-  // --school-primary, --school-secondary, dan seterusnya.
   useEffect(() => {
     const root = document.documentElement;
 
@@ -178,7 +173,6 @@ export default function TentangPage() {
 
     readTheme();
 
-    // PublicTheme dapat memasang variabel setelah request API selesai.
     const observer = new MutationObserver(readTheme);
 
     observer.observe(root, {
@@ -324,7 +318,6 @@ export default function TentangPage() {
       className="min-h-screen"
       style={{ backgroundColor: surface, color: text }}
     >
-      {/* NAVIGASI */}
       <header
         className="sticky top-0 z-50 border-b backdrop-blur-xl"
         style={{
@@ -388,7 +381,6 @@ export default function TentangPage() {
         </div>
       </header>
 
-      {/* HERO */}
       <section
         className="relative overflow-hidden"
         style={{ backgroundColor: text }}
@@ -496,7 +488,6 @@ export default function TentangPage() {
         </div>
       </section>
 
-      {/* NILAI SEKOLAH */}
       <section className="border-b" style={borderStyle}>
         <div className="mx-auto grid max-w-7xl gap-0 px-6 lg:grid-cols-3 lg:px-8">
           {[
@@ -548,7 +539,6 @@ export default function TentangPage() {
         </div>
       </section>
 
-      {/* KONTEN TENTANG DARI CMS */}
       <section className="py-20 lg:py-24" style={{ backgroundColor: surface }}>
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-16">
@@ -674,7 +664,6 @@ export default function TentangPage() {
         </div>
       </section>
 
-      {/* NILAI UTAMA */}
       <section className="py-20 lg:py-24" style={{ backgroundColor: background }}>
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="max-w-2xl">
@@ -764,7 +753,6 @@ export default function TentangPage() {
         </div>
       </section>
 
-      {/* CTA */}
       <section className="py-20" style={{ backgroundColor: surface }}>
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div
@@ -810,7 +798,6 @@ export default function TentangPage() {
         </div>
       </section>
 
-      {/* KONTAK */}
       <section
         className="border-t py-16"
         style={{ backgroundColor: background, borderColor: border }}
@@ -881,7 +868,6 @@ export default function TentangPage() {
         </div>
       </section>
 
-      {/* FOOTER */}
       <footer style={{ backgroundColor: text, color: "#FFFFFF" }}>
         <div className="mx-auto max-w-7xl px-6 py-12 lg:px-8">
           <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-4">

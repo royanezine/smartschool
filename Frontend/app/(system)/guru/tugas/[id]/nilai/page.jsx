@@ -28,9 +28,6 @@ import {
   GraduationCap,
 } from "lucide-react";
 
-// ======================================================
-// THEME
-// ======================================================
 
 const primaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -52,9 +49,6 @@ const neutralBorder =
 const divider =
   "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
 
-// ======================================================
-// HELPERS
-// ======================================================
 
 function unwrapResponse(response) {
   let data = response;
@@ -132,9 +126,6 @@ function getSubmissionStatus(item) {
   return "Menunggu Penilaian";
 }
 
-// ======================================================
-// PAGE
-// ======================================================
 
 export default function NilaiTugasPage() {
   const params = useParams();
@@ -156,9 +147,6 @@ export default function NilaiTugasPage() {
 
   const notifications = [];
 
-  // ======================================================
-  // LOAD DATA
-  // ======================================================
 
   const loadData = useCallback(async () => {
     if (!tugasId) {
@@ -241,9 +229,6 @@ export default function NilaiTugasPage() {
     loadData();
   }, [loadData]);
 
-  // ======================================================
-  // DATA RINGKASAN
-  // ======================================================
 
   const kelasMapel = tugas?.kelasMapel || {};
 
@@ -296,9 +281,6 @@ export default function NilaiTugasPage() {
     });
   }, [pengumpulan, search, filter]);
 
-  // ======================================================
-  // UPDATE FORM
-  // ======================================================
 
   function updateField(id, field, value) {
     setNilaiForm((prev) => ({
@@ -312,9 +294,6 @@ export default function NilaiTugasPage() {
     setSuccess("");
   }
 
-  // ======================================================
-  // SAVE GRADE
-  // ======================================================
 
   async function handleSave(item) {
     const form = nilaiForm[item.id];
@@ -362,9 +341,6 @@ export default function NilaiTugasPage() {
     }
   }
 
-  // ======================================================
-  // LAYOUT
-  // ======================================================
 
   function renderLayout(content) {
     return (
@@ -399,9 +375,6 @@ export default function NilaiTugasPage() {
     );
   }
 
-  // ======================================================
-  // LOADING
-  // ======================================================
 
   if (loading) {
     return renderLayout(
@@ -418,9 +391,6 @@ export default function NilaiTugasPage() {
     );
   }
 
-  // ======================================================
-  // ERROR TANPA DATA
-  // ======================================================
 
   if (!tugas && error) {
     return renderLayout(
@@ -449,15 +419,11 @@ export default function NilaiTugasPage() {
     );
   }
 
-  // ======================================================
-  // MAIN CONTENT
-  // ======================================================
 
   return renderLayout(
     <main className="theme-page min-h-0 flex-1 overflow-y-auto">
       <div className="mx-auto w-full max-w-6xl px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
 
-        {/* BACK */}
         <button
           type="button"
           onClick={() => router.push(`/guru/tugas/${tugasId}`)}
@@ -467,7 +433,6 @@ export default function NilaiTugasPage() {
           Kembali ke Detail Tugas
         </button>
 
-        {/* PAGE TITLE */}
         <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <div className="flex items-center gap-2">
@@ -489,7 +454,6 @@ export default function NilaiTugasPage() {
           </div>
         </div>
 
-        {/* TASK INFORMATION */}
         <section
           className={`theme-card rounded-2xl border ${neutralBorder} ${cardShadow}`}
         >
@@ -523,7 +487,6 @@ export default function NilaiTugasPage() {
           </div>
         </section>
 
-        {/* SUMMARY */}
         <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
           <SummaryCard
             icon={<Users size={18} />}
@@ -544,7 +507,6 @@ export default function NilaiTugasPage() {
           />
         </div>
 
-        {/* NOTIFICATIONS */}
         {error && (
           <div className="mt-5 flex items-start gap-2 rounded-xl border border-red-500/20 bg-red-500/5 p-4 text-sm text-red-600">
             <AlertCircle size={18} className="mt-0.5 shrink-0" />
@@ -559,7 +521,6 @@ export default function NilaiTugasPage() {
           </div>
         )}
 
-        {/* STUDENT TABLE */}
         <section
           className={`theme-card mt-5 overflow-hidden rounded-2xl border ${neutralBorder} ${cardShadow}`}
         >
@@ -649,7 +610,6 @@ export default function NilaiTugasPage() {
                     key={item.id}
                     className="p-5 sm:p-6"
                   >
-                    {/* STUDENT */}
                     <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
                       <div className="flex min-w-0 items-start gap-3">
                         <div
@@ -720,7 +680,6 @@ export default function NilaiTugasPage() {
                         </div>
                       </div>
 
-                      {/* GRADE FORM */}
                       <div
                         className={`w-full rounded-xl border ${neutralBorder} ${neutralSurface} p-4 xl:max-w-md`}
                       >
@@ -822,7 +781,6 @@ export default function NilaiTugasPage() {
           )}
         </section>
 
-        {/* FOOTER NOTE */}
         <p className="theme-text-muted mt-4 text-xs leading-5">
           Pastikan nilai dan catatan sudah benar sebelum menyimpan.
           Nilai yang berhasil disimpan akan diperbarui dari data backend.
@@ -832,9 +790,6 @@ export default function NilaiTugasPage() {
   );
 }
 
-// ======================================================
-// SUMMARY CARD
-// ======================================================
 
 function SummaryCard({ icon, label, value }) {
   return (

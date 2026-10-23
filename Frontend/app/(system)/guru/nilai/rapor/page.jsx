@@ -34,9 +34,6 @@ import {
   RefreshCw,
 } from "lucide-react";
 
-/* =========================================================
-   THEME HELPERS
-========================================================= */
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -95,9 +92,6 @@ const themeDangerBorder =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-/* =========================================================
-   RESPONSE HELPERS
-========================================================= */
 
 function getResultData(response) {
   if (!response) return null;
@@ -159,9 +153,6 @@ function normalizeId(value) {
   return String(value);
 }
 
-/* =========================================================
-   STUDENT HELPERS
-========================================================= */
 
 function getStudentId(item) {
   if (!item) return null;
@@ -223,9 +214,6 @@ function getStudentNisn(item) {
   );
 }
 
-/* =========================================================
-   NILAI UJIAN HELPERS
-========================================================= */
 
 function getNilaiFromItem(item) {
   if (!item) return null;
@@ -406,9 +394,6 @@ const colorClasses = {
   },
 };
 
-/* =========================================================
-   NORMALIZE ANGGOTA KELAS
-========================================================= */
 
 function normalizeAnggotaKelas(detail) {
   if (!detail) return [];
@@ -433,9 +418,6 @@ function normalizeAnggotaKelas(detail) {
   return [];
 }
 
-/* =========================================================
-   NORMALIZE NILAI UJIAN
-========================================================= */
 
 function extractNilaiUjian(response) {
   const output = [];
@@ -529,9 +511,6 @@ function extractNilaiUjian(response) {
   return Array.from(unique.values());
 }
 
-/* =========================================================
-   PAGE
-========================================================= */
 
 export default function GuruRaporPage() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -568,9 +547,6 @@ export default function GuruRaporPage() {
     },
   ];
 
-  /* =======================================================
-     LOAD TAHUN AJARAN
-  ======================================================= */
 
   const loadTahunAjaran = useCallback(async () => {
     try {
@@ -599,9 +575,6 @@ export default function GuruRaporPage() {
     }
   }, []);
 
-  /* =======================================================
-     LOAD KELAS
-  ======================================================= */
 
   const loadKelas = useCallback(async (tahunAjaranId) => {
     if (!tahunAjaranId) {
@@ -648,9 +621,6 @@ export default function GuruRaporPage() {
     }
   }, []);
 
-  /* =======================================================
-     LOAD DETAIL KELAS
-  ======================================================= */
 
   const loadDetailKelas = useCallback(
     async (kelasId) => {
@@ -690,9 +660,6 @@ export default function GuruRaporPage() {
     [kelasList]
   );
 
-  /* =======================================================
-     LOAD NILAI RAPORT
-  ======================================================= */
 
   const loadNilaiRaport = useCallback(
     async (anggota, tahunAjaranId) => {
@@ -770,9 +737,6 @@ export default function GuruRaporPage() {
     []
   );
 
-  /* =======================================================
-     LOAD NILAI UJIAN
-  ======================================================= */
 
   const loadNilaiUjian = useCallback(
     async (kelasId) => {
@@ -1021,9 +985,6 @@ export default function GuruRaporPage() {
     [kelasList]
   );
 
-  /* =======================================================
-     INITIAL LOAD
-  ======================================================= */
 
   useEffect(() => {
     let mounted = true;
@@ -1072,9 +1033,6 @@ export default function GuruRaporPage() {
     loadKelas,
   ]);
 
-  /* =======================================================
-     LOAD KETIKA KELAS BERUBAH
-  ======================================================= */
 
   useEffect(() => {
     if (!selectedKelasId) {
@@ -1138,9 +1096,6 @@ export default function GuruRaporPage() {
     loadNilaiUjian,
   ]);
 
-  /* =======================================================
-     DATA KELAS TERPILIH
-  ======================================================= */
 
   const selectedKelas = useMemo(() => {
     return (
@@ -1163,9 +1118,6 @@ export default function GuruRaporPage() {
     kelasDetail?.namaKelas ||
     "-";
 
-  /* =======================================================
-     NORMALIZE DATA RAPORT SISWA
-  ======================================================= */
 
   const dataRapor = useMemo(() => {
     const map = new Map();
@@ -1383,9 +1335,6 @@ export default function GuruRaporPage() {
     nilaiRaport,
   ]);
 
-  /* =======================================================
-     NILAI UJIAN PER SISWA
-  ======================================================= */
 
   const nilaiUjianBySiswa =
     useMemo(() => {
@@ -1435,9 +1384,6 @@ export default function GuruRaporPage() {
       return map;
     }, [nilaiUjian]);
 
-  /* =======================================================
-     GABUNG RAPORT + UJIAN
-  ======================================================= */
 
   const dataTabel = useMemo(() => {
     return dataRapor
@@ -1482,9 +1428,6 @@ export default function GuruRaporPage() {
     nilaiUjianBySiswa,
   ]);
 
-  /* =======================================================
-     REKAP
-  ======================================================= */
 
   const rekap = useMemo(() => {
     if (dataTabel.length === 0) {
@@ -1541,9 +1484,6 @@ export default function GuruRaporPage() {
     };
   }, [dataTabel]);
 
-  /* =======================================================
-     MATA PELAJARAN
-  ======================================================= */
 
   const mataPelajaran = useMemo(() => {
     const names = [];
@@ -1570,17 +1510,11 @@ export default function GuruRaporPage() {
       : "Data mata pelajaran";
   }, [dataTabel]);
 
-  /* =======================================================
-     PRINT
-  ======================================================= */
 
   const handlePrint = () => {
     window.print();
   };
 
-  /* =======================================================
-     LOADING
-  ======================================================= */
 
   if (loading) {
     return (
@@ -1640,9 +1574,6 @@ export default function GuruRaporPage() {
     );
   }
 
-  /* =======================================================
-     ERROR
-  ======================================================= */
 
   if (error) {
     return (
@@ -1711,9 +1642,6 @@ export default function GuruRaporPage() {
     );
   }
 
-  /* =======================================================
-     RENDER
-  ======================================================= */
 
   return (
     <div className="flex h-screen overflow-hidden theme-page">
@@ -1747,9 +1675,6 @@ export default function GuruRaporPage() {
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 theme-page">
           <div className="w-full space-y-6">
 
-            {/* =================================================
-                HEADER
-            ================================================= */}
 
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="min-w-0">
@@ -1810,9 +1735,6 @@ export default function GuruRaporPage() {
               </div>
             )}
 
-            {/* =================================================
-                FILTER
-            ================================================= */}
 
             <div
               className={`theme-card rounded-xl border ${themeNeutralBorder} p-4 ${themeCardShadow}`}
@@ -1821,7 +1743,6 @@ export default function GuruRaporPage() {
 
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
 
-                  {/* TAHUN AJARAN */}
 
                   <div className="relative w-full sm:w-56">
                     <select
@@ -1902,7 +1823,6 @@ export default function GuruRaporPage() {
                     />
                   </div>
 
-                  {/* KELAS */}
 
                   <div className="relative w-full sm:w-48">
                     <select
@@ -1950,7 +1870,6 @@ export default function GuruRaporPage() {
                   </div>
                 </div>
 
-                {/* INFO */}
 
                 <div className="flex flex-wrap items-center gap-2 text-[11px] theme-text-secondary">
                   <Info
@@ -1984,9 +1903,6 @@ export default function GuruRaporPage() {
               </div>
             </div>
 
-            {/* =================================================
-                LOADING NILAI
-            ================================================= */}
 
             {loadingNilai && (
               <div
@@ -2003,13 +1919,9 @@ export default function GuruRaporPage() {
               </div>
             )}
 
-            {/* =================================================
-                SUMMARY
-            ================================================= */}
 
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
 
-              {/* TOTAL */}
 
               <div
                 className={`theme-card flex min-w-0 items-center gap-3 rounded-xl border ${themeNeutralBorder} p-3.5 ${themeCardShadow}`}
@@ -2031,7 +1943,6 @@ export default function GuruRaporPage() {
                 </div>
               </div>
 
-              {/* RATA-RATA */}
 
               <div
                 className={`theme-card flex min-w-0 items-center gap-3 rounded-xl border ${themeNeutralBorder} p-3.5 ${themeCardShadow}`}
@@ -2055,7 +1966,6 @@ export default function GuruRaporPage() {
                 </div>
               </div>
 
-              {/* TUNTAS */}
 
               <div
                 className={`theme-card flex min-w-0 items-center gap-3 rounded-xl border ${themeNeutralBorder} p-3.5 ${themeCardShadow}`}
@@ -2077,7 +1987,6 @@ export default function GuruRaporPage() {
                 </div>
               </div>
 
-              {/* BELUM TUNTAS */}
 
               <div
                 className={`theme-card flex min-w-0 items-center gap-3 rounded-xl border ${themeNeutralBorder} p-3.5 ${themeCardShadow}`}
@@ -2100,9 +2009,6 @@ export default function GuruRaporPage() {
               </div>
             </div>
 
-            {/* =================================================
-                TABEL
-            ================================================= */}
 
             <div
               className={`theme-card overflow-hidden rounded-xl border ${themeNeutralBorder} ${themeCardShadow}`}
@@ -2201,13 +2107,11 @@ export default function GuruRaporPage() {
                               }
                               className={`border-b ${themeDivider} last:border-b-0 ${themeNeutralHover} transition-colors`}
                             >
-                              {/* NO */}
 
                               <td className="px-4 py-3 text-xs theme-text-muted">
                                 {index + 1}
                               </td>
 
-                              {/* SISWA */}
 
                               <td className="px-4 py-3">
                                 <div>
@@ -2236,7 +2140,6 @@ export default function GuruRaporPage() {
                                 </div>
                               </td>
 
-                              {/* NILAI UJIAN */}
 
                               <td className="px-3 py-3 text-center">
                                 {student.nilaiUjian !==
@@ -2265,7 +2168,6 @@ export default function GuruRaporPage() {
                                 )}
                               </td>
 
-                              {/* NILAI AKHIR */}
 
                               <td className="px-3 py-3 text-center">
                                 {student.nilaiAkhir !==
@@ -2282,7 +2184,6 @@ export default function GuruRaporPage() {
                                 )}
                               </td>
 
-                              {/* KKM */}
 
                               <td className="px-3 py-3 text-center theme-text-secondary">
                                 {formatNumber(
@@ -2290,7 +2191,6 @@ export default function GuruRaporPage() {
                                 )}
                               </td>
 
-                              {/* PREDIKAT */}
 
                               <td className="px-3 py-3 text-center">
                                 <span
@@ -2309,7 +2209,6 @@ export default function GuruRaporPage() {
                                 </span>
                               </td>
 
-                              {/* STATUS */}
 
                               <td className="px-4 py-3 text-center">
                                 {student.statusUjian ===
@@ -2344,7 +2243,6 @@ export default function GuruRaporPage() {
                 </div>
               )}
 
-              {/* FOOTER */}
 
               {dataTabel.length > 0 && (
                 <div
@@ -2366,9 +2264,6 @@ export default function GuruRaporPage() {
               )}
             </div>
 
-            {/* =================================================
-                CATATAN
-            ================================================= */}
 
             <div
               className={`rounded-xl border ${themeInfoBorder} ${themeInfoSurface} p-4`}

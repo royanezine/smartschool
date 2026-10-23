@@ -32,9 +32,6 @@ import {
   XCircle,
 } from "lucide-react";
 
-/* =========================================================
-   DATA
-========================================================= */
 
 const QUICK_MODULES = [
   {
@@ -203,9 +200,6 @@ const RAPORT_STATUS = [
   },
 ];
 
-/* =========================================================
-   THEME MAP
-========================================================= */
 
 const toneMap = {
   blue: {
@@ -249,9 +243,6 @@ const toneMap = {
   },
 };
 
-/* =========================================================
-   COMPONENTS
-========================================================= */
 
 function StatCard({
   label,
@@ -403,9 +394,6 @@ function ProgressBar({ value, tone = "blue" }) {
   );
 }
 
-/* =========================================================
-   PAGE
-========================================================= */
 
 export default function ERaportPage() {
   const [activeView, setActiveView] = useState("ringkasan");
@@ -462,9 +450,6 @@ export default function ERaportPage() {
         <main className="min-h-0 flex-1 overflow-y-auto">
           <div className="mx-auto w-full max-w-[1600px] px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
 
-            {/* =====================================================
-                DISCLOSURE: DATA AGREGAT BELUM TERSEDIA
-            ====================================================== */}
 
             <div
               className="
@@ -486,9 +471,6 @@ export default function ERaportPage() {
               dan Cetak Raport.
             </div>
 
-            {/* =====================================================
-                HERO
-            ====================================================== */}
 
             <section
               className="
@@ -530,7 +512,6 @@ export default function ERaportPage() {
 
               <div className="relative grid gap-8 px-6 py-7 sm:px-8 sm:py-8 lg:grid-cols-[1fr_390px] lg:px-10 lg:py-9">
 
-                {/* HERO CONTENT */}
 
                 <div className="flex flex-col justify-center">
                   <div
@@ -613,7 +594,6 @@ export default function ERaportPage() {
                   </div>
                 </div>
 
-                {/* HERO SIDE */}
 
                 <div
                   className="
@@ -694,9 +674,6 @@ export default function ERaportPage() {
               </div>
             </section>
 
-            {/* =====================================================
-                QUICK MODULE
-            ====================================================== */}
 
             <section className="mb-7">
               <SectionHeader
@@ -790,9 +767,6 @@ export default function ERaportPage() {
               </div>
             </section>
 
-            {/* =====================================================
-                STATISTICS
-            ====================================================== */}
 
             <section className="mb-7">
               <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -832,13 +806,9 @@ export default function ERaportPage() {
               </div>
             </section>
 
-            {/* =====================================================
-                OVERVIEW
-            ====================================================== */}
 
             <section className="mb-7 grid gap-5 xl:grid-cols-[1.3fr_.7fr]">
 
-              {/* CLASS PROGRESS */}
 
               <div
                 className="
@@ -1098,7 +1068,6 @@ export default function ERaportPage() {
                 )}
               </div>
 
-              {/* RAPORT STATUS */}
 
               <div
                 className="
@@ -1236,13 +1205,9 @@ export default function ERaportPage() {
               </div>
             </section>
 
-            {/* =====================================================
-                SUBJECT + ACTIVITY
-            ====================================================== */}
 
             <section className="mb-7 grid gap-5 xl:grid-cols-[1fr_.85fr]">
 
-              {/* SUBJECT */}
 
               <div
                 className="
@@ -1326,7 +1291,6 @@ export default function ERaportPage() {
                 </div>
               </div>
 
-              {/* ACTIVITY */}
 
               <div
                 className="
@@ -1436,9 +1400,6 @@ export default function ERaportPage() {
               </div>
             </section>
 
-            {/* =====================================================
-                QUICK ACTION
-            ====================================================== */}
 
             <section className="mb-7">
               <div
@@ -1528,9 +1489,6 @@ export default function ERaportPage() {
               </div>
             </section>
 
-            {/* =====================================================
-                FOOTER
-            ====================================================== */}
 
             <div
               className="

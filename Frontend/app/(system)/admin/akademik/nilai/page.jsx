@@ -14,20 +14,6 @@ import {
   TrendingUp,
 } from "lucide-react";
 
-/**
- * app/admin/akademik/nilai/page.jsx
- *
- * Halaman Nilai — tabel rekap nilai siswa per mata pelajaran.
- *
- * Theme:
- * Menggunakan global Light/Dark theme SmartSchool melalui
- * class theme-* dari globals.css.
- *
- * CATATAN DATA:
- * MOCK_NILAI masih dummy. Kalau nanti sudah terhubung
- * ke API, tinggal ganti MOCK_NILAI dengan hasil fetch
- * yang memiliki struktur data yang sama.
- */
 
 const MAPEL = [
   { key: "agm", label: "Agm" },
@@ -411,7 +397,6 @@ export default function NilaiPage() {
 
   return (
     <div className="flex h-screen w-full theme-page overflow-hidden">
-      {/* SIDEBAR */}
       <Sidebar
         active="akademikNilai"
         setActive={() => {}}
@@ -420,7 +405,6 @@ export default function NilaiPage() {
         role="admin"
       />
 
-      {/* CONTENT */}
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
         <Header
           toggleSidebar={toggleSidebar}
@@ -434,7 +418,6 @@ export default function NilaiPage() {
 
         <main className="flex-1 overflow-y-auto">
           <div className="p-4 sm:p-6 lg:p-8 space-y-6">
-            {/* HEADER */}
             <div className="flex items-center gap-3">
               <div className="p-2.5 rounded-xl theme-primary shadow-lg">
                 <NotebookPen size={20} />
@@ -451,9 +434,7 @@ export default function NilaiPage() {
               </div>
             </div>
 
-            {/* STATISTIK RINGKAS */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {/* TOTAL SISWA */}
               <div className="theme-card rounded-xl border theme-border p-4 shadow-sm">
                 <div className="flex items-center gap-2">
                   <Users
@@ -471,7 +452,6 @@ export default function NilaiPage() {
                 </p>
               </div>
 
-              {/* JUMLAH KELAS */}
               <div className="theme-card rounded-xl border theme-border p-4 shadow-sm">
                 <div className="flex items-center gap-2">
                   <GraduationCap
@@ -489,7 +469,6 @@ export default function NilaiPage() {
                 </p>
               </div>
 
-              {/* RATA-RATA */}
               <div className="theme-card rounded-xl border theme-border p-4 shadow-sm">
                 <div className="flex items-center gap-2">
                   <TrendingUp
@@ -512,7 +491,6 @@ export default function NilaiPage() {
                 </p>
               </div>
 
-              {/* MATA PELAJARAN */}
               <div className="theme-card rounded-xl border theme-border p-4 shadow-sm">
                 <div className="flex items-center gap-2">
                   <NotebookPen
@@ -531,9 +509,7 @@ export default function NilaiPage() {
               </div>
             </div>
 
-            {/* FILTER BAR */}
             <div className="theme-card rounded-xl border theme-border p-4 shadow-sm flex flex-col sm:flex-row gap-3">
-              {/* SEARCH */}
               <div className="relative flex-1">
                 <Search
                   size={16}
@@ -557,7 +533,6 @@ export default function NilaiPage() {
                 />
               </div>
 
-              {/* FILTER KELAS */}
               <div className="flex items-center gap-2">
                 <Filter
                   size={15}
@@ -586,7 +561,6 @@ export default function NilaiPage() {
               </div>
             </div>
 
-            {/* TABEL NILAI */}
             <div className="theme-card rounded-xl border theme-border shadow-sm overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-sm border-collapse">
@@ -639,34 +613,28 @@ export default function NilaiPage() {
                           theme-table-hover
                         "
                       >
-                        {/* NO */}
                         <td className="px-4 py-2.5 theme-text-secondary font-medium">
                           {idx + 1}
                         </td>
 
-                        {/* KELAS */}
                         <td className="px-4 py-2.5">
                           <span className="theme-sidebar-text-active font-semibold hover:underline cursor-pointer">
                             {s.kelas}
                           </span>
                         </td>
 
-                        {/* INDUK */}
                         <td className="px-4 py-2.5 theme-text-secondary">
                           {s.induk}
                         </td>
 
-                        {/* NAMA */}
                         <td className="px-4 py-2.5 theme-text font-semibold">
                           {s.nama}
                         </td>
 
-                        {/* L/P */}
                         <td className="px-4 py-2.5 text-center theme-text-secondary font-medium">
                           {s.lp}
                         </td>
 
-                        {/* NILAI MAPEL */}
                         {MAPEL.map((m) => (
                           <td
                             key={m.key}
@@ -676,10 +644,8 @@ export default function NilaiPage() {
                           </td>
                         ))}
 
-                        {/* AKSI */}
                         <td className="px-4 py-2.5">
                           <div className="flex items-center justify-center gap-1.5">
-                            {/* CETAK */}
                             <button
                               onClick={() => handlePrint(s)}
                               title="Cetak nilai"
@@ -693,7 +659,6 @@ export default function NilaiPage() {
                               <Printer size={14} />
                             </button>
 
-                            {/* HAPUS */}
                             <button
                               onClick={() => handleDelete(s)}
                               title="Hapus nilai"
@@ -711,7 +676,6 @@ export default function NilaiPage() {
                       </tr>
                     ))}
 
-                    {/* EMPTY STATE */}
                     {filteredSiswa.length === 0 && (
                       <tr>
                         <td

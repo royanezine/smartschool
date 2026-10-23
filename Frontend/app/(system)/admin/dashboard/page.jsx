@@ -37,9 +37,6 @@ export default function AdminDashboardPage() {
   const [dashboardLoading, setDashboardLoading] = useState(true);
   const [dashboardError, setDashboardError] = useState("");
 
-  /* =========================================================
-     FETCH DASHBOARD - MENGIKUTI RESPONSE BE
-  ========================================================= */
 
   const fetchDashboard = useCallback(async () => {
     try {
@@ -78,14 +75,9 @@ export default function AdminDashboardPage() {
     fetchDashboard();
   }, [fetchDashboard]);
 
-  /* =========================================================
-     DATA DARI BE
-  ========================================================= */
 
   const cabang = dashboardData?.cabang ?? null;
 
-  // BE hanya mengirim objek yayasan untuk admin_yayasan.
-  // Tidak menampilkan bagian yayasan jika nilainya null.
   const yayasan = dashboardData?.yayasan ?? null;
 
   const formatNumber = (value) =>
@@ -104,9 +96,6 @@ export default function AdminDashboardPage() {
     hour12: false,
   }).format(new Date());
 
-  /* =========================================================
-     STATUS KEHADIRAN DARI BE
-  ========================================================= */
 
 const attendanceData = useMemo(() => {
   if (!cabang?.rekapKehadiran) {
@@ -147,9 +136,6 @@ const attendanceData = useMemo(() => {
   ];
 }, [cabang]);
 
-  /* =========================================================
-     AKSI CEPAT
-  ========================================================= */
 
   const quickActions = [
     {
@@ -178,9 +164,6 @@ const attendanceData = useMemo(() => {
     },
   ];
 
-  /* =========================================================
-     RENDER
-  ========================================================= */
 
   return (
     <div className="flex h-screen w-full overflow-hidden theme-page transition-colors duration-300">
@@ -202,7 +185,6 @@ const attendanceData = useMemo(() => {
         <main className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto theme-page transition-colors duration-300">
           <div className="w-full px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
             <div className="w-full space-y-6">
-              {/* WELCOME */}
 
               <section className="relative w-full overflow-hidden rounded-2xl border theme-card theme-border shadow-sm transition duration-300 hover:shadow-md">
                 <div className="pointer-events-none absolute -right-20 -top-20 h-52 w-52 rounded-full bg-[var(--color-info-background)] opacity-60 blur-3xl" />
@@ -260,7 +242,6 @@ const attendanceData = useMemo(() => {
                 </div>
               </section>
 
-              {/* ERROR */}
 
               {dashboardError && (
                 <section className="theme-danger rounded-2xl border theme-border px-4 py-4 text-sm">
@@ -286,7 +267,6 @@ const attendanceData = useMemo(() => {
                 </section>
               )}
 
-              {/* RINGKASAN SEKOLAH */}
 
               <section>
                 <div className="mb-4">
@@ -314,7 +294,6 @@ const attendanceData = useMemo(() => {
                   </div>
                 ) : dashboardData ? (
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                    {/* TOTAL SISWA */}
 
                     <StatCard
                       title="Total Siswa"
@@ -324,7 +303,6 @@ const attendanceData = useMemo(() => {
                       iconClass="theme-info"
                     />
 
-                    {/* TOTAL GURU */}
 
                     <StatCard
                       title="Total Guru"
@@ -334,7 +312,6 @@ const attendanceData = useMemo(() => {
                       iconClass="theme-primary"
                     />
 
-                    {/* TOTAL KELAS */}
 
                     <StatCard
                       title="Total Kelas"
@@ -344,7 +321,6 @@ const attendanceData = useMemo(() => {
                       iconClass="theme-info"
                     />
 
-                    {/* PERSENTASE KEHADIRAN DARI BE */}
 
                     <StatCard
                       title="Kehadiran"
@@ -361,7 +337,6 @@ const attendanceData = useMemo(() => {
                 ) : null}
               </section>
 
-              {/* REKAP KEHADIRAN */}
 
               {dashboardData && cabang.rekapKehadiran && (
                 <section>
@@ -434,7 +409,6 @@ const attendanceData = useMemo(() => {
                 </section>
               )}
 
-              {/* DATA YAYASAN HANYA JIKA DIKIRIM BE */}
 
               {yayasan && (
                 <section>
@@ -488,7 +462,6 @@ const attendanceData = useMemo(() => {
                 </section>
               )}
 
-              {/* AKSI CEPAT */}
 
               <section>
                 <div className="mb-4">
@@ -533,7 +506,6 @@ const attendanceData = useMemo(() => {
                 </div>
               </section>
 
-              {/* FOOTER */}
 
               <footer className="border-t theme-border-soft pt-6">
                 <div className="flex flex-col items-center justify-between gap-3 text-center text-xs theme-text-muted sm:flex-row sm:text-left">
@@ -556,9 +528,6 @@ const attendanceData = useMemo(() => {
   );
 }
 
-/* =========================================================
-   KOMPONEN KARTU STATISTIK
-========================================================= */
 
 function StatCard({
   title,

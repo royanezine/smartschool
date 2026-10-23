@@ -20,9 +20,6 @@ import {
   X,
 } from "lucide-react";
 
-/* =========================================================
-   DATA
-========================================================= */
 
 const initialSubjects = [
   {
@@ -93,9 +90,6 @@ const initialSubjects = [
   },
 ];
 
-/* =========================================================
-   HELPERS
-========================================================= */
 
 function getTotalWeight(subject) {
   return (
@@ -114,9 +108,6 @@ function getStatusStyle(status) {
   return "theme-card-soft theme-text-secondary";
 }
 
-/* =========================================================
-   STAT CARD
-========================================================= */
 
 function StatCard({
   icon: Icon,
@@ -174,9 +165,6 @@ function StatCard({
   );
 }
 
-/* =========================================================
-   INPUT BOBOT
-========================================================= */
 
 function WeightInput({
   label,
@@ -208,9 +196,6 @@ function WeightInput({
   );
 }
 
-/* =========================================================
-   MAIN PAGE
-========================================================= */
 
 export default function PengaturanAgregatPage() {
   const [subjects, setSubjects] = useState(initialSubjects);
@@ -233,9 +218,6 @@ export default function PengaturanAgregatPage() {
   const [saved, setSaved] =
     useState(false);
 
-  /* =========================================================
-     FILTER
-  ========================================================= */
 
   const filteredSubjects = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -258,9 +240,6 @@ export default function PengaturanAgregatPage() {
     });
   }, [subjects, search, kategori]);
 
-  /* =========================================================
-     STATISTICS
-  ========================================================= */
 
   const totalSubjects = subjects.length;
 
@@ -275,9 +254,6 @@ export default function PengaturanAgregatPage() {
   const invalidSubjects =
     totalSubjects - validSubjects;
 
-  /* =========================================================
-     UPDATE SUBJECT
-  ========================================================= */
 
   const updateSubject = (
     id,
@@ -298,9 +274,6 @@ export default function PengaturanAgregatPage() {
     setSaved(false);
   };
 
-  /* =========================================================
-     SAVE
-  ========================================================= */
 
   const handleSave = () => {
     setSaved(true);
@@ -310,9 +283,6 @@ export default function PengaturanAgregatPage() {
     }, 2500);
   };
 
-  /* =========================================================
-     RESET
-  ========================================================= */
 
   const resetFilter = () => {
     setSearch("");
@@ -321,9 +291,6 @@ export default function PengaturanAgregatPage() {
     setSemester("Ganjil");
   };
 
-  /* =========================================================
-     DELETE
-  ========================================================= */
 
   const deleteSubject = (id) => {
     setSubjects((current) =>
@@ -333,9 +300,6 @@ export default function PengaturanAgregatPage() {
     );
   };
 
-  /* =========================================================
-     RENDER
-  ========================================================= */
 
   return (
     <div className="theme-page flex min-h-screen w-full">
@@ -347,9 +311,6 @@ export default function PengaturanAgregatPage() {
         <main className="min-w-0 flex-1 px-4 py-5 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-[1280px]">
 
-            {/* =====================================================
-                DISCLOSURE: KONFIGURASI BELUM TERSIMPAN KE BACKEND
-            ====================================================== */}
 
             <div className="mb-5 rounded-xl border theme-border theme-card-soft px-4 py-3.5 text-xs leading-5 theme-text-secondary">
               <strong className="theme-text">
@@ -361,9 +322,6 @@ export default function PengaturanAgregatPage() {
               nilai per kelas-mapel pada menu Setup Bobot.
             </div>
 
-            {/* =====================================================
-                PAGE HEADER
-            ====================================================== */}
 
             <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex min-w-0 items-center gap-3">
@@ -409,9 +367,6 @@ export default function PengaturanAgregatPage() {
               </div>
             </div>
 
-            {/* =====================================================
-                SUCCESS
-            ====================================================== */}
 
             {saved && (
               <div className="theme-success mb-5 flex items-center gap-3 rounded-xl border px-4 py-3 text-sm">
@@ -429,9 +384,6 @@ export default function PengaturanAgregatPage() {
               </div>
             )}
 
-            {/* =====================================================
-                STAT CARDS
-            ====================================================== */}
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
               <StatCard
@@ -463,14 +415,10 @@ export default function PengaturanAgregatPage() {
               />
             </div>
 
-            {/* =====================================================
-                FILTER
-            ====================================================== */}
 
             <div className="theme-card theme-border mt-5 rounded-xl border p-4 shadow-sm sm:p-5">
               <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
 
-                {/* TAHUN AJARAN */}
 
                 <div>
                   <label className="theme-text-secondary mb-2 block text-xs font-semibold">
@@ -507,7 +455,6 @@ export default function PengaturanAgregatPage() {
                   </div>
                 </div>
 
-                {/* SEMESTER */}
 
                 <div>
                   <label className="theme-text-secondary mb-2 block text-xs font-semibold">
@@ -540,7 +487,6 @@ export default function PengaturanAgregatPage() {
                   </div>
                 </div>
 
-                {/* KATEGORI */}
 
                 <div>
                   <label className="theme-text-secondary mb-2 block text-xs font-semibold">
@@ -578,7 +524,6 @@ export default function PengaturanAgregatPage() {
                 </div>
               </div>
 
-              {/* SEARCH */}
 
               <div className="mt-4">
                 <div className="relative">
@@ -599,9 +544,6 @@ export default function PengaturanAgregatPage() {
               </div>
             </div>
 
-            {/* =====================================================
-                CONFIGURATION INFO
-            ====================================================== */}
 
             <div className="theme-info theme-border mt-5 rounded-xl border px-5 py-4">
               <div className="flex gap-3">
@@ -627,9 +569,6 @@ export default function PengaturanAgregatPage() {
               </div>
             </div>
 
-            {/* =====================================================
-                TABLE
-            ====================================================== */}
 
             <div className="theme-card theme-border mt-5 overflow-hidden rounded-xl border shadow-sm">
               <div className="overflow-x-auto">
@@ -844,7 +783,6 @@ export default function PengaturanAgregatPage() {
                 </table>
               </div>
 
-              {/* FOOTER */}
 
               <div className="theme-border-soft flex flex-col gap-2 border-t px-5 py-3 sm:flex-row sm:items-center sm:justify-between">
                 <p className="theme-text-muted text-xs">
@@ -865,9 +803,6 @@ export default function PengaturanAgregatPage() {
               </div>
             </div>
 
-            {/* =====================================================
-                DETAIL RULES
-            ====================================================== */}
 
             <div className="mt-5 grid grid-cols-1 gap-4 lg:grid-cols-2">
               <div className="theme-card theme-border rounded-xl border p-5">
@@ -940,9 +875,6 @@ export default function PengaturanAgregatPage() {
         </main>
       </div>
 
-      {/* =====================================================
-          EDIT MODAL
-      ====================================================== */}
 
       {editingSubject && (
         <div
@@ -954,7 +886,6 @@ export default function PengaturanAgregatPage() {
         >
           <div className="theme-card w-full max-w-lg overflow-hidden rounded-2xl shadow-2xl">
 
-            {/* HEADER */}
 
             <div className="theme-border flex items-center justify-between border-b px-5 py-4 sm:px-6">
               <div>
@@ -978,7 +909,6 @@ export default function PengaturanAgregatPage() {
               </button>
             </div>
 
-            {/* FORM */}
 
             <div className="p-5 sm:p-6">
               <div className="theme-card-soft rounded-xl p-4">
@@ -1041,7 +971,6 @@ export default function PengaturanAgregatPage() {
                 />
               </div>
 
-              {/* TOTAL */}
 
               <div className="theme-card theme-border mt-4 flex items-center justify-between rounded-lg border px-4 py-3">
                 <div>
@@ -1080,7 +1009,6 @@ export default function PengaturanAgregatPage() {
                 )}
               </div>
 
-              {/* KKM */}
 
               <div className="mt-4">
                 <label className="theme-text-secondary mb-2 block text-xs font-semibold">
@@ -1103,7 +1031,6 @@ export default function PengaturanAgregatPage() {
               </div>
             </div>
 
-            {/* FOOTER */}
 
             <div className="theme-border flex justify-end gap-2 border-t px-5 py-4 sm:px-6">
               <button

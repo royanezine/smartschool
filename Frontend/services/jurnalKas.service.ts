@@ -92,12 +92,10 @@ function buildQuery(params: JurnalKasParams = {}): string {
   return result ? `?${result}` : "";
 }
 
-// GET /api/keuangan/akun-kas
 export async function getAkunKas(): Promise<ApiResponse<AkunKas[]>> {
   return apiFetch("/api/keuangan/akun-kas");
 }
 
-// GET /api/keuangan/jurnal-kas
 export async function getJurnalKas(
   params: JurnalKasParams = {},
 ): Promise<ApiResponse<JurnalKas[]>> {
@@ -106,7 +104,6 @@ export async function getJurnalKas(
   );
 }
 
-// POST /api/keuangan/jurnal-kas
 export async function createJurnalKas(
   payload: CreateJurnalKasPayload,
 ): Promise<ApiResponse<JurnalKas>> {
@@ -116,7 +113,6 @@ export async function createJurnalKas(
   });
 }
 
-// POST /api/keuangan/jurnal-kas/:id/batal
 export async function batalkanJurnalKas(
   id: string,
   alasan: string,

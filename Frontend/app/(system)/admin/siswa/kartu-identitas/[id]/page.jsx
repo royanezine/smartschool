@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
   ArrowLeft,
@@ -21,11 +21,8 @@ import {
 
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
+import { getUserById } from "@/services/user.service";
 
-/* =========================================================
-   MOCK DATA
-   Nanti bisa diganti dengan hasil fetch API
-========================================================= */
 
 const MOCK_SISWA = [
   {
@@ -156,9 +153,6 @@ const MOCK_SISWA = [
   },
 ];
 
-/* =========================================================
-   THEME HELPERS
-========================================================= */
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -202,9 +196,6 @@ const themeDangerSurface =
 const themeDangerBorder =
   "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
 
-/* =========================================================
-   HELPERS
-========================================================= */
 
 function getInitials(nama) {
   return nama
@@ -216,9 +207,6 @@ function getInitials(nama) {
     .toUpperCase();
 }
 
-/* =========================================================
-   BADGES
-========================================================= */
 
 function StatusBadge({ status }) {
   const isActive = status === "aktif";
@@ -260,9 +248,6 @@ function JenisKelaminBadge({ jenisKelamin }) {
   );
 }
 
-/* =========================================================
-   INFO ITEM
-========================================================= */
 
 function InfoItem({ label, value, icon }) {
   return (
@@ -286,9 +271,6 @@ function InfoItem({ label, value, icon }) {
   );
 }
 
-/* =========================================================
-   SECTION HEADER
-========================================================= */
 
 function SectionHeader({ icon, title, subtitle }) {
   return (
@@ -316,29 +298,82 @@ function SectionHeader({ icon, title, subtitle }) {
   );
 }
 
-/* =========================================================
-   MAIN PAGE
-========================================================= */
 
 export default function DetailSiswaPage() {
   const router = useRouter();
   const params = useParams();
 
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [siswa, setSiswa] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const id = Number(params?.id);
-
-  const siswa = MOCK_SISWA.find(
-    (item) => item.id === id
-  );
+  const id = params?.id;
 
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
   };
 
-  /* =======================================================
-     DATA TIDAK DITEMUKAN
-  ======================================================= */
+  useEffect(() => {
+    let isMounted = true;
+
+    const timer = setTimeout(async () => {
+      if (!id) {
+        if (isMounted) setLoading(false);
+        return;
+      }
+
+      try {
+        if (isMounted) setLoading(true);
+        const res = await getUserById(id);
+        const data = res?.data ?? res;
+
+        if (data && isMounted) {
+          const kNama =
+            data.kelasSiswa?.[0]?.kelas?.nama ??
+            data.kelas?.nama ??
+            data.kelasNama ??
+            "-";
+
+          setSiswa({
+            id: data.id,
+            nama: data.namaLengkap || data.nama || "Tanpa Nama",
+            nisn: data.nisn || "-",
+            nik: data.nik || "-",
+            kelas: kNama,
+            jenjang: "Sekolah Menengah Kejuruan",
+            waliKelas: "-",
+            tahunMasuk: data.dibuatPada ? String(new Date(data.dibuatPada).getFullYear()) : "2025",
+            jenisKelamin: data.jenisKelamin === "L" || data.jenisKelamin === "Laki-laki" ? "L" : "P",
+            tempatLahir: data.tempatLahir || "-",
+            tanggalLahir: data.tanggalLahir
+              ? new Date(data.tanggalLahir).toLocaleDateString("id-ID")
+              : "-",
+            agama: data.agama || "-",
+            noTelepon: data.noTelepon || "-",
+            alamat: data.alamat || data.alamatDomisili || "-",
+            status: data.status || "aktif",
+            namaOrtu: data.namaAyah || data.namaIbu || data.namaWaliPesertaDidik || "-",
+            hubunganOrtu: data.namaAyah ? "Ayah Kandung" : data.namaIbu ? "Ibu Kandung" : "Wali",
+            teleponOrtu: data.noHpAyah || data.noHpIbu || "-",
+            alamatOrtu: data.alamat || "-",
+            avatar: data.avatar || null,
+            sekolahNama: data.sekolah?.nama || "SMARTSCHOOL",
+          });
+        }
+      } catch (err) {
+        console.error("Gagal mengambil data detail siswa dari API:", err);
+        if (isMounted) setSiswa(null);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    }, 0);
+
+    return () => {
+      isMounted = false;
+      clearTimeout(timer);
+    };
+  }, [id]);
+
 
   if (!siswa) {
     return (
@@ -396,13 +431,9 @@ export default function DetailSiswaPage() {
     );
   }
 
-  /* =======================================================
-     DETAIL
-  ======================================================= */
 
   return (
     <div className="flex h-screen w-full theme-page overflow-hidden">
-      {/* SIDEBAR */}
       <Sidebar
         active="siswaKartuIdentitas"
         setActive={() => {}}
@@ -411,9 +442,7 @@ export default function DetailSiswaPage() {
         role="admin"
       />
 
-      {/* CONTENT */}
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
-        {/* HEADER */}
         <Header
           toggleSidebar={toggleSidebar}
           notifications={[]}
@@ -424,13 +453,9 @@ export default function DetailSiswaPage() {
           }}
         />
 
-        {/* MAIN */}
         <main className="flex-1 overflow-y-auto">
           <div className="p-4 sm:p-6 lg:p-8 space-y-6">
 
-            {/* =================================================
-                PAGE HEADER
-            ================================================= */}
 
             <div className="flex items-center justify-between gap-4 flex-wrap">
               <div className="flex items-center gap-3">
@@ -458,7 +483,6 @@ export default function DetailSiswaPage() {
                 </div>
               </div>
 
-              {/* ACTION */}
               <div className="flex items-center gap-2">
                 <button
                   type="button"
@@ -477,7 +501,7 @@ export default function DetailSiswaPage() {
                   type="button"
                   onClick={() =>
                     router.push(
-                      `/admin/siswa/kartu-identitas/edit?id=${siswa.id}`
+                      `/admin/siswa/edit/${siswa.id}`
                     )
                   }
                   className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg ${themePrimaryGradient} text-[var(--color-card)] text-sm font-semibold ${themePrimaryShadow} hover:brightness-105 transition`}
@@ -488,9 +512,6 @@ export default function DetailSiswaPage() {
               </div>
             </div>
 
-            {/* =================================================
-                PROFILE SUMMARY
-            ================================================= */}
 
             <div
               className={`theme-card rounded-xl border ${themeNeutralBorder} ${themeCardShadow} overflow-hidden`}
@@ -498,14 +519,12 @@ export default function DetailSiswaPage() {
               <div className="p-5 sm:p-6">
                 <div className="flex flex-col sm:flex-row sm:items-center gap-5">
 
-                  {/* AVATAR */}
                   <div
                     className={`w-24 h-24 rounded-2xl ${themePrimaryGradient} text-[var(--color-card)] flex items-center justify-center text-3xl font-bold ${themePrimaryShadow} flex-shrink-0`}
                   >
                     {getInitials(siswa.nama)}
                   </div>
 
-                  {/* NAME */}
                   <div className="flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
                       <h2 className="text-xl sm:text-2xl font-bold theme-text">
@@ -543,9 +562,6 @@ export default function DetailSiswaPage() {
               </div>
             </div>
 
-            {/* =================================================
-                IDENTITAS
-            ================================================= */}
 
             <section
               className={`theme-card rounded-xl border ${themeNeutralBorder} ${themeCardShadow} overflow-hidden`}
@@ -619,7 +635,6 @@ export default function DetailSiswaPage() {
                   icon={<CheckCircle2 size={16} />}
                 />
 
-                {/* ALAMAT */}
                 <div className="sm:col-span-2 lg:col-span-3">
                   <div className="flex gap-3">
                     <div
@@ -642,9 +657,6 @@ export default function DetailSiswaPage() {
               </div>
             </section>
 
-            {/* =================================================
-                DATA AKADEMIK
-            ================================================= */}
 
             <section
               className={`theme-card rounded-xl border ${themeNeutralBorder} ${themeCardShadow} overflow-hidden`}
@@ -692,9 +704,6 @@ export default function DetailSiswaPage() {
               </div>
             </section>
 
-            {/* =================================================
-                ORANG TUA / WALI
-            ================================================= */}
 
             <section
               className={`theme-card rounded-xl border ${themeNeutralBorder} ${themeCardShadow} overflow-hidden`}
@@ -732,9 +741,6 @@ export default function DetailSiswaPage() {
               </div>
             </section>
 
-            {/* =================================================
-                FOOTER ACTION
-            ================================================= */}
 
             <div className="flex items-center justify-between gap-3 pb-4">
               <button
@@ -768,7 +774,7 @@ export default function DetailSiswaPage() {
                   type="button"
                   onClick={() =>
                     router.push(
-                      `/admin/siswa/kartu-identitas/edit?id=${siswa.id}`
+                      `/admin/siswa/edit/${siswa.id}`
                     )
                   }
                   className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-lg ${themePrimaryGradient} text-[var(--color-card)] text-sm font-semibold ${themePrimaryShadow} hover:brightness-105 transition`}

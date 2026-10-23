@@ -73,7 +73,6 @@ export default function TambahLanggananPage() {
     <div className="theme-page theme-text min-h-full">
       <div className="w-full px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
         <div className="mx-auto w-full max-w-5xl">
-          {/* BACK */}
           <button
             type="button"
             onClick={() => router.back()}
@@ -83,7 +82,6 @@ export default function TambahLanggananPage() {
             Kembali
           </button>
 
-          {/* TITLE */}
           <div className="mb-6">
             <h1 className="text-2xl font-bold theme-text">
               Tambah Langganan
@@ -94,11 +92,9 @@ export default function TambahLanggananPage() {
             </p>
           </div>
 
-          {/* CARD */}
           <div
             className={`w-full overflow-hidden rounded-xl border theme-border theme-card ${themeCardShadow}`}
           >
-            {/* CARD HEADER */}
             <div className={`border-b ${themeDivider} px-5 py-5 sm:px-7`}>
               <div className="flex items-center gap-3">
                 <div
@@ -119,10 +115,8 @@ export default function TambahLanggananPage() {
               </div>
             </div>
 
-            {/* FORM */}
             <form onSubmit={handleSubmit}>
               <div className="grid grid-cols-1 gap-5 p-5 sm:p-7 lg:grid-cols-2">
-                {/* SEKOLAH */}
                 <div className="min-w-0">
                   <label className="mb-2 block text-sm font-medium theme-text-secondary">
                     Sekolah
@@ -155,7 +149,6 @@ export default function TambahLanggananPage() {
                   </div>
                 </div>
 
-                {/* PAKET */}
                 <div className="min-w-0">
                   <label className="mb-2 block text-sm font-medium theme-text-secondary">
                     Paket Langganan
@@ -184,7 +177,6 @@ export default function TambahLanggananPage() {
                   </div>
                 </div>
 
-                {/* TANGGAL MULAI */}
                 <div className="min-w-0">
                   <label className="mb-2 block text-sm font-medium theme-text-secondary">
                     Tanggal Mulai
@@ -207,7 +199,6 @@ export default function TambahLanggananPage() {
                   </div>
                 </div>
 
-                {/* TANGGAL BERAKHIR */}
                 <div className="min-w-0">
                   <label className="mb-2 block text-sm font-medium theme-text-secondary">
                     Tanggal Berakhir
@@ -230,7 +221,6 @@ export default function TambahLanggananPage() {
                   </div>
                 </div>
 
-                {/* METODE PEMBAYARAN */}
                 <div className="min-w-0 lg:col-span-2">
                   <label className="mb-2 block text-sm font-medium theme-text-secondary">
                     Metode Pembayaran
@@ -266,7 +256,6 @@ export default function TambahLanggananPage() {
                   </div>
                 </div>
 
-                {/* CATATAN */}
                 <div className="min-w-0 lg:col-span-2">
                   <label className="mb-2 block text-sm font-medium theme-text-secondary">
                     Catatan{" "}
@@ -293,7 +282,6 @@ export default function TambahLanggananPage() {
                 </div>
               </div>
 
-              {/* FOOTER */}
               <div
                 className={`flex flex-col gap-3 border-t ${themeDivider} px-5 py-5 sm:flex-row sm:justify-end sm:px-7`}
               >

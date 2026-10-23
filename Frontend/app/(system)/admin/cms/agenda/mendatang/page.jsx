@@ -1,4 +1,3 @@
-// app/cmsAdmin/agenda/mendatang/page.jsx
 "use client";
 
 import { useState } from "react";
@@ -133,7 +132,6 @@ export default function AgendaMendatangPage() {
 
   return (
     <div className="theme-page flex min-h-screen w-full">
-      {/* SIDEBAR */}
       <Sidebar
         active={active}
         setActive={setActive}
@@ -141,7 +139,6 @@ export default function AgendaMendatangPage() {
         setCollapsed={setCollapsed}
       />
 
-      {/* MAIN CONTENT */}
       <div className="flex min-w-0 flex-1 flex-col">
         <Header
           title="Agenda Mendatang"
@@ -152,7 +149,6 @@ export default function AgendaMendatangPage() {
         <main className="theme-page min-w-0 flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
           <div className="mx-auto w-full min-w-0 max-w-7xl space-y-6">
 
-            {/* BREADCRUMB */}
             <nav className="theme-text-muted flex items-center gap-2 text-xs sm:text-sm">
               <a
                 href="/cmsAdmin"
@@ -177,7 +173,6 @@ export default function AgendaMendatangPage() {
               </span>
             </nav>
 
-            {/* BACK BUTTON */}
             <button
               type="button"
               onClick={() => router.back()}
@@ -187,7 +182,6 @@ export default function AgendaMendatangPage() {
               Kembali
             </button>
 
-            {/* HEADER CARD */}
             <div className="theme-card theme-border rounded-2xl border p-6 shadow-sm lg:p-8">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                 <div className="flex min-w-0 items-start gap-4">
@@ -225,10 +219,8 @@ export default function AgendaMendatangPage() {
               </div>
             </div>
 
-            {/* STATISTICS */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
 
-              {/* TOTAL */}
               <div className="theme-card theme-border flex items-center gap-4 rounded-xl border p-4 shadow-sm">
                 <div className="theme-info rounded-xl p-2.5">
                   <Calendar className="h-5 w-5" />
@@ -245,7 +237,6 @@ export default function AgendaMendatangPage() {
                 </div>
               </div>
 
-              {/* TERJADWAL */}
               <div className="theme-card theme-border flex items-center gap-4 rounded-xl border p-4 shadow-sm">
                 <div className="theme-success rounded-xl p-2.5">
                   <Timer className="h-5 w-5" />
@@ -266,7 +257,6 @@ export default function AgendaMendatangPage() {
                 </div>
               </div>
 
-              {/* DRAFT */}
               <div className="theme-card theme-border flex items-center gap-4 rounded-xl border p-4 shadow-sm">
                 <div className="theme-warning rounded-xl p-2.5">
                   <Clock className="h-5 w-5" />
@@ -288,7 +278,6 @@ export default function AgendaMendatangPage() {
               </div>
             </div>
 
-            {/* LIST HEADER */}
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h2 className="theme-text text-lg font-bold">
@@ -312,7 +301,6 @@ export default function AgendaMendatangPage() {
               </span>
             </div>
 
-            {/* LIST */}
             <div className="space-y-3">
               {upcoming.length > 0 ? (
                 upcoming.map((item) => {
@@ -332,7 +320,6 @@ export default function AgendaMendatangPage() {
                         hover:shadow-lg
                       "
                     >
-                      {/* ACCENT */}
                       <div
                         className="absolute bottom-0 left-0 top-0 w-1"
                         style={{
@@ -343,7 +330,6 @@ export default function AgendaMendatangPage() {
 
                       <div className="flex flex-col gap-4 p-4 sm:p-5 lg:flex-row lg:items-center">
 
-                        {/* DATE */}
                         <div className="flex shrink-0 items-center gap-3 lg:block">
                           <div className="theme-info flex h-16 w-16 flex-col items-center justify-center rounded-xl border shadow-sm">
                             <span className="text-[10px] font-bold uppercase tracking-wider opacity-80">
@@ -356,7 +342,6 @@ export default function AgendaMendatangPage() {
                           </div>
                         </div>
 
-                        {/* CONTENT */}
                         <div className="min-w-0 flex-1">
                           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                             <h3
@@ -383,7 +368,6 @@ export default function AgendaMendatangPage() {
 
                           <div className="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-2">
 
-                            {/* DATE */}
                             <div className="theme-text-muted inline-flex items-center gap-1.5 text-xs">
                               <Calendar
                                 className="h-3.5 w-3.5"
@@ -398,7 +382,6 @@ export default function AgendaMendatangPage() {
                               </span>
                             </div>
 
-                            {/* TIME */}
                             <div className="theme-text-muted inline-flex items-center gap-1.5 text-xs">
                               <Clock
                                 className="h-3.5 w-3.5"
@@ -413,7 +396,6 @@ export default function AgendaMendatangPage() {
                               </span>
                             </div>
 
-                            {/* LOCATION */}
                             <div className="theme-text-muted inline-flex items-center gap-1.5 text-xs">
                               <MapPin
                                 className="h-3.5 w-3.5"
@@ -429,7 +411,6 @@ export default function AgendaMendatangPage() {
                             </div>
                           </div>
 
-                          {/* STATUS MOBILE */}
                           <div className="mt-3 lg:hidden">
                             <span
                               className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-semibold ${status.wrapper}`}
@@ -449,7 +430,6 @@ export default function AgendaMendatangPage() {
                           </div>
                         </div>
 
-                        {/* STATUS DESKTOP */}
                         <div className="hidden shrink-0 lg:block">
                           <span
                             className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold ${status.wrapper}`}
@@ -468,10 +448,8 @@ export default function AgendaMendatangPage() {
                           </span>
                         </div>
 
-                        {/* ACTIONS */}
                         <div className="theme-border-soft flex shrink-0 items-center justify-end gap-1.5 border-t pt-3 lg:border-t-0 lg:pt-0">
 
-                          {/* EDIT */}
                           <button
                             type="button"
                             className="
@@ -489,7 +467,6 @@ export default function AgendaMendatangPage() {
                             <Pencil className="h-4 w-4" />
                           </button>
 
-                          {/* DELETE */}
                           <button
                             type="button"
                             onClick={() =>
@@ -510,7 +487,6 @@ export default function AgendaMendatangPage() {
                             <Trash2 className="h-4 w-4" />
                           </button>
 
-                          {/* OPTIONS */}
                           <button
                             type="button"
                             className="
@@ -533,7 +509,6 @@ export default function AgendaMendatangPage() {
                   );
                 })
               ) : (
-                /* EMPTY STATE */
                 <div className="theme-card theme-border flex flex-col items-center justify-center rounded-2xl border px-5 py-14 text-center shadow-sm">
                   <div className="theme-card-soft theme-border flex h-16 w-16 items-center justify-center rounded-2xl border">
                     <CalendarDays className="theme-text-muted h-7 w-7" />
@@ -565,7 +540,6 @@ export default function AgendaMendatangPage() {
               )}
             </div>
 
-            {/* FOOTER INFO */}
             {upcoming.length > 0 && (
               <div className="theme-card theme-border flex flex-col gap-2 rounded-xl border px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
                 <span className="theme-text-muted flex items-center gap-2 text-xs">
@@ -579,7 +553,6 @@ export default function AgendaMendatangPage() {
               </div>
             )}
 
-            {/* FOOTER */}
             <footer className="theme-border-soft theme-text-muted border-t pt-4 text-center text-xs">
               © 2026 SmartSchool CMS • Agenda Mendatang
             </footer>

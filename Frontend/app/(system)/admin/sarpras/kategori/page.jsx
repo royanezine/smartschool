@@ -26,9 +26,6 @@ import {
   deleteKategoriAset,
 } from "@/services/sarpras.service";
 
-/* ============================================================
-   HELPERS
-============================================================ */
 
 function extractArray(response) {
   if (Array.isArray(response)) return response;
@@ -39,9 +36,6 @@ function extractArray(response) {
   return [];
 }
 
-/* ============================================================
-   THEME HELPERS
-============================================================ */
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -76,9 +70,6 @@ const themeNeutralBorder =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-4 focus:ring-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]";
 
-/* ============================================================
-   PAGE
-============================================================ */
 
 export default function KategoriPage() {
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -92,9 +83,6 @@ export default function KategoriPage() {
 
   const [error, setError] = useState("");
 
-  /* ==========================================================
-     LOAD DATA
-  ========================================================== */
 
   useEffect(() => {
     loadKategori();
@@ -119,9 +107,6 @@ export default function KategoriPage() {
     }
   }
 
-  /* ==========================================================
-     DELETE
-  ========================================================== */
 
   async function handleDelete(id, nama) {
     const confirmed = window.confirm(
@@ -145,9 +130,6 @@ export default function KategoriPage() {
     }
   }
 
-  /* ==========================================================
-     FILTER
-  ========================================================== */
 
   const filteredKategori = useMemo(() => {
     const keyword = search.toLowerCase().trim();
@@ -164,9 +146,6 @@ export default function KategoriPage() {
     });
   }, [kategoriList, search, filterStatus]);
 
-  /* ==========================================================
-     STATISTICS
-  ========================================================== */
 
   const totalKategori = kategoriList.length;
 
@@ -178,9 +157,6 @@ export default function KategoriPage() {
     (item) => String(item?.status || "").toLowerCase() === "nonaktif"
   ).length;
 
-  /* ==========================================================
-     RENDER
-  ========================================================== */
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
@@ -206,9 +182,6 @@ export default function KategoriPage() {
 
         <main className="min-w-0 flex-1 overflow-y-auto">
           <div className="w-full px-4 py-5 sm:px-6 lg:px-8">
-            {/* ==================================================
-                PAGE HEADER
-            ================================================== */}
 
             <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex min-w-0 items-start gap-4">
@@ -248,9 +221,6 @@ export default function KategoriPage() {
               </Link>
             </div>
 
-            {/* ==================================================
-                ERROR
-            ================================================== */}
 
             {error && (
               <div
@@ -281,9 +251,6 @@ export default function KategoriPage() {
               </div>
             )}
 
-            {/* ==================================================
-                STATISTICS
-            ================================================== */}
 
             <div className="mb-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
               <StatCard
@@ -309,14 +276,10 @@ export default function KategoriPage() {
               />
             </div>
 
-            {/* ==================================================
-                MAIN CARD
-            ================================================== */}
 
             <div
               className={`theme-card overflow-hidden rounded-2xl border theme-border ${themeCardShadow}`}
             >
-              {/* CARD HEADER */}
               <div className="border-b theme-border px-5 py-4 sm:px-6 sm:py-5">
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                   <div className="flex items-center gap-3">
@@ -377,9 +340,6 @@ export default function KategoriPage() {
                 </div>
               </div>
 
-              {/* =================================================
-                  LOADING
-              ================================================= */}
 
               {loading ? (
                 <div className="flex min-h-[320px] items-center justify-center">
@@ -398,9 +358,6 @@ export default function KategoriPage() {
                   </div>
                 </div>
               ) : filteredKategori.length === 0 ? (
-                /* =================================================
-                   EMPTY
-                ================================================= */
 
                 <div className="flex min-h-[320px] flex-col items-center justify-center px-6 text-center">
                   <div
@@ -433,9 +390,6 @@ export default function KategoriPage() {
                 </div>
               ) : (
                 <>
-                  {/* =================================================
-                      DESKTOP TABLE
-                  ================================================= */}
 
                   <div className="hidden overflow-x-auto md:block">
                     <table className="w-full min-w-[720px] table-fixed">
@@ -474,14 +428,12 @@ export default function KategoriPage() {
                               key={item.id}
                               className="group transition theme-table-hover"
                             >
-                              {/* NO */}
                               <td className="px-6 py-4">
                                 <span className="theme-text-muted text-xs font-semibold">
                                   {String(index + 1).padStart(2, "0")}
                                 </span>
                               </td>
 
-                              {/* NAMA */}
                               <td className="px-6 py-4">
                                 <div className="flex min-w-0 items-center gap-3">
                                   <div
@@ -500,7 +452,6 @@ export default function KategoriPage() {
                                 </div>
                               </td>
 
-                              {/* STATUS */}
                               <td className="px-6 py-4">
                                 {aktif ? (
                                   <span className="theme-success inline-flex items-center gap-2 rounded-full border theme-border px-3 py-1.5 text-xs font-semibold">
@@ -515,7 +466,6 @@ export default function KategoriPage() {
                                 )}
                               </td>
 
-                              {/* AKSI */}
                               <td className="px-6 py-4">
                                 <div className="flex justify-end gap-1.5">
                                   <Link
@@ -553,9 +503,6 @@ export default function KategoriPage() {
                     </table>
                   </div>
 
-                  {/* =================================================
-                      MOBILE LIST
-                  ================================================= */}
 
                   <div className="divide-y divide-[var(--color-border)] md:hidden">
                     {filteredKategori.map((item, index) => {
@@ -633,9 +580,6 @@ export default function KategoriPage() {
                 </>
               )}
 
-              {/* =================================================
-                  FOOTER
-              ================================================= */}
 
               {!loading && filteredKategori.length > 0 && (
                 <div className="flex flex-col gap-2 border-t theme-border theme-card-soft px-5 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
@@ -658,9 +602,6 @@ export default function KategoriPage() {
               )}
             </div>
 
-            {/* ==================================================
-                BOTTOM INFO
-            ================================================== */}
 
             <div className="mt-6 flex items-center justify-center gap-2 text-center">
               <div className="h-1 w-1 rounded-full bg-[var(--color-text-placeholder)]" />
@@ -676,9 +617,6 @@ export default function KategoriPage() {
   );
 }
 
-/* ============================================================
-   STAT CARD
-============================================================ */
 
 function StatCard({ icon: Icon, label, value, description, tone = "primary" }) {
   const toneMap = {

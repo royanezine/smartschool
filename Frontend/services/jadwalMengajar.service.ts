@@ -5,9 +5,6 @@ const API_URL =
 const BASE_ENDPOINT =
   "/api/jadwal-mengajar";
 
-/* =========================================================
-   INTERFACE
-========================================================= */
 
 export interface JadwalMengajar {
   id: string;
@@ -55,9 +52,6 @@ export interface JadwalMengajar {
   };
 }
 
-/* =========================================================
-   RESPONSE
-========================================================= */
 
 export interface JadwalMengajarResponse {
   success: boolean;
@@ -71,9 +65,6 @@ export interface JadwalMengajarDetailResponse {
   data?: JadwalMengajar;
 }
 
-/* =========================================================
-   PAYLOAD
-========================================================= */
 
 export interface CreateJadwalMengajarPayload {
   kelasMapelId: string;
@@ -91,9 +82,6 @@ export interface UpdateJadwalMengajarPayload {
   ruangan?: string | null;
 }
 
-/* =========================================================
-   GET TOKEN
-========================================================= */
 
 function getToken(): string | null {
   if (typeof window === "undefined") {
@@ -121,9 +109,6 @@ function getToken(): string | null {
   return null;
 }
 
-/* =========================================================
-   REQUEST
-========================================================= */
 
 async function request<T>(
   endpoint: string,
@@ -250,9 +235,6 @@ async function request<T>(
     }
   }
 
-  /* =======================================================
-     ERROR HANDLING
-  ======================================================= */
 
   if (response.status === 401) {
     throw new Error(
@@ -299,9 +281,6 @@ async function request<T>(
   return result as T;
 }
 
-/* =========================================================
-   GET SEMUA JADWAL
-========================================================= */
 
 export async function getJadwalMengajar(): Promise<JadwalMengajarResponse> {
   return request<JadwalMengajarResponse>(
@@ -312,9 +291,6 @@ export async function getJadwalMengajar(): Promise<JadwalMengajarResponse> {
   );
 }
 
-/* =========================================================
-   GET JADWAL BY ID
-========================================================= */
 
 export async function getJadwalMengajarById(
   id: string
@@ -333,9 +309,6 @@ export async function getJadwalMengajarById(
   );
 }
 
-/* =========================================================
-   CREATE
-========================================================= */
 
 export async function createJadwalMengajar(
   payload: CreateJadwalMengajarPayload
@@ -393,9 +366,6 @@ export async function createJadwalMengajar(
   );
 }
 
-/* =========================================================
-   UPDATE
-========================================================= */
 
 export async function updateJadwalMengajar(
   id: string,
@@ -460,9 +430,6 @@ export async function updateJadwalMengajar(
   );
 }
 
-/* =========================================================
-   DELETE
-========================================================= */
 
 export async function deleteJadwalMengajar(
   id: string

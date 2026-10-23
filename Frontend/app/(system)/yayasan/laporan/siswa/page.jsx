@@ -16,10 +16,6 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-// ============================================================
-// DUMMY DATA
-// Catatan: ganti dengan data asli dari API/DB begitu tersedia.
-// ============================================================
 
 const JENJANG_OPTIONS = ["Semua Jenjang", "SD", "SMP", "SMA"];
 
@@ -98,9 +94,6 @@ const dataSekolah = [
   },
 ];
 
-// ============================================================
-// HELPERS
-// ============================================================
 
 const totalSekolah = (s) =>
   s.tingkat.reduce((acc, t) => acc + t.laki + t.perempuan, 0);
@@ -111,9 +104,6 @@ const totalLaki = (s) =>
 const totalPerempuan = (s) =>
   s.tingkat.reduce((acc, t) => acc + t.perempuan, 0);
 
-// ============================================================
-// THEME HELPERS
-// ============================================================
 
 const themeCardShadow =
   "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
@@ -145,9 +135,6 @@ const themeDivider =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-// ============================================================
-// MAIN COMPONENT
-// ============================================================
 
 export default function DataSiswaPage() {
   const router = useRouter();
@@ -156,9 +143,6 @@ export default function DataSiswaPage() {
   const [search, setSearch] = useState("");
   const [expandedId, setExpandedId] = useState(null);
 
-  // ============================================================
-  // FILTER
-  // ============================================================
 
   const filteredSekolah = useMemo(() => {
     const keyword = search.trim().toLowerCase();
@@ -174,9 +158,6 @@ export default function DataSiswaPage() {
     });
   }, [jenjang, search]);
 
-  // ============================================================
-  // SUMMARY
-  // ============================================================
 
   const summary = useMemo(() => {
     const totalSiswa = filteredSekolah.reduce(
@@ -204,26 +185,17 @@ export default function DataSiswaPage() {
     };
   }, [filteredSekolah]);
 
-  // ============================================================
-  // ACCORDION
-  // ============================================================
 
   const toggleExpand = (id) => {
     setExpandedId((prev) => (prev === id ? null : id));
   };
 
-  // ============================================================
-  // RENDER
-  // ============================================================
 
   return (
     <div className="theme-page theme-text min-h-full">
       <div className="w-full max-w-[1800px] mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
         <div className="space-y-6">
 
-          {/* ==================================================
-              PAGE HEADER
-          ================================================== */}
 
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="min-w-0">
@@ -294,9 +266,6 @@ export default function DataSiswaPage() {
             </button>
           </div>
 
-          {/* ==================================================
-              FILTER BAR
-          ================================================== */}
 
           <div
             className={`
@@ -309,7 +278,6 @@ export default function DataSiswaPage() {
           >
             <div className="flex flex-col sm:flex-row flex-wrap gap-3">
 
-              {/* SEARCH */}
 
               <div className="relative flex-1 min-w-[200px]">
                 <Search
@@ -339,7 +307,6 @@ export default function DataSiswaPage() {
                 />
               </div>
 
-              {/* JENJANG */}
 
               <div className="relative flex-1 min-w-[160px]">
                 <select
@@ -377,13 +344,9 @@ export default function DataSiswaPage() {
             </div>
           </div>
 
-          {/* ==================================================
-              SUMMARY CARDS
-          ================================================== */}
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
 
-            {/* TOTAL SISWA */}
 
             <div
               className={`
@@ -419,7 +382,6 @@ export default function DataSiswaPage() {
               </div>
             </div>
 
-            {/* UNIT SEKOLAH */}
 
             <div
               className={`
@@ -455,7 +417,6 @@ export default function DataSiswaPage() {
               </div>
             </div>
 
-            {/* LAKI-LAKI */}
 
             <div
               className={`
@@ -491,7 +452,6 @@ export default function DataSiswaPage() {
               </div>
             </div>
 
-            {/* PEREMPUAN */}
 
             <div
               className={`
@@ -528,9 +488,6 @@ export default function DataSiswaPage() {
             </div>
           </div>
 
-          {/* ==================================================
-              DAFTAR SEKOLAH
-          ================================================== */}
 
           <div className="space-y-3">
 
@@ -544,7 +501,6 @@ export default function DataSiswaPage() {
               </span>
             </div>
 
-            {/* EMPTY STATE */}
 
             {filteredSekolah.length === 0 ? (
               <div
@@ -586,9 +542,6 @@ export default function DataSiswaPage() {
                       overflow-hidden
                     `}
                   >
-                    {/* ==================================================
-                        HEADER SEKOLAH
-                    ================================================== */}
 
                     <button
                       type="button"
@@ -605,7 +558,6 @@ export default function DataSiswaPage() {
                     >
                       <div className="flex items-center gap-3 min-w-0">
 
-                        {/* SCHOOL ICON */}
 
                         <div
                           className={`
@@ -652,7 +604,6 @@ export default function DataSiswaPage() {
 
                       <div className="flex items-center gap-4 flex-shrink-0">
 
-                        {/* GENDER SUMMARY */}
 
                         <div className="hidden sm:flex items-center gap-3 text-xs theme-text-secondary">
                           <span className="flex items-center gap-1">
@@ -672,7 +623,6 @@ export default function DataSiswaPage() {
                           </span>
                         </div>
 
-                        {/* TOTAL */}
 
                         <div className="text-right">
                           <span className="text-base font-bold theme-text">
@@ -696,9 +646,6 @@ export default function DataSiswaPage() {
                       </div>
                     </button>
 
-                    {/* ==================================================
-                        DETAIL PER TINGKAT
-                    ================================================== */}
 
                     {isOpen && (
                       <div
@@ -866,7 +813,6 @@ export default function DataSiswaPage() {
                               ))}
                             </tbody>
 
-                            {/* TOTAL */}
 
                             <tfoot>
                               <tr

@@ -21,9 +21,6 @@ import {
   pinjamBuku,
 } from "@/services/perpustakaan.service";
 
-/* =========================================================
-   HELPERS
-========================================================= */
 
 function unwrapValue(response) {
   if (response?.data !== undefined) return response.data;
@@ -69,9 +66,6 @@ function getErrorMessage(error, fallback) {
   return error?.message || error?.error || fallback;
 }
 
-/* =========================================================
-   PAGE
-========================================================= */
 
 export default function PinjamBukuPage() {
   const router = useRouter();
@@ -86,9 +80,6 @@ export default function PinjamBukuPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
-  /* =========================================================
-     LOAD BUKU
-  ========================================================= */
 
   const loadBooks = async () => {
     try {
@@ -114,9 +105,6 @@ export default function PinjamBukuPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  /* =========================================================
-     BUKU TERSEDIA
-  ========================================================= */
 
   const availableBooks = useMemo(
     () =>
@@ -135,9 +123,6 @@ export default function PinjamBukuPage() {
     [availableBooks, bukuId]
   );
 
-  /* =========================================================
-     SUBMIT PEMINJAMAN
-  ========================================================= */
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -158,7 +143,6 @@ export default function PinjamBukuPage() {
       return;
     }
 
-    // Format input date adalah YYYY-MM-DD.
     if (!/^\d{4}-\d{2}-\d{2}$/.test(tanggalJatuhTempo)) {
       setError("Format tanggal jatuh tempo tidak valid.");
       return;
@@ -188,9 +172,6 @@ export default function PinjamBukuPage() {
     }
   };
 
-  /* =========================================================
-     STYLING
-  ========================================================= */
 
   const inputClass =
     "theme-input theme-border theme-text h-11 w-full rounded-lg border px-3.5 text-sm outline-none transition placeholder:text-[var(--color-text-placeholder)] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]";
@@ -201,9 +182,6 @@ export default function PinjamBukuPage() {
   const labelClass =
     "theme-text-secondary mb-2 block text-xs font-semibold";
 
-  /* =========================================================
-     RENDER
-  ========================================================= */
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
@@ -216,7 +194,6 @@ export default function PinjamBukuPage() {
 
         <main className="min-w-0 flex-1 overflow-y-auto">
           <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
-            {/* Tombol kembali */}
             <button
               type="button"
               onClick={() =>
@@ -228,7 +205,6 @@ export default function PinjamBukuPage() {
               Kembali ke Peminjaman
             </button>
 
-            {/* Header halaman */}
             <div className="mb-6 flex items-center gap-3">
               <div className="theme-primary-soft flex h-12 w-12 items-center justify-center rounded-xl">
                 <BookOpen size={23} />
@@ -245,7 +221,6 @@ export default function PinjamBukuPage() {
               </div>
             </div>
 
-            {/* Pesan error */}
             {error && (
               <div
                 role="alert"
@@ -260,7 +235,6 @@ export default function PinjamBukuPage() {
               </div>
             )}
 
-            {/* Form */}
             <form
               onSubmit={handleSubmit}
               className="space-y-5"
@@ -278,7 +252,6 @@ export default function PinjamBukuPage() {
                 </div>
 
                 <div className="grid grid-cols-1 gap-5 p-5 sm:p-6">
-                  {/* ID Pengguna */}
                   <div>
                     <label
                       htmlFor="penggunaId"
@@ -312,7 +285,6 @@ export default function PinjamBukuPage() {
                     </p>
                   </div>
 
-                  {/* Pilih buku */}
                   <div>
                     <label
                       htmlFor="bukuId"
@@ -365,7 +337,6 @@ export default function PinjamBukuPage() {
                       )}
                   </div>
 
-                  {/* Detail buku terpilih */}
                   {selectedBook && (
                     <div className="theme-card-soft rounded-xl border theme-border p-4">
                       <div className="flex items-start gap-3">
@@ -387,7 +358,6 @@ export default function PinjamBukuPage() {
                     </div>
                   )}
 
-                  {/* Tanggal jatuh tempo */}
                   <div>
                     <label
                       htmlFor="tanggalJatuhTempo"
@@ -420,7 +390,6 @@ export default function PinjamBukuPage() {
                     </p>
                   </div>
 
-                  {/* Catatan */}
                   <div>
                     <label
                       htmlFor="catatan"
@@ -453,7 +422,6 @@ export default function PinjamBukuPage() {
                 </div>
               </section>
 
-              {/* Tombol aksi */}
               <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
                 <button
                   type="button"

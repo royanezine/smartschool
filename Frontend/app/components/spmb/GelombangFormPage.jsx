@@ -19,10 +19,13 @@ import {
 
 import {
   createGelombangPpdb,
+  getGelombangPpdb,
   getGelombangPpdbById,
+  isGelombangEndpointMissing,
   updateGelombangPpdb,
 } from "@/services/gelombangPpdb.service";
 import { getJalurPpdb } from "@/services/jalurPpdb.service";
+import SpmbBackendBlocker from "./SpmbBackendBlocker";
 
 const themePrimaryText = "text-[var(--color-primary)]";
 const themePrimarySoft =
@@ -75,9 +78,12 @@ export default function GelombangFormPage({
   const [collapsed, setCollapsed] = useState(false);
   const [form, setForm] = useState(FORM_KOSONG);
   const [jalurList, setJalurList] = useState([]);
-  const [loading, setLoading] = useState(modeEdit);
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [endpointUnavailable, setEndpointUnavailable] =
+    useState(false);
+  const [detailLoaded, setDetailLoaded] = useState(!modeEdit);
 
   const loadJalur = useCallback(async () => {
     try {
@@ -93,13 +99,26 @@ export default function GelombangFormPage({
   }, []);
 
   const loadDetail = useCallback(async () => {
-    if (!modeEdit) {
-      return;
-    }
-
     try {
       setLoading(true);
       setError("");
+      setEndpointUnavailable(false);
+      setDetailLoaded(false);
+
+      if (!modeEdit) {
+        const cekEndpoint = await getGelombangPpdb();
+
+        if (!cekEndpoint?.success) {
+          throw new Error(
+            cekEndpoint?.message ||
+              "Endpoint gelombang PPDB tidak merespons dengan benar."
+          );
+        }
+
+        setForm(FORM_KOSONG);
+        setDetailLoaded(true);
+        return;
+      }
 
       const response =
         await getGelombangPpdbById(gelombangId);
@@ -122,12 +141,18 @@ export default function GelombangFormPage({
             : String(data.kuota),
         status: data?.status || "aktif",
       });
+
+      setDetailLoaded(true);
     } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Gagal memuat gelombang."
-      );
+      if (isGelombangEndpointMissing(err)) {
+        setEndpointUnavailable(true);
+      } else {
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Gagal memuat gelombang."
+        );
+      }
     } finally {
       setLoading(false);
     }
@@ -149,6 +174,10 @@ export default function GelombangFormPage({
 
   async function simpan(event) {
     event.preventDefault();
+
+    if (!detailLoaded) {
+      return;
+    }
 
     try {
       setSaving(true);
@@ -185,6 +214,30 @@ export default function GelombangFormPage({
     } finally {
       setSaving(false);
     }
+  }
+
+  if (endpointUnavailable) {
+    return (
+      <SpmbBackendBlocker
+        title={modeEdit ? "Edit Gelombang" : "Tambah Gelombang"}
+        description="Route gelombang PPDB belum dimount di Backend yang sedang berjalan, sehingga form tidak dapat digunakan."
+        backHref="/admin/spmb/gelombang"
+        backLabel="Kembali ke Gelombang"
+        blockers={[
+          {
+            label: modeEdit
+              ? "GET/PUT/DELETE /api/gelombang-ppdb/:id"
+              : "GET/POST /api/gelombang-ppdb",
+            detail:
+              "Model GelombangPpdb dan migration sudah ada, tetapi route/controller belum tersedia di Backend/src dan permintaan ke endpoint ini menghasilkan 404.",
+          },
+        ]}
+        notes={[
+          "Form hanya ditampilkan setelah GET endpoint gelombang berhasil, agar tidak ada aksi simpan yang mengarah ke API yang belum tersedia.",
+          "Halaman daftar gelombang tetap dapat dipakai untuk memantau status endpoint.",
+        ]}
+      />
+    );
   }
 
   return (
@@ -424,7 +477,7 @@ export default function GelombangFormPage({
 
                     <button
                       type="submit"
-                      disabled={saving}
+                      disabled={saving || !detailLoaded}
                       className={`${themePrimaryGradient} inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-xs font-semibold text-[var(--color-card)] transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50`}
                     >
                       {saving ? (

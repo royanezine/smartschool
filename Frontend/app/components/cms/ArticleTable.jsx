@@ -1,4 +1,3 @@
-// app/components/cms/ArticleTable.jsx
 
 "use client";
 
@@ -14,7 +13,6 @@ const ArticleTable = ({ articles: initialArticles }) => {
     setArticles(articles.filter((article) => article.id !== id));
   };
 
-  // EMPTY STATE
   if (articles.length === 0) {
     return (
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-12 text-center">
@@ -32,7 +30,6 @@ const ArticleTable = ({ articles: initialArticles }) => {
   return (
     <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden w-full">
       
-      {/* DESKTOP & TABLET TABLE VIEW */}
       <div className="hidden sm:block overflow-x-auto">
         <table className="w-full min-w-[640px] text-left">
           <thead>
@@ -60,10 +57,8 @@ const ArticleTable = ({ articles: initialArticles }) => {
                 key={article.id} 
                 className="group transition-colors hover:bg-slate-50/80"
               >
-                {/* Judul */}
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-3">
-                    {/* Avatar Inisial Premium */}
                     <div className="flex-shrink-0 h-9 w-9 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs font-semibold shadow-sm ring-1 ring-indigo-100">
                       {article.title.charAt(0).toUpperCase()}
                     </div>
@@ -71,7 +66,6 @@ const ArticleTable = ({ articles: initialArticles }) => {
                       <p className="text-sm font-medium text-slate-900 group-hover:text-indigo-600 transition-colors truncate">
                         {article.title}
                       </p>
-                      {/* Info singkat untuk tampilan tablet/small */}
                       <div className="flex items-center gap-2 mt-1 md:hidden flex-wrap">
                         <span className={`inline-flex items-center gap-1.5 text-[10px] font-medium px-2 py-0.5 rounded-full ${
                           article.status === "published"
@@ -93,7 +87,6 @@ const ArticleTable = ({ articles: initialArticles }) => {
                   </div>
                 </td>
 
-                {/* Status - Desktop */}
                 <td className="px-6 py-4 hidden md:table-cell">
                   <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
                     article.status === "published"
@@ -107,7 +100,6 @@ const ArticleTable = ({ articles: initialArticles }) => {
                   </span>
                 </td>
 
-                {/* Kategori - Desktop */}
                 <td className="px-6 py-4 hidden lg:table-cell">
                   {article.category ? (
                     <span className="inline-flex items-center gap-1.5 text-xs text-slate-600 bg-slate-100/70 px-2.5 py-1 rounded-full truncate max-w-[150px]">
@@ -119,7 +111,6 @@ const ArticleTable = ({ articles: initialArticles }) => {
                   )}
                 </td>
 
-                {/* Tanggal - Desktop */}
                 <td className="px-6 py-4 hidden xl:table-cell">
                   <div className="flex items-center gap-1.5 text-xs text-slate-500 whitespace-nowrap">
                     <Calendar className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
@@ -131,7 +122,6 @@ const ArticleTable = ({ articles: initialArticles }) => {
                   </div>
                 </td>
 
-                {/* Action Buttons */}
                 <td className="px-6 py-4 text-right">
                   <div className="flex items-center justify-end gap-1">
                     {article.status === "published" && (
@@ -166,13 +156,11 @@ const ArticleTable = ({ articles: initialArticles }) => {
         </table>
       </div>
 
-      {/* MOBILE - CARD LIST VIEW */}
       <div className="sm:hidden divide-y divide-slate-100">
         {articles.map((article) => (
           <div key={article.id} className="p-4 hover:bg-slate-50/60 transition-colors">
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-start gap-3 flex-1 min-w-0">
-                {/* Avatar Inisial */}
                 <div className="flex-shrink-0 h-10 w-10 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-sm font-semibold shadow-sm ring-1 ring-indigo-100 mt-0.5">
                   {article.title.charAt(0).toUpperCase()}
                 </div>
@@ -182,7 +170,6 @@ const ArticleTable = ({ articles: initialArticles }) => {
                     {article.title}
                   </p>
                   
-                  {/* Info Row */}
                   <div className="flex flex-wrap items-center gap-2">
                     <span className={`inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full ${
                       article.status === "published"
@@ -209,7 +196,6 @@ const ArticleTable = ({ articles: initialArticles }) => {
                 </div>
               </div>
 
-              {/* Aksi Mobile */}
               <div className="flex items-center gap-1 flex-shrink-0 mt-1">
                 {article.status === "published" && (
                   <Link href={`/preview/${article.slug}`} target="_blank" className="p-1.5 text-slate-400 hover:text-indigo-600 transition-colors">
@@ -228,7 +214,6 @@ const ArticleTable = ({ articles: initialArticles }) => {
         ))}
       </div>
 
-      {/* FOOTER - Ringkasan Data */}
       <div className="px-6 py-3 border-t border-slate-200 bg-slate-50/40 flex flex-col sm:flex-row items-center justify-between gap-2">
         <div className="flex items-center gap-4 text-xs text-slate-500">
           <span className="flex items-center gap-1.5">

@@ -26,13 +26,10 @@ import {
 } from "lucide-react";
 
 import { getUsers } from "@/services/user.service";
-import { getAbsensiSiswa } from "@/services/absensi.service";
+import { getAbsensiKelas } from "@/services/absensi.service";
 import { getKelasSayaDariAnggota } from "@/services/kelas.service";
 import { getTahunAjaran } from "@/services/tahunAjaran.service";
 
-/* ============================================================
-   THEME
-   ============================================================ */
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -60,9 +57,6 @@ const themeDangerSurface =
 const themeDangerBorder =
   "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
 
-/* ============================================================
-   HELPERS
-   ============================================================ */
 
 function getText(...values) {
   for (const value of values) {
@@ -199,9 +193,6 @@ function formatAcademicLevel(value) {
   return labels[level] || level;
 }
 
-/* ============================================================
-   PAGE
-   ============================================================ */
 
 export default function DetailSiswaPage() {
   const router = useRouter();
@@ -223,9 +214,6 @@ export default function DetailSiswaPage() {
   const [loadingAbsensi, setLoadingAbsensi] = useState(true);
   const [errorAbsensi, setErrorAbsensi] = useState("");
 
-  /* ============================================================
-     FETCH DETAIL SISWA
-     ============================================================ */
 
   useEffect(() => {
     let mounted = true;
@@ -280,9 +268,6 @@ export default function DetailSiswaPage() {
     };
   }, [id]);
 
-  /* ============================================================
-     FETCH KELAS DAN TAHUN AJARAN
-     ============================================================ */
 
   useEffect(() => {
     let mounted = true;
@@ -365,9 +350,6 @@ export default function DetailSiswaPage() {
     };
   }, [id]);
 
-  /* ============================================================
-     FETCH ABSENSI SISWA
-     ============================================================ */
 
   useEffect(() => {
     let mounted = true;
@@ -378,15 +360,38 @@ export default function DetailSiswaPage() {
         return;
       }
 
+      if (loadingAkademik) return;
+
+      if (!kelasSiswa?.id) {
+        setAbsensi([]);
+        setErrorAbsensi(
+          "Kelas siswa tidak ditemukan, sehingga riwayat absensi tidak dapat dimuat."
+        );
+        setLoadingAbsensi(false);
+        return;
+      }
+
       try {
         setLoadingAbsensi(true);
         setErrorAbsensi("");
 
-        const response = await getAbsensiSiswa(id);
+        const response = await getAbsensiKelas(kelasSiswa.id);
 
         if (!mounted) return;
 
-        setAbsensi(unwrapList(response));
+        const semuaAbsensi = unwrapList(response);
+
+        setAbsensi(
+          semuaAbsensi.filter(
+            (item) =>
+              String(
+                item?.penggunaId ??
+                  item?.pengguna?.id ??
+                  item?.siswaId ??
+                  ""
+              ) === String(id)
+          )
+        );
       } catch (err) {
         if (!mounted) return;
 
@@ -394,7 +399,7 @@ export default function DetailSiswaPage() {
         setAbsensi([]);
         setErrorAbsensi(
           err?.message ||
-            "Riwayat absensi belum dapat dimuat. Periksa endpoint backend."
+            "Riwayat absensi kelas belum dapat dimuat."
         );
       } finally {
         if (mounted) setLoadingAbsensi(false);
@@ -406,11 +411,8 @@ export default function DetailSiswaPage() {
     return () => {
       mounted = false;
     };
-  }, [id]);
+  }, [id, kelasSiswa, loadingAkademik]);
 
-  /* ============================================================
-     LOADING
-     ============================================================ */
 
   if (loading) {
     return (
@@ -441,9 +443,6 @@ export default function DetailSiswaPage() {
     );
   }
 
-  /* ============================================================
-     ERROR
-     ============================================================ */
 
   if (error || !siswa) {
     return (
@@ -483,9 +482,6 @@ export default function DetailSiswaPage() {
     );
   }
 
-  /* ============================================================
-     NORMALIZE STUDENT DATA
-     ============================================================ */
 
   const nama = getText(
     siswa.nama,
@@ -510,10 +506,6 @@ export default function DetailSiswaPage() {
 
   const nisn = getText(siswa.nisn, siswa.NISN);
 
-  /*
-   * Nama kelas dan tingkat diambil dari hasil getKelasSayaDariAnggota.
-   * Field siswa tetap dijadikan fallback.
-   */
 
   const kelasData = kelasSiswa;
 
@@ -654,9 +646,6 @@ export default function DetailSiswaPage() {
 
   const isActive = String(status).toLowerCase() === "aktif";
 
-  /* ============================================================
-     ATTENDANCE STATISTICS
-     ============================================================ */
 
   const attendanceCounts = absensi.reduce(
     (counts, item) => {
@@ -698,9 +687,6 @@ export default function DetailSiswaPage() {
     return dateB - dateA;
   });
 
-  /* ============================================================
-     RENDER
-     ============================================================ */
 
   return (
     <PageShell
@@ -711,7 +697,6 @@ export default function DetailSiswaPage() {
         <div className="w-full px-4 py-5 sm:px-6 md:px-7 lg:px-8 xl:px-10">
           <div className="mx-auto w-full max-w-[1500px]">
 
-            {/* ACTION BAR */}
 
             <div className="mb-5 flex flex-col gap-3 sm:mb-6 sm:flex-row sm:items-center sm:justify-between">
               <button
@@ -736,7 +721,6 @@ export default function DetailSiswaPage() {
               </button>
             </div>
 
-            {/* PROFILE */}
 
             <section
               className={`theme-card overflow-hidden rounded-xl border ${themeNeutralBorder} ${themeCardShadow}`}
@@ -853,12 +837,10 @@ export default function DetailSiswaPage() {
               </div>
             </section>
 
-            {/* MAIN CONTENT */}
 
             <div className="mt-5 grid grid-cols-1 gap-5 xl:grid-cols-3">
               <div className="min-w-0 space-y-5 xl:col-span-2">
 
-                {/* ALAMAT */}
 
                 <section
                   className={`theme-card overflow-hidden rounded-xl border ${themeNeutralBorder} ${themeCardShadow}`}
@@ -884,7 +866,6 @@ export default function DetailSiswaPage() {
                   </div>
                 </section>
 
-                {/* ORANG TUA / WALI */}
 
                 <section
                   className={`theme-card overflow-hidden rounded-xl border ${themeNeutralBorder} ${themeCardShadow}`}
@@ -932,7 +913,6 @@ export default function DetailSiswaPage() {
                   </div>
                 </section>
 
-                {/* RIWAYAT ABSENSI */}
 
                 <section
                   className={`theme-card overflow-hidden rounded-xl border ${themeNeutralBorder} ${themeCardShadow}`}
@@ -1087,7 +1067,6 @@ export default function DetailSiswaPage() {
                 </section>
               </div>
 
-              {/* RIGHT COLUMN */}
 
               <div className="min-w-0 space-y-5">
                 <section
@@ -1149,7 +1128,6 @@ export default function DetailSiswaPage() {
                   </div>
                 </section>
 
-                {/* RINGKASAN */}
 
                 <section
                   className={`theme-card overflow-hidden rounded-xl border ${themeNeutralBorder} ${themeCardShadow}`}
@@ -1185,9 +1163,6 @@ export default function DetailSiswaPage() {
   );
 }
 
-/* ============================================================
-   PAGE SHELL
-   ============================================================ */
 
 function PageShell({ children, isCollapsed, setIsCollapsed }) {
   return (
@@ -1218,9 +1193,6 @@ function PageShell({ children, isCollapsed, setIsCollapsed }) {
   );
 }
 
-/* ============================================================
-   SECTION HEADER
-   ============================================================ */
 
 function SectionHeader({ icon, title, description }) {
   return (
@@ -1244,9 +1216,6 @@ function SectionHeader({ icon, title, description }) {
   );
 }
 
-/* ============================================================
-   INFO ITEM
-   ============================================================ */
 
 function InfoItem({ icon, label, value, breakText = false }) {
   return (
@@ -1269,9 +1238,6 @@ function InfoItem({ icon, label, value, breakText = false }) {
   );
 }
 
-/* ============================================================
-   DETAIL ITEM
-   ============================================================ */
 
 function DetailItem({
   label,
@@ -1302,9 +1268,6 @@ function DetailItem({
   );
 }
 
-/* ============================================================
-   ACADEMIC STAT
-   ============================================================ */
 
 function AcademicStat({ label, value, valueClass = "theme-text" }) {
   return (
@@ -1324,9 +1287,6 @@ function AcademicStat({ label, value, valueClass = "theme-text" }) {
   );
 }
 
-/* ============================================================
-   SUMMARY ROW
-   ============================================================ */
 
 function SummaryRow({ label, value, valueClass = "theme-text-secondary" }) {
   return (
@@ -1343,9 +1303,6 @@ function SummaryRow({ label, value, valueClass = "theme-text-secondary" }) {
   );
 }
 
-/* ============================================================
-   ATTENDANCE STAT
-   ============================================================ */
 
 function AttendanceStat({ label, value }) {
   return (
@@ -1358,9 +1315,6 @@ function AttendanceStat({ label, value }) {
   );
 }
 
-/* ============================================================
-   ATTENDANCE BADGE
-   ============================================================ */
 
 function AttendanceBadge({ status }) {
   const config = {

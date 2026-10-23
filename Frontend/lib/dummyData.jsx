@@ -1,6 +1,3 @@
-// ============================================
-// DATA CMS (Artikel & Halaman Statis)
-// ============================================
 
 export const dummyArticles = [
   {
@@ -140,9 +137,6 @@ export const dummyStats = {
   totalViews: 15234,
 };
 
-// ============================================
-// DATA KATEGORI ARTIKEL
-// ============================================
 
 export const dummyCategories = [
   { id: 1, name: 'Pengumuman', slug: 'pengumuman', count: 2 },
@@ -152,9 +146,6 @@ export const dummyCategories = [
   { id: 5, name: 'Berita', slug: 'berita', count: 0 },
 ];
 
-// ============================================
-// DATA MEDIA - DENGAN GAMBAR REAL
-// ============================================
 
 export const dummyMedia = [
   {
@@ -211,9 +202,6 @@ export const dummyMediaFolders = [
   { id: 4, name: 'video', count: 1 },
 ];
 
-// ============================================
-// DATA BANNER & HERO - DENGAN GAMBAR REAL
-// ============================================
 
 export const dummyBanners = [
   {
@@ -248,9 +236,6 @@ export const dummyBanners = [
   },
 ];
 
-// ============================================
-// DATA MENU WEBSITE
-// ============================================
 
 export const dummyMenus = {
   main: [
@@ -322,9 +307,6 @@ export const dummyMenus = {
   ],
 };
 
-// ============================================
-// DATA PENGUMUMAN
-// ============================================
 
 export const dummyAnnouncements = [
   {
@@ -387,9 +369,6 @@ export const announcementTargets = [
   { id: 'staff', label: 'Staff' },
 ];
 
-// ============================================
-// DATA AGENDA / EVENT - DENGAN GAMBAR REAL
-// ============================================
 
 export const dummyEvents = [
   {
@@ -469,9 +448,6 @@ export const eventStatuses = [
   { id: 'passed', label: 'Selesai', color: 'gray' },
 ];
 
-// ============================================
-// DATA PENGATURAN CMS
-// ============================================
 
 export const dummySettings = {
   site: {
@@ -522,9 +498,6 @@ export const dummySettings = {
   },
 };
 
-// ============================================
-// DATA YAYASAN
-// ============================================
 
 export const yayasanData = [
   {
@@ -657,9 +630,6 @@ export const yayasanData = [
   },
 ];
 
-// ============================================
-// DATA SEKOLAH
-// ============================================
 
 export const sekolahData = [
   {
@@ -832,9 +802,6 @@ export const sekolahData = [
   },
 ];
 
-// ============================================
-// DATA LANGANAN / SUBSCRIPTION
-// ============================================
 
 export const dummyLangganan = [
   {
@@ -891,9 +858,6 @@ export const dummyLangganan = [
   },
 ];
 
-// ============================================
-// DATA ROLES
-// ============================================
 
 export const dummyRoles = [
   {
@@ -948,9 +912,6 @@ export const dummyRoles = [
   },
 ];
 
-// ============================================
-// DATA PERMISSIONS
-// ============================================
 
 export const dummyPermissions = [
   { id: 'perm-001', modul: 'Akademik', aksi: 'view', nama: 'Lihat Akademik' },

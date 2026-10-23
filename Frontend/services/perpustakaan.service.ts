@@ -2,9 +2,6 @@ import { apiFetch } from "../lib/api";
 
 const BASE_PATH = "/api/perpustakaan";
 
-/* =========================================================
-   TYPES
-========================================================= */
 
 export type BukuParams = {
   search?: string;
@@ -37,15 +34,12 @@ export type BukuPayload = {
 
 export type PeminjamanPayload = {
   bukuId: string;
-  tanggalJatuhTempo: string; // Format YYYY-MM-DD
+  tanggalJatuhTempo: string; 
   catatan?: string;
 };
 
 
 
-/* =========================================================
-   HELPER
-========================================================= */
 
 function unwrap(response: any) {
   if (response?.data !== undefined) {
@@ -73,9 +67,6 @@ function unwrapList(response: any) {
   return [];
 }
 
-/* =========================================================
-   BUKU
-========================================================= */
 
 export async function getBuku(params: BukuParams = {}) {
   const query = new URLSearchParams();
@@ -147,9 +138,6 @@ export async function deleteBuku(id: string) {
   });
 }
 
-/* =========================================================
-   PEMINJAMAN
-========================================================= */
 
 export async function getPeminjaman(
   params: PeminjamanParams = {},

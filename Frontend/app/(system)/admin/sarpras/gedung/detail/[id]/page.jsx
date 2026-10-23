@@ -30,9 +30,6 @@ import {
   deleteGedung,
 } from "@/services/infrastruktur.service";
 
-/* ============================================================
-   THEME HELPERS
-============================================================ */
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)]";
@@ -73,9 +70,6 @@ const themeDangerHover =
 const themeSoftSurface =
   "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
 
-/* ============================================================
-   COMPONENT
-============================================================ */
 
 export default function DetailGedungPage() {
   const router = useRouter();
@@ -91,18 +85,12 @@ export default function DetailGedungPage() {
 
   const [error, setError] = useState("");
 
-  /* =========================================================
-     FOTO GEDUNG
-  ========================================================= */
 
   const fotoGedung = useMemo(() => {
     const foto = data?.fotoGedung ?? data?.fotoUrl ?? "";
     return typeof foto === "string" ? foto.trim() : "";
   }, [data]);
 
-  /* =========================================================
-     FORMAT TANGGAL
-  ========================================================= */
 
   const formatDate = (date) => {
     if (!date) return "-";
@@ -117,9 +105,6 @@ export default function DetailGedungPage() {
     });
   };
 
-  /* =========================================================
-     TOTAL KELAS
-  ========================================================= */
 
   const totalKelas = useMemo(() => {
     return lantai.reduce((total, item) => {
@@ -127,9 +112,6 @@ export default function DetailGedungPage() {
     }, 0);
   }, [lantai]);
 
-  /* =========================================================
-     FETCH DETAIL
-  ========================================================= */
 
   useEffect(() => {
     if (!id) return;
@@ -200,9 +182,6 @@ export default function DetailGedungPage() {
     };
   }, [id]);
 
-  /* =========================================================
-     DELETE
-  ========================================================= */
 
   const handleDelete = async () => {
     if (!data) return;
@@ -229,9 +208,6 @@ export default function DetailGedungPage() {
     }
   };
 
-  /* =========================================================
-     LOADING
-  ========================================================= */
 
   if (isLoading) {
     return (
@@ -276,9 +252,6 @@ export default function DetailGedungPage() {
     );
   }
 
-  /* =========================================================
-     NOT FOUND
-  ========================================================= */
 
   if (!data) {
     return (
@@ -333,9 +306,6 @@ export default function DetailGedungPage() {
     );
   }
 
-  /* =========================================================
-     NORMAL PAGE
-  ========================================================= */
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
@@ -361,7 +331,6 @@ export default function DetailGedungPage() {
 
         <main className="theme-page min-w-0 flex-1 overflow-y-auto">
           <div className="mx-auto w-full max-w-[1450px] p-4 sm:p-5 lg:p-6 xl:p-7">
-            {/* BREADCRUMB */}
             <div className="theme-text-muted mb-4 flex items-center gap-2 text-xs">
               <button
                 type="button"
@@ -376,7 +345,6 @@ export default function DetailGedungPage() {
               </span>
             </div>
 
-            {/* HERO */}
             <section
               className={`theme-card ${themeCardShadow} relative overflow-hidden rounded-[22px] border ${themePrimaryBorder}`}
             >
@@ -389,7 +357,6 @@ export default function DetailGedungPage() {
 
               <div className="relative p-5 sm:p-6 lg:p-7">
                 <div className="flex flex-col gap-6 xl:flex-row xl:items-center xl:justify-between">
-                  {/* INFO */}
                   <div className="flex min-w-0 items-start gap-4">
                     <div
                       className={`${themePrimaryGradient} ${themePrimaryShadow} flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl text-[var(--color-card)] sm:h-16 sm:w-16`}
@@ -437,7 +404,6 @@ export default function DetailGedungPage() {
                     </div>
                   </div>
 
-                  {/* ACTION */}
                   <div className="flex flex-wrap items-center gap-2 xl:shrink-0">
                     <button
                       type="button"
@@ -482,9 +448,7 @@ export default function DetailGedungPage() {
               </div>
             </section>
 
-            {/* SUMMARY */}
             <div className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
-              {/* GEDUNG */}
               <div
                 className={`theme-card ${themeSmallShadow} rounded-2xl border ${themePrimaryBorder} p-4`}
               >
@@ -504,7 +468,6 @@ export default function DetailGedungPage() {
                 </p>
               </div>
 
-              {/* LANTAI */}
               <div
                 className={`theme-card ${themeSmallShadow} rounded-2xl border ${themePrimaryBorder} p-4`}
               >
@@ -526,7 +489,6 @@ export default function DetailGedungPage() {
                 </p>
               </div>
 
-              {/* KELAS */}
               <div
                 className={`theme-card ${themeSmallShadow} rounded-2xl border ${themePrimaryBorder} p-4`}
               >
@@ -546,7 +508,6 @@ export default function DetailGedungPage() {
                 </p>
               </div>
 
-              {/* STATUS */}
               <div
                 className={`theme-card ${themeSmallShadow} rounded-2xl border ${themePrimaryBorder} p-4`}
               >
@@ -565,11 +526,8 @@ export default function DetailGedungPage() {
               </div>
             </div>
 
-            {/* MAIN GRID */}
             <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_350px]">
-              {/* LEFT */}
               <div className="min-w-0 space-y-4">
-                {/* INFORMATION */}
                 <section
                   className={`theme-card ${themeCardShadow} rounded-2xl border ${themePrimaryBorder}`}
                 >
@@ -646,7 +604,6 @@ export default function DetailGedungPage() {
                   </div>
                 </section>
 
-                {/* LANTAI */}
                 <section
                   className={`theme-card ${themeCardShadow} overflow-hidden rounded-2xl border ${themePrimaryBorder}`}
                 >
@@ -777,9 +734,7 @@ export default function DetailGedungPage() {
                 </section>
               </div>
 
-              {/* RIGHT */}
               <aside className="space-y-4">
-                {/* FOTO */}
                 <section
                   className={`theme-card ${themeCardShadow} overflow-hidden rounded-2xl border ${themePrimaryBorder}`}
                 >
@@ -869,7 +824,6 @@ export default function DetailGedungPage() {
                   )}
                 </section>
 
-                {/* RINGKASAN */}
                 <section
                   className={`theme-card ${themeCardShadow} rounded-2xl border ${themePrimaryBorder} p-5`}
                 >
@@ -952,7 +906,6 @@ export default function DetailGedungPage() {
                   </div>
                 </section>
 
-                {/* WAKTU */}
                 <section
                   className={`theme-card ${themeCardShadow} rounded-2xl border ${themePrimaryBorder} p-5`}
                 >
@@ -994,7 +947,6 @@ export default function DetailGedungPage() {
                   </div>
                 </section>
 
-                {/* AKSI */}
                 <section
                   className={`theme-card ${themeCardShadow} rounded-2xl border ${themePrimaryBorder} p-4`}
                 >
@@ -1028,7 +980,6 @@ export default function DetailGedungPage() {
               </aside>
             </div>
 
-            {/* FOOTER */}
             <div
               className={`theme-text-muted mt-5 border-t ${themePrimaryBorder} py-4 text-center`}
             >
@@ -1040,7 +991,6 @@ export default function DetailGedungPage() {
         </main>
       </div>
 
-      {/* PRINT STYLE */}
       <style jsx global>{`
         @media print {
           aside,

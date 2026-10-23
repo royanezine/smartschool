@@ -1,10 +1,7 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
-
-// dummyPermissions diimpor dari data dummy terpusat
-import { dummyPermissions } from "../../../../../lib/dummyData";
 
 import {
   Shield,
@@ -22,11 +19,12 @@ import {
   Eye,
   Edit,
   Trash2,
+  RefreshCw,
+  Loader2,
 } from "lucide-react";
 
-// ============================================================
-// THEME HELPERS
-// ============================================================
+import { getPermissions, createRole } from "@/services/role.service";
+
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -93,14 +91,11 @@ const themeHeroSoft =
 const themeHeroSoftBorder =
   "border-[color-mix(in_srgb,var(--color-card)_22%,transparent)]";
 
-// ============================================================
-// DATA
-// ============================================================
 
 const AKSI_LIST = [
   { key: "view", label: "Lihat", icon: Eye },
   { key: "create", label: "Tambah", icon: Plus },
-  { key: "edit", label: "Ubah", icon: Edit },
+  { key: "update", label: "Ubah", icon: Edit },
   { key: "delete", label: "Hapus", icon: Trash2 },
 ];
 
@@ -117,6 +112,9 @@ export default function TambahRolePage() {
   const [isMobile, setIsMobile] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [permissions, setPermissions] = useState([]);
   const [cariModul, setCariModul] = useState("");
   const [modulTerbuka, setModulTerbuka] = useState(null);
   const [errors, setErrors] = useState({});
@@ -131,32 +129,52 @@ export default function TambahRolePage() {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
+  const loadData = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError("");
+      const data = await getPermissions();
+      setPermissions(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error("Gagal mengambil daftar izin:", err);
+      setError(err?.message || "Gagal mengambil daftar izin dari server.");
+      setPermissions([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    Promise.resolve().then(() => {
+      loadData();
+    });
+  }, [loadData]);
+
   const [form, setForm] = useState(formKosong);
 
   const [selectedPermissions, setSelectedPermissions] = useState(
     () => new Set()
   );
 
-  // ============================================================
-  // KELOMPOKKAN PERMISSION BERDASARKAN MODUL
-  // ============================================================
 
   const modulGroups = useMemo(() => {
     const map = new Map();
 
-    dummyPermissions.forEach((perm) => {
-      if (!map.has(perm.modul)) {
-        map.set(perm.modul, {});
+    permissions.forEach((perm) => {
+      const modul = perm?.modul || "Lainnya";
+      if (!map.has(modul)) {
+        map.set(modul, {});
       }
 
-      map.get(perm.modul)[perm.aksi] = perm;
+      const aksi = perm?.aksi || "";
+      map.get(modul)[aksi] = perm;
     });
 
     return Array.from(map.entries()).map(([modul, aksiMap]) => ({
       modul,
       aksiMap,
     }));
-  }, []);
+  }, [permissions]);
 
   const modulTersaring = useMemo(
     () =>
@@ -166,30 +184,35 @@ export default function TambahRolePage() {
     [modulGroups, cariModul]
   );
 
-  const totalPermissionTersedia = dummyPermissions.length;
+  const totalPermissionTersedia = permissions.length;
   const totalDipilih = selectedPermissions.size;
 
-  // ============================================================
-  // NAMA TAMPILAN OTOMATIS
-  // ============================================================
 
   const [namaTampilanManual, setNamaTampilanManual] = useState(false);
 
-  const buatSlug = (teks) =>
+  const formatNamaRole = (teks) =>
     teks
       .toLowerCase()
-      .trim()
-      .replace(/[^a-z0-9\s-]/g, "")
-      .replace(/\s+/g, "-");
+      .replace(/[\s-]+/g, "_")
+      .replace(/[^a-z_]/g, "")
+      .replace(/_+/g, "_")
+      .slice(0, 50);
 
   const handleNamaChange = (value) => {
+    const formatted = formatNamaRole(value);
     setForm((prev) => ({
       ...prev,
-      nama: value,
+      nama: formatted,
       namaTampilan: namaTampilanManual
         ? prev.namaTampilan
-        : buatSlug(value),
+        : formatted
+            .split("_")
+            .filter(Boolean)
+            .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+            .join(" "),
     }));
+    setSaved(false);
+    setErrors((prev) => ({ ...prev, nama: "" }));
   };
 
   const handleNamaTampilanChange = (value) => {
@@ -199,6 +222,8 @@ export default function TambahRolePage() {
       ...prev,
       namaTampilan: value,
     }));
+    setSaved(false);
+    setErrors((prev) => ({ ...prev, namaTampilan: "" }));
   };
 
   const handleChange = (field, value) => {
@@ -206,11 +231,10 @@ export default function TambahRolePage() {
       ...prev,
       [field]: value,
     }));
+    setSaved(false);
+    setErrors((prev) => ({ ...prev, [field]: "" }));
   };
 
-  // ============================================================
-  // PERMISSION
-  // ============================================================
 
   const togglePermission = (permId) => {
     setSelectedPermissions((prev) => {
@@ -224,10 +248,16 @@ export default function TambahRolePage() {
 
       return next;
     });
+    setSaved(false);
+    setErrors((prev) => ({ ...prev, izinIds: "" }));
   };
 
   const toggleModulPenuh = (aksiMap) => {
-    const idsModul = Object.values(aksiMap).map((p) => p.id);
+    const idsModul = Object.values(aksiMap)
+      .filter(Boolean)
+      .map((p) => p.id);
+
+    if (idsModul.length === 0) return;
 
     const semuaTerpilih = idsModul.every((id) =>
       selectedPermissions.has(id)
@@ -246,31 +276,49 @@ export default function TambahRolePage() {
 
       return next;
     });
+    setSaved(false);
+    setErrors((prev) => ({ ...prev, izinIds: "" }));
   };
 
   const pilihSemua = () => {
     setSelectedPermissions(
-      new Set(dummyPermissions.map((p) => p.id))
+      new Set(permissions.map((p) => p.id))
     );
+    setSaved(false);
+    setErrors((prev) => ({ ...prev, izinIds: "" }));
   };
 
   const hapusSemua = () => {
     setSelectedPermissions(new Set());
+    setSaved(false);
   };
 
-  // ============================================================
-  // VALIDASI
-  // ============================================================
 
   const validasi = () => {
     const errBaru = {};
 
-    if (!form.nama.trim()) {
+    const namaBersih = form.nama.trim();
+    if (!namaBersih) {
       errBaru.nama = "Nama peran wajib diisi.";
+    } else if (namaBersih.length < 3) {
+      errBaru.nama = "Nama peran minimal 3 karakter.";
+    } else if (namaBersih.length > 50) {
+      errBaru.nama = "Nama peran maksimal 50 karakter.";
+    } else if (!/^[a-z_]+$/.test(namaBersih)) {
+      errBaru.nama = "Nama hanya boleh memakai huruf kecil dan underscore (contoh: kepala_sekolah).";
     }
 
-    if (!form.namaTampilan.trim()) {
+    const namaTampilanBersih = form.namaTampilan.trim();
+    if (!namaTampilanBersih) {
       errBaru.namaTampilan = "Nama tampilan wajib diisi.";
+    } else if (namaTampilanBersih.length < 3) {
+      errBaru.namaTampilan = "Nama tampilan minimal 3 karakter.";
+    } else if (namaTampilanBersih.length > 100) {
+      errBaru.namaTampilan = "Nama tampilan maksimal 100 karakter.";
+    }
+
+    if (selectedPermissions.size === 0) {
+      errBaru.izinIds = "Pilih minimal 1 hak akses / izin.";
     }
 
     setErrors(errBaru);
@@ -278,43 +326,45 @@ export default function TambahRolePage() {
     return Object.keys(errBaru).length === 0;
   };
 
-  // ============================================================
-  // SIMPAN
-  // ============================================================
 
-  const handleSimpan = () => {
+  const handleSimpan = async () => {
     if (!validasi()) return;
 
-    setIsSaving(true);
+    try {
+      setIsSaving(true);
+      setError("");
+      setSaved(false);
 
-    // Simulasi penyimpanan ke server
-    setTimeout(() => {
-      console.log("Tambah role:", {
-        ...form,
-        permissions: Array.from(selectedPermissions),
-      });
+      const payload = {
+        nama: form.nama.trim(),
+        namaTampilan: form.namaTampilan.trim(),
+        ...(form.deskripsi && form.deskripsi.trim()
+          ? { deskripsi: form.deskripsi.trim() }
+          : {}),
+        izinIds: Array.from(selectedPermissions),
+      };
 
-      setIsSaving(false);
+      await createRole(payload);
+
       setSaved(true);
 
       setTimeout(() => {
         router.push("/super-admin/manajemenAkses");
       }, 900);
-    }, 600);
+    } catch (err) {
+      console.error("Gagal menambah role:", err);
+      setError(err?.message || "Gagal menyimpan role baru ke database.");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  // ============================================================
-  // RENDER
-  // ============================================================
 
   return (
     <div className="theme-page theme-text min-h-full">
       <main className="w-full max-w-[1600px] mx-auto px-4 py-5 sm:px-6 sm:py-7 lg:px-8">
         <div className="space-y-4 sm:space-y-5 lg:space-y-6">
 
-          {/* ==================================================
-              BACK BUTTON
-          ================================================== */}
 
           <button
             onClick={() => router.push("/super-admin/manajemenAkses")}
@@ -328,9 +378,6 @@ export default function TambahRolePage() {
             Kembali ke Manajemen Akses
           </button>
 
-          {/* ==================================================
-              PAGE HEADER
-          ================================================== */}
 
           <section
             className={`relative overflow-hidden rounded-2xl theme-card theme-border ${themeCardShadow}`}
@@ -403,9 +450,22 @@ export default function TambahRolePage() {
             </div>
           </section>
 
-          {/* ==================================================
-              NOTIFICATION
-          ================================================== */}
+
+          {error && (
+            <div
+              className={`flex items-start gap-3 rounded-2xl border ${themeDangerBorder} ${themeDangerSurface} px-4 py-3.5`}
+            >
+              <div
+                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ${themeWarningSurface} text-[var(--color-warning)]`}
+              >
+                <AlertCircle size={17} />
+              </div>
+              <div className="min-w-0">
+                <p className="theme-text text-sm font-semibold">Gagal memproses data</p>
+                <p className="theme-text-secondary mt-0.5 text-xs leading-5">{error}</p>
+              </div>
+            </div>
+          )}
 
           {saved && (
             <div
@@ -422,9 +482,6 @@ export default function TambahRolePage() {
             </div>
           )}
 
-          {/* ==================================================
-              INFORMASI ROLE
-          ================================================== */}
 
           <section
             className={`rounded-2xl theme-card theme-border ${themeCardShadow} p-4 sm:p-5 lg:p-6`}
@@ -454,7 +511,6 @@ export default function TambahRolePage() {
 
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 
-              {/* Nama Peran */}
 
               <div>
                 <label className="mb-1 block text-xs font-medium theme-text-secondary sm:mb-1.5">
@@ -466,21 +522,25 @@ export default function TambahRolePage() {
                   type="text"
                   value={form.nama}
                   onChange={(e) => handleNamaChange(e.target.value)}
-                  placeholder="Contoh: Admin Perpustakaan"
+                  maxLength={50}
+                  placeholder="Contoh: admin_perpustakaan"
                   className={`w-full rounded-xl border ${errors.nama ? themeDangerBorder : themeNeutralBorder} ${themeNeutralSurface} px-3 py-2 text-sm theme-text outline-none transition-all placeholder:theme-text-placeholder ${themeFocus} sm:px-4 sm:py-2.5`}
                 />
 
-                {errors.nama && (
+                {errors.nama ? (
                   <p
                     className={`mt-1 flex items-center gap-1 text-xs text-[var(--color-warning)] sm:mt-1.5`}
                   >
                     <AlertCircle size={12} />
                     {errors.nama}
                   </p>
+                ) : (
+                  <p className="mt-1 text-xs theme-text-muted sm:mt-1.5">
+                    Hanya huruf kecil dan underscore, tanpa spasi atau angka.
+                  </p>
                 )}
               </div>
 
-              {/* Nama Tampilan */}
 
               <div>
                 <label className="mb-1 block text-xs font-medium theme-text-secondary sm:mb-1.5">
@@ -494,8 +554,8 @@ export default function TambahRolePage() {
                   onChange={(e) =>
                     handleNamaTampilanChange(e.target.value)
                   }
-                  placeholder="admin-perpustakaan"
-                  className={`w-full rounded-xl border ${errors.namaTampilan ? themeDangerBorder : themeNeutralBorder} ${themeNeutralSurface} px-3 py-2 font-mono text-sm theme-text outline-none transition-all placeholder:font-sans placeholder:theme-text-placeholder ${themeFocus} sm:px-4 sm:py-2.5`}
+                  placeholder="Admin Perpustakaan"
+                  className={`w-full rounded-xl border ${errors.namaTampilan ? themeDangerBorder : themeNeutralBorder} ${themeNeutralSurface} px-3 py-2 text-sm theme-text outline-none transition-all placeholder:theme-text-placeholder ${themeFocus} sm:px-4 sm:py-2.5`}
                 />
 
                 {errors.namaTampilan ? (
@@ -510,7 +570,6 @@ export default function TambahRolePage() {
                 )}
               </div>
 
-              {/* Deskripsi */}
 
               <div className="md:col-span-2">
                 <label className="mb-1 block text-xs font-medium theme-text-secondary sm:mb-1.5">
@@ -528,7 +587,6 @@ export default function TambahRolePage() {
                 />
               </div>
 
-              {/* Status */}
 
               <div>
                 <label className="mb-1 block text-xs font-medium theme-text-secondary sm:mb-1.5">
@@ -536,38 +594,20 @@ export default function TambahRolePage() {
                 </label>
 
                 <div className="flex flex-wrap items-center gap-2">
-                  {["aktif", "nonaktif"].map((s) => {
-                    const isActive = form.status === s;
+                  <span
+                    className={`inline-flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs font-medium shadow-[0_2px_8px_color-mix(in_srgb,var(--color-text)_7%,transparent)] sm:px-4 sm:py-2 ${themeSuccessBorder} ${themeSuccessSurface} text-[var(--color-success)]`}
+                  >
+                    <CheckCircle size={14} />
+                    Aktif
+                  </span>
 
-                    const activeClasses =
-                      s === "aktif"
-                        ? `${themeSuccessBorder} ${themeSuccessSurface} text-[var(--color-success)]`
-                        : `${themeWarningBorder} ${themeWarningSurface} text-[var(--color-warning)]`;
-
-                    return (
-                      <button
-                        key={s}
-                        onClick={() => handleChange("status", s)}
-                        className={`inline-flex items-center gap-1.5 rounded-xl border px-3 py-1.5 text-xs font-medium transition-all sm:px-4 sm:py-2 ${
-                          isActive
-                            ? `${activeClasses} shadow-[0_2px_8px_color-mix(in_srgb,var(--color-text)_7%,transparent)]`
-                            : `${themeNeutralBorder} theme-card theme-text-secondary ${themeNeutralHover}`
-                        }`}
-                      >
-                        {s === "aktif" ? (
-                          <CheckCircle size={14} />
-                        ) : (
-                          <XCircle size={14} />
-                        )}
-
-                        {s === "aktif" ? "Aktif" : "Nonaktif"}
-                      </button>
-                    );
-                  })}
+                  <p className="text-[11px] theme-text-muted">
+                    Role baru selalu dibuat dengan status aktif.
+                    Status dapat diubah setelah role dibuat.
+                  </p>
                 </div>
               </div>
 
-              {/* Info */}
 
               <div className="flex items-end">
                 <div
@@ -587,9 +627,6 @@ export default function TambahRolePage() {
             </div>
           </section>
 
-          {/* ==================================================
-              PENEMPATAN HAK AKSES
-          ================================================== */}
 
           <section
             className={`overflow-hidden rounded-2xl theme-card theme-border ${themeCardShadow}`}
@@ -643,7 +680,13 @@ export default function TambahRolePage() {
                 </div>
               </div>
 
-              {/* Search */}
+              {errors.izinIds && (
+                <div className="mt-3 flex items-center gap-1.5 text-xs text-[var(--color-warning)]">
+                  <AlertCircle size={13} className="shrink-0" />
+                  <span>{errors.izinIds}</span>
+                </div>
+              )}
+
 
               <div className="relative mt-3 sm:mt-4">
                 <Search
@@ -661,9 +704,6 @@ export default function TambahRolePage() {
               </div>
             </div>
 
-            {/* ==================================================
-                DESKTOP
-            ================================================== */}
 
             {!isMobile && (
               <div className="overflow-x-auto">
@@ -688,7 +728,27 @@ export default function TambahRolePage() {
                   </thead>
 
                   <tbody>
-                    {modulTersaring.length === 0 ? (
+                    {loading ? (
+                      <tr>
+                        <td
+                          colSpan={5}
+                          className="px-4 py-16 text-center sm:px-5 sm:py-20"
+                        >
+                          <div className="flex flex-col items-center justify-center">
+                            <Loader2
+                              size={28}
+                              className="animate-spin text-[var(--color-primary)]"
+                            />
+                            <p className="mt-3 text-sm font-semibold theme-text">
+                              Memuat daftar izin...
+                            </p>
+                            <p className="mt-1 text-xs theme-text-muted">
+                              Mengambil hak akses modul dari server.
+                            </p>
+                          </div>
+                        </td>
+                      </tr>
+                    ) : modulTersaring.length === 0 ? (
                       <tr>
                         <td
                           colSpan={5}
@@ -801,13 +861,23 @@ export default function TambahRolePage() {
               </div>
             )}
 
-            {/* ==================================================
-                MOBILE
-            ================================================== */}
 
             {isMobile && (
               <div>
-                {modulTersaring.length === 0 ? (
+                {loading ? (
+                  <div className="flex flex-col items-center justify-center px-4 py-16 text-center">
+                    <Loader2
+                      size={28}
+                      className="animate-spin text-[var(--color-primary)]"
+                    />
+                    <p className="mt-3 text-sm font-semibold theme-text">
+                      Memuat daftar izin...
+                    </p>
+                    <p className="mt-1 text-xs theme-text-muted">
+                      Mengambil hak akses modul dari server.
+                    </p>
+                  </div>
+                ) : modulTersaring.length === 0 ? (
                   <div className="flex flex-col items-center justify-center px-4 py-12 text-center sm:px-5 sm:py-16">
                     <div
                       className={`flex h-10 w-10 items-center justify-center rounded-2xl ${themeNeutralSurface} theme-text-muted`}
@@ -931,9 +1001,6 @@ export default function TambahRolePage() {
               </div>
             )}
 
-            {/* ==================================================
-                FOOTER INFO
-            ================================================== */}
 
             <div
               className={`border-t ${themeDivider} ${themeNeutralSurface} px-4 py-2.5 sm:px-5 sm:py-3.5`}
@@ -951,9 +1018,6 @@ export default function TambahRolePage() {
             </div>
           </section>
 
-          {/* ==================================================
-              AKSI BAWAH
-          ================================================== */}
 
           <div
             className={`flex flex-col-reverse gap-2 border-t ${themeDivider} pt-4 sm:flex-row sm:items-center sm:justify-end sm:gap-2.5 sm:pt-5`}
@@ -982,9 +1046,6 @@ export default function TambahRolePage() {
             </button>
           </div>
 
-          {/* ==================================================
-              FOOTER
-          ================================================== */}
 
           <div
             className={`border-t ${themeDivider} pt-4 text-center sm:pt-5`}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   AlertCircle,
@@ -20,6 +20,10 @@ import {
 
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
+import {
+  getGelombangPpdb,
+  isGelombangEndpointMissing,
+} from "@/services/gelombangPpdb.service";
 
 const themePrimaryText = "text-[var(--color-primary)]";
 
@@ -42,22 +46,22 @@ const modules = [
   {
     title: "Data Pendaftaran",
     description:
-      "Daftar dan detail pendaftar PPDB.",
+      "Formulir pendaftaran calon siswa.",
     href: "/admin/spmb/data-pendaftaran",
     icon: Users,
-    status: "partial",
+    status: "blocked",
     statusText:
-      "Tambah via POST /api/ppdb/daftar; daftar pendaftar 404",
+      "Form tambah tersedia; endpoint baca daftar/detail belum ada",
   },
   {
     title: "Pendaftar",
     description:
-      "Verifikasi, unggah berkas, dan kelulusan.",
+      "Daftar dan verifikasi pendaftar.",
     href: "/admin/spmb/pendaftar",
     icon: ClipboardCheck,
     status: "blocked",
     statusText:
-      "Daftar & detail pendaftar belum tersedia (404)",
+      "Dialihkan ke Data Pendaftaran; endpoint baca belum tersedia",
   },
   {
     title: "Jalur Pendaftaran",
@@ -152,6 +156,74 @@ export default function SpmbOverviewPage() {
   const router = useRouter();
 
   const [collapsed, setCollapsed] = useState(false);
+  const [gelombangStatus, setGelombangStatus] =
+    useState({
+      status: "partial",
+      statusText:
+        "Memeriksa endpoint /api/gelombang-ppdb...",
+    });
+
+  useEffect(() => {
+    let aktif = true;
+
+    (async () => {
+      try {
+        const response = await getGelombangPpdb();
+
+        if (!response?.success) {
+          throw new Error(
+            response?.message ||
+              "Endpoint gelombang PPDB tidak merespons dengan benar."
+          );
+        }
+
+        const jumlah = Array.isArray(response?.data)
+          ? response.data.length
+          : 0;
+
+        if (!aktif) {
+          return;
+        }
+
+        setGelombangStatus({
+          status: "ready",
+          statusText: `CRUD /api/gelombang-ppdb terpasang${
+            jumlah ? ` (${jumlah} gelombang)` : ""
+          }`,
+        });
+      } catch (err) {
+        if (!aktif) {
+          return;
+        }
+
+        if (isGelombangEndpointMissing(err)) {
+          setGelombangStatus({
+            status: "blocked",
+            statusText:
+              "Endpoint /api/gelombang-ppdb belum tersedia (404)",
+          });
+        } else {
+          setGelombangStatus({
+            status: "partial",
+            statusText:
+              err instanceof Error
+                ? err.message
+                : "Gagal memeriksa endpoint gelombang",
+          });
+        }
+      }
+    })();
+
+    return () => {
+      aktif = false;
+    };
+  }, []);
+
+  const modulesDenganStatus = modules.map((item) =>
+    item.title === "Gelombang"
+      ? { ...item, ...gelombangStatus }
+      : item
+  );
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
@@ -200,7 +272,7 @@ export default function SpmbOverviewPage() {
             </div>
 
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-              {modules.map((item) => {
+              {modulesDenganStatus.map((item) => {
                 const Icon = item.icon;
 
                 const status =
@@ -270,13 +342,19 @@ export default function SpmbOverviewPage() {
                 /api/ppdb/:id/berkas, PATCH
                 /api/ppdb/:id/verifikasi, CRUD
                 /api/jalur-ppdb, dan GET/POST
-                /api/pengaturan. Endpoint
-                /api/ppdb/pendaftar, /api/ppdb/:id, dan
-                /api/gelombang-ppdb diuji dan mengembalikan
-                404, sehingga modul terkait ditandai
-                terblokir. Pengaturan SPMB dapat disimpan,
-                tetapi belum dibaca oleh alur pendaftaran
-                Backend.
+                /api/pengaturan. Endpoint baca GET
+                /api/ppdb/pendaftar dan GET
+                /api/ppdb/pendaftar/:id belum tersedia,
+                sehingga daftar dan detail pendaftar belum
+                dapat ditampilkan; hanya formulir
+                pendaftaran yang dapat dipakai. Status
+                /api/gelombang-ppdb diperiksa langsung saat
+                halaman ini dibuka:{" "}
+                {gelombangStatus.status === "ready"
+                  ? "route tersedia dan modul siap dipakai"
+                  : "route belum tersedia sehingga modul ditandai terblokir"}
+                . Pengaturan SPMB dapat disimpan, tetapi belum
+                dibaca oleh alur pendaftaran Backend.
               </p>
             </div>
           </div>

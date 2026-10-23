@@ -38,9 +38,6 @@ import {
   deleteJalurPpdb,
 } from "@/services/jalurPpdb.service";
 
-// =========================================================
-// THEME HELPERS
-// =========================================================
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -75,9 +72,6 @@ const themeSmallShadow =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-// =========================================================
-// STATUS
-// =========================================================
 
 const STATUS_FILTERS = [
   "Semua",
@@ -114,10 +108,6 @@ function emptyForm() {
   };
 }
 
-/**
- * Memvalidasi form sesuai kontrak Backend
- * (Backend/src/validations/jalurPpdb.validation.ts dan controller jalur PPDB).
- */
 function validateJalurForm(form) {
   const nama = String(form.nama || "").trim();
 
@@ -168,11 +158,6 @@ function validateJalurForm(form) {
 const AKSES_DITOLAK_VIEW =
   "Akses ditolak: akun ini tidak memiliki izin ppdb.view untuk melihat jalur PPDB.";
 
-/**
- * Snapshot permission dari token sesi. Dipakai dengan useSyncExternalStore
- * agar perubahan sesi (login/logout/akun lain) langsung tercermin tanpa
- * memanggil setState di dalam effect.
- */
 function getPermissionSnapshot() {
   return JSON.stringify({
     view: hasPermission("ppdb.view"),
@@ -213,9 +198,6 @@ function getColor(index) {
   ];
 }
 
-// =========================================================
-// STATUS BADGE
-// =========================================================
 
 function StatusBadge({ status }) {
   const normalized = normalizeStatus(status);
@@ -237,9 +219,6 @@ function StatusBadge({ status }) {
   );
 }
 
-// =========================================================
-// PAGE
-// =========================================================
 
 export default function JalurPPDBPage() {
   const [isCollapsed, setIsCollapsed] =
@@ -280,12 +259,6 @@ export default function JalurPPDBPage() {
   const [successMessage, setSuccessMessage] =
     useState("");
 
-  /*
-   * Permission dibaca dari klaim token sesi melalui mekanisme Frontend
-   * yang sudah ada (lib/auth). Backend tetap menjadi penentu akhir.
-   * Snapshot server bernilai "null" sehingga render awal menampilkan
-   * status pemeriksaan, bukan pesan akses ditolak.
-   */
   const permissionSnapshot = useSyncExternalStore(
     subscribeAuth,
     getPermissionSnapshot,
@@ -309,9 +282,6 @@ export default function JalurPPDBPage() {
   const summaryLoading =
     checkingAccess || (loading && canView);
 
-  // =========================================================
-  // LOAD DATA
-  // =========================================================
 
   const fetchJalur = useCallback(
     async () => {
@@ -366,16 +336,11 @@ export default function JalurPPDBPage() {
       return;
     }
 
-    // Dijalankan asinkron agar tidak memicu setState langsung di dalam
-    // badan effect (mengikuti aturan react-hooks).
     Promise.resolve().then(() => {
       fetchJalur();
     });
   }, [canView, fetchJalur]);
 
-  // =========================================================
-  // FILTER
-  // =========================================================
 
   const filtered = useMemo(() => {
     return jalurList.filter((j) => {
@@ -405,9 +370,6 @@ export default function JalurPPDBPage() {
     search,
   ]);
 
-  // =========================================================
-  // SUMMARY
-  // =========================================================
 
   const totalKuota = useMemo(() => {
     return jalurList.reduce(
@@ -427,14 +389,7 @@ export default function JalurPPDBPage() {
     ).length;
   }, [jalurList]);
 
-  /*
-   * Backend getJalurPpdb saat ini belum
-   * mengirim jumlah pendaftar per jalur.
-   */
 
-  // =========================================================
-  // TAMBAH
-  // =========================================================
 
   const openTambah = () => {
     if (!izin?.create) {
@@ -450,9 +405,6 @@ export default function JalurPPDBPage() {
     setShowModal(true);
   };
 
-  // =========================================================
-  // EDIT
-  // =========================================================
 
   const openEdit = (j) => {
     if (!izin?.update) {
@@ -490,16 +442,7 @@ export default function JalurPPDBPage() {
     setShowModal(true);
   };
 
-  // =========================================================
-  // TAUTAN PENDAFTARAN
-  // =========================================================
 
-  /*
-   * Tautan dibangun dari data jalur yang benar-benar dikembalikan
-   * Backend. Daftar jalur sudah memuat sekolahId, tetapi detail jalur
-   * dimuat ulang saat modal dibuka agar tautan tidak memakai data
-   * lama/terpotong dan sekolahId selalu berasal dari server.
-   */
   const openTautan = (jalur) => {
     if (!jalur?.id) {
       setError(
@@ -554,9 +497,6 @@ export default function JalurPPDBPage() {
       });
   };
 
-  // =========================================================
-  // SUBMIT
-  // =========================================================
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -592,10 +532,6 @@ export default function JalurPPDBPage() {
       setError("");
       setSuccessMessage("");
 
-      // Payload mengikuti kontrak controller Backend:
-      // nama, deskripsi, kuota, tanggalMulai, tanggalSelesai, status.
-      // sekolahId TIDAK dikirim karena Backend mengambilnya dari token
-      // (tenant aktif), bukan dari body.
       const payload = {
         nama: form.nama.trim(),
         deskripsi:
@@ -636,8 +572,6 @@ export default function JalurPPDBPage() {
       setShowModal(false);
       setForm(emptyForm());
 
-      // Pastikan data yang baru disimpan benar-benar muncul kembali
-      // dari GET /api/jalur-ppdb, bukan hanya dari respons POST/PUT.
       const rows = await fetchJalur();
 
       if (
@@ -672,9 +606,6 @@ export default function JalurPPDBPage() {
     }
   };
 
-  // =========================================================
-  // DELETE
-  // =========================================================
 
   const confirmDelete =
     async () => {
@@ -729,9 +660,6 @@ export default function JalurPPDBPage() {
       }
     };
 
-  // =========================================================
-  // SIDEBAR
-  // =========================================================
 
   const toggleSidebar = () => {
     setIsCollapsed(
@@ -739,9 +667,6 @@ export default function JalurPPDBPage() {
     );
   };
 
-  // =========================================================
-  // RENDER
-  // =========================================================
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
@@ -772,9 +697,6 @@ export default function JalurPPDBPage() {
         <main className="flex-1 overflow-y-auto">
           <div className="mx-auto w-full max-w-[1320px] space-y-5 p-4 md:p-6 lg:p-8">
 
-            {/* =================================================
-                BREADCRUMB
-            ================================================= */}
 
             <div className="theme-text-muted flex items-center gap-1.5 text-xs">
               <span>PPDB</span>
@@ -786,9 +708,6 @@ export default function JalurPPDBPage() {
               </span>
             </div>
 
-            {/* =================================================
-                ERROR
-            ================================================= */}
 
             {displayedError && (
               <div className="flex items-center justify-between gap-3 rounded-lg border border-[color-mix(in_srgb,var(--color-danger)_22%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_8%,transparent)] px-4 py-3 text-xs text-[var(--color-danger)]">
@@ -832,9 +751,6 @@ export default function JalurPPDBPage() {
               </div>
             )}
 
-            {/* =================================================
-                SUMMARY
-            ================================================= */}
 
             <section className="grid grid-cols-2 gap-4 lg:grid-cols-4">
               <SummaryCard
@@ -875,9 +791,6 @@ export default function JalurPPDBPage() {
               />
             </section>
 
-            {/* =================================================
-                PANEL
-            ================================================= */}
 
             <section
               className={`theme-card overflow-hidden rounded-xl ${themeCardShadow}`}
@@ -885,7 +798,6 @@ export default function JalurPPDBPage() {
               <div
                 className={`flex flex-wrap items-center justify-between gap-3 border-b ${themeDivider} px-5 pb-4 pt-4`}
               >
-                {/* FILTER */}
 
                 <div className="flex items-center gap-5">
                   {STATUS_FILTERS.map(
@@ -916,7 +828,6 @@ export default function JalurPPDBPage() {
                   )}
                 </div>
 
-                {/* ACTIONS */}
 
                 <div className="flex items-center gap-3">
                   <button
@@ -978,13 +889,9 @@ export default function JalurPPDBPage() {
                 </div>
               </div>
 
-              {/* =================================================
-                  DAFTAR
-              ================================================= */}
 
               <div className="grid grid-cols-1 gap-4 p-5 md:grid-cols-2">
 
-                {/* LOADING */}
 
                 {(checkingAccess || (loading && canView)) && (
                   <>
@@ -1015,7 +922,6 @@ export default function JalurPPDBPage() {
                   </>
                 )}
 
-                {/* EMPTY */}
 
                 {!checkingAccess &&
                   canView &&
@@ -1031,7 +937,6 @@ export default function JalurPPDBPage() {
                     </p>
                   )}
 
-                {/* DATA */}
 
                 {!checkingAccess &&
                   canView &&
@@ -1053,7 +958,6 @@ export default function JalurPPDBPage() {
                           key={j.id}
                           className={`theme-card rounded-xl border ${themeNeutralBorder} p-4 transition-shadow hover:${themeCardShadow}`}
                         >
-                          {/* HEADER */}
 
                           <div className="flex items-start justify-between gap-2">
                             <div className="flex items-center gap-2.5">
@@ -1077,14 +981,12 @@ export default function JalurPPDBPage() {
                             />
                           </div>
 
-                          {/* DESCRIPTION */}
 
                           <p className="theme-text-secondary mt-2.5 text-xs leading-relaxed">
                             {j.deskripsi ||
                               "Tidak ada deskripsi."}
                           </p>
 
-                          {/* DATE */}
 
                           {(j.tanggalMulai ||
                             j.tanggalSelesai) && (
@@ -1110,7 +1012,6 @@ export default function JalurPPDBPage() {
                             </div>
                           )}
 
-                          {/* QUOTA */}
 
                           <div
                             className={`mt-4 flex items-center justify-between gap-2 border-t ${themeDivider} pt-3`}
@@ -1127,7 +1028,6 @@ export default function JalurPPDBPage() {
                             </span>
                           </div>
 
-                          {/* ACTIONS */}
 
                           <div
                             className={`mt-3.5 flex items-center justify-end gap-2 border-t ${themeDivider} pt-3`}
@@ -1198,7 +1098,6 @@ export default function JalurPPDBPage() {
               </div>
             </section>
 
-            {/* FOOTER */}
 
             <footer className="theme-text-muted py-3 text-center text-[11px]">
               © 2026 SmartSchool · Dashboard
@@ -1208,9 +1107,6 @@ export default function JalurPPDBPage() {
         </main>
       </div>
 
-      {/* =====================================================
-          MODAL TAMBAH / EDIT
-      ====================================================== */}
 
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[color-mix(in_srgb,var(--color-text)_38%,transparent)] p-4 backdrop-blur-sm">
@@ -1219,7 +1115,6 @@ export default function JalurPPDBPage() {
           >
             <div className="p-6">
 
-              {/* MODAL HEADER */}
 
               <div className="mb-5 flex items-center justify-between">
                 <h3 className="theme-text text-sm font-semibold">
@@ -1249,7 +1144,6 @@ export default function JalurPPDBPage() {
                 }
                 className="space-y-4"
               >
-                {/* ERROR */}
 
                 {error && (
                   <div className="rounded-md border border-[color-mix(in_srgb,var(--color-danger)_22%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_8%,transparent)] px-3 py-2 text-xs text-[var(--color-danger)]">
@@ -1257,7 +1151,6 @@ export default function JalurPPDBPage() {
                   </div>
                 )}
 
-                {/* NAMA */}
 
                 <div>
                   <label className="theme-text-secondary mb-1 block text-xs">
@@ -1285,7 +1178,6 @@ export default function JalurPPDBPage() {
                   </p>
                 </div>
 
-                {/* DESKRIPSI */}
 
                 <div>
                   <label className="theme-text-secondary mb-1 block text-xs">
@@ -1315,7 +1207,6 @@ export default function JalurPPDBPage() {
                   </p>
                 </div>
 
-                {/* KUOTA */}
 
                 <div>
                   <label className="theme-text-secondary mb-1 block text-xs">
@@ -1341,7 +1232,6 @@ export default function JalurPPDBPage() {
                   />
                 </div>
 
-                {/* TANGGAL MULAI */}
 
                 <div>
                   <label className="theme-text-secondary mb-1 block text-xs">
@@ -1365,7 +1255,6 @@ export default function JalurPPDBPage() {
                   />
                 </div>
 
-                {/* TANGGAL SELESAI */}
 
                 <div>
                   <label className="theme-text-secondary mb-1 block text-xs">
@@ -1389,7 +1278,6 @@ export default function JalurPPDBPage() {
                   />
                 </div>
 
-                {/* STATUS */}
 
                 <div>
                   <label className="theme-text-secondary mb-1 block text-xs">
@@ -1420,7 +1308,6 @@ export default function JalurPPDBPage() {
                   </select>
                 </div>
 
-                {/* BUTTON */}
 
                 <div className="flex items-center justify-end gap-2 pt-2">
                   <button
@@ -1454,9 +1341,6 @@ export default function JalurPPDBPage() {
         </div>
       )}
 
-      {/* =====================================================
-          MODAL HAPUS
-      ====================================================== */}
 
       {deleteTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[color-mix(in_srgb,var(--color-text)_38%,transparent)] p-4 backdrop-blur-sm">

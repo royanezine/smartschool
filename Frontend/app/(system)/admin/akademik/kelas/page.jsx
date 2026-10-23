@@ -32,9 +32,6 @@ import {
   getTahunAjaran,
 } from "@/services/tahunAjaran.service";
 
-// =========================================================
-// HELPER
-// =========================================================
 
 function getJenjangFromTingkat(tingkat) {
   const value = Number(tingkat);
@@ -117,9 +114,6 @@ function getSemesterTahunAjaran(item) {
   );
 }
 
-// =========================================================
-// STAT CARD
-// =========================================================
 
 function StatCard({
   icon: Icon,
@@ -168,9 +162,6 @@ function StatCard({
   );
 }
 
-// =========================================================
-// MAIN
-// =========================================================
 
 export default function AdminKelasPage() {
   const router = useRouter();
@@ -195,9 +186,6 @@ export default function AdminKelasPage() {
 
   const [error, setError] = useState("");
 
-  // =========================================================
-  // LOAD TAHUN AJARAN
-  // =========================================================
 
   const loadTahunAjaran = async () => {
     try {
@@ -253,9 +241,6 @@ export default function AdminKelasPage() {
     }
   };
 
-  // =========================================================
-  // LOAD KELAS
-  // =========================================================
 
   const loadKelas = async (isRefresh = false) => {
     try {
@@ -382,17 +367,11 @@ export default function AdminKelasPage() {
     }
   };
 
-  // =========================================================
-  // INITIAL LOAD
-  // =========================================================
 
   useEffect(() => {
     loadTahunAjaran();
   }, []);
 
-  // =========================================================
-  // LOAD KELAS
-  // =========================================================
 
   useEffect(() => {
     loadKelas(false);
@@ -404,9 +383,6 @@ export default function AdminKelasPage() {
     tahunAjaranFilter,
   ]);
 
-  // =========================================================
-  // TOTAL PAGE
-  // =========================================================
 
   const totalPages = Math.max(
     1,
@@ -415,9 +391,6 @@ export default function AdminKelasPage() {
     )
   );
 
-  // =========================================================
-  // SAFETY CURRENT PAGE
-  // =========================================================
 
   useEffect(() => {
     if (
@@ -431,9 +404,6 @@ export default function AdminKelasPage() {
     totalPages,
   ]);
 
-  // =========================================================
-  // DISPLAYED DATA
-  // =========================================================
 
   const displayedKelas = useMemo(() => {
     return Array.isArray(kelas)
@@ -441,9 +411,6 @@ export default function AdminKelasPage() {
       : [];
   }, [kelas]);
 
-  // =========================================================
-  // STATISTICS
-  // =========================================================
 
   const totalKelas = totalData;
 
@@ -473,9 +440,6 @@ export default function AdminKelasPage() {
     displayedKelas.length -
     totalWali;
 
-  // =========================================================
-  // REFRESH
-  // =========================================================
 
   const handleRefresh = async () => {
     await Promise.all([
@@ -484,9 +448,6 @@ export default function AdminKelasPage() {
     ]);
   };
 
-  // =========================================================
-  // DELETE
-  // =========================================================
 
   const handleDelete = async (item) => {
     const confirmed =
@@ -518,9 +479,6 @@ export default function AdminKelasPage() {
     }
   };
 
-  // =========================================================
-  // PAGINATION
-  // =========================================================
 
   const goToPage = (page) => {
     if (
@@ -583,9 +541,6 @@ export default function AdminKelasPage() {
     totalData
   );
 
-  // =========================================================
-  // LOADING
-  // =========================================================
 
   if (loading) {
     return (
@@ -635,14 +590,10 @@ export default function AdminKelasPage() {
     );
   }
 
-  // =========================================================
-  // PAGE
-  // =========================================================
 
   return (
     <div className="flex h-screen w-full overflow-hidden theme-page">
 
-      {/* SIDEBAR */}
 
       <Sidebar
         active="kelas"
@@ -651,11 +602,9 @@ export default function AdminKelasPage() {
         setCollapsed={setIsCollapsed}
       />
 
-      {/* CONTENT */}
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
 
-        {/* HEADER */}
 
         <Header
           toggleSidebar={() =>
@@ -672,7 +621,6 @@ export default function AdminKelasPage() {
           }}
         />
 
-        {/* MAIN */}
 
         <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
 
@@ -680,7 +628,6 @@ export default function AdminKelasPage() {
 
             <div className="w-full space-y-5">
 
-              {/* PAGE HEADER */}
 
               <section
                 className="
@@ -815,7 +762,6 @@ export default function AdminKelasPage() {
 
               </section>
 
-              {/* ERROR */}
 
               {error && (
                 <div
@@ -861,7 +807,6 @@ export default function AdminKelasPage() {
                 </div>
               )}
 
-              {/* STATISTICS */}
 
               <section className="grid grid-cols-2 gap-3 xl:grid-cols-4">
 
@@ -902,7 +847,6 @@ export default function AdminKelasPage() {
 
               </section>
 
-              {/* FILTER */}
 
               <section
                 className="
@@ -915,7 +859,6 @@ export default function AdminKelasPage() {
 
                 <div className="flex flex-col gap-3">
 
-                  {/* SEARCH */}
 
                   <div className="relative">
 
@@ -952,7 +895,6 @@ export default function AdminKelasPage() {
 
                   </div>
 
-                  {/* FILTER */}
 
                   <div className="flex flex-wrap items-center gap-2">
 
@@ -1070,7 +1012,6 @@ export default function AdminKelasPage() {
 
               </section>
 
-              {/* TABLE */}
 
               <section
                 className="
@@ -1289,7 +1230,6 @@ export default function AdminKelasPage() {
                                 "
                               >
 
-                                {/* NO */}
 
                                 <td className="px-4 py-4 text-center text-sm font-medium theme-text-muted">
                                   {(currentPage -
@@ -1299,7 +1239,6 @@ export default function AdminKelasPage() {
                                     1}
                                 </td>
 
-                                {/* KELAS */}
 
                                 <td className="px-4 py-4">
 
@@ -1331,7 +1270,6 @@ export default function AdminKelasPage() {
 
                                 </td>
 
-                                {/* TINGKAT */}
 
                                 <td className="px-4 py-4">
 
@@ -1347,7 +1285,6 @@ export default function AdminKelasPage() {
 
                                 </td>
 
-                                {/* WALI */}
 
                                 <td className="px-4 py-4">
 
@@ -1402,7 +1339,6 @@ export default function AdminKelasPage() {
 
                                 </td>
 
-                                {/* TAHUN AJARAN */}
 
                                 <td className="px-4 py-4">
 
@@ -1434,7 +1370,6 @@ export default function AdminKelasPage() {
 
                                 </td>
 
-                                {/* SISWA */}
 
                                 <td className="px-4 py-4">
 
@@ -1455,7 +1390,6 @@ export default function AdminKelasPage() {
 
                                 </td>
 
-                                {/* AKSI */}
 
                                 <td className="px-4 py-4">
 
@@ -1536,7 +1470,6 @@ export default function AdminKelasPage() {
 
                 </div>
 
-                {/* PAGINATION */}
 
                 {totalData > 0 && (
 
@@ -1703,7 +1636,6 @@ export default function AdminKelasPage() {
 
               </section>
 
-              {/* INFO */}
 
               <section className="grid grid-cols-1 gap-4 lg:grid-cols-2">
 
@@ -1791,7 +1723,6 @@ export default function AdminKelasPage() {
 
               </section>
 
-              {/* FOOTER */}
 
               <footer className="border-t theme-border py-5 text-center">
 

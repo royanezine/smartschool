@@ -20,15 +20,9 @@ import {
 export default function MenuFooterPage() {
   const router = useRouter();
 
-  // =========================
-  // SIDEBAR
-  // =========================
   const [active, setActive] = useState("menu");
   const [collapsed, setCollapsed] = useState(false);
 
-  // =========================
-  // MENU FOOTER DATA
-  // =========================
   const [menuItems, setMenuItems] = useState([
     {
       id: 1,
@@ -56,9 +50,6 @@ export default function MenuFooterPage() {
     },
   ]);
 
-  // =========================
-  // DELETE
-  // =========================
   const handleDelete = (id) => {
     if (
       !confirm(
@@ -71,9 +62,6 @@ export default function MenuFooterPage() {
     setMenuItems((prev) => prev.filter((item) => item.id !== id));
   };
 
-  // =========================
-  // MOVE MENU
-  // =========================
   const handleMove = (id, direction) => {
     setMenuItems((prev) => {
       const index = prev.findIndex((item) => item.id === id);
@@ -108,13 +96,9 @@ export default function MenuFooterPage() {
     });
   };
 
-  // =========================
-  // EMPTY STATE
-  // =========================
   if (menuItems.length === 0) {
     return (
       <div className="flex min-h-screen w-full overflow-x-hidden theme-page">
-        {/* SIDEBAR */}
         <div className="shrink-0">
           <Sidebar
             active={active}
@@ -124,7 +108,6 @@ export default function MenuFooterPage() {
           />
         </div>
 
-        {/* MAIN */}
         <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto theme-page">
           <Header
             title="Menu Footer"
@@ -134,7 +117,6 @@ export default function MenuFooterPage() {
           <div className="w-full px-3 py-5 sm:px-4 md:px-6 lg:px-8 xl:px-10">
             <div className="mx-auto w-full max-w-7xl space-y-5 sm:space-y-6">
 
-              {/* BREADCRUMB */}
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <nav className="min-w-0 max-w-full overflow-x-auto">
                   <ol className="flex w-max items-center gap-2 whitespace-nowrap text-xs font-medium theme-text-muted sm:text-sm">
@@ -195,7 +177,6 @@ export default function MenuFooterPage() {
                 </button>
               </div>
 
-              {/* EMPTY STATE */}
               <div className="rounded-xl border theme-border theme-card px-5 py-12 text-center shadow-sm sm:rounded-2xl sm:px-8 sm:py-16">
                 <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full theme-card-soft sm:h-16 sm:w-16">
                   <Footprints className="h-7 w-7 theme-text-muted sm:h-8 sm:w-8" />
@@ -217,15 +198,9 @@ export default function MenuFooterPage() {
     );
   }
 
-  // =========================
-  // MAIN PAGE
-  // =========================
   return (
     <div className="flex min-h-screen w-full overflow-x-hidden theme-page">
 
-      {/* =========================
-          SIDEBAR
-      ========================= */}
       <div className="shrink-0">
         <Sidebar
           active={active}
@@ -235,27 +210,17 @@ export default function MenuFooterPage() {
         />
       </div>
 
-      {/* =========================
-          MAIN
-      ========================= */}
       <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto theme-page">
 
-        {/* HEADER */}
         <Header
           title="Menu Footer"
           user={{ name: "Admin" }}
         />
 
-        {/* =========================
-            PAGE CONTENT
-        ========================= */}
         <div className="w-full px-3 py-5 sm:px-4 sm:py-6 md:px-6 lg:px-8 xl:px-10 lg:py-8">
 
           <div className="mx-auto w-full max-w-7xl space-y-5 sm:space-y-6">
 
-            {/* =========================
-                BREADCRUMB
-            ========================= */}
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 
               <nav className="min-w-0 max-w-full overflow-x-auto">
@@ -320,14 +285,10 @@ export default function MenuFooterPage() {
 
             </div>
 
-            {/* =========================
-                PAGE HEADER
-            ========================= */}
             <section className="w-full rounded-xl border theme-border theme-card p-4 shadow-sm sm:rounded-2xl sm:p-5 md:p-6">
 
               <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
 
-                {/* TITLE */}
                 <div className="flex min-w-0 items-start gap-3 sm:gap-4">
 
                   <div className="shrink-0 rounded-xl border theme-border theme-info p-2.5 sm:rounded-2xl sm:p-3">
@@ -347,7 +308,6 @@ export default function MenuFooterPage() {
 
                 </div>
 
-                {/* ADD BUTTON */}
                 <button
                   type="button"
                   onClick={() =>
@@ -387,12 +347,8 @@ export default function MenuFooterPage() {
 
             </section>
 
-            {/* =========================
-                MENU LIST
-            ========================= */}
             <section className="w-full overflow-hidden rounded-xl border theme-border theme-card shadow-sm sm:rounded-2xl">
 
-              {/* LIST HEADER */}
               <div className="flex items-center justify-between gap-3 border-b theme-border theme-card-soft px-4 py-3.5 sm:px-5 sm:py-4 md:px-6">
 
                 <h3 className="flex min-w-0 items-center gap-2 text-[10px] font-semibold uppercase tracking-wider theme-text-muted sm:text-xs">
@@ -411,9 +367,6 @@ export default function MenuFooterPage() {
 
               </div>
 
-              {/* =========================
-                  MENU ITEMS
-              ========================= */}
               <div className="divide-y divide-[var(--color-border)]">
 
                 {menuItems.map((item, index) => (
@@ -438,17 +391,12 @@ export default function MenuFooterPage() {
                     "
                   >
 
-                    {/* NUMBER */}
                     <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full theme-card-soft text-[10px] font-bold theme-text-muted shadow-sm sm:h-7 sm:w-7">
                       {index + 1}
                     </span>
 
-                    {/* DRAG */}
                     <GripVertical className="h-4 w-4 shrink-0 cursor-grab theme-text-placeholder transition-colors group-hover:theme-text-muted" />
 
-                    {/* =========================
-                        DETAIL
-                    ========================= */}
                     <div className="min-w-0">
 
                       <p className="truncate text-sm font-bold theme-text transition-colors group-hover:text-[var(--color-primary)]">
@@ -467,12 +415,8 @@ export default function MenuFooterPage() {
 
                     </div>
 
-                    {/* =========================
-                        ACTION
-                    ========================= */}
                     <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
 
-                      {/* MOVE */}
                       <div className="mr-0.5 flex overflow-hidden rounded-lg border theme-border theme-card shadow-sm sm:mr-2">
 
                         <button
@@ -526,7 +470,6 @@ export default function MenuFooterPage() {
 
                       </div>
 
-                      {/* EDIT */}
                       <button
                         type="button"
                         className="
@@ -543,7 +486,6 @@ export default function MenuFooterPage() {
                         <Pencil className="h-4 w-4" />
                       </button>
 
-                      {/* DELETE */}
                       <button
                         type="button"
                         onClick={() =>
@@ -571,9 +513,6 @@ export default function MenuFooterPage() {
 
               </div>
 
-              {/* =========================
-                  FOOTER LIST
-              ========================= */}
               <div className="flex items-center justify-end border-t theme-border theme-card-soft px-4 py-3 sm:px-6">
 
                 <span className="whitespace-nowrap rounded-full theme-card-soft px-2.5 py-1 text-[9px] font-medium theme-text-muted ring-1 ring-[var(--color-border)] sm:px-3 sm:text-[10px]">
@@ -584,9 +523,6 @@ export default function MenuFooterPage() {
 
             </section>
 
-            {/* =========================
-                TIPS
-            ========================= */}
             <section className="flex items-start gap-3 rounded-xl border theme-border theme-info p-4 shadow-sm sm:gap-4 sm:rounded-2xl sm:p-5">
 
               <div className="shrink-0 rounded-lg theme-info p-2 shadow-sm sm:p-2.5">

@@ -18,9 +18,6 @@ import {
   ChevronRight,
 } from "lucide-react";
 
-/* ================================================================
-   THEME HELPERS
-================================================================ */
 
 const themeCardShadow =
   "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
@@ -61,7 +58,6 @@ const themeNeutralBorder =
 const themeDivider =
   "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
 
-/* FIX: Variabel yang sebelumnya belum didefinisikan */
 const themeNeutralHover =
   "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)] hover:border-[color-mix(in_srgb,var(--color-text)_16%,transparent)]";
 
@@ -71,9 +67,6 @@ const themePrimaryButton =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-4 focus:ring-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]";
 
-/* ================================================================
-   INPUT STYLE
-================================================================ */
 
 const inputClass = `
   w-full
@@ -136,9 +129,6 @@ const fileInputClass = `
   hover:file:bg-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]
 `;
 
-/* ================================================================
-   PAGE
-================================================================ */
 
 export default function TambahSekolahPage() {
   const router = useRouter();
@@ -150,7 +140,6 @@ export default function TambahSekolahPage() {
   return (
     <div className="theme-page theme-text min-h-full">
       <div className="mx-auto w-full max-w-[1400px] px-4 py-5 sm:px-6 sm:py-7 lg:px-8 xl:px-10">
-        {/* BREADCRUMB */}
         <div className="mb-5 flex items-center gap-2 text-xs">
           <button
             type="button"
@@ -167,7 +156,6 @@ export default function TambahSekolahPage() {
           </span>
         </div>
 
-        {/* PAGE HEADER */}
         <div className="mb-7 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex min-w-0 items-center gap-3">
             <button
@@ -199,7 +187,6 @@ export default function TambahSekolahPage() {
             </div>
           </div>
 
-          {/* INFO CARD */}
           <div
             className={`hidden shrink-0 items-center gap-2.5 rounded-xl border theme-border theme-card px-3 py-2.5 ${themeCardShadow} md:flex`}
           >
@@ -220,14 +207,12 @@ export default function TambahSekolahPage() {
           </div>
         </div>
 
-        {/* FORM */}
         <form
           className="space-y-6"
           onSubmit={(event) => {
             event.preventDefault();
           }}
         >
-          {/* INFORMASI SEKOLAH */}
           <section
             className={`overflow-hidden rounded-2xl border theme-border theme-card ${themeCardShadow}`}
           >
@@ -339,7 +324,6 @@ export default function TambahSekolahPage() {
             </div>
           </section>
 
-          {/* ALAMAT SEKOLAH */}
           <section
             className={`overflow-hidden rounded-2xl border theme-border theme-card ${themeCardShadow}`}
           >
@@ -445,7 +429,6 @@ export default function TambahSekolahPage() {
             </div>
           </section>
 
-          {/* YAYASAN & PAKET */}
           <section
             className={`overflow-hidden rounded-2xl border theme-border theme-card ${themeCardShadow}`}
           >
@@ -533,7 +516,6 @@ export default function TambahSekolahPage() {
             </div>
           </section>
 
-          {/* ACTION BAR */}
           <div className={`border-t ${themeDivider} pt-5`}>
             <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
               <p className="hidden text-xs theme-text-muted sm:block">
@@ -566,9 +548,6 @@ export default function TambahSekolahPage() {
   );
 }
 
-/* ================================================================
-   REUSABLE FORM FIELD
-================================================================ */
 
 function FormField({
   label,

@@ -11,18 +11,6 @@ import {
   GraduationCap,
 } from "lucide-react";
 
-/**
- * app/admin/akademik/rapor/[id]/page.jsx
- *
- * Halaman detail Rapor satu siswa. Diakses dari
- * app/admin/akademik/rapor/page.jsx (klik siswa di dalam kelas).
- *
- * CATATAN DATA:
- * MOCK_SISWA & MOCK_NILAI masih dummy, id-nya harus sama dengan yang
- * dipakai di halaman daftar kelas (app/admin/akademik/rapor/page.jsx).
- * Kalau nanti nyambung ke API, ganti bagian `useMemo` yang mencari siswa
- * dengan fetch berdasarkan `params.id`.
- */
 
 const MAPEL = [
   {
@@ -458,9 +446,6 @@ export default function RaporDetailPage() {
       ).toFixed(2)
     : 0;
 
-  /* ============================================================
-     DATA SISWA TIDAK DITEMUKAN
-     ============================================================ */
 
   if (!siswa) {
     return (
@@ -543,9 +528,6 @@ export default function RaporDetailPage() {
         <main className="flex-1 overflow-y-auto print:overflow-visible theme-page">
           <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-4xl mx-auto print:max-w-full">
 
-            {/* ======================================================
-                NAV & AKSI
-                ====================================================== */}
 
             <div className="flex items-center justify-between print:hidden">
               <button
@@ -579,9 +561,6 @@ export default function RaporDetailPage() {
               </button>
             </div>
 
-            {/* ======================================================
-                KOP RAPOR
-                ====================================================== */}
 
             <div
               className="
@@ -631,7 +610,6 @@ export default function RaporDetailPage() {
                 </p>
               </div>
 
-              {/* IDENTITAS SISWA */}
               <div className="px-6 py-5 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3">
                 <div className="flex items-center gap-3">
                   <div className="p-2.5 rounded-lg theme-info print:hidden">
@@ -709,9 +687,6 @@ export default function RaporDetailPage() {
               </div>
             </div>
 
-            {/* ======================================================
-                TABEL NILAI MAPEL
-                ====================================================== */}
 
             <div
               className="
@@ -843,12 +818,8 @@ export default function RaporDetailPage() {
               </div>
             </div>
 
-            {/* ======================================================
-                SIKAP & KEHADIRAN
-                ====================================================== */}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              {/* SIKAP */}
               <div
                 className="
                   theme-card rounded-xl
@@ -895,7 +866,6 @@ export default function RaporDetailPage() {
                 </div>
               </div>
 
-              {/* KEHADIRAN */}
               <div
                 className="
                   theme-card rounded-xl
@@ -953,9 +923,6 @@ export default function RaporDetailPage() {
               </div>
             </div>
 
-            {/* ======================================================
-                CATATAN WALI KELAS
-                ====================================================== */}
 
             <div
               className="
@@ -987,9 +954,6 @@ export default function RaporDetailPage() {
               </div>
             </div>
 
-            {/* ======================================================
-                TANDA TANGAN
-                ====================================================== */}
 
             <div
               className="
@@ -1003,7 +967,6 @@ export default function RaporDetailPage() {
               "
             >
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
-                {/* ORANG TUA */}
                 <div>
                   <p className="text-sm theme-text-secondary">
                     Orang Tua/Wali
@@ -1022,7 +985,6 @@ export default function RaporDetailPage() {
                   </p>
                 </div>
 
-                {/* WALI KELAS */}
                 <div>
                   <p className="text-sm theme-text-secondary">
                     Wali Kelas
@@ -1041,7 +1003,6 @@ export default function RaporDetailPage() {
                   </p>
                 </div>
 
-                {/* KEPALA SEKOLAH */}
                 <div>
                   <p className="text-sm theme-text-secondary">
                     Kepala Sekolah

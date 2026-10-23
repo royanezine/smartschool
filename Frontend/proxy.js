@@ -42,12 +42,10 @@ export function proxy(request) {
   const hostname = host.split(":")[0].toLowerCase();
   const pathname = url.pathname;
 
-  // 1. Lewati API dan aset statis.
   if (isExcludedPath(pathname)) {
     return NextResponse.next();
   }
 
-  // 2. Proxy tenant hanya untuk subdomain .localhost.
   if (!hostname.endsWith(".localhost")) {
     return NextResponse.next();
   }
@@ -58,25 +56,21 @@ export function proxy(request) {
     return NextResponse.next();
   }
 
-  // 3. Kirim subdomain sekolah ke halaman.
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-school-subdomain", tenant);
 
-  // 4. Jangan rewrite halaman autentikasi.
   if (matchesRoute(pathname, AUTH_ROUTES)) {
     return NextResponse.next({
       request: { headers: requestHeaders },
     });
   }
 
-  // 5. Jangan rewrite halaman sistem.
   if (matchesRoute(pathname, SYSTEM_ROUTES)) {
     return NextResponse.next({
       request: { headers: requestHeaders },
     });
   }
 
-  // 6. Cegah tenant ditambahkan dua kali.
   const tenantPrefix = `/${tenant}`;
 
   if (
@@ -91,7 +85,6 @@ export function proxy(request) {
     return NextResponse.redirect(correctedUrl);
   }
 
-  // 7. Rewrite URL publik ke route internal tenant.
   const rewriteUrl = url.clone();
 
   rewriteUrl.pathname =

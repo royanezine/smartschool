@@ -30,9 +30,6 @@ import {
   X,
 } from "lucide-react";
 
-/* =========================================================
-   HELPERS
-========================================================= */
 
 function formatTime(value) {
   if (!value) return "--:--";
@@ -89,9 +86,6 @@ function getLateLimit(shift) {
   ).padStart(2, "0")}`;
 }
 
-/* =========================================================
-   PAGE
-========================================================= */
 
 export default function MasterShiftPage() {
   const router = useRouter();
@@ -121,9 +115,6 @@ export default function MasterShiftPage() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
 
-  /* =======================================================
-     LOAD DATA
-  ======================================================= */
 
   const loadShifts = useCallback(
     async (isRefresh = false) => {
@@ -172,12 +163,11 @@ export default function MasterShiftPage() {
   );
 
   useEffect(() => {
-    loadShifts();
+    Promise.resolve().then(() => {
+      loadShifts();
+    });
   }, [loadShifts]);
 
-  /* =======================================================
-     SEARCH & FILTER
-  ======================================================= */
 
   function handleSearchSubmit(event) {
     event.preventDefault();
@@ -197,9 +187,6 @@ export default function MasterShiftPage() {
     setPage(1);
   }
 
-  /* =======================================================
-     DELETE
-  ======================================================= */
 
   async function handleDelete() {
     if (!deleteTarget?.id || deleting) return;
@@ -220,9 +207,6 @@ export default function MasterShiftPage() {
     }
   }
 
-  /* =======================================================
-     SUMMARY
-  ======================================================= */
 
   const activeCount = shifts.filter((shift) => shift.status === "aktif").length;
   const assignedCount = shifts.reduce((sum, shift) => sum + shift.jumlahPegawai, 0);
@@ -231,9 +215,6 @@ export default function MasterShiftPage() {
   const firstItem = meta.total === 0 ? 0 : (page - 1) * limit + 1;
   const lastItem = Math.min(page * limit, meta.total);
 
-  /* =======================================================
-     RENDER
-  ======================================================= */
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
@@ -248,12 +229,9 @@ export default function MasterShiftPage() {
           <Header onMenuClick={() => setSidebarOpen(true)} />
         </div>
 
-        {/* HANYA area ini yang scroll */}
         <main className="min-w-0 flex-1 overflow-y-auto theme-page theme-text">
-          {/* Konten w-full: melebar saat zoom out */}
           <div className="w-full px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
             
-            {/* PAGE HEADER */}
             <div className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h1 className="text-2xl font-bold tracking-tight sm:text-3xl theme-text">
@@ -277,6 +255,15 @@ export default function MasterShiftPage() {
 
                 <button
                   type="button"
+                  onClick={() => router.push("/admin/presensi/penugasan-shift")}
+                  className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border theme-border theme-card px-3.5 text-sm font-semibold theme-text hover:bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)] transition"
+                >
+                  <Users size={16} />
+                  Penugasan Shift
+                </button>
+
+                <button
+                  type="button"
                   onClick={() => router.push("/admin/presensi/master-shift/tambah")}
                   className="inline-flex h-10 items-center justify-center gap-2 rounded-lg theme-primary px-4 text-sm font-semibold transition hover:opacity-90"
                 >
@@ -286,7 +273,6 @@ export default function MasterShiftPage() {
               </div>
             </div>
 
-            {/* ALERTS */}
             {error && (
               <div
                 role="alert"
@@ -326,15 +312,13 @@ export default function MasterShiftPage() {
               </div>
             )}
 
-            {/* SUMMARY GRID (2xl:grid-cols-6) */}
-            <div className="mb-7 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-6 gap-3">
+            <div className="mb-7 grid w-full grid-cols-1 items-stretch gap-3 min-[360px]:grid-cols-2 lg:grid-cols-4 sm:gap-4">
               <SummaryCard title="Total Shift" value={meta.total} description="Sesuai filter" icon={CalendarClock} />
               <SummaryCard title="Shift Aktif" value={activeCount} description="Halaman ini" icon={CheckCircle2} />
               <SummaryCard title="Pegawai" value={assignedCount} description="Halaman ini" icon={Users} />
               <SummaryCard title="Absensi" value={attendanceCount} description="Halaman ini" icon={ClipboardCheck} />
             </div>
 
-            {/* FILTERS + TABLE */}
             <section className="theme-card overflow-hidden rounded-xl border theme-border shadow-sm">
               <div className="border-b theme-border p-4 sm:p-5">
                 <div className="mb-4">
@@ -388,7 +372,6 @@ export default function MasterShiftPage() {
                 </form>
               </div>
 
-              {/* TABLE AREA */}
               <div className="relative">
                 {loading ? (
                   <div className="flex min-h-64 flex-col items-center justify-center px-4 text-center">
@@ -433,7 +416,6 @@ export default function MasterShiftPage() {
                   </div>
                 ) : (
                   <>
-                    {/* TABLE DENGAN OVERFLOW-X-AUTO */}
                     <div className="overflow-x-auto">
                       <table className="w-full min-w-[900px] text-left text-sm">
                         <thead className="bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] text-xs uppercase tracking-wide theme-text-muted border-b theme-border">
@@ -535,7 +517,6 @@ export default function MasterShiftPage() {
                       </table>
                     </div>
 
-                    {/* PAGINATION */}
                     <div className="flex flex-col gap-3 border-t theme-border px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
                       <p className="text-sm theme-text-muted">
                         Menampilkan <span className="font-semibold theme-text">{firstItem}–{lastItem}</span> dari{" "}
@@ -576,7 +557,6 @@ export default function MasterShiftPage() {
         </main>
       </div>
 
-      {/* DELETE CONFIRMATION */}
       {deleteTarget && (
         <div
           className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-[2px]"
@@ -638,13 +618,10 @@ export default function MasterShiftPage() {
   );
 }
 
-/* =========================================================
-   SUMMARY CARD
-========================================================= */
 
 function SummaryCard({ title, value, description, icon: Icon }) {
   return (
-    <div className="theme-card rounded-xl border theme-border p-5 shadow-sm">
+    <div className="theme-card h-full min-w-0 rounded-xl border theme-border p-4 shadow-sm sm:p-5">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="text-sm font-medium theme-text-muted">{title}</p>
@@ -662,9 +639,6 @@ function SummaryCard({ title, value, description, icon: Icon }) {
   );
 }
 
-/* =========================================================
-   ACTION BUTTON
-========================================================= */
 
 function ActionButton({ label, onClick, danger = false, children }) {
   return (

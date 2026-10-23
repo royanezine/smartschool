@@ -26,9 +26,6 @@ import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
 import { getUserById } from "@/services/user.service";
 
-/* =========================================================
-   HELPERS
-========================================================= */
 
 function getUserName(user) {
   return (
@@ -133,9 +130,6 @@ function formatDate(date) {
   });
 }
 
-/* =========================================================
-   INFO ITEM
-========================================================= */
 
 function InfoItem({ icon: Icon, label, value }) {
   return (
@@ -157,10 +151,6 @@ function InfoItem({ icon: Icon, label, value }) {
   );
 }
 
-/* =========================================================
-   DETAIL USER CONTENT
-   useSearchParams digunakan di dalam komponen ini.
-========================================================= */
 
 function DetailUserContent() {
   const router = useRouter();
@@ -172,9 +162,6 @@ function DetailUserContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  /* =======================================================
-     LOAD USER
-  ======================================================= */
 
   useEffect(() => {
     let cancelled = false;
@@ -231,9 +218,6 @@ function DetailUserContent() {
 
   const active = isActiveStatus(user?.status);
 
-  /* =======================================================
-     RENDER
-  ======================================================= */
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -249,7 +233,6 @@ function DetailUserContent() {
 
         <main className="px-4 py-6 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-6xl">
-            {/* HEADER */}
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <button
@@ -288,7 +271,6 @@ function DetailUserContent() {
               )}
             </div>
 
-            {/* ERROR */}
             {error && (
               <div className="mb-6 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-red-700">
                 <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
@@ -303,7 +285,6 @@ function DetailUserContent() {
               </div>
             )}
 
-            {/* LOADING */}
             {loading ? (
               <div className="flex min-h-[420px] items-center justify-center rounded-xl border border-slate-200 bg-white shadow-sm">
                 <div className="flex flex-col items-center gap-3 text-slate-500">
@@ -316,7 +297,6 @@ function DetailUserContent() {
               </div>
             ) : user ? (
               <div className="grid gap-6 lg:grid-cols-[300px_1fr]">
-                {/* LEFT PROFILE */}
                 <div className="h-fit rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
                   <div className="flex flex-col items-center text-center">
                     <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full bg-blue-50 text-blue-600">
@@ -408,9 +388,7 @@ function DetailUserContent() {
                   </div>
                 </div>
 
-                {/* RIGHT CONTENT */}
                 <div className="space-y-6">
-                  {/* INFORMASI AKUN */}
                   <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
                     <div className="mb-3 border-b border-slate-100 pb-4">
                       <h2 className="text-lg font-bold text-slate-900">
@@ -449,7 +427,6 @@ function DetailUserContent() {
                     </div>
                   </div>
 
-                  {/* DATA IDENTITAS */}
                   <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
                     <div className="mb-3 border-b border-slate-100 pb-4">
                       <h2 className="text-lg font-bold text-slate-900">
@@ -500,7 +477,6 @@ function DetailUserContent() {
                     </div>
                   </div>
 
-                  {/* INFORMASI SEKOLAH */}
                   <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
                     <div className="mb-3 border-b border-slate-100 pb-4">
                       <h2 className="text-lg font-bold text-slate-900">
@@ -539,7 +515,6 @@ function DetailUserContent() {
                     </div>
                   </div>
 
-                  {/* INFORMASI SISTEM */}
                   <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
                     <div className="mb-3 border-b border-slate-100 pb-4">
                       <h2 className="text-lg font-bold text-slate-900">
@@ -572,7 +547,6 @@ function DetailUserContent() {
                     </div>
                   </div>
 
-                  {/* PASSWORD */}
                   <div className="rounded-xl border border-amber-200 bg-amber-50 p-5">
                     <div className="flex gap-3">
                       <KeyRound className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
@@ -606,10 +580,6 @@ function DetailUserContent() {
   );
 }
 
-/* =========================================================
-   PAGE WRAPPER
-   Suspense menangani useSearchParams saat production build.
-========================================================= */
 
 export default function DetailUserPage() {
   return (

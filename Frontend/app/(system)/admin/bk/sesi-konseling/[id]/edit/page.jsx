@@ -119,7 +119,6 @@ export default function EditSesiKonselingPage() {
         <main className="flex-1 overflow-y-auto p-5 md:p-6 lg:p-8">
           <div className="mx-auto w-full max-w-[1200px]">
 
-            {/* HEADER */}
             <div className="mb-7 flex items-start gap-4">
               <button
                 type="button"
@@ -178,7 +177,6 @@ export default function EditSesiKonselingPage() {
               </div>
             </div>
 
-            {/* ERROR */}
             {error && (
               <div className="theme-danger mb-6 flex items-start gap-3 rounded-xl border px-4 py-3.5 text-sm font-semibold shadow-sm">
                 <svg
@@ -199,7 +197,6 @@ export default function EditSesiKonselingPage() {
               </div>
             )}
 
-            {/* LOADING */}
             {loading ? (
               <div className="theme-card theme-border rounded-2xl border p-12 text-center shadow-xl">
                 <div className="theme-text-muted inline-flex items-center gap-2 text-sm font-medium">
@@ -210,12 +207,10 @@ export default function EditSesiKonselingPage() {
             ) : (
               <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_340px]">
 
-                {/* FORM */}
                 <form
                   onSubmit={handleSubmit}
                   className="theme-card theme-border overflow-hidden rounded-2xl border shadow-xl"
                 >
-                  {/* FORM HEADER */}
                   <div className="theme-card-soft theme-border-soft flex items-center gap-3 border-b px-6 py-5">
                     <div className="theme-info flex h-9 w-9 items-center justify-center rounded-lg">
                       <svg
@@ -244,7 +239,6 @@ export default function EditSesiKonselingPage() {
                     </div>
                   </div>
 
-                  {/* FORM CONTENT */}
                   <div className="grid gap-5 p-6 md:grid-cols-2">
 
                     <Field label="Siswa ID" required>
@@ -424,7 +418,6 @@ export default function EditSesiKonselingPage() {
                     </div>
                   </div>
 
-                  {/* FORM ACTION */}
                   <div className="theme-card-soft theme-border-soft flex justify-end gap-3 border-t px-6 py-4">
                     <button
                       type="button"
@@ -485,10 +478,8 @@ export default function EditSesiKonselingPage() {
                   </div>
                 </form>
 
-                {/* SIDEBAR */}
                 <aside className="space-y-5">
 
-                  {/* LIVE PREVIEW */}
                   <div className="theme-card theme-border relative overflow-hidden rounded-2xl border p-6 shadow-xl">
                     <div className="theme-info absolute -right-8 -top-8 h-24 w-24 rounded-full opacity-30" />
 
@@ -575,7 +566,6 @@ export default function EditSesiKonselingPage() {
                     </div>
                   </div>
 
-                  {/* PERHATIAN */}
                   <div className="theme-warning relative overflow-hidden rounded-2xl border p-5 shadow-sm">
                     <div className="flex items-start gap-3">
                       <div className="theme-card flex h-9 w-9 shrink-0 items-center justify-center rounded-xl shadow-sm">
@@ -616,9 +606,6 @@ export default function EditSesiKonselingPage() {
   );
 }
 
-/* =========================================================
-   FIELD
-========================================================= */
 
 function Field({ label, children, required }) {
   return (
@@ -638,9 +625,6 @@ function Field({ label, children, required }) {
   );
 }
 
-/* =========================================================
-   PREVIEW ROW
-========================================================= */
 
 function PreviewRow({ label, value, badge }) {
   return (

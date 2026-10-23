@@ -31,9 +31,6 @@ import {
 
 import { apiFetch } from "../../../../../lib/api";
 
-/* ============================================================
-   HELPERS
-   ============================================================ */
 
 function normalizeResponse(response) {
   if (!response) return null;
@@ -268,9 +265,6 @@ function getUploadUrl(value) {
   return `${cleanBaseUrl}/${cleanPath}`;
 }
 
-/* ============================================================
-   STAT CARD
-   ============================================================ */
 
 function StatCard({
   label,
@@ -317,9 +311,6 @@ function StatCard({
   );
 }
 
-/* ============================================================
-   STATUS BADGE
-   ============================================================ */
 
 function StatusBadge({ status }) {
   return (
@@ -341,9 +332,6 @@ function StatusBadge({ status }) {
   );
 }
 
-/* ============================================================
-   JENIS BADGE
-   ============================================================ */
 
 function JenisBadge({ jenis }) {
   return (
@@ -357,9 +345,6 @@ function JenisBadge({ jenis }) {
   );
 }
 
-/* ============================================================
-   MAIN PAGE
-   ============================================================ */
 
 export default function PermohonanIzinGuruPage() {
   const [data, setData] = useState([]);
@@ -382,9 +367,6 @@ export default function PermohonanIzinGuruPage() {
 
   const [catatan, setCatatan] = useState("");
 
-  /* ============================================================
-     FETCH DATA
-     ============================================================ */
 
   const fetchData = useCallback(async (showRefresh = false) => {
     try {
@@ -418,9 +400,6 @@ export default function PermohonanIzinGuruPage() {
     fetchData();
   }, [fetchData]);
 
-  /* ============================================================
-     FILTER DATA
-     ============================================================ */
 
   const filteredData = useMemo(() => {
     const keyword = search.trim().toLowerCase();
@@ -454,9 +433,6 @@ export default function PermohonanIzinGuruPage() {
     });
   }, [data, search, statusFilter, jenisFilter]);
 
-  /* ============================================================
-     STATISTICS
-     ============================================================ */
 
   const statistics = useMemo(() => {
     return {
@@ -482,18 +458,12 @@ export default function PermohonanIzinGuruPage() {
     };
   }, [data]);
 
-  /* ============================================================
-     OPEN DETAIL
-     ============================================================ */
 
   const handleOpenDetail = (item) => {
     setSelected(item);
     setCatatan("");
   };
 
-  /* ============================================================
-     CLOSE DETAIL
-     ============================================================ */
 
   const handleCloseDetail = () => {
     if (processing) return;
@@ -502,9 +472,6 @@ export default function PermohonanIzinGuruPage() {
     setCatatan("");
   };
 
-  /* ============================================================
-     APPROVE
-     ============================================================ */
 
   const handleApprove = async () => {
     if (!selected || processing) return;
@@ -564,9 +531,6 @@ export default function PermohonanIzinGuruPage() {
     }
   };
 
-  /* ============================================================
-     REJECT
-     ============================================================ */
 
   const handleReject = async () => {
     if (!selected || processing) return;
@@ -631,9 +595,6 @@ export default function PermohonanIzinGuruPage() {
     }
   };
 
-  /* ============================================================
-     RESET FILTER
-     ============================================================ */
 
   const resetFilter = () => {
     setSearch("");
@@ -641,30 +602,18 @@ export default function PermohonanIzinGuruPage() {
     setJenisFilter("semua");
   };
 
-  /* ============================================================
-     RENDER
-     ============================================================ */
 
   return (
     <div className="theme-page flex min-h-screen">
-      {/* ========================================================
-          SIDEBAR
-      ======================================================== */}
 
       <Sidebar />
 
-      {/* ========================================================
-          CONTENT
-      ======================================================== */}
 
       <div className="flex min-w-0 flex-1 flex-col">
         <Header />
 
         <main className="flex-1 p-4 sm:p-6 lg:p-8">
           <div className="mx-auto w-full max-w-[1600px]">
-            {/* ==================================================
-                BREADCRUMB
-            ================================================== */}
 
             <div className="theme-text-muted mb-5 flex items-center gap-2 text-sm">
               <span>Guru</span>
@@ -676,9 +625,6 @@ export default function PermohonanIzinGuruPage() {
               </span>
             </div>
 
-            {/* ==================================================
-                PAGE HEADER
-            ================================================== */}
 
             <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div>
@@ -716,9 +662,6 @@ export default function PermohonanIzinGuruPage() {
               </button>
             </div>
 
-            {/* ==================================================
-                ERROR
-            ================================================== */}
 
             {error && (
               <div className="theme-danger mb-6 flex items-start gap-3 rounded-xl border p-4">
@@ -747,9 +690,6 @@ export default function PermohonanIzinGuruPage() {
               </div>
             )}
 
-            {/* ==================================================
-                STATISTICS
-            ================================================== */}
 
             <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
               <StatCard
@@ -785,9 +725,6 @@ export default function PermohonanIzinGuruPage() {
               />
             </div>
 
-            {/* ==================================================
-                FILTER
-            ================================================== */}
 
             <div className="theme-card mb-6 rounded-2xl border p-4 shadow-sm">
               <div className="mb-4 flex items-center gap-2">
@@ -802,7 +739,6 @@ export default function PermohonanIzinGuruPage() {
               </div>
 
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-                {/* SEARCH */}
 
                 <div className="relative xl:col-span-2">
                   <Search
@@ -821,7 +757,6 @@ export default function PermohonanIzinGuruPage() {
                   />
                 </div>
 
-                {/* STATUS */}
 
                 <select
                   value={statusFilter}
@@ -851,7 +786,6 @@ export default function PermohonanIzinGuruPage() {
                   </option>
                 </select>
 
-                {/* JENIS */}
 
                 <select
                   value={jenisFilter}
@@ -905,9 +839,6 @@ export default function PermohonanIzinGuruPage() {
               )}
             </div>
 
-            {/* ==================================================
-                CONTENT
-            ================================================== */}
 
             {loading ? (
               <div className="theme-card flex min-h-[400px] items-center justify-center rounded-2xl border shadow-sm">
@@ -957,9 +888,6 @@ export default function PermohonanIzinGuruPage() {
               </div>
             ) : (
               <div className="theme-card overflow-hidden rounded-2xl border shadow-sm">
-                {/* ==================================================
-                    TABLE HEADER
-                ================================================== */}
 
                 <div className="theme-table-header border-b px-5 py-4">
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -983,9 +911,6 @@ export default function PermohonanIzinGuruPage() {
                   </div>
                 </div>
 
-                {/* ==================================================
-                    TABLE
-                ================================================== */}
 
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[900px] text-left">
@@ -1041,7 +966,6 @@ export default function PermohonanIzinGuruPage() {
                             key={id || `${nama}-${tanggalMulai}`}
                             className="theme-table-hover transition-colors"
                           >
-                            {/* GURU */}
 
                             <td className="px-5 py-4">
                               <div className="flex items-center gap-3">
@@ -1061,13 +985,11 @@ export default function PermohonanIzinGuruPage() {
                               </div>
                             </td>
 
-                            {/* JENIS */}
 
                             <td className="px-5 py-4">
                               <JenisBadge jenis={jenis} />
                             </td>
 
-                            {/* TANGGAL */}
 
                             <td className="px-5 py-4">
                               <div className="flex items-start gap-2">
@@ -1097,7 +1019,6 @@ export default function PermohonanIzinGuruPage() {
                               </div>
                             </td>
 
-                            {/* DURASI */}
 
                             <td className="px-5 py-4">
                               <span className="theme-text text-sm font-medium">
@@ -1108,13 +1029,11 @@ export default function PermohonanIzinGuruPage() {
                               </span>
                             </td>
 
-                            {/* STATUS */}
 
                             <td className="px-5 py-4">
                               <StatusBadge status={status} />
                             </td>
 
-                            {/* ACTION */}
 
                             <td className="px-5 py-4 text-right">
                               <button
@@ -1140,13 +1059,9 @@ export default function PermohonanIzinGuruPage() {
         </main>
       </div>
 
-      {/* ==========================================================
-          DETAIL DRAWER / MODAL
-      ========================================================== */}
 
       {selected && (
         <div className="fixed inset-0 z-50">
-          {/* OVERLAY */}
 
           <button
             type="button"
@@ -1155,10 +1070,8 @@ export default function PermohonanIzinGuruPage() {
             className="absolute inset-0 h-full w-full cursor-default bg-black/40 backdrop-blur-[1px]"
           />
 
-          {/* PANEL */}
 
           <div className="theme-card absolute right-0 top-0 flex h-full w-full max-w-xl flex-col border-l shadow-2xl">
-            {/* HEADER */}
 
             <div className="theme-header flex items-center justify-between border-b px-5 py-4">
               <div className="flex min-w-0 items-center gap-3">
@@ -1190,10 +1103,8 @@ export default function PermohonanIzinGuruPage() {
               </button>
             </div>
 
-            {/* CONTENT */}
 
             <div className="flex-1 overflow-y-auto p-5">
-              {/* GURU PROFILE */}
 
               <div className="theme-card-soft mb-5 rounded-2xl border p-4">
                 <div className="flex items-center gap-4">
@@ -1219,7 +1130,6 @@ export default function PermohonanIzinGuruPage() {
                 </div>
               </div>
 
-              {/* DETAIL GRID */}
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="theme-card rounded-xl border p-4">
@@ -1261,7 +1171,6 @@ export default function PermohonanIzinGuruPage() {
                 </div>
               </div>
 
-              {/* DATE */}
 
               <div className="theme-card mt-4 rounded-xl border p-4">
                 <div className="mb-3 flex items-center gap-2">
@@ -1302,7 +1211,6 @@ export default function PermohonanIzinGuruPage() {
                 </div>
               </div>
 
-              {/* REASON */}
 
               <div className="theme-card mt-4 rounded-xl border p-4">
                 <div className="mb-3 flex items-center gap-2">
@@ -1321,7 +1229,6 @@ export default function PermohonanIzinGuruPage() {
                 </p>
               </div>
 
-              {/* ATTACHMENT */}
 
               {getLampiran(selected) && (
                 <div className="theme-card mt-4 rounded-xl border p-4">
@@ -1350,7 +1257,6 @@ export default function PermohonanIzinGuruPage() {
                 </div>
               )}
 
-              {/* CATATAN VERIFIKASI */}
 
               {(getStatus(selected) === "menunggu" ||
                 getStatus(selected) === "pending" ||
@@ -1380,7 +1286,6 @@ export default function PermohonanIzinGuruPage() {
               )}
             </div>
 
-            {/* FOOTER */}
 
             {(getStatus(selected) === "menunggu" ||
               getStatus(selected) === "pending" ||
@@ -1417,9 +1322,6 @@ export default function PermohonanIzinGuruPage() {
         </div>
       )}
 
-      {/* ==========================================================
-          APPROVE MODAL
-      ========================================================== */}
 
       {showApproveModal && selected && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
@@ -1516,9 +1418,6 @@ export default function PermohonanIzinGuruPage() {
         </div>
       )}
 
-      {/* ==========================================================
-          REJECT MODAL
-      ========================================================== */}
 
       {showRejectModal && selected && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">

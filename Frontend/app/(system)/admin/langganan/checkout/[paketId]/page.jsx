@@ -117,9 +117,6 @@ export default function CheckoutLanggananPage() {
         ? await extendSubscription(payload)
         : await createPayment(payload);
 
-      // Backend tidak mengembalikan order_id pada POST /bayar.
-      // Resolusi ID transaksi dari endpoint pending yang tersedia
-      // (GET /api/langganan/sekolah/pending).
       let orderId = result?.order_id ?? null;
 
       if (!orderId) {
@@ -144,7 +141,6 @@ export default function CheckoutLanggananPage() {
         return;
       }
 
-      // Fallback: langsung arahkan ke halaman pembayaran Midtrans.
       if (result?.payment_url) {
         window.location.href = result.payment_url;
         return;
@@ -178,7 +174,6 @@ export default function CheckoutLanggananPage() {
 
         <main className="flex-1 overflow-y-auto theme-page">
           <div className="mx-auto w-full max-w-5xl p-4 sm:p-6 lg:p-8 space-y-6">
-            {/* KEMBALI */}
             <button
               type="button"
               onClick={() => router.push("/admin/langganan/paket")}
@@ -188,7 +183,6 @@ export default function CheckoutLanggananPage() {
               Kembali ke Paket
             </button>
 
-            {/* HEADER */}
             <div className="flex items-center gap-3">
               <div
                 className={`p-2.5 rounded-xl ${themePrimarySoft} ${themePrimarySoftBorder} border text-[var(--color-primary)] ${themePrimaryShadow}`}
@@ -205,7 +199,6 @@ export default function CheckoutLanggananPage() {
               </div>
             </div>
 
-            {/* LOADING */}
             {loading && (
               <div className="theme-card theme-border rounded-xl border p-14 flex flex-col items-center gap-3">
                 <Loader2
@@ -218,7 +211,6 @@ export default function CheckoutLanggananPage() {
               </div>
             )}
 
-            {/* LOAD ERROR */}
             {!loading && loadError && (
               <div className="theme-danger rounded-xl border p-5 flex items-start gap-3">
                 <AlertCircle size={18} className="mt-0.5 shrink-0" />
@@ -231,7 +223,6 @@ export default function CheckoutLanggananPage() {
 
             {!loading && !loadError && paket && (
               <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-5">
-                {/* KIRI: DETAIL PAKET */}
                 <section className="theme-card theme-border rounded-xl border p-5 sm:p-6">
                   <div className="flex items-start gap-4">
                     <div
@@ -265,7 +256,6 @@ export default function CheckoutLanggananPage() {
                     </div>
                   </div>
 
-                  {/* SIKLUS */}
                   <div className="mt-6">
                     <p className="text-xs font-semibold theme-text-secondary">
                       Siklus Penagihan
@@ -292,7 +282,6 @@ export default function CheckoutLanggananPage() {
                     </div>
                   </div>
 
-                  {/* FITUR */}
                   {Array.isArray(paket.fitur) && paket.fitur.length > 0 && (
                     <div className="mt-6 theme-border-soft border-t pt-5">
                       <p className="text-xs font-semibold theme-text-secondary">
@@ -320,7 +309,6 @@ export default function CheckoutLanggananPage() {
                     </div>
                   )}
 
-                  {/* INFO PERPANJANGAN */}
                   {isPerpanjang && aktif?.tanggalBerakhir && (
                     <div
                       className={`mt-6 flex items-start gap-3 rounded-xl border ${themePrimarySoftBorder} ${themePrimarySoft} p-4`}
@@ -338,7 +326,6 @@ export default function CheckoutLanggananPage() {
                   )}
                 </section>
 
-                {/* KANAN: RINGKASAN */}
                 <section className="theme-card theme-border rounded-xl border p-5 sm:p-6 h-fit lg:sticky lg:top-6">
                   <h2 className="text-sm font-bold theme-text">
                     Ringkasan Pembayaran

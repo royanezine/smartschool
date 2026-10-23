@@ -3,14 +3,12 @@
 import { useEffect } from "react";
 
 import { getToken } from "@/lib/auth";
+import ThemeProvider from "@/app/components/ThemeProvider";
 
 const API_URL = (
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
 ).replace(/\/$/, "");
 
-/* ============================================================
-   APPLY SCHOOL THEME
-   ============================================================ */
 
 function applyTheme(tema) {
   if (typeof document === "undefined") return;
@@ -18,25 +16,6 @@ function applyTheme(tema) {
 
   const root = document.documentElement;
 
-  /*
-   * ==========================================================
-   * SCHOOL THEME
-   *
-   * Jangan mengubah:
-   * --color-page
-   * --background
-   * --color-card
-   * --color-input
-   * --color-sidebar
-   * --color-header
-   * --color-text
-   * --foreground
-   * --color-border
-   *
-   * Variable-variable tersebut dikelola oleh globals.css
-   * untuk Light Mode dan Dark Mode.
-   * ==========================================================
-   */
 
   if (tema.primary?.hex) {
     root.style.setProperty(
@@ -93,9 +72,6 @@ function applyTheme(tema) {
   );
 }
 
-/* ============================================================
-   RESET SCHOOL THEME
-   ============================================================ */
 
 function resetTheme() {
   if (typeof document === "undefined") return;
@@ -117,9 +93,6 @@ function resetTheme() {
   });
 }
 
-/* ============================================================
-   LOAD SCHOOL THEME
-   ============================================================ */
 
 async function loadSchoolTheme() {
   const token = getToken();
@@ -174,9 +147,6 @@ async function loadSchoolTheme() {
   }
 }
 
-/* ============================================================
-   SYSTEM LAYOUT
-   ============================================================ */
 
 export default function SystemLayout({ children }) {
   useEffect(() => {
@@ -187,5 +157,5 @@ export default function SystemLayout({ children }) {
     };
   }, []);
 
-  return children;
+  return <ThemeProvider>{children}</ThemeProvider>;
 }

@@ -22,9 +22,6 @@ import Sidebar from "@/app/components/Sidebar";
 
 import { createKategoriAset } from "@/services/sarpras.service";
 
-// ============================================================
-// GLOBAL THEME HELPERS
-// ============================================================
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -77,9 +74,6 @@ const themeWarningBorder =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-4 focus:ring-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]";
 
-// ============================================================
-// PAGE
-// ============================================================
 
 export default function TambahKategoriPage() {
   const router = useRouter();
@@ -94,9 +88,6 @@ export default function TambahKategoriPage() {
     status: "aktif",
   });
 
-  // ==========================================================
-  // HANDLE CHANGE
-  // ==========================================================
 
   function handleChange(e) {
     const { name, value } = e.target;
@@ -115,9 +106,6 @@ export default function TambahKategoriPage() {
     }
   }
 
-  // ==========================================================
-  // SUBMIT
-  // ==========================================================
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -171,9 +159,6 @@ export default function TambahKategoriPage() {
     }
   }
 
-  // ==========================================================
-  // CANCEL
-  // ==========================================================
 
   function handleCancel() {
     if (saving) return;
@@ -181,21 +166,12 @@ export default function TambahKategoriPage() {
     router.push("/admin/sarpras/kategori");
   }
 
-  // ==========================================================
-  // STATUS
-  // ==========================================================
 
   const isActive = form.status === "aktif";
 
-  // ==========================================================
-  // MAIN
-  // ==========================================================
 
   return (
     <div className="theme-page h-screen w-full overflow-hidden">
-      {/* ======================================================
-          SIDEBAR
-      ====================================================== */}
 
       <div className="fixed inset-y-0 left-0 z-50">
         <Sidebar
@@ -206,18 +182,12 @@ export default function TambahKategoriPage() {
         />
       </div>
 
-      {/* ======================================================
-          CONTENT AREA
-      ====================================================== */}
 
       <div
         className={`flex h-screen min-w-0 flex-col overflow-hidden transition-[margin] duration-300 ${
           isCollapsed ? "lg:ml-[88px]" : "lg:ml-[260px]"
         }`}
       >
-        {/* ====================================================
-            HEADER
-        ==================================================== */}
 
         <div className="shrink-0">
           <Header
@@ -231,17 +201,11 @@ export default function TambahKategoriPage() {
           />
         </div>
 
-        {/* ====================================================
-            MAIN
-        ==================================================== */}
 
         <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
           <div className="w-full px-4 pb-10 pt-5 sm:px-6 sm:pt-6 lg:px-8 lg:pt-7">
             <div className="mx-auto w-full max-w-[1280px]">
 
-              {/* ==================================================
-                  PAGE HEADER
-              ================================================== */}
 
               <div className="mb-7">
                 <Link
@@ -270,7 +234,6 @@ export default function TambahKategoriPage() {
                     </p>
                   </div>
 
-                  {/* MODUL BADGE */}
 
                   <div
                     className={`theme-card ${themeDivider} ${themeSmallShadow} hidden shrink-0 items-center gap-3 rounded-2xl border px-4 py-3 sm:flex`}
@@ -294,9 +257,6 @@ export default function TambahKategoriPage() {
                 </div>
               </div>
 
-              {/* ==================================================
-                  ERROR ALERT
-              ================================================== */}
 
               {error && (
                 <div
@@ -328,9 +288,6 @@ export default function TambahKategoriPage() {
                 </div>
               )}
 
-              {/* ==================================================
-                  SUCCESS ALERT
-              ================================================== */}
 
               {saved && (
                 <div
@@ -354,21 +311,14 @@ export default function TambahKategoriPage() {
                 </div>
               )}
 
-              {/* ==================================================
-                  MAIN GRID
-              ================================================== */}
 
               <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_390px]">
 
-                {/* =================================================
-                    LEFT - FORM
-                ================================================= */}
 
                 <form onSubmit={handleSubmit} className="min-w-0">
                   <div
                     className={`theme-card ${themeDivider} ${themeCardShadow} overflow-hidden rounded-3xl border`}
                   >
-                    {/* FORM HEADER */}
 
                     <div
                       className={`border-b ${themeDivider} ${themeInfoSurface} px-5 py-5 sm:px-7`}
@@ -400,11 +350,9 @@ export default function TambahKategoriPage() {
                       </div>
                     </div>
 
-                    {/* FORM BODY */}
 
                     <div className="space-y-7 p-5 sm:p-7">
 
-                      {/* NAMA KATEGORI */}
 
                       <section>
                         <div className="mb-5">
@@ -461,7 +409,6 @@ export default function TambahKategoriPage() {
                         </div>
                       </section>
 
-                      {/* STATUS */}
 
                       <section
                         className={`border-t ${themeDivider} pt-7`}
@@ -523,7 +470,6 @@ export default function TambahKategoriPage() {
                         </div>
                       </section>
 
-                      {/* INFORMATION */}
 
                       <div
                         className={`rounded-2xl border ${themeInfoBorder} ${themeInfoSurface} p-4`}
@@ -549,12 +495,10 @@ export default function TambahKategoriPage() {
                       </div>
                     </div>
 
-                    {/* FORM FOOTER */}
 
                     <div
                       className={`flex flex-col-reverse gap-3 border-t ${themeDivider} ${themeNeutralSurface} px-5 py-4 sm:flex-row sm:justify-end sm:px-7`}
                     >
-                      {/* BATAL */}
 
                       <button
                         type="button"
@@ -566,7 +510,6 @@ export default function TambahKategoriPage() {
                         Batal
                       </button>
 
-                      {/* SIMPAN */}
 
                       <button
                         type="submit"
@@ -592,15 +535,11 @@ export default function TambahKategoriPage() {
                   </div>
                 </form>
 
-                {/* =================================================
-                    RIGHT - PREVIEW
-                ================================================= */}
 
                 <aside className="min-w-0 xl:sticky xl:top-5">
                   <div
                     className={`theme-card ${themeDivider} ${themeCardShadow} overflow-hidden rounded-3xl border`}
                   >
-                    {/* PREVIEW HEADER */}
 
                     <div
                       className={`border-b ${themeDivider} px-5 py-5`}
@@ -634,16 +573,13 @@ export default function TambahKategoriPage() {
                       </div>
                     </div>
 
-                    {/* PREVIEW BODY */}
 
                     <div className="p-5">
 
-                      {/* PREVIEW CARD */}
 
                       <div
                         className={`relative overflow-hidden rounded-2xl p-5 ${themePrimaryGradient}`}
                       >
-                        {/* Decorative elements */}
 
                         <div className="pointer-events-none absolute -right-12 -top-12 h-36 w-36 rounded-full bg-[color-mix(in_srgb,var(--color-card)_12%,transparent)] blur-3xl" />
 
@@ -688,7 +624,6 @@ export default function TambahKategoriPage() {
                         </div>
                       </div>
 
-                      {/* STATUS CARD */}
 
                       <div
                         className={`mt-4 rounded-2xl border ${themeNeutralBorder} ${themeNeutralSurface} p-4`}
@@ -726,7 +661,6 @@ export default function TambahKategoriPage() {
                         </div>
                       </div>
 
-                      {/* DETAIL */}
 
                       <div
                         className={`mt-4 overflow-hidden rounded-2xl border ${themeNeutralBorder}`}
@@ -770,7 +704,6 @@ export default function TambahKategoriPage() {
                         </div>
                       </div>
 
-                      {/* PREVIEW NOTE */}
 
                       <div
                         className={`mt-4 rounded-2xl border ${themeInfoBorder} ${themeInfoSurface} p-4`}
@@ -789,7 +722,6 @@ export default function TambahKategoriPage() {
                       </div>
                     </div>
 
-                    {/* PREVIEW FOOTER */}
 
                     <div
                       className={`border-t ${themeDivider} ${themeNeutralSurface} px-5 py-4`}
@@ -809,9 +741,6 @@ export default function TambahKategoriPage() {
                 </aside>
               </div>
 
-              {/* =================================================
-                  FOOTER
-              ================================================= */}
 
               <div
                 className={`mt-7 border-t ${themeDivider} pt-5 text-center`}

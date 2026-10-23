@@ -36,9 +36,6 @@ import {
 
 import { getSessionUser } from "@/lib/auth";
 
-/* =========================================================
-   THEME HELPERS
-========================================================= */
 
 const themeCardShadow =
   "shadow-[0_8px_30px_color-mix(in_srgb,var(--color-text)_6%,transparent)]";
@@ -94,9 +91,6 @@ const themeDangerText =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]";
 
-/* =========================================================
-   HELPERS
-========================================================= */
 
 function unwrapValue(response) {
   if (response?.data !== undefined) {
@@ -156,11 +150,8 @@ function getErrorMessage(error, fallback) {
   );
 }
 
-// getToken diimpor dari @/lib/auth (single source of truth)
 
 function getStoredUser() {
-  // Identitas selalu berasal dari sesi aktif (lib/auth). Membaca
-  // localStorage("user") langsung berisiko menampilkan akun lain.
   return getSessionUser();
 }
 
@@ -596,9 +587,6 @@ function getPopularBooks(books, loans) {
     .slice(0, 5);
 }
 
-/* =========================================================
-   STATUS BADGE
-========================================================= */
 
 function LoanStatusBadge({ loan }) {
   const status = loan.status;
@@ -633,9 +621,6 @@ function LoanStatusBadge({ loan }) {
   );
 }
 
-/* =========================================================
-   BOOK DETAIL MODAL
-========================================================= */
 
 function BookDetailModal({
   book,
@@ -839,9 +824,6 @@ function BookDetailModal({
   );
 }
 
-/* =========================================================
-   MAIN PAGE
-========================================================= */
 
 export default function PerpustakaanSiswaPage() {
   const [mounted, setMounted] = useState(false);
@@ -1154,7 +1136,6 @@ export default function PerpustakaanSiswaPage() {
 
   return (
     <main className="min-w-0 flex-1 overflow-y-auto theme-page theme-text">
-      {/* Konten w-full: melebar saat zoom out, tidak dibatasi max-width */}
       <div
         className={`w-full space-y-6 px-4 py-5 transition-all duration-700 sm:px-6 sm:py-6 lg:px-8 ${
           mounted
@@ -1162,9 +1143,6 @@ export default function PerpustakaanSiswaPage() {
             : "translate-y-4 opacity-0"
         }`}
       >
-        {/* =====================================================
-            HERO
-        ====================================================== */}
 
         <section
           className={`relative overflow-hidden rounded-[28px] border ${themePrimaryBorder} ${themeCardShadow} bg-[color-mix(in_srgb,var(--color-primary)_10%,var(--color-card))]`}
@@ -1298,9 +1276,6 @@ export default function PerpustakaanSiswaPage() {
           </div>
         </section>
 
-        {/* =====================================================
-            ERROR
-        ====================================================== */}
 
         {error && (
           <div className="flex items-start gap-3 rounded-xl border border-red-500/20 bg-red-500/10 p-4">
@@ -1329,9 +1304,6 @@ export default function PerpustakaanSiswaPage() {
           </div>
         )}
 
-        {/* =====================================================
-            STAT CARDS — grid responsif dengan 2xl:grid-cols-6
-        ====================================================== */}
 
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-6">
           <div className={`theme-card ${themeNeutralBorder} ${themeSmallShadow} rounded-xl px-4 py-4`}>
@@ -1419,9 +1391,6 @@ export default function PerpustakaanSiswaPage() {
           </div>
         </div>
 
-        {/* =====================================================
-            CATALOG
-        ====================================================== */}
 
         <section
           id="katalog"
@@ -1576,7 +1545,6 @@ export default function PerpustakaanSiswaPage() {
                 </p>
               </div>
             ) : (
-              /* Grid buku diperluas ke 2xl:grid-cols-6 */
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6">
                 {recentBooks.map(
                   (book) => {
@@ -1748,9 +1716,6 @@ export default function PerpustakaanSiswaPage() {
           </div>
         </section>
 
-        {/* =====================================================
-            POPULAR + CATEGORY — diperluas ke 2xl
-        ====================================================== */}
 
         <section className="grid gap-5 xl:grid-cols-[1.25fr_.75fr] 2xl:grid-cols-[1.4fr_.6fr]">
           <div
@@ -2002,9 +1967,6 @@ export default function PerpustakaanSiswaPage() {
           </div>
         </section>
 
-        {/* =====================================================
-            MY LOANS
-        ====================================================== */}
 
         <section
           id="peminjaman"
@@ -2037,7 +1999,6 @@ export default function PerpustakaanSiswaPage() {
             </div>
           </div>
 
-          {/* overflow-x-auto agar daftar peminjaman tidak merusak layout di layar kecil */}
           <div className="overflow-x-auto p-5 sm:p-6">
             {loading ? (
               <div className="flex min-h-[180px] items-center justify-center">
@@ -2233,9 +2194,6 @@ export default function PerpustakaanSiswaPage() {
           </div>
         </section>
 
-        {/* =====================================================
-            RECENT TRANSACTIONS — diperluas ke 2xl
-        ====================================================== */}
 
         <section className="grid gap-5 xl:grid-cols-[1.15fr_.85fr] 2xl:grid-cols-[1.3fr_.7fr]">
           <div
@@ -2403,9 +2361,6 @@ export default function PerpustakaanSiswaPage() {
           </div>
         </section>
 
-        {/* =====================================================
-            FOOTER
-        ====================================================== */}
 
         <div
           className={`flex flex-col gap-3 border-t ${themeDivider} py-5 text-xs theme-text-muted sm:flex-row sm:items-center sm:justify-between`}
@@ -2433,9 +2388,6 @@ export default function PerpustakaanSiswaPage() {
         </div>
       </div>
 
-      {/* =======================================================
-          DETAIL MODAL
-      ======================================================= */}
 
       <BookDetailModal
         book={selectedBook}

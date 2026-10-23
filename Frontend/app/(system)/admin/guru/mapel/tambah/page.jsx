@@ -42,9 +42,6 @@ import {
   getUsers,
 } from "@/services/user.service";
 
-/* =========================================================
-   STATUS BADGE
-========================================================= */
 
 function StatusBadge({ status }) {
   const aktif = status === "aktif";
@@ -70,9 +67,6 @@ function StatusBadge({ status }) {
   );
 }
 
-/* =========================================================
-   RESPONSE DATA HELPER
-========================================================= */
 
 function getResponseData(response) {
   if (Array.isArray(response)) {
@@ -110,9 +104,6 @@ function getUserData(response) {
   return [];
 }
 
-/* =========================================================
-   PAGE
-========================================================= */
 
 export default function TambahMapelPage() {
   const router = useRouter();
@@ -157,17 +148,11 @@ export default function TambahMapelPage() {
   const [success, setSuccess] =
     useState(false);
 
-  /* =========================================================
-     SIDEBAR
-  ========================================================= */
 
   const toggleSidebar = () => {
     setIsCollapsed((prev) => !prev);
   };
 
-  /* =========================================================
-     LOAD KELAS + GURU
-  ========================================================= */
 
   useEffect(() => {
     let mounted = true;
@@ -230,9 +215,6 @@ export default function TambahMapelPage() {
     };
   }, []);
 
-  /* =========================================================
-     HANDLE FORM
-  ========================================================= */
 
   const handleChange = (
     field,
@@ -248,9 +230,6 @@ export default function TambahMapelPage() {
     }
   };
 
-  /* =========================================================
-     FILTER KELAS
-  ========================================================= */
 
   const filteredKelas = useMemo(() => {
     const keyword =
@@ -285,9 +264,6 @@ export default function TambahMapelPage() {
     kelasSearch,
   ]);
 
-  /* =========================================================
-     FILTER GURU
-  ========================================================= */
 
   const filteredGuru = useMemo(() => {
     const keyword =
@@ -328,9 +304,6 @@ export default function TambahMapelPage() {
     guruSearch,
   ]);
 
-  /* =========================================================
-     SELECTED GURU
-  ========================================================= */
 
   const selectedGuru = useMemo(() => {
     return guruList.find(
@@ -343,9 +316,6 @@ export default function TambahMapelPage() {
     form.guruPengajarId,
   ]);
 
-  /* =========================================================
-     SELECTED KELAS
-  ========================================================= */
 
   const selectedKelas = useMemo(() => {
     return kelasList.filter(
@@ -359,9 +329,6 @@ export default function TambahMapelPage() {
     selectedKelasIds,
   ]);
 
-  /* =========================================================
-     TOGGLE KELAS
-  ========================================================= */
 
   const toggleKelas = (
     kelasId
@@ -389,9 +356,6 @@ export default function TambahMapelPage() {
     }
   };
 
-  /* =========================================================
-     SELECT ALL KELAS
-  ========================================================= */
 
   const selectAllFilteredKelas =
     () => {
@@ -420,18 +384,12 @@ export default function TambahMapelPage() {
       }
     };
 
-  /* =========================================================
-     CLEAR KELAS
-  ========================================================= */
 
   const clearSelectedKelas =
     () => {
       setSelectedKelasIds([]);
     };
 
-  /* =========================================================
-     SUBMIT
-  ========================================================= */
 
   const handleSubmit = async (
     e
@@ -482,10 +440,6 @@ export default function TambahMapelPage() {
       setError("");
       setSuccess(false);
 
-      /* ======================================================
-         STEP 1
-         CREATE MATA PELAJARAN
-      ====================================================== */
 
       const mapelResponse =
         await createMataPelajaran({
@@ -512,10 +466,6 @@ export default function TambahMapelPage() {
         );
       }
 
-      /* ======================================================
-         STEP 2
-         CREATE KELAS MAPEL
-      ====================================================== */
 
       const relationResults =
         await Promise.allSettled(
@@ -581,9 +531,6 @@ export default function TambahMapelPage() {
     }
   };
 
-  /* =========================================================
-     BACK
-  ========================================================= */
 
   const handleBack = () => {
     if (saving) return;
@@ -593,9 +540,6 @@ export default function TambahMapelPage() {
     );
   };
 
-  /* =========================================================
-     RENDER
-  ========================================================= */
 
   return (
     <div className="flex h-screen w-full theme-page overflow-hidden">
@@ -631,7 +575,6 @@ export default function TambahMapelPage() {
 
             <div className="max-w-7xl mx-auto space-y-6">
 
-              {/* PAGE HEADER */}
 
               <div className="flex items-center gap-3">
 
@@ -687,7 +630,6 @@ export default function TambahMapelPage() {
 
               </div>
 
-              {/* SUCCESS */}
 
               {success && (
                 <div className="flex items-center gap-3 p-4 rounded-xl border theme-success">
@@ -721,7 +663,6 @@ export default function TambahMapelPage() {
                 </div>
               )}
 
-              {/* ERROR */}
 
               {error && (
                 <div className="flex items-start gap-3 p-4 rounded-xl border theme-danger">
@@ -749,7 +690,6 @@ export default function TambahMapelPage() {
                 </div>
               )}
 
-              {/* LOADING DATA */}
 
               {loadingData && (
                 <div className="flex items-center gap-3 p-4 rounded-xl border theme-info">
@@ -776,11 +716,9 @@ export default function TambahMapelPage() {
                 </div>
               )}
 
-              {/* CONTENT GRID */}
 
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
 
-                {/* LEFT FORM */}
 
                 <form
                   onSubmit={
@@ -797,7 +735,6 @@ export default function TambahMapelPage() {
                   "
                 >
 
-                  {/* FORM HEADER */}
 
                   <div className="px-6 py-5 border-b theme-border-soft theme-card-soft">
 
@@ -831,11 +768,9 @@ export default function TambahMapelPage() {
 
                   </div>
 
-                  {/* FORM BODY */}
 
                   <div className="p-6 space-y-7">
 
-                    {/* NAMA */}
 
                     <div>
 
@@ -898,7 +833,6 @@ export default function TambahMapelPage() {
 
                     </div>
 
-                    {/* KODE */}
 
                     <div>
 
@@ -962,7 +896,6 @@ export default function TambahMapelPage() {
 
                     </div>
 
-                    {/* STATUS */}
 
                     <div>
 
@@ -1020,7 +953,6 @@ export default function TambahMapelPage() {
 
                     </div>
 
-                    {/* GURU */}
 
                     <div>
 
@@ -1285,7 +1217,6 @@ export default function TambahMapelPage() {
 
                     </div>
 
-                    {/* KELAS */}
 
                     <div>
 
@@ -1639,7 +1570,6 @@ export default function TambahMapelPage() {
 
                   </div>
 
-                  {/* FORM FOOTER */}
 
                   <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3 px-6 py-5 border-t theme-border-soft theme-card-soft">
 
@@ -1724,11 +1654,9 @@ export default function TambahMapelPage() {
 
                 </form>
 
-                {/* RIGHT SIDE */}
 
                 <div className="space-y-6">
 
-                  {/* PREVIEW */}
 
                   <div className="theme-card rounded-2xl border theme-border shadow-sm overflow-hidden">
 
@@ -1870,7 +1798,6 @@ export default function TambahMapelPage() {
 
                   </div>
 
-                  {/* RELATION INFO */}
 
                   <div className="theme-info rounded-2xl border theme-border p-5">
 
@@ -1949,7 +1876,6 @@ export default function TambahMapelPage() {
 
                   </div>
 
-                  {/* BACKEND INFO */}
 
                   <div className="theme-card rounded-2xl border theme-border shadow-sm p-5">
 

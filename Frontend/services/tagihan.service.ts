@@ -1,20 +1,8 @@
 import { apiFetch } from "@/lib/api";
 
-/* =========================================================
-   TAGIHAN & PEMBAYARAN SERVICE
-   Base backend : /api/keuangan
-   Routes       : tagihan.routes.ts, pembayaran.routes.ts,
-                  jurnalKas.routes.ts (akun kas)
-   Auth         : Bearer token (dilampirkan oleh lib/api)
-   Role         : admin_sekolah, bendahara, kepala_sekolah (read)
-                  admin_sekolah, bendahara (write)
-========================================================= */
 
 const BASE_PATH = "/api/keuangan";
 
-/* =========================================================
-   TYPES
-========================================================= */
 
 export type StatusTagihan =
   | "belum_bayar"
@@ -187,9 +175,6 @@ export interface BayarTagihanPayload {
   catatan?: string;
 }
 
-/* =========================================================
-   HELPERS
-========================================================= */
 
 function buildQuery(
   params: Record<string, string | number | undefined>
@@ -207,14 +192,7 @@ function buildQuery(
   return query ? `?${query}` : "";
 }
 
-/* =========================================================
-   TAGIHAN
-========================================================= */
 
-/**
- * GET /api/keuangan/tagihan
- * Response: okPage -> { success, message, data, meta }
- */
 export async function getTagihan(
   params: TagihanQuery = {}
 ): Promise<PageResponse<Tagihan>> {
@@ -234,10 +212,6 @@ export async function getTagihan(
   return apiFetch(`${BASE_PATH}/tagihan${query}`, { method: "GET" });
 }
 
-/**
- * GET /api/keuangan/tagihan/ringkasan
- * Response: ok() -> { success, message, data: RingkasanTagihan }
- */
 export async function getRingkasanTagihan(
   params: { tahunAjaranId?: string } = {}
 ): Promise<ItemResponse<RingkasanTagihan>> {
@@ -248,10 +222,6 @@ export async function getRingkasanTagihan(
   });
 }
 
-/**
- * GET /api/keuangan/tagihan/:id
- * Response: ok() -> { success, message, data: Tagihan }
- */
 export async function getDetailTagihan(
   id: string
 ): Promise<ItemResponse<Tagihan>> {
@@ -264,10 +234,6 @@ export async function getDetailTagihan(
   });
 }
 
-/**
- * POST /api/keuangan/tagihan/generate
- * Response: ok(..., 201) -> { success, message, data: {...ringkasan generate} }
- */
 export async function generateTagihan(
   payload: GenerateTagihanPayload
 ): Promise<
@@ -304,10 +270,6 @@ export async function generateTagihan(
   });
 }
 
-/**
- * POST /api/keuangan/tagihan/:id/batal
- * Response: ok() -> { success, message, data: null }
- */
 export async function batalkanTagihan(id: string, alasan: string) {
   if (!id) {
     throw new Error("ID tagihan wajib diisi.");
@@ -323,14 +285,7 @@ export async function batalkanTagihan(id: string, alasan: string) {
   });
 }
 
-/* =========================================================
-   TUNGGAKAN
-========================================================= */
 
-/**
- * GET /api/keuangan/tunggakan
- * Response custom: { success, message, data, ringkasan, meta }
- */
 export async function getTunggakan(
   params: TunggakanQuery = {}
 ): Promise<
@@ -350,10 +305,6 @@ export async function getTunggakan(
   return apiFetch(`${BASE_PATH}/tunggakan${query}`, { method: "GET" });
 }
 
-/**
- * GET /api/keuangan/tunggakan/rekap-siswa
- * Response custom: { success, message, data, ringkasan, meta }
- */
 export async function getRekapTunggakanSiswa(
   params: TunggakanQuery = {}
 ) {
@@ -371,14 +322,7 @@ export async function getRekapTunggakanSiswa(
   });
 }
 
-/* =========================================================
-   PEMBAYARAN
-========================================================= */
 
-/**
- * POST /api/keuangan/pembayaran
- * Response: ok(..., 201) -> { success, message, data: { pembayaran, tagihan } }
- */
 export async function bayarTagihan(
   payload: BayarTagihanPayload
 ): Promise<ItemResponse<{ pembayaran: PembayaranTagihan; tagihan: unknown }>> {
@@ -415,10 +359,6 @@ export async function bayarTagihan(
   });
 }
 
-/**
- * GET /api/keuangan/pembayaran
- * Response custom: { success, message, data, ringkasan, meta }
- */
 export async function getPembayaran(
   params: {
     page?: number;
@@ -449,10 +389,6 @@ export async function getPembayaran(
   return apiFetch(`${BASE_PATH}/pembayaran${query}`, { method: "GET" });
 }
 
-/**
- * GET /api/keuangan/pembayaran/:id
- * Response: ok() -> { success, message, data: PembayaranTagihan }
- */
 export async function getDetailPembayaran(id: string) {
   if (!id) {
     throw new Error("ID pembayaran wajib diisi.");
@@ -463,10 +399,6 @@ export async function getDetailPembayaran(id: string) {
   });
 }
 
-/**
- * POST /api/keuangan/pembayaran/:id/batal
- * Response: ok() -> { success, message, data: {...} }
- */
 export async function batalkanPembayaran(id: string, alasan: string) {
   if (!id) {
     throw new Error("ID pembayaran wajib diisi.");
@@ -485,10 +417,6 @@ export async function batalkanPembayaran(id: string, alasan: string) {
   );
 }
 
-/* =========================================================
-   AKUN KAS  (dipakai untuk memilih akun saat pembayaran)
-   GET /api/keuangan/akun-kas
-========================================================= */
 
 export async function getAkunKas(
   params: { status?: string } = {}

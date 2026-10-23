@@ -73,9 +73,6 @@ export default function PengaturanSiswaPage() {
   );
 }
 
-/* =========================================================
-   KARTU PENGATURAN
-========================================================= */
 
 function SettingsCard({ icon: Icon, title, desc, children }) {
   return (
@@ -100,9 +97,6 @@ function SettingsCard({ icon: Icon, title, desc, children }) {
   );
 }
 
-/* =========================================================
-   KEAMANAN / UBAH KATA SANDI
-========================================================= */
 
 function KeamananSection({ onSuccess, onError }) {
   const [sandiLama, setSandiLama] = useState("");

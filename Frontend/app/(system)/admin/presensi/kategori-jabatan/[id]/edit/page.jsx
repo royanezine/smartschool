@@ -22,9 +22,6 @@ import {
   Info,
 } from "lucide-react";
 
-/* =========================================================
-   HELPERS
-========================================================= */
 
 function getErrorMessage(error) {
   return error instanceof Error
@@ -65,9 +62,6 @@ function Field({ label, required, hint, number, children }) {
   );
 }
 
-/* =========================================================
-   HALAMAN EDIT
-========================================================= */
 
 export default function EditKategoriJabatanPage() {
   const params = useParams();
@@ -88,9 +82,6 @@ export default function EditKategoriJabatanPage() {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
 
-  /* =======================================================
-     LOAD DETAIL
-  ======================================================= */
 
   const loadDetail = useCallback(async () => {
     if (!id) return;
@@ -124,9 +115,6 @@ export default function EditKategoriJabatanPage() {
     return () => clearTimeout(timeout);
   }, [notice]);
 
-  /* =======================================================
-     FORM
-  ======================================================= */
 
   function updateForm(field, value) {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -155,7 +143,6 @@ export default function EditKategoriJabatanPage() {
 
       setNotice("Kategori jabatan berhasil diperbarui.");
 
-      // Redirect ke halaman detail setelah sukses
       setTimeout(() => {
         router.push(`/admin/presensi/kategori-jabatan/${id}`);
       }, 800);
@@ -171,9 +158,6 @@ export default function EditKategoriJabatanPage() {
     router.push(`/admin/presensi/kategori-jabatan/${id}`);
   }
 
-  /* =======================================================
-     RENDER
-  ======================================================= */
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
@@ -191,9 +175,6 @@ export default function EditKategoriJabatanPage() {
         <main className="min-w-0 flex-1 overflow-y-auto theme-page theme-text">
           <div className="w-full px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
             <div className="mx-auto w-full max-w-5xl space-y-6">
-              {/* ============================================
-                  PAGE HEADER
-              ============================================ */}
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div className="flex items-start gap-3">
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
@@ -230,9 +211,6 @@ export default function EditKategoriJabatanPage() {
                 </button>
               </div>
 
-              {/* ============================================
-                  NOTICE
-              ============================================ */}
               {notice && (
                 <div
                   role="status"
@@ -243,9 +221,6 @@ export default function EditKategoriJabatanPage() {
                 </div>
               )}
 
-              {/* ============================================
-                  ERROR
-              ============================================ */}
               {error && (
                 <div
                   role="alert"
@@ -259,9 +234,6 @@ export default function EditKategoriJabatanPage() {
                 </div>
               )}
 
-              {/* ============================================
-                  LOADING / FORM
-              ============================================ */}
               {loading ? (
                 <div className="flex min-h-[300px] flex-col items-center justify-center gap-3 theme-card rounded-xl border theme-border">
                   <LoaderCircle
@@ -277,9 +249,6 @@ export default function EditKategoriJabatanPage() {
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-6">
-                  {/* ============================================
-                      IDENTITAS KATEGORI
-                  ============================================ */}
                   <section className="theme-card overflow-hidden rounded-xl border theme-border shadow-sm">
                     <div className="flex items-start gap-3 border-b theme-border p-5 sm:p-6">
                       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
@@ -360,9 +329,6 @@ export default function EditKategoriJabatanPage() {
                     </div>
                   </section>
 
-                  {/* ============================================
-                      INFO TARIF
-                  ============================================ */}
                   <div className="flex items-start gap-2 rounded-lg border border-blue-200 bg-blue-50/70 p-4 text-sm text-blue-900 dark:border-blue-900/60 dark:bg-blue-950/30 dark:text-blue-200">
                     <Info size={18} className="mt-0.5 shrink-0" />
                     <p className="leading-6">
@@ -376,9 +342,6 @@ export default function EditKategoriJabatanPage() {
                     </p>
                   </div>
 
-                  {/* ============================================
-                      ACTION BUTTONS
-                  ============================================ */}
                   <div className="flex flex-col-reverse gap-3 border-t theme-border pt-5 sm:flex-row sm:justify-end">
                     <button
                       type="button"

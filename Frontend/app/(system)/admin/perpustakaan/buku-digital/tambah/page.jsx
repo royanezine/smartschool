@@ -15,9 +15,6 @@ import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
 import { createBuku } from "@/services/perpustakaan.service";
 
-/* =========================================================
-   CONSTANTS
-========================================================= */
 
 const initialForm = {
   kodeBuku: "",
@@ -45,9 +42,6 @@ const selectClass =
 const labelClass =
   "theme-text-secondary mb-2 block text-xs font-semibold";
 
-/* =========================================================
-   PAGE
-========================================================= */
 
 export default function TambahBukuPage() {
   const router = useRouter();

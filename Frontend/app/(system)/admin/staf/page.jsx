@@ -24,9 +24,6 @@ import {
   Printer,
 } from "lucide-react";
 
-// ======================================================
-// THEME HELPERS
-// ======================================================
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -88,9 +85,6 @@ const themeDangerBorder =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-// ======================================================
-// DATA DUMMY
-// ======================================================
 
 const generateDummyData = () => {
   const names = [
@@ -264,9 +258,6 @@ const statusOptions = [
   "Trial",
 ];
 
-// ======================================================
-// STATUS THEME
-// ======================================================
 
 const statusColorMap = {
   Aktif: {
@@ -291,9 +282,6 @@ const statusColorMap = {
   },
 };
 
-// ======================================================
-// ROLE THEME
-// ======================================================
 
 const roleColorMap = {
   "Super Admin": {
@@ -327,9 +315,6 @@ const roleColorMap = {
   },
 };
 
-// ======================================================
-// UTILITY
-// ======================================================
 
 const formatTanggal = (dateString) => {
   if (!dateString) return "-";
@@ -358,9 +343,6 @@ const timeAgo = (dateString) => {
   return formatTanggal(dateString);
 };
 
-// ======================================================
-// KOMPONEN UTAMA
-// ======================================================
 
 export default function StafPage() {
   const router = useRouter();
@@ -392,9 +374,6 @@ export default function StafPage() {
     },
   ];
 
-  // ======================================================
-  // MOBILE CHECK
-  // ======================================================
 
   useEffect(() => {
     const checkMobile = () =>
@@ -411,9 +390,6 @@ export default function StafPage() {
       );
   }, []);
 
-  // ======================================================
-  // FILTER
-  // ======================================================
 
   const filteredData = stafData.filter((item) => {
     const query = searchQuery.toLowerCase();
@@ -434,9 +410,6 @@ export default function StafPage() {
     return matchSearch && matchRole && matchStatus;
   });
 
-  // ======================================================
-  // SORT
-  // ======================================================
 
   const sortedData = [...filteredData].sort((a, b) => {
     const valA =
@@ -454,9 +427,6 @@ export default function StafPage() {
     return 0;
   });
 
-  // ======================================================
-  // PAGINATION
-  // ======================================================
 
   const totalPages = Math.max(
     1,
@@ -473,9 +443,6 @@ export default function StafPage() {
     startIndex + itemsPerPage
   );
 
-  // ======================================================
-  // ACTION
-  // ======================================================
 
   const handleSort = (field) => {
     if (sortField === field) {
@@ -523,9 +490,6 @@ export default function StafPage() {
     }
   };
 
-  // ======================================================
-  // EXPORT CSV
-  // ======================================================
 
   const exportCSV = () => {
     const headers = [
@@ -574,9 +538,6 @@ export default function StafPage() {
     URL.revokeObjectURL(url);
   };
 
-  // ======================================================
-  // EXPORT EXCEL
-  // ======================================================
 
   const exportExcel = () => {
     const headers = [
@@ -665,9 +626,6 @@ export default function StafPage() {
     URL.revokeObjectURL(url);
   };
 
-  // ======================================================
-  // EXPORT PDF
-  // ======================================================
 
   const exportPDF = () => {
     const printWindow = window.open(
@@ -793,16 +751,10 @@ export default function StafPage() {
     };
   };
 
-  // ======================================================
-  // RENDER
-  // ======================================================
 
   return (
     <div className="flex min-h-screen theme-page">
 
-      {/* ==================================================
-          SIDEBAR
-      ================================================== */}
 
       <Sidebar
         active={activeMenu}
@@ -813,9 +765,6 @@ export default function StafPage() {
         }
       />
 
-      {/* ==================================================
-          MAIN
-      ================================================== */}
 
       <div className="flex-1 flex flex-col min-w-0">
 
@@ -834,9 +783,6 @@ export default function StafPage() {
         <main className="flex-1 p-4 sm:p-6 lg:p-8">
           <div className="w-full space-y-5 sm:space-y-6">
 
-            {/* ==================================================
-                HEADER
-            ================================================== */}
 
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
 
@@ -876,7 +822,6 @@ export default function StafPage() {
 
               <div className="flex flex-wrap items-center gap-2.5">
 
-                {/* EXPORT */}
 
                 <div className="relative group">
 
@@ -918,7 +863,6 @@ export default function StafPage() {
                   </div>
                 </div>
 
-                {/* REFRESH */}
 
                 <button
                   onClick={() =>
@@ -930,7 +874,6 @@ export default function StafPage() {
                   <span>Refresh</span>
                 </button>
 
-                {/* TAMBAH */}
 
                 <button
                   onClick={() =>
@@ -945,9 +888,6 @@ export default function StafPage() {
               </div>
             </div>
 
-            {/* ==================================================
-                STATISTIK
-            ================================================== */}
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
 
@@ -981,9 +921,6 @@ export default function StafPage() {
 
             </div>
 
-            {/* ==================================================
-                FILTER
-            ================================================== */}
 
             <div
               className={`theme-card rounded-xl border ${themeNeutralBorder} p-4 ${themeCardShadow}`}
@@ -1061,15 +998,11 @@ export default function StafPage() {
               </div>
             </div>
 
-            {/* ==================================================
-                TABLE
-            ================================================== */}
 
             <div
               className={`theme-card rounded-xl border ${themeNeutralBorder} ${themeCardShadow} overflow-hidden`}
             >
 
-              {/* MOBILE */}
 
               {isMobile &&
               paginatedData.length > 0 ? (
@@ -1165,7 +1098,6 @@ export default function StafPage() {
 
                   <table className="w-full text-sm">
 
-                    {/* TABLE HEADER */}
 
                     <thead>
                       <tr
@@ -1235,7 +1167,6 @@ export default function StafPage() {
                       className={`divide-y ${themeDivider}`}
                     >
 
-                      {/* EMPTY */}
 
                       {paginatedData.length ===
                       0 ? (
@@ -1296,7 +1227,6 @@ export default function StafPage() {
                                 className={`${themeNeutralHover} transition-colors`}
                               >
 
-                                {/* NO */}
 
                                 <td
                                   className={`px-4 py-3 text-sm font-semibold ${themePrimaryText} text-center`}
@@ -1304,7 +1234,6 @@ export default function StafPage() {
                                   {rowNumber}
                                 </td>
 
-                                {/* NAMA */}
 
                                 <td className="px-4 py-3">
 
@@ -1324,19 +1253,16 @@ export default function StafPage() {
 
                                 </td>
 
-                                {/* EMAIL */}
 
                                 <td className="hidden md:table-cell px-4 py-3 theme-text-secondary text-sm truncate max-w-[150px]">
                                   {item.email}
                                 </td>
 
-                                {/* TELEPON */}
 
                                 <td className="hidden sm:table-cell px-4 py-3 theme-text-secondary text-sm">
                                   {item.telepon}
                                 </td>
 
-                                {/* ROLE */}
 
                                 <td className="px-4 py-3">
 
@@ -1348,7 +1274,6 @@ export default function StafPage() {
 
                                 </td>
 
-                                {/* STATUS */}
 
                                 <td className="px-4 py-3">
 
@@ -1366,7 +1291,6 @@ export default function StafPage() {
 
                                 </td>
 
-                                {/* LOGIN */}
 
                                 <td className="hidden lg:table-cell px-4 py-3 text-xs theme-text-secondary">
                                   {timeAgo(
@@ -1374,13 +1298,11 @@ export default function StafPage() {
                                   )}
                                 </td>
 
-                                {/* AKSI */}
 
                                 <td className="px-4 py-3 text-right">
 
                                   <div className="flex items-center justify-end gap-0.5">
 
-                                    {/* DETAIL */}
 
                                     <button
                                       onClick={() =>
@@ -1394,7 +1316,6 @@ export default function StafPage() {
                                       <Eye size={15} />
                                     </button>
 
-                                    {/* EDIT */}
 
                                     <button
                                       onClick={() =>
@@ -1408,7 +1329,6 @@ export default function StafPage() {
                                       <Edit size={15} />
                                     </button>
 
-                                    {/* DELETE */}
 
                                     <button
                                       onClick={() =>
@@ -1438,9 +1358,6 @@ export default function StafPage() {
                 </div>
               )}
 
-              {/* ==================================================
-                  PAGINATION
-              ================================================== */}
 
               {sortedData.length > 0 && (
                 <div
@@ -1492,7 +1409,6 @@ export default function StafPage() {
 
                   <div className="flex items-center gap-0.5">
 
-                    {/* PREVIOUS */}
 
                     <button
                       onClick={() =>
@@ -1515,7 +1431,6 @@ export default function StafPage() {
                       </span>
                     </button>
 
-                    {/* PAGE NUMBERS */}
 
                     {[
                       ...Array(
@@ -1545,7 +1460,6 @@ export default function StafPage() {
                       );
                     })}
 
-                    {/* LAST PAGE */}
 
                     {totalPages > 5 && (
                       <>
@@ -1571,7 +1485,6 @@ export default function StafPage() {
                       </>
                     )}
 
-                    {/* NEXT */}
 
                     <button
                       onClick={() =>
@@ -1603,9 +1516,6 @@ export default function StafPage() {
               )}
             </div>
 
-            {/* ==================================================
-                FOOTER
-            ================================================== */}
 
             <div
               className={`text-center text-xs theme-text-muted py-2 border-t ${themeDivider}`}
@@ -1621,9 +1531,6 @@ export default function StafPage() {
   );
 }
 
-// ======================================================
-// STAT CARD
-// ======================================================
 
 function StatCard({
   label,

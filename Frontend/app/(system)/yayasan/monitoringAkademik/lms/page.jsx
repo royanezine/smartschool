@@ -42,9 +42,6 @@ import {
   Cell,
 } from "recharts";
 
-// ============================================================
-// DUMMY DATA
-// ============================================================
 
 const JENJANG_OPTIONS = ["Semua Jenjang", "SD", "SMP", "SMA"];
 
@@ -241,9 +238,6 @@ const kontenIcon = {
   kuis: ClipboardList,
 };
 
-// ============================================================
-// THEME HELPERS
-// ============================================================
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -302,9 +296,6 @@ const themeDangerBorder =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-// ============================================================
-// STATUS STYLE
-// ============================================================
 
 function statusStyle(status) {
   switch (status) {
@@ -322,9 +313,6 @@ function statusStyle(status) {
   }
 }
 
-// ============================================================
-// BAR COLOR
-// ============================================================
 
 function barColor(value) {
   if (value >= 80) {
@@ -338,9 +326,6 @@ function barColor(value) {
   return "bg-[var(--color-primary)]";
 }
 
-// ============================================================
-// MAIN COMPONENT
-// ============================================================
 
 export default function MonitoringLmsPage() {
   const [jenjang, setJenjang] = useState(JENJANG_OPTIONS[0]);
@@ -348,9 +333,6 @@ export default function MonitoringLmsPage() {
   const [status, setStatus] = useState(STATUS_OPTIONS[0]);
   const [search, setSearch] = useState("");
 
-  // ============================================================
-  // FILTER SEKOLAH
-  // ============================================================
 
   const filteredSekolah = useMemo(() => {
     return dataSekolah
@@ -370,9 +352,6 @@ export default function MonitoringLmsPage() {
       .sort((a, b) => b.engagement - a.engagement);
   }, [jenjang, status, search]);
 
-  // ============================================================
-  // SUMMARY
-  // ============================================================
 
   const summary = useMemo(() => {
     const total = filteredSekolah.length;
@@ -416,9 +395,6 @@ export default function MonitoringLmsPage() {
     };
   }, [filteredSekolah]);
 
-  // ============================================================
-  // TREND USER
-  // ============================================================
 
   const penggunaMingguIni =
     trenMingguan[trenMingguan.length - 1].pengguna;
@@ -432,17 +408,11 @@ export default function MonitoringLmsPage() {
     100
   ).toFixed(1);
 
-  // ============================================================
-  // RENDER
-  // ============================================================
 
   return (
     <div className="theme-page theme-text min-h-full">
       <div className="w-full max-w-[1800px] mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 space-y-6">
 
-        {/* ======================================================
-            PAGE HEADER
-        ====================================================== */}
 
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="min-w-0">
@@ -484,16 +454,12 @@ export default function MonitoringLmsPage() {
           </button>
         </div>
 
-        {/* ======================================================
-            FILTER BAR
-        ====================================================== */}
 
         <div
           className={`theme-card rounded-xl border theme-border p-4 ${themeCardShadow}`}
         >
           <div className="flex flex-col sm:flex-row flex-wrap gap-3">
 
-            {/* SEARCH */}
             <div className="relative flex-1 min-w-[200px]">
               <Search
                 size={15}
@@ -509,7 +475,6 @@ export default function MonitoringLmsPage() {
               />
             </div>
 
-            {/* JENJANG */}
             <div className="relative flex-1 min-w-[150px]">
               <select
                 value={jenjang}
@@ -529,7 +494,6 @@ export default function MonitoringLmsPage() {
               />
             </div>
 
-            {/* PERIODE */}
             <div className="relative flex-1 min-w-[170px]">
               <select
                 value={periode}
@@ -549,7 +513,6 @@ export default function MonitoringLmsPage() {
               />
             </div>
 
-            {/* STATUS */}
             <div className="relative flex-1 min-w-[160px]">
               <select
                 value={status}
@@ -571,13 +534,9 @@ export default function MonitoringLmsPage() {
           </div>
         </div>
 
-        {/* ======================================================
-            SUMMARY CARDS
-        ====================================================== */}
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
 
-          {/* ADOPSI */}
           <div
             className={`theme-card rounded-xl border theme-border p-3.5 ${themeSmallShadow} flex items-center gap-3 min-w-0`}
           >
@@ -598,7 +557,6 @@ export default function MonitoringLmsPage() {
             </div>
           </div>
 
-          {/* LOGIN */}
           <div
             className={`theme-card rounded-xl border theme-border p-3.5 ${themeSmallShadow} flex items-center gap-3 min-w-0`}
           >
@@ -619,7 +577,6 @@ export default function MonitoringLmsPage() {
             </div>
           </div>
 
-          {/* TUGAS */}
           <div
             className={`theme-card rounded-xl border theme-border p-3.5 ${themeSmallShadow} flex items-center gap-3 min-w-0`}
           >
@@ -640,7 +597,6 @@ export default function MonitoringLmsPage() {
             </div>
           </div>
 
-          {/* PERHATIAN */}
           <div
             className={`theme-card rounded-xl border theme-border p-3.5 ${themeSmallShadow} flex items-center gap-3 min-w-0`}
           >
@@ -662,13 +618,9 @@ export default function MonitoringLmsPage() {
           </div>
         </div>
 
-        {/* ======================================================
-            TREN ADOPSI + DISTRIBUSI PERANGKAT
-        ====================================================== */}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
-          {/* TREN PENGGUNA */}
           <div
             className={`lg:col-span-2 theme-card rounded-xl border theme-border ${themeCardShadow} p-4 sm:p-5`}
           >
@@ -797,7 +749,6 @@ export default function MonitoringLmsPage() {
             </div>
           </div>
 
-          {/* DISTRIBUSI PERANGKAT */}
           <div
             className={`theme-card rounded-xl border theme-border ${themeCardShadow} p-4 sm:p-5 flex flex-col`}
           >
@@ -883,9 +834,6 @@ export default function MonitoringLmsPage() {
           </div>
         </div>
 
-        {/* ======================================================
-            POLA AKTIVITAS MINGGUAN
-        ====================================================== */}
 
         <div
           className={`theme-card rounded-xl border theme-border ${themeCardShadow} p-4 sm:p-5`}
@@ -977,13 +925,9 @@ export default function MonitoringLmsPage() {
           </div>
         </div>
 
-        {/* ======================================================
-            KONTEN TERPOPULER + GURU TERAKTIF
-        ====================================================== */}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
-          {/* KONTEN */}
           <div
             className={`theme-card rounded-xl border theme-border ${themeCardShadow} p-4 sm:p-5`}
           >
@@ -1034,7 +978,6 @@ export default function MonitoringLmsPage() {
             </div>
           </div>
 
-          {/* GURU */}
           <div
             className={`theme-card rounded-xl border theme-border ${themeCardShadow} p-4 sm:p-5`}
           >
@@ -1085,9 +1028,6 @@ export default function MonitoringLmsPage() {
           </div>
         </div>
 
-        {/* ======================================================
-            ENGAGEMENT PER UNIT SEKOLAH
-        ====================================================== */}
 
         <div>
           <div className="flex items-center justify-between mb-3">
@@ -1127,7 +1067,6 @@ export default function MonitoringLmsPage() {
                     key={s.id}
                     className={`flex flex-col lg:flex-row lg:items-center gap-4 p-4 sm:p-5 ${themeNeutralHover} transition-colors`}
                   >
-                    {/* IDENTITAS */}
                     <div className="flex items-center gap-3 lg:w-[220px] flex-shrink-0 min-w-0">
                       <div
                         className={`w-9 h-9 rounded-lg ${themePrimaryGradient} text-[var(--color-card)] flex items-center justify-center flex-shrink-0`}
@@ -1146,7 +1085,6 @@ export default function MonitoringLmsPage() {
                       </div>
                     </div>
 
-                    {/* ADOPSI */}
                     <div className="flex-1 min-w-[130px]">
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-[11px] font-medium theme-text-muted uppercase tracking-wide">
@@ -1172,7 +1110,6 @@ export default function MonitoringLmsPage() {
                       </div>
                     </div>
 
-                    {/* ENGAGEMENT */}
                     <div className="flex-1 min-w-[150px]">
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-[11px] font-medium theme-text-muted uppercase tracking-wide">
@@ -1226,7 +1163,6 @@ export default function MonitoringLmsPage() {
                       </div>
                     </div>
 
-                    {/* METRIK PENDUKUNG */}
                     <div className="flex-shrink-0 lg:w-[220px] flex items-center gap-4">
                       <div>
                         <p className="text-[11px] font-medium theme-text-muted uppercase tracking-wide mb-1">
@@ -1249,7 +1185,6 @@ export default function MonitoringLmsPage() {
                       </div>
                     </div>
 
-                    {/* STATUS */}
                     <div className="flex items-center justify-between gap-3 lg:w-[150px] flex-shrink-0">
                       <span
                         className={`inline-flex items-center gap-1 text-[10px] font-medium px-2 py-1 rounded-full border ${statusStyle(

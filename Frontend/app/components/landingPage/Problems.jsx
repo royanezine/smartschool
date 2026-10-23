@@ -51,7 +51,6 @@ export default function Problems() {
     <section className="py-24 bg-blue-50">
       <div className="max-w-7xl mx-auto px-6">
 
-        {/* Badge */}
         <div className="text-center">
           <span className="inline-flex items-center rounded-full bg-blue-50 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-blue-600">
             ⚠️ Masalah
@@ -67,7 +66,6 @@ export default function Problems() {
           </p>
         </div>
 
-        {/* Grid */}
         <div className="mt-16 grid gap-7 lg:grid-cols-3 md:grid-cols-2">
 
           {problems.map((item) => (
@@ -75,25 +73,20 @@ export default function Problems() {
               key={item.number}
               className="relative rounded-2xl bg-white p-8 border border-slate-100 shadow-sm hover:shadow-lg transition-all duration-300"
             >
-              {/* Number */}
               <div className="absolute left-6 top-6 flex h-9 w-9 items-center justify-center rounded-full bg-blue-50 text-sm font-bold text-blue-600">
                 {item.number}
               </div>
 
-              {/* Icon */}
               <div className="mt-10 text-blue-600">
                 {item.icon}
               </div>
 
-              {/* Title */}
               <h3 className="mt-5 text-lg font-bold text-slate-900 leading-7">
                 {item.title}
               </h3>
 
-              {/* Blue Line */}
               <div className="mt-3 h-1 w-12 rounded-full bg-blue-600"></div>
 
-              {/* Desc */}
               <p className="mt-5 text-sm leading-7 text-gray-500">
                 {item.desc}
               </p>

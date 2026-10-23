@@ -16,15 +16,6 @@ import {
 import PpdbNavbar from "@/app/components/ppdb/PpdbNavbar";
 import { urlFormulirPendaftaran } from "@/app/components/ppdb/rutePpdb";
 
-/*
- * Backend belum menyediakan endpoint publik untuk mengambil daftar jalur
- * PPDB (GET /api/jalur-ppdb mewajibkan autentikasi admin sekolah + izin
- * ppdb.view). Karena itu halaman ini TIDAK mengirim ID jalur buatan ke
- * Backend dan TIDAK mengklaim jalur tertentu sedang dibuka.
- *
- * Konten di bawah hanya penjelasan jenis jalur secara umum. Pendaftaran
- * sebenarnya dilakukan melalui tautan resmi yang dibagikan sekolah.
- */
 const jalurPendaftaran = [
   {
     key: "zonasi",
@@ -93,18 +84,7 @@ export default function JalurPendaftaranPage() {
 
   const [openId, setOpenId] = useState("zonasi");
 
-  /*
-   * Backend belum menyediakan endpoint publik untuk mengambil daftar jalur,
-   * sehingga halaman ini tidak dapat mengirim jalurPpdbId yang valid.
-   * Tombol formulir hanya membuka formulir; sekolah dan jalur akan terisi
-   * otomatis jika pengguna datang dari tautan resmi sekolah.
-   */
   const handleDaftar = () => {
-    /*
-     * Pertahankan sekolahId/jalurPpdbId bila pengguna membuka panduan
-     * dari tautan resmi sekolah. Tanpa ini, parameter hilang saat
-     * berpindah ke formulir.
-     */
     router.push(urlFormulirPendaftaran(basePath));
   };
 
@@ -155,9 +135,6 @@ export default function JalurPendaftaranPage() {
       <PpdbNavbar />
 
       <main>
-        {/* =====================================================
-            HERO
-        ===================================================== */}
         <section className="border-b border-slate-200 bg-white">
           <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 lg:px-8">
             <button
@@ -187,9 +164,6 @@ export default function JalurPendaftaranPage() {
           </div>
         </section>
 
-        {/* =====================================================
-            CARA MENDAFTAR
-        ===================================================== */}
 
         <section className="mx-auto max-w-6xl px-4 pt-8 sm:px-6 lg:px-8">
           <div className="rounded-2xl border border-blue-100 bg-blue-50/70 p-5 sm:p-6">
@@ -226,9 +200,6 @@ export default function JalurPendaftaranPage() {
           </div>
         </section>
 
-        {/* =====================================================
-            CONTENT
-        ===================================================== */}
         <section className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
           <div className="grid gap-5">
             {jalurPendaftaran.map((jalur) => {
@@ -245,9 +216,6 @@ export default function JalurPendaftaranPage() {
                   key={jalur.key}
                   className={`group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:shadow-md ${colors.border}`}
                 >
-                  {/* =================================================
-                      HEADER ACCORDION
-                  ================================================= */}
                   <button
                     type="button"
                     onClick={() =>
@@ -289,9 +257,6 @@ export default function JalurPendaftaranPage() {
                     />
                   </button>
 
-                  {/* =================================================
-                      ACCORDION CONTENT
-                  ================================================= */}
                   {isOpen && (
                     <div className="border-t border-slate-100 px-5 pb-5 sm:px-6 sm:pb-6">
                       <div className="grid gap-6 pt-5 lg:grid-cols-[1fr_auto]">
@@ -321,9 +286,6 @@ export default function JalurPendaftaranPage() {
                           </div>
                         </div>
 
-                        {/* =================================================
-                            KETERANGAN
-                        ================================================= */}
                         <div className="flex items-end">
                           <p className="max-w-[220px] text-xs leading-5 text-slate-500">
                             Ketersediaan jalur dan
@@ -339,9 +301,6 @@ export default function JalurPendaftaranPage() {
             })}
           </div>
 
-          {/* =====================================================
-              INFO
-          ===================================================== */}
           <div className="mt-8 flex flex-col gap-4 rounded-2xl border border-blue-100 bg-blue-50/70 p-5 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-sm font-semibold text-blue-900">
@@ -369,9 +328,6 @@ export default function JalurPendaftaranPage() {
         </section>
       </main>
 
-      {/* =====================================================
-          FOOTER
-      ===================================================== */}
       <footer className="border-t border-slate-200 bg-white">
         <div className="mx-auto max-w-6xl px-4 py-6 text-center text-xs text-slate-400 sm:px-6 lg:px-8">
           © 2026 SmartSchool — PPDB Online

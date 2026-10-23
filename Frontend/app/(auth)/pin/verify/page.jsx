@@ -15,7 +15,6 @@ import {
   LockKeyhole,
 } from "lucide-react";
 
-/* -------------------- INPUT PIN 6 KOTAK -------------------- */
 function PinInput({ value, onChange, disabled, show, idPrefix, autoFocus }) {
   const refs = useRef([]);
 
@@ -101,7 +100,6 @@ function PinInput({ value, onChange, disabled, show, idPrefix, autoFocus }) {
   );
 }
 
-/* -------------------- HALAMAN -------------------- */
 export default function VerifyPinPage() {
   const router = useRouter();
 
@@ -144,14 +142,11 @@ export default function VerifyPinPage() {
         throw new Error("Data pengguna tidak diterima dari server.");
       }
 
-      // Simpan token + identitas dari sesi PIN yang baru diverifikasi
-      // secara atomik (satu sumber kebenaran).
       const sessionUser = setSession(result.token, user);
 
       sessionStorage.removeItem("pin_setup_token");
       sessionStorage.removeItem("pin_access_token");
 
-      // Arahkan berdasarkan role sesi yang sebenarnya.
       router.replace(getRoleHome(sessionUser?.role) || "/siswa");
     } catch (err) {
       setError(
@@ -166,9 +161,7 @@ export default function VerifyPinPage() {
 
   return (
     <div className="relative flex min-h-screen items-center justify-center bg-white px-4 py-8">
-      {/* Kartu utama */}
       <div className="relative z-10 w-full max-w-sm overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        {/* Logo + judul */}
         <div className="flex flex-col items-center px-6 pt-8 pb-5 sm:px-8 sm:pt-9">
           <div className="relative flex h-24 w-24 items-center justify-center sm:h-28 sm:w-28">
             <Image
@@ -179,7 +172,6 @@ export default function VerifyPinPage() {
               priority
               className="h-full w-full object-contain"
             />
-            {/* Badge verifikasi */}
             <span className="absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-blue-600 text-white shadow-sm">
               <ShieldCheck size={16} />
             </span>
@@ -194,9 +186,7 @@ export default function VerifyPinPage() {
           </p>
         </div>
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="px-6 pb-6 sm:px-8">
-          {/* PIN */}
           <div>
             <div className="mb-2 flex items-center justify-between">
               <label className="text-xs font-medium text-slate-700">
@@ -222,7 +212,6 @@ export default function VerifyPinPage() {
             />
           </div>
 
-          {/* Error */}
           {error && (
             <div
               role="alert"
@@ -232,7 +221,6 @@ export default function VerifyPinPage() {
             </div>
           )}
 
-          {/* Info keamanan */}
           <div className="mt-4 flex gap-2.5 rounded-lg bg-slate-50 px-3.5 py-3">
             <LockKeyhole
               className="mt-0.5 shrink-0 text-slate-500"
@@ -244,7 +232,6 @@ export default function VerifyPinPage() {
             </p>
           </div>
 
-          {/* Tombol utama */}
           <button
             type="submit"
             disabled={loading || !pinValid}
@@ -260,7 +247,6 @@ export default function VerifyPinPage() {
             )}
           </button>
 
-          {/* Lupa PIN */}
           <button
             type="button"
             onClick={() => router.push("/pin/forgot")}
@@ -270,7 +256,6 @@ export default function VerifyPinPage() {
           </button>
         </form>
 
-        {/* Footer kartu */}
         <div className="border-t border-slate-100 px-6 py-4 sm:px-8">
           <div className="flex items-center justify-between gap-2">
             <button

@@ -19,7 +19,6 @@ import { getKelasById } from "@/services/kelas.service";
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
 
-// getStoredUser diimpor dari @/lib/auth (single source of truth)
 
 function getTeacherId(user) {
   const id = user?.userId || user?.id || user?.penggunaId || user?.guruId ||
@@ -149,7 +148,6 @@ function getStudentList(assignments, classDetail) {
         user?.nis ||
         "—";
 
-      // Jangan menampilkan data yang tidak bisa dikenali sebagai siswa.
       if (!id && !name) continue;
 
       result.push({
@@ -160,7 +158,6 @@ function getStudentList(assignments, classDetail) {
     }
   }
 
-  // Hilangkan siswa duplikat yang muncul pada beberapa relasi.
   const unique = new Map();
 
   for (const student of result) {
@@ -216,7 +213,6 @@ export default function GuruDetailKelasPage() {
       throw new Error("ID kelas tidak valid.");
     }
 
-    // 1. Ambil penugasan kelas dan mata pelajaran guru.
     const response = await getKelasMapel();
     const data = unwrapArray(response);
 
@@ -236,7 +232,6 @@ export default function GuruDetailKelasPage() {
 
     setAssignments(selected);
 
-    // 2. Ambil detail kelas, termasuk relasi anggota/siswa.
     try {
       const detailResponse = await getKelasById(kelasId);
 
@@ -264,7 +259,6 @@ export default function GuruDetailKelasPage() {
         detail?.anggota
       );
     } catch (detailError) {
-      // Penugasan dan mata pelajaran tetap bisa ditampilkan.
       console.error(
         "[DETAIL KELAS] Gagal mengambil anggota kelas:",
         detailError

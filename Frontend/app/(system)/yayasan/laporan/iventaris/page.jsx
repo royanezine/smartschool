@@ -15,10 +15,6 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-// ============================================================
-// DUMMY DATA
-// Catatan: ganti dengan data asli dari API/DB begitu tersedia.
-// ============================================================
 
 const UNIT_OPTIONS = [
   "Semua Unit",
@@ -181,9 +177,6 @@ const dataInventaris = [
   },
 ];
 
-// ============================================================
-// HELPERS THEME
-// ============================================================
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -236,9 +229,6 @@ const themeInfoSurface =
 const themeInfoBorder =
   "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
 
-// ============================================================
-// FORMAT
-// ============================================================
 
 const formatRupiah = (n) =>
   new Intl.NumberFormat("id-ID", {
@@ -247,9 +237,6 @@ const formatRupiah = (n) =>
     maximumFractionDigits: 0,
   }).format(n);
 
-// ============================================================
-// STATUS KONDISI
-// ============================================================
 
 const kondisiStyle = (kondisi) => {
   if (kondisi === "Baik") {
@@ -263,9 +250,6 @@ const kondisiStyle = (kondisi) => {
   return `${themeNeutralSurface} text-[var(--color-text-muted)] ${themeNeutralBorder}`;
 };
 
-// ============================================================
-// SUMMARY CARD
-// ============================================================
 
 function SummaryCard({ icon: Icon, label, value, variant = "primary" }) {
   const variants = {
@@ -299,9 +283,6 @@ function SummaryCard({ icon: Icon, label, value, variant = "primary" }) {
   );
 }
 
-// ============================================================
-// MAIN COMPONENT
-// ============================================================
 
 export default function DataInventarisPage() {
   const router = useRouter();
@@ -311,9 +292,6 @@ export default function DataInventarisPage() {
   const [kondisi, setKondisi] = useState(KONDISI_OPTIONS[0]);
   const [search, setSearch] = useState("");
 
-  // ==========================================================
-  // FILTER DATA
-  // ==========================================================
 
   const filteredInventaris = useMemo(() => {
     return dataInventaris.filter((it) => {
@@ -344,9 +322,6 @@ export default function DataInventarisPage() {
     });
   }, [unit, kategori, kondisi, search]);
 
-  // ==========================================================
-  // SUMMARY
-  // ==========================================================
 
   const summary = useMemo(() => {
     const totalItem = filteredInventaris.reduce(
@@ -375,18 +350,12 @@ export default function DataInventarisPage() {
     };
   }, [filteredInventaris]);
 
-  // ==========================================================
-  // RENDER
-  // ==========================================================
 
   return (
     <div className="theme-page theme-text min-h-full">
       <div className="w-full max-w-[1800px] mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
         <div className="space-y-6">
 
-          {/* ==================================================
-              PAGE HEADER
-          ================================================== */}
 
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="min-w-0">
@@ -432,16 +401,12 @@ export default function DataInventarisPage() {
             </button>
           </div>
 
-          {/* ==================================================
-              FILTER BAR
-          ================================================== */}
 
           <div
             className={`theme-card rounded-xl theme-border border p-4 ${themeCardShadow}`}
           >
             <div className="flex flex-col sm:flex-row flex-wrap gap-3">
 
-              {/* SEARCH */}
               <div className="relative flex-1 min-w-[200px]">
                 <Search
                   size={15}
@@ -457,7 +422,6 @@ export default function DataInventarisPage() {
                 />
               </div>
 
-              {/* UNIT */}
               <div className="relative flex-1 min-w-[180px]">
                 <select
                   value={unit}
@@ -477,7 +441,6 @@ export default function DataInventarisPage() {
                 />
               </div>
 
-              {/* KATEGORI */}
               <div className="relative flex-1 min-w-[160px]">
                 <select
                   value={kategori}
@@ -497,7 +460,6 @@ export default function DataInventarisPage() {
                 />
               </div>
 
-              {/* KONDISI */}
               <div className="relative flex-1 min-w-[160px]">
                 <select
                   value={kondisi}
@@ -519,9 +481,6 @@ export default function DataInventarisPage() {
             </div>
           </div>
 
-          {/* ==================================================
-              SUMMARY CARDS
-          ================================================== */}
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <SummaryCard
@@ -553,14 +512,10 @@ export default function DataInventarisPage() {
             />
           </div>
 
-          {/* ==================================================
-              TABEL INVENTARIS
-          ================================================== */}
 
           <div
             className={`theme-card rounded-xl theme-border border ${themeCardShadow} overflow-hidden`}
           >
-            {/* TABLE HEADER */}
             <div
               className={`p-4 sm:p-5 border-b ${themeDivider} flex items-center justify-between gap-2`}
             >
@@ -573,7 +528,6 @@ export default function DataInventarisPage() {
               </span>
             </div>
 
-            {/* TABLE */}
             <div className="overflow-x-auto w-full">
               <table className="w-full min-w-[920px] text-sm border-collapse">
                 <thead>
@@ -629,7 +583,6 @@ export default function DataInventarisPage() {
                 </thead>
 
                 <tbody>
-                  {/* EMPTY */}
                   {filteredInventaris.length === 0 && (
                     <tr>
                       <td
@@ -648,13 +601,11 @@ export default function DataInventarisPage() {
                     </tr>
                   )}
 
-                  {/* DATA */}
                   {filteredInventaris.map((it) => (
                     <tr
                       key={it.id}
                       className={`border-b ${themeDivider} ${themeNeutralHover} transition-colors`}
                     >
-                      {/* NAMA */}
                       <td
                         className={`border-x ${themeNeutralBorder} px-4 sm:px-5 py-3 whitespace-nowrap`}
                       >
@@ -663,7 +614,6 @@ export default function DataInventarisPage() {
                         </span>
                       </td>
 
-                      {/* KATEGORI */}
                       <td
                         className={`border-x ${themeNeutralBorder} px-3 py-3 whitespace-nowrap`}
                       >
@@ -674,28 +624,24 @@ export default function DataInventarisPage() {
                         </span>
                       </td>
 
-                      {/* UNIT */}
                       <td
                         className={`border-x ${themeNeutralBorder} px-3 py-3 theme-text-secondary whitespace-nowrap`}
                       >
                         {it.unit}
                       </td>
 
-                      {/* LOKASI */}
                       <td
                         className={`border-x ${themeNeutralBorder} px-3 py-3 theme-text-secondary whitespace-nowrap`}
                       >
                         {it.lokasi}
                       </td>
 
-                      {/* JUMLAH */}
                       <td
                         className={`border-x ${themeNeutralBorder} px-3 py-3 text-center theme-text-secondary whitespace-nowrap`}
                       >
                         {it.jumlah.toLocaleString("id-ID")}
                       </td>
 
-                      {/* KONDISI */}
                       <td
                         className={`border-x ${themeNeutralBorder} px-3 py-3 text-center whitespace-nowrap`}
                       >
@@ -708,7 +654,6 @@ export default function DataInventarisPage() {
                         </span>
                       </td>
 
-                      {/* NILAI */}
                       <td
                         className={`border-x ${themeNeutralBorder} px-3 py-3 text-right whitespace-nowrap`}
                       >
@@ -717,7 +662,6 @@ export default function DataInventarisPage() {
                         </span>
                       </td>
 
-                      {/* TANGGAL */}
                       <td
                         className={`border-x ${themeNeutralBorder} px-3 py-3 text-center theme-text-muted whitespace-nowrap`}
                       >

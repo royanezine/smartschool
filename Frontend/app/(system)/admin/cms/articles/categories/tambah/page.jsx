@@ -107,17 +107,12 @@ export default function TambahKategoriPage() {
 
   return (
     <div className="theme-page min-h-screen">
-      {/* SIDEBAR */}
       <Sidebar />
 
-      {/* MAIN */}
       <div className="min-h-screen lg:ml-[260px]">
         <Header />
 
         <main className="theme-page p-4 sm:p-6 lg:p-8">
-          {/* =================================================
-              TOP NAVIGATION
-          ================================================= */}
 
           <div className="mb-6">
             <button
@@ -143,9 +138,6 @@ export default function TambahKategoriPage() {
             </button>
           </div>
 
-          {/* =================================================
-              PAGE HEADER
-          ================================================= */}
 
           <div className="mb-7">
             <div className="flex items-start gap-4">
@@ -201,17 +193,10 @@ export default function TambahKategoriPage() {
             </div>
           </div>
 
-          {/* =================================================
-              CONTENT
-          ================================================= */}
 
           <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
-            {/* =================================================
-                FORM
-            ================================================= */}
 
             <div className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
-              {/* FORM HEADER */}
 
               <div className="theme-card-soft theme-border-soft border-b px-5 py-5 sm:px-7">
                 <div className="flex items-center gap-3">
@@ -231,11 +216,9 @@ export default function TambahKategoriPage() {
                 </div>
               </div>
 
-              {/* FORM BODY */}
 
               <form onSubmit={handleSubmit}>
                 <div className="space-y-6 p-5 sm:p-7">
-                  {/* ERROR */}
 
                   {error && (
                     <div className="theme-danger flex gap-3 rounded-xl border p-4">
@@ -256,7 +239,6 @@ export default function TambahKategoriPage() {
                     </div>
                   )}
 
-                  {/* NAMA */}
 
                   <div>
                     <label
@@ -313,7 +295,6 @@ export default function TambahKategoriPage() {
                     </div>
                   </div>
 
-                  {/* STATUS */}
 
                   <div>
                     <label
@@ -359,7 +340,6 @@ export default function TambahKategoriPage() {
                     </p>
                   </div>
 
-                  {/* PREVIEW */}
 
                   <div className="theme-border-soft border-t pt-6">
                     <p className="theme-text-muted mb-3 text-xs font-bold uppercase tracking-wider">
@@ -400,9 +380,6 @@ export default function TambahKategoriPage() {
                   </div>
                 </div>
 
-                {/* =================================================
-                    FORM FOOTER
-                ================================================= */}
 
                 <div className="theme-card-soft theme-border-soft flex flex-col-reverse gap-2 border-t px-5 py-4 sm:flex-row sm:justify-end sm:px-7">
                   <button
@@ -472,12 +449,8 @@ export default function TambahKategoriPage() {
               </form>
             </div>
 
-            {/* =================================================
-                INFORMATION SIDEBAR
-            ================================================= */}
 
             <div className="space-y-5">
-              {/* INFO CARD */}
 
               <div className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
                 <div className="theme-card-soft theme-border-soft border-b px-5 py-4">
@@ -509,7 +482,6 @@ export default function TambahKategoriPage() {
                 </div>
               </div>
 
-              {/* EXAMPLE */}
 
               <div className="theme-info rounded-2xl border p-5">
                 <div className="flex gap-3">
@@ -560,9 +532,6 @@ export default function TambahKategoriPage() {
   );
 }
 
-/* =========================================================
-   INFO ITEM
-========================================================= */
 
 function InfoItem({
   number,

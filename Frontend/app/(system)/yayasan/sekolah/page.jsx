@@ -16,15 +16,9 @@ import {
   BadgeCheck,
 } from "lucide-react";
 
-// ============================================================
-// STATUS OPTIONS
-// ============================================================
 
 const STATUS_OPTIONS = ["Semua Status", "aktif", "uji coba"];
 
-// ============================================================
-// THEME HELPERS
-// ============================================================
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
@@ -65,9 +59,6 @@ const themeWarningBorder =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-// ============================================================
-// MAIN COMPONENT
-// ============================================================
 
 export default function DataMasterSekolahPage() {
   const [status, setStatus] = useState(STATUS_OPTIONS[0]);
@@ -77,9 +68,6 @@ export default function DataMasterSekolahPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // ==========================================================
-  // FETCH DATA
-  // ==========================================================
 
   useEffect(() => {
     async function fetchSekolah() {
@@ -102,9 +90,6 @@ export default function DataMasterSekolahPage() {
     fetchSekolah();
   }, []);
 
-  // ==========================================================
-  // FILTER DATA
-  // ==========================================================
 
   const filteredSekolah = useMemo(() => {
     const keyword = search.trim().toLowerCase();
@@ -122,9 +107,6 @@ export default function DataMasterSekolahPage() {
     });
   }, [dataSekolah, status, search]);
 
-  // ==========================================================
-  // SUMMARY
-  // ==========================================================
 
   const summary = useMemo(() => {
     const totalUnit = filteredSekolah.length;
@@ -144,18 +126,12 @@ export default function DataMasterSekolahPage() {
     };
   }, [filteredSekolah]);
 
-  // ==========================================================
-  // RENDER
-  // ==========================================================
 
   return (
     <div className="theme-page theme-text min-h-full">
       <div className="w-full max-w-[1500px] mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
         <div className="w-full space-y-6">
 
-          {/* ================================================== */}
-          {/* PAGE HEADER */}
-          {/* ================================================== */}
 
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0">
@@ -201,9 +177,6 @@ export default function DataMasterSekolahPage() {
             </div>
           </div>
 
-          {/* ================================================== */}
-          {/* ERROR */}
-          {/* ================================================== */}
 
           {error && (
             <div
@@ -221,9 +194,6 @@ export default function DataMasterSekolahPage() {
             </div>
           )}
 
-          {/* ================================================== */}
-          {/* FILTER BAR */}
-          {/* ================================================== */}
 
           <div
             className={`
@@ -237,7 +207,6 @@ export default function DataMasterSekolahPage() {
           >
             <div className="flex flex-col flex-wrap gap-3 sm:flex-row">
 
-              {/* SEARCH */}
               <div className="relative min-w-[200px] flex-1">
                 <Search
                   size={15}
@@ -274,7 +243,6 @@ export default function DataMasterSekolahPage() {
                 />
               </div>
 
-              {/* STATUS */}
               <div className="relative min-w-[160px] flex-1">
                 <select
                   value={status}
@@ -325,9 +293,6 @@ export default function DataMasterSekolahPage() {
             </div>
           </div>
 
-          {/* ================================================== */}
-          {/* SUMMARY CARDS */}
-          {/* ================================================== */}
 
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
 
@@ -354,9 +319,6 @@ export default function DataMasterSekolahPage() {
 
           </div>
 
-          {/* ================================================== */}
-          {/* SCHOOL LIST */}
-          {/* ================================================== */}
 
           <div>
             <div className="mb-3 flex items-center justify-between gap-3">
@@ -371,9 +333,6 @@ export default function DataMasterSekolahPage() {
               </span>
             </div>
 
-            {/* ================================================= */}
-            {/* LOADING */}
-            {/* ================================================= */}
 
             {loading ? (
               <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -394,9 +353,6 @@ export default function DataMasterSekolahPage() {
               </div>
             ) : filteredSekolah.length === 0 ? (
 
-              /* =============================================== */
-              /* EMPTY STATE */
-              /* =============================================== */
 
               <div
                 className={`
@@ -435,9 +391,6 @@ export default function DataMasterSekolahPage() {
 
             ) : (
 
-              /* =============================================== */
-              /* SCHOOL CARDS */
-              /* =============================================== */
 
               <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
                 {filteredSekolah.map((s) => {
@@ -464,9 +417,6 @@ export default function DataMasterSekolahPage() {
                       `}
                     >
 
-                      {/* ====================================== */}
-                      {/* CARD HEADER */}
-                      {/* ====================================== */}
 
                       <div
                         className={`
@@ -482,7 +432,6 @@ export default function DataMasterSekolahPage() {
                       >
                         <div className="flex min-w-0 items-start gap-3">
 
-                          {/* SCHOOL ICON */}
                           <div
                             className={`
                               flex
@@ -503,7 +452,6 @@ export default function DataMasterSekolahPage() {
                             <School size={19} />
                           </div>
 
-                          {/* SCHOOL INFO */}
                           <div className="min-w-0">
                             <p className="truncate text-sm font-semibold theme-text">
                               {s.nama}
@@ -515,7 +463,6 @@ export default function DataMasterSekolahPage() {
 
                             <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
 
-                              {/* STATUS */}
                               <span
                                 className={`
                                   rounded-full
@@ -535,7 +482,6 @@ export default function DataMasterSekolahPage() {
                                 {s.status}
                               </span>
 
-                              {/* PACKAGE */}
                               {langganan?.paket?.nama && (
                                 <span
                                   className={`
@@ -558,13 +504,9 @@ export default function DataMasterSekolahPage() {
                         </div>
                       </div>
 
-                      {/* ====================================== */}
-                      {/* CARD DETAILS */}
-                      {/* ====================================== */}
 
                       <div className="flex-1 space-y-2.5 p-4 sm:p-5">
 
-                        {/* PHONE */}
                         <div className="flex items-center gap-2 text-xs theme-text-secondary">
                           <Phone
                             size={13}
@@ -576,7 +518,6 @@ export default function DataMasterSekolahPage() {
                           </span>
                         </div>
 
-                        {/* EMAIL */}
                         <div className="flex items-center gap-2 text-xs theme-text-secondary">
                           <Mail
                             size={13}
@@ -588,7 +529,6 @@ export default function DataMasterSekolahPage() {
                           </span>
                         </div>
 
-                        {/* SUBSCRIPTION END */}
                         {langganan?.tanggalBerakhir && (
                           <div className="flex items-center gap-2 text-xs theme-text-secondary">
                             <MapPin
@@ -617,9 +557,6 @@ export default function DataMasterSekolahPage() {
   );
 }
 
-// ============================================================
-// SUMMARY CARD
-// ============================================================
 
 function SummaryCard({
   icon: Icon,

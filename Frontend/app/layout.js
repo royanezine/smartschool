@@ -2,7 +2,6 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
-import ThemeProvider from "@/app/components/ThemeProvider";
 import { CmsThemeProvider } from "@/app/components/CmsThemeProvider";
 
 const geistSans = Geist({
@@ -28,13 +27,11 @@ export default function RootLayout({ children }) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <ThemeProvider>
-          <CmsThemeProvider>
-            <div className="app-theme min-h-full flex-1">
-              {children}
-            </div>
-          </CmsThemeProvider>
-        </ThemeProvider>
+        <CmsThemeProvider>
+          <div className="app-theme min-h-full flex-1">
+            {children}
+          </div>
+        </CmsThemeProvider>
       </body>
     </html>
   );

@@ -40,9 +40,6 @@ export default function EditPelanggaranPage() {
     catatan: "",
   });
 
-  // =========================================================
-  // LOAD DATA
-  // =========================================================
 
   useEffect(() => {
     if (!id) return;
@@ -103,9 +100,6 @@ export default function EditPelanggaranPage() {
     loadData();
   }, [id]);
 
-  // =========================================================
-  // CHANGE FORM
-  // =========================================================
 
   function handleChange(field, value) {
     setForm((prev) => ({
@@ -114,9 +108,6 @@ export default function EditPelanggaranPage() {
     }));
   }
 
-  // =========================================================
-  // CHANGE KATEGORI
-  // =========================================================
 
   function handleKategoriChange(value) {
     const selectedKategori = kategori.find(
@@ -135,9 +126,6 @@ export default function EditPelanggaranPage() {
     }));
   }
 
-  // =========================================================
-  // SUBMIT
-  // =========================================================
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -210,18 +198,12 @@ export default function EditPelanggaranPage() {
     }
   }
 
-  // =========================================================
-  // SELECTED CATEGORY
-  // =========================================================
 
   const selectedKategori = kategori.find(
     (item) =>
       String(item.id) === String(form.kategoriPelanggaranId)
   );
 
-  // =========================================================
-  // RENDER
-  // =========================================================
 
   return (
     <div className="theme-page flex h-screen overflow-hidden">
@@ -233,9 +215,6 @@ export default function EditPelanggaranPage() {
         <main className="flex-1 overflow-y-auto p-5 md:p-6 lg:p-8">
           <div className="mx-auto w-full max-w-[1200px]">
 
-            {/* =====================================================
-                HEADER
-            ===================================================== */}
 
             <div className="mb-7 flex items-start gap-4">
               <button
@@ -289,9 +268,6 @@ export default function EditPelanggaranPage() {
               </div>
             </div>
 
-            {/* =====================================================
-                ERROR
-            ===================================================== */}
 
             {error && (
               <div className="theme-danger mb-6 flex items-start gap-3 rounded-xl border px-4 py-3.5 text-sm font-semibold shadow-sm">
@@ -313,9 +289,6 @@ export default function EditPelanggaranPage() {
               </div>
             )}
 
-            {/* =====================================================
-                LOADING
-            ===================================================== */}
 
             {loading ? (
               <div className="theme-card theme-border rounded-2xl border p-12 text-center shadow-xl">
@@ -327,16 +300,12 @@ export default function EditPelanggaranPage() {
             ) : (
               <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_340px]">
 
-                {/* =================================================
-                    FORM
-                ================================================= */}
 
                 <form
                   onSubmit={handleSubmit}
                   className="theme-card theme-border overflow-hidden rounded-2xl border shadow-xl"
                 >
 
-                  {/* FORM HEADER */}
 
                   <div className="theme-card-soft theme-border flex items-center gap-3 border-b px-6 py-5">
                     <div className="theme-info flex h-9 w-9 items-center justify-center rounded-lg ring-1 ring-[var(--color-info)]/20">
@@ -366,11 +335,9 @@ export default function EditPelanggaranPage() {
                     </div>
                   </div>
 
-                  {/* FORM CONTENT */}
 
                   <div className="grid gap-5 p-6 md:grid-cols-2">
 
-                    {/* SISWA */}
 
                     <div className="md:col-span-2">
                       <Field
@@ -409,7 +376,6 @@ export default function EditPelanggaranPage() {
                       </Field>
                     </div>
 
-                    {/* KATEGORI */}
 
                     <Field
                       label="Kategori Pelanggaran"
@@ -438,7 +404,6 @@ export default function EditPelanggaranPage() {
                       </select>
                     </Field>
 
-                    {/* TANGGAL */}
 
                     <Field
                       label="Tanggal"
@@ -458,7 +423,6 @@ export default function EditPelanggaranPage() {
                       />
                     </Field>
 
-                    {/* POIN */}
 
                     <Field label="Poin">
                       <input
@@ -485,7 +449,6 @@ export default function EditPelanggaranPage() {
                       )}
                     </Field>
 
-                    {/* STATUS */}
 
                     <Field label="Status">
                       <select
@@ -516,7 +479,6 @@ export default function EditPelanggaranPage() {
                       </select>
                     </Field>
 
-                    {/* KRONOLOGI */}
 
                     <div className="md:col-span-2">
                       <Field label="Kronologi">
@@ -535,7 +497,6 @@ export default function EditPelanggaranPage() {
                       </Field>
                     </div>
 
-                    {/* TINDAK LANJUT */}
 
                     <div className="md:col-span-2">
                       <Field label="Tindak Lanjut">
@@ -554,7 +515,6 @@ export default function EditPelanggaranPage() {
                       </Field>
                     </div>
 
-                    {/* CATATAN */}
 
                     <div className="md:col-span-2">
                       <Field label="Catatan">
@@ -574,7 +534,6 @@ export default function EditPelanggaranPage() {
                     </div>
                   </div>
 
-                  {/* FOOTER */}
 
                   <div className="theme-card-soft theme-border flex justify-end gap-3 border-t px-6 py-4">
 
@@ -624,13 +583,9 @@ export default function EditPelanggaranPage() {
                   </div>
                 </form>
 
-                {/* =================================================
-                    SIDE PREVIEW
-                ================================================= */}
 
                 <aside className="space-y-5">
 
-                  {/* PREVIEW */}
 
                   <div className="theme-card theme-border relative overflow-hidden rounded-2xl border p-6 shadow-xl">
 
@@ -666,7 +621,6 @@ export default function EditPelanggaranPage() {
                         </h3>
                       </div>
 
-                      {/* SISWA PREVIEW */}
 
                       <div className="theme-border flex items-center gap-3 border-b pb-4">
                         <div className="theme-primary flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-base font-bold shadow-md shadow-blue-500/20">
@@ -690,7 +644,6 @@ export default function EditPelanggaranPage() {
                         </div>
                       </div>
 
-                      {/* PREVIEW ROWS */}
 
                       <div className="space-y-3 pt-4">
 
@@ -730,7 +683,6 @@ export default function EditPelanggaranPage() {
                     </div>
                   </div>
 
-                  {/* INFO */}
 
                   <div className="theme-warning relative overflow-hidden rounded-2xl border p-5">
                     <div className="flex items-start gap-3">
@@ -774,9 +726,6 @@ export default function EditPelanggaranPage() {
   );
 }
 
-// =========================================================
-// FIELD
-// =========================================================
 
 function Field({
   label,
@@ -803,9 +752,6 @@ function Field({
   );
 }
 
-// =========================================================
-// PREVIEW ROW
-// =========================================================
 
 function PreviewRow({
   label,
@@ -831,9 +777,6 @@ function PreviewRow({
   );
 }
 
-// =========================================================
-// INITIALS
-// =========================================================
 
 function getInitials(value) {
   if (!value) return "?";

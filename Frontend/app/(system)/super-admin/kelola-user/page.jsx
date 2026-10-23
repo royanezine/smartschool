@@ -33,10 +33,6 @@ import {
     resetUserPassword,
 } from "@/services/user.service";
 
-// ============================================================
-// THEME HELPERS
-// Mengikuti global theme SmartSchool
-// ============================================================
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -98,9 +94,6 @@ const themeDangerBorder =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-// ============================================================
-// PAGE
-// ============================================================
 
 export default function KelolaUserPage() {
   const router = useRouter();
@@ -132,9 +125,6 @@ export default function KelolaUserPage() {
 
   const [actionLoading, setActionLoading] = useState(false);
 
-  // ============================================================
-  // FETCH USERS
-  // ============================================================
 
   const fetchUsers = useCallback(
     async (isRefresh = false) => {
@@ -215,9 +205,6 @@ export default function KelolaUserPage() {
     setPage(1);
   }, [search, statusFilter, roleFilter]);
 
-  // ============================================================
-  // STATISTICS
-  // ============================================================
 
   const statistics = useMemo(() => {
     const total =
@@ -246,9 +233,6 @@ export default function KelolaUserPage() {
     };
   }, [users, pagination.totalData]);
 
-  // ============================================================
-  // DELETE
-  // ============================================================
 
   const handleDelete = async () => {
     if (!selectedUser?.id) return;
@@ -280,9 +264,6 @@ export default function KelolaUserPage() {
     }
   };
 
-  // ============================================================
-  // TOGGLE STATUS
-  // ============================================================
 
   const handleToggleStatus = async (user) => {
     if (!user?.id) return;
@@ -319,9 +300,6 @@ export default function KelolaUserPage() {
     }
   };
 
-  // ============================================================
-  // MODALS
-  // ============================================================
 
   const openDeleteModal = (user) => {
     setSelectedUser(user);
@@ -333,9 +311,6 @@ export default function KelolaUserPage() {
     setShowDetailModal(true);
   };
 
-  // ============================================================
-  // EDIT
-  // ============================================================
 
   const handleEdit = (user) => {
     router.push(
@@ -343,9 +318,6 @@ export default function KelolaUserPage() {
     );
   };
 
-  // ============================================================
-  // PAGINATION
-  // ============================================================
 
   const handlePrevious = () => {
     if (page > 1) {
@@ -362,9 +334,6 @@ export default function KelolaUserPage() {
     }
   };
 
-  // ============================================================
-  // RESET FILTER
-  // ============================================================
 
   const resetFilter = () => {
     setSearch("");
@@ -373,17 +342,11 @@ export default function KelolaUserPage() {
     setPage(1);
   };
 
-  // ============================================================
-  // RENDER
-  // ============================================================
 
   return (
     <div className="theme-page theme-text min-h-full">
       <div className="mx-auto w-full max-w-[1500px] px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
 
-        {/* ================================================== */}
-        {/* HERO */}
-        {/* ================================================== */}
 
         <section
           className={`relative mb-6 overflow-hidden rounded-3xl ${themePrimaryGradient} ${themePrimaryShadow}`}
@@ -455,9 +418,6 @@ export default function KelolaUserPage() {
           </div>
         </section>
 
-        {/* ================================================== */}
-        {/* ERROR */}
-        {/* ================================================== */}
 
         {error && (
           <div
@@ -491,9 +451,6 @@ export default function KelolaUserPage() {
           </div>
         )}
 
-        {/* ================================================== */}
-        {/* STATISTICS */}
-        {/* ================================================== */}
 
         <section className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
 
@@ -535,16 +492,12 @@ export default function KelolaUserPage() {
 
         </section>
 
-        {/* ================================================== */}
-        {/* FILTER */}
-        {/* ================================================== */}
 
         <section
           className={`mb-6 rounded-2xl border theme-border theme-card p-5 ${themeCardShadow}`}
         >
           <div className="flex flex-col gap-4 xl:flex-row xl:items-center">
 
-            {/* Search */}
 
             <div className="relative min-w-0 flex-1">
 
@@ -562,7 +515,6 @@ export default function KelolaUserPage() {
 
             </div>
 
-            {/* Status */}
 
             <div className="relative w-full xl:w-48">
 
@@ -590,7 +542,6 @@ export default function KelolaUserPage() {
 
             </div>
 
-            {/* Role */}
 
             <div className="relative w-full xl:w-52">
 
@@ -632,7 +583,6 @@ export default function KelolaUserPage() {
 
             </div>
 
-            {/* Refresh */}
 
             <button
               type="button"
@@ -654,7 +604,6 @@ export default function KelolaUserPage() {
 
           </div>
 
-          {/* Active filters */}
 
           {(search ||
             statusFilter !== "semua" ||
@@ -712,15 +661,11 @@ export default function KelolaUserPage() {
           )}
         </section>
 
-        {/* ================================================== */}
-        {/* TABLE */}
-        {/* ================================================== */}
 
         <section
           className={`overflow-hidden rounded-2xl border theme-border theme-card ${themeCardShadow}`}
         >
 
-          {/* Table Header */}
 
           <div
             className={`flex flex-col gap-3 border-b ${themeDivider} px-6 py-5 sm:flex-row sm:items-center sm:justify-between`}
@@ -765,7 +710,6 @@ export default function KelolaUserPage() {
 
           </div>
 
-          {/* Loading */}
 
           {loading ? (
             <LoadingState />
@@ -822,7 +766,6 @@ export default function KelolaUserPage() {
                           className={`group border-b ${themeDivider} transition ${themeNeutralHover}`}
                         >
 
-                          {/* User */}
 
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-3">
@@ -846,7 +789,6 @@ export default function KelolaUserPage() {
                             </div>
                           </td>
 
-                          {/* Email */}
 
                           <td className="px-6 py-4">
                             <span className="truncate text-sm theme-text-secondary">
@@ -855,7 +797,6 @@ export default function KelolaUserPage() {
                             </span>
                           </td>
 
-                          {/* Role */}
 
                           <td className="px-6 py-4">
                             <RoleBadge
@@ -865,7 +806,6 @@ export default function KelolaUserPage() {
                             />
                           </td>
 
-                          {/* Tenant */}
 
                           <td className="px-6 py-4">
                             <span className="truncate text-sm theme-text-secondary">
@@ -875,7 +815,6 @@ export default function KelolaUserPage() {
                             </span>
                           </td>
 
-                          {/* Status */}
 
                           <td className="px-6 py-4 text-center">
                             <StatusBadge
@@ -886,12 +825,10 @@ export default function KelolaUserPage() {
                             />
                           </td>
 
-                          {/* Actions */}
 
                           <td className="px-6 py-4">
                             <div className="flex items-center justify-end gap-1">
 
-                              {/* Detail */}
 
                               <button
                                 type="button"
@@ -906,7 +843,6 @@ export default function KelolaUserPage() {
                                 <Eye className="h-4 w-4" />
                               </button>
 
-                              {/* Edit */}
 
                               <button
                                 type="button"
@@ -921,7 +857,6 @@ export default function KelolaUserPage() {
                                 <Pencil className="h-4 w-4" />
                               </button>
 
-                              {/* Toggle */}
 
                               <button
                                 type="button"
@@ -951,7 +886,6 @@ export default function KelolaUserPage() {
                                 )}
                               </button>
 
-                              {/* Delete */}
 
                               <button
                                 type="button"
@@ -977,7 +911,6 @@ export default function KelolaUserPage() {
                 </table>
               </div>
 
-              {/* Pagination */}
 
               <div
                 className={`flex flex-col gap-3 border-t ${themeDivider} ${themeNeutralSurface} px-6 py-4 sm:flex-row sm:items-center sm:justify-between`}
@@ -1031,9 +964,6 @@ export default function KelolaUserPage() {
         </section>
       </div>
 
-      {/* ==================================================== */}
-      {/* DELETE MODAL */}
-      {/* ==================================================== */}
 
       {showDeleteModal && (
         <ModalOverlay
@@ -1141,9 +1071,6 @@ export default function KelolaUserPage() {
         </ModalOverlay>
       )}
 
-      {/* ==================================================== */}
-      {/* DETAIL MODAL */}
-      {/* ==================================================== */}
 
       {showDetailModal &&
         selectedUser && (
@@ -1156,7 +1083,6 @@ export default function KelolaUserPage() {
               className={`max-h-[92vh] w-full max-w-2xl overflow-hidden rounded-3xl theme-card ${themeCardShadow}`}
             >
 
-              {/* Modal Header */}
 
               <div
                 className={`flex items-start justify-between border-b ${themeDivider} ${themeNeutralSurface} p-5 md:p-6`}
@@ -1198,11 +1124,9 @@ export default function KelolaUserPage() {
 
               </div>
 
-              {/* Modal Content */}
 
               <div className="max-h-[calc(92vh-140px)] overflow-y-auto p-5 md:p-6">
 
-                {/* User summary */}
 
                 <div
                   className={`flex flex-col gap-4 rounded-2xl border ${themeInfoBorder} ${themeInfoSurface} p-5 sm:flex-row sm:items-center`}
@@ -1248,7 +1172,6 @@ export default function KelolaUserPage() {
 
                 </div>
 
-                {/* Account information */}
 
                 <div
                   className={`mt-4 rounded-2xl border theme-border theme-card p-5 ${themeSmallShadow}`}
@@ -1360,7 +1283,6 @@ export default function KelolaUserPage() {
                 </div>
               </div>
 
-              {/* Modal Footer */}
 
               <div
                 className={`flex justify-end border-t ${themeDivider} ${themeNeutralSurface} p-4 md:p-5`}
@@ -1385,9 +1307,6 @@ export default function KelolaUserPage() {
   );
 }
 
-// ============================================================
-// TABLE HEADER
-// ============================================================
 
 function TableHeader({
   children,
@@ -1409,9 +1328,6 @@ function TableHeader({
   );
 }
 
-// ============================================================
-// STAT CARD
-// ============================================================
 
 function StatCard({
   label,
@@ -1456,9 +1372,6 @@ function StatCard({
   );
 }
 
-// ============================================================
-// FILTER CHIP
-// ============================================================
 
 function FilterChip({
   label,
@@ -1481,9 +1394,6 @@ function FilterChip({
   );
 }
 
-// ============================================================
-// AVATAR
-// ============================================================
 
 function Avatar({
   user,
@@ -1521,9 +1431,6 @@ function Avatar({
   );
 }
 
-// ============================================================
-// ROLE BADGE
-// ============================================================
 
 function RoleBadge({ role }) {
   const normalized = String(role || "")
@@ -1561,9 +1468,6 @@ function RoleBadge({ role }) {
   );
 }
 
-// ============================================================
-// STATUS BADGE
-// ============================================================
 
 function StatusBadge({
   active,
@@ -1588,9 +1492,6 @@ function StatusBadge({
   );
 }
 
-// ============================================================
-// DETAIL ITEM
-// ============================================================
 
 function DetailItem({
   label,
@@ -1611,9 +1512,6 @@ function DetailItem({
   );
 }
 
-// ============================================================
-// LOADING
-// ============================================================
 
 function LoadingState() {
   return (
@@ -1638,9 +1536,6 @@ function LoadingState() {
   );
 }
 
-// ============================================================
-// EMPTY STATE
-// ============================================================
 
 function EmptyState({
   search,
@@ -1681,9 +1576,6 @@ function EmptyState({
   );
 }
 
-// ============================================================
-// MODAL OVERLAY
-// ============================================================
 
 function ModalOverlay({
   children,
@@ -1706,9 +1598,6 @@ function ModalOverlay({
   );
 }
 
-// ============================================================
-// USER HELPERS
-// ============================================================
 
 function getUserName(user) {
   if (!user) return "-";

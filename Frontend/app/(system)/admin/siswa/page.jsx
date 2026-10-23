@@ -23,13 +23,11 @@ import {
   ChevronDown,
   AlertTriangle,
   Loader2,
+  IdCard,
 } from "lucide-react";
 
 import { apiFetch } from "../../../../lib/api";
 
-// =========================================================
-// THEME
-// =========================================================
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -69,9 +67,6 @@ const themeDangerBorder =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-// =========================================================
-// RESPONSE HELPERS
-// =========================================================
 
 function getResponseData(response) {
   if (!response) return [];
@@ -115,12 +110,10 @@ function getStudentClass(item) {
     );
   };
 
-  // Bentuk relasi langsung.
   const directClass = getNamaKelas(item.kelas);
 
   if (directClass) return directClass;
 
-  // Bentuk relasi anggota kelas.
   const memberships =
     item.anggotaKelas ??
     item.kelasSiswa ??
@@ -226,9 +219,6 @@ function escapeHtml(value) {
   });
 }
 
-// =========================================================
-// PAGE
-// =========================================================
 
 export default function AdminSiswaPage() {
   const router = useRouter();
@@ -263,9 +253,6 @@ export default function AdminSiswaPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
-  // =======================================================
-  // LOAD STUDENTS
-  // =======================================================
 
 const loadSiswa = useCallback(async (isRefresh = false) => {
   try {
@@ -297,7 +284,6 @@ const loadSiswa = useCallback(async (isRefresh = false) => {
       (item) => item && item.id
     );
 
-    // Ambil daftar kelas dari database.
     const kelasResponse = await getKelas({
       page: 1,
       limit: 1000,
@@ -323,7 +309,6 @@ const loadSiswa = useCallback(async (isRefresh = false) => {
 
     setDaftarKelas(daftarKelasAPI);
 
-    // Ambil detail kelas untuk membaca daftar anggotanya.
     const detailKelas = await Promise.all(
       daftarKelasAPI
         .filter((kelas) => kelas?.id)
@@ -358,7 +343,6 @@ const loadSiswa = useCallback(async (isRefresh = false) => {
         })
     );
 
-    // Buat pemetaan ID siswa -> nama kelas.
     const kelasPerSiswa = new Map();
 
     for (const kelas of detailKelas) {
@@ -394,7 +378,6 @@ const loadSiswa = useCallback(async (isRefresh = false) => {
     const normalized = rawData.map((item) => {
       const siswaNormal = normalizeSiswa(item);
 
-      // Prioritaskan kelas yang sudah ada di respons siswa.
       const kelasDariRelasi = getStudentClass(item);
       const kelasDariDetail = kelasPerSiswa.get(String(item.id));
 
@@ -421,17 +404,12 @@ const loadSiswa = useCallback(async (isRefresh = false) => {
   }
 }, []);
 
-  // =======================================================
-  // LOAD CLASSES FROM DATABASE
-  // =======================================================
 
   const loadDaftarKelas = useCallback(async () => {
     try {
       setLoadingKelas(true);
       setErrorKelas("");
 
-      // Diasumsikan mount router kelas adalah /api/kelas.
-      // Jika mount path backend berbeda, sesuaikan endpoint ini.
       const response = await apiFetch(
         "/api/kelas?page=1&limit=1000",
         { method: "GET" }
@@ -469,9 +447,6 @@ const loadSiswa = useCallback(async (isRefresh = false) => {
     loadDaftarKelas();
   }, [loadSiswa, loadDaftarKelas]);
 
-  // =======================================================
-  // CLICK OUTSIDE CLASS DROPDOWN
-  // =======================================================
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -490,9 +465,6 @@ const loadSiswa = useCallback(async (isRefresh = false) => {
     };
   }, []);
 
-  // =======================================================
-  // UNIQUE CLASS OPTIONS
-  // =======================================================
 
   const uniqueKelas = useMemo(() => {
     const classNames = daftarKelas
@@ -503,8 +475,6 @@ const loadSiswa = useCallback(async (isRefresh = false) => {
       )
       .filter(Boolean);
 
-    // Tambahkan nama kelas dari data siswa jika ada kelas yang
-    // belum muncul di daftar endpoint kelas.
     const studentClassNames = siswa
       .map((item) => item.kelas)
       .filter((name) => name && name !== "-");
@@ -524,9 +494,6 @@ const loadSiswa = useCallback(async (isRefresh = false) => {
     );
   }, [uniqueKelas, kelasSearch]);
 
-  // =======================================================
-  // SEARCH
-  // =======================================================
 
   const filteredBySearch = useMemo(() => {
     const keyword = search.trim().toLowerCase();
@@ -548,9 +515,6 @@ const loadSiswa = useCallback(async (isRefresh = false) => {
     );
   }, [siswa, search]);
 
-  // =======================================================
-  // STATUS FILTER
-  // =======================================================
 
   const filteredByStatus = useMemo(() => {
     if (filterStatus === "semua") return filteredBySearch;
@@ -560,9 +524,6 @@ const loadSiswa = useCallback(async (isRefresh = false) => {
     );
   }, [filteredBySearch, filterStatus]);
 
-  // =======================================================
-  // CLASS FILTER
-  // =======================================================
 
   const filteredByKelas = useMemo(() => {
     if (filterKelas === "semua") return filteredByStatus;
@@ -572,9 +533,6 @@ const loadSiswa = useCallback(async (isRefresh = false) => {
     );
   }, [filteredByStatus, filterKelas]);
 
-  // =======================================================
-  // SORT
-  // =======================================================
 
   const sorted = useMemo(() => {
     return [...filteredByKelas].sort((a, b) => {
@@ -597,9 +555,6 @@ const loadSiswa = useCallback(async (isRefresh = false) => {
     });
   }, [filteredByKelas, sortBy]);
 
-  // =======================================================
-  // PAGINATION
-  // =======================================================
 
   const totalItems = sorted.length;
   const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
@@ -621,9 +576,6 @@ const loadSiswa = useCallback(async (isRefresh = false) => {
     if (page >= 1 && page <= totalPages) setCurrentPage(page);
   };
 
-  // =======================================================
-  // DELETE
-  // =======================================================
 
   const openDeleteModal = (id, nama) => {
     setDeleteModal({ open: true, id, nama });
@@ -665,9 +617,6 @@ const loadSiswa = useCallback(async (isRefresh = false) => {
     }
   };
 
-  // =======================================================
-  // REFRESH AND RESET
-  // =======================================================
 
   const handleRefresh = () => {
     loadSiswa(true);
@@ -682,9 +631,6 @@ const loadSiswa = useCallback(async (isRefresh = false) => {
     setSortBy("nama_asc");
   };
 
-  // =======================================================
-  // EXPORT HELPERS
-  // =======================================================
 
   const exportHeaders = [
     "No",
@@ -890,9 +836,6 @@ const loadSiswa = useCallback(async (isRefresh = false) => {
     };
   };
 
-  // =======================================================
-  // STATISTICS AND AVATAR
-  // =======================================================
 
   const totalSiswa = siswa.length;
   const totalAktif = siswa.filter((item) => item.status === "Aktif").length;
@@ -923,9 +866,6 @@ const loadSiswa = useCallback(async (isRefresh = false) => {
     return variants[String(nama || "").length % variants.length];
   };
 
-  // =======================================================
-  // RENDER
-  // =======================================================
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
@@ -951,7 +891,6 @@ const loadSiswa = useCallback(async (isRefresh = false) => {
           <div className="w-full px-3 py-4 sm:px-4 md:px-6 lg:px-8 xl:px-10">
             <div className="w-full space-y-5">
 
-              {/* HEADER */}
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex min-w-0 items-center gap-3">
                   <div
@@ -1032,7 +971,6 @@ const loadSiswa = useCallback(async (isRefresh = false) => {
                 </div>
               </div>
 
-              {/* ERROR */}
               {(error || errorKelas) && (
                 <div
                   className={`flex items-start gap-3 rounded-xl border ${themeDangerBorder} ${themeDangerSurface} px-4 py-3`}
@@ -1062,7 +1000,6 @@ const loadSiswa = useCallback(async (isRefresh = false) => {
                 </div>
               )}
 
-              {/* STATISTICS */}
               <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
                 <div className={`theme-card rounded-xl border ${themeNeutralBorder} p-4 ${themeCardShadow}`}>
                   <div className="flex items-center gap-2">
@@ -1117,7 +1054,6 @@ const loadSiswa = useCallback(async (isRefresh = false) => {
                 </div>
               </div>
 
-              {/* SEARCH AND FILTERS */}
               <div className={`theme-card rounded-xl border ${themeNeutralBorder} p-4 ${themeCardShadow}`}>
                 <div className="flex flex-col gap-3">
                   <div className="relative w-full">
@@ -1145,7 +1081,6 @@ const loadSiswa = useCallback(async (isRefresh = false) => {
                       <option value="Nonaktif">Nonaktif</option>
                     </select>
 
-                    {/* CLASS DROPDOWN */}
                     <div ref={kelasRef} className="relative min-w-[180px]">
                       <div className={`theme-input rounded-lg border ${themeNeutralBorder} px-3 py-1.5`}>
                         <div className="flex items-center gap-1">
@@ -1245,7 +1180,6 @@ const loadSiswa = useCallback(async (isRefresh = false) => {
                 </div>
               </div>
 
-              {/* TABLE */}
               <div className={`theme-card w-full overflow-hidden rounded-xl border ${themeNeutralBorder} ${themeCardShadow}`}>
                 <div className="w-full overflow-x-auto">
                   <table className="w-full min-w-[900px]">
@@ -1375,6 +1309,15 @@ const loadSiswa = useCallback(async (isRefresh = false) => {
 
                                 <button
                                   type="button"
+                                  onClick={() => router.push(`/admin/siswa/kartu-identitas/card?id=${item.id}`)}
+                                  className={`theme-text-muted rounded-lg p-2 transition hover:bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)] hover:text-[var(--color-primary)]`}
+                                  title="Cetak Kartu Siswa"
+                                >
+                                  <IdCard size={17} />
+                                </button>
+
+                                <button
+                                  type="button"
                                   onClick={() => router.push(`/admin/siswa/edit/${item.id}`)}
                                   className="theme-text-muted rounded-lg p-2 transition hover:bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)] hover:text-[var(--color-warning)]"
                                   title="Edit siswa"
@@ -1398,7 +1341,6 @@ const loadSiswa = useCallback(async (isRefresh = false) => {
                   </table>
                 </div>
 
-                {/* EMPTY STATE */}
                 {!loading && currentItems.length === 0 && (
                   <div className="p-12 text-center">
                     <div className={`mx-auto flex h-14 w-14 items-center justify-center rounded-full ${themeNeutralSurface}`}>
@@ -1430,7 +1372,6 @@ const loadSiswa = useCallback(async (isRefresh = false) => {
                   </div>
                 )}
 
-                {/* PAGINATION */}
                 {!loading && totalItems > 0 && (
                   <div className={`flex flex-col items-center justify-between gap-3 border-t ${themeDivider} ${themeNeutralSurface} px-4 py-3 sm:flex-row`}>
                     <div className="flex flex-wrap items-center gap-3 theme-text-secondary text-sm">
@@ -1537,7 +1478,6 @@ const loadSiswa = useCallback(async (isRefresh = false) => {
         </main>
       </div>
 
-      {/* DELETE MODAL */}
       {deleteModal.open && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"

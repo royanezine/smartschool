@@ -238,9 +238,6 @@ export default function PelanggaranPage() {
         <main className="flex-1 overflow-y-auto p-5 md:p-6 lg:p-8">
           <div className="mx-auto w-full max-w-[1600px]">
 
-            {/* =====================================================
-                PAGE HEADER
-            ====================================================== */}
             <div className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div className="flex items-start gap-4">
 
@@ -273,7 +270,6 @@ export default function PelanggaranPage() {
 
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
 
-                {/* REFRESH */}
                 <button
                   onClick={handleRefresh}
                   disabled={refreshing}
@@ -311,7 +307,6 @@ export default function PelanggaranPage() {
                     : "Refresh"}
                 </button>
 
-                {/* TAMBAH */}
                 <button
                   onClick={() =>
                     router.push(
@@ -345,9 +340,6 @@ export default function PelanggaranPage() {
               </div>
             </div>
 
-            {/* =====================================================
-                ERROR
-            ====================================================== */}
             {error && (
               <div className="mb-6 flex items-start gap-3 rounded-xl border theme-border theme-danger px-4 py-3.5 text-sm font-semibold shadow-sm">
                 <svg
@@ -368,9 +360,6 @@ export default function PelanggaranPage() {
               </div>
             )}
 
-            {/* =====================================================
-                STATS
-            ====================================================== */}
             <div className="mb-7 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
 
               <Stat
@@ -406,14 +395,10 @@ export default function PelanggaranPage() {
               />
             </div>
 
-            {/* =====================================================
-                FILTER
-            ====================================================== */}
             <div className="mb-5 rounded-2xl border theme-border theme-card p-4 shadow-sm">
 
               <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
 
-                {/* SEARCH */}
                 <div className="relative w-full lg:flex-1">
 
                   <svg
@@ -447,7 +432,6 @@ export default function PelanggaranPage() {
                   />
                 </div>
 
-                {/* SORT */}
                 <div className="relative">
 
                   <svg
@@ -504,7 +488,6 @@ export default function PelanggaranPage() {
                   </select>
                 </div>
 
-                {/* RESET */}
                 <button
                   onClick={resetFilter}
                   className="
@@ -535,7 +518,6 @@ export default function PelanggaranPage() {
                 </button>
               </div>
 
-              {/* INFO SORT */}
               <div className="mt-3 flex flex-wrap items-center gap-2 border-t theme-border-soft pt-3">
 
                 <span className="text-xs font-medium theme-text-muted">
@@ -579,9 +561,6 @@ export default function PelanggaranPage() {
               </div>
             </div>
 
-            {/* =====================================================
-                TABLE
-            ====================================================== */}
             <div className="overflow-hidden rounded-2xl border theme-border theme-card shadow-xl">
 
               <div className="overflow-x-auto">
@@ -618,7 +597,6 @@ export default function PelanggaranPage() {
 
                   <tbody className="divide-y theme-border-soft">
 
-                    {/* LOADING */}
                     {loading ? (
                       <tr>
                         <td
@@ -636,7 +614,6 @@ export default function PelanggaranPage() {
 
                     ) : paginatedData.length === 0 ? (
 
-                      /* EMPTY */
                       <tr>
                         <td
                           colSpan="6"
@@ -648,14 +625,12 @@ export default function PelanggaranPage() {
 
                     ) : (
 
-                      /* DATA */
                       paginatedData.map((item) => (
                         <tr
                           key={item.id}
                           className="theme-table-hover transition"
                         >
 
-                          {/* SISWA */}
                           <td className="px-5 py-4">
 
                             <div className="flex items-center gap-3">
@@ -684,18 +659,15 @@ export default function PelanggaranPage() {
                             </div>
                           </td>
 
-                          {/* KATEGORI */}
                           <td className="px-5 py-4 font-semibold theme-text-secondary">
                             {item.kategoriPelanggaran?.nama ||
                               "-"}
                           </td>
 
-                          {/* TANGGAL */}
                           <td className="px-5 py-4 font-medium theme-text-secondary">
                             {formatTanggal(item.tanggal)}
                           </td>
 
-                          {/* POIN */}
                           <td className="px-5 py-4">
 
                             <span className="theme-card-soft inline-flex items-center rounded-lg px-2.5 py-1 text-xs font-bold theme-text ring-1 theme-border">
@@ -704,7 +676,6 @@ export default function PelanggaranPage() {
 
                           </td>
 
-                          {/* STATUS */}
                           <td className="px-5 py-4">
 
                             <span
@@ -717,12 +688,10 @@ export default function PelanggaranPage() {
 
                           </td>
 
-                          {/* AKSI */}
                           <td className="px-5 py-4">
 
                             <div className="flex items-center justify-end gap-1">
 
-                              {/* DETAIL */}
                               <button
                                 onClick={() =>
                                   router.push(
@@ -759,7 +728,6 @@ export default function PelanggaranPage() {
                                 </svg>
                               </button>
 
-                              {/* EDIT */}
                               <button
                                 onClick={() =>
                                   router.push(
@@ -790,7 +758,6 @@ export default function PelanggaranPage() {
                                 </svg>
                               </button>
 
-                              {/* DELETE */}
                               <button
                                 onClick={() =>
                                   handleDelete(item.id)
@@ -828,9 +795,6 @@ export default function PelanggaranPage() {
                 </table>
               </div>
 
-              {/* =================================================
-                  PAGINATION
-              ================================================== */}
               {!loading && filteredData.length > 0 && (
                 <div className="flex flex-col items-center justify-between gap-3 border-t theme-border px-5 py-4 sm:flex-row">
 
@@ -855,7 +819,6 @@ export default function PelanggaranPage() {
 
                   <div className="flex items-center gap-1.5">
 
-                    {/* PREVIOUS */}
                     <button
                       onClick={() =>
                         setPage((p) =>
@@ -889,7 +852,6 @@ export default function PelanggaranPage() {
                       </svg>
                     </button>
 
-                    {/* PAGE NUMBERS */}
                     {Array.from({
                       length: totalPage,
                     }).map((_, i) => {
@@ -918,7 +880,6 @@ export default function PelanggaranPage() {
                       );
                     })}
 
-                    {/* NEXT */}
                     <button
                       onClick={() =>
                         setPage((p) =>
@@ -968,9 +929,6 @@ export default function PelanggaranPage() {
   );
 }
 
-/* =============================================================
-   STAT CARD
-============================================================= */
 
 function Stat({
   label,

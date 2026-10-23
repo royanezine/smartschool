@@ -22,9 +22,6 @@ import {
 
 import { getDaftarPeminjaman } from "@/services/sarpras.service";
 
-// =========================================================
-// THEME HELPERS
-// =========================================================
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -89,9 +86,6 @@ const themeDangerBorder =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-// =========================================================
-// FILTER
-// =========================================================
 
 const KATEGORI_FILTER = [
   "Semua",
@@ -108,9 +102,6 @@ const RENTANG_FILTER = [
   "Semua",
 ];
 
-// =========================================================
-// STATUS CONFIG
-// =========================================================
 
 const hasilConfig = {
   dikembalikan: {
@@ -141,9 +132,6 @@ const hasilConfig = {
   },
 };
 
-// =========================================================
-// HELPERS
-// =========================================================
 
 function formatTanggal(value) {
   if (!value) return "-";
@@ -280,9 +268,6 @@ function normalizeResponse(response) {
   return [];
 }
 
-// =========================================================
-// PAGE
-// =========================================================
 
 export default function GuruSarprasRiwayatPage() {
   const router = useRouter();
@@ -308,9 +293,6 @@ export default function GuruSarprasRiwayatPage() {
     },
   ];
 
-  // =======================================================
-  // LOAD RIWAYAT
-  // =======================================================
 
   const loadRiwayat = useCallback(async (isRefresh = false) => {
     try {
@@ -354,17 +336,15 @@ export default function GuruSarprasRiwayatPage() {
     }
   }, []);
 
-  // =======================================================
-  // LOAD PERTAMA KALI
-  // =======================================================
 
   useEffect(() => {
-    loadRiwayat(false);
+    const timer = setTimeout(() => {
+      loadRiwayat(false);
+    }, 0);
+
+    return () => clearTimeout(timer);
   }, [loadRiwayat]);
 
-  // =======================================================
-  // REFRESH
-  // =======================================================
 
   const handleRefresh = () => {
     if (loading || refreshing) return;
@@ -372,9 +352,6 @@ export default function GuruSarprasRiwayatPage() {
     loadRiwayat(true);
   };
 
-  // =======================================================
-  // RENTANG TANGGAL
-  // =======================================================
 
   const tanggalMulaiRentang = useMemo(() => {
     const sekarang = new Date();
@@ -420,9 +397,6 @@ export default function GuruSarprasRiwayatPage() {
     return null;
   }, [rentangAktif]);
 
-  // =======================================================
-  // FILTER DATA
-  // =======================================================
 
   const dataTersaring = useMemo(() => {
     const search = pencarian.trim().toLowerCase();
@@ -476,9 +450,6 @@ export default function GuruSarprasRiwayatPage() {
     tanggalMulaiRentang,
   ]);
 
-  // =======================================================
-  // RINGKASAN
-  // =======================================================
 
   const ringkasan = useMemo(() => {
     const total = dataTersaring.length;
@@ -503,9 +474,6 @@ export default function GuruSarprasRiwayatPage() {
     };
   }, [dataTersaring]);
 
-  // =======================================================
-  // DETAIL
-  // =======================================================
 
   const bukaDetail = (item) => {
     if (!item?.id) return;
@@ -515,9 +483,6 @@ export default function GuruSarprasRiwayatPage() {
     );
   };
 
-  // =======================================================
-  // RENDER
-  // =======================================================
 
   return (
     <div className="theme-page flex h-screen overflow-hidden">
@@ -546,9 +511,6 @@ export default function GuruSarprasRiwayatPage() {
         <main className="theme-page flex-1 overflow-y-auto">
           <div className="mx-auto w-full max-w-[1700px] space-y-6 px-4 py-6 sm:px-6 lg:px-8 lg:py-8 2xl:max-w-[1900px]">
 
-            {/* =================================================
-                PAGE HEADER
-            ================================================= */}
 
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div className="flex min-w-0 items-start gap-4">
@@ -585,7 +547,6 @@ export default function GuruSarprasRiwayatPage() {
                 </div>
               </div>
 
-              {/* REFRESH */}
 
               <button
                 type="button"
@@ -608,9 +569,6 @@ export default function GuruSarprasRiwayatPage() {
               </button>
             </div>
 
-            {/* =================================================
-                ERROR
-            ================================================= */}
 
             {error && (
               <div
@@ -634,15 +592,12 @@ export default function GuruSarprasRiwayatPage() {
               </div>
             )}
 
-            {/* =================================================
-                RINGKASAN
-            ================================================= */}
 
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               <RingkasanCard
                 label="Total Riwayat"
                 value={
-                  loading
+                  loading || error
                     ? "—"
                     : ringkasan.total
                 }
@@ -652,7 +607,7 @@ export default function GuruSarprasRiwayatPage() {
               <RingkasanCard
                 label="Tepat Waktu"
                 value={
-                  loading
+                  loading || error
                     ? "—"
                     : ringkasan.tepatWaktu
                 }
@@ -662,7 +617,7 @@ export default function GuruSarprasRiwayatPage() {
               <RingkasanCard
                 label="Terlambat"
                 value={
-                  loading
+                  loading || error
                     ? "—"
                     : ringkasan.terlambat
                 }
@@ -672,17 +627,14 @@ export default function GuruSarprasRiwayatPage() {
               <RingkasanCard
                 label="Ditolak"
                 value={
-                  loading
+                  loading || error
                     ? "—"
                     : ringkasan.ditolak
                 }
-                tone="red"
+                tone="rose"
               />
             </div>
 
-            {/* =================================================
-                SEARCH + FILTER
-            ================================================= */}
 
             <div
               className={`theme-card ${themeNeutralBorder} ${themeCardShadow} space-y-3 rounded-xl border p-4`}
@@ -705,7 +657,6 @@ export default function GuruSarprasRiwayatPage() {
               </div>
 
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                {/* KATEGORI */}
 
                 <div className="flex gap-2 overflow-x-auto pb-1">
                   {KATEGORI_FILTER.map((kategori) => {
@@ -731,7 +682,6 @@ export default function GuruSarprasRiwayatPage() {
                   })}
                 </div>
 
-                {/* RENTANG */}
 
                 <select
                   value={rentangAktif}
@@ -752,9 +702,6 @@ export default function GuruSarprasRiwayatPage() {
               </div>
             </div>
 
-            {/* =================================================
-                LIST
-            ================================================= */}
 
             <div
               className={`theme-card ${themeNeutralBorder} ${themeCardShadow} overflow-hidden rounded-xl border transition-opacity duration-200 ${
@@ -774,6 +721,33 @@ export default function GuruSarprasRiwayatPage() {
                     Memuat riwayat peminjaman...
                   </p>
                 </div>
+              ) : error ? (
+                <div className="px-4 py-16 text-center">
+                  <div
+                    className={`mx-auto flex h-14 w-14 items-center justify-center rounded-xl border ${themeDangerSurface} ${themeDangerBorder} text-[var(--color-danger,#ef4444)]`}
+                  >
+                    <AlertTriangle size={24} />
+                  </div>
+
+                  <p className="theme-text mt-4 text-base font-bold">
+                    Gagal Mengambil Riwayat
+                  </p>
+
+                  <p className="theme-text-secondary mx-auto mt-2 max-w-md text-xs leading-5">
+                    {error}
+                  </p>
+
+                  <div className="mt-5 flex justify-center">
+                    <button
+                      type="button"
+                      onClick={handleRefresh}
+                      className="theme-primary inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold text-white transition hover:opacity-90"
+                    >
+                      <RefreshCw size={14} />
+                      Coba Lagi
+                    </button>
+                  </div>
+                </div>
               ) : (
                 <div>
                   {dataTersaring.map((r) => {
@@ -791,7 +765,6 @@ export default function GuruSarprasRiwayatPage() {
                         onClick={() => bukaDetail(r)}
                         className={`group theme-card flex w-full items-center gap-4 border-b ${themeDivider} p-4 text-left transition-colors last:border-b-0 ${themeNeutralHover} sm:px-5 sm:py-4`}
                       >
-                        {/* ICON */}
 
                         <div
                           className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-lg border ${themePrimarySoft} ${themePrimarySoftBorder} ${themePrimaryText}`}
@@ -799,7 +772,6 @@ export default function GuruSarprasRiwayatPage() {
                           <Package size={18} />
                         </div>
 
-                        {/* CONTENT */}
 
                         <div className="min-w-0 flex-1">
                           <div className="flex flex-wrap items-center gap-2">
@@ -839,7 +811,6 @@ export default function GuruSarprasRiwayatPage() {
                           </div>
                         </div>
 
-                        {/* STATUS */}
 
                         {cfg && (
                           <span
@@ -855,7 +826,6 @@ export default function GuruSarprasRiwayatPage() {
                           </span>
                         )}
 
-                        {/* CHEVRON */}
 
                         <ChevronRight
                           size={16}
@@ -865,7 +835,6 @@ export default function GuruSarprasRiwayatPage() {
                     );
                   })}
 
-                  {/* EMPTY */}
 
                   {dataTersaring.length === 0 && (
                     <div className="px-4 py-16 text-center">
@@ -895,9 +864,6 @@ export default function GuruSarprasRiwayatPage() {
   );
 }
 
-// =========================================================
-// RINGKASAN CARD
-// =========================================================
 
 function RingkasanCard({
   label,

@@ -4,6 +4,8 @@ import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
+import { getUsers } from "@/services/user.service";
+import { getKelas } from "@/services/kelas.service";
 import {
   Search,
   Filter,
@@ -17,9 +19,6 @@ import {
   Plus,
 } from "lucide-react";
 
-/* =========================================================
-   THEME HELPERS
-========================================================= */
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -69,9 +68,6 @@ const themeInfoBorder =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-/* =========================================================
-   MOCK DATA
-========================================================= */
 
 const MOCK_SISWA = [
   {
@@ -172,9 +168,6 @@ const MOCK_SISWA = [
   },
 ];
 
-/* =========================================================
-   OPTIONS
-========================================================= */
 
 const KELAS_OPTIONS = [
   "Semua Kelas",
@@ -189,9 +182,6 @@ const STATUS_OPTIONS = [
   "Nonaktif",
 ];
 
-/* =========================================================
-   HELPER
-========================================================= */
 
 function getInitials(nama) {
   return nama
@@ -203,9 +193,6 @@ function getInitials(nama) {
     .toUpperCase();
 }
 
-/* =========================================================
-   JENIS KELAMIN BADGE
-========================================================= */
 
 function JenisKelaminBadge({ jenisKelamin }) {
   const isPria = jenisKelamin === "L";
@@ -223,9 +210,6 @@ function JenisKelaminBadge({ jenisKelamin }) {
   );
 }
 
-/* =========================================================
-   STATUS BADGE
-========================================================= */
 
 function StatusBadge({ status }) {
   const isActive = status === "aktif";
@@ -251,9 +235,6 @@ function StatusBadge({ status }) {
   );
 }
 
-/* =========================================================
-   AVATAR
-========================================================= */
 
 function Avatar({ nama, size = "md" }) {
   const dims =
@@ -270,9 +251,6 @@ function Avatar({ nama, size = "md" }) {
   );
 }
 
-/* =========================================================
-   MAIN PAGE
-========================================================= */
 
 export default function KartuIdentitasSiswaPage() {
   const router = useRouter();
@@ -281,27 +259,101 @@ export default function KartuIdentitasSiswaPage() {
     useState(false);
 
   const [search, setSearch] = useState("");
+  const [kelasFilter, setKelasFilter] = useState("Semua Kelas");
+  const [statusFilter, setStatusFilter] = useState("Semua Status");
+  const [siswaList, setSiswaList] = useState([]);
+  const [kelasList, setKelasList] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const [kelasFilter, setKelasFilter] =
-    useState("Semua Kelas");
+  useEffect(() => {
+    let isMounted = true;
 
-  const [statusFilter, setStatusFilter] =
-    useState("Semua Status");
+    async function loadData() {
+      try {
+        setLoading(true);
 
-  /* =======================================================
-     SIDEBAR
-  ======================================================= */
+        let allUsers = [];
+        let pageUser = 1;
+        let totalPagesUser = 1;
+
+        do {
+          const userRes = await getUsers({ page: pageUser, limit: 100, role: "siswa" });
+          const raw = userRes?.data ?? userRes ?? [];
+          const users = Array.isArray(raw) ? raw : [];
+          allUsers = allUsers.concat(users);
+
+          totalPagesUser = userRes?.pagination?.totalPages || 1;
+          pageUser++;
+        } while (pageUser <= totalPagesUser);
+
+        let allKelas = [];
+        let pageKelas = 1;
+        let totalPagesKelas = 1;
+
+        do {
+          const kelasRes = await getKelas({ page: pageKelas, limit: 100 });
+          const rawK = kelasRes?.data ?? kelasRes ?? [];
+          const kelasData = Array.isArray(rawK) ? rawK : [];
+          allKelas = allKelas.concat(kelasData);
+
+          totalPagesKelas = kelasRes?.pagination?.totalPages || 1;
+          pageKelas++;
+        } while (pageKelas <= totalPagesKelas);
+
+        if (isMounted) {
+          setKelasList(allKelas);
+
+          const formatted = allUsers.map((u) => {
+            const kNama =
+              u.kelasSiswa?.[0]?.kelas?.nama ??
+              u.kelas?.nama ??
+              u.kelasNama ??
+              "-";
+
+            return {
+              id: u.id,
+              nama: u.namaLengkap || u.nama || "Tanpa Nama",
+              nisn: u.nisn || "-",
+              nik: u.nik || "-",
+              kelas: kNama,
+              jenisKelamin: u.jenisKelamin || "-",
+              tempatLahir: u.tempatLahir || "-",
+              tanggalLahir: u.tanggalLahir
+                ? new Date(u.tanggalLahir).toLocaleDateString("id-ID")
+                : "-",
+              agama: u.agama || "-",
+              noTelepon: u.noTelepon || "-",
+              alamat: u.alamat || u.alamatDomisili || "-",
+              status: u.status || "aktif",
+              avatar: u.avatar || null,
+              sekolahNama: u.sekolah?.nama || "SMARTSCHOOL",
+            };
+          });
+
+          setSiswaList(formatted);
+        }
+      } catch (err) {
+        console.error("Gagal memuat data siswa/kelas:", err);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    }
+
+    loadData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
 
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
   };
 
-  /* =======================================================
-     FILTER DATA
-  ======================================================= */
 
   const filteredSiswa = useMemo(() => {
-    return MOCK_SISWA.filter((s) => {
+    return siswaList.filter((s) => {
       const searchValue = search.toLowerCase();
 
       const matchSearch =
@@ -327,28 +379,23 @@ export default function KartuIdentitasSiswaPage() {
       );
     });
   }, [
+    siswaList,
     search,
     kelasFilter,
     statusFilter,
   ]);
 
-  /* =======================================================
-     STATISTIK
-  ======================================================= */
 
-  const totalSiswa = MOCK_SISWA.length;
+  const totalSiswa = siswaList.length;
 
-  const totalAktif = MOCK_SISWA.filter(
+  const totalAktif = siswaList.filter(
     (s) => s.status === "aktif"
   ).length;
 
   const totalKelas = new Set(
-    MOCK_SISWA.map((s) => s.kelas)
+    siswaList.map((s) => s.kelas)
   ).size;
 
-  /* =======================================================
-     DETAIL
-  ======================================================= */
 
   const handleDetail = (s) => {
     router.push(
@@ -356,9 +403,6 @@ export default function KartuIdentitasSiswaPage() {
     );
   };
 
-  /* =======================================================
-     ID CARD
-  ======================================================= */
 
   const handleIdCard = (s) => {
     router.push(
@@ -366,16 +410,10 @@ export default function KartuIdentitasSiswaPage() {
     );
   };
 
-  /* =======================================================
-     RENDER
-  ======================================================= */
 
   return (
     <div className="flex h-screen w-full theme-page overflow-hidden">
 
-      {/* ===================================================
-          SIDEBAR
-      =================================================== */}
 
       <Sidebar
         active="siswaKartuIdentitas"
@@ -385,13 +423,9 @@ export default function KartuIdentitasSiswaPage() {
         role="admin"
       />
 
-      {/* ===================================================
-          CONTENT
-      =================================================== */}
 
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
 
-        {/* HEADER */}
 
         <Header
           toggleSidebar={toggleSidebar}
@@ -403,15 +437,11 @@ export default function KartuIdentitasSiswaPage() {
           }}
         />
 
-        {/* MAIN */}
 
         <main className="flex-1 overflow-y-auto">
 
           <div className="p-4 sm:p-6 lg:p-8 space-y-6">
 
-            {/* =================================================
-                PAGE HEADER
-            ================================================= */}
 
             <div className="flex items-center justify-between gap-3 flex-wrap">
 
@@ -451,13 +481,9 @@ export default function KartuIdentitasSiswaPage() {
 
             </div>
 
-            {/* =================================================
-                STATISTIK
-            ================================================= */}
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
 
-              {/* TOTAL SISWA */}
 
               <div
                 className={`theme-card rounded-xl border ${themeNeutralBorder} p-4 ${themeCardShadow}`}
@@ -482,7 +508,6 @@ export default function KartuIdentitasSiswaPage() {
 
               </div>
 
-              {/* JUMLAH KELAS */}
 
               <div
                 className={`theme-card rounded-xl border ${themeNeutralBorder} p-4 ${themeCardShadow}`}
@@ -507,7 +532,6 @@ export default function KartuIdentitasSiswaPage() {
 
               </div>
 
-              {/* AKTIF */}
 
               <div
                 className={`theme-card rounded-xl border ${themeNeutralBorder} p-4 ${themeCardShadow}`}
@@ -532,7 +556,6 @@ export default function KartuIdentitasSiswaPage() {
 
               </div>
 
-              {/* RATA-RATA */}
 
               <div
                 className={`theme-card rounded-xl border ${themeNeutralBorder} p-4 ${themeCardShadow}`}
@@ -563,15 +586,11 @@ export default function KartuIdentitasSiswaPage() {
 
             </div>
 
-            {/* =================================================
-                FILTER
-            ================================================= */}
 
             <div
               className={`theme-card rounded-xl border ${themeNeutralBorder} p-4 ${themeCardShadow} flex flex-col sm:flex-row gap-3`}
             >
 
-              {/* SEARCH */}
 
               <div className="relative flex-1">
 
@@ -592,7 +611,6 @@ export default function KartuIdentitasSiswaPage() {
 
               </div>
 
-              {/* FILTER */}
 
               <div className="flex items-center gap-2">
 
@@ -639,9 +657,6 @@ export default function KartuIdentitasSiswaPage() {
 
             </div>
 
-            {/* =================================================
-                TABEL
-            ================================================= */}
 
             <div
               className={`theme-card rounded-xl border ${themeNeutralBorder} ${themeCardShadow} overflow-hidden`}
@@ -651,9 +666,6 @@ export default function KartuIdentitasSiswaPage() {
 
                 <table className="w-full text-sm border-collapse">
 
-                  {/* =================================================
-                      TABLE HEADER
-                  ================================================= */}
 
                   <thead>
 
@@ -661,43 +673,36 @@ export default function KartuIdentitasSiswaPage() {
                       className={`${themePrimaryGradient} text-[var(--color-card)]`}
                     >
 
-                      {/* NO */}
 
                       <th className="text-center font-semibold px-4 py-3 w-[60px]">
                         No
                       </th>
 
-                      {/* PROFIL */}
 
                       <th className="text-left font-semibold px-4 py-3 min-w-[240px]">
                         Profil
                       </th>
 
-                      {/* NISN */}
 
                       <th className="text-left font-semibold px-4 py-3 whitespace-nowrap">
                         NISN
                       </th>
 
-                      {/* KELAS */}
 
                       <th className="text-left font-semibold px-4 py-3 whitespace-nowrap">
                         Kelas
                       </th>
 
-                      {/* JENIS KELAMIN */}
 
                       <th className="text-left font-semibold px-4 py-3 whitespace-nowrap">
                         Jenis Kelamin
                       </th>
 
-                      {/* STATUS */}
 
                       <th className="text-center font-semibold px-4 py-3 whitespace-nowrap">
                         Status
                       </th>
 
-                      {/* AKSI */}
 
                       <th className="text-center font-semibold px-4 py-3 whitespace-nowrap">
                         Aksi
@@ -707,9 +712,6 @@ export default function KartuIdentitasSiswaPage() {
 
                   </thead>
 
-                  {/* =================================================
-                      TABLE BODY
-                  ================================================= */}
 
                   <tbody>
 
@@ -724,7 +726,6 @@ export default function KartuIdentitasSiswaPage() {
                         } hover:bg-[color-mix(in_srgb,var(--color-primary)_7%,transparent)]`}
                       >
 
-                        {/* NO */}
 
                         <td className="px-4 py-3 text-center">
 
@@ -736,7 +737,6 @@ export default function KartuIdentitasSiswaPage() {
 
                         </td>
 
-                        {/* PROFIL */}
 
                         <td className="px-4 py-3">
 
@@ -770,7 +770,6 @@ export default function KartuIdentitasSiswaPage() {
 
                         </td>
 
-                        {/* NISN */}
 
                         <td className="px-4 py-3">
 
@@ -780,7 +779,6 @@ export default function KartuIdentitasSiswaPage() {
 
                         </td>
 
-                        {/* KELAS */}
 
                         <td className="px-4 py-3">
 
@@ -792,7 +790,6 @@ export default function KartuIdentitasSiswaPage() {
 
                         </td>
 
-                        {/* JENIS KELAMIN */}
 
                         <td className="px-4 py-3">
 
@@ -804,7 +801,6 @@ export default function KartuIdentitasSiswaPage() {
 
                         </td>
 
-                        {/* STATUS */}
 
                         <td className="px-4 py-3 text-center">
 
@@ -814,13 +810,11 @@ export default function KartuIdentitasSiswaPage() {
 
                         </td>
 
-                        {/* AKSI */}
 
                         <td className="px-4 py-3">
 
                           <div className="flex items-center justify-center gap-1.5">
 
-                            {/* DETAIL */}
 
                             <button
                               onClick={() =>
@@ -836,7 +830,6 @@ export default function KartuIdentitasSiswaPage() {
 
                             </button>
 
-                            {/* ID CARD */}
 
                             <button
                               onClick={() =>
@@ -862,7 +855,6 @@ export default function KartuIdentitasSiswaPage() {
 
                     ))}
 
-                    {/* EMPTY */}
 
                     {filteredSiswa.length === 0 && (
 
@@ -908,9 +900,6 @@ export default function KartuIdentitasSiswaPage() {
 
               </div>
 
-              {/* =================================================
-                  TABLE FOOTER
-              ================================================= */}
 
               <div
                 className={`px-4 py-3 border-t ${themeDivider} ${themeNeutralSurface} flex items-center justify-between`}

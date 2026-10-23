@@ -50,9 +50,6 @@ export default function EditGedungPage() {
 
   const BACK_URL = "/admin/sarpras/gedung";
 
-  /* =========================================================
-     THEME HELPERS
-  ========================================================= */
 
   const themePrimarySoft =
     "bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)]";
@@ -109,9 +106,6 @@ export default function EditGedungPage() {
   const themeInfoBorder =
     "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
 
-  /* =========================================================
-     FETCH DETAIL GEDUNG
-  ========================================================= */
 
   useEffect(() => {
     let cancelled = false;
@@ -181,9 +175,6 @@ export default function EditGedungPage() {
     };
   }, [id]);
 
-  /* =========================================================
-     HANDLE CHANGE
-  ========================================================= */
 
   const handleChange = (field, value) => {
     setFormData((prev) => ({
@@ -211,9 +202,6 @@ export default function EditGedungPage() {
     }
   };
 
-  /* =========================================================
-     VALIDATION
-  ========================================================= */
 
   const validate = () => {
     const newErrors = {};
@@ -252,9 +240,6 @@ export default function EditGedungPage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  /* =========================================================
-     SUBMIT
-  ========================================================= */
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -297,9 +282,6 @@ export default function EditGedungPage() {
     }
   };
 
-  /* =========================================================
-     LOADING
-  ========================================================= */
 
   if (isLoading) {
     return (
@@ -348,9 +330,6 @@ export default function EditGedungPage() {
     );
   }
 
-  /* =========================================================
-     MAIN
-  ========================================================= */
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
@@ -377,7 +356,6 @@ export default function EditGedungPage() {
         <main className="theme-page min-w-0 flex-1 overflow-y-auto">
           <div className="w-full p-3 sm:p-5 lg:p-6 xl:p-7">
             <div className="mx-auto w-full max-w-[1250px] space-y-5">
-              {/* BACK / BREADCRUMB */}
               <div className="flex items-center justify-between">
                 <button
                   type="button"
@@ -403,7 +381,6 @@ export default function EditGedungPage() {
                 </div>
               </div>
 
-              {/* HEADER CARD */}
               <section
                 className={`theme-card theme-border relative overflow-hidden rounded-2xl border ${themeCardShadow}`}
               >
@@ -474,7 +451,6 @@ export default function EditGedungPage() {
                 </div>
               </section>
 
-              {/* ERROR */}
               {errorMessage && (
                 <div
                   className={`flex items-start gap-3 rounded-xl border ${themeDangerBorder} ${themeDangerSoft} px-4 py-3.5`}
@@ -496,7 +472,6 @@ export default function EditGedungPage() {
                 </div>
               )}
 
-              {/* SUCCESS */}
               {saved && (
                 <div
                   className={`flex items-center gap-3 rounded-xl border ${themeSuccessBorder} ${themeSuccessSoft} px-4 py-3.5`}
@@ -518,9 +493,7 @@ export default function EditGedungPage() {
                 </div>
               )}
 
-              {/* CONTENT GRID */}
               <div className="grid min-w-0 grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_350px]">
-                {/* FORM */}
                 <section
                   className={`theme-card theme-border min-w-0 overflow-hidden rounded-2xl border ${themeCardShadow}`}
                 >
@@ -551,7 +524,6 @@ export default function EditGedungPage() {
 
                   <form onSubmit={handleSubmit} className="p-5 sm:p-6">
                     <div className="space-y-5">
-                      {/* NAMA */}
                       <div>
                         <label
                           htmlFor="nama"
@@ -597,7 +569,6 @@ export default function EditGedungPage() {
                         </div>
                       </div>
 
-                      {/* KODE */}
                       <div>
                         <label
                           htmlFor="kode"
@@ -642,7 +613,6 @@ export default function EditGedungPage() {
                         </div>
                       </div>
 
-                      {/* FOTO */}
                       <div>
                         <div className="mb-2 flex items-center justify-between">
                           <label
@@ -691,7 +661,6 @@ export default function EditGedungPage() {
                         )}
                       </div>
 
-                      {/* INFORMATION */}
                       <div
                         className={`rounded-xl border ${themeInfoBorder} ${themeInfoSoft} p-4`}
                       >
@@ -716,7 +685,6 @@ export default function EditGedungPage() {
                       </div>
                     </div>
 
-                    {/* FORM FOOTER */}
                     <div className="theme-border mt-6 flex flex-col-reverse gap-2.5 border-t pt-5 sm:flex-row sm:items-center sm:justify-end">
                       <button
                         type="button"
@@ -738,7 +706,6 @@ export default function EditGedungPage() {
                   </form>
                 </section>
 
-                {/* PREVIEW */}
                 <aside className="min-w-0">
                   <div
                     className={`theme-card theme-border overflow-hidden rounded-2xl border ${themeCardShadow} xl:sticky xl:top-5`}
@@ -886,7 +853,6 @@ export default function EditGedungPage() {
                 </aside>
               </div>
 
-              {/* FOOTER */}
               <div className="theme-border border-t py-2 text-center">
                 <p className="theme-text-muted text-[10px] sm:text-xs">
                   © 2026 SmartSchool • Edit Gedung • Sarana & Prasarana

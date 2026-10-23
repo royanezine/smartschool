@@ -25,9 +25,6 @@ import {
   deleteGudang,
 } from "@/services/sarpras.service";
 
-/* =========================================================
-   GLOBAL THEME HELPERS
-========================================================= */
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -89,9 +86,6 @@ const themeDangerBorder =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-/* =========================================================
-   RESPONSE HELPER
-========================================================= */
 
 function extractArray(response) {
   if (Array.isArray(response)) {
@@ -117,9 +111,6 @@ function extractArray(response) {
   return [];
 }
 
-/* =========================================================
-   PAGE
-========================================================= */
 
 export default function MasterGudangPage() {
   const router = useRouter();
@@ -148,9 +139,6 @@ export default function MasterGudangPage() {
   const [deletingId, setDeletingId] =
     useState(null);
 
-  /* =========================================================
-     LOAD DATA
-  ========================================================= */
 
   async function loadGudang(showRefresh = false) {
     try {
@@ -194,17 +182,11 @@ export default function MasterGudangPage() {
     }
   }
 
-  /* =========================================================
-     INITIAL LOAD
-  ========================================================= */
 
   useEffect(() => {
     loadGudang();
   }, []);
 
-  /* =========================================================
-     FILTER DATA
-  ========================================================= */
 
   const filteredGudang = useMemo(() => {
     const keyword =
@@ -243,9 +225,6 @@ export default function MasterGudangPage() {
     statusFilter,
   ]);
 
-  /* =========================================================
-     STATISTICS
-  ========================================================= */
 
   const totalGudang =
     gudangList.length;
@@ -267,9 +246,6 @@ export default function MasterGudangPage() {
         "nonaktif"
     ).length;
 
-  /* =========================================================
-     DELETE
-  ========================================================= */
 
   async function handleDelete(
     id,
@@ -313,18 +289,12 @@ export default function MasterGudangPage() {
     }
   }
 
-  /* =========================================================
-     RESET FILTER
-  ========================================================= */
 
   function handleReset() {
     setSearch("");
     setStatusFilter("Semua");
   }
 
-  /* =========================================================
-     SIDEBAR
-  ========================================================= */
 
   function toggleSidebar() {
     setIsCollapsed(
@@ -332,16 +302,10 @@ export default function MasterGudangPage() {
     );
   }
 
-  /* =========================================================
-     RENDER
-  ========================================================= */
 
   return (
     <div className="theme-page h-screen overflow-hidden">
 
-      {/* =====================================================
-          SIDEBAR
-      ===================================================== */}
 
       <div className="fixed inset-y-0 left-0 z-50">
         <Sidebar
@@ -352,9 +316,6 @@ export default function MasterGudangPage() {
         />
       </div>
 
-      {/* =====================================================
-          CONTENT
-      ===================================================== */}
 
       <div
         className={`flex h-screen min-w-0 flex-col overflow-hidden transition-[margin] duration-300 ${
@@ -364,9 +325,6 @@ export default function MasterGudangPage() {
         }`}
       >
 
-        {/* ===================================================
-            HEADER
-        =================================================== */}
 
         <div className="z-30 flex-shrink-0">
           <Header
@@ -381,9 +339,6 @@ export default function MasterGudangPage() {
           />
         </div>
 
-        {/* ===================================================
-            MAIN
-        =================================================== */}
 
         <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
 
@@ -391,9 +346,6 @@ export default function MasterGudangPage() {
 
             <div className="mx-auto w-full max-w-[1600px] space-y-5">
 
-              {/* =================================================
-                  HEADER
-              ================================================= */}
 
               <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
 
@@ -421,7 +373,6 @@ export default function MasterGudangPage() {
 
                 </div>
 
-                {/* ACTION */}
 
                 <div className="flex flex-wrap items-center gap-2">
 
@@ -464,9 +415,6 @@ export default function MasterGudangPage() {
 
               </div>
 
-              {/* =================================================
-                  ERROR
-              ================================================= */}
 
               {error && (
                 <div
@@ -503,13 +451,9 @@ export default function MasterGudangPage() {
                 </div>
               )}
 
-              {/* =================================================
-                  STATISTIK
-              ================================================= */}
 
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
 
-                {/* TOTAL */}
 
                 <div
                   className={`theme-card rounded-xl border ${themeNeutralBorder} p-4 ${themeCardShadow}`}
@@ -539,7 +483,6 @@ export default function MasterGudangPage() {
 
                 </div>
 
-                {/* AKTIF */}
 
                 <div
                   className={`theme-card rounded-xl border ${themeNeutralBorder} p-4 ${themeCardShadow}`}
@@ -569,7 +512,6 @@ export default function MasterGudangPage() {
 
                 </div>
 
-                {/* NONAKTIF */}
 
                 <div
                   className={`theme-card rounded-xl border ${themeNeutralBorder} p-4 ${themeCardShadow}`}
@@ -601,9 +543,6 @@ export default function MasterGudangPage() {
 
               </div>
 
-              {/* =================================================
-                  FILTER
-              ================================================= */}
 
               <div
                 className={`theme-card rounded-xl border ${themeNeutralBorder} p-4 ${themeCardShadow}`}
@@ -611,7 +550,6 @@ export default function MasterGudangPage() {
 
                 <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
 
-                  {/* SEARCH */}
 
                   <div className="relative min-w-0 flex-1">
 
@@ -634,7 +572,6 @@ export default function MasterGudangPage() {
 
                   </div>
 
-                  {/* STATUS */}
 
                   <select
                     value={statusFilter}
@@ -660,7 +597,6 @@ export default function MasterGudangPage() {
 
                   </select>
 
-                  {/* RESET */}
 
                   <button
                     type="button"
@@ -674,9 +610,6 @@ export default function MasterGudangPage() {
 
               </div>
 
-              {/* =================================================
-                  TABLE
-              ================================================= */}
 
               <div
                 className={`theme-card overflow-hidden rounded-xl border ${themeNeutralBorder} ${themeCardShadow}`}
@@ -686,9 +619,6 @@ export default function MasterGudangPage() {
 
                   <table className="w-full min-w-[700px] text-sm">
 
-                    {/* =================================================
-                        TABLE HEAD
-                    ================================================= */}
 
                     <thead>
 
@@ -716,13 +646,9 @@ export default function MasterGudangPage() {
 
                     </thead>
 
-                    {/* =================================================
-                        TABLE BODY
-                    ================================================= */}
 
                     <tbody>
 
-                      {/* LOADING */}
 
                       {loading ? (
                         <tr>
@@ -752,9 +678,6 @@ export default function MasterGudangPage() {
                       ) : filteredGudang.length ===
                         0 ? (
 
-                        /* =================================================
-                           EMPTY
-                        ================================================= */
 
                         <tr>
 
@@ -811,9 +734,6 @@ export default function MasterGudangPage() {
 
                       ) : (
 
-                        /* =================================================
-                           DATA
-                        ================================================= */
 
                         filteredGudang.map(
                           (item, index) => {
@@ -839,7 +759,6 @@ export default function MasterGudangPage() {
                                 }`}
                               >
 
-                                {/* NAMA */}
 
                                 <td className="px-5 py-4">
 
@@ -870,7 +789,6 @@ export default function MasterGudangPage() {
 
                                 </td>
 
-                                {/* LOKASI */}
 
                                 <td className="px-5 py-4">
 
@@ -890,7 +808,6 @@ export default function MasterGudangPage() {
 
                                 </td>
 
-                                {/* STATUS */}
 
                                 <td className="px-5 py-4">
 
@@ -919,13 +836,11 @@ export default function MasterGudangPage() {
 
                                 </td>
 
-                                {/* AKSI */}
 
                                 <td className="px-5 py-4">
 
                                   <div className="flex items-center justify-center gap-1">
 
-                                    {/* EDIT */}
 
                                     <button
                                       type="button"
@@ -942,7 +857,6 @@ export default function MasterGudangPage() {
                                       />
                                     </button>
 
-                                    {/* DELETE */}
 
                                     <button
                                       type="button"
@@ -989,9 +903,6 @@ export default function MasterGudangPage() {
 
               </div>
 
-              {/* =================================================
-                  FOOTER
-              ================================================= */}
 
               <footer
                 className={`border-t ${themeDivider} py-4 text-center text-[11px] theme-text-muted`}

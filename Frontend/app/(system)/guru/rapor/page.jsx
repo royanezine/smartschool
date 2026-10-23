@@ -31,18 +31,12 @@ import {
   setPublishRapot,
 } from "@/services/raport.service";
 
-/* =========================================================
-   CONSTANTS
-========================================================= */
 
 const JENIS_RAPOT_OPTIONS = [
   { value: "tengah_semester", label: "Tengah Semester" },
   { value: "akhir_semester", label: "Akhir Semester" },
 ];
 
-/* =========================================================
-   HELPERS
-========================================================= */
 
 function unwrapList(result) {
   if (Array.isArray(result)) return result;
@@ -80,25 +74,16 @@ function unwrapSemester(kelas) {
   return kelas?.tahunAjaran?.semester || kelas?.semester || "-";
 }
 
-/* =========================================================
-   PAGE
-========================================================= */
 
 export default function GuruRaporPage() {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
-  /* ---------------------------------------------------------
-     DATA
-  --------------------------------------------------------- */
   const [kelasWaliList, setKelasWaliList] = useState([]);
   const [selectedKelasId, setSelectedKelasId] = useState("");
   const [jenisRapot, setJenisRapot] = useState("akhir_semester");
   const [rapotList, setRapotList] = useState([]);
   const [search, setSearch] = useState("");
 
-  /* ---------------------------------------------------------
-     UI STATE
-  --------------------------------------------------------- */
   const [loading, setLoading] = useState(true);
   const [loadingRapot, setLoadingRapot] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -123,9 +108,6 @@ export default function GuruRaporPage() {
 
   const toggleSidebar = () => setIsCollapsed((prev) => !prev);
 
-  /* =======================================================
-     LOAD KELAS WALI
-  ======================================================= */
 
   const loadKelasWali = useCallback(async () => {
     try {
@@ -145,8 +127,6 @@ export default function GuruRaporPage() {
       });
     } catch (err) {
       console.error("Gagal memuat kelas wali:", err);
-      // Error API dibedakan dari data kosong: jangan tampilkan
-      // pesan "belum ada kelas" ketika permintaan justru gagal.
       setKelasError(
         err?.message ||
           "Gagal memuat daftar kelas yang dapat Anda kelola.",
@@ -162,9 +142,6 @@ export default function GuruRaporPage() {
     loadKelasWali();
   }, [loadKelasWali]);
 
-  /* =======================================================
-     LOAD RAPOT KELAS
-  ======================================================= */
 
   const loadRapot = useCallback(
     async (overrides = {}) => {
@@ -184,8 +161,6 @@ export default function GuruRaporPage() {
         setRapotList(unwrapList(result));
       } catch (err) {
         console.error("Gagal memuat rapot kelas:", err);
-        // Simpan sebagai error daftar rapot agar tidak tertukar
-        // dengan kondisi "belum ada rapot".
         setRapotError(err?.message || "Gagal memuat daftar rapot kelas.");
         setRapotList([]);
       } finally {
@@ -199,9 +174,6 @@ export default function GuruRaporPage() {
     loadRapot();
   }, [loadRapot]);
 
-  /* =======================================================
-     AUTO HILANG NOTIFIKASI
-  ======================================================= */
 
   useEffect(() => {
     if (!info) return undefined;
@@ -209,9 +181,6 @@ export default function GuruRaporPage() {
     return () => clearTimeout(timer);
   }, [info]);
 
-  /* =======================================================
-     DERIVED
-  ======================================================= */
 
   const selectedKelas = useMemo(
     () =>
@@ -251,9 +220,6 @@ export default function GuruRaporPage() {
     };
   }, [rapotList]);
 
-  /* =======================================================
-     GENERATE
-  ======================================================= */
 
   const openGenerateModal = () => {
     setError("");
@@ -281,8 +247,6 @@ export default function GuruRaporPage() {
 
       setShowGenerateModal(false);
       setJenisRapot(generateForm.jenisRapot);
-      // Muat ulang memakai jenis rapot yang baru saja digenerate agar
-      // tidak membaca state lama (closure) dan menampilkan status basi.
       await loadRapot({ jenisRapot: generateForm.jenisRapot });
     } catch (err) {
       console.error("Gagal generate rapot:", err);
@@ -292,9 +256,6 @@ export default function GuruRaporPage() {
     }
   };
 
-  /* =======================================================
-     CATATAN
-  ======================================================= */
 
   const openCatatanModal = (item) => {
     setCatatanTarget(item);
@@ -330,9 +291,6 @@ export default function GuruRaporPage() {
     }
   };
 
-  /* =======================================================
-     PUBLISH / UNPUBLISH
-  ======================================================= */
 
   const handlePublishToggle = async (item) => {
     if (!item?.id) {
@@ -352,15 +310,12 @@ export default function GuruRaporPage() {
 
       const result = await setPublishRapot(item.id, aksi);
 
-      // Jangan anggap berhasil bila backend menjawab success: false.
       if (result && result.success === false) {
         throw new Error(result.message || "Gagal mengubah status publish rapot.");
       }
 
       setInfo(result?.message || `Rapot berhasil di-${aksi}.`);
 
-      // Ambil ulang data terbaru sehingga status pada daftar konsisten
-      // dengan data backend (bukan hasil asumsi di frontend).
       await loadRapot();
     } catch (err) {
       console.error("Gagal mengubah status publish:", err);
@@ -370,9 +325,6 @@ export default function GuruRaporPage() {
     }
   };
 
-  /* =======================================================
-     RENDER
-  ======================================================= */
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
@@ -393,7 +345,6 @@ export default function GuruRaporPage() {
 
         <main className="theme-page min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
           <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8 xl:px-10">
-            {/* PAGE HEADER */}
             <div className="theme-card theme-border mb-6 overflow-hidden rounded-2xl border p-6 shadow-[0_10px_30px_color-mix(in_srgb,var(--color-text)_8%,transparent)] sm:p-8">
               <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-4">
@@ -440,7 +391,6 @@ export default function GuruRaporPage() {
               </div>
             </div>
 
-            {/* NOTIFIKASI */}
             {error && (
               <div className="theme-danger mb-4 flex items-start gap-3 rounded-xl border px-4 py-3 text-sm">
                 <AlertCircle size={18} className="mt-0.5 shrink-0" />
@@ -465,7 +415,6 @@ export default function GuruRaporPage() {
               </div>
             )}
 
-            {/* FILTER KELAS */}
             <div className="theme-card theme-border mb-4 rounded-2xl border p-4">
               <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
                 <div className="relative w-full lg:w-72">
@@ -545,7 +494,6 @@ export default function GuruRaporPage() {
               ) : null}
             </div>
 
-            {/* STATISTIK */}
             <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <StatCard
                 icon={<FileText size={22} />}
@@ -573,7 +521,6 @@ export default function GuruRaporPage() {
               />
             </div>
 
-            {/* TABLE */}
             <div className="theme-card theme-border overflow-hidden rounded-2xl border shadow-[0_1px_3px_color-mix(in_srgb,var(--color-text)_8%,transparent)]">
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[960px] text-sm">
@@ -815,7 +762,6 @@ export default function GuruRaporPage() {
         </main>
       </div>
 
-      {/* MODAL GENERATE */}
       {showGenerateModal && (
         <Modal
           title="Generate Rapot"
@@ -862,7 +808,6 @@ export default function GuruRaporPage() {
         </Modal>
       )}
 
-      {/* MODAL CATATAN */}
       {showCatatanModal && catatanTarget && (
         <Modal
           title="Catatan Wali Kelas"
@@ -912,9 +857,6 @@ export default function GuruRaporPage() {
   );
 }
 
-/* =========================================================
-   COMPONENTS
-========================================================= */
 
 function StatCard({ icon, label, value, color }) {
   const colors = {

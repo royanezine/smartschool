@@ -10,9 +10,6 @@ import {
   UserRound, Mail, ShieldCheck, AlertCircle, CheckCircle2, Loader2,
 } from "lucide-react";
 
-// =========================================================
-// THEME HELPERS
-// =========================================================
 const themePrimarySoft = "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]";
 const themePrimarySoftBorder = "border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)]";
 const themePrimaryHover = "hover:bg-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]";
@@ -20,9 +17,6 @@ const themeTextHover = "hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transpa
 const themeCardShadow = "shadow-[0_6px_24px_color-mix(in_srgb,var(--color-text)_6%,transparent)]";
 const themePrimaryShadow = "shadow-[0_10px_25px_color-mix(in_srgb,var(--color-primary)_20%,transparent)]";
 
-// =========================================================
-// HELPER URL GAMBAR
-// =========================================================
 function getBackendBaseUrl() {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
   return apiUrl.trim().replace(/\/api\/v1\/?$/i, "").replace(/\/api\/?$/i, "").replace(/\/+$/, "");
@@ -71,9 +65,6 @@ export default function EditFaceIdPage() {
   const API_URL = getBackendBaseUrl();
   const API_PREFIX = `${API_URL}/api`;
 
-  // =========================================================
-  // GET USER
-  // =========================================================
   useEffect(() => {
     if (!id) return;
     fetchUser();
@@ -125,9 +116,6 @@ export default function EditFaceIdPage() {
     }
   };
 
-  // =========================================================
-  // CAMERA
-  // =========================================================
   const startCamera = async () => {
     try {
       setError("");
@@ -214,9 +202,6 @@ export default function EditFaceIdPage() {
     startCamera();
   };
 
-  // =========================================================
-  // SAVE FACE ID
-  // =========================================================
   const handleSave = async () => {
     if (!capturedImage) return setError("Silakan ambil foto terlebih dahulu.");
 
@@ -273,9 +258,6 @@ export default function EditFaceIdPage() {
     }
   };
 
-  // =========================================================
-  // DELETE FACE ID
-  // =========================================================
   const handleDeleteFaceId = async () => {
     const confirmed = window.confirm("Yakin ingin menghapus Face ID pengguna ini?");
     if (!confirmed) return;
@@ -316,9 +298,6 @@ export default function EditFaceIdPage() {
     }
   };
 
-  // =========================================================
-  // RENDER: LOADING
-  // =========================================================
   if (loading) {
     return (
       <div className="theme-page flex h-screen w-full overflow-hidden">
@@ -338,9 +317,6 @@ export default function EditFaceIdPage() {
     );
   }
 
-  // =========================================================
-  // RENDER: USER NOT FOUND
-  // =========================================================
   if (!user) {
     return (
       <div className="theme-page flex h-screen w-full overflow-hidden">
@@ -369,31 +345,22 @@ export default function EditFaceIdPage() {
     );
   }
 
-  // =========================================================
-  // DATA USER
-  // =========================================================
   const userName = user?.nama || user?.namaLengkap || user?.name || user?.username || "-";
   const userEmail = user?.email || "-";
   const currentFaceId = user?.biometrikWajah || user?.faceId || user?.faceID || user?.biometrik || null;
   const currentFacePhoto = getFileUrl(currentFaceId?.urlFotoReferensi || currentFaceId?.url || user?.urlFotoReferensi || null);
 
-  // =========================================================
-  // RENDER: MAIN PAGE
-  // =========================================================
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
       <Sidebar role="admin" active="face-id" />
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-        {/* Header sticky di atas */}
         <div className="shrink-0 sticky top-0 z-40">
           <Header />
         </div>
 
-        {/* Hanya area ini yang scroll */}
         <main className="min-h-0 min-w-0 flex-1 overflow-y-auto">
           <div className="w-full px-4 py-6 sm:px-6 lg:px-8 xl:px-10 2xl:px-12">
-            {/* PAGE HEADER */}
             <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-3">
                 <button
@@ -410,7 +377,6 @@ export default function EditFaceIdPage() {
               </div>
             </div>
 
-            {/* ALERT */}
             {error && (
               <div className="theme-danger mb-5 flex items-start gap-2 rounded-xl border px-4 py-3 text-sm">
                 <AlertCircle size={16} className="mt-0.5 shrink-0" />
@@ -424,9 +390,7 @@ export default function EditFaceIdPage() {
               </div>
             )}
 
-            {/* GRID: 1 kolom mobile, 3 kolom desktop */}
             <div className="grid grid-cols-1 gap-5 lg:grid-cols-3 2xl:grid-cols-4">
-              {/* USER INFO */}
               <div className={`theme-card ${themeCardShadow} h-fit rounded-2xl border p-5 lg:col-span-1`}>
                 <div className="mb-4 flex items-center gap-2">
                   <UserRound size={18} className="text-[var(--color-primary)]" />
@@ -475,7 +439,6 @@ export default function EditFaceIdPage() {
                 </div>
               </div>
 
-              {/* FACE ID */}
               <div className={`theme-card ${themeCardShadow} rounded-2xl border p-5 lg:col-span-2 2xl:col-span-3`}>
                 <div className="mb-5 flex items-center gap-2">
                   <ShieldCheck size={18} className="text-[var(--color-primary)]" />
@@ -483,7 +446,6 @@ export default function EditFaceIdPage() {
                 </div>
 
                 <div className="w-full">
-                  {/* VIDEO */}
                   <div className={`relative aspect-video overflow-hidden rounded-2xl bg-black ${cameraActive ? "block" : "hidden"}`}>
                     <video ref={videoRef} autoPlay playsInline muted className="h-full w-full object-cover" />
                     <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
@@ -501,7 +463,6 @@ export default function EditFaceIdPage() {
                     </div>
                   </div>
 
-                  {/* FOTO SAAT INI */}
                   {!cameraActive && !capturedImage && currentFacePhoto && (
                     <div className="mb-5">
                       <p className="theme-text mb-2 text-xs font-semibold uppercase tracking-wider">Foto Face ID saat ini</p>
@@ -511,7 +472,6 @@ export default function EditFaceIdPage() {
                     </div>
                   )}
 
-                  {/* FOTO BARU */}
                   {capturedImage && !cameraActive && (
                     <div className="space-y-4">
                       <div className="theme-card-soft aspect-video w-full overflow-hidden rounded-2xl border">
@@ -539,7 +499,6 @@ export default function EditFaceIdPage() {
                     </div>
                   )}
 
-                  {/* OPEN CAMERA */}
                   {!cameraActive && !capturedImage && (
                     <div className={`rounded-2xl border-2 border-dashed p-8 text-center ${themePrimarySoftBorder}`}>
                       <div className={`mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full ${themePrimarySoft}`}>
@@ -562,7 +521,6 @@ export default function EditFaceIdPage() {
                   )}
                 </div>
 
-                {/* DELETE */}
                 {currentFaceId && (
                   <div className="theme-border mt-6 border-t pt-5">
                     <h3 className="theme-text text-sm font-semibold">Hapus Face ID</h3>

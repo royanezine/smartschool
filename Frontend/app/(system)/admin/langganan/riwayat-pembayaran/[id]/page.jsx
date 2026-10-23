@@ -73,7 +73,6 @@ function DetailBox({ icon: Icon, label, value, copy = false }) {
     try {
       await navigator.clipboard.writeText(String(value));
     } catch (error) {
-      /* ignore */
     }
   };
 
@@ -206,7 +205,6 @@ export default function DetailPembayaranPage() {
 
             {!loading && !error && payment && (
               <>
-                {/* HEADER */}
                 <div className="flex items-center justify-between gap-4 flex-wrap">
                   <div className="flex items-center gap-3">
                     <div
@@ -257,7 +255,6 @@ export default function DetailPembayaranPage() {
                   </div>
                 </div>
 
-                {/* HERO */}
                 <section className="theme-card theme-border rounded-xl border shadow-[0_1px_3px_color-mix(in_srgb,var(--color-text)_8%,transparent)]">
                   <div className="p-5 sm:p-6">
                     <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-6 items-center">
@@ -302,7 +299,6 @@ export default function DetailPembayaranPage() {
                   </div>
                 </section>
 
-                {/* DETAIL */}
                 <section className="grid grid-cols-1 xl:grid-cols-2 gap-5">
                   <div className="theme-card theme-border rounded-xl border shadow-[0_1px_3px_color-mix(in_srgb,var(--color-text)_8%,transparent)] p-5 sm:p-6">
                     <div className="flex items-center gap-3 mb-5">
@@ -402,7 +398,6 @@ export default function DetailPembayaranPage() {
                   </div>
                 </section>
 
-                {/* SEKOLAH */}
                 {sekolah && (
                   <section className="theme-card theme-border rounded-xl border shadow-[0_1px_3px_color-mix(in_srgb,var(--color-text)_8%,transparent)] p-5 sm:p-6">
                     <div className="flex items-center gap-3 mb-5">
@@ -439,7 +434,6 @@ export default function DetailPembayaranPage() {
                   </section>
                 )}
 
-                {/* BILLING */}
                 <section className="theme-card theme-border rounded-xl border shadow-[0_1px_3px_color-mix(in_srgb,var(--color-text)_8%,transparent)]">
                   <div className="p-5 sm:p-6">
                     <h2 className="font-bold theme-text mb-5">
@@ -468,7 +462,6 @@ export default function DetailPembayaranPage() {
                   </div>
                 </section>
 
-                {/* NOTE */}
                 <section className="theme-card theme-border rounded-xl border shadow-[0_1px_3px_color-mix(in_srgb,var(--color-text)_8%,transparent)] p-5">
                   <div className="flex items-start gap-3">
                     <div className="w-9 h-9 rounded-lg theme-success flex items-center justify-center shrink-0">

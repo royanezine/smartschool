@@ -18,9 +18,6 @@ import {
 
 import { getBuku } from "@/services/perpustakaan.service";
 
-/* =========================================================
-   THEME HELPERS
-========================================================= */
 
 const themeCardShadow =
   "shadow-[0_8px_30px_color-mix(in_srgb,var(--color-text)_6%,transparent)]";
@@ -49,9 +46,6 @@ const themeDivider =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]";
 
-/* =========================================================
-   HELPERS
-========================================================= */
 
 function unwrapValue(response) {
   if (response?.data !== undefined) {
@@ -237,9 +231,6 @@ function getCategories(books) {
   );
 }
 
-/* =========================================================
-   BOOK CARD
-========================================================= */
 
 function DigitalBookCard({ book }) {
   const hasEbookUrl =
@@ -249,7 +240,6 @@ function DigitalBookCard({ book }) {
     <article
       className={`group overflow-hidden rounded-2xl border ${themeNeutralBorder} theme-card ${themeCardShadow} ${themeCardHoverShadow} transition-all duration-300 hover:-translate-y-1`}
     >
-      {/* COVER */}
 
       <div className="relative flex h-56 items-center justify-center overflow-hidden bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]">
         {book.coverUrl ? (
@@ -288,7 +278,6 @@ function DigitalBookCard({ book }) {
         )}
       </div>
 
-      {/* CONTENT */}
 
       <div className="p-5">
         <div className="flex flex-wrap items-center gap-1.5">
@@ -377,9 +366,6 @@ function DigitalBookCard({ book }) {
   );
 }
 
-/* =========================================================
-   MAIN PAGE
-========================================================= */
 
 export default function BukuDigitalSiswaPage() {
   const [mounted, setMounted] =
@@ -419,14 +405,6 @@ export default function BukuDigitalSiswaPage() {
     setError("");
 
     try {
-      /*
-       * Backend:
-       * GET /api/perpustakaan/buku
-       *
-       * Filter tipe dikirim ke service.
-       * Jika service belum meneruskan parameter tipe,
-       * halaman tetap melakukan filter EBOOK di frontend.
-       */
 
       const response =
         await getBuku({
@@ -553,9 +531,6 @@ export default function BukuDigitalSiswaPage() {
             : "translate-y-4 opacity-0"
         }`}
       >
-        {/* =====================================================
-            HERO
-        ====================================================== */}
 
         <section
           className={`relative overflow-hidden rounded-[28px] border ${themePrimaryBorder} ${themeCardShadow} bg-[color-mix(in_srgb,var(--color-primary)_10%,var(--color-card))]`}
@@ -653,9 +628,6 @@ export default function BukuDigitalSiswaPage() {
           </div>
         </section>
 
-        {/* =====================================================
-            ERROR
-        ====================================================== */}
 
         {error && (
           <div className="flex items-start gap-3 rounded-xl border border-red-500/20 bg-red-500/10 p-4">
@@ -691,9 +663,6 @@ export default function BukuDigitalSiswaPage() {
           </div>
         )}
 
-        {/* =====================================================
-            FILTER
-        ====================================================== */}
 
         <section
           className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
@@ -830,9 +799,6 @@ export default function BukuDigitalSiswaPage() {
             </div>
           </div>
 
-          {/* ===================================================
-              BOOK GRID
-          ==================================================== */}
 
           <div className="p-5 sm:p-6">
             {loading ? (
@@ -911,9 +877,6 @@ export default function BukuDigitalSiswaPage() {
           </div>
         </section>
 
-        {/* =====================================================
-            INFORMATION
-        ====================================================== */}
 
         <section className="grid gap-5 lg:grid-cols-3">
           <div
@@ -993,9 +956,6 @@ export default function BukuDigitalSiswaPage() {
           </div>
         </section>
 
-        {/* =====================================================
-            FOOTER
-        ====================================================== */}
 
         <div
           className={`flex flex-col gap-3 border-t ${themeDivider} py-5 text-xs theme-text-muted sm:flex-row sm:items-center sm:justify-between`}

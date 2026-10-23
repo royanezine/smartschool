@@ -26,24 +26,6 @@ import {
   X,
 } from "lucide-react";
 
-/**
- * app/admin/guru/kartu-identitas/edit/page.jsx
- *
- * Halaman Edit Pegawai — dibuka dari tombol "Edit" di halaman Detail
- * (kartu-identitas/[id]/page.jsx), yang mengarah ke
- * /admin/guru/kartu-identitas/edit?id={id}.
- *
- * Route statis menggunakan query string (?id=...).
- *
- * Form mencakup semua field yang ada di MOCK_PEGAWAI:
- * - Foto profil
- * - Informasi utama
- * - Data diri
- * - Informasi kepegawaian
- * - Kontak & alamat
- *
- * Data masih dummy dan submit masih simulasi sampai API backend tersedia.
- */
 
 const MOCK_PEGAWAI = [
   {
@@ -221,9 +203,6 @@ const OPSI_GOLONGAN = [
   "IV/b",
 ];
 
-/* =========================================================
-   FOTO PLACEHOLDER
-========================================================= */
 
 function FotoPlaceholder() {
   return (
@@ -257,9 +236,6 @@ function FotoPlaceholder() {
   );
 }
 
-/* =========================================================
-   FOTO EDITOR
-========================================================= */
 
 function FotoEditor({
   pegawaiId,
@@ -345,9 +321,6 @@ function FotoEditor({
   );
 }
 
-/* =========================================================
-   FIELD WRAPPER
-========================================================= */
 
 function FieldWrapper({
   icon: Icon,
@@ -380,16 +353,10 @@ function FieldWrapper({
   );
 }
 
-/* =========================================================
-   INPUT CLASS
-========================================================= */
 
 const inputClass =
   "theme-input w-full rounded-xl border px-3.5 py-2.5 text-sm transition-colors focus:outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20";
 
-/* =========================================================
-   SECTION CARD
-========================================================= */
 
 function SectionCard({
   icon: Icon,
@@ -416,9 +383,6 @@ function SectionCard({
   );
 }
 
-/* =========================================================
-   EDIT CONTENT
-========================================================= */
 
 function EditContent() {
   const router = useRouter();
@@ -532,9 +496,6 @@ function EditContent() {
     }, 500);
   };
 
-  /* =======================================================
-     DATA TIDAK DITEMUKAN
-  ======================================================= */
 
   if (!pegawaiAsli) {
     return (
@@ -616,9 +577,6 @@ function EditContent() {
             onSubmit={handleSimpan}
             className="space-y-6 p-4 pb-28 sm:p-6 lg:p-8"
           >
-            {/* =================================================
-                BACK
-            ================================================= */}
 
             <button
               type="button"
@@ -629,9 +587,6 @@ function EditContent() {
               Kembali ke Detail Pegawai
             </button>
 
-            {/* =================================================
-                TITLE
-            ================================================= */}
 
             <div>
               <h1 className="theme-text text-2xl font-bold">
@@ -646,9 +601,6 @@ function EditContent() {
               </p>
             </div>
 
-            {/* =================================================
-                FOTO PROFIL
-            ================================================= */}
 
             <SectionCard
               icon={User}
@@ -661,9 +613,6 @@ function EditContent() {
               />
             </SectionCard>
 
-            {/* =================================================
-                INFORMASI UTAMA
-            ================================================= */}
 
             <SectionCard
               icon={BadgeCheck}
@@ -806,9 +755,6 @@ function EditContent() {
               </div>
             </SectionCard>
 
-            {/* =================================================
-                DATA DIRI
-            ================================================= */}
 
             <SectionCard
               icon={User}
@@ -946,9 +892,6 @@ function EditContent() {
               </div>
             </SectionCard>
 
-            {/* =================================================
-                INFORMASI KEPEGAWAIAN
-            ================================================= */}
 
             <SectionCard
               icon={Building2}
@@ -1011,9 +954,6 @@ function EditContent() {
               </div>
             </SectionCard>
 
-            {/* =================================================
-                KONTAK & ALAMAT
-            ================================================= */}
 
             <SectionCard
               icon={Phone}
@@ -1070,9 +1010,6 @@ function EditContent() {
           </form>
         </main>
 
-        {/* =====================================================
-            ACTION BAR
-        ===================================================== */}
 
         <div className="theme-header theme-border flex items-center justify-end gap-2.5 border-t px-4 py-3.5 backdrop-blur sm:px-6 lg:px-8">
           <button
@@ -1101,9 +1038,6 @@ function EditContent() {
   );
 }
 
-/* =========================================================
-   PAGE
-========================================================= */
 
 export default function Edit() {
   return (

@@ -16,7 +16,6 @@ import {
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
 
-// Data dummy (sama dengan data di halaman utama)
 const DUMMY_DATA = [
   {
     id: 1,
@@ -121,7 +120,6 @@ export default function TambahLaporanPage() {
     setError("");
     setSuccess("");
 
-    // Validasi
     if (!formData.tanggal) {
       setError("Tanggal harus diisi");
       setSaving(false);
@@ -141,7 +139,6 @@ export default function TambahLaporanPage() {
     }
 
     setTimeout(() => {
-      // Tambahkan ke DUMMY_DATA
       const newId =
         DUMMY_DATA.length > 0
           ? Math.max(...DUMMY_DATA.map((d) => d.id)) + 1
@@ -193,7 +190,6 @@ export default function TambahLaporanPage() {
         <main className="theme-page min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
           <div className="mx-auto w-full max-w-3xl px-4 py-6 sm:px-6 lg:px-8">
 
-            {/* HEADER */}
             <div
               className="
                 mb-6 flex flex-col gap-4 rounded-2xl p-6
@@ -260,10 +256,8 @@ export default function TambahLaporanPage() {
               </div>
             </div>
 
-            {/* FORM */}
             <form onSubmit={handleSubmit} className="space-y-6">
 
-              {/* ERROR */}
               {error && (
                 <div
                   className="
@@ -285,7 +279,6 @@ export default function TambahLaporanPage() {
                 </div>
               )}
 
-              {/* SUCCESS */}
               {success && (
                 <div
                   className="
@@ -307,10 +300,8 @@ export default function TambahLaporanPage() {
                 </div>
               )}
 
-              {/* FORM CARD */}
               <div className="theme-card grid grid-cols-1 gap-5 rounded-2xl border p-6 shadow-sm sm:p-8">
 
-                {/* TANGGAL */}
                 <div>
                   <label className="theme-text-secondary mb-1.5 block text-sm font-medium">
                     Tanggal Transaksi{" "}
@@ -346,7 +337,6 @@ export default function TambahLaporanPage() {
                   </div>
                 </div>
 
-                {/* DESKRIPSI */}
                 <div>
                   <label className="theme-text-secondary mb-1.5 block text-sm font-medium">
                     Deskripsi{" "}
@@ -384,10 +374,8 @@ export default function TambahLaporanPage() {
                   </div>
                 </div>
 
-                {/* KATEGORI & JUMLAH */}
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
 
-                  {/* KATEGORI */}
                   <div>
                     <label className="theme-text-secondary mb-1.5 block text-sm font-medium">
                       Kategori{" "}
@@ -417,7 +405,6 @@ export default function TambahLaporanPage() {
                     </select>
                   </div>
 
-                  {/* JUMLAH */}
                   <div>
                     <label className="theme-text-secondary mb-1.5 block text-sm font-medium">
                       Jumlah (Rp){" "}
@@ -459,10 +446,8 @@ export default function TambahLaporanPage() {
                   </div>
                 </div>
 
-                {/* METODE & STATUS */}
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
 
-                  {/* METODE */}
                   <div>
                     <label className="theme-text-secondary mb-1.5 block text-sm font-medium">
                       Metode Pembayaran
@@ -508,7 +493,6 @@ export default function TambahLaporanPage() {
                     </div>
                   </div>
 
-                  {/* STATUS */}
                   <div>
                     <label className="theme-text-secondary mb-1.5 block text-sm font-medium">
                       Status
@@ -541,7 +525,6 @@ export default function TambahLaporanPage() {
                   </div>
                 </div>
 
-                {/* INFO FIELD */}
                 <div className="theme-card-soft rounded-xl p-4">
                   <p className="theme-text-muted text-xs">
                     * Field bertanda wajib diisi
@@ -549,11 +532,9 @@ export default function TambahLaporanPage() {
                 </div>
               </div>
 
-              {/* BUTTONS */}
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="flex gap-3">
 
-                  {/* BATAL */}
                   <button
                     type="button"
                     onClick={handleCancel}
@@ -573,7 +554,6 @@ export default function TambahLaporanPage() {
                     Batal
                   </button>
 
-                  {/* SIMPAN */}
                   <button
                     type="submit"
                     disabled={saving}
@@ -614,7 +594,6 @@ export default function TambahLaporanPage() {
               </div>
             </form>
 
-            {/* FOOTER */}
             <footer
               className="
                 mt-8 border-t

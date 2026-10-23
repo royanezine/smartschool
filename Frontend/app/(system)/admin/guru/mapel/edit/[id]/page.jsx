@@ -75,12 +75,6 @@ export default function EditMapelPage() {
     setIsCollapsed((prev) => !prev);
   };
 
-  /*
-   * ============================================
-   * AMBIL DATA MAPEL
-   * GET /api/mata-pelajaran
-   * ============================================
-   */
   const loadMapel = async () => {
     if (!id) {
       setError("ID mata pelajaran tidak ditemukan.");
@@ -136,11 +130,6 @@ export default function EditMapelPage() {
     loadMapel();
   }, [id]);
 
-  /*
-   * ============================================
-   * HANDLE CHANGE
-   * ============================================
-   */
   const handleChange = (field, value) => {
     setForm((prev) => ({
       ...prev,
@@ -152,20 +141,6 @@ export default function EditMapelPage() {
     }
   };
 
-  /*
-   * ============================================
-   * UPDATE MAPEL
-   *
-   * PUT /api/mata-pelajaran/:id
-   *
-   * Body:
-   * {
-   *   nama,
-   *   kode,
-   *   status
-   * }
-   * ============================================
-   */
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -224,22 +199,12 @@ export default function EditMapelPage() {
     }
   };
 
-  /*
-   * ============================================
-   * BACK
-   * ============================================
-   */
   const handleBack = () => {
     if (saving) return;
 
     router.push("/admin/guru/mapel");
   };
 
-  /*
-   * ============================================
-   * LOADING PAGE
-   * ============================================
-   */
   if (loading) {
     return (
       <div className="flex h-screen w-full theme-page overflow-hidden">
@@ -289,11 +254,6 @@ export default function EditMapelPage() {
     );
   }
 
-  /*
-   * ============================================
-   * ERROR SAAT LOAD DATA
-   * ============================================
-   */
   if (error && !form.nama && !form.kode) {
     return (
       <div className="flex h-screen w-full theme-page overflow-hidden">
@@ -382,14 +342,8 @@ export default function EditMapelPage() {
     );
   }
 
-  /*
-   * ============================================
-   * MAIN PAGE
-   * ============================================
-   */
   return (
     <div className="flex h-screen w-full theme-page overflow-hidden">
-      {/* SIDEBAR */}
       <Sidebar
         active="guruMapel"
         setActive={() => {}}
@@ -398,9 +352,7 @@ export default function EditMapelPage() {
         role="admin"
       />
 
-      {/* MAIN CONTENT */}
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
-        {/* HEADER */}
         <Header
           toggleSidebar={toggleSidebar}
           notifications={[]}
@@ -415,7 +367,6 @@ export default function EditMapelPage() {
           <div className="p-4 sm:p-6 lg:p-8">
             <div className="max-w-7xl mx-auto space-y-6">
 
-              {/* PAGE HEADER */}
               <div className="flex items-center gap-3">
                 <button
                   type="button"
@@ -455,7 +406,6 @@ export default function EditMapelPage() {
                 </div>
               </div>
 
-              {/* SUCCESS */}
               {success && (
                 <div className="flex items-center gap-3 p-4 rounded-xl border theme-success">
                   <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 bg-[var(--color-success-background)]">
@@ -477,7 +427,6 @@ export default function EditMapelPage() {
                 </div>
               )}
 
-              {/* ERROR */}
               {error && (
                 <div className="flex items-start gap-3 p-4 rounded-xl border theme-danger">
                   <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 bg-[var(--color-danger-background)]">
@@ -499,10 +448,8 @@ export default function EditMapelPage() {
                 </div>
               )}
 
-              {/* MAIN GRID */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
 
-                {/* FORM */}
                 <form
                   onSubmit={handleSubmit}
                   className="
@@ -515,7 +462,6 @@ export default function EditMapelPage() {
                     overflow-hidden
                   "
                 >
-                  {/* FORM HEADER */}
                   <div className="px-6 py-5 border-b theme-border-soft theme-card-soft">
                     <div className="flex items-center gap-3">
                       <div className="w-9 h-9 rounded-lg theme-info flex items-center justify-center">
@@ -537,10 +483,8 @@ export default function EditMapelPage() {
                     </div>
                   </div>
 
-                  {/* FORM BODY */}
                   <div className="p-6 space-y-6">
 
-                    {/* NAMA */}
                     <div>
                       <label
                         htmlFor="nama"
@@ -595,7 +539,6 @@ export default function EditMapelPage() {
                       </p>
                     </div>
 
-                    {/* KODE */}
                     <div>
                       <label
                         htmlFor="kode"
@@ -651,7 +594,6 @@ export default function EditMapelPage() {
                       </p>
                     </div>
 
-                    {/* STATUS */}
                     <div>
                       <label
                         htmlFor="status"
@@ -709,7 +651,6 @@ export default function EditMapelPage() {
                     </div>
                   </div>
 
-                  {/* FORM FOOTER */}
                   <div
                     className="
                       flex
@@ -792,10 +733,8 @@ export default function EditMapelPage() {
                   </div>
                 </form>
 
-                {/* RIGHT PANEL */}
                 <div className="space-y-6">
 
-                  {/* PREVIEW */}
                   <div className="theme-card rounded-2xl border theme-border shadow-sm overflow-hidden">
                     <div className="px-5 py-4 border-b theme-border-soft theme-card-soft">
                       <div className="flex items-center gap-2">
@@ -854,7 +793,6 @@ export default function EditMapelPage() {
                     </div>
                   </div>
 
-                  {/* INFO BACKEND */}
                   <div className="theme-info rounded-2xl border p-5">
                     <div className="flex items-center gap-2 mb-3">
                       <div className="w-8 h-8 rounded-lg theme-card flex items-center justify-center">
@@ -905,7 +843,6 @@ export default function EditMapelPage() {
                     </div>
                   </div>
 
-                  {/* SCHOOL */}
                   <div className="theme-card rounded-2xl border theme-border shadow-sm p-5">
                     <div className="flex items-start gap-3">
                       <div className="w-9 h-9 rounded-lg theme-success flex items-center justify-center shrink-0">
@@ -932,7 +869,6 @@ export default function EditMapelPage() {
                 </div>
               </div>
 
-              {/* FOOTNOTE */}
               <div className="flex items-center gap-2 text-xs theme-text-muted px-1">
                 <AlertCircle size={14} />
 

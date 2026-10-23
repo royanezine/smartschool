@@ -31,9 +31,6 @@ import {
   getRoles,
 } from "@/services/role.service";
 
-/* ============================================================
-   THEME HELPERS
-============================================================ */
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -104,9 +101,6 @@ const themeTextSecondary =
 const themeTextMuted =
   "theme-text-muted";
 
-/* ============================================================
-   STATUS CONFIG
-============================================================ */
 
 const STATUS_CONFIG = {
   aktif: {
@@ -137,25 +131,16 @@ const STATUS_CONFIG = {
   },
 };
 
-/* ============================================================
-   FORMAT NUMBER
-============================================================ */
 
 function formatNumber(value) {
   return Number(value || 0).toLocaleString("id-ID");
 }
 
-/* ============================================================
-   STATUS LABEL
-============================================================ */
 
 function getStatusLabel(status) {
   return STATUS_CONFIG[status]?.label || "Belum Ditentukan";
 }
 
-/* ============================================================
-   PERMISSION ACTION LABEL
-============================================================ */
 
 function getPermissionActionLabel(aksi) {
   const labels = {
@@ -169,9 +154,6 @@ function getPermissionActionLabel(aksi) {
   return labels[aksi] || aksi || "-";
 }
 
-/* ============================================================
-   PERMISSION ACTION STYLE
-============================================================ */
 
 function getPermissionActionClass(aksi) {
   const classes = {
@@ -192,9 +174,6 @@ function getPermissionActionClass(aksi) {
   );
 }
 
-/* ============================================================
-   PAGE
-============================================================ */
 
 export default function DetailRolePage() {
   const params = useParams();
@@ -212,9 +191,6 @@ export default function DetailRolePage() {
     setPermissionSearchQuery,
   ] = useState("");
 
-  /* ==========================================================
-     LOAD DATA
-  ========================================================== */
 
   const loadData = async () => {
     if (!roleId) {
@@ -291,17 +267,11 @@ export default function DetailRolePage() {
     }
   };
 
-  /* ==========================================================
-     INITIAL LOAD
-  ========================================================== */
 
   useEffect(() => {
     loadData();
   }, [roleId]);
 
-  /* ==========================================================
-     GRANTED PERMISSIONS
-  ========================================================== */
 
   const grantedPermissions = useMemo(() => {
     if (!role?.izin) {
@@ -313,9 +283,6 @@ export default function DetailRolePage() {
       : [];
   }, [role]);
 
-  /* ==========================================================
-     FILTER PERMISSIONS
-  ========================================================== */
 
   const filteredPermissions = useMemo(() => {
     const query =
@@ -350,9 +317,6 @@ export default function DetailRolePage() {
     permissionSearchQuery,
   ]);
 
-  /* ==========================================================
-     TOTAL PERMISSION
-  ========================================================== */
 
   const totalGranted =
     role?._count?.peranIzin ??
@@ -361,9 +325,6 @@ export default function DetailRolePage() {
   const totalPermission =
     permissions.length;
 
-  /* ==========================================================
-     TOTAL MODUL
-  ========================================================== */
 
   const totalModul = useMemo(() => {
     return new Set(
@@ -376,9 +337,6 @@ export default function DetailRolePage() {
     ).size;
   }, [permissions]);
 
-  /* ==========================================================
-     MODUL YANG DIGUNAKAN
-  ========================================================== */
 
   const modulDenganAkses = useMemo(() => {
     return new Set(
@@ -391,16 +349,10 @@ export default function DetailRolePage() {
     ).size;
   }, [grantedPermissions]);
 
-  /* ==========================================================
-     TOTAL PENGGUNA
-  ========================================================== */
 
   const totalPengguna =
     role?._count?.pengguna ?? 0;
 
-  /* ==========================================================
-     STATUS
-  ========================================================== */
 
   const statusConfig =
     STATUS_CONFIG[role?.status] ||
@@ -409,9 +361,6 @@ export default function DetailRolePage() {
   const StatusIcon =
     statusConfig.icon;
 
-  /* ==========================================================
-     LOADING
-  ========================================================== */
 
   if (loading) {
     return (
@@ -464,9 +413,6 @@ export default function DetailRolePage() {
     );
   }
 
-  /* ==========================================================
-     ERROR
-  ========================================================== */
 
   if (error || !role) {
     return (
@@ -538,9 +484,6 @@ export default function DetailRolePage() {
     );
   }
 
-  /* ==========================================================
-     MAIN RENDER
-  ========================================================== */
 
   return (
     <div className="theme-page theme-text min-h-full">
@@ -549,9 +492,6 @@ export default function DetailRolePage() {
 
         <div className="mx-auto w-full max-w-[1600px]">
 
-          {/* ==================================================
-              BREADCRUMB
-          ================================================== */}
 
           <div
             className={`flex items-center gap-2 text-xs ${themeTextMuted} mb-5`}
@@ -579,15 +519,11 @@ export default function DetailRolePage() {
 
           </div>
 
-          {/* ==================================================
-              HERO
-          ================================================== */}
 
           <section
             className={`relative overflow-hidden rounded-[24px] ${themePrimaryGradient} ${themePrimaryShadow} mb-6`}
           >
 
-            {/* Glow */}
 
             <div
               className="absolute -top-32 -right-24 w-[420px] h-[420px] rounded-full bg-[color-mix(in_srgb,var(--color-info)_18%,transparent)] blur-3xl pointer-events-none"
@@ -597,7 +533,6 @@ export default function DetailRolePage() {
               className="absolute -bottom-40 left-1/3 w-[420px] h-[420px] rounded-full bg-[color-mix(in_srgb,var(--color-card)_8%,transparent)] blur-3xl pointer-events-none"
             />
 
-            {/* Grid */}
 
             <div
               className="absolute inset-0 opacity-[0.045] pointer-events-none"
@@ -612,7 +547,6 @@ export default function DetailRolePage() {
 
               <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
 
-                {/* ROLE */}
 
                 <div className="flex items-start gap-4 min-w-0">
 
@@ -731,7 +665,6 @@ export default function DetailRolePage() {
 
                 </div>
 
-                {/* ACTIONS */}
 
                 <div className="flex flex-col sm:flex-row gap-2.5 lg:shrink-0">
 
@@ -769,9 +702,6 @@ export default function DetailRolePage() {
 
           </section>
 
-          {/* ==================================================
-              ACCESS OVERVIEW
-          ================================================== */}
 
           <section className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
 
@@ -811,9 +741,6 @@ export default function DetailRolePage() {
 
           </section>
 
-          {/* ==================================================
-              PERMISSION SECTION
-          ================================================== */}
 
           <section
             className={`relative overflow-hidden rounded-2xl ${themeCard} ${themeNeutralBorder} ${themeCardShadow} mb-6`}
@@ -821,7 +748,6 @@ export default function DetailRolePage() {
 
             <div className={`h-1 ${themePrimaryGradient}`} />
 
-            {/* HEADER */}
 
             <div className={`p-4 sm:p-5 border-b ${themeDivider}`}>
 
@@ -866,7 +792,6 @@ export default function DetailRolePage() {
 
                 </div>
 
-                {/* SEARCH */}
 
                 <div className="relative w-full lg:w-72">
 
@@ -893,7 +818,6 @@ export default function DetailRolePage() {
 
             </div>
 
-            {/* PERMISSION CONTENT */}
 
             {filteredPermissions.length === 0 ? (
               <div className="py-16 px-5 text-center">
@@ -931,7 +855,6 @@ export default function DetailRolePage() {
               </div>
             ) : (
               <>
-                {/* DESKTOP */}
 
                 <div className="hidden md:block overflow-x-auto">
 
@@ -984,7 +907,6 @@ export default function DetailRolePage() {
                             className={`group border-b ${themeDivider} hover:bg-[color-mix(in_srgb,var(--color-primary)_4%,transparent)] transition-colors`}
                           >
 
-                            {/* NUMBER */}
 
                             <td className="px-5 py-4">
 
@@ -999,7 +921,6 @@ export default function DetailRolePage() {
 
                             </td>
 
-                            {/* NAME */}
 
                             <td className="px-3 py-4">
 
@@ -1034,7 +955,6 @@ export default function DetailRolePage() {
 
                             </td>
 
-                            {/* MODUL */}
 
                             <td className="px-3 py-4">
 
@@ -1051,7 +971,6 @@ export default function DetailRolePage() {
 
                             </td>
 
-                            {/* ACTION */}
 
                             <td className="px-3 py-4">
 
@@ -1067,7 +986,6 @@ export default function DetailRolePage() {
 
                             </td>
 
-                            {/* STATUS */}
 
                             <td className="px-5 py-4 text-right">
 
@@ -1093,7 +1011,6 @@ export default function DetailRolePage() {
 
                 </div>
 
-                {/* MOBILE */}
 
                 <div>
 
@@ -1174,7 +1091,6 @@ export default function DetailRolePage() {
               </>
             )}
 
-            {/* FOOTER */}
 
             <div
               className={`px-4 sm:px-5 py-3.5 border-t ${themeDivider} ${themeNeutralSurface}`}
@@ -1212,13 +1128,9 @@ export default function DetailRolePage() {
 
           </section>
 
-          {/* ==================================================
-              TWO COLUMN INFORMATION
-          ================================================== */}
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-6">
 
-            {/* USERS */}
 
             <section
               className={`relative overflow-hidden rounded-2xl ${themeCard} ${themeNeutralBorder} ${themeCardShadow}`}
@@ -1321,7 +1233,6 @@ export default function DetailRolePage() {
 
             </section>
 
-            {/* SECURITY STATUS */}
 
             <section
               className={`relative overflow-hidden rounded-2xl ${themeCard} ${themeNeutralBorder} ${themeCardShadow}`}
@@ -1397,9 +1308,6 @@ export default function DetailRolePage() {
 
           </div>
 
-          {/* ==================================================
-              LOG AKTIVITAS
-          ================================================== */}
 
           <section
             className={`relative overflow-hidden rounded-2xl ${themeCard} ${themeNeutralBorder} ${themeCardShadow} mb-6`}
@@ -1475,9 +1383,6 @@ export default function DetailRolePage() {
 
           </section>
 
-          {/* ==================================================
-              BOTTOM NAVIGATION
-          ================================================== */}
 
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-4">
 
@@ -1509,9 +1414,6 @@ export default function DetailRolePage() {
 
           </div>
 
-          {/* ==================================================
-              FOOTER
-          ================================================== */}
 
           <div
             className={`border-t ${themeDivider} pt-4 pb-2 flex flex-col sm:flex-row items-center justify-between gap-2`}
@@ -1549,9 +1451,6 @@ export default function DetailRolePage() {
   );
 }
 
-/* ============================================================
-   OVERVIEW CARD
-============================================================ */
 
 function OverviewCard({
   icon: Icon,
@@ -1633,9 +1532,6 @@ function OverviewCard({
   );
 }
 
-/* ============================================================
-   SECURITY ROW
-============================================================ */
 
 function SecurityRow({
   label,

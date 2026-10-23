@@ -26,9 +26,6 @@ import {
   updateLantai,
 } from "@/services/infrastruktur.service";
 
-// ============================================================
-// THEME HELPERS
-// ============================================================
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -102,9 +99,6 @@ export default function EditLantaiPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  /* =========================================================
-     LOAD DATA
-  ========================================================= */
 
   useEffect(() => {
     if (id) {
@@ -191,9 +185,6 @@ export default function EditLantaiPage() {
     }
   }
 
-  /* =========================================================
-     SELECTED GEDUNG
-  ========================================================= */
 
   const selectedGedung = useMemo(() => {
     return (
@@ -205,9 +196,6 @@ export default function EditLantaiPage() {
     );
   }, [gedung, form.gedungId]);
 
-  /* =========================================================
-     HANDLE CHANGE
-  ========================================================= */
 
   function handleChange(e) {
     const { name, value } = e.target;
@@ -221,9 +209,6 @@ export default function EditLantaiPage() {
     setSuccess("");
   }
 
-  /* =========================================================
-     SUBMIT
-  ========================================================= */
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -283,9 +268,6 @@ export default function EditLantaiPage() {
     }
   }
 
-  /* =========================================================
-     LOADING
-  ========================================================= */
 
   if (loading) {
     return (
@@ -339,15 +321,9 @@ export default function EditLantaiPage() {
     );
   }
 
-  /* =========================================================
-     MAIN
-  ========================================================= */
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
-      {/* =====================================================
-          SIDEBAR
-      ===================================================== */}
 
       <div className="shrink-0">
         <Sidebar
@@ -358,12 +334,8 @@ export default function EditLantaiPage() {
         />
       </div>
 
-      {/* =====================================================
-          CONTENT
-      ===================================================== */}
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        {/* HEADER */}
 
         <div className="shrink-0">
           <Header
@@ -377,17 +349,11 @@ export default function EditLantaiPage() {
           />
         </div>
 
-        {/* ===================================================
-            MAIN
-        =================================================== */}
 
         <main className="theme-page min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
           <div className="w-full px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-7 xl:px-10">
             <div className="mx-auto w-full max-w-[1280px]">
 
-              {/* =================================================
-                  TOP NAVIGATION
-              ================================================= */}
 
               <div className="mb-5 flex flex-col gap-4 sm:mb-6 sm:flex-row sm:items-center sm:justify-between">
                 <div>
@@ -429,7 +395,6 @@ export default function EditLantaiPage() {
                   </div>
                 </div>
 
-                {/* ID */}
 
                 <div
                   className={`theme-card ${themeNeutralBorder} hidden items-center gap-2 rounded-xl border px-3.5 py-2.5 ${themeCardShadow} sm:flex`}
@@ -451,9 +416,6 @@ export default function EditLantaiPage() {
                 </div>
               </div>
 
-              {/* =================================================
-                  ERROR / SUCCESS
-              ================================================= */}
 
               {error && (
                 <div
@@ -506,21 +468,14 @@ export default function EditLantaiPage() {
                 </div>
               )}
 
-              {/* =================================================
-                  MAIN GRID
-              ================================================= */}
 
               <div className="grid grid-cols-1 items-start gap-5 xl:grid-cols-[minmax(0,1fr)_350px]">
 
-                {/* =================================================
-                    LEFT — FORM
-                ================================================= */}
 
                 <section
                   className={`theme-card ${themeNeutralBorder} overflow-hidden rounded-2xl border ${themeCardShadow}`}
                 >
 
-                  {/* FORM HEADER */}
 
                   <div
                     className={`border-b ${themeNeutralDivider} ${themeSoftSurface} px-5 py-5 sm:px-7`}
@@ -557,12 +512,10 @@ export default function EditLantaiPage() {
                     </div>
                   </div>
 
-                  {/* FORM */}
 
                   <form onSubmit={handleSubmit}>
                     <div className="space-y-6 p-5 sm:p-7">
 
-                      {/* GEDUNG */}
 
                       <div>
                         <div className="mb-2 flex items-center justify-between">
@@ -612,7 +565,6 @@ export default function EditLantaiPage() {
                             ))}
                           </select>
 
-                          {/* CUSTOM ARROW */}
 
                           <div className="theme-text-muted pointer-events-none absolute right-4 top-1/2 -translate-y-1/2">
                             <svg
@@ -633,7 +585,6 @@ export default function EditLantaiPage() {
                         </p>
                       </div>
 
-                      {/* NAMA LANTAI */}
 
                       <div>
                         <div className="mb-2 flex items-center justify-between">
@@ -678,7 +629,6 @@ export default function EditLantaiPage() {
                         </p>
                       </div>
 
-                      {/* INFORMATION BOX */}
 
                       <div
                         className={`rounded-xl border ${themeInfoBorder} ${themeInfoSurface} p-4`}
@@ -707,7 +657,6 @@ export default function EditLantaiPage() {
                       </div>
                     </div>
 
-                    {/* FORM FOOTER */}
 
                     <div
                       className={`flex flex-col-reverse gap-3 border-t ${themeNeutralDivider} ${themeSoftSurface} px-5 py-4 sm:flex-row sm:items-center sm:justify-end sm:px-7`}
@@ -752,16 +701,12 @@ export default function EditLantaiPage() {
                   </form>
                 </section>
 
-                {/* =================================================
-                    RIGHT — PREVIEW CARD
-                ================================================= */}
 
                 <aside className="xl:sticky xl:top-5">
                   <div
                     className={`theme-card ${themeNeutralBorder} overflow-hidden rounded-2xl border ${themeCardShadow}`}
                   >
 
-                    {/* PREVIEW HEADER */}
 
                     <div
                       className={`border-b ${themeNeutralDivider} px-5 py-4.5`}
@@ -795,11 +740,9 @@ export default function EditLantaiPage() {
                       </div>
                     </div>
 
-                    {/* PREVIEW CONTENT */}
 
                     <div className="p-5">
 
-                      {/* VISUAL */}
 
                       <div
                         className={`relative overflow-hidden rounded-2xl p-5 text-[var(--color-card)] ${themePrimaryGradient} ${themePrimaryShadow}`}
@@ -843,13 +786,11 @@ export default function EditLantaiPage() {
                         </div>
                       </div>
 
-                      {/* DETAIL */}
 
                       <div
                         className={`theme-border mt-4 overflow-hidden rounded-xl border ${themeSoftSurface}`}
                       >
 
-                        {/* GEDUNG */}
 
                         <div
                           className={`flex items-center gap-3 border-b ${themeNeutralDivider} px-4 py-3.5`}
@@ -872,7 +813,6 @@ export default function EditLantaiPage() {
                           </div>
                         </div>
 
-                        {/* KODE GEDUNG */}
 
                         <div
                           className={`flex items-center gap-3 border-b ${themeNeutralDivider} px-4 py-3.5`}
@@ -895,7 +835,6 @@ export default function EditLantaiPage() {
                           </div>
                         </div>
 
-                        {/* ID */}
 
                         <div className="flex items-center gap-3 px-4 py-3.5">
                           <div
@@ -916,7 +855,6 @@ export default function EditLantaiPage() {
                         </div>
                       </div>
 
-                      {/* STATUS */}
 
                       <div
                         className={`mt-4 flex items-start gap-2.5 rounded-xl border ${themeSuccessBorder} ${themeSuccessSurface} px-3.5 py-3`}
@@ -940,7 +878,6 @@ export default function EditLantaiPage() {
                     </div>
                   </div>
 
-                  {/* QUICK INFO */}
 
                   <div
                     className={`theme-card ${themeNeutralBorder} mt-4 rounded-2xl border p-4 ${themeCardShadow}`}
@@ -968,9 +905,6 @@ export default function EditLantaiPage() {
                 </aside>
               </div>
 
-              {/* =================================================
-                  FOOTER
-              ================================================= */}
 
               <div
                 className={`mt-7 border-t ${themeNeutralDivider} py-5 text-center`}

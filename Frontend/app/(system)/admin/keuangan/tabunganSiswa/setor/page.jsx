@@ -54,9 +54,6 @@ function Field({ label, required, hint, children }) {
   );
 }
 
-/* =========================================================
-   INNER — pakai useSearchParams()
-========================================================= */
 
 function SetorFormContent() {
   const router = useRouter();
@@ -132,7 +129,6 @@ function SetorFormContent() {
 
   return (
     <div className="mx-auto w-full max-w-3xl space-y-6">
-      {/* HEADER */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex items-start gap-3">
           <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300">
@@ -167,7 +163,6 @@ function SetorFormContent() {
         </button>
       </div>
 
-      {/* INFO BANNER */}
       <div className="flex items-start gap-3 rounded-lg border theme-border theme-card p-4">
         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
           <Info size={18} />
@@ -183,7 +178,6 @@ function SetorFormContent() {
         </div>
       </div>
 
-      {/* ALERT */}
       {success && (
         <div
           role="status"
@@ -215,7 +209,6 @@ function SetorFormContent() {
         </div>
       )}
 
-      {/* FORM */}
       <form
         onSubmit={handleSubmit}
         className="theme-card space-y-5 rounded-xl border theme-border p-5 shadow-sm sm:p-6"
@@ -313,9 +306,6 @@ function SetorFormContent() {
   );
 }
 
-/* =========================================================
-   SUSPENSE FALLBACK
-========================================================= */
 
 function SetorSuspenseFallback() {
   return (
@@ -333,9 +323,6 @@ function SetorSuspenseFallback() {
   );
 }
 
-/* =========================================================
-   EXPORT DEFAULT — wrapper dengan Suspense
-========================================================= */
 
 export default function SetorTabunganPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);

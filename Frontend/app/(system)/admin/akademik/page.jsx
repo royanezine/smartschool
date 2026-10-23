@@ -76,9 +76,6 @@ const FALLBACK_SISWA = [
   },
 ];
 
-// =========================================================
-// LOAD SISWA
-// =========================================================
 
 const loadSiswaList = () => {
   if (typeof window === "undefined") {
@@ -98,9 +95,6 @@ const loadSiswaList = () => {
   }
 };
 
-// =========================================================
-// DETERMINISTIC SUMMARY
-// =========================================================
 
 const seedFromId = (id) => {
   const str = String(id);
@@ -130,9 +124,6 @@ const PRESTASI_POOL = [
   "Best Presenter Seminar Nasional",
 ];
 
-// =========================================================
-// BUILD SUMMARY
-// =========================================================
 
 const buildRingkasan = (siswaList) => {
   return siswaList.map((s) => {
@@ -177,9 +168,6 @@ const buildRingkasan = (siswaList) => {
   });
 };
 
-// =========================================================
-// HELPER
-// =========================================================
 
 const getInitials = (nama = "") => {
   const parts = nama.trim().split(" ");
@@ -204,9 +192,6 @@ const getAvatarColor = (nama = "") => {
   return colors[nama.length % colors.length];
 };
 
-// =========================================================
-// SIKAP STYLE
-// =========================================================
 
 const SIKAP_STYLE = {
   "Sangat Baik": "theme-success",
@@ -215,9 +200,6 @@ const SIKAP_STYLE = {
   "Perlu Perhatian": "theme-danger",
 };
 
-// =========================================================
-// SCORE COLOR
-// =========================================================
 
 const getScoreStyle = (nilai) => {
   if (nilai >= 90) {
@@ -235,9 +217,6 @@ const getScoreStyle = (nilai) => {
   return "text-[var(--color-danger)]";
 };
 
-// =========================================================
-// COMPONENT
-// =========================================================
 
 export default function AkademikPage() {
   const router = useRouter();
@@ -246,9 +225,6 @@ export default function AkademikPage() {
   const [ringkasan, setRingkasan] = useState([]);
   const [search, setSearch] = useState("");
 
-  // =======================================================
-  // LOAD
-  // =======================================================
 
   useEffect(() => {
     setRingkasan(buildRingkasan(loadSiswaList()));
@@ -258,9 +234,6 @@ export default function AkademikPage() {
     setIsCollapsed((prev) => !prev);
   };
 
-  // =======================================================
-  // SUMMARY
-  // =======================================================
 
   const totalSiswa = ringkasan.length;
 
@@ -290,9 +263,6 @@ export default function AkademikPage() {
     ? Math.round((raporSelesai / totalSiswa) * 100)
     : 0;
 
-  // =======================================================
-  // CLASS SUMMARY
-  // =======================================================
 
   const ringkasanKelas = useMemo(() => {
     const map = {};
@@ -340,9 +310,6 @@ export default function AkademikPage() {
       );
   }, [ringkasan]);
 
-  // =======================================================
-  // SEARCH
-  // =======================================================
 
   const filtered = useMemo(() => {
     const keyword = search.toLowerCase().trim();
@@ -358,9 +325,6 @@ export default function AkademikPage() {
     );
   }, [ringkasan, search]);
 
-  // =======================================================
-  // QUICK LINKS
-  // =======================================================
 
   const quickLinks = [
     {
@@ -390,13 +354,9 @@ export default function AkademikPage() {
     },
   ];
 
-  // =======================================================
-  // RENDER
-  // =======================================================
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
-      {/* SIDEBAR */}
 
       <Sidebar
         active="akademik"
@@ -406,7 +366,6 @@ export default function AkademikPage() {
         role="admin"
       />
 
-      {/* CONTENT */}
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <Header
@@ -419,13 +378,11 @@ export default function AkademikPage() {
           }}
         />
 
-        {/* MAIN */}
 
         <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
           <div className="mx-auto w-full max-w-[1500px] px-4 py-5 sm:px-6 sm:py-6 lg:px-8 xl:px-10">
             <div className="space-y-6">
 
-              {/* PAGE HEADER */}
 
               <section>
                 <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
@@ -455,7 +412,6 @@ export default function AkademikPage() {
                     </div>
                   </div>
 
-                  {/* QUICK ACTION */}
 
                   <button
                     type="button"
@@ -475,12 +431,10 @@ export default function AkademikPage() {
                 </div>
               </section>
 
-              {/* SUMMARY BAR */}
 
               <section className="theme-card overflow-hidden rounded-xl border shadow-sm">
                 <div className="grid grid-cols-2 divide-x divide-[var(--color-border)] sm:grid-cols-3 lg:grid-cols-5">
 
-                  {/* TOTAL */}
 
                   <div className="min-w-0 p-4 sm:p-5">
                     <div className="flex items-start gap-3">
@@ -506,7 +460,6 @@ export default function AkademikPage() {
                     </div>
                   </div>
 
-                  {/* NILAI */}
 
                   <div className="min-w-0 p-4 sm:p-5">
                     <div className="flex items-start gap-3">
@@ -532,7 +485,6 @@ export default function AkademikPage() {
                     </div>
                   </div>
 
-                  {/* PRESTASI */}
 
                   <div className="min-w-0 p-4 sm:p-5">
                     <div className="flex items-start gap-3">
@@ -558,7 +510,6 @@ export default function AkademikPage() {
                     </div>
                   </div>
 
-                  {/* ATTENTION */}
 
                   <div className="min-w-0 p-4 sm:p-5">
                     <div className="flex items-start gap-3">
@@ -584,7 +535,6 @@ export default function AkademikPage() {
                     </div>
                   </div>
 
-                  {/* RAPOR */}
 
                   <div className="col-span-2 min-w-0 p-4 sm:col-span-1 sm:p-5">
                     <div className="flex items-start gap-3">
@@ -625,7 +575,6 @@ export default function AkademikPage() {
                 </div>
               </section>
 
-              {/* NAVIGATION */}
 
               <section className="flex flex-col gap-3">
                 <div>
@@ -663,7 +612,6 @@ export default function AkademikPage() {
                 </div>
               </section>
 
-              {/* CLASS SUMMARY */}
 
               <section className="theme-card overflow-hidden rounded-xl border shadow-sm">
 
@@ -821,11 +769,9 @@ export default function AkademikPage() {
                 </div>
               </section>
 
-              {/* STUDENT TABLE */}
 
               <section className="theme-card overflow-hidden rounded-xl border shadow-sm">
 
-                {/* HEADER */}
 
                 <div className="theme-border-soft border-b px-4 py-4 sm:px-5">
 
@@ -866,7 +812,6 @@ export default function AkademikPage() {
                   </div>
                 </div>
 
-                {/* TABLE */}
 
                 <div className="overflow-x-auto">
 
@@ -910,7 +855,6 @@ export default function AkademikPage() {
                           className="theme-table-hover transition"
                         >
 
-                          {/* SISWA */}
 
                           <td className="theme-border-soft border-b px-5 py-4">
 
@@ -939,7 +883,6 @@ export default function AkademikPage() {
                             </div>
                           </td>
 
-                          {/* KELAS */}
 
                           <td className="theme-border-soft border-b px-5 py-4">
 
@@ -949,7 +892,6 @@ export default function AkademikPage() {
 
                           </td>
 
-                          {/* NILAI */}
 
                           <td className="theme-border-soft border-b px-5 py-4 text-center">
 
@@ -963,7 +905,6 @@ export default function AkademikPage() {
 
                           </td>
 
-                          {/* PRESTASI */}
 
                           <td className="theme-border-soft border-b px-5 py-4 text-center">
 
@@ -984,7 +925,6 @@ export default function AkademikPage() {
 
                           </td>
 
-                          {/* SIKAP */}
 
                           <td className="theme-border-soft border-b px-5 py-4 text-center">
 
@@ -998,7 +938,6 @@ export default function AkademikPage() {
 
                           </td>
 
-                          {/* RAPOR */}
 
                           <td className="theme-border-soft border-b px-5 py-4">
 
@@ -1060,7 +999,6 @@ export default function AkademikPage() {
                   </table>
                 </div>
 
-                {/* FOOTER */}
 
                 {filtered.length > 0 && (
                   <div className="theme-card-soft theme-border-soft flex items-center justify-between border-t px-4 py-3 sm:px-5">
@@ -1091,7 +1029,6 @@ export default function AkademikPage() {
                 )}
               </section>
 
-              {/* FOOTER */}
 
               <footer className="pb-5 pt-1 text-center">
                 <p className="theme-text-muted text-[10px]">

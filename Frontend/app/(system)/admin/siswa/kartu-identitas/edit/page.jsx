@@ -28,11 +28,6 @@ import {
   IdCard,
 } from "lucide-react";
 
-/*
-|--------------------------------------------------------------------------
-| THEME HELPERS
-|--------------------------------------------------------------------------
-*/
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -73,21 +68,11 @@ const themeDangerBorder =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-/*
-|--------------------------------------------------------------------------
-| CONFIG
-|--------------------------------------------------------------------------
-*/
 
 const STORAGE_KEY = "smartschool_siswa";
 
 const PHOTO_KEY_PREFIX = "siswa_foto_";
 
-/*
-|--------------------------------------------------------------------------
-| DATA DUMMY SISWA
-|--------------------------------------------------------------------------
-*/
 
 const MOCK_SISWA = [
   {
@@ -241,11 +226,6 @@ const MOCK_SISWA = [
   },
 ];
 
-/*
-|--------------------------------------------------------------------------
-| OPTIONS
-|--------------------------------------------------------------------------
-*/
 
 const OPSI_STATUS = ["Aktif", "Nonaktif"];
 
@@ -286,11 +266,6 @@ const OPSI_KELAS = [
   "XII TJKT 1",
 ];
 
-/*
-|--------------------------------------------------------------------------
-| PLACEHOLDER FOTO
-|--------------------------------------------------------------------------
-*/
 
 function FotoPlaceholder() {
   return (
@@ -320,11 +295,6 @@ function FotoPlaceholder() {
   );
 }
 
-/*
-|--------------------------------------------------------------------------
-| FOTO EDITOR
-|--------------------------------------------------------------------------
-*/
 
 function FotoEditor({
   siswaId,
@@ -362,7 +332,6 @@ function FotoEditor({
 
   return (
     <div className="flex flex-col sm:flex-row sm:items-center gap-5">
-      {/* FOTO */}
 
       <div className="relative w-24 h-24 sm:w-28 sm:h-28 shrink-0">
         <div
@@ -384,7 +353,6 @@ function FotoEditor({
           )}
         </div>
 
-        {/* CAMERA */}
 
         <button
           type="button"
@@ -413,7 +381,6 @@ function FotoEditor({
         />
       </div>
 
-      {/* INFO FOTO */}
 
       <div className="space-y-1.5">
         <p className="text-sm font-medium theme-text">
@@ -447,11 +414,6 @@ function FotoEditor({
   );
 }
 
-/*
-|--------------------------------------------------------------------------
-| FIELD WRAPPER
-|--------------------------------------------------------------------------
-*/
 
 function FieldWrapper({
   icon: Icon,
@@ -484,11 +446,6 @@ function FieldWrapper({
   );
 }
 
-/*
-|--------------------------------------------------------------------------
-| INPUT STYLE
-|--------------------------------------------------------------------------
-*/
 
 const inputClass = `
   w-full px-3.5 py-2.5 rounded-xl
@@ -501,11 +458,6 @@ const inputClass = `
   transition-colors
 `;
 
-/*
-|--------------------------------------------------------------------------
-| SECTION CARD
-|--------------------------------------------------------------------------
-*/
 
 function SectionCard({
   icon: Icon,
@@ -522,7 +474,6 @@ function SectionCard({
         overflow-hidden
       `}
     >
-      {/* HEADER */}
 
       <div
         className={`
@@ -557,7 +508,6 @@ function SectionCard({
         </div>
       </div>
 
-      {/* CONTENT */}
 
       <div className="p-5 sm:p-6">
         {children}
@@ -566,11 +516,6 @@ function SectionCard({
   );
 }
 
-/*
-|--------------------------------------------------------------------------
-| EDIT CONTENT
-|--------------------------------------------------------------------------
-*/
 
 function EditContent() {
   const router = useRouter();
@@ -588,21 +533,12 @@ function EditContent() {
   const [foto, setFoto] =
     useState(null);
 
-  /*
-  |--------------------------------------------------------------------------
-  | AMBIL ID
-  |--------------------------------------------------------------------------
-  */
 
   const siswaAsli = useMemo(() => {
     const id = Number(
       searchParams.get("id")
     );
 
-    /*
-     * Cari dulu dari localStorage.
-     * Kalau belum ada, gunakan MOCK.
-     */
 
     if (typeof window !== "undefined") {
       try {
@@ -638,11 +574,6 @@ function EditContent() {
     );
   }, [searchParams]);
 
-  /*
-  |--------------------------------------------------------------------------
-  | LOAD DATA
-  |--------------------------------------------------------------------------
-  */
 
   useEffect(() => {
     if (!siswaAsli) return;
@@ -668,11 +599,6 @@ function EditContent() {
     }
   }, [siswaAsli]);
 
-  /*
-  |--------------------------------------------------------------------------
-  | UPDATE FIELD
-  |--------------------------------------------------------------------------
-  */
 
   const updateField =
     (field) => (e) => {
@@ -687,11 +613,6 @@ function EditContent() {
       }));
     };
 
-  /*
-  |--------------------------------------------------------------------------
-  | SIDEBAR
-  |--------------------------------------------------------------------------
-  */
 
   const toggleSidebar = () => {
     setIsCollapsed(
@@ -699,11 +620,6 @@ function EditContent() {
     );
   };
 
-  /*
-  |--------------------------------------------------------------------------
-  | BACK
-  |--------------------------------------------------------------------------
-  */
 
   const handleBack = () => {
     if (siswaAsli) {
@@ -719,30 +635,17 @@ function EditContent() {
     );
   };
 
-  /*
-  |--------------------------------------------------------------------------
-  | BATAL
-  |--------------------------------------------------------------------------
-  */
 
   const handleBatal = () => {
     handleBack();
   };
 
-  /*
-  |--------------------------------------------------------------------------
-  | SIMPAN
-  |--------------------------------------------------------------------------
-  */
 
   const handleSimpan = (e) => {
     e.preventDefault();
 
     if (!form) return;
 
-    /*
-     * Validasi sederhana
-     */
 
     if (
       !form.nama?.trim() ||
@@ -760,9 +663,6 @@ function EditContent() {
     setSaving(true);
 
     try {
-      /*
-       * Ambil data lama
-       */
 
       const raw =
         window.localStorage.getItem(
@@ -774,9 +674,6 @@ function EditContent() {
           ? JSON.parse(raw)
           : [...MOCK_SISWA];
 
-      /*
-       * Cari index siswa
-       */
 
       const index =
         data.findIndex(
@@ -785,9 +682,6 @@ function EditContent() {
             Number(form.id)
         );
 
-      /*
-       * Update
-       */
 
       if (index !== -1) {
         data[index] = {
@@ -795,26 +689,16 @@ function EditContent() {
           ...form,
         };
       } else {
-        /*
-         * Kalau belum ada di localStorage,
-         * tambahkan data siswa.
-         */
 
         data.push(form);
       }
 
-      /*
-       * Simpan data siswa
-       */
 
       window.localStorage.setItem(
         STORAGE_KEY,
         JSON.stringify(data)
       );
 
-      /*
-       * Simpan foto
-       */
 
       if (foto) {
         window.localStorage.setItem(
@@ -832,9 +716,6 @@ function EditContent() {
         form
       );
 
-      /*
-       * Redirect
-       */
 
       setTimeout(() => {
         setSaving(false);
@@ -857,11 +738,6 @@ function EditContent() {
     }
   };
 
-  /*
-  |--------------------------------------------------------------------------
-  | DATA TIDAK DITEMUKAN
-  |--------------------------------------------------------------------------
-  */
 
   if (!siswaAsli) {
     return (
@@ -941,25 +817,14 @@ function EditContent() {
     );
   }
 
-  /*
-  |--------------------------------------------------------------------------
-  | LOADING FORM
-  |--------------------------------------------------------------------------
-  */
 
   if (!form) {
     return null;
   }
 
-  /*
-  |--------------------------------------------------------------------------
-  | MAIN
-  |--------------------------------------------------------------------------
-  */
 
   return (
     <div className="flex h-screen w-full theme-page overflow-hidden">
-      {/* SIDEBAR */}
 
       <Sidebar
         active="siswa"
@@ -969,10 +834,8 @@ function EditContent() {
         role="admin"
       />
 
-      {/* CONTENT AREA */}
 
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
-        {/* HEADER */}
 
         <Header
           toggleSidebar={toggleSidebar}
@@ -984,16 +847,12 @@ function EditContent() {
           }}
         />
 
-        {/* MAIN */}
 
         <main className="flex-1 overflow-y-auto">
           <form
             onSubmit={handleSimpan}
             className="p-4 sm:p-6 lg:p-8 space-y-6 pb-28"
           >
-            {/* =====================================================
-                BACK
-            ===================================================== */}
 
             <button
               type="button"
@@ -1012,9 +871,6 @@ function EditContent() {
               Kembali ke Detail Siswa
             </button>
 
-            {/* =====================================================
-                TITLE
-            ===================================================== */}
 
             <div>
               <div className="flex items-center gap-3">
@@ -1046,9 +902,6 @@ function EditContent() {
               </div>
             </div>
 
-            {/* =====================================================
-                FOTO PROFIL
-            ===================================================== */}
 
             <SectionCard
               icon={Camera}
@@ -1062,9 +915,6 @@ function EditContent() {
               />
             </SectionCard>
 
-            {/* =====================================================
-                INFORMASI UTAMA
-            ===================================================== */}
 
             <SectionCard
               icon={IdCard}
@@ -1072,7 +922,6 @@ function EditContent() {
               description="Informasi identitas utama siswa."
             >
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
-                {/* NAMA */}
 
                 <FieldWrapper
                   icon={User}
@@ -1090,7 +939,6 @@ function EditContent() {
                   />
                 </FieldWrapper>
 
-                {/* NIS */}
 
                 <FieldWrapper
                   icon={Fingerprint}
@@ -1107,7 +955,6 @@ function EditContent() {
                   />
                 </FieldWrapper>
 
-                {/* NISN */}
 
                 <FieldWrapper
                   icon={Fingerprint}
@@ -1124,7 +971,6 @@ function EditContent() {
                   />
                 </FieldWrapper>
 
-                {/* NIK */}
 
                 <FieldWrapper
                   icon={Fingerprint}
@@ -1139,7 +985,6 @@ function EditContent() {
                   />
                 </FieldWrapper>
 
-                {/* STATUS */}
 
                 <FieldWrapper
                   icon={UserRound}
@@ -1167,9 +1012,6 @@ function EditContent() {
               </div>
             </SectionCard>
 
-            {/* =====================================================
-                DATA DIRI
-            ===================================================== */}
 
             <SectionCard
               icon={User}
@@ -1177,7 +1019,6 @@ function EditContent() {
               description="Informasi pribadi dan identitas siswa."
             >
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
-                {/* TEMPAT LAHIR */}
 
                 <FieldWrapper
                   icon={MapPin}
@@ -1196,7 +1037,6 @@ function EditContent() {
                   />
                 </FieldWrapper>
 
-                {/* TANGGAL LAHIR */}
 
                 <FieldWrapper
                   icon={Cake}
@@ -1214,7 +1054,6 @@ function EditContent() {
                   />
                 </FieldWrapper>
 
-                {/* JENIS KELAMIN */}
 
                 <FieldWrapper
                   icon={
@@ -1248,7 +1087,6 @@ function EditContent() {
                   </select>
                 </FieldWrapper>
 
-                {/* AGAMA */}
 
                 <FieldWrapper
                   icon={BookOpen}
@@ -1276,7 +1114,6 @@ function EditContent() {
                   </select>
                 </FieldWrapper>
 
-                {/* STATUS KELUARGA */}
 
                 <FieldWrapper
                   icon={Heart}
@@ -1307,9 +1144,6 @@ function EditContent() {
               </div>
             </SectionCard>
 
-            {/* =====================================================
-                DATA AKADEMIK
-            ===================================================== */}
 
             <SectionCard
               icon={School}
@@ -1317,7 +1151,6 @@ function EditContent() {
               description="Informasi kelas dan riwayat pendidikan siswa."
             >
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
-                {/* KELAS */}
 
                 <FieldWrapper
                   icon={GraduationCap}
@@ -1351,7 +1184,6 @@ function EditContent() {
                   </select>
                 </FieldWrapper>
 
-                {/* TAHUN MASUK */}
 
                 <FieldWrapper
                   icon={CalendarDays}
@@ -1370,7 +1202,6 @@ function EditContent() {
                   />
                 </FieldWrapper>
 
-                {/* SEKOLAH ASAL */}
 
                 <FieldWrapper
                   icon={School}
@@ -1390,7 +1221,6 @@ function EditContent() {
                   />
                 </FieldWrapper>
 
-                {/* TANGGAL MASUK */}
 
                 <FieldWrapper
                   icon={CalendarDays}
@@ -1411,9 +1241,6 @@ function EditContent() {
               </div>
             </SectionCard>
 
-            {/* =====================================================
-                ORANG TUA / WALI
-            ===================================================== */}
 
             <SectionCard
               icon={Users}
@@ -1421,7 +1248,6 @@ function EditContent() {
               description="Informasi orang tua atau wali siswa."
             >
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
-                {/* AYAH */}
 
                 <FieldWrapper
                   icon={User}
@@ -1440,7 +1266,6 @@ function EditContent() {
                   />
                 </FieldWrapper>
 
-                {/* PEKERJAAN AYAH */}
 
                 <FieldWrapper
                   icon={BriefcaseIcon}
@@ -1459,7 +1284,6 @@ function EditContent() {
                   />
                 </FieldWrapper>
 
-                {/* IBU */}
 
                 <FieldWrapper
                   icon={User}
@@ -1478,7 +1302,6 @@ function EditContent() {
                   />
                 </FieldWrapper>
 
-                {/* PEKERJAAN IBU */}
 
                 <FieldWrapper
                   icon={BriefcaseIcon}
@@ -1497,7 +1320,6 @@ function EditContent() {
                   />
                 </FieldWrapper>
 
-                {/* TELEPON ORTU */}
 
                 <FieldWrapper
                   icon={Phone}
@@ -1519,9 +1341,6 @@ function EditContent() {
               </div>
             </SectionCard>
 
-            {/* =====================================================
-                KONTAK & ALAMAT
-            ===================================================== */}
 
             <SectionCard
               icon={Phone}
@@ -1529,7 +1348,6 @@ function EditContent() {
               description="Informasi kontak siswa."
             >
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
-                {/* TELEPON */}
 
                 <FieldWrapper
                   icon={Phone}
@@ -1548,7 +1366,6 @@ function EditContent() {
                   />
                 </FieldWrapper>
 
-                {/* EMAIL */}
 
                 <FieldWrapper
                   icon={Mail}
@@ -1567,7 +1384,6 @@ function EditContent() {
                   />
                 </FieldWrapper>
 
-                {/* ALAMAT */}
 
                 <FieldWrapper
                   icon={MapPin}
@@ -1591,9 +1407,6 @@ function EditContent() {
           </form>
         </main>
 
-        {/* =========================================================
-            STICKY ACTION BAR
-        ========================================================= */}
 
         <div
           className={`
@@ -1654,11 +1467,6 @@ function EditContent() {
   );
 }
 
-/*
-|--------------------------------------------------------------------------
-| BRIEFCASE ICON
-|--------------------------------------------------------------------------
-*/
 
 function BriefcaseIcon(props) {
   return (
@@ -1686,11 +1494,6 @@ function BriefcaseIcon(props) {
   );
 }
 
-/*
-|--------------------------------------------------------------------------
-| PAGE
-|--------------------------------------------------------------------------
-*/
 
 function EditSiswaPageContent() {
   return (

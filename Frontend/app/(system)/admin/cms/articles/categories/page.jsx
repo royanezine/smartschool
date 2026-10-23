@@ -21,9 +21,6 @@ import {
   AlertCircle,
 } from "lucide-react";
 
-/* =========================================================
-   HELPER
-========================================================= */
 
 function extractList(data) {
   if (Array.isArray(data)) {
@@ -45,9 +42,6 @@ function extractList(data) {
   return [];
 }
 
-/* =========================================================
-   STATUS BADGE
-========================================================= */
 
 function StatusBadge({ status }) {
   const normalizedStatus = String(
@@ -90,9 +84,6 @@ function StatusBadge({ status }) {
   );
 }
 
-/* =========================================================
-   STAT CARD
-========================================================= */
 
 function StatCard({
   label,
@@ -148,9 +139,6 @@ function StatCard({
   );
 }
 
-/* =========================================================
-   PAGE
-========================================================= */
 
 export default function ArticleCategoriesPage() {
   const [categories, setCategories] = useState([]);
@@ -174,9 +162,6 @@ export default function ArticleCategoriesPage() {
     status: "aktif",
   });
 
-  /* =======================================================
-     LOAD DATA
-  ======================================================= */
 
   useEffect(() => {
     loadCategories();
@@ -208,9 +193,6 @@ export default function ArticleCategoriesPage() {
     }
   }
 
-  /* =======================================================
-     MODAL
-  ======================================================= */
 
   function openAddModal() {
     setEditingCategory(null);
@@ -248,9 +230,6 @@ export default function ArticleCategoriesPage() {
     });
   }
 
-  /* =======================================================
-     FORM
-  ======================================================= */
 
   function handleChange(event) {
     const { name, value } = event.target;
@@ -261,9 +240,6 @@ export default function ArticleCategoriesPage() {
     }));
   }
 
-  /* =======================================================
-     CREATE / UPDATE
-  ======================================================= */
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -290,7 +266,6 @@ export default function ArticleCategoriesPage() {
         status: form.status,
       };
 
-      /* UPDATE */
 
       if (editingCategory) {
         await apiFetch(
@@ -306,7 +281,6 @@ export default function ArticleCategoriesPage() {
         );
       }
 
-      /* CREATE */
 
       else {
         await apiFetch(
@@ -340,9 +314,6 @@ export default function ArticleCategoriesPage() {
     }
   }
 
-  /* =======================================================
-     DELETE
-  ======================================================= */
 
   async function handleDelete() {
     if (!deleteTarget) {
@@ -381,9 +352,6 @@ export default function ArticleCategoriesPage() {
     }
   }
 
-  /* =======================================================
-     FILTER
-  ======================================================= */
 
   const filteredCategories = useMemo(() => {
     const keyword = search
@@ -402,9 +370,6 @@ export default function ArticleCategoriesPage() {
     );
   }, [categories, search]);
 
-  /* =======================================================
-     STATISTICS
-  ======================================================= */
 
   const totalCategories =
     categories.length;
@@ -425,21 +390,12 @@ export default function ArticleCategoriesPage() {
     totalCategories -
     activeCategories;
 
-  /* =======================================================
-     RENDER
-  ======================================================= */
 
   return (
     <div className="theme-page fixed inset-0 overflow-hidden">
-      {/* ===================================================
-          SIDEBAR
-      =================================================== */}
 
       <Sidebar />
 
-      {/* ===================================================
-          MAIN
-      =================================================== */}
 
       <div
         className="
@@ -472,9 +428,6 @@ export default function ArticleCategoriesPage() {
                 lg:py-7
               "
             >
-              {/* =================================================
-                  PAGE HEADER
-              ================================================= */}
 
               <div className="mb-7">
                 <div
@@ -488,7 +441,6 @@ export default function ArticleCategoriesPage() {
                   "
                 >
                   <div className="min-w-0">
-                    {/* BREADCRUMB */}
 
                     <div className="mb-2 flex flex-wrap items-center gap-2 text-[10px] font-bold uppercase tracking-[0.14em]">
                       <span
@@ -536,7 +488,6 @@ export default function ArticleCategoriesPage() {
                     </p>
                   </div>
 
-                  {/* ACTION */}
 
                   <div className="flex flex-wrap gap-2">
                     <button
@@ -602,9 +553,6 @@ export default function ArticleCategoriesPage() {
                 </div>
               </div>
 
-              {/* =================================================
-                  STATISTICS
-              ================================================= */}
 
               <div className="mb-5 grid grid-cols-1 gap-4 sm:grid-cols-3">
                 <StatCard
@@ -632,9 +580,6 @@ export default function ArticleCategoriesPage() {
                 />
               </div>
 
-              {/* =================================================
-                  CONTENT CARD
-              ================================================= */}
 
               <div
                 className="
@@ -646,7 +591,6 @@ export default function ArticleCategoriesPage() {
                   shadow-[0_1px_3px_rgba(15,23,42,0.04)]
                 "
               >
-                {/* CONTENT HEADER */}
 
                 <div
                   className="
@@ -674,7 +618,6 @@ export default function ArticleCategoriesPage() {
                     </p>
                   </div>
 
-                  {/* SEARCH */}
 
                   <div className="relative w-full sm:w-[300px]">
                     <Search
@@ -742,9 +685,6 @@ export default function ArticleCategoriesPage() {
                   </div>
                 </div>
 
-                {/* =================================================
-                    DESKTOP TABLE
-                ================================================= */}
 
                 <div className="hidden overflow-x-auto md:block">
                   <table className="w-full min-w-[720px]">
@@ -824,7 +764,6 @@ export default function ArticleCategoriesPage() {
                     </thead>
 
                     <tbody className="divide-y divide-[var(--color-border-soft)]">
-                      {/* LOADING */}
 
                       {loading && (
                         <tr>
@@ -853,7 +792,6 @@ export default function ArticleCategoriesPage() {
                         </tr>
                       )}
 
-                      {/* EMPTY */}
 
                       {!loading &&
                         filteredCategories.length ===
@@ -930,7 +868,6 @@ export default function ArticleCategoriesPage() {
                           </tr>
                         )}
 
-                      {/* DATA */}
 
                       {!loading &&
                         filteredCategories.map(
@@ -948,13 +885,11 @@ export default function ArticleCategoriesPage() {
                                 transition
                               "
                             >
-                              {/* NO */}
 
                               <td className="theme-text-muted px-5 py-4 text-sm font-medium">
                                 {index + 1}
                               </td>
 
-                              {/* CATEGORY */}
 
                               <td className="px-5 py-4">
                                 <div className="flex items-center gap-3">
@@ -991,7 +926,6 @@ export default function ArticleCategoriesPage() {
                                 </div>
                               </td>
 
-                              {/* SLUG */}
 
                               <td className="px-5 py-4">
                                 <span
@@ -1012,7 +946,6 @@ export default function ArticleCategoriesPage() {
                                 </span>
                               </td>
 
-                              {/* STATUS */}
 
                               <td className="px-5 py-4">
                                 <StatusBadge
@@ -1022,7 +955,6 @@ export default function ArticleCategoriesPage() {
                                 />
                               </td>
 
-                              {/* ACTION */}
 
                               <td className="px-5 py-4">
                                 <div className="flex justify-end gap-1.5">
@@ -1090,12 +1022,8 @@ export default function ArticleCategoriesPage() {
                   </table>
                 </div>
 
-                {/* =================================================
-                    MOBILE
-                ================================================= */}
 
                 <div className="divide-y divide-[var(--color-border-soft)] md:hidden">
-                  {/* LOADING */}
 
                   {loading && (
                     <div className="px-5 py-16 text-center">
@@ -1114,7 +1042,6 @@ export default function ArticleCategoriesPage() {
                     </div>
                   )}
 
-                  {/* EMPTY */}
 
                   {!loading &&
                     filteredCategories.length ===
@@ -1186,7 +1113,6 @@ export default function ArticleCategoriesPage() {
                       </div>
                     )}
 
-                  {/* DATA */}
 
                   {!loading &&
                     filteredCategories.map(
@@ -1329,9 +1255,6 @@ export default function ArticleCategoriesPage() {
                     )}
                 </div>
 
-                {/* =================================================
-                    FOOTER
-                ================================================= */}
 
                 {!loading &&
                   categories.length > 0 && (
@@ -1370,9 +1293,6 @@ export default function ArticleCategoriesPage() {
                   )}
               </div>
 
-              {/* =================================================
-                  PAGE FOOTER
-              ================================================= */}
 
               <div className="theme-border mt-6 border-t pt-4">
                 <p className="theme-text-muted text-[11px]">
@@ -1385,9 +1305,6 @@ export default function ArticleCategoriesPage() {
         </main>
       </div>
 
-      {/* =====================================================
-          ADD / EDIT MODAL
-      ===================================================== */}
 
       {showModal && (
         <div
@@ -1423,7 +1340,6 @@ export default function ArticleCategoriesPage() {
               shadow-[0_20px_60px_rgba(15,23,42,0.18)]
             "
           >
-            {/* MODAL HEADER */}
 
             <div
               className="
@@ -1484,11 +1400,9 @@ export default function ArticleCategoriesPage() {
               </button>
             </div>
 
-            {/* FORM */}
 
             <form onSubmit={handleSubmit}>
               <div className="space-y-5 p-5 sm:p-6">
-                {/* NAME */}
 
                 <div>
                   <label className="theme-text-secondary mb-2 block text-xs font-bold uppercase tracking-wide">
@@ -1541,7 +1455,6 @@ export default function ArticleCategoriesPage() {
                   </div>
                 </div>
 
-                {/* STATUS */}
 
                 <div>
                   <label className="theme-text-secondary mb-2 block text-xs font-bold uppercase tracking-wide">
@@ -1584,7 +1497,6 @@ export default function ArticleCategoriesPage() {
                   </p>
                 </div>
 
-                {/* INFO */}
 
                 <div className="theme-info flex gap-3 rounded-lg border p-4">
                   <AlertCircle
@@ -1606,7 +1518,6 @@ export default function ArticleCategoriesPage() {
                 </div>
               </div>
 
-              {/* MODAL FOOTER */}
 
               <div
                 className="
@@ -1694,9 +1605,6 @@ export default function ArticleCategoriesPage() {
         </div>
       )}
 
-      {/* =====================================================
-          DELETE CONFIRMATION
-      ===================================================== */}
 
       {deleteTarget && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center bg-slate-950/45 p-4 backdrop-blur-[2px]">

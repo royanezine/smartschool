@@ -7,9 +7,6 @@ import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
 import AuthGuard from "@/app/components/auth/AuthGuard";
 
-// ============================================================
-// NOTIFICATION DATA
-// ============================================================
 
 const recentNotifications = [
   {
@@ -32,9 +29,6 @@ const recentNotifications = [
   },
 ];
 
-// ============================================================
-// ACTIVE MENU
-// ============================================================
 
 function getActiveMenu(pathname) {
   if (!pathname || pathname === "/super-admin") {
@@ -88,9 +82,6 @@ function getActiveMenu(pathname) {
   return "dashboard";
 }
 
-// ============================================================
-// LAYOUT
-// ============================================================
 
 export default function SuperAdminLayout({ children }) {
   const pathname = usePathname();
@@ -116,9 +107,6 @@ export default function SuperAdminLayout({ children }) {
   return (
     <AuthGuard allowedRoles={["super_admin"]}>
       <div className="theme-page flex h-screen w-full overflow-hidden">
-        {/* ======================================================
-            SIDEBAR GLOBAL
-        ====================================================== */}
 
         <Sidebar
           active={activeMenu}
@@ -129,9 +117,6 @@ export default function SuperAdminLayout({ children }) {
           }
         />
 
-        {/* ======================================================
-            MAIN AREA
-        ====================================================== */}
 
         <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
           <Header
@@ -146,9 +131,6 @@ export default function SuperAdminLayout({ children }) {
             }}
           />
 
-          {/* ====================================================
-              GLOBAL PAGE CONTENT
-          ==================================================== */}
 
           <main className="theme-page theme-text min-h-0 flex-1 overflow-y-auto">
             {children}

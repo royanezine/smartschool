@@ -32,9 +32,6 @@ import {
 
 const KKM = 75;
 
-// ============================================================
-// THEME
-// ============================================================
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -96,9 +93,6 @@ const themeDangerBorder =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-// ============================================================
-// PREDIKAT
-// ============================================================
 
 const colorClasses = {
   emerald: {
@@ -132,9 +126,6 @@ const colorClasses = {
   },
 };
 
-// ============================================================
-// HELPERS
-// ============================================================
 
 function getPredikat(nilai) {
   if (
@@ -205,9 +196,6 @@ function getJam(value) {
   });
 }
 
-// ============================================================
-// PAGE
-// ============================================================
 
 export default function GuruNilaiTugasPage() {
   const [sidebarOpen, setSidebarOpen] =
@@ -261,9 +249,6 @@ export default function GuruNilaiTugasPage() {
     },
   ]);
 
-  // ============================================================
-  // AMBIL SEMUA TUGAS GURU
-  // ============================================================
 
   const loadTugas = async () => {
     try {
@@ -304,9 +289,6 @@ export default function GuruNilaiTugasPage() {
     loadTugas();
   }, []);
 
-  // ============================================================
-  // FILTER KELAS MAPEL
-  // ============================================================
 
   const kelasMapelOptions = useMemo(() => {
     const map = new Map();
@@ -330,9 +312,6 @@ export default function GuruNilaiTugasPage() {
     return Array.from(map.values());
   }, [tugasList]);
 
-  // ============================================================
-  // TUGAS KELAS TERPILIH
-  // ============================================================
 
   const tugasKelasIni = useMemo(() => {
     return tugasList
@@ -363,9 +342,6 @@ export default function GuruNilaiTugasPage() {
     selectedKelasMapelId,
   ]);
 
-  // ============================================================
-  // TUGAS TERPILIH
-  // ============================================================
 
   const selectedTugas = useMemo(() => {
     return (
@@ -379,9 +355,6 @@ export default function GuruNilaiTugasPage() {
     selectedTugasId,
   ]);
 
-  // ============================================================
-  // AMBIL PENGUMPULAN
-  // ============================================================
 
   const loadPengumpulan = async (
     tugasId
@@ -453,9 +426,6 @@ export default function GuruNilaiTugasPage() {
     }
   }, [selectedTugasId]);
 
-  // ============================================================
-  // KELAS MAPEL CHANGE
-  // ============================================================
 
   const handleKelasMapelChange = (
     value
@@ -476,9 +446,6 @@ export default function GuruNilaiTugasPage() {
     setError("");
   };
 
-  // ============================================================
-  // TUGAS CHANGE
-  // ============================================================
 
   const handleTugasChange = (
     value
@@ -488,9 +455,6 @@ export default function GuruNilaiTugasPage() {
     setError("");
   };
 
-  // ============================================================
-  // INPUT NILAI
-  // ============================================================
 
   const setNilaiSiswa = (
     pengumpulanId,
@@ -514,9 +478,6 @@ export default function GuruNilaiTugasPage() {
     }));
   };
 
-  // ============================================================
-  // INPUT CATATAN
-  // ============================================================
 
   const setCatatanSiswa = (
     pengumpulanId,
@@ -528,9 +489,6 @@ export default function GuruNilaiTugasPage() {
     }));
   };
 
-  // ============================================================
-  // REKAP
-  // ============================================================
 
   const nilaiTerisi = useMemo(() => {
     return Object.values(
@@ -587,9 +545,6 @@ export default function GuruNilaiTugasPage() {
     };
   }, [nilaiTerisi]);
 
-  // ============================================================
-  // SIMPAN SEMUA NILAI
-  // ============================================================
 
   const simpanSemuaNilai =
     async () => {
@@ -658,9 +613,6 @@ export default function GuruNilaiTugasPage() {
       }
     };
 
-  // ============================================================
-  // REFRESH
-  // ============================================================
 
   const refreshData = async () => {
     setSuccess("");
@@ -682,9 +634,6 @@ export default function GuruNilaiTugasPage() {
         selectedKelasMapelId
     );
 
-  // ============================================================
-  // RENDER
-  // ============================================================
 
   return (
     <div className="theme-page flex h-screen overflow-hidden">
@@ -720,9 +669,6 @@ export default function GuruNilaiTugasPage() {
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           <div className="w-full space-y-6">
 
-            {/* ==================================================
-                HEADER
-            ================================================== */}
 
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="min-w-0">
@@ -773,9 +719,6 @@ export default function GuruNilaiTugasPage() {
               </button>
             </div>
 
-            {/* ==================================================
-                ERROR
-            ================================================== */}
 
             {error && (
               <div
@@ -798,9 +741,6 @@ export default function GuruNilaiTugasPage() {
               </div>
             )}
 
-            {/* ==================================================
-                SUCCESS
-            ================================================== */}
 
             {success && (
               <div
@@ -817,16 +757,12 @@ export default function GuruNilaiTugasPage() {
               </div>
             )}
 
-            {/* ==================================================
-                SELECTOR
-            ================================================== */}
 
             <div
               className={`theme-card rounded-xl border p-4 ${themeNeutralBorder} ${themeCardShadow}`}
             >
               <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
 
-                {/* KELAS MAPEL */}
 
                 <div>
                   <label className="theme-text-secondary mb-2 block text-xs font-semibold">
@@ -883,7 +819,6 @@ export default function GuruNilaiTugasPage() {
                   </div>
                 </div>
 
-                {/* TUGAS */}
 
                 <div>
                   <label className="theme-text-secondary mb-2 block text-xs font-semibold">
@@ -934,9 +869,6 @@ export default function GuruNilaiTugasPage() {
               </div>
             </div>
 
-            {/* ==================================================
-                DETAIL TUGAS
-            ================================================== */}
 
             {selectedTugas && (
               <div
@@ -1015,13 +947,9 @@ export default function GuruNilaiTugasPage() {
               </div>
             )}
 
-            {/* ==================================================
-                SUMMARY
-            ================================================== */}
 
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
 
-              {/* Pengumpulan */}
 
               <div
                 className={`theme-card flex items-center gap-3 rounded-xl border p-3.5 ${themeNeutralBorder} ${themeCardShadow}`}
@@ -1043,7 +971,6 @@ export default function GuruNilaiTugasPage() {
                 </div>
               </div>
 
-              {/* Rata-rata */}
 
               <div
                 className={`theme-card flex items-center gap-3 rounded-xl border p-3.5 ${themeNeutralBorder} ${themeCardShadow}`}
@@ -1068,7 +995,6 @@ export default function GuruNilaiTugasPage() {
                 </div>
               </div>
 
-              {/* Tertinggi */}
 
               <div
                 className={`theme-card flex items-center gap-3 rounded-xl border p-3.5 ${themeNeutralBorder} ${themeCardShadow}`}
@@ -1093,7 +1019,6 @@ export default function GuruNilaiTugasPage() {
                 </div>
               </div>
 
-              {/* Terendah */}
 
               <div
                 className={`theme-card flex items-center gap-3 rounded-xl border p-3.5 ${themeNeutralBorder} ${themeCardShadow}`}
@@ -1118,7 +1043,6 @@ export default function GuruNilaiTugasPage() {
                 </div>
               </div>
 
-              {/* Belum Tuntas */}
 
               <div
                 className={`theme-card flex items-center gap-3 rounded-xl border p-3.5 ${themeNeutralBorder} ${themeCardShadow}`}
@@ -1143,15 +1067,9 @@ export default function GuruNilaiTugasPage() {
               </div>
             </div>
 
-            {/* ==================================================
-                CONTENT
-            ================================================== */}
 
             <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
 
-              {/* ==================================================
-                  FORM NILAI
-              ================================================== */}
 
               <div
                 className={`theme-card lg:col-span-2 overflow-hidden rounded-xl border ${themeNeutralBorder} ${themeCardShadow}`}
@@ -1199,7 +1117,6 @@ export default function GuruNilaiTugasPage() {
                   </div>
                 </div>
 
-                {/* LOADING */}
 
                 {loadingPengumpulan ? (
                   <div className="flex flex-col items-center justify-center p-10 text-center">
@@ -1216,7 +1133,6 @@ export default function GuruNilaiTugasPage() {
                 ) : pengumpulanList.length ===
                   0 ? (
 
-                  /* EMPTY */
 
                   <div className="p-10 text-center">
                     <div
@@ -1240,7 +1156,6 @@ export default function GuruNilaiTugasPage() {
                   </div>
                 ) : (
 
-                  /* LIST */
 
                   <div>
                     {pengumpulanList.map(
@@ -1269,7 +1184,6 @@ export default function GuruNilaiTugasPage() {
                           >
                             <div className="flex flex-col gap-3">
 
-                              {/* IDENTITAS + NILAI */}
 
                               <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
 
@@ -1335,7 +1249,6 @@ export default function GuruNilaiTugasPage() {
                                 </div>
                               </div>
 
-                              {/* CATATAN */}
 
                               <input
                                 type="text"
@@ -1358,7 +1271,6 @@ export default function GuruNilaiTugasPage() {
                                 className={`theme-input theme-text w-full rounded-lg border px-3 py-2 text-xs outline-none transition placeholder:text-[var(--color-text-placeholder)] ${themeFocus} ${themeNeutralBorder}`}
                               />
 
-                              {/* STATUS */}
 
                               <div className="flex flex-wrap items-center gap-2">
                                 {item.status ===
@@ -1403,7 +1315,6 @@ export default function GuruNilaiTugasPage() {
                   </div>
                 )}
 
-                {/* FOOTER FORM */}
 
                 {pengumpulanList.length >
                   0 && (
@@ -1453,15 +1364,9 @@ export default function GuruNilaiTugasPage() {
                 )}
               </div>
 
-              {/* ==================================================
-                  SIDEBAR KANAN
-              ================================================== */}
 
               <div className="space-y-6">
 
-                {/* ==================================================
-                    STATISTIK
-                ================================================== */}
 
                 <div
                   className={`theme-card rounded-xl border p-4 sm:p-5 ${themeNeutralBorder} ${themeCardShadow}`}
@@ -1486,7 +1391,6 @@ export default function GuruNilaiTugasPage() {
                   ) : (
                     <div className="space-y-4">
 
-                      {/* RATA-RATA */}
 
                       <div>
                         <div className="mb-1.5 flex items-center justify-between">
@@ -1516,7 +1420,6 @@ export default function GuruNilaiTugasPage() {
                         </div>
                       </div>
 
-                      {/* MAX MIN */}
 
                       <div className="grid grid-cols-2 gap-3">
                         <div
@@ -1548,7 +1451,6 @@ export default function GuruNilaiTugasPage() {
                         </div>
                       </div>
 
-                      {/* KKM */}
 
                       <div
                         className={`rounded-lg border p-3 ${themeWarningSurface} ${themeWarningBorder}`}
@@ -1575,9 +1477,6 @@ export default function GuruNilaiTugasPage() {
                   )}
                 </div>
 
-                {/* ==================================================
-                    RIWAYAT TUGAS
-                ================================================== */}
 
                 <div
                   className={`theme-card overflow-hidden rounded-xl border ${themeNeutralBorder} ${themeCardShadow}`}
@@ -1629,7 +1528,6 @@ export default function GuruNilaiTugasPage() {
                             >
                               <div className="flex items-start gap-3">
 
-                                {/* ICON */}
 
                                 <div
                                   className={`flex-shrink-0 rounded-lg p-2 ${
@@ -1645,7 +1543,6 @@ export default function GuruNilaiTugasPage() {
                                   />
                                 </div>
 
-                                {/* CONTENT */}
 
                                 <div className="min-w-0 flex-1">
                                   <p

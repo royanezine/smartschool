@@ -28,9 +28,6 @@ import {
 
 import { getDetailPeminjaman } from "@/services/sarpras.service";
 
-/* =========================================================
-   STATUS
-========================================================= */
 
 const STATUS = {
   MENUNGGU: "menunggu_persetujuan",
@@ -48,9 +45,6 @@ const STATUS_LABEL = {
   dikembalikan: "Dikembalikan",
 };
 
-/* =========================================================
-   THEME HELPERS
-========================================================= */
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -103,9 +97,6 @@ const themeDangerBorder =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-/* =========================================================
-   STATUS CONFIG
-========================================================= */
 
 const getStatusConfig = (status) => {
   switch (status) {
@@ -165,9 +156,6 @@ const getStatusConfig = (status) => {
   }
 };
 
-/* =========================================================
-   HELPERS
-========================================================= */
 
 const formatTanggal = (v) => {
   if (!v) return "-";
@@ -199,9 +187,6 @@ const formatTanggalWaktu = (v) => {
   }
 };
 
-/* =========================================================
-   PAGE
-========================================================= */
 
 export default function DetailPeminjamanPage() {
   const router = useRouter();
@@ -294,7 +279,6 @@ export default function DetailPeminjamanPage() {
         <main className="theme-page flex-1 overflow-y-auto">
           <div className="mx-auto w-full max-w-[1400px] space-y-5 p-4 sm:p-6 lg:p-8">
 
-            {/* BACK */}
             <button
               type="button"
               onClick={handleBack}
@@ -309,7 +293,6 @@ export default function DetailPeminjamanPage() {
               Kembali ke Peminjaman
             </button>
 
-            {/* LOADING */}
             {loading && (
               <div
                 className={`theme-card flex flex-col items-center justify-center rounded-xl border ${themePrimaryBorder} py-16 ${themeCardShadow}`}
@@ -325,7 +308,6 @@ export default function DetailPeminjamanPage() {
               </div>
             )}
 
-            {/* ERROR */}
             {!loading && error && (
               <div
                 className={`theme-card rounded-xl border ${themePrimaryBorder} p-6 ${themeCardShadow}`}
@@ -360,7 +342,6 @@ export default function DetailPeminjamanPage() {
               </div>
             )}
 
-            {/* NOT FOUND */}
             {!loading && !error && !detail && (
               <div
                 className={`theme-card rounded-xl border border-dashed ${themePrimaryBorder} py-16 text-center ${themeCardShadow}`}
@@ -389,11 +370,9 @@ export default function DetailPeminjamanPage() {
               </div>
             )}
 
-            {/* DETAIL */}
             {!loading && !error && detail && (
               <div className="space-y-5">
 
-                {/* HEADER CARD */}
                 <div
                   className={`theme-card overflow-hidden rounded-xl border ${themePrimaryBorder} ${themeCardShadow}`}
                 >
@@ -443,7 +422,6 @@ export default function DetailPeminjamanPage() {
                   </div>
                 </div>
 
-                {/* QUICK STATS */}
                 <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
                   <StatCard
                     icon={<UserRound size={15} />}
@@ -470,13 +448,10 @@ export default function DetailPeminjamanPage() {
                   />
                 </div>
 
-                {/* MAIN GRID */}
                 <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
 
-                  {/* LEFT */}
                   <div className="space-y-5">
 
-                    {/* DAFTAR ASET */}
                     <div
                       className={`theme-card overflow-hidden rounded-xl border ${themePrimaryBorder} ${themeCardShadow}`}
                     >
@@ -533,14 +508,12 @@ export default function DetailPeminjamanPage() {
                       </div>
                     </div>
 
-                    {/* KEPERLUAN */}
                     <InfoBlock
                       icon={<FileText size={15} />}
                       title="Keperluan"
                       content={detail.keperluan || "-"}
                     />
 
-                    {/* CATATAN PEMINJAMAN */}
                     {detail.catatanPeminjaman && (
                       <InfoBlock
                         icon={<ClipboardList size={15} />}
@@ -549,7 +522,6 @@ export default function DetailPeminjamanPage() {
                       />
                     )}
 
-                    {/* CATATAN PENOLAKAN */}
                     {detail.catatanPenolakan && (
                       <div
                         className={`theme-card overflow-hidden rounded-xl border ${themeDangerBorder} ${themeCardShadow}`}
@@ -582,7 +554,6 @@ export default function DetailPeminjamanPage() {
                       </div>
                     )}
 
-                    {/* SISWA PENGAMBIL */}
                     {(detail.namaSiswaPengambil ||
                       detail.siswaPengambil) && (
                       <InfoBlock
@@ -596,7 +567,6 @@ export default function DetailPeminjamanPage() {
                       />
                     )}
 
-                    {/* SISWA PENGEMBALI */}
                     {(detail.namaSiswaPengembali ||
                       detail.siswaPengembali) && (
                       <InfoBlock
@@ -611,7 +581,6 @@ export default function DetailPeminjamanPage() {
                     )}
                   </div>
 
-                  {/* RIGHT — ACTIONS */}
                   <aside className="space-y-5 lg:sticky lg:top-6">
                     <div
                       className={`theme-card overflow-hidden rounded-xl border ${themePrimaryBorder} ${themeCardShadow}`}
@@ -632,7 +601,6 @@ export default function DetailPeminjamanPage() {
 
                       <div className="space-y-2.5 p-4">
 
-                        {/* MENUNGGU */}
                         {detail.status === STATUS.MENUNGGU && (
                           <>
                             <button
@@ -655,7 +623,6 @@ export default function DetailPeminjamanPage() {
                           </>
                         )}
 
-                        {/* DISETUJUI */}
                         {detail.status === STATUS.DISETUJUI && (
                           <button
                             type="button"
@@ -667,7 +634,6 @@ export default function DetailPeminjamanPage() {
                           </button>
                         )}
 
-                        {/* DIPINJAM */}
                         {detail.status === STATUS.DIPINJAM && (
                           <button
                             type="button"
@@ -679,7 +645,6 @@ export default function DetailPeminjamanPage() {
                           </button>
                         )}
 
-                        {/* NO ACTION */}
                         {[STATUS.DITOLAK, STATUS.DIKEMBALIKAN].includes(
                           detail.status
                         ) && (
@@ -694,7 +659,6 @@ export default function DetailPeminjamanPage() {
                       </div>
                     </div>
 
-                    {/* BACK BUTTON */}
                     <button
                       type="button"
                       onClick={handleBack}
@@ -713,9 +677,6 @@ export default function DetailPeminjamanPage() {
   );
 }
 
-/* =========================================================
-   SUB COMPONENTS
-========================================================= */
 
 function StatCard({ icon, label, value }) {
   return (

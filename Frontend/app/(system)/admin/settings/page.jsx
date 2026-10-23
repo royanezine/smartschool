@@ -27,9 +27,6 @@ import {
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
-// Mendukung kedua konfigurasi:
-// NEXT_PUBLIC_API_URL=http://localhost:5000
-// NEXT_PUBLIC_API_URL=http://localhost:5000/api
 const PROFILE_ENDPOINT = API_BASE.replace(/\/+$/, "").endsWith("/api")
   ? "/users/profile"
   : "/api/users/profile";
@@ -259,7 +256,6 @@ export default function AdminPengaturanPage() {
 
         <main className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
           <div className="mx-auto w-full max-w-[1600px] space-y-6 p-3 sm:p-5 lg:p-7">
-            {/* Header halaman */}
             <section className={`${cardClass} relative overflow-hidden`}>
               <div className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] blur-3xl" />
 
@@ -304,7 +300,6 @@ export default function AdminPengaturanPage() {
               </div>
             </section>
 
-            {/* Loading */}
             {loading && (
               <section className={`${cardClass} p-10`}>
                 <div className="flex flex-col items-center justify-center text-center">
@@ -322,7 +317,6 @@ export default function AdminPengaturanPage() {
               </section>
             )}
 
-            {/* Error */}
             {!loading && error && (
               <section className="rounded-2xl border border-[color-mix(in_srgb,var(--color-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--color-warning)_7%,transparent)] p-5">
                 <div className="flex items-start gap-3">
@@ -357,7 +351,6 @@ export default function AdminPengaturanPage() {
               </section>
             )}
 
-            {/* Konten dengan data asli */}
             {!loading && !error && profile && (
               <>
                 <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -396,7 +389,6 @@ export default function AdminPengaturanPage() {
                 </section>
 
                 <div className="grid min-w-0 grid-cols-1 gap-6 xl:grid-cols-2">
-                  {/* Informasi sekolah */}
                   <section className={`${cardClass} min-w-0 overflow-hidden`}>
                     <SectionHeader
                       icon={Building2}
@@ -470,7 +462,6 @@ export default function AdminPengaturanPage() {
                     </div>
                   </section>
 
-                  {/* Informasi akun */}
                   <section className={`${cardClass} min-w-0 overflow-hidden`}>
                     <SectionHeader
                       icon={UserRound}
@@ -540,7 +531,6 @@ export default function AdminPengaturanPage() {
                     </div>
                   </section>
 
-                  {/* Informasi peran */}
                   <section className={`${cardClass} min-w-0 overflow-hidden`}>
                     <SectionHeader
                       icon={ShieldCheck}
@@ -605,7 +595,6 @@ export default function AdminPengaturanPage() {
                     </div>
                   </section>
 
-                  {/* Tahun ajaran */}
                   <section className={`${cardClass} min-w-0 overflow-hidden`}>
                     <SectionHeader
                       icon={CalendarDays}
@@ -646,7 +635,6 @@ export default function AdminPengaturanPage() {
                   </section>
                 </div>
 
-                {/* Informasi integrasi */}
                 <section className={`${cardClass} p-5 sm:p-6`}>
                   <div className="flex items-start gap-3">
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)] text-[var(--color-success)]">

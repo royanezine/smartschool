@@ -1,43 +1,36 @@
 ﻿
+import { getToken, clearSession } from "../lib/auth";
+
 const API_URL = (
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
 ).replace(/\/+$/, "");
 
-/* =========================================================
-   TYPES
-========================================================= */
 
 
 export interface User {
   id: string;
 
-  // Informasi akun
   email: string;
   namaPengguna: string;
   namaLengkap: string;
   avatar?: string | null;
 
-  // Identitas
   nipd?: string | null;
   nip?: string | null;
   nuptk?: string | null;
   nisn?: string | null;
   nik?: string | null;
 
-  // Jabatan dan kepegawaian
   jabatan?: string | null;
   golongan?: string | null;
 
-  // Shift kerja berupa nilai sederhana, misalnya "pagi" atau "siang"
   shiftKerja?: string | null;
 
-  // ID relasi master shift kerja
+
   shiftKerjaId?: string | null;
 
-  // ID relasi kategori jabatan
   kategoriJabatanId?: string | null;
 
-  // Data master shift kerja dari backend
   shiftKerjaMaster?: {
     id?: string;
     nama?: string | null;
@@ -46,14 +39,12 @@ export interface User {
     jamKeluar?: string | null;
   } | null;
 
-  // Data kategori jabatan dari backend
   kategoriJabatan?: {
     id?: string;
     nama?: string | null;
     kode?: string | null;
   } | null;
 
-  // Informasi pribadi
   jenisKelamin?: string | null;
   tempatLahir?: string | null;
   tanggalLahir?: string | null;
@@ -61,26 +52,22 @@ export interface User {
   alamatDomisili?: string | null;
   noTelepon?: string | null;
 
-  // Status dan waktu
   status?: string | null;
   dibuatPada?: string | null;
   diperbaruiPada?: string | null;
 
-  // Sekolah
   sekolah?: {
     id?: string;
     nama?: string | null;
     kode?: string | null;
   } | null;
 
-  // Peran pengguna
   peran?: {
     id?: string;
     nama?: string | null;
     namaTampilan?: string | null;
   } | null;
 
-  // Mendukung properti tambahan dari response backend
   [key: string]: any;
 }
 
@@ -190,35 +177,40 @@ export interface UserMutationResponse {
   data?: User;
 }
 
-/* =========================================================
-   TOKEN
-========================================================= */
-
-function getToken(): string | null {
-  if (typeof window === "undefined") return null;
-
-  const keys = [
-    "token",
-    "accessToken",
-    "access_token",
-    "authToken",
-    "jwt",
-  ];
-
-  for (const key of keys) {
-    const value = localStorage.getItem(key);
-
-    if (value?.trim()) {
-      return value.trim().replace(/^Bearer\s+/i, "");
-    }
-  }
-
-  return null;
+export interface UserAssignmentVerification {
+  shift: boolean;
+  category: boolean;
 }
 
-/* =========================================================
-   RESPONSE PARSER
-========================================================= */
+function hasOwnField(value: unknown, key: string): boolean {
+  return (
+    value != null &&
+    typeof value === "object" &&
+    Object.prototype.hasOwnProperty.call(value, key)
+  );
+}
+
+export function verifyUserAssignment(
+  user: unknown
+): UserAssignmentVerification {
+  if (user == null || typeof user !== "object") {
+    return { shift: false, category: false };
+  }
+
+  const record = user as Record<string, unknown>;
+
+  return {
+    shift:
+      hasOwnField(record, "shiftKerjaId") ||
+      hasOwnField(record, "shiftKerjaMaster") ||
+      (record.shiftKerja != null &&
+        typeof record.shiftKerja === "object"),
+    category:
+      hasOwnField(record, "kategoriJabatanId") ||
+      hasOwnField(record, "kategoriJabatan"),
+  };
+}
+
 
 async function parseResponse(response: Response): Promise<any> {
   const rawText = await response.text();
@@ -234,9 +226,6 @@ async function parseResponse(response: Response): Promise<any> {
   }
 }
 
-/* =========================================================
-   REQUEST
-========================================================= */
 
 async function request<T>(
   endpoint: string,
@@ -284,14 +273,21 @@ async function request<T>(
   } catch (error) {
     console.error("USER API NETWORK ERROR:", error);
 
-    throw new Error(
+    const netErr = new Error(
       `Tidak dapat terhubung ke server ${API_URL}. Periksa koneksi backend dan konfigurasi API.`
-    );
+    ) as Error & { status?: number; isNetworkError?: boolean };
+    netErr.status = 0;
+    netErr.isNetworkError = true;
+    throw netErr;
   }
 
   const result = await parseResponse(response);
 
   if (!response.ok) {
+    if (response.status === 401) {
+      clearSession();
+    }
+
     console.error("GAGAL REQUEST USER:", {
       url,
       method: options.method || "GET",
@@ -316,16 +312,15 @@ async function request<T>(
                 ? "Data pengguna sudah digunakan."
                 : `Request gagal (${response.status}).`);
 
-    throw new Error(message);
+    const err = new Error(message) as Error & { status?: number; data?: any };
+    err.status = response.status;
+    err.data = result?.data ?? result;
+    throw err;
   }
 
   return result as T;
 }
 
-/* =========================================================
-   GET USERS
-   GET /api/users
-========================================================= */
 
 export async function getUsers(
   params: GetUsersParams = {}
@@ -360,10 +355,6 @@ export async function getUsers(
   );
 }
 
-/* =========================================================
-   GET USER BY ID
-   GET /api/users/:id
-========================================================= */
 
 export async function getUserById(
   id: string
@@ -377,10 +368,6 @@ export async function getUserById(
   );
 }
 
-/* =========================================================
-   CREATE USER
-   POST /api/users
-========================================================= */
 
 export async function createUser(
   payload: CreateUserPayload
@@ -424,10 +411,6 @@ export async function createUser(
   });
 }
 
-/* =========================================================
-   UPDATE USER
-   PUT /api/users/:id
-========================================================= */
 
 
 
@@ -448,8 +431,6 @@ export async function updateUser(
       typeof value === "string" ? value.trim() : value;
   }
 
-  // Validasi hanya untuk field yang memang dikirim.
-  // Ini memungkinkan update status saja tanpa mengirim seluruh profil.
   if (
     "email" in cleanPayload &&
     !cleanPayload.email
@@ -473,10 +454,6 @@ export async function updateUser(
   );
 }
 
-/* =========================================================
-   DELETE USER
-   DELETE /api/users/:id
-========================================================= */
 
 export async function deleteUser(
   id: string
@@ -493,10 +470,6 @@ export async function deleteUser(
   );
 }
 
-/* =========================================================
-   UPDATE USER STATUS
-   PUT /api/users/:id
-========================================================= */
 
 export async function updateUserStatus(
   id: string,
@@ -519,9 +492,6 @@ export async function updateUserStatus(
   );
 }
 
-/* =========================================================
-   GET GURU BY ID
-========================================================= */
 
 export async function getGuruById(id: string) {
   if (!id) {
@@ -548,10 +518,6 @@ export async function getGuruById(id: string) {
   };
 }
 
-/* =========================================================
-   RESET PASSWORD
-   PATCH /api/users/:id/reset-password
-========================================================= */
 
 export async function resetUserPassword(
   id: string
@@ -599,5 +565,105 @@ export async function updateProfile(
     method: "PUT",
     body: JSON.stringify(payload),
   });
+}
+
+
+export interface WaliKelasGuru {
+  id: string;
+  nama: string;
+  nip: string;
+  email: string;
+  telp: string;
+  jabatan: string;
+  status: string;
+}
+
+function extractUserList(response: any): any[] {
+  if (Array.isArray(response)) return response;
+  if (Array.isArray(response?.data)) return response.data;
+  if (Array.isArray(response?.data?.data)) return response.data.data;
+  if (Array.isArray(response?.items)) return response.items;
+  return [];
+}
+
+function extractUserDetail(response: any): any {
+  if (!response) return null;
+  if (response.data !== undefined) {
+    return response.data?.data ?? response.data;
+  }
+  return response;
+}
+
+function normalizeGuru(user: any): WaliKelasGuru {
+  return {
+    id: String(user?.id ?? ""),
+    nama: String(
+      user?.namaLengkap ?? user?.nama ?? ""
+    ),
+    nip: String(user?.nip ?? ""),
+    email: String(user?.email ?? ""),
+    telp: String(user?.noTelepon ?? ""),
+    jabatan: String(user?.jabatan ?? ""),
+    status: String(user?.status ?? ""),
+  };
+}
+
+export async function getGuruWaliKelasList(): Promise<
+  WaliKelasGuru[]
+> {
+  const rows: any[] = [];
+  let page = 1;
+  let totalPages = 1;
+
+  do {
+    const response = await getUsers({
+      page,
+      limit: 100,
+      role: "guru",
+      sortBy: "namaLengkap",
+      sortOrder: "asc",
+    });
+
+    rows.push(...extractUserList(response));
+
+    const nextTotal = Number(
+      response?.pagination?.totalPages ??
+        (response as any)?.meta?.totalPages ??
+        1
+    );
+
+    totalPages =
+      Number.isFinite(nextTotal) && nextTotal > 0
+        ? nextTotal
+        : 1;
+
+    page += 1;
+  } while (page <= totalPages && page <= 50);
+
+  return rows
+    .map(normalizeGuru)
+    .filter((guru) => guru.id && guru.nama)
+    .sort((a, b) => {
+      const statusA = a.status === "nonaktif" ? 1 : 0;
+      const statusB = b.status === "nonaktif" ? 1 : 0;
+      return statusA - statusB;
+    });
+}
+
+export async function getGuruWaliKelasDetail(
+  id: string
+): Promise<WaliKelasGuru> {
+  if (!id) {
+    throw new Error("ID guru wajib diisi.");
+  }
+
+  const response = await getUserById(id);
+  const data = extractUserDetail(response);
+
+  if (!data?.id) {
+    throw new Error("Data guru tidak ditemukan.");
+  }
+
+  return normalizeGuru(data);
 }
 

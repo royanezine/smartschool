@@ -18,10 +18,6 @@ import {
 import { login } from "@/services/auth.services";
 import { setSession, clearSession, normalizeRole, getRoleHome } from "@/lib/auth";
 
-/*
- * Ukuran diukur dari gambar referensi (lebar 1746px).
- * --u didefinisikan di page.jsx (1px di HP, ikut skala di desktop).
- */
 const u = (n) => `calc(var(--u, 1px) * ${n})`;
 
 export default function LoginForm() {
@@ -53,7 +49,6 @@ export default function LoginForm() {
         "Sesi Anda telah berakhir karena token kedaluwarsa. Silakan login kembali."
       );
 
-      // Bersihkan penanda dari URL tanpa reload.
       params.delete("sessionExpired");
 
       const query = params.toString();
@@ -73,9 +68,6 @@ export default function LoginForm() {
     siswa: "c643899d-6a7d-4552-a310-a39b6e9103ee",
   };
 
-  // =====================================================
-  // DECODE JWT
-  // =====================================================
 
   const decodeJwtPayload = (token) => {
     try {
@@ -109,9 +101,6 @@ export default function LoginForm() {
     }
   };
 
-  // =====================================================
-  // GET ROLE
-  // =====================================================
 
   const getRoleFromPayload = (payload) => {
     if (!payload) return "";
@@ -146,9 +135,6 @@ export default function LoginForm() {
     return "";
   };
 
-  // =====================================================
-  // REDIRECT BERDASARKAN ROLE
-  // =====================================================
 
   const getRedirectPath = (role) => {
     if (role === "orang_tua" || role === "orangtua") {
@@ -160,11 +146,7 @@ export default function LoginForm() {
     return home && home !== "/login" ? home : "/admin/dashboard";
   };
 
-  // =====================================================
-  // HANDLE LOGIN
-  // =====================================================
 
-  // Request ID untuk mencegah response API lama menimpa sesi baru.
   const requestIdRef = useRef(0);
 
   const handleLogin = async (e) => {
@@ -208,7 +190,6 @@ export default function LoginForm() {
         throw new Error("Format respons login dari server tidak valid.");
       }
 
-      // 1. SISWA BELUM MEMILIKI PIN
       if (response.requiresPinSetup === true) {
         const setupToken = response.setupToken;
 
@@ -227,7 +208,6 @@ export default function LoginForm() {
         return;
       }
 
-      // 2. SISWA SUDAH MEMILIKI PIN
       if (response.requiresPin === true) {
         const pinToken = response.pinToken;
 
@@ -246,7 +226,6 @@ export default function LoginForm() {
         return;
       }
 
-      // 3. LOGIN NORMAL
       const token = response.token;
 
       if (!token) {
@@ -336,9 +315,6 @@ export default function LoginForm() {
     }
   };
 
-  // =====================================================
-  // REMEMBERED IDENTIFIER
-  // =====================================================
 
   const handleIdentifierFocus = () => {
     if (identifier) return;
@@ -350,9 +326,6 @@ export default function LoginForm() {
     }
   };
 
-  // =====================================================
-  // RENDER (presisi mengikuti referensi)
-  // =====================================================
 
   const inputClass =
     "w-full rounded-full border border-[#E3E8F0] bg-[#FAFBFD] text-[#1E293B] outline-none transition-all duration-200 placeholder:text-[#9AA6B8] focus:border-[#2563EB] focus:ring-4 focus:ring-blue-500/15 disabled:cursor-not-allowed disabled:bg-slate-50";
@@ -374,7 +347,6 @@ export default function LoginForm() {
         padding: `${u(35)} ${u(32)} ${u(33)}`,
       }}
     >
-      {/* HEADER */}
       <div className="text-center" style={{ marginBottom: u(17) }}>
         <div
           className="mx-auto flex items-center justify-center bg-[#EAF2FF]"
@@ -407,7 +379,6 @@ export default function LoginForm() {
         </p>
       </div>
 
-      {/* ERROR */}
       {error && (
         <div
           className="flex items-start gap-2 rounded-2xl border border-red-200 bg-red-50 px-3.5 py-2.5"
@@ -418,9 +389,7 @@ export default function LoginForm() {
         </div>
       )}
 
-      {/* FORM */}
       <form onSubmit={handleLogin}>
-        {/* IDENTIFIER */}
         <div>
           <label
             htmlFor="identifier"
@@ -452,7 +421,6 @@ export default function LoginForm() {
           </div>
         </div>
 
-        {/* PASSWORD */}
         <div style={{ marginTop: u(17) }}>
           <div
             className="flex items-center justify-between"
@@ -513,7 +481,6 @@ export default function LoginForm() {
           </div>
         </div>
 
-        {/* REMEMBER ME */}
         <label
           htmlFor="remember"
           className="flex w-fit cursor-pointer items-center"
@@ -540,7 +507,6 @@ export default function LoginForm() {
           </span>
         </label>
 
-        {/* LOGIN BUTTON */}
         <button
           type="submit"
           disabled={loading}
@@ -584,7 +550,6 @@ export default function LoginForm() {
           )}
         </button>
 
-        {/* DIVIDER */}
         <div
           className="relative flex items-center justify-center"
           style={{ marginTop: u(17), height: u(20) }}
@@ -598,7 +563,6 @@ export default function LoginForm() {
           </span>
         </div>
 
-        {/* GOOGLE */}
         <button
           type="button"
           disabled={loading}
@@ -621,9 +585,6 @@ export default function LoginForm() {
   );
 }
 
-// =====================================================
-// GOOGLE ICON
-// =====================================================
 
 function GoogleIcon() {
   return (

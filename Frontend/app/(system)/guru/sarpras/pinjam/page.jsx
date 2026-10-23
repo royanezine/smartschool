@@ -25,11 +25,8 @@ import {
   RefreshCw,
 } from "lucide-react";
 
-import { getAset } from "@/services/sarpras.service";
+import { getKetersediaanAset } from "@/services/sarpras.service";
 
-/* =========================================================
-   THEME HELPERS
-========================================================= */
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -88,9 +85,6 @@ const themeDangerSurface =
 const themeDangerBorder =
   "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
 
-/* =========================================================
-   KATEGORI
-========================================================= */
 
 const getKategoriIcon = (kategori = "") => {
   const nama = kategori.toLowerCase();
@@ -118,9 +112,6 @@ const getKategoriIcon = (kategori = "") => {
   return Wrench;
 };
 
-/* =========================================================
-   KATEGORI THEME
-========================================================= */
 
 const getKategoriTheme = (kategori = "") => {
   const nama = kategori.toLowerCase();
@@ -188,9 +179,6 @@ const getKategoriTheme = (kategori = "") => {
   };
 };
 
-/* =========================================================
-   PAGE
-========================================================= */
 
 export default function GuruSarprasPinjamPage() {
   const router = useRouter();
@@ -206,28 +194,55 @@ export default function GuruSarprasPinjamPage() {
   const [pencarian, setPencarian] = useState("");
   const [expandedId, setExpandedId] = useState(null);
 
-  /* =======================================================
-     LOAD ASET
-  ======================================================= */
 
-  const loadAset = useCallback(async (isRefresh = false) => {
+  const loadAset = useCallback(async () => {
+    const response = await getKetersediaanAset();
+
+    return Array.isArray(response?.data)
+      ? response.data
+      : Array.isArray(response)
+      ? response
+      : [];
+  }, []);
+
+  useEffect(() => {
+    let aktif = true;
+
+    loadAset()
+      .then((data) => {
+        if (!aktif) return;
+
+        setDaftarItem(data);
+        setError("");
+      })
+      .catch((err) => {
+        if (!aktif) return;
+
+        console.error("Gagal mengambil data aset:", err);
+
+        setError(
+          err?.message || "Gagal mengambil data sarana prasarana."
+        );
+
+        setDaftarItem([]);
+      })
+      .finally(() => {
+        if (aktif) setLoading(false);
+      });
+
+    return () => {
+      aktif = false;
+    };
+  }, [loadAset]);
+
+  const handleRefresh = async () => {
+    if (loading || refreshing) return;
+
+    setRefreshing(true);
+    setError("");
+
     try {
-      if (isRefresh) {
-        setRefreshing(true);
-      } else {
-        setLoading(true);
-      }
-
-      setError("");
-
-      const response = await getAset();
-
-      const data = Array.isArray(response?.data)
-        ? response.data
-        : Array.isArray(response)
-        ? response
-        : [];
-
+      const data = await loadAset();
       setDaftarItem(data);
     } catch (err) {
       console.error("Gagal mengambil data aset:", err);
@@ -238,20 +253,8 @@ export default function GuruSarprasPinjamPage() {
 
       setDaftarItem([]);
     } finally {
-      setLoading(false);
       setRefreshing(false);
     }
-  }, []);
-
-  /* LOAD PERTAMA */
-  useEffect(() => {
-    loadAset(false);
-  }, [loadAset]);
-
-  /* REFRESH */
-  const handleRefresh = () => {
-    if (loading || refreshing) return;
-    loadAset(true);
   };
 
   const notifications = [
@@ -263,9 +266,6 @@ export default function GuruSarprasPinjamPage() {
     },
   ];
 
-  /* =======================================================
-     KATEGORI
-  ======================================================= */
 
   const kategori = useMemo(() => {
     const kategoriBackend = daftarItem
@@ -277,9 +277,6 @@ export default function GuruSarprasPinjamPage() {
     return ["Semua", ...kategoriUnik];
   }, [daftarItem]);
 
-  /* =======================================================
-     FILTER
-  ======================================================= */
 
   const itemTersaring = useMemo(() => {
     return daftarItem.filter((item) => {
@@ -316,9 +313,6 @@ export default function GuruSarprasPinjamPage() {
     );
   };
 
-  /* =======================================================
-     NAVIGATE
-  ======================================================= */
 
   const bukaForm = (item) => {
     if (!item?.id) return;
@@ -328,9 +322,6 @@ export default function GuruSarprasPinjamPage() {
     );
   };
 
-  /* =========================================================
-     RENDER
-  ========================================================= */
 
   return (
     <div className="theme-page flex h-screen overflow-hidden">
@@ -358,7 +349,6 @@ export default function GuruSarprasPinjamPage() {
 
         <main className="theme-page relative flex-1 overflow-y-auto">
 
-          {/* BACKGROUND DECORATION */}
 
           <div
             aria-hidden="true"
@@ -383,9 +373,6 @@ export default function GuruSarprasPinjamPage() {
 
           <div className="relative mx-auto w-full max-w-[1700px] space-y-6 px-4 py-6 sm:px-6 lg:px-8 lg:py-8 2xl:max-w-[1900px]">
 
-            {/* =================================================
-                HEADER + REFRESH
-            ================================================= */}
 
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div className="flex min-w-0 items-start gap-4">
@@ -428,7 +415,6 @@ export default function GuruSarprasPinjamPage() {
                 </div>
               </div>
 
-              {/* REFRESH */}
 
               <button
                 type="button"
@@ -449,9 +435,6 @@ export default function GuruSarprasPinjamPage() {
               </button>
             </div>
 
-            {/* =================================================
-                SEARCH + KATEGORI
-            ================================================= */}
 
             <div
               className={`theme-card space-y-3 rounded-2xl border p-4 ${themeNeutralBorder} ${themeCardShadow}`}
@@ -517,9 +500,6 @@ export default function GuruSarprasPinjamPage() {
               </div>
             </div>
 
-            {/* =================================================
-                ERROR
-            ================================================= */}
 
             {error && (
               <div
@@ -543,9 +523,6 @@ export default function GuruSarprasPinjamPage() {
               </div>
             )}
 
-            {/* =================================================
-                LIST
-            ================================================= */}
 
             {loading ? (
               <div
@@ -600,7 +577,6 @@ export default function GuruSarprasPinjamPage() {
                     >
                       <div className="flex items-center gap-3 p-4 sm:p-5">
 
-                        {/* ICON */}
 
                         <div
                           className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl border ${categoryTheme.iconSurface} ${categoryTheme.iconBorder} ${categoryTheme.iconText}`}
@@ -608,7 +584,6 @@ export default function GuruSarprasPinjamPage() {
                           <Icon size={19} />
                         </div>
 
-                        {/* INFO */}
 
                         <div className="min-w-0 flex-1">
                           <div className="flex flex-wrap items-center gap-2">
@@ -637,11 +612,9 @@ export default function GuruSarprasPinjamPage() {
                           )}
                         </div>
 
-                        {/* ACTIONS */}
 
                         <div className="flex flex-shrink-0 items-center gap-2">
 
-                          {/* STATUS */}
 
                           <span
                             className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold ${
@@ -663,7 +636,6 @@ export default function GuruSarprasPinjamPage() {
                               : `Sisa ${sisa}/${total}`}
                           </span>
 
-                          {/* DETAIL */}
 
                           <button
                             type="button"
@@ -681,7 +653,6 @@ export default function GuruSarprasPinjamPage() {
                             )}
                           </button>
 
-                          {/* AJUKAN */}
 
                           <button
                             type="button"
@@ -700,7 +671,6 @@ export default function GuruSarprasPinjamPage() {
                         </div>
                       </div>
 
-                      {/* MOBILE DETAIL */}
 
                       <button
                         type="button"
@@ -718,7 +688,6 @@ export default function GuruSarprasPinjamPage() {
                         )}
                       </button>
 
-                      {/* EXPANDED */}
 
                       {expanded && (
                         <div
@@ -791,7 +760,6 @@ export default function GuruSarprasPinjamPage() {
                   );
                 })}
 
-                {/* EMPTY */}
 
                 {itemTersaring.length === 0 && (
                   <div
@@ -824,9 +792,6 @@ export default function GuruSarprasPinjamPage() {
   );
 }
 
-/* =========================================================
-   DETAIL ROW
-========================================================= */
 
 function DetailRow({
   label,

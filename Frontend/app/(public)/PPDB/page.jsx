@@ -13,22 +13,6 @@ import {
 } from "lucide-react";
 
 import PpdbNavbar from "@/app/components/ppdb/PpdbNavbar";
-/*
-|--------------------------------------------------------------------------
-| INFORMASI PPDB
-|--------------------------------------------------------------------------
-| Catatan:
-| - Halaman ini bersifat publik.
-| - Backend belum menyediakan GET daftar jalur PPDB untuk publik.
-| - Endpoint GET jalur PPDB yang tersedia membutuhkan autentikasi
-|   admin sekolah dan izin ppdb.view.
-| - Karena itu halaman ini TIDAK menampilkan daftar jalur milik sekolah
-|   dan TIDAK mengirim ID jalur buatan ke Backend.
-| - Konten jalur di bawah adalah penjelasan jenis jalur secara umum.
-| - Ketersediaan, kuota, dan jadwal jalur hanya dapat diketahui dari
-|   sekolah tujuan atau tautan pendaftaran resmi yang dibagikan sekolah.
-|--------------------------------------------------------------------------
-*/
 
 const jalurPendaftaran = [
   {
@@ -91,10 +75,6 @@ const persyaratan = [
   "Dokumen tambahan mengikuti ketentuan sekolah",
 ];
 
-/*
- * Pengumuman belum tersedia di Backend. Landing page tidak menampilkan
- * pengumuman contoh; bagian ini memakai empty state.
- */
 
 const colorMap = {
   blue: {
@@ -132,19 +112,12 @@ export default function PPDBLandingPage() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* ================================================================
-          NAVBAR COMPONENT
-      ================================================================ */}
 
       <PpdbNavbar />
 
-      {/* ================================================================
-          HERO
-      ================================================================ */}
 
       <section className="mx-auto max-w-6xl px-4 pb-8 pt-10 sm:px-6 sm:pt-14">
         <div className="grid grid-cols-1 items-stretch gap-6 lg:grid-cols-3">
-          {/* HERO CONTENT */}
 
           <div className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm sm:p-8 lg:col-span-2">
             <div className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-600">
@@ -192,7 +165,6 @@ export default function PPDBLandingPage() {
             </div>
           </div>
 
-          {/* PANDUAN SINGKAT */}
 
           <div className="flex flex-col justify-between rounded-2xl bg-blue-600 p-6 text-white shadow-sm sm:p-8">
             <div>
@@ -240,9 +212,6 @@ export default function PPDBLandingPage() {
         </div>
       </section>
 
-      {/* ================================================================
-          JALUR PENDAFTARAN
-      ================================================================ */}
 
       <section
         id="jalur"
@@ -321,16 +290,12 @@ export default function PPDBLandingPage() {
         </div>
       </section>
 
-      {/* ================================================================
-          ALUR + PERSYARATAN
-      ================================================================ */}
 
       <section
         id="alur"
         className="mx-auto max-w-6xl px-4 py-8 sm:px-6"
       >
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-          {/* ALUR */}
 
           <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm sm:p-6 lg:col-span-2">
             <div className="mb-5 flex items-center justify-between gap-2">
@@ -382,7 +347,6 @@ export default function PPDBLandingPage() {
             </div>
           </div>
 
-          {/* PERSYARATAN */}
 
           <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm sm:p-6">
             <h2 className="mb-4 text-base font-semibold text-slate-800 sm:text-lg">
@@ -408,9 +372,6 @@ export default function PPDBLandingPage() {
         </div>
       </section>
 
-      {/* ================================================================
-          PENGUMUMAN
-      ================================================================ */}
 
       <section
         id="pengumuman"
@@ -456,9 +417,6 @@ export default function PPDBLandingPage() {
         </div>
       </section>
 
-      {/* ================================================================
-          FOOTER
-      ================================================================ */}
 
       <footer className="mt-8 border-t border-slate-200/80 bg-white">
         <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-8 sm:flex-row sm:items-center sm:justify-between sm:px-6">

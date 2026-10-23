@@ -43,9 +43,6 @@ import { getKelasSayaDariAnggota } from "@/services/kelas.service";
 import { ajukanIzin } from "@/services/izin.service";
 import { apiFetch } from "../../../../lib/api";
 
-/* =========================================================
-   THEME COMPATIBILITY
-========================================================= */
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -109,9 +106,6 @@ const themeDangerBorder =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-/* =========================================================
-   STATUS CONSTANT
-========================================================= */
 
 const STATUS_LABEL = {
   hadir: "Hadir",
@@ -120,9 +114,6 @@ const STATUS_LABEL = {
   alpha: "Alpha",
 };
 
-/* =========================================================
-   HELPERS
-========================================================= */
 
 function getDateKey(date = new Date()) {
   const year = date.getFullYear();
@@ -220,7 +211,6 @@ function isVirtualCamera(device) {
   );
 }
 
-// Ubah dataURL (base64) dari canvas jadi Blob — ini KUNCI PERBAIKAN
 function dataUrlToBlob(dataUrl) {
   const parts = dataUrl.split(",");
   const meta = parts[0] || "";
@@ -234,9 +224,6 @@ function dataUrlToBlob(dataUrl) {
   return new Blob([buffer], { type: mime });
 }
 
-/* =========================================================
-   PAGE
-========================================================= */
 
 export default function SiswaAbsensiPage() {
   const videoRef = useRef(null);
@@ -265,7 +252,6 @@ export default function SiswaAbsensiPage() {
   const [cameras, setCameras] = useState([]);
   const [selectedCameraId, setSelectedCameraId] = useState("");
 
-  // Simpan blob + dataURL (untuk preview)
   const [capturedBlob, setCapturedBlob] = useState(null);
   const [capturedImage, setCapturedImage] = useState(null);
 
@@ -288,16 +274,12 @@ export default function SiswaAbsensiPage() {
   const today = new Date();
   const todayKey = mounted ? getDateKey(today) : "";
 
-  /* =======================================================
-     CEK METODE FACE AKTIF
-  ======================================================= */
   const loadMetodeAktif = useCallback(async () => {
     try {
       setLoadingMetode(true);
       const aktif = await getMetodeAbsensiAktif();
       setMetodeAktif(Array.isArray(aktif) ? aktif : []);
     } catch (err) {
-      // Kalau endpoint gagal, jangan block — biar backend yang menolak
       console.warn("Gagal cek metode absensi aktif:", err);
       setMetodeAktif([]);
     } finally {
@@ -310,9 +292,6 @@ export default function SiswaAbsensiPage() {
       ? true
       : metodeAktif.includes("face");
 
-  /* =======================================================
-     LOAD DATA
-  ======================================================= */
   const loadKelas = useCallback(async () => {
     try {
       const siswaResponse = await apiFetch("/api/siswa/me", { method: "GET" });
@@ -356,9 +335,6 @@ export default function SiswaAbsensiPage() {
     loadPage();
   }, [mounted, loadPage]);
 
-  /* =======================================================
-     CLEANUP CAMERA
-  ======================================================= */
   useEffect(() => {
     return () => {
       if (streamRef.current) {
@@ -367,9 +343,6 @@ export default function SiswaAbsensiPage() {
     };
   }, []);
 
-  /* =======================================================
-     ABSENSI HARI INI
-  ======================================================= */
   const todayAttendance = useMemo(() => {
     if (!mounted || !todayKey) return undefined;
     return absensi.find((item) => {
@@ -392,9 +365,6 @@ export default function SiswaAbsensiPage() {
       .slice(0, 20);
   }, [absensi]);
 
-  /* =======================================================
-     START CAMERA
-  ======================================================= */
   const startCamera = async (deviceId = "") => {
     try {
       setCameraLoading(true);
@@ -460,9 +430,6 @@ export default function SiswaAbsensiPage() {
     setCameraReady(false);
   };
 
-  /* =======================================================
-     GPS
-  ======================================================= */
   const getLocation = async () => {
     if (!navigator.geolocation) {
       throw new Error("Browser tidak mendukung GPS.");
@@ -504,9 +471,6 @@ export default function SiswaAbsensiPage() {
     }
   };
 
-  /* =======================================================
-     TAKE PHOTO — simpan BLOB, bukan cuma dataURL
-  ======================================================= */
   const takePhoto = () => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
@@ -545,9 +509,6 @@ export default function SiswaAbsensiPage() {
     );
   };
 
-  /* =======================================================
-     HANDLE ABSEN — pakai capturedBlob!
-  ======================================================= */
   const handleAbsen = async () => {
     try {
       setLoadingAbsen(true);
@@ -576,7 +537,6 @@ export default function SiswaAbsensiPage() {
         );
       }
 
-      // Pastikan GPS aktif
       const currentLocation = await getLocation();
 
       await absenDenganFace({
@@ -603,9 +563,6 @@ export default function SiswaAbsensiPage() {
     }
   };
 
-  /* =======================================================
-     AJUKAN IZIN
-  ======================================================= */
   const handleSubmitManual = async () => {
     if (!tanggalMulai) return setError("Tanggal mulai wajib diisi.");
     if (!tanggalSelesai) return setError("Tanggal selesai wajib diisi.");
@@ -647,9 +604,6 @@ export default function SiswaAbsensiPage() {
   const getStatusLabel = (status) =>
     STATUS_LABEL[String(status || "").toLowerCase()] || status || "-";
 
-  /* =======================================================
-     CAMERA LIST
-  ======================================================= */
   const loadCameras = useCallback(async () => {
     try {
       if (
@@ -731,9 +685,6 @@ export default function SiswaAbsensiPage() {
     );
   }, [location]);
 
-  /* =======================================================
-     STATISTIK
-  ======================================================= */
   const statistikAbsensi = useMemo(() => {
     const total = absensi.length;
     const hadir = absensi.filter(
@@ -752,9 +703,6 @@ export default function SiswaAbsensiPage() {
     return { total, hadir, izin, sakit, alpha, izinSakit: izin + sakit };
   }, [absensi]);
 
-  /* =======================================================
-     KALENDER
-  ======================================================= */
   const [currentMonth, setCurrentMonth] = useState(() => new Date());
   const calendarYear = currentMonth.getFullYear();
   const calendarMonth = currentMonth.getMonth();
@@ -782,13 +730,9 @@ export default function SiswaAbsensiPage() {
     ? getStatusLabel(todayAttendance?.status)
     : "Belum Absen";
 
-  /* =======================================================
-     RENDER
-  ======================================================= */
   return (
     <main className="min-w-0 flex-1 overflow-y-auto theme-page theme-text">
       <div className="w-full space-y-5 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
-        {/* HERO */}
         <section
           className={`overflow-hidden rounded-2xl ${themePrimaryGradient} ${themePrimaryShadow}`}
         >
@@ -843,7 +787,6 @@ export default function SiswaAbsensiPage() {
           </div>
         </section>
 
-        {/* STAT CARDS */}
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-6">
           {[
             { label: "Total", value: statistikAbsensi.total, icon: Layers3, tone: "primary" },
@@ -907,7 +850,6 @@ export default function SiswaAbsensiPage() {
           </div>
         </div>
 
-        {/* TABS */}
         <div
           className={`flex items-center justify-between border-b ${themeDivider}`}
         >
@@ -963,7 +905,6 @@ export default function SiswaAbsensiPage() {
           </button>
         </div>
 
-        {/* ALERTS */}
         {!faceAktif && !loadingMetode && (
           <div
             className={`flex items-start gap-3 rounded-xl border ${themeWarningBorder} ${themeWarningSurface} p-4`}
@@ -1029,7 +970,6 @@ export default function SiswaAbsensiPage() {
           </div>
         )}
 
-        {/* TAB ABSENSI */}
         {activeTab === "absensi" && (
           <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px] 2xl:grid-cols-[minmax(0,1fr)_380px]">
             <section
@@ -1062,7 +1002,6 @@ export default function SiswaAbsensiPage() {
               </div>
 
               <div className="p-5">
-                {/* DEVICE PICKER */}
                 <div className="mb-4">
                   <label className="mb-1.5 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest theme-text-muted">
                     <Video size={12} className={themePrimaryText} />
@@ -1096,7 +1035,6 @@ export default function SiswaAbsensiPage() {
                   </div>
                 </div>
 
-                {/* PREVIEW */}
                 {cameraOpen ? (
                   <div className="space-y-3">
                     <div className="relative overflow-hidden rounded-xl bg-[color-mix(in_srgb,var(--color-text)_92%,var(--color-card))]">
@@ -1165,7 +1103,6 @@ export default function SiswaAbsensiPage() {
                       </button>
                     </div>
 
-                    {/* LOCATION */}
                     <div
                       className={`flex items-start gap-3 rounded-lg border p-3 ${
                         locationStatus === "success"
@@ -1216,7 +1153,6 @@ export default function SiswaAbsensiPage() {
                       </div>
                     </div>
 
-                    {/* SUBMIT */}
                     <div className="flex flex-col gap-2 sm:flex-row">
                       <button
                         type="button"
@@ -1290,7 +1226,6 @@ export default function SiswaAbsensiPage() {
               </div>
             </section>
 
-            {/* SIDEBAR */}
             <aside className="space-y-4">
               <div
                 className={`theme-card rounded-2xl border ${themeNeutralBorder} p-4 ${themeCardShadow}`}
@@ -1343,7 +1278,6 @@ export default function SiswaAbsensiPage() {
                 </div>
               </div>
 
-              {/* KALENDER */}
               <div
                 className={`theme-card rounded-2xl border ${themeNeutralBorder} p-4 ${themeCardShadow}`}
               >
@@ -1427,7 +1361,6 @@ export default function SiswaAbsensiPage() {
                 </div>
               </div>
 
-              {/* IZIN FORM */}
               <div
                 className={`theme-card rounded-2xl border ${themeNeutralBorder} p-4 ${themeCardShadow}`}
               >
@@ -1537,7 +1470,6 @@ export default function SiswaAbsensiPage() {
           </div>
         )}
 
-        {/* TAB HISTORI */}
         {activeTab === "histori" && (
           <div
             className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}

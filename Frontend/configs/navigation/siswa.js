@@ -15,44 +15,6 @@ import {
   User,
 } from "lucide-react";
 
-/**
- * Konfigurasi Sidebar untuk role "siswa"
- *
- * Struktur halaman:
- *
- * /siswa
- * ├── page.jsx                      (Dashboard)
- * │
- * ├── materi
- * │   └── page.jsx
- * │
- * ├── tugas
- * │   └── page.jsx
- * │
- * ├── ujian
- * │   ├── page.jsx
- * │   └── [id]/page.jsx             (detail — bukan menu)
- * │
- * ├── absensi
- * │   └── page.jsx                  (tab: Absen Hari Ini, Histori, Ajukan Izin)
- * │
- * ├── rapor
- * │   └── page.jsx
- * │
- * ├── jadwal
- * │   └── page.jsx
- * │
- * └── perpustakaan
- *     ├── page.jsx                  (Katalog Buku)
- *     ├── buku-digital
- *     │   └── page.jsx
- *     ├── peminjaman
- *     │   └── page.jsx
- *     └── buku/[id]/page.jsx        (detail — bukan menu)
- *
- * Halaman [id] merupakan halaman detail,
- * bukan menu utama Sidebar.
- */
 
 export const siswaSidebarConfig = {
   role: "siswa",
@@ -60,9 +22,6 @@ export const siswaSidebarConfig = {
   brandName: "Portal Siswa",
 
   menuSections: [
-    // ============================================================
-    // DASHBOARD
-    // ============================================================
     {
       type: "item",
       key: "dashboard",
@@ -71,9 +30,6 @@ export const siswaSidebarConfig = {
       path: "/siswa",
     },
 
-    // ============================================================
-    // PROSES BELAJAR
-    // ============================================================
     {
       type: "header",
       key: "proses-belajar-header",
@@ -104,16 +60,12 @@ export const siswaSidebarConfig = {
       path: "/siswa/ujian",
     },
 
-    // ============================================================
-    // AKADEMIK
-    // ============================================================
     {
       type: "header",
       key: "akademik-header",
       label: "Akademik",
     },
 
-    // Absensi (tab: Absen Hari Ini, Histori, Ajukan Izin)
     {
       type: "item",
       key: "absensi",
@@ -122,7 +74,6 @@ export const siswaSidebarConfig = {
       path: "/siswa/absensi",
     },
 
-    // Raport
     {
       type: "item",
       key: "raport",
@@ -133,7 +84,6 @@ export const siswaSidebarConfig = {
 
    
 
-    // Jadwal
     {
       type: "item",
       key: "jadwal",
@@ -142,7 +92,6 @@ export const siswaSidebarConfig = {
       path: "/siswa/jadwal",
     },
 
-       // Konseling BK
     {
       type: "item",
       key: "konseling",
@@ -151,9 +100,6 @@ export const siswaSidebarConfig = {
       path: "/siswa/konseling",
     },
 
-    // ============================================================
-    // PERPUSTAKAAN
-    // ============================================================
     {
       type: "header",
       key: "perpustakaan-header",
@@ -194,9 +140,6 @@ export const siswaSidebarConfig = {
       ],
     },
 
-    // ============================================================
-    // AKUN
-    // ============================================================
     {
       type: "header",
       key: "akun-header",

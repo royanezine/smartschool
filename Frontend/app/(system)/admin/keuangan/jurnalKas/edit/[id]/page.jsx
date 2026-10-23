@@ -298,7 +298,6 @@ export default function EditJurnalKasPage() {
       setIsCollapsed={setIsCollapsed}
     >
       <div className="mx-auto max-w-[1100px]">
-        {/* BREADCRUMB */}
         <div className="mb-5 flex flex-wrap items-center gap-2 text-sm">
           <Link
             href="/admin/keuangan/jurnalKas"
@@ -323,7 +322,6 @@ export default function EditJurnalKasPage() {
           </span>
         </div>
 
-        {/* HEADER */}
         <div className="mb-6 flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-4">
             <div className="theme-primary flex h-12 w-12 items-center justify-center rounded-xl shadow-sm">
@@ -354,10 +352,8 @@ export default function EditJurnalKasPage() {
           </Link>
         </div>
 
-        {/* FORM */}
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_320px]">
-            {/* LEFT */}
             <div className="theme-card overflow-hidden rounded-2xl border shadow-sm">
               <div className="theme-border border-b px-6 py-5">
                 <div className="flex items-center gap-3">
@@ -378,7 +374,6 @@ export default function EditJurnalKasPage() {
               </div>
 
               <div className="space-y-6 p-6">
-                {/* TANGGAL */}
                 <FormField
                   label="Tanggal Transaksi"
                   required
@@ -403,7 +398,6 @@ export default function EditJurnalKasPage() {
                   </div>
                 </FormField>
 
-                {/* KETERANGAN */}
                 <FormField
                   label="Keterangan Transaksi"
                   required
@@ -423,7 +417,6 @@ export default function EditJurnalKasPage() {
                   />
                 </FormField>
 
-                {/* JENIS */}
                 <FormField
                   label="Jenis Transaksi"
                   required
@@ -449,7 +442,6 @@ export default function EditJurnalKasPage() {
                   </div>
                 </FormField>
 
-                {/* METODE */}
                 <FormField
                   label="Metode Pembayaran"
                   required
@@ -480,7 +472,6 @@ export default function EditJurnalKasPage() {
                   </div>
                 </FormField>
 
-                {/* NOMINAL */}
                 <FormField
                   label="Nominal Transaksi"
                   required
@@ -518,7 +509,6 @@ export default function EditJurnalKasPage() {
                   </div>
                 </FormField>
 
-                {/* CATATAN */}
                 <FormField
                   label="Catatan"
                   hint="Opsional. Tambahkan informasi pendukung transaksi."
@@ -539,9 +529,7 @@ export default function EditJurnalKasPage() {
               </div>
             </div>
 
-            {/* RIGHT */}
             <div className="space-y-5">
-              {/* PREVIEW */}
               <div className="theme-card overflow-hidden rounded-2xl border shadow-sm">
                 <div className="theme-border border-b px-5 py-4">
                   <h2 className="text-sm font-bold theme-text">
@@ -626,7 +614,6 @@ export default function EditJurnalKasPage() {
                 </div>
               </div>
 
-              {/* NOTICE */}
               <div className="theme-info rounded-2xl border p-5">
                 <div className="flex items-start gap-3">
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--color-info-background)]">
@@ -647,7 +634,6 @@ export default function EditJurnalKasPage() {
                 </div>
               </div>
 
-              {/* ACTION */}
               <div className="theme-card rounded-2xl border p-5 shadow-sm">
                 <button
                   type="submit"

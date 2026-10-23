@@ -30,9 +30,6 @@ import {
   Server,
 } from "lucide-react";
 
-// ============================================================
-// THEME HELPERS
-// ============================================================
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -91,9 +88,6 @@ const themeTextOnCard =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-// ============================================================
-// DUMMY DATA
-// ============================================================
 
 const statsData = [
   {
@@ -293,9 +287,6 @@ const quickActions = [
   },
 ];
 
-// ============================================================
-// HELPERS
-// ============================================================
 
 const getActivityIcon = (type) => {
   const map = {
@@ -362,9 +353,6 @@ const getPriority = (priority) => {
   return map[priority] || map.low;
 };
 
-// ============================================================
-// COMPONENT
-// ============================================================
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -382,9 +370,6 @@ export default function DashboardPage() {
       <div className="mx-auto w-full max-w-[1700px] px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
         <div className="space-y-5 lg:space-y-6">
 
-          {/* ==================================================
-              PAGE HEADER
-          ================================================== */}
 
           <section
             className={`flex flex-col gap-4 rounded-2xl border theme-border theme-card px-5 py-5 ${themeCardShadow} sm:px-6 lg:flex-row lg:items-center lg:justify-between`}
@@ -437,9 +422,6 @@ export default function DashboardPage() {
             </div>
           </section>
 
-          {/* ==================================================
-              STATISTICS
-          ================================================== */}
 
           <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             {statsData.map((stat) => {
@@ -502,13 +484,9 @@ export default function DashboardPage() {
             })}
           </section>
 
-          {/* ==================================================
-              OVERVIEW
-          ================================================== */}
 
           <section className="grid grid-cols-1 gap-4 xl:grid-cols-3">
 
-            {/* SCHOOL GROWTH */}
 
             <div
               className={`rounded-xl border theme-border theme-card p-5 ${themeCardShadow} xl:col-span-2`}
@@ -623,7 +601,6 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* SUBSCRIPTION */}
 
             <div
               className={`rounded-xl border theme-border theme-card p-5 ${themeCardShadow}`}
@@ -745,13 +722,9 @@ export default function DashboardPage() {
             </div>
           </section>
 
-          {/* ==================================================
-              REVENUE + SYSTEM
-          ================================================== */}
 
           <section className="grid grid-cols-1 gap-4 lg:grid-cols-3">
 
-            {/* REVENUE */}
 
             <div
               className={`rounded-xl border theme-border theme-card p-5 ${themeCardShadow} lg:col-span-2`}
@@ -855,7 +828,6 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* SYSTEM STATUS */}
 
             <div
               className={`overflow-hidden rounded-xl border theme-border theme-card p-5 ${themeCardShadow}`}
@@ -952,13 +924,9 @@ export default function DashboardPage() {
             </div>
           </section>
 
-          {/* ==================================================
-              ACTIVITIES + TASKS
-          ================================================== */}
 
           <section className="grid grid-cols-1 gap-4 lg:grid-cols-2">
 
-            {/* ACTIVITY */}
 
             <div
               className={`rounded-xl border theme-border theme-card p-5 ${themeCardShadow}`}
@@ -1059,11 +1027,9 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* RIGHT */}
 
             <div className="space-y-4">
 
-              {/* TASK */}
 
               <div
                 className={`rounded-xl border theme-border theme-card p-5 ${themeCardShadow}`}
@@ -1137,7 +1103,6 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              {/* NOTIFICATION */}
 
               <div
                 className={`rounded-xl border theme-border theme-card p-5 ${themeCardShadow}`}
@@ -1227,9 +1192,6 @@ export default function DashboardPage() {
             </div>
           </section>
 
-          {/* ==================================================
-              QUICK ACTION
-          ================================================== */}
 
           <section
             className={`rounded-xl border theme-border theme-card p-5 ${themeCardShadow}`}
@@ -1289,9 +1251,6 @@ export default function DashboardPage() {
             </div>
           </section>
 
-          {/* ==================================================
-              FOOTER
-          ================================================== */}
 
           <footer
             className={`flex flex-col items-center justify-between gap-2 border-t ${themeDivider} py-4 text-center sm:flex-row sm:text-left`}

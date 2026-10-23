@@ -15,9 +15,6 @@ const API_BASE = (() => {
   return `${base}/api`;
 })();
 
-/* =========================================================
-   TYPES
-========================================================= */
 
 export interface ExportRekapNilaiParams {
   kelasId?: string;
@@ -87,10 +84,6 @@ export interface InputNilaiBulkPayload {
   }>;
 }
 
-/* =========================================================
-   GURU - KELAS SAYA
-   GET /api/nilai/kelas-saya
-========================================================= */
 
 export async function getNilaiKelasSaya(): Promise<KelasMapelNilaiItem[]> {
   const result = await apiFetch("/api/nilai/kelas-saya", {
@@ -104,10 +97,6 @@ export async function getNilaiKelasSaya(): Promise<KelasMapelNilaiItem[]> {
       : [];
 }
 
-/* =========================================================
-   GURU - KOMPONEN NILAI
-   GET /api/nilai/komponen/:kelasMapelId
-========================================================= */
 
 export async function getKomponenNilai(
   kelasMapelId: string
@@ -126,10 +115,6 @@ export async function getKomponenNilai(
   return result?.data || result;
 }
 
-/* =========================================================
-   GURU - CREATE KOMPONEN NILAI
-   POST /api/nilai/komponen
-========================================================= */
 
 export async function createKomponenNilai(
   payload: CreateKomponenNilaiPayload
@@ -142,10 +127,6 @@ export async function createKomponenNilai(
   return result?.data || result;
 }
 
-/* =========================================================
-   GURU - GRID NILAI (INPUT)
-   GET /api/nilai/input/:kelasMapelId
-========================================================= */
 
 export async function getGridNilai(kelasMapelId: string): Promise<any> {
   if (!kelasMapelId) {
@@ -162,10 +143,6 @@ export async function getGridNilai(kelasMapelId: string): Promise<any> {
   return result?.data || result;
 }
 
-/* =========================================================
-   GURU - INPUT NILAI BULK
-   POST /api/nilai/input/bulk
-========================================================= */
 
 export async function inputNilaiBulk(
   payload: InputNilaiBulkPayload
@@ -178,10 +155,6 @@ export async function inputNilaiBulk(
   return result?.data || result;
 }
 
-/* =========================================================
-   GURU - FINALISASI NILAI
-   POST /api/nilai/finalisasi/:kelasMapelId
-========================================================= */
 
 export async function finalisasiNilai(kelasMapelId: string): Promise<any> {
   if (!kelasMapelId) {
@@ -198,10 +171,6 @@ export async function finalisasiNilai(kelasMapelId: string): Promise<any> {
   return result?.data || result;
 }
 
-/* =========================================================
-   GURU - TARIK SUMBER NILAI (TUGAS / ASESMEN)
-   POST /api/nilai/tarik-sumber
-========================================================= */
 
 export async function tarikSumberNilai(
   payload: TarikSumberNilaiPayload
@@ -214,9 +183,6 @@ export async function tarikSumberNilai(
   return result?.data || result;
 }
 
-/* =========================================================
-   EXPORT REKAP NILAI
-========================================================= */
 
 export async function exportRekapNilai(
   params: ExportRekapNilaiParams = {}
@@ -314,7 +280,6 @@ export async function exportRekapNilai(
         }
       }
     } catch {
-      // Gunakan message default
     }
 
     if (response.status === 401) {
@@ -353,9 +318,6 @@ export async function exportRekapNilai(
   return blob;
 }
 
-/* =========================================================
-   DOWNLOAD HELPER
-========================================================= */
 
 export function downloadRekapNilai(
   blob: Blob,

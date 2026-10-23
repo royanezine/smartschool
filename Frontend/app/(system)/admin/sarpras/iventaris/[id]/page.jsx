@@ -1,130 +1,46 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter, useParams } from "next/navigation";
-import Sidebar from "@/app/components/Sidebar";
-import Header from "@/app/components/Header";
+import { useCallback, useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
 import {
-  Package,
-  MapPin,
+  AlertCircle,
   ArrowLeft,
-  Pencil,
-  Trash2,
-  Tag,
   Boxes,
   Calendar,
   CheckCircle2,
-  AlertTriangle,
-  Clock,
+  Edit,
+  Layers,
+  Loader2,
+  MapPin,
+  Package,
+  RefreshCw,
+  Tag,
+  Trash2,
+  Warehouse,
 } from "lucide-react";
 
-// ============================================================
-// DUMMY DATA INVENTARIS
-// ============================================================
-const iventarisData = {
-  "inv-001": {
-    nama: "Kursi Kayu",
-    kategori: "Furnitur",
-    lokasi: "Gudang A",
-    stok: 120,
-    kondisi: "Baik",
-    dibuat: "10 Jan 2022",
-    deskripsi:
-      "Kursi kayu standar untuk ruang kelas, cukup kokoh dan mudah dirawat.",
-  },
-  "inv-002": {
-    nama: "Proyektor Epson",
-    kategori: "Elektronik",
-    lokasi: "Lab Komputer",
-    stok: 5,
-    kondisi: "Baik",
-    dibuat: "2 Mar 2023",
-    deskripsi:
-      "Proyektor Epson EB-X05, digunakan untuk presentasi dan pembelajaran di lab komputer.",
-  },
-  "inv-003": {
-    nama: "Meja Guru",
-    kategori: "Furnitur",
-    lokasi: "Ruang Guru",
-    stok: 30,
-    kondisi: "Rusak Ringan",
-    dibuat: "15 Jun 2021",
-    deskripsi:
-      "Meja kerja guru, beberapa unit mengalami keretakan pada permukaan.",
-  },
-  "inv-004": {
-    nama: "AC Split 1PK",
-    kategori: "Elektronik",
-    lokasi: "Ruang Kepala Sekolah",
-    stok: 8,
-    kondisi: "Baik",
-    dibuat: "20 Aug 2022",
-    deskripsi:
-      "AC split 1PK untuk ruangan kecil-menengah, kondisi terawat baik.",
-  },
-  "inv-005": {
-    nama: "Papan Tulis",
-    kategori: "Alat Belajar",
-    lokasi: "Gudang B",
-    stok: 15,
-    kondisi: "Rusak Berat",
-    dibuat: "5 Feb 2019",
-    deskripsi:
-      "Papan tulis whiteboard, sebagian besar permukaan sudah menguning dan sulit dihapus.",
-  },
-  "inv-006": {
-    nama: "Mikroskop",
-    kategori: "Laboratorium",
-    lokasi: "Lab IPA",
-    stok: 20,
-    kondisi: "Baik",
-    dibuat: "18 Sep 2021",
-    deskripsi:
-      "Mikroskop untuk praktikum biologi, lensa masih jernih dan berfungsi normal.",
-  },
-  "inv-007": {
-    nama: "Sound System",
-    kategori: "Elektronik",
-    lokasi: "Aula",
-    stok: 2,
-    kondisi: "Baik",
-    dibuat: "8 Nov 2022",
-    deskripsi:
-      "Sistem tata suara untuk acara di aula, mencakup speaker dan mixer.",
-  },
-  "inv-008": {
-    nama: "Lemari Arsip",
-    kategori: "Furnitur",
-    lokasi: "Ruang TU",
-    stok: 10,
-    kondisi: "Rusak Ringan",
-    dibuat: "12 Dec 2020",
-    deskripsi:
-      "Lemari penyimpanan arsip administrasi, engsel pintu beberapa unit sudah longgar.",
-  },
-};
+import Header from "@/app/components/Header";
+import Sidebar from "@/app/components/Sidebar";
 
-// ============================================================
-// GLOBAL THEME HELPERS
-// ============================================================
+import { deleteAset, getAsetById } from "@/services/sarpras.service";
+import {
+  formatDate,
+  formatKondisi,
+  formatNumber,
+  getStokStatus,
+  kondisiBadgeClass,
+} from "../_utils";
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
 
-const themePrimarySoft =
-  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
-
-const themePrimarySoftBorder =
-  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
-
 const themePrimaryShadow =
   "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
 
-const themeCardShadow =
-  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_6%,transparent)]";
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
 
-const themeSmallShadow =
-  "shadow-[0_2px_8px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+const themePrimaryText = "text-[var(--color-primary)]";
 
 const themeNeutralSurface =
   "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
@@ -138,398 +54,444 @@ const themeNeutralBorder =
 const themeDivider =
   "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
 
-const themeInfoSurface =
-  "bg-[color-mix(in_srgb,var(--color-info)_9%,transparent)]";
+const themeCardShadow =
+  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_6%,transparent)]";
 
-const themeInfoBorder =
-  "border-[color-mix(in_srgb,var(--color-info)_24%,transparent)]";
+function InfoRow({ icon: Icon, label, children }) {
+  return (
+    <div className="flex items-start gap-3">
+      <div
+        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${themeNeutralSurface} theme-text-muted`}
+      >
+        <Icon size={15} />
+      </div>
 
-const themeSuccessSurface =
-  "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
+      <div className="min-w-0">
+        <p className="text-[11px] theme-text-placeholder">{label}</p>
+        <div className="mt-0.5 text-sm font-medium theme-text">
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+}
 
-const themeSuccessBorder =
-  "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
-
-const themeWarningSurface =
-  "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]";
-
-const themeWarningBorder =
-  "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
-
-const themeDangerSurface =
-  "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
-
-const themeDangerBorder =
-  "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
-
-// ============================================================
-// KONDISI STYLE
-// ============================================================
-
-const kondisiStyle = {
-  Baik: `${themeSuccessSurface} ${themeSuccessBorder} text-[var(--color-success)]`,
-  "Rusak Ringan": `${themeWarningSurface} ${themeWarningBorder} text-[var(--color-warning)]`,
-  "Rusak Berat": `${themeDangerSurface} ${themeDangerBorder} theme-danger`,
-};
-
-// ============================================================
-// RIWAYAT BARANG
-// ============================================================
-
-const riwayatBarang = [
-  {
-    id: 1,
-    title: "Pemeriksaan stok rutin",
-    desc: "Diperiksa oleh Admin Sarpras • 2 bulan lalu",
-    status: "done",
-  },
-  {
-    id: 2,
-    title: "5 unit dipinjam oleh Pak Budi",
-    desc: "Ruang Lab Komputer • 3 bulan lalu",
-    status: "pending",
-  },
-  {
-    id: 3,
-    title: "Laporan kondisi diperbarui",
-    desc: "Ditindaklanjuti oleh Admin Sarpras • 4 bulan lalu",
-    status: "warning",
-  },
-];
-
-// ============================================================
-// STATUS ICON
-// ============================================================
-
-const statusIcon = {
-  pending: {
-    icon: Clock,
-    tone: `${themeWarningSurface} text-[var(--color-warning)]`,
-  },
-  done: {
-    icon: CheckCircle2,
-    tone: `${themeSuccessSurface} text-[var(--color-success)]`,
-  },
-  warning: {
-    icon: AlertTriangle,
-    tone: `${themeDangerSurface} theme-danger`,
-  },
-};
-
-// ============================================================
-// COMPONENT
-// ============================================================
-
-export default function IventarisDetailPage() {
+export default function InventarisDetailPage() {
   const router = useRouter();
   const params = useParams();
 
+  const id = Array.isArray(params?.id) ? params.id[0] : params?.id;
+
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [aset, setAset] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [deleting, setDeleting] = useState(false);
 
-  const id = params?.id;
-  const item = iventarisData[id];
+  const loadData = useCallback(async () => {
+    if (!id) {
+      setError("ID inventaris tidak ditemukan pada URL.");
+      setLoading(false);
+      return;
+    }
 
-  const notifications = [
-    {
-      id: 1,
-      title: "Stok papan tulis menipis",
-      desc: "Dikirim 3 jam lalu",
-      read: false,
-    },
-  ];
+    setLoading(true);
+    setError("");
 
-  // ============================================================
-  // DATA TIDAK DITEMUKAN
-  // ============================================================
+    try {
+      const response = await getAsetById(id);
+      setAset(response?.data || response);
+    } catch (err) {
+      setAset(null);
+      setError(
+        err?.message || "Gagal memuat detail inventaris dari server."
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, [id]);
 
-  if (!item) {
-    return (
-      <div className="theme-page flex min-h-screen">
-        <Sidebar
-          role="adminSarpras"
-          active="iventaris"
-          setActive={() => {}}
-          collapsed={!sidebarOpen}
-          setCollapsed={() => setSidebarOpen(!sidebarOpen)}
-        />
+  useEffect(() => {
+    Promise.resolve().then(() => {
+      loadData();
+    });
+  }, [loadData]);
 
-        <div className="flex min-w-0 flex-1 flex-col">
-          <Header
-            toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
-            notifications={notifications}
-            user={{
-              name: "Admin Sarpras",
-              email: "adminsarpras@smartschool.com",
-              avatar: "SP",
-            }}
-          />
+  async function handleDelete() {
+    if (!aset) return;
 
-          <main className="flex flex-1 items-center justify-center p-6">
-            <div className="text-center">
-              <p className="theme-text-secondary text-sm">
-                Barang dengan id "{id}" tidak ditemukan.
-              </p>
+    if (
+      typeof window !== "undefined" &&
+      !window.confirm(
+        `Hapus inventaris "${aset.nama}" (${aset.kode})? Data akan dinonaktifkan.`
+      )
+    ) {
+      return;
+    }
 
-              <button
-                onClick={() =>
-                  router.push("/adminSarpras/iventaris")
-                }
-                className="theme-primary mt-3 inline-flex items-center gap-1.5 text-sm font-medium transition-colors hover:text-[var(--color-primary)]"
-              >
-                <ArrowLeft size={14} />
-                Kembali ke daftar inventaris
-              </button>
-            </div>
-          </main>
-        </div>
-      </div>
-    );
+    try {
+      setDeleting(true);
+      setError("");
+
+      await deleteAset(aset.id);
+
+      router.push("/admin/sarpras/iventaris");
+      router.refresh();
+    } catch (err) {
+      setError(err?.message || "Gagal menghapus data inventaris.");
+      setDeleting(false);
+    }
   }
 
-  // ============================================================
-  // MAIN PAGE
-  // ============================================================
+  const stok = aset ? getStokStatus(aset) : null;
+  const statusAktif =
+    String(aset?.status || "aktif").toLowerCase() === "aktif";
 
   return (
     <div className="theme-page flex min-h-screen">
       <Sidebar
-        role="adminSarpras"
-        active="iventaris"
+        active="sarpras"
         setActive={() => {}}
         collapsed={!sidebarOpen}
-        setCollapsed={() => setSidebarOpen(!sidebarOpen)}
+        setCollapsed={() => setSidebarOpen((value) => !value)}
+        role="admin"
       />
 
       <div className="flex min-w-0 flex-1 flex-col">
         <Header
-          toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
-          notifications={notifications}
+          toggleSidebar={() => setSidebarOpen((value) => !value)}
+          notifications={[]}
           user={{
-            name: "Admin Sarpras",
-            email: "adminsarpras@smartschool.com",
-            avatar: "SP",
+            name: "Admin Sekolah",
+            email: "admin@smartschool.com",
+            avatar: "AD",
           }}
         />
 
         <main className="flex-1 p-4 sm:p-6 lg:p-8">
-          <div className="w-full space-y-6">
-
-            {/* ==================================================
-                BACK + PAGE HEADER
-            ================================================== */}
-
-            <div>
-              <button
-                onClick={() =>
-                  router.push("/adminSarpras/iventaris")
-                }
-                className="theme-text-muted mb-3 inline-flex items-center gap-1.5 text-xs font-medium transition-colors hover:text-[var(--color-primary)]"
-              >
-                <ArrowLeft size={14} />
-                Kembali ke Inventaris
-              </button>
-
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                <div className="min-w-0">
-                  <p className="theme-primary text-xs font-medium uppercase tracking-wide">
-                    Detail Inventaris
-                  </p>
-
-                  <h1 className="theme-text mt-1 truncate text-2xl font-bold tracking-tight sm:text-[28px]">
-                    {item.nama}
-                  </h1>
-
-                  <div className="theme-text-secondary mt-1.5 flex items-center gap-1.5 text-sm">
-                    <MapPin
-                      size={14}
-                      className="flex-shrink-0"
-                    />
-                    <span>{item.lokasi}</span>
-                  </div>
-                </div>
-
-                <div className="flex flex-shrink-0 items-center gap-2">
-                  {/* EDIT */}
-                  <button
-                    className={`theme-card ${themeNeutralBorder} ${themeNeutralHover} hover:text-[var(--color-primary)] inline-flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-medium transition-colors`}
-                  >
-                    <Pencil size={15} />
-                    Edit
-                  </button>
-
-                  {/* HAPUS */}
-                  <button
-                    className={`theme-card ${themeDangerBorder} ${themeDangerSurface} inline-flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-medium transition-colors theme-danger hover:text-[var(--color-text)]`}
-                  >
-                    <Trash2 size={15} />
-                    Hapus
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* ==================================================
-                INFO CARD
-            ================================================== */}
-
-            <div
-              className={`theme-card ${themeDivider} ${themeCardShadow} overflow-hidden rounded-2xl border`}
+          <div className="mx-auto w-full max-w-6xl space-y-5">
+            <button
+              type="button"
+              onClick={() => router.push("/admin/sarpras/iventaris")}
+              className="theme-text-muted inline-flex items-center gap-1.5 text-xs font-medium transition-colors hover:text-[var(--color-primary)]"
             >
-              {/* IMAGE / ICON AREA */}
+              <ArrowLeft size={14} />
+              Kembali ke Inventaris
+            </button>
+
+            {error && (
               <div
-                className={`flex h-40 items-center justify-center sm:h-52 ${themePrimarySoft}`}
+                role="alert"
+                className="flex flex-col gap-3 rounded-xl border border-[color-mix(in_srgb,var(--color-danger)_24%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_9%,transparent)] px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
               >
-                <div
-                  className={`flex h-20 w-20 items-center justify-center rounded-2xl ${themePrimaryGradient} ${themePrimaryShadow}`}
-                >
-                  <Package
-                    size={42}
-                    className="text-[var(--color-card)]"
+                <div className="flex items-start gap-3">
+                  <AlertCircle
+                    size={18}
+                    className="mt-0.5 shrink-0 text-[var(--color-danger)]"
                   />
+                  <div>
+                    <p className="text-sm font-semibold text-[var(--color-danger)]">
+                      Gagal memuat detail inventaris
+                    </p>
+                    <p className="mt-0.5 text-xs theme-text-secondary">
+                      {error}
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={loadData}
+                  disabled={loading}
+                  className={`inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border ${themeNeutralBorder} theme-card px-3 py-1.5 text-xs font-semibold theme-text-secondary ${themeNeutralHover} disabled:cursor-not-allowed disabled:opacity-60`}
+                >
+                  <RefreshCw
+                    size={13}
+                    className={loading ? "animate-spin" : ""}
+                  />
+                  Coba lagi
+                </button>
+              </div>
+            )}
+
+            {loading ? (
+              <div
+                className={`theme-card ${themeNeutralBorder} flex min-h-[420px] items-center justify-center rounded-2xl border ${themeCardShadow}`}
+              >
+                <div className="text-center">
+                  <Loader2
+                    size={30}
+                    className={`mx-auto animate-spin ${themePrimaryText}`}
+                  />
+                  <p className="mt-3 text-xs font-medium theme-text-muted">
+                    Memuat detail inventaris...
+                  </p>
                 </div>
               </div>
-
-              {/* CONTENT */}
-              <div className="space-y-5 p-5">
-                <p className="theme-text-secondary text-sm leading-relaxed">
-                  {item.deskripsi}
-                </p>
-
-                <div className="grid grid-cols-2 gap-4 pt-1 sm:grid-cols-4">
-
-                  {/* KATEGORI */}
-                  <div className="flex items-start gap-2.5">
-                    <div
-                      className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg ${themeNeutralSurface} theme-text-muted`}
-                    >
-                      <Tag size={15} />
-                    </div>
-
-                    <div className="min-w-0">
-                      <p className="theme-text-placeholder text-[11px]">
-                        Kategori
-                      </p>
-
-                      <p className="theme-text mt-0.5 truncate text-sm font-medium">
-                        {item.kategori}
-                      </p>
-                    </div>
+            ) : !aset ? (
+              <div
+                className={`theme-card ${themeNeutralBorder} flex min-h-[360px] items-center justify-center rounded-2xl border px-6 ${themeCardShadow}`}
+              >
+                <div className="max-w-md text-center">
+                  <div
+                    className={`mx-auto flex h-14 w-14 items-center justify-center rounded-2xl ${themeNeutralSurface} theme-text-muted`}
+                  >
+                    <Package size={26} />
                   </div>
+                  <h1 className="mt-4 text-sm font-bold theme-text">
+                    Data inventaris tidak ditemukan
+                  </h1>
+                  <p className="mt-1 text-xs theme-text-muted">
+                    Barang mungkin sudah dihapus atau tidak tersedia untuk
+                    sekolah Anda.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => router.push("/admin/sarpras/iventaris")}
+                    className={`mt-4 inline-flex items-center gap-2 rounded-xl border ${themeNeutralBorder} px-4 py-2 text-xs font-semibold theme-text-secondary ${themeNeutralHover}`}
+                  >
+                    <ArrowLeft size={13} />
+                    Kembali ke daftar
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="min-w-0">
+                    <p className="text-xs font-medium uppercase tracking-wide theme-primary">
+                      Detail Inventaris
+                    </p>
 
-                  {/* STOK */}
-                  <div className="flex items-start gap-2.5">
-                    <div
-                      className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg ${themeNeutralSurface} theme-text-muted`}
-                    >
-                      <Boxes size={15} />
-                    </div>
+                    <h1 className="mt-1 truncate text-xl font-bold tracking-tight theme-text sm:text-2xl lg:text-[28px]">
+                      {aset.nama}
+                    </h1>
 
-                    <div className="min-w-0">
-                      <p className="theme-text-placeholder text-[11px]">
-                        Stok
-                      </p>
-
-                      <p className="theme-text mt-0.5 truncate text-sm font-medium">
-                        {item.stok} unit
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* TERDAFTAR */}
-                  <div className="flex items-start gap-2.5">
-                    <div
-                      className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg ${themeNeutralSurface} theme-text-muted`}
-                    >
-                      <Calendar size={15} />
-                    </div>
-
-                    <div className="min-w-0">
-                      <p className="theme-text-placeholder text-[11px]">
-                        Terdaftar
-                      </p>
-
-                      <p className="theme-text mt-0.5 truncate text-sm font-medium">
-                        {item.dibuat}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* KONDISI */}
-                  <div className="flex items-start gap-2.5">
-                    <div
-                      className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg ${themeNeutralSurface} theme-text-muted`}
-                    >
-                      <CheckCircle2 size={15} />
-                    </div>
-
-                    <div className="min-w-0">
-                      <p className="theme-text-placeholder text-[11px]">
-                        Kondisi
-                      </p>
-
-                      <span
-                        className={`mt-0.5 inline-block rounded-full border px-2 py-0.5 text-[11px] font-medium ${kondisiStyle[item.kondisi]}`}
-                      >
-                        {item.kondisi}
+                    <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm theme-text-secondary">
+                      <span className="inline-flex items-center gap-1.5">
+                        <Package size={14} className="shrink-0" />
+                        {aset.kode}
+                      </span>
+                      <span className="inline-flex items-center gap-1.5">
+                        <MapPin size={14} className="shrink-0" />
+                        {aset.lokasi || aset.gudang?.lokasi || "-"}
                       </span>
                     </div>
                   </div>
-                </div>
-              </div>
-            </div>
 
-            {/* ==================================================
-                RIWAYAT BARANG
-            ================================================== */}
-
-            <div
-              className={`theme-card ${themeDivider} ${themeCardShadow} overflow-hidden rounded-2xl border`}
-            >
-              {/* HEADER */}
-              <div className={`border-b ${themeDivider} px-5 py-4`}>
-                <h3 className="theme-text text-sm font-semibold">
-                  Riwayat Barang
-                </h3>
-
-                <p className="theme-text-muted mt-0.5 text-xs">
-                  Aktivitas pemeriksaan & peminjaman barang ini
-                </p>
-              </div>
-
-              {/* LIST */}
-              <div>
-                {riwayatBarang.map((r) => {
-                  const s = statusIcon[r.status];
-                  const StatusIcon = s.icon;
-
-                  return (
-                    <div
-                      key={r.id}
-                      className={`flex items-center gap-3.5 border-b ${themeDivider} px-5 py-3.5 last:border-b-0`}
+                  <div className="flex shrink-0 flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        router.push(
+                          `/admin/sarpras/iventaris/${encodeURIComponent(
+                            aset.id
+                          )}/edit`
+                        )
+                      }
+                      className={`theme-card ${themeNeutralBorder} ${themeNeutralHover} inline-flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-medium theme-text-secondary transition-colors hover:text-[var(--color-primary)]`}
                     >
-                      {/* STATUS ICON */}
+                      <Edit size={15} />
+                      Edit
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleDelete}
+                      disabled={deleting}
+                      className="inline-flex items-center gap-2 rounded-xl border border-[color-mix(in_srgb,var(--color-danger)_24%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_9%,transparent)] px-4 py-2.5 text-sm font-medium text-[var(--color-danger)] transition-colors hover:bg-[color-mix(in_srgb,var(--color-danger)_14%,transparent)] disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {deleting ? (
+                        <Loader2 size={15} className="animate-spin" />
+                      ) : (
+                        <Trash2 size={15} />
+                      )}
+                      {deleting ? "Menghapus..." : "Hapus"}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+                  <div className="space-y-4 lg:col-span-2">
+                    <div
+                      className={`theme-card ${themeNeutralBorder} overflow-hidden rounded-2xl border ${themeCardShadow}`}
+                    >
                       <div
-                        className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg ${s.tone}`}
+                        className={`flex items-center gap-3 border-b ${themeDivider} px-5 py-4`}
                       >
-                        <StatusIcon size={16} />
+                        <div
+                          className={`flex h-9 w-9 items-center justify-center rounded-lg ${themePrimarySoft} ${themePrimaryText}`}
+                        >
+                          <Package size={17} />
+                        </div>
+                        <div>
+                          <h2 className="text-sm font-semibold theme-text">
+                            Informasi Barang
+                          </h2>
+                          <p className="text-xs theme-text-muted">
+                            Data inventaris yang tersimpan di server
+                          </p>
+                        </div>
                       </div>
 
-                      {/* CONTENT */}
-                      <div className="min-w-0 flex-1">
-                        <p className="theme-text truncate text-sm font-medium">
-                          {r.title}
-                        </p>
+                      <div className="grid grid-cols-1 gap-5 p-5 sm:grid-cols-2">
+                        <InfoRow icon={Tag} label="Kategori">
+                          {aset.kategoriAset?.nama || "-"}
+                        </InfoRow>
 
-                        <p className="theme-text-secondary mt-0.5 truncate text-xs">
-                          {r.desc}
-                        </p>
+                        <InfoRow icon={Warehouse} label="Gudang">
+                          {aset.gudang?.nama || "-"}
+                        </InfoRow>
+
+                        <InfoRow icon={MapPin} label="Lokasi Fisik">
+                          {aset.lokasi || aset.gudang?.lokasi || "-"}
+                        </InfoRow>
+
+                        <InfoRow icon={Layers} label="Kondisi">
+                          <span
+                            className={`inline-flex rounded-full border px-2.5 py-1 text-[11px] font-semibold ${kondisiBadgeClass(
+                              aset.kondisi
+                            )}`}
+                          >
+                            {formatKondisi(aset.kondisi)}
+                          </span>
+                        </InfoRow>
+
+                        <InfoRow icon={CheckCircle2} label="Status Aset">
+                          <span
+                            className={`inline-flex rounded-full border px-2.5 py-1 text-[11px] font-semibold ${
+                              statusAktif
+                                ? "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)] bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)] text-[var(--color-success)]"
+                                : "border-[color-mix(in_srgb,var(--color-text)_16%,transparent)] bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)] theme-text-secondary"
+                            }`}
+                          >
+                            {statusAktif ? "Aktif" : "Nonaktif"}
+                          </span>
+                        </InfoRow>
+
+                        <InfoRow icon={Calendar} label="Terdaftar">
+                          {formatDate(
+                            aset.dibuatPada || aset.createdAt
+                          )}
+                        </InfoRow>
                       </div>
                     </div>
-                  );
-                })}
-              </div>
-            </div>
 
+                    <div
+                      className={`theme-card ${themeNeutralBorder} rounded-2xl border p-5 ${themeCardShadow}`}
+                    >
+                      <h2 className="text-sm font-semibold theme-text">
+                        Catatan
+                      </h2>
+
+                      <p className="mt-2 text-sm theme-text-secondary">
+                        {aset.catatan?.trim()
+                          ? aset.catatan
+                          : "Belum ada catatan tersimpan untuk barang ini."}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div
+                      className={`theme-card ${themeNeutralBorder} rounded-2xl border p-5 ${themeCardShadow}`}
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <h2 className="text-sm font-semibold theme-text">
+                          Stok
+                        </h2>
+                        <span
+                          className={`inline-flex rounded-full border px-2.5 py-1 text-[11px] font-semibold ${stok.className}`}
+                        >
+                          {stok.label}
+                        </span>
+                      </div>
+
+                      <p className="mt-4 text-3xl font-bold theme-text">
+                        {formatNumber(aset.jumlahStok)}{" "}
+                        <span className="text-sm font-medium theme-text-muted">
+                          tersedia
+                        </span>
+                      </p>
+
+                      <div className="mt-4 space-y-2.5">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="theme-text-secondary">
+                            Jumlah unit
+                          </span>
+                          <span className="font-semibold theme-text">
+                            {formatNumber(aset.jumlah)}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="theme-text-secondary">
+                            Stok minimum
+                          </span>
+                          <span className="font-semibold theme-text">
+                            {formatNumber(aset.stokMinimum)}
+                          </span>
+                        </div>
+                        <div
+                          className={`h-2 overflow-hidden rounded-full ${themeNeutralSurface}`}
+                        >
+                          <div
+                            className={`h-full rounded-full ${themePrimaryGradient}`}
+                            style={{
+                              width: `${
+                                Number(aset.jumlah) > 0
+                                  ? Math.min(
+                                      100,
+                                      (Number(aset.jumlahStok) /
+                                        Number(aset.jumlah)) *
+                                        100
+                                    )
+                                  : 0
+                              }%`,
+                            }}
+                          />
+                        </div>
+                      </div>
+
+                      <p className="mt-4 text-[11px] theme-text-muted">
+                        Stok diperbarui melalui proses peminjaman dan
+                        pengembalian sarpras.
+                      </p>
+                    </div>
+
+                    <div
+                      className={`theme-card ${themeNeutralBorder} rounded-2xl border p-5 ${themeCardShadow}`}
+                    >
+                      <h2 className="text-sm font-semibold theme-text">
+                        Riwayat Data
+                      </h2>
+
+                      <div className="mt-3 space-y-3">
+                        <div>
+                          <p className="text-[11px] theme-text-placeholder">
+                            Terakhir diperbarui
+                          </p>
+                          <p className="mt-0.5 text-sm font-medium theme-text">
+                            {formatDate(
+                              aset.diperbaruiPada ||
+                                aset.updatedAt ||
+                                aset.dibuatPada
+                            )}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-[11px] theme-text-placeholder">
+                            ID Aset
+                          </p>
+                          <p className="mt-0.5 break-all text-xs theme-text-secondary">
+                            {aset.id}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </main>
       </div>

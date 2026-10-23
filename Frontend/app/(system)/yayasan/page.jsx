@@ -21,9 +21,6 @@ import {
   Bell,
 } from "lucide-react";
 
-// ============================================================
-// THEME HELPERS
-// ============================================================
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -82,9 +79,6 @@ const themeDangerSurface =
 const themeDangerBorder =
   "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
 
-// ============================================================
-// QUICK MENU
-// ============================================================
 
 const quickMenu = [
   {
@@ -145,9 +139,6 @@ const quickMenu = [
   },
 ];
 
-// ============================================================
-// UNIT LIST
-// ============================================================
 
 const unitList = [
   {
@@ -200,9 +191,6 @@ const unitList = [
   },
 ];
 
-// ============================================================
-// THEME COLOR MAP
-// ============================================================
 
 const colorMap = {
   primary: {
@@ -261,9 +249,6 @@ const colorMap = {
   },
 };
 
-// ============================================================
-// TREND ICON
-// ============================================================
 
 function TrendIcon({ trend }) {
   if (trend === "up") {
@@ -292,9 +277,6 @@ function TrendIcon({ trend }) {
   );
 }
 
-// ============================================================
-// MAIN COMPONENT
-// ============================================================
 
 export default function YayasanDashboardPage() {
   const router = useRouter();
@@ -303,9 +285,6 @@ export default function YayasanDashboardPage() {
   const [loadingSummary, setLoadingSummary] = useState(true);
   const [summaryError, setSummaryError] = useState(null);
 
-  // ============================================================
-  // FETCH SUMMARY
-  // ============================================================
 
   useEffect(() => {
     let mounted = true;
@@ -342,9 +321,6 @@ export default function YayasanDashboardPage() {
     };
   }, []);
 
-  // ============================================================
-  // KPI STRIP
-  // ============================================================
 
   const kpiStrip = [
     {
@@ -377,9 +353,6 @@ export default function YayasanDashboardPage() {
     },
   ];
 
-  // ============================================================
-  // NOTIFICATIONS
-  // ============================================================
 
   const notifications = [
     {
@@ -396,17 +369,11 @@ export default function YayasanDashboardPage() {
     },
   ];
 
-  // ============================================================
-  // RENDER
-  // ============================================================
 
   return (
     <div className="theme-page theme-text min-h-full">
       <div className="w-full max-w-[1800px] mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
         <div className="space-y-6">
-          {/* ==================================================
-              PAGE HEADER
-          ================================================== */}
 
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div className="min-w-0">
@@ -436,9 +403,6 @@ export default function YayasanDashboardPage() {
             </div>
           </div>
 
-          {/* ==================================================
-              ERROR SUMMARY
-          ================================================== */}
 
           {summaryError && (
             <div
@@ -464,9 +428,6 @@ export default function YayasanDashboardPage() {
             </div>
           )}
 
-          {/* ==================================================
-              KPI STRIP
-          ================================================== */}
 
           <div
             className={`theme-card rounded-2xl border theme-border ${themeCardShadow} divide-y divide-[color-mix(in_srgb,var(--color-text)_8%,transparent)] sm:divide-y-0 sm:divide-x sm:divide-[color-mix(in_srgb,var(--color-text)_8%,transparent)] grid grid-cols-2 sm:grid-cols-4 overflow-hidden`}
@@ -510,18 +471,12 @@ export default function YayasanDashboardPage() {
             })}
           </div>
 
-          {/* ==================================================
-              QUICK MENU
-          ================================================== */}
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 auto-rows-min">
             {quickMenu.map((item) => {
               const Icon = item.icon;
               const c = colorMap[item.color];
 
-              // =================================================
-              // FEATURED CARD
-              // =================================================
 
               if (item.featured) {
                 return (
@@ -567,9 +522,6 @@ export default function YayasanDashboardPage() {
                 );
               }
 
-              // =================================================
-              // NORMAL CARD
-              // =================================================
 
               return (
                 <button
@@ -607,14 +559,8 @@ export default function YayasanDashboardPage() {
             })}
           </div>
 
-          {/* ==================================================
-              UNIT OVERVIEW + NOTIFICATIONS
-          ================================================== */}
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* =================================================
-                UNIT OVERVIEW
-            ================================================= */}
 
             <div
               className={`lg:col-span-2 theme-card rounded-2xl border theme-border ${themeCardShadow} overflow-hidden`}
@@ -679,9 +625,6 @@ export default function YayasanDashboardPage() {
               </div>
             </div>
 
-            {/* =================================================
-                NOTIFICATIONS
-            ================================================= */}
 
             <div
               className={`theme-card rounded-2xl border theme-border ${themeCardShadow} overflow-hidden`}

@@ -30,9 +30,6 @@ import {
   deleteGedung,
 } from "@/services/infrastruktur.service";
 
-/* =========================================================
-   GLOBAL THEME HELPERS
-========================================================= */
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -103,9 +100,6 @@ const themeDangerBorder =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-4 focus:ring-[color-mix(in_srgb,var(--color-primary)_12%,transparent)]";
 
-/* =========================================================
-   STAT CARD
-========================================================= */
 
 function StatCard({
   icon: Icon,
@@ -146,9 +140,6 @@ function StatCard({
   );
 }
 
-/* =========================================================
-   IMAGE COMPONENT
-========================================================= */
 
 function GedungImage({ src, nama }) {
   const [imageError, setImageError] = useState(false);
@@ -192,9 +183,6 @@ function GedungImage({ src, nama }) {
   );
 }
 
-/* =========================================================
-   MAIN PAGE
-========================================================= */
 
 export default function SarprasGedungPage() {
   const router = useRouter();
@@ -217,9 +205,6 @@ export default function SarprasGedungPage() {
 
   const [showExport, setShowExport] = useState(false);
 
-  /* =========================================================
-     FETCH DATA
-  ========================================================= */
 
   const fetchGedung = useCallback(async () => {
     try {
@@ -266,17 +251,11 @@ export default function SarprasGedungPage() {
     fetchGedung();
   }, [fetchGedung]);
 
-  /* =========================================================
-     REFRESH
-  ========================================================= */
 
   const handleRefresh = () => {
     fetchGedung();
   };
 
-  /* =========================================================
-     NAVIGATION
-  ========================================================= */
 
   const handleAdd = () => {
     router.push("/admin/sarpras/gedung/tambah");
@@ -290,9 +269,6 @@ export default function SarprasGedungPage() {
     router.push(`/admin/sarpras/gedung/detail/${id}`);
   };
 
-  /* =========================================================
-     DELETE
-  ========================================================= */
 
   const handleDelete = async (id, nama) => {
     const confirmed = window.confirm(
@@ -317,9 +293,6 @@ export default function SarprasGedungPage() {
     }
   };
 
-  /* =========================================================
-     SEARCH
-  ========================================================= */
 
   const filteredData = useMemo(() => {
     const keyword = search.trim().toLowerCase();
@@ -342,9 +315,6 @@ export default function SarprasGedungPage() {
     });
   }, [data, search]);
 
-  /* =========================================================
-     SORT
-  ========================================================= */
 
   const sortedData = useMemo(() => {
     const result = [...filteredData];
@@ -405,9 +375,6 @@ export default function SarprasGedungPage() {
     return result;
   }, [filteredData, sortBy]);
 
-  /* =========================================================
-     PAGINATION
-  ========================================================= */
 
   const totalItems = sortedData.length;
 
@@ -481,9 +448,6 @@ export default function SarprasGedungPage() {
     ];
   };
 
-  /* =========================================================
-     STATISTICS
-  ========================================================= */
 
   const totalLantai = useMemo(() => {
     return data.reduce(
@@ -508,9 +472,6 @@ export default function SarprasGedungPage() {
     }).length;
   }, [data]);
 
-  /* =========================================================
-     EXPORT CSV
-  ========================================================= */
 
   const exportCSV = () => {
     if (!data.length) return;
@@ -588,9 +549,6 @@ export default function SarprasGedungPage() {
     setShowExport(false);
   };
 
-  /* =========================================================
-     EXPORT EXCEL
-  ========================================================= */
 
   const exportExcel = () => {
     if (!data.length) return;
@@ -693,9 +651,6 @@ export default function SarprasGedungPage() {
     setShowExport(false);
   };
 
-  /* =========================================================
-     RENDER
-  ========================================================= */
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
@@ -725,9 +680,6 @@ export default function SarprasGedungPage() {
           <div className="w-full p-3 sm:p-5 lg:p-7 xl:p-8">
             <div className="mx-auto w-full max-w-[1600px] space-y-4 sm:space-y-5 lg:space-y-6">
 
-              {/* =====================================================
-                  HEADER
-              ===================================================== */}
 
               <section
                 className={`relative overflow-hidden rounded-2xl border theme-border theme-card ${themeCardShadow}`}
@@ -782,7 +734,6 @@ export default function SarprasGedungPage() {
 
                   <div className="flex w-full flex-wrap gap-2 sm:flex-row lg:w-auto">
 
-                    {/* EXPORT */}
                     <div className="relative">
                       <button
                         onClick={() =>
@@ -834,7 +785,6 @@ export default function SarprasGedungPage() {
                       )}
                     </div>
 
-                    {/* REFRESH */}
                     <button
                       onClick={
                         handleRefresh
@@ -853,7 +803,6 @@ export default function SarprasGedungPage() {
                       />
                     </button>
 
-                    {/* ADD */}
                     <button
                       onClick={
                         handleAdd
@@ -871,9 +820,6 @@ export default function SarprasGedungPage() {
                 </div>
               </section>
 
-              {/* =====================================================
-                  ERROR
-              ===================================================== */}
 
               {error && (
                 <div
@@ -900,9 +846,6 @@ export default function SarprasGedungPage() {
                 </div>
               )}
 
-              {/* =====================================================
-                  STATS
-              ===================================================== */}
 
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
 
@@ -940,9 +883,6 @@ export default function SarprasGedungPage() {
                 />
               </div>
 
-              {/* =====================================================
-                  SEARCH
-              ===================================================== */}
 
               <section
                 className={`rounded-2xl border theme-border theme-card p-4 ${themeCardShadow} sm:p-5`}
@@ -971,7 +911,6 @@ export default function SarprasGedungPage() {
 
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 
-                  {/* SEARCH INPUT */}
                   <div className="relative">
                     <Search
                       size={15}
@@ -991,7 +930,6 @@ export default function SarprasGedungPage() {
                     />
                   </div>
 
-                  {/* SORT */}
                   <select
                     value={sortBy}
                     onChange={(e) =>
@@ -1026,7 +964,6 @@ export default function SarprasGedungPage() {
                     </option>
                   </select>
 
-                  {/* RESET */}
                   <button
                     onClick={() => {
                       setSearch("");
@@ -1053,9 +990,6 @@ export default function SarprasGedungPage() {
                 </div>
               </section>
 
-              {/* =====================================================
-                  TABLE
-              ===================================================== */}
 
               <section
                 className={`overflow-hidden rounded-2xl border theme-border theme-card ${themeCardShadow}`}
@@ -1117,7 +1051,6 @@ export default function SarprasGedungPage() {
                     <tbody
                       className={`divide-y ${themeNeutralDivider}`}
                     >
-                      {/* LOADING */}
                       {loading && (
                         <tr>
                           <td
@@ -1143,7 +1076,6 @@ export default function SarprasGedungPage() {
                         </tr>
                       )}
 
-                      {/* DATA */}
                       {!loading &&
                         currentItems.map(
                           (
@@ -1172,12 +1104,10 @@ export default function SarprasGedungPage() {
                                 }
                                 className={`group transition-colors ${themePrimaryHover}`}
                               >
-                                {/* NO */}
                                 <td className="theme-text-muted px-4 py-3.5 text-center text-sm">
                                   {rowNumber}
                                 </td>
 
-                                {/* FOTO */}
                                 <td className="px-4 py-3.5">
                                   <GedungImage
                                     src={
@@ -1189,7 +1119,6 @@ export default function SarprasGedungPage() {
                                   />
                                 </td>
 
-                                {/* NAMA */}
                                 <td className="px-4 py-3.5">
                                   <div className="flex items-center gap-3">
 
@@ -1225,7 +1154,6 @@ export default function SarprasGedungPage() {
                                   </div>
                                 </td>
 
-                                {/* KODE */}
                                 <td className="px-4 py-3.5">
                                   {item?.kode ? (
                                     <span
@@ -1242,7 +1170,6 @@ export default function SarprasGedungPage() {
                                   )}
                                 </td>
 
-                                {/* LANTAI */}
                                 <td className="px-4 py-3.5">
                                   <button
                                     onClick={() =>
@@ -1267,11 +1194,9 @@ export default function SarprasGedungPage() {
                                   </button>
                                 </td>
 
-                                {/* ACTION */}
                                 <td className="px-4 py-3.5">
                                   <div className="flex items-center justify-center gap-1">
 
-                                    {/* DETAIL */}
                                     <button
                                       onClick={() =>
                                         handleDetail(
@@ -1288,7 +1213,6 @@ export default function SarprasGedungPage() {
                                       />
                                     </button>
 
-                                    {/* EDIT */}
                                     <button
                                       onClick={() =>
                                         handleEdit(
@@ -1305,7 +1229,6 @@ export default function SarprasGedungPage() {
                                       />
                                     </button>
 
-                                    {/* DELETE */}
                                     <button
                                       onClick={() =>
                                         handleDelete(
@@ -1332,7 +1255,6 @@ export default function SarprasGedungPage() {
                   </table>
                 </div>
 
-                {/* EMPTY */}
                 {!loading &&
                   currentItems.length ===
                     0 && (
@@ -1373,7 +1295,6 @@ export default function SarprasGedungPage() {
                     </div>
                   )}
 
-                {/* PAGINATION */}
                 {!loading &&
                   totalItems > 0 && (
                     <div
@@ -1447,7 +1368,6 @@ export default function SarprasGedungPage() {
 
                       <div className="flex items-center gap-1">
 
-                        {/* FIRST */}
                         <button
                           onClick={() =>
                             goToPage(
@@ -1465,7 +1385,6 @@ export default function SarprasGedungPage() {
                           />
                         </button>
 
-                        {/* PREVIOUS */}
                         <button
                           onClick={() =>
                             goToPage(
@@ -1484,7 +1403,6 @@ export default function SarprasGedungPage() {
                           />
                         </button>
 
-                        {/* PAGE NUMBERS */}
                         {getPageNumbers().map(
                           (page) => (
                             <button
@@ -1510,7 +1428,6 @@ export default function SarprasGedungPage() {
                           )
                         )}
 
-                        {/* NEXT */}
                         <button
                           onClick={() =>
                             goToPage(
@@ -1529,7 +1446,6 @@ export default function SarprasGedungPage() {
                           />
                         </button>
 
-                        {/* LAST */}
                         <button
                           onClick={() =>
                             goToPage(
@@ -1551,7 +1467,6 @@ export default function SarprasGedungPage() {
                   )}
               </section>
 
-              {/* FOOTER */}
 
               <footer
                 className={`border-t ${themeNeutralDivider} pt-4 text-center sm:pt-5`}

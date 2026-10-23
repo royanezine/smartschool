@@ -27,7 +27,6 @@ export default function Testimonial() {
     },
   ];
 
-  // 🟢 Animasi Stagger
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -47,7 +46,6 @@ export default function Testimonial() {
   return (
     <section className="relative bg-white overflow-hidden py-24">
       
-      {/* 🌟 Background Glowing Blob (Seperti pada komponen lain, agar konsisten) */}
       <div
         className="absolute inset-0 opacity-[0.03] pointer-events-none"
         style={{
@@ -56,11 +54,10 @@ export default function Testimonial() {
         }}
       />
       <div className="absolute -top-16 -right-16 w-[600px] h-[600px] bg-blue-100/40 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute -bottom-16 -left-16 w-[600px] h-[600px] bg-indigo-100/40 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute -bottom-16 -left-16 w-[600px] h-[600px] bg-blue-50/50 rounded-full blur-[120px] pointer-events-none" />
 
       <div className="relative max-w-7xl mx-auto px-6 z-10">
 
-        {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
           <span className="inline-flex items-center gap-2 rounded-full bg-blue-50/80 border border-blue-200/60 px-4 py-1.5 text-xs font-semibold text-blue-600 shadow-sm mb-4">
             <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
@@ -69,7 +66,7 @@ export default function Testimonial() {
 
           <h2 className="text-4xl font-bold text-slate-900 tracking-tight">
             Apa Kata Pengguna{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
+            <span className="text-blue-600">
               Smart School?
             </span>
           </h2>
@@ -79,7 +76,6 @@ export default function Testimonial() {
           </p>
         </div>
 
-        {/* Content Grid dengan Animasi */}
         <motion.div
           variants={containerVariants}
           initial="hidden"
@@ -87,13 +83,11 @@ export default function Testimonial() {
           viewport={{ once: true, margin: "-50px" }}
           className="mt-16 grid gap-8 lg:grid-cols-3 items-stretch"
         >
-          {/* 🔥 KARTU UTAMA - Premium Gradient Glassmorphism */}
           <motion.div
             variants={itemVariants}
             transition={{ duration: 0.5, ease: "easeOut" }}
-            className="relative lg:col-span-2 rounded-3xl p-10 bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-xl shadow-blue-500/20 hover:shadow-2xl hover:shadow-blue-500/40 hover:scale-[1.01] transition-all duration-300 overflow-hidden group"
+            className="relative lg:col-span-2 rounded-3xl p-10 bg-blue-600 text-white shadow-lg shadow-blue-600/20 hover:shadow-xl hover:shadow-blue-600/30 hover:scale-[1.01] transition-all duration-300 overflow-hidden group"
           >
-            {/* Watermark Quote Raksasa di background */}
             <Quote
               size={140}
               className="absolute -top-4 -right-4 text-white/10 rotate-12 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-700"
@@ -101,10 +95,9 @@ export default function Testimonial() {
 
             <div className="relative z-10 flex flex-col h-full">
               <p className="text-lg md:text-xl leading-9 font-light mb-8 flex-1">
-                "{testimonials[0].text}"
+                &ldquo;{testimonials[0].text}&rdquo;
               </p>
 
-              {/* Bintang Rating dengan animasi */}
               <div className="flex gap-1 mb-8">
                 {[1, 2, 3, 4, 5].map((i) => (
                   <motion.div
@@ -118,7 +111,6 @@ export default function Testimonial() {
                 ))}
               </div>
 
-              {/* Profile User */}
               <div className="flex items-center gap-4 border-t border-white/20 pt-8">
                 <div className="relative">
                   <Image
@@ -128,7 +120,7 @@ export default function Testimonial() {
                     height={60}
                     className="rounded-full object-cover border-2 border-white/50 shadow-lg ring-2 ring-blue-500/30"
                   />
-                  <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-400 rounded-full border-2 border-indigo-600" />
+                  <div className="absolute bottom-0 right-0 w-4 h-4 bg-emerald-400 rounded-full border-2 border-blue-600" />
                 </div>
                 <div>
                   <h4 className="font-bold text-lg">{testimonials[0].name}</h4>
@@ -138,20 +130,17 @@ export default function Testimonial() {
             </div>
           </motion.div>
 
-          {/* 📦 KARTU SAMPING - Elegant White Cards with Colored Accent */}
           <div className="flex flex-col gap-6">
             {testimonials.slice(1).map((item, index) => (
               <motion.div
                 key={index}
                 variants={itemVariants}
                 transition={{ duration: 0.5, ease: "easeOut", delay: 0.1 * (index + 1) }}
-                className="group relative flex-1 bg-white rounded-2xl border border-slate-200/60 p-6 shadow-sm hover:shadow-xl hover:border-blue-200 hover:-translate-y-1 transition-all duration-300 overflow-hidden"
+                className="group relative flex-1 bg-white rounded-2xl border border-slate-200/60 p-6 shadow-sm hover:shadow-md hover:border-blue-200 hover:-translate-y-0.5 transition-all duration-300 overflow-hidden"
               >
-                {/* Garis Aksen Biru Vertikal di Kiri */}
-                <div className="absolute left-0 top-4 bottom-4 w-1 bg-gradient-to-b from-blue-500 to-indigo-500 rounded-full scale-y-0 group-hover:scale-y-100 transition-transform duration-300 origin-center" />
+                <div className="absolute left-0 top-4 bottom-4 w-1 bg-blue-500 rounded-full scale-y-0 group-hover:scale-y-100 transition-transform duration-300 origin-center" />
 
                 <div className="relative z-10 flex flex-col h-full">
-                  {/* Bintang Rating */}
                   <div className="flex gap-1 text-yellow-400 mb-4">
                     {[1, 2, 3, 4, 5].map((i) => (
                       <Star key={i} size={16} fill="currentColor" className="group-hover:scale-110 transition-transform duration-200" />
@@ -159,7 +148,7 @@ export default function Testimonial() {
                   </div>
 
                   <p className="text-sm leading-7 text-slate-600 flex-1">
-                    "{item.text}"
+                    &ldquo;{item.text}&rdquo;
                   </p>
 
                   <div className="mt-6 flex items-center gap-3 pt-4 border-t border-slate-100/80">

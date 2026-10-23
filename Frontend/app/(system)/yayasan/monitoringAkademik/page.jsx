@@ -18,9 +18,6 @@ import {
   Minus,
 } from "lucide-react";
 
-// ============================================================
-// THEME HELPERS
-// ============================================================
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -76,9 +73,6 @@ const themeDangerBorder =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-// ============================================================
-// DUMMY DATA
-// ============================================================
 
 const JENJANG_OPTIONS = [
   "Semua Jenjang",
@@ -209,9 +203,6 @@ const mapelOverview = [
   },
 ];
 
-// ============================================================
-// THEME STATUS
-// ============================================================
 
 function statusStyle(status) {
   switch (status) {
@@ -229,9 +220,6 @@ function statusStyle(status) {
   }
 }
 
-// ============================================================
-// PROGRESS BAR THEME
-// ============================================================
 
 function barColor(value, kind) {
   if (kind === "kehadiran") {
@@ -257,9 +245,6 @@ function barColor(value, kind) {
   return "bg-[var(--color-text)]";
 }
 
-// ============================================================
-// MAIN COMPONENT
-// ============================================================
 
 export default function MonitoringAkademikPage() {
   const [jenjang, setJenjang] = useState(JENJANG_OPTIONS[0]);
@@ -269,9 +254,6 @@ export default function MonitoringAkademikPage() {
   const [status, setStatus] = useState(STATUS_OPTIONS[0]);
   const [search, setSearch] = useState("");
 
-  // ==========================================================
-  // FILTER SEKOLAH
-  // ==========================================================
 
   const filteredSekolah = useMemo(() => {
     return dataSekolah
@@ -302,9 +284,6 @@ export default function MonitoringAkademikPage() {
       );
   }, [jenjang, status, search]);
 
-  // ==========================================================
-  // SUMMARY
-  // ==========================================================
 
   const summary = useMemo(() => {
     const total = filteredSekolah.length;
@@ -353,9 +332,6 @@ export default function MonitoringAkademikPage() {
     <div className="theme-page theme-text min-h-full">
       <div className="w-full max-w-[1800px] mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 space-y-6">
 
-        {/* ====================================================
-            PAGE HEADER
-        ==================================================== */}
 
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="min-w-0">
@@ -421,9 +397,6 @@ export default function MonitoringAkademikPage() {
           </button>
         </div>
 
-        {/* ====================================================
-            FILTER BAR
-        ==================================================== */}
 
         <div
           className={`
@@ -436,7 +409,6 @@ export default function MonitoringAkademikPage() {
         >
           <div className="flex flex-col sm:flex-row flex-wrap gap-3">
 
-            {/* SEARCH */}
             <div className="relative flex-1 min-w-[200px]">
               <Search
                 size={15}
@@ -471,7 +443,6 @@ export default function MonitoringAkademikPage() {
               />
             </div>
 
-            {/* JENJANG */}
             <div className="relative flex-1 min-w-[150px]">
               <select
                 value={jenjang}
@@ -513,7 +484,6 @@ export default function MonitoringAkademikPage() {
               />
             </div>
 
-            {/* TAHUN AJARAN */}
             <div className="relative flex-1 min-w-[190px]">
               <select
                 value={tahunAjaran}
@@ -555,7 +525,6 @@ export default function MonitoringAkademikPage() {
               />
             </div>
 
-            {/* STATUS */}
             <div className="relative flex-1 min-w-[160px]">
               <select
                 value={status}
@@ -599,13 +568,9 @@ export default function MonitoringAkademikPage() {
           </div>
         </div>
 
-        {/* ====================================================
-            SUMMARY CARDS
-        ==================================================== */}
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
 
-          {/* RATA-RATA NILAI */}
           <div
             className={`
               theme-card
@@ -644,7 +609,6 @@ export default function MonitoringAkademikPage() {
             </div>
           </div>
 
-          {/* KEHADIRAN */}
           <div
             className={`
               theme-card
@@ -683,7 +647,6 @@ export default function MonitoringAkademikPage() {
             </div>
           </div>
 
-          {/* UNIT PERHATIAN */}
           <div
             className={`
               theme-card
@@ -722,7 +685,6 @@ export default function MonitoringAkademikPage() {
             </div>
           </div>
 
-          {/* SISWA PERHATIAN */}
           <div
             className={`
               theme-card
@@ -762,9 +724,6 @@ export default function MonitoringAkademikPage() {
           </div>
         </div>
 
-        {/* ====================================================
-            RATA-RATA PER MAPEL
-        ==================================================== */}
 
         <div
           className={`
@@ -845,7 +804,6 @@ export default function MonitoringAkademikPage() {
                       }}
                     />
 
-                    {/* TARGET KKM */}
                     <div
                       className="
                         absolute
@@ -866,9 +824,6 @@ export default function MonitoringAkademikPage() {
           </div>
         </div>
 
-        {/* ====================================================
-            PERINGKAT UNIT SEKOLAH
-        ==================================================== */}
 
         <div>
           <div className="flex items-center justify-between mb-3">
@@ -928,9 +883,6 @@ export default function MonitoringAkademikPage() {
                       transition-colors
                     `}
                   >
-                    {/* ========================================
-                        PERINGKAT + IDENTITAS
-                    ======================================== */}
 
                     <div className="flex items-center gap-3 lg:w-[240px] flex-shrink-0 min-w-0">
                       <div
@@ -974,9 +926,6 @@ export default function MonitoringAkademikPage() {
                       </div>
                     </div>
 
-                    {/* ========================================
-                        NILAI
-                    ======================================== */}
 
                     <div className="flex-1 min-w-[140px]">
                       <div className="flex items-center justify-between mb-1">
@@ -1044,9 +993,6 @@ export default function MonitoringAkademikPage() {
                       </div>
                     </div>
 
-                    {/* ========================================
-                        KEHADIRAN
-                    ======================================== */}
 
                     <div className="flex-1 min-w-[140px]">
                       <div className="flex items-center justify-between mb-1">
@@ -1083,9 +1029,6 @@ export default function MonitoringAkademikPage() {
                       </div>
                     </div>
 
-                    {/* ========================================
-                        SISWA PERLU PERHATIAN
-                    ======================================== */}
 
                     <div className="flex-shrink-0 lg:w-[130px]">
                       <p className="text-[11px] font-medium theme-text-muted uppercase tracking-wide mb-1">
@@ -1097,9 +1040,6 @@ export default function MonitoringAkademikPage() {
                       </p>
                     </div>
 
-                    {/* ========================================
-                        STATUS
-                    ======================================== */}
 
                     <div className="flex items-center justify-between gap-3 lg:w-[200px] flex-shrink-0">
                       <div className="min-w-0">

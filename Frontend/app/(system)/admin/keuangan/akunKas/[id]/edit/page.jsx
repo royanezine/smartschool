@@ -53,7 +53,6 @@ export default function EditAkunKasPage() {
     setError("");
 
     try {
-      // BE menyediakan GET daftar akun, bukan GET detail berdasarkan ID.
       const response = await apiFetch("/api/keuangan/akun-kas");
 
       if (response?.success === false) {
@@ -113,10 +112,6 @@ export default function EditAkunKasPage() {
       return;
     }
 
-    // Mengikuti updateAkun BE:
-    // field kode tidak diproses oleh controller.
-    // saldoAwal tidak dikirim karena BE menolak perubahan saldo
-    // jika akun sudah memiliki transaksi.
     const payload = {
       nama: form.nama.trim(),
       tipe: form.tipe,
@@ -173,7 +168,6 @@ export default function EditAkunKasPage() {
         <main className="theme-page min-h-0 flex-1 overflow-y-auto">
           <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
             <div className="w-full space-y-6">
-              {/* HEADER */}
               <section className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
                 <div>
                   <Link
@@ -206,7 +200,6 @@ export default function EditAkunKasPage() {
                 </div>
               </section>
 
-              {/* ERROR */}
               {error && (
                 <div
                   role="alert"
@@ -237,7 +230,6 @@ export default function EditAkunKasPage() {
                 </div>
               )}
 
-              {/* FORM */}
               <section className="theme-card rounded-2xl border shadow-sm">
                 <div className="theme-border border-b px-5 py-4 sm:px-6">
                   <h2 className="theme-text text-sm font-bold">
@@ -267,7 +259,6 @@ export default function EditAkunKasPage() {
                     className="space-y-5 p-5 sm:p-6"
                   >
                     <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                      {/* KODE AKUN: READ ONLY */}
                       <div>
                         <label
                           htmlFor="kode"
@@ -288,7 +279,6 @@ export default function EditAkunKasPage() {
                         </p>
                       </div>
 
-                      {/* NAMA */}
                       <div>
                         <label
                           htmlFor="nama"
@@ -309,7 +299,6 @@ export default function EditAkunKasPage() {
                         />
                       </div>
 
-                      {/* TIPE */}
                       <div>
                         <label
                           htmlFor="tipe"
@@ -332,7 +321,6 @@ export default function EditAkunKasPage() {
                         </select>
                       </div>
 
-                      {/* STATUS */}
                       <div>
                         <label
                           htmlFor="status"
@@ -355,7 +343,6 @@ export default function EditAkunKasPage() {
                         </select>
                       </div>
 
-                      {/* SALDO AWAL: READ ONLY */}
                       <div className="md:col-span-2">
                         <label
                           htmlFor="saldoAwal"

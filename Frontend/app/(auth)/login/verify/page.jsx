@@ -6,29 +6,6 @@ import { AlertCircle, ArrowLeft, ShieldCheck } from "lucide-react";
 
 const IDENTIFIER_KEY = "login_identifier";
 
-/*
- * ============================================================
- * CATATAN AUDIT — LOGIN DENGAN OTP BELUM DIDUKUNG BACKEND
- * ============================================================
- * Backend SmartSchool (Backend/src/routes/auth.routes.ts) TIDAK
- * mendefinisikan rute POST /api/auth/verify-login. Satu-satunya alur
- * login yang benar-benar didukung adalah:
- *
- *   POST /api/auth/login  (identifier + kataSandi)
- *     - siswa belum punya PIN -> requiresPinSetup -> /pin/setup
- *     - siswa sudah punya PIN -> requiresPin      -> /pin/verify
- *     - role lain             -> JWT langsung
- *
- * OTP di Backend hanya dipakai untuk verifikasi pendaftaran
- * (POST /api/auth/verify-register), lupa kata sandi, dan lupa PIN —
- * bukan untuk login.
- *
- * Karena itu halaman ini TIDAK memanggil endpoint apa pun, TIDAK
- * membuat sesi, dan TIDAK menampilkan login sebagai berhasil. Halaman
- * hanya menjelaskan keterbatasan lalu mengarahkan pengguna kembali ke
- * halaman login berbasis kata sandi.
- * ============================================================
- */
 
 export default function VerifyLoginPage() {
   const [identifier, setIdentifier] = useState("");
@@ -41,7 +18,6 @@ export default function VerifyLoginPage() {
         setIdentifier(saved);
       }
     } catch {
-      /* sessionStorage bisa diblokir; tidak perlu gagal total */
     }
   }, []);
 
@@ -49,7 +25,6 @@ export default function VerifyLoginPage() {
     try {
       sessionStorage.removeItem(IDENTIFIER_KEY);
     } catch {
-      /* abaikan */
     }
 
     window.location.href = "/login";
@@ -57,9 +32,6 @@ export default function VerifyLoginPage() {
 
   return (
     <main className="relative min-h-screen overflow-hidden flex items-center justify-center">
-      {/* ==========================================
-          BACKGROUND
-      ========================================== */}
       <Image
         src="/hero/hero.png"
         alt="Smart School"
@@ -68,7 +40,6 @@ export default function VerifyLoginPage() {
         className="object-cover"
       />
 
-      {/* Overlay */}
       <div
         className="absolute inset-0"
         style={{
@@ -77,14 +48,9 @@ export default function VerifyLoginPage() {
         }}
       />
 
-      {/* Top accent */}
       <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-400 via-blue-600 to-blue-400" />
 
-      {/* ==========================================
-          CONTENT
-      ========================================== */}
       <div className="relative z-10 w-full max-w-md px-6 py-10">
-        {/* LOGO */}
         <div className="flex items-center justify-center gap-3 mb-6">
           <div className="relative w-10 h-10 rounded-lg bg-white flex items-center justify-center overflow-hidden shadow-sm">
             <Image
@@ -101,11 +67,7 @@ export default function VerifyLoginPage() {
           </span>
         </div>
 
-        {/* ==========================================
-            CARD
-        ========================================== */}
         <div className="bg-white rounded-2xl shadow-xl p-7">
-          {/* HEADER */}
           <div className="flex flex-col items-center text-center mb-6">
             <div className="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center mb-3">
               <AlertCircle size={25} className="text-amber-500" />
@@ -127,7 +89,6 @@ export default function VerifyLoginPage() {
             )}
           </div>
 
-          {/* PENJELASAN */}
           <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3.5">
             <p className="text-xs leading-5 text-amber-800">
               Halaman ini tidak mengirim permintaan ke server dan tidak
@@ -137,7 +98,6 @@ export default function VerifyLoginPage() {
             </p>
           </div>
 
-          {/* ALUR YANG DIDUKUNG */}
           <div className="mt-5">
             <p className="text-xs font-semibold text-slate-700 mb-2">
               Gunakan salah satu alur login yang tersedia:
@@ -164,7 +124,6 @@ export default function VerifyLoginPage() {
             </ul>
           </div>
 
-          {/* BACK */}
           <button
             type="button"
             onClick={handleBackToLogin}
@@ -175,7 +134,6 @@ export default function VerifyLoginPage() {
           </button>
         </div>
 
-        {/* FOOTER */}
         <p className="text-center text-[11px] text-slate-500 mt-5">
           SmartSchool • Sistem Informasi Sekolah
         </p>

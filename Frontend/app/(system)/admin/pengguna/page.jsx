@@ -41,9 +41,6 @@ import {
   MoreHorizontal,
 } from "lucide-react";
 
-/* =========================================================
-   API
-========================================================= */
 
 const API_URL = (
   process.env.NEXT_PUBLIC_API_URL ||
@@ -52,11 +49,7 @@ const API_URL = (
 
 const USERS_ENDPOINT = `${API_URL}/api/users`;
 
-/* =========================================================
-   HELPER TOKEN
-========================================================= */
 
-// getToken diimpor dari @/lib/auth (single source of truth)
 const _getTokenPlaceholder = () => {
   if (typeof window === "undefined") {
     return null;
@@ -65,9 +58,6 @@ const _getTokenPlaceholder = () => {
   return getToken();
 };
 
-/* =========================================================
-   EXTRACT DATA RESPONSE
-========================================================= */
 
 const extractUsers = (response) => {
   if (Array.isArray(response)) {
@@ -93,9 +83,6 @@ const extractUsers = (response) => {
   return [];
 };
 
-/* =========================================================
-   EXTRACT PAGINATION
-========================================================= */
 
 const extractPagination = (
   response,
@@ -144,9 +131,6 @@ const extractPagination = (
   };
 };
 
-/* =========================================================
-   ROLE NORMALIZER
-========================================================= */
 
 const normalizeRole = (role) => {
   const value = String(role || "")
@@ -175,9 +159,6 @@ const normalizeRole = (role) => {
   return role || "-";
 };
 
-/* =========================================================
-   STATUS NORMALIZER
-========================================================= */
 
 const normalizeStatus = (status) => {
   const value = String(status || "")
@@ -196,9 +177,6 @@ const normalizeStatus = (status) => {
   return "Nonaktif";
 };
 
-/* =========================================================
-   INITIAL
-========================================================= */
 
 const getInitials = (name) => {
   if (!name) {
@@ -222,9 +200,6 @@ const getInitials = (name) => {
   ).toUpperCase();
 };
 
-/* =========================================================
-   NORMALIZE USER
-========================================================= */
 
 const normalizeUser = (
   user,
@@ -318,9 +293,6 @@ const normalizeUser = (
   };
 };
 
-/* =========================================================
-   THEME HELPERS
-========================================================= */
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]";
@@ -340,9 +312,6 @@ const themeCardShadow =
 const themePrimaryShadow =
   "shadow-[0_10px_25px_color-mix(in_srgb,var(--color-primary)_20%,transparent)]";
 
-/* =========================================================
-   ROLE CONFIG
-========================================================= */
 
 const roleConfig = {
   Guru: {
@@ -370,9 +339,6 @@ const roleConfig = {
   },
 };
 
-/* =========================================================
-   ROLE BADGE
-========================================================= */
 
 function RoleBadge({ role }) {
   const config = roleConfig[role] || {
@@ -405,9 +371,6 @@ function RoleBadge({ role }) {
   );
 }
 
-/* =========================================================
-   STATUS BADGE
-========================================================= */
 
 function StatusBadge({ status }) {
   const active = status === "Aktif";
@@ -444,9 +407,6 @@ function StatusBadge({ status }) {
   );
 }
 
-/* =========================================================
-   STAT CARD
-========================================================= */
 
 function StatCard({
   title,
@@ -523,9 +483,6 @@ function StatCard({
   );
 }
 
-/* =========================================================
-   PAGE
-========================================================= */
 
 export default function PenggunaPage() {
   const router = useRouter();
@@ -533,9 +490,6 @@ export default function PenggunaPage() {
   const [sidebarOpen, setSidebarOpen] =
     useState(true);
 
-  /* =======================================================
-     USERS
-  ======================================================= */
 
   const [users, setUsers] =
     useState([]);
@@ -549,9 +503,6 @@ export default function PenggunaPage() {
   const [error, setError] =
     useState("");
 
-  /* =======================================================
-     FILTER
-  ======================================================= */
 
   const [search, setSearch] =
     useState("");
@@ -562,9 +513,6 @@ export default function PenggunaPage() {
   const [statusFilter, setStatusFilter] =
     useState("Semua");
 
-  /* =======================================================
-     PAGINATION
-  ======================================================= */
 
   const [page, setPage] =
     useState(1);
@@ -579,9 +527,6 @@ export default function PenggunaPage() {
       limit: LIMIT,
     });
 
-  /* =======================================================
-     MODAL
-  ======================================================= */
 
   const [selectedUser, setSelectedUser] =
     useState(null);
@@ -589,9 +534,6 @@ export default function PenggunaPage() {
   const [updatingStatus, setUpdatingStatus] =
     useState(false);
 
-  /* =======================================================
-     GET USERS
-  ======================================================= */
 
   const fetchUsers = useCallback(
     async ({
@@ -740,9 +682,6 @@ export default function PenggunaPage() {
     [],
   );
 
-  /* =======================================================
-     LOAD
-  ======================================================= */
 
   useEffect(() => {
     fetchUsers({
@@ -759,9 +698,6 @@ export default function PenggunaPage() {
     fetchUsers,
   ]);
 
-  /* =======================================================
-     STATISTICS
-  ======================================================= */
 
   const statistics =
     useMemo(() => {
@@ -813,9 +749,6 @@ export default function PenggunaPage() {
       pagination.totalData,
     ]);
 
-  /* =======================================================
-     SEARCH
-  ======================================================= */
 
   const handleSearchChange = (
     event,
@@ -827,9 +760,6 @@ export default function PenggunaPage() {
     setPage(1);
   };
 
-  /* =======================================================
-     ROLE
-  ======================================================= */
 
   const handleRoleChange = (
     event,
@@ -841,9 +771,6 @@ export default function PenggunaPage() {
     setPage(1);
   };
 
-  /* =======================================================
-     STATUS
-  ======================================================= */
 
   const handleStatusChange = (
     event,
@@ -855,9 +782,6 @@ export default function PenggunaPage() {
     setPage(1);
   };
 
-  /* =======================================================
-     RESET
-  ======================================================= */
 
   const handleResetFilter = () => {
     setSearch("");
@@ -866,18 +790,12 @@ export default function PenggunaPage() {
     setPage(1);
   };
 
-  /* =======================================================
-     ROLE QUICK FILTER
-  ======================================================= */
 
   const handleRoleFilter = (role) => {
     setRoleFilter(role);
     setPage(1);
   };
 
-  /* =======================================================
-     REFRESH
-  ======================================================= */
 
   const handleRefresh = () => {
     fetchUsers({
@@ -889,9 +807,6 @@ export default function PenggunaPage() {
     });
   };
 
-  /* =======================================================
-     DETAIL
-  ======================================================= */
 
   const handleDetail = (
     user,
@@ -905,9 +820,6 @@ export default function PenggunaPage() {
     );
   };
 
-  /* =======================================================
-     EDIT
-  ======================================================= */
 
   const handleEdit = (
     user,
@@ -921,9 +833,6 @@ export default function PenggunaPage() {
     );
   };
 
-  /* =======================================================
-     OPEN MODAL
-  ======================================================= */
 
   const handleOpenStatusModal = (
     user,
@@ -931,9 +840,6 @@ export default function PenggunaPage() {
     setSelectedUser(user);
   };
 
-  /* =======================================================
-     CLOSE MODAL
-  ======================================================= */
 
   const handleCloseStatusModal = () => {
     if (updatingStatus) {
@@ -943,9 +849,6 @@ export default function PenggunaPage() {
     setSelectedUser(null);
   };
 
-  /* =======================================================
-     UPDATE STATUS
-  ======================================================= */
 
   const handleUpdateStatus =
     async () => {
@@ -1027,9 +930,6 @@ export default function PenggunaPage() {
       }
     };
 
-  /* =======================================================
-     EXPORT
-  ======================================================= */
 
   const handleExport = () => {
     if (!users.length) {
@@ -1115,9 +1015,6 @@ export default function PenggunaPage() {
     URL.revokeObjectURL(url);
   };
 
-  /* =======================================================
-     PAGINATION
-  ======================================================= */
 
   const pageNumbers =
     useMemo(() => {
@@ -1156,15 +1053,9 @@ export default function PenggunaPage() {
       page,
     ]);
 
-  /* =======================================================
-     RENDER
-  ======================================================= */
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
-      {/* =====================================================
-          SIDEBAR
-      ===================================================== */}
 
       <Sidebar
         role="admin"
@@ -1177,12 +1068,8 @@ export default function PenggunaPage() {
         }
       />
 
-      {/* =====================================================
-          MAIN CONTENT
-      ===================================================== */}
 
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
-        {/* HEADER */}
 
         <Header
           title="Pengguna"
@@ -1193,15 +1080,9 @@ export default function PenggunaPage() {
           }
         />
 
-        {/* =====================================================
-            PAGE
-        ===================================================== */}
 
         <main className="flex-1 overflow-y-auto">
           <div className="p-4 sm:p-6 lg:p-8 space-y-5 sm:space-y-6">
-            {/* =================================================
-                PAGE HEADER
-            ================================================== */}
 
             <div
               className="
@@ -1213,7 +1094,6 @@ export default function PenggunaPage() {
                 gap-4
               "
             >
-              {/* TITLE */}
 
               <div className="flex items-center gap-3">
                 <div
@@ -1252,10 +1132,8 @@ export default function PenggunaPage() {
                 </div>
               </div>
 
-              {/* ACTION */}
 
               <div className="flex flex-col sm:flex-row gap-2">
-                {/* REFRESH */}
 
                 <button
                   type="button"
@@ -1293,7 +1171,6 @@ export default function PenggunaPage() {
                   Refresh
                 </button>
 
-                {/* EXPORT */}
 
                 <button
                   type="button"
@@ -1325,7 +1202,6 @@ export default function PenggunaPage() {
                   Export
                 </button>
 
-                {/* TAMBAH */}
 
                 <button
                   type="button"
@@ -1356,9 +1232,6 @@ export default function PenggunaPage() {
               </div>
             </div>
 
-            {/* =================================================
-                ERROR
-            ================================================== */}
 
             {error && (
               <div
@@ -1403,9 +1276,6 @@ export default function PenggunaPage() {
               </div>
             )}
 
-            {/* =================================================
-                STATISTICS
-            ================================================== */}
 
             <div
               className="
@@ -1453,9 +1323,6 @@ export default function PenggunaPage() {
               />
             </div>
 
-            {/* =================================================
-                OVERVIEW
-            ================================================== */}
 
             <section
               className={`
@@ -1478,7 +1345,6 @@ export default function PenggunaPage() {
                     gap-5
                   "
                 >
-                  {/* TEXT */}
 
                   <div>
                     <div className="flex items-center gap-2">
@@ -1511,7 +1377,6 @@ export default function PenggunaPage() {
                     </p>
                   </div>
 
-                  {/* ROLE SUMMARY */}
 
                   <div
                     className="
@@ -1523,7 +1388,6 @@ export default function PenggunaPage() {
                       xl:w-auto
                     "
                   >
-                    {/* SEMUA */}
 
                     <button
                       type="button"
@@ -1553,7 +1417,6 @@ export default function PenggunaPage() {
                       </p>
                     </button>
 
-                    {/* GURU */}
 
                     <button
                       type="button"
@@ -1583,7 +1446,6 @@ export default function PenggunaPage() {
                       </p>
                     </button>
 
-                    {/* SISWA */}
 
                     <button
                       type="button"
@@ -1613,7 +1475,6 @@ export default function PenggunaPage() {
                       </p>
                     </button>
 
-                    {/* STAFF */}
 
                     <button
                       type="button"
@@ -1645,7 +1506,6 @@ export default function PenggunaPage() {
                   </div>
                 </div>
 
-                {/* SMALL SUMMARY */}
 
                 <div
                   className="
@@ -1719,9 +1579,6 @@ export default function PenggunaPage() {
               </div>
             </section>
 
-            {/* =================================================
-                FILTER
-            ================================================== */}
 
             <section
               className={`
@@ -1741,7 +1598,6 @@ export default function PenggunaPage() {
                   gap-3
                 "
               >
-                {/* SEARCH */}
 
                 <div className="relative flex-1">
                   <Search
@@ -1801,7 +1657,6 @@ export default function PenggunaPage() {
                   )}
                 </div>
 
-                {/* FILTER */}
 
                 <div
                   className="
@@ -1909,9 +1764,6 @@ export default function PenggunaPage() {
               </div>
             </section>
 
-            {/* =================================================
-                TABLE
-            ================================================== */}
 
             <section
               className={`
@@ -1923,7 +1775,6 @@ export default function PenggunaPage() {
                 overflow-hidden
               `}
             >
-              {/* TABLE HEADER */}
 
               <div
                 className="
@@ -1990,7 +1841,6 @@ export default function PenggunaPage() {
                 </button>
               </div>
 
-              {/* TABLE */}
 
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[1100px] text-sm border-collapse">
@@ -2027,7 +1877,6 @@ export default function PenggunaPage() {
                   </thead>
 
                   <tbody>
-                    {/* LOADING */}
 
                     {loading ? (
                       Array.from({
@@ -2150,7 +1999,6 @@ export default function PenggunaPage() {
                             transition-colors
                           `}
                         >
-                          {/* NO */}
 
                           <td className="px-4 py-3 text-center">
                             <span
@@ -2175,7 +2023,6 @@ export default function PenggunaPage() {
                             </span>
                           </td>
 
-                          {/* USER */}
 
                           <td className="px-4 py-3">
                             <div className="flex items-center gap-3">
@@ -2235,7 +2082,6 @@ export default function PenggunaPage() {
                             </div>
                           </td>
 
-                          {/* KONTAK */}
 
                           <td className="px-4 py-3">
                             <div className="space-y-1">
@@ -2265,13 +2111,11 @@ export default function PenggunaPage() {
                             </div>
                           </td>
 
-                          {/* ROLE */}
 
                           <td className="px-4 py-3">
                             <RoleBadge role={user.peran} />
                           </td>
 
-                          {/* JABATAN */}
 
                           <td className="px-4 py-3">
                             <p className="text-xs font-medium theme-text-secondary">
@@ -2283,17 +2127,14 @@ export default function PenggunaPage() {
                             </p>
                           </td>
 
-                          {/* STATUS */}
 
                           <td className="px-4 py-3 text-center">
                             <StatusBadge status={user.status} />
                           </td>
 
-                          {/* ACTION */}
 
                           <td className="px-4 py-3">
                             <div className="flex items-center justify-center gap-1.5">
-                              {/* DETAIL */}
 
                               <button
                                 type="button"
@@ -2320,7 +2161,6 @@ export default function PenggunaPage() {
                                 <Eye size={14} />
                               </button>
 
-                              {/* EDIT */}
 
                               <button
                                 type="button"
@@ -2347,7 +2187,6 @@ export default function PenggunaPage() {
                                 <Pencil size={14} />
                               </button>
 
-                              {/* STATUS */}
 
                               <button
                                 type="button"
@@ -2383,7 +2222,6 @@ export default function PenggunaPage() {
                                 )}
                               </button>
 
-                              {/* MORE */}
 
                               <button
                                 type="button"
@@ -2414,9 +2252,6 @@ export default function PenggunaPage() {
                 </table>
               </div>
 
-              {/* =================================================
-                  PAGINATION
-              ================================================== */}
 
               {!loading && users.length > 0 && (
                 <div
@@ -2448,7 +2283,6 @@ export default function PenggunaPage() {
                   </p>
 
                   <div className="flex items-center gap-1">
-                    {/* PREV */}
 
                     <button
                       type="button"
@@ -2477,7 +2311,6 @@ export default function PenggunaPage() {
                       <ChevronLeft size={15} />
                     </button>
 
-                    {/* PAGE NUMBERS */}
 
                     {pageNumbers.map((pageNumber) => (
                       <button
@@ -2504,7 +2337,6 @@ export default function PenggunaPage() {
                       </button>
                     ))}
 
-                    {/* NEXT */}
 
                     <button
                       type="button"
@@ -2545,13 +2377,9 @@ export default function PenggunaPage() {
         </main>
       </div>
 
-      {/* =====================================================
-          CONFIRM STATUS MODAL
-      ====================================================== */}
 
       {selectedUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          {/* OVERLAY */}
 
           <div
             className="
@@ -2563,7 +2391,6 @@ export default function PenggunaPage() {
             onClick={handleCloseStatusModal}
           />
 
-          {/* MODAL */}
 
           <div
             className={`
@@ -2578,7 +2405,6 @@ export default function PenggunaPage() {
               overflow-hidden
             `}
           >
-            {/* HEADER */}
 
             <div
               className="
@@ -2652,7 +2478,6 @@ export default function PenggunaPage() {
               </button>
             </div>
 
-            {/* BODY */}
 
             <div className="p-5">
               <div
@@ -2706,7 +2531,6 @@ export default function PenggunaPage() {
               </p>
             </div>
 
-            {/* FOOTER */}
 
             <div
               className="

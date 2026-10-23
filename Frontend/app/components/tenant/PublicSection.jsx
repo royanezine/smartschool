@@ -68,8 +68,6 @@ export default function PublicSection({
     return null;
   }
 
-  // Konfigurasi publik bisa tidak memiliki properti status.
-  // Hanya status nonaktif yang disembunyikan.
   if (!showInactive && isInactiveStatus(config.status)) {
     return null;
   }

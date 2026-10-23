@@ -15,10 +15,6 @@ import {
   BookOpen,
 } from "lucide-react";
 
-// ============================================================
-// DUMMY DATA
-// Catatan: ganti dengan data asli dari API/DB begitu tersedia.
-// ============================================================
 
 const SEMESTER_OPTIONS = [
   "Ganjil 2025/2026",
@@ -111,9 +107,6 @@ const dataGuru = [
   },
 ];
 
-// ============================================================
-// THEME HELPERS
-// ============================================================
 
 const themeCardShadow =
   "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
@@ -163,9 +156,6 @@ const themeInfoSurface =
 const themeInfoBorder =
   "border-[color-mix(in_srgb,var(--color-info)_24%,transparent)]";
 
-// ============================================================
-// STATUS THEME
-// ============================================================
 
 const statusTheme = {
   Aktif: {
@@ -183,9 +173,6 @@ const statusTheme = {
   },
 };
 
-// ============================================================
-// MAIN COMPONENT
-// ============================================================
 
 export default function LaporanGuruPage() {
   const router = useRouter();
@@ -194,9 +181,6 @@ export default function LaporanGuruPage() {
   const [unit, setUnit] = useState(UNIT_OPTIONS[0]);
   const [search, setSearch] = useState("");
 
-  // ============================================================
-  // FILTER DATA
-  // ============================================================
 
   const filteredGuru = useMemo(() => {
     const keyword = search.trim().toLowerCase();
@@ -214,9 +198,6 @@ export default function LaporanGuruPage() {
     });
   }, [unit, search]);
 
-  // ============================================================
-  // SUMMARY
-  // ============================================================
 
   const summary = useMemo(() => {
     const totalGuru = filteredGuru.length;
@@ -242,9 +223,6 @@ export default function LaporanGuruPage() {
     };
   }, [filteredGuru]);
 
-  // ============================================================
-  // EXPORT
-  // ============================================================
 
   const handleDownload = () => {
     const headers = [
@@ -294,17 +272,11 @@ export default function LaporanGuruPage() {
     URL.revokeObjectURL(url);
   };
 
-  // ============================================================
-  // RENDER
-  // ============================================================
 
   return (
     <div className="theme-page theme-text min-h-full">
       <div className="w-full max-w-[1800px] mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 space-y-6">
 
-        {/* ======================================================
-            PAGE HEADER
-        ====================================================== */}
 
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="min-w-0">
@@ -356,7 +328,6 @@ export default function LaporanGuruPage() {
             </p>
           </div>
 
-          {/* DOWNLOAD */}
 
           <button
             type="button"
@@ -378,9 +349,6 @@ export default function LaporanGuruPage() {
           </button>
         </div>
 
-        {/* ======================================================
-            FILTER BAR
-        ====================================================== */}
 
         <div
           className={`
@@ -394,7 +362,6 @@ export default function LaporanGuruPage() {
         >
           <div className="flex flex-col sm:flex-row flex-wrap gap-3">
 
-            {/* SEMESTER */}
 
             <div className="relative flex-1 min-w-[160px]">
               <select
@@ -434,7 +401,6 @@ export default function LaporanGuruPage() {
               />
             </div>
 
-            {/* UNIT */}
 
             <div className="relative flex-1 min-w-[180px]">
               <select
@@ -474,7 +440,6 @@ export default function LaporanGuruPage() {
               />
             </div>
 
-            {/* SEARCH */}
 
             <div className="relative flex-1 min-w-[200px]">
               <Search
@@ -510,13 +475,9 @@ export default function LaporanGuruPage() {
           </div>
         </div>
 
-        {/* ======================================================
-            SUMMARY CARDS
-        ====================================================== */}
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
 
-          {/* TOTAL GURU */}
 
           <div
             className={`
@@ -554,7 +515,6 @@ export default function LaporanGuruPage() {
             </div>
           </div>
 
-          {/* GURU AKTIF */}
 
           <div
             className={`
@@ -592,7 +552,6 @@ export default function LaporanGuruPage() {
             </div>
           </div>
 
-          {/* UNIT SEKOLAH */}
 
           <div
             className={`
@@ -630,7 +589,6 @@ export default function LaporanGuruPage() {
             </div>
           </div>
 
-          {/* KELAS DIAMPU */}
 
           <div
             className={`
@@ -669,9 +627,6 @@ export default function LaporanGuruPage() {
           </div>
         </div>
 
-        {/* ======================================================
-            TABLE
-        ====================================================== */}
 
         <div
           className={`
@@ -683,7 +638,6 @@ export default function LaporanGuruPage() {
             overflow-hidden
           `}
         >
-          {/* TABLE HEADER */}
 
           <div
             className={`
@@ -703,7 +657,6 @@ export default function LaporanGuruPage() {
             </span>
           </div>
 
-          {/* TABLE */}
 
           <div className="overflow-x-auto w-full">
             <table className="w-full min-w-[760px] text-sm border-collapse">
@@ -813,7 +766,6 @@ export default function LaporanGuruPage() {
               </thead>
 
               <tbody>
-                {/* EMPTY */}
 
                 {filteredGuru.length === 0 && (
                   <tr>
@@ -841,7 +793,6 @@ export default function LaporanGuruPage() {
                   </tr>
                 )}
 
-                {/* DATA */}
 
                 {filteredGuru.map((g) => {
                   const status =
@@ -857,7 +808,6 @@ export default function LaporanGuruPage() {
                         transition-colors
                       `}
                     >
-                      {/* NAMA */}
 
                       <td
                         className={`
@@ -871,7 +821,6 @@ export default function LaporanGuruPage() {
                         </span>
                       </td>
 
-                      {/* MAPEL */}
 
                       <td
                         className={`
@@ -897,7 +846,6 @@ export default function LaporanGuruPage() {
                         </span>
                       </td>
 
-                      {/* UNIT */}
 
                       <td
                         className={`
@@ -920,7 +868,6 @@ export default function LaporanGuruPage() {
                         </div>
                       </td>
 
-                      {/* KELAS */}
 
                       <td
                         className={`
@@ -934,7 +881,6 @@ export default function LaporanGuruPage() {
                         {g.kelasDiampu} kelas
                       </td>
 
-                      {/* BERLAKU SEJAK */}
 
                       <td
                         className={`
@@ -948,7 +894,6 @@ export default function LaporanGuruPage() {
                         {g.berlakuSejak}
                       </td>
 
-                      {/* STATUS */}
 
                       <td
                         className={`

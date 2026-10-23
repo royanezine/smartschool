@@ -58,9 +58,6 @@ export default function TerjadwalPage() {
 
   return (
     <div className="flex min-h-screen w-full min-w-0 theme-page">
-      {/* =====================================================
-          SIDEBAR
-      ====================================================== */}
       <div className="relative z-30 shrink-0">
         <Sidebar
           active={active}
@@ -70,30 +67,16 @@ export default function TerjadwalPage() {
         />
       </div>
 
-      {/* =====================================================
-          PAGE AREA
-      ====================================================== */}
       <div className="flex min-w-0 flex-1 flex-col">
-        {/* HEADER */}
         <Header
           title="Pengumuman Terjadwal"
           user={{ name: "Admin" }}
         />
 
-        {/* ===================================================
-            MAIN
-        ==================================================== */}
         <main className="min-w-0 flex-1 overflow-x-hidden theme-page">
           <div className="w-full min-w-0 px-3 py-5 sm:px-5 sm:py-6 md:px-6 lg:px-8 xl:px-10 2xl:px-12">
-            {/* =================================================
-                CONTENT
-            ================================================== */}
             <div className="mx-auto w-full max-w-[1500px] min-w-0">
-              {/* =================================================
-                  BREADCRUMB + BACK
-              ================================================== */}
               <div className="mb-5 flex min-w-0 flex-col gap-3 sm:mb-6 sm:flex-row sm:items-center sm:justify-between">
-                {/* BREADCRUMB */}
                 <nav
                   aria-label="Breadcrumb"
                   className="min-w-0 overflow-x-auto"
@@ -127,7 +110,6 @@ export default function TerjadwalPage() {
                   </ol>
                 </nav>
 
-                {/* BACK */}
                 <button
                   type="button"
                   onClick={() => router.back()}
@@ -147,11 +129,7 @@ export default function TerjadwalPage() {
                 </button>
               </div>
 
-              {/* =================================================
-                  HERO HEADER
-              ================================================== */}
               <section className="relative mb-6 overflow-hidden rounded-2xl border theme-border theme-card shadow-sm sm:mb-7">
-                {/* subtle decoration */}
                 <div
                   className="
                     pointer-events-none absolute
@@ -177,9 +155,7 @@ export default function TerjadwalPage() {
                 />
 
                 <div className="relative flex min-w-0 flex-col gap-5 p-5 sm:p-6 md:p-7 lg:flex-row lg:items-center lg:justify-between lg:p-8">
-                  {/* LEFT */}
                   <div className="flex min-w-0 items-start gap-4">
-                    {/* ICON */}
                     <div
                       className="
                         flex h-12 w-12 shrink-0
@@ -194,7 +170,6 @@ export default function TerjadwalPage() {
                       <Clock className="h-6 w-6 sm:h-7 sm:w-7" />
                     </div>
 
-                    {/* TEXT */}
                     <div className="min-w-0">
                       <div className="mb-1 flex flex-wrap items-center gap-2">
                         <span
@@ -241,7 +216,6 @@ export default function TerjadwalPage() {
                     </div>
                   </div>
 
-                  {/* ACTION */}
                   <button
                     type="button"
                     onClick={() =>
@@ -267,9 +241,6 @@ export default function TerjadwalPage() {
                 </div>
               </section>
 
-              {/* =================================================
-                  SUMMARY
-              ================================================== */}
               <section className="mb-6 grid w-full min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 <SummaryCard
                   icon={
@@ -302,9 +273,6 @@ export default function TerjadwalPage() {
                 />
               </section>
 
-              {/* =================================================
-                  LIST HEADER
-              ================================================== */}
               <section className="mb-4 flex min-w-0 flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                 <div className="min-w-0">
                   <h2 className="text-base font-bold theme-text sm:text-lg">
@@ -335,9 +303,6 @@ export default function TerjadwalPage() {
                 </div>
               </section>
 
-              {/* =================================================
-                  LIST
-              ================================================== */}
               <section className="w-full min-w-0 space-y-3">
                 {scheduled.length > 0 ? (
                   scheduled.map((item) => (
@@ -356,9 +321,6 @@ export default function TerjadwalPage() {
                 )}
               </section>
 
-              {/* =================================================
-                  INFO
-              ================================================== */}
               <section className="mt-6 overflow-hidden rounded-2xl border theme-border theme-info">
                 <div className="flex min-w-0 items-start gap-3 p-4 sm:p-5">
                   <div
@@ -389,9 +351,6 @@ export default function TerjadwalPage() {
                 </div>
               </section>
 
-              {/* =================================================
-                  FOOTER
-              ================================================== */}
               <footer className="mt-8 border-t theme-border py-5 text-center">
                 <p className="text-[10px] font-medium theme-text-muted sm:text-xs">
                   © 2026 SmartSchool CMS • Pengumuman Terjadwal
@@ -405,9 +364,6 @@ export default function TerjadwalPage() {
   );
 }
 
-/* ============================================================
-   SUMMARY CARD
-============================================================ */
 
 function SummaryCard({
   icon,
@@ -477,9 +433,6 @@ function SummaryCard({
   );
 }
 
-/* ============================================================
-   SCHEDULED CARD
-============================================================ */
 
 function ScheduledCard({ item, onDelete }) {
   return (
@@ -495,7 +448,6 @@ function ScheduledCard({ item, onDelete }) {
         hover:shadow-lg
       "
     >
-      {/* LEFT ACCENT */}
       <div
         className="
           absolute bottom-0 left-0 top-0 w-1
@@ -504,7 +456,6 @@ function ScheduledCard({ item, onDelete }) {
       />
 
       <div className="flex min-w-0 flex-col gap-4 p-4 pl-5 sm:p-5 sm:pl-6 lg:flex-row lg:items-center">
-        {/* ICON */}
         <div
           className="
             flex h-11 w-11 shrink-0
@@ -520,9 +471,7 @@ function ScheduledCard({ item, onDelete }) {
           <Clock className="h-5 w-5" />
         </div>
 
-        {/* INFORMATION */}
         <div className="min-w-0 flex-1">
-          {/* TITLE */}
           <div className="flex min-w-0 flex-wrap items-center gap-2">
             <h3
               className="
@@ -556,7 +505,6 @@ function ScheduledCard({ item, onDelete }) {
             </span>
           </div>
 
-          {/* META */}
           <div className="mt-2.5 flex min-w-0 flex-wrap items-center gap-2">
             <div
               className="
@@ -592,7 +540,6 @@ function ScheduledCard({ item, onDelete }) {
           </div>
         </div>
 
-        {/* ACTIONS */}
         <div
           className="
             flex shrink-0 items-center justify-between
@@ -666,9 +613,6 @@ function ScheduledCard({ item, onDelete }) {
   );
 }
 
-/* ============================================================
-   EMPTY STATE
-============================================================ */
 
 function EmptyState({ onCreate }) {
   return (
