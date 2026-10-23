@@ -22,9 +22,7 @@ export const getKelas = async (req: AuthRequest, res: Response) => {
     const search = req.query.search as string;
     const tahunAjaranId = req.query.tahunAjaranId as string;
     const shiftQuery = req.query.shift as string | undefined;
-    const tingkat = req.query.tingkat
-      ? parseInt(req.query.tingkat as string)
-      : undefined;
+    const tingkatQuery = req.query.tingkat as string | undefined; // PERBAIKAN: Tangkap sebagai string
     const sortBy = (req.query.sortBy as string) || "tingkat";
     const sortOrder = (req.query.sortOrder as string) || "asc";
 
@@ -36,7 +34,11 @@ export const getKelas = async (req: AuthRequest, res: Response) => {
     };
 
     if (tahunAjaranId) whereClause.tahunAjaranId = tahunAjaranId;
-    if (tingkat !== undefined) whereClause.tingkat = tingkat;
+
+    // --- PERBAIKAN FILTER TINGKAT ---
+    if (tingkatQuery && tingkatQuery.toLowerCase() !== "semua") {
+      whereClause.tingkat = tingkatQuery;
+    }
 
     if (shiftQuery) {
       if (shiftQuery.trim().toLowerCase() === "belum") {

@@ -109,8 +109,13 @@ export const registerFaceIdByAdmin = async (
     return successResponse(res, "Face ID berhasil didaftarkan", biometrik, 201);
   } catch (error: any) {
     if (req.file && fs.existsSync(req.file.path)) {
-      fs.unlinkSync(req.file.path); // Hapus gambar jika proses gagal
+      fs.unlinkSync(req.file.path); 
     }
+
+    console.error(
+      "[AI SERVER ERROR DETAIL]:",
+      error.response?.data || error.message || error,
+    );
 
     if (error instanceof AppError) return next(error);
     return next(
@@ -1011,4 +1016,4 @@ export const getMonitoringGuru = async (
   } catch (error) {
     next(error);
   }
-};
+};
