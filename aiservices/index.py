@@ -1,8 +1,11 @@
 import os
 import urllib.request
+# pyrefly: ignore[missing-import]
 import cv2
 import numpy as np
+# pyrefly: ignore[missing-import]
 import uvicorn
+# pyrefly: ignore[missing-import]
 from fastapi import FastAPI, File, HTTPException, UploadFile
 
 # --- Konfigurasi (bisa di-override lewat environment variable) ---

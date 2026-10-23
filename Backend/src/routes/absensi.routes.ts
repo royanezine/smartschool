@@ -13,6 +13,7 @@ import {
   getRiwayatShiftSaya,
   getMetodeAbsensiAktif,
   registerFaceIdByAdmin,
+  getRiwayatAbsensiSiswa,
 } from "../controllers/absensi.controller";
 import { authenticate } from "../middlewares/auth.middleware";
 import { requireTenant, requireSubscription } from "../middlewares/tenant.middleware";
@@ -57,9 +58,13 @@ router.post(
 );
 router.get("/metode-aktif", getMetodeAbsensiAktif);
 
-// Rute Absensi Shift Kerja (Pegawai / Guru)
 router.post("/check-in", checkInShift);
 router.post("/check-out", checkOutShift);
 router.get("/shift-saya", getRiwayatShiftSaya);
+router.get(
+  "/siswa/:siswaId",
+  requireIzin("absensi.view"),
+  getRiwayatAbsensiSiswa,
+);
 
 export default router;
