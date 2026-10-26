@@ -1,7 +1,8 @@
 import { z } from "zod";
+import { paginationQuery } from "../utils/pagination";
 
 export const createAbsensiSchema = z.object({
-  kelasId: z.string().uuid("ID Kelas tidak valid").optional(),
+  kelasId: z.string().uuid("ID Kelas tidak valid"),
   status: z.enum(["hadir", "izin", "sakit", "alpha"]),
   keterangan: z.string().optional(),
 
@@ -31,4 +32,25 @@ export const checkOutShiftSchema = z.object({
   metode: z.enum(["lokasi", "barcode", "face", "manual"]).default("lokasi"),
   lintang: z.coerce.number().optional(),
   bujur: z.coerce.number().optional(),
+});
+
+export const absensiListQuerySchema = z.object({
+  ...paginationQuery,
+  sekolahId: z.string().uuid().optional(),
+  kelasId: z.string().uuid().optional(),
+  penggunaId: z.string().uuid().optional(),
+  shiftKerjaId: z.string().uuid().optional(),
+  tanggal: z.string().optional(),
+  tanggalMulai: z.string().optional(),
+  tanggalSelesai: z.string().optional(),
+  search: z.string().trim().max(200).optional(),
+  role: z.enum(["siswa", "guru", "staff", "staf", "pegawai", "karyawan", "admin_sekolah"]).optional(),
+  status: z.enum(["hadir", "izin", "sakit", "alpha", "terlambat"]).optional(),
+});
+
+export const updateAbsensiSchema = z.object({
+  status: z.enum(["hadir", "izin", "sakit", "alpha", "terlambat"]).optional(),
+  keterangan: z.string().trim().max(2000).nullable().optional(),
+}).strict().refine(value => value.status !== undefined || value.keterangan !== undefined, {
+  message: "Isi status atau keterangan yang ingin diperbarui",
 });

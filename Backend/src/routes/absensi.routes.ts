@@ -21,6 +21,7 @@ import { requireIzin } from "../middlewares/izin.middleware";
 import { uploadBiometrik } from "../middlewares/upload.middleware";
 
 import { authorizeRoles } from "../middlewares/role.middleware";
+import { getAbsensiSekolah, updateAbsensiByAdmin } from "../controllers/adminAbsensi.controller";
 
 const router = Router();
 
@@ -39,6 +40,8 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 router.use(authenticate, requireTenant, requireSubscription);
+
+router.get("/", authorizeRoles("admin_sekolah"), requireIzin("absensi.view", "lms.view"), getAbsensiSekolah);
 
 router.post(
   "/",
@@ -66,5 +69,7 @@ router.get(
   requireIzin("absensi.view"),
   getRiwayatAbsensiSiswa,
 );
+
+router.patch("/:id", authorizeRoles("admin_sekolah"), requireIzin("absensi.update", "lms.update"), updateAbsensiByAdmin);
 
 export default router;

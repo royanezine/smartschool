@@ -14,8 +14,14 @@ import {
 import { uploadPpdb } from "../middlewares/uploadPpdb.middleware";
 
 import { pendaftaranPpdbSchema } from "../validations/ppdb.validation";
+import { getPendaftar, getDetailPendaftar, getStatistikPendaftar } from "../controllers/pendaftar.controller";
 
 const router = Router();
+
+const readPendaftar = [authenticate, requireTenant, requireSubscription, requireIzin("ppdb.view")];
+router.get("/pendaftar", ...readPendaftar, getPendaftar);
+router.get("/pendaftar/statistik", ...readPendaftar, getStatistikPendaftar);
+router.get("/pendaftar/:id", ...readPendaftar, getDetailPendaftar);
 
 // PUBLIC
 router.post(

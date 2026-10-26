@@ -8,6 +8,7 @@ import {
   createAbsensiSchema,
   checkInShiftSchema,
   checkOutShiftSchema,
+  absensiListQuerySchema,
 } from "../validations/absensi.validation";
 import { AppError } from "../utils/appError";
 import { AuthRequest } from "../middlewares/auth.middleware";
@@ -16,6 +17,9 @@ import { successResponse, paginatedResponse } from "../utils/responseFormatter";
 import { NextFunction } from "express";
 import { normalizeRole, canManageRole, isSuperAdmin } from "../utils/rbac";
 import { postToFaceAi } from "../services/faceAi.service";
+import { attendanceDateFilter, localClockMinutes, todayDateOnly } from "../utils/dateOnly";
+import { attendanceInclude, attendanceListFilter, attendanceSchoolFilter } from "../services/absensiQuery.service";
+import { resolveSchoolId } from "../utils/schoolScope";
 
 export const registerFaceIdByAdmin = async (
   req: AuthRequest,
@@ -290,8 +294,8 @@ export const createAbsensi = async (
       urlFotoSaved = `/uploads/absensi/${file.filename}`;
     }
 
-    const hariIni = new Date();
-    hariIni.setHours(0, 0, 0, 0);
+    const waktuMasuk = new Date();
+    const hariIni = todayDateOnly(waktuMasuk);
 
     const absensiSudahAda = await prisma.absensi.findFirst({
       where: {
@@ -307,10 +311,12 @@ export const createAbsensi = async (
 
     const absensi = await prisma.absensi.create({
       data: {
+        sekolahId: effectiveSekolahId,
         penggunaId: userId,
         kelasId: data.kelasId,
         tanggal: hariIni,
         status: data.status,
+        waktuMasuk: data.status === "hadir" ? waktuMasuk : null,
         keterangan: data.keterangan || null,
         metode: data.metode,
         lintang: data.lintang || null,
@@ -354,7 +360,8 @@ export const getAbsensiKelas = async (
 ) => {
   try {
     const kelasId = req.params.kelasId as string;
-    const { tanggal } = req.query;
+    const query = absensiListQuerySchema.parse(req.query);
+    const tanggalFilter = attendanceDateFilter(query);
     const isSuper = isSuperAdmin(req.user?.role);
     const sekolahId = req.user?.sekolahId;
 
@@ -382,30 +389,20 @@ export const getAbsensiKelas = async (
 
     const where: any = {
       kelasId,
+      ...attendanceSchoolFilter(!isSuper ? sekolahId : undefined),
       kelas: {
         dihapusPada: null,
         ...(!isSuper ? { sekolahId } : {}),
       },
     };
 
-    if (tanggal) {
-      const tanggalFilter = new Date(tanggal as string);
-      tanggalFilter.setHours(0, 0, 0, 0);
-
+    if (tanggalFilter) {
       where.tanggal = tanggalFilter;
     }
 
     const absensi = await prisma.absensi.findMany({
       where,
-      include: {
-        pengguna: {
-          select: {
-            id: true,
-            namaLengkap: true,
-            nisn: true,
-          },
-        },
-      },
+      include: attendanceInclude,
       orderBy: {
         dibuatPada: "desc",
       },
@@ -417,44 +414,11 @@ export const getAbsensiKelas = async (
   }
 };
 
-export const exportRekapAbsensi = async (req: AuthRequest, res: Response) => {
+export const exportRekapAbsensi = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
-    const sekolahId = req.user?.sekolahId;
-
-    if (!sekolahId) {
-      return res.status(403).json({
-        success: false,
-        message: "Akses ditolak",
-      });
-    }
-
-    const { tanggalMulai, tanggalSelesai, kelasId } = req.query;
-
-    const where: any = {
-      kelas: {
-        sekolahId,
-      },
-    };
-
-    if (kelasId) {
-      where.kelasId = String(kelasId);
-    }
-
-    if (tanggalMulai || tanggalSelesai) {
-      where.tanggal = {};
-
-      if (tanggalMulai) {
-        const mulai = new Date(String(tanggalMulai));
-        mulai.setHours(0, 0, 0, 0);
-        where.tanggal.gte = mulai;
-      }
-
-      if (tanggalSelesai) {
-        const selesai = new Date(String(tanggalSelesai));
-        selesai.setHours(23, 59, 59, 999);
-        where.tanggal.lte = selesai;
-      }
-    }
+    const query = absensiListQuerySchema.parse(req.query);
+    const sekolahId = resolveSchoolId(req.user, query.sekolahId);
+    const where = attendanceListFilter(query, sekolahId);
 
     const absensi = await prisma.absensi.findMany({
       where,
@@ -500,7 +464,7 @@ export const exportRekapAbsensi = async (req: AuthRequest, res: Response) => {
         width: 15,
       },
       {
-        header: "Nama Siswa",
+        header: "Nama Pengguna",
         key: "nama",
         width: 30,
       },
@@ -570,12 +534,7 @@ export const exportRekapAbsensi = async (req: AuthRequest, res: Response) => {
 
     res.end();
   } catch (error) {
-    console.error("Error export rekap absensi:", error);
-
-    return res.status(500).json({
-      success: false,
-      message: "Gagal mengekspor rekap absensi",
-    });
+    next(error);
   }
 };
 
@@ -668,8 +627,8 @@ export const checkInShift = async (req: AuthRequest, res: Response) => {
     }
   }
 
-  const hariIni = new Date();
-  hariIni.setHours(0, 0, 0, 0);
+  const waktuMasuk = new Date();
+  const hariIni = todayDateOnly(waktuMasuk);
 
   const sudahAda = await prisma.absensi.findFirst({
     where: {
@@ -686,13 +645,11 @@ export const checkInShift = async (req: AuthRequest, res: Response) => {
     );
   }
 
-  const waktuMasuk = new Date();
-
   const partsMasuk = shift.jamMasuk.split(":");
   const jamJadwal = Number(partsMasuk[0] || 0);
   const menitJadwal = Number(partsMasuk[1] || 0);
   const totalMenitJadwal = jamJadwal * 60 + menitJadwal;
-  const totalMenitAktual = waktuMasuk.getHours() * 60 + waktuMasuk.getMinutes();
+  const totalMenitAktual = localClockMinutes(waktuMasuk);
   const selisihMenit = totalMenitAktual - totalMenitJadwal;
 
   let terlambatMenit = 0;
@@ -732,8 +689,8 @@ export const checkOutShift = async (req: AuthRequest, res: Response) => {
 
   const data = checkOutShiftSchema.parse(req.body);
 
-  const hariIni = new Date();
-  hariIni.setHours(0, 0, 0, 0);
+  const waktuKeluar = new Date();
+  const hariIni = todayDateOnly(waktuKeluar);
 
   const absensiAktif = await prisma.absensi.findFirst({
     where: {
@@ -755,7 +712,6 @@ export const checkOutShift = async (req: AuthRequest, res: Response) => {
     );
   }
 
-  const waktuKeluar = new Date();
   const waktuMasuk = absensiAktif.waktuMasuk;
 
   const durasiMenitKotor = Math.max(
@@ -771,8 +727,7 @@ export const checkOutShift = async (req: AuthRequest, res: Response) => {
     const jamPulang = Number(partsPulang[0] || 0);
     const menitPulang = Number(partsPulang[1] || 0);
     const jadwalPulangMenit = jamPulang * 60 + menitPulang;
-    const waktuKeluarMenit =
-      waktuKeluar.getHours() * 60 + waktuKeluar.getMinutes();
+    const waktuKeluarMenit = localClockMinutes(waktuKeluar);
 
     if (waktuKeluarMenit < jadwalPulangMenit) {
       statusShift =
@@ -877,42 +832,12 @@ export const getMonitoringGuru = async (
   next: NextFunction,
 ) => {
   try {
-    const isSuper = isSuperAdmin(req.user?.role);
-    const sekolahId = req.user?.sekolahId;
-
-    if (!isSuper && !sekolahId) {
-      throw new AppError(
-        "Data tidak ditemukan atau Anda tidak memiliki akses",
-        403,
-      );
-    }
-
-    const { tanggal, status, search, shiftKerjaId } = req.query;
-
-    let targetDate = new Date();
-    if (tanggal) {
-      const parsed = new Date(String(tanggal));
-      if (!isNaN(parsed.getTime())) {
-        targetDate = parsed;
-      }
-    }
-
-    const startOfDay = new Date(targetDate);
-    startOfDay.setHours(0, 0, 0, 0);
-
-    const endOfDay = new Date(targetDate);
-    endOfDay.setHours(23, 59, 59, 999);
+    const query = absensiListQuerySchema.parse(req.query);
+    const sekolahId = resolveSchoolId(req.user, query.sekolahId);
 
     const where: any = {
-      tanggal: {
-        gte: startOfDay,
-        lte: endOfDay,
-      },
-      ...(!isSuper && sekolahId
-        ? {
-            OR: [{ sekolahId }, { pengguna: { sekolahId } }],
-          }
-        : {}),
+      ...attendanceListFilter(query, sekolahId),
+      tanggal: attendanceDateFilter(query) || todayDateOnly(),
       pengguna: {
         dihapusPada: null,
         peran: {
@@ -940,27 +865,6 @@ export const getMonitoringGuru = async (
         },
       },
     };
-
-    if (status) {
-      where.status = String(status);
-    }
-
-    if (shiftKerjaId) {
-      where.shiftKerjaId = String(shiftKerjaId);
-    }
-
-    if (search) {
-      const searchStr = String(search);
-      where.pengguna = {
-        ...where.pengguna,
-        OR: [
-          { namaLengkap: { contains: searchStr, mode: "insensitive" } },
-          { nip: { contains: searchStr, mode: "insensitive" } },
-          { nuptk: { contains: searchStr, mode: "insensitive" } },
-          { email: { contains: searchStr, mode: "insensitive" } },
-        ],
-      };
-    }
 
     const absensiGuru = await prisma.absensi.findMany({
       where,
@@ -1043,7 +947,7 @@ export const getRiwayatAbsensiSiswa = async (
 
     const whereClause: any = {
       penggunaId: siswaId,
-      ...(!isSuper && sekolahId ? { sekolahId } : {}),
+      ...attendanceSchoolFilter(!isSuper ? sekolahId : undefined),
     };
 
     const [data, totalData] = await Promise.all([
