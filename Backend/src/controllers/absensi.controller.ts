@@ -1,5 +1,4 @@
 import { Response } from "express";
-import axios from "axios";
 import FormData from "form-data";
 import fs from "fs";
 import ExcelJS from "exceljs";
@@ -16,6 +15,7 @@ import { hitungJarakMeter } from "../utils/geo";
 import { successResponse, paginatedResponse } from "../utils/responseFormatter";
 import { NextFunction } from "express";
 import { normalizeRole, canManageRole, isSuperAdmin } from "../utils/rbac";
+import { postToFaceAi } from "../services/faceAi.service";
 
 export const registerFaceIdByAdmin = async (
   req: AuthRequest,
@@ -69,14 +69,12 @@ export const registerFaceIdByAdmin = async (
     const formData = new FormData();
     formData.append("image", fs.createReadStream(file.path));
 
-    const aiServiceUrl = process.env.AI_SERVICE_URL || "http://localhost:8000";
-
-    const aiResponse = await axios.post(
-      `${aiServiceUrl}/extract-embedding`,
+    const aiResponse = await postToFaceAi<{
+      success: boolean;
+      embedding: number[];
+    }>(
+      "/extract-embedding",
       formData,
-      {
-        headers: formData.getHeaders(),
-      },
     );
 
     if (!aiResponse.data.success || !aiResponse.data.embedding) {
@@ -117,13 +115,7 @@ export const registerFaceIdByAdmin = async (
       error.response?.data || error.message || error,
     );
 
-    if (error instanceof AppError) return next(error);
-    return next(
-      new AppError(
-        error.response?.data?.message || "Gagal menghubungi AI Face Server",
-        500,
-      ),
-    );
+    return next(error);
   }
 };
 
@@ -277,34 +269,21 @@ export const createAbsensi = async (
       }
 
       const formData = new FormData();
-      const aiServiceUrl =
-        process.env.AI_SERVICE_URL || "http://localhost:8000";
 
       const masterPath = process.cwd() + biometrik.urlFotoReferensi;
 
       formData.append("master_image", fs.createReadStream(masterPath));
       formData.append("snapshot_image", fs.createReadStream(file.path));
 
-      try {
-        const aiResponse = await axios.post(
-          `${aiServiceUrl}/verify-face`,
-          formData,
-          {
-            headers: formData.getHeaders(),
-          },
-        );
+      const aiResponse = await postToFaceAi<{
+        matched: boolean;
+        message: string;
+      }>("/verify-face", formData);
 
-        if (!aiResponse.data.matched) {
-          throw new AppError(
-            `Wajah tidak cocok: ${aiResponse.data.message}`,
-            400,
-          );
-        }
-      } catch (error: any) {
-        if (error instanceof AppError) throw error;
+      if (!aiResponse.data.matched) {
         throw new AppError(
-          error.response?.data?.message || "Gagal menghubungi AI Face Server",
-          500,
+          `Wajah tidak cocok: ${aiResponse.data.message}`,
+          400,
         );
       }
 

@@ -1,5 +1,6 @@
 import os
 import urllib.request
+from pathlib import Path
 # pyrefly: ignore[missing-import]
 import cv2
 import numpy as np
@@ -11,6 +12,9 @@ from fastapi import FastAPI, File, HTTPException, UploadFile
 # --- Konfigurasi (bisa di-override lewat environment variable) ---
 PORT = int(os.getenv("PORT", "8032"))
 SIMILARITY_THRESHOLD = float(os.getenv("SIMILARITY_THRESHOLD", "0.6"))
+MODEL_DIR = Path(__file__).resolve().parent
+YUNET_PATH = MODEL_DIR / "yunet.onnx"
+SFACE_PATH = MODEL_DIR / "sface.onnx"
 
 # --- Link Download Otomatis Model AI Ringan OpenCV ---
 YUNET_URL = "https://github.com/opencv/opencv_zoo/raw/main/models/face_detection_yunet/face_detection_yunet_2023mar.onnx"
@@ -22,17 +26,20 @@ def download_model(url, filename):
         urllib.request.urlretrieve(url, filename)
         print(f"{filename} berhasil diunduh!")
 
-download_model(YUNET_URL, "yunet.onnx")
-download_model(SFACE_URL, "sface.onnx")
+download_model(YUNET_URL, YUNET_PATH)
+download_model(SFACE_URL, SFACE_PATH)
 
 app = FastAPI(title="Face Verification Service (Lightweight SFace)")
 
 # Muat model ke dalam memori (Sangat ringan)
-detector = cv2.FaceDetectorYN.create("yunet.onnx", "", (320, 320))
-recognizer = cv2.FaceRecognizerSF.create("sface.onnx", "")
+detector = cv2.FaceDetectorYN.create(str(YUNET_PATH), "", (320, 320))
+recognizer = cv2.FaceRecognizerSF.create(str(SFACE_PATH), "")
 
 def get_face_feature(image_bytes: bytes):
     """Membaca gambar, mendeteksi lokasi wajah, lalu mengekstrak pola unik tulang wajah."""
+    if not image_bytes:
+        return None
+
     img = cv2.imdecode(np.frombuffer(image_bytes, np.uint8), cv2.IMREAD_COLOR)
     if img is None:
         return None
@@ -52,6 +59,23 @@ def get_face_feature(image_bytes: bytes):
     aligned_face = recognizer.alignCrop(img, face)
     feature = recognizer.feature(aligned_face)
     return feature
+
+@app.get("/health")
+def health():
+    return {"status": "ok", "service": "face-verification"}
+
+
+@app.post("/extract-embedding")
+async def extract_embedding(image: UploadFile = File(...)):
+    feature = get_face_feature(await image.read())
+    if feature is None:
+        raise HTTPException(
+            status_code=400,
+            detail="Wajah tidak terdeteksi. Pastikan foto wajah terang dan jelas.",
+        )
+
+    return {"success": True, "embedding": feature.flatten().tolist()}
+
 
 @app.post("/verify-face")
 async def verify_face(
@@ -84,4 +108,4 @@ async def verify_face(
         raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=PORT, reload=True)
+    uvicorn.run(app, host="0.0.0.0", port=PORT)
