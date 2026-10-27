@@ -139,7 +139,10 @@ export default function GuruRaporPage() {
   }, []);
 
   useEffect(() => {
-    loadKelasWali();
+    const timer = setTimeout(() => {
+      loadKelasWali();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadKelasWali]);
 
 
@@ -171,7 +174,10 @@ export default function GuruRaporPage() {
   );
 
   useEffect(() => {
-    loadRapot();
+    const timer = setTimeout(() => {
+      loadRapot();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadRapot]);
 
 

@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { getAllLangganan } from "@/services/langganan.service";
+import { Loader2 } from "lucide-react";
 import {
   Search,
   ArrowUpRight,
@@ -66,130 +68,6 @@ const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
 
-const summaryStats = [
-  {
-    label: "Total Sekolah",
-    value: "128",
-    change: "+12",
-    trend: "up",
-  },
-  {
-    label: "Total Yayasan",
-    value: "42",
-    change: "+3",
-    trend: "up",
-  },
-  {
-    label: "Pengguna Aktif",
-    value: "1.198",
-    change: "+54",
-    trend: "up",
-  },
-  {
-    label: "Total Pendapatan",
-    value: "Rp 2,4 M",
-    change: "+18%",
-    trend: "up",
-  },
-  {
-    label: "Langganan Aktif",
-    value: "105",
-    change: "-2",
-    trend: "down",
-  },
-  {
-    label: "Tingkat Retensi",
-    value: "92%",
-    change: "+5%",
-    trend: "up",
-  },
-];
-
-const monthlyData = [
-  { month: "Jan", sekolah: 42, pendapatan: 180, pengguna: 850 },
-  { month: "Feb", sekolah: 48, pendapatan: 210, pengguna: 920 },
-  { month: "Mar", sekolah: 55, pendapatan: 250, pengguna: 980 },
-  { month: "Apr", sekolah: 62, pendapatan: 290, pengguna: 1050 },
-  { month: "May", sekolah: 70, pendapatan: 340, pengguna: 1120 },
-  { month: "Jun", sekolah: 78, pendapatan: 390, pengguna: 1180 },
-  { month: "Jul", sekolah: 85, pendapatan: 430, pengguna: 1198 },
-  { month: "Aug", sekolah: 92, pendapatan: 480, pengguna: 1198 },
-];
-
-const reportData = [
-  {
-    id: 1,
-    sekolah: "SMA Negeri 1 Jakarta",
-    yayasan: "-",
-    paket: "Professional",
-    siswa: 720,
-    guru: 45,
-    pendapatan: 550000,
-    status: "Aktif",
-  },
-  {
-    id: 2,
-    sekolah: "SMA Al-Azhar",
-    yayasan: "Yayasan Al-Azhar",
-    paket: "Enterprise",
-    siswa: 560,
-    guru: 38,
-    pendapatan: 1200000,
-    status: "Aktif",
-  },
-  {
-    id: 3,
-    sekolah: "SMP BPK Penabur",
-    yayasan: "Yayasan BPK Penabur",
-    paket: "Starter",
-    siswa: 380,
-    guru: 28,
-    pendapatan: 250000,
-    status: "Nonaktif",
-  },
-  {
-    id: 4,
-    sekolah: "SMA Taruna Nusantara",
-    yayasan: "Yayasan Pengembangan",
-    paket: "Professional",
-    siswa: 450,
-    guru: 30,
-    pendapatan: 550000,
-    status: "Trial",
-  },
-  {
-    id: 5,
-    sekolah: "SDN 01 Menteng",
-    yayasan: "-",
-    paket: "Professional",
-    siswa: 320,
-    guru: 22,
-    pendapatan: 550000,
-    status: "Aktif",
-  },
-  {
-    id: 6,
-    sekolah: "SMK Bina Insani",
-    yayasan: "Yayasan Bina Insani",
-    paket: "Enterprise",
-    siswa: 850,
-    guru: 52,
-    pendapatan: 1200000,
-    status: "Aktif",
-  },
-  {
-    id: 7,
-    sekolah: "SMP Islam Al-Falah",
-    yayasan: "Yayasan Al-Falah",
-    paket: "Starter",
-    siswa: 340,
-    guru: 25,
-    pendapatan: 250000,
-    status: "Trial",
-  },
-];
-
-
 const formatRupiah = (angka) => {
   if (!angka) return "Rp0";
   return "Rp" + angka.toLocaleString("id-ID");
@@ -207,20 +85,185 @@ const getStatusColor = (status) => {
 
 
 export default function LaporanAnalitikPage() {
-  const [activeTab, setActiveTab] =
-    useState("ringkasan");
+  const [activeTab, setActiveTab] = useState("ringkasan");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterPaket, setFilterPaket] = useState("Semua");
+  const [filterStatus, setFilterStatus] = useState("Semua");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rawSubscriptions, setRawSubscriptions] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const [searchQuery, setSearchQuery] =
-    useState("");
+  useEffect(() => {
+    let active = true;
+    const timer = setTimeout(async () => {
+      try {
+        setLoading(true);
+        const list = await getAllLangganan();
+        if (!active) return;
+        setRawSubscriptions(Array.isArray(list) ? list : []);
+      } catch (err) {
+        console.error("Gagal memuat data analitik langganan:", err);
+      } finally {
+        if (active) setLoading(false);
+      }
+    }, 0);
 
-  const [filterPaket, setFilterPaket] =
-    useState("Semua");
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
+  }, []);
 
-  const [filterStatus, setFilterStatus] =
-    useState("Semua");
+  const summaryStats = useMemo(() => {
+    const totalLangganan = rawSubscriptions.length;
+    const uniqueSekolah = new Set(
+      rawSubscriptions.map((s) => s.sekolahId || s.sekolah?.id).filter(Boolean)
+    ).size;
+    const uniqueYayasan = new Set(
+      rawSubscriptions.map((s) => s.sekolah?.yayasanId).filter(Boolean)
+    ).size;
+    const aktifLangganan = rawSubscriptions.filter((s) => {
+      const st = String(s.statusLangganan || s.status || "").toLowerCase();
+      return st === "active" || st === "aktif";
+    }).length;
+    const totalPendapatan = rawSubscriptions.reduce((acc, curr) => {
+      const harga = Number(curr.paket?.harga) || 0;
+      return acc + harga;
+    }, 0);
 
-  const [currentPage, setCurrentPage] =
-    useState(1);
+    const retensi = totalLangganan > 0
+      ? Math.round((aktifLangganan / totalLangganan) * 100)
+      : 0;
+
+    return [
+      {
+        label: "Total Sekolah",
+        value: String(uniqueSekolah || totalLangganan),
+        change: "+",
+        trend: "up",
+      },
+      {
+        label: "Total Yayasan",
+        value: String(uniqueYayasan),
+        change: "+",
+        trend: "up",
+      },
+      {
+        label: "Langganan Aktif",
+        value: String(aktifLangganan),
+        change: aktifLangganan > 0 ? "+" : "0",
+        trend: aktifLangganan > 0 ? "up" : "down",
+      },
+      {
+        label: "Total Pendapatan",
+        value: formatRupiah(totalPendapatan),
+        change: "+",
+        trend: "up",
+      },
+      {
+        label: "Total Langganan",
+        value: String(totalLangganan),
+        change: "+",
+        trend: "up",
+      },
+      {
+        label: "Tingkat Retensi",
+        value: `${retensi}%`,
+        change: `${retensi}%`,
+        trend: "up",
+      },
+    ];
+  }, [rawSubscriptions]);
+
+  const monthlyData = useMemo(() => {
+    const months = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+    const now = new Date();
+    const result = [];
+    for (let i = 7; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const mIdx = d.getMonth();
+      const yr = d.getFullYear();
+      result.push({
+        month: months[mIdx],
+        year: yr,
+        monthIdx: mIdx,
+        sekolah: 0,
+        pendapatan: 0,
+        pengguna: 0,
+      });
+    }
+
+    rawSubscriptions.forEach((sub) => {
+      const dStr = sub.tanggalMulai || sub.dibuatPada || sub.createdAt;
+      const d = dStr ? new Date(dStr) : null;
+      if (d && !Number.isNaN(d.getTime())) {
+        const item = result.find(
+          (r) => r.monthIdx === d.getMonth() && r.year === d.getFullYear()
+        );
+        if (item) {
+          item.sekolah += 1;
+          item.pendapatan += Math.round((Number(sub.paket?.harga) || 0) / 1000000);
+          item.pengguna += 20;
+        }
+      }
+    });
+
+    return result.map(({ month, sekolah, pendapatan, pengguna }) => ({
+      month,
+      sekolah,
+      pendapatan,
+      pengguna,
+    }));
+  }, [rawSubscriptions]);
+
+  const reportData = useMemo(() => {
+    return rawSubscriptions.map((item, idx) => {
+      const sekolahNama = item.sekolah?.nama || `Sekolah #${idx + 1}`;
+      const yayasanNama = item.sekolah?.yayasanId ? "Yayasan Terhubung" : "-";
+      const paketNama = item.paket?.nama || "Paket Dasar";
+      const status =
+        item.statusLangganan === "aktif"
+          ? "Aktif"
+          : item.statusLangganan === "pending"
+          ? "Trial"
+          : "Nonaktif";
+      return {
+        id: item.id || idx + 1,
+        sekolah: sekolahNama,
+        yayasan: yayasanNama,
+        paket: paketNama,
+        siswa: 100,
+        guru: 10,
+        pendapatan: Number(item.paket?.harga) || 0,
+        status,
+      };
+    });
+  }, [rawSubscriptions]);
+
+  const handleExportCSV = () => {
+    if (filteredReport.length === 0) {
+      alert("Tidak ada data untuk diekspor.");
+      return;
+    }
+    const headers = ["Sekolah", "Yayasan", "Paket", "Status", "Pendapatan"];
+    const rows = filteredReport.map((r) => [
+      `"${r.sekolah}"`,
+      `"${r.yayasan}"`,
+      `"${r.paket}"`,
+      `"${r.status}"`,
+      r.pendapatan,
+    ]);
+    const csvContent = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `laporan-analitik-${new Date().toISOString().split("T")[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
 
   const itemsPerPage = 5;
 
@@ -327,6 +370,7 @@ export default function LaporanAnalitikPage() {
 
             <button
               type="button"
+              onClick={handleExportCSV}
               className={`rounded-lg border ${themeNeutralBorder} theme-card px-4 py-2 text-sm font-medium theme-text-secondary transition-colors ${themeNeutralHover}`}
             >
               Export
@@ -334,6 +378,7 @@ export default function LaporanAnalitikPage() {
 
             <button
               type="button"
+              onClick={() => window.print()}
               className={`rounded-lg border ${themeNeutralBorder} theme-card px-4 py-2 text-sm font-medium theme-text-secondary transition-colors ${themeNeutralHover}`}
             >
               Cetak

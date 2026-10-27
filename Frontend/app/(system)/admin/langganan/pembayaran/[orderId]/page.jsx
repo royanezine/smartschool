@@ -88,7 +88,10 @@ export default function PembayaranLanggananPage() {
   );
 
   useEffect(() => {
-    checkStatus({ showLoading: true });
+    const timer = setTimeout(() => {
+      checkStatus({ showLoading: true });
+    }, 0);
+    return () => clearTimeout(timer);
   }, [checkStatus]);
 
   useEffect(() => {
@@ -107,17 +110,22 @@ export default function PembayaranLanggananPage() {
         clearInterval(pollRef.current);
         pollRef.current = null;
       }
-      setPolling(false);
-      return;
+      const timer = setTimeout(() => {
+        setPolling(false);
+      }, 0);
+      return () => clearTimeout(timer);
     }
 
-    setPolling(true);
+    const timer = setTimeout(() => {
+      setPolling(true);
+    }, 0);
 
     pollRef.current = setInterval(() => {
       checkStatus();
     }, POLL_INTERVAL_MS);
 
     return () => {
+      clearTimeout(timer);
       if (pollRef.current) {
         clearInterval(pollRef.current);
         pollRef.current = null;

@@ -390,7 +390,10 @@ export default function BukuDigitalSiswaPage() {
     useState("Semua");
 
   useEffect(() => {
-    setMounted(true);
+    const timer = setTimeout(() => {
+      setMounted(true);
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   const loadBooks = async (
@@ -437,7 +440,10 @@ export default function BukuDigitalSiswaPage() {
   };
 
   useEffect(() => {
-    loadBooks();
+    const timer = setTimeout(() => {
+      loadBooks();
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   const categories = useMemo(

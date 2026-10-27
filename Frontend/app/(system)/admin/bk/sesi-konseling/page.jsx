@@ -9,9 +9,9 @@ import Sidebar from "@/app/components/Sidebar";
 import {
   getSesiKonseling,
   deleteSesiKonseling,
+  putuskanPengajuanKonseling,
 } from "@/services/bk.service";
 
-import { apiFetch } from "@/lib/api";
 
 export default function SesiKonselingPage() {
   const router = useRouter();
@@ -54,7 +54,10 @@ export default function SesiKonselingPage() {
   }, []);
 
   useEffect(() => {
-    loadData();
+    const timer = setTimeout(() => {
+      loadData();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadData]);
 
   async function handleRefresh() {
@@ -71,23 +74,31 @@ export default function SesiKonselingPage() {
 
 
  
-const handleDecision = async (id, keputusan, catatan = "") => {
-  try {
-    await apiFetch(`/api/bk/konseling/${id}/keputusan`, {
-      method: "PUT",
-      body: JSON.stringify({
+  const handleDecision = async (id, keputusan, catatan = "") => {
+    try {
+      setProcessingId(id);
+      setError("");
+      await putuskanPengajuanKonseling(id, {
         keputusan,
-        ...(keputusan === "ditolak"
+        ...(keputusan === "tolak" && catatan.trim()
           ? { catatan: catatan.trim() }
           : {}),
-      }),
-    });
+      });
 
-  } catch (error) {
-    console.error("Gagal memproses keputusan konseling:", error);
-    alert(error.message || "Gagal memproses keputusan konseling.");
-  }
-};
+      setSuccess(
+        `Pengajuan konseling berhasil ${keputusan === "setujui" ? "disetujui" : "ditolak"}.`
+      );
+      setShowRejectModal(false);
+      setRejectTarget(null);
+      setRejectNote("");
+      loadData(false);
+    } catch (err) {
+      console.error("Gagal memproses keputusan konseling:", err);
+      setError(err?.message || "Gagal memproses keputusan konseling.");
+    } finally {
+      setProcessingId(null);
+    }
+  };
 
 
   function getNamaSiswa(item) {
@@ -251,7 +262,10 @@ const handleDecision = async (id, keputusan, catatan = "") => {
   }, [data, search, statusFilter, sortBy]);
 
   useEffect(() => {
-    setPage(1);
+    const timer = setTimeout(() => {
+      setPage(1);
+    }, 0);
+    return () => clearTimeout(timer);
   }, [search, statusFilter, sortBy]);
 
   const totalPage = Math.max(

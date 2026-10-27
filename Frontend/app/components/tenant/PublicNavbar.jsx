@@ -32,7 +32,10 @@ export default function PublicNavbar({ sekolah = {}, halaman = [] }) {
   }, []);
 
   useEffect(() => {
-    setOpen(false);
+    const timer = setTimeout(() => {
+      setOpen(false);
+    }, 0);
+    return () => clearTimeout(timer);
   }, [pathname]);
 
   const menuItems = [

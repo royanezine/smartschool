@@ -134,7 +134,9 @@ export default function SiswaLayout({
 
 
   useEffect(() => {
-    setMounted(true);
+    const timer = setTimeout(() => {
+      setMounted(true);
+    }, 0);
 
     const loadUser = () => {
       const sessionUser = getSessionUser();

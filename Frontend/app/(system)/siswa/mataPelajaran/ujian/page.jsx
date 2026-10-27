@@ -273,7 +273,10 @@ function UjianPageInner() {
   }
 
   useEffect(() => {
-    loadData();
+    const timer = setTimeout(() => {
+      loadData();
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
 

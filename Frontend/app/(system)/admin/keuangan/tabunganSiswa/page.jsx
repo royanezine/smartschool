@@ -75,13 +75,13 @@ function StatCard({ title, value, description, icon: Icon, loading }) {
   return (
     <div className="theme-card rounded-xl border theme-border p-4 shadow-sm transition hover:shadow-md sm:p-5">
       <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <p className="text-xs font-medium theme-text-muted">{title}</p>
 
           {loading ? (
             <div className="mt-3 h-7 w-24 animate-pulse rounded-lg bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)]" />
           ) : (
-            <p className="mt-2 break-words text-xl font-bold tabular-nums theme-text sm:text-2xl">
+            <p className="mt-2 whitespace-nowrap text-xl font-bold tabular-nums theme-text sm:text-2xl">
               {value}
             </p>
           )}
@@ -178,11 +178,17 @@ export default function TabunganSiswaPage() {
   }, [loadTabungan, loadLaporan]);
 
   useEffect(() => {
-    loadTabungan();
+    const timer = setTimeout(() => {
+      loadTabungan();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadTabungan]);
 
   useEffect(() => {
-    loadLaporan();
+    const timer = setTimeout(() => {
+      loadLaporan();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadLaporan]);
 
   function handleSearch(event) {
@@ -306,7 +312,7 @@ export default function TabunganSiswaPage() {
                 </div>
               )}
 
-              <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
+              <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 <StatCard
                   title="Total Saldo"
                   value={formatRupiah(ringkasan.totalSaldo)}
@@ -429,7 +435,7 @@ export default function TabunganSiswaPage() {
                         <th className="px-4 py-3 font-semibold">No.</th>
                         <th className="px-4 py-3 font-semibold">Nama Siswa</th>
                         <th className="px-4 py-3 font-semibold">NIS</th>
-                        <th className="px-4 py-3 font-semibold">Saldo</th>
+                        <th className="px-4 py-3 font-semibold whitespace-nowrap">Saldo</th>
                         <th className="px-4 py-3 font-semibold">Status</th>
                         <th className="px-4 py-3 text-center font-semibold">
                           Aksi
@@ -482,7 +488,7 @@ export default function TabunganSiswaPage() {
                             <td className="px-4 py-4 text-xs theme-text-secondary">
                               {item.siswa?.nis || "-"}
                             </td>
-                            <td className="px-4 py-4 text-xs font-bold tabular-nums theme-text">
+                            <td className="px-4 py-4 text-xs font-bold tabular-nums whitespace-nowrap theme-text">
                               {formatRupiah(item.saldo)}
                             </td>
                             <td className="px-4 py-4">
@@ -566,7 +572,7 @@ export default function TabunganSiswaPage() {
                   <h3 className="text-sm font-bold">Ringkasan laporan tabungan</h3>
                   <p className="mt-1 text-xs leading-5">
                     Total saldo seluruh rekening berdasarkan laporan:{" "}
-                    <strong className="font-semibold">
+                    <strong className="font-semibold whitespace-nowrap">
                       {formatRupiah(laporan.totalSaldoSemuaSiswa)}
                     </strong>
                     .

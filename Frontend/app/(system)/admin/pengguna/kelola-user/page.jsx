@@ -271,7 +271,10 @@ export default function KelolaUserPage() {
   );
 
   useEffect(() => {
-    loadUsers({ page: currentPage });
+    const timer = setTimeout(() => {
+      loadUsers({ page: currentPage });
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadUsers, currentPage]);
 
 

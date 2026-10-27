@@ -453,12 +453,18 @@ export default function DataYayasanPage() {
 
 
   useEffect(() => {
-    fetchYayasan();
+    const timer = setTimeout(() => {
+      fetchYayasan();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [fetchYayasan]);
 
 
   useEffect(() => {
-    setCurrentPage(1);
+    const timer = setTimeout(() => {
+      setCurrentPage(1);
+    }, 0);
+    return () => clearTimeout(timer);
   }, [
     searchQuery,
     selectedStatus,

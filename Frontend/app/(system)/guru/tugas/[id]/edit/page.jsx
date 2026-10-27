@@ -272,22 +272,6 @@ export default function EditTugasPage() {
   });
 
 
-  const notifications = [
-    {
-      id: 1,
-      title: "Rapat Wali Kelas",
-      desc: "Dikirim 2 jam lalu",
-      read: false,
-    },
-    {
-      id: 2,
-      title: "Batas Input Nilai Rapor",
-      desc: "Dikirim 5 jam lalu",
-      read: false,
-    },
-  ];
-
-
   useEffect(() => {
     if (!id) return;
 
@@ -513,7 +497,6 @@ export default function EditTugasPage() {
           <div className="shrink-0">
             <Header
               toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
-              notifications={notifications}
               user={{
                 name: "Guru",
                 email: "guru@smartschool.com",
@@ -561,7 +544,6 @@ export default function EditTugasPage() {
           <div className="shrink-0">
             <Header
               toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
-              notifications={notifications}
               user={{
                 name: "Guru",
                 email: "guru@smartschool.com",
@@ -620,7 +602,6 @@ export default function EditTugasPage() {
         <div className="shrink-0">
           <Header
             toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
-            notifications={notifications}
             user={{
               name: "Guru",
               email: "guru@smartschool.com",

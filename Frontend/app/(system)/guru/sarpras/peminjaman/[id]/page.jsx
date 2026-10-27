@@ -231,15 +231,6 @@ export default function DetailPeminjamanPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const notifications = [
-    {
-      id: 1,
-      title: "Peminjaman Sarpras",
-      desc: "Pantau status pengajuan peminjaman",
-      read: false,
-    },
-  ];
-
   useEffect(() => {
     let mounted = true;
 
@@ -318,17 +309,9 @@ export default function DetailPeminjamanPage() {
       />
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <Header
-          toggleSidebar={() =>
+        <Header toggleSidebar={() =>
             setSidebarOpen((prev) => !prev)
-          }
-          notifications={notifications}
-          user={{
-            name: "Guru",
-            email: "guru@smartschool.com",
-            avatar: "GU",
-          }}
-        />
+          } />
 
         <main className="theme-page flex-1 overflow-y-auto">
           <div className="mx-auto w-full max-w-[1400px] space-y-5 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">

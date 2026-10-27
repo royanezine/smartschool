@@ -26,9 +26,8 @@ import {
   School,
 } from "lucide-react";
 
-import { getUsers } from "@/services/user.service";
+import { getUserById, getUsers } from "@/services/user.service";
 import { getKelasMapel } from "@/services/kelasMapel.service";
-import { apiFetch } from "@/lib/api";
 
 
 const getInitials = (nama = "") => {
@@ -227,21 +226,24 @@ export default function DetailGuruPage() {
         setLoading(true);
         setError("");
 
-        const response = await getUsers({
-          page: 1,
-          limit: 100,
-          role: "guru",
-        });
+        let found = null;
+        try {
+          const detailRes = await getUserById(id);
+          found = detailRes?.data || detailRes;
+        } catch {
+          // fallback to search in list
+          const response = await getUsers({
+            page: 1,
+            limit: 100,
+            role: "guru",
+          });
+          const users = extractList(response);
+          found = users.find((item) => String(item.id) === String(id));
+        }
 
         if (!mounted) return;
 
-        const users = extractList(response);
-
-        const found = users.find(
-          (item) => String(item.id) === String(id)
-        );
-
-        if (!found) {
+        if (!found || typeof found !== "object" || !found.id) {
           setGuru(null);
           setError("Data guru tidak ditemukan.");
           return;

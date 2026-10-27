@@ -155,9 +155,11 @@ export default function FormSoalUjianPage() {
 
   useEffect(() => {
     if (!ujianId) {
-      setError("ID ujian tidak ditemukan.");
-      setLoading(false);
-      return;
+      const timer = setTimeout(() => {
+        setError("ID ujian tidak ditemukan.");
+        setLoading(false);
+      }, 0);
+      return () => clearTimeout(timer);
     }
 
     let active = true;

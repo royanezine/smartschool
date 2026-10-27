@@ -64,7 +64,10 @@ export default function HasilPembayaranLanggananPage() {
   }, [orderId]);
 
   useEffect(() => {
-    loadData();
+    const timer = setTimeout(() => {
+      loadData();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadData]);
 
   useEffect(() => {

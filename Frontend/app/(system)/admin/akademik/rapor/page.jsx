@@ -1,198 +1,111 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
+import { getKelas, getDetailKelas } from "@/services/raport.service";
 import {
   Search,
   FileText,
   ChevronLeft,
   Users,
   GraduationCap,
-  Printer,
   Eye,
+  Loader2,
 } from "lucide-react";
-
-
-const WALI_KELAS = {
-  "X RPL 1": "Dewi Anggraini, S.Kom.",
-  "X RPL 2": "Fajar Nugroho, S.Kom.",
-  "X TKJ 1": "Rina Kartika, S.T.",
-  "X TKJ 2": "Andi Saputra, S.T.",
-  "XI RPL 1": "Yuni Astuti, S.Kom.",
-  "XI TKJ 1": "Bayu Pratama, S.T.",
-  "XI TKJ 2": "Sri Wahyuni, S.T.",
-  "XII RPL 1": "Hendra Gunawan, S.Kom.",
-  "XII RPL 2": "Lina Marlina, S.Kom.",
-  "XII TKJ 1": "Agus Setiawan, S.T.",
-};
-
-const MOCK_SISWA = [
-  {
-    id: 1,
-    kelas: "X RPL 1",
-    induk: "10231",
-    nama: "Alya Ramadhani",
-    lp: "P",
-  },
-  {
-    id: 2,
-    kelas: "X RPL 1",
-    induk: "10232",
-    nama: "Bunga Citra Lestari",
-    lp: "P",
-  },
-  {
-    id: 3,
-    kelas: "X RPL 1",
-    induk: "10233",
-    nama: "Cahyo Nugroho",
-    lp: "L",
-  },
-  {
-    id: 4,
-    kelas: "X RPL 2",
-    induk: "10301",
-    nama: "Dimas Prasetyo",
-    lp: "L",
-  },
-  {
-    id: 5,
-    kelas: "X TKJ 1",
-    induk: "10401",
-    nama: "Eka Wulandari",
-    lp: "P",
-  },
-  {
-    id: 6,
-    kelas: "X TKJ 1",
-    induk: "10501",
-    nama: "Fajar Setiawan",
-    lp: "P",
-  },
-  {
-    id: 7,
-    kelas: "X TKJ 2",
-    induk: "10601",
-    nama: "Gilang Ramadhan",
-    lp: "L",
-  },
-  {
-    id: 8,
-    kelas: "X TKJ 2",
-    induk: "10602",
-    nama: "Hana Permatasari",
-    lp: "P",
-  },
-  {
-    id: 9,
-    kelas: "XII RPL 1",
-    induk: "12101",
-    nama: "Indra Kusuma",
-    lp: "L",
-  },
-  {
-    id: 10,
-    kelas: "XII RPL 1",
-    induk: "12102",
-    nama: "Julia Anggraeni",
-    lp: "P",
-  },
-  {
-    id: 11,
-    kelas: "XII RPL 2",
-    induk: "12201",
-    nama: "Krisna Aditya",
-    lp: "L",
-  },
-  {
-    id: 12,
-    kelas: "XII RPL 2",
-    induk: "12202",
-    nama: "Larasati Dewi",
-    lp: "P",
-  },
-  {
-    id: 13,
-    kelas: "XII TKJ 1",
-    induk: "12301",
-    nama: "Muhammad Fadli",
-    lp: "L",
-  },
-  {
-    id: 14,
-    kelas: "XII TKJ 1",
-    induk: "12302",
-    nama: "Naila Zahra",
-    lp: "P",
-  },
-  {
-    id: 15,
-    kelas: "XI RPL 1",
-    induk: "11101",
-    nama: "Oka Wijaya",
-    lp: "L",
-  },
-  {
-    id: 16,
-    kelas: "XI RPL 1",
-    induk: "11102",
-    nama: "Putri Ayuningtyas",
-    lp: "P",
-  },
-  {
-    id: 17,
-    kelas: "XI TKJ 1",
-    induk: "11201",
-    nama: "Reza Firmansyah",
-    lp: "L",
-  },
-  {
-    id: 18,
-    kelas: "XI TKJ 2",
-    induk: "11202",
-    nama: "Salsabila Putri",
-    lp: "P",
-  },
-];
-
-const KELAS_LIST = Array.from(
-  new Set(MOCK_SISWA.map((s) => s.kelas))
-).sort();
 
 export default function RaporPage() {
   const router = useRouter();
 
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [kelasList, setKelasList] = useState([]);
+  const [loadingKelas, setLoadingKelas] = useState(true);
   const [kelasFilter, setKelasFilter] = useState("");
   const [selectedKelas, setSelectedKelas] = useState(null);
+  const [siswaList, setSiswaList] = useState([]);
+  const [loadingSiswa, setLoadingSiswa] = useState(false);
   const [search, setSearch] = useState("");
 
   const toggleSidebar = () => setIsCollapsed(!isCollapsed);
 
+  useEffect(() => {
+    let active = true;
+    const timer = setTimeout(async () => {
+      try {
+        setLoadingKelas(true);
+        const res = await getKelas({ limit: 100 });
+        if (!active) return;
+        const list = Array.isArray(res?.data)
+          ? res.data
+          : Array.isArray(res)
+          ? res
+          : [];
+        setKelasList(list);
+      } catch {
+        // Fallback to empty list
+      } finally {
+        if (active) setLoadingKelas(false);
+      }
+    }, 0);
+
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
+  }, []);
+
+  const handleSelectKelas = async (kelas) => {
+    setSelectedKelas(kelas);
+    setSearch("");
+    setLoadingSiswa(true);
+    try {
+      const res = await getDetailKelas(kelas.id);
+      const detail = res?.data || res || {};
+      const anggota = Array.isArray(detail?.anggota) ? detail.anggota : [];
+      const formatted = anggota.map((a, idx) => {
+        const s = a.siswa || a;
+        return {
+          id: s.id,
+          induk: s.nis || s.nisn || String(idx + 1),
+          nama: s.namaLengkap || "Siswa",
+          lp: s.jenisKelamin
+            ? s.jenisKelamin.toLowerCase().startsWith("p")
+              ? "P"
+              : "L"
+            : "-",
+          tahunAjaranId: detail?.tahunAjaranId || kelas?.tahunAjaranId,
+        };
+      });
+      setSiswaList(formatted);
+    } catch {
+      setSiswaList([]);
+    } finally {
+      setLoadingSiswa(false);
+    }
+  };
+
   const filteredKelas = useMemo(() => {
-    return KELAS_LIST.filter((k) =>
-      k.toLowerCase().includes(kelasFilter.toLowerCase())
-    );
-  }, [kelasFilter]);
+    return kelasList.filter((k) => {
+      const nama = k?.nama || "";
+      return nama.toLowerCase().includes(kelasFilter.toLowerCase());
+    });
+  }, [kelasList, kelasFilter]);
 
   const siswaDiKelas = useMemo(() => {
     if (!selectedKelas) return [];
 
-    return MOCK_SISWA.filter(
-      (s) =>
-        s.kelas === selectedKelas &&
-        s.nama.toLowerCase().includes(search.toLowerCase())
+    return siswaList.filter((s) =>
+      (s?.nama || "").toLowerCase().includes(search.toLowerCase())
     );
-  }, [selectedKelas, search]);
+  }, [selectedKelas, siswaList, search]);
 
   const handleLihatRapor = (siswa) => {
-    router.push(`/admin/akademik/rapor/${siswa.id}`);
-  };
-
-  const handleCetakRapor = (siswa) => {
-    console.log("Cetak rapor:", siswa.nama);
+    const taId = siswa.tahunAjaranId || selectedKelas?.tahunAjaranId || "";
+    const kId = selectedKelas?.id || "";
+    router.push(
+      `/admin/akademik/rapor/${siswa.id}?kelasId=${kId}&tahunAjaranId=${taId}`
+    );
   };
 
   return (
@@ -225,21 +138,23 @@ export default function RaporPage() {
 
               <div>
                 <h1 className="text-2xl font-bold theme-text">
-                  Rapor
+                  Rapor Akademik
                 </h1>
 
-                <p className="text-sm theme-text-secondary">
-                  {selectedKelas
-                    ? `Daftar siswa kelas ${selectedKelas}`
-                    : "Pilih kelas untuk melihat daftar siswa dan rapornya."}
+                <p className="text-sm theme-text-secondary mt-0.5">
+                  Pilih kelas untuk melihat dan mencetak buku rapor siswa
                 </p>
               </div>
             </div>
 
-            {selectedKelas === null ? (
+            {!selectedKelas ? (
               <>
-                <div className="theme-card rounded-xl border theme-border p-4 shadow-sm">
-                  <div className="relative">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <p className="text-sm font-semibold theme-text">
+                    Pilih Kelas ({filteredKelas.length})
+                  </p>
+
+                  <div className="relative w-full sm:w-64">
                     <Search
                       size={16}
                       className="absolute left-3 top-1/2 -translate-y-1/2 theme-text-muted"
@@ -250,86 +165,69 @@ export default function RaporPage() {
                       value={kelasFilter}
                       onChange={(e) => setKelasFilter(e.target.value)}
                       placeholder="Cari kelas..."
-                      className="
-                        w-full pl-9 pr-3 py-2 text-sm rounded-lg
-                        border theme-border theme-input
-                        focus:outline-none
-                      "
+                      className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border theme-border theme-input focus:outline-none"
                     />
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {filteredKelas.map((kelas) => {
-                    const jumlahSiswa = MOCK_SISWA.filter(
-                      (s) => s.kelas === kelas
-                    ).length;
+                {loadingKelas ? (
+                  <div className="theme-card rounded-xl border theme-border p-12 text-center text-sm theme-text-muted flex items-center justify-center gap-2">
+                    <Loader2 size={18} className="animate-spin theme-primary-text" />
+                    Memuat data kelas...
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {filteredKelas.map((kelas) => {
+                      const jumlahSiswa =
+                        kelas._count?.anggota ||
+                        (Array.isArray(kelas.anggota) ? kelas.anggota.length : 0);
+                      const namaWali =
+                        kelas.waliKelas?.namaLengkap ||
+                        kelas.waliKelas?.nama ||
+                        "-";
 
-                    return (
-                      <button
-                        key={kelas}
-                        onClick={() => {
-                          setSelectedKelas(kelas);
-                          setSearch("");
-                        }}
-                        className="
-                          text-left theme-card rounded-xl
-                          border theme-border p-5 shadow-sm
-                          theme-header-hover transition-all
-                        "
-                      >
-                        <div className="flex items-start justify-between">
-                          <div className="p-2.5 rounded-lg theme-info">
-                            <GraduationCap size={20} />
+                      return (
+                        <button
+                          key={kelas.id}
+                          onClick={() => handleSelectKelas(kelas)}
+                          className="text-left theme-card rounded-xl border theme-border p-5 shadow-sm theme-header-hover transition-all"
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="p-2.5 rounded-lg theme-info">
+                              <GraduationCap size={20} />
+                            </div>
+
+                            <span className="flex items-center gap-1 text-xs font-medium theme-card-soft theme-text-secondary px-2 py-1 rounded-md">
+                              <Users size={12} />
+                              {jumlahSiswa} siswa
+                            </span>
                           </div>
 
-                          <span
-                            className="
-                              flex items-center gap-1
-                              text-xs font-medium
-                              theme-card-soft theme-text-secondary
-                              px-2 py-1 rounded-md
-                            "
-                          >
-                            <Users size={12} />
-                            {jumlahSiswa} siswa
-                          </span>
-                        </div>
+                          <p className="text-lg font-bold theme-text mt-3">
+                            {kelas.nama}
+                          </p>
 
-                        <p className="text-lg font-bold theme-text mt-3">
-                          {kelas}
-                        </p>
+                          <p className="text-sm theme-text-secondary mt-0.5">
+                            Wali Kelas: {namaWali}
+                          </p>
+                        </button>
+                      );
+                    })}
 
-                        <p className="text-sm theme-text-secondary mt-0.5">
-                          Wali Kelas: {WALI_KELAS[kelas] || "-"}
-                        </p>
-                      </button>
-                    );
-                  })}
-
-                  {filteredKelas.length === 0 && (
-                    <div
-                      className="
-                        col-span-full theme-card rounded-xl
-                        border theme-border p-10 text-center
-                        text-sm theme-text-muted shadow-sm
-                      "
-                    >
-                      Tidak ada kelas yang cocok dengan pencarian.
-                    </div>
-                  )}
-                </div>
+                    {filteredKelas.length === 0 && (
+                      <div className="col-span-full theme-card rounded-xl border theme-border p-10 text-center text-sm theme-text-muted shadow-sm">
+                        Tidak ada kelas yang cocok dengan pencarian.
+                      </div>
+                    )}
+                  </div>
+                )}
               </>
             ) : (
               <>
                 <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                   <button
                     onClick={() => setSelectedKelas(null)}
-                    className="
-                      flex items-center gap-1.5 text-sm font-semibold
-                      theme-text-muted theme-sidebar-hover
-                      transition-colors rounded-md px-1 py-1
-                    "
+                    className="flex items-center gap-1.5 text-sm font-semibold theme-text-muted theme-sidebar-hover transition-colors rounded-md px-1 py-1"
                   >
                     <ChevronLeft size={16} />
                     Kembali ke daftar kelas
@@ -338,10 +236,7 @@ export default function RaporPage() {
                   <div className="relative flex-1 sm:max-w-xs sm:ml-auto">
                     <Search
                       size={16}
-                      className="
-                        absolute left-3 top-1/2
-                        -translate-y-1/2 theme-text-muted
-                      "
+                      className="absolute left-3 top-1/2 -translate-y-1/2 theme-text-muted"
                     />
 
                     <input
@@ -349,22 +244,12 @@ export default function RaporPage() {
                       value={search}
                       onChange={(e) => setSearch(e.target.value)}
                       placeholder="Cari nama siswa..."
-                      className="
-                        w-full pl-9 pr-3 py-2 text-sm rounded-lg
-                        border theme-border theme-input
-                        focus:outline-none
-                      "
+                      className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border theme-border theme-input focus:outline-none"
                     />
                   </div>
                 </div>
 
-                <div
-                  className="
-                    theme-card rounded-xl border theme-border
-                    p-4 shadow-sm flex items-center
-                    justify-between flex-wrap gap-3
-                  "
-                >
+                <div className="theme-card rounded-xl border theme-border p-4 shadow-sm flex items-center justify-between flex-wrap gap-3">
                   <div className="flex items-center gap-3">
                     <div className="p-2.5 rounded-lg theme-info">
                       <GraduationCap size={20} />
@@ -372,41 +257,25 @@ export default function RaporPage() {
 
                     <div>
                       <p className="text-base font-bold theme-text">
-                        {selectedKelas}
+                        {selectedKelas.nama}
                       </p>
 
                       <p className="text-sm theme-text-secondary">
                         Wali Kelas:{" "}
-                        {WALI_KELAS[selectedKelas] || "-"}
+                        {selectedKelas.waliKelas?.namaLengkap ||
+                          selectedKelas.waliKelas?.nama ||
+                          "-"}
                       </p>
                     </div>
                   </div>
 
-                  <span
-                    className="
-                      flex items-center gap-1.5
-                      text-sm font-semibold
-                      theme-card-soft theme-text-secondary
-                      px-3 py-1.5 rounded-lg
-                    "
-                  >
+                  <span className="flex items-center gap-1.5 text-sm font-semibold theme-card-soft theme-text-secondary px-3 py-1.5 rounded-lg">
                     <Users size={14} />
-
-                    {
-                      MOCK_SISWA.filter(
-                        (s) => s.kelas === selectedKelas
-                      ).length
-                    }{" "}
-                    siswa
+                    {siswaDiKelas.length} siswa
                   </span>
                 </div>
 
-                <div
-                  className="
-                    theme-card rounded-xl border theme-border
-                    shadow-sm overflow-hidden
-                  "
-                >
+                <div className="theme-card rounded-xl border theme-border shadow-sm overflow-hidden">
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead>
@@ -434,98 +303,62 @@ export default function RaporPage() {
                       </thead>
 
                       <tbody>
-                        {siswaDiKelas.map((s, idx) => (
-                          <tr
-                            key={s.id}
-                            className="
-                              border-b theme-border-soft
-                              last:border-0
-                              theme-table-hover
-                              transition-colors
-                            "
-                          >
-                            <td
-                              className="
-                                px-4 py-2.5
-                                theme-text-secondary
-                                font-medium
-                              "
-                            >
-                              {idx + 1}
-                            </td>
-
-                            <td className="px-4 py-2.5 theme-text-secondary">
-                              {s.induk}
-                            </td>
-
-                            <td
-                              className="
-                                px-4 py-2.5
-                                theme-text font-semibold
-                              "
-                            >
-                              {s.nama}
-                            </td>
-
-                            <td
-                              className="
-                                px-4 py-2.5 text-center
-                                theme-text-secondary font-medium
-                              "
-                            >
-                              {s.lp}
-                            </td>
-
-                            <td className="px-4 py-2.5">
-                              <div className="flex items-center justify-center gap-1.5">
-                                <button
-                                  onClick={() => handleLihatRapor(s)}
-                                  title="Lihat rapor"
-                                  className="
-                                    flex items-center gap-1.5
-                                    px-2.5 py-1.5 rounded-md
-                                    theme-info
-                                    text-xs font-semibold
-                                    transition-colors
-                                  "
-                                >
-                                  <Eye size={13} />
-                                  Lihat
-                                </button>
-
-                                <button
-                                  onClick={() => handleCetakRapor(s)}
-                                  title="Cetak rapor"
-                                  className="
-                                    flex items-center gap-1.5
-                                    px-2.5 py-1.5 rounded-md
-                                    theme-card-soft
-                                    theme-text-secondary
-                                    text-xs font-semibold
-                                    transition-colors
-                                    theme-header-hover
-                                  "
-                                >
-                                  <Printer size={13} />
-                                  Cetak
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-
-                        {siswaDiKelas.length === 0 && (
+                        {loadingSiswa ? (
                           <tr>
                             <td
                               colSpan={5}
-                              className="
-                                px-4 py-10 text-center
-                                text-sm theme-text-muted
-                              "
+                              className="px-4 py-10 text-center theme-text-muted"
                             >
-                              Tidak ada siswa yang cocok dengan pencarian.
+                              <div className="flex items-center justify-center gap-2">
+                                <Loader2 size={16} className="animate-spin theme-primary-text" />
+                                Memuat data siswa...
+                              </div>
                             </td>
                           </tr>
+                        ) : siswaDiKelas.length === 0 ? (
+                          <tr>
+                            <td
+                              colSpan={5}
+                              className="px-4 py-8 text-center text-sm theme-text-muted"
+                            >
+                              Belum ada siswa terdaftar di kelas ini.
+                            </td>
+                          </tr>
+                        ) : (
+                          siswaDiKelas.map((s, idx) => (
+                            <tr
+                              key={s.id}
+                              className="border-b theme-border-soft last:border-0 theme-table-hover transition-colors"
+                            >
+                              <td className="px-4 py-2.5 theme-text-secondary font-medium">
+                                {idx + 1}
+                              </td>
+
+                              <td className="px-4 py-2.5 theme-text-secondary">
+                                {s.induk}
+                              </td>
+
+                              <td className="px-4 py-2.5 theme-text font-semibold">
+                                {s.nama}
+                              </td>
+
+                              <td className="px-4 py-2.5 text-center theme-text-secondary font-medium">
+                                {s.lp}
+                              </td>
+
+                              <td className="px-4 py-2.5 text-center">
+                                <div className="flex items-center justify-center gap-1.5">
+                                  <button
+                                    onClick={() => handleLihatRapor(s)}
+                                    className="flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-md theme-info transition-colors"
+                                  >
+                                    <Eye size={12} />
+                                    Lihat Rapor
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))
                         )}
                       </tbody>
                     </table>

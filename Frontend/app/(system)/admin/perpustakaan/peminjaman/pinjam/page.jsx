@@ -101,8 +101,10 @@ export default function PinjamBukuPage() {
   };
 
   useEffect(() => {
-    loadBooks();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const timer = setTimeout(() => {
+      loadBooks();
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
 

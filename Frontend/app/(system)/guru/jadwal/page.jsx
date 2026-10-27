@@ -1,7 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { getStoredUser, getToken } from "@/lib/auth";
+import { getStoredUser } from "@/lib/auth";
+import { getAbsensiSaya, createAbsensi } from "@/services/absensi.service";
+import { getJadwalMengajar } from "@/services/jadwalMengajar.service";
 import {
   Camera,
   MapPin,
@@ -20,13 +22,6 @@ import {
 
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
-
-
-const API_URL = (
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
-)
-  .replace(/\/+$/, "")
-  .replace(/\/api$/, "");
 
 
 const themePrimaryGradient =
@@ -70,33 +65,7 @@ const themeDangerBorder =
   "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
 
 
-async function parseResponse(response) {
-  const text = await response.text();
-  let data = null;
 
-  try {
-    data = text ? JSON.parse(text) : null;
-  } catch {
-    throw new Error(
-      `Respons server bukan JSON. Status: ${response.status}`
-    );
-  }
-
-  if (!response.ok) {
-    throw new Error(
-      data?.message ||
-        data?.error ||
-        data?.detail ||
-        `Request gagal (${response.status})`
-    );
-  }
-
-  if (data?.success === false) {
-    throw new Error(data?.message || "Permintaan tidak berhasil.");
-  }
-
-  return data;
-}
 
 function getScheduleList(response) {
   if (Array.isArray(response)) return response;
@@ -367,38 +336,13 @@ export default function PresensiGuruPage() {
 
 
   const loadData = useCallback(async () => {
-    const token = getToken();
-
-    if (!token) {
-      setError("Sesi login tidak ditemukan. Silakan login kembali.");
-      setLoading(false);
-      return;
-    }
-
     try {
       setLoading(true);
       setError("");
 
-      const headers = {
-        Authorization: `Bearer ${token}`,
-      };
-
-      const [absensiResponse, jadwalResponse] = await Promise.all([
-        fetch(`${API_URL}/api/absensi/saya`, {
-          method: "GET",
-          headers,
-          cache: "no-store",
-        }),
-        fetch(`${API_URL}/api/jadwal-mengajar`, {
-          method: "GET",
-          headers,
-          cache: "no-store",
-        }),
-      ]);
-
       const [absensiResult, jadwalResult] = await Promise.all([
-        parseResponse(absensiResponse),
-        parseResponse(jadwalResponse),
+        getAbsensiSaya(),
+        getJadwalMengajar(),
       ]);
 
       const absensiData = getAbsensiList(absensiResult);
@@ -451,7 +395,10 @@ export default function PresensiGuruPage() {
   }, []);
 
   useEffect(() => {
-    loadData();
+    const timer = setTimeout(() => {
+      loadData();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadData]);
 
 
@@ -701,37 +648,16 @@ export default function PresensiGuruPage() {
         return;
       }
 
-      const token = getToken();
-
-      if (!token) {
-        setError("Sesi login tidak ditemukan. Silakan login kembali.");
-        return;
-      }
-
       setSubmitting(true);
 
-      const formData = new FormData();
-
-      formData.append("kelasId", String(kelasId));
-      formData.append("status", "hadir");
-      formData.append("metode", "face");
-      formData.append("lintang", String(currentLocation.lintang));
-      formData.append("bujur", String(currentLocation.bujur));
-      formData.append(
-        "snapshot",
-        capturedPhoto.blob,
-        `face-${Date.now()}.jpg`
-      );
-
-      const response = await fetch(`${API_URL}/api/absensi/`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formData,
+      const result = await createAbsensi({
+        kelasId: String(kelasId),
+        status: "hadir",
+        metode: "face",
+        lintang: currentLocation.lintang,
+        bujur: currentLocation.bujur,
+        snapshot: capturedPhoto.blob,
       });
-
-      const result = await parseResponse(response);
 
       setSuccess(
         result?.message || "Presensi Face ID berhasil dicatat."

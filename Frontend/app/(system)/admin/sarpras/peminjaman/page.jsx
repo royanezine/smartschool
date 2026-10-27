@@ -198,16 +198,6 @@ export default function AdminSarprasPeminjamanPage() {
 
   const [totalData, setTotalData] = useState(0);
 
-  const notifications = [
-    {
-      id: 1,
-      title: "Peminjaman Sarpras",
-      desc: "Kelola pengajuan peminjaman aset sekolah",
-      read: false,
-    },
-  ];
-
-
   const loadPeminjaman = useCallback(
     async (isRefresh = false) => {
       try {
@@ -247,7 +237,10 @@ export default function AdminSarprasPeminjamanPage() {
   );
 
   useEffect(() => {
-    loadPeminjaman(false);
+    const timer = setTimeout(() => {
+      loadPeminjaman(false);
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadPeminjaman]);
 
 
@@ -326,7 +319,6 @@ export default function AdminSarprasPeminjamanPage() {
           toggleSidebar={() =>
             setSidebarOpen((v) => !v)
           }
-          notifications={notifications}
           user={{
             name: "Admin Sekolah",
             email: "admin@smartschool.com",

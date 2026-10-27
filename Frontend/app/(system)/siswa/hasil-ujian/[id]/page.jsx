@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { getToken } from "@/lib/auth";
 import { useParams, useRouter } from "next/navigation";
+import { getUjianById } from "@/services/ujian.service";
 
 import {
   AlertCircle,
@@ -78,54 +78,7 @@ const themeDangerBorder =
   "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
 
 
-async function getUjianById(id) {
-  if (!id) {
-    throw new Error("ID ujian tidak ditemukan.");
-  }
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
-
-  const token =
-    typeof window !== "undefined"
-      ? getToken()
-      : null;
-
-  const response = await fetch(
-    `${API_URL}/api/ujian/${id}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        ...(token
-          ? {
-              Authorization: `Bearer ${token}`,
-            }
-          : {}),
-      },
-      cache: "no-store",
-    }
-  );
-
-  let data = null;
-
-  try {
-    data = await response.json();
-  } catch {
-    throw new Error(
-      "Server mengembalikan response yang tidak valid."
-    );
-  }
-
-  if (!response.ok) {
-    throw new Error(
-      data?.message ||
-        data?.error ||
-        "Gagal mengambil hasil ujian."
-    );
-  }
-
-  return data;
-}
 
 
 function normalizeObjectResponse(response) {
@@ -341,7 +294,6 @@ function getSavedHasilUjian(id) {
 
   const storages = [
     window.sessionStorage,
-    window.localStorage,
   ];
 
   for (const storage of storages) {
@@ -392,7 +344,7 @@ function getSavedHasilUjian(id) {
 
   try {
     const raw =
-      localStorage.getItem(
+      sessionStorage.getItem(
         "hasil-ujian-last"
       );
 
@@ -770,7 +722,10 @@ export default function HasilUjianPage() {
     );
 
   useEffect(() => {
-    loadHasil();
+    const timer = setTimeout(() => {
+      loadHasil();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadHasil]);
 
 

@@ -55,7 +55,10 @@ export default function KategoriPelanggaranPage() {
   }
 
   useEffect(() => {
-    loadData();
+    const timer = setTimeout(() => {
+      loadData();
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   const filteredData = useMemo(() => {
@@ -89,7 +92,10 @@ export default function KategoriPelanggaranPage() {
   }, [data, search, sortBy]);
 
   useEffect(() => {
-    setPage(1);
+    const timer = setTimeout(() => {
+      setPage(1);
+    }, 0);
+    return () => clearTimeout(timer);
   }, [search, sortBy]);
 
   const totalPage = Math.max(

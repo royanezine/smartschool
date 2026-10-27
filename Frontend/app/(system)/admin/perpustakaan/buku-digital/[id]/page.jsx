@@ -119,7 +119,10 @@ export default function DetailBukuPage() {
   }, [id]);
 
   useEffect(() => {
-    loadBook();
+    const timer = setTimeout(() => {
+      loadBook();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadBook]);
 
   return (

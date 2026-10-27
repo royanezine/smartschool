@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   FileText,
@@ -14,7 +15,9 @@ import {
   TrendingUp,
   TrendingDown,
   Minus,
+  Loader2,
 } from "lucide-react";
+import { getLaporanOverview } from "@/services/yayasan.service";
 
 
 const categories = [
@@ -215,6 +218,83 @@ const TrendIcon = ({ trend }) => {
 
 export default function LaporanYayasanPage() {
   const router = useRouter();
+  const [stats, setStats] = useState({
+    totalSekolah: 0,
+    totalGuru: 0,
+    totalSiswa: 0,
+    totalAset: 0,
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+    getLaporanOverview()
+      .then((res) => {
+        if (!active) return;
+        const d = res?.data || res || {};
+        setStats({
+          totalSekolah: Number(d.totalSekolah) || 0,
+          totalGuru: Number(d.totalGuru) || 0,
+          totalSiswa: Number(d.totalSiswa) || 0,
+          totalAset: Number(d.totalAset) || 0,
+        });
+      })
+      .catch((err) => {
+        console.error("Gagal memuat ringkasan laporan yayasan:", err);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const dynamicCategories = categories.map((cat) => {
+    let statText = cat.stat;
+    if (cat.id === "akademik") {
+      statText = `${stats.totalSekolah} unit sekolah`;
+    } else if (cat.id === "guru") {
+      statText = `${stats.totalGuru} guru aktif`;
+    } else if (cat.id === "iventaris") {
+      statText = `${stats.totalAset} aset terdata`;
+    } else if (cat.id === "siswa") {
+      statText = `${stats.totalSiswa} siswa`;
+    }
+    return { ...cat, stat: statText };
+  });
+
+  const liveReports = [
+    {
+      id: 1,
+      title: "Rekapitulasi Data Induk Siswa Unit Binaan",
+      category: "Siswa",
+      date: "Real-time Sync",
+      trend: "up",
+    },
+    {
+      id: 2,
+      title: "Distribusi Penugasan Guru & Rombel",
+      category: "Guru",
+      date: "Real-time Sync",
+      trend: "up",
+    },
+    {
+      id: 3,
+      title: "Inventarisasi Sarana & Prasarana Sekolah",
+      category: "Inventaris",
+      date: "Real-time Sync",
+      trend: "same",
+    },
+    {
+      id: 4,
+      title: "Laporan Capaian Pembelajaran & Kehadiran",
+      category: "Akademik",
+      date: "Real-time Sync",
+      trend: "up",
+    },
+  ];
 
   return (
     <div className="theme-page theme-text min-h-full">
@@ -256,7 +336,7 @@ export default function LaporanYayasanPage() {
 
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {categories.map((item) => {
+          {dynamicCategories.map((item) => {
             const Icon = item.icon;
             const c = categoryTheme[item.color];
 
@@ -353,7 +433,13 @@ export default function LaporanYayasanPage() {
                       truncate
                     `}
                   >
-                    {item.stat}
+                    {loading ? (
+                      <span className="flex items-center gap-1">
+                        <Loader2 size={10} className="animate-spin" /> Memuat...
+                      </span>
+                    ) : (
+                      item.stat
+                    )}
                   </div>
                 </div>
               </button>
@@ -404,7 +490,7 @@ export default function LaporanYayasanPage() {
           </div>
 
           <div>
-            {recentReports.map((r, index) => (
+            {liveReports.map((r, index) => (
               <div
                 key={r.id}
                 className={`
@@ -416,7 +502,7 @@ export default function LaporanYayasanPage() {
                   ${themeNeutralHover}
                   transition-colors
                   ${
-                    index !== recentReports.length - 1
+                    index !== liveReports.length - 1
                       ? `border-b ${themeDivider}`
                       : ""
                   }

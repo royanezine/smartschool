@@ -1,6 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
+import {
+  getNotifikasi,
+  markNotifikasiAsRead,
+  markAllNotifikasiAsRead,
+  kirimBroadcastPengumuman,
+} from "@/services/notifikasi.service";
 import { useRouter } from "next/navigation";
 import {
   Bell,
@@ -85,186 +91,6 @@ const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
 
-const dummyNotifications = [
-  {
-    id: 1,
-    judul: "Pembaruan Sistem v2.0",
-    isi: "SmartSchool telah diperbarui ke versi 2.0 dengan fitur-fitur baru seperti LMS, manajemen aset, dan dashboard eksekutif.",
-    kategori: "Sistem",
-    tipe: "info",
-    dibaca: false,
-    dibuatPada: "2026-08-11T10:30:00Z",
-    pengirim: "Super Admin",
-    targetUrl: "/super-admin/pengaturan",
-  },
-  {
-    id: 2,
-    judul: "Pengingat: Backup Data",
-    isi: "Lakukan backup data secara rutin setiap hari Jumat untuk menghindari kehilangan data penting.",
-    kategori: "Keamanan",
-    tipe: "warning",
-    dibaca: false,
-    dibuatPada: "2026-08-10T08:15:00Z",
-    pengirim: "Sistem",
-    targetUrl: null,
-  },
-  {
-    id: 3,
-    judul: "Yayasan baru mendaftar",
-    isi: "Yayasan Pendidikan Harapan telah mendaftar di SmartSchool dan menunggu verifikasi.",
-    kategori: "Yayasan",
-    tipe: "success",
-    dibaca: true,
-    dibuatPada: "2026-08-09T14:45:00Z",
-    pengirim: "Super Admin",
-    targetUrl: "/super-admin/yayasan/1",
-  },
-  {
-    id: 4,
-    judul: "Sekolah baru terdaftar",
-    isi: "SMA Bina Bangsa telah terdaftar sebagai sekolah baru dan siap digunakan.",
-    kategori: "Sekolah",
-    tipe: "info",
-    dibaca: true,
-    dibuatPada: "2026-08-08T09:00:00Z",
-    pengirim: "Super Admin",
-    targetUrl: "/super-admin/sekolah/2",
-  },
-  {
-    id: 5,
-    judul: "Pembayaran langganan gagal",
-    isi: "Pembayaran langganan untuk SMA Taruna Nusantara gagal diproses. Segera hubungi sekolah.",
-    kategori: "Langganan",
-    tipe: "error",
-    dibaca: false,
-    dibuatPada: "2026-08-07T16:20:00Z",
-    pengirim: "Sistem",
-    targetUrl: "/super-admin/langgananSekolah/lang-004",
-  },
-  {
-    id: 6,
-    judul: "Modul baru: E-Kantin",
-    isi: "Fitur E-Kantin telah tersedia untuk semua sekolah. Aktifkan melalui pengaturan modul.",
-    kategori: "Sistem",
-    tipe: "info",
-    dibaca: false,
-    dibuatPada: "2026-08-06T11:00:00Z",
-    pengirim: "Super Admin",
-    targetUrl: "/super-admin/paketModul",
-  },
-];
-
-const dummyAnnouncements = [
-  {
-    id: 1,
-    judul: "Libur Nasional 17 Agustus",
-    isi: "Seluruh aktivitas SmartSchool diliburkan pada tanggal 17 Agustus 2026 dalam rangka Hari Kemerdekaan RI.",
-    kategori: "Pengumuman",
-    status: "published",
-    dibuatPada: "2026-08-10T07:00:00Z",
-    dipublikasikanPada: "2026-08-10T08:00:00Z",
-    prioritas: "high",
-    penulis: "Super Admin",
-  },
-  {
-    id: 2,
-    judul: "Pelatihan Penggunaan LMS",
-    isi: "Akan diadakan pelatihan penggunaan LMS bagi seluruh guru pada 20 Agustus 2026 pukul 09.00 WIB.",
-    kategori: "Acara",
-    status: "draft",
-    dibuatPada: "2026-08-09T13:00:00Z",
-    dipublikasikanPada: null,
-    prioritas: "medium",
-    penulis: "Super Admin",
-  },
-  {
-    id: 3,
-    judul: "Pembaruan Kebijakan Privasi",
-    isi: "Kebijakan privasi SmartSchool telah diperbarui. Silakan baca di halaman kebijakan privasi.",
-    kategori: "Kebijakan",
-    status: "published",
-    dibuatPada: "2026-08-08T10:00:00Z",
-    dipublikasikanPada: "2026-08-08T11:00:00Z",
-    prioritas: "low",
-    penulis: "Super Admin",
-  },
-];
-
-
-const formatTanggal = (dateString) => {
-  if (!dateString) return "-";
-
-  return new Date(dateString).toLocaleDateString("id-ID", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-};
-
-const getTipeColor = (tipe) => {
-  const map = {
-    info: `${themeInfoSurface} text-[var(--color-info)] ${themeInfoBorder}`,
-    success: `${themeSuccessSurface} text-[var(--color-success)] ${themeSuccessBorder}`,
-    warning: `${themeWarningSurface} text-[var(--color-warning)] ${themeWarningBorder}`,
-    error: `${themeDangerSurface} text-[var(--color-warning)] ${themeDangerBorder}`,
-  };
-
-  return map[tipe] || map.info;
-};
-
-const getTipeIcon = (tipe) => {
-  const map = {
-    info: Info,
-    success: CheckCircle,
-    warning: AlertTriangle,
-    error: XCircle,
-  };
-
-  return map[tipe] || Info;
-};
-
-const getPrioritasColor = (prioritas) => {
-  const map = {
-    high: `${themeWarningSurface} text-[var(--color-warning)] ${themeWarningBorder}`,
-    medium: `${themeWarningSurface} text-[var(--color-warning)] ${themeWarningBorder}`,
-    low: `${themeInfoSurface} text-[var(--color-info)] ${themeInfoBorder}`,
-  };
-
-  return map[prioritas] || map.low;
-};
-
-const getPrioritasLabel = (prioritas) => {
-  const map = {
-    high: "Penting",
-    medium: "Sedang",
-    low: "Rendah",
-  };
-
-  return map[prioritas] || prioritas;
-};
-
-const getStatusBadge = (status) => {
-  const map = {
-    published: {
-      bg: `${themeSuccessSurface} text-[var(--color-success)] ${themeSuccessBorder}`,
-      label: "Dipublikasikan",
-    },
-    draft: {
-      bg: `${themeNeutralSurface} theme-text-secondary ${themeNeutralBorder}`,
-      label: "Draf",
-    },
-    archived: {
-      bg: `${themeDangerSurface} text-[var(--color-warning)] ${themeDangerBorder}`,
-      label: "Diarsipkan",
-    },
-  };
-
-  return map[status] || map.draft;
-};
-
-
 export default function NotifikasiPengumumanPage() {
   const router = useRouter();
 
@@ -275,28 +101,45 @@ export default function NotifikasiPengumumanPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [showNewAnnouncement, setShowNewAnnouncement] = useState(false);
 
-  const notificationsData = [
-    {
-      id: 1,
-      title: "Pembaruan Sistem v2.0",
-      desc: "Dikirim 2 jam lalu",
-      read: false,
-    },
-    {
-      id: 2,
-      title: "Pengingat: Backup Data",
-      desc: "Dikirim 1 hari lalu",
-      read: false,
-    },
-  ];
+  const [notifications, setNotifications] = useState([]);
+  const [announcements, setAnnouncements] = useState([]);
+  const [, setLoading] = useState(true);
 
-  const [notifications, setNotifications] = useState(
-    dummyNotifications
-  );
+  const loadData = useCallback(async () => {
+    try {
+      setLoading(true);
+      const res = await getNotifikasi();
+      const list = Array.isArray(res?.list) ? res.list : [];
+      setNotifications(list);
+      const announceList = list.filter((n) =>
+        n.kategori === "pengumuman_sekolah" ||
+        String(n.judul || "").toLowerCase().includes("[pengumuman]") ||
+        n.kategori === "Pengumuman"
+      ).map((n) => ({
+        id: n.id,
+        judul: String(n.judul || "").replace(/^\[Pengumuman\]\s*/i, ""),
+        isi: n.isi,
+        kategori: "Pengumuman",
+        status: "published",
+        dibuatPada: n.dibuatPada,
+        dipublikasikanPada: n.dibuatPada,
+        prioritas: n.tipe === "warning" ? "high" : "medium",
+        penulis: "Super Admin",
+      }));
+      setAnnouncements(announceList);
+    } catch (err) {
+      console.error("Gagal memuat notifikasi:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-  const [announcements, setAnnouncements] = useState(
-    dummyAnnouncements
-  );
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      loadData();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [loadData]);
 
   const [newAnnouncement, setNewAnnouncement] = useState({
     judul: "",
@@ -341,23 +184,33 @@ export default function NotifikasiPengumumanPage() {
   ).length;
 
 
-  const handleMarkRead = (id) => {
-    setNotifications((prev) =>
-      prev.map((n) =>
-        n.id === id
-          ? { ...n, dibaca: true }
-          : n
-      )
-    );
+  const handleMarkRead = async (id) => {
+    try {
+      await markNotifikasiAsRead(String(id));
+      setNotifications((prev) =>
+        prev.map((n) =>
+          n.id === id
+            ? { ...n, dibaca: true }
+            : n
+        )
+      );
+    } catch (err) {
+      console.error("Gagal menandai notifikasi dibaca:", err);
+    }
   };
 
-  const handleMarkAllRead = () => {
-    setNotifications((prev) =>
-      prev.map((n) => ({
-        ...n,
-        dibaca: true,
-      }))
-    );
+  const handleMarkAllRead = async () => {
+    try {
+      await markAllNotifikasiAsRead();
+      setNotifications((prev) =>
+        prev.map((n) => ({
+          ...n,
+          dibaca: true,
+        }))
+      );
+    } catch (err) {
+      console.error("Gagal menandai semua notifikasi:", err);
+    }
   };
 
   const handleDeleteNotif = (id) => {
@@ -392,7 +245,7 @@ export default function NotifikasiPengumumanPage() {
     );
   };
 
-  const handleCreateAnnouncement = () => {
+  const handleCreateAnnouncement = async () => {
     if (
       !newAnnouncement.judul.trim() ||
       !newAnnouncement.isi.trim()
@@ -400,28 +253,24 @@ export default function NotifikasiPengumumanPage() {
       return;
     }
 
-    const newItem = {
-      id: announcements.length + 1,
-      ...newAnnouncement,
-      status: "draft",
-      dibuatPada: new Date().toISOString(),
-      dipublikasikanPada: null,
-      penulis: "Super Admin",
-    };
-
-    setAnnouncements([
-      newItem,
-      ...announcements,
-    ]);
-
-    setShowNewAnnouncement(false);
-
-    setNewAnnouncement({
-      judul: "",
-      isi: "",
-      kategori: "Pengumuman",
-      prioritas: "medium",
-    });
+    try {
+      await kirimBroadcastPengumuman({
+        judul: newAnnouncement.judul,
+        isi: newAnnouncement.isi,
+        targetRole: "semua",
+      });
+      setShowNewAnnouncement(false);
+      setNewAnnouncement({
+        judul: "",
+        isi: "",
+        kategori: "Pengumuman",
+        prioritas: "medium",
+      });
+      await loadData();
+    } catch (err) {
+      console.error("Gagal mengirim broadcast pengumuman:", err);
+      alert(err?.message || "Gagal mengirim pengumuman.");
+    }
   };
 
 

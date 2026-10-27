@@ -23,45 +23,6 @@ import Sidebar from "@/app/components/Sidebar";
 import { getUserById } from "@/services/user.service";
 
 
-const DEFAULT_GURU = [
-  {
-    id: 1,
-    nama: "Andi Pratama, S.Pd.",
-    nip: "198506152010011001",
-    nuptk: "1234567890123456",
-    jenisKelamin: "L",
-    tempatLahir: "Tasikmalaya",
-    tanggalLahir: "1985-06-15",
-    agama: "Islam",
-    noTelepon: "0812-3456-7890",
-    email: "andi.pratama@smartschool.sch.id",
-    alamat: "Jl. Merdeka No. 15, Tasikmalaya",
-    mapel: "Matematika",
-    jabatan: "Guru Mata Pelajaran",
-    status: "aktif",
-    tahunMasuk: "2010",
-  },
-  {
-    id: 2,
-    nama: "Siti Rahmawati, S.Pd.",
-    nip: "198703122012022002",
-    nuptk: "1234567890123457",
-    jenisKelamin: "P",
-    tempatLahir: "Bandung",
-    tanggalLahir: "1987-03-12",
-    agama: "Islam",
-    noTelepon: "0813-2233-4455",
-    email: "siti.rahmawati@smartschool.sch.id",
-    alamat: "Jl. Cihideung No. 22, Tasikmalaya",
-    mapel: "Bahasa Indonesia",
-    jabatan: "Guru Mata Pelajaran",
-    status: "aktif",
-    tahunMasuk: "2012",
-  },
-];
-
-
-
 function getInitials(nama) {
   return nama
     .replace(/,.*/, "")

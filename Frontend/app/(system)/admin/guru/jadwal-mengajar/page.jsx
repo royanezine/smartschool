@@ -349,7 +349,10 @@ export default function JadwalMengajarPage() {
   };
 
   useEffect(() => {
-    fetchJadwal();
+    const timer = setTimeout(() => {
+      fetchJadwal();
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
 

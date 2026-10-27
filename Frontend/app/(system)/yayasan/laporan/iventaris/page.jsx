@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import {
   Boxes,
   Search,
@@ -12,169 +12,21 @@ import {
   AlertTriangle,
   Wallet,
   CheckCircle2,
+  Loader2,
+  AlertCircle,
+  RefreshCw,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { getLaporanInventaris } from "@/services/yayasan.service";
 
-
-const UNIT_OPTIONS = [
-  "Semua Unit",
-  "SD Smart School 1",
-  "SD Smart School 2",
-  "SMP Smart School 1",
-  "SMP Smart School 2",
-  "SMA Smart School 1",
-  "SMA Smart School 2",
-];
-
-const KATEGORI_OPTIONS = [
-  "Semua Kategori",
-  "Elektronik",
-  "Furnitur",
-  "Laboratorium",
-  "Olahraga",
-  "Buku & ATK",
-];
+const DEFAULT_UNIT_OPTIONS = ["Semua Unit"];
+const DEFAULT_KATEGORI_OPTIONS = ["Semua Kategori"];
 
 const KONDISI_OPTIONS = [
   "Semua Kondisi",
   "Baik",
   "Perlu Perbaikan",
   "Rusak",
-];
-
-const dataInventaris = [
-  {
-    id: 1,
-    nama: "Proyektor Epson EB-X41",
-    kategori: "Elektronik",
-    unit: "SMP Smart School 1",
-    lokasi: "Ruang Kelas 8A",
-    jumlah: 3,
-    kondisi: "Baik",
-    nilai: 15000000,
-    tanggal: "12 Jan 2023",
-  },
-  {
-    id: 2,
-    nama: "Kursi Siswa Lipat",
-    kategori: "Furnitur",
-    unit: "SD Smart School 1",
-    lokasi: "Gudang Utama",
-    jumlah: 120,
-    kondisi: "Baik",
-    nilai: 36000000,
-    tanggal: "03 Jul 2022",
-  },
-  {
-    id: 3,
-    nama: "Mikroskop Binokuler",
-    kategori: "Laboratorium",
-    unit: "SMA Smart School 1",
-    lokasi: "Lab IPA",
-    jumlah: 15,
-    kondisi: "Perlu Perbaikan",
-    nilai: 22500000,
-    tanggal: "20 Mar 2021",
-  },
-  {
-    id: 4,
-    nama: "Bola Basket Molten",
-    kategori: "Olahraga",
-    unit: "SMP Smart School 2",
-    lokasi: "Gudang Olahraga",
-    jumlah: 10,
-    kondisi: "Baik",
-    nilai: 3500000,
-    tanggal: "15 Aug 2024",
-  },
-  {
-    id: 5,
-    nama: "Laptop Lenovo ThinkPad E14",
-    kategori: "Elektronik",
-    unit: "SMA Smart School 2",
-    lokasi: "Lab Komputer",
-    jumlah: 25,
-    kondisi: "Baik",
-    nilai: 187500000,
-    tanggal: "09 Feb 2023",
-  },
-  {
-    id: 6,
-    nama: "Papan Tulis Whiteboard",
-    kategori: "Furnitur",
-    unit: "SD Smart School 2",
-    lokasi: "Ruang Kelas 3B",
-    jumlah: 8,
-    kondisi: "Rusak",
-    nilai: 4000000,
-    tanggal: "28 May 2019",
-  },
-  {
-    id: 7,
-    nama: "AC Split 1 PK",
-    kategori: "Elektronik",
-    unit: "SMP Smart School 1",
-    lokasi: "Ruang Guru",
-    jumlah: 6,
-    kondisi: "Baik",
-    nilai: 27000000,
-    tanggal: "11 Nov 2023",
-  },
-  {
-    id: 8,
-    nama: "Rak Buku Perpustakaan",
-    kategori: "Furnitur",
-    unit: "SMA Smart School 1",
-    lokasi: "Perpustakaan",
-    jumlah: 18,
-    kondisi: "Baik",
-    nilai: 21600000,
-    tanggal: "04 Sep 2020",
-  },
-  {
-    id: 9,
-    nama: "Set Alat Peraga Fisika",
-    kategori: "Laboratorium",
-    unit: "SMA Smart School 1",
-    lokasi: "Lab Fisika",
-    jumlah: 5,
-    kondisi: "Perlu Perbaikan",
-    nilai: 18000000,
-    tanggal: "17 Oct 2021",
-  },
-  {
-    id: 10,
-    nama: "Buku Paket Matematika Kelas 7",
-    kategori: "Buku & ATK",
-    unit: "SMP Smart School 2",
-    lokasi: "Perpustakaan",
-    jumlah: 300,
-    kondisi: "Baik",
-    nilai: 21000000,
-    tanggal: "02 Jul 2024",
-  },
-  {
-    id: 11,
-    nama: "Meja Guru",
-    kategori: "Furnitur",
-    unit: "SD Smart School 1",
-    lokasi: "Ruang Kelas 1A",
-    jumlah: 12,
-    kondisi: "Rusak",
-    nilai: 6000000,
-    tanggal: "19 Apr 2018",
-  },
-  {
-    id: 12,
-    nama: "Printer Epson L3110",
-    kategori: "Elektronik",
-    unit: "SD Smart School 2",
-    lokasi: "Ruang TU",
-    jumlah: 4,
-    kondisi: "Baik",
-    nilai: 6800000,
-    tanggal: "25 Dec 2023",
-  },
 ];
 
 
@@ -287,11 +139,73 @@ function SummaryCard({ icon: Icon, label, value, variant = "primary" }) {
 export default function DataInventarisPage() {
   const router = useRouter();
 
-  const [unit, setUnit] = useState(UNIT_OPTIONS[0]);
-  const [kategori, setKategori] = useState(KATEGORI_OPTIONS[0]);
+  const [unit, setUnit] = useState("Semua Unit");
+  const [unitOptions, setUnitOptions] = useState(DEFAULT_UNIT_OPTIONS);
+  const [kategori, setKategori] = useState("Semua Kategori");
+  const [kategoriOptions, setKategoriOptions] = useState(DEFAULT_KATEGORI_OPTIONS);
   const [kondisi, setKondisi] = useState(KONDISI_OPTIONS[0]);
   const [search, setSearch] = useState("");
+  const [dataInventaris, setDataInventaris] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
+  const fetchInventaris = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await getLaporanInventaris();
+      const list = Array.isArray(res?.data?.items)
+        ? res.data.items
+        : Array.isArray(res?.data)
+        ? res.data
+        : [];
+      setDataInventaris(list);
+      if (Array.isArray(res?.data?.unitOptions) && res.data.unitOptions.length > 0) {
+        setUnitOptions(res.data.unitOptions);
+      }
+      if (Array.isArray(res?.data?.kategoriOptions) && res.data.kategoriOptions.length > 0) {
+        setKategoriOptions(res.data.kategoriOptions);
+      }
+    } catch (err) {
+      setError(err?.message || "Gagal memuat laporan inventaris yayasan.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      try {
+        const res = await getLaporanInventaris();
+        if (cancelled) return;
+        const list = Array.isArray(res?.data?.items)
+          ? res.data.items
+          : Array.isArray(res?.data)
+          ? res.data
+          : [];
+        setDataInventaris(list);
+        if (Array.isArray(res?.data?.unitOptions) && res.data.unitOptions.length > 0) {
+          setUnitOptions(res.data.unitOptions);
+        }
+        if (Array.isArray(res?.data?.kategoriOptions) && res.data.kategoriOptions.length > 0) {
+          setKategoriOptions(res.data.kategoriOptions);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setError(err?.message || "Gagal memuat laporan inventaris yayasan.");
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    }
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const filteredInventaris = useMemo(() => {
     return dataInventaris.filter((it) => {
@@ -310,8 +224,8 @@ export default function DataInventarisPage() {
 
       const matchSearch =
         !searchValue ||
-        it.nama.toLowerCase().includes(searchValue) ||
-        it.lokasi.toLowerCase().includes(searchValue);
+        it.nama?.toLowerCase().includes(searchValue) ||
+        it.lokasi?.toLowerCase().includes(searchValue);
 
       return (
         matchUnit &&
@@ -320,7 +234,7 @@ export default function DataInventarisPage() {
         matchSearch
       );
     });
-  }, [unit, kategori, kondisi, search]);
+  }, [dataInventaris, unit, kategori, kondisi, search]);
 
 
   const summary = useMemo(() => {
@@ -428,7 +342,7 @@ export default function DataInventarisPage() {
                   onChange={(e) => setUnit(e.target.value)}
                   className={`w-full appearance-none pl-3 pr-9 py-2.5 text-sm font-medium theme-text-secondary theme-neutral-surface border theme-border rounded-lg outline-none transition-colors cursor-pointer ${themeFocus}`}
                 >
-                  {UNIT_OPTIONS.map((u) => (
+                  {unitOptions.map((u) => (
                     <option key={u} value={u}>
                       {u}
                     </option>
@@ -447,7 +361,7 @@ export default function DataInventarisPage() {
                   onChange={(e) => setKategori(e.target.value)}
                   className={`w-full appearance-none pl-3 pr-9 py-2.5 text-sm font-medium theme-text-secondary theme-neutral-surface border theme-border rounded-lg outline-none transition-colors cursor-pointer ${themeFocus}`}
                 >
-                  {KATEGORI_OPTIONS.map((k) => (
+                  {kategoriOptions.map((k) => (
                     <option key={k} value={k}>
                       {k}
                     </option>
@@ -583,7 +497,39 @@ export default function DataInventarisPage() {
                 </thead>
 
                 <tbody>
-                  {filteredInventaris.length === 0 && (
+                  {loading ? (
+                    <tr>
+                      <td
+                        colSpan={8}
+                        className={`border ${themeNeutralBorder} p-10 text-center`}
+                      >
+                        <Loader2
+                          size={28}
+                          className="mx-auto text-[var(--color-primary)] animate-spin mb-2"
+                        />
+                        <p className="text-sm theme-text-muted">
+                          Memuat data inventaris yayasan...
+                        </p>
+                      </td>
+                    </tr>
+                  ) : error ? (
+                    <tr>
+                      <td
+                        colSpan={8}
+                        className={`border ${themeNeutralBorder} p-8 text-center text-[var(--color-danger)]`}
+                      >
+                        <AlertCircle size={28} className="mx-auto mb-2" />
+                        <p className="text-sm">{error}</p>
+                        <button
+                          type="button"
+                          onClick={fetchInventaris}
+                          className="mt-2 text-xs font-semibold underline"
+                        >
+                          Coba Lagi
+                        </button>
+                      </td>
+                    </tr>
+                  ) : filteredInventaris.length === 0 ? (
                     <tr>
                       <td
                         colSpan={8}
@@ -599,9 +545,8 @@ export default function DataInventarisPage() {
                         </p>
                       </td>
                     </tr>
-                  )}
-
-                  {filteredInventaris.map((it) => (
+                  ) : (
+                    filteredInventaris.map((it) => (
                     <tr
                       key={it.id}
                       className={`border-b ${themeDivider} ${themeNeutralHover} transition-colors`}
@@ -668,7 +613,7 @@ export default function DataInventarisPage() {
                         {it.tanggal}
                       </td>
                     </tr>
-                  ))}
+                  )))}
                 </tbody>
               </table>
             </div>

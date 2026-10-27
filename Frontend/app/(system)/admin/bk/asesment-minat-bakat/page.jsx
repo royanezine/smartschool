@@ -69,7 +69,10 @@ export default function AsesmenMinatBakatPage() {
 
 
   useEffect(() => {
-    loadData();
+    const timer = setTimeout(() => {
+      loadData();
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
 
@@ -147,7 +150,10 @@ export default function AsesmenMinatBakatPage() {
 
 
   useEffect(() => {
-    setPage(1);
+    const timer = setTimeout(() => {
+      setPage(1);
+    }, 0);
+    return () => clearTimeout(timer);
   }, [search, sortBy]);
 
 

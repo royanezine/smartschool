@@ -603,8 +603,11 @@ export default function BukuDetailSiswaPage() {
     useState("");
 
   useEffect(() => {
-    setMounted(true);
-    setUser(getStoredUser());
+    const timer = setTimeout(() => {
+      setMounted(true);
+      setUser(getStoredUser());
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   const userId = useMemo(
@@ -774,38 +777,41 @@ export default function BukuDetailSiswaPage() {
       return;
     }
 
-    const token =
-      getToken();
+    const timer = setTimeout(() => {
+      const token = getToken();
 
-    if (!token) {
-      setLoading(false);
-      setError(
-        "Token login tidak ditemukan. Silakan login kembali.",
-      );
-      return;
-    }
+      if (!token) {
+        setLoading(false);
+        setError(
+          "Token login tidak ditemukan. Silakan login kembali.",
+        );
+        return;
+      }
 
-    if (!bukuId) {
-      setLoading(false);
-      setError(
-        "ID buku tidak ditemukan.",
-      );
-      return;
-    }
+      if (!bukuId) {
+        setLoading(false);
+        setError(
+          "ID buku tidak ditemukan.",
+        );
+        return;
+      }
 
-    if (!userId) {
-      setLoading(false);
-      setError(
-        "ID siswa tidak ditemukan dari akun yang sedang login.",
-      );
-      return;
-    }
+      if (!userId) {
+        setLoading(false);
+        setError(
+          "ID siswa tidak ditemukan dari akun yang sedang login.",
+        );
+        return;
+      }
 
-    loadData();
+      loadData();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [
     mounted,
     bukuId,
     userId,
+    loadData,
   ]);
 
   const handleBorrow =

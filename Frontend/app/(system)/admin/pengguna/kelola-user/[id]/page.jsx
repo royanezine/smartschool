@@ -206,7 +206,10 @@ export default function DetailUserPage() {
   }, [id]);
 
   useEffect(() => {
-    loadUser();
+    const timer = setTimeout(() => {
+      loadUser();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadUser]);
 
   const role = String(

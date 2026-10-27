@@ -532,22 +532,6 @@ export default function GuruRaporPage() {
   const [error, setError] = useState("");
   const [nilaiUjianError, setNilaiUjianError] = useState("");
 
-  const notifications = [
-    {
-      id: 1,
-      title: "Rapat Wali Kelas",
-      desc: "Dikirim 2 jam lalu",
-      read: false,
-    },
-    {
-      id: 2,
-      title: "Batas Input Nilai Rapor",
-      desc: "Dikirim 5 jam lalu",
-      read: false,
-    },
-  ];
-
-
   const loadTahunAjaran = useCallback(async () => {
     try {
       const response = await getTahunAjaran();
@@ -1036,10 +1020,12 @@ export default function GuruRaporPage() {
 
   useEffect(() => {
     if (!selectedKelasId) {
-      setAnggotaKelas([]);
-      setNilaiRaport([]);
-      setNilaiUjian([]);
-      return;
+      const timer = setTimeout(() => {
+        setAnggotaKelas([]);
+        setNilaiRaport([]);
+        setNilaiUjian([]);
+      }, 0);
+      return () => clearTimeout(timer);
     }
 
     let mounted = true;
@@ -1537,7 +1523,6 @@ export default function GuruRaporPage() {
                 (value) => !value
               )
             }
-            notifications={notifications}
             user={{
               name: "Guru",
               email:
@@ -1596,7 +1581,6 @@ export default function GuruRaporPage() {
                 (value) => !value
               )
             }
-            notifications={notifications}
             user={{
               name: "Guru",
               email:
@@ -1663,7 +1647,6 @@ export default function GuruRaporPage() {
               (value) => !value
             )
           }
-          notifications={notifications}
           user={{
             name: "Guru",
             email:

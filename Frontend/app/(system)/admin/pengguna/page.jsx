@@ -1,6 +1,6 @@
 "use client";
 
-import { getToken } from "@/lib/auth";
+import { getUsers, updateUserStatus } from "@/services/user.service";
 
 import {
   useCallback,
@@ -47,16 +47,8 @@ const API_URL = (
   "http://localhost:5000"
 ).replace(/\/$/, "");
 
-const USERS_ENDPOINT = `${API_URL}/api/users`;
 
 
-const _getTokenPlaceholder = () => {
-  if (typeof window === "undefined") {
-    return null;
-  }
-
-  return getToken();
-};
 
 
 const extractUsers = (response) => {
@@ -684,12 +676,15 @@ export default function PenggunaPage() {
 
 
   useEffect(() => {
-    fetchUsers({
-      pageNumber: page,
-      searchValue: search,
-      roleValue: roleFilter,
-      statusValue: statusFilter,
-    });
+    const timer = setTimeout(() => {
+      fetchUsers({
+        pageNumber: page,
+        searchValue: search,
+        roleValue: roleFilter,
+        statusValue: statusFilter,
+      });
+    }, 0);
+    return () => clearTimeout(timer);
   }, [
     page,
     search,
@@ -863,49 +858,13 @@ export default function PenggunaPage() {
         setUpdatingStatus(true);
         setError("");
 
-        const token = getToken();
-
         const newStatus =
           selectedUser.status ===
           "Aktif"
             ? "nonaktif"
             : "aktif";
 
-        const response =
-          await fetch(
-            `${USERS_ENDPOINT}/${selectedUser.id}`,
-            {
-              method: "PUT",
-
-              headers: {
-                "Content-Type":
-                  "application/json",
-
-                Accept:
-                  "application/json",
-
-                ...(token
-                  ? {
-                      Authorization: `Bearer ${token}`,
-                    }
-                  : {}),
-              },
-
-              body: JSON.stringify({
-                status: newStatus,
-              }),
-            },
-          );
-
-        const result =
-          await response.json();
-
-        if (!response.ok) {
-          throw new Error(
-            result?.message ||
-              "Gagal mengubah status pengguna",
-          );
-        }
+        await updateUserStatus(selectedUser.id, newStatus);
 
         setSelectedUser(null);
 

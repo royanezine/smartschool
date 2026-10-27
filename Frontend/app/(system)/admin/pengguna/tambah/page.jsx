@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getToken } from "@/lib/auth";
+import { getProfile, getUsers, createUser } from "@/services/user.service";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
@@ -174,42 +174,7 @@ export default function TambahPenggunaPage() {
         setLoadingData(true);
         setError("");
 
-        const token = getToken();
-
-        if (!token) {
-          throw new Error(
-            "Token login tidak ditemukan."
-          );
-        }
-
-        const headers = {
-          Accept: "application/json",
-          Authorization: `Bearer ${token}`,
-        };
-
-
-        const profileResponse = await fetch(
-          `${API_URL}/api/users/profile`,
-          {
-            method: "GET",
-            headers,
-          }
-        );
-
-        const profileResult =
-          await profileResponse.json();
-
-        console.log(
-          "PROFILE ADMIN:",
-          profileResult
-        );
-
-        if (!profileResponse.ok) {
-          throw new Error(
-            profileResult?.message ||
-              "Gagal mengambil profile pengguna."
-          );
-        }
+        const profileResult = await getProfile();
 
         const profile =
           profileResult?.data;
@@ -221,29 +186,7 @@ export default function TambahPenggunaPage() {
           setSekolahId(currentSekolahId);
         }
 
-
-        const usersResponse = await fetch(
-          `${API_URL}/api/users?page=1&limit=1000`,
-          {
-            method: "GET",
-            headers,
-          }
-        );
-
-        const usersResult =
-          await usersResponse.json();
-
-        console.log(
-          "DATA USERS UNTUK ROLE:",
-          usersResult
-        );
-
-        if (!usersResponse.ok) {
-          throw new Error(
-            usersResult?.message ||
-              "Gagal mengambil data role."
-          );
-        }
+        const usersResult = await getUsers({ page: 1, limit: 1000 });
 
 
         let users = [];

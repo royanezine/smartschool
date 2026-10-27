@@ -31,34 +31,37 @@ export default function LoginForm() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const emailFromUrl = params.get("email");
+    const timer = setTimeout(() => {
+      const params = new URLSearchParams(window.location.search);
+      const emailFromUrl = params.get("email");
 
-    const savedEmail =
-      localStorage.getItem("onboarding_email") ||
-      localStorage.getItem("tenant_register_email");
+      const savedEmail =
+        localStorage.getItem("onboarding_email") ||
+        localStorage.getItem("tenant_register_email");
 
-    const email = emailFromUrl || savedEmail;
+      const email = emailFromUrl || savedEmail;
 
-    if (email) {
-      setIdentifier(email);
-    }
+      if (email) {
+        setIdentifier(email);
+      }
 
-    if (params.get("sessionExpired") === "1") {
-      setError(
-        "Sesi Anda telah berakhir karena token kedaluwarsa. Silakan login kembali."
-      );
+      if (params.get("sessionExpired") === "1") {
+        setError(
+          "Sesi Anda telah berakhir karena token kedaluwarsa. Silakan login kembali."
+        );
 
-      params.delete("sessionExpired");
+        params.delete("sessionExpired");
 
-      const query = params.toString();
-      const cleanUrl =
-        window.location.pathname +
-        (query ? `?${query}` : "") +
-        window.location.hash;
+        const query = params.toString();
+        const cleanUrl =
+          window.location.pathname +
+          (query ? `?${query}` : "") +
+          window.location.hash;
 
-      window.history.replaceState(null, "", cleanUrl);
-    }
+        window.history.replaceState(null, "", cleanUrl);
+      }
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   const ROLE_IDS = {

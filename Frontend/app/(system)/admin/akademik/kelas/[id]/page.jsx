@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
+import Link from "next/link";
 
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
@@ -27,7 +28,9 @@ import {
 } from "lucide-react";
 
 import { getKelasById } from "@/services/kelas.service";
-import { getJadwalMengajar } from "@/services/jadwalMengajar.service";
+import { getJadwalMengajar, deleteJadwalMengajar } from "@/services/jadwalMengajar.service";
+import { getUsers } from "@/services/user.service";
+import { getMataPelajaran } from "@/services/mataPelajaran.service";
 
 const HARI_LIST = [
   "Senin",
@@ -296,43 +299,69 @@ export default function DetailKelasPage() {
   useEffect(() => {
     if (!id) return;
 
-    loadDetail();
-    loadJadwal();
+    const timer = setTimeout(() => {
+      loadDetail();
+      loadJadwal();
+    }, 0);
+
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    let isMounted = true;
 
-    try {
-      const guru = localStorage.getItem(
-        "guru_data"
-      );
+    async function loadMasterGuruMapel() {
+      try {
+        let allGuru = [];
+        let page = 1;
+        let totalPages = 1;
 
-      const mapel = localStorage.getItem(
-        "mapel_data"
-      );
+        do {
+          const resGuru = await getUsers({ role: "guru", page, limit: 50 });
+          const rawGuru = resGuru?.data ?? resGuru ?? [];
+          const guruArr = Array.isArray(rawGuru) ? rawGuru : [];
+          allGuru = allGuru.concat(guruArr);
 
-      setGuruList(
-        guru
-          ? JSON.parse(guru)
-          : []
-      );
+          totalPages =
+            resGuru?.meta?.totalPages ??
+            resGuru?.pagination?.totalPages ??
+            1;
+          page++;
+        } while (page <= totalPages);
 
-      setMapelList(
-        mapel
-          ? JSON.parse(mapel)
-          : []
-      );
-    } catch (err) {
-      console.error(
-        "Gagal membaca guru/mapel:",
-        err
-      );
+        const resMapel = await getMataPelajaran();
+        const rawMapel = resMapel?.data ?? resMapel ?? [];
+        const mapelArr = Array.isArray(rawMapel) ? rawMapel : [];
 
-      setGuruList([]);
-      setMapelList([]);
+        if (isMounted) {
+          setGuruList(
+            allGuru.map((g) => ({
+              id: g.id,
+              nama: g.namaLengkap || g.nama || "Tanpa Nama",
+              nip: g.nip || "-",
+            }))
+          );
+
+          setMapelList(
+            mapelArr.map((m) => ({
+              id: m.id,
+              nama: m.nama || m.namaMapel || "Mapel",
+              kode: m.kode || m.kodeMapel || "-",
+            }))
+          );
+        }
+      } catch (err) {
+        console.error("Gagal mengambil master guru/mapel dari API:", err);
+      }
     }
+
+    loadMasterGuruMapel();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
 
@@ -447,71 +476,18 @@ export default function DetailKelasPage() {
   }, [jadwal]);
 
 
-  const handleAddJadwal = () => {
-    if (
-      !newJadwal.mapel ||
-      !newJadwal.guru
-    ) {
-      alert(
-        "Mata pelajaran dan guru wajib diisi!"
-      );
+  const handleDeleteJadwal = async (jadwalId) => {
+    if (!confirm("Hapus jadwal ini?")) {
       return;
     }
 
-    const newEntry = {
-      id: `local-${Date.now()}`,
-
-      kelasId: id,
-
-      hari: newJadwal.hari,
-
-      jamMulai:
-        newJadwal.jamMulai,
-
-      jamSelesai:
-        newJadwal.jamSelesai,
-
-      mapel:
-        newJadwal.mapel,
-
-      guru:
-        newJadwal.guru,
-
-      ruangan:
-        newJadwal.ruangan,
-    };
-
-    setJadwal((prev) => [
-      ...prev,
-      newEntry,
-    ]);
-
-    setNewJadwal({
-      ...EMPTY_JADWAL,
-    });
-
-    setShowAddJadwal(false);
-  };
-
-
-  const handleDeleteJadwal = (
-    jadwalId
-  ) => {
-    if (
-      !confirm(
-        "Hapus jadwal ini?"
-      )
-    ) {
-      return;
+    try {
+      await deleteJadwalMengajar(String(jadwalId));
+      await loadJadwal();
+    } catch (err) {
+      console.error("Gagal menghapus jadwal:", err);
+      alert(err?.message || "Gagal menghapus jadwal.");
     }
-
-    setJadwal((prev) =>
-      prev.filter(
-        (item) =>
-          String(item.id) !==
-          String(jadwalId)
-      )
-    );
   };
 
 
@@ -1406,25 +1382,13 @@ export default function DetailKelasPage() {
                           Refresh
                         </button>
 
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setShowAddJadwal(
-                              (prev) => !prev
-                            )
-                          }
+                        <Link
+                          href={`/admin/guru/jadwal-mengajar/tambah?kelasId=${encodeURIComponent(String(id || ""))}`}
                           className="theme-primary inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold shadow-sm transition"
                         >
-                          {showAddJadwal ? (
-                            <X size={16} />
-                          ) : (
-                            <Plus size={16} />
-                          )}
-
-                          {showAddJadwal
-                            ? "Tutup Form"
-                            : "Tambah Jadwal"}
-                        </button>
+                          <Plus size={16} />
+                          Tambah Jadwal
+                        </Link>
                       </div>
                     </div>
 
@@ -1446,220 +1410,6 @@ export default function DetailKelasPage() {
                               {jadwalError}
                             </p>
                           </div>
-                        </div>
-                      </div>
-                    )}
-
-
-                    {showAddJadwal && (
-                      <div className="theme-card-soft theme-border border-b p-5 sm:p-6">
-                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-
-
-                          <div>
-                            <label className="theme-text-secondary mb-1.5 block text-xs font-semibold">
-                              Hari
-                            </label>
-
-                            <select
-                              value={newJadwal.hari}
-                              onChange={(e) =>
-                                setNewJadwal(
-                                  (prev) => ({
-                                    ...prev,
-                                    hari: e.target.value,
-                                  })
-                                )
-                              }
-                              className="theme-input h-10 w-full rounded-xl border px-3 text-sm outline-none transition focus:border-[var(--color-primary)]"
-                            >
-                              {HARI_LIST.map(
-                                (hari) => (
-                                  <option
-                                    key={hari}
-                                    value={hari}
-                                  >
-                                    {hari}
-                                  </option>
-                                )
-                              )}
-                            </select>
-                          </div>
-
-
-                          <div>
-                            <label className="theme-text-secondary mb-1.5 block text-xs font-semibold">
-                              Jam Mulai
-                            </label>
-
-                            <input
-                              type="time"
-                              value={
-                                newJadwal.jamMulai
-                              }
-                              onChange={(e) =>
-                                setNewJadwal(
-                                  (prev) => ({
-                                    ...prev,
-                                    jamMulai:
-                                      e.target.value,
-                                  })
-                                )
-                              }
-                              className="theme-input h-10 w-full rounded-xl border px-3 text-sm outline-none transition focus:border-[var(--color-primary)]"
-                            />
-                          </div>
-
-
-                          <div>
-                            <label className="theme-text-secondary mb-1.5 block text-xs font-semibold">
-                              Jam Selesai
-                            </label>
-
-                            <input
-                              type="time"
-                              value={
-                                newJadwal.jamSelesai
-                              }
-                              onChange={(e) =>
-                                setNewJadwal(
-                                  (prev) => ({
-                                    ...prev,
-                                    jamSelesai:
-                                      e.target.value,
-                                  })
-                                )
-                              }
-                              className="theme-input h-10 w-full rounded-xl border px-3 text-sm outline-none transition focus:border-[var(--color-primary)]"
-                            />
-                          </div>
-
-
-                          <div>
-                            <label className="theme-text-secondary mb-1.5 block text-xs font-semibold">
-                              Mata Pelajaran
-                            </label>
-
-                            <select
-                              value={
-                                newJadwal.mapel
-                              }
-                              onChange={(e) =>
-                                setNewJadwal(
-                                  (prev) => ({
-                                    ...prev,
-                                    mapel:
-                                      e.target.value,
-                                  })
-                                )
-                              }
-                              className="theme-input h-10 w-full rounded-xl border px-3 text-sm outline-none transition focus:border-[var(--color-primary)]"
-                            >
-                              <option value="">
-                                Pilih Mapel
-                              </option>
-
-                              {mapelList.map(
-                                (mapel) => (
-                                  <option
-                                    key={mapel.id}
-                                    value={mapel.nama}
-                                  >
-                                    {mapel.nama}
-                                  </option>
-                                )
-                              )}
-                            </select>
-                          </div>
-
-
-                          <div>
-                            <label className="theme-text-secondary mb-1.5 block text-xs font-semibold">
-                              Guru
-                            </label>
-
-                            <select
-                              value={
-                                newJadwal.guru
-                              }
-                              onChange={(e) =>
-                                setNewJadwal(
-                                  (prev) => ({
-                                    ...prev,
-                                    guru:
-                                      e.target.value,
-                                  })
-                                )
-                              }
-                              className="theme-input h-10 w-full rounded-xl border px-3 text-sm outline-none transition focus:border-[var(--color-primary)]"
-                            >
-                              <option value="">
-                                Pilih Guru
-                              </option>
-
-                              {guruList.map(
-                                (guru) => (
-                                  <option
-                                    key={guru.id}
-                                    value={getNama(guru)}
-                                  >
-                                    {getNama(guru)}
-                                  </option>
-                                )
-                              )}
-                            </select>
-                          </div>
-
-
-                          <div>
-                            <label className="theme-text-secondary mb-1.5 block text-xs font-semibold">
-                              Ruangan
-                            </label>
-
-                            <input
-                              type="text"
-                              value={
-                                newJadwal.ruangan
-                              }
-                              onChange={(e) =>
-                                setNewJadwal(
-                                  (prev) => ({
-                                    ...prev,
-                                    ruangan:
-                                      e.target.value,
-                                  })
-                                )
-                              }
-                              placeholder="A-01"
-                              className="theme-input h-10 w-full rounded-xl border px-3 text-sm outline-none transition focus:border-[var(--color-primary)]"
-                            />
-                          </div>
-                        </div>
-
-                        <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row">
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setShowAddJadwal(
-                                false
-                              )
-                            }
-                            className="theme-card theme-border theme-text-secondary inline-flex h-10 items-center justify-center gap-2 rounded-xl border px-4 text-sm font-semibold transition hover:bg-[var(--color-header-hover)]"
-                          >
-                            <X size={15} />
-                            Batal
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={
-                              handleAddJadwal
-                            }
-                            className="theme-primary inline-flex h-10 items-center justify-center gap-2 rounded-xl px-5 text-sm font-semibold transition"
-                          >
-                            <Check size={16} />
-                            Simpan Jadwal
-                          </button>
                         </div>
                       </div>
                     )}

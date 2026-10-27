@@ -3,6 +3,7 @@
 
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import {
   ArrowLeft,
   ArrowRight,
@@ -56,24 +57,27 @@ function VerifyTenantPageContent() {
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    if (emailFromUrl) {
-      setEmail(emailFromUrl);
-      return;
-    }
-
-    try {
-      const savedEmail =
-        sessionStorage.getItem("tenant_register_email") ||
-        localStorage.getItem("tenant_register_email") ||
-        localStorage.getItem("onboarding_email") ||
-        "";
-
-      if (savedEmail) {
-        setEmail(savedEmail);
+    const timer = setTimeout(() => {
+      if (emailFromUrl) {
+        setEmail(emailFromUrl);
+        return;
       }
-    } catch (err) {
-      console.error("Gagal membaca email pendaftaran:", err);
-    }
+
+      try {
+        const savedEmail =
+          sessionStorage.getItem("tenant_register_email") ||
+          localStorage.getItem("tenant_register_email") ||
+          localStorage.getItem("onboarding_email") ||
+          "";
+
+        if (savedEmail) {
+          setEmail(savedEmail);
+        }
+      } catch (err) {
+        console.error("Gagal membaca email pendaftaran:", err);
+      }
+    }, 0);
+    return () => clearTimeout(timer);
   }, [emailFromUrl]);
 
   async function handleSubmit(event) {
@@ -216,7 +220,7 @@ function VerifyTenantPageContent() {
     <main className="min-h-screen bg-slate-50 text-slate-900">
       <header className="border-b border-slate-200/80 bg-white">
         <div className="mx-auto flex h-[76px] max-w-7xl items-center justify-between px-5 sm:px-6 lg:px-8">
-          <a href="/" className="flex items-center gap-3">
+          <Link href="/" className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#0D47C9] shadow-sm">
               <span className="text-lg font-extrabold text-white">S</span>
             </div>
@@ -229,15 +233,15 @@ function VerifyTenantPageContent() {
                 School Management System
               </p>
             </div>
-          </a>
+          </Link>
 
-          <a
+          <Link
             href="/login"
             className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-blue-200 hover:text-blue-700"
           >
             Masuk
             <ArrowRight className="h-4 w-4" />
-          </a>
+          </Link>
         </div>
       </header>
 
@@ -633,13 +637,13 @@ function VerifyTenantPageContent() {
                 )}
 
                 <div className="mt-7 border-t border-slate-100 pt-6">
-                  <a
+                  <Link
                     href="/daftar-sekolah"
                     className="group inline-flex items-center gap-2 text-sm font-semibold text-slate-500 transition hover:text-blue-600"
                   >
                     <ArrowLeft className="h-4 w-4 transition group-hover:-translate-x-0.5" />
                     Kembali ke pendaftaran
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>

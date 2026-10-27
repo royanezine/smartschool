@@ -100,7 +100,10 @@ export default function DetailTabunganPage() {
   }, [siswaId]);
 
   useEffect(() => {
-    loadDetail();
+    const timer = setTimeout(() => {
+      loadDetail();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadDetail]);
 
   function handleBack() {
@@ -255,7 +258,7 @@ export default function DetailTabunganPage() {
                           Saldo tabungan
                         </p>
                       </div>
-                      <p className="mt-2 text-lg font-bold tabular-nums theme-text">
+                      <p className="mt-2 whitespace-nowrap text-lg font-bold tabular-nums theme-text">
                         {formatRupiah(detail?.saldo ?? 0)}
                       </p>
                     </div>
@@ -343,7 +346,7 @@ export default function DetailTabunganPage() {
                                     </span>
                                   </td>
                                   <td
-                                    className={`px-4 py-3 text-right text-xs font-bold tabular-nums ${
+                                    className={`px-4 py-3 text-right text-xs font-bold tabular-nums whitespace-nowrap ${
                                       isSetor
                                         ? "text-emerald-700 dark:text-emerald-400"
                                         : "text-amber-700 dark:text-amber-400"
@@ -352,7 +355,7 @@ export default function DetailTabunganPage() {
                                     {isSetor ? "+" : "-"}
                                     {formatRupiah(item.jumlah)}
                                   </td>
-                                  <td className="px-4 py-3 text-right text-xs font-semibold tabular-nums theme-text">
+                                  <td className="px-4 py-3 text-right text-xs font-semibold tabular-nums whitespace-nowrap theme-text">
                                     {formatRupiah(item.saldoSesudah)}
                                   </td>
                                 </tr>

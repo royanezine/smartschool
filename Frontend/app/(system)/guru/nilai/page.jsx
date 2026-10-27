@@ -168,22 +168,6 @@ export default function GuruNilaiIndexPage() {
   const [exportError, setExportError] = useState("");
   const [exportSuccess, setExportSuccess] = useState("");
 
-  const notifications = [
-    {
-      id: 1,
-      title: "Rapat Wali Kelas",
-      desc: "Dikirim 2 jam lalu",
-      read: false,
-    },
-    {
-      id: 2,
-      title: "Batas Input Nilai Rapor",
-      desc: "Dikirim 5 jam lalu",
-      read: false,
-    },
-  ];
-
-
   const handleExportNilai = async () => {
     try {
       setIsExporting(true);
@@ -232,7 +216,6 @@ export default function GuruNilaiIndexPage() {
           toggleSidebar={() =>
             setSidebarOpen(!sidebarOpen)
           }
-          notifications={notifications}
           user={{
             name: "Bu Sari",
             email: "guru@smartschool.com",

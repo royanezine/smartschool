@@ -4,6 +4,8 @@ import { Suspense, useState, useMemo, useRef, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
+import { getSemuaSiswa, updateSiswa } from "@/services/siswa.service";
+import { getKelas } from "@/services/kelas.service";
 
 import {
   ArrowLeft,
@@ -69,164 +71,6 @@ const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
 
-const STORAGE_KEY = "smartschool_siswa";
-
-const PHOTO_KEY_PREFIX = "siswa_foto_";
-
-
-const MOCK_SISWA = [
-  {
-    id: 1,
-    nama: "Ahmad Fauzan",
-    nis: "20240001",
-    nisn: "0081234567",
-    nik: "3273011209080001",
-    kelas: "X PPLG 1",
-    status: "Aktif",
-
-    tempatLahir: "Depok",
-    tglLahir: "2008-09-12",
-    jenisKelamin: "Laki-laki",
-    agama: "Islam",
-    statusKeluarga: "Anak Kandung",
-
-    sekolahAsal: "SMP Negeri 1 Depok",
-    tahunMasuk: "2024",
-    tanggalMasuk: "2024-07-15",
-
-    namaAyah: "Budi Fauzan",
-    pekerjaanAyah: "Karyawan Swasta",
-    namaIbu: "Siti Aminah",
-    pekerjaanIbu: "Ibu Rumah Tangga",
-    telpOrangTua: "081234567890",
-
-    telp: "081298765432",
-    email: "ahmad.fauzan@student.sch.id",
-    alamat: "Jl. Merdeka No. 12, Depok",
-  },
-
-  {
-    id: 2,
-    nama: "Siti Aisyah",
-    nis: "20240002",
-    nisn: "0081234568",
-    nik: "3273015209090002",
-    kelas: "X PPLG 1",
-    status: "Aktif",
-
-    tempatLahir: "Jakarta",
-    tglLahir: "2009-09-15",
-    jenisKelamin: "Perempuan",
-    agama: "Islam",
-    statusKeluarga: "Anak Kandung",
-
-    sekolahAsal: "SMP Negeri 5 Jakarta",
-    tahunMasuk: "2024",
-    tanggalMasuk: "2024-07-15",
-
-    namaAyah: "Agus Setiawan",
-    pekerjaanAyah: "Wiraswasta",
-    namaIbu: "Dewi Lestari",
-    pekerjaanIbu: "Guru",
-    telpOrangTua: "081223344556",
-
-    telp: "082112345678",
-    email: "siti.aisyah@student.sch.id",
-    alamat: "Jl. Melati No. 8, Jakarta",
-  },
-
-  {
-    id: 3,
-    nama: "Rizky Pratama",
-    nis: "20240003",
-    nisn: "0081234569",
-    nik: "3273011009080003",
-    kelas: "X PPLG 2",
-    status: "Aktif",
-
-    tempatLahir: "Bogor",
-    tglLahir: "2008-09-10",
-    jenisKelamin: "Laki-laki",
-    agama: "Islam",
-    statusKeluarga: "Anak Kandung",
-
-    sekolahAsal: "SMP Negeri 2 Bogor",
-    tahunMasuk: "2024",
-    tanggalMasuk: "2024-07-15",
-
-    namaAyah: "Hendra Pratama",
-    pekerjaanAyah: "Pegawai Negeri",
-    namaIbu: "Rina Marlina",
-    pekerjaanIbu: "Wiraswasta",
-    telpOrangTua: "085612345678",
-
-    telp: "085612345679",
-    email: "rizky.pratama@student.sch.id",
-    alamat: "Jl. Raya Bogor No. 20",
-  },
-
-  {
-    id: 4,
-    nama: "Nabila Putri",
-    nis: "20240004",
-    nisn: "0081234570",
-    nik: "3273015809090004",
-    kelas: "X AKL 1",
-    status: "Aktif",
-
-    tempatLahir: "Depok",
-    tglLahir: "2009-09-18",
-    jenisKelamin: "Perempuan",
-    agama: "Islam",
-    statusKeluarga: "Anak Kandung",
-
-    sekolahAsal: "SMP Negeri 3 Depok",
-    tahunMasuk: "2024",
-    tanggalMasuk: "2024-07-15",
-
-    namaAyah: "Dedi Setiawan",
-    pekerjaanAyah: "Karyawan Swasta",
-    namaIbu: "Maya Sari",
-    pekerjaanIbu: "Ibu Rumah Tangga",
-    telpOrangTua: "082233445566",
-
-    telp: "082233445567",
-    email: "nabila.putri@student.sch.id",
-    alamat: "Jl. Kenanga No. 14, Depok",
-  },
-
-  {
-    id: 5,
-    nama: "Fajar Ramadhan",
-    nis: "20240005",
-    nisn: "0081234571",
-    nik: "3273012509080005",
-    kelas: "X TJKT 1",
-    status: "Nonaktif",
-
-    tempatLahir: "Bekasi",
-    tglLahir: "2008-09-25",
-    jenisKelamin: "Laki-laki",
-    agama: "Islam",
-    statusKeluarga: "Anak Kandung",
-
-    sekolahAsal: "SMP Negeri 4 Bekasi",
-    tahunMasuk: "2024",
-    tanggalMasuk: "2024-07-15",
-
-    namaAyah: "Andi Ramadhan",
-    pekerjaanAyah: "Wiraswasta",
-    namaIbu: "Lina Kartika",
-    pekerjaanIbu: "Karyawan Swasta",
-    telpOrangTua: "081345678901",
-
-    telp: "081345678902",
-    email: "fajar.ramadhan@student.sch.id",
-    alamat: "Jl. Mawar No. 5, Bekasi",
-  },
-];
-
-
 const OPSI_STATUS = ["Aktif", "Nonaktif"];
 
 const OPSI_JENIS_KELAMIN = [
@@ -248,24 +92,6 @@ const OPSI_STATUS_KELUARGA = [
   "Anak Tiri",
   "Anak Angkat",
 ];
-
-const OPSI_KELAS = [
-  "X PPLG 1",
-  "X PPLG 2",
-  "X AKL 1",
-  "X AKL 2",
-  "X TJKT 1",
-  "X TJKT 2",
-  "XI PPLG 1",
-  "XI PPLG 2",
-  "XI AKL 1",
-  "XI TJKT 1",
-  "XII PPLG 1",
-  "XII PPLG 2",
-  "XII AKL 1",
-  "XII TJKT 1",
-];
-
 
 function FotoPlaceholder() {
   return (
@@ -521,223 +347,145 @@ function EditContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [isCollapsed, setIsCollapsed] =
-    useState(false);
-
-  const [saving, setSaving] =
-    useState(false);
-
-  const [form, setForm] =
-    useState(null);
-
-  const [foto, setFoto] =
-    useState(null);
-
-
-  const siswaAsli = useMemo(() => {
-    const id = Number(
-      searchParams.get("id")
-    );
-
-
-    if (typeof window !== "undefined") {
-      try {
-        const saved =
-          window.localStorage.getItem(
-            STORAGE_KEY
-          );
-
-        if (saved) {
-          const data =
-            JSON.parse(saved);
-
-          const found =
-            data.find(
-              (item) =>
-                Number(item.id) === id
-            );
-
-          if (found) {
-            return found;
-          }
-        }
-      } catch (error) {
-        console.error(
-          "Gagal membaca data siswa:",
-          error
-        );
-      }
-    }
-
-    return MOCK_SISWA.find(
-      (item) => item.id === id
-    );
-  }, [searchParams]);
-
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState(null);
+  const [foto, setFoto] = useState(null);
+  const [siswaAsli, setSiswaAsli] = useState(null);
+  const [loadingSiswa, setLoadingSiswa] = useState(true);
 
   useEffect(() => {
-    if (!siswaAsli) return;
+    let active = true;
 
-    setForm({
-      ...siswaAsli,
-    });
+    async function loadSiswa() {
+      const id = searchParams.get("id");
+      if (!id) {
+        setLoadingSiswa(false);
+        return;
+      }
 
-    try {
-      const savedFoto =
-        window.localStorage.getItem(
-          `${PHOTO_KEY_PREFIX}${siswaAsli.id}`
+      try {
+        setLoadingSiswa(true);
+        const [res, resKelas] = await Promise.allSettled([
+          getSemuaSiswa({ search: String(id), limit: 50 }),
+          getKelas({ limit: 100 }),
+        ]);
+        if (!active) return;
+        if (resKelas.status === "fulfilled") {
+          const val = resKelas.value;
+          const kList = Array.isArray(val?.data) ? val.data : Array.isArray(val) ? val : [];
+          setOpsiKelas(kList.map((k) => k.nama).filter(Boolean));
+        }
+        const siswaVal = res.status === "fulfilled" ? res.value : null;
+        const list = Array.isArray(siswaVal?.data) ? siswaVal.data : [];
+        if (!active) return;
+        
+        const found = list.find(
+          (item) =>
+            String(item.id) === String(id) ||
+            String(item.nis) === String(id) ||
+            String(item.nisn) === String(id)
         );
 
-      if (savedFoto) {
-        setFoto(savedFoto);
+        if (found) {
+          const mapped = {
+            id: found.id,
+            nama: found.namaLengkap || "",
+            nis: found.nis || "",
+            nisn: found.nisn || "",
+            nik: "-",
+            kelas: found.kelas?.nama || "Umum",
+            status: found.status || "Aktif",
+            tempatLahir: "-",
+            tglLahir: "-",
+            jenisKelamin: found.jenisKelamin || "Laki-laki",
+            agama: "Islam",
+            statusKeluarga: "Anak Kandung",
+            sekolahAsal: "-",
+            tahunMasuk: "-",
+            tanggalMasuk: "-",
+            namaAyah: "-",
+            pekerjaanAyah: "-",
+            namaIbu: "-",
+            pekerjaanIbu: "-",
+            telpOrangTua: "-",
+            telp: found.noTelepon || "",
+            email: found.email || "",
+            alamat: "-",
+          };
+          setSiswaAsli(mapped);
+          setForm(mapped);
+        }
+      } catch (err) {
+        console.error("Gagal memuat siswa:", err);
+      } finally {
+        if (active) setLoadingSiswa(false);
       }
-    } catch (error) {
-      console.error(
-        "Gagal memuat foto siswa:",
-        error
-      );
     }
-  }, [siswaAsli]);
 
+    const timer = setTimeout(() => {
+      loadSiswa();
+    }, 0);
 
-  const updateField =
-    (field) => (e) => {
-      const value =
-        e?.target
-          ? e.target.value
-          : e;
-
-      setForm((prev) => ({
-        ...prev,
-        [field]: value,
-      }));
+    return () => {
+      active = false;
+      clearTimeout(timer);
     };
+  }, [searchParams]);
 
+  const updateField = (field) => (e) => {
+    const value = e?.target ? e.target.value : e;
+    setForm((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
 
   const toggleSidebar = () => {
-    setIsCollapsed(
-      (prev) => !prev
-    );
+    setIsCollapsed((prev) => !prev);
   };
-
 
   const handleBack = () => {
-    if (siswaAsli) {
-      router.push(
-        `/admin/siswa/${siswaAsli.id}`
-      );
-
+    if (siswaAsli?.id) {
+      router.push(`/admin/siswa/${siswaAsli.id}`);
       return;
     }
-
-    router.push(
-      "/admin/siswa"
-    );
+    router.push("/admin/siswa/kartu-identitas");
   };
-
 
   const handleBatal = () => {
     handleBack();
   };
 
-
-  const handleSimpan = (e) => {
+  const handleSimpan = async (e) => {
     e.preventDefault();
-
     if (!form) return;
 
-
-    if (
-      !form.nama?.trim() ||
-      !form.nis?.trim() ||
-      !form.nisn?.trim() ||
-      !form.kelas
-    ) {
-      alert(
-        "Nama, NIS, NISN, dan kelas wajib diisi."
-      );
-
+    if (!form.nama?.trim() || !form.nis?.trim() || !form.nisn?.trim()) {
+      alert("Nama, NIS, dan NISN wajib diisi.");
       return;
     }
 
     setSaving(true);
-
     try {
+      await updateSiswa(String(form.id), {
+        namaLengkap: form.nama.trim(),
+        email: form.email?.trim() || undefined,
+        nis: form.nis.trim(),
+        nisn: form.nisn.trim(),
+        status: form.status || "Aktif",
+        jenisKelamin: form.jenisKelamin,
+        noTelepon: form.telp?.trim() || undefined,
+      });
 
-      const raw =
-        window.localStorage.getItem(
-          STORAGE_KEY
-        );
-
-      let data =
-        raw
-          ? JSON.parse(raw)
-          : [...MOCK_SISWA];
-
-
-      const index =
-        data.findIndex(
-          (item) =>
-            Number(item.id) ===
-            Number(form.id)
-        );
-
-
-      if (index !== -1) {
-        data[index] = {
-          ...data[index],
-          ...form,
-        };
-      } else {
-
-        data.push(form);
-      }
-
-
-      window.localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify(data)
-      );
-
-
-      if (foto) {
-        window.localStorage.setItem(
-          `${PHOTO_KEY_PREFIX}${form.id}`,
-          foto
-        );
-      } else {
-        window.localStorage.removeItem(
-          `${PHOTO_KEY_PREFIX}${form.id}`
-        );
-      }
-
-      console.log(
-        "Data siswa berhasil disimpan:",
-        form
-      );
-
-
-      setTimeout(() => {
-        setSaving(false);
-
-        router.push(
-          `/admin/siswa/${form.id}`
-        );
-      }, 500);
-    } catch (error) {
-      console.error(
-        "Gagal menyimpan data siswa:",
-        error
-      );
-
+      router.push("/admin/siswa/kartu-identitas");
+    } catch (err) {
+      console.error("Gagal menyimpan data siswa:", err);
+      alert(err?.message || "Gagal menyimpan perubahan data siswa.");
+    } finally {
       setSaving(false);
-
-      alert(
-        "Gagal menyimpan perubahan data siswa."
-      );
     }
   };
-
 
   if (!siswaAsli) {
     return (
@@ -1171,7 +919,7 @@ function EditContent() {
                       Pilih kelas
                     </option>
 
-                    {OPSI_KELAS.map(
+                    {opsiKelas.map(
                       (option) => (
                         <option
                           key={option}
@@ -1513,4 +1261,5 @@ export default function Edit() {
       <EditContent />
     </Suspense>
   );
-}
+const [opsiKelas, setOpsiKelas] = useState([]);
+  }

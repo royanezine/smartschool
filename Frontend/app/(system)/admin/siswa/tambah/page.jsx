@@ -218,7 +218,10 @@ export default function TambahSiswaPage() {
   }, []);
 
   useEffect(() => {
-    loadKelas();
+    const timer = setTimeout(() => {
+      loadKelas();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadKelas]);
 
   const handleChange = (event) => {

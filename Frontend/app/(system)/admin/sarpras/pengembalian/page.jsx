@@ -315,16 +315,6 @@ function PengembalianContent() {
   const requestIdRef = useRef(0);
   const ringkasanRequestIdRef = useRef(0);
 
-  const notifications = [
-    {
-      id: 1,
-      title: "Pengembalian Sarpras",
-      desc: "Peminjaman aktif dan proses pengembalian aset",
-      read: false,
-    },
-  ];
-
-
   useEffect(() => {
     const timer = setTimeout(() => {
       setPencarianAktif(pencarian.trim());
@@ -475,7 +465,6 @@ function PengembalianContent() {
           toggleSidebar={() =>
             setSidebarOpen(!sidebarOpen)
           }
-          notifications={notifications}
           user={{
             name: "Admin Sekolah",
             email: "admin@smartschool.com",

@@ -134,7 +134,10 @@ export default function SiswaRaportPage() {
   }, []);
 
   useEffect(() => {
-    loadRapot();
+    const timer = setTimeout(() => {
+      loadRapot();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadRapot]);
 
 

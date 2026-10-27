@@ -680,8 +680,11 @@ export default function PeminjamanSiswaPage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    setMounted(true);
-    setUser(getStoredUser());
+    const timer = setTimeout(() => {
+      setMounted(true);
+      setUser(getStoredUser());
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   const userId = useMemo(
@@ -739,26 +742,29 @@ export default function PeminjamanSiswaPage() {
       return;
     }
 
-    const token = getToken();
+    const timer = setTimeout(() => {
+      const token = getToken();
 
-    if (!token) {
-      setLoading(false);
-      setError(
-        "Token login tidak ditemukan. Silakan login kembali.",
-      );
-      return;
-    }
+      if (!token) {
+        setLoading(false);
+        setError(
+          "Token login tidak ditemukan. Silakan login kembali.",
+        );
+        return;
+      }
 
-    if (!userId) {
-      setLoading(false);
-      setError(
-        "ID siswa tidak ditemukan dari akun yang sedang login.",
-      );
-      return;
-    }
+      if (!userId) {
+        setLoading(false);
+        setError(
+          "ID siswa tidak ditemukan dari akun yang sedang login.",
+        );
+        return;
+      }
 
-    loadData();
-  }, [mounted, userId]);
+      loadData();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [mounted, userId, loadData]);
 
   const activeLoans = useMemo(
     () =>

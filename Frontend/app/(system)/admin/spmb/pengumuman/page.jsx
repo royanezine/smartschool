@@ -5,16 +5,20 @@ export default function PengumumanSpmbPage() {
     <SpmbBackendBlocker
       title="Pengumuman SPMB"
       description="Pengelolaan pengumuman resmi PPDB/SPMB untuk calon peserta didik."
+      backHref="/admin/spmb"
+      backLabel="Kembali ke SPMB"
       blockers={[
         {
-          label: "Model/route Pengumuman PPDB",
+          label: "Model & route Pengumuman PPDB",
           detail:
-            "Belum ada model pengumuman PPDB di Prisma dan belum ada route/controller pengumuman.",
+            "schema.prisma tidak memiliki model pengumuman PPDB, dan tidak ada route/controller /api/pengumuman-ppdb untuk membaca atau menerbitkan pengumuman.",
         },
       ]}
       notes={[
-        "Daftar pengumuman contoh sudah dihapus dari halaman admin dan halaman publik.",
-        "Halaman publik /PPDB/pengumuman sekarang menampilkan empty state yang jujur.",
+        "Fitur pengumuman SPMB belum diintegrasikan karena sumber datanya belum ada di Backend.",
+        "Endpoint POST /api/notifikasi/broadcast hanya membuat catatan Notifikasi untuk pengguna terdaftar. Endpoint itu bukan penyimpanan pengumuman PPDB dan tidak dapat dibaca calon peserta didik di halaman publik.",
+        "Modul CMS dan artikel adalah konten umum dengan model berbeda, sehingga tidak dipakai sebagai pengganti pengumuman PPDB.",
+        "Halaman publik /PPDB/pengumuman menampilkan empty state, bukan data contoh. Halaman admin ini juga tidak menampilkan pengumuman karangan.",
       ]}
     />
   );

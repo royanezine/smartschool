@@ -656,15 +656,24 @@ export default function NilaiUjianGuruPage() {
   }, [selectedUjianId, selectedKelasMapel, loadDetailKelas]);
 
   useEffect(() => {
-    loadKelasMapel();
+    const timer = setTimeout(() => {
+      loadKelasMapel();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadKelasMapel]);
 
   useEffect(() => {
-    loadUjian();
+    const timer = setTimeout(() => {
+      loadUjian();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadUjian]);
 
   useEffect(() => {
-    loadDetailUjian();
+    const timer = setTimeout(() => {
+      loadDetailUjian();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadDetailUjian]);
 
   const handleChangeKelasMapel = (id) => {
@@ -1096,45 +1105,27 @@ export default function NilaiUjianGuruPage() {
 
   const openDetail = useCallback(
     (item) => {
-      if (typeof window !== "undefined") {
-        sessionStorage.setItem(
-          "selectedNilaiDetail",
-          JSON.stringify({
-            siswa: item,
-            ujian: {
-              id: selectedUjianId,
-              nama: namaUjian,
-              jenis: jenisUjian,
-              mataPelajaran,
-              namaKelas,
-              jumlahSoal,
-              durasi,
-              tanggalMulai,
-            },
-          })
-        );
-      }
-
       const sid = item?.siswaId || item?.id || "";
       const uid = selectedUjianId || "";
+      const sNama = item?.nama || item?.user?.nama || "";
+      const sNisn = item?.nisn || item?.nis || "";
+      const sNilai =
+        item?.nilai !== undefined && item?.nilai !== null
+          ? String(item?.nilai)
+          : "";
+      const sStatus = item?.status || "";
 
       router.push(
         `/guru/nilaiUjian/detail?siswaId=${encodeURIComponent(
           sid
-        )}&ujianId=${encodeURIComponent(uid)}`
+        )}&ujianId=${encodeURIComponent(uid)}&nama=${encodeURIComponent(
+          sNama
+        )}&nisn=${encodeURIComponent(sNisn)}&nilai=${encodeURIComponent(
+          sNilai
+        )}&status=${encodeURIComponent(sStatus)}`
       );
     },
-    [
-      router,
-      selectedUjianId,
-      namaUjian,
-      jenisUjian,
-      mataPelajaran,
-      namaKelas,
-      jumlahSoal,
-      durasi,
-      tanggalMulai,
-    ]
+    [router, selectedUjianId]
   );
 
 

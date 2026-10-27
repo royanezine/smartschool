@@ -1,9 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { apiFetch } from "../../../lib/api";
-
 import {
   LayoutDashboard,
   Building2,
@@ -15,11 +13,15 @@ import {
   Settings,
   ChevronRight,
   Sparkles,
-  TrendingUp,
-  TrendingDown,
-  Minus,
   Bell,
+  Info,
 } from "lucide-react";
+
+import {
+  getYayasanSummary,
+  getSekolahBinaan,
+} from "@/services/yayasan.service";
+import { getNotifikasi } from "@/services/notifikasi.service";
 
 
 const themePrimaryGradient =
@@ -33,9 +35,6 @@ const themePrimarySoftBorder =
 
 const themePrimaryText =
   "text-[var(--color-primary)]";
-
-const themePrimaryHover =
-  "hover:bg-[color-mix(in_srgb,var(--color-primary)_88%,var(--color-text))]";
 
 const themeCardShadow =
   "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
@@ -80,118 +79,6 @@ const themeDangerBorder =
   "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
 
 
-const quickMenu = [
-  {
-    id: "sekolah",
-    title: "Sekolah",
-    desc: "Kelola profil dan data seluruh unit sekolah di bawah yayasan",
-    icon: Building2,
-    color: "primary",
-    path: "/yayasan/sekolah",
-    stat: "6 unit sekolah",
-    featured: true,
-  },
-  {
-    id: "laporan",
-    title: "Laporan & Analitik",
-    desc: "Ringkasan laporan akademik, guru, inventaris, dan siswa",
-    icon: FileText,
-    color: "info",
-    path: "/yayasan/laporan",
-    stat: "4 kategori laporan",
-    featured: true,
-  },
-  {
-    id: "guru",
-    title: "Guru",
-    desc: "Data induk tenaga pendidik",
-    icon: GraduationCap,
-    color: "info",
-    path: "/yayasan/guru",
-    stat: "184 aktif",
-  },
-  {
-    id: "siswa",
-    title: "Siswa",
-    desc: "Data induk siswa lintas unit",
-    icon: UserSquare2,
-    color: "success",
-    path: "/yayasan/siswa",
-    stat: "4.312 siswa",
-  },
-  {
-    id: "monitoringAkademik",
-    title: "Monitoring Akademik",
-    desc: "Kehadiran, nilai, LMS, mapel",
-    icon: ClipboardCheck,
-    color: "warning",
-    path: "/yayasan/monitoringAkademik",
-    stat: "Update harian",
-  },
-  {
-    id: "pengaturan",
-    title: "Pengaturan",
-    desc: "Konfigurasi sistem yayasan",
-    icon: Settings,
-    color: "neutral",
-    path: "/yayasan/pengaturan",
-    stat: "3 hari lalu",
-  },
-];
-
-
-const unitList = [
-  {
-    id: 1,
-    nama: "SD Smart School 1",
-    siswa: 612,
-    guru: 34,
-    kehadiran: 97,
-    trend: "up",
-  },
-  {
-    id: 2,
-    nama: "SD Smart School 2",
-    siswa: 548,
-    guru: 30,
-    kehadiran: 95,
-    trend: "down",
-  },
-  {
-    id: 3,
-    nama: "SMP Smart School 1",
-    siswa: 734,
-    guru: 41,
-    kehadiran: 96,
-    trend: "same",
-  },
-  {
-    id: 4,
-    nama: "SMP Smart School 2",
-    siswa: 689,
-    guru: 38,
-    kehadiran: 94,
-    trend: "down",
-  },
-  {
-    id: 5,
-    nama: "SMA Smart School 1",
-    siswa: 812,
-    guru: 45,
-    kehadiran: 98,
-    trend: "up",
-  },
-  {
-    id: 6,
-    nama: "SMA Smart School 2",
-    siswa: 917,
-    guru: 49,
-    kehadiran: 96,
-    trend: "same",
-  },
-];
-
-
 const colorMap = {
   primary: {
     bg: themePrimarySoft,
@@ -201,7 +88,6 @@ const colorMap = {
       "hover:border-[color-mix(in_srgb,var(--color-primary)_36%,transparent)]",
     ring:
       "group-hover:ring-[color-mix(in_srgb,var(--color-primary)_12%,transparent)]",
-    bar: "bg-[var(--color-primary)]",
   },
 
   info: {
@@ -212,7 +98,6 @@ const colorMap = {
       "hover:border-[color-mix(in_srgb,var(--color-info)_36%,transparent)]",
     ring:
       "group-hover:ring-[color-mix(in_srgb,var(--color-info)_12%,transparent)]",
-    bar: "bg-[var(--color-info)]",
   },
 
   success: {
@@ -223,7 +108,6 @@ const colorMap = {
       "hover:border-[color-mix(in_srgb,var(--color-success)_36%,transparent)]",
     ring:
       "group-hover:ring-[color-mix(in_srgb,var(--color-success)_12%,transparent)]",
-    bar: "bg-[var(--color-success)]",
   },
 
   warning: {
@@ -234,7 +118,6 @@ const colorMap = {
       "hover:border-[color-mix(in_srgb,var(--color-warning)_36%,transparent)]",
     ring:
       "group-hover:ring-[color-mix(in_srgb,var(--color-warning)_12%,transparent)]",
-    bar: "bg-[var(--color-warning)]",
   },
 
   neutral: {
@@ -245,36 +128,31 @@ const colorMap = {
       "hover:border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]",
     ring:
       "group-hover:ring-[color-mix(in_srgb,var(--color-text)_8%,transparent)]",
-    bar: "bg-[var(--color-text-muted)]",
   },
 };
 
 
-function TrendIcon({ trend }) {
-  if (trend === "up") {
-    return (
-      <TrendingUp
-        size={13}
-        className="text-[var(--color-success)] flex-shrink-0"
-      />
-    );
+function unwrapData(response) {
+  if (response && typeof response === "object" && "data" in response) {
+    return response.data;
   }
 
-  if (trend === "down") {
-    return (
-      <TrendingDown
-        size={13}
-        className="text-[var(--color-warning)] flex-shrink-0"
-      />
-    );
-  }
+  return response;
+}
 
-  return (
-    <Minus
-      size={13}
-      className="text-[var(--color-text-muted)] flex-shrink-0"
-    />
-  );
+
+function formatTanggal(value) {
+  if (!value) return "-";
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) return "-";
+
+  return date.toLocaleDateString("id-ID", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
 }
 
 
@@ -282,39 +160,74 @@ export default function YayasanDashboardPage() {
   const router = useRouter();
 
   const [summary, setSummary] = useState(null);
-  const [loadingSummary, setLoadingSummary] = useState(true);
-  const [summaryError, setSummaryError] = useState(null);
+  const [schools, setSchools] = useState([]);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
 
 
   useEffect(() => {
     let mounted = true;
 
-    async function fetchSummary() {
+    async function fetchDashboard() {
       try {
-        setLoadingSummary(true);
-        setSummaryError(null);
+        setLoading(true);
+        setLoadError(null);
 
-        const res = await apiFetch("/yayasan/summary");
+        const [summaryResult, schoolsResult, notifResult] =
+          await Promise.allSettled([
+            getYayasanSummary(),
+            getSekolahBinaan(),
+            getNotifikasi(),
+          ]);
 
         if (!mounted) return;
 
-        if (res) {
-          setSummary(res.data);
+        if (summaryResult.status === "fulfilled") {
+          setSummary(unwrapData(summaryResult.value) ?? null);
+        }
+
+        if (schoolsResult.status === "fulfilled") {
+          const payload = unwrapData(schoolsResult.value);
+          setSchools(Array.isArray(payload?.items) ? payload.items : []);
+        }
+
+        if (notifResult.status === "fulfilled") {
+          setNotifications(
+            Array.isArray(notifResult.value?.list)
+              ? notifResult.value.list
+              : []
+          );
+          setUnreadCount(Number(notifResult.value?.unreadCount) || 0);
+        }
+
+        const failures = [summaryResult, schoolsResult, notifResult].filter(
+          (result) => result.status === "rejected"
+        );
+
+        if (failures.length > 0) {
+          const firstFailure = failures[0].reason;
+
+          setLoadError(
+            firstFailure?.message ||
+              "Sebagian data dashboard gagal dimuat."
+          );
         }
       } catch (err) {
         if (!mounted) return;
 
-        setSummaryError(
+        setLoadError(
           err?.message || "Terjadi kesalahan saat mengambil data dashboard."
         );
       } finally {
         if (mounted) {
-          setLoadingSummary(false);
+          setLoading(false);
         }
       }
     }
 
-    fetchSummary();
+    fetchDashboard();
 
     return () => {
       mounted = false;
@@ -322,18 +235,36 @@ export default function YayasanDashboardPage() {
   }, []);
 
 
+  const totalSiswa = schools.reduce(
+    (total, sekolah) => total + Number(sekolah?.statistik?.totalSiswa ?? 0),
+    0
+  );
+
+  const totalGuru = schools.reduce(
+    (total, sekolah) => total + Number(sekolah?.statistik?.totalGuru ?? 0),
+    0
+  );
+
+  const totalKelas = schools.reduce(
+    (total, sekolah) => total + Number(sekolah?.statistik?.totalKelas ?? 0),
+    0
+  );
+
+
   const kpiStrip = [
     {
       id: "sekolah",
       label: "Unit Sekolah",
-      value: summary?.totalSekolah ?? "-",
+      value: summary?.totalSekolah ?? (loading ? "-" : schools.length),
       icon: Building2,
       color: "primary",
     },
     {
-      id: "siswaGuru",
+      id: "pengguna",
       label: "Total Pengguna Aktif",
-      value: summary?.totalPenggunaAktif ?? "-",
+      value:
+        summary?.totalPenggunaAktif ??
+        (loading ? "-" : totalSiswa + totalGuru),
       icon: UserSquare2,
       color: "info",
     },
@@ -354,18 +285,62 @@ export default function YayasanDashboardPage() {
   ];
 
 
-  const notifications = [
+  const quickMenu = [
     {
-      id: 1,
-      title: "Pengumuman Libur Semester",
-      desc: "Dikirim 2 jam lalu",
-      read: false,
+      id: "sekolah",
+      title: "Sekolah",
+      desc: "Kelola profil dan data seluruh unit sekolah di bawah yayasan",
+      icon: Building2,
+      color: "primary",
+      path: "/yayasan/sekolah",
+      stat: loading ? "Memuat data..." : `${schools.length} unit sekolah`,
+      featured: true,
     },
     {
-      id: 2,
-      title: "Deadline Input Nilai",
-      desc: "Dikirim 5 jam lalu",
-      read: false,
+      id: "laporan",
+      title: "Laporan & Analitik",
+      desc: "Ringkasan laporan akademik, guru, inventaris, dan siswa",
+      icon: FileText,
+      color: "info",
+      path: "/yayasan/laporan",
+      stat: "Laporan per modul",
+      featured: true,
+    },
+    {
+      id: "guru",
+      title: "Guru",
+      desc: "Data induk tenaga pendidik",
+      icon: GraduationCap,
+      color: "info",
+      path: "/yayasan/guru",
+      stat: loading ? "Memuat data..." : `${totalGuru} guru aktif`,
+    },
+    {
+      id: "siswa",
+      title: "Siswa",
+      desc: "Data induk siswa lintas unit",
+      icon: UserSquare2,
+      color: "success",
+      path: "/yayasan/siswa",
+      stat: loading ? "Memuat data..." : `${totalSiswa} siswa aktif`,
+    },
+    {
+      id: "monitoringAkademik",
+      title: "Monitoring Akademik",
+      desc: "Kehadiran, nilai, LMS, mapel",
+      icon: ClipboardCheck,
+      color: "warning",
+      path: "/yayasan/monitoringAkademik",
+      stat: "Data per unit",
+    },
+    {
+      id: "pengaturan",
+      title: "Pengaturan",
+      desc: "Konfigurasi sistem yayasan",
+      icon: Settings,
+      color: "neutral",
+      path: "/yayasan/pengaturan",
+      stat: "Per sekolah",
     },
   ];
 
@@ -404,7 +379,7 @@ export default function YayasanDashboardPage() {
           </div>
 
 
-          {summaryError && (
+          {loadError && (
             <div
               className={`rounded-xl border ${themeDangerBorder} ${themeDangerSurface} p-3.5 sm:p-4`}
             >
@@ -417,11 +392,11 @@ export default function YayasanDashboardPage() {
 
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-[var(--color-warning)]">
-                    Gagal memuat metrik dashboard
+                    Sebagian data dashboard gagal dimuat
                   </p>
 
                   <p className="text-xs theme-text-secondary mt-0.5 break-words">
-                    {summaryError}
+                    {loadError}
                   </p>
                 </div>
               </div>
@@ -448,7 +423,7 @@ export default function YayasanDashboardPage() {
                   </div>
 
                   <div className="min-w-0">
-                    {loadingSummary ? (
+                    {loading ? (
                       <div
                         className="h-5 w-10 rounded animate-pulse"
                         style={{
@@ -576,7 +551,7 @@ export default function YayasanDashboardPage() {
                   </div>
 
                   <h3 className="text-sm font-semibold theme-text truncate">
-                    Kehadiran per Unit Sekolah
+                    Ringkasan Unit Sekolah
                   </h3>
                 </div>
 
@@ -590,38 +565,93 @@ export default function YayasanDashboardPage() {
                 </button>
               </div>
 
-              <div className="p-4 sm:p-5 space-y-4">
-                {unitList.map((unit) => (
-                  <div
-                    key={unit.id}
-                    className="flex items-center gap-3 sm:gap-4"
-                  >
-                    <span className="w-24 sm:w-40 flex-shrink-0 text-sm theme-text font-medium truncate">
-                      {unit.nama}
-                    </span>
-
-                    <div
-                      className="flex-1 min-w-0 h-2 rounded-full overflow-hidden"
-                      style={{
-                        background:
-                          "color-mix(in srgb, var(--color-text) 7%, transparent)",
-                      }}
-                    >
+              <div className="p-4 sm:p-5">
+                {loading ? (
+                  <div className="space-y-3">
+                    {[1, 2, 3].map((item) => (
                       <div
-                        className="h-full rounded-full bg-[var(--color-primary)] transition-all duration-500"
+                        key={item}
+                        className="h-14 rounded-lg animate-pulse"
                         style={{
-                          width: `${unit.kehadiran}%`,
+                          background:
+                            "color-mix(in srgb, var(--color-text) 6%, transparent)",
                         }}
                       />
-                    </div>
-
-                    <span className="w-10 flex-shrink-0 text-right text-sm theme-text-secondary">
-                      {unit.kehadiran}%
-                    </span>
-
-                    <TrendIcon trend={unit.trend} />
+                    ))}
                   </div>
-                ))}
+                ) : schools.length === 0 ? (
+                  <div className="py-8 text-center">
+                    <Building2
+                      size={32}
+                      className="mx-auto text-[var(--color-text-muted)]"
+                    />
+
+                    <p className="mt-2 text-sm font-medium theme-text-secondary">
+                      Belum ada unit sekolah
+                    </p>
+
+                    <p className="mt-1 text-xs theme-text-muted">
+                      Data sekolah binaan belum tersedia.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {schools.map((unit) => (
+                      <button
+                        key={unit.id}
+                        type="button"
+                        onClick={() =>
+                          router.push(`/yayasan/sekolah/${unit.id}`)
+                        }
+                        className={`w-full text-left rounded-xl border ${themeNeutralBorder} ${themeNeutralSurface} p-3 ${themeNeutralHover} transition-colors`}
+                      >
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <div className="min-w-0">
+                            <p className="text-sm font-semibold theme-text truncate">
+                              {unit.nama}
+                            </p>
+
+                            <p className="text-xs theme-text-muted truncate">
+                              {unit.jenjang || "-"}
+                              {unit.npsn ? ` · NPSN ${unit.npsn}` : ""}
+                            </p>
+                          </div>
+
+                          <div className="flex flex-wrap items-center gap-2 text-xs">
+                            <span
+                              className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 ${themeInfoSurface} text-[var(--color-info)]`}
+                            >
+                              <UserSquare2 size={12} />
+                              {Number(unit?.statistik?.totalSiswa ?? 0)} siswa
+                            </span>
+
+                            <span
+                              className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 ${themeSuccessSurface} text-[var(--color-success)]`}
+                            >
+                              <GraduationCap size={12} />
+                              {Number(unit?.statistik?.totalGuru ?? 0)} guru
+                            </span>
+
+                            <span
+                              className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 ${themeNeutralSurface} theme-text-secondary`}
+                            >
+                              <Building2 size={12} />
+                              {Number(unit?.statistik?.totalKelas ?? 0)} kelas
+                            </span>
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+
+                    <div
+                      className={`flex flex-wrap items-center gap-4 border-t ${themeDivider} pt-3 text-xs theme-text-muted`}
+                    >
+                      <span>Total siswa: {totalSiswa}</span>
+                      <span>Total guru: {totalGuru}</span>
+                      <span>Total kelas: {totalKelas}</span>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -643,33 +673,78 @@ export default function YayasanDashboardPage() {
                     Notifikasi Terbaru
                   </h3>
                 </div>
+
+                {unreadCount > 0 && (
+                  <span
+                    className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${themeWarningSurface} text-[var(--color-warning)] border ${themeWarningBorder} flex-shrink-0`}
+                  >
+                    {unreadCount}
+                  </span>
+                )}
               </div>
 
               <div className="divide-y divide-[color-mix(in_srgb,var(--color-text)_7%,transparent)]">
-                {notifications.map((notification) => (
-                  <div
-                    key={notification.id}
-                    className={`p-4 sm:p-5 flex items-start gap-3 ${themeNeutralHover} transition-colors`}
-                  >
-                    <div
-                      className={`mt-1 w-1.5 h-1.5 rounded-full flex-shrink-0 ${
-                        notification.read
-                          ? "bg-[var(--color-text-placeholder)]"
-                          : "bg-[var(--color-primary)]"
-                      }`}
+                {loading ? (
+                  <div className="p-4 space-y-3">
+                    {[1, 2].map((item) => (
+                      <div
+                        key={item}
+                        className="h-12 rounded-lg animate-pulse"
+                        style={{
+                          background:
+                            "color-mix(in srgb, var(--color-text) 6%, transparent)",
+                        }}
+                      />
+                    ))}
+                  </div>
+                ) : notifications.length === 0 ? (
+                  <div className="p-6 text-center">
+                    <Bell
+                      size={28}
+                      className="mx-auto text-[var(--color-text-muted)]"
                     />
 
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium theme-text truncate">
-                        {notification.title}
-                      </p>
-
-                      <p className="text-xs text-[var(--color-text-muted)] mt-0.5">
-                        {notification.desc}
-                      </p>
-                    </div>
+                    <p className="mt-2 text-sm font-medium theme-text-secondary">
+                      Belum ada notifikasi
+                    </p>
                   </div>
-                ))}
+                ) : (
+                  notifications.slice(0, 4).map((notification) => (
+                    <div
+                      key={notification.id}
+                      className={`p-4 sm:p-5 flex items-start gap-3 ${themeNeutralHover} transition-colors`}
+                    >
+                      <div
+                        className={`mt-1 w-1.5 h-1.5 rounded-full flex-shrink-0 ${
+                          notification.dibaca
+                            ? "bg-[var(--color-text-placeholder)]"
+                            : "bg-[var(--color-primary)]"
+                        }`}
+                      />
+
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium theme-text truncate">
+                          {notification.judul}
+                        </p>
+
+                        <p className="text-xs theme-text-secondary mt-0.5 line-clamp-2">
+                          {notification.isi}
+                        </p>
+
+                        <p className="text-[11px] theme-text-muted mt-1">
+                          {formatTanggal(notification.dibuatPada)}
+                        </p>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              <div className={`p-3 border-t ${themeDivider}`}>
+                <p className="flex items-start gap-1.5 text-[11px] theme-text-muted">
+                  <Info size={12} className="mt-0.5 flex-shrink-0" />
+                  Notifikasi personal diambil dari endpoint /api/notifikasi.
+                </p>
               </div>
             </div>
           </div>

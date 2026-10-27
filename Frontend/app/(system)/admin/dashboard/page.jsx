@@ -72,7 +72,10 @@ export default function AdminDashboardPage() {
   }, []);
 
   useEffect(() => {
-    fetchDashboard();
+    const timer = setTimeout(() => {
+      fetchDashboard();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [fetchDashboard]);
 
 

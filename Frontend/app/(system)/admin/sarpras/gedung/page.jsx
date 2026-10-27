@@ -248,7 +248,10 @@ export default function SarprasGedungPage() {
   }, []);
 
   useEffect(() => {
-    fetchGedung();
+    const timer = setTimeout(() => {
+      fetchGedung();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [fetchGedung]);
 
 
@@ -402,7 +405,10 @@ export default function SarprasGedungPage() {
   );
 
   useEffect(() => {
-    setCurrentPage(1);
+    const timer = setTimeout(() => {
+      setCurrentPage(1);
+    }, 0);
+    return () => clearTimeout(timer);
   }, [search, sortBy, itemsPerPage]);
 
   const goToPage = (page) => {

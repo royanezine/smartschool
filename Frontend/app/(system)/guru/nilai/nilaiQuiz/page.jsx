@@ -124,21 +124,6 @@ export default function GuruNilaiQuizPage() {
   const [error, setError] = useState("");
   const [feedback, setFeedback] = useState(null);
 
-  const notifications = [
-    {
-      id: 1,
-      title: "Rapat Wali Kelas",
-      desc: "Dikirim 2 jam lalu",
-      read: false,
-    },
-    {
-      id: 2,
-      title: "Batas Input Nilai Rapor",
-      desc: "Dikirim 5 jam lalu",
-      read: false,
-    },
-  ];
-
   const loadClasses = useCallback(async () => {
     setLoadingClasses(true);
     setError("");
@@ -348,7 +333,6 @@ export default function GuruNilaiQuizPage() {
 
         <Header
           toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
-          notifications={notifications}
           user={{
             name: "Guru",
             email: "guru@smartschool.com",

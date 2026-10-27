@@ -5,6 +5,9 @@ import { getToken, getSessionUser } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 
 import { getKelas, getKelasById } from "@/services/kelas.service";
+import { getNotifikasi } from "@/services/notifikasi.service";
+import { getTugasByKelasMapel } from "@/services/tugas.service";
+import { getMateriPembelajaran } from "@/services/materiPembelajaran.service";
 
 import {
   AlertCircle,
@@ -22,8 +25,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
 
 
 const themePrimaryGradient =
@@ -258,20 +260,7 @@ function getCurrentUser() {
 
 
 
-function getHeaders() {
-  const token = getToken();
 
-  return {
-    "Content-Type": "application/json",
-    Accept: "application/json",
-
-    ...(token
-      ? {
-          Authorization: `Bearer ${token}`,
-        }
-      : {}),
-  };
-}
 
 
 function getUserId(user) {
@@ -533,47 +522,10 @@ export default function MataPelajaranPage() {
           return;
         }
 
-        const response =
-          await fetch(
-            `${API_URL}/api/notifikasi`,
-            {
-              method: "GET",
-              headers: getHeaders(),
-              cache: "no-store",
-            }
-          );
+        const result = await getNotifikasi();
+        const list = Array.isArray(result?.list) ? result.list : [];
 
-        let result = null;
-
-        try {
-          result =
-            await response.json();
-        } catch {
-          result = null;
-        }
-
-        if (!response.ok) {
-          console.error(
-            "[MATA PELAJARAN] Gagal mengambil notifikasi:",
-            result
-          );
-
-          setNotifications([]);
-          return;
-        }
-
-        const list =
-          result?.data?.list ||
-          result?.data?.data ||
-          result?.data ||
-          result?.list ||
-          [];
-
-        setNotifications(
-          Array.isArray(list)
-            ? list.slice(0, 5)
-            : []
-        );
+        setNotifications(list.slice(0, 5));
       } catch (error) {
         console.error(
           "[MATA PELAJARAN] Error notifikasi:",
@@ -588,7 +540,9 @@ export default function MataPelajaranPage() {
 
 
   useEffect(() => {
-    fetchNotifications();
+    const timer = setTimeout(() => {
+      fetchNotifications();
+    }, 0);
 
     const interval =
       setInterval(() => {
@@ -596,6 +550,7 @@ export default function MataPelajaranPage() {
       }, 30000);
 
     return () => {
+      clearTimeout(timer);
       clearInterval(interval);
     };
   }, [fetchNotifications]);
@@ -609,36 +564,8 @@ export default function MataPelajaranPage() {
             return 0;
           }
 
-          const response =
-            await fetch(
-              `${API_URL}/api/tugas/kelas-mapel/${kelasMapelId}`,
-              {
-                method: "GET",
-                headers: getHeaders(),
-                cache: "no-store",
-              }
-            );
-
-          let result = null;
-
-          try {
-            result =
-              await response.json();
-          } catch {
-            result = null;
-          }
-
-          if (!response.ok) {
-            console.error(
-              `[MATA PELAJARAN] Gagal fetch tugas ${kelasMapelId}:`,
-              result
-            );
-
-            return 0;
-          }
-
-          const tugasData =
-            extractArray(result);
+          const result = await getTugasByKelasMapel(kelasMapelId);
+          const tugasData = extractArray(result);
 
           return tugasData.length;
         } catch (error) {
@@ -687,37 +614,8 @@ export default function MataPelajaranPage() {
   const fetchSemuaMateri =
     useCallback(async () => {
       try {
-        const response =
-          await fetch(
-            `${API_URL}/api/materi-pembelajaran`,
-            {
-              method: "GET",
-              headers: getHeaders(),
-              cache: "no-store",
-            }
-          );
-
-        let result = null;
-
-        try {
-          result =
-            await response.json();
-        } catch {
-          result = null;
-        }
-
-        if (!response.ok) {
-          console.error(
-            "[MATA PELAJARAN] Gagal fetch materi:",
-            result
-          );
-
-          return [];
-        }
-
-        return extractArray(
-          result
-        );
+        const result = await getMateriPembelajaran();
+        return extractArray(result);
       } catch (error) {
         console.error(
           "[MATA PELAJARAN] Error fetch materi:",
@@ -949,11 +847,14 @@ export default function MataPelajaranPage() {
 
 
   useEffect(() => {
-    const user =
-      getCurrentUser();
+    const timer = setTimeout(() => {
+      const user =
+        getCurrentUser();
 
-    setCurrentUser(user);
-    setUserLoaded(true);
+      setCurrentUser(user);
+      setUserLoaded(true);
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
 
@@ -962,18 +863,23 @@ export default function MataPelajaranPage() {
       userLoaded &&
       currentUser
     ) {
-      fetchMataPelajaran();
+      const timer = setTimeout(() => {
+        fetchMataPelajaran();
+      }, 0);
+      return () => clearTimeout(timer);
     }
 
     if (
       userLoaded &&
       !currentUser
     ) {
-      setLoading(false);
-
-      setError(
-        "Sesi siswa tidak ditemukan. Silakan login kembali."
-      );
+      const timer = setTimeout(() => {
+        setLoading(false);
+        setError(
+          "Sesi siswa tidak ditemukan. Silakan login kembali."
+        );
+      }, 0);
+      return () => clearTimeout(timer);
     }
   }, [
     userLoaded,

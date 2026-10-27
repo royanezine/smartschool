@@ -175,11 +175,17 @@ export default function JurnalKasPage() {
   ]);
 
   useEffect(() => {
-    loadAkunKas();
+    const timer = setTimeout(() => {
+      loadAkunKas();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadAkunKas, refreshKey]);
 
   useEffect(() => {
-    loadJurnal();
+    const timer = setTimeout(() => {
+      loadJurnal();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadJurnal]);
 
   const totalMasuk = Number(ringkasan.totalMasuk || 0);

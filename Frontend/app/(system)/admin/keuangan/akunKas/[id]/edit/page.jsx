@@ -13,7 +13,7 @@ import {
   Info,
 } from "lucide-react";
 
-import { apiFetch } from "@/lib/api";
+import { getAkunKas, updateAkunKas } from "@/services/jurnalKas.service";
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
 
@@ -53,7 +53,7 @@ export default function EditAkunKasPage() {
     setError("");
 
     try {
-      const response = await apiFetch("/api/keuangan/akun-kas");
+      const response = await getAkunKas();
 
       if (response?.success === false) {
         throw new Error(
@@ -88,7 +88,10 @@ export default function EditAkunKasPage() {
   }, [akunId]);
 
   useEffect(() => {
-    loadDetail();
+    const timer = setTimeout(() => {
+      loadDetail();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadDetail]);
 
   function updateForm(field, value) {

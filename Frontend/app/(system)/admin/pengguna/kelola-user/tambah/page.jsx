@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
 import { createUser } from "@/services/user.service";
+import { getRoles } from "@/services/role.service";
 
 import {
   ArrowLeft,
@@ -27,29 +28,7 @@ import {
   Clock,
 } from "lucide-react";
 
-const API_URL = (
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
-).replace(/\/+$/, "");
 
-function getToken() {
-  if (typeof window === "undefined") return null;
-
-  for (const key of [
-    "token",
-    "accessToken",
-    "access_token",
-    "authToken",
-    "jwt",
-  ]) {
-    const value = localStorage.getItem(key);
-
-    if (value?.trim()) {
-      return value.trim().replace(/^Bearer\s+/i, "");
-    }
-  }
-
-  return null;
-}
 
 function normalizeRole(value = "") {
   return String(value)
@@ -142,30 +121,8 @@ export default function TambahUserPage() {
       setIsLoadingRoles(true);
       setServerError("");
 
-      const token = getToken();
-
-      if (!token) {
-        throw new Error("Sesi login tidak ditemukan. Silakan login kembali.");
-      }
-
-      const response = await fetch(`${API_URL}/api/role`, {
-        method: "GET",
-        headers: {
-          Accept: "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        cache: "no-store",
-      });
-
-      const result = await response.json().catch(() => null);
-
-      if (!response.ok) {
-        throw new Error(
-          result?.message || `Gagal mengambil role (${response.status}).`
-        );
-      }
-
-      const roleList = extractRoles(result);
+      const response = await getRoles();
+      const roleList = Array.isArray(response) ? response : extractRoles(response);
 
       if (!roleList.length) {
         setRoles([]);

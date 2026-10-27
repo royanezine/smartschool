@@ -542,7 +542,10 @@ export default function PaketModulPage() {
   }
 
   useEffect(() => {
-    loadData();
+    const timer = setTimeout(() => {
+      loadData();
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
 
@@ -812,13 +815,8 @@ export default function PaketModulPage() {
       langganan: 0,
     };
 
-    sessionStorage.setItem(
-      "duplikatPaket",
-      JSON.stringify(data)
-    );
-
     router.push(
-      "/super-admin/paketModul/tambah?duplikat=true"
+      `/super-admin/paketModul/tambah?duplikatFrom=${paket.id}`
     );
   }
 
@@ -1857,7 +1855,7 @@ function ConfirmDeleteModal({
             Kamu akan menghapus
             paket{" "}
             <span className="font-semibold theme-text">
-              "{paket.nama}"
+              &ldquo;{paket.nama}&rdquo;
             </span>
             . Tindakan ini akan
             menghapus paket dari

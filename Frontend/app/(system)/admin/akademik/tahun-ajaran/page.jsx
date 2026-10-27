@@ -121,8 +121,10 @@ export default function AdminTahunAjaranPage() {
   };
 
   useEffect(() => {
-    loadData(false);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const timer = setTimeout(() => {
+      loadData(false);
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
 
@@ -205,7 +207,12 @@ export default function AdminTahunAjaranPage() {
   );
 
   useEffect(() => {
-    if (currentPage > totalPages) setCurrentPage(totalPages);
+    if (currentPage > totalPages) {
+      const timer = setTimeout(() => {
+        setCurrentPage(totalPages);
+      }, 0);
+      return () => clearTimeout(timer);
+    }
   }, [currentPage, totalPages]);
 
 

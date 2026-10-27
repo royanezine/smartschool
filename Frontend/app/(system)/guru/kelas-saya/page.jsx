@@ -342,15 +342,18 @@ export default function GuruKelasSayaPage() {
 const [loadingTahunAjaran, setLoadingTahunAjaran] = useState(true);
 
   useEffect(() => {
-    setMounted(true);
+    const timer = setTimeout(() => {
+      setMounted(true);
 
-    const user = getStoredUser();
+      const user = getStoredUser();
 
-    setTeacher({
-      id: getTeacherId(user),
-      name: getTeacherName(user),
-      email: getTeacherEmail(user),
-    });
+      setTeacher({
+        id: getTeacherId(user),
+        name: getTeacherName(user),
+        email: getTeacherEmail(user),
+      });
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
@@ -517,8 +520,10 @@ async function loadKelasSaya() {
 
 
   useEffect(() => {
-    loadKelasSaya();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const timer = setTimeout(() => {
+      loadKelasSaya();
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   const mapelOptions = useMemo(() => {

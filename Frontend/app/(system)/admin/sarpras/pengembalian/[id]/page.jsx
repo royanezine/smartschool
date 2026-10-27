@@ -253,16 +253,6 @@ export default function PengembalianDetailPage() {
   const [actionError, setActionError] = useState("");
   const [success, setSuccess] = useState("");
 
-  const notifications = [
-    {
-      id: 1,
-      title: "Pengembalian Sarpras",
-      desc: "Proses pengembalian aset sekolah",
-      read: false,
-    },
-  ];
-
-
   const loadDetail = useCallback(
     async (silent = false) => {
       try {
@@ -446,7 +436,6 @@ export default function PengembalianDetailPage() {
           toggleSidebar={() =>
             setSidebarOpen(!sidebarOpen)
           }
-          notifications={notifications}
           user={{
             name: "Admin Sekolah",
             email: "admin@smartschool.com",

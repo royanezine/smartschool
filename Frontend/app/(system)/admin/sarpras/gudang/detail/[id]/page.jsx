@@ -203,7 +203,10 @@ export default function DetailAsetPage() {
   );
 
   useEffect(() => {
-    loadDetail();
+    const timer = setTimeout(() => {
+      loadDetail();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadDetail]);
 
   const toggleSidebar = () => {

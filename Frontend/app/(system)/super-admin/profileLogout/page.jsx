@@ -248,7 +248,10 @@ export default function ProfilePage() {
   }, []);
 
   useEffect(() => {
-    loadProfile();
+    const timer = setTimeout(() => {
+      loadProfile();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadProfile]);
 
   const handleProfileChange = (field, value) => {

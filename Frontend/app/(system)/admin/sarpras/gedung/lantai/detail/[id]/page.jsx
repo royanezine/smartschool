@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
   ArrowLeft,
@@ -86,13 +86,7 @@ export default function DetailLantaiPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    if (id) {
-      loadDetail();
-    }
-  }, [id]);
-
-  async function loadDetail() {
+  const loadDetail = useCallback(async () => {
     try {
       setLoading(true);
       setError("");
@@ -105,7 +99,9 @@ export default function DetailLantaiPage() {
         );
       }
 
-      const gedungList = gedungResult.data || [];
+      const gedungList = Array.isArray(gedungResult.data)
+        ? gedungResult.data
+        : [];
 
       let foundLantai = null;
       let foundGedung = null;
@@ -117,7 +113,9 @@ export default function DetailLantaiPage() {
           continue;
         }
 
-        const lantaiList = result.data || [];
+        const lantaiList = Array.isArray(result.data)
+          ? result.data
+          : [];
 
         const found = lantaiList.find(
           (lantai) => String(lantai.id) === String(id)
@@ -138,12 +136,22 @@ export default function DetailLantaiPage() {
       setGedung(foundGedung);
     } catch (err) {
       console.error(err);
-
-      setError(err?.message || "Gagal mengambil detail lantai.");
+      setError(
+        err?.message || "Gagal mengambil detail lantai."
+      );
     } finally {
       setLoading(false);
     }
-  }
+  }, [id]);
+
+  useEffect(() => {
+    if (id) {
+      const timer = setTimeout(() => {
+        loadDetail();
+      }, 0);
+      return () => clearTimeout(timer);
+    }
+  }, [id, loadDetail]);
 
   function formatDate(date) {
     if (!date) return "-";

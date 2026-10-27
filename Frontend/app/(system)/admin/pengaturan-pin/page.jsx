@@ -18,13 +18,10 @@ import {
 
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
-import { apiFetch } from "@/lib/api";
-import { getKelasSayaDariAnggota } from "@/services/kelas.service";
+import { getKelas, getKelasById } from "@/services/kelas.service";
+import { getSemuaSiswa, adminResetPin } from "@/services/siswa.service";
 
-const ENDPOINT_SISWA = "/api/siswa";
 
-const ENDPOINT_RESET_PIN = (userId) =>
-  `/api/auth/pin/admin-reset/${encodeURIComponent(userId)}`;
 
 
 function unwrapResponse(response) {
@@ -168,60 +165,97 @@ export default function PengaturanPinPage() {
     }
 
     try {
-      const response = await apiFetch(ENDPOINT_SISWA, {
-        method: "GET",
-      });
+      const response = await getSemuaSiswa({ page: 1, limit: 1000 });
 
-      const daftarSiswa = ambilDaftarSiswa(response);
+      let daftarSiswa = ambilDaftarSiswa(response);
 
       if (!Array.isArray(daftarSiswa)) {
         throw new Error("Format daftar siswa dari Backend tidak valid.");
       }
 
+      const meta = response?.meta || unwrapResponse(response)?.meta;
+      const totalPages = Number(meta?.totalPages || meta?.total_pages || 1);
+
+      if (totalPages > 1) {
+        const remainingPages = [];
+        for (let p = 2; p <= totalPages; p++) {
+          remainingPages.push(getSemuaSiswa({ page: p, limit: 1000 }));
+        }
+        const results = await Promise.all(remainingPages);
+        for (const res of results) {
+          const list = ambilDaftarSiswa(res);
+          if (Array.isArray(list)) {
+            daftarSiswa = daftarSiswa.concat(list);
+          }
+        }
+      }
+
       const daftarKhususSiswa = daftarSiswa.filter(merupakanSiswa);
 
-      const daftarDenganKelas = await Promise.all(
-        daftarKhususSiswa.map(async (item) => {
-          const siswaId = item?.id || item?.userId;
+      let kelasPerSiswa = new Map();
+      try {
+        const kelasResponse = await getKelas({ page: 1, limit: 1000 });
+        const rows =
+          kelasResponse?.data?.data ??
+          kelasResponse?.data ??
+          kelasResponse?.items ??
+          kelasResponse?.rows ??
+          [];
 
-          const kelasTersedia = formatKelas(item);
+        if (Array.isArray(rows) && rows.length > 0) {
+          const detailKelasList = await Promise.all(
+            rows
+              .filter((k) => k?.id)
+              .map((k) => getKelasById(k.id).catch(() => null))
+          );
 
-          if (kelasTersedia || !siswaId) {
-            return {
-              ...item,
-              kelasTampilan: kelasTersedia || "Belum terdaftar",
-            };
-          }
-
-          try {
-            const detailKelas = await getKelasSayaDariAnggota(
-              siswaId
-            );
+          for (const rawDetail of detailKelasList) {
+            const detail =
+              rawDetail?.data?.data ??
+              rawDetail?.data ??
+              rawDetail;
+            if (!detail?.id) continue;
 
             const namaKelas =
-              detailKelas?.nama ||
-              detailKelas?.namaKelas ||
-              detailKelas?.kelas?.nama ||
-              detailKelas?.kelas?.namaKelas ||
+              detail?.nama ||
+              detail?.namaKelas ||
+              detail?.nama_kelas ||
               "";
 
-            return {
-              ...item,
-              kelasTampilan: namaKelas || "Belum terdaftar",
-            };
-          } catch (err) {
-            console.warn(
-              `Gagal mengambil kelas siswa ${siswaId}:`,
-              err
-            );
+            const anggota = Array.isArray(detail?.anggota)
+              ? detail.anggota
+              : Array.isArray(detail?.anggotaKelas)
+              ? detail.anggotaKelas
+              : [];
 
-            return {
-              ...item,
-              kelasTampilan: "Belum tersedia",
-            };
+            for (const member of anggota) {
+              const sid =
+                member?.siswa?.id ??
+                member?.pengguna?.id ??
+                member?.siswaId ??
+                member?.penggunaId ??
+                member?.userId;
+
+              if (sid) {
+                kelasPerSiswa.set(String(sid), namaKelas);
+              }
+            }
           }
-        })
-      );
+        }
+      } catch (err) {
+        console.warn("Gagal mengambil daftar kelas untuk mapping siswa:", err);
+      }
+
+      const daftarDenganKelas = daftarKhususSiswa.map((item) => {
+        const siswaId = item?.id || item?.userId;
+        const kelasTersedia = formatKelas(item);
+        const kelasDariMap = siswaId ? kelasPerSiswa.get(String(siswaId)) : null;
+
+        return {
+          ...item,
+          kelasTampilan: kelasTersedia || kelasDariMap || "Belum terdaftar",
+        };
+      });
 
       setSiswa(daftarDenganKelas);
 
@@ -244,41 +278,50 @@ export default function PengaturanPinPage() {
 
 
   useEffect(() => {
-    try {
-      const user = getStoredUser() || {};
+    const timer = setTimeout(() => {
+      try {
+        const user = getStoredUser() || {};
 
-      const token = getToken();
+        const token = getToken();
 
-      const role = String(
-        user?.role ||
-          user?.peran?.nama ||
-          user?.namaPeran ||
-          ""
-      )
-        .trim()
-        .toLowerCase()
-        .replace(/[\s-]+/g, "_");
+        const role = String(
+          user?.role ||
+            user?.peran?.nama ||
+            user?.namaPeran ||
+            ""
+        )
+          .trim()
+          .toLowerCase()
+          .replace(/[\s-]+/g, "_");
 
-      setRoleDiizinkan(
-        Boolean(token) &&
-          [
-            "admin_sekolah",
-            "super_admin",
-            "superadmin",
-          ].includes(role)
-      );
-    } catch {
-      setRoleDiizinkan(false);
-    } finally {
-      setSiapPeriksaRole(true);
-    }
+        setRoleDiizinkan(
+          Boolean(token) &&
+            [
+              "admin_sekolah",
+              "super_admin",
+              "superadmin",
+            ].includes(role)
+        );
+      } catch {
+        setRoleDiizinkan(false);
+      } finally {
+        setSiapPeriksaRole(true);
+      }
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
     if (siapPeriksaRole && roleDiizinkan) {
-      muatSiswa();
+      const timer = setTimeout(() => {
+        muatSiswa();
+      }, 0);
+      return () => clearTimeout(timer);
     } else if (siapPeriksaRole) {
-      setLoading(false);
+      const timer = setTimeout(() => {
+        setLoading(false);
+      }, 0);
+      return () => clearTimeout(timer);
     }
   }, [siapPeriksaRole, roleDiizinkan, muatSiswa]);
 
@@ -333,12 +376,7 @@ export default function PengaturanPinPage() {
     setSedangReset(userId);
 
     try {
-      const response = await apiFetch(
-        ENDPOINT_RESET_PIN(userId),
-        {
-          method: "POST",
-        }
-      );
+      const response = await adminResetPin(userId);
 
       setSukses(
         pesanResponse(

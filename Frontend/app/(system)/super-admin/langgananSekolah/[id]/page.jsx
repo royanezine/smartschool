@@ -16,7 +16,9 @@ import {
   Layers,
   User,
 } from "lucide-react";
-import { dummyLangganan } from "../../../../../lib/data";
+import { useState, useEffect } from "react";
+import { getAllLangganan } from "@/services/langganan.service";
+import { Loader2 } from "lucide-react";
 
 
 const themePrimaryGradient =
@@ -100,10 +102,55 @@ export default function DetailLanggananPage() {
   const router = useRouter();
 
   const id = params.id;
+  const [langganan, setLangganan] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const langganan = dummyLangganan.find(
-    (item) => item.id === id
-  );
+  useEffect(() => {
+    let isMounted = true;
+    async function loadData() {
+      try {
+        setLoading(true);
+        const list = await getAllLangganan();
+        const found = list.find((item) => String(item.id) === String(id));
+        if (isMounted) {
+          if (found) {
+            setLangganan({
+              ...found,
+              sekolah: {
+                nama: found.sekolah?.nama || "Sekolah",
+                subdomain: found.sekolah?.subdomain || "-",
+                logo: "🏫",
+                ...(found.sekolah || {}),
+              },
+              paket: {
+                nama: found.paket?.nama || "Paket",
+                deskripsi: found.paket?.deskripsi || "-",
+                harga: found.paket?.harga || found.hargaSaatBerlangganan || 0,
+                ...(found.paket || {}),
+              },
+              fiturAktif: found.fiturAktif || [],
+            });
+          } else {
+            setLangganan(null);
+          }
+        }
+      } catch (err) {
+        console.error("Gagal memuat detail langganan:", err);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    }
+    loadData();
+    return () => { isMounted = false; };
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-[var(--color-primary)]" />
+      </div>
+    );
+  }
 
 
   if (!langganan) {
@@ -684,8 +731,8 @@ export default function DetailLanggananPage() {
           <button
             type="button"
             onClick={() =>
-              alert(
-                "Fitur perpanjangan akan segera hadir"
+              router.push(
+                `/super-admin/langgananSekolah/edit/${langganan.id}`
               )
             }
             className={`inline-flex w-full items-center justify-center gap-2 rounded-xl border px-6 py-2.5 text-sm font-semibold ${themeSuccessSurface} text-[var(--color-success)] ${themeSuccessBorder} transition hover:opacity-85 sm:w-auto`}

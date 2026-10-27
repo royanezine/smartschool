@@ -10,7 +10,7 @@ import {
 
 import { useParams, useRouter } from "next/navigation";
 
-import { apiFetch } from "../../../../../lib/api";
+import { getUjianById, getSoalByUjian, mulaiUjian, submitUjian } from "@/services/ujian.service";
 
 import {
   AlertCircle,
@@ -156,49 +156,7 @@ function formatDecimal(value) {
 }
 
 
-async function getUjianById(id) {
-  if (!id) throw new Error("ID ujian tidak ditemukan.");
 
-  return apiFetch(`/api/ujian/${id}`, {
-    method: "GET",
-  });
-}
-
-async function getSoalByUjian(ujianId) {
-  if (!ujianId) throw new Error("ID ujian tidak ditemukan.");
-
-  return apiFetch(`/api/soal-ujian/ujian/${ujianId}`, {
-    method: "GET",
-  });
-}
-
-async function mulaiUjian(ujianId, token) {
-  if (!ujianId) throw new Error("ID ujian tidak ditemukan.");
-
-  if (!token?.trim()) {
-    throw new Error("Token ujian wajib diisi.");
-  }
-
-  return apiFetch(`/api/ujian/${ujianId}/mulai`, {
-    method: "POST",
-    body: JSON.stringify({
-      token: token.trim().toUpperCase(),
-    }),
-  });
-}
-
-async function submitUjian(sesiId, jawaban) {
-  if (!sesiId) {
-    throw new Error("ID sesi ujian tidak ditemukan.");
-  }
-
-  return apiFetch(`/api/ujian/sesi/${sesiId}/submit`, {
-    method: "POST",
-    body: JSON.stringify({
-      jawaban,
-    }),
-  });
-}
 
 
 function saveHasilUjian(
@@ -285,24 +243,11 @@ function saveHasilUjian(
 
   const serialized = JSON.stringify(payload);
 
-  localStorage.setItem(
-    `hasil-ujian-${ujianId}`,
-    serialized
-  );
-
   try {
     sessionStorage.setItem(
       `hasil-ujian-${ujianId}`,
       serialized
     );
-  } catch {}
-
-  localStorage.setItem(
-    "hasil-ujian-last",
-    serialized
-  );
-
-  try {
     sessionStorage.setItem(
       "hasil-ujian-last",
       serialized
@@ -426,9 +371,12 @@ export default function UjianPage() {
   }, [id]);
 
   useEffect(() => {
-  loadUjian();
+  const timer = setTimeout(() => {
+    loadUjian();
+  }, 0);
 
   return () => {
+    clearTimeout(timer);
     if (timerRef.current) {
       clearInterval(timerRef.current);
       timerRef.current = null;
@@ -588,8 +536,10 @@ export default function UjianPage() {
     }
 
     if (waktu <= 0) {
-      handleAutoSubmit();
-      return;
+      const timer = setTimeout(() => {
+        handleAutoSubmit();
+      }, 0);
+      return () => clearTimeout(timer);
     }
 
     if (timerRef.current) {
@@ -635,7 +585,10 @@ export default function UjianPage() {
       !isFinished &&
       !submitting
     ) {
-      handleAutoSubmit();
+      const timer = setTimeout(() => {
+        handleAutoSubmit();
+      }, 0);
+      return () => clearTimeout(timer);
     }
   }, [
     waktu,

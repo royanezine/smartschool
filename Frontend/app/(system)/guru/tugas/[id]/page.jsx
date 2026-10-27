@@ -162,22 +162,6 @@ export default function DetailTugasPage() {
   const [error, setError] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  const notifications = [
-    {
-      id: 1,
-      title: "Rapat Wali Kelas",
-      desc: "Dikirim 2 jam lalu",
-      read: false,
-    },
-    {
-      id: 2,
-      title: "Batas Input Nilai Rapor",
-      desc: "Dikirim 5 jam lalu",
-      read: false,
-    },
-  ];
-
-
   useEffect(() => {
     if (!tugasId) return;
 
@@ -331,7 +315,6 @@ export default function DetailTugasPage() {
           <div className="shrink-0">
             <Header
               toggleSidebar={() => setSidebarOpen((prev) => !prev)}
-              notifications={notifications}
               user={{
                 name: guruNama !== "-" ? guruNama : "Guru",
                 email: guru?.email ?? "guru@smartschool.com",

@@ -61,3 +61,14 @@ export async function markAllNotifikasiAsRead() {
     }
   );
 }
+
+export async function kirimBroadcastPengumuman(data: {
+  judul: string;
+  isi: string;
+  targetRole?: string;
+}) {
+  return apiFetch("/api/notifikasi/broadcast", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}

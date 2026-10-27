@@ -22,7 +22,7 @@ import {
   ArrowDown,
   ArrowUpDown,
 } from "lucide-react";
-import { apiFetch } from "@/lib/api";
+import { getAkunKas, deleteAkunKas } from "@/services/jurnalKas.service";
 
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
@@ -69,7 +69,7 @@ export default function AkunKasPage() {
     setError("");
 
     try {
-      const response = await apiFetch("/api/keuangan/akun-kas");
+      const response = await getAkunKas();
 
       if (response?.success === false) {
         throw new Error(response.message || "Gagal mengambil akun kas.");
@@ -90,7 +90,10 @@ export default function AkunKasPage() {
   }, []);
 
   useEffect(() => {
-    loadAkun();
+    const timer = setTimeout(() => {
+      loadAkun();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadAkun]);
 
 
@@ -183,10 +186,7 @@ export default function AkunKasPage() {
     setError("");
 
     try {
-      const response = await apiFetch(
-        `/api/keuangan/akun-kas/${item.id}`,
-        { method: "DELETE" },
-      );
+      const response = await deleteAkunKas(item.id);
 
       if (response?.success === false) {
         throw new Error(response.message || "Gagal menghapus akun kas.");

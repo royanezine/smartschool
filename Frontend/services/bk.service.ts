@@ -761,3 +761,23 @@ export async function ajukanSesiKonseling(
 
   return handleResponse(response);
 }
+
+export async function putuskanPengajuanKonseling(
+  id: string,
+  payload: {
+    keputusan: "setujui" | "tolak";
+    konselorId?: string;
+    catatan?: string;
+  }
+) {
+  const response = await fetch(
+    `${API_URL}/api/bk/konseling/${id}/keputusan`,
+    {
+      method: "PUT",
+      headers: getHeaders(),
+      body: JSON.stringify(payload),
+    }
+  );
+
+  return handleResponse(response);
+}

@@ -209,12 +209,18 @@ export default function SlipGajiPage() {
   }, [bulan, tahun]);
 
   useEffect(() => {
-    loadSlips();
+    const timer = setTimeout(() => {
+      loadSlips();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadSlips]);
 
   useEffect(() => {
-    setSelected(null);
-    setDetailOpen(false);
+    const timer = setTimeout(() => {
+      setSelected(null);
+      setDetailOpen(false);
+    }, 0);
+    return () => clearTimeout(timer);
   }, [bulan, tahun]);
 
   const filteredSlips = useMemo(() => {

@@ -129,12 +129,6 @@ export default function EditGudangPage() {
   });
 
 
-  useEffect(() => {
-    if (!id) return;
-
-    loadGudang();
-  }, [id]);
-
   const loadGudang = async () => {
     try {
       setLoading(true);
@@ -177,6 +171,15 @@ export default function EditGudangPage() {
     }
   };
 
+
+  useEffect(() => {
+    if (!id) return;
+
+    const timer = setTimeout(() => {
+      loadGudang();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [id]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;

@@ -162,33 +162,52 @@ export default function TambahMapelPage() {
         setLoadingData(true);
         setError("");
 
-        const [
-          kelasResponse,
-          guruResponse,
-        ] = await Promise.all([
-          getKelas({
-            page: 1,
-            limit: 100,
-          }),
+        let allGuru = [];
+        let guruPage = 1;
+        let guruTotalPages = 1;
 
-          getUsers({
-            page: 1,
-            limit: 100,
+        do {
+          const resGuru = await getUsers({
+            page: guruPage,
+            limit: 50,
             role: "guru",
             status: "aktif",
-          }),
-        ]);
+          });
+          const raw = resGuru?.data ?? resGuru ?? [];
+          const rows = Array.isArray(raw) ? raw : [];
+          allGuru = allGuru.concat(rows);
+
+          guruTotalPages =
+            resGuru?.meta?.totalPages ??
+            resGuru?.pagination?.totalPages ??
+            1;
+          guruPage++;
+        } while (guruPage <= guruTotalPages);
+
+        let allKelas = [];
+        let kelasPage = 1;
+        let kelasTotalPages = 1;
+
+        do {
+          const resKelas = await getKelas({
+            page: kelasPage,
+            limit: 50,
+          });
+          const raw = resKelas?.data ?? resKelas ?? [];
+          const rows = Array.isArray(raw) ? raw : [];
+          allKelas = allKelas.concat(rows);
+
+          kelasTotalPages =
+            resKelas?.meta?.totalPages ??
+            resKelas?.pagination?.totalPages ??
+            1;
+          kelasPage++;
+        } while (kelasPage <= kelasTotalPages);
 
         if (!mounted) return;
 
-        const kelasData =
-          getResponseData(kelasResponse);
-
-        const guruData =
-          getUserData(guruResponse);
-
-        setKelasList(kelasData);
-        setGuruList(guruData);
+        setKelasList(allKelas);
+        setGuruList(getUserData(allGuru));
       } catch (err) {
         console.error(
           "LOAD DATA TAMBAH MAPEL ERROR:",

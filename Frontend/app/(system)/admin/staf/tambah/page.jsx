@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
+import { createUser } from "@/services/user.service";
+import { getRoles } from "@/services/role.service";
 import {
   ArrowLeft,
   User,
@@ -16,6 +18,9 @@ import {
   CheckCircle,
   Info,
   KeyRound,
+  AlertCircle,
+  Loader2,
+  AtSign,
 } from "lucide-react";
 
 
@@ -62,35 +67,63 @@ const themeCardShadow =
   "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
 
 
+const normalizeRoleName = (value) =>
+  String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[\s-]+/g, "_");
+
 export default function TambahStafPage() {
   const router = useRouter();
 
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeMenu] = useState("staf");
+  const [roles, setRoles] = useState([]);
+  const [loadingRoles, setLoadingRoles] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
   const [formData, setFormData] = useState({
     nama: "",
+    namaPengguna: "",
     email: "",
     telepon: "",
     role: "",
-    status: "Aktif",
+    status: "aktif",
     password: "",
   });
 
-  const notifications = [
-    {
-      id: 1,
-      title: "Pembaruan Sistem v2.0",
-      desc: "Dikirim 2 jam lalu",
-      read: false,
-    },
-    {
-      id: 2,
-      title: "Pengingat: Backup Data",
-      desc: "Dikirim 1 hari lalu",
-      read: false,
-    },
-  ];
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadRoles = async () => {
+      setLoadingRoles(true);
+      try {
+        const roleData = await getRoles();
+        if (cancelled) return;
+        const roleList = Array.isArray(roleData) ? roleData : [];
+        setRoles(
+          roleList.filter(
+            (role) => normalizeRoleName(role?.nama) !== "siswa"
+          )
+        );
+      } catch (err) {
+        if (cancelled) return;
+        console.error("[TambahStafPage] Gagal memuat role:", err);
+      } finally {
+        if (!cancelled) setLoadingRoles(false);
+      }
+    };
+
+    const timer = setTimeout(() => {
+      loadRoles();
+    }, 0);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, []);
 
   const goBack = () => {
     router.push("/admin/staf");
@@ -105,12 +138,46 @@ export default function TambahStafPage() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    console.log("Tambah staf:", formData);
+    if (saving) return;
+    setSubmitError("");
 
-    router.push("/admin/staf");
+    if (!formData.role) {
+      setSubmitError("Role wajib dipilih.");
+      return;
+    }
+
+    if (!formData.password || formData.password.length < 8) {
+      setSubmitError("Password minimal 8 karakter.");
+      return;
+    }
+
+    setSaving(true);
+
+    try {
+      const generatedUsername =
+        formData.namaPengguna.trim() ||
+        formData.email.trim().split("@")[0].toLowerCase().replace(/[^a-z0-9_]/g, "");
+
+      await createUser({
+        namaPengguna: generatedUsername || `user_${Date.now()}`,
+        namaLengkap: formData.nama.trim(),
+        email: formData.email.trim(),
+        kataSandi: formData.password,
+        peranId: formData.role,
+        noTelepon: formData.telepon.trim() || null,
+        status: formData.status.toLowerCase() === "nonaktif" ? "nonaktif" : "aktif",
+      });
+
+      router.push("/admin/staf");
+    } catch (err) {
+      console.error("[TambahStafPage] Gagal membuat staf:", err);
+      setSubmitError(err?.message || "Gagal menambahkan staf.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -136,7 +203,6 @@ export default function TambahStafPage() {
           toggleSidebar={() =>
             setSidebarOpen((prev) => !prev)
           }
-          notifications={notifications}
           user={{
             name: "Super Admin",
             email: "admin@smartschool.com",
@@ -190,6 +256,25 @@ export default function TambahStafPage() {
               </div>
             </div>
 
+
+            {submitError && (
+              <div
+                className={`mb-5 p-4 rounded-xl border ${themeNeutralBorder} ${themeNeutralSurface} flex items-start gap-3`}
+              >
+                <AlertCircle
+                  size={18}
+                  className="text-[var(--color-danger)] shrink-0 mt-0.5"
+                />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-[var(--color-danger)]">
+                    Gagal Menyimpan Data
+                  </p>
+                  <p className="text-xs theme-text-secondary mt-0.5">
+                    {submitError}
+                  </p>
+                </div>
+              </div>
+            )}
 
             <form
               onSubmit={handleSubmit}
@@ -274,6 +359,20 @@ export default function TambahStafPage() {
                     />
                   </FormField>
 
+                  <FormField
+                    label="Username"
+                    icon={AtSign}
+                  >
+                    <input
+                      type="text"
+                      name="namaPengguna"
+                      value={formData.namaPengguna}
+                      onChange={handleChange}
+                      autoComplete="username"
+                      className={inputClass}
+                      placeholder="username (opsional, auto dari email)"
+                    />
+                  </FormField>
 
                   <FormField
                     label="Email"
@@ -321,15 +420,11 @@ export default function TambahStafPage() {
                       required
                       className={`${inputClass} cursor-pointer appearance-none`}
                     >
-                      <option value="Aktif">
+                      <option value="aktif">
                         Aktif
                       </option>
 
-                      <option value="Trial">
-                        Trial
-                      </option>
-
-                      <option value="Nonaktif">
+                      <option value="nonaktif">
                         Nonaktif
                       </option>
                     </select>
@@ -377,28 +472,13 @@ export default function TambahStafPage() {
                         className={`${inputClass} cursor-pointer appearance-none`}
                       >
                         <option value="">
-                          Pilih role
+                          {loadingRoles ? "Memuat daftar role..." : "Pilih role"}
                         </option>
-
-                        <option value="Super Admin">
-                          Super Admin
-                        </option>
-
-                        <option value="Admin Sekolah">
-                          Admin Sekolah
-                        </option>
-
-                        <option value="Admin Yayasan">
-                          Admin Yayasan
-                        </option>
-
-                        <option value="Guru">
-                          Guru
-                        </option>
-
-                        <option value="Staf TU">
-                          Staf TU
-                        </option>
+                        {roles.map((r) => (
+                          <option key={r.id} value={r.id}>
+                            {r.namaTampilan || r.nama}
+                          </option>
+                        ))}
                       </select>
                     </FormField>
 
@@ -516,17 +596,28 @@ export default function TambahStafPage() {
                     <button
                       type="button"
                       onClick={goBack}
-                      className={`inline-flex items-center justify-center px-5 py-2.5 text-sm font-medium theme-text-secondary theme-card border ${themeNeutralBorder} rounded-lg ${themeNeutralHover} hover:text-[var(--color-primary)] transition-colors`}
+                      disabled={saving}
+                      className={`inline-flex items-center justify-center px-5 py-2.5 text-sm font-medium theme-text-secondary theme-card border ${themeNeutralBorder} rounded-lg ${themeNeutralHover} hover:text-[var(--color-primary)] transition-colors disabled:opacity-50`}
                     >
                       Batal
                     </button>
 
                     <button
                       type="submit"
-                      className={`inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-medium text-[var(--color-card)] ${themePrimaryGradient} rounded-lg shadow-sm hover:opacity-95 active:opacity-90 transition-all`}
+                      disabled={saving}
+                      className={`inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-medium text-[var(--color-card)] ${themePrimaryGradient} rounded-lg shadow-sm hover:opacity-95 active:opacity-90 transition-all disabled:opacity-50`}
                     >
-                      <Save size={16} />
-                      Simpan Staf
+                      {saving ? (
+                        <>
+                          <Loader2 size={16} className="animate-spin" />
+                          <span>Menyimpan...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Save size={16} />
+                          <span>Simpan Staf</span>
+                        </>
+                      )}
                     </button>
 
                   </div>

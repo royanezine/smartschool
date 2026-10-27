@@ -170,7 +170,10 @@ export default function DetailInvoicePage() {
   }, [id]);
 
   useEffect(() => {
-    loadData();
+    const timer = setTimeout(() => {
+      loadData();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadData]);
 
   const langganan = invoice?.langgananSekolah ?? null;

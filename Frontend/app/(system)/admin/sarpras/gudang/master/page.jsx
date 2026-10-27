@@ -184,7 +184,10 @@ export default function MasterGudangPage() {
 
 
   useEffect(() => {
-    loadGudang();
+    const timer = setTimeout(() => {
+      loadGudang();
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
 

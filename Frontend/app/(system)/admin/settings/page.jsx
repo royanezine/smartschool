@@ -5,7 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
-import { apiFetch } from "@/lib/api";
+import { getProfile } from "@/services/user.service";
 import {
   Settings,
   Building2,
@@ -25,11 +25,6 @@ import {
   Info,
 } from "lucide-react";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-
-const PROFILE_ENDPOINT = API_BASE.replace(/\/+$/, "").endsWith("/api")
-  ? "/users/profile"
-  : "/api/users/profile";
 
 const cardClass =
   "rounded-2xl border border-[var(--color-text)]/10 theme-card shadow-sm";
@@ -187,7 +182,7 @@ export default function AdminPengaturanPage() {
     setError("");
 
     try {
-      const response = await apiFetch(PROFILE_ENDPOINT);
+      const response = await getProfile();
 
       if (response?.success === false) {
         throw new Error(
@@ -217,7 +212,10 @@ export default function AdminPengaturanPage() {
   }, []);
 
   useEffect(() => {
-    loadProfile();
+    const timer = setTimeout(() => {
+      loadProfile();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadProfile]);
 
   const toggleSidebar = () => {

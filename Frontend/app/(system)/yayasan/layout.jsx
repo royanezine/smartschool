@@ -48,22 +48,6 @@ export default function YayasanLayout({ children }) {
   const activeMenu = getActiveMenu();
 
 
-  const notifications = [
-    {
-      id: 1,
-      title: "Pengumuman Libur Semester",
-      desc: "Dikirim 2 jam lalu",
-      read: false,
-    },
-    {
-      id: 2,
-      title: "Deadline Input Nilai",
-      desc: "Dikirim 5 jam lalu",
-      read: false,
-    },
-  ];
-
-
   return (
     <AuthGuard
       allowedRoles={["admin_yayasan", "yayasan", "super_admin"]}
@@ -83,7 +67,6 @@ export default function YayasanLayout({ children }) {
 
           <Header
             toggleSidebar={() => setSidebarOpen((prev) => !prev)}
-            notifications={notifications}
             user={{
               name: "Admin Yayasan",
               email: "admin@smartschool.com",

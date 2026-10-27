@@ -69,112 +69,7 @@ const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
 
-const MOCK_SISWA = [
-  {
-    id: 1,
-    nama: "Alya Ramadhani",
-    nisn: "0051234567",
-    kelas: "7A",
-    jenjang: "VII",
-    jenisKelamin: "P",
-    status: "aktif",
-    tempatLahir: "Tasikmalaya",
-    tanggalLahir: "12 Mar 2013",
-    alamat: "Jl. Merdeka No. 12, Tasikmalaya",
-    namaOrtu: "Hendra Ramadhani",
-    teleponOrtu: "0812-3456-7890",
-    waliKelas: "Siti Rahayu, S.Pd",
-    tahunMasuk: "2025",
-  },
-  {
-    id: 2,
-    nama: "Bunga Citra Lestari",
-    nisn: "0051234568",
-    kelas: "7A",
-    jenjang: "VII",
-    jenisKelamin: "P",
-    status: "aktif",
-    tempatLahir: "Bandung",
-    tanggalLahir: "24 Jul 2013",
-    alamat: "Jl. Cihideung No. 5, Tasikmalaya",
-    namaOrtu: "Agus Lestari",
-    teleponOrtu: "0813-2233-4455",
-    waliKelas: "Siti Rahayu, S.Pd",
-    tahunMasuk: "2025",
-  },
-  {
-    id: 3,
-    nama: "Cahyo Nugroho",
-    nisn: "0051234569",
-    kelas: "7B",
-    jenjang: "VII",
-    jenisKelamin: "L",
-    status: "aktif",
-    tempatLahir: "Tasikmalaya",
-    tanggalLahir: "02 Jan 2013",
-    alamat: "Jl. Sutisna Senjaya No. 88, Tasikmalaya",
-    namaOrtu: "Wawan Nugroho",
-    teleponOrtu: "0821-9988-7766",
-    waliKelas: "Andi Prasetyo, S.Pd",
-    tahunMasuk: "2025",
-  },
-  {
-    id: 4,
-    nama: "Indra Kusuma",
-    nisn: "0041234570",
-    kelas: "8A",
-    jenjang: "VIII",
-    jenisKelamin: "L",
-    status: "aktif",
-    tempatLahir: "Garut",
-    tanggalLahir: "18 Sep 2012",
-    alamat: "Jl. Yudanegara No. 21, Tasikmalaya",
-    namaOrtu: "Sutrisno Kusuma",
-    teleponOrtu: "0857-1122-3344",
-    waliKelas: "Dewi Anggraini, S.Si",
-    tahunMasuk: "2024",
-  },
-  {
-    id: 5,
-    nama: "Julia Anggraeni",
-    nisn: "0041234571",
-    kelas: "8A",
-    jenjang: "VIII",
-    jenisKelamin: "P",
-    status: "nonaktif",
-    tempatLahir: "Tasikmalaya",
-    tanggalLahir: "30 Nov 2012",
-    alamat: "Jl. Ir. H. Djuanda No. 40, Tasikmalaya",
-    namaOrtu: "Yayan Anggraeni",
-    teleponOrtu: "0878-5566-7788",
-    waliKelas: "Dewi Anggraini, S.Si",
-    tahunMasuk: "2024",
-  },
-  {
-    id: 6,
-    nama: "Reza Firmansyah",
-    nisn: "0031234572",
-    kelas: "9A",
-    jenjang: "IX",
-    jenisKelamin: "L",
-    status: "aktif",
-    tempatLahir: "Ciamis",
-    tanggalLahir: "07 Apr 2011",
-    alamat: "Jl. Cieunteung No. 9, Tasikmalaya",
-    namaOrtu: "Dadang Firmansyah",
-    teleponOrtu: "0896-4433-2211",
-    waliKelas: "Budi Santoso, S.Pd",
-    tahunMasuk: "2023",
-  },
-];
 
-
-const KELAS_OPTIONS = [
-  "Semua Kelas",
-  ...Array.from(
-    new Set(MOCK_SISWA.map((s) => s.kelas))
-  ).sort(),
-];
 
 const STATUS_OPTIONS = [
   "Semua Status",
@@ -264,6 +159,11 @@ export default function KartuIdentitasSiswaPage() {
   const [siswaList, setSiswaList] = useState([]);
   const [kelasList, setKelasList] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const kelasOptions = useMemo(() => [
+    "Semua Kelas",
+    ...Array.from(new Set(kelasList.map((k) => k.nama).filter(Boolean))).sort(),
+  ], [kelasList]);
 
   useEffect(() => {
     let isMounted = true;
@@ -626,7 +526,7 @@ export default function KartuIdentitasSiswaPage() {
                   }
                   className={`text-sm rounded-lg theme-input theme-text px-3 py-2 font-medium focus:outline-none ${themeFocus} transition-colors`}
                 >
-                  {KELAS_OPTIONS.map((k) => (
+                  {kelasOptions.map((k) => (
                     <option
                       key={k}
                       value={k}

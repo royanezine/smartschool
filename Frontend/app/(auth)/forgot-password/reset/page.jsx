@@ -51,14 +51,17 @@ export default function ResetPasswordPage() {
     useState("");
 
   useEffect(() => {
-    const savedEmail =
-      sessionStorage.getItem(
-        "forgot_password_email",
-      );
+    const timer = setTimeout(() => {
+      const savedEmail =
+        sessionStorage.getItem(
+          "forgot_password_email",
+        );
 
-    if (savedEmail) {
-      setEmail(savedEmail);
-    }
+      if (savedEmail) {
+        setEmail(savedEmail);
+      }
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   const handleSubmit = async (e) => {

@@ -431,12 +431,6 @@ export default function BuatJadwalGuruPage() {
     ruangan: "",
   });
 
-  useEffect(() => {
-    loadKelasMapel();
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   async function loadKelasMapel() {
     try {
       setLoadingData(true);
@@ -472,6 +466,13 @@ export default function BuatJadwalGuruPage() {
       setLoadingData(false);
     }
   }
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      loadKelasMapel();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, []);
 
   const selectedKelasMapel = useMemo(() => {
     if (!form.kelasMapelId) return null;

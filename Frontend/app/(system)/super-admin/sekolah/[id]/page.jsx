@@ -116,9 +116,11 @@ export default function DetailSekolahPage() {
 
     useEffect(() => {
         if (!id) {
-            setError("ID sekolah tidak ditemukan");
-            setLoading(false);
-            return;
+            const timer = setTimeout(() => {
+                setError("ID sekolah tidak ditemukan");
+                setLoading(false);
+            }, 0);
+            return () => clearTimeout(timer);
         }
 
         let cancelled = false;

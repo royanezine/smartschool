@@ -269,7 +269,10 @@ export default function GuruIzinPage() {
   }
 
   useEffect(() => {
-    loadRiwayatIzin(true);
+    const timer = setTimeout(() => {
+      loadRiwayatIzin(true);
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
 

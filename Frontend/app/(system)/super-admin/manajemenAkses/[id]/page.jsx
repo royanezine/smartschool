@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 
 import {
@@ -192,7 +192,7 @@ export default function DetailRolePage() {
   ] = useState("");
 
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     if (!roleId) {
       return;
     }
@@ -265,12 +265,15 @@ export default function DetailRolePage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [roleId]);
 
 
   useEffect(() => {
-    loadData();
-  }, [roleId]);
+    const timer = setTimeout(() => {
+      loadData();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [loadData]);
 
 
   const grantedPermissions = useMemo(() => {

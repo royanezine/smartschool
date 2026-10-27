@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
@@ -71,11 +71,7 @@ export default function TambahLantaiPage() {
   const [success, setSuccess] = useState("");
 
 
-  useEffect(() => {
-    loadGedung();
-  }, []);
-
-  async function loadGedung() {
+  const loadGedung = useCallback(async () => {
     try {
       setLoadingGedung(true);
       setError("");
@@ -98,8 +94,14 @@ export default function TambahLantaiPage() {
     } finally {
       setLoadingGedung(false);
     }
-  }
+  }, []);
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      loadGedung();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [loadGedung]);
 
   function handleChange(e) {
     const { name, value } = e.target;

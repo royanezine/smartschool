@@ -159,23 +159,6 @@ export default function AdminKelasEditPage() {
   }
 
 
-  useEffect(() => {
-    loadTahunAjaran();
-    loadGedung();
-    loadGuru();
-  }, []);
-
-
-  useEffect(() => {
-    if (!id) {
-      setError("ID kelas tidak ditemukan.");
-      setPageLoading(false);
-      return;
-    }
-
-    loadDetail();
-  }, [id]);
-
   async function loadTahunAjaran() {
     try {
       setLoadingTahun(true);
@@ -390,6 +373,30 @@ export default function AdminKelasEditPage() {
     }
   }
 
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      loadTahunAjaran();
+      loadGedung();
+      loadGuru();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    if (!id) {
+      const timer = setTimeout(() => {
+        setError("ID kelas tidak ditemukan.");
+        setPageLoading(false);
+      }, 0);
+      return () => clearTimeout(timer);
+    }
+
+    const timer = setTimeout(() => {
+      loadDetail();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [id]);
 
   function handleChange(e) {
     const {

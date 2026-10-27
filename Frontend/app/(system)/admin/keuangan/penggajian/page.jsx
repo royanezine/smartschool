@@ -315,11 +315,14 @@ export default function PenggajianPage() {
         setRefreshing(false);
       }
     },
-    [page, limit, bulan, tahun, status, search]
+    [page, limit, bulan, tahun, status, search, setPage]
   );
 
   useEffect(() => {
-    loadData();
+    const timer = setTimeout(() => {
+      loadData();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadData]);
 
   const sortedItems = useMemo(() => {
@@ -1258,9 +1261,9 @@ function SummaryCard({ title, value, description, icon: Icon, tone = "blue" }) {
   return (
     <div className="theme-card rounded-xl border theme-border p-5 shadow-sm">
       <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <p className="text-sm font-medium theme-text-muted">{title}</p>
-          <p className="mt-3 break-words text-xl font-bold tracking-tight tabular-nums theme-text sm:text-2xl">
+          <p className="mt-3 whitespace-nowrap text-xl font-bold tracking-tight tabular-nums theme-text sm:text-2xl">
             {value}
           </p>
           <p className="mt-1 text-xs theme-text-muted">{description}</p>

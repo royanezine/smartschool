@@ -1,8 +1,19 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
+import {
+  getAkunKas,
+  getJurnalKas,
+  getLaporanKas,
+  createJurnalKas,
+} from "@/services/jurnalKas.service";
+import {
+  getRingkasanTagihan,
+  getTunggakan,
+} from "@/services/tagihan.service";
 import {
   Wallet,
   TrendingUp,
@@ -76,122 +87,54 @@ function formatTanggal(value) {
 }
 
 
-const DUMMY_LAPORAN = {
-  totalPemasukan: 45250000,
-  totalPengeluaran: 28750000,
-  saldoAkhir: 16500000,
-  jumlahTransaksi: 148,
-  pemasukanBulanIni: 8250000,
-  pengeluaranBulanIni: 5400000,
-};
+function formatKategori(value) {
+  return String(value || "-")
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
 
-const DUMMY_TRANSAKSI = [
-  {
-    id: 1,
-    tanggal: "2026-10-15",
-    nomor: "TRX-20261015-001",
-    kategori: "SPP",
-    keterangan: "Pembayaran SPP Oktober - Ahmad Fauzi",
-    jenis: "pemasukan",
-    jumlah: 750000,
-    status: "lunas",
-    akun: "Kas Utama",
-  },
-  {
-    id: 2,
-    tanggal: "2026-10-15",
-    nomor: "TRX-20261015-002",
-    kategori: "Operasional",
-    keterangan: "Pembelian ATK kantor",
-    jenis: "pengeluaran",
-    jumlah: 450000,
-    status: "lunas",
-    akun: "Kas Utama",
-  },
-  {
-    id: 3,
-    tanggal: "2026-10-14",
-    nomor: "TRX-20261014-003",
-    kategori: "SPP",
-    keterangan: "Pembayaran SPP Oktober - Siti Nurhaliza",
-    jenis: "pemasukan",
-    jumlah: 750000,
-    status: "lunas",
-    akun: "Kas Utama",
-  },
-  {
-    id: 4,
-    tanggal: "2026-10-14",
-    nomor: "TRX-20261014-004",
-    kategori: "Gaji",
-    keterangan: "Pembayaran honor guru ekstrakurikuler",
-    jenis: "pengeluaran",
-    jumlah: 2400000,
-    status: "lunas",
-    akun: "Bank BCA",
-  },
-  {
-    id: 5,
-    tanggal: "2026-10-13",
-    nomor: "TRX-20261013-005",
-    kategori: "SPP",
-    keterangan: "Pembayaran SPP Oktober - Budi Santoso",
-    jenis: "pemasukan",
-    jumlah: 750000,
-    status: "menunggu",
-    akun: "Kas Utama",
-  },
-  {
-    id: 6,
-    tanggal: "2026-10-12",
-    nomor: "TRX-20261012-006",
-    kategori: "Pemeliharaan",
-    keterangan: "Perbaikan AC ruang guru",
-    jenis: "pengeluaran",
-    jumlah: 850000,
-    status: "lunas",
-    akun: "Kas Utama",
-  },
-  {
-    id: 7,
-    tanggal: "2026-10-11",
-    nomor: "TRX-20261011-007",
-    kategori: "Lainnya",
-    keterangan: "Donasi dari alumni",
-    jenis: "pemasukan",
-    jumlah: 5000000,
-    status: "lunas",
-    akun: "Bank BCA",
-  },
-  {
-    id: 8,
-    tanggal: "2026-10-10",
-    nomor: "TRX-20261010-008",
-    kategori: "Operasional",
-    keterangan: "Pembayaran listrik dan air",
-    jenis: "pengeluaran",
-    jumlah: 1850000,
-    status: "lunas",
-    akun: "Bank BCA",
-  },
-];
+function todayISO() {
+  const date = new Date();
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
 
-const DUMMY_AKUN = [
-  {
-    id: 1,
-    nama: "Kas Utama",
-    jenis: "kas",
-    saldo: 8500000,
-    nomor: "-",
-  },
-  {
-    id: 2,
-    nama: "Bank BCA",
-    jenis: "bank",
-    saldo: 8000000,
-    nomor: "1234567890",
-  },
-];
+function awalBulanIni() {
+  const date = new Date();
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  return `${year}-${month}-01`;
+}
+
+function isSameMonth(value) {
+  if (!value) return false;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return false;
+  const now = new Date();
+  return (
+    date.getFullYear() === now.getFullYear() &&
+    date.getMonth() === now.getMonth()
+  );
+}
+
+function getErrorMessage(error, fallback) {
+  if (error instanceof Error && error.message) return error.message;
+  return `Gagal memuat ${fallback}.`;
+}
+
+function formatRupiahOrUnavailable(value) {
+  return value === null || value === undefined
+    ? "Tidak tersedia"
+    : formatRupiah(value);
+}
+
+function formatNumberOrUnavailable(value) {
+  return value === null || value === undefined
+    ? "Tidak tersedia"
+    : Number(value).toLocaleString("id-ID");
+}
 
 
 export default function KeuanganPage() {
@@ -200,6 +143,7 @@ export default function KeuanganPage() {
   const [search, setSearch] = useState("");
   const [jenisFilter, setJenisFilter] = useState("semua");
   const [kategoriFilter, setKategoriFilter] = useState("semua");
+  const [bulanIniOnly, setBulanIniOnly] = useState(false);
 
   const [page, setPage] = useState(1);
   const limit = 5;
@@ -210,17 +154,152 @@ export default function KeuanganPage() {
   const [formOpen, setFormOpen] = useState(false);
   const [formType, setFormType] = useState("pemasukan");
   const [form, setForm] = useState({
-    tanggal: new Date().toISOString().slice(0, 10),
+    tanggal: todayISO(),
     kategori: "",
     jumlah: "",
     keterangan: "",
-    akun: "Kas Utama",
+    akunKasId: "",
   });
+  const [formError, setFormError] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const [akunKas, setAkunKas] = useState([]);
+  const [akunTotalSaldo, setAkunTotalSaldo] = useState(null);
+
+  const [jurnal, setJurnal] = useState([]);
+  const [jurnalRingkasan, setJurnalRingkasan] = useState(null);
+  const [jurnalTotal, setJurnalTotal] = useState(null);
+
+  const [tagihanRingkasan, setTagihanRingkasan] = useState(null);
+  const [tunggakanRingkasan, setTunggakanRingkasan] = useState(null);
+  const [bulanIni, setBulanIni] = useState(null);
+
+  useEffect(() => {
+    let active = true;
+
+    const load = async () => {
+      setLoading(true);
+      setError("");
+
+      const results = await Promise.allSettled([
+        getAkunKas(),
+        getJurnalKas({ page: 1, limit: 100 }),
+        getRingkasanTagihan(),
+        getTunggakan({ page: 1, limit: 1 }),
+        getLaporanKas({
+          dari: awalBulanIni(),
+          sampai: todayISO(),
+        }),
+      ]);
+
+      if (!active) return;
+
+      const messages = [];
+      const [akunRes, jurnalRes, tagihanRes, tunggakanRes, bulanRes] =
+        results;
+
+      if (akunRes.status === "fulfilled") {
+        setAkunKas(akunRes.value.data || []);
+        setAkunTotalSaldo(
+          akunRes.value.ringkasan?.totalSaldo === undefined ||
+            akunRes.value.ringkasan?.totalSaldo === null
+            ? null
+            : Number(akunRes.value.ringkasan.totalSaldo)
+        );
+      } else {
+        setAkunKas([]);
+        setAkunTotalSaldo(null);
+        messages.push(getErrorMessage(akunRes.reason, "akun kas"));
+      }
+
+      if (jurnalRes.status === "fulfilled") {
+        setJurnal(jurnalRes.value.data || []);
+        setJurnalRingkasan(jurnalRes.value.ringkasan || null);
+        setJurnalTotal(
+          typeof jurnalRes.value.meta?.total === "number"
+            ? jurnalRes.value.meta.total
+            : null
+        );
+      } else {
+        setJurnal([]);
+        setJurnalRingkasan(null);
+        setJurnalTotal(null);
+        messages.push(getErrorMessage(jurnalRes.reason, "jurnal kas"));
+      }
+
+      if (tagihanRes.status === "fulfilled") {
+        setTagihanRingkasan(tagihanRes.value.data || null);
+      } else {
+        setTagihanRingkasan(null);
+        messages.push(getErrorMessage(tagihanRes.reason, "ringkasan tagihan"));
+      }
+
+      if (tunggakanRes.status === "fulfilled") {
+        setTunggakanRingkasan(tunggakanRes.value.ringkasan || null);
+      } else {
+        setTunggakanRingkasan(null);
+        messages.push(getErrorMessage(tunggakanRes.reason, "tunggakan"));
+      }
+
+      if (bulanRes.status === "fulfilled") {
+        setBulanIni(bulanRes.value.data || null);
+      } else {
+        setBulanIni(null);
+        messages.push(getErrorMessage(bulanRes.reason, "laporan bulan ini"));
+      }
+
+      setError(messages.join(" "));
+      setLoading(false);
+    };
+
+    load();
+
+    return () => {
+      active = false;
+    };
+  }, [refreshKey]);
+
+  const transactions = useMemo(
+    () =>
+      jurnal.map((item) => ({
+        id: item.id,
+        tanggal: item.tanggal,
+        nomor: item.nomorJurnal || "-",
+        kategori: formatKategori(item.kategori),
+        kategoriKey: item.kategori,
+        keterangan: item.keterangan || "-",
+        jenis: item.jenis === "masuk" ? "pemasukan" : "pengeluaran",
+        jumlah: Number(item.jumlah) || 0,
+        status: item.status || "aktif",
+        akun: item.akunKas?.nama || "-",
+        sumber: item.sumber || "-",
+      })),
+    [jurnal]
+  );
+
+  const kategoriOptions = useMemo(() => {
+    const map = new Map();
+
+    transactions.forEach((item) => {
+      if (item.kategoriKey) {
+        map.set(item.kategoriKey, item.kategori);
+      }
+    });
+
+    return [...map.entries()].map(([value, label]) => ({
+      value,
+      label,
+    }));
+  }, [transactions]);
 
   const filteredData = useMemo(() => {
     const keyword = search.trim().toLowerCase();
 
-    return DUMMY_TRANSAKSI.filter((item) => {
+    return transactions.filter((item) => {
       const matchSearch =
         !keyword ||
         item.keterangan.toLowerCase().includes(keyword) ||
@@ -231,11 +310,13 @@ export default function KeuanganPage() {
 
       const matchKategori =
         kategoriFilter === "semua" ||
-        item.kategori === kategoriFilter;
+        item.kategoriKey === kategoriFilter;
 
-      return matchSearch && matchJenis && matchKategori;
+      const matchBulan = !bulanIniOnly || isSameMonth(item.tanggal);
+
+      return matchSearch && matchJenis && matchKategori && matchBulan;
     });
-  }, [search, jenisFilter, kategoriFilter]);
+  }, [transactions, search, jenisFilter, kategoriFilter, bulanIniOnly]);
 
   const totalPages = Math.max(1, Math.ceil(filteredData.length / limit));
   const currentPage = Math.min(page, totalPages);
@@ -243,6 +324,28 @@ export default function KeuanganPage() {
     (currentPage - 1) * limit,
     currentPage * limit
   );
+
+  const activeAkun = useMemo(
+    () =>
+      akunKas.filter(
+        (akun) => (akun.status || "aktif") === "aktif"
+      ),
+    [akunKas]
+  );
+
+  const saldoAkhir = akunTotalSaldo;
+  const totalMasuk =
+    jurnalRingkasan === null
+      ? null
+      : Number(jurnalRingkasan.totalMasuk || 0);
+  const totalKeluar =
+    jurnalRingkasan === null
+      ? null
+      : Number(jurnalRingkasan.totalKeluar || 0);
+  const pemasukanBulanIni =
+    bulanIni === null ? null : Number(bulanIni.totalMasuk || 0);
+  const pengeluaranBulanIni =
+    bulanIni === null ? null : Number(bulanIni.totalKeluar || 0);
 
   const openDetail = (item) => {
     setSelectedTransaksi(item);
@@ -256,25 +359,121 @@ export default function KeuanganPage() {
 
   const openForm = (type) => {
     setFormType(type);
+    setFormError("");
     setForm({
-      tanggal: new Date().toISOString().slice(0, 10),
+      tanggal: todayISO(),
       kategori: "",
       jumlah: "",
       keterangan: "",
-      akun: "Kas Utama",
+      akunKasId: activeAkun[0]?.id || "",
     });
     setFormOpen(true);
   };
 
-  const closeForm = () => setFormOpen(false);
+  const closeForm = () => {
+    setFormOpen(false);
+    setFormError("");
+  };
 
   const updateForm = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }));
+    setFormError("");
   };
 
-  const handleSubmitForm = (e) => {
-    e.preventDefault();
-    setFormOpen(false);
+  const handleSubmitForm = async (event) => {
+    event.preventDefault();
+    setFormError("");
+
+    if (!form.akunKasId) {
+      setFormError("Pilih akun kas terlebih dahulu.");
+      return;
+    }
+
+    if (!form.tanggal) {
+      setFormError("Tanggal transaksi wajib diisi.");
+      return;
+    }
+
+    if (!form.kategori.trim()) {
+      setFormError("Kategori transaksi wajib diisi.");
+      return;
+    }
+
+    if (!form.jumlah || Number(form.jumlah) <= 0) {
+      setFormError("Jumlah transaksi harus lebih dari 0.");
+      return;
+    }
+
+    setSaving(true);
+
+    try {
+      const response = await createJurnalKas({
+        akunKasId: form.akunKasId,
+        tanggal: form.tanggal,
+        jenis: formType === "pemasukan" ? "masuk" : "keluar",
+        kategori: form.kategori.trim(),
+        jumlah: Number(form.jumlah),
+        keterangan: form.keterangan.trim() || undefined,
+      });
+
+      if (response?.success === false) {
+        throw new Error(response.message || "Transaksi gagal disimpan.");
+      }
+
+      closeForm();
+      setRefreshKey((value) => value + 1);
+    } catch (err) {
+      setFormError(getErrorMessage(err, "transaksi"));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleExport = () => {
+    if (filteredData.length === 0) return;
+
+    const headers = [
+      "Tanggal",
+      "Nomor Jurnal",
+      "Kategori",
+      "Keterangan",
+      "Akun Kas",
+      "Jenis",
+      "Jumlah",
+      "Status",
+    ];
+
+    const rows = filteredData.map((item) => [
+      item.tanggal,
+      item.nomor,
+      item.kategori,
+      item.keterangan,
+      item.akun,
+      item.jenis === "pemasukan" ? "Pemasukan" : "Pengeluaran",
+      item.jumlah,
+      item.status,
+    ]);
+
+    const escapeCsv = (value) =>
+      `"${String(value ?? "").replace(/"/g, '""')}"`;
+
+    const csv = [
+      headers.map(escapeCsv).join(","),
+      ...rows.map((row) => row.map(escapeCsv).join(",")),
+    ].join("\r\n");
+
+    const blob = new Blob(["\uFEFF", csv], {
+      type: "text/csv;charset=utf-8;",
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = "keuangan-smartschool.csv";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
   };
 
   const toggleSidebar = () => setIsCollapsed((v) => !v);
@@ -330,7 +529,9 @@ export default function KeuanganPage() {
               <div className="flex flex-wrap gap-2">
                 <button
                   type="button"
-                  className={`inline-flex h-10 items-center justify-center gap-2 rounded-xl border ${themeNeutralBorder} theme-card px-4 text-sm font-semibold theme-text-secondary transition ${themeNeutralHover}`}
+                  onClick={handleExport}
+                  disabled={filteredData.length === 0}
+                  className={`inline-flex h-10 items-center justify-center gap-2 rounded-xl border ${themeNeutralBorder} theme-card px-4 text-sm font-semibold theme-text-secondary transition ${themeNeutralHover} disabled:cursor-not-allowed disabled:opacity-50`}
                 >
                   <Download size={15} />
                   Export
@@ -357,115 +558,161 @@ export default function KeuanganPage() {
             </div>
 
 
+            {error && (
+              <div className="flex items-start gap-3 rounded-xl border border-[color-mix(in_srgb,var(--color-danger)_28%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_6%,transparent)] p-4 text-sm">
+                <AlertCircle
+                  size={18}
+                  className="mt-0.5 shrink-0 text-[var(--color-danger)]"
+                />
+                <div className="min-w-0 flex-1">
+                  <p className="font-semibold theme-text">
+                    Sebagian data gagal dimuat
+                  </p>
+                  <p className="mt-1 break-words theme-text-secondary">
+                    {error}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setRefreshKey((value) => value + 1)}
+                  className="inline-flex shrink-0 items-center gap-1 text-xs font-semibold theme-text-secondary"
+                >
+                  <RefreshCw size={13} />
+                  Coba lagi
+                </button>
+              </div>
+            )}
+
+            {loading && (
+              <div className="flex items-center gap-2 rounded-xl border theme-border theme-card p-4 text-sm theme-text-muted">
+                <Loader2 size={16} className="animate-spin" />
+                Memuat data keuangan dari server...
+              </div>
+            )}
+
             <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
               <StatCard
                 icon={Wallet}
                 label="Saldo Akhir"
-                value={formatRupiah(DUMMY_LAPORAN.saldoAkhir)}
-                description="Saldo semua akun"
+                value={formatRupiahOrUnavailable(saldoAkhir)}
+                description="Saldo semua akun kas"
                 accent="primary"
               />
 
               <StatCard
                 icon={TrendingUp}
                 label="Total Pemasukan"
-                value={formatRupiah(DUMMY_LAPORAN.totalPemasukan)}
-                description="Semua periode"
+                value={formatRupiahOrUnavailable(totalMasuk)}
+                description="Ringkasan jurnal kas"
                 accent="success"
               />
 
               <StatCard
                 icon={TrendingDown}
                 label="Total Pengeluaran"
-                value={formatRupiah(DUMMY_LAPORAN.totalPengeluaran)}
-                description="Semua periode"
+                value={formatRupiahOrUnavailable(totalKeluar)}
+                description="Ringkasan jurnal kas"
                 accent="danger"
               />
 
               <StatCard
                 icon={Receipt}
                 label="Jumlah Transaksi"
-                value={DUMMY_LAPORAN.jumlahTransaksi.toLocaleString("id-ID")}
-                description="Tercatat di sistem"
+                value={formatNumberOrUnavailable(jurnalTotal)}
+                description="Total jurnal tercatat"
                 accent="info"
               />
 
               <StatCard
                 icon={ArrowDownCircle}
                 label="Pemasukan Bulan Ini"
-                value={formatRupiah(DUMMY_LAPORAN.pemasukanBulanIni)}
-                description="Oktober 2026"
+                value={formatRupiahOrUnavailable(pemasukanBulanIni)}
+                description="Dari laporan kas periode ini"
                 accent="success"
               />
 
               <StatCard
                 icon={ArrowUpCircle}
                 label="Pengeluaran Bulan Ini"
-                value={formatRupiah(DUMMY_LAPORAN.pengeluaranBulanIni)}
-                description="Oktober 2026"
+                value={formatRupiahOrUnavailable(pengeluaranBulanIni)}
+                description="Dari laporan kas periode ini"
                 accent="warning"
               />
             </section>
 
 
             <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {DUMMY_AKUN.map((akun) => (
-                <div
-                  key={akun.id}
-                  className={`group relative overflow-hidden rounded-2xl border ${themeNeutralBorder} theme-card p-4 ${themeCardShadow} transition hover:-translate-y-0.5 hover:shadow-md`}
-                >
+              {akunKas.map((akun) => {
+                const isBank = akun.tipe === "bank";
+
+                return (
                   <div
-                    className={`absolute inset-x-0 top-0 h-0.5 ${
-                      akun.jenis === "bank"
-                        ? "bg-[var(--color-info)]"
-                        : "bg-[var(--color-primary)]"
-                    }`}
-                  />
+                    key={akun.id}
+                    className={`group relative overflow-hidden rounded-2xl border ${themeNeutralBorder} theme-card p-4 ${themeCardShadow} transition hover:-translate-y-0.5 hover:shadow-md`}
+                  >
+                    <div
+                      className={`absolute inset-x-0 top-0 h-0.5 ${
+                        isBank
+                          ? "bg-[var(--color-info)]"
+                          : "bg-[var(--color-primary)]"
+                      }`}
+                    />
 
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-3">
-                      <div
-                        className={`flex h-10 w-10 items-center justify-center rounded-xl ${
-                          akun.jenis === "bank"
-                            ? "bg-[color-mix(in_srgb,var(--color-info)_12%,transparent)] text-[var(--color-info)]"
-                            : `${themePrimarySurface} ${themePrimaryText}`
-                        }`}
-                      >
-                        {akun.jenis === "bank" ? (
-                          <CreditCard size={18} />
-                        ) : (
-                          <Wallet size={18} />
-                        )}
-                      </div>
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={`flex h-10 w-10 items-center justify-center rounded-xl ${
+                            isBank
+                              ? "bg-[color-mix(in_srgb,var(--color-info)_12%,transparent)] text-[var(--color-info)]"
+                              : `${themePrimarySurface} ${themePrimaryText}`
+                          }`}
+                        >
+                          {isBank ? (
+                            <CreditCard size={18} />
+                          ) : (
+                            <Wallet size={18} />
+                          )}
+                        </div>
 
-                      <div className="min-w-0">
-                        <p className="text-sm font-semibold theme-text">
-                          {akun.nama}
-                        </p>
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold theme-text">
+                            {akun.nama}
+                          </p>
 
-                        <p className="mt-0.5 text-xs theme-text-muted">
-                          {akun.jenis === "bank"
-                            ? `No. ${akun.nomor}`
-                            : "Kas tunai"}
-                        </p>
+                          <p className="mt-0.5 text-xs theme-text-muted">
+                            {akun.kode} •{" "}
+                            {isBank ? "Bank" : "Kas tunai"}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  <div className={`mt-3 border-t ${themeDivider} pt-3`}>
-                    <p className="text-[11px] font-medium uppercase tracking-wider theme-text-muted">
-                      Saldo
-                    </p>
+                    <div className={`mt-3 border-t ${themeDivider} pt-3`}>
+                      <p className="text-[11px] font-medium uppercase tracking-wider theme-text-muted">
+                        Saldo
+                      </p>
 
-                    <p className="mt-1 text-lg font-bold theme-text">
-                      {formatRupiah(akun.saldo)}
-                    </p>
+                      <p className="mt-1 text-lg font-bold theme-text">
+                        {formatRupiah(akun.saldo)}
+                      </p>
+                    </div>
                   </div>
+                );
+              })}
+
+              {!loading && akunKas.length === 0 && (
+                <div
+                  className={`flex items-center justify-center rounded-2xl border border-dashed ${themeNeutralBorder} p-4`}
+                >
+                  <p className="text-center text-xs theme-text-muted">
+                    Belum ada akun kas yang dapat ditampilkan.
+                  </p>
                 </div>
-              ))}
+              )}
 
-              <div
-                className={`flex items-center justify-center rounded-2xl border border-dashed ${themeNeutralBorder} p-4 transition ${themeNeutralHover} cursor-pointer hover:border-[var(--color-primary)]`}
+              <Link
+                href="/admin/keuangan/akunKas/tambah"
+                className={`flex items-center justify-center rounded-2xl border border-dashed ${themeNeutralBorder} p-4 transition ${themeNeutralHover} hover:border-[var(--color-primary)]`}
               >
                 <div className="text-center">
                   <div
@@ -477,6 +724,113 @@ export default function KeuanganPage() {
                   <p className="mt-2 text-xs font-semibold theme-text-secondary">
                     Tambah Akun
                   </p>
+                </div>
+              </Link>
+            </section>
+
+            <section className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+              <div
+                className={`rounded-2xl border ${themeNeutralBorder} theme-card p-5 ${themeCardShadow}`}
+              >
+                <div className="flex items-center gap-3">
+                  <div
+                    className={`flex h-10 w-10 items-center justify-center rounded-xl ${themePrimarySurface} ${themePrimaryText}`}
+                  >
+                    <FileText size={18} />
+                  </div>
+
+                  <div>
+                    <h3 className="text-sm font-bold theme-text">
+                      Ringkasan Tagihan Siswa
+                    </h3>
+                    <p className="mt-0.5 text-xs theme-text-muted">
+                      Agregat seluruh tagihan yang tercatat.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-4 space-y-2.5">
+                  {tagihanRingkasan ? (
+                    <>
+                      <ReportRow
+                        label="Jumlah Tagihan"
+                        value={Number(
+                          tagihanRingkasan.jumlahTagihan || 0
+                        ).toLocaleString("id-ID")}
+                        variant="neutral"
+                      />
+                      <ReportRow
+                        label="Total Tagihan"
+                        value={formatRupiah(
+                          tagihanRingkasan.totalTagihan
+                        )}
+                        variant="neutral"
+                      />
+                      <ReportRow
+                        label="Total Dibayar"
+                        value={formatRupiah(
+                          tagihanRingkasan.totalDibayar
+                        )}
+                        variant="success"
+                      />
+                      <ReportRow
+                        label="Sisa Tagihan"
+                        value={formatRupiah(
+                          tagihanRingkasan.totalSisa
+                        )}
+                        variant="danger"
+                      />
+                    </>
+                  ) : (
+                    <p className="text-sm theme-text-muted">
+                      Tidak tersedia.
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div
+                className={`rounded-2xl border ${themeNeutralBorder} theme-card p-5 ${themeCardShadow}`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-warning)_12%,transparent)] text-[var(--color-warning)]">
+                    <AlertCircle size={18} />
+                  </div>
+
+                  <div>
+                    <h3 className="text-sm font-bold theme-text">
+                      Ringkasan Tunggakan
+                    </h3>
+                    <p className="mt-0.5 text-xs theme-text-muted">
+                      Tagihan yang sudah melewati jatuh tempo.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-4 space-y-2.5">
+                  {tunggakanRingkasan ? (
+                    <>
+                      <ReportRow
+                        label="Jumlah Tagihan Menunggak"
+                        value={Number(
+                          tunggakanRingkasan.jumlahTagihan || 0
+                        ).toLocaleString("id-ID")}
+                        variant="neutral"
+                      />
+                      <ReportRow
+                        label="Total Tunggakan"
+                        value={formatRupiah(
+                          tunggakanRingkasan.totalTunggakan
+                        )}
+                        variant="danger"
+                        bold
+                      />
+                    </>
+                  ) : (
+                    <p className="text-sm theme-text-muted">
+                      Tidak tersedia.
+                    </p>
+                  )}
                 </div>
               </div>
             </section>
@@ -501,7 +855,16 @@ export default function KeuanganPage() {
                 <div className="flex flex-wrap gap-2">
                   <button
                     type="button"
-                    className={`inline-flex h-9 items-center gap-2 rounded-lg border ${themeNeutralBorder} theme-card px-3 text-xs font-semibold theme-text-secondary transition ${themeNeutralHover}`}
+                    onClick={() => {
+                      setBulanIniOnly((value) => !value);
+                      setPage(1);
+                    }}
+                    aria-pressed={bulanIniOnly}
+                    className={`inline-flex h-9 items-center gap-2 rounded-lg border px-3 text-xs font-semibold transition ${
+                      bulanIniOnly
+                        ? "border-[var(--color-primary)] bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)] text-[var(--color-primary)]"
+                        : `${themeNeutralBorder} theme-card theme-text-secondary ${themeNeutralHover}`
+                    }`}
                   >
                     <Calendar size={14} />
                     Bulan Ini
@@ -509,9 +872,14 @@ export default function KeuanganPage() {
 
                   <button
                     type="button"
-                    className={`inline-flex h-9 items-center gap-2 rounded-lg border ${themeNeutralBorder} theme-card px-3 text-xs font-semibold theme-text-secondary transition ${themeNeutralHover}`}
+                    onClick={() => setRefreshKey((value) => value + 1)}
+                    disabled={loading}
+                    className={`inline-flex h-9 items-center gap-2 rounded-lg border ${themeNeutralBorder} theme-card px-3 text-xs font-semibold theme-text-secondary transition ${themeNeutralHover} disabled:cursor-not-allowed disabled:opacity-50`}
                   >
-                    <RefreshCw size={14} />
+                    <RefreshCw
+                      size={14}
+                      className={loading ? "animate-spin" : ""}
+                    />
                     Refresh
                   </button>
                 </div>
@@ -568,11 +936,11 @@ export default function KeuanganPage() {
                     className={`h-10 cursor-pointer rounded-xl border ${themeNeutralBorder} theme-card px-3 text-sm theme-text-secondary outline-none transition ${themeFocus}`}
                   >
                     <option value="semua">Semua Kategori</option>
-                    <option value="SPP">SPP</option>
-                    <option value="Gaji">Gaji</option>
-                    <option value="Operasional">Operasional</option>
-                    <option value="Pemeliharaan">Pemeliharaan</option>
-                    <option value="Lainnya">Lainnya</option>
+                    {kategoriOptions.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>
@@ -608,7 +976,22 @@ export default function KeuanganPage() {
                   </thead>
 
                   <tbody>
-                    {paginatedData.length === 0 ? (
+                    {loading ? (
+                      <tr>
+                        <td colSpan={7} className="px-4 py-14 text-center">
+                          <Loader2
+                            size={24}
+                            className="mx-auto animate-spin text-[var(--color-primary)]"
+                          />
+                          <p className="mt-3 text-sm font-semibold theme-text">
+                            Memuat transaksi
+                          </p>
+                          <p className="mt-1 text-xs theme-text-muted">
+                            Mengambil data jurnal kas dari server.
+                          </p>
+                        </td>
+                      </tr>
+                    ) : paginatedData.length === 0 ? (
                       <tr>
                         <td colSpan={7} className="px-4 py-14 text-center">
                           <div
@@ -771,17 +1154,13 @@ export default function KeuanganPage() {
                 <div className="mt-4 space-y-2.5">
                   <ReportRow
                     label="Pemasukan"
-                    value={formatRupiah(
-                      DUMMY_LAPORAN.pemasukanBulanIni
-                    )}
+                    value={formatRupiahOrUnavailable(pemasukanBulanIni)}
                     variant="success"
                   />
 
                   <ReportRow
                     label="Pengeluaran"
-                    value={formatRupiah(
-                      DUMMY_LAPORAN.pengeluaranBulanIni
-                    )}
+                    value={formatRupiahOrUnavailable(pengeluaranBulanIni)}
                     variant="danger"
                   />
 
@@ -790,14 +1169,24 @@ export default function KeuanganPage() {
                   >
                     <ReportRow
                       label="Selisih"
-                      value={formatRupiah(
-                        DUMMY_LAPORAN.pemasukanBulanIni -
-                          DUMMY_LAPORAN.pengeluaranBulanIni
-                      )}
+                      value={
+                        pemasukanBulanIni === null ||
+                        pengeluaranBulanIni === null
+                          ? "Tidak tersedia"
+                          : formatRupiah(
+                              pemasukanBulanIni - pengeluaranBulanIni
+                            )
+                      }
                       variant="primary"
                       bold
                     />
                   </div>
+
+                  {bulanIni === null && (
+                    <p className="text-[11px] theme-text-muted">
+                      Agregat laporan kas bulan ini tidak tersedia.
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -823,26 +1212,29 @@ export default function KeuanganPage() {
                 </div>
 
                 <div className="mt-4 space-y-2.5">
-                  {DUMMY_AKUN.map((akun) => (
-                    <ReportRow
-                      key={akun.id}
-                      label={akun.nama}
-                      value={formatRupiah(akun.saldo)}
-                      variant="neutral"
-                    />
-                  ))}
+                  {akunKas.length === 0 ? (
+                    <p className="text-sm theme-text-muted">
+                      {loading
+                        ? "Memuat akun kas..."
+                        : "Belum ada akun kas."}
+                    </p>
+                  ) : (
+                    akunKas.map((akun) => (
+                      <ReportRow
+                        key={akun.id}
+                        label={akun.nama}
+                        value={formatRupiah(akun.saldo)}
+                        variant="neutral"
+                      />
+                    ))
+                  )}
 
                   <div
                     className={`border-t ${themeDivider} pt-2.5`}
                   >
                     <ReportRow
                       label="Total"
-                      value={formatRupiah(
-                        DUMMY_AKUN.reduce(
-                          (sum, a) => sum + a.saldo,
-                          0
-                        )
-                      )}
+                      value={formatRupiahOrUnavailable(saldoAkhir)}
                       variant="primary"
                       bold
                     />
@@ -965,7 +1357,7 @@ export default function KeuanganPage() {
             >
               <button
                 type="button"
-                onClick={closeDetail}
+                onClick={() => window.print()}
                 className={`inline-flex h-10 items-center gap-2 rounded-xl border ${themeNeutralBorder} theme-card px-4 text-sm font-semibold theme-text-secondary transition ${themeNeutralHover}`}
               >
                 <Printer size={15} />
@@ -1098,14 +1490,23 @@ export default function KeuanganPage() {
                 </label>
 
                 <select
-                  value={form.akun}
+                  value={form.akunKasId}
                   onChange={(e) =>
-                    updateForm("akun", e.target.value)
+                    updateForm("akunKasId", e.target.value)
                   }
-                  className={`h-10 w-full cursor-pointer rounded-xl border ${themeNeutralBorder} theme-card px-3 text-sm theme-text outline-none transition ${themeFocus}`}
+                  disabled={saving || activeAkun.length === 0}
+                  className={`h-10 w-full cursor-pointer rounded-xl border ${themeNeutralBorder} theme-card px-3 text-sm theme-text outline-none transition ${themeFocus} disabled:cursor-not-allowed disabled:opacity-60`}
                 >
-                  <option value="Kas Utama">Kas Utama</option>
-                  <option value="Bank BCA">Bank BCA</option>
+                  <option value="">
+                    {activeAkun.length === 0
+                      ? "Belum ada akun kas aktif"
+                      : "Pilih akun kas"}
+                  </option>
+                  {activeAkun.map((akun) => (
+                    <option key={akun.id} value={akun.id}>
+                      {akun.kode} - {akun.nama}
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -1125,27 +1526,40 @@ export default function KeuanganPage() {
                 />
               </div>
 
+              {formError && (
+                <div className="flex items-start gap-2 rounded-xl border border-[color-mix(in_srgb,var(--color-danger)_28%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_6%,transparent)] p-3 text-xs text-[var(--color-danger)]">
+                  <AlertCircle size={15} className="mt-0.5 shrink-0" />
+                  <span>{formError}</span>
+                </div>
+              )}
+
               <div
                 className={`flex justify-end gap-2 border-t ${themeDivider} pt-4`}
               >
                 <button
                   type="button"
                   onClick={closeForm}
-                  className={`inline-flex h-10 items-center rounded-xl border ${themeNeutralBorder} theme-card px-4 text-sm font-semibold theme-text-secondary transition ${themeNeutralHover}`}
+                  disabled={saving}
+                  className={`inline-flex h-10 items-center rounded-xl border ${themeNeutralBorder} theme-card px-4 text-sm font-semibold theme-text-secondary transition ${themeNeutralHover} disabled:opacity-60`}
                 >
                   Batal
                 </button>
 
                 <button
                   type="submit"
-                  className={`inline-flex h-10 items-center gap-2 rounded-xl px-4 text-sm font-semibold text-[var(--color-card)] transition hover:opacity-90 ${
+                  disabled={saving || activeAkun.length === 0}
+                  className={`inline-flex h-10 items-center gap-2 rounded-xl px-4 text-sm font-semibold text-[var(--color-card)] transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60 ${
                     formType === "pemasukan"
                       ? "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_75%,var(--color-success)))] shadow-[0_4px_14px_color-mix(in_srgb,var(--color-primary)_25%,transparent)]"
                       : "bg-[var(--color-danger)] shadow-[0_4px_14px_color-mix(in_srgb,var(--color-danger)_25%,transparent)]"
                   }`}
                 >
-                  <Plus size={15} />
-                  Simpan
+                  {saving ? (
+                    <Loader2 size={15} className="animate-spin" />
+                  ) : (
+                    <Plus size={15} />
+                  )}
+                  {saving ? "Menyimpan..." : "Simpan"}
                 </button>
               </div>
             </form>
@@ -1238,36 +1652,52 @@ function getKategoriStyle(kategori) {
 
 function StatusBadge({ status }) {
   const config = {
+    aktif: {
+      className:
+        "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)] bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)] text-[var(--color-success)]",
+      icon: CheckCircle2,
+      label: "Aktif",
+    },
     lunas: {
       className:
         "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)] bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)] text-[var(--color-success)]",
       icon: CheckCircle2,
+      label: "Lunas",
     },
     menunggu: {
       className:
         "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)] bg-[color-mix(in_srgb,var(--color-warning)_10%,transparent)] text-[var(--color-warning)]",
       icon: Clock,
+      label: "Menunggu",
+    },
+    dibatalkan: {
+      className:
+        "border-[color-mix(in_srgb,var(--color-danger)_24%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_10%,transparent)] text-[var(--color-danger)]",
+      icon: AlertCircle,
+      label: "Dibatalkan",
     },
     gagal: {
       className:
         "border-[color-mix(in_srgb,var(--color-danger)_24%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_10%,transparent)] text-[var(--color-danger)]",
       icon: AlertCircle,
+      label: "Gagal",
     },
   };
 
   const item = config[status] || {
     className: `${themeNeutralSurface} theme-text-muted border theme-border`,
     icon: AlertCircle,
+    label: formatKategori(status),
   };
 
   const Icon = item.icon;
 
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold capitalize ${item.className}`}
+      className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${item.className}`}
     >
       <Icon size={11} />
-      {status}
+      {item.label}
     </span>
   );
 }

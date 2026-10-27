@@ -257,16 +257,6 @@ export default function GuruSarprasPinjamPage() {
     }
   };
 
-  const notifications = [
-    {
-      id: 1,
-      title: "Informasi Peminjaman",
-      desc: "Cek status pengajuan peminjaman Anda",
-      read: false,
-    },
-  ];
-
-
   const kategori = useMemo(() => {
     const kategoriBackend = daftarItem
       .map((item) => item?.kategoriAset?.nama)
@@ -335,17 +325,9 @@ export default function GuruSarprasPinjamPage() {
       />
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <Header
-          toggleSidebar={() =>
+        <Header toggleSidebar={() =>
             setSidebarOpen((v) => !v)
-          }
-          notifications={notifications}
-          user={{
-            name: "Bu Sari",
-            email: "guru@smartschool.com",
-            avatar: "AS",
-          }}
-        />
+          } />
 
         <main className="theme-page relative flex-1 overflow-y-auto">
 

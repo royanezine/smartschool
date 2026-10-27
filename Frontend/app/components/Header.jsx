@@ -41,7 +41,10 @@ export default function Header({ notifications = [], user: userProp = null }) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
+    const timer = setTimeout(() => {
+      setMounted(true);
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
  
@@ -249,7 +252,10 @@ export default function Header({ notifications = [], user: userProp = null }) {
   }, []);
 
   useEffect(() => {
-    loadNotifications(true);
+    const timer = setTimeout(() => {
+      loadNotifications(true);
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadNotifications]);
 
   useEffect(() => {
@@ -262,7 +268,10 @@ export default function Header({ notifications = [], user: userProp = null }) {
 
   useEffect(() => {
     if (isNotifOpen) {
-      loadNotifications(true);
+      const timer = setTimeout(() => {
+        loadNotifications(true);
+      }, 0);
+      return () => clearTimeout(timer);
     }
   }, [isNotifOpen, loadNotifications]);
 

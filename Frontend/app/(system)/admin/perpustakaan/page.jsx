@@ -523,7 +523,10 @@ export default function PerpustakaanPage() {
   };
 
   useEffect(() => {
-    loadDashboard();
+    const timer = setTimeout(() => {
+      loadDashboard();
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   const physicalBooks = useMemo(

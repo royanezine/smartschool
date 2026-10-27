@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   ArrowLeft,
   ArrowRight,
@@ -41,40 +42,43 @@ export default function PembayaranPage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    try {
-      const savedPayment = sessionStorage.getItem("tenant_payment_data");
+    const timer = setTimeout(() => {
+      try {
+        const savedPayment = sessionStorage.getItem("tenant_payment_data");
 
-      if (!savedPayment) {
-        setError(
-          "Informasi pembayaran tidak ditemukan. Silakan lakukan verifikasi terlebih dahulu."
-        );
-        return;
+        if (!savedPayment) {
+          setError(
+            "Informasi pembayaran tidak ditemukan. Silakan lakukan verifikasi terlebih dahulu."
+          );
+          return;
+        }
+
+        const parsedPayment = JSON.parse(savedPayment);
+
+        if (!parsedPayment || typeof parsedPayment !== "object") {
+          setError("Informasi pembayaran tidak valid.");
+          return;
+        }
+
+        if (
+          parsedPayment.is_trial === false &&
+          !parsedPayment.redirect_url
+        ) {
+          setError(
+            "Tautan pembayaran belum tersedia. Silakan ulangi proses verifikasi."
+          );
+          return;
+        }
+
+        setPayment(parsedPayment);
+      } catch (err) {
+        console.error("Gagal membaca informasi pembayaran:", err);
+        setError("Informasi pembayaran gagal dimuat.");
+      } finally {
+        setLoading(false);
       }
-
-      const parsedPayment = JSON.parse(savedPayment);
-
-      if (!parsedPayment || typeof parsedPayment !== "object") {
-        setError("Informasi pembayaran tidak valid.");
-        return;
-      }
-
-      if (
-        parsedPayment.is_trial === false &&
-        !parsedPayment.redirect_url
-      ) {
-        setError(
-          "Tautan pembayaran belum tersedia. Silakan ulangi proses verifikasi."
-        );
-        return;
-      }
-
-      setPayment(parsedPayment);
-    } catch (err) {
-      console.error("Gagal membaca informasi pembayaran:", err);
-      setError("Informasi pembayaran gagal dimuat.");
-    } finally {
-      setLoading(false);
-    }
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   const handleCopy = async (value, field = "order") => {
@@ -172,7 +176,7 @@ export default function PembayaranPage() {
     <main className="min-h-screen bg-slate-50 text-slate-900">
       <header className="border-b border-slate-200/80 bg-white">
         <div className="mx-auto flex h-[76px] max-w-7xl items-center justify-between px-5 sm:px-6 lg:px-8">
-          <a href="/" className="flex items-center gap-3">
+          <Link href="/" className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#0D47C9] shadow-sm">
               <span className="text-lg font-extrabold tracking-tight text-white">
                 S
@@ -187,7 +191,7 @@ export default function PembayaranPage() {
                 School Management System
               </p>
             </div>
-          </a>
+          </Link>
 
           <div className="hidden items-center gap-2 text-xs font-semibold text-emerald-700 sm:flex">
             <ShieldCheck className="h-4 w-4" />

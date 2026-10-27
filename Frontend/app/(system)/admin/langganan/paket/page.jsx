@@ -161,7 +161,10 @@ export default function PaketSayaPage() {
   }, []);
 
   useEffect(() => {
-    loadData();
+    const timer = setTimeout(() => {
+      loadData();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadData]);
 
   const aktif = useMemo(

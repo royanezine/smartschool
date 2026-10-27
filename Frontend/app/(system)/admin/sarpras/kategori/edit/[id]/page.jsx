@@ -139,7 +139,10 @@ export default function EditKategoriPage() {
   }, [id]);
 
   useEffect(() => {
-    loadKategori();
+    const timer = setTimeout(() => {
+      loadKategori();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadKategori]);
 
 

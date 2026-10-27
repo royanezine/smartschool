@@ -198,15 +198,6 @@ export default function DetailPeminjamanPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const notifications = [
-    {
-      id: 1,
-      title: "Detail Peminjaman",
-      desc: "Detail pengajuan peminjaman",
-      read: false,
-    },
-  ];
-
   useEffect(() => {
     let mounted = true;
 
@@ -268,7 +259,6 @@ export default function DetailPeminjamanPage() {
       <div className="flex min-w-0 flex-1 flex-col">
         <Header
           toggleSidebar={() => setSidebarOpen((v) => !v)}
-          notifications={notifications}
           user={{
             name: "Admin Sekolah",
             email: "admin@smartschool.com",

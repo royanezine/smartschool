@@ -1,11 +1,14 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { getMataPelajaran } from "@/services/mataPelajaran.service";
+import { getKkm, setKkm } from "@/services/pengaturan.service";
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
 
 import {
   Settings2,
+  Loader2,
   Save,
   RefreshCw,
   ChevronDown,
@@ -19,76 +22,6 @@ import {
   Trash2,
   X,
 } from "lucide-react";
-
-
-const initialSubjects = [
-  {
-    id: 1,
-    mapel: "Pemrograman Web",
-    kategori: "Produktif",
-    tugas: 25,
-    uts: 25,
-    uas: 30,
-    praktik: 20,
-    kkm: 75,
-    status: "Aktif",
-  },
-  {
-    id: 2,
-    mapel: "Basis Data",
-    kategori: "Produktif",
-    tugas: 25,
-    uts: 25,
-    uas: 30,
-    praktik: 20,
-    kkm: 75,
-    status: "Aktif",
-  },
-  {
-    id: 3,
-    mapel: "Pemrograman Dasar",
-    kategori: "Produktif",
-    tugas: 30,
-    uts: 25,
-    uas: 25,
-    praktik: 20,
-    kkm: 75,
-    status: "Aktif",
-  },
-  {
-    id: 4,
-    mapel: "Jaringan Komputer",
-    kategori: "Produktif",
-    tugas: 25,
-    uts: 25,
-    uas: 30,
-    praktik: 20,
-    kkm: 75,
-    status: "Aktif",
-  },
-  {
-    id: 5,
-    mapel: "Matematika",
-    kategori: "Umum",
-    tugas: 30,
-    uts: 20,
-    uas: 30,
-    praktik: 20,
-    kkm: 70,
-    status: "Aktif",
-  },
-  {
-    id: 6,
-    mapel: "Bahasa Indonesia",
-    kategori: "Umum",
-    tugas: 30,
-    uts: 20,
-    uas: 30,
-    praktik: 20,
-    kkm: 70,
-    status: "Aktif",
-  },
-];
 
 
 function getTotalWeight(subject) {
@@ -198,25 +131,68 @@ function WeightInput({
 
 
 export default function PengaturanAgregatPage() {
-  const [subjects, setSubjects] = useState(initialSubjects);
+  const [subjects, setSubjects] = useState([]);
+  const [tahunAjaran, setTahunAjaran] = useState("2025/2026");
+  const [semester, setSemester] = useState("Ganjil");
+  const [kategori, setKategori] = useState("Semua");
+  const [search, setSearch] = useState("");
+  const [editingSubject, setEditingSubject] = useState(null);
+  const [saved, setSaved] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
-  const [tahunAjaran, setTahunAjaran] =
-    useState("2025/2026");
+  useEffect(() => {
+    let active = true;
+    const timer = setTimeout(async () => {
+      try {
+        setLoading(true);
+        setErrorMsg("");
+        const [mapelRes, kkmRes] = await Promise.allSettled([
+          getMataPelajaran(),
+          getKkm(),
+        ]);
+        if (!active) return;
+        const mapelList =
+          mapelRes.status === "fulfilled" && Array.isArray(mapelRes.value?.data)
+            ? mapelRes.value.data
+            : [];
+        const kkmData =
+          kkmRes.status === "fulfilled" && kkmRes.value?.data
+            ? kkmRes.value.data
+            : { kkmDefault: 75, kkmPerMapel: {} };
 
-  const [semester, setSemester] =
-    useState("Ganjil");
+        const perMapel = kkmData.kkmPerMapel || {};
+        const defaultKkm = Number(kkmData.kkmDefault) || 75;
 
-  const [kategori, setKategori] =
-    useState("Semua");
+        const mapped = mapelList.map((m, idx) => {
+          const key = (m.nama || "").trim().toLowerCase();
+          const itemKkm = perMapel[key] !== undefined ? perMapel[key] : defaultKkm;
+          return {
+            id: m.id || idx + 1,
+            mapel: m.nama || "Mata Pelajaran",
+            kategori: "Umum",
+            tugas: 25,
+            uts: 25,
+            uas: 30,
+            praktik: 20,
+            kkm: itemKkm,
+            status: m.status === "tidak_aktif" ? "Nonaktif" : "Aktif",
+          };
+        });
+        setSubjects(mapped);
+      } catch (err) {
+        setErrorMsg(err.message || "Gagal memuat data KKM dan mata pelajaran");
+      } finally {
+        if (active) setLoading(false);
+      }
+    }, 0);
 
-  const [search, setSearch] =
-    useState("");
-
-  const [editingSubject, setEditingSubject] =
-    useState(null);
-
-  const [saved, setSaved] =
-    useState(false);
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
+  }, []);
 
 
   const filteredSubjects = useMemo(() => {
@@ -275,12 +251,33 @@ export default function PengaturanAgregatPage() {
   };
 
 
-  const handleSave = () => {
-    setSaved(true);
-
-    setTimeout(() => {
-      setSaved(false);
-    }, 2500);
+  const handleSave = async () => {
+    try {
+      setSaving(true);
+      setErrorMsg("");
+      const perMapel = {};
+      subjects.forEach((s) => {
+        if (s.mapel) {
+          perMapel[s.mapel.trim().toLowerCase()] = Number(s.kkm) || 75;
+        }
+      });
+      const payload = {
+        kkmDefault: 75,
+        kkmPerMapel: perMapel,
+      };
+      await apiFetch("/api/pengaturan/kkm", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      });
+      setSaved(true);
+      setTimeout(() => {
+        setSaved(false);
+      }, 2500);
+    } catch (err) {
+      setErrorMsg(err.message || "Gagal menyimpan pengaturan KKM");
+    } finally {
+      setSaving(false);
+    }
   };
 
 
@@ -358,11 +355,12 @@ export default function PengaturanAgregatPage() {
 
                 <button
                   type="button"
+                  disabled={saving || loading}
                   onClick={handleSave}
-                  className="theme-primary flex h-10 items-center gap-2 rounded-lg px-4 text-sm font-semibold shadow-sm transition"
+                  className="theme-primary flex h-10 items-center gap-2 rounded-lg px-4 text-sm font-semibold shadow-sm transition disabled:opacity-50"
                 >
-                  <Save size={17} />
-                  Simpan Pengaturan
+                  {saving ? <Loader2 size={17} className="animate-spin" /> : <Save size={17} />}
+                  {saving ? "Menyimpan..." : "Simpan Pengaturan"}
                 </button>
               </div>
             </div>
@@ -622,8 +620,18 @@ export default function PengaturanAgregatPage() {
                   </thead>
 
                   <tbody>
-                    {filteredSubjects.map(
-                      (subject, index) => {
+                    {loading ? (
+                      <tr>
+                        <td colSpan={11} className="py-12 text-center text-sm text-[var(--color-text-muted)]">
+                          <div className="flex items-center justify-center gap-2">
+                            <Loader2 className="animate-spin" size={18} />
+                            <span>Memuat data mata pelajaran & KKM...</span>
+                          </div>
+                        </td>
+                      </tr>
+                    ) : (
+                      <>
+                        {filteredSubjects.map((subject, index) => {
                         const total =
                           getTotalWeight(
                             subject
@@ -759,25 +767,8 @@ export default function PengaturanAgregatPage() {
                       }
                     )}
 
-                    {filteredSubjects.length === 0 && (
-                      <tr>
-                        <td
-                          colSpan={11}
-                          className="px-5 py-16 text-center"
-                        >
-                          <div className="theme-card-soft theme-text-muted mx-auto flex h-12 w-12 items-center justify-center rounded-full">
-                            <BookOpen size={21} />
-                          </div>
-
-                          <p className="theme-text-secondary mt-3 text-sm font-semibold">
-                            Mata pelajaran tidak ditemukan
-                          </p>
-
-                          <p className="theme-text-muted mt-1 text-xs">
-                            Coba ubah filter atau kata pencarian.
-                          </p>
-                        </td>
-                      </tr>
+                        {}
+                      </>
                     )}
                   </tbody>
                 </table>

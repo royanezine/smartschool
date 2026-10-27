@@ -592,7 +592,10 @@ export default function SarprasLantaiPage() {
   );
 
   useEffect(() => {
-    setCurrentPage(1);
+    const timer = setTimeout(() => {
+      setCurrentPage(1);
+    }, 0);
+    return () => clearTimeout(timer);
   }, [
     search,
     sortBy,

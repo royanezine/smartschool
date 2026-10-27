@@ -202,7 +202,10 @@ export default function KelolaUserPage() {
   }, [fetchUsers]);
 
   useEffect(() => {
-    setPage(1);
+    const timer = setTimeout(() => {
+      setPage(1);
+    }, 0);
+    return () => clearTimeout(timer);
   }, [search, statusFilter, roleFilter]);
 
 

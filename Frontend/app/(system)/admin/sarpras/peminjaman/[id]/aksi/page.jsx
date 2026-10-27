@@ -171,16 +171,6 @@ function AksiContent() {
   const [kondisiKembali, setKondisiKembali] = useState({});
   const [catatanKembali, setCatatanKembali] = useState({});
 
-  const notifications = [
-    {
-      id: 1,
-      title: config.title,
-      desc: config.subtitle,
-      read: false,
-    },
-  ];
-
-
   useEffect(() => {
     let mounted = true;
 
@@ -354,7 +344,6 @@ function AksiContent() {
           toggleSidebar={() =>
             setSidebarOpen((v) => !v)
           }
-          notifications={notifications}
           user={{
             name: "Admin Sekolah",
             email: "admin@smartschool.com",

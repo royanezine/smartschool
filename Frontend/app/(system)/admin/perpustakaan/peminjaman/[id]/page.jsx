@@ -240,7 +240,10 @@ export default function DetailPeminjamanPage() {
   }, [id]);
 
   useEffect(() => {
-    loadLoan();
+    const timer = setTimeout(() => {
+      loadLoan();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadLoan]);
 
   const confirmReturn = async () => {

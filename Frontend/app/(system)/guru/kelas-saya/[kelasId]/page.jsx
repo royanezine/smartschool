@@ -180,12 +180,15 @@ export default function GuruDetailKelasPage() {
   const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
-    const user = getStoredUser();
-    setTeacher({
-      id: getTeacherId(user),
-      name: getTeacherName(user),
-      email: user?.email || user?.emailPengguna || "",
-    });
+    const timer = setTimeout(() => {
+      const user = getStoredUser();
+      setTeacher({
+        id: getTeacherId(user),
+        name: getTeacherName(user),
+        email: user?.email || user?.emailPengguna || "",
+      });
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   const loadDetail = useCallback(async () => {
@@ -282,7 +285,12 @@ export default function GuruDetailKelasPage() {
   }
 }, [kelasId]);
 
-  useEffect(() => { loadDetail(); }, [loadDetail]);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      loadDetail();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [loadDetail]);
 
   const subjects = useMemo(() => [...new Set(assignments.map(subjectName))], [assignments]);
 const students = useMemo(

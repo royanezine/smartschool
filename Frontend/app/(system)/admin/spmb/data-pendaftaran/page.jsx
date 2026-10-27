@@ -29,36 +29,26 @@ import {
 
 import { getPendaftarPpdb, isPpdbEndpointMissing } from "@/services/ppdb.service";
 import { getJalurPpdb } from "@/services/jalurPpdb.service";
+import {
+  formatTanggal,
+  normalisasiStatusPendaftaran,
+  statusPendaftaranKeApi,
+} from "@/lib/spmb";
 
 const LIMIT_PENDAFTAR = 10;
 
-function keStatusApi(label) {
-  const value = String(label || "").toLowerCase();
-
-  if (value === "terverifikasi") {
-    return "lulus";
+function angkaAtauNull(value) {
+  if (
+    value === undefined ||
+    value === null ||
+    value === "" ||
+    !Number.isFinite(Number(value))
+  ) {
+    return null;
   }
 
-  if (value === "ditolak") {
-    return "ditolak";
-  }
-
-  if (value === "menunggu verifikasi") {
-    return "menunggu";
-  }
-
-  return undefined;
+  return Number(value);
 }
-
-async function hitungStatistikPpdb() {
-  return {
-    total: null,
-    menunggu: null,
-    lulus: null,
-    ditolak: null,
-  };
-}
-
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -93,38 +83,6 @@ const themeSmallShadow =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-
-function normalizeStatus(status) {
-  const value = String(status || "").toLowerCase();
-
-  if (value === "lulus") {
-    return "Terverifikasi";
-  }
-
-  if (value === "ditolak") {
-    return "Ditolak";
-  }
-
-  return "Menunggu Verifikasi";
-}
-
-function formatTanggal(value) {
-  if (!value) {
-    return "-";
-  }
-
-  const date = new Date(value);
-
-  if (Number.isNaN(date.getTime())) {
-    return "-";
-  }
-
-  return date.toLocaleDateString("id-ID", {
-    day: "2-digit",
-    month: "long",
-    year: "numeric",
-  });
-}
 
 function StatusBadge({ status }) {
   const config = {
@@ -201,26 +159,23 @@ export default function PendaftaranPage() {
           setLoading(true);
         }
 
-        const [response, statistikBackend] = await Promise.all([
-          getPendaftarPpdb({
-            search: search.trim() || undefined,
-            jalurPpdbId:
-              jalur === "Semua" ? undefined : jalur,
-            status:
-              status === "Semua"
-                ? undefined
-                : keStatusApi(status),
-            page,
-            limit: LIMIT_PENDAFTAR,
-          }),
-          hitungStatistikPpdb(),
-        ]);
+        const response = await getPendaftarPpdb({
+          search: search.trim() || undefined,
+          jalurPpdbId:
+            jalur === "Semua" ? undefined : jalur,
+          status:
+            status === "Semua"
+              ? undefined
+              : statusPendaftaranKeApi(status),
+          page,
+          limit: LIMIT_PENDAFTAR,
+        });
 
-        setData(
-          Array.isArray(response?.data)
-            ? response.data
-            : []
-        );
+        const daftar = Array.isArray(response?.data)
+          ? response.data
+          : [];
+
+        setData(daftar);
 
         const pagination =
           response?.pagination ||
@@ -250,7 +205,22 @@ export default function PendaftaranPage() {
             pagination.hasPrev ?? page > 1,
         });
 
-        setStatistik(statistikBackend);
+        const statistikResponse = response?.statistik;
+
+        setStatistik({
+          total:
+            angkaAtauNull(statistikResponse?.total) ??
+            total,
+          menunggu: angkaAtauNull(
+            statistikResponse?.menunggu
+          ),
+          lulus: angkaAtauNull(
+            statistikResponse?.lulus
+          ),
+          ditolak: angkaAtauNull(
+            statistikResponse?.ditolak
+          ),
+        });
       } catch (err) {
         setData([]);
         setMeta({
@@ -333,9 +303,9 @@ export default function PendaftaranPage() {
       tanggal: formatTanggal(
         item?.dibuatPada
       ),
-      statusLabel: normalizeStatus(
+      statusLabel: normalisasiStatusPendaftaran(
         item?.status
-      ),
+      ).label,
     }));
   }, [data]);
 
@@ -490,7 +460,7 @@ export default function PendaftaranPage() {
                   </h1>
 
                   <p className="theme-text-muted text-xs">
-                    Formulir pendaftaran tersedia; daftar pendaftar belum dapat dimuat.
+                    Daftar, detail, dan verifikasi pendaftar SPMB.
                   </p>
                 </div>
               </div>
@@ -541,13 +511,13 @@ export default function PendaftaranPage() {
 
                   <p className="theme-text-secondary mt-0.5 text-xs">
                     {isEndpointUnavailable
-                      ? "Endpoint baca daftar pendaftar belum tersedia di Backend, sehingga data tidak ditampilkan."
+                      ? "Server Backend yang berjalan mengembalikan 404 untuk GET /api/ppdb/pendaftar, sehingga daftar belum dapat ditampilkan."
                       : error}
                   </p>
 
                   {isEndpointUnavailable && (
                     <p className="mt-1 text-[11px] theme-text-muted">
-                      Backend saat ini belum menyediakan rute GET /api/ppdb/pendaftar. Penambahan calon siswa baru tetap dapat dilakukan melalui tombol Tambah Pendaftar.
+                      Artefak build Backend/dist sudah memuat handler daftar pendaftar. Data akan tampil setelah server yang berjalan memakai build tersebut atau sumbernya disinkronkan. Penambahan calon siswa baru tetap dapat dilakukan melalui tombol Tambah Pendaftar.
                     </p>
                   )}
                 </div>
@@ -735,11 +705,11 @@ export default function PendaftaranPage() {
                       </h3>
 
                       <p className="theme-text-secondary mt-1 text-xs leading-5">
-                        Endpoint baca daftar pendaftar belum tersedia di Backend.
+                        Endpoint baca daftar pendaftar belum aktif pada server Backend yang berjalan (404).
                       </p>
 
                       <p className="theme-text-muted mt-2 text-[11px] leading-4">
-                        Fitur pengelolaan data pendaftar memerlukan rute API <code>GET /api/ppdb/pendaftar</code>. Seluruh kontrol data pendaftar dinonaktifkan sementara hingga endpoint backend disediakan.
+                        Fitur pengelolaan data pendaftar memerlukan rute API <code>GET /api/ppdb/pendaftar</code>. Artefak Backend/dist sudah memuat rute tersebut, tetapi server yang berjalan belum. Seluruh kontrol data pendaftar dinonaktifkan sampai endpoint aktif.
                       </p>
 
                       <button
@@ -800,7 +770,7 @@ export default function PendaftaranPage() {
 
                       <p className="theme-text-muted mt-1 text-xs max-w-md mx-auto">
                         {isEndpointUnavailable
-                          ? "Server backend saat ini belum menyediakan endpoint daftar pendaftar (GET /api/ppdb/pendaftar). Pendaftaran baru tetap dapat diproses melalui formulir Tambah Pendaftar."
+                          ? "Server Backend yang berjalan belum menyediakan endpoint daftar pendaftar (GET /api/ppdb/pendaftar). Pendaftaran baru tetap dapat diproses melalui formulir Tambah Pendaftar."
                           : "Belum ada calon siswa yang mendaftar atau tidak ada data yang sesuai dengan filter."}
                       </p>
                     </div>

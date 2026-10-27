@@ -366,11 +366,17 @@ export default function SPPPage() {
   ]);
 
   useEffect(() => {
-    loadMaster();
+    const timer = setTimeout(() => {
+      loadMaster();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadMaster]);
 
   useEffect(() => {
-    loadTagihan();
+    const timer = setTimeout(() => {
+      loadTagihan();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadTagihan]);
 
 

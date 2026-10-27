@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
@@ -17,7 +17,6 @@ import {
   Building2,
   BadgeCheck,
   Pencil,
-  Camera,
   User,
   Cake,
   Venus,
@@ -28,142 +27,6 @@ import {
 } from "lucide-react";
 
 
-const MOCK_PEGAWAI = [
-  {
-    id: 1,
-    nama: "Sarah Amelia, S.Pd",
-    nip: "198501152010012001",
-    nik: "3272011501850002",
-    tipe: "Guru",
-    jabatan: "Guru Matematika",
-    level: "Guru",
-    status: "aktif",
-    unit: "Mata Pelajaran Matematika",
-    telp: "0812-3456-7890",
-    email: "sarah.amelia@smartschool.sch.id",
-    alamat: "Jl. Merdeka No. 12, Tasikmalaya",
-    tglMasuk: "15 Jan 2010",
-    golongan: "III/c",
-    tempatLahir: "Tasikmalaya",
-    tglLahir: "15 Jan 1985",
-    jenisKelamin: "Perempuan",
-    agama: "Islam",
-    statusNikah: "Menikah",
-    pendidikanTerakhir: "S1 Pendidikan Matematika — Universitas Siliwangi",
-  },
-  {
-    id: 2,
-    nama: "Budi Santoso, S.E",
-    nip: "197803102005011003",
-    nik: "3272011003780003",
-    tipe: "Staff",
-    jabatan: "Tata Usaha",
-    level: "Staff",
-    status: "aktif",
-    unit: "Administrasi & Keuangan",
-    telp: "0813-2233-4455",
-    email: "budi.santoso@smartschool.sch.id",
-    alamat: "Jl. Cihideung No. 5, Tasikmalaya",
-    tglMasuk: "10 Mar 2005",
-    golongan: "III/a",
-    tempatLahir: "Ciamis",
-    tglLahir: "10 Mar 1978",
-    jenisKelamin: "Laki-laki",
-    agama: "Islam",
-    statusNikah: "Menikah",
-    pendidikanTerakhir: "S1 Ekonomi — Universitas Galuh",
-  },
-  {
-    id: 3,
-    nama: "Dewi Anggraini, S.Si",
-    nip: "199002202015022004",
-    nik: "3272016002900004",
-    tipe: "Guru",
-    jabatan: "Guru IPA",
-    level: "Guru",
-    status: "aktif",
-    unit: "Mata Pelajaran IPA",
-    telp: "0821-9988-7766",
-    email: "dewi.anggraini@smartschool.sch.id",
-    alamat: "Jl. Sutisna Senjaya No. 88, Tasikmalaya",
-    tglMasuk: "20 Feb 2015",
-    golongan: "III/b",
-    tempatLahir: "Tasikmalaya",
-    tglLahir: "20 Feb 1990",
-    jenisKelamin: "Perempuan",
-    agama: "Islam",
-    statusNikah: "Belum Menikah",
-    pendidikanTerakhir: "S1 Biologi — Universitas Siliwangi",
-  },
-  {
-    id: 4,
-    nama: "Andi Prasetyo, S.Pd",
-    nip: "198712052012011002",
-    nik: "3272010512870005",
-    tipe: "Guru",
-    jabatan: "Guru Bahasa Indonesia",
-    level: "Guru",
-    status: "nonaktif",
-    unit: "Mata Pelajaran Bahasa Indonesia",
-    telp: "0857-1122-3344",
-    email: "andi.prasetyo@smartschool.sch.id",
-    alamat: "Jl. Yudanegara No. 21, Tasikmalaya",
-    tglMasuk: "05 Des 2012",
-    golongan: "III/a",
-    tempatLahir: "Garut",
-    tglLahir: "05 Des 1987",
-    jenisKelamin: "Laki-laki",
-    agama: "Islam",
-    statusNikah: "Menikah",
-    pendidikanTerakhir: "S1 Pendidikan Bahasa Indonesia — Universitas Galuh",
-  },
-  {
-    id: 5,
-    nama: "Nina Kartika, S.Sn",
-    nip: "199105182018022005",
-    nik: "3272015805910006",
-    tipe: "Guru",
-    jabatan: "Guru Seni Budaya",
-    level: "Guru",
-    status: "aktif",
-    unit: "Mata Pelajaran Seni Budaya",
-    telp: "0878-5566-7788",
-    email: "nina.kartika@smartschool.sch.id",
-    alamat: "Jl. Ir. H. Djuanda No. 40, Tasikmalaya",
-    tglMasuk: "18 Mei 2018",
-    golongan: "III/a",
-    tempatLahir: "Bandung",
-    tglLahir: "18 Mei 1991",
-    jenisKelamin: "Perempuan",
-    agama: "Islam",
-    statusNikah: "Belum Menikah",
-    pendidikanTerakhir: "S1 Seni Rupa — Institut Seni Budaya Indonesia",
-  },
-  {
-    id: 6,
-    nama: "Rudi Hartono, S.Pd",
-    nip: "198309252008011006",
-    nik: "3272012509830007",
-    tipe: "Staff",
-    jabatan: "Petugas Sarana Prasarana",
-    level: "Staff",
-    status: "aktif",
-    unit: "Sarana & Prasarana",
-    telp: "0896-4433-2211",
-    email: "rudi.hartono@smartschool.sch.id",
-    alamat: "Jl. Cieunteung No. 9, Tasikmalaya",
-    tglMasuk: "25 Sep 2008",
-    golongan: "II/d",
-    tempatLahir: "Tasikmalaya",
-    tglLahir: "25 Sep 1983",
-    jenisKelamin: "Laki-laki",
-    agama: "Islam",
-    statusNikah: "Menikah",
-    pendidikanTerakhir: "S1 Pendidikan Jasmani — Universitas Galuh",
-  },
-];
-
-const PHOTO_KEY_PREFIX = "ki_foto_";
 
 function getInitials(nama) {
   return nama
@@ -217,74 +80,33 @@ function FotoPlaceholder() {
   );
 }
 
-function FotoProfil({ pegawaiId, editable = false }) {
-  const [foto, setFoto] = useState(null);
-  const [loaded, setLoaded] = useState(false);
-  const fileInputRef = useRef(null);
+function getAvatarUrl(avatar) {
+  if (!avatar || typeof avatar !== "string") return null;
+  if (/^(https?:|data:)/i.test(avatar)) return avatar;
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      try {
-        const saved = window.localStorage.getItem(`${PHOTO_KEY_PREFIX}${pegawaiId}`);
-        if (saved) setFoto(saved);
-      } catch (err) {
-        console.error("Gagal memuat foto pegawai:", err);
-      } finally {
-        setLoading(false);
-      }
-    }, 0);
+  const baseUrl = (
+    process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
+  ).replace(/\/+$/, "");
 
-    return () => clearTimeout(timer);
-  }, [pegawaiId]);
+  return `${baseUrl}/${avatar.replace(/^\/+/, "")}`;
+}
 
-  const handlePilihFoto = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleFotoChange = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      const dataUrl = reader.result;
-      setFoto(dataUrl);
-      try {
-        window.localStorage.setItem(`${PHOTO_KEY_PREFIX}${pegawaiId}`, dataUrl);
-      } catch (err) {
-        console.error("Gagal menyimpan foto pegawai:", err);
-      }
-    };
-    reader.readAsDataURL(file);
-  };
+function FotoProfil({ nama, avatar }) {
+  const avatarUrl = getAvatarUrl(avatar);
 
   return (
     <div className="relative w-24 h-24 sm:w-28 sm:h-28 shrink-0">
       <div className="w-full h-full rounded-2xl overflow-hidden shadow-[0_10px_30px_color-mix(in_srgb,var(--color-text)_14%,transparent)] border-2 border-[var(--color-card)] ring-1 ring-[var(--color-border)]">
-        {loaded && foto ? (
-          <img src={foto} alt="Foto profil" className="w-full h-full object-cover" />
+        {avatarUrl ? (
+          <img
+            src={avatarUrl}
+            alt={`Foto profil ${nama}`}
+            className="w-full h-full object-cover"
+          />
         ) : (
           <FotoPlaceholder />
         )}
       </div>
-      {editable && (
-        <>
-          <button
-            type="button"
-            onClick={handlePilihFoto}
-            title="Ubah foto"
-            className="absolute -bottom-1.5 -right-1.5 w-8 h-8 rounded-full theme-primary flex items-center justify-center shadow-[0_1px_3px_color-mix(in_srgb,var(--color-text)_8%,transparent)] transition-colors"
-          >
-            <Camera size={14} />
-          </button>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            onChange={handleFotoChange}
-            className="hidden"
-          />
-        </>
-      )}
     </div>
   );
 
@@ -327,22 +149,36 @@ export default function DetailPegawaiPage() {
             nip: data.nip || "-",
             nuptk: data.nuptk || "-",
             nik: data.nik || "-",
-            tipe: data.jabatan ? (data.jabatan.toLowerCase().includes("guru") ? "Guru" : "Staff") : "Guru",
-            jabatan: data.jabatan || "Tenaga Pendidik",
+            tipe:
+              String(data.peran?.nama).toLowerCase() === "guru"
+                ? "Guru"
+                : data.peran?.namaTampilan || "-",
+            jabatan: data.jabatan || "-",
             status: data.status || "aktif",
             email: data.email || "-",
             telp: data.noTelepon || "-",
             alamat: data.alamat || data.alamatDomisili || "-",
-            jenisKelamin: data.jenisKelamin === "L" || data.jenisKelamin === "Laki-laki" ? "Laki-laki" : "Perempuan",
+            jenisKelamin:
+              data.jenisKelamin === "L" ||
+              data.jenisKelamin === "Laki-laki"
+                ? "Laki-laki"
+                : data.jenisKelamin === "P" ||
+                    data.jenisKelamin === "Perempuan"
+                  ? "Perempuan"
+                  : "-",
             tempatLahir: data.tempatLahir || "-",
-            tglLahir: data.tanggalLahir ? new Date(data.tanggalLahir).toLocaleDateString("id-ID") : "-",
+            tglLahir: data.tanggalLahir
+              ? new Date(data.tanggalLahir).toLocaleDateString("id-ID")
+              : "-",
             agama: data.agama || "-",
             statusNikah: "-",
             pendidikanTerakhir: "-",
-            unit: "Unit Pendidikan",
+            unit: data.jabatan || "-",
             golongan: data.golongan || "-",
-            level: "-",
-            tglMasuk: data.dibuatPada ? new Date(data.dibuatPada).toLocaleDateString("id-ID") : "-",
+            level: data.peran?.namaTampilan || "-",
+            tglMasuk: data.dibuatPada
+              ? new Date(data.dibuatPada).toLocaleDateString("id-ID")
+              : "-",
             avatar: data.avatar || null,
           });
         }
@@ -366,7 +202,7 @@ export default function DetailPegawaiPage() {
 
   const handleEdit = () => {
     if (pegawai?.id) {
-      router.push(`/admin/guru/edit/${pegawai.id}`);
+      router.push(`/admin/guru/kartu-identitas/edit?id=${pegawai.id}`);
     }
   };
 
@@ -461,7 +297,7 @@ export default function DetailPegawaiPage() {
 
             <div className="theme-card theme-border rounded-xl border shadow-[0_1px_3px_color-mix(in_srgb,var(--color-text)_8%,transparent)] p-5 sm:p-6">
               <div className="flex flex-col sm:flex-row sm:items-center gap-5">
-                <FotoProfil pegawaiId={pegawai.id} editable />
+                <FotoProfil nama={pegawai.nama} avatar={pegawai.avatar} />
                 <div className="flex-1 min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <h1 className="text-xl font-bold theme-text">{pegawai.nama}</h1>

@@ -536,15 +536,18 @@ export default function KalenderGuruPage() {
   ] = useState("all");
 
   useEffect(() => {
-    const user =
-      getCurrentUserFromToken();
+    const timer = setTimeout(() => {
+      const user =
+        getCurrentUserFromToken();
 
-    console.log(
-      "[KALENDER GURU] USER LOGIN:",
-      user
-    );
+      console.log(
+        "[KALENDER GURU] USER LOGIN:",
+        user
+      );
 
-    setCurrentUser(user);
+      setCurrentUser(user);
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   const loadSchedules =
@@ -708,7 +711,10 @@ export default function KalenderGuruPage() {
     };
 
   useEffect(() => {
-    loadSchedules();
+    const timer = setTimeout(() => {
+      loadSchedules();
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   const today = new Date();

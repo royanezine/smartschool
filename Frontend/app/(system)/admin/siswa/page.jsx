@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
 import { getKelas, getKelasById } from "@/services/kelas.service";
+import { getUsers, deleteUser } from "@/services/user.service";
 
 import {
   Users,
@@ -26,7 +27,6 @@ import {
   IdCard,
 } from "lucide-react";
 
-import { apiFetch } from "../../../../lib/api";
 
 
 const themePrimaryGradient =
@@ -264,10 +264,7 @@ const loadSiswa = useCallback(async (isRefresh = false) => {
 
     setError("");
 
-    const response = await apiFetch(
-      "/api/users?role=siswa&page=1&limit=1000",
-      { method: "GET" }
-    );
+    const response = await getUsers({ role: "siswa", page: 1, limit: 1000 });
 
     const result =
       response && typeof response.json === "function"
@@ -410,10 +407,7 @@ const loadSiswa = useCallback(async (isRefresh = false) => {
       setLoadingKelas(true);
       setErrorKelas("");
 
-      const response = await apiFetch(
-        "/api/kelas?page=1&limit=1000",
-        { method: "GET" }
-      );
+      const response = await getKelas({ page: 1, limit: 1000 });
 
       const result =
         response && typeof response.json === "function"
@@ -443,8 +437,11 @@ const loadSiswa = useCallback(async (isRefresh = false) => {
   }, []);
 
   useEffect(() => {
-    loadSiswa();
-    loadDaftarKelas();
+    const timer = setTimeout(() => {
+      loadSiswa();
+      loadDaftarKelas();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadSiswa, loadDaftarKelas]);
 
 
@@ -565,11 +562,19 @@ const loadSiswa = useCallback(async (isRefresh = false) => {
   const currentItems = sorted.slice(startIndex, endIndex);
 
   useEffect(() => {
-    setCurrentPage(1);
+    const timer = setTimeout(() => {
+      setCurrentPage(1);
+    }, 0);
+    return () => clearTimeout(timer);
   }, [search, filterStatus, filterKelas, sortBy, itemsPerPage]);
 
   useEffect(() => {
-    if (currentPage > totalPages) setCurrentPage(totalPages);
+    if (currentPage > totalPages) {
+      const timer = setTimeout(() => {
+        setCurrentPage(totalPages);
+      }, 0);
+      return () => clearTimeout(timer);
+    }
   }, [currentPage, totalPages]);
 
   const goToPage = (page) => {
@@ -595,9 +600,7 @@ const loadSiswa = useCallback(async (isRefresh = false) => {
       setDeleting(true);
       setError("");
 
-      const response = await apiFetch(`/api/users/${id}`, {
-        method: "DELETE",
-      });
+      const response = await deleteUser(id);
 
       if (response?.ok === false) {
         const result = await response.json().catch(() => ({}));
@@ -1500,7 +1503,7 @@ const loadSiswa = useCallback(async (isRefresh = false) => {
                 Apakah kamu yakin ingin menghapus data siswa
                 <br />
                 <span className="theme-text font-semibold">
-                  "{deleteModal.nama}"
+                  &quot;{deleteModal.nama}&quot;
                 </span>
                 ?
               </p>

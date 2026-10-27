@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import {
   ClipboardCheck,
   Search,
@@ -16,8 +16,11 @@ import {
   BarChart3,
   ChevronRight,
   Minus,
+  Loader2,
+  AlertCircle,
+  RefreshCw,
 } from "lucide-react";
-
+import { getMonitoringAkademik } from "@/services/yayasan.service";
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -73,7 +76,6 @@ const themeDangerBorder =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-
 const JENJANG_OPTIONS = [
   "Semua Jenjang",
   "SD",
@@ -92,115 +94,6 @@ const STATUS_OPTIONS = [
   "Baik",
   "Perlu Perhatian",
   "Kritis",
-];
-
-const dataSekolah = [
-  {
-    id: 1,
-    nama: "SD Smart School 1",
-    jenjang: "SD",
-    rataRataNilai: 84,
-    trend: "up",
-    perubahan: 2.1,
-    kehadiran: 96,
-    mapelLemah: null,
-    siswaPerluPerhatian: 6,
-    totalSiswa: 612,
-    status: "Baik",
-  },
-  {
-    id: 2,
-    nama: "SD Smart School 2",
-    jenjang: "SD",
-    rataRataNilai: 79,
-    trend: "up",
-    perubahan: 1.4,
-    kehadiran: 93,
-    mapelLemah: null,
-    siswaPerluPerhatian: 11,
-    totalSiswa: 548,
-    status: "Baik",
-  },
-  {
-    id: 3,
-    nama: "SMP Smart School 1",
-    jenjang: "SMP",
-    rataRataNilai: 76,
-    trend: "down",
-    perubahan: -0.8,
-    kehadiran: 90,
-    mapelLemah: "Matematika",
-    siswaPerluPerhatian: 24,
-    totalSiswa: 734,
-    status: "Baik",
-  },
-  {
-    id: 4,
-    nama: "SMP Smart School 2",
-    jenjang: "SMP",
-    rataRataNilai: 68,
-    trend: "down",
-    perubahan: -3.2,
-    kehadiran: 82,
-    mapelLemah: "IPA",
-    siswaPerluPerhatian: 47,
-    totalSiswa: 689,
-    status: "Perlu Perhatian",
-  },
-  {
-    id: 5,
-    nama: "SMA Smart School 1",
-    jenjang: "SMA",
-    rataRataNilai: 81,
-    trend: "up",
-    perubahan: 0.6,
-    kehadiran: 91,
-    mapelLemah: null,
-    siswaPerluPerhatian: 18,
-    totalSiswa: 812,
-    status: "Baik",
-  },
-  {
-    id: 6,
-    nama: "SMA Smart School 2",
-    jenjang: "SMA",
-    rataRataNilai: 59,
-    trend: "down",
-    perubahan: -4.5,
-    kehadiran: 74,
-    mapelLemah: "Matematika",
-    siswaPerluPerhatian: 63,
-    totalSiswa: 917,
-    status: "Kritis",
-  },
-];
-
-const mapelOverview = [
-  {
-    mapel: "Matematika",
-    rataRata: 71,
-    target: 75,
-  },
-  {
-    mapel: "Bahasa Indonesia",
-    rataRata: 79,
-    target: 75,
-  },
-  {
-    mapel: "IPA",
-    rataRata: 70,
-    target: 75,
-  },
-  {
-    mapel: "IPS",
-    rataRata: 76,
-    target: 75,
-  },
-  {
-    mapel: "Bahasa Inggris",
-    rataRata: 74,
-    target: 75,
-  },
 ];
 
 
@@ -253,7 +146,62 @@ export default function MonitoringAkademikPage() {
   );
   const [status, setStatus] = useState(STATUS_OPTIONS[0]);
   const [search, setSearch] = useState("");
+  const [dataSekolah, setDataSekolah] = useState([]);
+  const [mapelOverview, setMapelOverview] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
+  const fetchMonitoring = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await getMonitoringAkademik();
+      const list = Array.isArray(res?.data?.items)
+        ? res.data.items
+        : Array.isArray(res?.data)
+        ? res.data
+        : [];
+      setDataSekolah(list);
+      if (Array.isArray(res?.data?.mapelOverview)) {
+        setMapelOverview(res.data.mapelOverview);
+      }
+    } catch (err) {
+      setError(err?.message || "Gagal memuat monitoring akademik yayasan.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      try {
+        const res = await getMonitoringAkademik();
+        if (cancelled) return;
+        const list = Array.isArray(res?.data?.items)
+          ? res.data.items
+          : Array.isArray(res?.data)
+          ? res.data
+          : [];
+        setDataSekolah(list);
+        if (Array.isArray(res?.data?.mapelOverview)) {
+          setMapelOverview(res.data.mapelOverview);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setError(err?.message || "Gagal memuat monitoring akademik yayasan.");
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    }
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const filteredSekolah = useMemo(() => {
     return dataSekolah
@@ -269,7 +217,7 @@ export default function MonitoringAkademikPage() {
         const matchSearch =
           !search.trim() ||
           s.nama
-            .toLowerCase()
+            ?.toLowerCase()
             .includes(search.toLowerCase());
 
         return (
@@ -282,7 +230,7 @@ export default function MonitoringAkademikPage() {
         (a, b) =>
           b.rataRataNilai - a.rataRataNilai
       );
-  }, [jenjang, status, search]);
+  }, [dataSekolah, jenjang, status, search]);
 
 
   const summary = useMemo(() => {

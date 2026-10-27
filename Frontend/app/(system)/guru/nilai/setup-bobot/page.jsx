@@ -13,27 +13,13 @@ import {
   Info,
   Loader2,
   LockKeyhole,
-  Plus,
   RefreshCw,
   SlidersHorizontal,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
-import {
-  createKomponenNilai,
-  getKomponenNilai,
-  getNilaiKelasSaya,
-} from "@/services/nilai.service";
-
-const JENIS_KOMPONEN = [
-  { value: "tugas", label: "Tugas" },
-  { value: "kuis", label: "Kuis" },
-  { value: "uts", label: "UTS" },
-  { value: "uas", label: "UAS" },
-  { value: "praktik", label: "Praktik" },
-  { value: "lainnya", label: "Lainnya" },
-];
+import { getKomponenNilai, getNilaiKelasSaya } from "@/services/nilai.service";
 
 const formatPercent = (value) => `${Number(value) || 0}%`;
 
@@ -52,15 +38,8 @@ export default function SetupBobotPage() {
 
   const [loadingClasses, setLoadingClasses] = useState(true);
   const [loadingKomponen, setLoadingKomponen] = useState(false);
-  const [adding, setAdding] = useState(false);
 
   const [error, setError] = useState("");
-  const [feedback, setFeedback] = useState(null);
-
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [newName, setNewName] = useState("");
-  const [newJenis, setNewJenis] = useState("tugas");
-  const [newWeight, setNewWeight] = useState("");
 
   const loadClasses = useCallback(async () => {
     setLoadingClasses(true);
@@ -139,18 +118,22 @@ export default function SetupBobotPage() {
     (item) => item.kelasMapelId === selectedClassId
   );
 
-  const components = komponenData.komponen;
+  const components = useMemo(
+    () => (Array.isArray(komponenData?.komponen) ? komponenData.komponen : []),
+    [komponenData]
+  );
 
-  const totalWeight = komponenData.totalBobot;
-  const sisaBobot = 100 - totalWeight;
+  const totalWeight = Number(komponenData?.totalBobot) || 0;
+  const sisaBobot =
+    typeof komponenData?.sisaBobot === "number"
+      ? komponenData.sisaBobot
+      : Math.max(0, Math.round((100 - totalWeight) * 100) / 100);
 
   const isFinalized =
     komponenData.status === "final" || selectedClass?.status === "final";
 
   const isValid =
     components.length > 0 && totalWeight === 100 && !isFinalized;
-
-  const canAdd = !isFinalized && sisaBobot > 0;
 
   const simulasiNilai = useMemo(
     () =>
@@ -166,94 +149,6 @@ export default function SetupBobotPage() {
         selectedClass.kelas?.nama || "-"
       }`
     : "Pilih mata pelajaran";
-
-  const handleAddComponent = async () => {
-    if (!selectedClassId) {
-      setFeedback({
-        type: "error",
-        message: "Pilih kelas dan mata pelajaran terlebih dahulu.",
-      });
-      return;
-    }
-
-    const name = newName.trim();
-    const weight = Number(newWeight);
-
-    if (!name) {
-      setFeedback({
-        type: "error",
-        message: "Nama komponen penilaian wajib diisi.",
-      });
-      return;
-    }
-
-    if (
-      components.some(
-        (component) =>
-          component.nama.toLowerCase() === name.toLowerCase()
-      )
-    ) {
-      setFeedback({
-        type: "error",
-        message: "Nama komponen tersebut sudah digunakan pada kelas ini.",
-      });
-      return;
-    }
-
-    if (!Number.isFinite(weight) || weight <= 0 || weight > 100) {
-      setFeedback({
-        type: "error",
-        message: "Bobot harus berada di antara 0–100%.",
-      });
-      return;
-    }
-
-    if (weight > sisaBobot) {
-      setFeedback({
-        type: "error",
-        message: `Bobot melebihi sisa yang tersedia. Sisa bobot saat ini ${formatPercent(
-          sisaBobot
-        )}.`,
-      });
-      return;
-    }
-
-    setAdding(true);
-    setFeedback(null);
-
-    try {
-      await createKomponenNilai({
-        kelasMapelId: selectedClassId,
-        nama: name,
-        jenis: newJenis,
-        bobot: weight,
-        nilaiMaksimum: 100,
-        kelompok: "umum",
-      });
-
-      setNewName("");
-      setNewJenis("tugas");
-      setNewWeight("");
-      setShowAddForm(false);
-
-      await loadKomponen(selectedClassId);
-
-      setFeedback({
-        type: "success",
-        message: `Komponen "${name}" berhasil ditambahkan.`,
-      });
-    } catch (err) {
-      console.error("Gagal menambah komponen nilai:", err);
-      setFeedback({
-        type: "error",
-        message:
-          err?.message ||
-          "Gagal menambah komponen nilai. Periksa kembali data yang diisi.",
-      });
-    } finally {
-      setAdding(false);
-    }
-  };
 
   const showLoading = loadingClasses || loadingKomponen;
 
@@ -293,9 +188,9 @@ export default function SetupBobotPage() {
                 </div>
 
                 <p className="theme-text-secondary mt-3 max-w-2xl text-sm leading-6">
-                  Kelola komponen penilaian untuk setiap kelas dan mata
-                  pelajaran. Pastikan total bobot mencapai 100% sebelum
-                  finalisasi nilai.
+                  Tinjau komponen penilaian dan bobot aktual yang tersimpan di
+                  backend untuk setiap kelas dan mata pelajaran. Pastikan total
+                  bobot mencapai 100% sebelum finalisasi nilai.
                 </p>
               </div>
 
@@ -313,12 +208,12 @@ export default function SetupBobotPage() {
 
                 <button
                   type="button"
-                  onClick={() => setShowAddForm((current) => !current)}
-                  disabled={!canAdd || showLoading}
+                  onClick={() => loadKomponen(selectedClassId)}
+                  disabled={showLoading || !selectedClassId}
                   className="inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--color-primary)] px-4 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  <Plus size={16} />
-                  Tambah komponen
+                  <RefreshCw size={16} />
+                  Muat ulang data
                 </button>
               </div>
             </div>
@@ -346,44 +241,12 @@ export default function SetupBobotPage() {
               </div>
             )}
 
-            {feedback && (
-              <div
-                role="status"
-                className={`mb-6 flex items-start gap-3 rounded-xl border p-4 ${
-                  feedback.type === "success"
-                    ? "border-[color-mix(in_srgb,var(--color-success)_25%,transparent)] bg-[color-mix(in_srgb,var(--color-success)_8%,transparent)]"
-                    : "border-[color-mix(in_srgb,var(--color-danger)_25%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_8%,transparent)]"
-                }`}
-              >
-                {feedback.type === "success" ? (
-                  <Check
-                    size={18}
-                    className="mt-0.5 shrink-0 text-[var(--color-success)]"
-                  />
-                ) : (
-                  <AlertTriangle
-                    size={18}
-                    className="mt-0.5 shrink-0 text-[var(--color-danger)]"
-                  />
-                )}
-                <p
-                  className={`text-sm leading-6 ${
-                    feedback.type === "success"
-                      ? "text-[var(--color-success)]"
-                      : "text-[var(--color-danger)]"
-                  }`}
-                >
-                  {feedback.message}
-                </p>
-              </div>
-            )}
-
-            <section className="mb-7 grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <section className="mb-7 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <article className="theme-card rounded-xl border border-[color-mix(in_srgb,var(--color-text)_10%,transparent)] p-5">
                 <div className="flex items-start justify-between">
                   <div>
                     <p className="theme-text-secondary text-sm">
-                      Komponen penilaian
+                      Total komponen
                     </p>
                     <p className="theme-text mt-2 text-3xl font-bold">
                       {showLoading ? "—" : components.length}
@@ -395,7 +258,7 @@ export default function SetupBobotPage() {
                   />
                 </div>
                 <p className="theme-text-secondary mt-3 text-xs">
-                  Komponen aktif untuk kelas-mapel ini
+                  Komponen aktif di database
                 </p>
               </article>
 
@@ -421,10 +284,33 @@ export default function SetupBobotPage() {
                     className="h-full rounded-full transition-all"
                     style={{
                       width: `${Math.min(Math.max(totalWeight, 0), 100)}%`,
-                      backgroundColor: isValid ? "#0D9488" : "#2563EB",
+                      backgroundColor: totalWeight === 100 ? "#0D9488" : "#2563EB",
                     }}
                   />
                 </div>
+              </article>
+
+              <article className="theme-card rounded-xl border border-[color-mix(in_srgb,var(--color-text)_10%,transparent)] p-5">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="theme-text-secondary text-sm">
+                      Sisa kuota bobot
+                    </p>
+                    <p className="theme-text mt-2 text-3xl font-bold">
+                      {showLoading ? "—" : sisaBobot}
+                      <span className="ml-1 text-base font-medium">%</span>
+                    </p>
+                  </div>
+                  <SlidersHorizontal
+                    size={19}
+                    className="text-[var(--color-primary)]"
+                  />
+                </div>
+                <p className="theme-text-secondary mt-3 text-xs">
+                  {sisaBobot === 0
+                    ? "Seluruh kuota bobot 100% sudah terpakai"
+                    : `Sisa ${sisaBobot}% belum dialokasikan pada komponen`}
+                </p>
               </article>
 
               <article className="theme-card rounded-xl border border-[color-mix(in_srgb,var(--color-text)_10%,transparent)] p-5">
@@ -467,14 +353,10 @@ export default function SetupBobotPage() {
                   {showLoading
                     ? "Mengambil komponen dari backend..."
                     : isFinalized
-                      ? "Nilai sudah difinalisasi sehingga komponen tidak dapat ditambah."
+                      ? "Nilai sudah difinalisasi dan konfigurasi terkunci."
                       : isValid
-                        ? "Total bobot sudah tepat 100%."
-                        : totalWeight > 100
-                          ? `Total bobot melebihi 100% sebesar ${Math.abs(
-                              sisaBobot
-                            )}%.`
-                          : `Tambahkan ${sisaBobot}% lagi agar total menjadi 100%.`}
+                        ? "Total bobot tepat 100%, siap difinalisasi."
+                        : "Total bobot belum mencapai 100%."}
                 </p>
               </article>
             </section>
@@ -517,11 +399,6 @@ export default function SetupBobotPage() {
                       value={selectedClassId}
                       onChange={(event) => {
                         setSelectedClassId(event.target.value);
-                        setFeedback(null);
-                        setShowAddForm(false);
-                        setNewName("");
-                        setNewJenis("tugas");
-                        setNewWeight("");
                       }}
                       disabled={loadingClasses || classes.length === 0}
                       className="theme-input w-full appearance-none rounded-lg border border-[color-mix(in_srgb,var(--color-text)_15%,transparent)] py-3 pl-10 pr-10 text-sm outline-none transition focus:border-[var(--color-primary)] disabled:cursor-not-allowed disabled:opacity-60"
@@ -560,84 +437,6 @@ export default function SetupBobotPage() {
                     </p>
                   )}
                 </div>
-
-                {showAddForm && (
-                  <div className="border-b border-[color-mix(in_srgb,var(--color-text)_8%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_3%,transparent)] p-5 sm:px-6">
-                    <h3 className="theme-text text-sm font-bold">
-                      Komponen baru
-                    </h3>
-                    <p className="theme-text-secondary mt-1 text-xs">
-                      Komponen akan langsung disimpan ke backend. Sisa bobot:{" "}
-                      {formatPercent(sisaBobot)}.
-                    </p>
-
-                    <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_150px_120px_auto]">
-                      <input
-                        value={newName}
-                        onChange={(event) => setNewName(event.target.value)}
-                        placeholder="Contoh: Praktik"
-                        maxLength={60}
-                        disabled={adding}
-                        className="theme-input min-w-0 rounded-lg border border-[color-mix(in_srgb,var(--color-text)_15%,transparent)] px-3 py-2.5 text-sm outline-none focus:border-[var(--color-primary)] disabled:opacity-60"
-                      />
-
-                      <div className="relative">
-                        <select
-                          value={newJenis}
-                          onChange={(event) =>
-                            setNewJenis(event.target.value)
-                          }
-                          disabled={adding}
-                          className="theme-input w-full appearance-none rounded-lg border border-[color-mix(in_srgb,var(--color-text)_15%,transparent)] px-3 py-2.5 pr-8 text-sm outline-none focus:border-[var(--color-primary)] disabled:opacity-60"
-                        >
-                          {JENIS_KOMPONEN.map((jenis) => (
-                            <option key={jenis.value} value={jenis.value}>
-                              {jenis.label}
-                            </option>
-                          ))}
-                        </select>
-
-                        <ChevronDown
-                          size={14}
-                          className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text-secondary)]"
-                        />
-                      </div>
-
-                      <div className="relative">
-                        <input
-                          type="number"
-                          min="0"
-                          max="100"
-                          step="0.01"
-                          value={newWeight}
-                          onChange={(event) =>
-                            setNewWeight(event.target.value)
-                          }
-                          placeholder="Bobot"
-                          disabled={adding}
-                          className="theme-input w-full rounded-lg border border-[color-mix(in_srgb,var(--color-text)_15%,transparent)] px-3 py-2.5 pr-8 text-sm outline-none focus:border-[var(--color-primary)] disabled:opacity-60"
-                        />
-                        <span className="theme-text-secondary absolute right-3 top-1/2 -translate-y-1/2 text-sm">
-                          %
-                        </span>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={handleAddComponent}
-                        disabled={adding}
-                        className="inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--color-primary)] px-4 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        {adding ? (
-                          <Loader2 size={15} className="animate-spin" />
-                        ) : (
-                          <Plus size={15} />
-                        )}
-                        {adding ? "Menyimpan..." : "Tambahkan"}
-                      </button>
-                    </div>
-                  </div>
-                )}
 
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[570px] text-left text-sm">
@@ -743,7 +542,7 @@ export default function SetupBobotPage() {
                               <p className="theme-text-secondary mt-1 text-xs">
                                 {classes.length === 0
                                   ? "Akun guru ini belum ditugaskan pada kelas-mapel mana pun."
-                                  : "Gunakan tombol Tambah komponen untuk membuat komponen pertama."}
+                                  : "Backend belum menyimpan komponen penilaian untuk kelas-mapel ini."}
                               </p>
                             </td>
                           </tr>
@@ -792,19 +591,21 @@ export default function SetupBobotPage() {
                 <div className="flex flex-col gap-3 border-t border-[color-mix(in_srgb,var(--color-text)_8%,transparent)] p-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
                   <p className="theme-text-secondary flex items-start gap-2 text-xs leading-5">
                     <CircleHelp size={15} className="mt-0.5 shrink-0" />
-                    Backend saat ini hanya menyediakan penambahan komponen.
-                    Bobot komponen yang sudah tersimpan belum dapat diubah atau
-                    dihapus dari halaman ini.
+                    {isFinalized
+                      ? "Kelas ini telah difinalisasi di backend sehingga seluruh komponen terkunci."
+                      : totalWeight === 100
+                        ? "Total bobot telah mencapai 100% dan tersimpan di database."
+                        : `Total bobot saat ini ${totalWeight}%. Sisa ${sisaBobot}% belum dialokasikan pada komponen mana pun.`}
                   </p>
 
                   <button
                     type="button"
                     onClick={() => router.push("/guru/nilai/finalisasi")}
-                    disabled={!isValid}
+                    disabled={!isValid && !isFinalized}
                     className="inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--color-primary)] px-4 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <Check size={15} />
-                    Lanjut ke finalisasi
+                    {isFinalized ? "Halaman finalisasi" : "Lanjut ke finalisasi"}
                   </button>
                 </div>
               </section>
@@ -882,7 +683,7 @@ export default function SetupBobotPage() {
                       className="text-[var(--color-primary)]"
                     />
                     <h2 className="theme-text text-sm font-bold">
-                      Sebelum menyimpan
+                      Catatan komponen
                     </h2>
                   </div>
 
@@ -892,14 +693,16 @@ export default function SetupBobotPage() {
                         size={14}
                         className="mt-0.5 shrink-0 text-[var(--color-primary)]"
                       />
-                      Pastikan kelas dan mata pelajaran sudah benar.
+                      Seluruh bobot pada halaman ini dibaca langsung dari
+                      backend sesuai kelas-mapel yang dipilih.
                     </li>
                     <li className="flex gap-2">
-                      <Check
+                      <Info
                         size={14}
                         className="mt-0.5 shrink-0 text-[var(--color-primary)]"
                       />
-                      Sesuaikan bobot dengan kebijakan penilaian sekolah.
+                      Halaman ini bersifat baca saja: komponen dan bobot yang
+                      sudah tersimpan tidak dapat diubah dari sini.
                     </li>
                     <li className="flex gap-2">
                       <Check

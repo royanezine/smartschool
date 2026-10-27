@@ -384,15 +384,6 @@ export default function GuruSarprasPeminjamanPage() {
   const [totalPages, setTotalPages] =
     useState(1);
 
-  const notifications = [
-    {
-      id: 1,
-      title: "Peminjaman Sarpras",
-      desc: "Pantau status pengajuan peminjaman",
-      read: false,
-    },
-  ];
-
   const loadPeminjaman = async () => {
     try {
       setLoading(true);
@@ -489,19 +480,11 @@ export default function GuruSarprasPeminjamanPage() {
 
       <div className="flex min-w-0 flex-1 flex-col">
 
-        <Header
-          toggleSidebar={() =>
+        <Header toggleSidebar={() =>
             setSidebarOpen(
               (prev) => !prev
             )
-          }
-          notifications={notifications}
-          user={{
-            name: "Guru",
-            email: "guru@smartschool.com",
-            avatar: "GU",
-          }}
-        />
+          } />
 
         <main className="theme-page relative flex-1 overflow-y-auto">
 

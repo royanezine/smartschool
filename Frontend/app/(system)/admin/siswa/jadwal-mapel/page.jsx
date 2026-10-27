@@ -1,9 +1,12 @@
 "use client";
 
-import { useState, useMemo, useRef } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import * as XLSX from "xlsx";
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
+import { getKelas } from "@/services/kelas.service";
+import { getJadwalMengajar, deleteJadwalMengajar } from "@/services/jadwalMengajar.service";
+import { Loader2 } from "lucide-react";
 
 import {
   CalendarDays,
@@ -68,15 +71,6 @@ const themeDangerBorder =
   "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
 
 
-const KELAS_LIST = [
-  "7A",
-  "7B",
-  "7C",
-  "8A",
-  "8B",
-  "9A",
-];
-
 const HARI_LIST = [
   "Senin",
   "Selasa",
@@ -96,148 +90,6 @@ const PERIOD_TIMES = [
   "10.35 - 11.15",
   "11.15 - 11.55",
 ];
-
-const MAPEL_POOL = [
-  {
-    mapel: "Matematika",
-    guru: "Andi Prasetyo, S.Pd",
-  },
-  {
-    mapel: "Bahasa Indonesia",
-    guru: "Siti Rahayu, S.Pd",
-  },
-  {
-    mapel: "Bahasa Inggris",
-    guru: "Budi Santoso, S.Pd",
-  },
-  {
-    mapel: "IPA",
-    guru: "Dewi Anggraini, S.Si",
-  },
-  {
-    mapel: "IPS",
-    guru: "Fajar Ramadhan, S.Pd",
-  },
-  {
-    mapel: "PPKn",
-    guru: "Yeni Kusnadi, S.Pd",
-  },
-  {
-    mapel: "Pendidikan Agama Islam",
-    guru: "Ahmad Fauzi, S.Pd.I",
-  },
-  {
-    mapel: "Seni Budaya",
-    guru: "Lina Marlina, S.Pd",
-  },
-  {
-    mapel: "PJOK",
-    guru: "Deni Iskandar, S.Pd",
-  },
-  {
-    mapel: "Prakarya",
-    guru: "Ira Susanti, S.Pd",
-  },
-  {
-    mapel: "Bahasa Sunda",
-    guru: "Wati Rohaeti, S.Pd",
-  },
-  {
-    mapel: "Bimbingan Konseling",
-    guru: "Sri Wulandari, S.Pd",
-  },
-];
-
-
-function buildJadwalKelas(offset) {
-  const jadwal = {};
-
-  HARI_LIST.forEach((hari, hariIdx) => {
-    const jumlahSlot =
-      hari === "Sabtu" ? 6 : 8;
-
-    const slots = [];
-
-    for (
-      let slotIdx = 0;
-      slotIdx < jumlahSlot;
-      slotIdx++
-    ) {
-      const jam = PERIOD_TIMES[slotIdx];
-
-      if (slotIdx === 3) {
-        slots.push({
-          jam,
-          mapel: "Istirahat",
-          guru: "-",
-          tipe: "istirahat",
-        });
-
-        continue;
-      }
-
-      if (
-        hari === "Senin" &&
-        slotIdx === 0
-      ) {
-        slots.push({
-          jam,
-          mapel: "Upacara Bendera",
-          guru: "Seluruh Guru",
-          tipe: "upacara",
-        });
-
-        continue;
-      }
-
-      if (
-        hari === "Sabtu" &&
-        slotIdx === jumlahSlot - 1
-      ) {
-        slots.push({
-          jam,
-          mapel: "Ekstrakurikuler",
-          guru: "Pembina Ekskul",
-          tipe: "ekskul",
-        });
-
-        continue;
-      }
-
-      const poolIndex =
-        (offset +
-          hariIdx * 3 +
-          slotIdx * 5) %
-        MAPEL_POOL.length;
-
-      const item = MAPEL_POOL[poolIndex];
-
-      slots.push({
-        jam,
-        mapel: item.mapel,
-        guru: item.guru,
-        tipe: "reguler",
-      });
-    }
-
-    jadwal[hari] = slots;
-  });
-
-  return jadwal;
-}
-
-function buildInitialJadwal() {
-  const data = {};
-
-  KELAS_LIST.forEach((kelas, idx) => {
-    data[kelas] = buildJadwalKelas(
-      idx * 4
-    );
-  });
-
-  return data;
-}
-
 
 function cellStyle(tipe) {
   switch (tipe) {
@@ -260,11 +112,131 @@ export default function JadwalPelajaranPage() {
   const [isCollapsed, setIsCollapsed] =
     useState(false);
 
-  const [jadwalData, setJadwalData] =
-    useState(buildInitialJadwal);
+  const [kelasList, setKelasList] = useState([]);
+  const [rawJadwal, setRawJadwal] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [kelasAktif, setKelasAktif] = useState("");
 
-  const [kelasAktif, setKelasAktif] =
-    useState(KELAS_LIST[0]);
+  const activeKelasList = useMemo(() => {
+    return kelasList.map((k) => (typeof k === "string" ? k : k?.nama || "")).filter(Boolean);
+  }, [kelasList]);
+
+  useEffect(() => {
+    let active = true;
+    const timer = setTimeout(async () => {
+      try {
+        setLoading(true);
+        const [kelasRes, jadwalRes] = await Promise.allSettled([
+          getKelas({ limit: 100 }),
+          getJadwalMengajar(),
+        ]);
+        if (!active) return;
+        let kList = [];
+        if (kelasRes.status === "fulfilled") {
+          const val = kelasRes.value;
+          kList = Array.isArray(val?.data)
+            ? val.data
+            : Array.isArray(val)
+            ? val
+            : [];
+          setKelasList(kList);
+          if (kList.length > 0) {
+            const first = typeof kList[0] === "string" ? kList[0] : kList[0]?.nama || "";
+            setKelasAktif((prev) => prev || first);
+          }
+        }
+        if (jadwalRes.status === "fulfilled") {
+          const val = jadwalRes.value;
+          const jList = Array.isArray(val?.data)
+            ? val.data
+            : Array.isArray(val)
+            ? val
+            : [];
+          setRawJadwal(jList);
+        }
+      } catch {
+        // Fallback
+      } finally {
+        if (active) setLoading(false);
+      }
+    }, 0);
+
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
+  }, []);
+
+  const jadwalKelasAktif = useMemo(() => {
+    const jadwal = {};
+    const normalizedKelas = (kelasAktif || "").trim().toLowerCase();
+
+    HARI_LIST.forEach((hari) => {
+      const jumlahSlot = hari === "Sabtu" ? 6 : 8;
+      const slots = [];
+      const hariSlots = rawJadwal.filter(
+        (j) =>
+          (j.hari || "").trim().toLowerCase() === hari.toLowerCase() &&
+          (j.kelasMapel?.kelas?.nama || "").trim().toLowerCase() === normalizedKelas
+      );
+
+      for (let slotIdx = 0; slotIdx < jumlahSlot; slotIdx++) {
+        const jam = PERIOD_TIMES[slotIdx];
+        if (slotIdx === 3) {
+          slots.push({
+            jam,
+            mapel: "Istirahat",
+            guru: "-",
+            tipe: "istirahat",
+          });
+          continue;
+        }
+
+        if (hari === "Senin" && slotIdx === 0) {
+          slots.push({
+            jam,
+            mapel: "Upacara Bendera",
+            guru: "Seluruh Guru",
+            tipe: "upacara",
+          });
+          continue;
+        }
+
+        if (hari === "Sabtu" && slotIdx === jumlahSlot - 1) {
+          slots.push({
+            jam,
+            mapel: "Ekstrakurikuler",
+            guru: "Pembina Ekskul",
+            tipe: "ekskul",
+          });
+          continue;
+        }
+
+        const matched = hariSlots[slotIdx] || null;
+        if (matched) {
+          slots.push({
+            id: matched.id,
+            jam: matched.jamMulai && matched.jamSelesai
+              ? `${matched.jamMulai} - ${matched.jamSelesai}`
+              : jam,
+            mapel: matched.kelasMapel?.mataPelajaran?.nama || "-",
+            guru: matched.kelasMapel?.guruPengajar?.namaLengkap || "-",
+            tipe: "reguler",
+          });
+        } else {
+          slots.push({
+            jam,
+            mapel: "-",
+            guru: "-",
+            tipe: "reguler",
+          });
+        }
+      }
+      jadwal[hari] = slots;
+    });
+
+    return jadwal;
+  }, [rawJadwal, kelasAktif]);
 
   const [importMsg, setImportMsg] =
     useState(null);
@@ -290,32 +262,17 @@ export default function JadwalPelajaranPage() {
   };
 
 
-  const jadwalKelasAktif =
-    jadwalData[kelasAktif];
+
 
 
   const totalMapelUnik = useMemo(() => {
     const set = new Set();
-
-    Object.values(jadwalData).forEach(
-      (jadwal) => {
-        Object.values(jadwal).forEach(
-          (slots) => {
-            slots.forEach((s) => {
-              if (
-                s.tipe === "reguler" &&
-                s.mapel !== "-"
-              ) {
-                set.add(s.mapel);
-              }
-            });
-          }
-        );
-      }
-    );
-
+    rawJadwal.forEach((j) => {
+      const nama = j.kelasMapel?.mataPelajaran?.nama;
+      if (nama && nama !== "-") set.add(nama);
+    });
     return set.size;
-  }, [jadwalData]);
+  }, [rawJadwal]);
 
   const totalJamPerMinggu =
     useMemo(() => {
@@ -424,28 +381,12 @@ export default function JadwalPelajaranPage() {
 
     if (!yakin) return;
 
-    setJadwalData((prev) => {
-      const updated = {
-        ...prev,
-        [kelasAktif]: {
-          ...prev[kelasAktif],
-          [hari]: [
-            ...prev[kelasAktif][hari],
-          ],
-        },
-      };
-
-      updated[kelasAktif][hari][
-        slotIdx
-      ] = {
-        jam: slot.jam,
-        mapel: "-",
-        guru: "-",
-        tipe: "reguler",
-      };
-
-      return updated;
-    });
+    if (slot.id) {
+      deleteJadwalMengajar(slot.id).catch((err) => {
+        console.error("Gagal menghapus jadwal:", err);
+      });
+      setRawJadwal((prev) => prev.filter((j) => j.id !== slot.id));
+    }
   }
 
 
@@ -516,24 +457,6 @@ export default function JadwalPelajaranPage() {
       };
     }
 
-    setJadwalData((prev) => {
-      const updated = {
-        ...prev,
-        [kelasAktif]: {
-          ...prev[kelasAktif],
-          [hari]: [
-            ...prev[kelasAktif][hari],
-          ],
-        },
-      };
-
-      updated[kelasAktif][hari][
-        slotIdx
-      ] = newSlot;
-
-      return updated;
-    });
-
     setShowModal(false);
     setEditingData(null);
 
@@ -555,8 +478,8 @@ export default function JadwalPelajaranPage() {
     const workbook =
       XLSX.utils.book_new();
 
-    KELAS_LIST.forEach((kelas) => {
-      const jadwal = jadwalData[kelas];
+    activeKelasList.forEach((kelas) => {
+      const jadwal = jadwalKelasAktif;
 
       const header = [
         "Jam",
@@ -680,7 +603,7 @@ export default function JadwalPelajaranPage() {
 
         let kelasDiimpor = 0;
 
-        KELAS_LIST.forEach(
+        activeKelasList.forEach(
           (kelas) => {
             const sheet =
               workbook.Sheets[kelas];
@@ -984,7 +907,7 @@ export default function JadwalPelajaranPage() {
               <StatCard
                 icon={School}
                 title="Total Kelas"
-                value={KELAS_LIST.length}
+                value={activeKelasList.length}
               />
 
               <StatCard
@@ -1010,7 +933,7 @@ export default function JadwalPelajaranPage() {
 
             <div className="flex flex-wrap items-center gap-2">
 
-              {KELAS_LIST.map(
+              {activeKelasList.map(
                 (kelas) => (
                   <button
                     key={kelas}

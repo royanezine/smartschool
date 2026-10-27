@@ -527,22 +527,6 @@ export default function GuruMateriPage() {
   const [successMessage, setSuccessMessage] =
     useState("");
 
-  const notifications = [
-    {
-      id: 1,
-      title: "Rapat Wali Kelas",
-      desc: "Dikirim 2 jam lalu",
-      read: false,
-    },
-    {
-      id: 2,
-      title: "Batas Input Nilai Rapor",
-      desc: "Dikirim 5 jam lalu",
-      read: false,
-    },
-  ];
-
-
   const loadMateri = useCallback(
     async (isRefresh = false) => {
       try {
@@ -587,7 +571,10 @@ export default function GuruMateriPage() {
   );
 
   useEffect(() => {
-    loadMateri();
+    const timer = setTimeout(() => {
+      loadMateri();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadMateri]);
 
 
@@ -851,15 +838,6 @@ export default function GuruMateriPage() {
           toggleSidebar={
             toggleSidebar
           }
-          notifications={
-            notifications
-          }
-          user={{
-            name: "Bu Sari",
-            email:
-              "guru@smartschool.com",
-            avatar: "BS",
-          }}
         />
 
         <main className="flex-1 overflow-y-auto overflow-x-hidden">

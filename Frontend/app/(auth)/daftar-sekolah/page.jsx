@@ -4,6 +4,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 import {
   ArrowRight,
   Building2,
@@ -355,7 +356,7 @@ async function handleSubmit(event) {
     <main className="min-h-screen bg-[#f5f8fc] text-slate-900">
       <nav className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl">
         <div className="mx-auto flex h-[72px] max-w-7xl items-center justify-between px-5 sm:px-6 lg:px-8">
-          <a href="/" className="flex items-center gap-3">
+          <Link href="/" className="flex items-center gap-3">
             <div className="relative h-10 w-10">
               <Image
                 src="/logo/logoSS.png"
@@ -370,21 +371,21 @@ async function handleSubmit(event) {
             <span className="text-xl font-bold tracking-tight text-blue-600">
               SmartSchool
             </span>
-          </a>
+          </Link>
 
           <div className="hidden items-center gap-8 md:flex">
-            <a href="/#fitur" className="text-sm text-slate-500 hover:text-blue-600">Fitur</a>
-            <a href="/#harga" className="text-sm text-slate-500 hover:text-blue-600">Harga</a>
-            <a href="/#cara-kerja" className="text-sm text-slate-500 hover:text-blue-600">Cara Kerja</a>
-            <a href="/#kontak" className="text-sm text-slate-500 hover:text-blue-600">Kontak</a>
-            <a href="/login" className="rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-semibold hover:border-blue-300 hover:text-blue-600">
+            <Link href="/#fitur" className="text-sm text-slate-500 hover:text-blue-600">Fitur</Link>
+            <Link href="/#harga" className="text-sm text-slate-500 hover:text-blue-600">Harga</Link>
+            <Link href="/#cara-kerja" className="text-sm text-slate-500 hover:text-blue-600">Cara Kerja</Link>
+            <Link href="/#kontak" className="text-sm text-slate-500 hover:text-blue-600">Kontak</Link>
+            <Link href="/login" className="rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-semibold hover:border-blue-300 hover:text-blue-600">
               Masuk
-            </a>
+            </Link>
           </div>
 
-          <a href="/login" className="inline-flex items-center gap-1.5 text-sm font-semibold text-blue-600 md:hidden">
+          <Link href="/login" className="inline-flex items-center gap-1.5 text-sm font-semibold text-blue-600 md:hidden">
             Masuk <ChevronRight size={16} />
-          </a>
+          </Link>
         </div>
       </nav>
 

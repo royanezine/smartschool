@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Check,
   ArrowRight,
@@ -22,6 +23,7 @@ import {
 import { getPaket } from "@/services/paket.service";
 
 export default function PricingSection() {
+  const router = useRouter();
   const [paket, setPaket] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");

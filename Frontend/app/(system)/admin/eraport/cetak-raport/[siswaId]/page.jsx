@@ -675,15 +675,21 @@ export default function DetailRaportPage() {
 
 
   useEffect(() => {
-    loadReport();
-    loadTahunAjaran();
+    const timer = setTimeout(() => {
+      loadReport();
+      loadTahunAjaran();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [
     loadReport,
     loadTahunAjaran,
   ]);
 
   useEffect(() => {
-    loadNilaiUjian();
+    const timer = setTimeout(() => {
+      loadNilaiUjian();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadNilaiUjian]);
 
 

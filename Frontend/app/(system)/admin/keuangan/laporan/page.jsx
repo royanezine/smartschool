@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Download,
   Eye,
@@ -14,81 +14,48 @@ import {
   ChevronLeft,
   ChevronRight,
   Edit,
-  Trash2,
   Clock,
   FileText,
   Plus,
+  Loader2,
+  AlertCircle,
+  RefreshCw,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
+import { getJurnalKas } from "@/services/jurnalKas.service";
 
-const initialTransactions = [
-  {
-    id: 1,
-    tanggal: "2026-09-01",
-    deskripsi: "Pembayaran SPP Siswa",
-    kategori: "Pemasukan",
-    jumlah: 12500000,
-    metode: "Transfer",
-    status: "Lunas",
-  },
-  {
-    id: 2,
-    tanggal: "2026-09-02",
-    deskripsi: "Pembelian Alat Tulis",
-    kategori: "Pengeluaran",
-    jumlah: 2350000,
-    metode: "Tunai",
-    status: "Lunas",
-  },
-  {
-    id: 3,
-    tanggal: "2026-09-03",
-    deskripsi: "Gaji Guru Bulan Agustus",
-    kategori: "Pengeluaran",
-    jumlah: 35000000,
-    metode: "Transfer",
-    status: "Lunas",
-  },
-  {
-    id: 4,
-    tanggal: "2026-09-05",
-    deskripsi: "Donasi BOS",
-    kategori: "Pemasukan",
-    jumlah: 5000000,
-    metode: "Transfer",
-    status: "Pending",
-  },
-  {
-    id: 5,
-    tanggal: "2026-09-06",
-    deskripsi: "Biaya Listrik",
-    kategori: "Pengeluaran",
-    jumlah: 1800000,
-    metode: "Tunai",
-    status: "Lunas",
-  },
-  {
-    id: 6,
-    tanggal: "2026-09-07",
-    deskripsi: "SPP Siswa",
-    kategori: "Pemasukan",
-    jumlah: 8000000,
-    metode: "Transfer",
-    status: "Lunas",
-  },
-  {
-    id: 7,
-    tanggal: "2026-09-08",
-    deskripsi: "Pembelian Komputer",
-    kategori: "Pengeluaran",
-    jumlah: 12000000,
-    metode: "Transfer",
-    status: "Pending",
-  },
-];
+const LIMIT = 10;
+
+const formatRupiah = (value) =>
+  new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    maximumFractionDigits: 0,
+  }).format(Number(value) || 0);
+
+const formatTanggal = (value) => {
+  if (!value) return "-";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "-";
+  return date.toLocaleDateString("id-ID", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
+};
+
+const formatKategori = (value) =>
+  String(value || "-")
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+
+const getErrorMessage = (error, fallback) =>
+  error instanceof Error && error.message
+    ? error.message
+    : `Gagal memuat ${fallback}.`;
 
 export default function LaporanKeuanganPage() {
   const router = useRouter();
@@ -97,23 +64,82 @@ export default function LaporanKeuanganPage() {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("semua");
   const [currentPage, setCurrentPage] = useState(1);
-  const [entriesPerPage] = useState(5);
+  const [entriesPerPage] = useState(10);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const [transactions, setTransactions] = useState(initialTransactions);
+  const [transactions, setTransactions] = useState([]);
+  const [summary, setSummary] = useState({
+    totalMasuk: 0,
+    totalKeluar: 0,
+    selisih: 0,
+  });
+
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    setError("");
+
+    try {
+      const response = await getJurnalKas({
+        page: 1,
+        limit: 100,
+      });
+
+      const list = Array.isArray(response?.data) ? response.data : [];
+      const mapped = list.map((item) => {
+        const isIncome = String(item.jenis).toLowerCase() === "masuk";
+        return {
+          id: item.id,
+          nomorJurnal: item.nomorJurnal || `JK-${String(item.id).slice(0, 8)}`,
+          tanggal: item.tanggal ? String(item.tanggal).slice(0, 10) : "-",
+          deskripsi: item.keterangan || item.kategori,
+          kategori: isIncome ? "Pemasukan" : "Pengeluaran",
+          kategoriNama: item.kategori,
+          jumlah: Number(item.jumlah) || 0,
+          metode: item.akunKas?.nama || item.sumber || "Kas",
+          status: item.status === "batal" ? "Batal" : "Selesai",
+        };
+      });
+
+      setTransactions(mapped);
+
+      if (response?.ringkasan) {
+        setSummary({
+          totalMasuk: Number(response.ringkasan.totalMasuk) || 0,
+          totalKeluar: Number(response.ringkasan.totalKeluar) || 0,
+          selisih: Number(response.ringkasan.selisih) || 0,
+        });
+      }
+    } catch (err) {
+      console.error("[LaporanKeuangan] Gagal mengambil data jurnal:", err);
+      setError(getErrorMessage(err, "data laporan keuangan"));
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      loadData();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [loadData]);
 
   const toggleSidebar = () => {
     setIsCollapsed((prev) => !prev);
   };
 
-  const totalPemasukan = transactions
+  const computedMasuk = transactions
     .filter((transaction) => transaction.kategori === "Pemasukan")
     .reduce((total, transaction) => total + transaction.jumlah, 0);
 
-  const totalPengeluaran = transactions
+  const computedKeluar = transactions
     .filter((transaction) => transaction.kategori === "Pengeluaran")
     .reduce((total, transaction) => total + transaction.jumlah, 0);
 
-  const saldo = totalPemasukan - totalPengeluaran;
+  const totalPemasukan = summary.totalMasuk || computedMasuk;
+  const totalPengeluaran = summary.totalKeluar || computedKeluar;
+  const saldo = summary.selisih || (totalPemasukan - totalPengeluaran);
 
   const filtered = transactions.filter((transaction) => {
     const keyword = search.trim().toLowerCase();
@@ -140,41 +166,15 @@ export default function LaporanKeuanganPage() {
   const currentEntries = filtered.slice(indexOfFirst, indexOfLast);
 
   const handleEdit = (id) => {
-    router.push(`/laporan-keuangan/edit/${id}`);
+    router.push(`/admin/keuangan/jurnalKas/detail/${id}`);
   };
 
   const handleDelete = (id) => {
-    const confirmed = window.confirm(
-      "Apakah Anda yakin ingin menghapus transaksi ini?"
-    );
-
-    if (!confirmed) return;
-
-    setTransactions((previous) =>
-      previous.filter((transaction) => transaction.id !== id)
-    );
-
-    if (safeCurrentPage > 1 && currentEntries.length === 1) {
-      setCurrentPage((previous) => Math.max(1, previous - 1));
-    }
+    router.push(`/admin/keuangan/jurnalKas/detail/${id}`);
   };
 
   const handleView = (id) => {
-    const transaction = transactions.find(
-      (item) => item.id === id
-    );
-
-    if (!transaction) return;
-
-    window.alert(
-      `📋 Detail Transaksi\n\n` +
-        `Tanggal   : ${transaction.tanggal}\n` +
-        `Deskripsi : ${transaction.deskripsi}\n` +
-        `Kategori  : ${transaction.kategori}\n` +
-        `Jumlah    : Rp ${transaction.jumlah.toLocaleString("id-ID")}\n` +
-        `Metode    : ${transaction.metode}\n` +
-        `Status    : ${transaction.status}`
-    );
+    router.push(`/admin/keuangan/jurnalKas/detail/${id}`);
   };
 
   const handleSearchChange = (event) => {
@@ -308,7 +308,7 @@ export default function LaporanKeuanganPage() {
 
                   <button
                     type="button"
-                    onClick={() => router.push("/laporan/tambah")}
+                    onClick={() => router.push("/admin/keuangan/jurnalKas/tambah")}
                     className="
                       theme-primary
                       inline-flex
@@ -474,7 +474,48 @@ export default function LaporanKeuanganPage() {
                   </thead>
 
                   <tbody className="divide-y divide-[var(--color-border-soft)]">
-                    {currentEntries.length === 0 ? (
+                    {loading ? (
+                      <tr>
+                        <td
+                          colSpan={7}
+                          className="theme-text-muted px-4 py-12 text-center"
+                        >
+                          <div className="flex flex-col items-center justify-center gap-2">
+                            <Loader2
+                              size={28}
+                              className="animate-spin text-[var(--color-primary)]"
+                            />
+                            <p className="theme-text-secondary text-sm">
+                              Memuat data transaksi...
+                            </p>
+                          </div>
+                        </td>
+                      </tr>
+                    ) : error ? (
+                      <tr>
+                        <td
+                          colSpan={7}
+                          className="theme-text-muted px-4 py-12 text-center"
+                        >
+                          <div className="flex flex-col items-center justify-center gap-2">
+                            <AlertCircle
+                              size={28}
+                              className="text-[var(--color-danger)]"
+                            />
+                            <p className="text-[var(--color-danger)] text-sm font-medium">
+                              {error}
+                            </p>
+                            <button
+                              type="button"
+                              onClick={loadData}
+                              className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--color-primary)] hover:underline"
+                            >
+                              <RefreshCw size={12} /> Coba lagi
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ) : currentEntries.length === 0 ? (
                       <tr>
                         <td
                           colSpan={7}
@@ -570,42 +611,6 @@ export default function LaporanKeuanganPage() {
                                 "
                               >
                                 <Eye size={16} />
-                              </button>
-
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  handleEdit(transaction.id)
-                                }
-                                title="Edit Transaksi"
-                                className="
-                                  theme-text-muted
-                                  rounded-lg
-                                  p-1.5
-                                  transition
-                                  hover:bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]
-                                  hover:text-[var(--color-primary)]
-                                "
-                              >
-                                <Edit size={16} />
-                              </button>
-
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  handleDelete(transaction.id)
-                                }
-                                title="Hapus Transaksi"
-                                className="
-                                  theme-text-muted
-                                  rounded-lg
-                                  p-1.5
-                                  transition
-                                  hover:bg-[color-mix(in_srgb,var(--color-danger)_9%,transparent)]
-                                  hover:text-[var(--color-danger)]
-                                "
-                              >
-                                <Trash2 size={16} />
                               </button>
                             </div>
                           </td>

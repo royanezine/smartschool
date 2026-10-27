@@ -91,13 +91,16 @@ export default function ForgotPasswordPage() {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const savedEmail = sessionStorage.getItem(
-      "forgot_password_email"
-    );
+    const timer = setTimeout(() => {
+      const savedEmail = sessionStorage.getItem(
+        "forgot_password_email"
+      );
 
-    if (savedEmail) {
-      setEmail(savedEmail);
-    }
+      if (savedEmail) {
+        setEmail(savedEmail);
+      }
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
 

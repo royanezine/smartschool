@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { apiFetch } from "../../../../../lib/api";
+import { getDetailSekolahBinaan } from "@/services/yayasan.service";
 
 import {
   School,
@@ -71,7 +71,7 @@ export default function DetailSekolahPage() {
         setLoading(true);
         setError(null);
 
-        const res = await apiFetch(`/yayasan/sekolah/${id}`);
+        const res = await getDetailSekolahBinaan(id);
 
         if (res) {
           setData(res.data);

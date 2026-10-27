@@ -253,7 +253,10 @@ export default function BookingKonselingPage() {
   }, []);
 
   useEffect(() => {
-    loadHistory();
+    const timer = setTimeout(() => {
+      loadHistory();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadHistory]);
 
   const tanggalHariIni = toDateKey(today);

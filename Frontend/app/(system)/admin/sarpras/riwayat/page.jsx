@@ -239,16 +239,6 @@ export default function RiwayatPage() {
 
   const requestIdRef = useRef(0);
 
-  const notifications = [
-    {
-      id: 1,
-      title: "Riwayat Sarpras",
-      desc: "Riwayat peminjaman yang sudah dikembalikan",
-      read: false,
-    },
-  ];
-
-
   useEffect(() => {
     const timer = setTimeout(() => {
       setPencarianAktif(pencarian.trim());
@@ -352,7 +342,6 @@ export default function RiwayatPage() {
           toggleSidebar={() =>
             setSidebarOpen(!sidebarOpen)
           }
-          notifications={notifications}
           user={{
             name: "Admin Sekolah",
             email: "admin@smartschool.com",

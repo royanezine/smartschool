@@ -204,13 +204,15 @@ export default function SpmbBackendBlocker({
                 <strong>pendaftaran publik</strong>{" "}
                 (POST /api/ppdb/daftar dan POST
                 /api/ppdb/:id/berkas), verifikasi{" "}
-                (PATCH /api/ppdb/:id/verifikasi), dan{" "}
+                (PATCH /api/ppdb/:id/verifikasi),{" "}
                 <strong>pengaturan</strong> (GET/POST
-                /api/pengaturan). Endpoint baca daftar dan
-                detail pendaftar (GET /api/ppdb/pendaftar
-                serta GET /api/ppdb/pendaftar/:id) belum
-                tersedia, sehingga menu Data Pendaftaran
-                hanya menyediakan formulir pendaftaran.
+                /api/pengaturan), serta <strong>baca
+                pendaftar</strong> (GET /api/ppdb/pendaftar
+                dan GET /api/ppdb/pendaftar/:id) yang
+                dipakai Dashboard, Seleksi, Kuota, dan
+                Laporan. Ketersediaan endpoint baca pada
+                server yang berjalan dapat diperiksa dari
+                halaman ringkasan SPMB.
               </p>
             </div>
           </div>

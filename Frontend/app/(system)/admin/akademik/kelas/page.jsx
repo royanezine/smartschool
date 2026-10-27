@@ -369,12 +369,18 @@ export default function AdminKelasPage() {
 
 
   useEffect(() => {
-    loadTahunAjaran();
+    const timer = setTimeout(() => {
+      loadTahunAjaran();
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
 
   useEffect(() => {
-    loadKelas(false);
+    const timer = setTimeout(() => {
+      loadKelas(false);
+    }, 0);
+    return () => clearTimeout(timer);
   }, [
     currentPage,
     itemsPerPage,
@@ -397,7 +403,10 @@ export default function AdminKelasPage() {
       currentPage > totalPages &&
       currentPage > 1
     ) {
-      setCurrentPage(totalPages);
+      const timer = setTimeout(() => {
+        setCurrentPage(totalPages);
+      }, 0);
+      return () => clearTimeout(timer);
     }
   }, [
     currentPage,

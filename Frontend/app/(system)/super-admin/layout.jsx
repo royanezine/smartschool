@@ -8,28 +8,6 @@ import Header from "@/app/components/Header";
 import AuthGuard from "@/app/components/auth/AuthGuard";
 
 
-const recentNotifications = [
-  {
-    id: 1,
-    title: "Pembaruan Sistem v2.0",
-    desc: "SmartSchool telah diperbarui ke versi terbaru.",
-    read: false,
-  },
-  {
-    id: 2,
-    title: "Pengingat Backup Data",
-    desc: "Backup database terakhir berhasil dilakukan.",
-    read: false,
-  },
-  {
-    id: 3,
-    title: "Yayasan Baru Mendaftar",
-    desc: "YPI Harapan telah menyelesaikan pendaftaran.",
-    read: true,
-  },
-];
-
-
 function getActiveMenu(pathname) {
   if (!pathname || pathname === "/super-admin") {
     return "dashboard";
@@ -93,16 +71,7 @@ export default function SuperAdminLayout({ children }) {
     [pathname]
   );
 
-  const notifications = useMemo(
-    () =>
-      recentNotifications.map((item) => ({
-        id: item.id,
-        title: item.title,
-        desc: item.desc,
-        read: item.read,
-      })),
-    []
-  );
+
 
   return (
     <AuthGuard allowedRoles={["super_admin"]}>
@@ -123,7 +92,6 @@ export default function SuperAdminLayout({ children }) {
             toggleSidebar={() =>
               setSidebarOpen((prev) => !prev)
             }
-            notifications={notifications}
             user={{
               name: "Super Admin",
               email: "admin@smartschool.com",

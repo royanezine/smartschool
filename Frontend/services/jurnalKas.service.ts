@@ -15,6 +15,7 @@ export interface AkunKas {
 
 export interface JurnalKas {
   id: string;
+  akunKasId?: string;
   nomorJurnal?: string;
   tanggal: string;
   jenis: "masuk" | "keluar";
@@ -22,12 +23,30 @@ export interface JurnalKas {
   jumlah: number | string;
   keterangan?: string | null;
   sumber?: string;
+  sumberId?: string | null;
   status?: string;
+  dibuatPada?: string;
+  diperbaruiPada?: string;
   akunKas?: {
     id: string;
     kode: string;
     nama: string;
   } | null;
+}
+
+export interface LaporanKas {
+  periode: { dari: string; sampai: string };
+  saldoAwal: number | string;
+  totalMasuk: number | string;
+  totalKeluar: number | string;
+  saldoAkhir: number | string;
+  jumlahTransaksi: number;
+  perKategori: Array<{
+    kategori: string;
+    jenis: "masuk" | "keluar";
+    total: number | string;
+    jumlah: number;
+  }>;
 }
 
 export interface JurnalKasRingkasan {
@@ -96,6 +115,42 @@ export async function getAkunKas(): Promise<ApiResponse<AkunKas[]>> {
   return apiFetch("/api/keuangan/akun-kas");
 }
 
+export async function createAkunKas(payload: {
+  kode: string;
+  nama: string;
+  tipe?: string;
+  saldoAwal?: number | string;
+}): Promise<ApiResponse<AkunKas>> {
+  return apiFetch("/api/keuangan/akun-kas", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function updateAkunKas(
+  id: string,
+  payload: {
+    nama?: string;
+    tipe?: string;
+    status?: string;
+    saldoAwal?: number | string;
+  },
+): Promise<ApiResponse<AkunKas>> {
+  return apiFetch(`/api/keuangan/akun-kas/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function deleteAkunKas(
+  id: string,
+): Promise<ApiResponse<null>> {
+  return apiFetch(`/api/keuangan/akun-kas/${id}`, {
+    method: "DELETE",
+  });
+}
+
+
 export async function getJurnalKas(
   params: JurnalKasParams = {},
 ): Promise<ApiResponse<JurnalKas[]>> {
@@ -121,4 +176,38 @@ export async function batalkanJurnalKas(
     method: "POST",
     body: JSON.stringify({ alasan }),
   });
+}
+
+export async function getLaporanKas(
+  params: { dari: string; sampai: string; akunKasId?: string },
+): Promise<ApiResponse<LaporanKas>> {
+  return apiFetch(`/api/keuangan/laporan-kas${buildQuery(params)}`);
+}
+
+/**
+ * There is no GET /jurnal-kas/:id endpoint. Walk the paginated list
+ * (limit is capped at 100 by the backend) until the record is found.
+ */
+export async function getJurnalKasById(
+  id: string,
+): Promise<JurnalKas | null> {
+  if (!id) return null;
+
+  const limit = 100;
+  let page = 1;
+  let totalPages = 1;
+
+  do {
+    const response = await getJurnalKas({ page, limit });
+    const found = (response.data || []).find(
+      (item) => String(item.id) === String(id),
+    );
+
+    if (found) return found;
+
+    totalPages = response.meta?.totalPages ?? 1;
+    page += 1;
+  } while (page <= totalPages && page <= 100);
+
+  return null;
 }

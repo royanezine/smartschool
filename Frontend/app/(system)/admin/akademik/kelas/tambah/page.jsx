@@ -223,12 +223,6 @@ export default function AdminKelasTambahPage() {
     }
   }
 
-  useEffect(() => {
-    loadTahunAjaran();
-    loadGedung();
-    loadGuru();
-  }, []);
-
   async function loadTahunAjaran() {
     try {
       setLoadingTahun(true);
@@ -331,6 +325,15 @@ export default function AdminKelasTambahPage() {
       setLoadingLantai(false);
     }
   }
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      loadTahunAjaran();
+      loadGedung();
+      loadGuru();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, []);
 
   function handleChange(e) {
     const { name, value } = e.target;

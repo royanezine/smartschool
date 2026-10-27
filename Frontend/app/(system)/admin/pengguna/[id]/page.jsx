@@ -2,7 +2,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { getToken } from "@/lib/auth";
+
 import { useParams, useRouter } from "next/navigation";
 import {
   ArrowLeft,
@@ -29,10 +29,9 @@ import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
 import { getShiftKerja } from "@/services/shiftKerja.service";
 import { getKategoriJabatan } from "@/services/kategoriJabatan.service";
+import { getUserById } from "@/services/user.service";
 
-const API_URL = (
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
-).replace(/\/$/, "");
+
 
 
 
@@ -369,41 +368,11 @@ export default function DetailPenggunaPage() {
       setLoading(true);
       setError("");
 
-      const token = getToken();
-
-      if (!token) {
-        throw new Error("Token login tidak ditemukan. Silakan login kembali.");
-      }
-
       if (!id) {
         throw new Error("ID pengguna tidak ditemukan.");
       }
 
-      const response = await fetch(
-        `${API_URL}/api/users/${encodeURIComponent(id)}`,
-        {
-          method: "GET",
-          headers: {
-            Accept: "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          cache: "no-store",
-        }
-      );
-
-      const result = await response.json().catch(() => ({}));
-
-      if (!response.ok) {
-        throw new Error(
-          result?.message ||
-            result?.error ||
-            "Gagal mengambil detail pengguna."
-        );
-      }
-
-      if (result?.success === false) {
-        throw new Error(result?.message || "Gagal mengambil detail pengguna.");
-      }
+      const result = await getUserById(id);
 
       const userData = unwrapUserResponse(result);
 
@@ -456,8 +425,11 @@ export default function DetailPenggunaPage() {
   }, []);
 
   useEffect(() => {
-    loadUser();
-    loadMasterData();
+    const timer = setTimeout(() => {
+      loadUser();
+      loadMasterData();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadUser, loadMasterData]);
 
   const pageLayout = (content) => (

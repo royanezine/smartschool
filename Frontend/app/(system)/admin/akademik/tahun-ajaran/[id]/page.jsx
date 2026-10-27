@@ -91,7 +91,7 @@ export default function DetailTahunAjaranPage() {
     return [];
   };
 
-  const loadDetail = async (isRefresh = false) => {
+  const loadDetail = useCallback(async (isRefresh = false) => {
     try {
       setError("");
 
@@ -153,13 +153,16 @@ export default function DetailTahunAjaranPage() {
       setLoadingKelas(false);
       setRefreshing(false);
     }
-  };
+  }, [id]);
 
   useEffect(() => {
     if (id) {
-      loadDetail(false);
+      const timer = setTimeout(() => {
+        loadDetail(false);
+      }, 0);
+      return () => clearTimeout(timer);
     }
-  }, [id]);
+  }, [id, loadDetail]);
 
   const toggleSidebar = () => {
     setIsCollapsed((prev) => !prev);

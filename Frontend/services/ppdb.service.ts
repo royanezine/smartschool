@@ -24,6 +24,8 @@ export interface PendaftaranPpdb {
   id: string;
   sekolahId: string;
   jalurPpdbId: string;
+  gelombangPpdbId?: string | null;
+  gelombang?: string | null;
   nomorPendaftaran: string;
   namaLengkap: string;
   nisn: string;
@@ -73,6 +75,18 @@ export interface BerkasPpdb {
   dihapusPada?: string | null;
 }
 
+export interface HasilSeleksiPpdb {
+  id?: string;
+  pendaftaranPpdbId?: string;
+  nilaiTes?: number | string | null;
+  peringkat?: number | null;
+  statusKelulusan?: string | null;
+  catatan?: string | null;
+  dibuatPada?: string;
+  diperbaruiPada?: string;
+  dihapusPada?: string | null;
+}
+
 export interface PendaftarPpdb extends PendaftaranPpdb {
   jalurPpdb?: {
     id: string;
@@ -83,13 +97,69 @@ export interface PendaftarPpdb extends PendaftaranPpdb {
     tanggalSelesai?: string | null;
     status?: string | null;
   } | null;
+  gelombangPpdb?: {
+    id: string;
+    nama: string;
+    tanggalMulai?: string | null;
+    tanggalSelesai?: string | null;
+    kuota?: number | null;
+    status?: string | null;
+  } | null;
   berkasPpdb?: BerkasPpdb[];
+  hasilSeleksiPpdb?: HasilSeleksiPpdb | null;
+  pengguna?: {
+    id: string;
+    namaPengguna?: string;
+    namaLengkap?: string;
+    email?: string;
+    nisn?: string;
+    status?: string | null;
+  } | null;
+  sekolah?: {
+    id: string;
+    nama?: string;
+    jenjang?: string | null;
+  } | null;
+}
+
+export interface PpdbPagination {
+  page: number;
+  limit: number;
+  total: number;
+  totalData: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrev: boolean;
+}
+
+export interface PpdbStatistik {
+  total: number;
+  menunggu: number;
+  lulus: number;
+  ditolak: number;
 }
 
 export interface GetPendaftarPpdbResponse {
   success: boolean;
   message?: string;
   data: PendaftarPpdb[];
+  meta?: Partial<PpdbPagination>;
+  pagination?: Partial<PpdbPagination>;
+  statistik?: Partial<PpdbStatistik>;
+}
+
+export interface GetPendaftarPpdbDetailResponse {
+  success: boolean;
+  message?: string;
+  data: PendaftarPpdb;
+}
+
+export interface GetAllPendaftarPpdbResult {
+  data: PendaftarPpdb[];
+  total: number;
+  statistik?: PpdbStatistik;
+  jumlahHalaman: number;
+  terpotong: boolean;
 }
 
 export interface UploadBerkasPpdbResponse {
@@ -150,27 +220,41 @@ export async function daftarPpdb(
   });
 }
 
+export interface PendaftarPpdbFilters {
+  search?: string;
+  jalurPpdbId?: string;
+  gelombangPpdbId?: string;
+  status?: string;
+  page?: number;
+  limit?: number;
+}
+
 export async function getPendaftarPpdb(
-  filterOrJalurId?:
-    | string
-    | {
-        search?: string;
-        jalurPpdbId?: string;
-        status?: string;
-        page?: number;
-        limit?: number;
-      }
-): Promise<any> {
+  filterOrJalurId?: string | PendaftarPpdbFilters
+): Promise<GetPendaftarPpdbResponse> {
   const query = new URLSearchParams();
 
   if (typeof filterOrJalurId === "string") {
     if (filterOrJalurId) query.set("jalurPpdbId", filterOrJalurId);
   } else if (filterOrJalurId && typeof filterOrJalurId === "object") {
-    if (filterOrJalurId.search) query.set("search", filterOrJalurId.search);
-    if (filterOrJalurId.jalurPpdbId) query.set("jalurPpdbId", filterOrJalurId.jalurPpdbId);
-    if (filterOrJalurId.status) query.set("status", filterOrJalurId.status);
-    if (filterOrJalurId.page) query.set("page", String(filterOrJalurId.page));
-    if (filterOrJalurId.limit) query.set("limit", String(filterOrJalurId.limit));
+    if (filterOrJalurId.search?.trim()) {
+      query.set("search", filterOrJalurId.search.trim());
+    }
+    if (filterOrJalurId.jalurPpdbId) {
+      query.set("jalurPpdbId", filterOrJalurId.jalurPpdbId);
+    }
+    if (filterOrJalurId.gelombangPpdbId) {
+      query.set("gelombangPpdbId", filterOrJalurId.gelombangPpdbId);
+    }
+    if (filterOrJalurId.status) {
+      query.set("status", filterOrJalurId.status);
+    }
+    if (filterOrJalurId.page) {
+      query.set("page", String(filterOrJalurId.page));
+    }
+    if (filterOrJalurId.limit) {
+      query.set("limit", String(filterOrJalurId.limit));
+    }
   }
 
   const qs = query.toString();
@@ -181,7 +265,114 @@ export async function getPendaftarPpdb(
   });
 }
 
-export async function getPendaftarPpdbById(id: string): Promise<any> {
+const LIMIT_PENDAFTAR_MAKS = 100;
+const MAKS_HALAMAN_LAPORAN = 50;
+
+function bacaAngka(
+  value: unknown,
+  fallback: number
+): number {
+  const angka = Number(value);
+  return Number.isFinite(angka) && angka >= 0
+    ? angka
+    : fallback;
+}
+
+function normalisasiStatistik(
+  statistik?: Partial<PpdbStatistik>
+): PpdbStatistik | undefined {
+  if (!statistik) {
+    return undefined;
+  }
+
+  return {
+    total: bacaAngka(statistik.total, 0),
+    menunggu: bacaAngka(statistik.menunggu, 0),
+    lulus: bacaAngka(statistik.lulus, 0),
+    ditolak: bacaAngka(statistik.ditolak, 0),
+  };
+}
+
+/**
+ * Mengambil seluruh halaman daftar pendaftar dari endpoint resmi
+ * GET /api/ppdb/pendaftar. Dipakai untuk rekap dashboard/laporan yang
+ * membutuhkan data lengkap, bukan hanya satu halaman.
+ */
+export async function getAllPendaftarPpdb(
+  filters: Omit<PendaftarPpdbFilters, "page" | "limit"> = {},
+  maxPages = MAKS_HALAMAN_LAPORAN
+): Promise<GetAllPendaftarPpdbResult> {
+  const first = await getPendaftarPpdb({
+    ...filters,
+    page: 1,
+    limit: LIMIT_PENDAFTAR_MAKS,
+  });
+
+  const dataPertama = Array.isArray(first?.data)
+    ? first.data
+    : [];
+  const meta: Partial<PpdbPagination> =
+    first?.meta || first?.pagination || {};
+  const total = bacaAngka(
+    meta.totalData ?? meta.total,
+    dataPertama.length
+  );
+  const limitServer = Math.max(
+    1,
+    bacaAngka(meta.limit, LIMIT_PENDAFTAR_MAKS)
+  );
+  const totalHalaman = Math.max(
+    1,
+    bacaAngka(
+      meta.totalPages,
+      Math.ceil(total / limitServer)
+    )
+  );
+  const batasHalaman = Math.min(
+    totalHalaman,
+    Math.max(1, maxPages)
+  );
+
+  const data = [...dataPertama];
+
+  for (let halaman = 2; halaman <= batasHalaman; halaman += 1) {
+    const response = await getPendaftarPpdb({
+      ...filters,
+      page: halaman,
+      limit: limitServer,
+    });
+
+    if (Array.isArray(response?.data)) {
+      data.push(...response.data);
+    }
+  }
+
+  return {
+    data,
+    total: Math.max(total, data.length),
+    statistik: normalisasiStatistik(first?.statistik),
+    jumlahHalaman: batasHalaman,
+    terpotong: totalHalaman > batasHalaman,
+  };
+}
+
+export async function getStatistikPpdb(
+  filters: Omit<PendaftarPpdbFilters, "page" | "limit"> = {}
+): Promise<{ success: boolean; message?: string; data: PpdbStatistik }> {
+  const query = new URLSearchParams();
+  if (filters.search?.trim()) query.set("search", filters.search.trim());
+  if (filters.jalurPpdbId) query.set("jalurPpdbId", filters.jalurPpdbId);
+  if (filters.gelombangPpdbId) query.set("gelombangPpdbId", filters.gelombangPpdbId);
+  if (filters.status) query.set("status", filters.status);
+  const qs = query.toString();
+  return apiFetch(`${ENDPOINT}/pendaftar/statistik${qs ? `?${qs}` : ""}`, {
+    method: "GET",
+  });
+}
+
+export async function getPendaftarPpdbById(
+  id: string
+): Promise<GetPendaftarPpdbDetailResponse> {
   if (!id) {
     throw new Error("ID pendaftaran tidak ditemukan.");
   }
@@ -189,6 +380,89 @@ export async function getPendaftarPpdbById(id: string): Promise<any> {
   return apiFetch(`${ENDPOINT}/pendaftar/${encodeURIComponent(id)}`, {
     method: "GET",
   });
+}
+
+export interface MuatDetailPendaftarPpdbResult {
+  data: PendaftarPpdb[];
+  gagal: Array<{
+    id: string;
+    message: string;
+  }>;
+}
+
+/**
+ * Memuat detail beberapa pendaftar dengan batas paralel.
+ *
+ * Dipakai bila respons daftar tidak menyertakan `hasilSeleksiPpdb`
+ * (varian `pagination`), sedangkan endpoint detail menyertakannya.
+ */
+export async function muatDetailPendaftarPpdb(
+  ids: string[],
+  opsi: {
+    batasParalel?: number;
+    onProgress?: (selesai: number, total: number) => void;
+  } = {}
+): Promise<MuatDetailPendaftarPpdbResult> {
+  const unik = Array.from(
+    new Set(
+      (Array.isArray(ids) ? ids : [])
+        .map((id) => String(id || "").trim())
+        .filter(Boolean)
+    )
+  );
+
+  const batas = Math.max(
+    1,
+    Math.min(10, Number(opsi.batasParalel) || 4)
+  );
+
+  const data: PendaftarPpdb[] = [];
+  const gagal: MuatDetailPendaftarPpdbResult["gagal"] = [];
+
+  let indeks = 0;
+  let selesai = 0;
+
+  async function pekerja() {
+    while (indeks < unik.length) {
+      const posisi = indeks;
+      indeks += 1;
+
+      const id = unik[posisi];
+
+      try {
+        const response = await getPendaftarPpdbById(id);
+
+        if (response?.data) {
+          data.push(response.data);
+        } else {
+          gagal.push({
+            id,
+            message: "Detail pendaftar tidak ditemukan.",
+          });
+        }
+      } catch (err) {
+        gagal.push({
+          id,
+          message:
+            err instanceof Error
+              ? err.message
+              : "Gagal memuat detail pendaftar.",
+        });
+      } finally {
+        selesai += 1;
+        opsi.onProgress?.(selesai, unik.length);
+      }
+    }
+  }
+
+  await Promise.all(
+    Array.from(
+      { length: Math.min(batas, unik.length) },
+      () => pekerja()
+    )
+  );
+
+  return { data, gagal };
 }
 
 export function isPpdbEndpointMissing(error: unknown): boolean {
@@ -524,7 +798,10 @@ export async function verifikasiPpdb(
 const ppdbService = {
   daftarPpdb,
   getPendaftarPpdb,
+  getStatistikPpdb,
+  getAllPendaftarPpdb,
   getPendaftarPpdbById,
+  muatDetailPendaftarPpdb,
   uploadBerkasPpdb,
   verifikasiPpdb,
   getPengaturanSpmb,

@@ -3,7 +3,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { apiFetch } from "@/lib/api";
+import { getProfile } from "@/services/user.service";
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
 import {
@@ -31,7 +31,6 @@ import {
   ChevronRight,
 } from "lucide-react";
 
-const PROFILE_ENDPOINT = "/api/users/profile";
 
 function formatDate(value, withTime = false) {
   if (!value) return "Belum tersedia";
@@ -166,7 +165,7 @@ export default function AdminProfilePage() {
       setError("");
 
       try {
-        const response = await apiFetch(PROFILE_ENDPOINT);
+        const response = await getProfile();
         const user = normalizeProfile(response);
 
         setProfile(user);
@@ -185,7 +184,10 @@ export default function AdminProfilePage() {
   );
 
   useEffect(() => {
-    fetchProfile();
+    const timer = setTimeout(() => {
+      fetchProfile();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [fetchProfile]);
 
   const handleLogout = () => {

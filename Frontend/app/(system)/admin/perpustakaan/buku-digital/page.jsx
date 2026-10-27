@@ -16,6 +16,7 @@ import {
   CheckCircle2,
   Archive,
   FileText,
+  AlertCircle,
 } from "lucide-react";
 
 import {
@@ -157,8 +158,10 @@ export default function DataBukuPage() {
   }
 
   useEffect(() => {
-    loadBooks();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const timer = setTimeout(() => {
+      loadBooks();
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   const categories = useMemo(() => {
@@ -612,7 +615,7 @@ export default function DataBukuPage() {
                 <p className="theme-text-secondary mt-1.5 text-sm leading-6">
                   Data buku{" "}
                   <span className="theme-text font-semibold">
-                    "{deleteBook.judul}"
+                    &quot;{deleteBook.judul}&quot;
                   </span>{" "}
                   akan dihapus dari daftar perpustakaan.
                 </p>

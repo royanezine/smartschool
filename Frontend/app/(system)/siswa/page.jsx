@@ -8,6 +8,8 @@ import {
   getKelas,
   getKelasById,
 } from "@/services/kelas.service";
+import { getTugasByKelasMapel } from "@/services/tugas.service";
+import { getMateriPembelajaran } from "@/services/materiPembelajaran.service";
 
 import { getSessionUser, subscribeAuth } from "@/lib/auth";
 
@@ -34,9 +36,7 @@ import {
 } from "lucide-react";
 
 
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ||
-  "http://localhost:5000";
+
 
 
 const themePrimaryGradient =
@@ -403,15 +403,7 @@ function extractObject(response) {
 
 
 
-function getHeaders() {
-  const token = getToken();
 
-  return {
-    "Content-Type": "application/json",
-    Accept: "application/json",
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-  };
-}
 
 
 async function fetchKelasDetail(id) {
@@ -506,30 +498,7 @@ async function fetchJumlahTugas(kelasMapelId) {
   try {
     if (!kelasMapelId) return 0;
 
-    const response = await fetch(
-      `${API_URL}/api/tugas/kelas-mapel/${kelasMapelId}`,
-      {
-        method: "GET",
-        headers: getHeaders(),
-        cache: "no-store",
-      }
-    );
-
-    let result = null;
-    try {
-      result = await response.json();
-    } catch {
-      result = null;
-    }
-
-    if (!response.ok) {
-      console.error(
-        `[MATA PELAJARAN] Gagal fetch tugas ${kelasMapelId}:`,
-        result
-      );
-      return 0;
-    }
-
+    const result = await getTugasByKelasMapel(kelasMapelId);
     return extractArray(result).length;
   } catch (error) {
     console.error(
@@ -645,20 +614,23 @@ export default function SiswaDashboardPage() {
 
 
   useEffect(() => {
-    setMounted(true);
+    const timer = setTimeout(() => {
+      setMounted(true);
 
-    const sessionUser = readSessionUser();
+      const sessionUser = readSessionUser();
 
-    if (!sessionUser) {
-      console.warn(
-        "[USER] Sesi pengguna tidak ditemukan. Silakan login kembali."
-      );
-      return;
-    }
+      if (!sessionUser) {
+        console.warn(
+          "[USER] Sesi pengguna tidak ditemukan. Silakan login kembali."
+        );
+        return;
+      }
 
-    setUser(sessionUser);
+      setUser(sessionUser);
 
-    console.log("[USER] Data user login berhasil dibaca:", sessionUser);
+      console.log("[USER] Data user login berhasil dibaca:", sessionUser);
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {

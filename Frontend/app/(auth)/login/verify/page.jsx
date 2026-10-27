@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { AlertCircle, ArrowLeft, ShieldCheck } from "lucide-react";
 
@@ -8,17 +9,21 @@ const IDENTIFIER_KEY = "login_identifier";
 
 
 export default function VerifyLoginPage() {
+  const router = useRouter();
   const [identifier, setIdentifier] = useState("");
 
   useEffect(() => {
-    try {
-      const saved = sessionStorage.getItem(IDENTIFIER_KEY);
+    const timer = setTimeout(() => {
+      try {
+        const saved = sessionStorage.getItem(IDENTIFIER_KEY);
 
-      if (saved) {
-        setIdentifier(saved);
+        if (saved) {
+          setIdentifier(saved);
+        }
+      } catch {
       }
-    } catch {
-    }
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   const handleBackToLogin = () => {
@@ -27,7 +32,7 @@ export default function VerifyLoginPage() {
     } catch {
     }
 
-    window.location.href = "/login";
+    router.push("/login");
   };
 
   return (

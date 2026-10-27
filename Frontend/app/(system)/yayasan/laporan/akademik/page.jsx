@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 
 import {
@@ -14,7 +14,11 @@ import {
   TrendingUp,
   Users,
   CheckCircle2,
+  Loader2,
+  AlertCircle,
+  RefreshCw,
 } from "lucide-react";
+import { getLaporanAkademik } from "@/services/yayasan.service";
 
 
 const themePrimaryGradient =
@@ -84,80 +88,63 @@ const JENJANG_OPTIONS = [
 
 const KKM = 75;
 
-const unitAkademik = [
-  {
-    id: 1,
-    nama: "SD Smart School 1",
-    jenjang: "SD",
-    siswa: 612,
-    rataNilai: 82.4,
-    kehadiran: 97,
-    tuntas: 588,
-  },
-  {
-    id: 2,
-    nama: "SD Smart School 2",
-    jenjang: "SD",
-    siswa: 548,
-    rataNilai: 78.1,
-    kehadiran: 95,
-    tuntas: 501,
-  },
-  {
-    id: 3,
-    nama: "SMP Smart School 1",
-    jenjang: "SMP",
-    siswa: 734,
-    rataNilai: 80.6,
-    kehadiran: 96,
-    tuntas: 690,
-  },
-  {
-    id: 4,
-    nama: "SMP Smart School 2",
-    jenjang: "SMP",
-    siswa: 689,
-    rataNilai: 74.9,
-    kehadiran: 94,
-    tuntas: 601,
-  },
-  {
-    id: 5,
-    nama: "SMA Smart School 1",
-    jenjang: "SMA",
-    siswa: 812,
-    rataNilai: 85.2,
-    kehadiran: 98,
-    tuntas: 779,
-  },
-  {
-    id: 6,
-    nama: "SMA Smart School 2",
-    jenjang: "SMA",
-    siswa: 917,
-    rataNilai: 81.7,
-    kehadiran: 96,
-    tuntas: 862,
-  },
-];
-
-
 const round1 = (n) => Math.round(n * 10) / 10;
-
 
 export default function LaporanAkademikPage() {
   const router = useRouter();
 
-  const [semester, setSemester] = useState(
-    SEMESTER_OPTIONS[0]
-  );
-
-  const [jenjang, setJenjang] = useState(
-    JENJANG_OPTIONS[0]
-  );
-
+  const [semester, setSemester] = useState(SEMESTER_OPTIONS[0]);
+  const [jenjang, setJenjang] = useState(JENJANG_OPTIONS[0]);
   const [search, setSearch] = useState("");
+  const [unitAkademik, setUnitAkademik] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
+  const fetchAkademik = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await getLaporanAkademik();
+      const list = Array.isArray(res?.data?.items)
+        ? res.data.items
+        : Array.isArray(res?.data)
+        ? res.data
+        : [];
+      setUnitAkademik(list);
+    } catch (err) {
+      setError(err?.message || "Gagal memuat laporan akademik yayasan.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      try {
+        const res = await getLaporanAkademik();
+        if (cancelled) return;
+        const list = Array.isArray(res?.data?.items)
+          ? res.data.items
+          : Array.isArray(res?.data)
+          ? res.data
+          : [];
+        setUnitAkademik(list);
+      } catch (err) {
+        if (!cancelled) {
+          setError(err?.message || "Gagal memuat laporan akademik yayasan.");
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    }
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const filteredUnits = useMemo(() => {
     const keyword = search.trim().toLowerCase();
@@ -169,14 +156,13 @@ export default function LaporanAkademikPage() {
 
       const matchSearch =
         !keyword ||
-        unit.nama.toLowerCase().includes(keyword);
+        unit.nama?.toLowerCase().includes(keyword);
 
       return matchJenjang && matchSearch;
-    });
-  }, [jenjang, search]);
+      });
+      }, [unitAkademik, jenjang, search]);
 
-
-  const summary = useMemo(() => {
+      const summary = useMemo(() => {
     if (filteredUnits.length === 0) {
       return {
         rataNilai: null,
@@ -555,7 +541,24 @@ export default function LaporanAkademikPage() {
                 </thead>
 
                 <tbody>
-                  {filteredUnits.length === 0 && (
+                  {loading ? (
+                    <tr>
+                      <td colSpan={6} className="border theme-border p-10 text-center">
+                        <Loader2 size={24} className="mx-auto text-[var(--color-primary)] animate-spin mb-2" />
+                        <p className="text-sm text-[var(--color-text-muted)]">Memuat data akademik sekolah...</p>
+                      </td>
+                    </tr>
+                  ) : error ? (
+                    <tr>
+                      <td colSpan={6} className="border theme-border p-8 text-center text-[var(--color-danger)]">
+                        <AlertCircle size={24} className="mx-auto mb-2" />
+                        <p className="text-sm">{error}</p>
+                        <button type="button" onClick={fetchAkademik} className="mt-2 text-xs font-semibold underline">
+                          Coba Lagi
+                        </button>
+                      </td>
+                    </tr>
+                  ) : filteredUnits.length === 0 ? (
                     <tr>
                       <td
                         colSpan={6}
@@ -571,9 +574,8 @@ export default function LaporanAkademikPage() {
                         </p>
                       </td>
                     </tr>
-                  )}
-
-                  {filteredUnits.map((unit) => {
+                  ) : (
+                    filteredUnits.map((unit) => {
                     const persenTuntas = round1(
                       (unit.tuntas / unit.siswa) * 100
                     );
@@ -625,7 +627,7 @@ export default function LaporanAkademikPage() {
                         </td>
                       </tr>
                     );
-                  })}
+                  }))}
                 </tbody>
               </table>
             </div>

@@ -12,7 +12,7 @@ import {
   X,
   Info,
 } from "lucide-react";
-import { apiFetch } from "@/lib/api";
+import { createAkunKas } from "@/services/jurnalKas.service";
 
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
@@ -73,10 +73,7 @@ export default function TambahAkunKasPage() {
     setSaving(true);
 
     try {
-      const response = await apiFetch("/api/keuangan/akun-kas", {
-        method: "POST",
-        body: JSON.stringify(payload),
-      });
+      const response = await createAkunKas(payload);
 
       if (response?.success === false) {
         throw new Error(response.message || "Gagal menyimpan akun kas.");

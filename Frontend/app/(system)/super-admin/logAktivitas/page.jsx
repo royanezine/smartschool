@@ -139,7 +139,12 @@ export default function LogAktivitasPage() {
     }
   }, []);
 
-  useEffect(() => { loadAuditLogs(); }, [loadAuditLogs]);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      loadAuditLogs();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [loadAuditLogs]);
 
   const roleOptions = useMemo(() => [...new Set(logs.map(x => x.role).filter(x => x && x !== "-"))].sort(), [logs]);
   const moduleOptions = useMemo(() => [...new Set(logs.map(x => x.module).filter(x => x && x !== "-"))].sort(), [logs]);
@@ -200,7 +205,12 @@ export default function LogAktivitasPage() {
   const totalPages = Math.max(1, Math.ceil(sortedLogs.length / PAGE_SIZE));
   const pageLogs = sortedLogs.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
   useEffect(() => {
-    if (currentPage > totalPages) setCurrentPage(totalPages);
+    if (currentPage > totalPages) {
+      const timer = setTimeout(() => {
+        setCurrentPage(totalPages);
+      }, 0);
+      return () => clearTimeout(timer);
+    }
   }, [currentPage, totalPages]);
 
   const stats = useMemo(() => ({

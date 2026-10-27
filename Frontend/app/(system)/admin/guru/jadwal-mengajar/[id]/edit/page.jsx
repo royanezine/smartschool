@@ -379,14 +379,6 @@ export default function EditJadwalMengajarPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  useEffect(() => {
-    if (!id) return;
-
-    loadData();
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
-
   async function loadData() {
     try {
       setLoading(true);
@@ -427,6 +419,15 @@ export default function EditJadwalMengajarPage() {
       setLoadingKelasMapel(false);
     }
   }
+
+  useEffect(() => {
+    if (!id) return;
+
+    const timer = setTimeout(() => {
+      loadData();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [id]);
 
   function handleChange(e) {
     const { name, value } = e.target;

@@ -2,7 +2,7 @@
 "use client";
 
 import { Suspense, useEffect, useMemo, useState } from "react";
-import { getToken, getStoredUser } from "@/lib/auth";
+import { getToken, getStoredUser, getSessionUser } from "@/lib/auth";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import {
@@ -36,8 +36,8 @@ import {
 
 import {
   getMateriPembelajaran,
-  getKelasMapel,
 } from "@/services/materiPembelajaran.service";
+import { getKelasMapelSiswa } from "@/services/kelasMapel.service";
 
 
 const themePrimarySurface =
@@ -328,6 +328,9 @@ function getBackendFileUrl(url) {
 
 function getCurrentUser() {
   try {
+    const sessionUser = getSessionUser();
+    if (sessionUser) return sessionUser;
+
     const rawUser = getStoredUser();
 
     if (!rawUser) return null;
@@ -336,7 +339,11 @@ function getCurrentUser() {
       return rawUser;
     }
 
-    if (typeof rawUser === "string") {
+    if (
+      typeof rawUser === "string" &&
+      !rawUser.startsWith("[object") &&
+      rawUser !== "undefined"
+    ) {
       return JSON.parse(rawUser);
     }
 
@@ -388,7 +395,10 @@ function MateriPageInner() {
 
 
   useEffect(() => {
-    setCurrentUser(getCurrentUser());
+    const timer = setTimeout(() => {
+      setCurrentUser(getCurrentUser());
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
 
@@ -399,7 +409,7 @@ function MateriPageInner() {
 
       const [kelasMapelResponse, materiResponse] =
         await Promise.all([
-          getKelasMapel(),
+          getKelasMapelSiswa(),
           getMateriPembelajaran(),
         ]);
 
@@ -436,8 +446,10 @@ function MateriPageInner() {
   }
 
   useEffect(() => {
-    loadData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const timer = setTimeout(() => {
+      loadData();
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
 
@@ -452,9 +464,7 @@ function MateriPageInner() {
 
 
   const kelasMapelSiswa = useMemo(() => {
-    if (!currentUser) return [];
-
-    let data = kelasMapelList;
+    let data = Array.isArray(kelasMapelList) ? kelasMapelList : [];
 
     if (kelasMapelParam) {
       return data.filter(
@@ -463,15 +473,17 @@ function MateriPageInner() {
     }
 
     if (userKelasId != null) {
-      data = data.filter(
+      const filteredByKelas = data.filter(
         (item) =>
           String(getKelasId(item)) === String(userKelasId)
       );
+      if (filteredByKelas.length > 0) {
+        return filteredByKelas;
+      }
     }
 
     return data;
   }, [
-    currentUser,
     kelasMapelList,
     kelasMapelParam,
     userKelasId,
@@ -516,7 +528,10 @@ function MateriPageInner() {
     );
 
     if (!exists && !kelasMapelExists) {
-      setActiveMapel("semua");
+      const timer = setTimeout(() => {
+        setActiveMapel("semua");
+      }, 0);
+      return () => clearTimeout(timer);
     }
   }, [activeMapel, mataPelajaranList, kelasMapelSiswa]);
 

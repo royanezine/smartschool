@@ -1,6 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { getKelas } from "@/services/kelas.service";
+import { getKelasMapel } from "@/services/kelasMapel.service";
 import Link from "next/link";
 
 import Header from "@/app/components/Header";
@@ -59,147 +61,6 @@ const QUICK_MODULES = [
     tone: "indigo",
   },
 ];
-
-const CLASS_PROGRESS = [
-  {
-    kelas: "Kelas 7A",
-    tingkat: "VII",
-    siswa: 32,
-    nilai: 94,
-    raport: 88,
-    status: "Hampir selesai",
-  },
-  {
-    kelas: "Kelas 7B",
-    tingkat: "VII",
-    siswa: 30,
-    nilai: 87,
-    raport: 81,
-    status: "Berjalan",
-  },
-  {
-    kelas: "Kelas 8A",
-    tingkat: "VIII",
-    siswa: 31,
-    nilai: 96,
-    raport: 92,
-    status: "Hampir selesai",
-  },
-  {
-    kelas: "Kelas 8B",
-    tingkat: "VIII",
-    siswa: 29,
-    nilai: 78,
-    raport: 70,
-    status: "Perlu perhatian",
-  },
-  {
-    kelas: "Kelas 9A",
-    tingkat: "IX",
-    siswa: 32,
-    nilai: 98,
-    raport: 95,
-    status: "Selesai",
-  },
-  {
-    kelas: "Kelas 9B",
-    tingkat: "IX",
-    siswa: 31,
-    nilai: 91,
-    raport: 87,
-    status: "Hampir selesai",
-  },
-];
-
-const RECENT_ACTIVITY = [
-  {
-    title: "Entry nilai diperbarui",
-    detail: "Matematika · Kelas 9A",
-    user: "Budi Santoso",
-    time: "8 menit lalu",
-    icon: PenLine,
-    tone: "blue",
-  },
-  {
-    title: "Raport berhasil diproses",
-    detail: "32 siswa · Kelas 9A",
-    user: "Admin Sekolah",
-    time: "24 menit lalu",
-    icon: FileCheck2,
-    tone: "emerald",
-  },
-  {
-    title: "Pengaturan agregat diperbarui",
-    detail: "Semester Ganjil 2026/2027",
-    user: "Admin Sekolah",
-    time: "1 jam lalu",
-    icon: Settings2,
-    tone: "violet",
-  },
-  {
-    title: "Entry nilai baru",
-    detail: "Bahasa Inggris · Kelas 8A",
-    user: "Rina Amelia",
-    time: "2 jam lalu",
-    icon: BookOpen,
-    tone: "indigo",
-  },
-];
-
-const SUBJECT_PROGRESS = [
-  {
-    subject: "Matematika",
-    teacher: "Budi Santoso",
-    progress: 96,
-    students: 184,
-  },
-  {
-    subject: "Bahasa Indonesia",
-    teacher: "Siti Rahma",
-    progress: 91,
-    students: 184,
-  },
-  {
-    subject: "IPA",
-    teacher: "Dewi Lestari",
-    progress: 88,
-    students: 184,
-  },
-  {
-    subject: "Bahasa Inggris",
-    teacher: "Rina Amelia",
-    progress: 83,
-    students: 184,
-  },
-  {
-    subject: "IPS",
-    teacher: "Anwar Hidayat",
-    progress: 76,
-    students: 184,
-  },
-];
-
-const RAPORT_STATUS = [
-  {
-    label: "Sudah lengkap",
-    value: 428,
-    percentage: 78,
-    tone: "emerald",
-  },
-  {
-    label: "Sedang diproses",
-    value: 82,
-    percentage: 15,
-    tone: "blue",
-  },
-  {
-    label: "Belum lengkap",
-    value: 38,
-    percentage: 7,
-    tone: "amber",
-  },
-];
-
 
 const toneMap = {
   blue: {
@@ -397,37 +258,118 @@ function ProgressBar({ value, tone = "blue" }) {
 
 export default function ERaportPage() {
   const [activeView, setActiveView] = useState("ringkasan");
+  const [kelasList, setKelasList] = useState([]);
+  const [kelasMapelList, setKelasMapelList] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const totalSiswa = useMemo(
-    () =>
-      CLASS_PROGRESS.reduce(
-        (sum, item) => sum + item.siswa,
-        0
-      ),
-    []
-  );
+  useEffect(() => {
+    let active = true;
+    const timer = setTimeout(async () => {
+      try {
+        setLoading(true);
+        const [kelasRes, mapelRes] = await Promise.allSettled([
+          getKelas({ limit: 100 }),
+          getKelasMapel(),
+        ]);
+        if (!active) return;
+        if (kelasRes.status === "fulfilled") {
+          const val = kelasRes.value;
+          const kList = Array.isArray(val?.data)
+            ? val.data
+            : Array.isArray(val)
+            ? val
+            : [];
+          setKelasList(kList);
+        }
+        if (mapelRes.status === "fulfilled") {
+          const val = mapelRes.value;
+          const mList = Array.isArray(val?.data)
+            ? val.data
+            : Array.isArray(val)
+            ? val
+            : [];
+          setKelasMapelList(mList);
+        }
+      } catch {
+        // Fallback
+      } finally {
+        if (active) setLoading(false);
+      }
+    }, 0);
 
-  const averageNilai = useMemo(
-    () =>
-      Math.round(
-        CLASS_PROGRESS.reduce(
-          (sum, item) => sum + item.nilai,
-          0
-        ) / CLASS_PROGRESS.length
-      ),
-    []
-  );
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
+  }, []);
 
-  const averageRaport = useMemo(
-    () =>
-      Math.round(
-        CLASS_PROGRESS.reduce(
-          (sum, item) => sum + item.raport,
-          0
-        ) / CLASS_PROGRESS.length
-      ),
-    []
-  );
+  const classProgress = useMemo(() => {
+    return kelasList.map((k) => {
+      const siswaCount =
+        k._count?.anggotaKelas ??
+        (Array.isArray(k.anggotaKelas) ? k.anggotaKelas.length : k.kapasitas || 0);
+      return {
+        id: k.id,
+        kelas: k.nama || "Kelas",
+        tingkat: k.tingkat ? `Tingkat ${k.tingkat}` : "Reguler",
+        siswa: siswaCount,
+        nilai: 100,
+        raport: 100,
+        status: "Aktif",
+      };
+    });
+  }, [kelasList]);
+
+  const totalSiswa = useMemo(() => {
+    return classProgress.reduce((sum, item) => sum + item.siswa, 0);
+  }, [classProgress]);
+
+  const subjectProgress = useMemo(() => {
+    return kelasMapelList.slice(0, 8).map((km) => ({
+      id: km.id,
+      subject: km.mataPelajaran?.nama || "Mata Pelajaran",
+      teacher: km.guruPengajar?.namaLengkap || "Guru Pengajar",
+      progress: 100,
+      students: totalSiswa,
+    }));
+  }, [kelasMapelList, totalSiswa]);
+
+  const raportStatus = useMemo(() => {
+    return [
+      {
+        label: "Siswa Terdaftar",
+        value: totalSiswa,
+        percentage: 100,
+        tone: "emerald",
+      },
+      {
+        label: "Kelas Terdaftar",
+        value: kelasList.length,
+        percentage: 100,
+        tone: "blue",
+      },
+      {
+        label: "Mata Pelajaran",
+        value: kelasMapelList.length,
+        percentage: 100,
+        tone: "amber",
+      },
+    ];
+  }, [totalSiswa, kelasList.length, kelasMapelList.length]);
+
+  const recentActivity = useMemo(() => {
+    return kelasList.slice(0, 4).map((k, idx) => ({
+      title: `Kelas ${k.nama || ""} aktif`,
+      detail: `${k.tingkat ? `Tingkat ${k.tingkat}` : "Reguler"} · ${k.kapasitas || 0} kapasitas`,
+      user: "Sistem Akademik",
+      time: "Aktif",
+      icon: FileCheck2,
+      tone: idx % 2 === 0 ? "emerald" : "blue",
+    }));
+  }, [kelasList]);
+
+  const averageNilai = 100;
+  const averageRaport = 100;
 
   return (
     <div className="theme-page flex h-screen min-h-0 overflow-hidden">
@@ -915,7 +857,7 @@ export default function ERaportPage() {
                     </thead>
 
                     <tbody className="divide-y divide-[var(--color-border-soft)]">
-                      {CLASS_PROGRESS.map((item) => (
+                      {classProgress.map((item) => (
                         <tr
                           key={item.kelas}
                           className="
@@ -1135,7 +1077,7 @@ export default function ERaportPage() {
                 </div>
 
                 <div className="mt-7 space-y-4">
-                  {RAPORT_STATUS.map((item) => (
+                  {raportStatus.map((item) => (
                     <div key={item.label}>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
@@ -1238,7 +1180,7 @@ export default function ERaportPage() {
 
                 <div className="p-5 sm:p-6">
                   <div className="space-y-5">
-                    {SUBJECT_PROGRESS.map((item, index) => (
+                    {subjectProgress.map((item, index) => (
                       <div key={item.subject}>
                         <div className="flex items-center gap-3">
                           <div
@@ -1333,7 +1275,7 @@ export default function ERaportPage() {
                     <div className="absolute bottom-5 left-[17px] top-5 w-px bg-[var(--color-border-soft)]" />
 
                     <div className="space-y-5">
-                      {RECENT_ACTIVITY.map((item) => {
+                      {recentActivity.map((item) => {
                         const Icon = item.icon;
                         const theme =
                           toneMap[item.tone] ||

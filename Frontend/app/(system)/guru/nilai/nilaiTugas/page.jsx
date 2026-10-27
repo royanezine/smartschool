@@ -234,20 +234,7 @@ export default function GuruNilaiTugasPage() {
   const [catatanForm, setCatatanForm] =
     useState({});
 
-  const [sidebarNotifications] = useState([
-    {
-      id: 1,
-      title: "Rapat Wali Kelas",
-      desc: "Dikirim 2 jam lalu",
-      read: false,
-    },
-    {
-      id: 2,
-      title: "Batas Input Nilai Rapor",
-      desc: "Dikirim 5 jam lalu",
-      read: false,
-    },
-  ]);
+
 
 
   const loadTugas = async () => {
@@ -286,7 +273,10 @@ export default function GuruNilaiTugasPage() {
   };
 
   useEffect(() => {
-    loadTugas();
+    const timer = setTimeout(() => {
+      loadTugas();
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
 
@@ -420,9 +410,10 @@ export default function GuruNilaiTugasPage() {
 
   useEffect(() => {
     if (selectedTugasId) {
-      loadPengumpulan(
-        selectedTugasId
-      );
+      const timer = setTimeout(() => {
+        loadPengumpulan(selectedTugasId);
+      }, 0);
+      return () => clearTimeout(timer);
     }
   }, [selectedTugasId]);
 
@@ -655,15 +646,6 @@ export default function GuruNilaiTugasPage() {
               !sidebarOpen
             )
           }
-          notifications={
-            sidebarNotifications
-          }
-          user={{
-            name: "Guru",
-            email:
-              "guru@smartschool.com",
-            avatar: "GU",
-          }}
         />
 
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">

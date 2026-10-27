@@ -1,7 +1,11 @@
 ﻿"use client";
 
-import { getToken, getStoredUser } from "@/lib/auth";
-
+import { getKelasMapelSiswa } from "@/services/kelasMapel.service";
+import {
+  getTugasByKelasMapel,
+  getDetailTugas,
+  submitTugas,
+} from "@/services/tugas.service";
 import {
   Suspense,
   useCallback,
@@ -9,9 +13,8 @@ import {
   useMemo,
   useState,
 } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import {
-  ArrowLeft,
   BookOpen,
   CalendarDays,
   CheckCircle2,
@@ -31,14 +34,6 @@ import {
   Timer,
   GraduationCap,
 } from "lucide-react";
-
-
-const API_URL = (
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
-).replace(/\/$/, "");
-
-const KELAS_BASE_URL = `${API_URL}/api/kelas`;
-const TASK_BASE_URL = `${API_URL}/api/tugas`;
 
 
 const themePrimaryGradient =
@@ -123,58 +118,6 @@ const themeDisabled =
   "disabled:cursor-not-allowed disabled:opacity-60";
 
 
-async function apiRequest(endpoint, options = {}) {
-  const token =
-    typeof window !== "undefined"
-      ? getToken()
-      : null;
-
-  const headers = {
-    ...(token
-      ? {
-          Authorization: `Bearer ${token}`,
-        }
-      : {}),
-    ...(options.headers || {}),
-  };
-
-  if (!(options.body instanceof FormData)) {
-    headers["Content-Type"] = "application/json";
-  }
-
-  const response = await fetch(endpoint, {
-    ...options,
-    headers,
-  });
-
-  const contentType =
-    response.headers.get("content-type") || "";
-
-  let result;
-
-  if (contentType.includes("application/json")) {
-    result = await response.json();
-  } else {
-    const text = await response.text();
-
-    result = {
-      success: response.ok,
-      message: text || "Terjadi kesalahan",
-    };
-  }
-
-  if (!response.ok) {
-    throw new Error(
-      result?.message ||
-        result?.error ||
-        `Request gagal (${response.status})`
-    );
-  }
-
-  return result;
-}
-
-
 function getData(response) {
   if (!response) return null;
 
@@ -186,97 +129,6 @@ function getData(response) {
 }
 
 
-function getLoggedInUserId() {
-  if (typeof window === "undefined") {
-    return null;
-  }
-
-  try {
-    const storedUser = getStoredUser();
-
-    if (storedUser) {
-      const user = JSON.parse(storedUser);
-
-      const userId =
-        user?.id ||
-        user?.userId ||
-        user?.penggunaId ||
-        user?.siswa?.id ||
-        user?.data?.id ||
-        user?.data?.userId ||
-        user?.data?.penggunaId;
-
-      if (userId) {
-        return userId;
-      }
-    }
-  } catch (error) {
-    console.error(
-      "Gagal membaca user dari localStorage:",
-      error
-    );
-  }
-
-  try {
-    const token = getToken();
-
-    if (!token) {
-      return null;
-    }
-
-    const parts = token.split(".");
-
-    if (parts.length !== 3) {
-      return null;
-    }
-
-    const payload = JSON.parse(
-      atob(
-        parts[1]
-          .replace(/-/g, "+")
-          .replace(/_/g, "/")
-      )
-    );
-
-    return (
-      payload?.userId ||
-      payload?.id ||
-      payload?.penggunaId ||
-      null
-    );
-  } catch (error) {
-    console.error(
-      "Gagal membaca userId dari token:",
-      error
-    );
-
-    return null;
-  }
-}
-
-
-function getArrayData(response) {
-  const data = getData(response);
-
-  if (Array.isArray(data)) {
-    return data;
-  }
-
-  if (Array.isArray(data?.data)) {
-    return data.data;
-  }
-
-  if (Array.isArray(data?.items)) {
-    return data.items;
-  }
-
-  if (Array.isArray(data?.rows)) {
-    return data.rows;
-  }
-
-  return [];
-}
-
 function getNamaMapel(data) {
   return (
     data?.kelasMapel?.mataPelajaran?.nama ||
@@ -285,109 +137,6 @@ function getNamaMapel(data) {
     data?.namaMapel ||
     "Mata pelajaran belum tersedia"
   );
-}
-
-
-async function getKelasSiswaId() {
-  const userId = getLoggedInUserId();
-
-  if (!userId) {
-    throw new Error(
-      "Data pengguna tidak ditemukan. Silakan login ulang."
-    );
-  }
-
-  const kelasResponse = await apiRequest(
-    KELAS_BASE_URL
-  );
-
-  const kelasList = getArrayData(kelasResponse);
-
-  if (kelasList.length === 0) {
-    throw new Error(
-      "Belum ada data kelas yang tersedia."
-    );
-  }
-
-  for (const kelas of kelasList) {
-    if (!kelas?.id) {
-      continue;
-    }
-
-    try {
-      const detailResponse = await apiRequest(
-        `${KELAS_BASE_URL}/${kelas.id}`
-      );
-
-      const detailData = getData(detailResponse);
-
-      const anggota = Array.isArray(
-        detailData?.anggota
-      )
-        ? detailData.anggota
-        : [];
-
-      const ditemukan = anggota.some((item) => {
-        const siswaId =
-          item?.siswa?.id ||
-          item?.siswaId ||
-          item?.penggunaId ||
-          item?.userId;
-
-        return (
-          String(siswaId) === String(userId)
-        );
-      });
-
-      if (ditemukan) {
-        return kelas.id;
-      }
-    } catch (error) {
-      console.error(
-        `Gagal mengambil detail kelas ${kelas.id}:`,
-        error
-      );
-    }
-  }
-
-  throw new Error(
-    "Kelas siswa tidak ditemukan."
-  );
-}
-
-
-async function getKelasMapelSiswa() {
-  const params =
-    typeof window !== "undefined"
-      ? new URLSearchParams(
-          window.location.search
-        )
-      : null;
-
-  const queryKelasMapelId =
-    params?.get("kelasMapelId");
-
-  if (queryKelasMapelId) {
-    return [queryKelasMapelId];
-  }
-
-  const kelasId = await getKelasSiswaId();
-
-  const response = await apiRequest(
-    `${KELAS_BASE_URL}/${kelasId}`
-  );
-
-  const data = getData(response);
-
-  const kelasMapel = Array.isArray(
-    data?.kelasMapel
-  )
-    ? data.kelasMapel
-    : [];
-
-  return kelasMapel
-    .map((item) => item?.id)
-    .filter(Boolean);
 }
 
 
@@ -474,7 +223,6 @@ function statusClass(status) {
 
 
 function TugasSiswaPageContent() {
-  const router = useRouter();
   const searchParams = useSearchParams();
 
   const kelasMapelId =
@@ -486,6 +234,9 @@ function TugasSiswaPageContent() {
 
   const [submissionMap, setSubmissionMap] =
     useState({});
+
+  const [totalKelasMapel, setTotalKelasMapel] =
+    useState(0);
 
   const [loadingList, setLoadingList] =
     useState(true);
@@ -530,10 +281,7 @@ function TugasSiswaPageContent() {
           setSuccessMessage("");
         }
 
-        const response = await apiRequest(
-          `${TASK_BASE_URL}/${tugasId}`
-        );
-
+        const response = await getDetailTugas(tugasId);
         const data = getData(response);
 
         if (!data) {
@@ -590,9 +338,19 @@ function TugasSiswaPageContent() {
       setError("");
       setSuccessMessage("");
 
-      const kelasMapelIds = kelasMapelId
-        ? [kelasMapelId]
-        : await getKelasMapelSiswa();
+      let kelasMapelList = [];
+      if (kelasMapelId) {
+        kelasMapelList = [{ id: kelasMapelId }];
+        setTotalKelasMapel(1);
+      } else {
+        const studentMapel = await getKelasMapelSiswa();
+        kelasMapelList = Array.isArray(studentMapel) ? studentMapel : [];
+        setTotalKelasMapel(kelasMapelList.length);
+      }
+
+      const kelasMapelIds = kelasMapelList
+        .map((item) => item?.id)
+        .filter(Boolean);
 
       if (!kelasMapelIds || kelasMapelIds.length === 0) {
         setTugasList([]);
@@ -604,10 +362,7 @@ function TugasSiswaPageContent() {
       const taskResponses = await Promise.all(
         kelasMapelIds.map(async (id) => {
           try {
-            const response = await apiRequest(
-              `${TASK_BASE_URL}/kelas-mapel/${id}`
-            );
-
+            const response = await getTugasByKelasMapel(id);
             const data = getData(response);
 
             return Array.isArray(data) ? data : [];
@@ -654,10 +409,7 @@ function TugasSiswaPageContent() {
       const detailResults = await Promise.all(
         uniqueTasks.map(async (task) => {
           try {
-            const detailResponse = await apiRequest(
-              `${TASK_BASE_URL}/${task.id}`
-            );
-
+            const detailResponse = await getDetailTugas(task.id);
             const detailData = getData(detailResponse);
 
             const submission =
@@ -723,7 +475,10 @@ function TugasSiswaPageContent() {
 
 
   useEffect(() => {
-    loadTugas();
+    const timer = setTimeout(() => {
+      loadTugas();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadTugas]);
 
 
@@ -732,13 +487,16 @@ function TugasSiswaPageContent() {
       tugasList.length > 0 &&
       !selectedTugas
     ) {
-      loadDetailTugas(
+      const timer = setTimeout(() => {
+        loadDetailTugas(
         tugasList[0].id,
         {
           showLoading: true,
           clearMessages: false,
         }
-      );
+        );
+      }, 0);
+      return () => clearTimeout(timer);
     }
   }, [
     tugasList,
@@ -911,18 +669,10 @@ function TugasSiswaPageContent() {
       setSuccessMessage("");
 
       const response =
-        await apiRequest(
-          `${TASK_BASE_URL}/${selectedTugas.id}/submit`,
-          {
-            method: "POST",
-            body: JSON.stringify({
-              urlFile: cleanUrl,
-              keterangan:
-                cleanKeterangan ||
-                null,
-            }),
-          }
-        );
+        await submitTugas(selectedTugas.id, {
+          urlFile: cleanUrl,
+          keterangan: cleanKeterangan || null,
+        });
 
       const submission =
         getData(response);
@@ -957,9 +707,7 @@ function TugasSiswaPageContent() {
       }
 
       const refreshedResponse =
-        await apiRequest(
-          `${TASK_BASE_URL}/${selectedTugas.id}`
-        );
+        await getDetailTugas(selectedTugas.id);
 
       const refreshedData =
         getData(
@@ -1149,7 +897,7 @@ function TugasSiswaPageContent() {
               <div>
                 <p className="text-xs theme-text-muted">Kelas mapel</p>
                 <p className="mt-1 text-xl font-bold theme-text">
-                  {loadingList ? "—" : kelasMapelId ? 1 : "—"}
+                  {loadingList ? "—" : totalKelasMapel || (kelasMapelId ? 1 : 0)}
                 </p>
               </div>
               <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${themePrimarySurface} ${themePrimaryText}`}>

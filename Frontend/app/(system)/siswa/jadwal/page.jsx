@@ -328,7 +328,10 @@ export default function JadwalSiswaPage() {
   };
 
   useEffect(() => {
-    loadJadwal();
+    const timer = setTimeout(() => {
+      loadJadwal();
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
 

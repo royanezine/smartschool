@@ -436,7 +436,10 @@ export default function GuruTugasPage() {
   }, []);
 
   useEffect(() => {
-    loadTugas();
+    const timer = setTimeout(() => {
+      loadTugas();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadTugas]);
 
   useEffect(() => {

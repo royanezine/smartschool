@@ -1077,7 +1077,10 @@ export default function CetakRaportPage() {
 
 
   useEffect(() => {
-    loadTahunAjaran();
+    const timer = setTimeout(() => {
+      loadTahunAjaran();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadTahunAjaran]);
 
   useEffect(() => {
@@ -1085,7 +1088,10 @@ export default function CetakRaportPage() {
       return;
     }
 
-    loadStudents();
+    const timer = setTimeout(() => {
+      loadStudents();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [
     selectedYearId,
     loadStudents,
@@ -1096,19 +1102,24 @@ export default function CetakRaportPage() {
       !selectedYearId ||
       !students.length
     ) {
-      setReportCache({});
-      setExamScoreCache({});
-      return;
+      const timer = setTimeout(() => {
+        setReportCache({});
+        setExamScoreCache({});
+      }, 0);
+      return () => clearTimeout(timer);
     }
 
-    loadReports(
-      students,
-      selectedYearId
-    );
+    const timer = setTimeout(() => {
+      loadReports(
+        students,
+        selectedYearId
+      );
 
-    loadExamScores(
-      students
-    );
+      loadExamScores(
+        students
+      );
+    }, 0);
+    return () => clearTimeout(timer);
   }, [
     selectedYearId,
     students,
@@ -1117,7 +1128,10 @@ export default function CetakRaportPage() {
   ]);
 
   useEffect(() => {
-    setCurrentPage(1);
+    const timer = setTimeout(() => {
+      setCurrentPage(1);
+    }, 0);
+    return () => clearTimeout(timer);
   }, [
     search,
     kelasFilter,

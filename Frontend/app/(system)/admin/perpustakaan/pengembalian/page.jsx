@@ -170,7 +170,10 @@ export default function PengembalianBukuPage() {
   }, []);
 
   useEffect(() => {
-    loadPeminjaman();
+    const timer = setTimeout(() => {
+      loadPeminjaman();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadPeminjaman]);
 
 

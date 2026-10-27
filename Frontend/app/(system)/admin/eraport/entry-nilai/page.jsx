@@ -332,7 +332,10 @@ export default function EntryNilaiPage() {
   }, []);
 
   useEffect(() => {
-    loadTahunAjaran();
+    const timer = setTimeout(() => {
+      loadTahunAjaran();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadTahunAjaran]);
 
 
@@ -434,7 +437,10 @@ export default function EntryNilaiPage() {
   ]);
 
   useEffect(() => {
-    loadKelas();
+    const timer = setTimeout(() => {
+      loadKelas();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadKelas]);
 
 
@@ -541,7 +547,10 @@ export default function EntryNilaiPage() {
   }, [kelasId]);
 
   useEffect(() => {
-    loadDetailKelas();
+    const timer = setTimeout(() => {
+      loadDetailKelas();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadDetailKelas]);
 
 

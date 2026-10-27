@@ -5,6 +5,11 @@ import { useRouter, useParams } from "next/navigation";
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
 import {
+  getUserById,
+  updateUser,
+} from "@/services/user.service";
+import { getRoles } from "@/services/role.service";
+import {
   ArrowLeft,
   User,
   Mail,
@@ -63,63 +68,27 @@ const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
 
-const stafData = [
+const normalizeRoleName = (value) =>
+  String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[\s-]+/g, "_");
+
+const statusOptions = [
   {
-    id: 1,
-    nama: "Dr. Ahmad Fauzi, M.Pd.",
-    email: "ahmad.fauzi@smartschool.com",
-    telepon: "0812-3456-7890",
-    role: "Super Admin",
-    status: "Aktif",
-    terakhirLogin: "2026-08-26T08:30:00Z",
-    bergabung: "2024-01-15",
-    avatar: "AF",
+    value: "aktif",
+    label: "Aktif",
   },
   {
-    id: 2,
-    nama: "Dewi Lestari, S.Kom.",
-    email: "dewi.lestari@smartschool.com",
-    telepon: "0813-4567-8901",
-    role: "Admin Sekolah",
-    status: "Aktif",
-    terakhirLogin: "2026-08-25T14:20:00Z",
-    bergabung: "2024-02-10",
-    avatar: "DL",
-  },
-  {
-    id: 3,
-    nama: "Budi Santoso, S.E.",
-    email: "budi.santoso@smartschool.com",
-    telepon: "0814-5678-9012",
-    role: "Admin Yayasan",
-    status: "Aktif",
-    terakhirLogin: "2026-08-24T09:15:00Z",
-    bergabung: "2024-03-01",
-    avatar: "BS",
-  },
-  {
-    id: 4,
-    nama: "Siti Rahayu, S.Pd.",
-    email: "siti.rahayu@smartschool.com",
-    telepon: "0815-6789-0123",
-    role: "Guru",
-    status: "Nonaktif",
-    terakhirLogin: "2026-08-20T11:00:00Z",
-    bergabung: "2024-04-15",
-    avatar: "SR",
-  },
-  {
-    id: 5,
-    nama: "M. Rizki Firmansyah, S.Si.",
-    email: "rizki.firmansyah@smartschool.com",
-    telepon: "0816-7890-1234",
-    role: "Staf TU",
-    status: "Trial",
-    terakhirLogin: "2026-08-22T16:45:00Z",
-    bergabung: "2024-05-20",
-    avatar: "RF",
+    value: "nonaktif",
+    label: "Nonaktif",
   },
 ];
+
+const getStatusLabel = (status) =>
+  String(status || "").toLowerCase() === "aktif"
+    ? "Aktif"
+    : "Nonaktif";
 
 
 export default function EditStafPage() {
@@ -131,58 +100,95 @@ export default function EditStafPage() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
-
+  const [loadError, setLoadError] = useState("");
   const [staf, setStaf] = useState(null);
+  const [roles, setRoles] = useState([]);
+  const [saving, setSaving] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
   const [formData, setFormData] = useState({
-    nama: "",
+    namaLengkap: "",
     email: "",
-    telepon: "",
-    role: "",
-    status: "",
-    password: "",
+    noTelepon: "",
+    peranId: "",
+    status: "aktif",
+    kataSandi: "",
   });
 
 
-  const notifications = [
-    {
-      id: 1,
-      title: "Pembaruan Sistem v2.0",
-      desc: "Dikirim 2 jam lalu",
-      read: false,
-    },
-    {
-      id: 2,
-      title: "Pengingat: Backup Data",
-      desc: "Dikirim 1 hari lalu",
-      read: false,
-    },
-  ];
-
-
   useEffect(() => {
-    if (!id) return;
+    let cancelled = false;
 
-    const found = stafData.find(
-      (item) => item.id === Number(id)
-    );
+    const loadData = async () => {
+      if (!id) {
+        setNotFound(true);
+        setLoading(false);
+        return;
+      }
 
-    if (found) {
-      setStaf(found);
+      setLoading(true);
+      setNotFound(false);
+      setLoadError("");
 
-      setFormData({
-        nama: found.nama,
-        email: found.email,
-        telepon: found.telepon || "",
-        role: found.role,
-        status: found.status,
-        password: "",
-      });
-    } else {
-      setNotFound(true);
-    }
+      try {
+        const [userResponse, roleData] = await Promise.all([
+          getUserById(String(id)),
+          getRoles(),
+        ]);
 
-    setLoading(false);
+        if (cancelled) return;
+
+        const data = userResponse?.data ?? userResponse;
+
+        if (!data?.id) {
+          throw new Error("Data staf tidak ditemukan.");
+        }
+
+        const roleList = Array.isArray(roleData)
+          ? roleData
+          : [];
+
+        setStaf(data);
+        setRoles(
+          roleList.filter(
+            (role) =>
+              normalizeRoleName(role?.nama) !== "siswa"
+          )
+        );
+        setFormData({
+          namaLengkap: data.namaLengkap || "",
+          email: data.email || "",
+          noTelepon: data.noTelepon || "",
+          peranId: data.peran?.id || "",
+          status:
+            String(data.status || "").toLowerCase() ===
+            "nonaktif"
+              ? "nonaktif"
+              : "aktif",
+          kataSandi: "",
+        });
+      } catch (err) {
+        if (cancelled) return;
+
+        console.error(
+          "[EditStafPage] Gagal mengambil data staf:",
+          err
+        );
+        setStaf(null);
+        setNotFound(true);
+        setLoadError(
+          err?.message || "Gagal memuat data staf."
+        );
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
+    loadData();
+
+    return () => {
+      cancelled = true;
+    };
   }, [id]);
 
 
@@ -199,24 +205,46 @@ export default function EditStafPage() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const payload = {
-      id,
-      nama: formData.nama,
-      email: formData.email,
-      telepon: formData.telepon,
-      role: formData.role,
-      status: formData.status,
-      ...(formData.password
-        ? { password: formData.password }
-        : {}),
-    };
+    if (saving) return;
 
-    console.log("Update staf:", payload);
+    setSubmitError("");
 
-    router.push("/admin/staf");
+    if (!formData.peranId) {
+      setSubmitError("Role wajib dipilih.");
+      return;
+    }
+
+    setSaving(true);
+
+    try {
+      const payload = {
+        namaLengkap: formData.namaLengkap.trim(),
+        email: formData.email.trim(),
+        noTelepon: formData.noTelepon.trim() || null,
+        peranId: formData.peranId,
+        status: formData.status,
+      };
+
+      if (formData.kataSandi.trim()) {
+        payload.kataSandi = formData.kataSandi;
+      }
+
+      await updateUser(String(id), payload);
+      router.push("/admin/staf");
+    } catch (err) {
+      console.error(
+        "[EditStafPage] Gagal menyimpan data staf:",
+        err
+      );
+      setSubmitError(
+        err?.message || "Gagal menyimpan perubahan."
+      );
+    } finally {
+      setSaving(false);
+    }
   };
 
 
@@ -239,12 +267,6 @@ export default function EditStafPage() {
       toggleSidebar={() =>
         setSidebarOpen((prev) => !prev)
       }
-      notifications={notifications}
-      user={{
-        name: "Super Admin",
-        email: "admin@smartschool.com",
-        avatar: "SA",
-      }}
     />
   );
 
@@ -298,7 +320,8 @@ export default function EditStafPage() {
               </h2>
 
               <p className="text-sm theme-text-muted mt-1 mb-5">
-                Data staf yang ingin Anda edit tidak tersedia.
+                {loadError ||
+                  "Data staf yang ingin Anda edit tidak tersedia."}
               </p>
 
               <button
@@ -387,7 +410,13 @@ export default function EditStafPage() {
                     className={`w-14 h-14 shrink-0 rounded-full ${themePrimarySoft} ${themePrimarySoftBorder} border flex items-center justify-center`}
                   >
                     <span className={`text-sm font-semibold ${themePrimaryText}`}>
-                      {staf.avatar}
+                      {(
+                        staf.namaLengkap ||
+                        staf.namaPengguna ||
+                        "?"
+                      )
+                        .charAt(0)
+                        .toUpperCase()}
                     </span>
                   </div>
 

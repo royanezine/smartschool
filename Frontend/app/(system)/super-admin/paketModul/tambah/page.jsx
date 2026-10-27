@@ -21,6 +21,7 @@ import {
 
 import {
   getFitur,
+  getPaketById,
   createPaket,
 } from "@/services/paket.service";
 
@@ -243,8 +244,10 @@ function TambahPaketPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const isDuplikat =
-    searchParams.get("duplikat") === "true";
+  const duplikatId =
+    searchParams.get("duplikatFrom") ||
+    searchParams.get("duplikatId") ||
+    (searchParams.get("duplikat") === "true" ? searchParams.get("id") : null);
 
 
   const [fiturList, setFiturList] = useState([]);
@@ -310,68 +313,51 @@ function TambahPaketPageContent() {
 
 
   useEffect(() => {
-    if (!isDuplikat) {
+    if (!duplikatId) {
       return;
     }
 
-    try {
-      const stored =
-        sessionStorage.getItem(
-          "duplikatPaket"
-        );
+    let active = true;
 
-      if (!stored) {
-        return;
-      }
+    async function loadDuplikatData() {
+      try {
+        const response = await getPaketById(String(duplikatId));
+        if (!active) return;
 
-      const parsed = JSON.parse(stored);
+        const paket = response?.data;
+        if (!paket) return;
 
-      console.log(
-        "DATA DUPLIKAT:",
-        parsed
-      );
+        setNama(`${paket.nama || ""} (Salinan)`);
+        setDeskripsi(paket.deskripsi || "");
+        setHarga(Number(paket.harga) || 0);
 
-      setNama(parsed.nama || "");
-      setDeskripsi(parsed.deskripsi || "");
-      setHarga(Number(parsed.harga) || 0);
+        if (paket.durasi !== undefined) {
+          setSiklus(getSiklusFromDurasi(paket.durasi));
+        }
 
-      if (parsed.siklus) {
-        setSiklus(parsed.siklus);
-      } else if (
-        parsed.durasi !== undefined
-      ) {
-        setSiklus(
-          getSiklusFromDurasi(
-            parsed.durasi
-          )
-        );
-      }
+        setStatus(paket.status || "aktif");
 
-      setStatus(
-        parsed.status || "aktif"
-      );
-
-      const modulIds =
-        Array.isArray(parsed.modulIds)
-          ? parsed.modulIds
+        const modulIds = Array.isArray(paket.fitur)
+          ? paket.fitur.map((f) => f.id)
           : [];
 
-      setFiturTerpilih(modulIds);
-
-      sessionStorage.removeItem(
-        "duplikatPaket"
-      );
-    } catch (err) {
-      console.error(
-        "Gagal membaca data duplikat:",
-        err
-      );
-
-      setError(
-        "Data duplikat tidak dapat dibaca."
-      );
+        setFiturTerpilih(modulIds);
+      } catch (err) {
+        if (!active) return;
+        console.error("Gagal membaca data duplikat:", err);
+        setError("Data paket acuan tidak dapat dimuat.");
+      }
     }
-  }, [isDuplikat]);
+
+    const timer = setTimeout(() => {
+      loadDuplikatData();
+    }, 0);
+
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
+  }, [duplikatId]);
 
 
   function toggleFitur(id) {

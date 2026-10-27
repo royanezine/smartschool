@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
   GraduationCap,
@@ -13,8 +13,11 @@ import {
   UserCheck,
   Building2,
   BookOpen,
+  Loader2,
+  AlertCircle,
+  RefreshCw,
 } from "lucide-react";
-
+import { getLaporanGuru } from "@/services/yayasan.service";
 
 const SEMESTER_OPTIONS = [
   "Ganjil 2025/2026",
@@ -22,90 +25,7 @@ const SEMESTER_OPTIONS = [
   "Ganjil 2024/2025",
 ];
 
-const UNIT_OPTIONS = [
-  "Semua Unit",
-  "SD Smart School 1",
-  "SD Smart School 2",
-  "SMP Smart School 1",
-  "SMP Smart School 2",
-  "SMA Smart School 1",
-  "SMA Smart School 2",
-];
-
-const dataGuru = [
-  {
-    id: 1,
-    nama: "Budi Santoso, S.Pd",
-    mapel: "Matematika",
-    unit: "SMP Smart School 1",
-    kelasDiampu: 4,
-    status: "Aktif",
-    berlakuSejak: "12 Jul 2023",
-  },
-  {
-    id: 2,
-    nama: "Siti Aminah, S.Pd",
-    mapel: "Bahasa Indonesia",
-    unit: "SD Smart School 1",
-    kelasDiampu: 6,
-    status: "Aktif",
-    berlakuSejak: "03 Jan 2021",
-  },
-  {
-    id: 3,
-    nama: "Rudi Hartono, M.Pd",
-    mapel: "IPA",
-    unit: "SMP Smart School 2",
-    kelasDiampu: 5,
-    status: "Aktif",
-    berlakuSejak: "18 Aug 2022",
-  },
-  {
-    id: 4,
-    nama: "Dewi Kusuma, S.Pd",
-    mapel: "Bahasa Inggris",
-    unit: "SMA Smart School 1",
-    kelasDiampu: 3,
-    status: "Aktif",
-    berlakuSejak: "25 Feb 2024",
-  },
-  {
-    id: 5,
-    nama: "Ahmad Fauzan, S.Pd",
-    mapel: "Matematika",
-    unit: "SMA Smart School 2",
-    kelasDiampu: 4,
-    status: "Nonaktif",
-    berlakuSejak: "10 Jun 2019",
-  },
-  {
-    id: 6,
-    nama: "Nurul Hidayah, S.Pd",
-    mapel: "IPS",
-    unit: "SD Smart School 2",
-    kelasDiampu: 6,
-    status: "Aktif",
-    berlakuSejak: "07 Sep 2023",
-  },
-  {
-    id: 7,
-    nama: "Eko Prasetyo, M.Pd",
-    mapel: "Fisika",
-    unit: "SMA Smart School 1",
-    kelasDiampu: 3,
-    status: "Aktif",
-    berlakuSejak: "14 Apr 2022",
-  },
-  {
-    id: 8,
-    nama: "Fitriani, S.Pd",
-    mapel: "Seni Budaya",
-    unit: "SMP Smart School 1",
-    kelasDiampu: 5,
-    status: "Aktif",
-    berlakuSejak: "29 Nov 2020",
-  },
-];
+const DEFAULT_UNIT_OPTIONS = ["Semua Unit"];
 
 
 const themeCardShadow =
@@ -178,9 +98,64 @@ export default function LaporanGuruPage() {
   const router = useRouter();
 
   const [semester, setSemester] = useState(SEMESTER_OPTIONS[0]);
-  const [unit, setUnit] = useState(UNIT_OPTIONS[0]);
+  const [unit, setUnit] = useState("Semua Unit");
+  const [unitOptions, setUnitOptions] = useState(DEFAULT_UNIT_OPTIONS);
   const [search, setSearch] = useState("");
+  const [dataGuru, setDataGuru] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
+  const fetchGuru = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await getLaporanGuru();
+      const list = Array.isArray(res?.data?.items)
+        ? res.data.items
+        : Array.isArray(res?.data)
+        ? res.data
+        : [];
+      setDataGuru(list);
+      if (Array.isArray(res?.data?.unitOptions) && res.data.unitOptions.length > 0) {
+        setUnitOptions(res.data.unitOptions);
+      }
+    } catch (err) {
+      setError(err?.message || "Gagal memuat laporan data guru yayasan.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      try {
+        const res = await getLaporanGuru();
+        if (cancelled) return;
+        const list = Array.isArray(res?.data?.items)
+          ? res.data.items
+          : Array.isArray(res?.data)
+          ? res.data
+          : [];
+        setDataGuru(list);
+        if (Array.isArray(res?.data?.unitOptions) && res.data.unitOptions.length > 0) {
+          setUnitOptions(res.data.unitOptions);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setError(err?.message || "Gagal memuat laporan data guru yayasan.");
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    }
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const filteredGuru = useMemo(() => {
     const keyword = search.trim().toLowerCase();
@@ -191,12 +166,12 @@ export default function LaporanGuruPage() {
 
       const matchSearch =
         !keyword ||
-        g.nama.toLowerCase().includes(keyword) ||
-        g.mapel.toLowerCase().includes(keyword);
+        g.nama?.toLowerCase().includes(keyword) ||
+        g.mapel?.toLowerCase().includes(keyword);
 
       return matchUnit && matchSearch;
     });
-  }, [unit, search]);
+  }, [dataGuru, unit, search]);
 
 
   const summary = useMemo(() => {
@@ -422,7 +397,7 @@ export default function LaporanGuruPage() {
                   cursor-pointer
                 `}
               >
-                {UNIT_OPTIONS.map((u) => (
+                {unitOptions.map((u) => (
                   <option key={u} value={u}>
                     {u}
                   </option>
@@ -766,8 +741,39 @@ export default function LaporanGuruPage() {
               </thead>
 
               <tbody>
-
-                {filteredGuru.length === 0 && (
+                {loading ? (
+                  <tr>
+                    <td
+                      colSpan={6}
+                      className={`border ${themeNeutralBorder} p-10 text-center`}
+                    >
+                      <Loader2
+                        size={28}
+                        className="mx-auto text-[var(--color-primary)] animate-spin mb-2"
+                      />
+                      <p className="text-sm theme-text-muted">
+                        Memuat data guru yayasan...
+                      </p>
+                    </td>
+                  </tr>
+                ) : error ? (
+                  <tr>
+                    <td
+                      colSpan={6}
+                      className={`border ${themeNeutralBorder} p-8 text-center text-[var(--color-danger)]`}
+                    >
+                      <AlertCircle size={28} className="mx-auto mb-2" />
+                      <p className="text-sm">{error}</p>
+                      <button
+                        type="button"
+                        onClick={fetchGuru}
+                        className="mt-2 text-xs font-semibold underline"
+                      >
+                        Coba Lagi
+                      </button>
+                    </td>
+                  </tr>
+                ) : filteredGuru.length === 0 ? (
                   <tr>
                     <td
                       colSpan={6}
@@ -791,10 +797,8 @@ export default function LaporanGuruPage() {
                       </p>
                     </td>
                   </tr>
-                )}
-
-
-                {filteredGuru.map((g) => {
+                ) : (
+                  filteredGuru.map((g) => {
                   const status =
                     statusTheme[g.status] || statusTheme.Nonaktif;
 
@@ -919,7 +923,7 @@ export default function LaporanGuruPage() {
                       </td>
                     </tr>
                   );
-                })}
+                }))}
               </tbody>
             </table>
           </div>

@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
-import { apiFetch } from "../../../../lib/api";
+import { getSekolahBinaan } from "@/services/yayasan.service";
 
 import {
   School,
@@ -75,10 +75,15 @@ export default function DataMasterSekolahPage() {
         setLoading(true);
         setError(null);
 
-        const res = await apiFetch("/yayasan/sekolah");
+        const res = await getSekolahBinaan();
 
         if (res) {
-          setDataSekolah(res.data || []);
+          const list = Array.isArray(res.data?.items)
+            ? res.data.items
+            : Array.isArray(res.data)
+            ? res.data
+            : [];
+          setDataSekolah(list);
         }
       } catch (err) {
         setError(err.message);

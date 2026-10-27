@@ -55,7 +55,6 @@ export default function AjukanIzinPage() {
     bukti: null,
   });
 
-  const [notifications] = useState([]);
 
 
   const themePrimary =
@@ -254,11 +253,6 @@ export default function AjukanIzinPage() {
         <Header
           sidebarOpen={sidebarOpen}
           setSidebarOpen={setSidebarOpen}
-          notifications={notifications}
-          user={{
-            name: "Bu Sari",
-            role: "Guru",
-          }}
         />
 
 

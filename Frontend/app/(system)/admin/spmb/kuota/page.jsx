@@ -15,6 +15,15 @@ import {
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
 import { getJalurPpdb } from "@/services/jalurPpdb.service";
+import {
+  getAllPendaftarPpdb,
+  isPpdbEndpointMissing,
+} from "@/services/ppdb.service";
+import {
+  formatAngka,
+  formatTanggal,
+  hitungRekapJalur,
+} from "@/lib/spmb";
 
 const themePrimaryText = "text-[var(--color-primary)]";
 
@@ -36,29 +45,16 @@ const themeNeutralBorder =
 const themeDivider =
   "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
 
-function formatTanggal(value) {
-  if (!value) {
-    return "-";
-  }
-
-  const date = new Date(value);
-
-  if (Number.isNaN(date.getTime())) {
-    return "-";
-  }
-
-  return date.toLocaleDateString("id-ID", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
-}
-
 export default function KuotaSpmbPage() {
   const router = useRouter();
 
   const [collapsed, setCollapsed] = useState(false);
   const [data, setData] = useState([]);
+  const [pendaftar, setPendaftar] = useState([]);
+  const [pendaftarTersedia, setPendaftarTersedia] =
+    useState(null);
+  const [pendaftarError, setPendaftarError] =
+    useState("");
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
@@ -66,6 +62,7 @@ export default function KuotaSpmbPage() {
   const loadData = useCallback(async (isRefresh = false) => {
     try {
       setError("");
+      setPendaftarError("");
 
       if (isRefresh) {
         setRefreshing(true);
@@ -73,22 +70,66 @@ export default function KuotaSpmbPage() {
         setLoading(true);
       }
 
-      const response = await getJalurPpdb();
+      const [hasilJalur, hasilPendaftar] =
+        await Promise.allSettled([
+          getJalurPpdb(),
+          getAllPendaftarPpdb(),
+        ]);
 
-      if (!response?.success) {
-        throw new Error(
-          response?.message ||
-            "Gagal mengambil data kuota jalur PPDB."
+      if (hasilJalur.status === "fulfilled") {
+        const response = hasilJalur.value;
+
+        if (!response?.success) {
+          throw new Error(
+            response?.message ||
+              "Gagal mengambil data kuota jalur PPDB."
+          );
+        }
+
+        setData(
+          Array.isArray(response?.data)
+            ? response.data
+            : []
+        );
+      } else {
+        setData([]);
+
+        const err = hasilJalur.reason;
+
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Gagal mengambil data kuota jalur PPDB."
         );
       }
 
-      setData(
-        Array.isArray(response?.data)
-          ? response.data
-          : []
-      );
+      if (hasilPendaftar.status === "fulfilled") {
+        const result = hasilPendaftar.value;
+
+        setPendaftar(
+          Array.isArray(result?.data)
+            ? result.data
+            : []
+        );
+        setPendaftarTersedia(true);
+      } else {
+        setPendaftar([]);
+        setPendaftarTersedia(false);
+
+        const err = hasilPendaftar.reason;
+
+        setPendaftarError(
+          isPpdbEndpointMissing(err)
+            ? "Endpoint GET /api/ppdb/pendaftar belum aktif pada server Backend yang berjalan (404), sehingga jumlah terisi belum dapat dihitung."
+            : err instanceof Error
+              ? err.message
+              : "Gagal menghitung jumlah pendaftar terisi."
+        );
+      }
     } catch (err) {
       setData([]);
+      setPendaftar([]);
+      setPendaftarTersedia(false);
 
       setError(
         err instanceof Error
@@ -106,6 +147,21 @@ export default function KuotaSpmbPage() {
       loadData();
     });
   }, [loadData]);
+
+  const rekapJalur = useMemo(
+    () => hitungRekapJalur(pendaftar, data),
+    [pendaftar, data]
+  );
+
+  const rekapPerJalur = useMemo(() => {
+    const peta = new Map();
+
+    rekapJalur.forEach((item) => {
+      peta.set(item.id, item);
+    });
+
+    return peta;
+  }, [rekapJalur]);
 
   const totalKuota = useMemo(
     () =>
@@ -126,6 +182,17 @@ export default function KuotaSpmbPage() {
       ).length,
     [data]
   );
+
+  const totalTerisi = useMemo(() => {
+    if (!pendaftarTersedia) {
+      return null;
+    }
+
+    return rekapJalur.reduce(
+      (total, item) => total + item.nonDitolak,
+      0
+    );
+  }, [pendaftarTersedia, rekapJalur]);
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
@@ -159,8 +226,8 @@ export default function KuotaSpmbPage() {
                 </h1>
 
                 <p className="theme-text-secondary mt-1 text-sm">
-                  Kuota per jalur pendaftaran yang
-                  tersimpan di database.
+                  Kuota, jumlah terisi, dan sisa per
+                  jalur pendaftaran.
                 </p>
               </div>
 
@@ -214,7 +281,7 @@ export default function KuotaSpmbPage() {
               </div>
             )}
 
-            <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <div className="mb-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
               <Stat
                 title="Total Kuota"
                 value={totalKuota}
@@ -232,7 +299,30 @@ export default function KuotaSpmbPage() {
                 value={jalurAktif}
                 icon={CalendarDays}
               />
+
+              <Stat
+                title="Terisi"
+                value={
+                  totalTerisi === null
+                    ? "-"
+                    : totalTerisi
+                }
+                icon={Users}
+              />
             </div>
+
+            {pendaftarError && (
+              <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)] bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)] px-4 py-3">
+                <Info
+                  size={16}
+                  className="mt-0.5 shrink-0 text-[var(--color-warning)]"
+                />
+
+                <p className="theme-text-secondary text-xs leading-5">
+                  {pendaftarError}
+                </p>
+              </div>
+            )}
 
             <div
               className={`theme-card ${themeNeutralBorder} overflow-hidden rounded-xl border ${themeCardShadow}`}
@@ -269,7 +359,7 @@ export default function KuotaSpmbPage() {
                 </div>
               ) : (
                 <div className="overflow-x-auto">
-                  <table className="w-full min-w-[640px]">
+                  <table className="w-full min-w-[780px]">
                     <thead>
                       <tr
                         className={`border-b ${themeDivider} ${themeNeutralSurface}`}
@@ -278,8 +368,16 @@ export default function KuotaSpmbPage() {
                           Jalur
                         </th>
 
-                        <th className="theme-text-muted px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wide">
+                        <th className="theme-text-muted px-4 py-3 text-right text-[10px] font-bold uppercase tracking-wide">
                           Kuota
+                        </th>
+
+                        <th className="theme-text-muted px-4 py-3 text-right text-[10px] font-bold uppercase tracking-wide">
+                          Terisi
+                        </th>
+
+                        <th className="theme-text-muted px-4 py-3 text-right text-[10px] font-bold uppercase tracking-wide">
+                          Sisa
                         </th>
 
                         <th className="theme-text-muted px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wide">
@@ -293,36 +391,55 @@ export default function KuotaSpmbPage() {
                     </thead>
 
                     <tbody>
-                      {data.map((item) => (
-                        <tr
-                          key={item.id}
-                          className={`border-b ${themeDivider} last:border-0`}
-                        >
-                          <td className="theme-text px-4 py-4 text-sm font-semibold">
-                            {item.nama || "-"}
-                          </td>
+                      {data.map((item) => {
+                        const rekap =
+                          rekapPerJalur.get(item.id);
 
-                          <td className="theme-text-secondary px-4 py-4 text-sm">
-                            {Number(
-                              item.kuota || 0
-                            ).toLocaleString("id-ID")}
-                          </td>
+                        return (
+                          <tr
+                            key={item.id}
+                            className={`border-b ${themeDivider} last:border-0`}
+                          >
+                            <td className="theme-text px-4 py-4 text-sm font-semibold">
+                              {item.nama || "-"}
+                            </td>
 
-                          <td className="theme-text-secondary px-4 py-4 text-xs">
-                            {formatTanggal(
-                              item.tanggalMulai
-                            )}{" "}
-                            -{" "}
-                            {formatTanggal(
-                              item.tanggalSelesai
-                            )}
-                          </td>
+                            <td className="theme-text-secondary px-4 py-4 text-right text-sm">
+                              {formatAngka(item.kuota)}
+                            </td>
 
-                          <td className="theme-text-secondary px-4 py-4 text-xs capitalize">
-                            {item.status || "-"}
-                          </td>
-                        </tr>
-                      ))}
+                            <td className="theme-text px-4 py-4 text-right text-sm font-semibold">
+                              {rekap
+                                ? formatAngka(
+                                    rekap.nonDitolak
+                                  )
+                                : "-"}
+                            </td>
+
+                            <td className="theme-text-secondary px-4 py-4 text-right text-sm">
+                              {rekap
+                                ? formatAngka(
+                                    rekap.sisaKuota
+                                  )
+                                : "-"}
+                            </td>
+
+                            <td className="theme-text-secondary px-4 py-4 text-xs">
+                              {formatTanggal(
+                                item.tanggalMulai
+                              )}{" "}
+                              -{" "}
+                              {formatTanggal(
+                                item.tanggalSelesai
+                              )}
+                            </td>
+
+                            <td className="theme-text-secondary px-4 py-4 text-xs capitalize">
+                              {item.status || "-"}
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
@@ -338,11 +455,12 @@ export default function KuotaSpmbPage() {
               />
 
               <p className="theme-text-secondary text-xs leading-5">
-                Jumlah pendaftar terisi per jalur belum
-                dapat dihitung karena endpoint daftar
-                pendaftar belum tersedia. Kuota dapat
-                diubah melalui menu Jalur Pendaftaran
-                (PUT /api/jalur-ppdb/:id).
+                Kolom Terisi dihitung dari pendaftar
+                berstatus menunggu atau lulus (bukan
+                ditolak) pada data resmi. Sisa kuota adalah
+                kuota dikurangi jumlah terisi. Kuota dapat
+                diubah melalui menu Jalur Pendaftaran (PUT
+                /api/jalur-ppdb/:id).
               </p>
             </div>
           </div>
@@ -364,9 +482,9 @@ function Stat({ title, value, icon: Icon }) {
           </p>
 
           <p className="theme-text mt-1 text-2xl font-bold">
-            {Number(value || 0).toLocaleString(
-              "id-ID"
-            )}
+            {typeof value === "string"
+              ? value
+              : formatAngka(value)}
           </p>
         </div>
 

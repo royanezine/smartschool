@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
-import { clearSession, getToken } from "@/lib/auth";
+import { clearSession } from "@/lib/auth";
+import { getProfile } from "@/services/user.service";
 
 import {
   User,
@@ -34,8 +35,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
 
 
 const themePrimaryGradient =
@@ -113,50 +113,12 @@ export default function ProfilGuruPage() {
     setIsCollapsed((prev) => !prev);
   };
 
-  useEffect(() => {
-    loadProfile();
-  }, []);
-
-  const loadProfile = async () => {
+  const loadProfile = useCallback(async () => {
     try {
       setLoading(true);
       setError("");
 
-      const token = getToken();
-
-      if (!token) {
-        router.push("/login");
-        return;
-      }
-
-      const cleanToken = token.replace(/^Bearer\s+/i, "");
-
-      const response = await fetch(`${API_URL}/api/users/profile`, {
-        method: "GET",
-        headers: {
-          Accept: "application/json",
-          Authorization: `Bearer ${cleanToken}`,
-        },
-      });
-
-      const result = await response.json().catch(() => null);
-
-      console.log("PROFILE RESPONSE:", result);
-
-      if (response.status === 401) {
-        clearSession();
-
-        router.push("/login");
-        return;
-      }
-
-      if (!response.ok) {
-        throw new Error(
-          result?.message ||
-            result?.error ||
-            `Gagal mengambil profil (${response.status})`
-        );
-      }
+      const result = await getProfile();
 
       const rawData =
         result?.data?.data ||
@@ -179,7 +141,14 @@ export default function ProfilGuruPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      loadProfile();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [loadProfile]);
 
   const handleEditProfile = () => {
     router.push("/guru/profil/edit");

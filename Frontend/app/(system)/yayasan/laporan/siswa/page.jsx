@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import {
   Users,
   Search,
@@ -13,96 +13,30 @@ import {
   Venus,
   Mars,
   MapPin,
+  RefreshCw,
+  Loader2,
+  AlertCircle,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { getLaporanSiswa } from "@/services/yayasan.service";
 
 
 const JENJANG_OPTIONS = ["Semua Jenjang", "SD", "SMP", "SMA"];
 
-const dataSekolah = [
-  {
-    id: 1,
-    nama: "SD Smart School 1",
-    jenjang: "SD",
-    alamat: "Jl. Melati No. 12, Jakarta Selatan",
-    tingkat: [
-      { label: "Kelas 1", laki: 48, perempuan: 52 },
-      { label: "Kelas 2", laki: 50, perempuan: 49 },
-      { label: "Kelas 3", laki: 47, perempuan: 51 },
-      { label: "Kelas 4", laki: 45, perempuan: 48 },
-      { label: "Kelas 5", laki: 44, perempuan: 46 },
-      { label: "Kelas 6", laki: 42, perempuan: 40 },
-    ],
-  },
-  {
-    id: 2,
-    nama: "SD Smart School 2",
-    jenjang: "SD",
-    alamat: "Jl. Anggrek No. 8, Jakarta Timur",
-    tingkat: [
-      { label: "Kelas 1", laki: 45, perempuan: 43 },
-      { label: "Kelas 2", laki: 44, perempuan: 46 },
-      { label: "Kelas 3", laki: 43, perempuan: 41 },
-      { label: "Kelas 4", laki: 40, perempuan: 45 },
-      { label: "Kelas 5", laki: 42, perempuan: 39 },
-      { label: "Kelas 6", laki: 38, perempuan: 42 },
-    ],
-  },
-  {
-    id: 3,
-    nama: "SMP Smart School 1",
-    jenjang: "SMP",
-    alamat: "Jl. Kenanga No. 21, Jakarta Selatan",
-    tingkat: [
-      { label: "Kelas 7", laki: 128, perempuan: 120 },
-      { label: "Kelas 8", laki: 122, perempuan: 118 },
-      { label: "Kelas 9", laki: 119, perempuan: 127 },
-    ],
-  },
-  {
-    id: 4,
-    nama: "SMP Smart School 2",
-    jenjang: "SMP",
-    alamat: "Jl. Mawar No. 5, Jakarta Barat",
-    tingkat: [
-      { label: "Kelas 7", laki: 115, perempuan: 110 },
-      { label: "Kelas 8", laki: 108, perempuan: 116 },
-      { label: "Kelas 9", laki: 112, perempuan: 118 },
-    ],
-  },
-  {
-    id: 5,
-    nama: "SMA Smart School 1",
-    jenjang: "SMA",
-    alamat: "Jl. Dahlia No. 3, Jakarta Selatan",
-    tingkat: [
-      { label: "Kelas 10", laki: 140, perempuan: 132 },
-      { label: "Kelas 11", laki: 135, perempuan: 138 },
-      { label: "Kelas 12", laki: 130, perempuan: 137 },
-    ],
-  },
-  {
-    id: 6,
-    nama: "SMA Smart School 2",
-    jenjang: "SMA",
-    alamat: "Jl. Cempaka No. 17, Jakarta Utara",
-    tingkat: [
-      { label: "Kelas 10", laki: 152, perempuan: 148 },
-      { label: "Kelas 11", laki: 149, perempuan: 155 },
-      { label: "Kelas 12", laki: 156, perempuan: 157 },
-    ],
-  },
-];
-
-
 const totalSekolah = (s) =>
-  s.tingkat.reduce((acc, t) => acc + t.laki + t.perempuan, 0);
+  Array.isArray(s?.tingkat) && s.tingkat.length > 0
+    ? s.tingkat.reduce((acc, t) => acc + (t.laki || 0) + (t.perempuan || 0), 0)
+    : (s?.statistik?.totalSiswa ?? s?.totalSiswa ?? 0);
 
 const totalLaki = (s) =>
-  s.tingkat.reduce((acc, t) => acc + t.laki, 0);
+  Array.isArray(s?.tingkat) && s.tingkat.length > 0
+    ? s.tingkat.reduce((acc, t) => acc + (t.laki || 0), 0)
+    : 0;
 
 const totalPerempuan = (s) =>
-  s.tingkat.reduce((acc, t) => acc + t.perempuan, 0);
+  Array.isArray(s?.tingkat) && s.tingkat.length > 0
+    ? s.tingkat.reduce((acc, t) => acc + (t.perempuan || 0), 0)
+    : 0;
 
 
 const themeCardShadow =
@@ -143,20 +77,81 @@ export default function DataSiswaPage() {
   const [search, setSearch] = useState("");
   const [expandedId, setExpandedId] = useState(null);
 
+  const [dataSekolah, setDataSekolah] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchSekolah = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const res = await getLaporanSiswa();
+      const list = Array.isArray(res?.data?.items)
+        ? res.data.items
+        : Array.isArray(res?.data)
+        ? res.data
+        : Array.isArray(res)
+        ? res
+        : [];
+      setDataSekolah(list);
+    } catch (err) {
+      setError(err?.message || "Gagal memuat data sekolah binaan.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function load() {
+      try {
+        const res = await getLaporanSiswa();
+        if (cancelled) return;
+        const list = Array.isArray(res?.data?.items)
+          ? res.data.items
+          : Array.isArray(res?.data)
+          ? res.data
+          : Array.isArray(res)
+          ? res
+          : [];
+        setDataSekolah(list);
+      } catch (err) {
+        if (!cancelled) {
+          setError(err?.message || "Gagal memuat data sekolah binaan.");
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    }
+
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const filteredSekolah = useMemo(() => {
     const keyword = search.trim().toLowerCase();
 
     return dataSekolah.filter((s) => {
       const matchJenjang =
-        jenjang === "Semua Jenjang" || s.jenjang === jenjang;
+        jenjang === "Semua Jenjang" ||
+        s.jenjang === jenjang ||
+        s.nama?.toUpperCase().includes(jenjang);
 
       const matchSearch =
-        !keyword || s.nama.toLowerCase().includes(keyword);
+        !keyword ||
+        s.nama?.toLowerCase().includes(keyword) ||
+        s.subdomain?.toLowerCase().includes(keyword) ||
+        s.alamat?.toLowerCase().includes(keyword);
 
       return matchJenjang && matchSearch;
     });
-  }, [jenjang, search]);
+  }, [dataSekolah, jenjang, search]);
 
 
   const summary = useMemo(() => {
@@ -502,7 +497,50 @@ export default function DataSiswaPage() {
             </div>
 
 
-            {filteredSekolah.length === 0 ? (
+            {loading ? (
+              <div
+                className={`
+                  theme-card
+                  rounded-xl
+                  border theme-border
+                  ${themeCardShadow}
+                  p-12
+                  text-center
+                `}
+              >
+                <Loader2
+                  size={32}
+                  className="mx-auto text-[var(--color-primary)] animate-spin mb-3"
+                />
+                <p className="text-sm theme-text-muted">
+                  Memuat data sekolah binaan...
+                </p>
+              </div>
+            ) : error ? (
+              <div
+                className={`
+                  theme-card
+                  rounded-xl
+                  border border-[var(--color-danger)]/20
+                  ${themeCardShadow}
+                  p-8
+                  text-center
+                `}
+              >
+                <AlertCircle
+                  size={32}
+                  className="mx-auto text-[var(--color-danger)] mb-2"
+                />
+                <p className="text-sm font-medium theme-text">{error}</p>
+                <button
+                  type="button"
+                  onClick={fetchSekolah}
+                  className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[var(--color-primary)] text-white"
+                >
+                  <RefreshCw size={12} /> Coba Lagi
+                </button>
+              </div>
+            ) : filteredSekolah.length === 0 ? (
               <div
                 className={`
                   theme-card
@@ -591,13 +629,13 @@ export default function DataSiswaPage() {
                                 flex-shrink-0
                               "
                             >
-                              {s.jenjang}
+                              {s.jenjang || "Umum"}
                             </span>
                           </div>
 
                           <p className="text-xs theme-text-muted truncate flex items-center gap-1 mt-0.5">
                             <MapPin size={11} className="flex-shrink-0" />
-                            {s.alamat}
+                            {s.alamat || "-"}
                           </p>
                         </div>
                       </div>
@@ -655,103 +693,171 @@ export default function DataSiswaPage() {
                           bg-[color-mix(in_srgb,var(--color-text)_2%,transparent)]
                         `}
                       >
-                        <div className="overflow-x-auto w-full">
-                          <table className="w-full min-w-[480px] text-sm border-collapse">
+                        {Array.isArray(s.tingkat) && s.tingkat.length > 0 ? (
+                          <div className="overflow-x-auto w-full">
+                            <table className="w-full min-w-[480px] text-sm border-collapse">
 
-                            <thead>
-                              <tr
+                              <thead>
+                                <tr
+                                  className="
+                                    bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]
+                                  "
+                                >
+                                  <th
+                                    className="
+                                      border
+                                      border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]
+                                      text-left
+                                      font-medium
+                                      theme-text-muted
+                                      text-xs
+                                      uppercase
+                                      tracking-wider
+                                      px-4 sm:px-5
+                                      py-2.5
+                                      whitespace-nowrap
+                                    "
+                                  >
+                                    Tingkat
+                                  </th>
+
+                                  <th
+                                    className="
+                                      border
+                                      border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]
+                                      text-center
+                                      font-medium
+                                      theme-text-muted
+                                      text-xs
+                                      uppercase
+                                      tracking-wider
+                                      px-3
+                                      py-2.5
+                                      whitespace-nowrap
+                                    "
+                                  >
+                                    Laki-laki
+                                  </th>
+
+                                  <th
+                                    className="
+                                      border
+                                      border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]
+                                      text-center
+                                      font-medium
+                                      theme-text-muted
+                                      text-xs
+                                      uppercase
+                                      tracking-wider
+                                      px-3
+                                      py-2.5
+                                      whitespace-nowrap
+                                    "
+                                  >
+                                    Perempuan
+                                  </th>
+
+                                  <th
+                                    className="
+                                      border
+                                      border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]
+                                      text-center
+                                      font-medium
+                                      theme-text-muted
+                                      text-xs
+                                      uppercase
+                                      tracking-wider
+                                      px-3
+                                      py-2.5
+                                      whitespace-nowrap
+                                    "
+                                  >
+                                    Total
+                                  </th>
+                                </tr>
+                              </thead>
+
+                              <tbody
                                 className="
-                                  bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]
+                                  divide-y
+                                  divide-[color-mix(in_srgb,var(--color-text)_8%,transparent)]
+                                  theme-card
                                 "
                               >
-                                <th
-                                  className="
-                                    border
-                                    border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]
-                                    text-left
-                                    font-medium
-                                    theme-text-muted
-                                    text-xs
-                                    uppercase
-                                    tracking-wider
-                                    px-4 sm:px-5
-                                    py-2.5
-                                    whitespace-nowrap
-                                  "
-                                >
-                                  Tingkat
-                                </th>
+                                {s.tingkat.map((t, i) => (
+                                  <tr
+                                    key={i}
+                                    className={`
+                                      ${themeNeutralHover}
+                                      transition-colors
+                                    `}
+                                  >
+                                    <td
+                                      className="
+                                        border
+                                        border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]
+                                        px-4 sm:px-5
+                                        py-2.5
+                                        whitespace-nowrap
+                                      "
+                                    >
+                                      <span className="text-sm font-medium theme-text">
+                                        {t.label}
+                                      </span>
+                                    </td>
 
-                                <th
-                                  className="
-                                    border
-                                    border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]
-                                    text-center
-                                    font-medium
-                                    theme-text-muted
-                                    text-xs
-                                    uppercase
-                                    tracking-wider
-                                    px-3
-                                    py-2.5
-                                    whitespace-nowrap
-                                  "
-                                >
-                                  Laki-laki
-                                </th>
+                                    <td
+                                      className="
+                                        border
+                                        border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]
+                                        px-3
+                                        py-2.5
+                                        text-center
+                                        theme-text-secondary
+                                        whitespace-nowrap
+                                      "
+                                    >
+                                      {t.laki}
+                                    </td>
 
-                                <th
-                                  className="
-                                    border
-                                    border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]
-                                    text-center
-                                    font-medium
-                                    theme-text-muted
-                                    text-xs
-                                    uppercase
-                                    tracking-wider
-                                    px-3
-                                    py-2.5
-                                    whitespace-nowrap
-                                  "
-                                >
-                                  Perempuan
-                                </th>
+                                    <td
+                                      className="
+                                        border
+                                        border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]
+                                        px-3
+                                        py-2.5
+                                        text-center
+                                        theme-text-secondary
+                                        whitespace-nowrap
+                                      "
+                                    >
+                                      {t.perempuan}
+                                    </td>
 
-                                <th
-                                  className="
-                                    border
-                                    border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]
-                                    text-center
-                                    font-medium
-                                    theme-text-muted
-                                    text-xs
-                                    uppercase
-                                    tracking-wider
-                                    px-3
-                                    py-2.5
-                                    whitespace-nowrap
-                                  "
-                                >
-                                  Total
-                                </th>
-                              </tr>
-                            </thead>
+                                    <td
+                                      className="
+                                        border
+                                        border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]
+                                        px-3
+                                        py-2.5
+                                        text-center
+                                        whitespace-nowrap
+                                      "
+                                    >
+                                      <span className="text-sm font-semibold theme-text">
+                                        {t.laki + t.perempuan}
+                                      </span>
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
 
-                            <tbody
-                              className="
-                                divide-y
-                                divide-[color-mix(in_srgb,var(--color-text)_8%,transparent)]
-                                theme-card
-                              "
-                            >
-                              {s.tingkat.map((t, i) => (
+
+                              <tfoot>
                                 <tr
-                                  key={i}
-                                  className={`
-                                    ${themeNeutralHover}
-                                    transition-colors
-                                  `}
+                                  className="
+                                    bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]
+                                  "
                                 >
                                   <td
                                     className="
@@ -759,26 +865,12 @@ export default function DataSiswaPage() {
                                       border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]
                                       px-4 sm:px-5
                                       py-2.5
-                                      whitespace-nowrap
-                                    "
-                                  >
-                                    <span className="text-sm font-medium theme-text">
-                                      {t.label}
-                                    </span>
-                                  </td>
-
-                                  <td
-                                    className="
-                                      border
-                                      border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]
-                                      px-3
-                                      py-2.5
-                                      text-center
+                                      text-sm
+                                      font-semibold
                                       theme-text-secondary
-                                      whitespace-nowrap
                                     "
                                   >
-                                    {t.laki}
+                                    Total {s.nama}
                                   </td>
 
                                   <td
@@ -788,11 +880,12 @@ export default function DataSiswaPage() {
                                       px-3
                                       py-2.5
                                       text-center
+                                      text-sm
+                                      font-semibold
                                       theme-text-secondary
-                                      whitespace-nowrap
                                     "
                                   >
-                                    {t.perempuan}
+                                    {totalLaki(s)}
                                   </td>
 
                                   <td
@@ -802,86 +895,42 @@ export default function DataSiswaPage() {
                                       px-3
                                       py-2.5
                                       text-center
-                                      whitespace-nowrap
+                                      text-sm
+                                      font-semibold
+                                      theme-text-secondary
                                     "
                                   >
-                                    <span className="text-sm font-semibold theme-text">
-                                      {t.laki + t.perempuan}
-                                    </span>
+                                    {totalPerempuan(s)}
+                                  </td>
+
+                                  <td
+                                    className="
+                                      border
+                                      border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]
+                                      px-3
+                                      py-2.5
+                                      text-center
+                                      text-sm
+                                      font-bold
+                                      theme-text
+                                    "
+                                  >
+                                    {total}
                                   </td>
                                 </tr>
-                              ))}
-                            </tbody>
-
-
-                            <tfoot>
-                              <tr
-                                className="
-                                  bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]
-                                "
-                              >
-                                <td
-                                  className="
-                                    border
-                                    border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]
-                                    px-4 sm:px-5
-                                    py-2.5
-                                    text-sm
-                                    font-semibold
-                                    theme-text-secondary
-                                  "
-                                >
-                                  Total {s.nama}
-                                </td>
-
-                                <td
-                                  className="
-                                    border
-                                    border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]
-                                    px-3
-                                    py-2.5
-                                    text-center
-                                    text-sm
-                                    font-semibold
-                                    theme-text-secondary
-                                  "
-                                >
-                                  {totalLaki(s)}
-                                </td>
-
-                                <td
-                                  className="
-                                    border
-                                    border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]
-                                    px-3
-                                    py-2.5
-                                    text-center
-                                    text-sm
-                                    font-semibold
-                                    theme-text-secondary
-                                  "
-                                >
-                                  {totalPerempuan(s)}
-                                </td>
-
-                                <td
-                                  className="
-                                    border
-                                    border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]
-                                    px-3
-                                    py-2.5
-                                    text-center
-                                    text-sm
-                                    font-bold
-                                    theme-text
-                                  "
-                                >
-                                  {total}
-                                </td>
-                              </tr>
-                            </tfoot>
-                          </table>
-                        </div>
+                              </tfoot>
+                            </table>
+                          </div>
+                        ) : (
+                          <div className="p-4 sm:p-5 text-sm theme-text-muted flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                            <span>
+                              Data siswa unit {s.nama} tercatat di sistem dengan total {total.toLocaleString("id-ID")} siswa. Rincian per rombel belum dikonfigurasi.
+                            </span>
+                            <span className="font-semibold theme-text whitespace-nowrap">
+                              {total.toLocaleString("id-ID")} Siswa
+                            </span>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>

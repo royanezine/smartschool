@@ -102,10 +102,6 @@ export default function TambahTugasPage() {
   });
 
 
-  useEffect(() => {
-    loadKelasMapel();
-  }, []);
-
   const loadKelasMapel = async () => {
     try {
       setLoading(true);
@@ -168,6 +164,13 @@ export default function TambahTugasPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      loadKelasMapel();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, []);
 
 
   const handleChange = (e) => {

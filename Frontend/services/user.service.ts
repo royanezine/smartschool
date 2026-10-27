@@ -84,14 +84,18 @@ export interface GetUsersParams {
 export interface Pagination {
   page: number;
   limit: number;
-  totalData: number;
+  total?: number;
+  totalData?: number;
   totalPages: number;
+  hasNext?: boolean;
+  hasPrev?: boolean;
 }
 
 export interface GetUsersResponse {
   success: boolean;
   message?: string;
   data: User[];
+  meta?: Pagination;
   pagination?: Pagination;
 }
 

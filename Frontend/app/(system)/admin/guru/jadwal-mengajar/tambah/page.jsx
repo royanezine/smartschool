@@ -389,9 +389,20 @@ export default function TambahJadwalMengajarPage() {
             ? response
             : [];
 
-        setKelasMapelList(
-          data
-        );
+        setKelasMapelList(data);
+
+        if (typeof window !== "undefined") {
+          const searchParams = new URLSearchParams(window.location.search);
+          const targetKelasId = searchParams.get("kelasId");
+          if (targetKelasId) {
+            const found = data.find(
+              (km) => String(km.kelasId || km.kelas?.id) === String(targetKelasId)
+            );
+            if (found) {
+              setSelectedKelasMapelId(found.id);
+            }
+          }
+        }
 
         console.log(
           "========== KELAS MAPEL =========="

@@ -4,7 +4,12 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
-import { apiFetch } from "@/lib/api";
+import { getRiwayatShiftSaya, getAbsensiKelas } from "@/services/absensi.service";
+import { getKelasMapel } from "@/services/kelasMapel.service";
+import { getJadwalMengajar } from "@/services/jadwalMengajar.service";
+import { getNotifikasi, markNotifikasiAsRead, markAllNotifikasiAsRead } from "@/services/notifikasi.service";
+import { getKelasById } from "@/services/kelas.service";
+import { getTugasByKelasMapel, getPengumpulanByTugas } from "@/services/tugas.service";
 import { getSessionUser, subscribeAuth } from "@/lib/auth";
 
 import {
@@ -356,6 +361,8 @@ export default function GuruDashboardPage() {
   const [attendanceTodayError, setAttendanceTodayError] = useState("");
   const [pendingSubmissions, setPendingSubmissions] = useState(0);
   const [taskCountAvailable, setTaskCountAvailable] = useState(true);
+  const [studentCount, setStudentCount] = useState(0);
+  const [studentCountAvailable, setStudentCountAvailable] = useState(false);
 
   const today = useMemo(() => new Date(), []);
   const todayString = getLocalDateString();
@@ -365,9 +372,7 @@ export default function GuruDashboardPage() {
     try {
       setAttendanceTodayError("");
 
-      const response = await apiFetch(
-        "/api/absensi/shift-saya?page=1&limit=100"
-      );
+      const response = await getRiwayatShiftSaya(1, 100);
 
       const records = getArrayPayload(response);
       const todayKey = getJakartaDateString(new Date());
@@ -415,10 +420,10 @@ export default function GuruDashboardPage() {
 
         const [kelasResult, jadwalResult, notificationResult, attendanceResult] =
           await Promise.allSettled([
-            apiFetch("/api/kelas-mapel"),
-            apiFetch("/api/jadwal-mengajar"),
-            apiFetch("/api/notifikasi"),
-            apiFetch("/api/absensi/shift-saya?page=1&limit=100"),
+            getKelasMapel(),
+            getJadwalMengajar(),
+            getNotifikasi(),
+            getRiwayatShiftSaya(1, 100),
           ]);
 
         const kelasPayload =
@@ -529,12 +534,41 @@ export default function GuruDashboardPage() {
           ).values(),
         ];
 
+        let totalStudents = 0;
+        let studentsCountAvailable = false;
+
+        try {
+          const studentCounts = await Promise.all(
+            uniqueClasses.map(async (kelas) => {
+              try {
+                const res = await getKelasById(kelas.id);
+                const kData = res?.data || res;
+                const count =
+                  kData?.jumlahSiswa ??
+                  kData?.totalSiswa ??
+                  (Array.isArray(kData?.anggota) ? kData.anggota.length : null) ??
+                  (Array.isArray(kData?.siswaKelas) ? kData.siswaKelas.length : null);
+                return count !== null && count !== undefined && !Number.isNaN(Number(count))
+                  ? Number(count)
+                  : 0;
+              } catch {
+                return 0;
+              }
+            })
+          );
+          totalStudents = studentCounts.reduce((acc, curr) => acc + curr, 0);
+          studentsCountAvailable = true;
+        } catch {
+          studentsCountAvailable = false;
+        }
+
+        setStudentCount(totalStudents);
+        setStudentCountAvailable(studentsCountAvailable);
+
         const attendanceEntries = await Promise.all(
           uniqueClasses.map(async (kelas) => {
             try {
-              const response = await apiFetch(
-                `/api/absensi/kelas/${encodeURIComponent(kelas.id)}?tanggal=${encodeURIComponent(todayString)}`
-              );
+              const response = await getAbsensiKelas(kelas.id, todayString);
 
               const records = getArrayPayload(response);
               const present = records.filter((item) =>
@@ -582,9 +616,7 @@ export default function GuruDashboardPage() {
               if (!item?.id) return [];
 
               try {
-                const response = await apiFetch(
-                  `/api/tugas/kelas-mapel/${encodeURIComponent(item.id)}`
-                );
+                const response = await getTugasByKelasMapel(item.id);
                 const tasks = getArrayPayload(response);
                 return tasks;
               } catch {
@@ -601,9 +633,7 @@ export default function GuruDashboardPage() {
               if (!task?.id) return [];
 
               try {
-                const response = await apiFetch(
-                  `/api/tugas/${encodeURIComponent(task.id)}/pengumpulan`
-                );
+                const response = await getPengumpulanByTugas(task.id);
                 return getArrayPayload(response);
               } catch {
                 taskDataFailed = true;
@@ -649,7 +679,10 @@ export default function GuruDashboardPage() {
   );
 
   useEffect(() => {
-    loadDashboard();
+    const timer = setTimeout(() => {
+      loadDashboard();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadDashboard]);
 
   useEffect(() => {
@@ -702,10 +735,7 @@ export default function GuruDashboardPage() {
     if (!item?.id || item.dibaca) return;
 
     try {
-      await apiFetch(
-        `/api/notifikasi/${encodeURIComponent(item.id)}/read`,
-        { method: "PATCH" }
-      );
+      await markNotifikasiAsRead(item.id);
 
       setNotifikasi((previous) =>
         previous.map((notification) =>
@@ -723,7 +753,7 @@ export default function GuruDashboardPage() {
 
   async function markAllNotificationsAsRead() {
     try {
-      await apiFetch("/api/notifikasi/read-all", { method: "PATCH" });
+      await markAllNotifikasiAsRead();
       setNotifikasi((previous) =>
         previous.map((item) => ({ ...item, dibaca: true }))
       );
@@ -815,7 +845,12 @@ export default function GuruDashboardPage() {
 
               <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
                 <StatCard title="Kelas Diampu" value={loading ? "…" : uniqueClassCount} subtitle="Kelas unik dari kelas-mapel" Icon={GraduationCap} />
-                <StatCard title="Siswa Diampu" value="—" subtitle="Jumlah anggota kelas belum tersedia" Icon={Users} />
+                <StatCard
+                  title="Siswa Diampu"
+                  value={loading ? "…" : studentCountAvailable ? studentCount : "—"}
+                  subtitle={studentCountAvailable ? "Total siswa dalam kelas yang diampu" : "Data siswa belum berhasil dimuat"}
+                  Icon={Users}
+                />
                 <StatCard
                   title="Pengumpulan Belum Dinilai"
                   value={loading ? "…" : taskCountAvailable ? pendingSubmissions : "—"}
@@ -1133,17 +1168,34 @@ export default function GuruDashboardPage() {
               </section>
 
               <section className={`${themeCard} p-4 sm:p-5`}>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 mb-3">
                   <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${themeSoft} ${themePrimary}`}>
                     <MoreHorizontal size={17} />
                   </div>
                   <div>
                     <h2 className="text-sm font-bold theme-text">Aktivitas Terbaru</h2>
-                    <p className={`mt-1 text-xs ${themeMuted}`}>
-                      Belum tersedia endpoint aktivitas khusus guru pada route yang diperiksa.
+                    <p className={`mt-0.5 text-xs ${themeMuted}`}>
+                      Pembaruan terkini dari sistem dan notifikasi Anda
                     </p>
                   </div>
                 </div>
+                {notifikasi.length > 0 ? (
+                  <div className="divide-y divide-black/5 dark:divide-white/5">
+                    {notifikasi.slice(0, 3).map((item) => (
+                      <div key={item.id} className="py-2.5 flex items-start justify-between gap-3">
+                        <div>
+                          <p className="text-xs font-semibold theme-text">{item.judul || "Pemberitahuan Sistem"}</p>
+                          <p className="text-xs theme-text-secondary mt-0.5">{item.pesan || item.konten || ""}</p>
+                        </div>
+                        <span className={`text-[10px] shrink-0 ${themeMuted}`}>
+                          {item.dibuatPada ? formatTime(item.dibuatPada) : ""}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className={`text-xs ${themeMuted}`}>Belum ada aktivitas terbaru hari ini.</p>
+                )}
               </section>
             </div>
           </div>

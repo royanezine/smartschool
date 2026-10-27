@@ -100,13 +100,7 @@ export default function EditLantaiPage() {
   const [success, setSuccess] = useState("");
 
 
-  useEffect(() => {
-    if (id) {
-      loadData();
-    }
-  }, [id]);
-
-  async function loadData() {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
       setError("");
@@ -168,14 +162,13 @@ export default function EditLantaiPage() {
 
       setForm({
         gedungId:
-          foundLantai?.gedungId ||
           foundGedungId ||
+          foundLantai?.gedungId ||
           "",
-        nama: foundLantai?.nama || "",
+        nama: foundLantai.nama || "",
       });
     } catch (err) {
       console.error(err);
-
       setError(
         err?.message ||
           "Gagal mengambil data lantai."
@@ -183,19 +176,16 @@ export default function EditLantaiPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [id]);
 
-
-  const selectedGedung = useMemo(() => {
-    return (
-      gedung.find(
-        (item) =>
-          String(item?.id) ===
-          String(form.gedungId)
-      ) || null
-    );
-  }, [gedung, form.gedungId]);
-
+  useEffect(() => {
+    if (id) {
+      const timer = setTimeout(() => {
+        loadData();
+      }, 0);
+      return () => clearTimeout(timer);
+    }
+  }, [id, loadData]);
 
   function handleChange(e) {
     const { name, value } = e.target;

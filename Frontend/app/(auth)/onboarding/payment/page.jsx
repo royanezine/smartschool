@@ -25,6 +25,7 @@ export default function PaymentPage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    const timer = setTimeout(() => {
     const savedUrl = sessionStorage.getItem("onboarding_payment_url") || "";
     const savedOrderId = sessionStorage.getItem("onboarding_order_id") || "";
     const savedVaNumber = sessionStorage.getItem("onboarding_va_number") || "";
@@ -48,8 +49,10 @@ export default function PaymentPage() {
     setVaNumber(savedVaNumber);
     setBank(savedBank);
     setAmount(savedAmount);
-    setLoading(false);
-  }, []);
+    setLoading(false)
+    }, 0);
+    return () => clearTimeout(timer);
+  }, []);;
 
   const handlePayment = () => {
     if (!paymentUrl) return;

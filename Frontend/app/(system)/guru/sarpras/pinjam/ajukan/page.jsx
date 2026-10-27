@@ -110,15 +110,6 @@ function AjukanPeminjamanContent() {
   const [berhasilKirim, setBerhasilKirim] = useState(false);
   const [dataPeminjaman, setDataPeminjaman] = useState(null);
 
-  const notifications = [
-    {
-      id: 1,
-      title: "Informasi Peminjaman",
-      desc: "Cek status pengajuan peminjaman Anda",
-      read: false,
-    },
-  ];
-
   useEffect(() => {
     let mounted = true;
 
@@ -263,15 +254,7 @@ function AjukanPeminjamanContent() {
       />
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <Header
-          toggleSidebar={() => setSidebarOpen((v) => !v)}
-          notifications={notifications}
-          user={{
-            name: "Bu Sari",
-            email: "guru@smartschool.com",
-            avatar: "AS",
-          }}
-        />
+        <Header toggleSidebar={() => setSidebarOpen((v) => !v)} />
 
         <main className="theme-page relative flex-1 overflow-y-auto">
           <div

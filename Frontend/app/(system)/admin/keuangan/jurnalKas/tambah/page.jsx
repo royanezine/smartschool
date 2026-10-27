@@ -150,7 +150,10 @@ export default function TambahJurnalKasPage() {
   };
 
   useEffect(() => {
-    loadAccounts();
+    const timer = setTimeout(() => {
+      loadAccounts();
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   const handleChange = (field, value) => {

@@ -271,41 +271,49 @@ export default function DetailNilaiSiswaPage() {
 
   const ujianId = searchParams.get("ujianId");
   const siswaId = searchParams.get("siswaId");
+  const namaParam = searchParams.get("nama");
+  const nisnParam = searchParams.get("nisn");
+  const nilaiParam = searchParams.get("nilai");
+  const statusParam = searchParams.get("status");
 
   useEffect(() => {
-    try {
-      const raw = sessionStorage.getItem("selectedNilaiDetail");
-      if (!raw) {
-        setError("Data detail tidak ditemukan. Silakan kembali dan pilih ulang.");
+    if (!ujianId) {
+      const timer = setTimeout(() => {
+        setError(
+          "Data detail tidak ditemukan. Silakan kembali dan pilih ulang."
+        );
         setLoading(false);
-        return;
-      }
-      const parsed = JSON.parse(raw);
-      setData(parsed);
-    } catch {
-      setError("Gagal memuat data detail.");
-    } finally {
-      setLoading(false);
+      }, 0);
+      return () => clearTimeout(timer);
     }
-  }, []);
-
-  useEffect(() => {
-    if (data || !ujianId) return;
 
     let cancelled = false;
-    (async () => {
+    const timer = setTimeout(async () => {
       try {
         setLoading(true);
+        setError("");
         const res = await getDetailUjian(ujianId);
         const detail = parseObject(res);
         if (!cancelled && detail) {
           setData({
-            siswa: null,
+            siswa: siswaId
+              ? {
+                  id: siswaId,
+                  nama: namaParam || "-",
+                  nisn: nisnParam || "-",
+                  nilai:
+                    nilaiParam !== null && nilaiParam !== ""
+                      ? Number(nilaiParam)
+                      : null,
+                  status: statusParam || "selesai",
+                }
+              : null,
             ujian: {
               id: ujianId,
               nama: detail.judul || detail.nama || "Ujian",
               jenis: detail.tipe || detail.jenis || "ujian",
-              mataPelajaran: detail.kelasMapel?.mataPelajaran?.nama || "-",
+              mataPelajaran:
+                detail.kelasMapel?.mataPelajaran?.nama || "-",
               namaKelas: detail.kelasMapel?.kelas?.nama || "-",
               jumlahSoal:
                 detail._count?.soalAsesmen ||
@@ -317,17 +325,22 @@ export default function DetailNilaiSiswaPage() {
             },
           });
         }
-      } catch {
-        if (!cancelled) setError("Gagal memuat data ujian.");
+      } catch (err) {
+        if (!cancelled) {
+          setError(err?.message || "Gagal memuat data ujian.");
+        }
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
-    })();
+    }, 0);
 
     return () => {
       cancelled = true;
+      clearTimeout(timer);
     };
-  }, [data, ujianId]);
+  }, [ujianId, siswaId, namaParam, nisnParam, nilaiParam, statusParam]);
 
   const siswa = data?.siswa || null;
   const ujian = data?.ujian || null;
@@ -373,10 +386,7 @@ export default function DetailNilaiSiswaPage() {
           setIsCollapsed={setIsCollapsed}
         />
         <div className="flex h-screen flex-1 flex-col overflow-hidden">
-          <Header
-            notifications={[]}
-            user={{ name: "Guru", email: "guru@smartschool.com", avatar: "GR" }}
-          />
+          <Header />
           <main className="flex flex-1 items-center justify-center p-6">
             <div
               className={`theme-card w-full max-w-sm rounded-2xl border ${themeNeutralBorder} p-8 text-center ${themeCardShadow}`}
@@ -409,10 +419,7 @@ export default function DetailNilaiSiswaPage() {
           setIsCollapsed={setIsCollapsed}
         />
         <div className="flex h-screen flex-1 flex-col overflow-hidden">
-          <Header
-            notifications={[]}
-            user={{ name: "Guru", email: "guru@smartschool.com", avatar: "GR" }}
-          />
+          <Header />
           <main className="flex flex-1 items-center justify-center p-6">
             <div
               className={`theme-card w-full max-w-md rounded-2xl border ${themeNeutralBorder} p-8 text-center ${themeCardShadow}`}
@@ -458,10 +465,7 @@ export default function DetailNilaiSiswaPage() {
       />
 
       <div className="flex h-screen flex-1 flex-col overflow-hidden">
-        <Header
-          notifications={[]}
-          user={{ name: "Guru", email: "guru@smartschool.com", avatar: "GR" }}
-        />
+        <Header />
 
         <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
           <div className="mx-auto w-full max-w-[1200px]">

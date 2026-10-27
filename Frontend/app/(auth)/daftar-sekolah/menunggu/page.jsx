@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 import {
   ArrowRight,
   CheckCircle2,
@@ -22,23 +23,24 @@ function MenungguPendaftaranContent() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const emailFromUrl = searchParams.get("email");
+    const timer = setTimeout(() => {
+      const emailFromUrl = searchParams.get("email");
 
-    const savedEmail =
-      localStorage.getItem("onboarding_email") ||
-      localStorage.getItem("tenant_register_email") ||
-      localStorage.getItem("remembered_identifier") ||
-      "";
+      const savedEmail =
+        localStorage.getItem("onboarding_email") ||
+        localStorage.getItem("tenant_register_email") ||
+        localStorage.getItem("remembered_identifier") ||
+        "";
 
-    const currentEmail = emailFromUrl || savedEmail;
+      const currentEmail = emailFromUrl || savedEmail;
 
-    if (currentEmail) {
-      setEmail(currentEmail);
-      localStorage.setItem("onboarding_email", currentEmail);
-      localStorage.setItem("tenant_register_email", currentEmail);
-    }
+      if (currentEmail) {
+        setEmail(currentEmail);
+      }
 
-    setLoading(false);
+      setLoading(false);
+    }, 0);
+    return () => clearTimeout(timer);
   }, [searchParams]);
 
   function lanjutVerifikasi() {
@@ -97,7 +99,7 @@ function MenungguPendaftaranContent() {
 
       <div className="relative mx-auto max-w-2xl">
         <div className="mb-8 flex justify-center">
-          <a
+          <Link
             href="/"
             className="relative block h-12 w-48"
             aria-label="SmartSchool"
@@ -110,7 +112,7 @@ function MenungguPendaftaranContent() {
               sizes="192px"
               className="object-contain"
             />
-          </a>
+          </Link>
         </div>
 
         <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_15px_50px_rgba(15,23,42,0.07)]">

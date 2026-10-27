@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import {
@@ -223,7 +223,7 @@ export default function ManajemenAksesPage() {
   const [deletingId, setDeletingId] = useState(null);
 
 
-  const loadRoles = async () => {
+  const loadRoles = useCallback(async () => {
     try {
       setLoading(true);
       setErrorMessage("");
@@ -250,11 +250,14 @@ export default function ManajemenAksesPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    loadRoles();
-  }, []);
+    const timer = setTimeout(() => {
+      loadRoles();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [loadRoles]);
 
 
   useEffect(() => {
@@ -427,7 +430,10 @@ export default function ManajemenAksesPage() {
 
   useEffect(() => {
     if (currentPage > totalPages) {
-      setCurrentPage(totalPages);
+      const timer = setTimeout(() => {
+        setCurrentPage(totalPages);
+      }, 0);
+      return () => clearTimeout(timer);
     }
   }, [
     currentPage,

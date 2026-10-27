@@ -33,14 +33,17 @@ export default function VerifyPage() {
   const inputRefs = useRef([]);
 
   useEffect(() => {
-    const savedEmail = sessionStorage.getItem("onboarding_email");
+    const timer = setTimeout(() => {
+      const savedEmail = sessionStorage.getItem("onboarding_email");
 
-    if (!savedEmail) {
-      router.replace("/onboarding/school");
-      return;
-    }
+      if (!savedEmail) {
+        router.replace("/onboarding/school");
+        return;
+      }
 
-    setEmail(savedEmail);
+      setEmail(savedEmail);
+    }, 0);
+    return () => clearTimeout(timer);
   }, [router]);
 
   const handleOtpChange = (index, value) => {

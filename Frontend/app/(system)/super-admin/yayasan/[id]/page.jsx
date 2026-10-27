@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { getToken } from "@/lib/auth";
+import { getDetailSekolahBinaan } from "@/services/yayasan.service";
 import {
     Building2,
     School,
@@ -88,9 +88,11 @@ export default function DetailYayasanPage() {
 
     useEffect(() => {
         if (!id) {
-            setError("ID yayasan tidak ditemukan.");
-            setLoading(false);
-            return;
+            const timer = setTimeout(() => {
+                setError("ID yayasan tidak ditemukan.");
+                setLoading(false);
+            }, 0);
+            return () => clearTimeout(timer);
         }
 
         let cancelled = false;
@@ -100,58 +102,7 @@ export default function DetailYayasanPage() {
                 setLoading(true);
                 setError("");
 
-                const API_URL =
-                    process.env.NEXT_PUBLIC_API_URL ||
-                    "http://localhost:5000";
-
-                const token = getToken();
-
-                if (!token) {
-                    throw new Error(
-                        "Token login tidak ditemukan. Silakan login kembali."
-                    );
-                }
-
-                const response = await fetch(
-                    `${API_URL}/api/yayasan/${id}`,
-                    {
-                        method: "GET",
-                        headers: {
-                            "Content-Type": "application/json",
-                            Authorization: `Bearer ${token}`,
-                        },
-                        cache: "no-store",
-                    }
-                );
-
-                const text = await response.text();
-
-                let result = null;
-
-                try {
-                    result = text ? JSON.parse(text) : null;
-                } catch {
-                    console.error(
-                        "Response bukan JSON:",
-                        text
-                    );
-
-                    throw new Error(
-                        "Response dari server bukan JSON."
-                    );
-                }
-
-                console.log(
-                    "DETAIL YAYASAN RESPONSE:",
-                    result
-                );
-
-                if (!response.ok) {
-                    throw new Error(
-                        result?.message ||
-                            "Gagal mengambil detail yayasan."
-                    );
-                }
+                const result = await getDetailSekolahBinaan(id);
 
                 if (cancelled) return;
 
@@ -529,7 +480,7 @@ export default function DetailYayasanPage() {
                             <button
                                 onClick={() =>
                                     router.push(
-                                        `/super-admin/yayasan/edit/${yayasan.id}`
+                                        `/super-admin/sekolah/${yayasan.id}`
                                     )
                                 }
                                 className="flex items-center justify-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg transition-all bg-[var(--color-primary)] text-[var(--color-card)] hover:opacity-90 shadow-[0_6px_16px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]"
@@ -765,7 +716,7 @@ export default function DetailYayasanPage() {
                     <button
                         onClick={() =>
                             router.push(
-                                `/super-admin/yayasan/edit/${yayasan.id}`
+                                `/super-admin/sekolah/${yayasan.id}`
                             )
                         }
                         className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-2.5 text-sm font-medium rounded-lg transition-all bg-[var(--color-primary)] text-[var(--color-card)] hover:opacity-90 shadow-[0_6px_16px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]"

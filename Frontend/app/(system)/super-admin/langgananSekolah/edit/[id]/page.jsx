@@ -2,15 +2,42 @@
 
 import { useParams } from "next/navigation";
 import LanggananForm from "@/app/components/LanggananForm";
-import { dummyLangganan } from "../../../../../../lib/data";
+import { useState, useEffect } from "react";
+import { getAllLangganan } from "@/services/langganan.service";
+import { Loader2 } from "lucide-react";
 
 export default function EditLanggananPage() {
   const params = useParams();
   const id = params.id;
 
-  const initialData = dummyLangganan.find(
-    (item) => item.id === id
-  );
+  const [initialData, setInitialData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let isMounted = true;
+    async function loadData() {
+      try {
+        setLoading(true);
+        const list = await getAllLangganan();
+        const found = list.find((item) => String(item.id) === String(id));
+        if (isMounted) setInitialData(found || null);
+      } catch (err) {
+        console.error("Gagal memuat data langganan:", err);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    }
+    loadData();
+    return () => { isMounted = false; };
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-[var(--color-primary)]" />
+      </div>
+    );
+  }
 
   if (!initialData) {
     return (

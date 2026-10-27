@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { apiFetch } from "../../../../lib/api";
+import { useEffect, useState, useCallback } from "react";
+import { getProfile, updateProfile } from "@/services/user.service";
 import {
   User,
   Check,
@@ -58,18 +58,12 @@ export default function PengaturanSiswaPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  useEffect(() => {
-    loadProfile();
-  }, []);
-
-  const loadProfile = async () => {
+  const loadProfile = useCallback(async () => {
     try {
       setLoadingProfile(true);
       setError("");
 
-      const response = await apiFetch("/api/users/profile", {
-        method: "GET",
-      });
+      const response = await getProfile();
 
       const userData =
         response?.data ||
@@ -87,7 +81,14 @@ export default function PengaturanSiswaPage() {
     } finally {
       setLoadingProfile(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      loadProfile();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [loadProfile]);
 
   const nama = profile?.namaLengkap || "Siswa";
   const email = profile?.email || "-";
@@ -449,21 +450,24 @@ function DataPribadiSection({
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    setNamaLengkap(profile?.namaLengkap || "");
-    setNoTelepon(profile?.noTelepon || "");
-    setAlamat(profile?.alamat || "");
-    setAlamatDomisili(
-      profile?.alamatDomisili || ""
-    );
-    setTempatLahir(profile?.tempatLahir || "");
+    const timer = setTimeout(() => {
+      setNamaLengkap(profile?.namaLengkap || "");
+      setNoTelepon(profile?.noTelepon || "");
+      setAlamat(profile?.alamat || "");
+      setAlamatDomisili(
+        profile?.alamatDomisili || ""
+      );
+      setTempatLahir(profile?.tempatLahir || "");
 
-    setTanggalLahir(
-      profile?.tanggalLahir
-        ? new Date(profile.tanggalLahir)
-            .toISOString()
-            .split("T")[0]
-        : ""
-    );
+      setTanggalLahir(
+        profile?.tanggalLahir
+          ? new Date(profile.tanggalLahir)
+              .toISOString()
+              .split("T")[0]
+          : ""
+      );
+    }, 0);
+    return () => clearTimeout(timer);
   }, [profile]);
 
   const handleSave = async () => {
@@ -472,21 +476,15 @@ function DataPribadiSection({
       onError("");
       onSuccess("");
 
-      const response = await apiFetch(
-        "/api/users/profile",
-        {
-          method: "PUT",
-          body: JSON.stringify({
-            namaLengkap,
-            noTelepon,
-            alamat,
-            alamatDomisili,
-            tempatLahir,
-            tanggalLahir:
-              tanggalLahir || undefined,
-          }),
-        }
-      );
+      const response = await updateProfile({
+        namaLengkap,
+        noTelepon,
+        alamat,
+        alamatDomisili,
+        tempatLahir,
+        tanggalLahir:
+          tanggalLahir || undefined,
+      });
 
       const updatedProfile =
         response?.data ||

@@ -259,7 +259,10 @@ export default function LanggananSekolahPage() {
   };
 
   useEffect(() => {
-    fetchSubscriptions();
+    const timer = setTimeout(() => {
+      fetchSubscriptions();
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   const statistics = useMemo(() => {
@@ -296,7 +299,12 @@ export default function LanggananSekolahPage() {
   }, [sortedSubscriptions, currentPage, pageSize]);
 
   useEffect(() => {
-    if (page > totalPages) setPage(totalPages);
+    if (page > totalPages) {
+      const timer = setTimeout(() => {
+        setPage(totalPages);
+      }, 0);
+      return () => clearTimeout(timer);
+    }
   }, [page, totalPages]);
 
   const toggleSortDir = () => setSortDir((d) => (d === "asc" ? "desc" : "asc"));

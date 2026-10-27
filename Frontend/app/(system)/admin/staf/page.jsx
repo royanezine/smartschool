@@ -1,9 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
+import { deleteUser, getUsers } from "@/services/user.service";
+import { getRoles } from "@/services/role.service";
 
 import {
   Users,
@@ -17,11 +19,12 @@ import {
   ArrowDown,
   CheckCircle,
   XCircle,
-  Clock,
   RefreshCw,
   Download,
   FileText,
   Printer,
+  AlertCircle,
+  Loader2,
 } from "lucide-react";
 
 
@@ -86,201 +89,94 @@ const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
 
-const generateDummyData = () => {
-  const names = [
-    {
-      nama: "Dr. Ahmad Fauzi, M.Pd.",
-      role: "Super Admin",
-      avatar: "AF",
-    },
-    {
-      nama: "Dewi Lestari, S.Kom.",
-      role: "Admin Sekolah",
-      avatar: "DL",
-    },
-    {
-      nama: "Budi Santoso, S.E.",
-      role: "Admin Yayasan",
-      avatar: "BS",
-    },
-    {
-      nama: "Siti Rahayu, S.Pd.",
-      role: "Guru",
-      avatar: "SR",
-    },
-    {
-      nama: "M. Rizki Firmansyah, S.Si.",
-      role: "Staf TU",
-      avatar: "RF",
-    },
-    {
-      nama: "Nina Susanti, S.Pd.",
-      role: "Guru",
-      avatar: "NS",
-    },
-    {
-      nama: "Agus Salim, S.Pd.I.",
-      role: "Guru",
-      avatar: "AS",
-    },
-    {
-      nama: "Rina Marlina, S.E.",
-      role: "Staf TU",
-      avatar: "RM",
-    },
-    {
-      nama: "Dodi Saputra, S.Kom.",
-      role: "Admin Sekolah",
-      avatar: "DS",
-    },
-    {
-      nama: "Tuti Rahayu, S.Pd.",
-      role: "Guru",
-      avatar: "TR",
-    },
-    {
-      nama: "Hendra Gunawan, S.Si.",
-      role: "Guru",
-      avatar: "HG",
-    },
-    {
-      nama: "Maya Sari, S.Pd.",
-      role: "Guru",
-      avatar: "MS",
-    },
-    {
-      nama: "Rahmat Hidayat, S.Pd.",
-      role: "Guru",
-      avatar: "RH",
-    },
-    {
-      nama: "Yuli Astuti, S.Pd.",
-      role: "Guru",
-      avatar: "YA",
-    },
-    {
-      nama: "Anton Budiman, S.Kom.",
-      role: "Staf TU",
-      avatar: "AB",
-    },
-    {
-      nama: "Diana Kusuma, S.Pd.",
-      role: "Guru",
-      avatar: "DK",
-    },
-    {
-      nama: "Rudi Hartono, S.Pd.",
-      role: "Guru",
-      avatar: "RH",
-    },
-    {
-      nama: "Sari Wulandari, S.Pd.",
-      role: "Guru",
-      avatar: "SW",
-    },
-    {
-      nama: "Irwan Setiawan, S.Pd.",
-      role: "Guru",
-      avatar: "IS",
-    },
-    {
-      nama: "Nurul Hikmah, S.Pd.",
-      role: "Guru",
-      avatar: "NH",
-    },
-  ];
+const normalizeRoleName = (value) =>
+  String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[\s-]+/g, "_");
 
-  const statuses = ["Aktif", "Trial", "Nonaktif"];
+const normalizeStatus = (value) => {
+  const status = String(value || "").toLowerCase();
 
-  const phones = [
-    "0812-3456-7890",
-    "0813-4567-8901",
-    "0814-5678-9012",
-    "0815-6789-0123",
-    "0816-7890-1234",
-  ];
+  if (status === "aktif" || status === "active") {
+    return "aktif";
+  }
 
-  return names.map((item, index) => {
-    const statusIdx = index % 10 < 7 ? 0 : index % 3;
+  if (status === "nonaktif" || status === "inactive") {
+    return "nonaktif";
+  }
 
-    return {
-      id: index + 1,
-      nama: item.nama,
-      email: `${item.nama.split(" ")[0].toLowerCase()}.${item.nama.split(" ")[1]?.toLowerCase() || "staf"}@smartschool.com`,
-      telepon: phones[index % phones.length],
-      role: item.role,
-      status: statuses[statusIdx],
-      terakhirLogin: `2026-08-${String(
-        20 - (index % 5)
-      ).padStart(2, "0")}T${String(
-        8 + (index % 8)
-      ).padStart(2, "0")}:${String(
-        30 + (index % 30)
-      ).padStart(2, "0")}:00Z`,
-      bergabung: `202${String(
-        4 + (index % 3)
-      )}-${String(1 + (index % 12)).padStart(
-        2,
-        "0"
-      )}-${String(1 + (index % 28)).padStart(
-        2,
-        "0"
-      )}`,
-      avatar: item.avatar,
-    };
-  });
+  return status || "nonaktif";
 };
 
-const stafData = generateDummyData();
+const getRoleDisplayName = (peran) =>
+  peran?.namaTampilan || peran?.nama || "-";
 
-const stats = {
-  total: stafData.length,
-  aktif: stafData.filter((s) => s.status === "Aktif").length,
-  nonaktif: stafData.filter(
-    (s) => s.status === "Nonaktif"
-  ).length,
-  trial: stafData.filter((s) => s.status === "Trial").length,
+const getInitials = (value) => {
+  const words = String(value || "")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+
+  if (words.length === 0) return "?";
+  if (words.length === 1) {
+    return words[0].slice(0, 2).toUpperCase();
+  }
+
+  return `${words[0][0]}${words[words.length - 1][0]}`.toUpperCase();
 };
 
-const roleOptions = [
-  "Semua",
-  "Super Admin",
-  "Admin Sekolah",
-  "Admin Yayasan",
-  "Guru",
-  "Staf TU",
-];
+const mapUserToRow = (user) => ({
+  id: user.id,
+  nama: user.namaLengkap || user.namaPengguna || "-",
+  email: user.email || "-",
+  telepon: user.noTelepon || "-",
+  role: getRoleDisplayName(user.peran),
+  roleNama: user.peran?.nama || "",
+  status: normalizeStatus(user.status),
+  dibuatPada: user.dibuatPada || null,
+  avatar: getInitials(user.namaLengkap || user.namaPengguna),
+});
 
 const statusOptions = [
-  "Semua",
-  "Aktif",
-  "Nonaktif",
-  "Trial",
+  {
+    value: "Semua",
+    label: "Semua Status",
+  },
+  {
+    value: "aktif",
+    label: "Aktif",
+  },
+  {
+    value: "nonaktif",
+    label: "Nonaktif",
+  },
 ];
 
-
 const statusColorMap = {
-  Aktif: {
+  aktif: {
+    label: "Aktif",
     bg: themeSuccessSurface,
     text: "text-[var(--color-success)]",
     border: themeSuccessBorder,
     dot: "bg-[var(--color-success)]",
   },
 
-  Trial: {
-    bg: themeWarningSurface,
-    text: "text-[var(--color-warning)]",
-    border: themeWarningBorder,
-    dot: "bg-[var(--color-warning)]",
-  },
-
-  Nonaktif: {
+  nonaktif: {
+    label: "Nonaktif",
     bg: themeNeutralSurface,
     text: "theme-text-secondary",
     border: themeNeutralBorder,
     dot: "bg-[color-mix(in_srgb,var(--color-text)_35%,transparent)]",
   },
 };
+
+const getStatusStyle = (status) =>
+  statusColorMap[normalizeStatus(status)] ||
+  statusColorMap.nonaktif;
+
+const getStatusLabel = (status) =>
+  getStatusStyle(status).label;
 
 
 const roleColorMap = {
@@ -315,6 +211,9 @@ const roleColorMap = {
   },
 };
 
+const getRoleStyle = (role) =>
+  roleColorMap[role] || roleColorMap["Staf TU"];
+
 
 const formatTanggal = (dateString) => {
   if (!dateString) return "-";
@@ -324,23 +223,6 @@ const formatTanggal = (dateString) => {
     month: "long",
     year: "numeric",
   });
-};
-
-const timeAgo = (dateString) => {
-  const now = new Date();
-  const past = new Date(dateString);
-
-  const diffMs = now - past;
-  const diffMin = Math.floor(diffMs / 60000);
-  const diffHour = Math.floor(diffMs / 3600000);
-  const diffDay = Math.floor(diffMs / 86400000);
-
-  if (diffMin < 1) return "Baru saja";
-  if (diffMin < 60) return `${diffMin} menit lalu`;
-  if (diffHour < 24) return `${diffHour} jam lalu`;
-  if (diffDay < 7) return `${diffDay} hari lalu`;
-
-  return formatTanggal(dateString);
 };
 
 
@@ -359,20 +241,106 @@ export default function StafPage() {
   const [sortOrder, setSortOrder] = useState("asc");
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
-  const notifications = [
-    {
-      id: 1,
-      title: "Pembaruan Sistem v2.0",
-      desc: "Dikirim 2 jam lalu",
-      read: false,
-    },
-    {
-      id: 2,
-      title: "Pengingat: Backup Data",
-      desc: "Dikirim 1 hari lalu",
-      read: false,
-    },
-  ];
+  const [stafList, setStafList] = useState([]);
+  const [roles, setRoles] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [deletingId, setDeletingId] = useState(null);
+
+  const fetchStaf = useCallback(async (showLoading = true) => {
+    if (showLoading) setLoading(true);
+    setError("");
+
+    try {
+      const collected = [];
+      let page = 1;
+      let totalPages = 1;
+
+      do {
+        const response = await getUsers({
+          page,
+          limit: 100,
+          sortBy: "namaLengkap",
+          sortOrder: "asc",
+        });
+
+        if (response?.success === false) {
+          throw new Error(
+            response?.message || "Gagal mengambil data staf."
+          );
+        }
+
+        const users = Array.isArray(response?.data)
+          ? response.data
+          : [];
+
+        collected.push(...users);
+
+        const meta =
+          response?.meta ?? response?.pagination ?? {};
+        const nextTotalPages = Number(meta.totalPages ?? 1);
+
+        totalPages =
+          Number.isFinite(nextTotalPages) &&
+          nextTotalPages > 0
+            ? nextTotalPages
+            : 1;
+
+        page += 1;
+      } while (page <= totalPages && page <= 50);
+
+      const seen = new Set();
+      const mapped = collected
+        .filter(
+          (user) =>
+            normalizeRoleName(user?.peran?.nama) !== "siswa"
+        )
+        .filter((user) => {
+          const key = String(user?.id ?? "");
+
+          if (!key || seen.has(key)) return false;
+
+          seen.add(key);
+
+          return true;
+        })
+        .map(mapUserToRow);
+
+      setStafList(mapped);
+    } catch (err) {
+      console.error(
+        "[StafPage] Gagal mengambil data staf:",
+        err
+      );
+      setStafList([]);
+      setError(err?.message || "Gagal mengambil data staf.");
+    } finally {
+      if (showLoading) setLoading(false);
+    }
+  }, []);
+
+  const fetchRoles = useCallback(async () => {
+    try {
+      const data = await getRoles();
+
+      setRoles(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error(
+        "[StafPage] Gagal mengambil data role:",
+        err
+      );
+      setRoles([]);
+    }
+  }, []);
+
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchStaf();
+      fetchRoles();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [fetchStaf, fetchRoles]);
 
 
   useEffect(() => {
@@ -391,7 +359,42 @@ export default function StafPage() {
   }, []);
 
 
-  const filteredData = stafData.filter((item) => {
+  const roleOptions = useMemo(() => {
+    const options = roles
+      .filter(
+        (role) =>
+          normalizeRoleName(role?.nama) !== "siswa"
+      )
+      .map((role) => ({
+        value: role.nama,
+        label: role.namaTampilan || role.nama,
+      }));
+
+    return [
+      {
+        value: "Semua",
+        label: "Semua Role",
+      },
+      ...options,
+    ];
+  }, [roles]);
+
+
+  const stats = useMemo(
+    () => ({
+      total: stafList.length,
+      aktif: stafList.filter(
+        (item) => item.status === "aktif"
+      ).length,
+      nonaktif: stafList.filter(
+        (item) => item.status === "nonaktif"
+      ).length,
+    }),
+    [stafList]
+  );
+
+
+  const filteredData = stafList.filter((item) => {
     const query = searchQuery.toLowerCase();
 
     const matchSearch =
@@ -401,7 +404,7 @@ export default function StafPage() {
 
     const matchRole =
       filterRole === "Semua" ||
-      item.role === filterRole;
+      item.roleNama === filterRole;
 
     const matchStatus =
       filterStatus === "Semua" ||
@@ -480,13 +483,29 @@ export default function StafPage() {
     setCurrentPage(1);
   };
 
-  const handleDelete = (staf) => {
-    if (
-      confirm(
-        `Apakah Anda yakin ingin menghapus ${staf.nama}?`
-      )
-    ) {
-      console.log("Hapus:", staf.id);
+  const handleDelete = async (staf) => {
+    if (!staf?.id || deletingId) return;
+
+    const confirmed = window.confirm(
+      `Apakah Anda yakin ingin menghapus ${staf.nama}?`
+    );
+
+    if (!confirmed) return;
+
+    setDeletingId(staf.id);
+    setError("");
+
+    try {
+      await deleteUser(String(staf.id));
+      await fetchStaf(false);
+    } catch (err) {
+      console.error(
+        "[StafPage] Gagal menghapus staf:",
+        err
+      );
+      setError(err?.message || "Gagal menghapus staf.");
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -498,7 +517,6 @@ export default function StafPage() {
       "Telepon",
       "Role",
       "Status",
-      "Terakhir Login",
       "Bergabung",
     ];
 
@@ -507,9 +525,8 @@ export default function StafPage() {
       s.email,
       s.telepon,
       s.role,
-      s.status,
-      formatTanggal(s.terakhirLogin),
-      formatTanggal(s.bergabung),
+      getStatusLabel(s.status),
+      formatTanggal(s.dibuatPada),
     ]);
 
     let csv = headers.join(",") + "\n";
@@ -546,7 +563,6 @@ export default function StafPage() {
       "Telepon",
       "Role",
       "Status",
-      "Terakhir Login",
       "Bergabung",
     ];
 
@@ -589,13 +605,8 @@ export default function StafPage() {
           <td>${s.email}</td>
           <td>${s.telepon}</td>
           <td>${s.role}</td>
-          <td>${s.status}</td>
-          <td>${formatTanggal(
-            s.terakhirLogin
-          )}</td>
-          <td>${formatTanggal(
-            s.bergabung
-          )}</td>
+          <td>${getStatusLabel(s.status)}</td>
+          <td>${formatTanggal(s.dibuatPada)}</td>
         </tr>
       `;
     });
@@ -725,7 +736,7 @@ export default function StafPage() {
           <td>${s.nama}</td>
           <td>${s.email}</td>
           <td>${s.role}</td>
-          <td>${s.status}</td>
+          <td>${getStatusLabel(s.status)}</td>
         </tr>
       `;
     });
@@ -772,12 +783,6 @@ export default function StafPage() {
           toggleSidebar={() =>
             setSidebarOpen(!sidebarOpen)
           }
-          notifications={notifications}
-          user={{
-            name: "Super Admin",
-            email: "admin@smartschool.com",
-            avatar: "SA",
-          }}
         />
 
         <main className="flex-1 p-4 sm:p-6 lg:p-8">
@@ -865,12 +870,14 @@ export default function StafPage() {
 
 
                 <button
-                  onClick={() =>
-                    window.location.reload()
-                  }
-                  className={`flex items-center gap-2 px-4 py-2 text-sm font-medium theme-text-secondary theme-card border ${themeNeutralBorder} rounded-lg ${themeNeutralHover} transition-colors`}
+                  onClick={() => fetchStaf()}
+                  disabled={loading}
+                  className={`flex items-center gap-2 px-4 py-2 text-sm font-medium theme-text-secondary theme-card border ${themeNeutralBorder} rounded-lg ${themeNeutralHover} transition-colors disabled:opacity-60 disabled:cursor-not-allowed`}
                 >
-                  <RefreshCw size={16} />
+                  <RefreshCw
+                    size={16}
+                    className={loading ? "animate-spin" : ""}
+                  />
                   <span>Refresh</span>
                 </button>
 
@@ -889,7 +896,7 @@ export default function StafPage() {
             </div>
 
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
 
               <StatCard
                 label="Total Staf"
@@ -906,13 +913,6 @@ export default function StafPage() {
               />
 
               <StatCard
-                label="Trial"
-                value={stats.trial}
-                icon={Clock}
-                color="warning"
-              />
-
-              <StatCard
                 label="Nonaktif"
                 value={stats.nonaktif}
                 icon={XCircle}
@@ -920,6 +920,31 @@ export default function StafPage() {
               />
 
             </div>
+
+
+            {error && (
+              <div
+                className={`flex items-start gap-2.5 rounded-xl border ${themeDangerBorder} ${themeDangerSurface} p-3.5 text-sm`}
+              >
+                <AlertCircle
+                  size={16}
+                  className="theme-danger mt-0.5 shrink-0"
+                />
+
+                <div className="min-w-0 flex-1">
+                  <p className="theme-danger leading-relaxed">
+                    {error}
+                  </p>
+
+                  <button
+                    onClick={() => fetchStaf()}
+                    className={`mt-1.5 text-xs font-medium ${themePrimaryText} hover:underline`}
+                  >
+                    Coba lagi
+                  </button>
+                </div>
+              </div>
+            )}
 
 
             <div
@@ -958,10 +983,10 @@ export default function StafPage() {
                   >
                     {roleOptions.map((opt) => (
                       <option
-                        key={opt}
-                        value={opt}
+                        key={opt.value}
+                        value={opt.value}
                       >
-                        {opt}
+                        {opt.label}
                       </option>
                     ))}
                   </select>
@@ -975,10 +1000,10 @@ export default function StafPage() {
                   >
                     {statusOptions.map((opt) => (
                       <option
-                        key={opt}
-                        value={opt}
+                        key={opt.value}
+                        value={opt.value}
                       >
-                        {opt}
+                        {opt.label}
                       </option>
                     ))}
                   </select>
@@ -1011,12 +1036,10 @@ export default function StafPage() {
                   {paginatedData.map(
                     (item, index) => {
                       const statusStyle =
-                        statusColorMap[item.status] ||
-                        statusColorMap.Aktif;
+                        getStatusStyle(item.status);
 
                       const roleStyle =
-                        roleColorMap[item.role] ||
-                        roleColorMap["Staf TU"];
+                        getRoleStyle(item.role);
 
                       const rowNumber =
                         startIndex + index + 1;
@@ -1081,7 +1104,7 @@ export default function StafPage() {
                                 className={`inline-block w-1.5 h-1.5 rounded-full ${statusStyle.dot} mr-1`}
                               />
 
-                              {item.status}
+                              {statusStyle.label}
                             </span>
 
                           </div>
@@ -1153,7 +1176,7 @@ export default function StafPage() {
                         </th>
 
                         <th className="hidden lg:table-cell px-4 py-3 text-left text-[10px] font-bold text-[var(--color-card)] uppercase tracking-wider">
-                          Terakhir Login
+                          Bergabung
                         </th>
 
                         <th className="px-4 py-3 text-right text-[10px] font-bold text-[var(--color-card)] uppercase tracking-wider">
@@ -1182,19 +1205,30 @@ export default function StafPage() {
                               <div
                                 className={`w-12 h-12 rounded-full ${themePrimarySoft} flex items-center justify-center`}
                               >
-                                <Search
-                                  size={24}
-                                  className={themePrimaryText}
-                                />
+                                {loading ? (
+                                  <Loader2
+                                    size={24}
+                                    className={`${themePrimaryText} animate-spin`}
+                                  />
+                                ) : (
+                                  <Search
+                                    size={24}
+                                    className={themePrimaryText}
+                                  />
+                                )}
                               </div>
 
                               <p className="text-sm font-medium theme-text">
-                                Tidak ada staf ditemukan
+                                {loading
+                                  ? "Memuat data staf..."
+                                  : "Tidak ada staf ditemukan"}
                               </p>
 
-                              <p className="text-xs theme-text-muted">
-                                Coba ubah filter atau kata kunci pencarian
-                              </p>
+                              {!loading && (
+                                <p className="text-xs theme-text-muted">
+                                  Coba ubah filter atau kata kunci pencarian
+                                </p>
+                              )}
 
                             </div>
 
@@ -1205,16 +1239,10 @@ export default function StafPage() {
                         paginatedData.map(
                           (item, index) => {
                             const statusStyle =
-                              statusColorMap[
-                                item.status
-                              ] ||
-                              statusColorMap.Aktif;
+                              getStatusStyle(item.status);
 
                             const roleStyle =
-                              roleColorMap[
-                                item.role
-                              ] ||
-                              roleColorMap["Staf TU"];
+                              getRoleStyle(item.role);
 
                             const rowNumber =
                               startIndex +
@@ -1285,7 +1313,7 @@ export default function StafPage() {
                                       className={`inline-block w-1.5 h-1.5 rounded-full ${statusStyle.dot} mr-1`}
                                     />
 
-                                    {item.status}
+                                    {statusStyle.label}
 
                                   </span>
 
@@ -1293,8 +1321,8 @@ export default function StafPage() {
 
 
                                 <td className="hidden lg:table-cell px-4 py-3 text-xs theme-text-secondary">
-                                  {timeAgo(
-                                    item.terakhirLogin
+                                  {formatTanggal(
+                                    item.dibuatPada
                                   )}
                                 </td>
 
@@ -1336,10 +1364,22 @@ export default function StafPage() {
                                           item
                                         )
                                       }
-                                      className={`p-1.5 rounded-lg ${themeDangerSurface} theme-danger hover:opacity-80 transition-colors`}
+                                      disabled={
+                                        deletingId ===
+                                        item.id
+                                      }
+                                      className={`p-1.5 rounded-lg ${themeDangerSurface} theme-danger hover:opacity-80 transition-colors disabled:opacity-40 disabled:cursor-not-allowed`}
                                       title="Hapus"
                                     >
-                                      <Trash2 size={15} />
+                                      {deletingId ===
+                                      item.id ? (
+                                        <Loader2
+                                          size={15}
+                                          className="animate-spin"
+                                        />
+                                      ) : (
+                                        <Trash2 size={15} />
+                                      )}
                                     </button>
 
                                   </div>
@@ -1520,8 +1560,7 @@ export default function StafPage() {
             <div
               className={`text-center text-xs theme-text-muted py-2 border-t ${themeDivider}`}
             >
-              © 2026 SmartSchool • Data staf terakhir
-              diperbaruhi hari ini
+              © 2026 SmartSchool • Manajemen Staf
             </div>
 
           </div>

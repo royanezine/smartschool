@@ -1,9 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
+import {
+  deleteUser,
+  getUserById,
+} from "@/services/user.service";
 import {
   ArrowLeft,
   User,
@@ -61,77 +65,11 @@ const themeWarningSurface =
 const themeWarningBorder =
   "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
 
-const themeInfoSurface =
-  "bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)]";
-
-const themeInfoBorder =
-  "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
-
-const themeFocus =
-  "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
-
 const themeDangerSurface =
   "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
 
 const themeDangerBorder =
   "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
-
-const dummyStaf = [
-  {
-    id: 1,
-    nama: "Dr. Ahmad Fauzi, M.Pd.",
-    email: "ahmad.fauzi@smartschool.com",
-    telepon: "(021) 555-1234",
-    alamat: "Jl. Merdeka No. 45, Jakarta Pusat",
-    role: "Kepala Sekolah",
-    unit: "SMA Negeri 1 Jakarta",
-    status: "aktif",
-    bergabung: "2020-07-15",
-    gender: "Laki-laki",
-    tempatLahir: "Jakarta",
-    tanggalLahir: "1975-03-12",
-    nip: "197503121995031001",
-    pendidikan: "S3 Pendidikan",
-    spesialisasi: "Manajemen Pendidikan",
-    catatan: "Pengalaman 20 tahun di bidang pendidikan",
-  },
-  {
-    id: 2,
-    nama: "Dra. Siti Rahayu, M.Si.",
-    email: "siti.rahayu@smartschool.com",
-    telepon: "(021) 555-5678",
-    alamat: "Jl. Sudirman No. 12, Bandung",
-    role: "Wakil Kepala Sekolah",
-    unit: "SMP Negeri 2 Bandung",
-    status: "aktif",
-    bergabung: "2019-08-20",
-    gender: "Perempuan",
-    tempatLahir: "Bandung",
-    tanggalLahir: "1980-07-22",
-    nip: "198007221999032002",
-    pendidikan: "S2 Manajemen Pendidikan",
-    spesialisasi: "Kurikulum",
-    catatan: "Sertifikasi kepala sekolah",
-  },
-  {
-    id: 3,
-    nama: "Budi Santoso, S.Pd.",
-    email: "budi.santoso@smartschool.com",
-    telepon: "(031) 555-9012",
-    alamat: "Jl. Raya Darmo No. 8, Surabaya",
-    role: "Guru",
-    unit: "SMA Negeri 3 Surabaya",
-    status: "nonaktif",
-    bergabung: "2021-01-10",
-    gender: "Laki-laki",
-    tempatLahir: "Surabaya",
-    tanggalLahir: "1985-11-05",
-    nip: "198511052010011001",
-    pendidikan: "S1 Pendidikan Matematika",
-    spesialisasi: "Matematika",
-    catatan: "Mengundurkan diri karena pindah",
-  },
-];
 
 export default function DetailStafPage() {
   const router = useRouter();
@@ -142,65 +80,85 @@ export default function DetailStafPage() {
   const [staf, setStaf] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [actionError, setActionError] = useState("");
+  const [deleting, setDeleting] = useState(false);
 
-  const notifications = [
-    {
-      id: 1,
-      title: "Pembaruan Sistem v2.0",
-      desc: "Dikirim 2 jam lalu",
-      read: false,
-    },
-    {
-      id: 2,
-      title: "Pengingat: Backup Data",
-      desc: "Dikirim 1 hari lalu",
-      read: false,
-    },
-  ];
+  const loadStaf = useCallback(async () => {
+    if (!id) {
+      setError("ID staf tidak ditemukan.");
+      setLoading(false);
+      return;
+    }
 
-  useEffect(() => {
-    const loadData = () => {
-      try {
-        setLoading(true);
+    setLoading(true);
+    setError("");
 
-        const found = dummyStaf.find(
-          (item) => item.id === Number(id)
-        );
+    try {
+      const response = await getUserById(String(id));
+      const data = response?.data ?? response;
 
-        if (found) {
-          setStaf(found);
-        } else {
-          setError("Data staf tidak ditemukan.");
-        }
-      } catch (err) {
-        setError("Gagal memuat data.");
-      } finally {
-        setLoading(false);
+      if (!data?.id) {
+        throw new Error("Data staf tidak ditemukan.");
       }
-    };
 
-    if (id) {
-      loadData();
+      setStaf(data);
+    } catch (err) {
+      console.error(
+        "[DetailStafPage] Gagal mengambil data staf:",
+        err
+      );
+      setStaf(null);
+      setError(err?.message || "Gagal memuat data staf.");
+    } finally {
+      setLoading(false);
     }
   }, [id]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      loadStaf();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [loadStaf]);
 
   const goBack = () => {
     router.push("/admin/staf");
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
+    if (!staf?.id || deleting) return;
+
+    const namaStaf =
+      staf.namaLengkap || staf.namaPengguna || "staf ini";
+
     const confirmed = window.confirm(
-      `Apakah Anda yakin ingin menghapus staf ${staf.nama}?`
+      `Apakah Anda yakin ingin menghapus ${namaStaf}?`
     );
 
-    if (confirmed) {
-      console.log("Hapus staf:", staf.id);
+    if (!confirmed) return;
+
+    setDeleting(true);
+    setActionError("");
+
+    try {
+      await deleteUser(String(staf.id));
       router.push("/admin/staf");
+    } catch (err) {
+      console.error(
+        "[DetailStafPage] Gagal menghapus staf:",
+        err
+      );
+      setActionError(
+        err?.message || "Gagal menghapus staf."
+      );
+      setDeleting(false);
     }
   };
 
   const getStatusStyle = (status) => {
-    if (status === "aktif") {
+    const normalized = String(status || "").toLowerCase();
+
+    if (normalized === "aktif" || normalized === "active") {
       return {
         label: "Aktif",
         bg: themeSuccessSurface,
@@ -212,7 +170,11 @@ export default function DetailStafPage() {
     }
 
     return {
-      label: "Nonaktif",
+      label:
+        normalized === "nonaktif" ||
+        normalized === "inactive"
+          ? "Nonaktif"
+          : status || "Nonaktif",
       bg: themeNeutralSurface,
       text: "theme-text-secondary",
       border: themeNeutralBorder,
@@ -234,12 +196,6 @@ export default function DetailStafPage() {
         <div className="flex-1 min-w-0 flex flex-col">
           <Header
             toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
-            notifications={notifications}
-            user={{
-              name: "Admin",
-              email: "admin@smartschool.com",
-              avatar: "AD",
-            }}
           />
 
           <main className="flex-1 flex items-center justify-center p-6">
@@ -272,12 +228,6 @@ export default function DetailStafPage() {
         <div className="flex-1 min-w-0 flex flex-col">
           <Header
             toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
-            notifications={notifications}
-            user={{
-              name: "Admin",
-              email: "admin@smartschool.com",
-              avatar: "AD",
-            }}
           />
 
           <main className="flex-1 flex items-center justify-center p-6">
@@ -316,6 +266,21 @@ export default function DetailStafPage() {
   const statusStyle = getStatusStyle(staf.status);
   const StatusIcon = statusStyle.icon;
 
+  const namaStaf =
+    staf.namaLengkap || staf.namaPengguna || "-";
+
+  const roleName =
+    staf.peran?.namaTampilan ||
+    staf.peran?.nama ||
+    "-";
+
+  const jenisKelamin =
+    staf.jenisKelamin === "L"
+      ? "Laki-laki"
+      : staf.jenisKelamin === "P"
+        ? "Perempuan"
+        : staf.jenisKelamin || "-";
+
   return (
     <div className="min-h-screen theme-page flex">
       <Sidebar
@@ -328,12 +293,6 @@ export default function DetailStafPage() {
       <div className="flex-1 min-w-0 flex flex-col">
         <Header
           toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
-          notifications={notifications}
-          user={{
-            name: "Admin",
-            email: "admin@smartschool.com",
-            avatar: "AD",
-          }}
         />
 
         <main className="flex-1 min-w-0">
@@ -374,6 +333,21 @@ export default function DetailStafPage() {
               </div>
             </div>
 
+            {actionError && (
+              <div
+                className={`mb-5 flex items-start gap-2.5 rounded-xl border ${themeDangerBorder} ${themeDangerSurface} p-3.5 text-sm`}
+              >
+                <AlertCircle
+                  size={16}
+                  className="theme-danger mt-0.5 shrink-0"
+                />
+
+                <p className="theme-danger leading-relaxed">
+                  {actionError}
+                </p>
+              </div>
+            )}
+
             <section
               className={`theme-card border ${themeNeutralBorder} rounded-xl ${themeCardShadow} overflow-hidden`}
             >
@@ -397,7 +371,7 @@ export default function DetailStafPage() {
 
                     <div className="min-w-0">
                       <h2 className="text-lg sm:text-xl font-semibold theme-text break-words">
-                        {staf.nama}
+                        {namaStaf}
                       </h2>
 
                       <div className="flex flex-wrap items-center gap-2 mt-2">
@@ -406,7 +380,7 @@ export default function DetailStafPage() {
                           className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md ${themeNeutralSurface} border ${themeNeutralBorder} text-xs font-medium theme-text-secondary`}
                         >
                           <Briefcase size={13} />
-                          {staf.role}
+                          {roleName}
                         </span>
 
                         <span
@@ -437,10 +411,18 @@ export default function DetailStafPage() {
 
                     <button
                       onClick={handleDelete}
-                      className={`inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border ${themeDangerBorder} ${themeDangerSurface} theme-danger text-sm font-medium hover:opacity-80 transition`}
+                      disabled={deleting}
+                      className={`inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border ${themeDangerBorder} ${themeDangerSurface} theme-danger text-sm font-medium hover:opacity-80 transition disabled:opacity-50 disabled:cursor-not-allowed`}
                     >
-                      <Trash2 size={16} />
-                      Hapus
+                      {deleting ? (
+                        <Loader2
+                          size={16}
+                          className="animate-spin"
+                        />
+                      ) : (
+                        <Trash2 size={16} />
+                      )}
+                      {deleting ? "Menghapus..." : "Hapus"}
                     </button>
                   </div>
                 </div>
@@ -463,25 +445,29 @@ export default function DetailStafPage() {
                   <InfoCard
                     icon={Mail}
                     label="Email"
-                    value={staf.email}
+                    value={staf.email || "-"}
                   />
 
                   <InfoCard
                     icon={Phone}
                     label="Telepon"
-                    value={staf.telepon}
+                    value={staf.noTelepon || "-"}
                   />
 
                   <InfoCard
                     icon={MapPin}
                     label="Alamat"
-                    value={staf.alamat}
+                    value={
+                      staf.alamat ||
+                      staf.alamatDomisili ||
+                      "-"
+                    }
                   />
 
                   <InfoCard
                     icon={School}
-                    label="Unit"
-                    value={staf.unit}
+                    label="Sekolah"
+                    value={staf.sekolah?.nama || "-"}
                   />
                 </div>
 
@@ -502,97 +488,42 @@ export default function DetailStafPage() {
                     <DetailItem
                       icon={Calendar}
                       label="Tanggal Bergabung"
-                      value={formatDate(staf.bergabung)}
+                      value={formatDate(staf.dibuatPada)}
                     />
 
                     <DetailItem
                       icon={User}
                       label="Jenis Kelamin"
-                      value={staf.gender}
+                      value={jenisKelamin}
                     />
 
                     <DetailItem
                       icon={Building}
                       label="NIP"
-                      value={staf.nip}
+                      value={staf.nip || "-"}
+                      mono
+                    />
+
+                    <DetailItem
+                      icon={Building}
+                      label="NUPTK"
+                      value={staf.nuptk || "-"}
                       mono
                     />
 
                     <DetailItem
                       icon={MapPin}
                       label="Tempat Lahir"
-                      value={staf.tempatLahir}
+                      value={staf.tempatLahir || "-"}
+                    />
+
+                    <DetailItem
+                      icon={Calendar}
+                      label="Tanggal Lahir"
+                      value={formatDate(staf.tanggalLahir)}
                     />
                   </div>
                 </div>
-
-                <div className={`mt-7 pt-6 border-t ${themeDivider}`}>
-
-                  <div className="mb-4">
-                    <h3 className="text-sm font-semibold theme-text">
-                      Pendidikan & Keahlian
-                    </h3>
-
-                    <p className="text-xs theme-text-muted mt-1">
-                      Riwayat pendidikan dan bidang spesialisasi.
-                    </p>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-
-                    <div
-                      className={`p-4 rounded-lg border ${themePrimarySoftBorder} ${themePrimarySoft}`}
-                    >
-                      <p
-                        className={`text-xs font-medium ${themePrimaryText} mb-1`}
-                      >
-                        Pendidikan Terakhir
-                      </p>
-
-                      <p className="text-sm font-semibold theme-text">
-                        {staf.pendidikan}
-                      </p>
-                    </div>
-
-                    <div
-                      className={`p-4 rounded-lg border ${themeNeutralBorder} ${themeNeutralSurface}`}
-                    >
-                      <p className="text-xs font-medium theme-text-muted mb-1">
-                        Spesialisasi
-                      </p>
-
-                      <p className="text-sm font-semibold theme-text">
-                        {staf.spesialisasi}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {staf.catatan && (
-                  <div className={`mt-7 pt-6 border-t ${themeDivider}`}>
-                    <div
-                      className={`p-4 rounded-lg border ${themeWarningBorder} ${themeWarningSurface}`}
-                    >
-                      <div className="flex items-start gap-3">
-
-                        <AlertCircle
-                          size={17}
-                          className="text-[var(--color-warning)] mt-0.5 shrink-0"
-                        />
-
-                        <div className="min-w-0">
-                          <p className="text-xs font-semibold text-[var(--color-warning)]">
-                            Catatan
-                          </p>
-
-                          <p className="text-sm theme-text-secondary mt-1 leading-relaxed">
-                            {staf.catatan}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
 
                 <div
                   className={`mt-7 pt-5 border-t ${themeDivider} flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3`}

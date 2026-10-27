@@ -11,7 +11,6 @@ import {
   NotebookPen,
   Award,
   FileSpreadsheet,
-  Smile,
   GraduationCap,
   Search,
   Users,
@@ -19,154 +18,14 @@ import {
   AlertCircle,
   CheckCircle2,
   ArrowUpRight,
+  CalendarDays,
+  School,
+  Split,
+  RefreshCw,
 } from "lucide-react";
 
-const STORAGE_KEY = "siswa_data";
-
-const FALLBACK_SISWA = [
-  {
-    id: 1,
-    nama: "Ahmad Fauzan",
-    kelas: "X RPL 1",
-  },
-  {
-    id: 2,
-    nama: "Bella Safira",
-    kelas: "X RPL 1",
-  },
-  {
-    id: 4,
-    nama: "Dinda Maharani",
-    kelas: "X RPL 2",
-  },
-  {
-    id: 7,
-    nama: "Galang Ramadhan",
-    kelas: "X TKJ 1",
-  },
-  {
-    id: 10,
-    nama: "Jihan Anastasya",
-    kelas: "X TKJ 2",
-  },
-  {
-    id: 13,
-    nama: "Muhammad Rizky",
-    kelas: "X AK 1",
-  },
-  {
-    id: 16,
-    nama: "Putri Maharani",
-    kelas: "XI RPL 1",
-  },
-  {
-    id: 19,
-    nama: "Tegar Pratama",
-    kelas: "XI RPL 2",
-  },
-  {
-    id: 22,
-    nama: "Wulan Sari",
-    kelas: "XI TKJ 1",
-  },
-  {
-    id: 25,
-    nama: "Ardiansyah Putra",
-    kelas: "XII RPL 1",
-  },
-];
-
-
-const loadSiswaList = () => {
-  if (typeof window === "undefined") {
-    return FALLBACK_SISWA;
-  }
-
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-
-    const data = stored ? JSON.parse(stored) : null;
-
-    return Array.isArray(data) && data.length > 0
-      ? data
-      : FALLBACK_SISWA;
-  } catch {
-    return FALLBACK_SISWA;
-  }
-};
-
-
-const seedFromId = (id) => {
-  const str = String(id);
-
-  let h = 0;
-
-  for (const ch of str) {
-    h = (h * 31 + ch.charCodeAt(0)) % 1000000;
-  }
-
-  return h + 1;
-};
-
-const pseudoRandom = (seed, min, max) => {
-  const x = Math.sin(seed) * 10000;
-
-  const frac = x - Math.floor(x);
-
-  return Math.floor(frac * (max - min + 1)) + min;
-};
-
-const PRESTASI_POOL = [
-  "Juara 1 Lomba Debat Bahasa Inggris",
-  "Juara 2 LKS Tingkat Provinsi",
-  "Medali Emas OSN Matematika",
-  "Juara Harapan Lomba Fotografi",
-  "Best Presenter Seminar Nasional",
-];
-
-
-const buildRingkasan = (siswaList) => {
-  return siswaList.map((s) => {
-    const seed = seedFromId(s.id);
-
-    const nilai = pseudoRandom(seed, 68, 98);
-
-    const prestasi =
-      pseudoRandom(seed + 1, 0, 100) < 25
-        ? 1 + pseudoRandom(seed + 5, 0, 1)
-        : 0;
-
-    const sikapRoll = pseudoRandom(seed + 2, 0, 99);
-
-    const sikap =
-      sikapRoll < 6
-        ? "Perlu Perhatian"
-        : sikapRoll < 22
-        ? "Cukup"
-        : sikapRoll < 65
-        ? "Baik"
-        : "Sangat Baik";
-
-    const raporSelesai =
-      pseudoRandom(seed + 3, 0, 99) < 78;
-
-    const prestasiLabel =
-      prestasi > 0
-        ? PRESTASI_POOL[
-            seedFromId(s.id + "p") % PRESTASI_POOL.length
-          ]
-        : null;
-
-    return {
-      ...s,
-      nilai,
-      prestasi,
-      sikap,
-      raporSelesai,
-      prestasiLabel,
-    };
-  });
-};
+import { getUsers } from "@/services/user.service";
+import { getKelas, getKelasById } from "@/services/kelas.service";
 
 
 const getInitials = (nama = "") => {
@@ -193,164 +52,212 @@ const getAvatarColor = (nama = "") => {
 };
 
 
-const SIKAP_STYLE = {
-  "Sangat Baik": "theme-success",
-  Baik: "theme-info",
-  Cukup: "theme-warning",
-  "Perlu Perhatian": "theme-danger",
-};
 
-
-const getScoreStyle = (nilai) => {
-  if (nilai >= 90) {
-    return "text-[var(--color-success)]";
-  }
-
-  if (nilai >= 80) {
-    return "theme-sidebar-text-active";
-  }
-
-  if (nilai >= 70) {
-    return "text-[var(--color-warning)]";
-  }
-
-  return "text-[var(--color-danger)]";
-};
 
 
 export default function AkademikPage() {
   const router = useRouter();
 
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [ringkasan, setRingkasan] = useState([]);
+  const [siswaList, setSiswaList] = useState([]);
+  const [kelasList, setKelasList] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [search, setSearch] = useState("");
 
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      setError("");
+
+      let allSiswa = [];
+      let pageSiswa = 1;
+      let totalPagesSiswa = 1;
+
+      do {
+        const res = await getUsers({
+          page: pageSiswa,
+          limit: 100,
+          role: "siswa",
+        });
+        const raw = res?.data ?? [];
+        const rows = Array.isArray(raw) ? raw : [];
+        allSiswa = allSiswa.concat(rows);
+
+        const nextTotal = Number(
+          res?.pagination?.totalPages ??
+            res?.meta?.totalPages ??
+            1
+        );
+        totalPagesSiswa = Number.isFinite(nextTotal) && nextTotal > 0 ? nextTotal : 1;
+        pageSiswa += 1;
+      } while (pageSiswa <= totalPagesSiswa);
+
+      let allKelas = [];
+      let pageKelas = 1;
+      let totalPagesKelas = 1;
+
+      do {
+        const resKelas = await getKelas({
+          page: pageKelas,
+          limit: 100,
+          sortBy: "nama",
+          sortOrder: "asc",
+        });
+        const rawK = resKelas?.data ?? resKelas?.data?.data ?? [];
+        const rowsK = Array.isArray(rawK) ? rawK : [];
+        allKelas = allKelas.concat(rowsK);
+
+        const nextTotalK = Number(
+          resKelas?.meta?.totalPages ??
+            resKelas?.pagination?.totalPages ??
+            1
+        );
+        totalPagesKelas = Number.isFinite(nextTotalK) && nextTotalK > 0 ? nextTotalK : 1;
+        pageKelas += 1;
+      } while (pageKelas <= totalPagesKelas);
+
+      const siswaKelasMap = {};
+      const kelasDetailFailedSet = new Set();
+
+      const kelasDetails = await Promise.allSettled(
+        allKelas.map((k) => getKelasById(k.id))
+      );
+
+      kelasDetails.forEach((result, idx) => {
+        const k = allKelas[idx];
+        if (result.status === "fulfilled") {
+          const detail =
+            result.value?.data?.data ??
+            result.value?.data ??
+            result.value;
+          const kNama = k?.nama || "Tanpa Kelas";
+          const anggota = Array.isArray(detail?.anggota) ? detail.anggota : [];
+          anggota.forEach((item) => {
+            const sid = item?.siswa?.id ?? item?.siswaId ?? item?.penggunaId;
+            if (sid) {
+              siswaKelasMap[sid] = kNama;
+            }
+          });
+        } else {
+          if (k?.id) {
+            kelasDetailFailedSet.add(k.id);
+          }
+        }
+      });
+
+      const hasKelasDetailFailure = kelasDetailFailedSet.size > 0;
+      const normalizedSiswa = allSiswa.map((s) => {
+        let kelasNama = "Belum ada kelas";
+        if (siswaKelasMap[s.id]) {
+          kelasNama = siswaKelasMap[s.id];
+        } else if (hasKelasDetailFailure) {
+          kelasNama = "Gagal memuat kelas";
+        }
+
+        return {
+          id: s.id,
+          nama: s.namaLengkap || s.nama || "Tanpa Nama",
+          kelas: kelasNama,
+          status: s.status || "aktif",
+        };
+      });
+
+      setSiswaList(normalizedSiswa);
+      setKelasList(allKelas);
+    } catch (err) {
+      console.error("Gagal memuat data akademik:", err);
+      setError("Gagal memuat data dari server. Periksa koneksi.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    setRingkasan(buildRingkasan(loadSiswaList()));
+    const timer = setTimeout(() => {
+      loadData();
+    }, 0);
+
+    return () => clearTimeout(timer);
   }, []);
 
   const toggleSidebar = () => {
     setIsCollapsed((prev) => !prev);
   };
 
-
-  const totalSiswa = ringkasan.length;
-
-  const rataRata = totalSiswa
-    ? Math.round(
-        ringkasan.reduce(
-          (total, item) => total + item.nilai,
-          0
-        ) / totalSiswa
-      )
-    : 0;
-
-  const totalPrestasi = ringkasan.reduce(
-    (total, item) => total + item.prestasi,
-    0
-  );
-
-  const perluPerhatian = ringkasan.filter(
-    (item) => item.sikap === "Perlu Perhatian"
-  ).length;
-
-  const raporSelesai = totalSiswa
-    ? ringkasan.filter((item) => item.raporSelesai).length
-    : 0;
-
-  const raporPercent = totalSiswa
-    ? Math.round((raporSelesai / totalSiswa) * 100)
-    : 0;
-
+  const totalSiswa = siswaList.length;
 
   const ringkasanKelas = useMemo(() => {
     const map = {};
 
-    ringkasan.forEach((siswa) => {
-      if (!map[siswa.kelas]) {
-        map[siswa.kelas] = [];
-      }
+    kelasList.forEach((k) => {
+      const rawCount =
+        k?._count?.anggota ?? k?.jumlahSiswa ?? k?.jumlah_siswa;
+      const countNum =
+        rawCount !== undefined && rawCount !== null
+          ? Number(rawCount)
+          : null;
 
-      map[siswa.kelas].push(siswa);
+      map[k.nama] = {
+        kelas: k.nama,
+        jumlah: Number.isFinite(countNum) ? countNum : null,
+      };
     });
 
-    return Object.entries(map)
-      .map(([kelas, arr]) => ({
-        kelas,
+    siswaList.forEach((siswa) => {
+      if (siswa.kelas && siswa.kelas !== "Belum ada kelas" && siswa.kelas !== "Gagal memuat kelas") {
+        if (!map[siswa.kelas]) {
+          map[siswa.kelas] = {
+            kelas: siswa.kelas,
+            jumlah: null,
+          };
+        }
+      }
+    });
 
-        jumlah: arr.length,
-
-        rataRata: Math.round(
-          arr.reduce(
-            (total, item) => total + item.nilai,
-            0
-          ) / arr.length
-        ),
-
-        prestasi: arr.reduce(
-          (total, item) => total + item.prestasi,
-          0
-        ),
-
-        perluPerhatian: arr.filter(
-          (item) => item.sikap === "Perlu Perhatian"
-        ).length,
-
-        raporPercent: Math.round(
-          (arr.filter(
-            (item) => item.raporSelesai
-          ).length /
-            arr.length) *
-            100
-        ),
-      }))
-      .sort((a, b) =>
-        a.kelas.localeCompare(b.kelas)
-      );
-  }, [ringkasan]);
-
+    return Object.values(map).sort((a, b) => a.kelas.localeCompare(b.kelas));
+  }, [kelasList, siswaList]);
 
   const filtered = useMemo(() => {
     const keyword = search.toLowerCase().trim();
 
     if (!keyword) {
-      return ringkasan;
+      return siswaList;
     }
 
-    return ringkasan.filter(
+    return siswaList.filter(
       (item) =>
         item.nama.toLowerCase().includes(keyword) ||
         item.kelas.toLowerCase().includes(keyword)
     );
-  }, [ringkasan, search]);
+  }, [siswaList, search]);
 
 
   const quickLinks = [
     {
-      label: "Monitoring Siswa",
-      icon: ClipboardList,
-      path: "/admin/akademik/monitoringSiswa",
+      label: "Tahun Ajaran",
+      icon: CalendarDays,
+      path: "/admin/akademik/tahun-ajaran",
     },
     {
-      label: "Nilai",
+      label: "Kelas & Rombel",
+      icon: School,
+      path: "/admin/akademik/kelas",
+    },
+    {
+      label: "Jurusan",
+      icon: Split,
+      path: "/admin/akademik/jurusan",
+    },
+    {
+      label: "Entry Nilai e-Rapor",
       icon: NotebookPen,
-      path: "/admin/akademik/nilai",
+      path: "/admin/eraport/entry-nilai",
     },
     {
-      label: "Prestasi",
-      icon: Award,
-      path: "/admin/akademik/prestasi",
-    },
-    {
-      label: "Rapor",
+      label: "Cetak Rapor",
       icon: FileSpreadsheet,
-      path: "/admin/akademik/rapor",
-    },
-    {
-      label: "Sikap & Perilaku",
-      icon: Smile,
-      path: "/admin/akademik/sikapPerilaku",
+      path: "/admin/eraport/cetak-raport",
     },
   ];
 
@@ -413,21 +320,34 @@ export default function AkademikPage() {
                   </div>
 
 
-                  <button
-                    type="button"
-                    onClick={() =>
-                      router.push(
-                        "/admin/akademik/monitoringSiswa"
-                      )
-                    }
-                    className="theme-primary inline-flex h-10 items-center justify-center gap-2 self-start rounded-lg px-4 text-xs font-semibold shadow-sm transition xl:self-center"
-                  >
-                    <ClipboardList size={15} />
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => loadData()}
+                      disabled={loading}
+                      title="Perbarui Data"
+                      className="theme-card theme-border theme-text-secondary theme-header-hover inline-flex h-10 items-center justify-center gap-1.5 rounded-lg border px-3 text-xs font-semibold shadow-sm transition disabled:opacity-50"
+                    >
+                      <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
+                      <span>{loading ? "Memuat..." : "Refresh"}</span>
+                    </button>
 
-                    Monitoring Siswa
+                    <button
+                      type="button"
+                      onClick={() =>
+                        router.push(
+                          "/admin/siswa"
+                        )
+                      }
+                      className="theme-primary inline-flex h-10 items-center justify-center gap-2 self-start rounded-lg px-4 text-xs font-semibold shadow-sm transition xl:self-center"
+                    >
+                      <ClipboardList size={15} />
 
-                    <ArrowUpRight size={14} />
-                  </button>
+                      Data Siswa
+
+                      <ArrowUpRight size={14} />
+                    </button>
+                  </div>
                 </div>
               </section>
 
@@ -474,7 +394,7 @@ export default function AkademikPage() {
                         </p>
 
                         <p className="theme-text mt-1 text-xl font-bold">
-                          {rataRata}
+                          —
                         </p>
 
                         <p className="theme-text-muted mt-0.5 text-[10px]">
@@ -499,7 +419,7 @@ export default function AkademikPage() {
                         </p>
 
                         <p className="theme-text mt-1 text-xl font-bold">
-                          {totalPrestasi}
+                          —
                         </p>
 
                         <p className="theme-text-muted mt-0.5 text-[10px]">
@@ -524,7 +444,7 @@ export default function AkademikPage() {
                         </p>
 
                         <p className="theme-text mt-1 text-xl font-bold">
-                          {perluPerhatian}
+                          —
                         </p>
 
                         <p className="theme-text-muted mt-0.5 text-[10px]">
@@ -551,7 +471,7 @@ export default function AkademikPage() {
                           </p>
 
                           <p className="theme-text text-sm font-bold">
-                            {raporPercent}%
+                            —
                           </p>
 
                         </div>
@@ -560,13 +480,13 @@ export default function AkademikPage() {
                           <div
                             className="theme-primary h-full rounded-full transition-all"
                             style={{
-                              width: `${raporPercent}%`,
+                              width: "0%",
                             }}
                           />
                         </div>
 
                         <p className="theme-text-muted mt-1.5 text-[10px]">
-                          {raporSelesai} dari {totalSiswa} siswa
+                          — dari {totalSiswa} siswa
                         </p>
                       </div>
 
@@ -575,6 +495,22 @@ export default function AkademikPage() {
                 </div>
               </section>
 
+
+              {error && (
+                <div className="theme-danger flex items-center justify-between rounded-xl border p-4 text-xs font-medium shadow-sm">
+                  <div className="flex items-center gap-2">
+                    <AlertCircle size={16} />
+                    <span>{error}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => loadData()}
+                    className="underline hover:no-underline"
+                  >
+                    Coba lagi
+                  </button>
+                </div>
+              )}
 
               <section className="flex flex-col gap-3">
                 <div>
@@ -687,67 +623,46 @@ export default function AkademikPage() {
 
                           <td className="theme-border-soft border-b px-5 py-3.5 text-center text-xs font-medium">
                             <span className="theme-text-secondary">
-                              {item.jumlah}
+                              {item.jumlah !== null && item.jumlah !== undefined
+                                ? item.jumlah
+                                : "—"}
                             </span>
-                          </td>
-
-                          <td className="theme-border-soft border-b px-5 py-3.5 text-center">
-
-                            <span
-                              className={`text-sm font-bold ${getScoreStyle(
-                                item.rataRata
-                              )}`}
-                            >
-                              {item.rataRata}
-                            </span>
-
                           </td>
 
                           <td className="theme-border-soft border-b px-5 py-3.5 text-center text-xs">
-                            <span className="theme-text-muted">
-                              {item.prestasi}
-                            </span>
+                            <span className="theme-text-muted">—</span>
                           </td>
 
-                          <td className="theme-border-soft border-b px-5 py-3.5 text-center">
+                          <td className="theme-border-soft border-b px-5 py-3.5 text-center text-xs">
+                            <span className="theme-text-muted">—</span>
+                          </td>
 
-                            <span
-                              className={
-                                item.perluPerhatian > 0
-                                  ? "text-[var(--color-danger)] text-xs font-bold"
-                                  : "theme-text-muted text-xs font-medium"
-                              }
-                            >
-                              {item.perluPerhatian}
-                            </span>
-
+                          <td className="theme-border-soft border-b px-5 py-3.5 text-center text-xs">
+                            <span className="theme-text-muted">—</span>
                           </td>
 
                           <td className="theme-border-soft border-b px-5 py-3.5">
-
                             <div className="flex items-center gap-3">
-
-                              <div className="theme-card-soft h-1.5 w-20 overflow-hidden rounded-full">
-                                <div
-                                  className="theme-primary h-full rounded-full"
-                                  style={{
-                                    width: `${item.raporPercent}%`,
-                                  }}
-                                />
-                              </div>
-
-                              <span className="theme-text-secondary text-[11px] font-semibold">
-                                {item.raporPercent}%
+                              <span className="theme-text-muted text-[11px]">
+                                —
                               </span>
-
                             </div>
-
                           </td>
 
                         </tr>
                       ))}
 
-                      {ringkasanKelas.length === 0 && (
+                      {loading && ringkasanKelas.length === 0 && (
+                        <tr>
+                          <td colSpan={6} className="px-5 py-12 text-center">
+                            <p className="theme-text-muted text-xs">
+                              Memuat ringkasan kelas...
+                            </p>
+                          </td>
+                        </tr>
+                      )}
+
+                      {!loading && ringkasanKelas.length === 0 && (
                         <tr>
                           <td
                             colSpan={6}
@@ -758,7 +673,7 @@ export default function AkademikPage() {
                             </p>
 
                             <p className="theme-text-muted mt-1 text-xs">
-                              Data akan tampil setelah siswa tersedia.
+                              Data akan tampil setelah kelas dan siswa tersedia.
                             </p>
                           </td>
                         </tr>
@@ -894,83 +809,35 @@ export default function AkademikPage() {
 
 
                           <td className="theme-border-soft border-b px-5 py-4 text-center">
-
-                            <span
-                              className={`text-sm font-bold ${getScoreStyle(
-                                student.nilai
-                              )}`}
-                            >
-                              {student.nilai}
-                            </span>
-
+                            <span className="theme-text-muted text-xs">—</span>
                           </td>
-
 
                           <td className="theme-border-soft border-b px-5 py-4 text-center">
-
-                            {student.prestasi > 0 ? (
-                              <span
-                                title={student.prestasiLabel}
-                                className="theme-warning inline-flex items-center justify-center gap-1 rounded-md px-2.5 py-1 text-[10px] font-semibold"
-                              >
-                                <Award size={12} />
-
-                                {student.prestasi}
-                              </span>
-                            ) : (
-                              <span className="theme-text-placeholder text-xs">
-                                -
-                              </span>
-                            )}
-
+                            <span className="theme-text-muted text-xs">—</span>
                           </td>
-
 
                           <td className="theme-border-soft border-b px-5 py-4 text-center">
-
-                            <span
-                              className={`inline-flex whitespace-nowrap rounded-full px-2.5 py-1 text-[10px] font-semibold ${SIKAP_STYLE[
-                                student.sikap
-                              ]}`}
-                            >
-                              {student.sikap}
-                            </span>
-
+                            <span className="theme-text-muted text-xs">—</span>
                           </td>
-
 
                           <td className="theme-border-soft border-b px-5 py-4">
-
-                            <div className="flex items-center gap-2">
-
-                              {student.raporSelesai ? (
-                                <>
-                                  <CheckCircle2
-                                    size={14}
-                                    className="text-[var(--color-success)]"
-                                  />
-
-                                  <span className="theme-success rounded-md px-1.5 py-0.5 text-[11px] font-semibold">
-                                    Selesai
-                                  </span>
-                                </>
-                              ) : (
-                                <>
-                                  <span className="h-2 w-2 rounded-full bg-[var(--color-warning)]" />
-
-                                  <span className="theme-warning rounded-md px-1.5 py-0.5 text-[11px] font-semibold">
-                                    Proses
-                                  </span>
-                                </>
-                              )}
-
-                            </div>
+                            <span className="theme-text-muted text-xs">—</span>
                           </td>
 
                         </tr>
                       ))}
 
-                      {filtered.length === 0 && (
+                      {loading && filtered.length === 0 && (
+                        <tr>
+                          <td colSpan={6} className="px-5 py-14 text-center">
+                            <p className="theme-text-muted text-xs">
+                              Memuat data siswa dari server...
+                            </p>
+                          </td>
+                        </tr>
+                      )}
+
+                      {!loading && filtered.length === 0 && (
                         <tr>
                           <td
                             colSpan={6}
@@ -987,7 +854,9 @@ export default function AkademikPage() {
                               </p>
 
                               <p className="theme-text-muted mt-1 text-xs">
-                                Tidak ada siswa yang sesuai dengan pencarian.
+                                {search
+                                  ? "Tidak ada siswa yang sesuai dengan pencarian."
+                                  : "Belum ada data siswa terdaftar."}
                               </p>
 
                             </div>

@@ -127,7 +127,10 @@ export default function EditMapelPage() {
   };
 
   useEffect(() => {
-    loadMapel();
+    const timer = setTimeout(() => {
+      loadMapel();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [id]);
 
   const handleChange = (field, value) => {

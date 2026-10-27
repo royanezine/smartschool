@@ -1,6 +1,11 @@
 "use client";
 
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { getPaket } from "@/services/paket.service";
+import { getAuditLogs } from "@/services/auditLog.service";
+import { getAllLangganan } from "@/services/langganan.service";
+import { getNotifikasi } from "@/services/notifikasi.service";
 
 import {
   LayoutDashboard,
@@ -89,49 +94,6 @@ const themeFocus =
   "focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
 
-const statsData = [
-  {
-    id: 1,
-    label: "Total Sekolah",
-    value: "128",
-    change: "+12",
-    description: "sekolah terdaftar",
-    trend: "up",
-    icon: School,
-    accent: "primary",
-  },
-  {
-    id: 2,
-    label: "Total Yayasan",
-    value: "42",
-    change: "+3",
-    description: "yayasan terdaftar",
-    trend: "up",
-    icon: Building2,
-    accent: "neutral",
-  },
-  {
-    id: 3,
-    label: "Pengguna Aktif",
-    value: "1.198",
-    change: "+54",
-    description: "pengguna aktif",
-    trend: "up",
-    icon: Users,
-    accent: "primary",
-  },
-  {
-    id: 4,
-    label: "Langganan Aktif",
-    value: "105",
-    change: "-2",
-    description: "dari 128 sekolah",
-    trend: "down",
-    icon: Package,
-    accent: "neutral",
-  },
-];
-
 const revenueData = [
   { month: "Jan", value: 38 },
   { month: "Feb", value: 43 },
@@ -152,49 +114,6 @@ const schoolGrowthData = [
   { month: "Jun", value: 78 },
   { month: "Jul", value: 85 },
   { month: "Agu", value: 92 },
-];
-
-const recentActivities = [
-  {
-    id: 1,
-    user: "Super Admin",
-    action: "Menambahkan sekolah baru",
-    target: "SMA Bina Bangsa",
-    timestamp: "2026-08-26T14:30:00",
-    type: "create",
-  },
-  {
-    id: 2,
-    user: "Super Admin",
-    action: "Memperbarui paket langganan",
-    target: "SMA Negeri 1 Jakarta",
-    timestamp: "2026-08-26T13:15:00",
-    type: "update",
-  },
-  {
-    id: 3,
-    user: "Admin Sekolah",
-    action: "Menambahkan pengguna baru",
-    target: "SMP BPK Penabur",
-    timestamp: "2026-08-26T12:45:00",
-    type: "create",
-  },
-  {
-    id: 4,
-    user: "Super Admin",
-    action: "Memverifikasi yayasan",
-    target: "YPI Harapan",
-    timestamp: "2026-08-26T11:20:00",
-    type: "verify",
-  },
-  {
-    id: 5,
-    user: "Sistem",
-    action: "Pembayaran berhasil",
-    target: "SMA Al-Azhar",
-    timestamp: "2026-08-26T10:30:00",
-    type: "payment",
-  },
 ];
 
 const upcomingTasks = [
@@ -224,29 +143,6 @@ const upcomingTasks = [
   },
 ];
 
-const recentNotifications = [
-  {
-    id: 1,
-    title: "Pembaruan Sistem v2.0",
-    desc: "SmartSchool telah diperbarui ke versi terbaru.",
-    read: false,
-    time: "2 jam lalu",
-  },
-  {
-    id: 2,
-    title: "Pengingat Backup Data",
-    desc: "Backup database terakhir berhasil dilakukan.",
-    read: false,
-    time: "5 jam lalu",
-  },
-  {
-    id: 3,
-    title: "Yayasan Baru Mendaftar",
-    desc: "YPI Harapan telah menyelesaikan pendaftaran.",
-    read: true,
-    time: "1 hari lalu",
-  },
-];
 
 const quickActions = [
   {
@@ -356,6 +252,141 @@ const getPriority = (priority) => {
 
 export default function DashboardPage() {
   const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  const [subscriptions, setSubscriptions] = useState([]);
+  const [pakets, setPakets] = useState([]);
+  const [logs, setLogs] = useState([]);
+  const [notifications, setNotifications] = useState([]);
+
+  useEffect(() => {
+    let active = true;
+    const timer = setTimeout(async () => {
+      try {
+        setLoading(true);
+        const [subRes, paketRes, logRes, notifRes] = await Promise.allSettled([
+          getAllLangganan(),
+          getPaket(),
+          getAuditLogs({ limit: 10 }),
+          getNotifikasi(),
+        ]);
+
+        if (!active) return;
+
+        if (subRes.status === "fulfilled") {
+          const val = subRes.value;
+          setSubscriptions(Array.isArray(val) ? val : []);
+        }
+
+        if (paketRes.status === "fulfilled") {
+          const pList = Array.isArray(paketRes.value?.data)
+            ? paketRes.value.data
+            : [];
+          setPakets(pList);
+        }
+
+        if (logRes.status === "fulfilled") {
+          const lList = Array.isArray(logRes.value?.data)
+            ? logRes.value.data
+            : [];
+          setLogs(lList);
+        }
+
+        if (notifRes.status === "fulfilled") {
+          const nList = Array.isArray(notifRes.value?.data)
+            ? notifRes.value.data
+            : Array.isArray(notifRes.value)
+            ? notifRes.value
+            : [];
+          setNotifications(nList);
+        }
+      } catch {
+        // Fallback
+      } finally {
+        if (active) setLoading(false);
+      }
+    }, 0);
+
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
+  }, []);
+
+  const statsData = useMemo(() => {
+    const totalSekolah = new Set(
+      subscriptions.map((s) => s.sekolahId || s.sekolah?.id).filter(Boolean)
+    ).size || subscriptions.length;
+    const langgananAktif = subscriptions.filter(
+      (s) => {
+        const st = String(s.statusLangganan || s.status || "").toLowerCase();
+        return st === "aktif" || st === "active";
+      }
+    ).length;
+    const totalPaket = pakets.length;
+    const totalAktivitas = logs.length;
+
+    return [
+      {
+        id: 1,
+        label: "Total Sekolah",
+        value: String(totalSekolah),
+        change: `${totalSekolah > 0 ? "+" + totalSekolah : "0"}`,
+        description: "sekolah terdata",
+        trend: "up",
+        icon: School,
+        accent: "primary",
+      },
+      {
+        id: 2,
+        label: "Paket Modul",
+        value: String(totalPaket),
+        change: `${totalPaket}`,
+        description: "paket tersedia",
+        trend: "up",
+        icon: Package,
+        accent: "neutral",
+      },
+      {
+        id: 3,
+        label: "Aktivitas Sistem",
+        value: String(totalAktivitas),
+        change: `${totalAktivitas}`,
+        description: "log tercatat",
+        trend: "up",
+        icon: Activity,
+        accent: "primary",
+      },
+      {
+        id: 4,
+        label: "Langganan Aktif",
+        value: String(langgananAktif),
+        change: `${langgananAktif}`,
+        description: `dari ${totalSekolah} sekolah`,
+        trend: langgananAktif > 0 ? "up" : "down",
+        icon: ShieldCheck,
+        accent: "neutral",
+      },
+    ];
+  }, [subscriptions, pakets, logs]);
+
+  const recentActivities = useMemo(() => {
+    if (!logs.length) return [];
+    return logs.slice(0, 5).map((log) => {
+      const aksi = log.aksi || "Aktivitas Sistem";
+      const isCreate = /buat|tambah|create/i.test(aksi);
+      const isUpdate = /ubah|edit|update/i.test(aksi);
+      const isDelete = /hapus|delete/i.test(aksi);
+
+      return {
+        id: log.id,
+        user: log.pengguna?.namaLengkap || "Super Admin",
+        action: aksi,
+        target: log.modul || "Sistem",
+        timestamp: log.waktu || new Date().toISOString(),
+        type: isCreate ? "create" : isUpdate ? "update" : isDelete ? "payment" : "verify",
+      };
+    });
+  }, [logs]);
 
   const maxRevenue = Math.max(
     ...revenueData.map((item) => item.value)
@@ -1139,54 +1170,69 @@ export default function DashboardPage() {
                 </div>
 
                 <div className="mt-4 space-y-1">
-                  {recentNotifications.map((notif) => (
-                    <div
-                      key={notif.id}
-                      className={`rounded-lg p-2.5 transition ${themeNeutralHover} ${
-                        !notif.read
-                          ? themePrimarySoft
-                          : ""
-                      }`}
-                    >
-                      <div className="flex items-start gap-3">
+                  {notifications.length === 0 ? (
+                    <p className="p-3 text-center text-xs theme-text-muted">
+                      Tidak ada notifikasi baru
+                    </p>
+                  ) : (
+                    notifications.slice(0, 5).map((notif) => {
+                      const isRead = notif.dibaca ?? notif.read ?? false;
+                      const title = notif.judul || notif.title || "Notifikasi";
+                      const desc = notif.pesan || notif.desc || "";
+                      const time = notif.dibuatPada ? new Date(notif.dibuatPada).toLocaleDateString("id-ID") : notif.time || "";
+
+                      return (
                         <div
-                          className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-md ${
-                            notif.read
-                              ? `${themeNeutralSurface} theme-text-muted`
-                              : `${themePrimarySoft} ${themePrimaryText}`
+                          key={notif.id}
+                          className={`rounded-lg p-2.5 transition ${themeNeutralHover} ${
+                            !isRead ? themePrimarySoft : ""
                           }`}
                         >
-                          <Bell size={13} />
-                        </div>
-
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-2">
-                            <p
-                              className={`truncate text-xs ${
-                                notif.read
-                                  ? "font-medium theme-text-secondary"
-                                  : "font-semibold theme-text"
+                          <div className="flex items-start gap-3">
+                            <div
+                              className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-md ${
+                                isRead
+                                  ? `${themeNeutralSurface} theme-text-muted`
+                                  : `${themePrimarySoft} ${themePrimaryText}`
                               }`}
                             >
-                              {notif.title}
-                            </p>
+                              <Bell size={13} />
+                            </div>
 
-                            {!notif.read && (
-                              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-primary)]" />
-                            )}
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-2">
+                                <p
+                                  className={`truncate text-xs ${
+                                    isRead
+                                      ? "font-medium theme-text-secondary"
+                                      : "font-semibold theme-text"
+                                  }`}
+                                >
+                                  {title}
+                                </p>
+
+                                {!isRead && (
+                                  <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-primary)]" />
+                                )}
+                              </div>
+
+                              {desc && (
+                                <p className="mt-0.5 truncate text-[10px] theme-text-muted">
+                                  {desc}
+                                </p>
+                              )}
+
+                              {time && (
+                                <p className="mt-1 text-[9px] theme-text-muted">
+                                  {time}
+                                </p>
+                              )}
+                            </div>
                           </div>
-
-                          <p className="mt-0.5 truncate text-[10px] theme-text-muted">
-                            {notif.desc}
-                          </p>
-
-                          <p className="mt-1 text-[9px] theme-text-muted">
-                            {notif.time}
-                          </p>
                         </div>
-                      </div>
-                    </div>
-                  ))}
+                      );
+                    })
+                  )}
                 </div>
               </div>
             </div>

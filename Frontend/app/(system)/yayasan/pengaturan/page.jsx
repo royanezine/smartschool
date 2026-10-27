@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { getProfile, updateProfile } from "@/services/user.service";
 import {
   Settings,
   ChevronLeft,
@@ -22,6 +23,8 @@ import {
   Phone,
   Shield,
   AlertTriangle,
+  Loader2,
+  AlertCircle,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -110,10 +113,10 @@ const TABS = [
 ];
 
 const initialProfil = {
-  nama: "Admin Yayasan",
-  email: "admin@smartschool.com",
-  telepon: "081234567890",
-  jabatan: "Administrator Sistem",
+  nama: "",
+  email: "",
+  telepon: "",
+  jabatan: "",
 };
 
 const initialYayasan = {
@@ -247,6 +250,9 @@ export default function PengaturanPage() {
 
   const [activeTab, setActiveTab] = useState("profil");
   const [saved, setSaved] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
   const [profil, setProfil] = useState(initialProfil);
   const [yayasan, setYayasan] = useState(initialYayasan);
@@ -269,6 +275,36 @@ export default function PengaturanPage() {
     konfirmasi: "",
   });
 
+  useEffect(() => {
+    let active = true;
+    async function loadProfile() {
+      try {
+        setLoading(true);
+        setErrorMsg("");
+        const res = await getProfile();
+        const u = res?.data?.data || res?.data || res;
+        if (active && u) {
+          setProfil({
+            nama: u.namaLengkap || u.nama || "",
+            email: u.email || "",
+            telepon: u.noTelepon || "",
+            jabatan: u.role?.nama || u.role || u.jabatan || "Admin Yayasan",
+          });
+        }
+      } catch (err) {
+        if (active) {
+          console.error("Gagal memuat profil:", err);
+          setErrorMsg(err?.message || "Gagal memuat profil pengguna");
+        }
+      } finally {
+        if (active) setLoading(false);
+      }
+    }
+    loadProfile();
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const toggleNotifikasi = (id) => {
     setNotifikasi((prev) =>
@@ -283,13 +319,26 @@ export default function PengaturanPage() {
     );
   };
 
-
-  const handleSimpan = () => {
-    setSaved(true);
-
-    setTimeout(() => {
-      setSaved(false);
-    }, 2500);
+  const handleSimpan = async () => {
+    try {
+      setSaving(true);
+      setErrorMsg("");
+      if (activeTab === "profil") {
+        await updateProfile({
+          namaLengkap: profil.nama,
+          noTelepon: profil.telepon,
+        });
+      }
+      setSaved(true);
+      setTimeout(() => {
+        setSaved(false);
+      }, 2500);
+    } catch (err) {
+      console.error("Gagal menyimpan:", err);
+      setErrorMsg(err?.message || "Gagal menyimpan perubahan");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -354,6 +403,7 @@ export default function PengaturanPage() {
           <button
             type="button"
             onClick={handleSimpan}
+            disabled={saving || loading}
             className={`
               flex
               items-center
@@ -371,15 +421,21 @@ export default function PengaturanPage() {
               ${themePrimaryShadow}
               whitespace-nowrap
               flex-shrink-0
+              disabled:opacity-50
+              disabled:cursor-not-allowed
             `}
           >
-            {saved ? (
+            {saving ? (
+              <Loader2 size={16} className="animate-spin" />
+            ) : saved ? (
               <Check size={16} />
             ) : (
               <Save size={16} />
             )}
 
-            {saved
+            {saving
+              ? "Menyimpan..."
+              : saved
               ? "Tersimpan"
               : "Simpan Perubahan"}
           </button>
@@ -451,7 +507,23 @@ export default function PengaturanPage() {
           <div className="flex-1 min-w-0 space-y-4">
 
 
-            {activeTab === "profil" && (
+            {errorMsg && (
+              <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-xs flex items-center gap-2">
+                <AlertCircle size={14} className="flex-shrink-0" />
+                <span>{errorMsg}</span>
+              </div>
+            )}
+
+            {activeTab === "profil" && loading && (
+              <SectionCard>
+                <div className="flex flex-col items-center justify-center py-12 gap-3">
+                  <Loader2 className="w-7 h-7 animate-spin text-[var(--color-primary)]" />
+                  <span className="text-xs theme-text-muted">Memuat profil pengguna...</span>
+                </div>
+              </SectionCard>
+            )}
+
+            {activeTab === "profil" && !loading && (
               <SectionCard>
                 <h3 className="text-sm font-semibold theme-text-secondary mb-4">
                   Informasi Profil

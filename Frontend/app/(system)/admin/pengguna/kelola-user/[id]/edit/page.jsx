@@ -223,7 +223,10 @@ export default function EditUserPage() {
   }, [id]);
 
   useEffect(() => {
-    loadUser();
+    const timer = setTimeout(() => {
+      loadUser();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadUser]);
 
   function handleChange(event) {

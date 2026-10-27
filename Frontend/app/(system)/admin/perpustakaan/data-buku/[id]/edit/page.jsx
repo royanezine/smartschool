@@ -102,7 +102,10 @@ export default function EditBukuPage() {
   }, [id]);
 
   useEffect(() => {
-    loadBook();
+    const timer = setTimeout(() => {
+      loadBook();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadBook]);
 
   const update = (key) => (event) => {

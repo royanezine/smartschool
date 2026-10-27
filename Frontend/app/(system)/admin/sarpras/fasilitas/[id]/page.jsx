@@ -231,7 +231,7 @@ export default function FasilitasDetailPage() {
           <main className="theme-page flex flex-1 items-center justify-center p-6">
             <div className="text-center">
               <p className="theme-text-muted text-sm">
-                Fasilitas dengan id "{id}" tidak ditemukan.
+                Fasilitas dengan id &quot;{id}&quot; tidak ditemukan.
               </p>
 
               <button

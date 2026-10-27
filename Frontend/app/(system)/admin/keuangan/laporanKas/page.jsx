@@ -15,7 +15,7 @@ import {
   Download,
   Printer,
 } from "lucide-react";
-import { apiFetch } from "@/lib/api";
+import { getAkunKas, getLaporanKas } from "@/services/jurnalKas.service";
 
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
@@ -71,7 +71,7 @@ export default function LaporanKasPage() {
 
   const loadAkun = useCallback(async () => {
     try {
-      const response = await apiFetch("/api/keuangan/akun-kas");
+      const response = await getAkunKas();
 
       const data = Array.isArray(response?.data)
         ? response.data
@@ -100,18 +100,11 @@ export default function LaporanKasPage() {
     setError("");
 
     try {
-      const params = new URLSearchParams({
+      const response = await getLaporanKas({
         dari,
         sampai,
+        akunKasId: akunKasId || undefined,
       });
-
-      if (akunKasId) {
-        params.set("akunKasId", akunKasId);
-      }
-
-      const response = await apiFetch(
-        `/api/keuangan/laporan-kas?${params.toString()}`
-      );
 
       const data = response?.data ?? response;
 
@@ -132,11 +125,17 @@ export default function LaporanKasPage() {
   }, [dari, sampai, akunKasId]);
 
   useEffect(() => {
-    loadAkun();
+    const timer = setTimeout(() => {
+      loadAkun();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadAkun]);
 
   useEffect(() => {
-    loadData();
+    const timer = setTimeout(() => {
+      loadData();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadData]);
 
   const totalMasuk = getNumber(laporan, ["totalMasuk"]);

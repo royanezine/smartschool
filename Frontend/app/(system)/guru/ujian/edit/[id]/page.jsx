@@ -299,7 +299,10 @@ export default function EditUjianPage() {
   );
 
   useEffect(() => {
-    loadUjian();
+    const timer = setTimeout(() => {
+      loadUjian();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadUjian]);
 
 

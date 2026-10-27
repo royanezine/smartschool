@@ -139,8 +139,11 @@ export default function AdminGuruEditPage() {
   }, [id]);
 
   useEffect(() => {
-    fetchGuru();
-    fetchShift();
+    const timer = setTimeout(() => {
+      fetchGuru();
+      fetchShift();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [fetchGuru, fetchShift]);
 
   const handleChange = (e) => {

@@ -166,7 +166,10 @@ export default function DetailPenggajianPage() {
   );
 
   useEffect(() => {
-    loadDetail();
+    const timer = setTimeout(() => {
+      loadDetail();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadDetail]);
 
   async function handleFreeze() {
@@ -614,7 +617,7 @@ function SummaryCard({ icon: Icon, label, value, tone = "blue" }) {
         </div>
       </div>
       <p
-        className={`mt-4 break-words text-xl font-bold tracking-tight tabular-nums sm:text-2xl ${
+        className={`mt-4 whitespace-nowrap text-xl font-bold tracking-tight tabular-nums sm:text-2xl ${
           tone === "highlight"
             ? "text-blue-900 dark:text-blue-100"
             : "theme-text"

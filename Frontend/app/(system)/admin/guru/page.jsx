@@ -225,12 +225,18 @@ export default function AdminGuruPage() {
 
 
   useEffect(() => {
-    fetchGuru();
+    const timer = setTimeout(() => {
+      fetchGuru();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [fetchGuru]);
 
   useEffect(() => {
-    fetchShiftKerja();
-    fetchMapel();
+    const timer = setTimeout(() => {
+      fetchShiftKerja();
+      fetchMapel();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [fetchShiftKerja, fetchMapel]);
 
 

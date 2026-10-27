@@ -1,10 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
+import { getSesiKonseling, getPelanggaranSiswa } from "@/services/bk.service";
 
 import {
   Search,
@@ -34,191 +35,6 @@ import {
   Activity,
   ShieldCheck,
 } from "lucide-react";
-
-
-const KONSELING_DATA = [
-  {
-    id: 1,
-    siswa: "Rizky Pratama",
-    nis: "20260001",
-    kelas: "XII IPA 1",
-    tanggal: "09 September 2026",
-    waktu: "08:30",
-    konselor: "Ibu Siti Rahma",
-    kategori: "Akademik",
-    status: "Selesai",
-    prioritas: "Normal",
-    catatan:
-      "Konsultasi mengenai persiapan menghadapi ujian akhir.",
-    avatar: "RP",
-  },
-  {
-    id: 2,
-    siswa: "Nabila Putri",
-    nis: "20260002",
-    kelas: "XI IPS 2",
-    tanggal: "09 September 2026",
-    waktu: "09:30",
-    konselor: "Ibu Maya Anggraini",
-    kategori: "Pribadi",
-    status: "Terjadwal",
-    prioritas: "Sedang",
-    catatan: "Sesi lanjutan.",
-    avatar: "NP",
-  },
-  {
-    id: 3,
-    siswa: "Fajar Hidayat",
-    nis: "20260003",
-    kelas: "X IPA 2",
-    tanggal: "09 September 2026",
-    waktu: "10:00",
-    konselor: "Ibu Siti Rahma",
-    kategori: "Sosial",
-    status: "Terjadwal",
-    prioritas: "Normal",
-    catatan: "Konseling adaptasi lingkungan sekolah.",
-    avatar: "FH",
-  },
-  {
-    id: 4,
-    siswa: "Sarah Aulia",
-    nis: "20260007",
-    kelas: "XII IPA 2",
-    tanggal: "08 September 2026",
-    waktu: "11:00",
-    konselor: "Ibu Maya Anggraini",
-    kategori: "Karier",
-    status: "Selesai",
-    prioritas: "Normal",
-    catatan: "Diskusi pilihan perguruan tinggi.",
-    avatar: "SA",
-  },
-  {
-    id: 5,
-    siswa: "Yoga Saputra",
-    nis: "20260004",
-    kelas: "X IPA 2",
-    tanggal: "08 September 2026",
-    waktu: "13:00",
-    konselor: "Ibu Siti Rahma",
-    kategori: "Akademik",
-    status: "Dibatalkan",
-    prioritas: "Rendah",
-    catatan: "Siswa berhalangan hadir.",
-    avatar: "YS",
-  },
-  {
-    id: 6,
-    siswa: "Putri Amelia",
-    nis: "20260005",
-    kelas: "XII IPS 1",
-    tanggal: "07 September 2026",
-    waktu: "09:00",
-    konselor: "Ibu Maya Anggraini",
-    kategori: "Pribadi",
-    status: "Selesai",
-    prioritas: "Tinggi",
-    catatan: "Perlu sesi tindak lanjut.",
-    avatar: "PA",
-  },
-];
-
-const PELANGGARAN_DATA = [
-  {
-    id: 1,
-    siswa: "Fajar Hidayat",
-    nis: "20260003",
-    kelas: "X IPA 2",
-    pelanggaran: "Terlambat masuk sekolah",
-    kategori: "Kedisiplinan",
-    point: 5,
-    tanggal: "09 September 2026",
-    status: "Diproses",
-    avatar: "FH",
-  },
-  {
-    id: 2,
-    siswa: "Yoga Saputra",
-    nis: "20260004",
-    kelas: "X IPA 2",
-    pelanggaran: "Tidak menggunakan atribut lengkap",
-    kategori: "Kedisiplinan",
-    point: 3,
-    tanggal: "08 September 2026",
-    status: "Selesai",
-    avatar: "YS",
-  },
-  {
-    id: 3,
-    siswa: "Andi Setiawan",
-    nis: "20260006",
-    kelas: "XI IPA 1",
-    pelanggaran: "Tidak mengikuti kegiatan wajib",
-    kategori: "Tata Tertib",
-    point: 5,
-    tanggal: "07 September 2026",
-    status: "Diproses",
-    avatar: "AS",
-  },
-  {
-    id: 4,
-    siswa: "Rizky Pratama",
-    nis: "20260001",
-    kelas: "XII IPA 1",
-    pelanggaran: "Terlambat mengumpulkan tugas",
-    kategori: "Akademik",
-    point: 2,
-    tanggal: "05 September 2026",
-    status: "Selesai",
-    avatar: "RP",
-  },
-  {
-    id: 5,
-    siswa: "Nabila Putri",
-    nis: "20260002",
-    kelas: "XI IPS 2",
-    pelanggaran: "Pelanggaran ringan",
-    kategori: "Tata Tertib",
-    point: 2,
-    tanggal: "04 September 2026",
-    status: "Selesai",
-    avatar: "NP",
-  },
-];
-
-const PRESTASI_DATA = [
-  {
-    id: 1,
-    siswa: "Rizky Pratama",
-    kelas: "XII IPA 1",
-    prestasi: "Juara 1 Olimpiade Matematika",
-    tingkat: "Provinsi",
-    tanggal: "06 September 2026",
-    kategori: "Akademik",
-    avatar: "RP",
-  },
-  {
-    id: 2,
-    siswa: "Nabila Putri",
-    kelas: "XI IPS 2",
-    prestasi: "Juara 2 Lomba Debat Bahasa Indonesia",
-    tingkat: "Kota",
-    tanggal: "01 September 2026",
-    kategori: "Non Akademik",
-    avatar: "NP",
-  },
-  {
-    id: 3,
-    siswa: "Sarah Aulia",
-    kelas: "XII IPA 2",
-    prestasi: "Juara 1 Desain Poster Digital",
-    tingkat: "Sekolah",
-    tanggal: "28 Agustus 2026",
-    kategori: "Kreativitas",
-    avatar: "SA",
-  },
-];
 
 
 const KONSELING_STATUS = {
@@ -402,11 +218,118 @@ export default function BKPage() {
   const [selectedPrestasi, setSelectedPrestasi] =
     useState(null);
 
+  const [rawKonseling, setRawKonseling] = useState([]);
+  const [rawPelanggaran, setRawPelanggaran] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   const itemsPerPage = 5;
 
+  useEffect(() => {
+    let active = true;
+    const timer = setTimeout(async () => {
+      try {
+        setLoading(true);
+        const [resK, resP] = await Promise.allSettled([
+          getSesiKonseling(),
+          getPelanggaranSiswa(),
+        ]);
+        if (!active) return;
+        if (resK.status === "fulfilled" && Array.isArray(resK.value)) {
+          setRawKonseling(resK.value);
+        }
+        if (resP.status === "fulfilled" && Array.isArray(resP.value)) {
+          setRawPelanggaran(resP.value);
+        }
+      } catch {
+        // Biarkan array kosong jika ada kendala
+      } finally {
+        if (active) setLoading(false);
+      }
+    }, 0);
+
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
+  }, []);
+
+  const konselingData = useMemo(() => {
+    return rawKonseling.map((item) => {
+      const namaSiswa = item.siswa?.namaLengkap || "Siswa";
+      const avatar =
+        namaSiswa
+          .split(" ")
+          .map((w) => w[0])
+          .filter(Boolean)
+          .slice(0, 2)
+          .join("")
+          .toUpperCase() || "SW";
+      const waktu = item.waktuMulai
+        ? item.waktuSelesai
+          ? `${item.waktuMulai} - ${item.waktuSelesai}`
+          : item.waktuMulai
+        : "-";
+      return {
+        id: item.id,
+        siswa: namaSiswa,
+        nis: item.siswa?.nis || item.siswa?.nisn || "-",
+        kelas: "-",
+        tanggal: item.tanggal
+          ? new Date(item.tanggal).toLocaleDateString("id-ID", {
+              day: "2-digit",
+              month: "long",
+              year: "numeric",
+            })
+          : "-",
+        waktu,
+        konselor: item.konselor?.namaLengkap || "Konselor",
+        kategori: item.topik || "Akademik",
+        status: item.status
+          ? item.status.charAt(0).toUpperCase() + item.status.slice(1)
+          : "Terjadwal",
+        prioritas: "Normal",
+        catatan: item.catatan || item.hasil || item.masalah || "-",
+        avatar,
+      };
+    });
+  }, [rawKonseling]);
+
+  const pelanggaranData = useMemo(() => {
+    return rawPelanggaran.map((item) => {
+      const namaSiswa = item.siswa?.namaLengkap || "Siswa";
+      const avatar =
+        namaSiswa
+          .split(" ")
+          .map((w) => w[0])
+          .filter(Boolean)
+          .slice(0, 2)
+          .join("")
+          .toUpperCase() || "SW";
+      return {
+        id: item.id,
+        siswa: namaSiswa,
+        nis: item.siswa?.nis || item.siswa?.nisn || "-",
+        kelas: "-",
+        pelanggaran: item.kronologi || item.kategoriPelanggaran?.nama || "-",
+        kategori: item.kategoriPelanggaran?.nama || "Tata Tertib",
+        point: item.poin ?? item.kategoriPelanggaran?.poin ?? 0,
+        tanggal: item.tanggal
+          ? new Date(item.tanggal).toLocaleDateString("id-ID", {
+              day: "2-digit",
+              month: "long",
+              year: "numeric",
+            })
+          : "-",
+        status: item.status
+          ? item.status.charAt(0).toUpperCase() + item.status.slice(1)
+          : "Diproses",
+        avatar,
+      };
+    });
+  }, [rawPelanggaran]);
 
   const filteredKonseling = useMemo(() => {
-    return KONSELING_DATA.filter((item) => {
+    return konselingData.filter((item) => {
       const search = searchQuery.toLowerCase().trim();
 
       const matchesSearch =
@@ -430,7 +353,7 @@ export default function BKPage() {
         matchesClass
       );
     });
-  }, [searchQuery, statusFilter, classFilter]);
+  }, [konselingData, searchQuery, statusFilter, classFilter]);
 
   const totalPages = Math.max(
     1,
@@ -553,7 +476,7 @@ export default function BKPage() {
             <div className="mb-4 grid shrink-0 grid-cols-2 gap-3 xl:grid-cols-4">
               <StatCard
                 title="Sesi Konseling"
-                value="24"
+                value={loading ? "..." : String(konselingData.length)}
                 description="Sesi bulan ini"
                 icon={MessageSquare}
                 iconBg="theme-info"
@@ -566,7 +489,7 @@ export default function BKPage() {
 
               <StatCard
                 title="Prestasi Siswa"
-                value="18"
+                value="0"
                 description="Prestasi tercatat"
                 icon={Award}
                 iconBg="theme-success"
@@ -579,7 +502,7 @@ export default function BKPage() {
 
               <StatCard
                 title="Pelanggaran"
-                value="12"
+                value={loading ? "..." : String(pelanggaranData.length)}
                 description="Kasus bulan ini"
                 icon={AlertTriangle}
                 iconBg="theme-warning"
@@ -592,7 +515,7 @@ export default function BKPage() {
 
               <StatCard
                 title="Asesmen"
-                value="86%"
+                value="0%"
                 description="Siswa sudah mengikuti"
                 icon={Brain}
                 iconBg="theme-info"
@@ -605,28 +528,28 @@ export default function BKPage() {
               <QuickSummary
                 icon={Clock3}
                 title="Terjadwal Hari Ini"
-                value="5"
+                value={loading ? "..." : String(konselingData.filter((k) => k.status.toLowerCase() === "terjadwal").length)}
                 description="Sesi konseling"
               />
 
               <QuickSummary
                 icon={CheckCircle2}
                 title="Selesai"
-                value="16"
+                value={loading ? "..." : String(konselingData.filter((k) => k.status.toLowerCase() === "selesai").length)}
                 description="Sesi bulan ini"
               />
 
               <QuickSummary
                 icon={AlertTriangle}
                 title="Kasus Aktif"
-                value="4"
+                value={loading ? "..." : String(pelanggaranData.filter((p) => p.status.toLowerCase() !== "selesai").length)}
                 description="Perlu tindak lanjut"
               />
 
               <QuickSummary
                 icon={Target}
                 title="Minat Bakat"
-                value="92%"
+                value="0%"
                 description="Data terisi"
               />
             </div>
@@ -796,8 +719,22 @@ export default function BKPage() {
                       </thead>
 
                       <tbody className="divide-y divide-[var(--color-border-soft)]">
-                        {paginatedKonseling.map(
-                          (item) => (
+                        {loading ? (
+                          <tr>
+                            <td colSpan={6} className="px-4 py-8 text-center text-xs theme-text-muted">
+                              Memuat data sesi konseling...
+                            </td>
+                          </tr>
+                        ) : filteredKonseling.length === 0 ? (
+                          <tr>
+                            <td colSpan={6} className="px-4 py-8 text-center text-xs theme-text-muted">
+                              {searchQuery || statusFilter !== "Semua" || classFilter !== "Semua"
+                                ? "Tidak ada sesi konseling yang sesuai filter."
+                                : "Belum ada sesi konseling yang tercatat."}
+                            </td>
+                          </tr>
+                        ) : (
+                          paginatedKonseling.map((item) => (
                             <tr
                               key={item.id}
                               className="theme-table-hover transition"
@@ -890,7 +827,7 @@ export default function BKPage() {
                                 </div>
                               </td>
                             </tr>
-                          )
+                          ))
                         )}
                       </tbody>
                     </table>
@@ -1020,8 +957,20 @@ export default function BKPage() {
                     </thead>
 
                     <tbody className="divide-y divide-[var(--color-border-soft)]">
-                      {PELANGGARAN_DATA.map(
-                        (item) => (
+                      {loading ? (
+                        <tr>
+                          <td colSpan={6} className="px-4 py-8 text-center text-xs theme-text-muted">
+                            Memuat data pelanggaran siswa...
+                          </td>
+                        </tr>
+                      ) : pelanggaranData.length === 0 ? (
+                        <tr>
+                          <td colSpan={6} className="px-4 py-8 text-center text-xs theme-text-muted">
+                            Belum ada data pelanggaran siswa yang tercatat.
+                          </td>
+                        </tr>
+                      ) : (
+                        pelanggaranData.map((item) => (
                           <tr
                             key={item.id}
                             className="theme-table-hover transition"
@@ -1086,7 +1035,7 @@ export default function BKPage() {
                               </div>
                             </td>
                           </tr>
-                        )
+                        ))
                       )}
                     </tbody>
                   </table>
@@ -1136,65 +1085,11 @@ export default function BKPage() {
                     </thead>
 
                     <tbody className="divide-y divide-[var(--color-border-soft)]">
-                      {PRESTASI_DATA.map((item) => (
-                        <tr
-                          key={item.id}
-                          className="theme-table-hover transition"
-                        >
-                          <td className="px-4 py-3">
-                            <div className="flex items-center gap-3">
-                              <div className="theme-info flex h-9 w-9 items-center justify-center rounded-lg text-xs font-bold">
-                                {item.avatar}
-                              </div>
-
-                              <div>
-                                <p className="theme-text text-sm font-semibold">
-                                  {item.siswa}
-                                </p>
-
-                                <p className="theme-text-placeholder text-[11px]">
-                                  {item.kelas}
-                                </p>
-                              </div>
-                            </div>
-                          </td>
-
-                          <td className="px-4 py-3">
-                            <p className="theme-text max-w-[270px] truncate text-xs font-semibold">
-                              {item.prestasi}
-                            </p>
-                          </td>
-
-                          <td className="px-4 py-3">
-                            <span className="theme-success rounded-md border px-2.5 py-1 text-xs font-medium">
-                              {item.tingkat}
-                            </span>
-                          </td>
-
-                          <td className="theme-text-secondary px-4 py-3 text-xs">
-                            {item.kategori}
-                          </td>
-
-                          <td className="theme-text-muted px-4 py-3 text-xs">
-                            {item.tanggal}
-                          </td>
-
-                          <td className="px-4 py-3">
-                            <div className="flex justify-end">
-                              <button
-                                onClick={() =>
-                                  setSelectedPrestasi(
-                                    item
-                                  )
-                                }
-                                className="theme-text-muted theme-header-hover flex h-8 w-8 items-center justify-center rounded-lg transition"
-                              >
-                                <Eye size={16} />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
+                      <tr>
+                        <td colSpan={6} className="px-4 py-8 text-center text-xs theme-text-muted">
+                          Belum ada catatan prestasi atau modul prestasi belum diaktifkan di server.
+                        </td>
+                      </tr>
                     </tbody>
                   </table>
                 </SectionCard>

@@ -191,7 +191,10 @@ export default function EditPenggajianPage() {
   }, [id]);
 
   useEffect(() => {
-    loadDetail();
+    const timer = setTimeout(() => {
+      loadDetail();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadDetail]);
 
   async function handleSubmit(event) {
@@ -455,7 +458,7 @@ export default function EditPenggajianPage() {
                           <p className="text-sm font-medium text-blue-800 dark:text-blue-300">
                             Total Gaji
                           </p>
-                          <p className="mt-2 break-words text-xl font-bold tabular-nums text-blue-900 dark:text-blue-100 sm:text-2xl">
+                          <p className="mt-2 whitespace-nowrap text-xl font-bold tabular-nums text-blue-900 dark:text-blue-100 sm:text-2xl">
                             {formatCurrency(item.totalGaji)}
                           </p>
                         </div>

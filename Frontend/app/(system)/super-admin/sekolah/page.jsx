@@ -740,7 +740,10 @@ export default function DataSekolahPage() {
   };
 
   useEffect(() => {
-    loadData();
+    const timer = setTimeout(() => {
+      loadData();
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
 
@@ -894,7 +897,10 @@ export default function DataSekolahPage() {
 
 
   useEffect(() => {
-    setCurrentPage(1);
+    const timer = setTimeout(() => {
+      setCurrentPage(1);
+    }, 0);
+    return () => clearTimeout(timer);
   }, [
     searchQuery,
     selectedJenjang,
@@ -1238,7 +1244,7 @@ export default function DataSekolahPage() {
                       ${themePrimaryText}
                     `}
                   >
-                    "{searchQuery}"
+                    &quot;{searchQuery}&quot;
                   </span>
                 )}
 

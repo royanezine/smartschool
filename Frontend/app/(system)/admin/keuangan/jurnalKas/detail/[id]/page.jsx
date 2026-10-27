@@ -12,7 +12,6 @@ import {
   User,
   Clock3,
   FileText,
-  Edit,
   Trash2,
   ArrowUpRight,
   ArrowDownRight,
@@ -20,106 +19,16 @@ import {
   CircleCheck,
   ReceiptText,
   Building2,
+  Ban,
+  Loader2,
 } from "lucide-react";
 
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
-
-const STORAGE_KEY = "smartschool_jurnal_kas";
-
-const defaultData = [
-  {
-    id: "1",
-    tanggal: "2026-09-01",
-    keterangan: "Setoran SPP Siswa",
-    debit: 0,
-    kredit: 12500000,
-    saldo: 12500000,
-    jenis: "Pemasukan",
-    metode: "Transfer",
-    catatan: "Pembayaran SPP bulan September dari 50 siswa",
-    dibuatOleh: "Admin",
-    tanggalDibuat: "2026-09-01 08:00",
-  },
-  {
-    id: "2",
-    tanggal: "2026-09-02",
-    keterangan: "Pembelian ATK",
-    debit: 2350000,
-    kredit: 0,
-    saldo: 10150000,
-    jenis: "Pengeluaran",
-    metode: "Tunai",
-    catatan: "Pembelian alat tulis kantor untuk 1 bulan",
-    dibuatOleh: "Admin",
-    tanggalDibuat: "2026-09-02 10:30",
-  },
-  {
-    id: "3",
-    tanggal: "2026-09-03",
-    keterangan: "Gaji Guru Bulan Agustus",
-    debit: 35000000,
-    kredit: 0,
-    saldo: -24850000,
-    jenis: "Pengeluaran",
-    metode: "Transfer",
-    catatan: "Pembayaran gaji untuk 25 guru",
-    dibuatOleh: "Admin",
-    tanggalDibuat: "2026-09-03 14:00",
-  },
-  {
-    id: "4",
-    tanggal: "2026-09-05",
-    keterangan: "Donasi BOS",
-    debit: 0,
-    kredit: 5000000,
-    saldo: -19850000,
-    jenis: "Pemasukan",
-    metode: "Transfer",
-    catatan: "Bantuan Operasional Sekolah dari pemerintah",
-    dibuatOleh: "Admin",
-    tanggalDibuat: "2026-09-05 09:15",
-  },
-  {
-    id: "5",
-    tanggal: "2026-09-06",
-    keterangan: "Pembayaran Listrik",
-    debit: 1800000,
-    kredit: 0,
-    saldo: -21650000,
-    jenis: "Pengeluaran",
-    metode: "Tunai",
-    catatan: "Tagihan listrik bulan Agustus",
-    dibuatOleh: "Admin",
-    tanggalDibuat: "2026-09-06 11:00",
-  },
-  {
-    id: "6",
-    tanggal: "2026-09-07",
-    keterangan: "Setoran SPP",
-    debit: 0,
-    kredit: 8000000,
-    saldo: -13650000,
-    jenis: "Pemasukan",
-    metode: "Transfer",
-    catatan: "Pembayaran SPP dari 32 siswa",
-    dibuatOleh: "Admin",
-    tanggalDibuat: "2026-09-07 08:45",
-  },
-  {
-    id: "7",
-    tanggal: "2026-09-08",
-    keterangan: "Biaya Maintenance",
-    debit: 2500000,
-    kredit: 0,
-    saldo: -16150000,
-    jenis: "Pengeluaran",
-    metode: "Tunai",
-    catatan: "Perbaikan AC dan komputer lab",
-    dibuatOleh: "Admin",
-    tanggalDibuat: "2026-09-08 13:20",
-  },
-];
+import {
+  getJurnalKasById,
+  batalkanJurnalKas,
+} from "@/services/jurnalKas.service";
 
 export default function DetailJurnalKasPage() {
   const params = useParams();
@@ -128,26 +37,61 @@ export default function DetailJurnalKasPage() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [transaction, setTransaction] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [cancelling, setCancelling] = useState(false);
 
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
+    let active = true;
 
-      const data = saved ? JSON.parse(saved) : defaultData;
+    async function loadData() {
+      if (!params?.id) {
+        setLoading(false);
+        return;
+      }
+      setLoading(true);
+      try {
+        const item = await getJurnalKasById(String(params.id));
+        if (!active) return;
+        if (!item) {
+          setTransaction(null);
+          return;
+        }
 
-      const selected = Array.isArray(data)
-        ? data.find(
-            (item) => String(item.id) === String(params.id)
-          )
-        : null;
-
-      setTransaction(selected || null);
-    } catch (error) {
-      console.error("Gagal membaca transaksi:", error);
-    } finally {
-      setLoading(false);
+        const isIncome = String(item.jenis).toLowerCase() === "masuk";
+        setTransaction({
+          id: item.id,
+          nomorJurnal:
+            item.nomorJurnal || `JK-${String(item.id).slice(0, 8)}`,
+          tanggal: item.tanggal,
+          keterangan: item.keterangan || item.kategori,
+          debit: !isIncome ? Number(item.jumlah) : 0,
+          kredit: isIncome ? Number(item.jumlah) : 0,
+          saldo: Number(item.jumlah),
+          jenis: isIncome ? "Pemasukan" : "Pengeluaran",
+          metode: item.akunKas?.nama || item.sumber || "Kas",
+          catatan: item.keterangan || "-",
+          dibuatOleh: item.akunKas?.nama || "Admin",
+          tanggalDibuat: item.dibuatPada || item.tanggal,
+          status: item.status || "selesai",
+          isBatal: item.status === "batal",
+        });
+      } catch (err) {
+        if (!active) return;
+        console.error("Gagal membaca transaksi:", err);
+        setTransaction(null);
+      } finally {
+        if (active) setLoading(false);
+      }
     }
-  }, [params.id]);
+
+    const timer = setTimeout(() => {
+      loadData();
+    }, 0);
+
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
+  }, [params?.id]);
 
   const formatCurrency = (value) => {
     return new Intl.NumberFormat("id-ID", {
@@ -168,31 +112,24 @@ export default function DetailJurnalKasPage() {
     });
   };
 
-  const handleDelete = () => {
-    if (!transaction) return;
+  const handleBatal = async () => {
+    if (!transaction || cancelling) return;
 
-    const confirmed = window.confirm(
-      `Hapus transaksi "${transaction.keterangan}"?`
+    const alasan = window.prompt(
+      `Masukkan alasan pembatalan transaksi "${transaction.keterangan}":`
     );
 
-    if (!confirmed) return;
+    if (!alasan || !alasan.trim()) return;
 
+    setCancelling(true);
     try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      const data = saved ? JSON.parse(saved) : defaultData;
-
-      const updated = data.filter(
-        (item) => String(item.id) !== String(transaction.id)
-      );
-
-      localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify(updated)
-      );
-
+      await batalkanJurnalKas(transaction.id, alasan.trim());
       router.push("/admin/keuangan/jurnalKas");
     } catch (error) {
-      console.error("Gagal menghapus transaksi:", error);
+      console.error("Gagal membatalkan transaksi:", error);
+      alert(error?.message || "Gagal membatalkan transaksi.");
+    } finally {
+      setCancelling(false);
     }
   };
 
@@ -308,14 +245,6 @@ export default function DetailJurnalKasPage() {
             >
               <ArrowLeft size={16} />
               Kembali
-            </Link>
-
-            <Link
-              href={`/admin/keuangan/jurnalKas/edit/${transaction.id}`}
-              className="theme-primary inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold shadow-sm transition"
-            >
-              <Edit size={16} />
-              Edit Transaksi
             </Link>
 
           </div>
@@ -615,18 +544,36 @@ export default function DetailJurnalKasPage() {
                 Zona Tindakan
               </p>
 
-              <p className="mt-1 text-xs leading-5 opacity-80">
-                Penghapusan transaksi akan menghilangkan data
-                dari jurnal kas.
-              </p>
+              {transaction.isBatal ? (
+                <p className="mt-2 text-xs leading-5 text-[var(--color-danger)] font-medium">
+                  Transaksi ini telah dibatalkan pada jurnal kas.
+                </p>
+              ) : (
+                <>
+                  <p className="mt-1 text-xs leading-5 opacity-80">
+                    Jurnal kas bersifat immutable. Pembatalan akan menandai
+                    transaksi sebagai batal dan menyesuaikan saldo akun kas.
+                  </p>
 
-              <button
-                onClick={handleDelete}
-                className="theme-input mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition hover:bg-[var(--color-danger-background)] hover:text-[var(--color-danger)]"
-              >
-                <Trash2 size={16} />
-                Hapus Transaksi
-              </button>
+                  <button
+                    onClick={handleBatal}
+                    disabled={cancelling}
+                    className="theme-input mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition hover:bg-[var(--color-danger-background)] hover:text-[var(--color-danger)] disabled:opacity-50"
+                  >
+                    {cancelling ? (
+                      <>
+                        <Loader2 size={16} className="animate-spin" />
+                        <span>Membatalkan...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Ban size={16} />
+                        <span>Batalkan Transaksi</span>
+                      </>
+                    )}
+                  </button>
+                </>
+              )}
 
             </div>
 

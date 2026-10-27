@@ -31,6 +31,7 @@ import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
 
 import { getGedung } from "@/services/infrastruktur.service";
+import { getAset, getDaftarPeminjaman } from "@/services/sarpras.service";
 
 
 const themePrimarySurface =
@@ -107,6 +108,9 @@ export default function SarprasPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [gedung, setGedung] = useState([]);
+  const [totalAsetCount, setTotalAsetCount] = useState(0);
+  const [totalPeminjamanCount, setTotalPeminjamanCount] = useState(0);
+  const [totalPengembalianCount, setTotalPengembalianCount] = useState(0);
   const [search, setSearch] = useState("");
   const [error, setError] = useState("");
 
@@ -124,27 +128,43 @@ export default function SarprasPage() {
 
       setError("");
 
-      const response = await getGedung();
+      const [resGedung, resAset, resPeminjaman] = await Promise.allSettled([
+        getGedung(),
+        getAset(),
+        getDaftarPeminjaman({ limit: 100 }),
+      ]);
 
-      if (response?.success === false) {
-        setError(
-          response?.message || "Data gedung belum dapat dimuat."
-        );
-        setGedung([]);
-        return;
+      if (resGedung.status === "fulfilled") {
+        const response = resGedung.value;
+        if (response?.success === false) {
+          setError(response?.message || "Data gedung belum dapat dimuat.");
+          setGedung([]);
+        } else {
+          let data = [];
+          if (Array.isArray(response)) {
+            data = response;
+          } else if (Array.isArray(response?.data)) {
+            data = response.data;
+          } else if (Array.isArray(response?.result)) {
+            data = response.result;
+          }
+          setGedung(data);
+        }
       }
 
-      let data = [];
-
-      if (Array.isArray(response)) {
-        data = response;
-      } else if (Array.isArray(response?.data)) {
-        data = response.data;
-      } else if (Array.isArray(response?.result)) {
-        data = response.result;
+      if (resAset.status === "fulfilled") {
+        const aVal = resAset.value;
+        const aList = Array.isArray(aVal) ? aVal : Array.isArray(aVal?.data) ? aVal.data : [];
+        setTotalAsetCount(aList.length);
       }
 
-      setGedung(data);
+      if (resPeminjaman.status === "fulfilled") {
+        const pVal = resPeminjaman.value;
+        const pList = Array.isArray(pVal) ? pVal : Array.isArray(pVal?.data) ? pVal.data : [];
+        setTotalPeminjamanCount(pList.length);
+        const dipinjamCount = pList.filter((p) => String(p?.status || "").toUpperCase() === "DIPINJAM").length;
+        setTotalPengembalianCount(dipinjamCount);
+      }
     } catch (err) {
       console.error("Gagal memuat data sarpras:", err);
 
@@ -236,7 +256,7 @@ export default function SarprasPage() {
         "Kelola barang dan aset inventaris sekolah",
       icon: Package,
       href: "/admin/sarpras/iventaris",
-      stat: "Kelola Aset",
+      stat: `${totalAsetCount} Aset`,
       iconClass: `${themePrimarySurface} ${themePrimaryText}`,
     },
     {
@@ -254,7 +274,7 @@ export default function SarprasPage() {
         "Pantau dan kelola peminjaman barang",
       icon: ClipboardList,
       href: "/admin/sarpras/peminjaman",
-      stat: "Kelola Peminjaman",
+      stat: `${totalPeminjamanCount} Transaksi`,
       iconClass: `${themeWarningSurface} text-[var(--color-warning)]`,
     },
     {
@@ -263,7 +283,7 @@ export default function SarprasPage() {
         "Kelola pengembalian dan kondisi aset",
       icon: RefreshCw,
       href: "/admin/sarpras/pengembalian",
-      stat: "Pengembalian",
+      stat: `${totalPengembalianCount} Dipinjam`,
       iconClass: `${themeInfoSurface} text-[var(--color-info)]`,
     },
     {

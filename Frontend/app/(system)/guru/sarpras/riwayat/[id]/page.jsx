@@ -263,15 +263,6 @@ export default function DetailRiwayatPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const notifications = [
-    {
-      id: 1,
-      title: "Riwayat Peminjaman",
-      desc: "Detail riwayat peminjaman",
-      read: false,
-    },
-  ];
-
   useEffect(() => {
     let mounted = true;
 
@@ -335,15 +326,7 @@ export default function DetailRiwayatPage() {
       />
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <Header
-          toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
-          notifications={notifications}
-          user={{
-            name: "Bu Sari",
-            email: "guru@smartschool.com",
-            avatar: "AS",
-          }}
-        />
+        <Header toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
 
         <main className="theme-page flex-1 overflow-y-auto">
           <div className="mx-auto w-full max-w-[1400px] space-y-5 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">

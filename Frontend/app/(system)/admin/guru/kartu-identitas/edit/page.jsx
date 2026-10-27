@@ -1,195 +1,33 @@
 "use client";
 
-import { Suspense, useState, useMemo, useRef, useEffect } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
+import { getUserById, updateUser } from "@/services/user.service";
 import {
   ArrowLeft,
   Save,
-  Camera,
   User,
   Fingerprint,
   Cake,
-  Heart,
-  BookOpen,
-  Building2,
+  MapPin,
   Phone,
   Mail,
-  MapPin,
   GraduationCap,
   BadgeCheck,
   CalendarDays,
   Briefcase,
   Venus,
   Mars,
-  X,
+  Loader2,
+  AlertCircle,
 } from "lucide-react";
 
 
-const MOCK_PEGAWAI = [
-  {
-    id: 1,
-    nama: "Sarah Amelia, S.Pd",
-    nip: "198501152010012001",
-    nik: "3272011501850002",
-    tipe: "Guru",
-    jabatan: "Guru Matematika",
-    level: "Guru",
-    status: "aktif",
-    unit: "Mata Pelajaran Matematika",
-    telp: "0812-3456-7890",
-    email: "sarah.amelia@smartschool.sch.id",
-    alamat: "Jl. Merdeka No. 12, Tasikmalaya",
-    tglMasuk: "2010-01-15",
-    golongan: "III/c",
-    tempatLahir: "Tasikmalaya",
-    tglLahir: "1985-01-15",
-    jenisKelamin: "Perempuan",
-    agama: "Islam",
-    statusNikah: "Menikah",
-    pendidikanTerakhir:
-      "S1 Pendidikan Matematika — Universitas Siliwangi",
-  },
-  {
-    id: 2,
-    nama: "Budi Santoso, S.E",
-    nip: "197803102005011003",
-    nik: "3272011003780003",
-    tipe: "Staff",
-    jabatan: "Tata Usaha",
-    level: "Staff",
-    status: "aktif",
-    unit: "Administrasi & Keuangan",
-    telp: "0813-2233-4455",
-    email: "budi.santoso@smartschool.sch.id",
-    alamat: "Jl. Cihideung No. 5, Tasikmalaya",
-    tglMasuk: "2005-03-10",
-    golongan: "III/a",
-    tempatLahir: "Ciamis",
-    tglLahir: "1978-03-10",
-    jenisKelamin: "Laki-laki",
-    agama: "Islam",
-    statusNikah: "Menikah",
-    pendidikanTerakhir:
-      "S1 Ekonomi — Universitas Galuh",
-  },
-  {
-    id: 3,
-    nama: "Dewi Anggraini, S.Si",
-    nip: "199002202015022004",
-    nik: "3272016002900004",
-    tipe: "Guru",
-    jabatan: "Guru IPA",
-    level: "Guru",
-    status: "aktif",
-    unit: "Mata Pelajaran IPA",
-    telp: "0821-9988-7766",
-    email: "dewi.anggraini@smartschool.sch.id",
-    alamat: "Jl. Sutisna Senjaya No. 88, Tasikmalaya",
-    tglMasuk: "2015-02-20",
-    golongan: "III/b",
-    tempatLahir: "Tasikmalaya",
-    tglLahir: "1990-02-20",
-    jenisKelamin: "Perempuan",
-    agama: "Islam",
-    statusNikah: "Belum Menikah",
-    pendidikanTerakhir:
-      "S1 Biologi — Universitas Siliwangi",
-  },
-  {
-    id: 4,
-    nama: "Andi Prasetyo, S.Pd",
-    nip: "198712052012011002",
-    nik: "3272010512870005",
-    tipe: "Guru",
-    jabatan: "Guru Bahasa Indonesia",
-    level: "Guru",
-    status: "nonaktif",
-    unit: "Mata Pelajaran Bahasa Indonesia",
-    telp: "0857-1122-3344",
-    email: "andi.prasetyo@smartschool.sch.id",
-    alamat: "Jl. Yudanegara No. 21, Tasikmalaya",
-    tglMasuk: "2012-12-05",
-    golongan: "III/a",
-    tempatLahir: "Garut",
-    tglLahir: "1987-12-05",
-    jenisKelamin: "Laki-laki",
-    agama: "Islam",
-    statusNikah: "Menikah",
-    pendidikanTerakhir:
-      "S1 Pendidikan Bahasa Indonesia — Universitas Galuh",
-  },
-  {
-    id: 5,
-    nama: "Nina Kartika, S.Sn",
-    nip: "199105182018022005",
-    nik: "3272015805910006",
-    tipe: "Guru",
-    jabatan: "Guru Seni Budaya",
-    level: "Guru",
-    status: "aktif",
-    unit: "Mata Pelajaran Seni Budaya",
-    telp: "0878-5566-7788",
-    email: "nina.kartika@smartschool.sch.id",
-    alamat: "Jl. Ir. H. Djuanda No. 40, Tasikmalaya",
-    tglMasuk: "2018-05-18",
-    golongan: "III/a",
-    tempatLahir: "Bandung",
-    tglLahir: "1991-05-18",
-    jenisKelamin: "Perempuan",
-    agama: "Islam",
-    statusNikah: "Belum Menikah",
-    pendidikanTerakhir:
-      "S1 Seni Rupa — Institut Seni Budaya Indonesia",
-  },
-  {
-    id: 6,
-    nama: "Rudi Hartono, S.Pd",
-    nip: "198309252008011006",
-    nik: "3272012509830007",
-    tipe: "Staff",
-    jabatan: "Petugas Sarana Prasarana",
-    level: "Staff",
-    status: "aktif",
-    unit: "Sarana & Prasarana",
-    telp: "0896-4433-2211",
-    email: "rudi.hartono@smartschool.sch.id",
-    alamat: "Jl. Cieunteung No. 9, Tasikmalaya",
-    tglMasuk: "2008-09-25",
-    golongan: "II/d",
-    tempatLahir: "Tasikmalaya",
-    tglLahir: "1983-09-25",
-    jenisKelamin: "Laki-laki",
-    agama: "Islam",
-    statusNikah: "Menikah",
-    pendidikanTerakhir:
-      "S1 Pendidikan Jasmani — Universitas Galuh",
-  },
-];
-
-const PHOTO_KEY_PREFIX = "ki_foto_";
-
-const OPSI_TIPE = ["Guru", "Staff"];
 const OPSI_STATUS = ["aktif", "nonaktif"];
-const OPSI_JENIS_KELAMIN = [
-  "Laki-laki",
-  "Perempuan",
-];
-const OPSI_AGAMA = [
-  "Islam",
-  "Kristen",
-  "Katolik",
-  "Hindu",
-  "Buddha",
-  "Konghucu",
-];
-const OPSI_STATUS_NIKAH = [
-  "Belum Menikah",
-  "Menikah",
-  "Cerai Hidup",
-  "Cerai Mati",
-];
+const OPSI_JENIS_KELAMIN = ["Laki-laki", "Perempuan"];
+const OPSI_SHIFT = ["pagi", "siang"];
 const OPSI_GOLONGAN = [
   "II/a",
   "II/b",
@@ -203,149 +41,59 @@ const OPSI_GOLONGAN = [
   "IV/b",
 ];
 
+const inputClass =
+  "theme-input w-full rounded-xl border px-3.5 py-2.5 text-sm transition-colors focus:outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20";
 
-function FotoPlaceholder() {
-  return (
-    <div className="theme-card-soft flex h-full w-full items-center justify-center">
-      <svg
-        viewBox="0 0 200 200"
-        className="h-full w-full"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <rect
-          width="200"
-          height="200"
-          fill="var(--color-card-soft)"
-        />
+function toDateInput(value) {
+  if (!value) return "";
 
-        <circle
-          cx="100"
-          cy="80"
-          r="38"
-          fill="var(--color-text-placeholder)"
-          opacity="0.65"
-        />
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
 
-        <path
-          d="M30 200c0-51.7 31.3-93.6 70-93.6s70 41.9 70 93.6H30z"
-          fill="var(--color-text-placeholder)"
-          opacity="0.65"
-        />
-      </svg>
-    </div>
-  );
+  return date.toISOString().slice(0, 10);
 }
 
+function normalizeJenisKelamin(value) {
+  if (value === "L" || value === "Laki-laki") return "Laki-laki";
+  if (value === "P" || value === "Perempuan") return "Perempuan";
+  return "";
+}
 
-function FotoEditor({
-  pegawaiId,
-  foto,
-  onChange,
-}) {
-  const fileInputRef = useRef(null);
-
-  const handlePilihFoto = () =>
-    fileInputRef.current?.click();
-
-  const handleFotoChange = (e) => {
-    const file = e.target.files?.[0];
-
-    if (!file) return;
-
-    const reader = new FileReader();
-
-    reader.onload = () =>
-      onChange(reader.result);
-
-    reader.readAsDataURL(file);
+function mapUserToForm(user) {
+  return {
+    namaLengkap: user?.namaLengkap || "",
+    namaPengguna: user?.namaPengguna || "",
+    email: user?.email || "",
+    nip: user?.nip || "",
+    nuptk: user?.nuptk || "",
+    nik: user?.nik || "",
+    jabatan: user?.jabatan || "",
+    golongan: user?.golongan || "",
+    status: user?.status || "aktif",
+    shiftKerja: String(user?.shiftKerja || "").toLowerCase(),
+    jenisKelamin: normalizeJenisKelamin(user?.jenisKelamin),
+    tempatLahir: user?.tempatLahir || "",
+    tanggalLahir: toDateInput(user?.tanggalLahir),
+    noTelepon: user?.noTelepon || "",
+    alamat: user?.alamat || "",
+    alamatDomisili: user?.alamatDomisili || "",
+    avatar: user?.avatar || "",
   };
-
-  const handleHapusFoto = () =>
-    onChange(null);
-
-  return (
-    <div className="flex items-center gap-5">
-      <div className="relative h-24 w-24 shrink-0 sm:h-28 sm:w-28">
-        <div className="theme-card-soft theme-border h-full w-full overflow-hidden rounded-2xl border-2 shadow-lg">
-          {foto ? (
-            <img
-              src={foto}
-              alt="Foto profil"
-              className="h-full w-full object-cover"
-            />
-          ) : (
-            <FotoPlaceholder />
-          )}
-        </div>
-
-        <button
-          type="button"
-          onClick={handlePilihFoto}
-          title="Ubah foto"
-          className="theme-primary absolute -bottom-1.5 -right-1.5 flex h-8 w-8 items-center justify-center rounded-full shadow-md transition"
-        >
-          <Camera size={14} />
-        </button>
-
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          onChange={handleFotoChange}
-          className="hidden"
-        />
-      </div>
-
-      <div className="space-y-1.5">
-        <p className="theme-text text-sm font-medium">
-          Foto Profil
-        </p>
-
-        <p className="theme-text-muted max-w-xs text-xs">
-          Format JPG/PNG, disarankan rasio 1:1. Klik ikon
-          kamera untuk mengganti foto.
-        </p>
-
-        {foto && (
-          <button
-            type="button"
-            onClick={handleHapusFoto}
-            className="inline-flex items-center gap-1.5 text-xs font-medium text-[var(--color-danger)] transition-colors hover:opacity-80"
-          >
-            <X size={12} />
-            Hapus foto
-          </button>
-        )}
-      </div>
-    </div>
-  );
 }
-
 
 function FieldWrapper({
   icon: Icon,
   label,
-  required,
+  required = false,
   children,
   className = "",
 }) {
   return (
     <div className={className}>
       <label className="theme-text-secondary mb-1.5 flex items-center gap-1.5 text-xs font-medium">
-        {Icon && (
-          <Icon
-            size={13}
-            className="theme-text-muted"
-          />
-        )}
-
+        {Icon && <Icon size={13} className="theme-text-muted" />}
         {label}
-
-        {required && (
-          <span className="text-[var(--color-danger)]">
-            *
-          </span>
-        )}
+        {required && <span className="text-[var(--color-danger)]">*</span>}
       </label>
 
       {children}
@@ -353,151 +101,145 @@ function FieldWrapper({
   );
 }
 
-
-const inputClass =
-  "theme-input w-full rounded-xl border px-3.5 py-2.5 text-sm transition-colors focus:outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20";
-
-
-function SectionCard({
-  icon: Icon,
-  title,
-  children,
-}) {
+function SectionCard({ icon: Icon, title, children }) {
   return (
     <div className="theme-card theme-border overflow-hidden rounded-xl border shadow-sm">
       <div className="theme-border flex items-center gap-2.5 border-b px-5 py-4 sm:px-6">
-        <Icon
-          size={16}
-          className="text-[var(--color-primary)]"
-        />
-
-        <h2 className="theme-text text-sm font-semibold">
-          {title}
-        </h2>
+        <Icon size={16} className="text-[var(--color-primary)]" />
+        <h2 className="theme-text text-sm font-semibold">{title}</h2>
       </div>
 
-      <div className="p-5 sm:p-6">
-        {children}
-      </div>
+      <div className="p-5 sm:p-6">{children}</div>
     </div>
   );
 }
-
 
 function EditContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [isCollapsed, setIsCollapsed] =
-    useState(false);
+  const id = searchParams.get("id");
 
-  const [saving, setSaving] = useState(false);
-
-  const pegawaiAsli = useMemo(() => {
-    const id = Number(
-      searchParams.get("id")
-    );
-
-    return MOCK_PEGAWAI.find(
-      (p) => p.id === id
-    );
-  }, [searchParams]);
-
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const [form, setForm] = useState(null);
-  const [foto, setFoto] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
+
+  const toggleSidebar = () => setIsCollapsed((previous) => !previous);
+
+  const loadData = useCallback(async () => {
+    if (!id) {
+      setError("ID pegawai tidak ditemukan.");
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+
+    try {
+      const response = await getUserById(id);
+      const data = response?.data ?? response;
+
+      if (!data?.id) {
+        throw new Error("Data pegawai tidak ditemukan.");
+      }
+
+      setForm(mapUserToForm(data));
+    } catch (err) {
+      console.error("Gagal mengambil data pegawai:", err);
+      setError(err?.message || "Gagal mengambil data pegawai.");
+      setForm(null);
+    } finally {
+      setLoading(false);
+    }
+  }, [id]);
 
   useEffect(() => {
-    if (!pegawaiAsli) return;
+    const timer = setTimeout(() => {
+      loadData();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [loadData]);
 
-    setForm({ ...pegawaiAsli });
+  const updateField = (field) => (event) => {
+    const value = event?.target ? event.target.value : event;
 
-    try {
-      const saved =
-        window.localStorage.getItem(
-          `${PHOTO_KEY_PREFIX}${pegawaiAsli.id}`
-        );
-
-      if (saved) {
-        setFoto(saved);
-      }
-    } catch (err) {
-      console.error(
-        "Gagal memuat foto pegawai:",
-        err
-      );
-    }
-  }, [pegawaiAsli]);
-
-  const updateField = (field) => (e) => {
-    const value = e?.target
-      ? e.target.value
-      : e;
-
-    setForm((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
+    setForm((previous) => ({ ...previous, [field]: value }));
   };
-
-  const toggleSidebar = () =>
-    setIsCollapsed(!isCollapsed);
 
   const handleBack = () => {
-    if (pegawaiAsli) {
-      router.push(
-        `/admin/guru/kartu-identitas/${pegawaiAsli.id}`
-      );
-    } else {
-      router.push(
-        "/admin/guru/kartu-identitas"
-      );
+    if (id) {
+      router.push(`/admin/guru/kartu-identitas/${id}`);
+      return;
     }
+
+    router.push("/admin/guru/kartu-identitas");
   };
 
-  const handleBatal = () =>
-    handleBack();
+  const handleSimpan = async (event) => {
+    event.preventDefault();
 
-  const handleSimpan = (e) => {
-    e.preventDefault();
+    if (!form || !id) return;
 
-    if (!form) return;
+    if (!form.namaLengkap.trim() || !form.namaPengguna.trim()) {
+      setError("Nama lengkap dan nama pengguna wajib diisi.");
+      return;
+    }
 
     setSaving(true);
+    setError("");
+    setNotice("");
 
     try {
-      if (foto) {
-        window.localStorage.setItem(
-          `${PHOTO_KEY_PREFIX}${form.id}`,
-          foto
-        );
-      } else {
-        window.localStorage.removeItem(
-          `${PHOTO_KEY_PREFIX}${form.id}`
-        );
+      const payload = {
+        namaLengkap: form.namaLengkap.trim(),
+        namaPengguna: form.namaPengguna.trim(),
+        email: form.email.trim(),
+        nip: form.nip.trim() || null,
+        nuptk: form.nuptk.trim() || null,
+        nik: form.nik.trim() || null,
+        jabatan: form.jabatan.trim() || null,
+        golongan: form.golongan.trim() || null,
+        status: form.status,
+        jenisKelamin: form.jenisKelamin || null,
+        tempatLahir: form.tempatLahir.trim() || null,
+        tanggalLahir: form.tanggalLahir || null,
+        noTelepon: form.noTelepon.trim() || null,
+        alamat: form.alamat.trim() || null,
+        alamatDomisili: form.alamatDomisili.trim() || null,
+        avatar: form.avatar.trim() || null,
+      };
+
+      if (form.shiftKerja) {
+        payload.shiftKerja = form.shiftKerja;
       }
+
+      await updateUser(id, payload);
+
+      router.push(`/admin/guru/kartu-identitas/${id}`);
     } catch (err) {
-      console.error(
-        "Gagal menyimpan foto pegawai:",
-        err
-      );
-    }
-
-    console.log(
-      "Data pegawai disimpan (dummy):",
-      form
-    );
-
-    setTimeout(() => {
+      console.error("Gagal menyimpan data pegawai:", err);
+      setError(err?.message || "Gagal menyimpan perubahan data pegawai.");
+    } finally {
       setSaving(false);
-
-      router.push(
-        `/admin/guru/kartu-identitas/${form.id}`
-      );
-    }, 500);
+    }
   };
 
+  if (loading) {
+    return (
+      <div className="theme-page flex h-screen w-full items-center justify-center overflow-hidden">
+        <div className="flex items-center gap-2 text-sm theme-text-muted">
+          <Loader2 size={20} className="animate-spin" />
+          Memuat data pegawai...
+        </div>
+      </div>
+    );
+  }
 
-  if (!pegawaiAsli) {
+  if (!form) {
     return (
       <div className="theme-page flex h-screen w-full overflow-hidden">
         <Sidebar
@@ -511,7 +253,6 @@ function EditContent() {
         <div className="flex h-full min-w-0 flex-1 flex-col overflow-hidden">
           <Header
             toggleSidebar={toggleSidebar}
-            notifications={[]}
             user={{
               name: "Admin Sekolah",
               email: "admin@smartschool.com",
@@ -523,18 +264,13 @@ function EditContent() {
             <div className="p-4 sm:p-6 lg:p-8">
               <div className="theme-card theme-border rounded-xl border p-10 text-center shadow-sm">
                 <p className="theme-text-secondary mb-4 text-sm">
-                  Data pegawai tidak ditemukan.
-                  Pastikan kamu membuka halaman ini lewat
-                  tombol &quot;Edit&quot; di halaman Detail
-                  Pegawai.
+                  {error || "Data pegawai tidak ditemukan."}
                 </p>
 
                 <button
                   type="button"
                   onClick={() =>
-                    router.push(
-                      "/admin/guru/kartu-identitas"
-                    )
+                    router.push("/admin/guru/kartu-identitas")
                   }
                   className="theme-primary inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition"
                 >
@@ -549,8 +285,6 @@ function EditContent() {
     );
   }
 
-  if (!form) return null;
-
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
       <Sidebar
@@ -564,7 +298,6 @@ function EditContent() {
       <div className="flex h-full min-w-0 flex-1 flex-col overflow-hidden">
         <Header
           toggleSidebar={toggleSidebar}
-          notifications={[]}
           user={{
             name: "Admin Sekolah",
             email: "admin@smartschool.com",
@@ -577,7 +310,6 @@ function EditContent() {
             onSubmit={handleSimpan}
             className="space-y-6 p-4 pb-28 sm:p-6 lg:p-8"
           >
-
             <button
               type="button"
               onClick={handleBack}
@@ -587,37 +319,31 @@ function EditContent() {
               Kembali ke Detail Pegawai
             </button>
 
-
             <div>
               <h1 className="theme-text text-2xl font-bold">
                 Edit Data Pegawai
               </h1>
 
               <p className="theme-text-muted text-sm">
-                {pegawaiAsli.nama} •{" "}
-                <span className="font-mono">
-                  {pegawaiAsli.nip}
-                </span>
+                {form.namaLengkap} •{" "}
+                <span className="font-mono">{form.nip || "-"}</span>
               </p>
             </div>
 
+            {error && (
+              <div className="theme-danger flex items-start gap-3 rounded-xl px-4 py-3 text-sm">
+                <AlertCircle size={18} className="mt-0.5 shrink-0" />
+                <p>{error}</p>
+              </div>
+            )}
 
-            <SectionCard
-              icon={User}
-              title="Foto Profil"
-            >
-              <FotoEditor
-                pegawaiId={form.id}
-                foto={foto}
-                onChange={setFoto}
-              />
-            </SectionCard>
+            {notice && (
+              <div className="theme-success rounded-xl px-4 py-3 text-sm">
+                {notice}
+              </div>
+            )}
 
-
-            <SectionCard
-              icon={BadgeCheck}
-              title="Informasi Utama"
-            >
+            <SectionCard icon={User} title="Akun Pengguna">
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
                 <FieldWrapper
                   icon={User}
@@ -627,366 +353,191 @@ function EditContent() {
                 >
                   <input
                     type="text"
-                    value={form.nama}
-                    onChange={updateField(
-                      "nama"
-                    )}
+                    value={form.namaLengkap}
+                    onChange={updateField("namaLengkap")}
                     className={inputClass}
-                    placeholder="Contoh: Sarah Amelia, S.Pd"
                     required
                   />
                 </FieldWrapper>
 
-                <FieldWrapper
-                  icon={Fingerprint}
-                  label="NIP"
-                  required
-                >
+                <FieldWrapper icon={User} label="Nama Pengguna" required>
                   <input
                     type="text"
-                    value={form.nip}
-                    onChange={updateField(
-                      "nip"
-                    )}
-                    className={`${inputClass} font-mono`}
-                    placeholder="18 digit NIP"
+                    value={form.namaPengguna}
+                    onChange={updateField("namaPengguna")}
+                    className={inputClass}
                     required
                   />
                 </FieldWrapper>
 
-                <FieldWrapper
-                  icon={Fingerprint}
-                  label="NIK"
-                  required
-                >
-                  <input
-                    type="text"
-                    value={form.nik}
-                    onChange={updateField(
-                      "nik"
-                    )}
-                    className={`${inputClass} font-mono`}
-                    placeholder="16 digit NIK"
-                    required
-                  />
-                </FieldWrapper>
-
-                <FieldWrapper
-                  icon={Briefcase}
-                  label="Jabatan"
-                  required
-                >
-                  <input
-                    type="text"
-                    value={form.jabatan}
-                    onChange={updateField(
-                      "jabatan"
-                    )}
-                    className={inputClass}
-                    placeholder="Contoh: Guru Matematika"
-                    required
-                  />
-                </FieldWrapper>
-
-                <FieldWrapper
-                  icon={GraduationCap}
-                  label="Tipe"
-                >
-                  <select
-                    value={form.tipe}
-                    onChange={updateField(
-                      "tipe"
-                    )}
-                    className={inputClass}
-                  >
-                    {OPSI_TIPE.map(
-                      (opt) => (
-                        <option
-                          key={opt}
-                          value={opt}
-                        >
-                          {opt}
-                        </option>
-                      )
-                    )}
-                  </select>
-                </FieldWrapper>
-
-                <FieldWrapper
-                  icon={GraduationCap}
-                  label="Level"
-                >
-                  <input
-                    type="text"
-                    value={form.level}
-                    onChange={updateField(
-                      "level"
-                    )}
-                    className={inputClass}
-                    placeholder="Contoh: Guru / Staff"
-                  />
-                </FieldWrapper>
-
-                <FieldWrapper
-                  icon={BadgeCheck}
-                  label="Status Kepegawaian"
-                >
-                  <select
-                    value={form.status}
-                    onChange={updateField(
-                      "status"
-                    )}
-                    className={inputClass}
-                  >
-                    {OPSI_STATUS.map(
-                      (opt) => (
-                        <option
-                          key={opt}
-                          value={opt}
-                        >
-                          {opt === "aktif"
-                            ? "Aktif"
-                            : "Nonaktif"}
-                        </option>
-                      )
-                    )}
-                  </select>
-                </FieldWrapper>
-              </div>
-            </SectionCard>
-
-
-            <SectionCard
-              icon={User}
-              title="Data Diri"
-            >
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
-                <FieldWrapper
-                  icon={MapPin}
-                  label="Tempat Lahir"
-                >
-                  <input
-                    type="text"
-                    value={
-                      form.tempatLahir
-                    }
-                    onChange={updateField(
-                      "tempatLahir"
-                    )}
-                    className={inputClass}
-                    placeholder="Contoh: Tasikmalaya"
-                  />
-                </FieldWrapper>
-
-                <FieldWrapper
-                  icon={Cake}
-                  label="Tanggal Lahir"
-                >
-                  <input
-                    type="date"
-                    value={form.tglLahir}
-                    onChange={updateField(
-                      "tglLahir"
-                    )}
-                    className={inputClass}
-                  />
-                </FieldWrapper>
-
-                <FieldWrapper
-                  icon={
-                    form.jenisKelamin ===
-                    "Perempuan"
-                      ? Venus
-                      : Mars
-                  }
-                  label="Jenis Kelamin"
-                >
-                  <select
-                    value={
-                      form.jenisKelamin
-                    }
-                    onChange={updateField(
-                      "jenisKelamin"
-                    )}
-                    className={inputClass}
-                  >
-                    {OPSI_JENIS_KELAMIN.map(
-                      (opt) => (
-                        <option
-                          key={opt}
-                          value={opt}
-                        >
-                          {opt}
-                        </option>
-                      )
-                    )}
-                  </select>
-                </FieldWrapper>
-
-                <FieldWrapper
-                  icon={BookOpen}
-                  label="Agama"
-                >
-                  <select
-                    value={form.agama}
-                    onChange={updateField(
-                      "agama"
-                    )}
-                    className={inputClass}
-                  >
-                    {OPSI_AGAMA.map(
-                      (opt) => (
-                        <option
-                          key={opt}
-                          value={opt}
-                        >
-                          {opt}
-                        </option>
-                      )
-                    )}
-                  </select>
-                </FieldWrapper>
-
-                <FieldWrapper
-                  icon={Heart}
-                  label="Status Pernikahan"
-                >
-                  <select
-                    value={
-                      form.statusNikah
-                    }
-                    onChange={updateField(
-                      "statusNikah"
-                    )}
-                    className={inputClass}
-                  >
-                    {OPSI_STATUS_NIKAH.map(
-                      (opt) => (
-                        <option
-                          key={opt}
-                          value={opt}
-                        >
-                          {opt}
-                        </option>
-                      )
-                    )}
-                  </select>
-                </FieldWrapper>
-
-                <FieldWrapper
-                  icon={GraduationCap}
-                  label="Pendidikan Terakhir"
-                >
-                  <input
-                    type="text"
-                    value={
-                      form.pendidikanTerakhir
-                    }
-                    onChange={updateField(
-                      "pendidikanTerakhir"
-                    )}
-                    className={inputClass}
-                    placeholder="Contoh: S1 Pendidikan Matematika — Universitas Siliwangi"
-                  />
-                </FieldWrapper>
-              </div>
-            </SectionCard>
-
-
-            <SectionCard
-              icon={Building2}
-              title="Informasi Kepegawaian"
-            >
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
-                <FieldWrapper
-                  icon={Building2}
-                  label="Unit / Bidang"
-                  className="sm:col-span-2"
-                >
-                  <input
-                    type="text"
-                    value={form.unit}
-                    onChange={updateField(
-                      "unit"
-                    )}
-                    className={inputClass}
-                    placeholder="Contoh: Mata Pelajaran Matematika"
-                  />
-                </FieldWrapper>
-
-                <FieldWrapper
-                  icon={BadgeCheck}
-                  label="Golongan"
-                >
-                  <select
-                    value={form.golongan}
-                    onChange={updateField(
-                      "golongan"
-                    )}
-                    className={inputClass}
-                  >
-                    {OPSI_GOLONGAN.map(
-                      (opt) => (
-                        <option
-                          key={opt}
-                          value={opt}
-                        >
-                          {opt}
-                        </option>
-                      )
-                    )}
-                  </select>
-                </FieldWrapper>
-
-                <FieldWrapper
-                  icon={CalendarDays}
-                  label="Tanggal Masuk Kerja"
-                >
-                  <input
-                    type="date"
-                    value={form.tglMasuk}
-                    onChange={updateField(
-                      "tglMasuk"
-                    )}
-                    className={inputClass}
-                  />
-                </FieldWrapper>
-              </div>
-            </SectionCard>
-
-
-            <SectionCard
-              icon={Phone}
-              title="Kontak & Alamat"
-            >
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
-                <FieldWrapper
-                  icon={Phone}
-                  label="Nomor Telepon"
-                >
-                  <input
-                    type="tel"
-                    value={form.telp}
-                    onChange={updateField(
-                      "telp"
-                    )}
-                    className={inputClass}
-                    placeholder="Contoh: 0812-3456-7890"
-                  />
-                </FieldWrapper>
-
-                <FieldWrapper
-                  icon={Mail}
-                  label="Email"
-                >
+                <FieldWrapper icon={Mail} label="Email" required>
                   <input
                     type="email"
                     value={form.email}
-                    onChange={updateField(
-                      "email"
-                    )}
+                    onChange={updateField("email")}
                     className={inputClass}
-                    placeholder="nama@smartschool.sch.id"
+                    required
+                  />
+                </FieldWrapper>
+
+                <FieldWrapper icon={BadgeCheck} label="Status Akun">
+                  <select
+                    value={form.status}
+                    onChange={updateField("status")}
+                    className={inputClass}
+                  >
+                    {OPSI_STATUS.map((option) => (
+                      <option key={option} value={option}>
+                        {option === "aktif" ? "Aktif" : "Nonaktif"}
+                      </option>
+                    ))}
+                  </select>
+                </FieldWrapper>
+
+                <FieldWrapper icon={CalendarDays} label="Shift Kerja">
+                  <select
+                    value={form.shiftKerja}
+                    onChange={updateField("shiftKerja")}
+                    className={inputClass}
+                  >
+                    <option value="">Belum ditentukan</option>
+                    {OPSI_SHIFT.map((option) => (
+                      <option key={option} value={option}>
+                        {option === "pagi" ? "Pagi" : "Siang"}
+                      </option>
+                    ))}
+                  </select>
+                </FieldWrapper>
+
+                <FieldWrapper
+                  icon={User}
+                  label="URL Foto Profil"
+                  className="sm:col-span-2"
+                >
+                  <input
+                    type="url"
+                    value={form.avatar}
+                    onChange={updateField("avatar")}
+                    className={inputClass}
+                    placeholder="https://..."
+                  />
+                </FieldWrapper>
+              </div>
+            </SectionCard>
+
+            <SectionCard icon={BadgeCheck} title="Informasi Kepegawaian">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
+                <FieldWrapper icon={Fingerprint} label="NIP">
+                  <input
+                    type="text"
+                    value={form.nip}
+                    onChange={updateField("nip")}
+                    className={`${inputClass} font-mono`}
+                  />
+                </FieldWrapper>
+
+                <FieldWrapper icon={Fingerprint} label="NUPTK">
+                  <input
+                    type="text"
+                    value={form.nuptk}
+                    onChange={updateField("nuptk")}
+                    className={`${inputClass} font-mono`}
+                  />
+                </FieldWrapper>
+
+                <FieldWrapper icon={Fingerprint} label="NIK">
+                  <input
+                    type="text"
+                    value={form.nik}
+                    onChange={updateField("nik")}
+                    className={`${inputClass} font-mono`}
+                  />
+                </FieldWrapper>
+
+                <FieldWrapper icon={Briefcase} label="Jabatan">
+                  <input
+                    type="text"
+                    value={form.jabatan}
+                    onChange={updateField("jabatan")}
+                    className={inputClass}
+                    placeholder="Contoh: Guru Matematika"
+                  />
+                </FieldWrapper>
+
+                <FieldWrapper icon={GraduationCap} label="Golongan">
+                  <select
+                    value={form.golongan}
+                    onChange={updateField("golongan")}
+                    className={inputClass}
+                  >
+                    <option value="">Pilih golongan</option>
+                    {OPSI_GOLONGAN.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                </FieldWrapper>
+              </div>
+            </SectionCard>
+
+            <SectionCard icon={User} title="Data Diri">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
+                <FieldWrapper icon={MapPin} label="Tempat Lahir">
+                  <input
+                    type="text"
+                    value={form.tempatLahir}
+                    onChange={updateField("tempatLahir")}
+                    className={inputClass}
+                  />
+                </FieldWrapper>
+
+                <FieldWrapper icon={Cake} label="Tanggal Lahir">
+                  <input
+                    type="date"
+                    value={form.tanggalLahir}
+                    onChange={updateField("tanggalLahir")}
+                    className={inputClass}
+                  />
+                </FieldWrapper>
+
+                <FieldWrapper
+                  icon={form.jenisKelamin === "Perempuan" ? Venus : Mars}
+                  label="Jenis Kelamin"
+                >
+                  <select
+                    value={form.jenisKelamin}
+                    onChange={updateField("jenisKelamin")}
+                    className={inputClass}
+                  >
+                    <option value="">Pilih jenis kelamin</option>
+                    {OPSI_JENIS_KELAMIN.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </select>
+                </FieldWrapper>
+
+                <FieldWrapper icon={Phone} label="Nomor Telepon">
+                  <input
+                    type="tel"
+                    value={form.noTelepon}
+                    onChange={updateField("noTelepon")}
+                    className={inputClass}
+                  />
+                </FieldWrapper>
+
+                <FieldWrapper
+                  icon={MapPin}
+                  label="Alamat Domisili"
+                  className="sm:col-span-2"
+                >
+                  <textarea
+                    value={form.alamatDomisili}
+                    onChange={updateField("alamatDomisili")}
+                    rows={2}
+                    className={`${inputClass} resize-none`}
                   />
                 </FieldWrapper>
 
@@ -997,12 +548,9 @@ function EditContent() {
                 >
                   <textarea
                     value={form.alamat}
-                    onChange={updateField(
-                      "alamat"
-                    )}
+                    onChange={updateField("alamat")}
                     rows={3}
                     className={`${inputClass} resize-none`}
-                    placeholder="Alamat lengkap"
                   />
                 </FieldWrapper>
               </div>
@@ -1010,12 +558,12 @@ function EditContent() {
           </form>
         </main>
 
-
         <div className="theme-header theme-border flex items-center justify-end gap-2.5 border-t px-4 py-3.5 backdrop-blur sm:px-6 lg:px-8">
           <button
             type="button"
-            onClick={handleBatal}
-            className="theme-card theme-border theme-text-secondary theme-sidebar-hover rounded-xl border px-4 py-2.5 text-sm font-medium transition-colors"
+            onClick={handleBack}
+            disabled={saving}
+            className="theme-card theme-border theme-text-secondary theme-sidebar-hover rounded-xl border px-4 py-2.5 text-sm font-medium transition-colors disabled:opacity-50"
           >
             Batal
           </button>
@@ -1026,11 +574,12 @@ function EditContent() {
             disabled={saving}
             className="theme-primary inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60"
           >
-            <Save size={15} />
-
-            {saving
-              ? "Menyimpan..."
-              : "Simpan Perubahan"}
+            {saving ? (
+              <Loader2 size={15} className="animate-spin" />
+            ) : (
+              <Save size={15} />
+            )}
+            {saving ? "Menyimpan..." : "Simpan Perubahan"}
           </button>
         </div>
       </div>
@@ -1041,11 +590,7 @@ function EditContent() {
 
 export default function Edit() {
   return (
-    <Suspense
-      fallback={
-        <div className="theme-page min-h-screen" />
-      }
-    >
+    <Suspense fallback={<div className="theme-page min-h-screen" />}>
       <EditContent />
     </Suspense>
   );

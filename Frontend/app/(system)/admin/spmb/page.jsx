@@ -24,6 +24,10 @@ import {
   getGelombangPpdb,
   isGelombangEndpointMissing,
 } from "@/services/gelombangPpdb.service";
+import {
+  getPendaftarPpdb,
+  isPpdbEndpointMissing,
+} from "@/services/ppdb.service";
 
 const themePrimaryText = "text-[var(--color-primary)]";
 
@@ -44,14 +48,32 @@ const themeDivider =
 
 const modules = [
   {
+    title: "Dashboard",
+    description:
+      "Ringkasan pendaftaran, kuota, dan seleksi.",
+    href: "/admin/spmb/dashboard",
+    icon: LayoutDashboard,
+    status: "partial",
+    statusText:
+      "Memeriksa endpoint daftar pendaftar...",
+    cekPendaftar: true,
+    statusSiap: "ready",
+    statusTextSiap:
+      "Rekap dari GET /api/ppdb/pendaftar",
+  },
+  {
     title: "Data Pendaftaran",
     description:
-      "Formulir pendaftaran calon siswa.",
+      "Daftar, detail, dan verifikasi pendaftar.",
     href: "/admin/spmb/data-pendaftaran",
     icon: Users,
-    status: "blocked",
+    status: "partial",
     statusText:
-      "Form tambah tersedia; endpoint baca daftar/detail belum ada",
+      "Memeriksa endpoint daftar pendaftar...",
+    cekPendaftar: true,
+    statusSiap: "ready",
+    statusTextSiap:
+      "Daftar, detail, verifikasi, dan statistik resmi",
   },
   {
     title: "Pendaftar",
@@ -59,9 +81,13 @@ const modules = [
       "Daftar dan verifikasi pendaftar.",
     href: "/admin/spmb/pendaftar",
     icon: ClipboardCheck,
-    status: "blocked",
+    status: "partial",
     statusText:
-      "Dialihkan ke Data Pendaftaran; endpoint baca belum tersedia",
+      "Dialihkan ke Data Pendaftaran",
+    cekPendaftar: true,
+    statusSiap: "ready",
+    statusTextSiap:
+      "Dialihkan ke Data Pendaftaran",
   },
   {
     title: "Jalur Pendaftaran",
@@ -76,11 +102,16 @@ const modules = [
   {
     title: "Kuota",
     description:
-      "Rekap kuota per jalur pendaftaran.",
+      "Rekap kuota, terisi, dan sisa per jalur.",
     href: "/admin/spmb/kuota",
     icon: Layers3,
     status: "partial",
-    statusText: "Kuota nyata; jumlah terisi belum tersedia",
+    statusText:
+      "Memeriksa endpoint daftar pendaftar...",
+    cekPendaftar: true,
+    statusSiap: "ready",
+    statusTextSiap:
+      "Kuota, terisi, dan sisa dari data resmi",
   },
   {
     title: "Seleksi",
@@ -88,8 +119,13 @@ const modules = [
       "Perangkingan dan hasil seleksi.",
     href: "/admin/spmb/seleksi",
     icon: GraduationCap,
-    status: "blocked",
-    statusText: "Belum ada endpoint hasil seleksi",
+    status: "partial",
+    statusText:
+      "Memeriksa endpoint daftar pendaftar...",
+    cekPendaftar: true,
+    statusSiap: "partial",
+    statusTextSiap:
+      "Baca nilai/peringkat; penetapan hasil belum ada",
   },
   {
     title: "Gelombang",
@@ -108,7 +144,8 @@ const modules = [
     href: "/admin/spmb/pengumuman",
     icon: Megaphone,
     status: "blocked",
-    statusText: "Belum ada model/endpoint pengumuman",
+    statusText:
+      "Belum ada model/route pengumuman PPDB",
   },
   {
     title: "Laporan",
@@ -116,8 +153,13 @@ const modules = [
       "Rekap dan ekspor data SPMB.",
     href: "/admin/spmb/laporan",
     icon: FileText,
-    status: "blocked",
-    statusText: "Butuh endpoint daftar/agregat",
+    status: "partial",
+    statusText:
+      "Memeriksa endpoint daftar pendaftar...",
+    cekPendaftar: true,
+    statusSiap: "ready",
+    statusTextSiap:
+      "Rekap dan ekspor CSV dari data resmi",
   },
   {
     title: "Pengaturan",
@@ -162,6 +204,12 @@ export default function SpmbOverviewPage() {
       statusText:
         "Memeriksa endpoint /api/gelombang-ppdb...",
     });
+
+  const [pendaftarTersedia, setPendaftarTersedia] =
+    useState(null);
+
+  const [pendaftarPesan, setPendaftarPesan] =
+    useState("");
 
   useEffect(() => {
     let aktif = true;
@@ -219,11 +267,77 @@ export default function SpmbOverviewPage() {
     };
   }, []);
 
-  const modulesDenganStatus = modules.map((item) =>
-    item.title === "Gelombang"
-      ? { ...item, ...gelombangStatus }
-      : item
-  );
+  useEffect(() => {
+    let aktif = true;
+
+    (async () => {
+      try {
+        const response = await getPendaftarPpdb({
+          page: 1,
+          limit: 1,
+        });
+
+        if (!aktif) {
+          return;
+        }
+
+        setPendaftarTersedia(Boolean(response?.success));
+        setPendaftarPesan("");
+      } catch (err) {
+        if (!aktif) {
+          return;
+        }
+
+        setPendaftarTersedia(false);
+        setPendaftarPesan(
+          isPpdbEndpointMissing(err)
+            ? "GET /api/ppdb/pendaftar belum aktif pada server berjalan (404)"
+            : err instanceof Error
+              ? err.message
+              : "Gagal memeriksa endpoint daftar pendaftar"
+        );
+      }
+    })();
+
+    return () => {
+      aktif = false;
+    };
+  }, []);
+
+  const modulesDenganStatus = modules.map((item) => {
+    if (item.title === "Gelombang") {
+      return { ...item, ...gelombangStatus };
+    }
+
+    if (!item.cekPendaftar) {
+      return item;
+    }
+
+    if (pendaftarTersedia === null) {
+      return {
+        ...item,
+        status: "partial",
+        statusText:
+          "Memeriksa endpoint daftar pendaftar...",
+      };
+    }
+
+    if (pendaftarTersedia) {
+      return {
+        ...item,
+        status: item.statusSiap,
+        statusText: item.statusTextSiap,
+      };
+    }
+
+    return {
+      ...item,
+      status: "blocked",
+      statusText:
+        pendaftarPesan ||
+        "GET /api/ppdb/pendaftar belum aktif (404)",
+    };
+  });
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
@@ -337,24 +451,30 @@ export default function SpmbOverviewPage() {
               </p>
 
               <p className="mt-1.5 text-xs leading-5 opacity-90">
-                Endpoint PPDB yang benar-benar terpasang di
-                Backend lokal: POST /api/ppdb/daftar, POST
-                /api/ppdb/:id/berkas, PATCH
-                /api/ppdb/:id/verifikasi, CRUD
+                Endpoint PPDB yang terpasang: POST
+                /api/ppdb/daftar, POST /api/ppdb/:id/berkas,
+                PATCH /api/ppdb/:id/verifikasi, CRUD
                 /api/jalur-ppdb, dan GET/POST
-                /api/pengaturan. Endpoint baca GET
-                /api/ppdb/pendaftar dan GET
-                /api/ppdb/pendaftar/:id belum tersedia,
-                sehingga daftar dan detail pendaftar belum
-                dapat ditampilkan; hanya formulir
-                pendaftaran yang dapat dipakai. Status
-                /api/gelombang-ppdb diperiksa langsung saat
+                /api/pengaturan. Dashboard, Data
+                Pendaftaran, Seleksi, Kuota, dan Laporan
+                membaca GET /api/ppdb/pendaftar beserta
+                GET /api/ppdb/pendaftar/:id; status
+                endpoint daftar diperiksa langsung saat
                 halaman ini dibuka:{" "}
+                {pendaftarTersedia === null
+                  ? "sedang diperiksa"
+                  : pendaftarTersedia
+                    ? "route merespons, modul rekap aktif"
+                    : "route belum aktif pada server berjalan, modul rekap menampilkan status belum tersedia tanpa angka contoh"}
+                . Status /api/gelombang-ppdb juga diperiksa
+                langsung:{" "}
                 {gelombangStatus.status === "ready"
                   ? "route tersedia dan modul siap dipakai"
                   : "route belum tersedia sehingga modul ditandai terblokir"}
-                . Pengaturan SPMB dapat disimpan, tetapi belum
-                dibaca oleh alur pendaftaran Backend.
+                . Pengaturan SPMB dapat disimpan, tetapi
+                belum dibaca oleh alur pendaftaran Backend.
+                Pengumuman PPDB belum memiliki model
+                maupun route.
               </p>
             </div>
           </div>

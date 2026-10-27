@@ -395,7 +395,7 @@ export default function CreatePelanggaranPage() {
 
                       <p className="theme-text-muted mt-1.5 text-xs">
                         Jika Tindak Lanjut diisi, status
-                        otomatis menjadi "Ditindaklanjuti".
+                        otomatis menjadi &quot;Ditindaklanjuti&quot;.
                       </p>
                     </Field>
                   </div>

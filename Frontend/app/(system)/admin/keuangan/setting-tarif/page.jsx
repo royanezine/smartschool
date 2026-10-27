@@ -282,15 +282,24 @@ export default function SettingTarifPage() {
   ]);
 
   useEffect(() => {
-    loadMaster();
+    const timer = setTimeout(() => {
+      loadMaster();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadMaster]);
 
   useEffect(() => {
-    loadKategori();
+    const timer = setTimeout(() => {
+      loadKategori();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadKategori]);
 
   useEffect(() => {
-    loadTarif();
+    const timer = setTimeout(() => {
+      loadTarif();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadTarif]);
 
 

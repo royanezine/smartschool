@@ -88,7 +88,10 @@ export default function CheckoutLanggananPage() {
   }, [paketId]);
 
   useEffect(() => {
-    loadData();
+    const timer = setTimeout(() => {
+      loadData();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadData]);
 
   const hargaBulanan = Number(paket?.harga ?? 0);
