@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { getMataPelajaran } from "@/services/mataPelajaran.service";
 import { getKkm, setKkm } from "@/services/pengaturan.service";
+import { apiFetch } from "@/lib/api";
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
 

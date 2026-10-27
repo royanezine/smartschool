@@ -383,3 +383,35 @@ export async function verifyTenant(
   return result;
 }
 
+export interface TenantStatusResponse {
+  success: boolean;
+  message: string;
+  data?: {
+    id: string;
+    status: string;
+    jenisPendaftaran: string;
+    namaPendaftar: string;
+    emailPendaftar: string;
+    namaSekolah?: string | null;
+    namaYayasan?: string | null;
+    subdomain?: string | null;
+    midtransOrderId?: string | null;
+    paket?: {
+      id: string;
+      nama: string;
+      tipe: string;
+      harga: number;
+    } | null;
+    sekolahTerbuatId?: string | null;
+    yayasanTerbuatId?: string | null;
+    dibuatPada: string;
+    diperbaruiPada?: string;
+  };
+}
+
+// REMOVED: getTenantStatus, getOnboardingRegistration, updateTenantFoundation
+// Backend HEAD tidak menyediakan endpoint-endpoint tersebut.
+// Flow onboarding Backend HEAD:
+// 1. POST /api/tenant/register - registrasi dengan SEMUA data sekaligus (sekolah + yayasan opsional)
+// 2. POST /api/tenant/verify - verifikasi OTP dan aktivasi/pembayaran
+

@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -33,8 +33,9 @@ function formatRupiah(value) {
   }).format(Number(value) || 0);
 }
 
-export default function PembayaranPage() {
+function PembayaranContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const [payment, setPayment] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -44,7 +45,7 @@ export default function PembayaranPage() {
   useEffect(() => {
     const timer = setTimeout(() => {
       try {
-        const savedPayment = sessionStorage.getItem("tenant_payment_data");
+        const savedPayment = searchParams.get("payment");
 
         if (!savedPayment) {
           setError(
@@ -79,7 +80,7 @@ export default function PembayaranPage() {
       }
     }, 0);
     return () => clearTimeout(timer);
-  }, []);
+  }, [searchParams]);
 
   const handleCopy = async (value, field = "order") => {
     if (!value) return;
@@ -515,5 +516,14 @@ export default function PembayaranPage() {
         </footer>
       </section>
     </main>
+  );
+}
+
+
+export default function PembayaranPage() {
+  return (
+    <Suspense fallback={null}>
+      <PembayaranContent />
+    </Suspense>
   );
 }

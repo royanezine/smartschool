@@ -63,19 +63,8 @@ function VerifyTenantPageContent() {
         return;
       }
 
-      try {
-        const savedEmail =
-          sessionStorage.getItem("tenant_register_email") ||
-          localStorage.getItem("tenant_register_email") ||
-          localStorage.getItem("onboarding_email") ||
-          "";
-
-        if (savedEmail) {
-          setEmail(savedEmail);
-        }
-      } catch (err) {
-        console.error("Gagal membaca email pendaftaran:", err);
-      }
+      // Email hanya dari query ?email= (diteruskan halaman sebelumnya);
+      // bila tidak ada, pengguna mengisi sendiri di input email.
     }, 0);
     return () => clearTimeout(timer);
   }, [emailFromUrl]);
@@ -131,15 +120,7 @@ function VerifyTenantPageContent() {
         );
 
         try {
-          sessionStorage.removeItem("tenant_register_email");
-          sessionStorage.removeItem("tenant_register_nama");
-          sessionStorage.removeItem("tenant_register_paket_id");
-          sessionStorage.removeItem("tenant_payment_data");
-
-          localStorage.removeItem("onboarding_email");
-          localStorage.removeItem("tenant_register_email");
           localStorage.removeItem("onboarding_paket_id");
-          localStorage.removeItem("tenant_register_nama");
         } catch (storageError) {
           console.error("Gagal membersihkan data onboarding:", storageError);
         }
@@ -172,15 +153,6 @@ function VerifyTenantPageContent() {
           result.message ||
             "Verifikasi berhasil. Silakan selesaikan pembayaran menggunakan informasi berikut."
         );
-
-        try {
-          sessionStorage.setItem(
-            "tenant_payment_data",
-            JSON.stringify(paymentData)
-          );
-        } catch (storageError) {
-          console.error("Gagal menyimpan informasi pembayaran:", storageError);
-        }
 
         return;
       }

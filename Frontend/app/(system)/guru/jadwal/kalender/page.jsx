@@ -34,6 +34,7 @@ import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
 
 import { getJadwalMengajar } from "@/services/jadwalMengajar.service";
+import { getAuthPayload } from "@/lib/auth";
 
 
 const themeCard = "theme-card";
@@ -157,101 +158,41 @@ function normalizeEmail(value) {
 }
 
 
-function getToken() {
-  if (typeof window === "undefined") {
-    return null;
-  }
-
-  const tokenKeys = [
-    "token",
-    "accessToken",
-    "access_token",
-    "authToken",
-    "jwt",
-  ];
-
-  for (const key of tokenKeys) {
-    const value = localStorage.getItem(key);
-
-    if (value && value.trim()) {
-      return value
-        .trim()
-        .replace(/^Bearer\s+/i, "");
-    }
-  }
-
-  return null;
-}
-
 function getCurrentUserFromToken() {
-  const token = getToken();
+  const payload = getAuthPayload();
 
-  if (!token) {
+  if (!payload) {
     return null;
   }
 
-  try {
-    const parts = token.split(".");
+  return {
+    id:
+      payload?.userId ??
+      payload?.id ??
+      payload?.sub ??
+      null,
 
-    if (parts.length !== 3) {
-      return null;
-    }
+    name:
+      payload?.namaLengkap ??
+      payload?.name ??
+      payload?.nama ??
+      null,
 
-    let base64 = parts[1]
-      .replace(/-/g, "+")
-      .replace(/_/g, "/");
+    email: payload?.email ?? null,
 
-    base64 += "=".repeat(
-      (4 - (base64.length % 4)) % 4
-    );
+    username:
+      payload?.username ??
+      payload?.userName ??
+      null,
 
-    const binary = atob(base64);
+    sekolahId:
+      payload?.sekolahId ?? null,
 
-    const bytes = Uint8Array.from(
-      binary,
-      (char) => char.charCodeAt(0)
-    );
-
-    const json = new TextDecoder().decode(bytes);
-
-    const payload = JSON.parse(json);
-
-    return {
-      id:
-        payload?.userId ??
-        payload?.id ??
-        payload?.sub ??
-        null,
-
-      name:
-        payload?.namaLengkap ??
-        payload?.name ??
-        payload?.nama ??
-        null,
-
-      email: payload?.email ?? null,
-
-      username:
-        payload?.username ??
-        payload?.userName ??
-        null,
-
-      sekolahId:
-        payload?.sekolahId ?? null,
-
-      role:
-        payload?.role ??
-        payload?.peran ??
-        null,
-    };
-  } catch (error) {
-    console.error(
-      "[KALENDER GURU] Gagal membaca JWT:",
-      error
-    );
-
-    return null;
-  }
+    role:
+      payload?.role ??
+      payload?.peran ??
+      null,
+  };
 }
 
 

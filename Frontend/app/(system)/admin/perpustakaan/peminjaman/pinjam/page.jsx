@@ -10,7 +10,6 @@ import {
   Plus,
   Loader2,
   AlertCircle,
-  UserRound,
   CalendarDays,
 } from "lucide-react";
 
@@ -71,7 +70,6 @@ export default function PinjamBukuPage() {
   const router = useRouter();
 
   const [books, setBooks] = useState([]);
-  const [penggunaId, setPenggunaId] = useState("");
   const [bukuId, setBukuId] = useState("");
   const [tanggalJatuhTempo, setTanggalJatuhTempo] = useState("");
   const [catatan, setCatatan] = useState("");
@@ -129,11 +127,6 @@ export default function PinjamBukuPage() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError("");
-
-    if (!penggunaId.trim()) {
-      setError("ID pengguna wajib diisi.");
-      return;
-    }
 
     if (!bukuId) {
       setError("Buku wajib dipilih.");
@@ -254,36 +247,11 @@ export default function PinjamBukuPage() {
                 </div>
 
                 <div className="grid grid-cols-1 gap-5 p-5 sm:p-6">
-                  <div>
-                    <label
-                      htmlFor="penggunaId"
-                      className={labelClass}
-                    >
-                      ID Pengguna
-                    </label>
-
-                    <div className="relative">
-                      <UserRound
-                        size={17}
-                        className="theme-text-muted pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2"
-                      />
-
-                      <input
-                        id="penggunaId"
-                        name="penggunaId"
-                        type="text"
-                        required
-                        value={penggunaId}
-                        onChange={(event) =>
-                          setPenggunaId(event.target.value)
-                        }
-                        placeholder="Masukkan UUID pengguna/siswa"
-                        className={`${inputClass} pl-10`}
-                      />
-                    </div>
-
-                    <p className="theme-text-muted mt-1.5 text-[11px] leading-5">
-                      Isi ID pengguna yang akan meminjam buku.
+                  <div className="theme-card theme-border rounded-lg border px-4 py-3">
+                    <p className="theme-text-secondary text-xs leading-5">
+                      Peminjaman dicatat atas akun yang sedang login
+                      (sesuai perilaku Backend yang memakai pengguna dari
+                      token sesi), bukan atas ID pengguna lain.
                     </p>
                   </div>
 

@@ -94,27 +94,6 @@ const themeFocus =
   "focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
 
-const revenueData = [
-  { month: "Jan", value: 38 },
-  { month: "Feb", value: 43 },
-  { month: "Mar", value: 49 },
-  { month: "Apr", value: 55 },
-  { month: "Mei", value: 61 },
-  { month: "Jun", value: 69 },
-  { month: "Jul", value: 77 },
-  { month: "Agu", value: 86 },
-];
-
-const schoolGrowthData = [
-  { month: "Jan", value: 42 },
-  { month: "Feb", value: 48 },
-  { month: "Mar", value: 55 },
-  { month: "Apr", value: 62 },
-  { month: "Mei", value: 70 },
-  { month: "Jun", value: 78 },
-  { month: "Jul", value: 85 },
-  { month: "Agu", value: 92 },
-];
 
 const upcomingTasks = [
   {
@@ -369,6 +348,88 @@ export default function DashboardPage() {
     ];
   }, [subscriptions, pakets, logs]);
 
+  // Grafik dashboard diturunkan dari data langganan Backend
+  // (GET /api/langganan/sekolah). Tidak ada angka statis.
+  const monthlySeries = useMemo(() => {
+    const NAMA_BULAN = [
+      "Jan", "Feb", "Mar", "Apr", "Mei", "Jun",
+      "Jul", "Agu", "Sep", "Okt", "Nov", "Des",
+    ];
+
+    const sekarang = new Date();
+    const buckets = [];
+
+    for (let i = 7; i >= 0; i -= 1) {
+      const tanggal = new Date(
+        sekarang.getFullYear(),
+        sekarang.getMonth() - i,
+        1
+      );
+
+      buckets.push({
+        key: `${tanggal.getFullYear()}-${tanggal.getMonth()}`,
+        month: NAMA_BULAN[tanggal.getMonth()],
+        nilaiLangganan: 0,
+        sekolah: new Set(),
+      });
+    }
+
+    const peta = new Map(buckets.map((b) => [b.key, b]));
+
+    subscriptions.forEach((langganan) => {
+      const idSekolah = langganan?.sekolahId || langganan?.sekolah?.id;
+      const harga = Number(
+        langganan?.hargaSaatBerlangganan ??
+          langganan?.paket?.harga ??
+          0
+      );
+
+      const tanggalLangganan =
+        langganan?.tanggalMulai || langganan?.dibuatPada;
+
+      if (tanggalLangganan) {
+        const d = new Date(tanggalLangganan);
+
+        if (!Number.isNaN(d.getTime())) {
+          const bucket = peta.get(`${d.getFullYear()}-${d.getMonth()}`);
+
+          if (bucket) {
+            bucket.nilaiLangganan += Number.isFinite(harga) ? harga : 0;
+
+            if (idSekolah) bucket.sekolah.add(String(idSekolah));
+          }
+        }
+      }
+    });
+
+    return {
+      pendapatan: buckets.map((b) => ({
+        month: b.month,
+        value: b.nilaiLangganan,
+      })),
+      pertumbuhan: buckets.map((b) => ({
+        month: b.month,
+        value: b.sekolah.size,
+      })),
+      pendapatanBulanIni:
+        buckets[buckets.length - 1]?.nilaiLangganan || 0,
+    };
+  }, [subscriptions]);
+
+  const formatRingkasRupiah = (nilai) => {
+    const angka = Number(nilai) || 0;
+
+    if (angka >= 1_000_000_000) {
+      return `Rp ${(angka / 1_000_000_000).toFixed(1).replace(".", ",")} M`;
+    }
+
+    if (angka >= 1_000_000) {
+      return `Rp ${(angka / 1_000_000).toFixed(1).replace(".", ",")} Jt`;
+    }
+
+    return `Rp ${angka.toLocaleString("id-ID")}`;
+  };
+
   const recentActivities = useMemo(() => {
     if (!logs.length) return [];
     return logs.slice(0, 5).map((log) => {
@@ -389,11 +450,13 @@ export default function DashboardPage() {
   }, [logs]);
 
   const maxRevenue = Math.max(
-    ...revenueData.map((item) => item.value)
+    1,
+    ...monthlySeries.pendapatan.map((item) => item.value)
   );
 
   const maxSchool = Math.max(
-    ...schoolGrowthData.map((item) => item.value)
+    1,
+    ...monthlySeries.pertumbuhan.map((item) => item.value)
   );
 
   return (
@@ -536,8 +599,8 @@ export default function DashboardPage() {
                     </h2>
 
                     <p className="mt-0.5 text-xs theme-text-muted">
-                      Perkembangan jumlah sekolah sepanjang
-                      tahun 2026
+                      Sekolah berlangganan yang terdaftar per
+                      bulan (8 bulan terakhir)
                     </p>
                   </div>
                 </div>
@@ -565,13 +628,13 @@ export default function DashboardPage() {
                   </div>
 
                   <div className="relative flex h-full items-end gap-2 sm:gap-4">
-                    {schoolGrowthData.map((item, index) => {
+                    {monthlySeries.pertumbuhan.map((item, index) => {
                       const height =
                         (item.value / maxSchool) * 100;
 
                       const isLast =
                         index ===
-                        schoolGrowthData.length - 1;
+                        monthlySeries.pertumbuhan.length - 1;
 
                       return (
                         <div
@@ -774,7 +837,7 @@ export default function DashboardPage() {
                     </h2>
 
                     <p className="mt-0.5 text-xs theme-text-muted">
-                      Performa pendapatan platform
+                      Total nilai langganan tercatat per bulan
                     </p>
                   </div>
                 </div>
@@ -785,18 +848,18 @@ export default function DashboardPage() {
                   </p>
 
                   <p className="mt-0.5 text-lg font-semibold theme-text">
-                    Rp 12,5 Jt
+                    {formatRingkasRupiah(monthlySeries.pendapatanBulanIni)}
                   </p>
                 </div>
               </div>
 
               <div className="mt-7 flex items-end gap-2 sm:gap-4">
-                {revenueData.map((item, index) => {
+                {monthlySeries.pendapatan.map((item, index) => {
                   const height =
                     (item.value / maxRevenue) * 100;
 
                   const isLast =
-                    index === revenueData.length - 1;
+                    index === monthlySeries.pendapatan.length - 1;
 
                   return (
                     <div
@@ -819,7 +882,7 @@ export default function DashboardPage() {
                         <div
                           className={`pointer-events-none absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md ${themeNeutralSurface} border ${themeNeutralBorder} px-2 py-1 text-[9px] theme-text opacity-0 transition group-hover:opacity-100`}
                         >
-                          Rp {item.value / 10} Jt
+                          {formatRingkasRupiah(item.value)}
                         </div>
                       </div>
 

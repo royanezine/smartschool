@@ -20,6 +20,7 @@ function isBrowser() {
   return typeof window !== "undefined";
 }
 
+// Satu-satunya storage sesi auth: sessionStorage.
 function authStore() {
   if (!isBrowser()) {
     return null;
@@ -28,12 +29,21 @@ function authStore() {
   return window.sessionStorage;
 }
 
-function legacyAuthStore() {
+// Versi lama aplikasi menyimpan token/user di localStorage. Nilai sisa tersebut
+// hanya dibersihkan (remove-only) supaya tidak lagi terbaca sebagai sumber sesi.
+function purgeLegacyAuthStorage() {
   if (!isBrowser()) {
-    return null;
+    return;
   }
 
-  return window.localStorage;
+  try {
+    const legacyStore = window.localStorage;
+
+    [AUTH_TOKEN_KEY, AUTH_USER_KEY, ...LEGACY_TOKEN_KEYS].forEach((key) => {
+      legacyStore.removeItem(key);
+    });
+  } catch (error) {
+  }
 }
 
 export function getToken() {
@@ -41,11 +51,7 @@ export function getToken() {
     return null;
   }
 
-  let token = authStore()?.getItem(AUTH_TOKEN_KEY);
-
-  if (!token) {
-    token = legacyAuthStore()?.getItem(AUTH_TOKEN_KEY);
-  }
+  const token = authStore()?.getItem(AUTH_TOKEN_KEY);
 
   return token && token.trim() ? token.trim() : null;
 }
@@ -272,7 +278,6 @@ export function setSession(token, rawUser = null) {
   }
 
   const store = authStore();
-  const legacyStore = legacyAuthStore();
   const cleanToken = String(token).trim();
   const payload = decodeToken(cleanToken);
   const user = normalizeUser(rawUser, payload);
@@ -280,21 +285,14 @@ export function setSession(token, rawUser = null) {
   store.setItem(AUTH_TOKEN_KEY, cleanToken);
   store.setItem(AUTH_USER_KEY, JSON.stringify(user));
 
-  if (legacyStore) {
-    try {
-      legacyStore.setItem(AUTH_TOKEN_KEY, cleanToken);
-      legacyStore.setItem(AUTH_USER_KEY, JSON.stringify(user));
-    } catch {
-    }
-  }
-
   LEGACY_TOKEN_KEYS.forEach((key) => {
     try {
       store.removeItem(key);
-      legacyStore?.removeItem(key);
     } catch {
     }
   });
+
+  purgeLegacyAuthStorage();
 
   emitAuthUpdate();
 
@@ -311,7 +309,6 @@ export function clearSession() {
   activeProfileVerification = null;
 
   const store = authStore();
-  const legacyStore = legacyAuthStore();
 
   const keys = [
     AUTH_TOKEN_KEY,
@@ -322,10 +319,11 @@ export function clearSession() {
   keys.forEach((key) => {
     try {
       store.removeItem(key);
-      legacyStore?.removeItem(key);
     } catch {
     }
   });
+
+  purgeLegacyAuthStorage();
 
   emitAuthUpdate();
 }
@@ -473,6 +471,10 @@ export function emitAuthUpdate() {
   }
 }
 
+// Sinkronisasi auth utama: event internal AUTH_EVENT yang dipancarkan
+// setSession()/clearSession() di tab yang sama. Listener "storage" hanya
+// sebagai pelengkap untuk perubahan pada sessionStorage (satu-satunya storage
+// sesi auth) dan tidak lagi bergantung pada localStorage.
 export function subscribeAuth(listener) {
   if (!isBrowser() || typeof listener !== "function") {
     return () => {};
@@ -489,7 +491,7 @@ export function subscribeAuth(listener) {
 
     if (
       event.storageArea &&
-      event.storageArea !== window.localStorage
+      event.storageArea !== window.sessionStorage
     ) {
       return;
     }

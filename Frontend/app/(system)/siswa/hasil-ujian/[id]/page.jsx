@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { getUjianById } from "@/services/ujian.service";
 
 import {
@@ -279,109 +279,6 @@ function getResultData(ujian, percobaan) {
 }
 
 
-function getSavedHasilUjian(id) {
-  if (
-    typeof window === "undefined" ||
-    !id
-  ) {
-    return null;
-  }
-
-  const keys = [
-    `hasil-ujian-${id}`,
-    `hasil-asesmen-${id}`,
-  ];
-
-  const storages = [
-    window.sessionStorage,
-  ];
-
-  for (const storage of storages) {
-    for (const key of keys) {
-      try {
-        const raw =
-          storage.getItem(key);
-
-        if (!raw) {
-          continue;
-        }
-
-        const parsed =
-          JSON.parse(raw);
-
-        if (!parsed) {
-          continue;
-        }
-
-        if (
-          parsed?.ujianId &&
-          String(parsed.ujianId) !==
-            String(id)
-        ) {
-          continue;
-        }
-
-        const hasil =
-          normalizeHasilUjian(
-            parsed?.hasilAsesmen ??
-              parsed?.hasilUjian ??
-              parsed?.hasil ??
-              parsed
-          );
-
-        if (
-          isValidHasilUjian(hasil)
-        ) {
-          return {
-            ...parsed,
-            hasil,
-          };
-        }
-      } catch {
-      }
-    }
-  }
-
-  try {
-    const raw =
-      sessionStorage.getItem(
-        "hasil-ujian-last"
-      );
-
-    if (raw) {
-      const parsed =
-        JSON.parse(raw);
-
-      if (
-        parsed?.ujianId &&
-        String(parsed.ujianId) ===
-          String(id)
-      ) {
-        const hasil =
-          normalizeHasilUjian(
-            parsed?.hasilAsesmen ??
-              parsed?.hasilUjian ??
-              parsed?.hasil ??
-              parsed
-          );
-
-        if (
-          isValidHasilUjian(hasil)
-        ) {
-          return {
-            ...parsed,
-            hasil,
-          };
-        }
-      }
-    }
-  } catch {
-  }
-
-  return null;
-}
-
-
 function firstValidNumber(...values) {
   for (const value of values) {
     if (
@@ -615,6 +512,38 @@ function getPercobaanFromUjian(ujian) {
 export default function HasilUjianPage() {
   const router = useRouter();
   const params = useParams();
+  const searchParams = useSearchParams();
+
+  // Hasil ujian dibaca dari query navigasi (bukan sessionStorage).
+  const idDariRoute = params?.id;
+
+  const hasilDariUrl = useMemo(() => {
+    const raw = searchParams?.get("hasil");
+
+    if (!raw) {
+      return null;
+    }
+
+    try {
+      const parsed = JSON.parse(raw);
+      const hasil = normalizeHasilUjian(
+        parsed?.hasil ?? parsed?.hasilAsesmen ?? parsed
+      );
+
+      if (!isValidHasilUjian(hasil)) {
+        return null;
+      }
+
+      return {
+        ujianId: String(idDariRoute || ""),
+        sesiId: parsed?.sesiId ?? null,
+        submittedAt: parsed?.submittedAt ?? null,
+        hasil,
+      };
+    } catch {
+      return null;
+    }
+  }, [searchParams, idDariRoute]);
 
   const id = Array.isArray(
     params?.id
@@ -651,7 +580,7 @@ export default function HasilUjianPage() {
           setError("");
 
           const localHasil =
-            getSavedHasilUjian(id);
+            hasilDariUrl;
 
           if (localHasil) {
             setSavedHasil(

@@ -35,11 +35,7 @@ export default function LoginForm() {
       const params = new URLSearchParams(window.location.search);
       const emailFromUrl = params.get("email");
 
-      const savedEmail =
-        localStorage.getItem("onboarding_email") ||
-        localStorage.getItem("tenant_register_email");
-
-      const email = emailFromUrl || savedEmail;
+      const email = emailFromUrl;
 
       if (email) {
         setIdentifier(email);
@@ -201,8 +197,6 @@ export default function LoginForm() {
         }
 
         clearSession();
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
 
         sessionStorage.setItem("pin_setup_token", setupToken);
         sessionStorage.removeItem("pin_access_token");
@@ -219,8 +213,6 @@ export default function LoginForm() {
         }
 
         clearSession();
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
 
         sessionStorage.setItem("pin_access_token", pinToken);
         sessionStorage.removeItem("pin_setup_token");
@@ -284,8 +276,6 @@ export default function LoginForm() {
       };
 
       clearSession();
-      sessionStorage.removeItem("token");
-      sessionStorage.removeItem("user");
 
       setSession(token, userInfo);
 
@@ -299,10 +289,8 @@ export default function LoginForm() {
         localStorage.removeItem("remembered_identifier");
       }
 
-      sessionStorage.removeItem("onboarding_email");
       sessionStorage.removeItem("onboarding_paket_id");
       sessionStorage.removeItem("onboarding_pendaftaran_id");
-      sessionStorage.removeItem("onboarding_payment_url");
 
       const redirectPath = getRedirectPath(role);
 

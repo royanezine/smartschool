@@ -1,6 +1,7 @@
 "use client";
 
 import { getUsers, updateUserStatus } from "@/services/user.service";
+import { getToken } from "@/lib/auth";
 
 import {
   useCallback,

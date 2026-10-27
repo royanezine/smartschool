@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useEffect, useRef, useState  } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
   CheckCircle2,
@@ -21,8 +21,9 @@ const BANKS = [
   { value: "permata", label: "Permata" },
 ];
 
-export default function VerifyPage() {
+function VerifyPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
@@ -34,7 +35,7 @@ export default function VerifyPage() {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      const savedEmail = sessionStorage.getItem("onboarding_email");
+      const savedEmail = searchParams.get("email") || "";
 
       if (!savedEmail) {
         router.replace("/onboarding/school");
@@ -44,7 +45,7 @@ export default function VerifyPage() {
       setEmail(savedEmail);
     }, 0);
     return () => clearTimeout(timer);
-  }, [router]);
+  }, [router, searchParams]);
 
   const handleOtpChange = (index, value) => {
     const numericValue = value.replace(/\D/g, "");
@@ -134,8 +135,18 @@ export default function VerifyPage() {
 
       const data = result.data || {};
 
-      sessionStorage.setItem("onboarding_email", email);
-      sessionStorage.setItem("onboarding_bank", bank);
+      const queryPembayaran = new URLSearchParams();
+      if (email) queryPembayaran.set("email", email.trim().toLowerCase());
+      if (data.order_id) queryPembayaran.set("order_id", String(data.order_id));
+      if (data.va_number) queryPembayaran.set("va_number", String(data.va_number));
+      if (data.gross_amount !== undefined && data.gross_amount !== null) {
+        queryPembayaran.set("gross_amount", String(data.gross_amount));
+      }
+      if (data.bank || bank) queryPembayaran.set("bank", String(data.bank || bank));
+      if (data.payment_url) queryPembayaran.set("payment_url", String(data.payment_url));
+
+      const qsPembayaran = queryPembayaran.toString();
+      const urlPembayaran = `/onboarding/payment${qsPembayaran ? `?${qsPembayaran}` : ""}`;
 
       if (data.is_trial === true) {
         setSuccess("Verifikasi berhasil. Sekolah uji coba telah dibuat.");
@@ -148,27 +159,20 @@ export default function VerifyPage() {
       }
 
       if (data.va_number) {
-        sessionStorage.setItem("onboarding_order_id", data.order_id || "");
-        sessionStorage.setItem("onboarding_va_number", data.va_number);
-        sessionStorage.setItem("onboarding_gross_amount", String(data.gross_amount ?? ""));
-        sessionStorage.setItem("onboarding_payment_bank", data.bank || bank.toUpperCase());
-
         setSuccess("Verifikasi berhasil. Menyiapkan informasi pembayaran...");
 
         setTimeout(() => {
-          router.push("/onboarding/payment");
+          router.push(urlPembayaran);
         }, 500);
 
         return;
       }
 
       if (data.payment_url) {
-        sessionStorage.setItem("onboarding_payment_url", data.payment_url);
-
         setSuccess("Verifikasi berhasil. Mengarahkan ke pembayaran...");
 
         setTimeout(() => {
-          router.push("/onboarding/payment");
+          router.push(urlPembayaran);
         }, 500);
 
         return;
@@ -178,7 +182,7 @@ export default function VerifyPage() {
         setSuccess("Verifikasi berhasil. Mengarahkan ke pemilihan pembayaran...");
 
         setTimeout(() => {
-          router.push("/onboarding/payment");
+          router.push(urlPembayaran);
         }, 500);
 
         return;
@@ -333,5 +337,13 @@ export default function VerifyPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function VerifyPage() {
+  return (
+    <Suspense fallback={null}>
+      <VerifyPageContent />
+    </Suspense>
   );
 }

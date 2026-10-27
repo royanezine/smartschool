@@ -323,12 +323,21 @@ export default function PengaturanPage() {
     try {
       setSaving(true);
       setErrorMsg("");
-      if (activeTab === "profil") {
-        await updateProfile({
-          namaLengkap: profil.nama,
-          noTelepon: profil.telepon,
-        });
+      if (activeTab !== "profil") {
+        // Tab ini belum memiliki endpoint Backend (tidak ada route update
+        // yayasan/preferensi), jadi jangan tampilkan status "tersimpan" palsu.
+        setErrorMsg(
+          "Pengaturan pada tab ini belum memiliki endpoint Backend. "
+            + "Hanya data profil yang dapat disimpan saat ini."
+        );
+        return;
       }
+
+      await updateProfile({
+        namaLengkap: profil.nama,
+        noTelepon: profil.telepon,
+      });
+
       setSaved(true);
       setTimeout(() => {
         setSaved(false);

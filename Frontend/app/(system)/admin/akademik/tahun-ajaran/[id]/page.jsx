@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 
@@ -340,7 +340,7 @@ export default function DetailTahunAjaranPage() {
                             </p>
 
                             <h1 className="mt-1 truncate text-2xl font-bold tracking-tight text-white sm:text-3xl">
-                              {data.nama || "-"}
+                              {data.tahunAjaran || "-"}
                             </h1>
 
                             <p className="mt-1 text-sm text-white/75">
@@ -471,7 +471,7 @@ export default function DetailTahunAjaranPage() {
                       <DetailRow
                         label="Nama Tahun Ajaran"
                         value={
-                          data.nama || "-"
+                          data.tahunAjaran || "-"
                         }
                       />
 
@@ -666,7 +666,7 @@ export default function DetailTahunAjaranPage() {
                             menggunakan tahun
                             ajaran{" "}
                             <span className="font-semibold theme-text-secondary">
-                              {data.nama}
+                              {data.tahunAjaran}
                             </span>
                             .
                           </p>
@@ -832,8 +832,8 @@ export default function DetailTahunAjaranPage() {
                           }
                         >
                           {isActive
-                            ? `${data.nama} semester ${data.semester} sedang digunakan sebagai periode akademik aktif sekolah.`
-                            : `${data.nama} semester ${data.semester} saat ini tidak digunakan sebagai periode akademik aktif.`}
+                            ? `${data.tahunAjaran} semester ${data.semester} sedang digunakan sebagai periode akademik aktif sekolah.`
+                            : `${data.tahunAjaran} semester ${data.semester} saat ini tidak digunakan sebagai periode akademik aktif.`}
                         </p>
                       </div>
                     </div>

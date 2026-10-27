@@ -181,27 +181,7 @@ export default function SchoolOnboardingPage() {
     async function loadPaket() {
       try {
         const params = new URLSearchParams(window.location.search);
-        let paketId = params.get("paketId");
-        let storedPaket = null;
-
-        if (!paketId) {
-          try {
-            const raw = sessionStorage.getItem("selected_paket");
-            if (raw) {
-              storedPaket = JSON.parse(raw);
-              paketId =
-                storedPaket?.id ||
-                storedPaket?.paketId ||
-                storedPaket?._id;
-            }
-          } catch {
-            storedPaket = null;
-          }
-        }
-
-        if (!paketId) {
-          paketId = sessionStorage.getItem("selected_paket_id");
-        }
+        const paketId = params.get("paketId");
 
         if (paketId) {
           const response = await getPaketById(paketId);
@@ -221,11 +201,6 @@ export default function SchoolOnboardingPage() {
             normalized.success !== false
           ) {
             setPaket(normalized);
-            sessionStorage.setItem(
-              "selected_paket",
-              JSON.stringify(normalized)
-            );
-            sessionStorage.setItem("selected_paket_id", String(paketId));
             return;
           }
         }
@@ -347,17 +322,41 @@ export default function SchoolOnboardingPage() {
     setLoading(true);
 
     try {
+      // Ambil data foundation dari URL query parameters jika ada
+      const params = new URLSearchParams(window.location.search);
+      const hasFoundation = params.get("hasFoundation") === "true";
+      
+      let foundationData = null;
+      if (hasFoundation) {
+        foundationData = {
+          nama: params.get("namaYayasan") || "",
+          npyp: params.get("npypYayasan") || "",
+          alamat: params.get("alamatYayasan") || "",
+          telepon: params.get("teleponYayasan") || "",
+          email: params.get("emailYayasan") || "",
+        };
+      }
+
       const payload = {
+        jenisPendaftaran: "sekolah",
         paketId,
         nama,
+        email,
+        kataSandi: form.kataSandi,
         namaSekolah,
         jenjang: form.jenjang,
         subdomain,
-        email,
-        teleponSekolah,
         alamatSekolah,
-        kataSandi: form.kataSandi,
+        teleponSekolah,
         ...(logo ? { logo } : {}),
+        // Tambahkan data yayasan jika ada (sesuai kontrak Backend)
+        ...(foundationData?.nama ? {
+          namaYayasan: foundationData.nama,
+          ...(foundationData.npyp ? { npypYayasan: foundationData.npyp } : {}),
+          ...(foundationData.alamat ? { alamatYayasan: foundationData.alamat } : {}),
+          ...(foundationData.telepon ? { teleponYayasan: foundationData.telepon } : {}),
+          ...(foundationData.email ? { emailYayasan: foundationData.email } : {}),
+        } : {}),
       };
 
       const response = await registerTenant(payload);
@@ -369,10 +368,11 @@ export default function SchoolOnboardingPage() {
         );
       }
 
-      sessionStorage.setItem("onboarding_email", email.trim().toLowerCase());
-      sessionStorage.setItem("onboarding_paket_id", String(paketId));
-
-      router.push("/onboarding/verify");
+      router.push(
+        `/onboarding/verify?email=${encodeURIComponent(
+          email.trim().toLowerCase()
+        )}`
+      );
     } catch (err) {
       console.warn(
         "[ONBOARDING] Registrasi sekolah gagal:",

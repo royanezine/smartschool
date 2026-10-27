@@ -9,6 +9,8 @@ import {
   useState,
 } from "react";
 
+import { clearSession, getToken } from "@/lib/auth";
+
 const CmsThemeContext = createContext(null);
 
 const API_BASE_URL = (
@@ -56,14 +58,6 @@ const DEFAULT_TEMA = {
   },
 };
 
-const TOKEN_KEYS = [
-  "token",
-  "accessToken",
-  "access_token",
-  "authToken",
-  "jwt",
-];
-
 const CORE_MAP = {
   primary: ["--cms-primary", "--school-primary"],
   secondary: ["--cms-secondary", "--school-secondary"],
@@ -77,20 +71,6 @@ const CORE_MAP = {
 const STATUS_KEYS = Object.keys(DEFAULT_TEMA.badgeStatus);
 const ROLE_KEYS = Object.keys(DEFAULT_TEMA.labelRole);
 const SHIFT_KEYS = Object.keys(DEFAULT_TEMA.shiftKerja);
-
-function getToken() {
-  if (typeof window === "undefined") return null;
-
-  for (const key of TOKEN_KEYS) {
-    const token = window.localStorage.getItem(key);
-
-    if (token?.trim()) {
-      return token.trim();
-    }
-  }
-
-  return null;
-}
 
 function getHex(value, fallback = "#000000") {
   const raw = typeof value === "string" ? value : value?.hex;
@@ -314,12 +294,7 @@ const refreshTema = useCallback(async () => {
     if (response.status === 401 || response.status === 403) {
       const result = await response.json().catch(() => null);
 
-      TOKEN_KEYS.forEach((key) => {
-        try {
-          window.localStorage.removeItem(key);
-        } catch (e) {
-        }
-      });
+      clearSession();
 
       try {
         window.localStorage.removeItem(THEME_CACHE_KEY);

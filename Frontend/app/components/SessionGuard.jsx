@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { expireSession, isTokenExpired } from "@/lib/session";
+import { clearSession, getToken, isTokenExpired } from "@/lib/auth";
 
 export default function SessionGuard() {
   useEffect(() => {
@@ -11,13 +11,17 @@ export default function SessionGuard() {
     const checkSession = () => {
       if (expired) return;
 
-      const token = localStorage.getItem("token");
+      const token = getToken();
 
       if (!token) return;
 
       if (isTokenExpired(token)) {
         expired = true;
-        expireSession();
+        clearSession();
+
+        if (window.location.pathname !== "/login") {
+          window.location.replace("/login?sessionExpired=1");
+        }
       }
     };
 

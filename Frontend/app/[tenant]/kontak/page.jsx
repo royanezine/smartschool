@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useParams } from "next/navigation";
 import Link from "next/link";
 import {
   AlertCircle,
@@ -20,7 +21,6 @@ import {
 } from "lucide-react";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
-const SUBDOMAIN = "smart";
 const SLUG_KONTAK = "kontak-1789495236882";
 
 const HERO_IMAGE =
@@ -39,6 +39,15 @@ const THEME = {
 };
 
 export default function KontakPage() {
+  const params = useParams();
+
+  const subdomain =
+    typeof params?.tenant === "string"
+      ? params.tenant
+      : Array.isArray(params?.tenant)
+        ? params.tenant[0] || ""
+        : "";
+
   const [page, setPage] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -65,7 +74,7 @@ export default function KontakPage() {
 
       const response = await fetch(
         `${apiBaseUrl}/api/publik/${encodeURIComponent(
-          SUBDOMAIN
+          subdomain
         )}/halaman/${encodeURIComponent(SLUG_KONTAK)}`,
         {
           method: "GET",

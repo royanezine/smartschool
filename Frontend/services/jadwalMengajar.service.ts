@@ -1,3 +1,5 @@
+import { getToken as getAuthToken } from "../lib/auth";
+
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL ||
   "http://localhost:5000";
@@ -83,44 +85,19 @@ export interface UpdateJadwalMengajarPayload {
 }
 
 
-function getToken(): string | null {
-  if (typeof window === "undefined") {
-    return null;
-  }
-
-  const tokenKeys = [
-    "token",
-    "accessToken",
-    "access_token",
-    "authToken",
-    "jwt",
-  ];
-
-  for (const key of tokenKeys) {
-    const value = localStorage.getItem(key);
-
-    if (value && value.trim()) {
-      return value
-        .trim()
-        .replace(/^Bearer\s+/i, "");
-    }
-  }
-
-  return null;
-}
-
-
 async function request<T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> {
-  const token = getToken();
+  const rawToken = getAuthToken();
+
+  const token = rawToken
+    ? rawToken.replace(/^Bearer\s+/i, "").trim()
+    : null;
 
   console.log(
     "[JADWAL API] Token:",
-    token
-      ? `${token.substring(0, 15)}...`
-      : "TIDAK ADA"
+    token ? "TERSEDIA" : "TIDAK ADA"
   );
 
   if (!token) {

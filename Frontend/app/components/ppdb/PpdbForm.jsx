@@ -41,7 +41,6 @@ const EMAIL_REGEX = /^\S+@\S+\.\S+$/;
 const SESI_SEKOLAH = "ppdb_sekolah_id";
 const SESI_JALUR = "ppdb_jalur_id";
 const SESI_PENDAFTARAN = "ppdb_pendaftaran_id";
-const SESI_NOMOR = "ppdb_nomor_pendaftaran";
 const SESI_SUBMISSION = "ppdb_last_submission";
 
 function isUuid(value) {
@@ -588,12 +587,6 @@ export default function PpdbForm({
             : "";
 
       sessionStorage.setItem(SESI_PENDAFTARAN, pendaftaranId);
-
-      if (nomorPendaftaran) {
-        sessionStorage.setItem(SESI_NOMOR, nomorPendaftaran);
-      } else {
-        sessionStorage.removeItem(SESI_NOMOR);
-      }
 
       if (tokenPendaftaran) {
         sessionStorage.setItem("ppdb_token_pendaftaran", tokenPendaftaran);

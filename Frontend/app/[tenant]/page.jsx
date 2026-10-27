@@ -68,7 +68,7 @@ export default function WebsiteHomePage() {
       ? params.tenant
       : Array.isArray(params?.tenant)
         ? params.tenant[0]
-        : "smart";
+        : "";
 
   const [artikel, setArtikel] = useState([]);
   const [loadingArtikel, setLoadingArtikel] = useState(true);
@@ -76,6 +76,8 @@ export default function WebsiteHomePage() {
 
   const [theme, setTheme] = useState(DEFAULT_THEME);
   const [loadingTheme, setLoadingTheme] = useState(true);
+
+  const [profil, setProfil] = useState(null);
 
   const [mobileMenu, setMobileMenu] = useState(false);
 
@@ -173,6 +175,48 @@ export default function WebsiteHomePage() {
     }
 
     fetchTheme();
+
+    return () => {
+      mounted = false;
+    };
+  }, [tenant]);
+
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function fetchProfil() {
+      if (!tenant) {
+        return;
+      }
+
+      try {
+        const apiBase = getPublicApiBase();
+
+        const response = await fetch(
+          `${apiBase}/${encodeURIComponent(tenant)}/profil`,
+          {
+            method: "GET",
+            cache: "no-store",
+          }
+        );
+
+        if (!response.ok) {
+          return;
+        }
+
+        const result = await response.json().catch(() => null);
+        const data = result?.data;
+
+        if (mounted && data) {
+          setProfil(data);
+        }
+      } catch (error) {
+        console.error("Gagal mengambil profil sekolah:", error);
+      }
+    }
+
+    fetchProfil();
 
     return () => {
       mounted = false;
@@ -339,7 +383,7 @@ export default function WebsiteHomePage() {
                   color: "var(--school-text)",
                 }}
               >
-                SMK SMART SCHOOL
+                {profil?.nama || "SmartSchool"}
               </p>
 
               <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">
@@ -1017,7 +1061,7 @@ export default function WebsiteHomePage() {
 
                 <div>
                   <p className="text-sm font-bold text-white">
-                    SMK SMART SCHOOL
+                    {profil?.nama || "SmartSchool"}
                   </p>
 
                   <p className="text-[10px] uppercase tracking-wider text-slate-500">
@@ -1084,7 +1128,7 @@ export default function WebsiteHomePage() {
                   />
 
                   <span>
-                    Jl. Pendidikan No. 1, Indonesia
+                    {profil?.alamat || "-"}
                   </span>
                 </div>
 
@@ -1097,7 +1141,7 @@ export default function WebsiteHomePage() {
                     }}
                   />
 
-                  <span>021-12345678</span>
+                  <span>{profil?.telepon || "-"}</span>
                 </div>
 
                 <div className="flex gap-3">
@@ -1109,7 +1153,7 @@ export default function WebsiteHomePage() {
                     }}
                   />
 
-                  <span>info@smartschool.id</span>
+                  <span>{profil?.email || "-"}</span>
                 </div>
               </div>
             </div>

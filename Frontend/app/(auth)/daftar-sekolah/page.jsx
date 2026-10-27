@@ -308,14 +308,10 @@ async function handleSubmit(event) {
       );
     }
 
-    localStorage.setItem("onboarding_email", email);
-    localStorage.setItem("tenant_register_email", email);
+    // Email tidak disalin ke storage bisnis. Email diteruskan lewat
+    // query navigasi (?email=) ke halaman menunggu/verifikasi; Backend
+    // tidak menyediakan endpoint GET pendaftaran tenant untuk dibaca ulang.
     localStorage.setItem("onboarding_paket_id", selectedPaket.id);
-    localStorage.setItem("tenant_register_nama", nama);
-
-    sessionStorage.setItem("tenant_register_email", email);
-    sessionStorage.setItem("tenant_register_nama", nama);
-    sessionStorage.setItem("tenant_register_paket_id", selectedPaket.id);
 
     setSuccess(
       result.message || "Pendaftaran berhasil. Silakan verifikasi email."

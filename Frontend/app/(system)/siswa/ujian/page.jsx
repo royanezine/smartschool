@@ -337,15 +337,6 @@ function getLoggedInUser() {
     const sessionUser = getSessionUser();
     const parsedSession = parseUserSafely(sessionUser);
     if (parsedSession) {
-      if (
-        typeof window !== "undefined" &&
-        window.localStorage?.getItem("user") === "[object Object]"
-      ) {
-        try {
-          window.localStorage.setItem("user", JSON.stringify(parsedSession));
-        } catch {
-        }
-      }
       return parsedSession;
     }
 
@@ -353,16 +344,6 @@ function getLoggedInUser() {
     const parsedStored = parseUserSafely(storedUser);
     if (parsedStored) {
       return parsedStored;
-    }
-
-    if (typeof window !== "undefined") {
-      const rawLocal = window.localStorage?.getItem("user");
-      const parsedLocal = parseUserSafely(rawLocal);
-      if (parsedLocal) return parsedLocal;
-
-      const rawSession = window.sessionStorage?.getItem("user");
-      const parsedSessionStorage = parseUserSafely(rawSession);
-      if (parsedSessionStorage) return parsedSessionStorage;
     }
   } catch (error) {
     console.warn("Gagal membaca identitas pengguna:", error);

@@ -1,38 +1,19 @@
 
+import {
+  clearSession,
+  isTokenExpired as isAuthTokenExpired,
+} from "./auth";
+
+// Adapter tipis di atas lib/auth. Token auth hanya dibaca dari sessionStorage
+// lewat lib/auth; modul ini tidak lagi menjadikan localStorage sumber sesi.
 export function isTokenExpired(token: string): boolean {
-  try {
-    const parts = token.split(".");
-    if (parts.length !== 3) return false;
-
-    const base64 = parts[1]
-      .replace(/-/g, "+")
-      .replace(/_/g, "/");
-
-    const padded = base64.padEnd(
-      base64.length + ((4 - (base64.length % 4)) % 4),
-      "="
-    );
-
-    const payload = JSON.parse(
-      window.atob(padded)
-    );
-
-    if (typeof payload.exp !== "number") return false;
-
-    return Date.now() >= payload.exp * 1000;
-  } catch {
-    return false;
-  }
+  return isAuthTokenExpired(token);
 }
 
 export function expireSession(): void {
   if (typeof window === "undefined") return;
 
-  localStorage.removeItem("token");
-  localStorage.removeItem("user");
-
-  sessionStorage.removeItem("token");
-  sessionStorage.removeItem("user");
+  clearSession();
 
   if (window.location.pathname !== "/login") {
     window.location.replace("/login?sessionExpired=1");

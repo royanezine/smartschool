@@ -27,10 +27,7 @@ function MenungguPendaftaranContent() {
       const emailFromUrl = searchParams.get("email");
 
       const savedEmail =
-        localStorage.getItem("onboarding_email") ||
-        localStorage.getItem("tenant_register_email") ||
-        localStorage.getItem("remembered_identifier") ||
-        "";
+        localStorage.getItem("remembered_identifier") || "";
 
       const currentEmail = emailFromUrl || savedEmail;
 

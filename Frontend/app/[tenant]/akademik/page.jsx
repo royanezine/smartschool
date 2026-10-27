@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
+import { useParams } from "next/navigation";
 import {
   ArrowRight,
   BookOpen,
@@ -62,6 +63,8 @@ function getSchoolColor(name, fallback) {
 }
 
 export default function AkademikPage() {
+  const params = useParams();
+
   const [subdomain, setSubdomain] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
   const [page, setPage] = useState(null);

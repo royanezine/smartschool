@@ -124,12 +124,9 @@ export default function EditAkunKasPage() {
     setSaving(true);
 
     try {
-      const response = await apiFetch(
-        `/api/keuangan/akun-kas/${akunId}`,
-        {
-          method: "PUT",
-          body: JSON.stringify(payload),
-        },
+      const response = await updateAkunKas(
+        akunId,
+        payload,
       );
 
       if (response?.success === false) {

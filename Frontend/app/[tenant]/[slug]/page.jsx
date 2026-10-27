@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useParams } from "next/navigation";
 
 import {
   ArrowRight,
@@ -31,7 +32,7 @@ function getApiBaseUrl() {
 
 function getSubdomain() {
   if (typeof window === "undefined") {
-    return "smart";
+    return "";
   }
 
   const hostname = window.location.hostname;
@@ -53,7 +54,7 @@ function getSubdomain() {
     hostname === "localhost" ||
     hostname === "127.0.0.1"
   ) {
-    return "smart";
+    return "";
   }
 
   return "smart";
@@ -61,7 +62,16 @@ function getSubdomain() {
 
 
 export default function WebsiteHomePage() {
-  const [subdomain, setSubdomain] = useState("smart");
+  const params = useParams();
+
+  const tenantFromRoute =
+    typeof params?.tenant === "string"
+      ? params.tenant
+      : Array.isArray(params?.tenant)
+        ? params.tenant[0] || ""
+        : "";
+
+  const [subdomain, setSubdomain] = useState(tenantFromRoute);
 
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -71,12 +81,13 @@ export default function WebsiteHomePage() {
 
 
   useEffect(() => {
-    const detected = getSubdomain();
+    if (tenantFromRoute) {
+      setSubdomain(tenantFromRoute);
+      return;
+    }
 
-    console.log("DETECTED SUBDOMAIN:", detected);
-
-    setSubdomain(detected);
-  }, []);
+    setSubdomain(getSubdomain());
+  }, [tenantFromRoute]);
 
 
   useEffect(() => {

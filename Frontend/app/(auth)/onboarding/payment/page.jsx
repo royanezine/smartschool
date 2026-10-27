@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
   CheckCircle2,
@@ -13,28 +13,27 @@ import {
   AlertCircle,
 } from "lucide-react";
 
-export default function PaymentPage() {
+function PaymentContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const [paymentUrl, setPaymentUrl] = useState("");
   const [orderId, setOrderId] = useState("");
   const [vaNumber, setVaNumber] = useState("");
   const [bank, setBank] = useState("");
   const [amount, setAmount] = useState("");
+  const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
     const timer = setTimeout(() => {
-    const savedUrl = sessionStorage.getItem("onboarding_payment_url") || "";
-    const savedOrderId = sessionStorage.getItem("onboarding_order_id") || "";
-    const savedVaNumber = sessionStorage.getItem("onboarding_va_number") || "";
-    const savedBank =
-      sessionStorage.getItem("onboarding_payment_bank") ||
-      sessionStorage.getItem("onboarding_bank") ||
-      "";
-    const savedAmount =
-      sessionStorage.getItem("onboarding_gross_amount") || "";
+    const savedUrl = searchParams.get("payment_url") || "";
+    const savedOrderId = searchParams.get("order_id") || "";
+    const savedVaNumber = searchParams.get("va_number") || "";
+    const savedBank = searchParams.get("bank") || "";
+    const savedAmount = searchParams.get("gross_amount") || "";
+    const savedEmail = searchParams.get("email") || "";
 
     if (!savedUrl && !savedVaNumber) {
       setError(
@@ -49,10 +48,11 @@ export default function PaymentPage() {
     setVaNumber(savedVaNumber);
     setBank(savedBank);
     setAmount(savedAmount);
+    setEmail(savedEmail);
     setLoading(false)
     }, 0);
     return () => clearTimeout(timer);
-  }, []);;
+  }, [searchParams]);
 
   const handlePayment = () => {
     if (!paymentUrl) return;
@@ -212,18 +212,20 @@ export default function PaymentPage() {
 
               <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-4">
                 <p className="text-xs leading-5 text-slate-500">
-                  Halaman ini tidak dapat memverifikasi status pembayaran
-                  secara langsung karena Backend belum menyediakan endpoint
-                  status tenant. Konfirmasi pembayaran diproses oleh server
-                  melalui notifikasi Midtrans. Setelah sekolah diaktifkan,
-                  Anda dapat masuk menggunakan akun yang terdaftar.
+                  Setelah melakukan transfer, Anda dapat langsung memeriksa status aktivasi sekolah.
+                  Server SmartSchool akan memperbarui status pendaftaran segera setelah notifikasi Midtrans diterima.
                 </p>
                 <button
                   type="button"
-                  onClick={() => router.push("/login")}
-                  className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl border border-blue-600 bg-blue-50/50 px-5 py-3 text-sm font-semibold text-blue-700 transition hover:bg-blue-100"
+                  onClick={() => {
+                    const params = new URLSearchParams();
+                    if (orderId) params.set("order_id", orderId);
+                    if (email) params.set("email", email);
+                    router.push(`/onboarding/status?${params.toString()}`);
+                  }}
+                  className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700"
                 >
-                  Masuk ke Halaman Login
+                  Cek Status Pembayaran & Aktivasi
                 </button>
               </div>
             </>
@@ -267,5 +269,14 @@ export default function PaymentPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+
+export default function PaymentPage() {
+  return (
+    <Suspense fallback={null}>
+      <PaymentContent />
+    </Suspense>
   );
 }

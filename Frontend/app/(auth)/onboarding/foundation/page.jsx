@@ -1,13 +1,15 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { Suspense, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Loader2 } from "lucide-react";
 
-export default function FoundationPage() {
+function FoundationContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const paketId = searchParams.get("paketId");
 
   const [hasFoundation, setHasFoundation] = useState(null);
-
   const [form, setForm] = useState({
     nama: "",
     npyp: "",
@@ -15,6 +17,7 @@ export default function FoundationPage() {
     telepon: "",
     email: "",
   });
+  const [error, setError] = useState("");
 
   const handleChange = (e) => {
     setForm((prev) => ({
@@ -24,20 +27,35 @@ export default function FoundationPage() {
   };
 
   const handleContinue = () => {
-    const previousData = JSON.parse(
-      sessionStorage.getItem("onboardingData") || "{}"
-    );
+    if (hasFoundation === null) return;
+    setError("");
 
-    sessionStorage.setItem(
-      "onboardingData",
-      JSON.stringify({
-        ...previousData,
-        yayasan: hasFoundation ? form : null,
-      })
-    );
+    if (hasFoundation && !form.nama.trim()) {
+      setError("Nama yayasan wajib diisi jika sekolah memiliki yayasan.");
+      return;
+    }
 
-    router.push("/onboarding/verify");
-  };
+    if (!paketId) {
+      setError("Paket belum dipilih. Silakan pilih paket terlebih dahulu.");
+      return;
+    }
+
+    // Build URL dengan query parameters untuk data yayasan
+    const params = new URLSearchParams({ paketId });
+    
+    if (hasFoundation && form.nama.trim()) {
+      params.set("hasFoundation", "true");
+      params.set("namaYayasan", form.nama.trim());
+      if (form.npyp.trim()) params.set("npypYayasan", form.npyp.trim());
+      if (form.alamat.trim()) params.set("alamatYayasan", form.alamat.trim());
+      if (form.telepon.trim()) params.set("teleponYayasan", form.telepon.trim());
+      if (form.email.trim()) params.set("emailYayasan", form.email.trim());
+    } else {
+      params.set("hasFoundation", "false");
+    }
+
+    router.push(`/onboarding/school?${params.toString()}`);
+  }
 
   return (
     <main className="min-h-screen bg-slate-50 px-4 py-10">
@@ -130,17 +148,40 @@ export default function FoundationPage() {
             </div>
           )}
 
+          {error && (
+            <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-xs text-red-600">
+              {error}
+            </div>
+          )}
+
           <button
             type="button"
             disabled={hasFoundation === null}
             onClick={handleContinue}
-            className="mt-6 w-full rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
+            className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
           >
             Lanjutkan
           </button>
         </div>
       </div>
     </main>
+  );
+}
+
+export default function FoundationPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="min-h-screen bg-slate-50 flex items-center justify-center px-4 py-10">
+          <div className="flex items-center gap-3 text-slate-600">
+            <Loader2 size={24} className="animate-spin text-blue-600" />
+            <span className="text-sm font-medium">Memuat...</span>
+          </div>
+        </main>
+      }
+    >
+      <FoundationContent />
+    </Suspense>
   );
 }
 

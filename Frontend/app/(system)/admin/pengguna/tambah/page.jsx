@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { getProfile, getUsers, createUser } from "@/services/user.service";
+import { getToken } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,

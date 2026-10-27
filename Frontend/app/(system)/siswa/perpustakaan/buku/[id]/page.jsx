@@ -602,6 +602,17 @@ export default function BukuDetailSiswaPage() {
   const [success, setSuccess] =
     useState("");
 
+  const [tanggalJatuhTempo, setTanggalJatuhTempo] =
+    useState("");
+
+  const tanggalHariIni = useMemo(() => {
+    const sekarang = new Date();
+    const offsetMenit = sekarang.getTimezoneOffset();
+    return new Date(sekarang.getTime() - offsetMenit * 60000)
+      .toISOString()
+      .slice(0, 10);
+  }, []);
+
   useEffect(() => {
     const timer = setTimeout(() => {
       setMounted(true);
@@ -863,6 +874,13 @@ export default function BukuDetailSiswaPage() {
         return;
       }
 
+      if (!tanggalJatuhTempo) {
+        setError(
+          "Tanggal jatuh tempo wajib dipilih.",
+        );
+        return;
+      }
+
       setSaving(true);
       setError("");
       setSuccess("");
@@ -872,8 +890,7 @@ export default function BukuDetailSiswaPage() {
           bukuId: String(
             book.id,
           ),
-          penggunaId:
-            String(userId),
+          tanggalJatuhTempo,
         });
 
         setSuccess(
@@ -1208,6 +1225,28 @@ export default function BukuDetailSiswaPage() {
                     "Tidak ada deskripsi buku yang tersedia."}
                 </p>
 
+
+                {!isEbook && !activeLoan && (
+                  <div className="mt-6 max-w-xs">
+                    <label
+                      htmlFor="tanggalJatuhTempo"
+                      className="theme-text mb-1.5 block text-xs font-semibold"
+                    >
+                      Tanggal Jatuh Tempo
+                    </label>
+
+                    <input
+                      id="tanggalJatuhTempo"
+                      type="date"
+                      min={tanggalHariIni}
+                      value={tanggalJatuhTempo}
+                      onChange={(event) =>
+                        setTanggalJatuhTempo(event.target.value)
+                      }
+                      className="theme-card theme-border theme-text h-11 w-full rounded-xl border px-3 text-sm outline-none"
+                    />
+                  </div>
+                )}
 
                 <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                   {isEbook ? (

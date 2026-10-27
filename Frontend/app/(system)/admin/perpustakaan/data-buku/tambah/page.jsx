@@ -34,6 +34,26 @@ const emptyForm = {
 const inputClass =
   "theme-input theme-border theme-text h-11 w-full rounded-lg border px-3.5 text-sm outline-none transition placeholder:text-[var(--color-text-placeholder)] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]";
 
+// Enum KategoriBuku pada Backend (Prisma): nilai harus salah satu dari daftar ini.
+const KATEGORI_BUKU = [
+  "PELAJARAN",
+  "NOVEL",
+  "KOMIK",
+  "ENSIKLOPEDIA",
+  "KAMUS",
+  "MAJALAH",
+  "JURNAL",
+  "BIOGRAFI",
+  "AGAMA",
+  "TEKNOLOGI",
+  "SAINS",
+  "SEJARAH",
+  "BAHASA",
+  "MATEMATIKA",
+  "FIKSI",
+  "NON_FIKSI",
+];
+
 const selectClass =
   "theme-input theme-border theme-text h-11 w-full appearance-none rounded-lg border px-3.5 pr-9 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]";
 
@@ -226,13 +246,25 @@ export default function TambahBukuPage() {
                   </div>
                   <div>
                     <label className={labelClass}>Kategori</label>
-                    <input
-                      required
-                      value={form.kategori}
-                      onChange={update("kategori")}
-                      placeholder="Contoh: Matematika"
-                      className={inputClass}
-                    />
+                    <div className="relative">
+                      <select
+                        required
+                        value={form.kategori}
+                        onChange={update("kategori")}
+                        className={selectClass}
+                      >
+                        <option value="">Pilih kategori</option>
+                        {KATEGORI_BUKU.map((kategori) => (
+                          <option key={kategori} value={kategori}>
+                            {kategori.replace(/_/g, " ")}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown
+                        size={15}
+                        className="theme-text-muted pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
+                      />
+                    </div>
                   </div>
                   <div>
                     <label className={labelClass}>Jumlah</label>

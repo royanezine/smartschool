@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 import Link from "next/link";
 import {
   AlertCircle,
@@ -89,6 +90,8 @@ function getPublicApiBase() {
 export default function TentangPage() {
   const [halaman, setHalaman] = useState(null);
   const [loading, setLoading] = useState(true);
+  const params = useParams();
+
   const [error, setError] = useState("");
   const [theme, setTheme] = useState(DEFAULT_THEME);
 
@@ -100,7 +103,9 @@ export default function TentangPage() {
         setLoading(true);
         setError("");
 
-        const subdomain = getSubdomain();
+        const subdomain =
+          (typeof params?.tenant === "string" ? params.tenant : "") ||
+          getSubdomain();
 
         if (!subdomain) {
           throw new Error(
@@ -148,7 +153,7 @@ export default function TentangPage() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [params?.tenant]);
 
   useEffect(() => {
     const root = document.documentElement;

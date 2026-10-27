@@ -241,20 +241,30 @@ function saveHasilUjian(
       : null,
   };
 
-  const serialized = JSON.stringify(payload);
+  return payload;
+}
+
+
+// Hasil ujian diteruskan lewat query navigasi (bukan storage bisnis) supaya
+// halaman hasil tetap dapat dibaca ulang setelah refresh.
+function buildHasilUrl(ujianId, hasilPayload) {
+  if (!ujianId || !hasilPayload) {
+    return `/siswa/hasil-ujian/${ujianId}`;
+  }
 
   try {
-    sessionStorage.setItem(
-      `hasil-ujian-${ujianId}`,
-      serialized
-    );
-    sessionStorage.setItem(
-      "hasil-ujian-last",
-      serialized
-    );
-  } catch {}
+    const ringkas = {
+      sesiId: hasilPayload.sesiId ?? null,
+      submittedAt: hasilPayload.submittedAt ?? null,
+      hasil: hasilPayload.hasil ?? null,
+    };
 
-  return payload;
+    return `/siswa/hasil-ujian/${ujianId}?hasil=${encodeURIComponent(
+      JSON.stringify(ringkas)
+    )}`;
+  } catch {
+    return `/siswa/hasil-ujian/${ujianId}`;
+  }
 }
 
 
@@ -483,7 +493,7 @@ export default function UjianPage() {
             payloadJawaban
           );
 
-        saveHasilUjian(
+        const hasilPayload = saveHasilUjian(
           id,
           submitResponse,
           sesi,
@@ -497,9 +507,7 @@ export default function UjianPage() {
           timerRef.current = null;
         }
 
-        router.push(
-          `/siswa/hasil-ujian/${id}`
-        );
+        router.push(buildHasilUrl(id, hasilPayload));
       } catch (err) {
         console.error(
           "AUTO SUBMIT ERROR:",
@@ -686,7 +694,7 @@ export default function UjianPage() {
           payloadJawaban
         );
 
-      saveHasilUjian(
+      const hasilPayload = saveHasilUjian(
         id,
         submitResponse,
         sesi,
@@ -695,9 +703,7 @@ export default function UjianPage() {
 
       setIsFinished(true);
 
-      router.push(
-        `/siswa/hasil-ujian/${id}`
-      );
+      router.push(buildHasilUrl(id, hasilPayload));
     } catch (err) {
       console.error(
         "SUBMIT UJIAN ERROR:",
