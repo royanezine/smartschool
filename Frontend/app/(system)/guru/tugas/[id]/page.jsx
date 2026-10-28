@@ -6,6 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
+
 import {
   getDetailTugas,
   getPengumpulanByTugas,
@@ -22,7 +23,6 @@ import {
   BookOpen,
   Clock,
 } from "lucide-react";
-
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -59,21 +59,169 @@ const themeDangerSurface =
 const themeDangerBorder =
   "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
 
+const UUID_REGEX =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-function formatTanggalWaktu(date) {
-  if (!date) return "-";
+function isUUID(value) {
+  return typeof value === "string" && UUID_REGEX.test(value.trim());
+}
 
-  const d = new Date(date);
+function unwrapResponse(response) {
+  let data = response;
 
-  if (Number.isNaN(d.getTime())) return "-";
+  for (let i = 0; i < 5; i += 1) {
+    if (!data || typeof data !== "object" || Array.isArray(data)) {
+      break;
+    }
 
-  return d.toLocaleString("id-ID", {
-    day: "2-digit",
-    month: "long",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+    if (
+      data.data !== undefined &&
+      data.data !== null &&
+      typeof data.data === "object"
+    ) {
+      data = data.data;
+      continue;
+    }
+
+    break;
+  }
+
+  return data;
+}
+
+/**
+ * Mengambil nama pengguna dari object relasi API.
+ * String yang berbentuk UUID tidak dianggap sebagai nama.
+ */
+function getNamaPengguna(value) {
+  if (!value) return "";
+
+  if (typeof value === "string") {
+    const text = value.trim();
+
+    return text && !isUUID(text) ? text : "";
+  }
+
+  if (typeof value !== "object" || Array.isArray(value)) {
+    return "";
+  }
+
+  const kandidat = [
+    value.namaLengkap,
+    value.nama,
+    value.name,
+    value.namaGuru,
+    value.namaPengguna,
+    value.fullName,
+    value.displayName,
+    value.user?.namaLengkap,
+    value.user?.nama,
+    value.user?.name,
+    value.pengguna?.namaLengkap,
+    value.pengguna?.nama,
+    value.pengguna?.name,
+    value.guru?.namaLengkap,
+    value.guru?.nama,
+    value.guru?.pengguna?.namaLengkap,
+    value.guru?.pengguna?.nama,
+    value.profil?.namaLengkap,
+    value.profil?.nama,
+  ];
+
+  for (const nama of kandidat) {
+    if (
+      typeof nama === "string" &&
+      nama.trim() &&
+      nama.trim() !== "-" &&
+      !isUUID(nama.trim())
+    ) {
+      return nama.trim();
+    }
+  }
+
+  return "";
+}
+
+/**
+ * Mengambil data guru dari beberapa kemungkinan relasi API.
+ */
+function getDataGuru(tugas) {
+  const kelasMapel = tugas?.kelasMapel ?? {};
+
+  const kandidat = [
+    kelasMapel?.guruPengajar,
+    kelasMapel?.guru,
+    kelasMapel?.pengguna,
+    kelasMapel?.guruMapel,
+    kelasMapel?.pengajar,
+    kelasMapel?.guruPengajar?.pengguna,
+    kelasMapel?.guru?.pengguna,
+    tugas?.guruPengajar,
+    tugas?.guru,
+    tugas?.guruMapel,
+    tugas?.pengajar,
+    tugas?.pengguna,
+    tugas?.dibuatOleh,
+    tugas?.createdBy,
+  ];
+
+  for (const item of kandidat) {
+    if (
+      item &&
+      typeof item === "object" &&
+      !Array.isArray(item)
+    ) {
+      return item;
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Mengambil nama guru, bukan ID guru.
+ */
+function getNamaGuru(tugas) {
+  if (!tugas) return "";
+
+  const kelasMapel = tugas?.kelasMapel ?? {};
+
+  const kandidatNama = [
+    getNamaPengguna(kelasMapel?.guruPengajar),
+    getNamaPengguna(kelasMapel?.guru),
+    getNamaPengguna(kelasMapel?.pengguna),
+    getNamaPengguna(kelasMapel?.guruMapel),
+    getNamaPengguna(kelasMapel?.pengajar),
+    getNamaPengguna(kelasMapel?.guruPengajar?.pengguna),
+    getNamaPengguna(kelasMapel?.guru?.pengguna),
+    getNamaPengguna(tugas?.guruPengajar),
+    getNamaPengguna(tugas?.guru),
+    getNamaPengguna(tugas?.guruMapel),
+    getNamaPengguna(tugas?.pengajar),
+    getNamaPengguna(tugas?.pengguna),
+    getNamaPengguna(tugas?.dibuatOleh),
+    getNamaPengguna(tugas?.createdBy),
+    tugas?.guruPengajarNama,
+    tugas?.namaGuru,
+    tugas?.guruNama,
+    tugas?.namaPengajar,
+    kelasMapel?.guruPengajarNama,
+    kelasMapel?.namaGuru,
+    kelasMapel?.namaPengajar,
+  ];
+
+  for (const nama of kandidatNama) {
+    if (
+      typeof nama === "string" &&
+      nama.trim() &&
+      nama.trim() !== "-" &&
+      !isUUID(nama.trim())
+    ) {
+      return nama.trim();
+    }
+  }
+
+  return "";
 }
 
 function formatTanggal(date) {
@@ -103,26 +251,6 @@ function formatJam(date) {
   });
 }
 
-function unwrapResponse(response) {
-  let data = response;
-
-  for (let i = 0; i < 4; i += 1) {
-    if (!data || typeof data !== "object") break;
-
-    if (
-      data.data &&
-      typeof data.data === "object"
-    ) {
-      data = data.data;
-      continue;
-    }
-
-    break;
-  }
-
-  return data;
-}
-
 function getStatusTugas(tugas) {
   if (!tugas?.batasWaktu) return "Tanpa Batas Waktu";
 
@@ -149,7 +277,6 @@ const statusIcon = {
   Berakhir: AlertCircle,
 };
 
-
 export default function DetailTugasPage() {
   const params = useParams();
   const router = useRouter();
@@ -163,7 +290,11 @@ export default function DetailTugasPage() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   useEffect(() => {
-    if (!tugasId) return;
+    if (!tugasId) {
+      setLoading(false);
+      setError("ID tugas tidak ditemukan pada URL.");
+      return;
+    }
 
     let active = true;
 
@@ -189,6 +320,7 @@ export default function DetailTugasPage() {
         if (
           !data ||
           typeof data !== "object" ||
+          Array.isArray(data) ||
           !data.id
         ) {
           throw new Error(
@@ -196,30 +328,49 @@ export default function DetailTugasPage() {
           );
         }
 
-        const submissions =
-          submissionResult.status === "fulfilled"
-            ? submissionResult.value
-            : null;
+        let submissions = null;
 
-        if (submissionResult.status === "rejected") {
+        if (submissionResult.status === "fulfilled") {
+          const submissionData = unwrapResponse(
+            submissionResult.value
+          );
+
+          if (Array.isArray(submissionData)) {
+            submissions = submissionData;
+          } else if (
+            Array.isArray(submissionData?.pengumpulanTugasSiswa)
+          ) {
+            submissions = submissionData.pengumpulanTugasSiswa;
+          } else if (
+            Array.isArray(submissionData?.pengumpulan)
+          ) {
+            submissions = submissionData.pengumpulan;
+          } else if (Array.isArray(submissionData?.items)) {
+            submissions = submissionData.items;
+          }
+        } else {
           console.error(
             "GAGAL MEMUAT DAFTAR PENGUMPULAN TUGAS:",
             submissionResult.reason
           );
         }
 
-        setTugas(
-          Array.isArray(submissions)
+        const tugasFinal = {
+          ...data,
+          ...(Array.isArray(submissions)
             ? {
-                ...data,
                 pengumpulanTugasSiswa: submissions,
                 _count: {
                   ...(data._count || {}),
                   pengumpulanTugasSiswa: submissions.length,
                 },
               }
-            : data
-        );
+            : {}),
+        };
+
+        if (!active) return;
+
+        setTugas(tugasFinal);
       } catch (err) {
         if (!active) return;
 
@@ -240,9 +391,9 @@ export default function DetailTugasPage() {
     };
   }, [tugasId]);
 
-
   const kelasMapel = tugas?.kelasMapel ?? {};
   const kelas = kelasMapel?.kelas ?? tugas?.kelas ?? {};
+
   const mapel =
     kelasMapel?.mataPelajaran ??
     kelasMapel?.mapel ??
@@ -250,23 +401,8 @@ export default function DetailTugasPage() {
     tugas?.mapel ??
     {};
 
-  const guru =
-    kelasMapel?.guruPengajar ??
-    kelasMapel?.guru ??
-    tugas?.guruPengajar ??
-    tugas?.guru ??
-    kelasMapel?.pengguna ??
-    null;
-
-  const guruNama =
-    guru?.namaLengkap ??
-    guru?.nama ??
-    guru?.name ??
-    guru?.user?.namaLengkap ??
-    guru?.pengguna?.namaLengkap ??
-    tugas?.guruPengajarNama ??
-    tugas?.namaGuru ??
-    "-";
+  const guru = getDataGuru(tugas);
+  const guruNama = getNamaGuru(tugas);
 
   const kelasNama =
     kelas?.nama ??
@@ -300,34 +436,46 @@ export default function DetailTugasPage() {
     ? statusIcon[status] || ClipboardList
     : ClipboardList;
 
+  const namaUntukHeader = guruNama || "Guru";
+
+  const emailGuru =
+    guru?.email ??
+    guru?.user?.email ??
+    guru?.pengguna?.email ??
+    "guru@smartschool.com";
+
+  const avatarGuru = guruNama
+    ? guruNama
+        .split(/\s+/)
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((word) => word[0])
+        .join("")
+        .toUpperCase()
+    : "GU";
 
   function renderLayout(content) {
     return (
-      <div className="theme-page flex h-screen overflow-hidden">
+      <div className="theme-page flex h-screen min-h-0 overflow-hidden">
         <Sidebar
           active="tugas"
           setActive={() => {}}
           collapsed={!sidebarOpen}
-          setCollapsed={() => setSidebarOpen((prev) => !prev)}
+          setCollapsed={() =>
+            setSidebarOpen((prev) => !prev)
+          }
         />
 
-        <div className="flex min-w-0 flex-1 flex-col">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
           <div className="shrink-0">
             <Header
-              toggleSidebar={() => setSidebarOpen((prev) => !prev)}
+              toggleSidebar={() =>
+                setSidebarOpen((prev) => !prev)
+              }
               user={{
-                name: guruNama !== "-" ? guruNama : "Guru",
-                email: guru?.email ?? "guru@smartschool.com",
-                avatar:
-                  guruNama !== "-"
-                    ? guruNama
-                        .split(" ")
-                        .filter(Boolean)
-                        .slice(0, 2)
-                        .map((word) => word[0])
-                        .join("")
-                        .toUpperCase()
-                    : "GU",
+                name: namaUntukHeader,
+                email: emailGuru,
+                avatar: avatarGuru,
               }}
             />
           </div>
@@ -338,10 +486,9 @@ export default function DetailTugasPage() {
     );
   }
 
-
   if (loading) {
     return renderLayout(
-      <main className="flex flex-1 items-center justify-center p-4">
+      <main className="flex min-w-0 flex-1 items-center justify-center p-4">
         <div className="text-center">
           <div
             className={`mx-auto flex h-12 w-12 items-center justify-center rounded-xl ${themePrimarySoft}`}
@@ -359,10 +506,9 @@ export default function DetailTugasPage() {
     );
   }
 
-
   if (error) {
     return renderLayout(
-      <main className="flex flex-1 items-center justify-center p-4">
+      <main className="flex min-w-0 flex-1 items-center justify-center p-4">
         <div
           className={`theme-card w-full max-w-md rounded-2xl border ${themeDangerBorder} p-6 text-center ${themeCardShadow}`}
         >
@@ -393,10 +539,9 @@ export default function DetailTugasPage() {
     );
   }
 
-
   if (!tugas) {
     return renderLayout(
-      <main className="flex flex-1 items-center justify-center p-4">
+      <main className="flex min-w-0 flex-1 items-center justify-center p-4">
         <div className="text-center">
           <div
             className={`mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl ${themeNeutralSurface}`}
@@ -421,13 +566,12 @@ export default function DetailTugasPage() {
     );
   }
 
-
   return renderLayout(
-    <main className="theme-page min-h-0 flex-1 overflow-y-auto">
-      <div className="mx-auto w-full max-w-5xl px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
+    <main className="min-h-0 min-w-0 flex-1 overflow-y-auto">
+      <div className="w-full p-4 sm:p-5 lg:p-6 xl:p-8">
         <button
           type="button"
-          onClick={() => router.back()}
+          onClick={() => router.push("/guru/tugas")}
           className="theme-text-secondary mb-5 inline-flex items-center gap-2 text-sm font-medium transition-colors hover:text-[var(--color-primary)]"
         >
           <ArrowLeft size={16} />
@@ -480,12 +624,15 @@ export default function DetailTugasPage() {
               </span>
             </div>
 
-            <div className="mt-7 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-7 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-3">
               <div
                 className={`rounded-xl border ${themeNeutralBorder} ${themeNeutralSurface} p-4`}
               >
                 <div className="flex items-center gap-2">
-                  <Users size={16} className={themePrimaryText} />
+                  <Users
+                    size={16}
+                    className={themePrimaryText}
+                  />
                   <span className="theme-text-muted text-xs font-medium">
                     Kelas
                   </span>
@@ -500,7 +647,10 @@ export default function DetailTugasPage() {
                 className={`rounded-xl border ${themeNeutralBorder} ${themeNeutralSurface} p-4`}
               >
                 <div className="flex items-center gap-2">
-                  <BookOpen size={16} className={themePrimaryText} />
+                  <BookOpen
+                    size={16}
+                    className={themePrimaryText}
+                  />
                   <span className="theme-text-muted text-xs font-medium">
                     Mata Pelajaran
                   </span>
@@ -515,7 +665,10 @@ export default function DetailTugasPage() {
                 className={`rounded-xl border ${themeNeutralBorder} ${themeNeutralSurface} p-4`}
               >
                 <div className="flex items-center gap-2">
-                  <ClipboardList size={16} className={themePrimaryText} />
+                  <ClipboardList
+                    size={16}
+                    className={themePrimaryText}
+                  />
                   <span className="theme-text-muted text-xs font-medium">
                     Pengumpulan
                   </span>
@@ -529,7 +682,7 @@ export default function DetailTugasPage() {
           </div>
         </section>
 
-        <div className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1fr)_300px]">
+        <div className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1fr)_300px] 2xl:grid-cols-[minmax(0,1fr)_340px]">
           <section
             className={`theme-card rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
           >
@@ -651,7 +804,7 @@ export default function DetailTugasPage() {
                     Guru Pengajar
                   </p>
                   <p className="theme-text mt-1 break-words text-sm font-medium">
-                    {guruNama}
+                    {guruNama || "Nama guru belum tersedia"}
                   </p>
                 </div>
               </div>

@@ -18,6 +18,7 @@ import {
   Loader2,
   ChevronRight,
   RefreshCw,
+  ArrowLeft,
 } from "lucide-react";
 
 import { getDaftarPeminjaman } from "@/services/sarpras.service";
@@ -492,6 +493,16 @@ export default function GuruSarprasRiwayatPage() {
 
         <main className="theme-page flex-1 overflow-y-auto">
           <div className="mx-auto w-full max-w-[1700px] space-y-6 px-4 py-6 sm:px-6 lg:px-8 lg:py-8 2xl:max-w-[1900px]">
+
+
+            <button
+              type="button"
+              onClick={() => router.push("/guru/sarpras")}
+              className={`theme-card ${themeNeutralBorder} theme-text-secondary inline-flex items-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-semibold ${themeNeutralHover} ${themeSmallShadow} transition-all hover:text-[var(--color-primary)] sm:text-sm`}
+            >
+              <ArrowLeft size={15} />
+              Kembali
+            </button>
 
 
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">

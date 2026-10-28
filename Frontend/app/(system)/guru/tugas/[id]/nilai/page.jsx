@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -26,6 +25,9 @@ import {
   Save,
   Loader2,
   GraduationCap,
+  CalendarDays,
+  Info,
+  ExternalLink,
 } from "lucide-react";
 
 
@@ -35,19 +37,52 @@ const primaryGradient =
 const primarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
 
+const primarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
 const primaryText = "text-[var(--color-primary)]";
+
+const primaryShadow =
+  "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
 
 const cardShadow =
   "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
 
+const smallShadow =
+  "shadow-[0_2px_8px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
 const neutralSurface =
   "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+const neutralHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
 
 const neutralBorder =
   "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
 
 const divider =
   "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+
+const successSurface =
+  "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
+
+const successBorder =
+  "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
+
+const warningSurface =
+  "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]";
+
+const warningBorder =
+  "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
+
+const dangerSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const dangerBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
+
+const focusRing =
+  "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
 
 function unwrapResponse(response) {
@@ -262,6 +297,11 @@ export default function NilaiTugasPage() {
 
   const jumlahMenunggu = pengumpulan.length - jumlahDinilai;
 
+  const persenDinilai =
+    pengumpulan.length > 0
+      ? Math.round((jumlahDinilai / pengumpulan.length) * 100)
+      : 0;
+
   const filteredSubmissions = useMemo(() => {
     const keyword = search.trim().toLowerCase();
 
@@ -347,7 +387,7 @@ export default function NilaiTugasPage() {
 
   function renderLayout(content) {
     return (
-      <div className="theme-page flex h-screen overflow-hidden">
+      <div className="theme-page flex h-screen min-h-0 overflow-hidden">
         <Sidebar
           active="tugas"
           setActive={() => {}}
@@ -357,7 +397,8 @@ export default function NilaiTugasPage() {
           }
         />
 
-        <div className="flex min-w-0 flex-1 flex-col">
+        {/* Body: sidebar + main sejajar */}
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
           <div className="shrink-0">
             <Header
               toggleSidebar={() =>
@@ -381,7 +422,7 @@ export default function NilaiTugasPage() {
 
   if (loading) {
     return renderLayout(
-      <main className="flex flex-1 items-center justify-center">
+      <main className="flex min-w-0 flex-1 items-center justify-center p-4">
         <div className="text-center">
           <Loader2
             className={`mx-auto h-8 w-8 animate-spin ${primaryText}`}
@@ -397,7 +438,7 @@ export default function NilaiTugasPage() {
 
   if (!tugas && error) {
     return renderLayout(
-      <main className="flex flex-1 items-center justify-center p-5">
+      <main className="flex min-w-0 flex-1 items-center justify-center p-5">
         <div className="theme-card w-full max-w-md rounded-2xl border p-6 text-center">
           <AlertCircle
             className="theme-danger mx-auto"
@@ -411,8 +452,8 @@ export default function NilaiTugasPage() {
           </p>
           <button
             type="button"
-            onClick={() => router.back()}
-            className={`mt-5 inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-white ${primaryGradient}`}
+            onClick={() => router.push(`/guru/tugas/${tugasId}`)}
+            className={`mt-5 inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-[var(--color-card)] ${primaryGradient}`}
           >
             <ArrowLeft size={16} />
             Kembali
@@ -424,112 +465,155 @@ export default function NilaiTugasPage() {
 
 
   return renderLayout(
-    <main className="theme-page min-h-0 flex-1 overflow-y-auto">
-      <div className="mx-auto w-full max-w-6xl px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
+    <main className="min-h-0 min-w-0 flex-1 overflow-y-auto">
+      {/* Konten w-full (bukan max-w) → melebar saat zoom out */}
+      <div className="w-full p-4 sm:p-5 lg:p-6 xl:p-8">
 
         <button
           type="button"
           onClick={() => router.push(`/guru/tugas/${tugasId}`)}
-          className="theme-text-secondary mb-5 inline-flex items-center gap-2 text-sm font-medium hover:text-[var(--color-primary)]"
+          className={`theme-card ${neutralBorder} theme-text-secondary mb-5 inline-flex items-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-semibold ${neutralHover} ${smallShadow} transition-all hover:text-[var(--color-primary)] sm:text-sm`}
         >
-          <ArrowLeft size={16} />
+          <ArrowLeft size={15} />
           Kembali ke Detail Tugas
         </button>
 
+        {/* ================= HEADER ================= */}
         <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <div className="flex items-center gap-2">
-              <div
-                className={`flex h-10 w-10 items-center justify-center rounded-xl ${primarySoft} ${primaryText}`}
-              >
-                <GraduationCap size={21} />
-              </div>
+          <div className="flex items-start gap-3">
+            <div
+              className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${primaryGradient} text-[var(--color-card)] ${primaryShadow}`}
+            >
+              <GraduationCap size={21} />
+            </div>
 
-              <div>
-                <h1 className="theme-text text-xl font-semibold sm:text-2xl">
-                  Penilaian Tugas
-                </h1>
-                <p className="theme-text-secondary mt-1 text-sm">
-                  Periksa pengumpulan dan berikan nilai kepada siswa.
-                </p>
-              </div>
+            <div className="min-w-0">
+              <h1 className="theme-text text-xl font-bold sm:text-2xl">
+                Penilaian Tugas
+              </h1>
+              <p className="theme-text-secondary mt-1 text-sm">
+                Beri nilai dan catatan untuk tugas yang sudah dikumpulkan siswa.
+              </p>
             </div>
           </div>
         </div>
 
+        {/* ================= INFO TUGAS ================= */}
         <section
           className={`theme-card rounded-2xl border ${neutralBorder} ${cardShadow}`}
         >
           <div className="p-5 sm:p-6">
-            <h2 className="theme-text break-words text-lg font-semibold">
+            <p className="theme-text-muted text-[11px] font-bold uppercase tracking-wider">
+              Tugas
+            </p>
+
+            <h2 className="theme-text mt-1 break-words text-lg font-semibold">
               {tugas?.judul || "Tanpa judul"}
             </h2>
 
             <div className="theme-text-secondary mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm">
-              <span className="inline-flex items-center gap-2">
-                <BookOpen size={15} />
+              <span className="inline-flex items-center gap-1.5">
+                <BookOpen size={15} className="theme-text-muted" />
                 {mapelNama}
               </span>
 
-              <span className="inline-flex items-center gap-2">
-                <Users size={15} />
+              <span className="inline-flex items-center gap-1.5">
+                <Users size={15} className="theme-text-muted" />
                 {kelasNama}
               </span>
 
-              <span className="inline-flex items-center gap-2">
-                <Clock size={15} />
+              <span className="inline-flex items-center gap-1.5">
+                <CalendarDays size={15} className="theme-text-muted" />
                 Batas: {formatDate(tugas?.batasWaktu)}
               </span>
             </div>
 
             {guruNama !== "-" && (
-              <p className="theme-text-secondary mt-3 text-xs">
+              <p className="theme-text-muted mt-3 text-xs">
                 Guru pengajar: {guruNama}
               </p>
             )}
           </div>
         </section>
 
-        <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
+        {/* ================= STAT CARDS ================= */}
+        {/* Responsif: 1 → 3 kolom. Jika nanti stat bertambah jadi 6, ganti `2xl:grid-cols-3` → `2xl:grid-cols-6` */}
+        <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-3">
           <SummaryCard
             icon={<Users size={18} />}
             label="Siswa Mengumpulkan"
             value={jumlahPengumpulan}
+            hint="Total siswa yang mengumpulkan tugas"
           />
 
           <SummaryCard
             icon={<CheckCircle2 size={18} />}
             label="Sudah Dinilai"
             value={jumlahDinilai}
+            hint="Sudah kamu beri nilai"
+            tone="success"
           />
 
           <SummaryCard
             icon={<Clock size={18} />}
             label="Menunggu Penilaian"
             value={jumlahMenunggu}
+            hint="Belum kamu beri nilai"
+            tone="warning"
           />
         </div>
 
+        {/* ================= PROGRESS ================= */}
+        {pengumpulan.length > 0 && (
+          <div
+            className={`theme-card mt-4 rounded-2xl border ${neutralBorder} p-4 ${smallShadow} sm:p-5`}
+          >
+            <div className="flex items-center justify-between gap-3">
+              <p className="theme-text-secondary text-xs font-semibold sm:text-sm">
+                Progres penilaian
+              </p>
+              <p className="theme-text text-sm font-bold">
+                {jumlahDinilai}/{pengumpulan.length} siswa
+              </p>
+            </div>
+
+            <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-[color-mix(in_srgb,var(--color-text)_8%,transparent)]">
+              <div
+                className={`h-full rounded-full ${primaryGradient} transition-all duration-500`}
+                style={{ width: `${persenDinilai}%` }}
+              />
+            </div>
+
+            <p className="theme-text-muted mt-2 text-xs">
+              {persenDinilai}% siswa sudah dinilai.
+            </p>
+          </div>
+        )}
+
+        {/* ================= ALERT ================= */}
         {error && (
-          <div className="mt-5 flex items-start gap-2 rounded-xl border border-red-500/20 bg-red-500/5 p-4 text-sm text-red-600">
+          <div
+            className={`mt-5 flex items-start gap-2 rounded-xl border ${dangerBorder} ${dangerSurface} p-4 text-sm theme-danger`}
+          >
             <AlertCircle size={18} className="mt-0.5 shrink-0" />
             <p>{error}</p>
           </div>
         )}
 
         {success && (
-          <div className="mt-5 flex items-start gap-2 rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4 text-sm text-emerald-600">
+          <div
+            className={`mt-5 flex items-start gap-2 rounded-xl border ${successBorder} ${successSurface} p-4 text-sm text-[var(--color-success)]`}
+          >
             <CheckCircle2 size={18} className="mt-0.5 shrink-0" />
             <p>{success}</p>
           </div>
         )}
 
+        {/* ================= DAFTAR PENGUMPULAN ================= */}
         <section
           className={`theme-card mt-5 overflow-hidden rounded-2xl border ${neutralBorder} ${cardShadow}`}
         >
-          <div
-            className={`border-b ${divider} p-5 sm:p-6`}
-          >
+          <div className={`border-b ${divider} p-5 sm:p-6`}>
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div>
                 <h2 className="theme-text text-base font-semibold">
@@ -552,7 +636,7 @@ export default function NilaiTugasPage() {
                       setSearch(event.target.value)
                     }
                     placeholder="Cari nama atau NISN..."
-                    className={`theme-input w-full rounded-lg border ${neutralBorder} bg-transparent py-2.5 pl-9 pr-3 text-sm outline-none focus:border-[var(--color-primary)] sm:w-64`}
+                    className={`theme-input w-full rounded-lg border ${neutralBorder} bg-transparent py-2.5 pl-9 pr-3 text-sm outline-none sm:w-64 ${focusRing}`}
                   />
                 </div>
 
@@ -561,7 +645,7 @@ export default function NilaiTugasPage() {
                   onChange={(event) =>
                     setFilter(event.target.value)
                   }
-                  className={`theme-input rounded-lg border ${neutralBorder} bg-[var(--color-card)] px-3 py-2.5 text-sm outline-none focus:border-[var(--color-primary)]`}
+                  className={`theme-input rounded-lg border ${neutralBorder} bg-[var(--color-card)] px-3 py-2.5 text-sm outline-none ${focusRing}`}
                 >
                   <option value="semua">Semua Status</option>
                   <option value="menunggu">Menunggu Penilaian</option>
@@ -587,17 +671,38 @@ export default function NilaiTugasPage() {
               </h3>
 
               <p className="theme-text-secondary mx-auto mt-2 max-w-md text-sm leading-6">
-                Belum ada data pengumpulan siswa pada respons detail tugas.
-                Jika halaman daftar tugas menunjukkan siswa sudah mengumpulkan,
-                pastikan endpoint detail menyertakan seluruh data pengumpulan.
+                Belum ada siswa yang mengumpulkan tugas ini. Pengumpulan
+                akan muncul di sini setelah siswa mengunggah jawaban.
               </p>
             </div>
           ) : filteredSubmissions.length === 0 ? (
-            <div className="theme-text-secondary px-5 py-10 text-center text-sm">
-              Tidak ada siswa yang sesuai dengan pencarian atau filter.
+            <div className="px-5 py-10 text-center">
+              <div
+                className={`mx-auto flex h-12 w-12 items-center justify-center rounded-xl ${neutralSurface}`}
+              >
+                <Search
+                  size={22}
+                  className="theme-text-muted"
+                />
+              </div>
+
+              <p className="theme-text-secondary mt-3 text-sm">
+                Tidak ada siswa yang sesuai dengan pencarian atau filter.
+              </p>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setSearch("");
+                  setFilter("semua");
+                }}
+                className={`mt-3 text-xs font-semibold ${primaryText} hover:underline`}
+              >
+                Reset pencarian
+              </button>
             </div>
           ) : (
-            <div className="divide-y divide-[color-mix(in_srgb,var(--color-text)_8%,transparent)]">
+            <div className={`divide-y ${divider}`}>
               {filteredSubmissions.map((item) => {
                 const nama = getStudentName(item);
                 const status = getSubmissionStatus(item);
@@ -614,6 +719,7 @@ export default function NilaiTugasPage() {
                     className="p-5 sm:p-6"
                   >
                     <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+                      {/* Profil siswa + info pengumpulan */}
                       <div className="flex min-w-0 items-start gap-3">
                         <div
                           className={`flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full ${primarySoft} ${primaryText} text-sm font-semibold`}
@@ -646,9 +752,9 @@ export default function NilaiTugasPage() {
                             <span
                               className={`rounded-full border px-2.5 py-1 text-xs font-medium ${
                                 status === "Sudah Dinilai"
-                                  ? "border-emerald-500/20 bg-emerald-500/5 text-emerald-600"
+                                  ? `${successBorder} ${successSurface} text-[var(--color-success)]`
                                   : status === "Terlambat"
-                                    ? "border-red-500/20 bg-red-500/5 text-red-600"
+                                    ? `${dangerBorder} ${dangerSurface} theme-danger`
                                     : `${neutralBorder} ${neutralSurface} theme-text-secondary`
                               }`}
                             >
@@ -664,6 +770,7 @@ export default function NilaiTugasPage() {
                               >
                                 <FileText size={14} />
                                 Buka Jawaban
+                                <ExternalLink size={12} className="theme-text-muted" />
                               </a>
                             )}
                           </div>
@@ -683,6 +790,7 @@ export default function NilaiTugasPage() {
                         </div>
                       </div>
 
+                      {/* Form penilaian */}
                       <div
                         className={`w-full rounded-xl border ${neutralBorder} ${neutralSurface} p-4 xl:max-w-md`}
                       >
@@ -721,7 +829,7 @@ export default function NilaiTugasPage() {
                                 )
                               }
                               placeholder="0–100"
-                              className={`theme-input w-full rounded-lg border ${neutralBorder} bg-[var(--color-card)] px-3 py-2.5 text-sm outline-none focus:border-[var(--color-primary)]`}
+                              className={`theme-input w-full rounded-lg border ${neutralBorder} bg-[var(--color-card)] px-3 py-2.5 text-sm outline-none ${focusRing}`}
                             />
                           </div>
 
@@ -730,7 +838,7 @@ export default function NilaiTugasPage() {
                               htmlFor={`catatan-${item.id}`}
                               className="theme-text-secondary mb-1.5 block text-xs font-medium"
                             >
-                              Catatan guru
+                              Catatan guru (opsional)
                             </label>
 
                             <input
@@ -745,7 +853,7 @@ export default function NilaiTugasPage() {
                                 )
                               }
                               placeholder="Catatan atau umpan balik..."
-                              className={`theme-input w-full rounded-lg border ${neutralBorder} bg-[var(--color-card)] px-3 py-2.5 text-sm outline-none focus:border-[var(--color-primary)]`}
+                              className={`theme-input w-full rounded-lg border ${neutralBorder} bg-[var(--color-card)] px-3 py-2.5 text-sm outline-none ${focusRing}`}
                             />
                           </div>
                         </div>
@@ -761,7 +869,7 @@ export default function NilaiTugasPage() {
                             type="button"
                             disabled={saving}
                             onClick={() => handleSave(item)}
-                            className={`inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-white ${primaryGradient} transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60`}
+                            className={`inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-[var(--color-card)] ${primaryGradient} ${primaryShadow} transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60`}
                           >
                             {saving ? (
                               <Loader2
@@ -784,35 +892,71 @@ export default function NilaiTugasPage() {
           )}
         </section>
 
-        <p className="theme-text-muted mt-4 text-xs leading-5">
-          Pastikan nilai dan catatan sudah benar sebelum menyimpan.
-          Nilai yang berhasil disimpan akan diperbarui dari data backend.
-        </p>
+        <div
+          className={`mt-4 flex items-start gap-2 rounded-xl border ${neutralBorder} ${neutralSurface} p-3 text-xs theme-text-muted`}
+        >
+          <Info size={14} className="mt-0.5 shrink-0" />
+          <p>
+            Pastikan nilai dan catatan sudah benar sebelum menyimpan. Nilai
+            yang berhasil disimpan akan langsung diperbarui.
+          </p>
+        </div>
+
+        {/*
+          Contoh wrapper tabel — kalau nanti ada tabel di halaman ini,
+          bungkus dengan `overflow-x-auto` supaya tidak merusak layout di layar kecil:
+
+          <div className="overflow-x-auto rounded-xl border themeNeutralBorder">
+            <table className="w-full min-w-[720px] text-sm"> ... </table>
+          </div>
+        */}
       </div>
     </main>
   );
 }
 
 
-function SummaryCard({ icon, label, value }) {
+function SummaryCard({ icon, label, value, hint, tone = "primary" }) {
+  const toneMap = {
+    primary: {
+      icon: `${primarySoft} ${primarySoftBorder} ${primaryText}`,
+      value: "theme-text",
+    },
+    success: {
+      icon: `${successSurface} ${successBorder} text-[var(--color-success)]`,
+      value: "text-[var(--color-success)]",
+    },
+    warning: {
+      icon: `${warningSurface} ${warningBorder} text-[var(--color-warning)]`,
+      value: "text-[var(--color-warning)]",
+    },
+  };
+
+  const t = toneMap[tone] || toneMap.primary;
+
   return (
     <div
       className={`theme-card rounded-xl border ${neutralBorder} p-4 ${cardShadow}`}
     >
       <div className="flex items-center gap-3">
         <div
-          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${primarySoft} ${primaryText}`}
+          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border ${t.icon}`}
         >
           {icon}
         </div>
 
         <div className="min-w-0">
-          <p className="theme-text-secondary text-xs">
+          <p className="theme-text-secondary truncate text-xs">
             {label}
           </p>
-          <p className="theme-text mt-1 text-xl font-semibold">
+          <p className={`mt-1 text-xl font-semibold ${t.value}`}>
             {value}
           </p>
+          {hint && (
+            <p className="theme-text-muted mt-0.5 truncate text-[11px]">
+              {hint}
+            </p>
+          )}
         </div>
       </div>
     </div>

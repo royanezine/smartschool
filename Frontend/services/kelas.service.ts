@@ -652,3 +652,22 @@ export async function getKelasSayaDariAnggota(siswaId) {
 
   return null;
 }
+
+export async function getShiftKelas(kelasId) {
+  return apiFetch(`/kelas/${kelasId}/shift`);
+}
+
+
+export async function updateShiftKelas(kelasId, shift) {
+  return apiFetch(`/kelas/${kelasId}/shift`, {
+    method: "PATCH",
+    body: JSON.stringify({ shift }),
+  });
+}
+
+export async function updateShiftKelasMassal(payload) {
+  return apiFetch("/kelas/shift-massal", {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}

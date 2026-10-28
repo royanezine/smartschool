@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { getProfile, updateProfile } from "@/services/user.service";
+import { getProfile } from "@/services/user.service";
 import {
   Lock,
   Check,
@@ -12,7 +12,6 @@ import {
   User,
   Mail,
   Loader2,
-  Save,
   GraduationCap,
 } from "lucide-react";
 
@@ -65,8 +64,6 @@ export default function PengaturanSiswaPage() {
   const [form, setForm] = useState(emptyForm);
 
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
 
   const loadProfile = useCallback(async () => {
@@ -108,60 +105,12 @@ export default function PengaturanSiswaPage() {
     }));
   };
 
-  const handleSaveProfile = async (event) => {
-    event.preventDefault();
-
-    if (!form.namaLengkap.trim()) {
-      setError("Nama lengkap wajib diisi.");
-      return;
-    }
-
-    setSaving(true);
-    setError("");
-    setSuccess("");
-
-    try {
-      const response = await updateProfile({
-        namaLengkap: form.namaLengkap.trim(),
-        noTelepon: form.noTelepon.trim() || null,
-        alamat: form.alamat.trim() || null,
-        alamatDomisili: form.alamatDomisili.trim() || null,
-        tempatLahir: form.tempatLahir.trim() || null,
-        tanggalLahir: form.tanggalLahir || null,
-      });
-
-      if (!response?.success) {
-        throw new Error(
-          response?.message || "Profil gagal diperbarui."
-        );
-      }
-
-      const updated = {
-        ...profile,
-        ...(response.data || {}),
-        ...form,
-        tanggalLahir: form.tanggalLahir || null,
-      };
-
-      setProfile(updated);
-      setForm(normalizeForm(updated));
-      setSuccess(response.message || "Profil berhasil diperbarui.");
-    } catch (err) {
-      console.error("Gagal menyimpan profil siswa:", err);
-      setError(
-        err?.message || "Terjadi kesalahan saat menyimpan profil."
-      );
-    } finally {
-      setSaving(false);
-    }
-  };
-
   const kelas = profile?.kelas?.nama || "-";
   const waliKelas = profile?.waliKelas?.namaLengkap || "-";
 
   return (
-    <main className="theme-page min-h-full flex-1 overflow-y-auto">
-      <div className="mx-auto w-full max-w-[1000px] p-4 sm:p-6 lg:p-8">
+    <main className="min-w-0 flex-1 overflow-y-auto">
+      <div className="w-full p-4 sm:p-6 lg:p-8">
         <header className="mb-6">
           <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-primary)]">
             Preferensi Akun
@@ -183,13 +132,6 @@ export default function PengaturanSiswaPage() {
           </div>
         )}
 
-        {success && (
-          <div className="theme-success mb-5 flex items-start gap-3 rounded-xl px-4 py-3 text-sm">
-            <Check size={18} className="mt-0.5 shrink-0" />
-            <p>{success}</p>
-          </div>
-        )}
-
         {loading ? (
           <div className="theme-card theme-border flex items-center justify-center gap-2 rounded-2xl border py-12 text-sm theme-text-muted">
             <Loader2 size={18} className="animate-spin" />
@@ -202,8 +144,8 @@ export default function PengaturanSiswaPage() {
               title="Profil Siswa"
               desc="Data ini tersimpan pada profil akun kamu di server."
             >
-              <form onSubmit={handleSaveProfile} className="space-y-4">
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
                   <ReadOnlyField
                     icon={Mail}
                     label="Email"
@@ -236,14 +178,13 @@ export default function PengaturanSiswaPage() {
 
                   <input
                     type="text"
-                    required
                     value={form.namaLengkap}
                     onChange={updateField("namaLengkap")}
                     className="theme-input mt-1.5 h-11 w-full rounded-xl px-3.5 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
                   />
                 </div>
 
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
                   <div>
                     <label className="text-xs font-semibold theme-text-secondary">
                       Nomor Telepon
@@ -294,51 +235,41 @@ export default function PengaturanSiswaPage() {
                   </div>
                 </div>
 
-                <div>
-                  <label className="text-xs font-semibold theme-text-secondary">
-                    Alamat Domisili
-                  </label>
+                <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                  <div>
+                    <label className="text-xs font-semibold theme-text-secondary">
+                      Alamat Domisili
+                    </label>
 
-                  <textarea
-                    rows={2}
-                    value={form.alamatDomisili}
-                    onChange={updateField("alamatDomisili")}
-                    className="theme-input mt-1.5 w-full resize-none rounded-xl px-3.5 py-3 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
-                  />
+                    <textarea
+                      rows={2}
+                      value={form.alamatDomisili}
+                      onChange={updateField("alamatDomisili")}
+                      className="theme-input mt-1.5 w-full resize-none rounded-xl px-3.5 py-3 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-semibold theme-text-secondary">
+                      Alamat
+                    </label>
+
+                    <textarea
+                      rows={2}
+                      value={form.alamat}
+                      onChange={updateField("alamat")}
+                      className="theme-input mt-1.5 w-full resize-none rounded-xl px-3.5 py-3 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
+                    />
+                  </div>
                 </div>
 
-                <div>
-                  <label className="text-xs font-semibold theme-text-secondary">
-                    Alamat
-                  </label>
-
-                  <textarea
-                    rows={3}
-                    value={form.alamat}
-                    onChange={updateField("alamat")}
-                    className="theme-input mt-1.5 w-full resize-none rounded-xl px-3.5 py-3 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
-                  />
-                </div>
-
-                <div className="flex flex-col gap-3 border-t theme-border-soft pt-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="border-t theme-border-soft pt-4">
                   <p className="text-xs theme-text-placeholder">
-                    Terakhir diperbarui: {formatTanggal(profile?.diperbaruiPada)}
+                    Terakhir diperbarui:{" "}
+                    {formatTanggal(profile?.diperbaruiPada)}
                   </p>
-
-                  <button
-                    type="submit"
-                    disabled={saving}
-                    className="theme-primary inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold shadow-sm transition disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    {saving ? (
-                      <Loader2 size={15} className="animate-spin" />
-                    ) : (
-                      <Save size={15} />
-                    )}
-                    {saving ? "Menyimpan..." : "Simpan Profil"}
-                  </button>
                 </div>
-              </form>
+              </div>
             </SettingsCard>
 
             <KeamananSection />
@@ -364,7 +295,6 @@ export default function PengaturanSiswaPage() {
     </main>
   );
 }
-
 
 function SettingsCard({ icon: Icon, title, desc, children }) {
   return (
@@ -405,7 +335,6 @@ function ReadOnlyField({ icon: Icon, label, value }) {
     </div>
   );
 }
-
 
 function KeamananSection() {
   return (

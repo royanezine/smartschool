@@ -43,6 +43,9 @@ const themePrimaryShadow =
 const themeCardShadow =
   "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
 
+const themeSmallShadow =
+  "shadow-[0_2px_8px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
 const themeNeutralSurface =
   "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
 
@@ -318,18 +321,14 @@ export default function TambahTugasPage() {
 
 
   return (
-    <div className="theme-page fixed inset-0 flex overflow-hidden">
+    <div className="theme-page flex h-screen min-h-0 overflow-hidden">
 
+      <Sidebar />
 
-      <div className="h-full flex-shrink-0">
-        <Sidebar />
-      </div>
+      {/* Body: sidebar + main sejajar */}
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
 
-
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-
-
-        <div className="flex-shrink-0">
+        <div className="shrink-0">
           <Header
             title="Tambah Tugas"
             userName="Guru"
@@ -338,22 +337,18 @@ export default function TambahTugasPage() {
           />
         </div>
 
+        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto">
 
-        <main className="theme-page flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
-
-          <div className="mx-auto w-full max-w-5xl">
-
+          {/* Konten w-full (bukan max-w) → melebar saat zoom out */}
+          <div className="w-full p-4 sm:p-5 lg:p-6 xl:p-8">
 
             <div className="mb-6">
-
               <button
                 type="button"
-                onClick={() =>
-                  router.push("/guru/tugas")
-                }
-                className="theme-text-secondary mb-3 inline-flex items-center gap-2 text-sm font-medium transition-colors hover:text-[var(--color-primary)]"
+                onClick={() => router.push("/guru/tugas")}
+                className={`theme-card ${themeNeutralBorder} theme-text-secondary mb-3 inline-flex items-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-semibold ${themeNeutralHover} ${themeSmallShadow} transition-all hover:text-[var(--color-primary)] sm:text-sm`}
               >
-                <ArrowLeft size={18} />
+                <ArrowLeft size={15} />
                 Kembali ke Tugas
               </button>
 
@@ -365,7 +360,6 @@ export default function TambahTugasPage() {
                 Buat tugas baru untuk siswa.
               </p>
             </div>
-
 
             {error && (
               <div
@@ -392,7 +386,6 @@ export default function TambahTugasPage() {
               </div>
             )}
 
-
             {success && (
               <div
                 className={`mb-5 flex items-start gap-3 rounded-xl border p-4 ${themeSuccessSurface} text-[var(--color-success)] ${themeSuccessBorder}`}
@@ -416,21 +409,16 @@ export default function TambahTugasPage() {
             )}
 
             <form onSubmit={handleSubmit}>
+              <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 2xl:grid-cols-[minmax(0,1fr)_400px]">
 
-              <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-
-
-                <div className="lg:col-span-2">
-
+                <div className="lg:col-span-2 2xl:col-span-1">
                   <div
                     className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
                   >
-
                     <div
                       className={`border-b px-5 py-5 sm:px-6 ${themeDivider}`}
                     >
                       <div className="flex items-center gap-3">
-
                         <div
                           className={`flex h-10 w-10 items-center justify-center rounded-xl border ${themePrimarySoft} ${themePrimarySoftBorder} ${themePrimaryText}`}
                         >
@@ -446,28 +434,23 @@ export default function TambahTugasPage() {
                             Lengkapi informasi tugas.
                           </p>
                         </div>
-
                       </div>
                     </div>
 
                     <div className="space-y-6 p-5 sm:p-6">
 
-
                       <div>
-
                         <label
                           htmlFor="kelasMapelId"
                           className="theme-text mb-2 block text-sm font-semibold"
                         >
                           Kelas & Mata Pelajaran
-
                           <span className="ml-1 theme-danger">
                             *
                           </span>
                         </label>
 
                         <div className="relative">
-
                           <BookOpen
                             size={18}
                             className="theme-text-muted pointer-events-none absolute left-3 top-1/2 -translate-y-1/2"
@@ -483,7 +466,6 @@ export default function TambahTugasPage() {
                             }
                             className={`theme-input w-full appearance-none rounded-xl border py-3 pl-10 pr-4 text-sm outline-none transition disabled:cursor-not-allowed disabled:opacity-60 ${themeFocus}`}
                           >
-
                             <option value="">
                               {loading
                                 ? "Memuat data..."
@@ -511,7 +493,6 @@ export default function TambahTugasPage() {
                                 </option>
                               )
                             )}
-
                           </select>
                         </div>
 
@@ -534,15 +515,12 @@ export default function TambahTugasPage() {
                           )}
                       </div>
 
-
                       <div>
-
                         <label
                           htmlFor="judul"
                           className="theme-text mb-2 block text-sm font-semibold"
                         >
                           Judul Tugas
-
                           <span className="ml-1 theme-danger">
                             *
                           </span>
@@ -565,12 +543,9 @@ export default function TambahTugasPage() {
                             {form.judul.length}/100
                           </span>
                         </div>
-
                       </div>
 
-
                       <div>
-
                         <label
                           htmlFor="deskripsi"
                           className="theme-text mb-2 block text-sm font-semibold"
@@ -593,25 +568,18 @@ export default function TambahTugasPage() {
                           Jelaskan instruksi tugas
                           dengan jelas.
                         </p>
-
                       </div>
 
-
                       <div>
-
                         <label className="theme-text mb-2 block text-sm font-semibold">
                           Deadline
-
                           <span className="ml-1 theme-danger">
                             *
                           </span>
                         </label>
 
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-
-
                           <div>
-
                             <label
                               htmlFor="tanggal"
                               className="theme-text-secondary mb-2 block text-xs font-medium"
@@ -620,7 +588,6 @@ export default function TambahTugasPage() {
                             </label>
 
                             <div className="relative">
-
                               <Calendar
                                 size={18}
                                 className="theme-text-muted pointer-events-none absolute left-3 top-1/2 -translate-y-1/2"
@@ -635,13 +602,10 @@ export default function TambahTugasPage() {
                                 disabled={saving}
                                 className={`theme-input w-full rounded-xl border py-3 pl-10 pr-4 text-sm outline-none transition disabled:cursor-not-allowed disabled:opacity-60 ${themeFocus}`}
                               />
-
                             </div>
                           </div>
 
-
                           <div>
-
                             <label
                               htmlFor="waktu"
                               className="theme-text-secondary mb-2 block text-xs font-medium"
@@ -650,7 +614,6 @@ export default function TambahTugasPage() {
                             </label>
 
                             <div className="relative">
-
                               <Clock
                                 size={18}
                                 className="theme-text-muted pointer-events-none absolute left-3 top-1/2 -translate-y-1/2"
@@ -665,27 +628,19 @@ export default function TambahTugasPage() {
                                 disabled={saving}
                                 className={`theme-input w-full rounded-xl border py-3 pl-10 pr-4 text-sm outline-none transition disabled:cursor-not-allowed disabled:opacity-60 ${themeFocus}`}
                               />
-
                             </div>
                           </div>
-
                         </div>
                       </div>
-
                     </div>
                   </div>
                 </div>
 
-
                 <div className="lg:col-span-1">
-
                   <div className="space-y-5 lg:sticky lg:top-6">
-
-
                     <div
                       className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
                     >
-
                       <div
                         className={`border-b px-5 py-4 ${themeDivider}`}
                       >
@@ -699,10 +654,7 @@ export default function TambahTugasPage() {
                       </div>
 
                       <div className="space-y-5 p-5">
-
-
                         <div className="flex gap-3">
-
                           <div
                             className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border ${themePrimarySoft} ${themePrimarySoftBorder} ${themePrimaryText}`}
                           >
@@ -710,7 +662,6 @@ export default function TambahTugasPage() {
                           </div>
 
                           <div className="min-w-0">
-
                             <p className="theme-text-muted text-xs">
                               Kelas
                             </p>
@@ -722,13 +673,10 @@ export default function TambahTugasPage() {
                             <p className="theme-text-secondary text-xs">
                               {namaMapel}
                             </p>
-
                           </div>
                         </div>
 
-
                         <div className="flex gap-3">
-
                           <div
                             className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border ${themeNeutralSurface} ${themeNeutralBorder} theme-text-secondary`}
                           >
@@ -736,7 +684,6 @@ export default function TambahTugasPage() {
                           </div>
 
                           <div className="min-w-0">
-
                             <p className="theme-text-muted text-xs">
                               Judul
                             </p>
@@ -745,13 +692,10 @@ export default function TambahTugasPage() {
                               {form.judul ||
                                 "Belum diisi"}
                             </p>
-
                           </div>
                         </div>
 
-
                         <div className="flex gap-3">
-
                           <div
                             className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border ${themeWarningSurface} ${themeWarningBorder} text-[var(--color-warning)]`}
                           >
@@ -759,7 +703,6 @@ export default function TambahTugasPage() {
                           </div>
 
                           <div className="min-w-0">
-
                             <p className="theme-text-muted text-xs">
                               Deadline
                             </p>
@@ -780,24 +723,19 @@ export default function TambahTugasPage() {
                                   )
                                 : "Belum diisi"}
                             </p>
-
                           </div>
                         </div>
-
 
                         <div
                           className={`rounded-xl border p-4 ${themeInfoSurface} ${themeInfoBorder}`}
                         >
-
                           <div className="flex gap-3">
-
                             <Users
                               size={18}
                               className={`mt-0.5 shrink-0 ${themePrimaryText}`}
                             />
 
                             <div>
-
                               <p className="theme-text text-sm font-semibold">
                                 Tugas untuk siswa
                               </p>
@@ -807,22 +745,16 @@ export default function TambahTugasPage() {
                                 kepada siswa pada
                                 kelas yang dipilih.
                               </p>
-
                             </div>
                           </div>
-
                         </div>
                       </div>
                     </div>
 
-
                     <div
                       className={`theme-card rounded-2xl border p-4 ${themeNeutralBorder} ${themeCardShadow}`}
                     >
-
                       <div className="flex flex-col gap-3">
-
-
                         <button
                           type="submit"
                           disabled={
@@ -848,7 +780,6 @@ export default function TambahTugasPage() {
                           )}
                         </button>
 
-
                         <button
                           type="button"
                           disabled={saving}
@@ -861,15 +792,21 @@ export default function TambahTugasPage() {
                         >
                           Batal
                         </button>
-
                       </div>
                     </div>
-
                   </div>
                 </div>
-
               </div>
             </form>
+
+            {/*
+              Contoh wrapper tabel — kalau nanti ada tabel di halaman ini,
+              bungkus dengan `overflow-x-auto` supaya tidak merusak layout di layar kecil:
+
+              <div className="overflow-x-auto rounded-xl border themeNeutralBorder">
+                <table className="w-full min-w-[720px] text-sm"> ... </table>
+              </div>
+            */}
           </div>
         </main>
       </div>

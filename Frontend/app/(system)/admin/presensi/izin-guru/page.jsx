@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
-
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   AlertCircle,
   ArrowLeft,
@@ -28,33 +22,203 @@ import {
 
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
-
 import {
   getDaftarIzin,
   verifikasiIzin,
   verifikasiPengajuan,
 } from "@/services/izin.service";
+import { getUsers } from "@/services/user.service";
 
-import { apiFetch } from "../../../../../lib/api";
-
+/* =========================================================
+   HELPER RESPONSE API
+========================================================= */
 
 function normalizeResponseData(response) {
-  if (!response) return [];
   if (Array.isArray(response)) return response;
-  if (Array.isArray(response.data)) return response.data;
-  if (Array.isArray(response.data?.data)) return response.data.data;
-  if (Array.isArray(response.data?.items)) return response.data.items;
-  if (Array.isArray(response.data?.results)) return response.data.results;
-  if (Array.isArray(response.data?.users)) return response.data.users;
-  if (Array.isArray(response.users)) return response.users;
-  if (Array.isArray(response.items)) return response.items;
-  if (Array.isArray(response.results)) return response.results;
-  return [];
+  if (!response || typeof response !== "object") return [];
+
+  const candidates = [
+    response.data,
+    response.data?.data,
+    response.data?.items,
+    response.data?.results,
+    response.items,
+    response.results,
+  ];
+
+  return candidates.find(Array.isArray) || [];
 }
 
+function normalizeText(value) {
+  return String(value ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/[\s-]+/g, "_");
+}
+
+/* =========================================================
+   HELPER PENGGUNA
+========================================================= */
+
+function getPengguna(item) {
+  return (
+    item?.pengguna ||
+    item?.user ||
+    item?.pemohon ||
+    item?.siswa ||
+    item?.pegawai ||
+    {}
+  );
+}
+
+function getRoleValues(item) {
+  const pengguna = getPengguna(item);
+  const peran = pengguna?.peran;
+  const role = pengguna?.role;
+
+  const values = [
+    peran?.namaTampilan,
+    peran?.nama,
+    peran?.kode,
+    typeof peran === "string" ? peran : null,
+    role?.namaTampilan,
+    role?.nama,
+    role?.name,
+    role?.kode,
+    typeof role === "string" ? role : null,
+    pengguna?.jabatan,
+    pengguna?.jenisPengguna,
+    pengguna?.namaRole,
+    item?.peran?.namaTampilan,
+    item?.peran?.nama,
+    typeof item?.peran === "string" ? item.peran : null,
+    item?.role?.nama,
+    item?.role?.name,
+    typeof item?.role === "string" ? item.role : null,
+    item?.jabatan,
+    item?.jenisPengguna,
+  ];
+
+  return values
+    .filter((value) => typeof value === "string" && value.trim())
+    .map(normalizeText);
+}
+
+function getKategoriPengguna(item) {
+  const roles = getRoleValues(item);
+
+  const mengandung = (kataKunci) =>
+    roles.some((role) =>
+      kataKunci.some((kata) => role.includes(kata))
+    );
+
+  if (mengandung(["siswa", "murid", "student", "peserta_didik"])) {
+    return "siswa";
+  }
+
+  if (mengandung(["guru", "teacher", "tenaga_pendidik", "pendidik"])) {
+    return "guru";
+  }
+
+  if (mengandung(["orang_tua", "wali_murid", "parent", "wali_siswa"])) {
+    return "orang_tua";
+  }
+
+  if (
+    mengandung([
+      "pegawai",
+      "staff",
+      "staf",
+      "karyawan",
+      "admin",
+      "kepala_sekolah",
+      "tenaga_kependidikan",
+    ])
+  ) {
+    return "lainnya";
+  }
+
+  return "tidak_diketahui";
+}
+
+function getLabelKategori(kategori) {
+  const labels = {
+    guru: "Guru",
+    siswa: "Siswa",
+    orang_tua: "Orang Tua",
+    lainnya: "Pegawai/Lainnya",
+    tidak_diketahui: "Jenis pengguna belum tersedia",
+  };
+
+  return labels[kategori] || "Jenis pengguna belum tersedia";
+}
+
+function getNamaPengguna(item) {
+  const pengguna = getPengguna(item);
+
+  return (
+    pengguna?.namaLengkap ||
+    pengguna?.nama ||
+    pengguna?.name ||
+    item?.namaLengkap ||
+    item?.nama ||
+    item?.name ||
+    "Nama tidak tersedia"
+  );
+}
+
+function getIdentitasPengguna(item) {
+  const pengguna = getPengguna(item);
+  const kategori = getKategoriPengguna(item);
+
+  if (kategori === "siswa") {
+    return (
+      pengguna?.nisn ||
+      pengguna?.nis ||
+      item?.nisn ||
+      item?.nis ||
+      pengguna?.nomorInduk ||
+      "-"
+    );
+  }
+
+  return (
+    pengguna?.nip ||
+    item?.nip ||
+    pengguna?.nisn ||
+    item?.nisn ||
+    pengguna?.nis ||
+    item?.nis ||
+    "-"
+  );
+}
+
+function getJabatanPengguna(item) {
+  const pengguna = getPengguna(item);
+  const peran = pengguna?.peran;
+  const role = pengguna?.role;
+
+  return (
+    pengguna?.jabatan ||
+    peran?.namaTampilan ||
+    peran?.nama ||
+    role?.namaTampilan ||
+    role?.nama ||
+    role?.name ||
+    (typeof peran === "string" ? peran : "") ||
+    (typeof role === "string" ? role : "") ||
+    item?.jabatan ||
+    ""
+  );
+}
+
+/* =========================================================
+   FORMAT DATA
+========================================================= */
 
 function formatTanggal(value) {
   if (!value) return "-";
+
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
 
@@ -67,6 +231,7 @@ function formatTanggal(value) {
 
 function formatTanggalSingkat(value) {
   if (!value) return "-";
+
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
 
@@ -79,6 +244,7 @@ function formatTanggalSingkat(value) {
 
 function formatTanggalWaktu(value) {
   if (!value) return "-";
+
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
 
@@ -91,68 +257,88 @@ function formatTanggalWaktu(value) {
   });
 }
 
-function hitungDurasi(tanggalMulai, tanggalSelesai) {
-  if (!tanggalMulai || !tanggalSelesai) return "-";
+function hitungDurasi(mulai, selesai) {
+  if (!mulai || !selesai) return "-";
 
-  const mulai = new Date(tanggalMulai);
-  const selesai = new Date(tanggalSelesai);
+  const awal = new Date(mulai);
+  const akhir = new Date(selesai);
 
   if (
-    Number.isNaN(mulai.getTime()) ||
-    Number.isNaN(selesai.getTime())
+    Number.isNaN(awal.getTime()) ||
+    Number.isNaN(akhir.getTime())
   ) {
     return "-";
   }
 
-  const selisih = Math.abs(selesai.getTime() - mulai.getTime());
-  const hari = Math.floor(selisih / (1000 * 60 * 60 * 24));
+  const selisihHari = Math.floor(
+    (Date.UTC(
+      akhir.getFullYear(),
+      akhir.getMonth(),
+      akhir.getDate()
+    ) -
+      Date.UTC(
+        awal.getFullYear(),
+        awal.getMonth(),
+        awal.getDate()
+      )) /
+      86400000
+  );
 
-  return `${hari + 1} hari`;
+  return `${Math.abs(selisihHari) + 1} hari`;
 }
 
-function getInitials(name) {
-  if (!name) return "GU";
-
-  return String(name)
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((word) => word.charAt(0).toUpperCase())
-    .join("");
+function getInitials(nama) {
+  return (
+    String(nama || "NA")
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((bagian) => bagian[0].toUpperCase())
+      .join("") || "NA"
+  );
 }
 
 function getJenisLabel(jenis) {
-  if (jenis === "sakit") return "Sakit";
-  if (jenis === "izin") return "Izin";
+  const value = normalizeText(jenis);
+
+  if (value === "sakit") return "Sakit";
+  if (value === "izin") return "Izin";
+  if (value === "cuti") return "Cuti";
+
   return jenis || "-";
 }
 
 function getStatusLabel(status) {
-  if (status === "menunggu") return "Menunggu";
-  if (status === "disetujui") return "Disetujui";
-  if (status === "ditolak") return "Ditolak";
+  const value = normalizeText(status);
+
+  if (["menunggu", "pending"].includes(value)) return "Menunggu";
+  if (["disetujui", "approved"].includes(value)) return "Disetujui";
+  if (["ditolak", "rejected"].includes(value)) return "Ditolak";
+
   return status || "-";
 }
 
-
 function getStatusStyle(status) {
-  if (status === "menunggu") {
+  const value = normalizeText(status);
+
+  if (["menunggu", "pending"].includes(value)) {
     return {
-      badge: "theme-warning border-[color-mix(in_srgb,var(--color-warning)_20%,transparent)]",
+      badge: "theme-warning",
       dot: "bg-[var(--color-warning)]",
     };
   }
 
-  if (status === "disetujui") {
+  if (["disetujui", "approved"].includes(value)) {
     return {
-      badge: "theme-success border-[color-mix(in_srgb,var(--color-success)_20%,transparent)]",
+      badge: "theme-success",
       dot: "bg-[var(--color-success)]",
     };
   }
 
-  if (status === "ditolak") {
+  if (["ditolak", "rejected"].includes(value)) {
     return {
-      badge: "theme-danger border-[color-mix(in_srgb,var(--color-danger)_20%,transparent)]",
+      badge: "theme-danger",
       dot: "bg-[var(--color-danger)]",
     };
   }
@@ -164,13 +350,10 @@ function getStatusStyle(status) {
 }
 
 function getJenisStyle(jenis) {
-  if (jenis === "sakit") {
-    return "theme-warning border-[color-mix(in_srgb,var(--color-warning)_20%,transparent)]";
-  }
+  const value = normalizeText(jenis);
 
-  if (jenis === "izin") {
-    return "theme-info border-[color-mix(in_srgb,var(--color-info)_20%,transparent)]";
-  }
+  if (value === "sakit") return "theme-warning";
+  if (value === "izin") return "theme-info";
 
   return "theme-card-soft theme-text-secondary theme-border";
 }
@@ -178,218 +361,236 @@ function getJenisStyle(jenis) {
 function getUploadUrl(url) {
   if (!url) return null;
 
-  if (url.startsWith("http://") || url.startsWith("https://")) {
-    return url;
-  }
+  if (/^https?:\/\//i.test(url)) return url;
 
-  const baseUrl =
-    process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+  const apiBase = (
+    process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api"
+  ).replace(/\/+$/, "");
 
-  return `${baseUrl.replace(/\/$/, "")}/${url.replace(/^\//, "")}`;
+  const path = String(url).replace(/^\/+/, "");
+
+  const serverBase = apiBase.replace(/\/api$/i, "");
+
+  return `${serverBase}/${path}`;
 }
 
+/* =========================================================
+   MAPPING PERMOHONAN IZIN
+========================================================= */
 
 function mapIzinToAdminData(item) {
+  const pengguna = getPengguna(item);
+
+  const guruPengganti =
+    item?.guruPengganti ||
+    item?.guru_pengganti ||
+    item?.pengganti ||
+    null;
+
   return {
-    id: item?.id,
-    nama: item?.pengguna?.namaLengkap || item?.namaLengkap || "Tidak diketahui",
-    nip: item?.pengguna?.nip || item?.nip || "-",
-    jabatan: item?.pengguna?.jabatan || item?.jabatan || "Guru",
-    penggunaId: item?.penggunaId || item?.pengguna?.id || null,
-    jenis: item?.jenis || "-",
-    tanggalMulai: item?.tanggalMulai || null,
-    tanggalSelesai: item?.tanggalSelesai || null,
-    alasan: item?.alasan || "-",
-    urlBukti: item?.urlBukti || null,
-    status: item?.status || "menunggu",
-    catatan: item?.catatan || null,
+    id: item?.id ?? item?.izinId ?? item?.pengajuanId ?? null,
+    nama: getNamaPengguna(item),
+    identitas: getIdentitasPengguna(item),
+    jabatan: getJabatanPengguna(item),
+    kategori: getKategoriPengguna(item),
+    penggunaId:
+      item?.penggunaId ||
+      item?.userId ||
+      pengguna?.id ||
+      pengguna?.userId ||
+      null,
+    jenis: item?.jenis || item?.jenisIzin || "-",
+    tanggalMulai: item?.tanggalMulai || item?.mulai || null,
+    tanggalSelesai: item?.tanggalSelesai || item?.selesai || null,
+    alasan: item?.alasan || item?.keterangan || "-",
+    urlBukti:
+      item?.urlBukti ||
+      item?.fileBukti ||
+      item?.lampiran ||
+      item?.bukti ||
+      null,
+    status: normalizeText(item?.status || "menunggu"),
+    catatan: item?.catatan || item?.catatanVerifikasi || null,
     penyetujuId: item?.penyetujuId || null,
-    penyetujuNama: item?.penyetuju?.namaLengkap || null,
-    dibuatPada: item?.dibuatPada || null,
-    diperbaruiPada: item?.diperbaruiPada || null,
+    penyetujuNama:
+      item?.penyetuju?.namaLengkap ||
+      item?.penyetuju?.nama ||
+      item?.penyetuju?.name ||
+      null,
+
+    /* Guru pengganti */
     guruPenggantiId:
       item?.guruPenggantiId ||
-      item?.guruPengganti?.id ||
-      item?.guruPengganti?.userId ||
-      item?.guruPengganti?.penggunaId ||
+      guruPengganti?.id ||
       null,
-    guruPengganti: item?.guruPengganti || null,
+    guruPenggantiNama:
+      guruPengganti?.namaLengkap ||
+      guruPengganti?.nama ||
+      null,
+    guruPenggantiNip: guruPengganti?.nip || null,
+    guruPenggantiJabatan: guruPengganti?.jabatan || null,
+
+    dibuatPada: item?.dibuatPada || item?.createdAt || null,
+    diperbaruiPada: item?.diperbaruiPada || item?.updatedAt || null,
+    raw: item,
   };
 }
 
-function normalizeGuru(item) {
-  if (!item) return null;
+/* =========================================================
+   KOMPONEN STATISTIK
+========================================================= */
 
-  const id = item.id || item.userId || item.penggunaId;
-  const namaLengkap =
-    item.namaLengkap ||
-    item.nama ||
-    item.name ||
-    item.pengguna?.namaLengkap;
+function StatCard({ label, value, icon: Icon, color }) {
+  return (
+    <div className="rounded-2xl border theme-border theme-card p-5 shadow-sm transition hover:shadow-md">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wider theme-text-placeholder">
+            {label}
+          </p>
+          <p className="mt-2 text-3xl font-bold tracking-tight theme-text">
+            {value}
+          </p>
+        </div>
 
-  if (!id || !namaLengkap) return null;
-
-  return {
-    id: String(id),
-    namaLengkap,
-    nip: item.nip || item.pengguna?.nip || null,
-    jabatan: item.jabatan || item.pengguna?.jabatan || "Guru",
-    peran:
-      item.peran ||
-      item.role ||
-      item.namaRole ||
-      item.pengguna?.peran ||
-      null,
-  };
+        <div
+          className={`flex h-12 w-12 items-center justify-center rounded-xl ${color}`}
+        >
+          <Icon className="h-5 w-5" />
+        </div>
+      </div>
+    </div>
+  );
 }
 
+/* =========================================================
+   HALAMAN PERMOHONAN IZIN
+========================================================= */
 
 export default function PermohonanIzinGuruPage() {
   const [data, setData] = useState([]);
-  const [guruList, setGuruList] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("semua");
   const [jenisFilter, setJenisFilter] = useState("semua");
+  const [kategoriFilter, setKategoriFilter] = useState("semua");
 
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [guruLoading, setGuruLoading] = useState(false);
-
-  const [guruError, setGuruError] = useState("");
   const [error, setError] = useState("");
-
   const [processingId, setProcessingId] = useState(null);
 
+  /* Modal setujui */
   const [showApproveModal, setShowApproveModal] = useState(false);
-  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [approveGuruPenggantiId, setApproveGuruPenggantiId] =
+    useState("");
 
-  const [selectedGuruPenggantiId, setSelectedGuruPenggantiId] = useState("");
+  /* Modal tolak */
+  const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectCatatan, setRejectCatatan] = useState("");
 
+  /* Daftar guru untuk dropdown pengganti */
+  const [guruList, setGuruList] = useState([]);
+  const [loadingGuru, setLoadingGuru] = useState(false);
 
-  const loadData = useCallback(
-    async (showRefresh = false) => {
-      try {
-        if (showRefresh) {
-          setRefreshing(true);
-        } else {
-          setLoading(true);
-        }
+  /* ---------- load data ---------- */
 
-        setError("");
-
-        const response = await getDaftarIzin();
-        const normalized = normalizeResponseData(response);
-        const mapped = normalized.map(mapIzinToAdminData);
-
-        setData(mapped);
-
-        if (selectedId) {
-          const masihAda = mapped.some(
-            (item) => String(item.id) === String(selectedId)
-          );
-
-          if (!masihAda) {
-            setSelectedId(null);
-          }
-        }
-      } catch (err) {
-        console.error("Gagal mengambil data permohonan izin:", err);
-        setError(err?.message || "Gagal mengambil data permohonan izin.");
-      } finally {
-        setLoading(false);
-        setRefreshing(false);
-      }
-    },
-    [selectedId]
-  );
-
-
-  const loadGuru = useCallback(async () => {
+  const loadData = useCallback(async (showRefresh = false) => {
     try {
-      setGuruLoading(true);
-      setGuruError("");
-
-      const response = await apiFetch("/api/users/?role=guru&limit=100", {
-        method: "GET",
-      });
-
-      const normalized = normalizeResponseData(response);
-      const normalizedGuru = normalized.map(normalizeGuru).filter(Boolean);
-
-      const uniqueGuru = Array.from(
-        new Map(normalizedGuru.map((guru) => [String(guru.id), guru])).values()
-      );
-
-      setGuruList(uniqueGuru);
-
-      if (uniqueGuru.length === 0) {
-        setGuruError(
-          "Data guru kosong. Cek response endpoint /api/users/?role=guru&limit=100."
-        );
+      if (showRefresh) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
       }
+
+      setError("");
+
+      const response = await getDaftarIzin();
+      const items = normalizeResponseData(response);
+
+      const mapped = items
+        .map(mapIzinToAdminData)
+        .filter((item) => item.id != null);
+
+      setData(mapped);
+
+      setSelectedId((previousId) => {
+        if (!previousId) return null;
+
+        return mapped.some(
+          (item) => String(item.id) === String(previousId)
+        )
+          ? previousId
+          : null;
+      });
     } catch (err) {
-      console.error("Gagal mengambil daftar guru:", err);
-      setGuruError(err?.message || "Daftar guru tidak dapat dimuat.");
-      setGuruList([]);
+      console.error("Gagal mengambil data permohonan izin:", err);
+      setError(
+        err?.message || "Gagal mengambil data permohonan izin."
+      );
     } finally {
-      setGuruLoading(false);
+      setLoading(false);
+      setRefreshing(false);
     }
   }, []);
 
+  /* ---------- load daftar guru ---------- */
+
+  const loadGuru = useCallback(async () => {
+    if (guruList.length > 0) return;
+
+    try {
+      setLoadingGuru(true);
+
+      const response = await getUsers({
+        role: "guru",
+        status: "aktif",
+        limit: 200,
+      });
+
+      const raw =
+        response?.data?.data ||
+        response?.data ||
+        response?.users ||
+        response;
+
+      const list = Array.isArray(raw) ? raw : [];
+
+      setGuruList(
+        list
+          .map((item) => ({
+            id: item?.id,
+            nama:
+              item?.namaLengkap ||
+              item?.nama ||
+              item?.name ||
+              "Tanpa nama",
+            nip: item?.nip || null,
+            jabatan: item?.jabatan || null,
+          }))
+          .filter((item) => item.id)
+      );
+    } catch (err) {
+      console.error("Gagal memuat daftar guru:", err);
+      // Tidak dijadikan error fatal — dropdown tetap kosong.
+    } finally {
+      setLoadingGuru(false);
+    }
+  }, [guruList.length]);
+
   useEffect(() => {
     loadData();
-    loadGuru();
-  }, [loadData, loadGuru]);
+  }, [loadData]);
 
+  /* ---------- derived ---------- */
 
-  const selectedData = useMemo(() => {
-    if (!selectedId) return null;
-    return (
-      data.find((item) => String(item.id) === String(selectedId)) || null
-    );
-  }, [data, selectedId]);
-
-  const selectedGuruPengganti = useMemo(() => {
-    if (!selectedGuruPenggantiId) return null;
-    return (
-      guruList.find(
-        (guru) => String(guru.id) === String(selectedGuruPenggantiId)
-      ) || null
-    );
-  }, [guruList, selectedGuruPenggantiId]);
-
-  const detailGuruPengganti = useMemo(() => {
-    if (!selectedData) return null;
-
-    const guruDariResponse = selectedData.guruPengganti;
-
-    if (
-      guruDariResponse &&
-      (guruDariResponse.namaLengkap ||
-        guruDariResponse.nama ||
-        guruDariResponse.name)
-    ) {
-      return {
-        ...guruDariResponse,
-        namaLengkap:
-          guruDariResponse.namaLengkap ||
-          guruDariResponse.nama ||
-          guruDariResponse.name,
-        nip: guruDariResponse.nip || "-",
-      };
-    }
-
-    const guruId = selectedData.guruPenggantiId;
-    if (!guruId) return null;
-
-    return (
-      guruList.find((guru) => String(guru.id) === String(guruId)) || null
-    );
-  }, [selectedData, guruList]);
-
+  const selectedData = useMemo(
+    () =>
+      data.find((item) => String(item.id) === String(selectedId)) ||
+      null,
+    [data, selectedId]
+  );
 
   const filteredData = useMemo(() => {
     const keyword = search.trim().toLowerCase();
@@ -397,90 +598,115 @@ export default function PermohonanIzinGuruPage() {
     return data.filter((item) => {
       const matchSearch =
         !keyword ||
-        String(item.nama || "").toLowerCase().includes(keyword) ||
-        String(item.nip || "").toLowerCase().includes(keyword) ||
-        String(item.alasan || "").toLowerCase().includes(keyword);
+        String(item.nama).toLowerCase().includes(keyword) ||
+        String(item.identitas).toLowerCase().includes(keyword) ||
+        String(item.alasan).toLowerCase().includes(keyword) ||
+        String(item.jabatan || "").toLowerCase().includes(keyword) ||
+        getLabelKategori(item.kategori).toLowerCase().includes(keyword);
 
-      const matchStatus = statusFilter === "semua" || item.status === statusFilter;
-      const matchJenis = jenisFilter === "semua" || item.jenis === jenisFilter;
+      const matchStatus =
+        statusFilter === "semua" || item.status === statusFilter;
 
-      return matchSearch && matchStatus && matchJenis;
+      const matchJenis =
+        jenisFilter === "semua" ||
+        normalizeText(item.jenis) === normalizeText(jenisFilter);
+
+      const matchKategori =
+        kategoriFilter === "semua" ||
+        item.kategori === kategoriFilter;
+
+      return (
+        matchSearch &&
+        matchStatus &&
+        matchJenis &&
+        matchKategori
+      );
     });
-  }, [data, search, statusFilter, jenisFilter]);
+  }, [data, search, statusFilter, jenisFilter, kategoriFilter]);
 
-
-  const statistics = useMemo(() => {
-    return {
+  const statistics = useMemo(
+    () => ({
       total: data.length,
-      menunggu: data.filter((item) => item.status === "menunggu").length,
-      disetujui: data.filter((item) => item.status === "disetujui").length,
-      ditolak: data.filter((item) => item.status === "ditolak").length,
-    };
-  }, [data]);
+      menunggu: data.filter((item) =>
+        ["menunggu", "pending"].includes(item.status)
+      ).length,
+      disetujui: data.filter((item) =>
+        ["disetujui", "approved"].includes(item.status)
+      ).length,
+      ditolak: data.filter((item) =>
+        ["ditolak", "rejected"].includes(item.status)
+      ).length,
+    }),
+    [data]
+  );
 
+  const kategoriStatistics = useMemo(
+    () => ({
+      guru: data.filter((item) => item.kategori === "guru").length,
+      siswa: data.filter((item) => item.kategori === "siswa").length,
+      orangTua: data.filter((item) => item.kategori === "orang_tua").length,
+      lainnya: data.filter((item) => item.kategori === "lainnya").length,
+      tidakDiketahui: data.filter(
+        (item) => item.kategori === "tidak_diketahui"
+      ).length,
+    }),
+    [data]
+  );
+
+  /* ---------- handlers ---------- */
 
   const handleSelectData = (item) => {
     setSelectedId(item.id);
-    setSelectedGuruPenggantiId(
-      item.guruPenggantiId ? String(item.guruPenggantiId) : ""
-    );
-    setRejectCatatan("");
+    setRejectCatatan(item.catatan || "");
+    setApproveGuruPenggantiId(item.guruPenggantiId || "");
     setError("");
   };
 
   const openApproveModal = () => {
     if (!selectedData) return;
-    setSelectedGuruPenggantiId(
-      selectedData.guruPenggantiId ? String(selectedData.guruPenggantiId) : ""
-    );
-    setGuruError("");
-    if (guruList.length === 0) {
-      loadGuru();
-    }
-    setShowApproveModal(true);
-  };
 
-  const closeApproveModal = () => {
-    if (processingId) return;
-    setShowApproveModal(false);
-    if (!selectedData?.guruPenggantiId) {
-      setSelectedGuruPenggantiId("");
+    setError("");
+    setApproveGuruPenggantiId(selectedData.guruPenggantiId || "");
+    setShowApproveModal(true);
+
+    // Hanya butuh daftar guru kalau pemohon adalah guru.
+    if (selectedData.kategori === "guru") {
+      loadGuru();
     }
   };
 
   const openRejectModal = () => {
     if (!selectedData) return;
-    setRejectCatatan(selectedData.catatan || "");
-    setShowRejectModal(true);
-  };
 
-  const closeRejectModal = () => {
-    if (processingId) return;
-    setShowRejectModal(false);
-    setRejectCatatan("");
+    setRejectCatatan(selectedData.catatan || "");
+    setError("");
+    setShowRejectModal(true);
   };
 
   const handleApprove = async () => {
     if (!selectedData) return;
 
-    if (!selectedGuruPenggantiId) {
-      setError("Silakan pilih guru pengganti terlebih dahulu.");
-      return;
-    }
-
     try {
       setProcessingId(selectedData.id);
       setError("");
 
+      const guruPenggantiId =
+        selectedData.kategori === "guru"
+          ? approveGuruPenggantiId || null
+          : null;
+
+      // verifikasiPengajuan mendukung payload guruPenggantiId.
+      // Kalau backend belum mendukung, ia akan melempar error
+      // dengan pesan informatif dan ditangkap di catch.
       await verifikasiPengajuan(selectedData.id, {
         status: "disetujui",
         catatan: "Permohonan izin disetujui.",
-        guruPenggantiId: selectedGuruPenggantiId,
+        guruPenggantiId,
       });
 
       setShowApproveModal(false);
+      setApproveGuruPenggantiId("");
       await loadData(true);
-      setSelectedGuruPenggantiId(String(selectedGuruPenggantiId));
     } catch (err) {
       console.error("Gagal menyetujui permohonan:", err);
       setError(err?.message || "Gagal menyetujui permohonan izin.");
@@ -503,7 +729,6 @@ export default function PermohonanIzinGuruPage() {
 
       setShowRejectModal(false);
       setRejectCatatan("");
-      setSelectedGuruPenggantiId("");
       await loadData(true);
     } catch (err) {
       console.error("Gagal menolak permohonan:", err);
@@ -513,81 +738,88 @@ export default function PermohonanIzinGuruPage() {
     }
   };
 
+  const isMenunggu = (status) =>
+    ["menunggu", "pending"].includes(normalizeText(status));
+
+  /* ---------- render ---------- */
 
   return (
     <div className="flex h-screen w-full overflow-hidden theme-page">
       <Sidebar />
 
       <div className="flex h-screen min-w-0 flex-1 flex-col overflow-hidden">
-        <header className="z-30 flex-shrink-0 border-b theme-border theme-card backdrop-blur-md">
+        <header className="z-30 flex-shrink-0 border-b theme-border theme-card">
           <Header />
         </header>
 
         <main className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto theme-page">
           <div className="w-full space-y-6 p-4 sm:p-6 lg:p-8">
-            <div className="relative overflow-hidden rounded-2xl border theme-border theme-card shadow-sm">
-              <div className="p-5 sm:p-6">
-                <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                  <div className="flex items-start gap-4">
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl theme-primary text-white shadow-sm">
-                      <FileText className="h-6 w-6" />
-                    </div>
-
-                    <div>
-                      <div className="mb-1.5 flex items-center gap-2 text-xs theme-text-placeholder">
-                        <span>Admin</span>
-                        <span>/</span>
-                        <span>Presensi</span>
-                        <span>/</span>
-                        <span className="font-medium theme-text-secondary">
-                          Permohonan Izin
-                        </span>
-                      </div>
-
-                      <h1 className="text-xl font-bold tracking-tight theme-text sm:text-2xl">
-                        Permohonan Izin Guru
-                      </h1>
-
-                      <p className="mt-1 text-sm theme-text-muted">
-                        Kelola pengajuan izin dan penugasan guru pengganti.
-                      </p>
-                    </div>
+            {/* HEADER */}
+            <section className="rounded-2xl border theme-border theme-card shadow-sm">
+              <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+                <div className="flex items-start gap-4">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl theme-primary text-white">
+                    <FileText className="h-6 w-6" />
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={() => {
-                      loadData(true);
-                      loadGuru();
-                    }}
-                    disabled={refreshing}
-                    className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-xl border theme-border theme-card px-4 text-sm font-medium theme-text-secondary shadow-sm transition hover:theme-card-soft disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} />
-                    {refreshing ? "Memuat..." : "Refresh"}
-                  </button>
+                  <div>
+                    <div className="mb-1.5 flex flex-wrap items-center gap-2 text-xs theme-text-placeholder">
+                      <span>Admin</span>
+                      <span>/</span>
+                      <span>Presensi</span>
+                      <span>/</span>
+                      <span className="font-medium theme-text-secondary">
+                        Permohonan Izin
+                      </span>
+                    </div>
+
+                    <h1 className="text-xl font-bold tracking-tight theme-text sm:text-2xl">
+                      Permohonan Izin
+                    </h1>
+
+                    <p className="mt-1 text-sm theme-text-muted">
+                      Kelola pengajuan izin dan verifikasi permohonan pengguna.
+                    </p>
+                  </div>
                 </div>
+
+                <button
+                  type="button"
+                  onClick={() => loadData(true)}
+                  disabled={refreshing}
+                  className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-xl border theme-border theme-card px-4 text-sm font-medium theme-text-secondary shadow-sm disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  <RefreshCw
+                    className={`h-4 w-4 ${
+                      refreshing ? "animate-spin" : ""
+                    }`}
+                  />
+                  {refreshing ? "Memuat..." : "Refresh"}
+                </button>
               </div>
-            </div>
+            </section>
 
             {error && (
-              <div className="flex items-start gap-3 rounded-xl border p-4 text-sm theme-danger shadow-sm">
+              <div className="flex items-start gap-3 rounded-xl border theme-danger p-4 text-sm shadow-sm">
                 <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
-                <div className="flex-1">
+
+                <div className="min-w-0 flex-1">
                   <p className="font-semibold">Terjadi kesalahan</p>
-                  <p className="mt-0.5">{error}</p>
+                  <p className="mt-0.5 break-words">{error}</p>
                 </div>
+
                 <button
                   type="button"
                   onClick={() => setError("")}
-                  className="opacity-70 transition hover:opacity-100"
+                  aria-label="Tutup pesan kesalahan"
                 >
                   <X className="h-4 w-4" />
                 </button>
               </div>
             )}
 
-            <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            {/* STATISTIK */}
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
               <StatCard
                 label="Total Pengajuan"
                 value={statistics.total}
@@ -614,61 +846,125 @@ export default function PermohonanIzinGuruPage() {
               />
             </div>
 
-            <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_440px]">
-              <div className="overflow-hidden rounded-2xl border theme-border theme-card shadow-sm">
-                <div className="border-b theme-border theme-card-soft p-4">
-                  <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
-                    <div className="relative flex-1">
-                      <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 theme-text-placeholder" />
-                      <input
-                        type="text"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        placeholder="Cari nama guru, NIP, atau alasan..."
-                        className="h-10 w-full rounded-xl border theme-border theme-input pl-10 pr-4 text-sm theme-text outline-none transition placeholder:theme-text-placeholder focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[color-mix(in_srgb,var(--color-primary)_12%,transparent)]"
-                      />
-                    </div>
+            {/* KATEGORI PEMOHON */}
+            <section className="rounded-2xl border theme-border theme-card p-4 sm:p-5">
+              <div className="mb-3 flex items-center gap-2">
+                <Users className="h-5 w-5 theme-text-primary" />
+                <h2 className="text-sm font-bold theme-text">
+                  Kategori Pemohon
+                </h2>
+              </div>
 
-                    <div className="flex flex-col gap-3 sm:flex-row">
-                      <div className="relative">
-                        <Filter className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 theme-text-placeholder" />
-                        <select
-                          value={statusFilter}
-                          onChange={(e) => setStatusFilter(e.target.value)}
-                          className="h-10 w-full min-w-[155px] cursor-pointer appearance-none rounded-xl border theme-border theme-input pl-10 pr-8 text-sm theme-text-secondary outline-none transition focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[color-mix(in_srgb,var(--color-primary)_12%,transparent)]"
-                        >
-                          <option value="semua">Semua Status</option>
-                          <option value="menunggu">Menunggu</option>
-                          <option value="disetujui">Disetujui</option>
-                          <option value="ditolak">Ditolak</option>
-                        </select>
-                      </div>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5">
+                {[
+                  { label: "Guru", value: kategoriStatistics.guru },
+                  { label: "Siswa", value: kategoriStatistics.siswa },
+                  
+                  {
+                    label: "Pegawai/Lainnya",
+                    value: kategoriStatistics.lainnya,
+                  },
+                  {
+                    label: "Belum Teridentifikasi",
+                    value: kategoriStatistics.tidakDiketahui,
+                  },
+                ].map((item) => (
+                  <div
+                    key={item.label}
+                    className="rounded-xl border theme-border theme-card-soft p-3"
+                  >
+                    <p className="text-xs theme-text-muted">{item.label}</p>
+                    <p className="mt-1 text-xl font-bold theme-text">
+                      {item.value}
+                    </p>
+                  </div>
+                ))}
+              </div>
+
+              {kategoriStatistics.tidakDiketahui > 0 && (
+                <p className="mt-3 text-xs leading-5 theme-text-muted">
+                  Jenis pengguna yang belum teridentifikasi tetap ditampilkan.
+                  Pastikan response API menyertakan relasi peran dan jabatan
+                  pengguna.
+                </p>
+              )}
+            </section>
+
+            {/* DAFTAR DAN DETAIL */}
+            <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_420px]">
+              {/* KOLOM KIRI: TABEL */}
+              <section className="min-w-0 overflow-hidden rounded-2xl border theme-border theme-card shadow-sm">
+                <div className="space-y-3 border-b theme-border theme-card-soft p-4">
+                  <div className="relative">
+                    <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 theme-text-placeholder" />
+
+                    <input
+                      type="search"
+                      value={search}
+                      onChange={(event) => setSearch(event.target.value)}
+                      placeholder="Cari nama, NIP/NISN, jabatan, atau alasan..."
+                      className="h-10 w-full rounded-xl border theme-border theme-input pl-10 pr-4 text-sm theme-text outline-none focus:border-[var(--color-primary)]"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                    <div className="relative">
+                      <Filter className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 theme-text-placeholder" />
 
                       <select
-                        value={jenisFilter}
-                        onChange={(e) => setJenisFilter(e.target.value)}
-                        className="h-10 min-w-[130px] cursor-pointer rounded-xl border theme-border theme-input px-3 text-sm theme-text-secondary outline-none transition focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[color-mix(in_srgb,var(--color-primary)_12%,transparent)]"
+                        value={kategoriFilter}
+                        onChange={(event) =>
+                          setKategoriFilter(event.target.value)
+                        }
+                        className="h-10 w-full appearance-none rounded-xl border theme-border theme-input pl-10 pr-3 text-sm theme-text-secondary"
                       >
-                        <option value="semua">Semua Jenis</option>
-                        <option value="sakit">Sakit</option>
-                        <option value="izin">Izin</option>
+                        <option value="semua">Semua Pemohon</option>
+                        <option value="guru">Guru</option>
+                        <option value="siswa">Siswa</option>
+                        <option value="orang_tua">Orang Tua</option>
+                        <option value="lainnya">Pegawai/Lainnya</option>
+                        <option value="tidak_diketahui">
+                          Belum Teridentifikasi
+                        </option>
                       </select>
                     </div>
+
+                    <select
+                      value={statusFilter}
+                      onChange={(event) => setStatusFilter(event.target.value)}
+                      className="h-10 w-full rounded-xl border theme-border theme-input px-3 text-sm theme-text-secondary"
+                    >
+                      <option value="semua">Semua Status</option>
+                      <option value="menunggu">Menunggu</option>
+                      <option value="disetujui">Disetujui</option>
+                      <option value="ditolak">Ditolak</option>
+                    </select>
+
+                    <select
+                      value={jenisFilter}
+                      onChange={(event) => setJenisFilter(event.target.value)}
+                      className="h-10 w-full rounded-xl border theme-border theme-input px-3 text-sm theme-text-secondary"
+                    >
+                      <option value="semua">Semua Jenis</option>
+                      <option value="sakit">Sakit</option>
+                      <option value="izin">Izin</option>
+                      <option value="cuti">Cuti</option>
+                    </select>
                   </div>
                 </div>
 
                 <div className="overflow-x-auto">
-                  <table className="w-full min-w-[760px]">
+                  <table className="w-full min-w-[720px]">
                     <thead>
                       <tr className="border-b theme-border theme-table-header">
                         <th className="px-5 py-3.5 text-left text-[11px] font-bold uppercase tracking-wider theme-text-muted">
-                          Guru
+                          Pemohon
                         </th>
                         <th className="px-5 py-3.5 text-left text-[11px] font-bold uppercase tracking-wider theme-text-muted">
-                          Jenis
+                          Jenis Izin
                         </th>
                         <th className="px-5 py-3.5 text-left text-[11px] font-bold uppercase tracking-wider theme-text-muted">
-                          Tanggal
+                          Periode
                         </th>
                         <th className="px-5 py-3.5 text-left text-[11px] font-bold uppercase tracking-wider theme-text-muted">
                           Status
@@ -683,66 +979,63 @@ export default function PermohonanIzinGuruPage() {
                       {loading ? (
                         <tr>
                           <td colSpan={5} className="px-5 py-16 text-center">
-                            <div className="flex flex-col items-center justify-center">
-                              <Loader2 className="h-7 w-7 animate-spin theme-text-primary" />
-                              <p className="mt-3 text-sm theme-text-muted">
-                                Memuat data...
-                              </p>
-                            </div>
+                            <Loader2 className="mx-auto h-7 w-7 animate-spin theme-text-primary" />
+                            <p className="mt-3 text-sm theme-text-muted">
+                              Memuat data pengajuan...
+                            </p>
                           </td>
                         </tr>
                       ) : filteredData.length === 0 ? (
                         <tr>
                           <td colSpan={5} className="px-5 py-16 text-center">
-                            <div className="mx-auto flex max-w-sm flex-col items-center">
-                              <div className="flex h-14 w-14 items-center justify-center rounded-2xl theme-card-soft">
-                                <FileText className="h-6 w-6 theme-text-placeholder" />
-                              </div>
-                              <p className="mt-3 text-sm font-semibold theme-text-secondary">
-                                Tidak ada data
-                              </p>
-                              <p className="mt-1 text-xs theme-text-muted">
-                                Belum ada permohonan izin yang sesuai dengan filter.
-                              </p>
-                            </div>
+                            <FileText className="mx-auto h-8 w-8 theme-text-placeholder" />
+                            <p className="mt-3 text-sm font-semibold theme-text-secondary">
+                              Tidak ada data
+                            </p>
+                            <p className="mt-1 text-xs theme-text-muted">
+                              Tidak ada permohonan yang sesuai dengan filter.
+                            </p>
                           </td>
                         </tr>
                       ) : (
                         filteredData.map((item) => {
-                          const isSelected = String(item.id) === String(selectedId);
+                          const selected =
+                            String(item.id) === String(selectedId);
                           const statusStyle = getStatusStyle(item.status);
 
                           return (
                             <tr
                               key={item.id}
-                              className={`cursor-pointer transition-all duration-150 ${
-                                isSelected
+                              onClick={() => handleSelectData(item)}
+                              className={`cursor-pointer transition ${
+                                selected
                                   ? "bg-[color-mix(in_srgb,var(--color-primary)_5%,transparent)]"
                                   : "hover:theme-table-hover"
                               }`}
-                              onClick={() => handleSelectData(item)}
                             >
                               <td className="px-5 py-4">
                                 <div className="flex items-center gap-3">
-                                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl theme-primary text-xs font-bold text-white shadow-sm">
+                                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl theme-primary text-xs font-bold text-white">
                                     {getInitials(item.nama)}
                                   </div>
+
                                   <div className="min-w-0">
                                     <p className="truncate text-sm font-semibold theme-text">
                                       {item.nama}
                                     </p>
                                     <p className="mt-0.5 text-xs theme-text-muted">
-                                      NIP: {item.nip}
+                                      {item.identitas}
                                     </p>
+                                    <span className="mt-1 inline-flex rounded-full border theme-border theme-card-soft px-2 py-0.5 text-[10px] font-semibold theme-text-secondary">
+                                      {getLabelKategori(item.kategori)}
+                                    </span>
                                   </div>
                                 </div>
                               </td>
 
                               <td className="px-5 py-4">
                                 <span
-                                  className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${getJenisStyle(
-                                    item.jenis
-                                  )}`}
+                                  className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${getJenisStyle(item.jenis)}`}
                                 >
                                   {getJenisLabel(item.jenis)}
                                 </span>
@@ -761,7 +1054,9 @@ export default function PermohonanIzinGuruPage() {
                                 <span
                                   className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold ${statusStyle.badge}`}
                                 >
-                                  <span className={`h-1.5 w-1.5 rounded-full ${statusStyle.dot}`} />
+                                  <span
+                                    className={`h-1.5 w-1.5 rounded-full ${statusStyle.dot}`}
+                                  />
                                   {getStatusLabel(item.status)}
                                 </span>
                               </td>
@@ -773,7 +1068,7 @@ export default function PermohonanIzinGuruPage() {
                                     event.stopPropagation();
                                     handleSelectData(item);
                                   }}
-                                  className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold theme-text-primary transition hover:theme-primary hover:text-white"
+                                  className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold theme-text-primary hover:theme-primary hover:text-white"
                                 >
                                   Detail
                                   <ArrowLeft className="h-4 w-4 rotate-180" />
@@ -791,421 +1086,374 @@ export default function PermohonanIzinGuruPage() {
                   <div className="border-t theme-border theme-card-soft px-5 py-3">
                     <p className="text-xs theme-text-muted">
                       Menampilkan{" "}
-                      <span className="font-semibold theme-text-primary">
+                      <strong className="theme-text-primary">
                         {filteredData.length}
-                      </span>{" "}
+                      </strong>{" "}
                       dari{" "}
-                      <span className="font-semibold theme-text-secondary">
+                      <strong className="theme-text-secondary">
                         {data.length}
-                      </span>{" "}
-                      pengajuan
+                      </strong>{" "}
+                      pengajuan.
                     </p>
                   </div>
                 )}
-              </div>
+              </section>
 
-              <div className="overflow-hidden rounded-2xl border theme-border theme-card shadow-sm">
-                {!selectedData ? (
-                  <div className="flex min-h-[560px] flex-col items-center justify-center px-6 text-center">
-                    <div className="flex h-16 w-16 items-center justify-center rounded-2xl theme-card-soft theme-text-primary shadow-sm">
-                      <FileText className="h-7 w-7" />
-                    </div>
-                    <h3 className="mt-5 text-base font-bold theme-text">
-                      Pilih pengajuan
-                    </h3>
-                    <p className="mt-1.5 max-w-xs text-sm leading-6 theme-text-muted">
-                      Pilih salah satu permohonan izin pada tabel untuk melihat detail pengajuan.
-                    </p>
-                  </div>
-                ) : (
-                  <>
-                    <div className="relative border-b theme-border theme-card-soft p-5">
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex min-w-0 items-center gap-3">
-                          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl theme-primary text-sm font-bold text-white shadow-sm">
-                            {getInitials(selectedData.nama)}
-                          </div>
-                          <div className="min-w-0">
-                            <h2 className="truncate text-base font-bold theme-text">
-                              {selectedData.nama}
-                            </h2>
-                            <p className="mt-0.5 text-xs theme-text-muted">
-                              NIP: {selectedData.nip}
-                            </p>
-                          </div>
+              {/* KOLOM KANAN: DETAIL (STICKY) */}
+              <section className="min-w-0 xl:sticky xl:top-6">
+                <div className="max-h-[calc(100vh-3rem)] overflow-hidden rounded-2xl border theme-border theme-card shadow-sm">
+                  <div className="max-h-[calc(100vh-3rem)] overflow-y-auto">
+                    {!selectedData ? (
+                      <div className="flex min-h-[500px] flex-col items-center justify-center px-6 text-center">
+                        <div className="flex h-16 w-16 items-center justify-center rounded-2xl theme-card-soft theme-text-primary">
+                          <FileText className="h-7 w-7" />
                         </div>
-
-                        <span
-                          className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold ${
-                            getStatusStyle(selectedData.status).badge
-                          }`}
-                        >
-                          <span
-                            className={`h-1.5 w-1.5 rounded-full ${
-                              getStatusStyle(selectedData.status).dot
-                            }`}
-                          />
-                          {getStatusLabel(selectedData.status)}
-                        </span>
+                        <h3 className="mt-5 text-base font-bold theme-text">
+                          Pilih pengajuan
+                        </h3>
+                        <p className="mt-1.5 max-w-xs text-sm leading-6 theme-text-muted">
+                          Pilih data pada tabel untuk melihat detail dan melakukan
+                          verifikasi.
+                        </p>
                       </div>
-                    </div>
-
-                    <div className="space-y-5 p-5">
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className="rounded-xl border theme-border theme-card-soft p-3.5">
-                          <p className="text-[11px] font-semibold uppercase tracking-wider theme-text-placeholder">
-                            Jenis Izin
-                          </p>
-                          <span
-                            className={`mt-2 inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${getJenisStyle(
-                              selectedData.jenis
-                            )}`}
-                          >
-                            {getJenisLabel(selectedData.jenis)}
-                          </span>
-                        </div>
-
-                        <div className="rounded-xl border theme-border theme-card-soft p-3.5">
-                          <p className="text-[11px] font-semibold uppercase tracking-wider theme-text-placeholder">
-                            Durasi
-                          </p>
-                          <p className="mt-2 text-sm font-bold theme-text">
-                            {hitungDurasi(selectedData.tanggalMulai, selectedData.tanggalSelesai)}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="rounded-xl border theme-border theme-card p-4">
-                        <div className="mb-3 flex items-center gap-2">
-                          <div className="flex h-7 w-7 items-center justify-center rounded-lg theme-info">
-                            <CalendarDays className="h-3.5 w-3.5" />
-                          </div>
-                          <p className="text-sm font-bold theme-text">
-                            Periode Izin
-                          </p>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <p className="text-[11px] font-semibold uppercase tracking-wider theme-text-placeholder">
-                              Mulai
-                            </p>
-                            <p className="mt-1 text-sm font-semibold theme-text">
-                              {formatTanggal(selectedData.tanggalMulai)}
-                            </p>
-                          </div>
-                          <div>
-                            <p className="text-[11px] font-semibold uppercase tracking-wider theme-text-placeholder">
-                              Selesai
-                            </p>
-                            <p className="mt-1 text-sm font-semibold theme-text">
-                              {formatTanggal(selectedData.tanggalSelesai)}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div>
-                        <p className="mb-2 text-sm font-bold theme-text">Alasan</p>
-                        <div className="rounded-xl border theme-border theme-card-soft p-4">
-                          <p className="whitespace-pre-wrap text-sm leading-6 theme-text-secondary">
-                            {selectedData.alasan}
-                          </p>
-                        </div>
-                      </div>
-
-                      {selectedData.urlBukti && (
-                        <div>
-                          <p className="mb-2 text-sm font-bold theme-text">Bukti Izin</p>
-                          <a
-                            href={getUploadUrl(selectedData.urlBukti)}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center justify-between rounded-xl border theme-border theme-card p-3 transition hover:border-[var(--color-primary)] hover:theme-primary/5 hover:shadow-sm"
-                          >
-                            <div className="flex items-center gap-3">
-                              <div className="flex h-9 w-9 items-center justify-center rounded-lg theme-primary text-white shadow-sm">
-                                <FileText className="h-4 w-4" />
+                    ) : (
+                      <>
+                        <div className="border-b theme-border theme-card-soft p-5">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex min-w-0 items-center gap-3">
+                              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl theme-primary text-sm font-bold text-white">
+                                {getInitials(selectedData.nama)}
                               </div>
-                              <div>
-                                <p className="text-sm font-semibold theme-text">
-                                  Lihat bukti izin
+
+                              <div className="min-w-0">
+                                <h2 className="break-words text-base font-bold theme-text">
+                                  {selectedData.nama}
+                                </h2>
+                                <p className="mt-0.5 text-xs theme-text-muted">
+                                  Identitas: {selectedData.identitas}
                                 </p>
-                                <p className="text-xs theme-text-muted">
-                                  Buka dokumen/lampiran
-                                </p>
+                                <span className="mt-1 inline-flex rounded-full border theme-border theme-card px-2 py-0.5 text-[10px] font-semibold theme-text-secondary">
+                                  {getLabelKategori(selectedData.kategori)}
+                                </span>
                               </div>
                             </div>
-                            <ExternalLink className="h-4 w-4 theme-text-placeholder" />
-                          </a>
-                        </div>
-                      )}
 
-                      <div className="overflow-hidden rounded-xl border theme-border theme-card-soft p-4">
-                        <div className="mb-3 flex items-center gap-2">
-                          <div className="flex h-9 w-9 items-center justify-center rounded-xl theme-primary text-white shadow-sm">
-                            <UserCheck className="h-4.5 w-4.5" />
-                          </div>
-                          <div>
-                            <p className="text-sm font-bold theme-text">
-                              Guru Pengganti
-                            </p>
-                            <p className="text-xs theme-text-muted">
-                              Ditugaskan menggantikan selama izin.
-                            </p>
-                          </div>
-                        </div>
-
-                        {selectedData.status === "menunggu" ? (
-                          <div className="rounded-lg border border-dashed theme-border theme-card p-3">
-                            <p className="text-sm theme-text-muted">
-                              Guru pengganti belum ditentukan karena permohonan masih menunggu persetujuan.
-                            </p>
-                          </div>
-                        ) : detailGuruPengganti ? (
-                          <div className="rounded-lg border theme-border theme-card p-3 shadow-sm">
-                            <div className="flex items-center justify-between gap-3">
-                              <div className="flex min-w-0 items-center gap-3">
-                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl theme-success text-xs font-bold">
-                                  {getInitials(detailGuruPengganti.namaLengkap)}
-                                </div>
-                                <div className="min-w-0">
-                                  <p className="break-words text-sm font-semibold theme-text">
-                                    {detailGuruPengganti.namaLengkap}
-                                  </p>
-                                  <p className="mt-0.5 text-xs theme-text-muted">
-                                    NIP: {detailGuruPengganti.nip || "-"}
-                                  </p>
-                                </div>
-                              </div>
-                              <CheckCircle2 className="h-5 w-5 shrink-0 theme-text-success" />
-                            </div>
-                          </div>
-                        ) : selectedData.guruPenggantiId ? (
-                          <div className="rounded-lg border theme-warning p-3">
-                            <p className="text-sm font-semibold">
-                              ID guru pengganti tersedia, tetapi nama belum ditemukan.
-                            </p>
-                            <p className="mt-1 break-all text-xs">
-                              ID: {selectedData.guruPenggantiId}
-                            </p>
-                          </div>
-                        ) : (
-                          <div className="rounded-lg border theme-border theme-card p-3">
-                            <p className="text-sm theme-text-muted">
-                              Belum ada data guru pengganti.
-                            </p>
-                          </div>
-                        )}
-                      </div>
-
-                      {selectedData.catatan && (
-                        <div>
-                          <p className="mb-2 text-sm font-bold theme-text">Catatan</p>
-                          <div className="rounded-xl border theme-warning p-4">
-                            <p className="whitespace-pre-wrap text-sm leading-6">
-                              {selectedData.catatan}
-                            </p>
-                          </div>
-                        </div>
-                      )}
-
-                      <div className="border-t theme-border pt-4">
-                        <div className="space-y-2.5">
-                          <div className="flex items-center justify-between gap-4">
-                            <span className="text-xs font-medium uppercase tracking-wider theme-text-placeholder">
-                              Diajukan
-                            </span>
-                            <span className="text-right text-xs font-semibold theme-text-secondary">
-                              {formatTanggalWaktu(selectedData.dibuatPada)}
+                            <span
+                              className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold ${getStatusStyle(selectedData.status).badge}`}
+                            >
+                              <span
+                                className={`h-1.5 w-1.5 rounded-full ${getStatusStyle(selectedData.status).dot}`}
+                              />
+                              {getStatusLabel(selectedData.status)}
                             </span>
                           </div>
-                          {selectedData.penyetujuNama && (
-                            <div className="flex items-center justify-between gap-4">
-                              <span className="text-xs font-medium uppercase tracking-wider theme-text-placeholder">
-                                Diproses oleh
-                              </span>
-                              <span className="text-right text-xs font-semibold theme-text-secondary">
-                                {selectedData.penyetujuNama}
+
+                          {selectedData.jabatan && (
+                            <div className="mt-4">
+                              <span className="inline-flex rounded-lg border theme-border theme-card px-2.5 py-1 text-xs theme-text-secondary">
+                                Jabatan/Peran: {selectedData.jabatan}
                               </span>
                             </div>
                           )}
                         </div>
-                      </div>
 
-                      {selectedData.status === "menunggu" && (
-                        <div className="grid grid-cols-2 gap-3 border-t theme-border pt-5">
-                          <button
-                            type="button"
-                            onClick={openRejectModal}
-                            className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border theme-danger px-4 text-sm font-bold transition hover:opacity-80"
-                          >
-                            <XCircle className="h-4 w-4" />
-                            Tolak
-                          </button>
-                          <button
-                            type="button"
-                            onClick={openApproveModal}
-                            className="inline-flex h-11 items-center justify-center gap-2 rounded-xl theme-primary px-4 text-sm font-bold shadow-sm transition hover:opacity-90 hover:shadow-md"
-                          >
-                            <CheckCircle2 className="h-4 w-4" />
-                            Setujui
-                          </button>
+                        <div className="space-y-5 p-5">
+                          <div className="grid grid-cols-2 gap-3">
+                            <div className="rounded-xl border theme-border theme-card-soft p-3.5">
+                              <p className="text-[11px] font-semibold uppercase tracking-wider theme-text-placeholder">
+                                Jenis Izin
+                              </p>
+                              <span
+                                className={`mt-2 inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${getJenisStyle(selectedData.jenis)}`}
+                              >
+                                {getJenisLabel(selectedData.jenis)}
+                              </span>
+                            </div>
+
+                            <div className="rounded-xl border theme-border theme-card-soft p-3.5">
+                              <p className="text-[11px] font-semibold uppercase tracking-wider theme-text-placeholder">
+                                Durasi
+                              </p>
+                              <p className="mt-2 text-sm font-bold theme-text">
+                                {hitungDurasi(
+                                  selectedData.tanggalMulai,
+                                  selectedData.tanggalSelesai
+                                )}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="rounded-xl border theme-border theme-card p-4">
+                            <div className="mb-3 flex items-center gap-2">
+                              <CalendarDays className="h-4 w-4 theme-text-primary" />
+                              <p className="text-sm font-bold theme-text">
+                                Periode Izin
+                              </p>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                              <div>
+                                <p className="text-[11px] font-semibold uppercase tracking-wider theme-text-placeholder">
+                                  Mulai
+                                </p>
+                                <p className="mt-1 text-sm font-semibold theme-text">
+                                  {formatTanggal(selectedData.tanggalMulai)}
+                                </p>
+                              </div>
+
+                              <div>
+                                <p className="text-[11px] font-semibold uppercase tracking-wider theme-text-placeholder">
+                                  Selesai
+                                </p>
+                                <p className="mt-1 text-sm font-semibold theme-text">
+                                  {formatTanggal(selectedData.tanggalSelesai)}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div>
+                            <p className="mb-2 text-sm font-bold theme-text">
+                              Alasan
+                            </p>
+                            <div className="rounded-xl border theme-border theme-card-soft p-4">
+                              <p className="whitespace-pre-wrap break-words text-sm leading-6 theme-text-secondary">
+                                {selectedData.alasan}
+                              </p>
+                            </div>
+                          </div>
+
+                          {selectedData.urlBukti && (
+                            <div>
+                              <p className="mb-2 text-sm font-bold theme-text">
+                                Bukti Izin
+                              </p>
+                              <a
+                                href={getUploadUrl(selectedData.urlBukti)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center justify-between gap-3 rounded-xl border theme-border theme-card p-3 transition hover:border-[var(--color-primary)]"
+                              >
+                                <div className="flex min-w-0 items-center gap-3">
+                                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg theme-primary text-white">
+                                    <FileText className="h-4 w-4" />
+                                  </div>
+                                  <div className="min-w-0">
+                                    <p className="text-sm font-semibold theme-text">
+                                      Lihat bukti izin
+                                    </p>
+                                    <p className="text-xs theme-text-muted">
+                                      Buka dokumen atau lampiran
+                                    </p>
+                                  </div>
+                                </div>
+                                <ExternalLink className="h-4 w-4 shrink-0 theme-text-placeholder" />
+                              </a>
+                            </div>
+                          )}
+
+                          {/* GURU PENGGANTI */}
+                          {(selectedData.kategori === "guru" ||
+                            selectedData.guruPenggantiId) && (
+                            <div>
+                              <p className="mb-2 flex items-center gap-2 text-sm font-bold theme-text">
+                                <UserCheck className="h-4 w-4 theme-text-primary" />
+                                Guru Pengganti
+                              </p>
+
+                              {selectedData.guruPenggantiNama ? (
+                                <div className="rounded-xl border theme-info p-4">
+                                  <p className="text-sm font-bold">
+                                    {selectedData.guruPenggantiNama}
+                                  </p>
+                                  <p className="mt-1 text-xs opacity-80">
+                                    {selectedData.guruPenggantiNip
+                                      ? `NIP: ${selectedData.guruPenggantiNip}`
+                                      : "NIP belum tersedia"}
+                                    {selectedData.guruPenggantiJabatan
+                                      ? ` · ${selectedData.guruPenggantiJabatan}`
+                                      : ""}
+                                  </p>
+                                </div>
+                              ) : isMenunggu(selectedData.status) ? (
+                                <div className="rounded-xl border border-dashed theme-border-soft p-3 text-xs theme-text-muted">
+                                  Belum ditentukan. Pilih guru pengganti saat
+                                  menyetujui.
+                                </div>
+                              ) : (
+                                <div className="rounded-xl border border-dashed theme-border-soft p-3 text-xs theme-text-muted">
+                                  Tidak ada guru pengganti yang ditugaskan.
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          {selectedData.catatan && (
+                            <div>
+                              <p className="mb-2 text-sm font-bold theme-text">
+                                Catatan Verifikasi
+                              </p>
+                              <div className="rounded-xl border theme-warning p-4">
+                                <p className="whitespace-pre-wrap break-words text-sm leading-6">
+                                  {selectedData.catatan}
+                                </p>
+                              </div>
+                            </div>
+                          )}
+
+                          <div className="space-y-2.5 border-t theme-border pt-4">
+                            <div className="flex items-center justify-between gap-4">
+                              <span className="text-xs font-medium uppercase tracking-wider theme-text-placeholder">
+                                Diajukan
+                              </span>
+                              <span className="text-right text-xs font-semibold theme-text-secondary">
+                                {formatTanggalWaktu(selectedData.dibuatPada)}
+                              </span>
+                            </div>
+
+                            {selectedData.penyetujuNama && (
+                              <div className="flex items-center justify-between gap-4">
+                                <span className="text-xs font-medium uppercase tracking-wider theme-text-placeholder">
+                                  Diproses oleh
+                                </span>
+                                <span className="text-right text-xs font-semibold theme-text-secondary">
+                                  {selectedData.penyetujuNama}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+
+                          {isMenunggu(selectedData.status) && (
+                            <div className="grid grid-cols-2 gap-3 border-t theme-border pt-5">
+                              <button
+                                type="button"
+                                onClick={openRejectModal}
+                                disabled={processingId != null}
+                                className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border theme-danger px-4 text-sm font-bold transition hover:opacity-80 disabled:opacity-50"
+                              >
+                                <XCircle className="h-4 w-4" />
+                                Tolak
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={openApproveModal}
+                                disabled={processingId != null}
+                                className="inline-flex h-11 items-center justify-center gap-2 rounded-xl theme-primary px-4 text-sm font-bold text-white shadow-sm transition hover:opacity-90 disabled:opacity-50"
+                              >
+                                <CheckCircle2 className="h-4 w-4" />
+                                Setujui
+                              </button>
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
-                  </>
-                )}
-              </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </section>
             </div>
           </div>
         </main>
       </div>
 
+      {/* MODAL PERSETUJUAN */}
       {showApproveModal && selectedData && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[color-mix(in_srgb,var(--color-text)_50%,transparent)] p-4 backdrop-blur-sm">
-          <div className="w-full max-w-lg overflow-hidden rounded-2xl theme-card shadow-2xl">
-            <div className="relative border-b theme-border theme-card-soft px-5 py-4">
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl theme-success shadow-sm">
-                    <CheckCircle2 className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <h3 className="text-base font-bold theme-text">
-                      Setujui Permohonan
-                    </h3>
-                    <p className="mt-0.5 text-xs theme-text-muted">
-                      Tentukan guru pengganti sebelum menyetujui.
-                    </p>
-                  </div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50 p-4 backdrop-blur-sm">
+          <div className="my-auto w-full max-w-md overflow-hidden rounded-2xl theme-card shadow-2xl">
+            <div className="flex items-start justify-between gap-3 border-b theme-border theme-card-soft px-5 py-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl theme-success">
+                  <CheckCircle2 className="h-5 w-5" />
                 </div>
-                <button
-                  type="button"
-                  onClick={closeApproveModal}
-                  disabled={!!processingId}
-                  className="rounded-lg p-1.5 theme-text-placeholder transition hover:theme-card hover:theme-text-secondary disabled:opacity-50"
-                >
-                  <X className="h-5 w-5" />
-                </button>
+
+                <div>
+                  <h3 className="text-base font-bold theme-text">
+                    Setujui Permohonan
+                  </h3>
+                  <p className="mt-0.5 text-xs theme-text-muted">
+                    Periksa informasi sebelum menyetujui.
+                  </p>
+                </div>
               </div>
+
+              <button
+                type="button"
+                onClick={() => setShowApproveModal(false)}
+                disabled={processingId != null}
+                aria-label="Tutup modal persetujuan"
+                className="rounded-lg p-1.5 theme-text-placeholder disabled:opacity-50"
+              >
+                <X className="h-5 w-5" />
+              </button>
             </div>
 
-            <div className="space-y-5 p-5">
+            <div className="space-y-4 p-5">
               <div className="rounded-xl border theme-border theme-card-soft p-4">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl theme-primary text-xs font-bold text-white shadow-sm">
-                    {getInitials(selectedData.nama)}
-                  </div>
-                  <div>
-                    <p className="text-sm font-bold theme-text">
-                      {selectedData.nama}
-                    </p>
-                    <p className="mt-0.5 text-xs theme-text-muted">
-                      NIP: {selectedData.nip}
-                    </p>
-                  </div>
-                </div>
-                <div className="mt-3 border-t theme-border pt-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-medium uppercase tracking-wider theme-text-placeholder">
-                      Periode
-                    </span>
-                    <span className="text-xs font-semibold theme-text-secondary">
-                      {formatTanggalSingkat(selectedData.tanggalMulai)} -{" "}
-                      {formatTanggalSingkat(selectedData.tanggalSelesai)}
-                    </span>
-                  </div>
-                </div>
+                <p className="text-sm font-bold theme-text">
+                  {selectedData.nama}
+                </p>
+                <p className="mt-1 text-xs theme-text-muted">
+                  {getLabelKategori(selectedData.kategori)} · Identitas:{" "}
+                  {selectedData.identitas}
+                </p>
+                <p className="mt-3 border-t theme-border pt-3 text-sm theme-text-secondary">
+                  Periode: {formatTanggalSingkat(selectedData.tanggalMulai)} -{" "}
+                  {formatTanggalSingkat(selectedData.tanggalSelesai)}
+                </p>
               </div>
 
-              <div>
-                <label className="mb-2 block text-sm font-bold theme-text">
-                  Guru Pengganti<span className="ml-1 text-[var(--color-danger)]">*</span>
-                </label>
-                <div className="relative">
-                  <Users className="pointer-events-none absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 theme-text-placeholder" />
+              {/* DROPDOWN GURU PENGGANTI — hanya untuk pemohon guru */}
+              {selectedData.kategori === "guru" && (
+                <div>
+                  <label className="mb-2 block text-sm font-bold theme-text">
+                    Guru Pengganti{" "}
+                    <span className="font-normal theme-text-muted">
+                      (opsional)
+                    </span>
+                  </label>
+
                   <select
-                    value={selectedGuruPenggantiId}
-                    onChange={(e) => {
-                      setSelectedGuruPenggantiId(e.target.value);
-                      setError("");
-                    }}
-                    disabled={guruLoading || !!processingId}
-                    className="h-11 w-full cursor-pointer appearance-none rounded-xl border theme-border theme-input pl-10 pr-10 text-sm theme-text-secondary outline-none transition focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] disabled:cursor-not-allowed disabled:theme-card-soft"
+                    value={approveGuruPenggantiId}
+                    onChange={(event) =>
+                      setApproveGuruPenggantiId(event.target.value)
+                    }
+                    disabled={loadingGuru || processingId != null}
+                    className="h-11 w-full rounded-xl border theme-border theme-input px-3 text-sm theme-text-secondary disabled:opacity-60"
                   >
                     <option value="">
-                      {guruLoading
+                      {loadingGuru
                         ? "Memuat daftar guru..."
-                        : guruList.length === 0
-                        ? "Tidak ada guru tersedia"
-                        : "Pilih guru pengganti"}
+                        : "Tanpa guru pengganti"}
                     </option>
-                    {guruList.map((guru) => (
-                      <option key={guru.id} value={guru.id}>
-                        {guru.namaLengkap}
-                        {guru.nip ? ` - ${guru.nip}` : ""}
-                      </option>
-                    ))}
+
+                    {guruList
+                      .filter(
+                        (guru) =>
+                          String(guru.id) !==
+                          String(selectedData.penggunaId)
+                      )
+                      .map((guru) => (
+                        <option key={guru.id} value={guru.id}>
+                          {guru.nama}
+                          {guru.nip ? ` — ${guru.nip}` : ""}
+                        </option>
+                      ))}
                   </select>
-                </div>
 
-                {guruLoading && (
-                  <div className="mt-2 flex items-center gap-2 text-xs theme-text-muted">
-                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                    Mengambil daftar guru...
-                  </div>
-                )}
-
-                {guruError && (
-                  <div className="mt-2 rounded-lg border theme-danger p-3">
-                    <p className="text-xs">{guruError}</p>
-                    <button
-                      type="button"
-                      onClick={loadGuru}
-                      className="mt-2 text-xs font-bold underline"
-                    >
-                      Coba lagi
-                    </button>
-                  </div>
-                )}
-
-                {!guruLoading && !guruError && guruList.length === 0 && (
-                  <p className="mt-2 text-xs theme-warning">
-                    Data guru belum tersedia.
+                  <p className="mt-1.5 text-xs leading-5 theme-text-muted">
+                    Guru pengganti akan ditugaskan untuk menggantikan guru yang
+                    mengajukan izin selama periode izin.
                   </p>
-                )}
-              </div>
-
-              {selectedGuruPengganti && (
-                <div className="overflow-hidden rounded-xl border theme-success p-4">
-                  <div className="mb-3 flex items-center gap-2">
-                    <UserCheck className="h-4 w-4" />
-                    <p className="text-sm font-bold">
-                      Guru pengganti yang dipilih
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-3 rounded-lg border theme-border theme-card p-3 shadow-sm">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl theme-success text-xs font-bold">
-                      {getInitials(selectedGuruPengganti.namaLengkap)}
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-sm font-bold theme-text">
-                        {selectedGuruPengganti.namaLengkap}
-                      </p>
-                      <p className="mt-0.5 text-xs theme-text-muted">
-                        NIP: {selectedGuruPengganti.nip || "-"}
-                      </p>
-                    </div>
-                    <CheckCircle2 className="ml-auto h-5 w-5 shrink-0" />
-                  </div>
                 </div>
               )}
 
               <div className="flex gap-3 rounded-xl border theme-info p-3">
                 <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
                 <p className="text-xs leading-5">
-                  Pastikan guru pengganti yang dipilih sudah benar sebelum menyetujui permohonan.
+                  Permohonan akan disetujui sesuai API backend. Jika backend
+                  belum mendukung penyimpanan guru pengganti, penugasan akan
+                  diabaikan dan pesan error akan ditampilkan.
                 </p>
               </div>
             </div>
@@ -1213,24 +1461,20 @@ export default function PermohonanIzinGuruPage() {
             <div className="flex justify-end gap-3 border-t theme-border theme-card-soft px-5 py-4">
               <button
                 type="button"
-                onClick={closeApproveModal}
-                disabled={!!processingId}
-                className="h-10 rounded-xl border theme-border theme-card px-4 text-sm font-semibold theme-text-secondary transition hover:theme-card-soft disabled:opacity-50"
+                onClick={() => setShowApproveModal(false)}
+                disabled={processingId != null}
+                className="h-10 rounded-xl border theme-border theme-card px-4 text-sm font-semibold theme-text-secondary disabled:opacity-50"
               >
                 Batal
               </button>
+
               <button
                 type="button"
                 onClick={handleApprove}
-                disabled={
-                  !!processingId ||
-                  !selectedGuruPenggantiId ||
-                  guruLoading ||
-                  guruList.length === 0
-                }
-                className="inline-flex h-10 items-center justify-center gap-2 rounded-xl theme-primary px-4 text-sm font-bold text-white shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                disabled={processingId != null}
+                className="inline-flex h-10 items-center justify-center gap-2 rounded-xl theme-primary px-4 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {processingId ? (
+                {processingId != null ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
                     Memproses...
@@ -1247,50 +1491,43 @@ export default function PermohonanIzinGuruPage() {
         </div>
       )}
 
+      {/* MODAL PENOLAKAN */}
       {showRejectModal && selectedData && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[color-mix(in_srgb,var(--color-text)_50%,transparent)] p-4 backdrop-blur-sm">
-          <div className="w-full max-w-md overflow-hidden rounded-2xl theme-card shadow-2xl">
-            <div className="relative border-b theme-border theme-card-soft px-5 py-4">
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl theme-danger shadow-sm">
-                    <XCircle className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <h3 className="text-base font-bold theme-text">
-                      Tolak Permohonan
-                    </h3>
-                    <p className="mt-0.5 text-xs theme-text-muted">
-                      Berikan alasan penolakan jika diperlukan.
-                    </p>
-                  </div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50 p-4 backdrop-blur-sm">
+          <div className="my-auto w-full max-w-md overflow-hidden rounded-2xl theme-card shadow-2xl">
+            <div className="flex items-start justify-between gap-3 border-b theme-border theme-card-soft px-5 py-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl theme-danger">
+                  <XCircle className="h-5 w-5" />
                 </div>
-                <button
-                  type="button"
-                  onClick={closeRejectModal}
-                  disabled={!!processingId}
-                  className="rounded-lg p-1.5 theme-text-placeholder transition hover:theme-card hover:theme-text-secondary disabled:opacity-50"
-                >
-                  <X className="h-5 w-5" />
-                </button>
+
+                <div>
+                  <h3 className="text-base font-bold theme-text">
+                    Tolak Permohonan
+                  </h3>
+                  <p className="mt-0.5 text-xs theme-text-muted">
+                    Tambahkan catatan penolakan.
+                  </p>
+                </div>
               </div>
+
+              <button
+                type="button"
+                onClick={() => setShowRejectModal(false)}
+                disabled={processingId != null}
+                aria-label="Tutup modal penolakan"
+                className="rounded-lg p-1.5 theme-text-placeholder disabled:opacity-50"
+              >
+                <X className="h-5 w-5" />
+              </button>
             </div>
 
             <div className="space-y-4 p-5">
               <div className="rounded-xl border theme-danger p-4">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl theme-danger text-white shadow-sm">
-                    <XCircle className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-bold">
-                      {selectedData.nama}
-                    </p>
-                    <p className="mt-0.5 text-xs opacity-80">
-                      Permohonan akan ditolak.
-                    </p>
-                  </div>
-                </div>
+                <p className="text-sm font-bold">{selectedData.nama}</p>
+                <p className="mt-1 text-xs opacity-80">
+                  Permohonan ini akan ditolak.
+                </p>
               </div>
 
               <div>
@@ -1299,11 +1536,11 @@ export default function PermohonanIzinGuruPage() {
                 </label>
                 <textarea
                   value={rejectCatatan}
-                  onChange={(e) => setRejectCatatan(e.target.value)}
+                  onChange={(event) => setRejectCatatan(event.target.value)}
                   rows={4}
                   placeholder="Masukkan catatan penolakan..."
-                  disabled={!!processingId}
-                  className="w-full resize-none rounded-xl border theme-border theme-input px-3 py-2.5 text-sm theme-text-secondary outline-none placeholder:theme-text-placeholder transition focus:border-[var(--color-danger)] focus:ring-4 focus:ring-[color-mix(in_srgb,var(--color-danger)_12%,transparent)] disabled:theme-card-soft"
+                  disabled={processingId != null}
+                  className="w-full resize-y rounded-xl border theme-border theme-input px-3 py-2.5 text-sm theme-text-secondary outline-none focus:border-[var(--color-danger)] disabled:opacity-60"
                 />
               </div>
             </div>
@@ -1311,19 +1548,20 @@ export default function PermohonanIzinGuruPage() {
             <div className="flex justify-end gap-3 border-t theme-border theme-card-soft px-5 py-4">
               <button
                 type="button"
-                onClick={closeRejectModal}
-                disabled={!!processingId}
-                className="h-10 rounded-xl border theme-border theme-card px-4 text-sm font-semibold theme-text-secondary transition hover:theme-card-soft disabled:opacity-50"
+                onClick={() => setShowRejectModal(false)}
+                disabled={processingId != null}
+                className="h-10 rounded-xl border theme-border theme-card px-4 text-sm font-semibold theme-text-secondary disabled:opacity-50"
               >
                 Batal
               </button>
+
               <button
                 type="button"
                 onClick={handleReject}
-                disabled={!!processingId}
-                className="inline-flex h-10 items-center justify-center gap-2 rounded-xl theme-danger px-4 text-sm font-bold shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                disabled={processingId != null}
+                className="inline-flex h-10 items-center justify-center gap-2 rounded-xl theme-danger px-4 text-sm font-bold disabled:cursor-not-allowed disabled:opacity-50"
               >
-                {processingId ? (
+                {processingId != null ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
                     Memproses...
@@ -1339,29 +1577,6 @@ export default function PermohonanIzinGuruPage() {
           </div>
         </div>
       )}
-    </div>
-  );
-}
-
-
-function StatCard({ label, value, icon: Icon, color }) {
-  return (
-    <div className="group relative overflow-hidden rounded-2xl border theme-border theme-card p-5 shadow-sm transition hover:shadow-md">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-wider theme-text-placeholder">
-            {label}
-          </p>
-          <p className="mt-2 text-3xl font-bold tracking-tight theme-text">
-            {value}
-          </p>
-        </div>
-        <div
-          className={`flex h-12 w-12 items-center justify-center rounded-xl ${color} shadow-sm transition group-hover:scale-105`}
-        >
-          <Icon className="h-5 w-5" />
-        </div>
-      </div>
     </div>
   );
 }

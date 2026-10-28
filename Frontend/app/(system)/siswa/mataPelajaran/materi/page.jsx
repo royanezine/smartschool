@@ -862,17 +862,7 @@ async function handleDownload(item) {
       <div className="w-full max-w-[1280px] mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
 
 
-        <button
-          onClick={() => router.push("/siswa/mataPelajaran")}
-          className="group inline-flex items-center gap-2 text-sm font-medium theme-text-secondary hover:text-[var(--color-primary)] transition-colors mb-5"
-        >
-          <span
-            className={`w-8 h-8 rounded-lg ${themeNeutralBorder} theme-card flex items-center justify-center group-hover:border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)] ${themePrimaryText} transition-all`}
-          >
-            <ArrowLeft size={15} />
-          </span>
-          Kembali ke mata pelajaran
-        </button>
+        
 
 
         <section

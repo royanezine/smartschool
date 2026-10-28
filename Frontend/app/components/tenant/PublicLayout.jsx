@@ -1,8 +1,11 @@
-
 import PublicNavbar from "./PublicNavbar";
 import PublicFooter from "./PublicFooter";
-import PublicTheme from "./PublicTheme";
 import { publikService } from "@/services/publik.service";
+import { AlertTriangle } from "lucide-react";
+
+/* =========================================================
+   MEMUAT DATA WEBSITE PUBLIK BERDASARKAN SUBDOMAIN
+========================================================= */
 
 export async function loadPublicLayout(subdomain) {
   const [
@@ -39,15 +42,24 @@ export async function loadPublicLayout(subdomain) {
       : [];
 
   if (profilResult.status === "rejected") {
-    console.error("[PUBLIC LAYOUT] Gagal mengambil profil:", profilResult.reason);
+    console.error(
+      "[PUBLIC LAYOUT] Gagal mengambil profil:",
+      profilResult.reason
+    );
   }
 
   if (temaResult.status === "rejected") {
-    console.error("[PUBLIC LAYOUT] Gagal mengambil tema:", temaResult.reason);
+    console.error(
+      "[PUBLIC LAYOUT] Gagal mengambil tema:",
+      temaResult.reason
+    );
   }
 
   if (halamanResult.status === "rejected") {
-    console.error("[PUBLIC LAYOUT] Gagal mengambil halaman:", halamanResult.reason);
+    console.error(
+      "[PUBLIC LAYOUT] Gagal mengambil daftar halaman:",
+      halamanResult.reason
+    );
   }
 
   if (konfigurasiResult.status === "rejected") {
@@ -65,6 +77,10 @@ export async function loadPublicLayout(subdomain) {
   };
 }
 
+/* =========================================================
+   LAYOUT WEBSITE PUBLIK
+========================================================= */
+
 export default function PublicLayout({
   profil,
   tema,
@@ -72,86 +88,94 @@ export default function PublicLayout({
   konfigurasi = [],
   children,
 }) {
+  /* -------------------------------------------------------
+     FALLBACK JIKA PROFIL SEKOLAH TIDAK TERSEDIA
+  ------------------------------------------------------- */
+
   if (!profil) {
     return (
-      <main className="flex min-h-screen items-center justify-center px-4 py-16">
+      <main
+        className="flex min-h-screen items-center justify-center px-4 py-16"
+        style={{
+          backgroundColor: "var(--school-background, #F8FAFC)",
+          color: "var(--school-text, #0F172A)",
+        }}
+      >
         <div
-          className="w-full max-w-lg rounded-2xl border p-8 text-center shadow-sm"
+          className="w-full max-w-lg rounded-3xl border p-8 text-center shadow-xl"
           style={{
-            backgroundColor: "var(--warna-netral-putih, #FFFFFF)",
-            borderColor: "var(--warna-netral-garis, #E2E8F0)",
-            color: "var(--warna-netral-teks, #0F172A)",
+            backgroundColor: "var(--school-surface, #FFFFFF)",
+            borderColor: "var(--school-border, #E2E8F0)",
           }}
         >
           <div
-            className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl"
+            className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full"
             style={{
-              backgroundColor: "var(--warna-netral-latar, #F8FAFC)",
-              color: "var(--warna-primer-utama, #2563EB)",
+              backgroundColor:
+                "color-mix(in srgb, var(--school-accent, #F59E0B) 12%, white)",
+              color: "var(--school-accent, #F59E0B)",
             }}
           >
-            <svg
-              width="27"
-              height="27"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.7"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <path d="M3 21h18" />
-              <path d="M5 21V7l7-4 7 4v14" />
-              <path d="M9 21v-5h6v5" />
-              <path d="M9 9h.01M15 9h.01M9 12h.01M15 12h.01" />
-            </svg>
+            <AlertTriangle size={32} />
           </div>
 
-          <h1 className="text-xl font-bold tracking-tight sm:text-2xl">
+          <h1
+            className="text-xl font-bold tracking-tight sm:text-2xl"
+            style={{ color: "var(--school-text, #0F172A)" }}
+          >
             Website sekolah belum dapat ditampilkan
           </h1>
 
           <p
-            className="mt-3 text-sm leading-6"
-            style={{ color: "var(--warna-netral-teksLembut, #64748B)" }}
+            className="mt-3 text-sm leading-relaxed"
+            style={{ color: "var(--school-secondary, #64748B)" }}
           >
             Data profil sekolah belum berhasil dimuat. Silakan periksa
-            koneksi atau coba kembali beberapa saat lagi.
+            koneksi internet Anda atau coba kembali beberapa saat lagi.
           </p>
         </div>
       </main>
     );
   }
 
+  /* -------------------------------------------------------
+     NORMALISASI DATA
+  ------------------------------------------------------- */
+
   const daftarHalaman = Array.isArray(halaman) ? halaman : [];
-  const daftarKonfigurasi = konfigurasi ?? [];
+
+  const daftarKonfigurasi = Array.isArray(konfigurasi)
+    ? konfigurasi
+    : konfigurasi && typeof konfigurasi === "object"
+      ? konfigurasi
+      : [];
+
+  /* -------------------------------------------------------
+     RENDER LAYOUT
+  ------------------------------------------------------- */
 
   return (
-    <>
-      <PublicTheme tema={tema} />
+    <div
+      className="flex min-h-screen w-full flex-col"
+      style={{
+        backgroundColor: "var(--school-background, #F8FAFC)",
+        color: "var(--school-text, #0F172A)",
+      }}
+    >
+      <PublicNavbar
+        sekolah={profil}
+        halaman={daftarHalaman}
+      />
 
-      <div
-        className="flex min-h-screen w-full flex-col"
-        style={{
-          backgroundColor: "var(--warna-netral-latar, #F8FAFC)",
-          color: "var(--warna-netral-teks, #0F172A)",
-        }}
-      >
-        <PublicNavbar sekolah={profil} halaman={daftarHalaman} />
+      <main className="flex w-full flex-1 flex-col">
+        {children}
+      </main>
 
-        <main className="min-w-0 w-full flex-1">
-          <div className="mx-auto w-full max-w-7xl px-4 py-7 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
-            {children}
-          </div>
-        </main>
-
-        <PublicFooter
-          sekolah={profil}
-          halaman={daftarHalaman}
-          konfigurasi={daftarKonfigurasi}
-        />
-      </div>
-    </>
+      <PublicFooter
+        sekolah={profil}
+        halaman={daftarHalaman}
+        konfigurasi={daftarKonfigurasi}
+      />
+    </div>
   );
 }

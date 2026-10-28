@@ -302,16 +302,16 @@ async function handleSubmit(event) {
 
     const result = await registerTenant(payload);
 
-    if (result?.success !== true) {
+    // Service tenant sudah memeriksa HTTP error dan success: false.
+    // Jangan menganggap gagal hanya karena backend tidak mengirim properti success.
+    if (result?.success === false) {
       throw new Error(
         result?.message || "Pendaftaran belum berhasil diproses."
       );
     }
 
-    // Email tidak disalin ke storage bisnis. Email diteruskan lewat
-    // query navigasi (?email=) ke halaman menunggu/verifikasi; Backend
-    // tidak menyediakan endpoint GET pendaftaran tenant untuk dibaca ulang.
-    localStorage.setItem("onboarding_paket_id", selectedPaket.id);
+    // Email diteruskan ke halaman verifikasi melalui query URL.
+    // Tidak perlu menyimpan data pendaftaran ke localStorage.
 
     setSuccess(
       result.message || "Pendaftaran berhasil. Silakan verifikasi email."
@@ -321,15 +321,34 @@ async function handleSubmit(event) {
       `/daftar-sekolah/menunggu?email=${encodeURIComponent(email)}`
     );
   } catch (err) {
-    console.error("REGISTER TENANT ERROR:", {
-      message: err instanceof Error ? err.message : "Pendaftaran gagal.",
-    });
+    // Ambil pesan error dari Error biasa, TenantApiError, atau object respons
+    // yang mungkin dilempar oleh service/backend.
+    const errorObject =
+      err && typeof err === "object"
+        ? err
+        : null;
 
-    setError(
+    const errorMessage =
       err instanceof Error
         ? err.message
-        : "Pendaftaran gagal. Silakan coba kembali."
-    );
+        : typeof errorObject?.message === "string"
+          ? errorObject.message
+          : typeof errorObject?.error === "string"
+            ? errorObject.error
+            : typeof errorObject?.payload?.message === "string"
+              ? errorObject.payload.message
+              : "Pendaftaran gagal. Silakan coba kembali.";
+
+    console.error("REGISTER TENANT ERROR:", {
+      message: errorMessage,
+      name: err instanceof Error ? err.name : errorObject?.name,
+      status: errorObject?.status,
+      errorCode: errorObject?.errorCode,
+      payload: errorObject?.payload,
+      error: err,
+    });
+
+    setError(errorMessage);
   } finally {
     setLoadingSubmit(false);
   }

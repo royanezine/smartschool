@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -14,25 +15,41 @@ import {
   ShieldCheck,
   UserRound,
 } from "lucide-react";
+import {
+  forgotPin,
+  resetPin,
+} from "@/services/auth.services";
 
-const API_URL = (
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
-).replace(/\/+$/, "");
+function getResponseData(response) {
+  let result = response;
 
-async function requestApi(path, payload) {
-  const response = await fetch(`${API_URL}${path}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-
-  const result = await response.json().catch(() => ({}));
-
-  if (!response.ok || result.success === false) {
-    throw new Error(result.message || "Permintaan gagal. Silakan coba lagi.");
+  // Mendukung response langsung, { data: ... },
+  // maupun { data: { data: ... } }.
+  for (let i = 0; i < 3; i += 1) {
+    if (
+      result &&
+      typeof result === "object" &&
+      result.data &&
+      typeof result.data === "object"
+    ) {
+      result = result.data;
+    } else {
+      break;
+    }
   }
 
   return result;
+}
+
+function getErrorMessage(error, fallback) {
+  return (
+    error?.response?.data?.message ||
+    error?.data?.message ||
+    error?.response?.data?.error ||
+    error?.data?.error ||
+    error?.message ||
+    fallback
+  );
 }
 
 export default function ForgotPinPage() {
@@ -46,120 +63,230 @@ export default function ForgotPinPage() {
 
   const [showPin, setShowPin] = useState(false);
   const [showConfirmPin, setShowConfirmPin] = useState(false);
+
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
+  const pinValid = /^\d{6}$/.test(pinBaru);
+  const otpValid = /^\d{6}$/.test(kodeOtp);
+  const konfirmasiValid =
+    /^\d{6}$/.test(konfirmasiPin) &&
+    pinBaru === konfirmasiPin;
+
+  function clearMessages() {
+    setErrorMessage("");
+    setSuccessMessage("");
+  }
 
   async function handleRequestOtp(event) {
     event.preventDefault();
-    setErrorMessage("");
-    setSuccessMessage("");
 
-    const value = identifier.trim();
+    if (loading) return;
 
-    if (!value) {
-      setErrorMessage("Masukkan email atau username akun siswa.");
+    clearMessages();
+
+    const normalizedIdentifier = identifier.trim();
+
+    if (!normalizedIdentifier) {
+      setErrorMessage(
+        "Masukkan email atau username akun kamu."
+      );
       return;
     }
 
     setLoading(true);
 
     try {
-      const result = await requestApi("/api/auth/pin/forgot", {
-        identifier: value,
-      });
+      const response = await forgotPin(normalizedIdentifier);
+      const result = getResponseData(response);
 
+      if (result?.success === false) {
+        throw new Error(
+          result.message || "Gagal meminta kode OTP."
+        );
+      }
+
+      setIdentifier(normalizedIdentifier);
+      setKodeOtp("");
+      setPinBaru("");
+      setKonfirmasiPin("");
       setStep(2);
+
       setSuccessMessage(
-        result.message ||
-          "Jika akun terdaftar, kode OTP akan dikirim ke email.",
+        result?.message ||
+          "Jika akun terdaftar, kode OTP akan dikirim ke email yang terdaftar."
       );
     } catch (error) {
       setErrorMessage(
-        error instanceof Error ? error.message : "Gagal meminta kode OTP.",
+        getErrorMessage(
+          error,
+          "Gagal meminta kode OTP. Silakan coba lagi."
+        )
       );
     } finally {
       setLoading(false);
     }
   }
 
-
   async function handleResetPin(event) {
     event.preventDefault();
-    setErrorMessage("");
-    setSuccessMessage("");
 
-    if (!/^\d{6}$/.test(kodeOtp.trim())) {
-      setErrorMessage("Kode OTP harus terdiri dari 6 digit.");
+    if (loading) return;
+
+    clearMessages();
+
+    const normalizedIdentifier = identifier.trim();
+    const normalizedOtp = kodeOtp.trim();
+
+    if (!normalizedIdentifier) {
+      setErrorMessage(
+        "Email atau username tidak boleh kosong."
+      );
       return;
     }
 
-    if (!/^\d{6}$/.test(pinBaru)) {
-      setErrorMessage("PIN baru harus terdiri dari 6 digit angka.");
+    if (!/^\d{6}$/.test(normalizedOtp)) {
+      setErrorMessage(
+        "Kode OTP harus terdiri dari 6 digit angka."
+      );
       return;
     }
 
-    if (pinBaru !== konfirmasiPin) {
-      setErrorMessage("Konfirmasi PIN tidak sama dengan PIN baru.");
+    if (!pinValid) {
+      setErrorMessage(
+        "PIN baru harus terdiri dari 6 digit angka."
+      );
+      return;
+    }
+
+    if (!konfirmasiValid) {
+      setErrorMessage(
+        "Konfirmasi PIN tidak sama dengan PIN baru."
+      );
       return;
     }
 
     setLoading(true);
 
     try {
-      const result = await requestApi("/api/auth/pin/reset", {
-        identifier: identifier.trim(),
-        kodeOtp: kodeOtp.trim(),
-        pinBaru,
-      });
+      const response = await resetPin(
+        normalizedIdentifier,
+        normalizedOtp,
+        pinBaru
+      );
+
+      const result = getResponseData(response);
+
+      if (result?.success === false) {
+        throw new Error(
+          result.message || "Gagal mereset PIN."
+        );
+      }
 
       setSuccessMessage(
-        result.message || "PIN berhasil direset. Silakan login kembali.",
+        result?.message ||
+          "PIN berhasil direset. Silakan login kembali."
       );
 
       setStep(3);
       setKodeOtp("");
       setPinBaru("");
       setKonfirmasiPin("");
+      setShowPin(false);
+      setShowConfirmPin(false);
     } catch (error) {
       setErrorMessage(
-        error instanceof Error
-          ? error.message
-          : "Gagal mereset PIN. Periksa OTP dan coba lagi.",
+        getErrorMessage(
+          error,
+          "Gagal mereset PIN. Periksa kode OTP dan coba lagi."
+        )
       );
     } finally {
       setLoading(false);
     }
   }
 
-
   function goBack() {
+    if (loading) return;
+
+    clearMessages();
+
     if (step === 2) {
       setStep(1);
-      setErrorMessage("");
-      setSuccessMessage("");
+      setKodeOtp("");
+      setPinBaru("");
+      setKonfirmasiPin("");
+      setShowPin(false);
+      setShowConfirmPin(false);
       return;
     }
+
     router.push("/login");
   }
 
+  function handleIdentifierChange(value) {
+    setIdentifier(value);
+    clearMessages();
+  }
+
+  function handleOtpChange(value) {
+    setKodeOtp(
+      value.replace(/\D/g, "").slice(0, 6)
+    );
+    setErrorMessage("");
+  }
+
+  function handlePinChange(value) {
+    setPinBaru(
+      value.replace(/\D/g, "").slice(0, 6)
+    );
+    setErrorMessage("");
+  }
+
+  function handleConfirmPinChange(value) {
+    setKonfirmasiPin(
+      value.replace(/\D/g, "").slice(0, 6)
+    );
+    setErrorMessage("");
+  }
+
+  function handleRequestAnotherOtp() {
+    if (loading) return;
+
+    setStep(1);
+    setKodeOtp("");
+    setPinBaru("");
+    setKonfirmasiPin("");
+    setShowPin(false);
+    setShowConfirmPin(false);
+    clearMessages();
+  }
+
+  function goToLogin() {
+    router.replace("/login");
+  }
 
   return (
     <div className="relative flex min-h-screen items-center justify-center bg-white px-4 py-8">
       <div className="relative z-10 w-full max-w-sm overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <div className="flex flex-col items-center px-6 pt-8 pb-5 sm:px-8 sm:pt-9">
+        <div className="flex flex-col items-center px-6 pb-5 pt-8 sm:px-8 sm:pt-9">
           <div className="relative flex h-24 w-24 items-center justify-center sm:h-28 sm:w-28">
             <Image
               src="/logo/logoSS.png"
-              alt="Logo Sekolah"
+              alt="Logo SmartSchool"
               width={112}
               height={112}
               priority
               className="h-full w-full object-contain"
             />
+
             <span className="absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-blue-600 text-white shadow-sm">
-              <KeyRound size={16} />
+              {step === 3 ? (
+                <CheckCircle2 size={16} />
+              ) : (
+                <KeyRound size={16} />
+              )}
             </span>
           </div>
 
@@ -168,6 +295,7 @@ export default function ForgotPinPage() {
             {step === 2 && "Verifikasi OTP"}
             {step === 3 && "PIN Berhasil Direset"}
           </h1>
+
           <p className="mt-1 text-center text-xs leading-5 text-slate-500">
             {step === 1 &&
               "Masukkan email atau username untuk meminta kode OTP reset PIN."}
@@ -180,7 +308,10 @@ export default function ForgotPinPage() {
 
         <div className="px-6 pb-6 sm:px-8">
           {step === 1 && (
-            <form onSubmit={handleRequestOtp} className="space-y-4">
+            <form
+              onSubmit={handleRequestOtp}
+              className="space-y-4"
+            >
               <div>
                 <label
                   htmlFor="identifier"
@@ -194,16 +325,19 @@ export default function ForgotPinPage() {
                     size={16}
                     className="shrink-0 text-slate-400"
                   />
+
                   <input
                     id="identifier"
+                    name="identifier"
                     type="text"
                     autoComplete="username"
                     placeholder="Masukkan email atau username"
                     value={identifier}
-                    onChange={(event) => {
-                      setIdentifier(event.target.value);
-                      setErrorMessage("");
-                    }}
+                    onChange={(event) =>
+                      handleIdentifierChange(
+                        event.target.value
+                      )
+                    }
                     disabled={loading}
                     required
                     className="w-full bg-transparent text-xs text-slate-900 outline-none placeholder:text-slate-400"
@@ -226,12 +360,15 @@ export default function ForgotPinPage() {
 
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || !identifier.trim()}
                 className="flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400"
               >
                 {loading ? (
                   <>
-                    <LoaderCircle size={16} className="animate-spin" />
+                    <LoaderCircle
+                      size={16}
+                      className="animate-spin"
+                    />
                     Memproses...
                   </>
                 ) : (
@@ -242,17 +379,10 @@ export default function ForgotPinPage() {
           )}
 
           {step === 2 && (
-            <form onSubmit={handleResetPin} className="space-y-4">
-              <div className="flex items-center gap-2.5 rounded-lg border border-blue-100 bg-blue-50/60 px-3.5 py-2.5">
-                <Mail size={15} className="shrink-0 text-blue-600" />
-                <span className="text-[11px] text-slate-600">
-                  Akun:{" "}
-                  <strong className="break-all font-semibold text-slate-900">
-                    {identifier}
-                  </strong>
-                </span>
-              </div>
-
+            <form
+              onSubmit={handleResetPin}
+              className="space-y-4"
+            >
               {successMessage && (
                 <div
                   role="status"
@@ -262,6 +392,20 @@ export default function ForgotPinPage() {
                 </div>
               )}
 
+              <div className="flex items-center gap-2.5 rounded-lg border border-blue-100 bg-blue-50/60 px-3.5 py-2.5">
+                <Mail
+                  size={15}
+                  className="shrink-0 text-blue-600"
+                />
+
+                <span className="text-[11px] text-slate-600">
+                  Akun:{" "}
+                  <strong className="break-all font-semibold text-slate-900">
+                    {identifier}
+                  </strong>
+                </span>
+              </div>
+
               <div>
                 <label
                   htmlFor="otp"
@@ -269,19 +413,18 @@ export default function ForgotPinPage() {
                 >
                   Kode OTP
                 </label>
+
                 <input
                   id="otp"
+                  name="otp"
                   type="text"
                   inputMode="numeric"
                   autoComplete="one-time-code"
                   placeholder="Masukkan 6 digit OTP"
                   value={kodeOtp}
-                  onChange={(event) => {
-                    setKodeOtp(
-                      event.target.value.replace(/\D/g, "").slice(0, 6),
-                    );
-                    setErrorMessage("");
-                  }}
+                  onChange={(event) =>
+                    handleOtpChange(event.target.value)
+                  }
                   maxLength={6}
                   required
                   disabled={loading}
@@ -297,31 +440,40 @@ export default function ForgotPinPage() {
                   >
                     PIN baru
                   </label>
+
                   <button
                     type="button"
-                    onClick={() => setShowPin((v) => !v)}
+                    onClick={() =>
+                      setShowPin((value) => !value)
+                    }
                     className="inline-flex items-center gap-1 text-xs font-medium text-slate-500 transition hover:text-blue-600"
                   >
-                    {showPin ? <EyeOff size={13} /> : <Eye size={13} />}
+                    {showPin ? (
+                      <EyeOff size={13} />
+                    ) : (
+                      <Eye size={13} />
+                    )}
                     {showPin ? "Sembunyikan" : "Tampilkan"}
                   </button>
                 </div>
 
                 <div className="flex items-center gap-2.5 rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 transition focus-within:border-blue-400 focus-within:ring-4 focus-within:ring-blue-100">
-                  <KeyRound size={16} className="shrink-0 text-slate-400" />
+                  <KeyRound
+                    size={16}
+                    className="shrink-0 text-slate-400"
+                  />
+
                   <input
                     id="new-pin"
+                    name="pinBaru"
                     type={showPin ? "text" : "password"}
                     inputMode="numeric"
                     autoComplete="new-password"
                     placeholder="Buat PIN 6 digit"
                     value={pinBaru}
-                    onChange={(event) => {
-                      setPinBaru(
-                        event.target.value.replace(/\D/g, "").slice(0, 6),
-                      );
-                      setErrorMessage("");
-                    }}
+                    onChange={(event) =>
+                      handlePinChange(event.target.value)
+                    }
                     maxLength={6}
                     required
                     disabled={loading}
@@ -338,9 +490,12 @@ export default function ForgotPinPage() {
                   >
                     Konfirmasi PIN baru
                   </label>
+
                   <button
                     type="button"
-                    onClick={() => setShowConfirmPin((v) => !v)}
+                    onClick={() =>
+                      setShowConfirmPin((value) => !value)
+                    }
                     className="inline-flex items-center gap-1 text-xs font-medium text-slate-500 transition hover:text-blue-600"
                   >
                     {showConfirmPin ? (
@@ -348,31 +503,51 @@ export default function ForgotPinPage() {
                     ) : (
                       <Eye size={13} />
                     )}
-                    {showConfirmPin ? "Sembunyikan" : "Tampilkan"}
+                    {showConfirmPin
+                      ? "Sembunyikan"
+                      : "Tampilkan"}
                   </button>
                 </div>
 
                 <div className="flex items-center gap-2.5 rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 transition focus-within:border-blue-400 focus-within:ring-4 focus-within:ring-blue-100">
-                  <KeyRound size={16} className="shrink-0 text-slate-400" />
+                  <KeyRound
+                    size={16}
+                    className="shrink-0 text-slate-400"
+                  />
+
                   <input
                     id="confirm-pin"
+                    name="konfirmasiPin"
                     type={showConfirmPin ? "text" : "password"}
                     inputMode="numeric"
                     autoComplete="new-password"
                     placeholder="Ulangi PIN baru"
                     value={konfirmasiPin}
-                    onChange={(event) => {
-                      setKonfirmasiPin(
-                        event.target.value.replace(/\D/g, "").slice(0, 6),
-                      );
-                      setErrorMessage("");
-                    }}
+                    onChange={(event) =>
+                      handleConfirmPinChange(
+                        event.target.value
+                      )
+                    }
                     maxLength={6}
                     required
                     disabled={loading}
                     className="w-full bg-transparent text-xs text-slate-900 outline-none placeholder:text-slate-400"
                   />
                 </div>
+
+                {pinBaru.length === 6 &&
+                  konfirmasiPin.length === 6 &&
+                  !konfirmasiValid && (
+                    <p className="mt-2 text-xs text-amber-600">
+                      Konfirmasi PIN belum sama.
+                    </p>
+                  )}
+
+                {konfirmasiValid && (
+                  <p className="mt-2 text-xs font-medium text-emerald-600">
+                    PIN sudah cocok.
+                  </p>
+                )}
               </div>
 
               {errorMessage && (
@@ -386,12 +561,20 @@ export default function ForgotPinPage() {
 
               <button
                 type="submit"
-                disabled={loading}
+                disabled={
+                  loading ||
+                  !otpValid ||
+                  !pinValid ||
+                  !konfirmasiValid
+                }
                 className="flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-400"
               >
                 {loading ? (
                   <>
-                    <LoaderCircle size={16} className="animate-spin" />
+                    <LoaderCircle
+                      size={16}
+                      className="animate-spin"
+                    />
                     Menyimpan PIN...
                   </>
                 ) : (
@@ -401,11 +584,7 @@ export default function ForgotPinPage() {
 
               <button
                 type="button"
-                onClick={() => {
-                  setStep(1);
-                  setErrorMessage("");
-                  setSuccessMessage("");
-                }}
+                onClick={handleRequestAnotherOtp}
                 disabled={loading}
                 className="w-full py-1 text-xs font-medium text-blue-600 transition hover:text-blue-800 disabled:opacity-50"
               >
@@ -421,6 +600,7 @@ export default function ForgotPinPage() {
                   size={17}
                   className="mt-0.5 shrink-0 text-emerald-600"
                 />
+
                 <p className="text-xs leading-5 text-emerald-800">
                   {successMessage}
                 </p>
@@ -428,7 +608,7 @@ export default function ForgotPinPage() {
 
               <button
                 type="button"
-                onClick={() => router.push("/login")}
+                onClick={goToLogin}
                 className="flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-100"
               >
                 Kembali ke Login

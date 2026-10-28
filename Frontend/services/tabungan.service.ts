@@ -338,3 +338,31 @@ export async function tarikTabungan(
 
   return response.data;
 }
+
+export async function cariSiswaTabungan(
+  q: string,
+  limit = 10,
+): Promise<ApiResponse<Array<{
+  id: string;
+  nama: string;
+  kelas: {
+    id: string;
+    nama: string;
+    tingkat: number | null;
+  } | null;
+}>>> {
+  const keyword = q.trim();
+
+  if (keyword.length < 2) {
+    throw new Error("Kata kunci minimal 2 karakter.");
+  }
+
+  const query = buildQuery({
+    q: keyword,
+    limit,
+  });
+
+  return apiFetch(
+    `${TABUNGAN_URL}/cari-siswa${query}`,
+  );
+}

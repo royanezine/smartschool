@@ -1,13 +1,28 @@
 import Link from "next/link";
 import Image from "next/image";
+import { CalendarDays, ArrowRight, Image as ImageIcon, Sparkles } from "lucide-react";
 
 function formatTanggal(iso) {
   if (!iso) return "";
   const tanggal = new Date(iso);
   if (Number.isNaN(tanggal.getTime())) return "";
   return tanggal.toLocaleDateString("id-ID", {
-    day: "numeric", month: "long", year: "numeric",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
   });
+}
+
+function isNewArticle(iso) {
+  if (!iso) return false;
+  const tanggal = new Date(iso);
+  if (Number.isNaN(tanggal.getTime())) return false;
+  
+  const today = new Date();
+  const diffTime = Math.abs(today - tanggal);
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  
+  return diffDays <= 7;
 }
 
 function getRingkasan(artikel) {
@@ -39,55 +54,70 @@ export default function ArticleCard({ artikel, subdomain }) {
   const tenant = subdomain;
 
   const href =
-    typeof tenant === "string" && tenant.trim() &&
-    typeof slug === "string" && slug.trim()
-      ? `/${encodeURIComponent(tenant.trim())}/articles/${encodeURIComponent(slug.trim())}`
+    typeof tenant === "string" &&
+    tenant.trim() &&
+    typeof slug === "string" &&
+    slug.trim()
+      ? `/${encodeURIComponent(tenant.trim())}/articles/${encodeURIComponent(
+          slug.trim()
+        )}`
       : null;
 
   const judul = artikel.judul || "Artikel sekolah";
   const ringkasan = getRingkasan(artikel);
-  const tanggal = formatTanggal(artikel.dibuatPada);
+  const tanggal = formatTanggal(artikel.dibuatPada || artikel.tanggalPublikasi);
   const kategori = artikel.kategoriArtikel?.nama;
   const gambarUrl = artikel.gambarUtama || artikel.gambarUrl;
+  
+  const isNew = isNewArticle(artikel.dibuatPada || artikel.tanggalPublikasi);
 
   return (
     <article
-      className="group relative flex h-full flex-col overflow-hidden rounded-2xl border transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
-      style={{
-        borderColor: "var(--warna-netral-garis, #E2E8F0)",
-        backgroundColor: "var(--warna-netral-putih, #FFFFFF)",
-      }}
+      className="group relative flex h-full flex-col overflow-hidden rounded-2xl border bg-white shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl"
+      style={{ borderColor: "var(--school-border, #E2E8F0)" }}
     >
       <div
-        className="relative aspect-[4/3] w-full overflow-hidden"
-        style={{ backgroundColor: "var(--warna-netral-garis, #E2E8F0)" }}
+        className="relative aspect-[16/9] w-full overflow-hidden"
+        style={{ backgroundColor: "var(--school-background, #F1F5F9)" }}
       >
-        {kategori && (
-          <div className="absolute left-4 top-4 z-10">
+        <div className="absolute left-4 top-4 z-20 flex flex-wrap items-center gap-2">
+          {kategori && (
             <span
-              className="inline-flex rounded-full px-3 py-1 text-xs font-bold shadow-md backdrop-blur-md"
+              className="inline-flex rounded-full px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider shadow-sm backdrop-blur-md"
               style={{
-                backgroundColor: "rgba(255, 255, 255, 0.9)",
-                color: "var(--warna-primer-gelap, #1E3A8A)",
+                backgroundColor: "rgba(255, 255, 255, 0.95)",
+                color: "var(--school-primary, #1E3A8A)",
               }}
             >
               {kategori}
             </span>
-          </div>
-        )}
+          )}
+
+          {isNew && (
+            <span
+              className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-white shadow-sm"
+              style={{
+                backgroundColor: "var(--school-accent, #F59E0B)", 
+              }}
+            >
+              <Sparkles size={12} />
+              Terbaru
+            </span>
+          )}
+        </div>
 
         {gambarUrl ? (
           href ? (
-            <Link href={href} className="block h-full w-full relative">
+            <Link href={href} className="relative block h-full w-full">
               <Image
                 src={gambarUrl}
                 alt={judul}
                 fill
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                className="object-cover transition-transform duration-500 group-hover:scale-110"
+                className="object-cover transition-transform duration-700 group-hover:scale-110"
                 unoptimized
               />
-              <div className="absolute inset-0 bg-black/10 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
             </Link>
           ) : (
             <Image
@@ -100,17 +130,20 @@ export default function ArticleCard({ artikel, subdomain }) {
             />
           )
         ) : (
-          <div className="flex h-full items-center justify-center text-sm font-medium" style={{ color: "var(--warna-netral-teksLembut, #64748B)" }}>
-            <svg className="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-            Tidak ada gambar
+          <div
+            className="flex h-full items-center justify-center"
+            style={{ color: "var(--school-secondary, #94A3B8)" }}
+          >
+            <ImageIcon size={40} className="opacity-50" />
           </div>
         )}
       </div>
 
-      <div className="flex flex-1 flex-col p-5">
-        <h3 className="mb-3 line-clamp-2 text-lg font-bold leading-snug transition-colors group-hover:text-[var(--warna-primer-utama)]" style={{ color: "var(--warna-netral-teks, #0F172A)" }}>
+      <div className="flex flex-1 flex-col p-6">
+        <h3
+          className="mb-3 line-clamp-2 text-xl font-bold leading-snug transition-colors group-hover:text-[var(--school-primary)]"
+          style={{ color: "var(--school-text, #0F172A)" }}
+        >
           {href ? (
             <Link href={href} className="focus:outline-none">
               {judul}
@@ -121,29 +154,37 @@ export default function ArticleCard({ artikel, subdomain }) {
         </h3>
 
         {ringkasan && (
-          <p className="mb-5 line-clamp-3 text-sm leading-relaxed" style={{ color: "var(--warna-netral-teksLembut, #64748B)" }}>
+          <p
+            className="mb-6 line-clamp-3 text-sm leading-relaxed"
+            style={{ color: "var(--school-secondary, #475569)" }}
+          >
             {ringkasan}
           </p>
         )}
 
-        <div className="mt-auto flex items-center justify-between border-t pt-4" style={{ borderColor: "var(--warna-netral-garis, #E2E8F0)" }}>
-          <div className="flex items-center gap-2 text-xs font-medium" style={{ color: "var(--warna-netral-teksLembut)" }}>
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-            {tanggal}
+        <div
+          className="mt-auto flex items-center justify-between border-t pt-4"
+          style={{ borderColor: "var(--school-border, #F1F5F9)" }}
+        >
+          <div
+            className="flex items-center gap-1.5 text-xs font-medium"
+            style={{ color: "var(--school-secondary, #64748B)" }}
+          >
+            <CalendarDays size={14} />
+            {tanggal || "-"}
           </div>
 
           {href && (
             <Link
               href={href}
-              className="flex items-center gap-1 text-xs font-bold transition-transform group-hover:translate-x-1"
-              style={{ color: "var(--warna-primer-utama, #2563EB)" }}
+              className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-bold transition-all group-hover:bg-[var(--school-primary)] group-hover:text-white"
+              style={{ 
+                color: "var(--school-primary, #2563EB)",
+                backgroundColor: "color-mix(in srgb, var(--school-primary, #2563EB) 8%, transparent)"
+              }}
             >
               Baca
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-              </svg>
+              <ArrowRight size={16} />
             </Link>
           )}
         </div>

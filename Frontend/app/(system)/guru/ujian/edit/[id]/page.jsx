@@ -18,6 +18,11 @@ import {
   Settings2,
   Eye,
   EyeOff,
+  Timer,
+  Award,
+  FileText,
+  Globe,
+  Target,
 } from "lucide-react";
 
 import {
@@ -43,6 +48,9 @@ const themePrimaryShadow =
 
 const themeCardShadow =
   "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeSmallShadow =
+  "shadow-[0_2px_8px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
 
 const themeNeutralSurface =
   "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
@@ -130,6 +138,22 @@ function formatDateTimeLocal(value) {
   ).padStart(2, "0");
 
   return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+
+function formatDateTime(value) {
+  if (!value) return "-";
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) return "-";
+
+  return date.toLocaleString("id-ID", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 const JENIS_UJIAN_OPTIONS = [
@@ -473,7 +497,7 @@ export default function EditUjianPage() {
 
   if (loading) {
     return (
-      <div className="theme-page flex min-h-screen">
+      <div className="theme-page flex h-screen min-h-0 overflow-hidden">
         <Sidebar
           role="guru"
           active="ujian"
@@ -485,23 +509,25 @@ export default function EditUjianPage() {
           }
         />
 
-        <div className="flex min-w-0 flex-1 flex-col">
-          <Header
-            toggleSidebar={() =>
-              setIsSidebarCollapsed(
-                (prev) => !prev
-              )
-            }
-            notifications={[]}
-            user={{
-              name: "Guru",
-              email:
-                "guru@smartschool.com",
-              avatar: "G",
-            }}
-          />
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+          <div className="shrink-0">
+            <Header
+              toggleSidebar={() =>
+                setIsSidebarCollapsed(
+                  (prev) => !prev
+                )
+              }
+              notifications={[]}
+              user={{
+                name: "Guru",
+                email:
+                  "guru@smartschool.com",
+                avatar: "G",
+              }}
+            />
+          </div>
 
-          <main className="flex flex-1 items-center justify-center">
+          <main className="flex min-h-0 min-w-0 flex-1 items-center justify-center">
             <div className="text-center">
               <Loader2
                 size={32}
@@ -519,8 +545,63 @@ export default function EditUjianPage() {
   }
 
 
+  const statCards = [
+    {
+      label: "Jenis Ujian",
+      value: form.jenis || "—",
+      hint: "Tipe asesmen",
+      icon: Target,
+      tone: "primary",
+    },
+    {
+      label: "Durasi",
+      value: form.durasi ? `${form.durasi} mnt` : "—",
+      hint: "Waktu pengerjaan",
+      icon: Timer,
+      tone: "warning",
+    },
+    {
+      label: "Nilai Kelulusan",
+      value:
+        form.nilaiKelulusan !== ""
+          ? `${form.nilaiKelulusan}%`
+          : "—",
+      hint: "Batas minimal lulus",
+      icon: Award,
+      tone: "success",
+    },
+    {
+      label: "Waktu Mulai",
+      value: form.waktuMulai ? "✓" : "—",
+      hint: form.waktuMulai
+        ? formatDateTime(form.waktuMulai)
+        : "Belum diatur",
+      icon: CalendarDays,
+      tone: form.waktuMulai ? "info" : "neutral",
+    },
+    {
+      label: "Waktu Selesai",
+      value: form.waktuSelesai ? "✓" : "—",
+      hint: form.waktuSelesai
+        ? formatDateTime(form.waktuSelesai)
+        : "Belum diatur",
+      icon: Clock3,
+      tone: form.waktuSelesai ? "info" : "neutral",
+    },
+    {
+      label: "Status",
+      value: form.dipublikasikan ? "Publik" : "Draft",
+      hint: form.dipublikasikan
+        ? "Siswa dapat melihat"
+        : "Belum dipublikasikan",
+      icon: form.dipublikasikan ? Eye : EyeOff,
+      tone: form.dipublikasikan ? "success" : "neutral",
+    },
+  ];
+
+
   return (
-    <div className="theme-page flex min-h-screen">
+    <div className="theme-page flex h-screen min-h-0 overflow-hidden">
 
       <Sidebar
         role="guru"
@@ -534,25 +615,28 @@ export default function EditUjianPage() {
       />
 
 
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <Header
-          toggleSidebar={() =>
-            setIsSidebarCollapsed(
-              (prev) => !prev
-            )
-          }
-          notifications={[]}
-          user={{
-            name: "Guru",
-            email:
-              "guru@smartschool.com",
-            avatar: "G",
-          }}
-        />
+      {/* Body: sidebar + main sejajar */}
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+        <div className="shrink-0">
+          <Header
+            toggleSidebar={() =>
+              setIsSidebarCollapsed(
+                (prev) => !prev
+              )
+            }
+            notifications={[]}
+            user={{
+              name: "Guru",
+              email:
+                "guru@smartschool.com",
+              avatar: "G",
+            }}
+          />
+        </div>
 
-        <main className="theme-page flex-1 overflow-y-auto">
-          <div className="mx-auto w-full max-w-5xl p-4 sm:p-6 lg:p-8">
-
+        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto">
+          {/* Konten w-full (bukan max-w) → melebar saat zoom out */}
+          <div className="w-full p-4 sm:p-5 lg:p-6 xl:p-8">
 
             <div className="mb-6">
               <button
@@ -562,9 +646,9 @@ export default function EditUjianPage() {
                     "/guru/ujian"
                   )
                 }
-                className={`theme-text-secondary mb-5 flex items-center gap-2 text-sm font-medium transition hover:text-[var(--color-primary)]`}
+                className={`theme-card ${themeNeutralBorder} theme-text-secondary mb-5 inline-flex items-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-semibold ${themeNeutralHover} ${themeSmallShadow} transition-all hover:text-[var(--color-primary)] sm:text-sm`}
               >
-                <ArrowLeft size={17} />
+                <ArrowLeft size={15} />
                 Kembali ke Ujian
               </button>
 
@@ -572,7 +656,7 @@ export default function EditUjianPage() {
                 <div>
                   <div className="flex items-center gap-3">
                     <div
-                      className={`flex h-11 w-11 items-center justify-center rounded-xl ${themePrimarySoft} ${themePrimaryText}`}
+                      className={`flex h-11 w-11 items-center justify-center rounded-xl ${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow}`}
                     >
                       <BookOpen size={21} />
                     </div>
@@ -609,6 +693,67 @@ export default function EditUjianPage() {
                   </div>
                 )}
               </div>
+            </div>
+
+
+            {/* ================= STAT CARDS ================= */}
+            {/* Responsif sampai 6 kolom di 2xl */}
+            <div className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-6">
+              {statCards.map((stat) => {
+                const Icon = stat.icon;
+
+                const toneMap = {
+                  primary: {
+                    icon: `${themePrimarySoft} ${themePrimarySoftBorder} ${themePrimaryText}`,
+                    value: "theme-text",
+                  },
+                  info: {
+                    icon: `${themeInfoSurface} ${themeInfoBorder} text-[var(--color-info)]`,
+                    value: "text-[var(--color-info)]",
+                  },
+                  success: {
+                    icon: `${themeSuccessSurface} ${themeSuccessBorder} text-[var(--color-success)]`,
+                    value: "text-[var(--color-success)]",
+                  },
+                  warning: {
+                    icon: `${themeWarningSurface} ${themeWarningBorder} text-[var(--color-warning)]`,
+                    value: "text-[var(--color-warning)]",
+                  },
+                  neutral: {
+                    icon: `${themeNeutralSurface} ${themeNeutralBorder} theme-text-muted`,
+                    value: "theme-text-muted",
+                  },
+                };
+
+                const t = toneMap[stat.tone] || toneMap.primary;
+
+                return (
+                  <div
+                    key={stat.label}
+                    className={`theme-card ${themeNeutralBorder} ${themeSmallShadow} rounded-xl border p-3`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <div
+                        className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border ${t.icon}`}
+                      >
+                        <Icon size={14} />
+                      </div>
+
+                      <p className="theme-text-muted truncate text-[10px] font-bold uppercase tracking-wide">
+                        {stat.label}
+                      </p>
+                    </div>
+
+                    <p className={`mt-2 truncate text-lg font-bold ${t.value}`}>
+                      {stat.value}
+                    </p>
+
+                    <p className="theme-text-muted mt-0.5 truncate text-[11px]">
+                      {stat.hint}
+                    </p>
+                  </div>
+                );
+              })}
             </div>
 
 
@@ -657,7 +802,6 @@ export default function EditUjianPage() {
 
             <form onSubmit={handleSubmit}>
 
-
               <section
                 className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
               >
@@ -685,7 +829,6 @@ export default function EditUjianPage() {
 
                 <div className="grid gap-5 p-5 sm:p-6">
 
-
                   <div>
                     <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                       Judul Ujian
@@ -704,7 +847,6 @@ export default function EditUjianPage() {
                     />
                   </div>
 
-
                   <div>
                     <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                       Deskripsi
@@ -719,7 +861,6 @@ export default function EditUjianPage() {
                       className={`theme-input w-full resize-none rounded-xl border px-4 py-3 text-sm outline-none transition placeholder:text-[var(--color-text-placeholder)] ${themeFocus}`}
                     />
                   </div>
-
 
                   <div className="grid gap-5 sm:grid-cols-2">
 
@@ -799,7 +940,6 @@ export default function EditUjianPage() {
 
                 <div className="grid gap-5 p-5 sm:grid-cols-2 lg:grid-cols-4">
 
-
                   <div>
                     <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                       Durasi
@@ -820,7 +960,6 @@ export default function EditUjianPage() {
                       </span>
                     </div>
                   </div>
-
 
                   <div>
                     <label className="theme-text-secondary mb-2 block text-sm font-semibold">
@@ -846,7 +985,6 @@ export default function EditUjianPage() {
                     </div>
                   </div>
 
-
                   <div>
                     <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                       Waktu Mulai
@@ -862,7 +1000,6 @@ export default function EditUjianPage() {
                       className={`theme-input w-full rounded-xl border px-3 py-3 text-sm outline-none ${themeFocus}`}
                     />
                   </div>
-
 
                   <div>
                     <label className="theme-text-secondary mb-2 block text-sm font-semibold">
@@ -910,7 +1047,6 @@ export default function EditUjianPage() {
 
                 <div className="space-y-4 p-5 sm:p-6">
 
-
                   <label
                     className={`theme-card flex cursor-pointer items-start gap-4 rounded-xl border ${themeNeutralBorder} p-4 transition ${themeNeutralHover} hover:border-[color-mix(in_srgb,var(--color-primary)_24%,transparent)]`}
                   >
@@ -945,7 +1081,6 @@ export default function EditUjianPage() {
                       </p>
                     </div>
                   </label>
-
 
                   <label
                     className={`theme-card flex cursor-pointer items-start gap-4 rounded-xl border ${themeNeutralBorder} p-4 transition ${themeNeutralHover} hover:border-[color-mix(in_srgb,var(--color-primary)_24%,transparent)]`}
@@ -1048,6 +1183,8 @@ export default function EditUjianPage() {
             <footer className="theme-text-muted py-8 text-center text-xs">
               © 2026 SmartSchool • Guru Ujian
             </footer>
+
+            
           </div>
         </main>
       </div>

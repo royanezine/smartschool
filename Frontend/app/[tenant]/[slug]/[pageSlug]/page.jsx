@@ -34,27 +34,16 @@ const pageSlug = params?.pageSlug;
 const [subdomain, setSubdomain] = useState("");
 
 useEffect(() => {
-  const tenantFromRoute =
-    typeof params?.tenant === "string"
-      ? params.tenant
-      : Array.isArray(params?.tenant)
-        ? params.tenant[0] || ""
-        : "";
-
-  if (tenantFromRoute) {
-    setSubdomain(tenantFromRoute);
-    return;
-  }
-
   const hostname = window.location.hostname;
   const parts = hostname.split(".");
 
-  if (hostname.endsWith(".localhost") && parts.length >= 2) {
-    setSubdomain(parts[0]);
-  } else if (parts.length >= 3) {
+  if (
+    hostname.endsWith(".localhost") &&
+    parts.length >= 2
+  ) {
     setSubdomain(parts[0]);
   }
-}, [params?.tenant]);
+}, []);
 
   const [page, setPage] = useState(null);
   const [loading, setLoading] = useState(true);

@@ -88,9 +88,7 @@ export async function verifyPin(
 export async function forgotPin(identifier: string) {
   return apiFetch("/api/auth/pin/forgot", {
     method: "POST",
-    body: JSON.stringify({
-      identifier,
-    }),
+    body: JSON.stringify({ identifier }),
   });
 }
 
@@ -101,13 +99,11 @@ export async function resetPin(
 ) {
   return apiFetch("/api/auth/pin/reset", {
     method: "POST",
-    body: JSON.stringify({
-      identifier,
-      kodeOtp,
-      pinBaru,
-    }),
+    body: JSON.stringify({ identifier, kodeOtp, pinBaru }),
   });
 }
+
+
 
 
 export async function resetPinByAdmin(userId: string | number) {

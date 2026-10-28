@@ -3,9 +3,11 @@ import {
   Users,
   UserCheck,
   UserPlus,
+  LayoutTemplate,
   ScanFace,
   GraduationCap,
   Split,
+  FolderOpen,
   WalletCards,
   Landmark,
   KeyRound,
@@ -110,15 +112,9 @@ export const adminSidebarConfig = {
           path: "/admin/siswa/absen",
         },
         {
-          key: "permohonanIzinSiswa",
-          icon: FileText,
-          label: "Permohonan Izin Siswa",
-          path: "/admin/presensi/izin-siswa",
-        },
-        {
-          key: "permohonanIzinGuru",
+          key: "permohonanIzin",
           icon: FileSignature,
-          label: "Permohonan Izin Guru",
+          label: "Daftar Permohonan Izin",
           path: "/admin/presensi/izin-guru",
         },
 
@@ -526,33 +522,48 @@ export const adminSidebarConfig = {
     },
 
     {
-      type: "item",
-      key: "cms",
-      icon: Globe2,
-      label: "CMS",
-      path: "/admin/cms",
+  type: "item",
+  key: "cms",
+  icon: Globe2,
+  label: "CMS",
+  path: "/admin/cms",
 
-      children: [
-        {
-          key: "cmsPages",
-          icon: FileText,
-          label: "Halaman Website",
-          path: "/admin/cms/pages",
-        },
-        {
-          key: "cmsMedia",
-          icon: FileInput,
-          label: "Artikel",
-          path: "/admin/cms/articles",
-        },
-        {
-          key: "cmsSettings",
-          icon: Settings2,
-          label: "Sistem & Pengaturan",
-          path: "/admin/cms/pengaturan",
-        },
-      ],
+  children: [
+
+     {
+      key: "cmsArticleCategories",
+      icon: FolderOpen,
+      label: "Kategori Artikel",
+      path: "/admin/cms/articles/categories",
     },
+     {
+      key: "cmsArticles",
+      icon: FileInput,
+      label: "Artikel",
+      path: "/admin/cms/articles",
+    },
+    {
+      key: "cmsWebsitePages",
+      icon: LayoutTemplate,
+      label: "Halaman Website",
+      path: "/admin/cms/pages",
+    },
+   
+   
+     {
+      key: "cmsPages",
+      icon: FileText,
+      label: "Konfigurasi Konten",
+      path: "/admin/cms/menu",
+    },
+    {
+      key: "cmsSettings",
+      icon: Settings2,
+      label: "Sistem & Pengaturan",
+      path: "/admin/cms/pengaturan",
+    },
+  ],
+},
 
     {
       type: "item",

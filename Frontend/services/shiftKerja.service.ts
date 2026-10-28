@@ -161,67 +161,7 @@ function buildQuery(params: ShiftKerjaQuery = {}): string {
 }
 
 
-export async function getShiftKerja(
-  params: ShiftKerjaQuery = {},
-): Promise<PaginatedShiftKerja> {
-  const response = await apiFetch(
-    `/api/shift-kerja${buildQuery({
-      page: params.page ?? 1,
-      limit: params.limit ?? 20,
-      ...params,
-    })}`,
-    {
-      method: "GET",
-    },
-  );
 
-  const result = response as ApiResponse<unknown>;
-
-  const rawData = unwrapData<unknown>(response);
-
-  let items: ShiftKerja[] = [];
-
-  if (Array.isArray(rawData)) {
-    items = rawData as ShiftKerja[];
-  } else if (
-    rawData &&
-    typeof rawData === "object" &&
-    "items" in (rawData as Record<string, unknown>) &&
-    Array.isArray((rawData as { items: unknown[] }).items)
-  ) {
-    items = (rawData as { items: ShiftKerja[] }).items;
-  } else if (
-    rawData &&
-    typeof rawData === "object" &&
-    "data" in (rawData as Record<string, unknown>) &&
-    Array.isArray((rawData as { data: unknown[] }).data)
-  ) {
-    items = (rawData as { data: ShiftKerja[] }).data;
-  }
-
-  const pagination =
-    result.pagination ??
-    result.meta ??
-    (rawData && typeof rawData === "object"
-      ? (rawData as ApiResponse<unknown>).pagination ??
-        (rawData as ApiResponse<unknown>).meta
-      : undefined);
-
-  const page = Number(pagination?.page ?? params.page ?? 1);
-  const limit = Number(pagination?.limit ?? params.limit ?? 20);
-  const total = Number(pagination?.total ?? items.length);
-
-  return {
-    data: items.map(normalizeShift),
-    page,
-    limit,
-    total,
-    totalPages: Number(
-      pagination?.totalPages ??
-        Math.ceil(total / Math.max(limit, 1)),
-    ),
-  };
-}
 
 
 export async function getShiftKerjaById(
@@ -330,9 +270,66 @@ export async function deleteShiftKerja(
 }
 
 
+
+export async function getShiftKerja(
+  params: ShiftKerjaQuery = {},
+): Promise<PaginatedShiftKerja> {
+  const query = buildQuery({
+    page: 1,
+    limit: 100,
+    ...params,
+  });
+
+  const response = await apiFetch(`/shift-kerja${query}`, {
+    method: "GET",
+  });
+
+  const result = response as ApiResponse<unknown>;
+  const rawData = unwrapData<unknown>(response);
+
+  let items: ShiftKerja[] = [];
+
+  if (Array.isArray(rawData)) {
+    items = rawData as ShiftKerja[];
+  } else if (
+    rawData &&
+    typeof rawData === "object" &&
+    Array.isArray((rawData as Record<string, unknown>).items)
+  ) {
+    items = (rawData as { items: ShiftKerja[] }).items;
+  }
+
+  const pagination =
+    result.pagination ??
+    result.meta ??
+    (rawData && typeof rawData === "object"
+      ? (rawData as ApiResponse<unknown>).pagination ??
+        (rawData as ApiResponse<unknown>).meta
+      : undefined);
+
+  const page = Number(pagination?.page ?? params.page ?? 1);
+  const limit = Number(pagination?.limit ?? params.limit ?? 100);
+  const total = Number(pagination?.total ?? items.length);
+
+  return {
+    data: items.map(normalizeShift),
+    page,
+    limit,
+    total,
+    totalPages: Number(
+      pagination?.totalPages ??
+        Math.ceil(total / Math.max(limit, 1)),
+    ),
+  };
+}
+
 export async function assignUserShiftAndJabatan(
   payload: AssignUserShiftPayload,
 ): Promise<AssignedUserShift> {
+  if (!payload.penggunaId) {
+    throw new Error("Pegawai wajib dipilih.");
+  }
+
   const body: AssignUserShiftPayload = {
     penggunaId: payload.penggunaId,
     shiftKerjaId: payload.shiftKerjaId,
@@ -342,7 +339,7 @@ export async function assignUserShiftAndJabatan(
     body.kategoriJabatanId = payload.kategoriJabatanId;
   }
 
-  const response = await apiFetch("/api/shift-kerja/assign-user", {
+  const response = await apiFetch("/shift-kerja/assign-user", {
     method: "POST",
     body: JSON.stringify(body),
   });

@@ -17,13 +17,19 @@ export interface PermohonanIzin {
 
   guruPenggantiId?: string | null;
 
-  pengguna?: {
-    id?: string;
-    namaLengkap?: string;
-    nisn?: string | null;
-    nip?: string | null;
-    jabatan?: string | null;
-  };
+ 
+pengguna?: {
+  id?: string;
+  namaLengkap?: string;
+  nisn?: string | null;
+  nip?: string | null;
+  jabatan?: string | null;
+  peran?: {
+    nama?: string;
+    namaTampilan?: string;
+  } | null;
+};
+
 
   penyetuju?: {
     id?: string;
@@ -118,12 +124,19 @@ export async function verifikasiIzin(
   return response?.data || response;
 }
 
+
 export async function verifikasiPengajuan(
   id: string,
   data: VerifikasiPengajuanData,
 ): Promise<PermohonanIzin> {
   if (!id) {
     throw new Error("ID permohonan izin tidak valid.");
+  }
+
+  if (data.guruPenggantiId) {
+    throw new Error(
+      "Penugasan guru pengganti belum didukung oleh payload verifikasi API yang tersedia.",
+    );
   }
 
   const response = await apiFetch(
@@ -139,6 +152,7 @@ export async function verifikasiPengajuan(
 
   return response?.data || response;
 }
+
 
 const izinService = {
   ajukanIzin,

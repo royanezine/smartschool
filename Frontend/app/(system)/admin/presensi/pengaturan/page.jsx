@@ -296,13 +296,7 @@ export default function PengaturanPresensiPage() {
 
         <main className="min-h-0 flex-1 overflow-y-auto">
           <div className="mx-auto w-full max-w-[1500px] px-4 py-6 sm:px-6 lg:px-8">
-            <div className="mb-5 flex items-center gap-2 text-sm text-slate-500">
-              <span>Pengaturan</span>
-              <ChevronRight size={15} />
-              <span className="font-medium text-slate-800">
-                Presensi
-              </span>
-            </div>
+          
 
             <div className="mb-7 flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
               <div>

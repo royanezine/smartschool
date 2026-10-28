@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -8,8 +7,6 @@ import Sidebar from "@/app/components/Sidebar";
 import {
   Settings,
   Globe,
-  Search,
-  Share2,
   Palette,
   ArrowRight,
   Monitor,
@@ -22,6 +19,7 @@ export default function PengaturanPage() {
   const [active, setActive] = useState("pengaturan");
   const [collapsed, setCollapsed] = useState(false);
 
+  // Menu SEO dan Sosial Media telah dihapus
   const menuItems = [
     {
       id: "identitas",
@@ -32,27 +30,9 @@ export default function PengaturanPage() {
       count: "1 Pengaturan",
     },
     {
-      id: "seo",
-      title: "SEO",
-      description: "Optimalkan meta title, description, dan script tracking.",
-      icon: Search,
-      route: "/admin/cms/pengaturan/seo",
-      count: "4 Pengaturan",
-    },
-    {
-      id: "sosial-media",
-      title: "Sosial Media",
-      description:
-        "Hubungkan akun Facebook, Instagram, YouTube, dan lainnya.",
-      icon: Share2,
-      route: "/admin/cms/pengaturan/sosial-media",
-      count: "5 Platform",
-    },
-    {
       id: "tampilan",
       title: "Pengaturan Tampilan",
-      description:
-        "Sesuaikan tema warna, jenis font, dan layout website.",
+      description: "Sesuaikan tema warna, jenis font, dan layout website.",
       icon: Palette,
       route: "/admin/cms/pengaturan/tampilan",
       count: "3 Pengaturan",
@@ -60,7 +40,9 @@ export default function PengaturanPage() {
   ];
 
   return (
-    <div className="flex min-h-screen w-full theme-page">
+    // ROOT: h-screen overflow-hidden agar halaman tidak bisa scroll
+    <div className="theme-page flex h-screen w-full overflow-hidden">
+      
       <Sidebar
         active={active}
         setActive={setActive}
@@ -68,19 +50,29 @@ export default function PengaturanPage() {
         setCollapsed={setCollapsed}
       />
 
-      <div className="flex-1 min-w-0 flex flex-col">
-        <Header
-          title="Pengaturan CMS"
-          user={{
-            name: "CMS Admin",
-            email: "cms@smartschool.com",
-            avatar: "CA",
-          }}
-          notifications={[]}
-        />
+      {/* BODY: min-h-0 flex-1 agar sidebar + main sejajar */}
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+        
+        {/* HEADER: shrink-0 agar tetap di atas */}
+        <div className="shrink-0 border-b theme-border">
+          <Header
+            title="Pengaturan CMS"
+            user={{
+              name: "CMS Admin",
+              email: "cms@smartschool.com",
+              avatar: "CA",
+            }}
+            notifications={[]}
+          />
+        </div>
 
-        <main className="flex-1 min-w-0 overflow-y-auto p-4 md:p-6 lg:p-8 theme-page">
-          <div className="w-full min-w-0 max-w-6xl mx-auto space-y-7">
+        {/* MAIN: min-w-0 flex-1 overflow-y-auto agar hanya ini yang scroll */}
+        <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto">
+          
+          {/* KONTEN: w-full tanpa max-w agar melebar saat zoom out */}
+          <div className="w-full px-4 py-6 md:px-6 lg:px-8 space-y-7">
+            
+            {/* BREADCRUMB */}
             <nav className="flex items-center gap-2 text-sm">
               <a
                 href="/admin/cms"
@@ -88,77 +80,30 @@ export default function PengaturanPage() {
               >
                 Dashboard
               </a>
-
               <ChevronRight className="w-4 h-4 theme-text-placeholder" />
-
               <span className="text-[var(--color-primary)] font-semibold">
                 Pengaturan
               </span>
             </nav>
 
+            {/* HEADER PAGE */}
             <div className="flex items-start gap-4">
               <div className="shrink-0 p-3 rounded-xl theme-info border">
                 <Settings className="w-6 h-6" />
               </div>
-
               <div>
                 <h1 className="text-2xl font-bold theme-text">
                   Pengaturan CMS
                 </h1>
-
-                <p className="text-sm theme-text-muted mt-1">
-                  Konfigurasikan semua aspek website sekolah dari satu
-                  tempat.
+                <p className="text-sm theme-text-muted mt-1 max-w-2xl">
+                  Konfigurasikan identitas dan tampilan website sekolah dari satu tempat.
                 </p>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {menuItems.map((item) => {
-                const Icon = item.icon;
-
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => router.push(item.route)}
-                    className="
-                      group text-left
-                      theme-card
-                      border theme-border
-                      rounded-xl p-4
-                      hover:border-[var(--color-primary)]
-                      hover:shadow-md
-                      transition-all duration-200
-                    "
-                  >
-                    <div className="flex items-center gap-3">
-                      <div
-                        className="
-                          p-2 rounded-lg
-                          theme-info
-                          border
-                          transition-colors
-                        "
-                      >
-                        <Icon className="w-4 h-4" />
-                      </div>
-
-                      <div className="min-w-0">
-                        <p className="text-[11px] font-medium theme-text-muted truncate">
-                          {item.title}
-                        </p>
-
-                        <p className="text-sm font-bold theme-text">
-                          {item.count}
-                        </p>
-                      </div>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {/* GRID MENU UTAMA */}
+            {/* Grid responsif, 2xl:grid-cols-6 untuk stat cards/menu card */}
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2 2xl:grid-cols-6">
               {menuItems.map((item) => {
                 const Icon = item.icon;
 
@@ -175,6 +120,8 @@ export default function PengaturanPage() {
                       hover:shadow-lg
                       transition-all duration-200
                       flex flex-col
+                      md:col-span-1
+                      2xl:col-span-3
                     "
                   >
                     <div className="flex items-start gap-4">
@@ -190,27 +137,34 @@ export default function PengaturanPage() {
                       </div>
 
                       <div className="min-w-0 flex-1">
-                        <h3
-                          className="
-                            text-base font-semibold theme-text
-                            group-hover:text-[var(--color-primary)]
-                            transition-colors
-                          "
-                        >
-                          {item.title}
-                        </h3>
+                        <div className="flex items-center justify-between gap-2">
+                          <h3
+                            className="
+                              text-base font-semibold theme-text
+                              group-hover:text-[var(--color-primary)]
+                              transition-colors
+                            "
+                          >
+                            {item.title}
+                          </h3>
+                          
+                          {/* Badge Count */}
+                          <span className="inline-flex items-center rounded-md bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] px-2 py-1 text-[10px] font-bold theme-text-muted">
+                            {item.count}
+                          </span>
+                        </div>
 
-                        <p className="text-sm theme-text-muted mt-1 leading-relaxed">
+                        <p className="text-sm theme-text-muted mt-2 leading-relaxed">
                           {item.description}
                         </p>
                       </div>
                     </div>
 
-                    <div className="mt-4 pt-4 border-t theme-border flex items-center justify-end">
+                    <div className="mt-5 pt-4 border-t theme-border flex items-center justify-end">
                       <span
                         className="
                           inline-flex items-center gap-1.5
-                          text-sm font-medium
+                          text-sm font-bold
                           text-[var(--color-primary)]
                           group-hover:gap-2.5
                           transition-all
@@ -225,6 +179,7 @@ export default function PengaturanPage() {
               })}
             </div>
 
+            {/* TIPS KONFIGURASI */}
             <div className="theme-info border rounded-xl p-5 flex items-start gap-4">
               <div
                 className="
@@ -242,21 +197,16 @@ export default function PengaturanPage() {
                 <h4 className="text-sm font-semibold theme-text">
                   Tips Konfigurasi
                 </h4>
-
                 <p className="text-sm theme-text-secondary mt-1 leading-relaxed">
                   Pastikan Anda telah mengatur{" "}
-                  <strong className="theme-text">
-                    Identitas Website
-                  </strong>{" "}
-                  terlebih dahulu. Selanjutnya, lengkapi{" "}
-                  <strong className="theme-text">SEO</strong> agar website
-                  mudah ditemukan, lalu sesuaikan{" "}
-                  <strong className="theme-text">Tampilan</strong> dengan
-                  branding sekolah Anda.
+                  <strong className="theme-text">Identitas Website</strong>{" "}
+                  terlebih dahulu. Selanjutnya, sesuaikan{" "}
+                  <strong className="theme-text">Tampilan</strong> dengan branding sekolah Anda agar website terlihat lebih profesional.
                 </p>
               </div>
             </div>
 
+            {/* FOOTER */}
             <footer className="pt-4 border-t theme-border text-center text-xs theme-text-muted">
               © 2026 SmartSchool CMS • Pengaturan
             </footer>

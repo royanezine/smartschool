@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
@@ -9,51 +10,31 @@ import { apiFetch } from "../../../../../../../lib/api";
 
 import {
   ArrowLeft,
-  Tags,
-  Check,
+  Save,
   Loader2,
   AlertCircle,
-  FolderOpen,
+  Tags,
 } from "lucide-react";
 
-export default function TambahKategoriPage() {
+export default function CreateCategoryPage() {
   const router = useRouter();
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
   const [form, setForm] = useState({
     nama: "",
     status: "aktif",
   });
 
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState("");
-
-  function handleChange(event) {
-    const { name, value } = event.target;
-
-    setForm((previous) => ({
-      ...previous,
-      [name]: value,
-    }));
-
-    if (error) {
-      setError("");
-    }
+  function handleChange(e) {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
   }
 
-  async function handleSubmit(event) {
-    event.preventDefault();
-
-    const nama = form.nama.trim();
-
-    if (!nama) {
+  async function handleSubmit(e) {
+    e.preventDefault();
+    if (!form.nama.trim()) {
       setError("Nama kategori wajib diisi.");
-      return;
-    }
-
-    if (nama.length < 3) {
-      setError(
-        "Nama kategori minimal 3 karakter."
-      );
       return;
     }
 
@@ -61,497 +42,113 @@ export default function TambahKategoriPage() {
       setSaving(true);
       setError("");
 
-      const payload = {
-        nama,
-        status: form.status,
-      };
+      await apiFetch("/api/cms/kategori-artikel", {
+        method: "POST",
+        body: JSON.stringify({
+          nama: form.nama.trim(),
+          status: form.status,
+        }),
+      });
 
-      await apiFetch(
-        "/api/cms/kategori-artikel",
-        {
-          method: "POST",
-          body: JSON.stringify(payload),
-        }
-      );
-
-      alert(
-        "Kategori artikel berhasil ditambahkan."
-      );
-
-      router.push(
-        "/admin/cms/articles/categories"
-      );
+      router.push("/admin/cms/articles/categories");
       router.refresh();
-    } catch (error) {
-      console.error(
-        "Gagal membuat kategori:",
-        error
-      );
-
-      setError(
-        error?.message ||
-          "Gagal membuat kategori artikel."
-      );
+    } catch (err) {
+      setError(err?.message || "Gagal menyimpan kategori.");
     } finally {
       setSaving(false);
     }
   }
 
-  function handleCancel() {
-    if (saving) return;
-
-    router.push(
-      "/admin/cms/articles/categories"
-    );
-  }
-
   return (
-    <div className="theme-page min-h-screen">
+    <div className="theme-page flex h-screen w-full overflow-hidden">
       <Sidebar />
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+        <div className="shrink-0 border-b theme-border">
+          <Header />
+        </div>
 
-      <div className="min-h-screen lg:ml-[260px]">
-        <Header />
+        <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto">
+          <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
+            <div className="mx-auto w-full max-w-4xl">
+              
+              <div className="mb-6 flex flex-col gap-4">
+                <Link
+                  href="/admin/cms/articles/categories"
+                  className="theme-text-muted inline-flex w-fit items-center gap-2 text-sm font-medium transition hover:opacity-70"
+                >
+                  <ArrowLeft size={16} />
+                  Kembali ke Daftar Kategori
+                </Link>
 
-        <main className="theme-page p-4 sm:p-6 lg:p-8">
-
-          <div className="mb-6">
-            <button
-              type="button"
-              onClick={handleCancel}
-              disabled={saving}
-              className="
-                theme-text-secondary
-                inline-flex
-                items-center
-                gap-2
-                text-sm
-                font-semibold
-                transition
-                hover:opacity-80
-                disabled:cursor-not-allowed
-                disabled:opacity-50
-              "
-            >
-              <ArrowLeft size={17} />
-
-              Kembali ke Kategori
-            </button>
-          </div>
-
-
-          <div className="mb-7">
-            <div className="flex items-start gap-4">
-              <div className="theme-info flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border">
-                <Tags size={23} />
-              </div>
-
-              <div>
-                <div className="mb-1 flex flex-wrap items-center gap-2 text-xs font-medium">
-                  <span
-                    style={{
-                      color: "var(--color-primary)",
-                    }}
-                  >
-                    CMS
-                  </span>
-
-                  <span className="theme-text-placeholder">
-                    /
-                  </span>
-
-                  <span className="theme-text-muted">
-                    Artikel
-                  </span>
-
-                  <span className="theme-text-placeholder">
-                    /
-                  </span>
-
-                  <span className="theme-text-muted">
-                    Kategori
-                  </span>
-
-                  <span className="theme-text-placeholder">
-                    /
-                  </span>
-
-                  <span className="theme-text-muted">
-                    Tambah
-                  </span>
-                </div>
-
-                <h1 className="theme-text text-2xl font-bold tracking-tight sm:text-3xl">
-                  Tambah Kategori Artikel
-                </h1>
-
-                <p className="theme-text-muted mt-2 max-w-2xl text-sm leading-6">
-                  Buat kategori baru untuk
-                  mengelompokkan artikel sekolah
-                  agar konten CMS lebih terorganisir.
-                </p>
-              </div>
-            </div>
-          </div>
-
-
-          <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
-
-            <div className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
-
-              <div className="theme-card-soft theme-border-soft border-b px-5 py-5 sm:px-7">
-                <div className="flex items-center gap-3">
-                  <div className="theme-card theme-border theme-text-muted flex h-9 w-9 items-center justify-center rounded-lg border">
-                    <FolderOpen size={18} />
-                  </div>
-
-                  <div>
-                    <h2 className="theme-text text-sm font-bold">
-                      Informasi Kategori
-                    </h2>
-
-                    <p className="theme-text-muted mt-0.5 text-xs">
-                      Isi informasi kategori di bawah
-                    </p>
-                  </div>
+                <div>
+                  <h1 className="theme-text text-2xl font-bold">Tambah Kategori</h1>
+                  <p className="theme-text-muted mt-1 text-sm">Buat kategori baru untuk mengelompokkan artikel.</p>
                 </div>
               </div>
 
+              {error && (
+                <div className="theme-danger mb-6 flex items-start gap-3 rounded-xl border p-4">
+                  <AlertCircle size={18} className="mt-0.5 shrink-0" />
+                  <p className="text-sm">{error}</p>
+                </div>
+              )}
 
-              <form onSubmit={handleSubmit}>
-                <div className="space-y-6 p-5 sm:p-7">
-
-                  {error && (
-                    <div className="theme-danger flex gap-3 rounded-xl border p-4">
-                      <AlertCircle
-                        size={18}
-                        className="mt-0.5 shrink-0"
-                      />
-
-                      <div>
-                        <p className="text-sm font-bold">
-                          Gagal menyimpan
-                        </p>
-
-                        <p className="mt-1 text-xs leading-5">
-                          {error}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-
-
-                  <div>
-                    <label
-                      htmlFor="nama"
-                      className="theme-text-secondary mb-2 block text-sm font-semibold"
-                    >
-                      Nama Kategori
-                      <span
-                        className="ml-1"
-                        style={{
-                          color:
-                            "var(--color-danger)",
-                        }}
-                      >
-                        *
-                      </span>
+              <form onSubmit={handleSubmit} className="theme-card theme-border rounded-2xl border shadow-sm overflow-hidden">
+                <div className="grid grid-cols-1 gap-6 p-6 sm:p-8 md:grid-cols-2">
+                  <div className="md:col-span-2">
+                    <label className="theme-text-secondary mb-2 block text-sm font-semibold">
+                      Nama Kategori <span className="text-[var(--color-danger)]">*</span>
                     </label>
-
-                    <input
-                      id="nama"
-                      type="text"
-                      name="nama"
-                      value={form.nama}
-                      onChange={handleChange}
-                      placeholder="Contoh: Berita Sekolah"
-                      disabled={saving}
-                      autoFocus
-                      maxLength={100}
-                      className="
-                        theme-input
-                        h-12
-                        w-full
-                        rounded-xl
-                        border
-                        px-4
-                        text-sm
-                        outline-none
-                        transition
-                        placeholder:theme-text-placeholder
-                        focus:border-[var(--color-primary)]
-                        disabled:cursor-not-allowed
-                        disabled:opacity-60
-                      "
-                    />
-
-                    <div className="mt-2 flex items-center justify-between gap-3">
-                      <p className="theme-text-muted text-xs">
-                        Minimal 3 karakter.
-                      </p>
-
-                      <p className="theme-text-muted text-xs">
-                        {form.nama.length}/100
-                      </p>
+                    <div className="relative">
+                      <Tags size={18} className="theme-text-muted absolute left-3 top-1/2 -translate-y-1/2" />
+                      <input
+                        type="text"
+                        name="nama"
+                        value={form.nama}
+                        onChange={handleChange}
+                        placeholder="Contoh: Berita Sekolah"
+                        className="theme-input w-full rounded-xl border pl-10 pr-4 py-3 text-sm outline-none transition focus:border-[var(--color-primary)]"
+                        autoFocus
+                      />
                     </div>
                   </div>
 
-
                   <div>
-                    <label
-                      htmlFor="status"
-                      className="theme-text-secondary mb-2 block text-sm font-semibold"
-                    >
+                    <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                       Status
                     </label>
-
                     <select
-                      id="status"
                       name="status"
                       value={form.status}
                       onChange={handleChange}
-                      disabled={saving}
-                      className="
-                        theme-input
-                        h-12
-                        w-full
-                        rounded-xl
-                        border
-                        px-4
-                        text-sm
-                        outline-none
-                        transition
-                        focus:border-[var(--color-primary)]
-                        disabled:cursor-not-allowed
-                        disabled:opacity-60
-                      "
+                      className="theme-input w-full rounded-xl border px-4 py-3 text-sm outline-none transition focus:border-[var(--color-primary)]"
                     >
-                      <option value="aktif">
-                        Aktif
-                      </option>
-
-                      <option value="nonaktif">
-                        Nonaktif
-                      </option>
+                      <option value="aktif">Aktif</option>
+                      <option value="nonaktif">Nonaktif</option>
                     </select>
-
-                    <p className="theme-text-muted mt-2 text-xs leading-5">
-                      Kategori aktif dapat langsung
-                      digunakan ketika membuat artikel.
-                    </p>
-                  </div>
-
-
-                  <div className="theme-border-soft border-t pt-6">
-                    <p className="theme-text-muted mb-3 text-xs font-bold uppercase tracking-wider">
-                      Preview
-                    </p>
-
-                    <div className="theme-card-soft theme-border flex items-center gap-3 rounded-xl border p-4">
-                      <div className="theme-info flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border">
-                        <Tags size={18} />
-                      </div>
-
-                      <div className="min-w-0 flex-1">
-                        <p className="theme-text truncate text-sm font-bold">
-                          {form.nama.trim() ||
-                            "Nama kategori"}
-                        </p>
-
-                        <p className="theme-text-muted mt-1 text-xs">
-                          {form.status ===
-                          "aktif"
-                            ? "Kategori aktif"
-                            : "Kategori nonaktif"}
-                        </p>
-                      </div>
-
-                      <span
-                        className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold ${
-                          form.status === "aktif"
-                            ? "theme-success"
-                            : "theme-card theme-text-muted theme-border border"
-                        }`}
-                      >
-                        {form.status === "aktif"
-                          ? "Aktif"
-                          : "Nonaktif"}
-                      </span>
-                    </div>
                   </div>
                 </div>
 
-
-                <div className="theme-card-soft theme-border-soft flex flex-col-reverse gap-2 border-t px-5 py-4 sm:flex-row sm:justify-end sm:px-7">
-                  <button
-                    type="button"
-                    onClick={handleCancel}
-                    disabled={saving}
-                    className="
-                      theme-card
-                      theme-border
-                      theme-text-secondary
-                      h-11
-                      rounded-xl
-                      border
-                      px-5
-                      text-sm
-                      font-semibold
-                      transition
-                      hover:opacity-80
-                      disabled:cursor-not-allowed
-                      disabled:opacity-50
-                    "
+                <div className="theme-card-soft theme-border-soft flex flex-col-reverse gap-3 border-t p-4 sm:flex-row sm:justify-end sm:px-8 sm:py-5">
+                  <Link
+                    href="/admin/cms/articles/categories"
+                    className="theme-card theme-border theme-text-secondary inline-flex h-11 items-center justify-center rounded-xl border px-5 text-sm font-semibold transition hover:opacity-80"
                   >
                     Batal
-                  </button>
-
+                  </Link>
                   <button
                     type="submit"
-                    disabled={
-                      saving ||
-                      !form.nama.trim()
-                    }
-                    className="
-                      theme-primary
-                      inline-flex
-                      h-11
-                      items-center
-                      justify-center
-                      gap-2
-                      rounded-xl
-                      px-6
-                      text-sm
-                      font-semibold
-                      shadow-sm
-                      transition
-                      disabled:cursor-not-allowed
-                      disabled:opacity-50
-                    "
+                    disabled={saving}
+                    className="theme-primary inline-flex h-11 items-center justify-center gap-2 rounded-xl px-6 text-sm font-semibold shadow-sm transition disabled:opacity-60"
                   >
-                    {saving ? (
-                      <>
-                        <Loader2
-                          size={17}
-                          className="animate-spin"
-                        />
-
-                        Menyimpan...
-                      </>
-                    ) : (
-                      <>
-                        <Check size={17} />
-
-                        Simpan Kategori
-                      </>
-                    )}
+                    {saving ? <><Loader2 size={18} className="animate-spin" /> Menyimpan...</> : <><Save size={18} /> Simpan Kategori</>}
                   </button>
                 </div>
               </form>
-            </div>
 
-
-            <div className="space-y-5">
-
-              <div className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
-                <div className="theme-card-soft theme-border-soft border-b px-5 py-4">
-                  <h2 className="theme-text text-sm font-bold">
-                    Tentang Kategori
-                  </h2>
-                </div>
-
-                <div className="p-5">
-                  <div className="space-y-5">
-                    <InfoItem
-                      number="01"
-                      title="Nama kategori"
-                      description="Gunakan nama yang jelas dan mudah dipahami oleh admin maupun pengunjung website."
-                    />
-
-                    <InfoItem
-                      number="02"
-                      title="Status aktif"
-                      description="Kategori aktif dapat dipilih saat admin membuat atau mengedit artikel."
-                    />
-
-                    <InfoItem
-                      number="03"
-                      title="Slug otomatis"
-                      description="Slug tidak perlu diisi manual. Backend akan membuat slug berdasarkan nama kategori."
-                    />
-                  </div>
-                </div>
-              </div>
-
-
-              <div className="theme-info rounded-2xl border p-5">
-                <div className="flex gap-3">
-                  <div className="theme-card flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border">
-                    <Tags size={17} />
-                  </div>
-
-                  <div>
-                    <p className="text-sm font-bold">
-                      Contoh kategori
-                    </p>
-
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {[
-                        "Berita Sekolah",
-                        "Pengumuman",
-                        "Prestasi",
-                        "Kegiatan",
-                        "Akademik",
-                        "Ekstrakurikuler",
-                      ].map((item) => (
-                        <span
-                          key={item}
-                          className="
-                            theme-card
-                            theme-border
-                            theme-text-secondary
-                            rounded-lg
-                            border
-                            px-2.5
-                            py-1.5
-                            text-[11px]
-                            font-semibold
-                          "
-                        >
-                          {item}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         </main>
-      </div>
-    </div>
-  );
-}
-
-
-function InfoItem({
-  number,
-  title,
-  description,
-}) {
-  return (
-    <div className="flex gap-3">
-      <div className="theme-card-soft theme-text-muted flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border text-[10px] font-bold">
-        {number}
-      </div>
-
-      <div>
-        <p className="theme-text-secondary text-sm font-semibold">
-          {title}
-        </p>
-
-        <p className="theme-text-muted mt-1 text-xs leading-5">
-          {description}
-        </p>
       </div>
     </div>
   );

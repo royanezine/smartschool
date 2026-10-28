@@ -1,4 +1,3 @@
-
 "use client";
 
 import Image from "next/image";
@@ -24,8 +23,10 @@ function normalizeSection(value) {
 function normalizeUrl(value) {
   const url = text(value);
   if (!url) return "";
+
   if (/^(https?:\/\/|mailto:|tel:)/i.test(url)) return url;
   if (url.startsWith("//")) return `https:${url}`;
+
   return `https://${url}`;
 }
 
@@ -137,15 +138,23 @@ function validPages(pages) {
   });
 }
 
+const theme = {
+  primary: "var(--school-primary, #2563EB)",
+  secondary: "var(--school-secondary, #64748B)",
+  accent: "var(--school-accent, #F59E0B)",
+  background: "var(--school-background, #F8FAFC)",
+  surface: "var(--school-surface, #FFFFFF)",
+  text: "var(--school-text, #0F172A)",
+  border: "var(--school-border, #E2E8F0)",
+};
+
 function FooterLink({ href, children }) {
   if (!href) return null;
 
   const classes =
-    "inline-flex max-w-full items-center gap-1 break-words text-sm transition-colors hover:text-[var(--warna-primer-utama,#2563EB)]";
+    "inline-flex max-w-full items-center gap-1 break-words text-sm transition-colors";
 
-  const style = {
-    color: "var(--warna-netral-teksLembut, #64748B)",
-  };
+  const style = { color: theme.secondary };
 
   if (isExternalUrl(href)) {
     return (
@@ -173,6 +182,7 @@ function SocialLink({ href, label }) {
   if (!href) return null;
 
   const lower = text(label).toLowerCase();
+
   const Icon = lower.includes("instagram")
     ? Camera
     : lower.includes("youtube") || lower.includes("youtu.be")
@@ -185,8 +195,8 @@ function SocialLink({ href, label }) {
       target="_blank"
       rel="noopener noreferrer"
       aria-label={label}
-      className="inline-flex max-w-full items-center gap-2 break-words text-sm transition-colors hover:text-[var(--warna-primer-utama,#2563EB)]"
-      style={{ color: "var(--warna-netral-teksLembut, #64748B)" }}
+      className="inline-flex max-w-full items-center gap-2 break-words text-sm transition-colors"
+      style={{ color: theme.secondary }}
     >
       <Icon size={17} className="shrink-0" />
       <span className="break-all">{label}</span>
@@ -198,8 +208,8 @@ function SocialLink({ href, label }) {
 function FooterHeading({ children }) {
   return (
     <h3
-      className="text-sm font-bold tracking-tight"
-      style={{ color: "var(--warna-netral-teks, #0F172A)" }}
+      className="break-words text-sm font-bold tracking-tight"
+      style={{ color: theme.text }}
     >
       {children}
     </h3>
@@ -223,14 +233,17 @@ export default function PublicFooter({
 
   const configs = unwrapConfigurations(konfigurasi).filter((item) => {
     const status = text(item?.status).toLowerCase();
+
     return !["nonaktif", "inactive", "draft"].includes(status);
   });
 
   const identitas = findConfig(configs, "footer", "identitas");
   const navigasi = findConfig(configs, "footer", "navigasi");
+
   const infoKontak =
     findConfig(configs, "kontak", "info_utama") ||
     findConfig(configs, "footer", "kontak");
+
   const infoSosmed =
     findConfig(configs, "kontak", "sosmed") ||
     findConfig(configs, "footer", "mediasosial");
@@ -250,7 +263,10 @@ export default function PublicFooter({
 
   if (socials.length === 0 && text(infoSosmed?.ctaLink)) {
     socials.push({
-      nama: text(infoSosmed?.ctaText) || text(infoSosmed?.judul) || "Media Sosial",
+      nama:
+        text(infoSosmed?.ctaText) ||
+        text(infoSosmed?.judul) ||
+        "Media Sosial",
       url: normalizeUrl(infoSosmed.ctaLink),
     });
   }
@@ -261,20 +277,22 @@ export default function PublicFooter({
     <footer
       className="mt-auto border-t"
       style={{
-        backgroundColor: "var(--warna-netral-putih, #FFFFFF)",
-        borderColor: "var(--warna-netral-garis, #E2E8F0)",
+        backgroundColor: theme.surface,
+        borderColor: theme.border,
+        color: theme.text,
       }}
     >
       <div className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 sm:py-12 lg:px-8 lg:py-14">
         <div className="grid grid-cols-1 gap-9 sm:grid-cols-2 lg:grid-cols-4 lg:gap-10">
+          {/* IDENTITAS SEKOLAH */}
           <section className="min-w-0">
             <div className="mb-4 flex items-center gap-3">
               {gambarIdentitas ? (
                 <div
                   className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl border p-1"
                   style={{
-                    backgroundColor: "var(--warna-netral-putih, #FFFFFF)",
-                    borderColor: "var(--warna-netral-garis, #E2E8F0)",
+                    backgroundColor: theme.surface,
+                    borderColor: theme.border,
                   }}
                 >
                   <Image
@@ -289,7 +307,7 @@ export default function PublicFooter({
               ) : (
                 <div
                   className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-lg font-bold text-white"
-                  style={{ backgroundColor: "var(--warna-primer-utama, #2563EB)" }}
+                  style={{ backgroundColor: theme.primary }}
                 >
                   {namaSekolah.charAt(0).toUpperCase()}
                 </div>
@@ -297,10 +315,11 @@ export default function PublicFooter({
 
               <div className="min-w-0">
                 <FooterHeading>{judulIdentitas}</FooterHeading>
+
                 {subJudulIdentitas && (
                   <p
                     className="mt-1 text-xs"
-                    style={{ color: "var(--warna-netral-teksLembut, #64748B)" }}
+                    style={{ color: theme.secondary }}
                   >
                     {subJudulIdentitas}
                   </p>
@@ -311,7 +330,7 @@ export default function PublicFooter({
             {deskripsi && (
               <p
                 className="whitespace-pre-line break-words text-sm leading-6"
-                style={{ color: "var(--warna-netral-teksLembut, #64748B)" }}
+                style={{ color: theme.secondary }}
               >
                 {deskripsi}
               </p>
@@ -322,11 +341,11 @@ export default function PublicFooter({
                 <MapPin
                   size={16}
                   className="mt-1 shrink-0"
-                  style={{ color: "var(--warna-primer-utama, #2563EB)" }}
+                  style={{ color: theme.primary }}
                 />
                 <span
                   className="break-words"
-                  style={{ color: "var(--warna-netral-teksLembut, #64748B)" }}
+                  style={{ color: theme.secondary }}
                 >
                   {alamat}
                 </span>
@@ -342,24 +361,37 @@ export default function PublicFooter({
             )}
           </section>
 
+          {/* NAVIGASI WEBSITE */}
           <section className="min-w-0">
-            <FooterHeading>{text(navigasi?.judul) || "Jelajahi Website"}</FooterHeading>
+            <FooterHeading>
+              {text(navigasi?.judul) || "Jelajahi Website"}
+            </FooterHeading>
+
             {text(navigasi?.konten) && (
               <p
                 className="mt-2 whitespace-pre-line text-sm leading-6"
-                style={{ color: "var(--warna-netral-teksLembut, #64748B)" }}
+                style={{ color: theme.secondary }}
               >
                 {navigasi.konten}
               </p>
             )}
 
             <ul className="mt-4 space-y-3">
-              <li><FooterLink href={base}>Beranda</FooterLink></li>
-              <li><FooterLink href={`${base}/tentang`}>Tentang Sekolah</FooterLink></li>
-              <li><FooterLink href={`${base}/articles`}>Berita & Artikel</FooterLink></li>
+              <li>
+                <FooterLink href={base}>Beranda</FooterLink>
+              </li>
+              <li>
+                <FooterLink href={`${base}/tentang`}>Tentang Sekolah</FooterLink>
+              </li>
+              <li>
+                <FooterLink href={`${base}/articles`}>Berita & Artikel</FooterLink>
+              </li>
+
               {pages.map((item) => (
                 <li key={item.id || item.slug}>
-                  <FooterLink href={`${base}/${String(item.slug).replace(/^\/+/, "")}`}>
+                  <FooterLink
+                    href={`${base}/${String(item.slug).replace(/^\/+/, "")}`}
+                  >
                     {item.judul}
                   </FooterLink>
                 </li>
@@ -367,16 +399,24 @@ export default function PublicFooter({
             </ul>
           </section>
 
+          {/* INFORMASI KONTAK */}
           <section className="min-w-0">
-            <FooterHeading>{text(infoKontak?.judul) || "Hubungi Kami"}</FooterHeading>
+            <FooterHeading>
+              {text(infoKontak?.judul) || "Hubungi Kami"}
+            </FooterHeading>
+
             <div className="mt-4 space-y-4">
               {telepon && (
                 <a
                   href={`tel:${telepon.replace(/[^\d+]/g, "")}`}
-                  className="flex items-start gap-2 text-sm transition-colors hover:text-[var(--warna-primer-utama,#2563EB)]"
-                  style={{ color: "var(--warna-netral-teksLembut, #64748B)" }}
+                  className="flex items-start gap-2 text-sm transition-colors"
+                  style={{ color: theme.secondary }}
                 >
-                  <Phone size={16} className="mt-0.5 shrink-0" />
+                  <Phone
+                    size={16}
+                    className="mt-0.5 shrink-0"
+                    style={{ color: theme.primary }}
+                  />
                   <span className="break-words">{telepon}</span>
                 </a>
               )}
@@ -384,10 +424,14 @@ export default function PublicFooter({
               {email && (
                 <a
                   href={`mailto:${email}`}
-                  className="flex items-start gap-2 text-sm transition-colors hover:text-[var(--warna-primer-utama,#2563EB)]"
-                  style={{ color: "var(--warna-netral-teksLembut, #64748B)" }}
+                  className="flex items-start gap-2 text-sm transition-colors"
+                  style={{ color: theme.secondary }}
                 >
-                  <Mail size={16} className="mt-0.5 shrink-0" />
+                  <Mail
+                    size={16}
+                    className="mt-0.5 shrink-0"
+                    style={{ color: theme.primary }}
+                  />
                   <span className="break-all">{email}</span>
                 </a>
               )}
@@ -395,7 +439,7 @@ export default function PublicFooter({
               {text(infoKontak?.konten) && (
                 <p
                   className="whitespace-pre-line text-sm leading-6"
-                  style={{ color: "var(--warna-netral-teksLembut, #64748B)" }}
+                  style={{ color: theme.secondary }}
                 >
                   {infoKontak.konten}
                 </p>
@@ -404,7 +448,7 @@ export default function PublicFooter({
               {!telepon && !email && !text(infoKontak?.konten) && (
                 <p
                   className="text-sm leading-6"
-                  style={{ color: "var(--warna-netral-teksLembut, #64748B)" }}
+                  style={{ color: theme.secondary }}
                 >
                   Informasi kontak belum tersedia.
                 </p>
@@ -412,13 +456,16 @@ export default function PublicFooter({
             </div>
           </section>
 
+          {/* MEDIA SOSIAL */}
           <section className="min-w-0">
-            <FooterHeading>{text(infoSosmed?.judul) || "Ikuti Kami"}</FooterHeading>
+            <FooterHeading>
+              {text(infoSosmed?.judul) || "Ikuti Kami"}
+            </FooterHeading>
 
             {text(infoSosmed?.konten) && (
               <p
                 className="mt-3 whitespace-pre-line text-sm leading-6"
-                style={{ color: "var(--warna-netral-teksLembut, #64748B)" }}
+                style={{ color: theme.secondary }}
               >
                 {infoSosmed.konten}
               </p>
@@ -427,13 +474,17 @@ export default function PublicFooter({
             {socials.length > 0 ? (
               <div className="mt-4 flex flex-col items-start gap-3">
                 {socials.map((item) => (
-                  <SocialLink key={item.nama} href={item.url} label={item.nama} />
+                  <SocialLink
+                    key={item.nama}
+                    href={item.url}
+                    label={item.nama}
+                  />
                 ))}
               </div>
             ) : (
               <p
                 className="mt-3 text-sm leading-6"
-                style={{ color: "var(--warna-netral-teksLembut, #64748B)" }}
+                style={{ color: theme.secondary }}
               >
                 Media sosial belum tersedia.
               </p>
@@ -441,15 +492,21 @@ export default function PublicFooter({
           </section>
         </div>
 
+        {/* COPYRIGHT */}
         <div
           className="mt-10 flex flex-col gap-2 border-t pt-5 text-xs leading-5 sm:flex-row sm:items-center sm:justify-between"
           style={{
-            borderColor: "var(--warna-netral-garis, #E2E8F0)",
-            color: "var(--warna-netral-teksLembut, #64748B)",
+            borderColor: theme.border,
+            color: theme.secondary,
           }}
         >
-          <p>© {tahun} {namaSekolah}. Hak cipta dilindungi.</p>
-          <p>SmartSchool — All-in-One School Management System</p>
+          <p>
+            © {tahun} {namaSekolah}. Hak cipta dilindungi.
+          </p>
+
+          <p>
+            SmartSchool — All-in-One School Management System
+          </p>
         </div>
       </div>
     </footer>

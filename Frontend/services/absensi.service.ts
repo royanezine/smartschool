@@ -102,6 +102,124 @@ export interface RiwayatShiftResponse {
 }
 
 
+export type AbsensiFilterStatus =
+  | "hadir"
+  | "izin"
+  | "sakit"
+  | "alpha"
+  | "terlambat";
+
+export type AbsensiFilterRole =
+  | "siswa"
+  | "guru"
+  | "staff"
+  | "staf"
+  | "pegawai"
+  | "karyawan"
+  | "admin_sekolah";
+
+export interface AbsensiListParams {
+  page?: number;
+  limit?: number;
+  sekolahId?: string;
+  kelasId?: string;
+  penggunaId?: string;
+  tanggal?: string;
+  tanggalMulai?: string;
+  tanggalSelesai?: string;
+  search?: string;
+  role?: AbsensiFilterRole;
+  status?: AbsensiFilterStatus;
+}
+
+export interface StatistikAbsensi {
+  total: number;
+  hadir: number;
+  terlambat: number;
+  izin: number;
+  sakit: number;
+  alpha: number;
+}
+
+export interface AbsensiSekolahResponse {
+  data: Absensi[];
+  meta: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+    [key: string]: unknown;
+  };
+  statistik: StatistikAbsensi;
+}
+
+export async function getAbsensiSekolah(
+  params: AbsensiListParams = {},
+): Promise<AbsensiSekolahResponse> {
+  const query = new URLSearchParams();
+
+  Object.entries(params).forEach(([key, value]) => {
+    if (
+      value !== undefined &&
+      value !== null &&
+      value !== ""
+    ) {
+      query.set(key, String(value));
+    }
+  });
+
+  const response = await apiFetch(
+    `/api/absensi?${query.toString()}`,
+    { method: "GET" },
+  );
+
+  const result = unwrapObject(response);
+  const payload = unwrapObject(result.data);
+
+  // Backend getAbsensiSekolah mengembalikan:
+  // { success, message, data, meta, statistik }
+  const records = Array.isArray(result.data)
+    ? result.data
+    : Array.isArray(payload.data)
+      ? payload.data
+      : Array.isArray(result.items)
+        ? result.items
+        : [];
+
+  const meta = unwrapObject(result.meta ?? payload.meta);
+  const statistikRaw = unwrapObject(
+    result.statistik ?? payload.statistik,
+  );
+
+  const page = Number(meta.page ?? params.page ?? 1);
+  const limit = Number(meta.limit ?? params.limit ?? 10);
+  const total = Number(meta.total ?? records.length);
+
+  return {
+    data: records as Absensi[],
+    meta: {
+      ...meta,
+      page,
+      limit,
+      total,
+      totalPages: Number(
+        meta.totalPages ??
+          Math.ceil(total / Math.max(limit, 1)),
+      ),
+    },
+    statistik: {
+      total: Number(statistikRaw.total ?? total),
+      hadir: Number(statistikRaw.hadir ?? 0),
+      terlambat: Number(statistikRaw.terlambat ?? 0),
+      izin: Number(statistikRaw.izin ?? 0),
+      sakit: Number(statistikRaw.sakit ?? 0),
+      alpha: Number(statistikRaw.alpha ?? 0),
+    },
+  };
+}
+
+
+
 function unwrapArray<T>(value: unknown): T[] {
   if (Array.isArray(value)) {
     return value as T[];
@@ -556,6 +674,7 @@ export async function getMetodeAbsensiAktif(): Promise<string[]> {
 const absensiService = {
   getAbsensiSaya,
   getAbsensiKelas,
+  getAbsensiSekolah,
   createAbsensi,
   absenDenganLokasi,
   absenDenganBarcode,
@@ -566,8 +685,8 @@ const absensiService = {
   checkInShift,
   checkOutShift,
   getRiwayatShiftSaya,
-   getMonitoringKehadiranGuru,
-   getMetodeAbsensiAktif,
+  getMonitoringKehadiranGuru,
+  getMetodeAbsensiAktif,
 };
 
 export default absensiService;

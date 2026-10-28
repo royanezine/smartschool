@@ -528,7 +528,7 @@ export default function PagesPage() {
                   </h2>
 
                   <p className="theme-text-secondary mt-0.5 text-xs">
-                    Data berikut diambil langsung dari CMS backend.
+                    Data berikut diambil langsung dari CMS sistem.
                   </p>
                 </div>
 
@@ -680,13 +680,7 @@ export default function PagesPage() {
                                   <div className="flex items-center justify-end gap-1">
 
 
-                                    <Link
-                                      href={`/cmsAdmin/pages/${page.id}`}
-                                      title="Lihat detail"
-                                      className="theme-text-muted flex h-9 w-9 items-center justify-center rounded-lg transition hover:bg-[var(--color-sidebar-active)] hover:text-[var(--color-primary)]"
-                                    >
-                                      <Eye className="h-4 w-4" />
-                                    </Link>
+                                    
 
 
                                     <Link
@@ -904,7 +898,7 @@ export default function PagesPage() {
                   </h3>
 
                   <p className="theme-text-secondary mt-1 text-xs leading-5">
-                    Slug halaman berasal dari backend CMS sehingga
+                    Slug halaman berasal dari sistem CMS sehingga
                     frontend tidak perlu membuat slug sendiri.
                   </p>
                 </div>
@@ -1151,7 +1145,7 @@ export default function PagesPage() {
               </p>
 
               <p className="theme-text-muted mt-2 text-xs leading-5">
-                Data akan dihapus melalui endpoint CMS backend.
+                Data akan dihapus melalui endpoint CMS sistem.
               </p>
             </div>
 

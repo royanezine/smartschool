@@ -154,13 +154,7 @@ export default function DetailTabunganPage() {
                   </button>
 
                   <div>
-                    <div className="flex items-center gap-2 text-sm theme-text-muted">
-                      <span>Keuangan</span>
-                      <span>/</span>
-                      <span>Tabungan Siswa</span>
-                      <span>/</span>
-                      <span>Detail</span>
-                    </div>
+                   
                     <h1 className="mt-1 text-2xl font-bold theme-text">
                       Detail Tabungan Siswa
                     </h1>
@@ -171,14 +165,7 @@ export default function DetailTabunganPage() {
                 </div>
 
                 <div className="flex flex-wrap gap-2">
-                  <button
-                    type="button"
-                    onClick={handleBack}
-                    className={buttonSecondary}
-                  >
-                    <ArrowLeft size={16} />
-                    Kembali
-                  </button>
+                  
                   <button
                     type="button"
                     onClick={openSetor}

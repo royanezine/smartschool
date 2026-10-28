@@ -1,8 +1,8 @@
 
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -40,7 +40,6 @@ function formatRupiah(value) {
 }
 
 function VerifyTenantPageContent() {
-  const router = useRouter();
   const searchParams = useSearchParams();
 
   const emailFromUrl = searchParams.get("email") || "";
@@ -55,19 +54,6 @@ function VerifyTenantPageContent() {
   const [resultData, setResultData] = useState(null);
   const [trialCreated, setTrialCreated] = useState(false);
   const [copied, setCopied] = useState(false);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (emailFromUrl) {
-        setEmail(emailFromUrl);
-        return;
-      }
-
-      // Email hanya dari query ?email= (diteruskan halaman sebelumnya);
-      // bila tidak ada, pengguna mengisi sendiri di input email.
-    }, 0);
-    return () => clearTimeout(timer);
-  }, [emailFromUrl]);
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -107,10 +93,21 @@ function VerifyTenantPageContent() {
       );
 
       if (!result || result.success === false) {
-        throw new Error(result?.message || "Verifikasi gagal.");
+        throw new Error(
+          result?.message ||
+            result?.error ||
+            "Verifikasi gagal. Periksa kode OTP dan coba kembali."
+        );
       }
 
-      const data = result?.data?.data ?? result?.data ?? {};
+      // Mendukung respons langsung maupun respons dengan pembungkus data.
+      const responseData = result?.data;
+      const data =
+        responseData?.data && typeof responseData.data === "object"
+          ? responseData.data
+          : responseData && typeof responseData === "object"
+            ? responseData
+            : result;
 
       if (data.is_trial === true) {
         setTrialCreated(true);
@@ -119,13 +116,8 @@ function VerifyTenantPageContent() {
             "Sekolah uji coba berhasil dibuat. Kamu akan diarahkan ke halaman login."
         );
 
-        try {
-          localStorage.removeItem("onboarding_paket_id");
-        } catch (storageError) {
-          console.error("Gagal membersihkan data onboarding:", storageError);
-        }
-
-        router.replace("/login");
+        // Tidak menyimpan atau menghapus data pendaftaran di browser.
+        // Tampilkan status berhasil terlebih dahulu agar pengguna bisa membaca pesan.
         return;
       }
 
@@ -161,11 +153,32 @@ function VerifyTenantPageContent() {
         "Respons backend tidak memuat status paket yang dikenali."
       );
     } catch (err) {
-      console.error("VERIFY TENANT ERROR:", err);
+      const errorObject =
+        err && typeof err === "object"
+          ? err
+          : null;
 
-      setError(
-        err?.message || "Verifikasi gagal. Silakan coba kembali."
-      );
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : typeof errorObject?.message === "string"
+            ? errorObject.message
+            : typeof errorObject?.error === "string"
+              ? errorObject.error
+              : typeof errorObject?.payload?.message === "string"
+                ? errorObject.payload.message
+                : "Verifikasi gagal. Silakan coba kembali.";
+
+      console.error("VERIFY TENANT ERROR:", {
+        message: errorMessage,
+        name: errorObject?.name,
+        status: errorObject?.status,
+        errorCode: errorObject?.errorCode,
+        payload: errorObject?.payload,
+        error: err,
+      });
+
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

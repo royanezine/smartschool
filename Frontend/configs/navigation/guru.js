@@ -188,15 +188,6 @@ export const guruSidebarConfig = {
 
     {
       type: "item",
-      key: "perpustakaan",
-      label: "Perpustakaan",
-      icon: Library,
-      path: "/guru/perpustakaan",
-      permission: "akademik.view",
-    },
-
-    {
-      type: "item",
       key: "sarpras",
       label: "Sarpras",
       icon: Package,

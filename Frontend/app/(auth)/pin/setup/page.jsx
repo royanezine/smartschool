@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useMemo, useRef, useState } from "react";
@@ -13,80 +14,172 @@ import {
   ArrowLeft,
 } from "lucide-react";
 
-function PinInput({ value, onChange, disabled, show, idPrefix, autoFocus }) {
+const SETUP_TOKEN_KEY = "pin_setup_token";
+const PIN_TOKEN_KEY = "pin_access_token";
+
+function getApiResult(response) {
+  let result = response;
+
+  // Menangani beberapa kemungkinan bentuk response apiFetch.
+  for (let i = 0; i < 3; i += 1) {
+    if (
+      result &&
+      typeof result === "object" &&
+      result.data &&
+      typeof result.data === "object"
+    ) {
+      result = result.data;
+    } else {
+      break;
+    }
+  }
+
+  return result;
+}
+
+function PinInput({
+  value,
+  onChange,
+  disabled,
+  show,
+  idPrefix,
+  autoFocus = false,
+}) {
   const refs = useRef([]);
 
   const digits = useMemo(() => {
-    const arr = value.split("").slice(0, 6);
-    while (arr.length < 6) arr.push("");
-    return arr;
+    const result = String(value || "")
+      .replace(/\D/g, "")
+      .slice(0, 6)
+      .split("");
+
+    while (result.length < 6) {
+      result.push("");
+    }
+
+    return result;
   }, [value]);
 
-  const setDigit = (index, char) => {
-    const next = digits.slice();
-    next[index] = char;
-    onChange(next.join("").replace(/\D/g, "").slice(0, 6));
+  const updatePin = (nextDigits) => {
+    onChange(
+      nextDigits
+        .map((digit) => String(digit || "").replace(/\D/g, ""))
+        .join("")
+        .slice(0, 6)
+    );
   };
 
   const handleChange = (index, raw) => {
-    const cleaned = raw.replace(/\D/g, "");
+    const cleaned = String(raw || "").replace(/\D/g, "");
+
     if (!cleaned) {
-      setDigit(index, "");
+      const next = digits.slice();
+      next[index] = "";
+      updatePin(next);
       return;
     }
+
+    const next = digits.slice();
+
     if (cleaned.length > 1) {
-      const gabung = (digits.join("").slice(0, index) + cleaned).slice(0, 6);
-      onChange(gabung);
-      const fokus = Math.min(gabung.length, 5);
-      refs.current[fokus]?.focus();
+      for (
+        let i = 0;
+        i < cleaned.length && index + i < 6;
+        i += 1
+      ) {
+        next[index + i] = cleaned[i];
+      }
+
+      updatePin(next);
+
+      const nextFocus = Math.min(index + cleaned.length, 5);
+      refs.current[nextFocus]?.focus();
       return;
     }
-    setDigit(index, cleaned);
-    if (index < 5) refs.current[index + 1]?.focus();
+
+    next[index] = cleaned.slice(-1);
+    updatePin(next);
+
+    if (index < 5) {
+      refs.current[index + 1]?.focus();
+    }
   };
 
-  const handleKeyDown = (index, e) => {
-    if (e.key === "Backspace") {
-      e.preventDefault();
-      if (digits[index]) {
-        setDigit(index, "");
+  const handleKeyDown = (index, event) => {
+    if (event.key === "Backspace") {
+      event.preventDefault();
+
+      const next = digits.slice();
+
+      if (next[index]) {
+        next[index] = "";
+        updatePin(next);
       } else if (index > 0) {
-        refs.current[index - 1]?.focus();
-        const next = digits.slice();
         next[index - 1] = "";
-        onChange(next.join(""));
+        updatePin(next);
+        refs.current[index - 1]?.focus();
       }
+
+      return;
     }
-    if (e.key === "ArrowLeft" && index > 0) refs.current[index - 1]?.focus();
-    if (e.key === "ArrowRight" && index < 5) refs.current[index + 1]?.focus();
+
+    if (event.key === "ArrowLeft" && index > 0) {
+      refs.current[index - 1]?.focus();
+    }
+
+    if (event.key === "ArrowRight" && index < 5) {
+      refs.current[index + 1]?.focus();
+    }
+  };
+
+  const handlePaste = (event, index) => {
+    event.preventDefault();
+
+    const pasted = event.clipboardData
+      .getData("text")
+      .replace(/\D/g, "")
+      .slice(0, 6);
+
+    if (!pasted) return;
+
+    const next = digits.slice();
+
+    for (let i = 0; i < 6; i += 1) {
+      next[i] = pasted[i] || "";
+    }
+
+    updatePin(next);
+    refs.current[Math.min(index + pasted.length, 5)]?.focus();
   };
 
   return (
     <div className="flex items-center gap-2">
       {digits.map((digit, index) => {
-        const terisi = Boolean(digit);
+        const filled = Boolean(digit);
+
         return (
           <input
-            key={index}
-            ref={(el) => {
-              refs.current[index] = el;
-              if (autoFocus && index === 0 && el && !el.dataset.focused) {
-                el.dataset.focused = "1";
-                el.focus();
-              }
+            key={`${idPrefix}-${index}`}
+            ref={(element) => {
+              refs.current[index] = element;
             }}
             id={`${idPrefix}-${index}`}
             type={show ? "text" : "password"}
             inputMode="numeric"
-            autoComplete="one-time-code"
-            maxLength={1}
+            autoComplete="off"
+            maxLength={6}
             value={digit}
             disabled={disabled}
-            onChange={(e) => handleChange(index, e.target.value)}
-            onKeyDown={(e) => handleKeyDown(index, e)}
-            onFocus={(e) => e.target.select()}
+            onChange={(event) =>
+              handleChange(index, event.target.value)
+            }
+            onKeyDown={(event) => handleKeyDown(index, event)}
+            onPaste={(event) => handlePaste(event, index)}
+            onFocus={(event) => event.target.select()}
+            autoFocus={autoFocus && index === 0}
+            aria-label={`${idPrefix} digit ${index + 1}`}
             className={`h-12 w-full min-w-0 rounded-lg border text-center text-lg font-semibold outline-none transition sm:h-14 sm:text-xl ${
-              terisi
+              filled
                 ? "border-sky-400 bg-sky-50/50 text-slate-900"
                 : "border-slate-200 bg-white text-slate-900"
             } placeholder:text-slate-300 focus:border-sky-400 focus:ring-4 focus:ring-sky-100 disabled:bg-slate-50`}
@@ -111,17 +204,28 @@ export default function SetupPinPage() {
 
   const pinValid = /^\d{6}$/.test(pin);
   const konfirmasiValid = /^\d{6}$/.test(konfirmasiPin);
-  const cocok = pinValid && konfirmasiValid && pin === konfirmasiPin;
+  const cocok =
+    pinValid && konfirmasiValid && pin === konfirmasiPin;
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    if (loading) return;
+
     setError("");
     setSuccess("");
 
-    const setupToken = sessionStorage.getItem("pin_setup_token");
+    if (typeof window === "undefined") return;
+
+    // Harus sama dengan key yang disimpan halaman login.
+    const setupToken = window.sessionStorage.getItem(
+      SETUP_TOKEN_KEY
+    );
 
     if (!setupToken) {
-      setError("Sesi pembuatan PIN tidak ditemukan. Silakan login kembali.");
+      setError(
+        "Sesi setup PIN tidak ditemukan. Silakan kembali ke login dan masuk kembali."
+      );
       return;
     }
 
@@ -135,43 +239,104 @@ export default function SetupPinPage() {
       return;
     }
 
+    setLoading(true);
+
     try {
-      setLoading(true);
-
       const response = await setupPin(pin, setupToken);
-      const result = response?.data ?? response;
+      const result = getApiResult(response);
 
-      if (!result?.token) {
-        throw new Error("Token akses tidak diterima dari server.");
+      if (!result || typeof result !== "object") {
+        throw new Error("Respons server tidak valid.");
       }
 
-      const user = result.user;
-      if (!user) {
-        throw new Error("Data pengguna tidak diterima dari server.");
+      if (result.success === false) {
+        throw new Error(
+          result.message || "Gagal membuat PIN."
+        );
       }
 
-      const sessionUser = setSession(result.token, user);
+      // Endpoint setup PIN harus mengembalikan token akses dan data user.
+      const accessToken =
+        result.token ||
+        result.accessToken ||
+        result.access_token;
 
-      sessionStorage.removeItem("pin_setup_token");
-      sessionStorage.removeItem("pin_access_token");
+      const user =
+        result.user ||
+        result.pengguna ||
+        result.data?.user;
 
-      setSuccess("PIN berhasil dibuat. Mengarahkan ke dashboard...");
-      router.replace(getRoleHome(sessionUser?.role) || "/siswa");
+      if (!accessToken) {
+        throw new Error(
+          result.message ||
+            "Token akses tidak diterima dari server. Periksa response endpoint setup PIN."
+        );
+      }
+
+      if (!user || typeof user !== "object") {
+        throw new Error(
+          "Data pengguna tidak diterima dari server. Periksa response endpoint setup PIN."
+        );
+      }
+
+      const sessionUser = setSession(accessToken, user);
+
+      if (!sessionUser) {
+        throw new Error(
+          "Sesi pengguna gagal dibuat. Silakan ulangi proses login."
+        );
+      }
+
+      // Hapus token sementara setelah sesi berhasil dibuat.
+      window.sessionStorage.removeItem(SETUP_TOKEN_KEY);
+      window.sessionStorage.removeItem(PIN_TOKEN_KEY);
+
+      // Bersihkan variabel global lama jika masih digunakan oleh kode lain.
+      delete window.__SMARTSCHOOL_SETUP_TOKEN__;
+      delete window.__SMARTSCHOOL_PIN_TOKEN__;
+
+      const role =
+        sessionUser.role ||
+        user.role ||
+        user.peran?.nama ||
+        user.jabatan?.nama;
+
+      const destination = getRoleHome(role);
+
+      setSuccess(
+        "PIN berhasil dibuat. Mengarahkan ke dashboard..."
+      );
+
+      router.replace(destination || "/login");
     } catch (err) {
-      setError(err?.message || "Gagal membuat PIN. Silakan coba lagi.");
+      setError(
+        err?.message ||
+          "Gagal membuat PIN. Silakan coba lagi."
+      );
     } finally {
       setLoading(false);
     }
   };
 
+  const handleBackToLogin = () => {
+    if (typeof window !== "undefined") {
+      window.sessionStorage.removeItem(SETUP_TOKEN_KEY);
+      window.sessionStorage.removeItem(PIN_TOKEN_KEY);
+      delete window.__SMARTSCHOOL_SETUP_TOKEN__;
+      delete window.__SMARTSCHOOL_PIN_TOKEN__;
+    }
+
+    router.replace("/login");
+  };
+
   return (
     <div className="relative flex min-h-screen items-center justify-center bg-white px-4 py-8">
       <div className="relative z-10 w-full max-w-sm overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <div className="flex flex-col items-center px-6 pt-8 pb-5 sm:px-8 sm:pt-9">
+        <div className="flex flex-col items-center px-6 pb-5 pt-8 sm:px-8 sm:pt-9">
           <div className="flex h-24 w-24 items-center justify-center sm:h-28 sm:w-28">
             <Image
               src="/logo/logoSS.png"
-              alt="Logo Sekolah"
+              alt="Logo SmartSchool"
               width={112}
               height={112}
               priority
@@ -182,23 +347,38 @@ export default function SetupPinPage() {
           <h1 className="mt-4 text-base font-semibold tracking-tight text-slate-900">
             Buat PIN kamu
           </h1>
+
           <p className="mt-1 text-center text-xs leading-5 text-slate-500">
             Buat PIN 6 digit untuk melindungi akun SmartSchool kamu.
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="px-6 pb-6 sm:px-8">
+        <form
+          onSubmit={handleSubmit}
+          className="px-6 pb-6 sm:px-8"
+        >
           <div>
             <div className="mb-2 flex items-center justify-between">
-              <label className="text-xs font-medium text-slate-700">
+              <label
+                htmlFor="pin-0"
+                className="text-xs font-medium text-slate-700"
+              >
                 PIN baru
               </label>
+
               <button
                 type="button"
-                onClick={() => setShowPin(!showPin)}
+                onClick={() => setShowPin((value) => !value)}
                 className="inline-flex items-center gap-1 text-xs font-medium text-slate-500 transition hover:text-sky-600"
+                aria-label={
+                  showPin ? "Sembunyikan PIN" : "Tampilkan PIN"
+                }
               >
-                {showPin ? <EyeOff size={13} /> : <Eye size={13} />}
+                {showPin ? (
+                  <EyeOff size={13} />
+                ) : (
+                  <Eye size={13} />
+                )}
                 {showPin ? "Sembunyikan" : "Tampilkan"}
               </button>
             </div>
@@ -206,7 +386,11 @@ export default function SetupPinPage() {
             <PinInput
               idPrefix="pin"
               value={pin}
-              onChange={setPin}
+              onChange={(value) => {
+                setPin(value);
+                setError("");
+                setSuccess("");
+              }}
               disabled={loading}
               show={showPin}
               autoFocus
@@ -215,15 +399,30 @@ export default function SetupPinPage() {
 
           <div className="mt-4">
             <div className="mb-2 flex items-center justify-between">
-              <label className="text-xs font-medium text-slate-700">
+              <label
+                htmlFor="konfirmasi-0"
+                className="text-xs font-medium text-slate-700"
+              >
                 Konfirmasi PIN
               </label>
+
               <button
                 type="button"
-                onClick={() => setShowKonfirmasi(!showKonfirmasi)}
+                onClick={() =>
+                  setShowKonfirmasi((value) => !value)
+                }
                 className="inline-flex items-center gap-1 text-xs font-medium text-slate-500 transition hover:text-sky-600"
+                aria-label={
+                  showKonfirmasi
+                    ? "Sembunyikan konfirmasi PIN"
+                    : "Tampilkan konfirmasi PIN"
+                }
               >
-                {showKonfirmasi ? <EyeOff size={13} /> : <Eye size={13} />}
+                {showKonfirmasi ? (
+                  <EyeOff size={13} />
+                ) : (
+                  <Eye size={13} />
+                )}
                 {showKonfirmasi ? "Sembunyikan" : "Tampilkan"}
               </button>
             </div>
@@ -231,7 +430,11 @@ export default function SetupPinPage() {
             <PinInput
               idPrefix="konfirmasi"
               value={konfirmasiPin}
-              onChange={setKonfirmasiPin}
+              onChange={(value) => {
+                setKonfirmasiPin(value);
+                setError("");
+                setSuccess("");
+              }}
               disabled={loading}
               show={showKonfirmasi}
             />
@@ -274,7 +477,10 @@ export default function SetupPinPage() {
           >
             {loading ? (
               <>
-                <LoaderCircle size={16} className="animate-spin" />
+                <LoaderCircle
+                  size={16}
+                  className="animate-spin"
+                />
                 Menyimpan...
               </>
             ) : (
@@ -291,25 +497,23 @@ export default function SetupPinPage() {
           <div className="flex items-center justify-between gap-2">
             <button
               type="button"
-              onClick={() => router.replace("/login")}
-              className="inline-flex items-center gap-1 text-xs font-medium text-slate-500 transition hover:text-sky-600"
+              onClick={handleBackToLogin}
+              disabled={loading}
+              className="inline-flex items-center gap-1 text-xs font-medium text-slate-500 transition hover:text-sky-600 disabled:opacity-50"
             >
               <ArrowLeft size={13} />
               Kembali ke login
             </button>
 
-            <button
-              type="button"
-              className="inline-flex items-center gap-1 text-xs font-medium text-slate-500 transition hover:text-sky-600"
-            >
+            <span className="inline-flex items-center gap-1 text-xs font-medium text-slate-500">
               <Globe size={13} />
               Bahasa Indonesia
-            </button>
+            </span>
           </div>
         </div>
       </div>
 
-      <p className="absolute bottom-4 left-1/2 z-10 -translate-x-1/2 text-[11px] text-slate-400">
+      <p className="absolute bottom-4 left-1/2 z-10 -translate-x-1/2 -translate-x-1/2 text-[11px] text-slate-400">
         © {new Date().getFullYear()} Yayasan Setya Bakti
       </p>
     </div>

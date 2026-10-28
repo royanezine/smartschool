@@ -1,1526 +1,547 @@
-"use client";
-
-import { useEffect, useState } from "react";
+import { publikService } from "@/services/publik.service";
 import Link from "next/link";
-import { useParams } from "next/navigation";
-import {
-  ArrowRight,
-  CalendarDays,
-  ChevronRight,
-  GraduationCap,
-  Menu,
-  Newspaper,
-  School,
-  Trophy,
-  Users,
-  X,
-  UserCircle,
-  Lock,
-  Sparkles,
-  ShieldCheck,
-  BookOpen,
-  Award,
-  Building2,
-  MapPin,
-  Phone,
-  Mail,
-} from "lucide-react";
+import { ArrowRight, Newspaper, BookOpen, CheckCircle2 } from "lucide-react";
+import ArticleCard from "@/app/components/tenant/ArticleCard";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
+function unwrap(value) {
+  let result = value;
+
+  for (let i = 0; i < 8; i++) {
+    if (
+      !result ||
+      typeof result !== "object" ||
+      Array.isArray(result) ||
+      !Object.prototype.hasOwnProperty.call(result, "data")
+    ) {
+      break;
+    }
+
+    result = result.data;
+  }
+
+  return result;
+}
+
+function getText(value) {
+  if (typeof value === "string" || typeof value === "number") {
+    return String(value);
+  }
+
+  return "";
+}
+
+function getValue(item, ...keys) {
+  for (const key of keys) {
+    const value = getText(item?.[key]);
+
+    if (value.trim()) return value;
+  }
+
+  return "";
+}
 
 
-const API_URL = (
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
-).replace(/\/$/, "");
+function normalizeSections(response) {
+  const config = unwrap(response);
 
-const HERO_IMAGE =
-  "https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=2000&q=85";
+  if (!config || typeof config !== "object") {
+    return [];
+  }
+
+  // Mendukung struktur response konfigurasi publik.
+  const beranda =
+    config?.beranda ??
+    config?.Beranda ??
+    config?.home ??
+    config?.homepage ??
+    config?.konfigurasi?.beranda ??
+    config?.konfigurasi?.home;
+
+  if (!beranda || typeof beranda !== "object") {
+    return [];
+  }
+
+  const sections = Array.isArray(beranda)
+    ? beranda
+    : Object.entries(beranda).map(([key, item]) => ({
+        ...item,
+        section: item?.section ?? key,
+      }));
+
+  return sections
+    .filter(
+      (item) =>
+        item &&
+        typeof item === "object" &&
+        String(item.status ?? "aktif").toLowerCase() !== "nonaktif"
+    )
+    .map((item, index) => ({
+      ...item,
+      section: String(item.section ?? `section-${index + 1}`)
+        .trim()
+        .toLowerCase(),
+      urutan: Number(item.urutan ?? item.order ?? index + 1),
+    }))
+    .sort((a, b) => {
+      const aHero = a.section === "hero";
+      const bHero = b.section === "hero";
+
+      if (aHero && !bHero) return -1;
+      if (!aHero && bHero) return 1;
+
+      return a.urutan - b.urutan;
+    });
+}
 
 
-const DEFAULT_THEME = {
-  primary: "#2563EB",
-  secondary: "#64748B",
-  accent: "#F59E0B",
-  background: "#F8FAFC",
-  surface: "#FFFFFF",
-  text: "#0F172A",
-  border: "#E2E8F0",
+function getArticles(response) {
+  const result = unwrap(response);
+
+  if (Array.isArray(result)) return result;
+  if (!result || typeof result !== "object") return [];
+
+  for (const key of [
+    "artikel",
+    "artikels",
+    "articles",
+    "daftarArtikel",
+    "items",
+    "results",
+  ]) {
+    if (Array.isArray(result[key])) return result[key];
+  }
+
+  return [];
+}
+
+function getArticleDate(article) {
+  return (
+    article?.tanggalPublikasi ||
+    article?.publishedAt ||
+    article?.dibuatPada ||
+    article?.createdAt ||
+    article?.updatedAt ||
+    ""
+  );
+}
+
+const themeStyles = {
+  primary: { color: "var(--school-primary, #2563EB)" },
+  primaryBackground: { backgroundColor: "var(--school-primary, #2563EB)" },
+  accentBackground: { backgroundColor: "var(--school-accent, #F59E0B)" },
+  text: { color: "var(--school-text, #0F172A)" },
+  mutedText: { color: "var(--school-secondary, #64748B)" },
 };
 
+function SectionItem({ item }) {
+  const sectionName = String(item.section || "").toLowerCase();
 
-function getPublicApiBase() {
-  if (API_URL.endsWith("/api")) {
-    return `${API_URL}/v1/publik`;
+  const title = getValue(item, "judul", "title", "nama", "heading", "label");
+  const subtitle = getValue(
+    item,
+    "subJudul",
+    "subjudul",
+    "subtitle",
+    "sub_title"
+  );
+  const content = getValue(
+    item,
+    "konten",
+    "content",
+    "deskripsi",
+    "deskripsiSection",
+    "isi",
+    "text",
+    "value"
+  );
+  const image = getValue(
+    item,
+    "gambarUrl",
+    "gambar",
+    "gambarUtama",
+    "image",
+    "imageUrl",
+    "urlGambar"
+  );
+  const ctaText = getValue(
+    item,
+    "ctaText",
+    "teksTombol",
+    "buttonText",
+    "tombolText"
+  );
+  const ctaLink = getValue(
+    item,
+    "ctaLink",
+    "tautan",
+    "buttonLink",
+    "urlTombol"
+  );
+
+  const sectionId = sectionName.replace(/[^a-z0-9-_]/g, "-");
+
+  if (!title && !subtitle && !content && !image && !ctaText) {
+    return null;
   }
 
-  return `${API_URL}/api/publik`;
-}
-
-
-function getThemeColor(theme, key) {
-  return theme?.[key] || DEFAULT_THEME[key];
-}
-
-
-export default function WebsiteHomePage() {
-  const params = useParams();
-
-  const tenant =
-    typeof params?.tenant === "string"
-      ? params.tenant
-      : Array.isArray(params?.tenant)
-        ? params.tenant[0]
-        : "";
-
-  const [artikel, setArtikel] = useState([]);
-  const [loadingArtikel, setLoadingArtikel] = useState(true);
-  const [errorArtikel, setErrorArtikel] = useState("");
-
-  const [theme, setTheme] = useState(DEFAULT_THEME);
-  const [loadingTheme, setLoadingTheme] = useState(true);
-
-  const [profil, setProfil] = useState(null);
-
-  const [mobileMenu, setMobileMenu] = useState(false);
-
-
-  const homeUrl = `/${tenant}`;
-  const tentangUrl = `/${tenant}/tentang`;
-  const akademikUrl = `/${tenant}/akademik`;
-  const artikelUrl = `/${tenant}/articles`;
-  const kontakUrl = `/${tenant}/kontak`;
-  const loginUrl = "/login";
-
-
-  useEffect(() => {
-    let mounted = true;
-
-    async function fetchTheme() {
-      try {
-        setLoadingTheme(true);
-
-        if (!tenant) {
-          return;
-        }
-
-        const apiBase = getPublicApiBase();
-
-        const response = await fetch(
-          `${apiBase}/${encodeURIComponent(tenant)}/tema`,
-          {
-            method: "GET",
-            cache: "no-store",
-          }
-        );
-
-        if (!response.ok) {
-          console.warn(
-            "Theme publik belum tersedia. Menggunakan warna default."
-          );
-
-          if (mounted) {
-            setTheme(DEFAULT_THEME);
-          }
-
-          return;
-        }
-
-        const result = await response.json();
-
-        const data = result?.data;
-
-        if (!data) {
-          if (mounted) {
-            setTheme(DEFAULT_THEME);
-          }
-
-          return;
-        }
-
-        const cmsTheme = {
-          primary:
-            data?.tema?.primary?.hex || DEFAULT_THEME.primary,
-
-          secondary:
-            data?.tema?.secondary?.hex || DEFAULT_THEME.secondary,
-
-          accent:
-            data?.tema?.accent?.hex || DEFAULT_THEME.accent,
-
-          background:
-            data?.tema?.background?.hex || DEFAULT_THEME.background,
-
-          surface:
-            data?.tema?.surface?.hex || DEFAULT_THEME.surface,
-
-          text:
-            data?.tema?.text?.hex || DEFAULT_THEME.text,
-
-          border:
-            data?.tema?.border?.hex || DEFAULT_THEME.border,
-        };
-
-        if (mounted) {
-          setTheme(cmsTheme);
-        }
-      } catch (error) {
-        console.error("Gagal mengambil theme publik:", error);
-
-        if (mounted) {
-          setTheme(DEFAULT_THEME);
-        }
-      } finally {
-        if (mounted) {
-          setLoadingTheme(false);
-        }
-      }
-    }
-
-    fetchTheme();
-
-    return () => {
-      mounted = false;
-    };
-  }, [tenant]);
-
-
-  useEffect(() => {
-    let mounted = true;
-
-    async function fetchProfil() {
-      if (!tenant) {
-        return;
-      }
-
-      try {
-        const apiBase = getPublicApiBase();
-
-        const response = await fetch(
-          `${apiBase}/${encodeURIComponent(tenant)}/profil`,
-          {
-            method: "GET",
-            cache: "no-store",
-          }
-        );
-
-        if (!response.ok) {
-          return;
-        }
-
-        const result = await response.json().catch(() => null);
-        const data = result?.data;
-
-        if (mounted && data) {
-          setProfil(data);
-        }
-      } catch (error) {
-        console.error("Gagal mengambil profil sekolah:", error);
-      }
-    }
-
-    fetchProfil();
-
-    return () => {
-      mounted = false;
-    };
-  }, [tenant]);
-
-
-  useEffect(() => {
-    if (typeof document === "undefined") {
-      return;
-    }
-
-    const root = document.documentElement;
-
-    root.style.setProperty(
-      "--school-primary",
-      getThemeColor(theme, "primary")
-    );
-
-    root.style.setProperty(
-      "--school-secondary",
-      getThemeColor(theme, "secondary")
-    );
-
-    root.style.setProperty(
-      "--school-accent",
-      getThemeColor(theme, "accent")
-    );
-
-    root.style.setProperty(
-      "--school-background",
-      getThemeColor(theme, "background")
-    );
-
-    root.style.setProperty(
-      "--school-surface",
-      getThemeColor(theme, "surface")
-    );
-
-    root.style.setProperty(
-      "--school-text",
-      getThemeColor(theme, "text")
-    );
-
-    root.style.setProperty(
-      "--school-border",
-      getThemeColor(theme, "border")
-    );
-  }, [theme]);
-
-
-  useEffect(() => {
-    let mounted = true;
-
-    async function fetchArtikel() {
-      try {
-        setLoadingArtikel(true);
-        setErrorArtikel("");
-
-        if (!tenant) {
-          throw new Error("Tenant sekolah tidak ditemukan.");
-        }
-
-        const apiBase = getPublicApiBase();
-
-        const response = await fetch(
-          `${apiBase}/${encodeURIComponent(tenant)}/artikel`,
-          {
-            method: "GET",
-            cache: "no-store",
-          }
-        );
-
-        const result = await response.json();
-
-        if (!response.ok) {
-          throw new Error(
-            result?.message || "Gagal mengambil artikel."
-          );
-        }
-
-        const data = Array.isArray(result?.data)
-          ? result.data
-          : [];
-
-        if (mounted) {
-          setArtikel(data);
-        }
-      } catch (error) {
-        console.error(
-          "Gagal mengambil artikel publik:",
-          error
-        );
-
-        if (mounted) {
-          setErrorArtikel(
-            error?.message || "Gagal mengambil artikel."
-          );
-          setArtikel([]);
-        }
-      } finally {
-        if (mounted) {
-          setLoadingArtikel(false);
-        }
-      }
-    }
-
-    fetchArtikel();
-
-    return () => {
-      mounted = false;
-    };
-  }, [tenant]);
-
-  const artikelTerbaru = artikel.slice(0, 3);
-
-  return (
-    <main
-      className="min-h-screen overflow-x-hidden"
-      style={{
-        backgroundColor: "var(--school-background)",
-        color: "var(--school-text)",
-      }}
-    >
-
-      <header
-        className="sticky top-0 z-50 border-b backdrop-blur-xl"
-        style={{
-          borderColor: "var(--school-border)",
-          backgroundColor: "rgba(255,255,255,0.92)",
-        }}
+  const isHero = sectionName === "hero";
+
+  if (isHero) {
+    return (
+      <section
+        id={sectionId || "hero"}
+        className="relative flex min-h-[90vh] w-full items-center justify-center overflow-hidden bg-slate-900 pt-32 pb-20 sm:pb-28"
       >
-        <div className="mx-auto flex h-[76px] max-w-7xl items-center justify-between px-5 sm:px-8">
-
-          <Link
-            href={homeUrl}
-            className="group flex items-center gap-3"
-          >
-            <div
-              className="relative flex h-11 w-11 items-center justify-center rounded-xl text-white shadow-lg transition-transform duration-300 group-hover:scale-105"
-              style={{
-                backgroundColor: "var(--school-primary)",
-                boxShadow:
-                  "0 10px 25px color-mix(in srgb, var(--school-primary) 25%, transparent)",
-              }}
-            >
-              <School size={22} />
-
-              <span
-                className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full text-[8px] font-bold"
-                style={{
-                  backgroundColor: "var(--school-accent)",
-                  color: "var(--school-text)",
-                }}
-              >
-                S
-              </span>
-            </div>
-
-            <div>
-              <p
-                className="text-[15px] font-extrabold tracking-tight"
-                style={{
-                  color: "var(--school-text)",
-                }}
-              >
-                {profil?.nama || "SmartSchool"}
-              </p>
-
-              <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">
-                Sekolah Digital
-              </p>
-            </div>
-          </Link>
-
-
-          <nav className="hidden items-center gap-8 md:flex">
-            <Link
-              href={homeUrl}
-              className="relative text-sm font-semibold"
-              style={{
-                color: "var(--school-primary)",
-              }}
-            >
-              Beranda
-
-              <span
-                className="absolute -bottom-2 left-0 h-0.5 w-full rounded-full"
-                style={{
-                  backgroundColor: "var(--school-primary)",
-                }}
-              />
-            </Link>
-
-            <NavLink
-              href={tentangUrl}
-              label="Tentang"
+        {image && (
+          <div className="absolute inset-0 h-full w-full">
+            <img
+              src={image}
+              alt={title || "Foto sekolah"}
+              className="h-full w-full object-cover"
             />
-
-            <NavLink
-              href={akademikUrl}
-              label="Akademik"
-            />
-
-            <NavLink
-              href={artikelUrl}
-              label="Artikel"
-            />
-
-            <NavLink
-              href={kontakUrl}
-              label="Kontak"
-            />
-          </nav>
-
-
-          <div className="hidden md:block">
-            <Link
-              href={loginUrl}
-              className="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5"
-              style={{
-                backgroundColor: "var(--school-primary)",
-              }}
-            >
-              Portal Sekolah
-
-              <ArrowRight size={15} />
-            </Link>
-          </div>
-
-
-          <button
-            type="button"
-            onClick={() => setMobileMenu(!mobileMenu)}
-            className="flex h-10 w-10 items-center justify-center rounded-lg border text-slate-600 transition md:hidden"
-            style={{
-              borderColor: "var(--school-border)",
-            }}
-          >
-            {mobileMenu ? (
-              <X size={20} />
-            ) : (
-              <Menu size={20} />
-            )}
-          </button>
-        </div>
-
-
-        {mobileMenu && (
-          <div
-            className="border-t px-5 py-4 shadow-xl md:hidden"
-            style={{
-              borderColor: "var(--school-border)",
-              backgroundColor: "var(--school-surface)",
-            }}
-          >
-            <nav className="space-y-1">
-              <MobileNavLink
-                href={homeUrl}
-                label="Beranda"
-                onClick={() => setMobileMenu(false)}
-              />
-
-              <MobileNavLink
-                href={tentangUrl}
-                label="Tentang"
-                onClick={() => setMobileMenu(false)}
-              />
-
-              <MobileNavLink
-                href={akademikUrl}
-                label="Akademik"
-                onClick={() => setMobileMenu(false)}
-              />
-
-              <MobileNavLink
-                href={artikelUrl}
-                label="Artikel"
-                onClick={() => setMobileMenu(false)}
-              />
-
-              <MobileNavLink
-                href={kontakUrl}
-                label="Kontak"
-                onClick={() => setMobileMenu(false)}
-              />
-
-              <Link
-                href={loginUrl}
-                onClick={() => setMobileMenu(false)}
-                className="mt-3 flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold text-white"
-                style={{
-                  backgroundColor: "var(--school-primary)",
-                }}
-              >
-                Portal Sekolah
-
-                <ArrowRight size={15} />
-              </Link>
-            </nav>
+            <div className="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-slate-900/40 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-transparent opacity-50" />
           </div>
         )}
-      </header>
 
-
-      <section className="relative min-h-[680px] overflow-hidden">
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{
-            backgroundImage: `url("${HERO_IMAGE}")`,
-          }}
-        />
-
-        <div className="absolute inset-0 bg-slate-950/80" />
-
-        <div
-          className="absolute inset-0"
-          style={{
-            background: `linear-gradient(
-              90deg,
-              color-mix(in srgb, var(--school-primary) 90%, #000 35%),
-              color-mix(in srgb, var(--school-primary) 70%, #000 20%),
-              color-mix(in srgb, var(--school-secondary) 40%, transparent)
-            )`,
-          }}
-        />
-
-        <div
-          className="absolute right-[-120px] top-[-120px] h-[420px] w-[420px] rounded-full border blur-3xl"
-          style={{
-            borderColor:
-              "color-mix(in srgb, var(--school-primary) 25%, transparent)",
-            backgroundColor:
-              "color-mix(in srgb, var(--school-primary) 20%, transparent)",
-          }}
-        />
-
-        <div
-          className="absolute bottom-[-180px] left-[-120px] h-[420px] w-[420px] rounded-full blur-3xl"
-          style={{
-            backgroundColor:
-              "color-mix(in srgb, var(--school-primary) 20%, transparent)",
-          }}
-        />
-
-        <div className="relative mx-auto flex min-h-[680px] max-w-7xl items-center px-5 py-20 sm:px-8">
-          <div className="grid w-full items-center gap-14 lg:grid-cols-[1.15fr_0.85fr]">
-
-            <div className="max-w-3xl animate-fade-up">
-              <div
-                className="mb-7 inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-semibold backdrop-blur-md"
-                style={{
-                  borderColor: "rgba(255,255,255,0.15)",
-                  backgroundColor: "rgba(255,255,255,0.10)",
-                  color: "#dbeafe",
-                }}
-              >
-                <Sparkles size={14} />
-
-                Portal Resmi Sekolah Digital
-              </div>
-
-              <h1 className="text-4xl font-bold leading-[1.08] tracking-tight text-white sm:text-5xl lg:text-[64px]">
-                Membangun Generasi
-
+        <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-col items-start px-6 sm:px-8 lg:px-12">
+          <div className="max-w-3xl">
+            {subtitle && (
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-black/30 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-white backdrop-blur-md">
                 <span
-                  className="mt-2 block"
+                  className="h-2 w-2 rounded-full animate-pulse"
                   style={{
-                    color:
-                      "color-mix(in srgb, var(--school-accent) 80%, white)",
+                    backgroundColor: "var(--school-primary, #3B82F6)",
                   }}
-                >
-                  Berprestasi & Berkarakter
-                </span>
+                />
+                {subtitle}
+              </div>
+            )}
+
+            {title && (
+              <h1 className="text-4xl font-extrabold leading-[1.1] tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl drop-shadow-lg">
+                {title}
               </h1>
+            )}
 
-              <p className="mt-7 max-w-2xl text-base leading-8 text-slate-200 sm:text-lg">
-                Selamat datang di website resmi SMK Smart
-                School. Temukan informasi akademik,
-                kegiatan, prestasi, berita, dan layanan
-                sekolah dalam satu platform digital yang
-                terintegrasi.
+            {content && (
+              <p className="mt-6 max-w-2xl text-lg leading-relaxed text-slate-200 sm:text-xl drop-shadow-md">
+                {content}
               </p>
+            )}
 
-              <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-                <Link
-                  href={artikelUrl}
-                  className="group inline-flex items-center justify-center gap-2 rounded-xl px-7 py-3.5 text-sm font-semibold text-white shadow-xl transition duration-300 hover:-translate-y-0.5"
-                  style={{
-                    backgroundColor:
-                      "var(--school-primary)",
-                  }}
-                >
-                  Jelajahi Informasi
-
-                  <ArrowRight
-                    size={17}
-                    className="transition-transform group-hover:translate-x-1"
-                  />
-                </Link>
-
-                <Link
-                  href={tentangUrl}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl border bg-white/10 px-7 py-3.5 text-sm font-semibold text-white backdrop-blur-md transition hover:bg-white/15"
-                  style={{
-                    borderColor:
-                      "rgba(255,255,255,0.20)",
-                  }}
-                >
-                  Tentang Sekolah
-                </Link>
+            <div className="mt-8 flex flex-wrap items-center gap-4 text-sm font-medium text-slate-200">
+              <div className="flex items-center gap-2">
+                <CheckCircle2
+                  size={18}
+                  style={{ color: "var(--school-primary, #10B981)" }}
+                />
+                Akreditasi A
               </div>
-
-              <div className="mt-10 flex flex-wrap items-center gap-x-7 gap-y-3 text-xs text-slate-300">
-                <div className="flex items-center gap-2">
-                  <ShieldCheck
-                    size={16}
-                    style={{
-                      color:
-                        "color-mix(in srgb, var(--school-accent) 70%, white)",
-                    }}
-                  />
-
-                  Pendidikan Terintegrasi
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <Award
-                    size={16}
-                    style={{
-                      color:
-                        "color-mix(in srgb, var(--school-accent) 70%, white)",
-                    }}
-                  />
-
-                  Berorientasi Prestasi
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <Users
-                    size={16}
-                    style={{
-                      color:
-                        "color-mix(in srgb, var(--school-accent) 70%, white)",
-                    }}
-                  />
-
-                  Komunitas Positif
-                </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle2
+                  size={18}
+                  style={{ color: "var(--school-primary, #10B981)" }}
+                />
+                Fasilitas Modern
               </div>
             </div>
 
-
-            <div className="hidden lg:block animate-fade-up-delay">
-              <div className="rounded-3xl border border-white/15 bg-white/10 p-5 shadow-2xl backdrop-blur-xl">
-                <div className="overflow-hidden rounded-2xl border border-white/10 bg-slate-950/40">
-                  <div className="relative h-[270px] overflow-hidden">
-                    <img
-                      src={HERO_IMAGE}
-                      alt="Gedung sekolah"
-                      className="h-full w-full object-cover"
-                    />
-
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent" />
-
-                    <div className="absolute bottom-5 left-5 right-5">
-                      <p
-                        className="text-xs font-semibold uppercase tracking-[0.18em]"
-                        style={{
-                          color:
-                            "color-mix(in srgb, var(--school-accent) 70%, white)",
-                        }}
-                      >
-                        SmartSchool
-                      </p>
-
-                      <h2 className="mt-2 text-xl font-bold text-white">
-                        Lingkungan belajar untuk masa depan
-                      </h2>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-px bg-white/10">
-                    <HeroMiniStat
-                      icon={<Users size={18} />}
-                      value="1.200+"
-                      label="Siswa Aktif"
-                    />
-
-                    <HeroMiniStat
-                      icon={<GraduationCap size={18} />}
-                      value="80+"
-                      label="Guru & Staff"
-                    />
-
-                    <HeroMiniStat
-                      icon={<Trophy size={18} />}
-                      value="50+"
-                      label="Prestasi"
-                    />
-
-                    <HeroMiniStat
-                      icon={<Building2 size={18} />}
-                      value="25+"
-                      label="Program"
-                    />
-                  </div>
-                </div>
+            {ctaText && ctaLink && (
+              <div className="mt-10 flex flex-col gap-4 sm:flex-row">
+                <Link
+                  href={ctaLink}
+                  className="inline-flex items-center justify-center gap-2 rounded-xl px-8 py-4 text-sm font-bold text-white shadow-xl transition hover:opacity-90 hover:-translate-y-0.5"
+                  style={{
+                    backgroundColor: "var(--school-primary, #2563EB)",
+                    boxShadow:
+                      "0 10px 25px -5px var(--school-primary, rgba(37, 99, 235, 0.5))",
+                  }}
+                >
+                  {ctaText} <ArrowRight size={18} />
+                </Link>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </section>
+    );
+  }
 
-
-      <section className="relative z-10 -mt-10 px-5 sm:px-8">
-        <div className="mx-auto grid max-w-7xl gap-4 md:grid-cols-3">
-          <QuickInfo
-            icon={<GraduationCap size={22} />}
-            title="Pendidikan Berkualitas"
-            description="Pembelajaran terarah untuk mendukung kompetensi dan karakter siswa."
-          />
-
-          <QuickInfo
-            icon={<Trophy size={22} />}
-            title="Pengembangan Prestasi"
-            description="Mendorong siswa berkembang melalui berbagai program akademik dan nonakademik."
-          />
-
-          <QuickInfo
-            icon={<ShieldCheck size={22} />}
-            title="Lingkungan Positif"
-            description="Membangun lingkungan sekolah yang aman, nyaman, dan kolaboratif."
-          />
-        </div>
-      </section>
-
-
-      <section className="mx-auto max-w-7xl px-5 py-24 sm:px-8">
-        <div className="mx-auto max-w-2xl text-center">
-          <span
-            className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold uppercase tracking-widest"
-            style={{
-              backgroundColor:
-                "color-mix(in srgb, var(--school-primary) 10%, white)",
-              color: "var(--school-primary)",
-            }}
-          >
-            <Lock size={14} />
-
-            Akses Cepat
-          </span>
-
-          <h2
-            className="mt-5 text-3xl font-bold tracking-tight sm:text-4xl"
-            style={{
-              color: "var(--school-text)",
-            }}
-          >
-            Portal Sekolah
-          </h2>
-
-          <p className="mt-3 text-sm leading-7 text-slate-500 sm:text-base">
-            Akses layanan digital sesuai kebutuhan Anda.
-          </p>
-        </div>
-
-        <div className="mt-12 grid gap-6 md:grid-cols-3">
-          <PortalCard
-            icon={<UserCircle size={27} />}
-            title="Portal Siswa"
-            description="Akses jadwal, nilai, tugas, ujian, dan informasi akademik."
-            link={loginUrl}
-          />
-
-          <PortalCard
-            icon={<GraduationCap size={27} />}
-            title="Portal Guru"
-            description="Kelola kelas, materi, tugas, ujian, dan penilaian siswa."
-            link={loginUrl}
-          />
-
-          <PortalCard
-            icon={<Users size={27} />}
-            title="Portal Orang Tua"
-            description="Pantau perkembangan akademik dan kegiatan siswa."
-            link={loginUrl}
-          />
-        </div>
-      </section>
-
-
-      <section
-        className="border-y py-24"
-        style={{
-          borderColor: "var(--school-border)",
-          backgroundColor: "var(--school-surface)",
-        }}
+  return (
+    <section
+      id={sectionId}
+      className="w-full border-t px-6 py-20 sm:px-8 sm:py-28"
+      style={{
+        backgroundColor: "var(--school-surface, #FFFFFF)",
+        borderColor: "var(--school-border, #E2E8F0)",
+      }}
+    >
+      <div
+        className={`mx-auto grid max-w-6xl gap-12 sm:gap-16 ${
+          image ? "md:grid-cols-2 md:items-center" : ""
+        }`}
       >
-        <div className="mx-auto max-w-7xl px-5 sm:px-8">
-          <div className="mb-10 flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
-            <div>
+        <div className="min-w-0">
+          {subtitle && (
+            <div className="mb-4 flex items-center gap-3">
               <span
-                className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest"
-                style={{
-                  color: "var(--school-primary)",
-                }}
-              >
-                <Newspaper size={15} />
-
-                Informasi Sekolah
-              </span>
-
-              <h2
-                className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl"
-                style={{
-                  color: "var(--school-text)",
-                }}
-              >
-                Artikel Terbaru
-              </h2>
-
-              <p className="mt-3 text-sm leading-7 text-slate-500">
-                Berita, kegiatan, dan informasi terbaru dari
-                sekolah.
-              </p>
-            </div>
-
-            <Link
-              href={artikelUrl}
-              className="group inline-flex items-center gap-2 text-sm font-semibold transition"
-              style={{
-                color: "var(--school-primary)",
-              }}
-            >
-              Lihat Semua
-
-              <ChevronRight
-                size={17}
-                className="transition-transform group-hover:translate-x-1"
+                className="h-1 w-8 rounded-full"
+                style={themeStyles.accentBackground}
               />
-            </Link>
-          </div>
-
-
-          {loadingArtikel && (
-            <div className="grid gap-6 md:grid-cols-3">
-              {[1, 2, 3].map((item) => (
-                <ArticleSkeleton key={item} />
-              ))}
-            </div>
-          )}
-
-
-          {!loadingArtikel && errorArtikel && (
-            <div className="rounded-2xl border border-red-100 bg-red-50 p-6">
-              <p className="text-sm font-bold text-red-700">
-                Gagal memuat artikel
-              </p>
-
-              <p className="mt-1 text-xs text-red-600">
-                {errorArtikel}
+              <p
+                className="text-sm font-bold uppercase tracking-widest"
+                style={themeStyles.primary}
+              >
+                {subtitle}
               </p>
             </div>
           )}
 
+          {title && (
+            <h2
+              className="text-3xl font-extrabold tracking-tight sm:text-4xl"
+              style={themeStyles.text}
+            >
+              {title}
+            </h2>
+          )}
 
-          {!loadingArtikel &&
-            !errorArtikel &&
-            artikelTerbaru.length === 0 && (
-              <div
-                className="rounded-2xl border border-dashed px-6 py-16 text-center"
-                style={{
-                  borderColor: "var(--school-border)",
-                  backgroundColor:
-                    "color-mix(in srgb, var(--school-background) 80%, white)",
-                }}
-              >
-                <Newspaper
-                  size={42}
-                  className="mx-auto text-slate-300"
-                />
+          {content && (
+            <p
+              className="mt-5 whitespace-pre-line text-base leading-relaxed sm:text-lg"
+              style={themeStyles.mutedText}
+            >
+              {content}
+            </p>
+          )}
 
-                <h3 className="mt-4 text-sm font-bold text-slate-700">
-                  Belum ada artikel
-                </h3>
-
-                <p className="mt-2 text-xs text-slate-400">
-                  Artikel yang dipublikasikan melalui CMS akan
-                  muncul di sini.
-                </p>
-              </div>
-            )}
-
-
-          {!loadingArtikel &&
-            !errorArtikel &&
-            artikelTerbaru.length > 0 && (
-              <div className="grid gap-6 md:grid-cols-3">
-                {artikelTerbaru.map((article) => (
-                  <ArticleCard
-                    key={article.id}
-                    article={article}
-                    tenant={tenant}
-                  />
-                ))}
-              </div>
-            )}
-        </div>
-      </section>
-
-
-      <section className="mx-auto max-w-7xl px-5 py-24 sm:px-8">
-        <div
-          className="grid overflow-hidden rounded-3xl shadow-2xl lg:grid-cols-[1.1fr_0.9fr]"
-          style={{
-            backgroundColor: "var(--school-primary)",
-          }}
-        >
-          <div className="relative overflow-hidden p-10 sm:p-14">
-            <div
-              className="absolute -right-20 -top-20 h-64 w-64 rounded-full blur-3xl"
-              style={{
-                backgroundColor:
-                  "color-mix(in srgb, var(--school-accent) 20%, transparent)",
-              }}
-            />
-
-            <div className="relative">
-              <span
-                className="text-xs font-bold uppercase tracking-[0.2em]"
-                style={{
-                  color:
-                    "color-mix(in srgb, var(--school-accent) 70%, white)",
-                }}
-              >
-                Tentang SmartSchool
-              </span>
-
-              <h2 className="mt-4 max-w-2xl text-3xl font-bold leading-tight text-white sm:text-4xl">
-                Mempersiapkan siswa untuk masa depan yang
-                lebih baik.
-              </h2>
-
-              <p className="mt-5 max-w-2xl text-sm leading-7 text-blue-100">
-                Kami berkomitmen menghadirkan lingkungan
-                pendidikan yang mendukung perkembangan
-                akademik, karakter, keterampilan,
-                kreativitas, dan prestasi siswa.
-              </p>
-
+          {ctaText && ctaLink && (
+            <div className="mt-8">
               <Link
-                href={tentangUrl}
-                className="group mt-8 inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3.5 text-sm font-semibold shadow-lg transition hover:bg-slate-50"
-                style={{
-                  color: "var(--school-primary)",
-                }}
+                href={ctaLink}
+                className="inline-flex items-center gap-2 rounded-xl px-6 py-3.5 text-sm font-bold text-white transition hover:opacity-90"
+                style={themeStyles.primaryBackground}
               >
-                Kenali Sekolah Kami
-
-                <ArrowRight
-                  size={16}
-                  className="transition-transform group-hover:translate-x-1"
-                />
+                {ctaText} <ArrowRight size={17} />
               </Link>
             </div>
-          </div>
+          )}
+        </div>
 
-          <div className="relative hidden min-h-[330px] lg:block">
+        {image && (
+          <div
+            className="relative aspect-[4/3] w-full overflow-hidden rounded-3xl shadow-xl"
+            style={{ border: "1px solid var(--school-border, #E2E8F0)" }}
+          >
             <img
-              src={HERO_IMAGE}
-              alt="Lingkungan sekolah"
-              className="absolute inset-0 h-full w-full object-cover"
+              src={image}
+              alt={title || "Informasi sekolah"}
+              className="h-full w-full object-cover transition-transform duration-700 hover:scale-105"
+              loading="lazy"
             />
-
-            <div className="absolute inset-0 bg-slate-950/60" />
-
-            <div className="absolute inset-0 flex items-center justify-center p-10">
-              <div className="w-full rounded-2xl border border-white/15 bg-white/10 p-7 backdrop-blur-xl">
-                <p
-                  className="text-xs font-semibold uppercase tracking-widest"
-                  style={{
-                    color:
-                      "color-mix(in srgb, var(--school-accent) 70%, white)",
-                  }}
-                >
-                  SmartSchool
-                </p>
-
-                <p className="mt-3 text-xl font-bold leading-8 text-white">
-                  Satu platform untuk informasi sekolah yang
-                  modern dan terintegrasi.
-                </p>
-
-                <div className="mt-6 space-y-3">
-                  <FeatureItem
-                    icon={<BookOpen size={15} />}
-                    text="Informasi akademik"
-                  />
-
-                  <FeatureItem
-                    icon={<Newspaper size={15} />}
-                    text="Berita & artikel sekolah"
-                  />
-
-                  <FeatureItem
-                    icon={<Award size={15} />}
-                    text="Prestasi siswa"
-                  />
-
-                  <FeatureItem
-                    icon={<CalendarDays size={15} />}
-                    text="Kegiatan sekolah"
-                  />
-                </div>
-              </div>
-            </div>
           </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function getTenantArticleLink(tenant, link) {
+  const target = link.trim();
+
+  if (!target) return `/${tenant}/articles`;
+
+  // URL eksternal tetap digunakan sebagaimana dikonfigurasi.
+  if (/^(https?:\/\/|mailto:|tel:)/i.test(target)) {
+    return target;
+  }
+
+  // Pertahankan subdomain pada navigasi website sekolah.
+  const path = target.startsWith("/") ? target : `/${target}`;
+  const tenantPrefix = `/${tenant}`;
+
+  if (path === tenantPrefix || path.startsWith(`${tenantPrefix}/`)) {
+    return path;
+  }
+
+  return `${tenantPrefix}${path === "/" ? "" : path}`;
+}
+
+export default async function TenantHomePage({ params }) {
+  const resolvedParams = await params;
+  const tenant = resolvedParams?.tenant;
+
+  if (!tenant) {
+    return (
+      <section className="flex min-h-screen items-center justify-center px-5 pt-32">
+        <div className="text-center">
+          <BookOpen size={48} className="mx-auto mb-4 text-slate-300" />
+          <h1 className="text-2xl font-bold text-slate-900">
+            Subdomain sekolah tidak ditemukan
+          </h1>
+          <p className="mt-2 text-slate-500">
+            Pastikan alamat website sekolah sudah benar.
+          </p>
         </div>
       </section>
+    );
+  }
 
+  const [konfigurasiResult, artikelResult] = await Promise.allSettled([
+    publikService.getKonfigurasi(tenant),
+    publikService.getArtikel(tenant),
+  ]);
 
-      <footer
-        style={{
-          backgroundColor:
-            "color-mix(in srgb, var(--school-primary) 70%, #020617)",
-        }}
-      >
-        <div className="mx-auto max-w-7xl px-5 py-14 sm:px-8">
-          <div className="grid gap-10 md:grid-cols-3">
+  const sections =
+    konfigurasiResult.status === "fulfilled"
+      ? normalizeSections(konfigurasiResult.value)
+      : [];
 
-            <div>
-              <div className="flex items-center gap-3">
-                <div
-                  className="flex h-10 w-10 items-center justify-center rounded-xl text-white"
-                  style={{
-                    backgroundColor: "var(--school-primary)",
-                  }}
-                >
-                  <School size={19} />
-                </div>
+  const articles =
+    artikelResult.status === "fulfilled"
+      ? getArticles(artikelResult.value)
+          .filter((item) => item && typeof item === "object")
+          .sort((a, b) => {
+            const dateA = new Date(getArticleDate(a)).getTime() || 0;
+            const dateB = new Date(getArticleDate(b)).getTime() || 0;
+            return dateB - dateA;
+          })
+          .slice(0, 3)
+      : [];
 
-                <div>
-                  <p className="text-sm font-bold text-white">
-                    {profil?.nama || "SmartSchool"}
-                  </p>
+  // Ambil konfigurasi section informasi dari data CMS.
+  const informasiConfig = sections.find(
+    (item) =>
+      String(item.section || "").toLowerCase() === "informasi-terbaru"
+  );
 
-                  <p className="text-[10px] uppercase tracking-wider text-slate-500">
-                    Sekolah Digital
-                  </p>
-                </div>
-              </div>
+  const informasiTitle =
+    getValue(informasiConfig, "judul", "title") ||
+    "Informasi & Artikel Terbaru";
 
-              <p className="mt-5 max-w-sm text-sm leading-7 text-slate-400">
-                Website resmi sekolah sebagai pusat informasi,
-                berita, kegiatan, prestasi, dan layanan digital
-                sekolah.
-              </p>
-            </div>
+  const informasiSubtitle =
+    getValue(informasiConfig, "subJudul", "subjudul", "subtitle") ||
+    "Kabar Sekolah";
 
+  const informasiContent =
+    getValue(informasiConfig, "konten", "content", "deskripsi") ||
+    "Ikuti informasi, kegiatan, prestasi, dan artikel terbaru yang dipublikasikan oleh sekolah.";
 
-            <div>
-              <h3 className="text-sm font-bold text-white">
-                Navigasi
-              </h3>
+  const informasiCtaText =
+    getValue(informasiConfig, "ctaText", "teksTombol", "buttonText") ||
+    "Lihat Semua";
 
-              <div className="mt-5 space-y-3">
-                <FooterLink
-                  href={homeUrl}
-                  label="Beranda"
-                />
+  const informasiCtaLink = getTenantArticleLink(
+    tenant,
+    getValue(informasiConfig, "ctaLink", "tautan", "buttonLink") ||
+      "/articles"
+  );
 
-                <FooterLink
-                  href={tentangUrl}
-                  label="Tentang Sekolah"
-                />
+  // Jangan menghapus informasi-terbaru. Semua section konfigurasi dirender.
+  const visibleSections = sections;
 
-                <FooterLink
-                  href={akademikUrl}
-                  label="Akademik"
-                />
-
-                <FooterLink
-                  href={artikelUrl}
-                  label="Artikel"
-                />
-
-                <FooterLink
-                  href={kontakUrl}
-                  label="Kontak"
-                />
-              </div>
-            </div>
-
-
-            <div>
-              <h3 className="text-sm font-bold text-white">
-                Kontak
-              </h3>
-
-              <div className="mt-5 space-y-4 text-sm text-slate-400">
-                <div className="flex gap-3">
-                  <MapPin
-                    size={18}
-                    className="mt-0.5 shrink-0"
-                    style={{
-                      color: "var(--school-accent)",
-                    }}
-                  />
-
-                  <span>
-                    {profil?.alamat || "-"}
-                  </span>
-                </div>
-
-                <div className="flex gap-3">
-                  <Phone
-                    size={18}
-                    className="mt-0.5 shrink-0"
-                    style={{
-                      color: "var(--school-accent)",
-                    }}
-                  />
-
-                  <span>{profil?.telepon || "-"}</span>
-                </div>
-
-                <div className="flex gap-3">
-                  <Mail
-                    size={18}
-                    className="mt-0.5 shrink-0"
-                    style={{
-                      color: "var(--school-accent)",
-                    }}
-                  />
-
-                  <span>{profil?.email || "-"}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-12 border-t border-white/10 pt-6">
-            <p className="text-xs text-slate-500">
-              © {new Date().getFullYear()} SmartSchool. Semua
-              hak dilindungi.
+  return (
+    <main className="min-h-screen w-full bg-white">
+      {visibleSections.length > 0 ? (
+        visibleSections.map((item, index) => (
+          <SectionItem key={`${item.section}-${index}`} item={item} />
+        ))
+      ) : (
+        <section className="flex min-h-[70vh] items-center justify-center bg-slate-50 px-6 pt-32 pb-20 text-center">
+          <div className="max-w-2xl">
+            <BookOpen size={56} className="mx-auto mb-5 text-blue-600" />
+            <h1 className="text-4xl font-extrabold text-slate-900 sm:text-5xl">
+              Selamat Datang
+            </h1>
+            <p className="mt-5 leading-relaxed text-slate-600">
+              Informasi sekolah, kegiatan, dan berita terbaru dapat dilihat
+              melalui website resmi sekolah ini.
             </p>
           </div>
-        </div>
-      </footer>
+        </section>
+      )}
 
-
-      <style jsx>{`
-        @keyframes fade-up {
-          from {
-            opacity: 0;
-            transform: translateY(25px);
-          }
-
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        .animate-fade-up {
-          animation: fade-up 0.8s ease-out forwards;
-        }
-
-        .animate-fade-up-delay {
-          opacity: 0;
-          animation: fade-up 1s ease-out 0.2s forwards;
-        }
-      `}</style>
-    </main>
-  );
-}
-
-
-function NavLink({ href, label }) {
-  return (
-    <Link
-      href={href}
-      className="text-sm font-medium text-slate-500 transition"
-      style={{
-        color: undefined,
-      }}
-      onMouseEnter={(event) => {
-        event.currentTarget.style.color =
-          "var(--school-primary)";
-      }}
-      onMouseLeave={(event) => {
-        event.currentTarget.style.color = "";
-      }}
-    >
-      {label}
-    </Link>
-  );
-}
-
-
-function MobileNavLink({ href, label, onClick }) {
-  return (
-    <Link
-      href={href}
-      onClick={onClick}
-      className="block border-b px-2 py-3 text-sm font-semibold text-slate-600 transition"
-      style={{
-        borderColor: "var(--school-border)",
-      }}
-    >
-      {label}
-    </Link>
-  );
-}
-
-
-function HeroMiniStat({ icon, value, label }) {
-  return (
-    <div className="bg-slate-950/30 p-5">
-      <div
-        style={{
-          color:
-            "color-mix(in srgb, var(--school-accent) 75%, white)",
-        }}
+      <section
+        id="artikel-terbaru"
+        className="w-full bg-slate-50 px-6 py-20 sm:px-8 sm:py-28"
+        style={{ borderColor: "var(--school-border, #E2E8F0)" }}
       >
-        {icon}
-      </div>
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-12 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+            <div className="max-w-2xl">
+              <div className="mb-3 flex items-center gap-3">
+                <span
+                  className="h-1 w-8 rounded-full"
+                  style={themeStyles.accentBackground}
+                />
+                <span
+                  className="text-sm font-bold uppercase tracking-widest"
+                  style={themeStyles.primary}
+                >
+                  {informasiSubtitle}
+                </span>
+              </div>
 
-      <p className="mt-3 text-xl font-bold text-white">
-        {value}
-      </p>
+              <h2
+                className="text-3xl font-extrabold tracking-tight sm:text-4xl"
+                style={themeStyles.text}
+              >
+                {informasiTitle}
+              </h2>
 
-      <p className="mt-1 text-[11px] text-slate-400">
-        {label}
-      </p>
-    </div>
-  );
-}
+              <p
+                className="mt-4 text-base leading-relaxed"
+                style={themeStyles.mutedText}
+              >
+                {informasiContent}
+              </p>
+            </div>
 
-
-function QuickInfo({ icon, title, description }) {
-  return (
-    <div
-      className="rounded-2xl border bg-white p-6 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl"
-      style={{
-        borderColor: "var(--school-border)",
-        backgroundColor: "var(--school-surface)",
-      }}
-    >
-      <div className="flex gap-4">
-        <div
-          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-white shadow-lg"
-          style={{
-            backgroundColor: "var(--school-primary)",
-          }}
-        >
-          {icon}
-        </div>
-
-        <div>
-          <h3
-            className="text-sm font-bold"
-            style={{
-              color: "var(--school-text)",
-            }}
-          >
-            {title}
-          </h3>
-
-          <p className="mt-1 text-xs leading-6 text-slate-500">
-            {description}
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-
-function PortalCard({
-  icon,
-  title,
-  description,
-  link,
-}) {
-  return (
-    <Link
-      href={link}
-      className="group rounded-2xl border bg-white p-8 shadow-sm transition duration-300 hover:-translate-y-1.5 hover:shadow-xl"
-      style={{
-        borderColor: "var(--school-border)",
-        backgroundColor: "var(--school-surface)",
-      }}
-    >
-      <div
-        className="flex h-14 w-14 items-center justify-center rounded-2xl text-white shadow-lg transition duration-300 group-hover:scale-105"
-        style={{
-          backgroundColor: "var(--school-primary)",
-        }}
-      >
-        {icon}
-      </div>
-
-      <h3
-        className="mt-6 text-lg font-bold"
-        style={{
-          color: "var(--school-text)",
-        }}
-      >
-        {title}
-      </h3>
-
-      <p className="mt-2 text-sm leading-6 text-slate-500">
-        {description}
-      </p>
-
-      <div
-        className="mt-6 inline-flex items-center gap-2 text-xs font-bold"
-        style={{
-          color: "var(--school-primary)",
-        }}
-      >
-        Masuk ke Portal
-
-        <ArrowRight
-          size={14}
-          className="transition-transform group-hover:translate-x-1"
-        />
-      </div>
-    </Link>
-  );
-}
-
-
-function ArticleCard({ article, tenant }) {
-  const articleSlug =
-    article?.slug || article?.id || "";
-
-  const articleUrl = `/${tenant}/articles/${articleSlug}`;
-
-  return (
-    <Link
-      href={articleUrl}
-      className="group overflow-hidden rounded-2xl border bg-white shadow-sm transition duration-300 hover:-translate-y-1.5 hover:shadow-xl"
-      style={{
-        borderColor: "var(--school-border)",
-        backgroundColor: "var(--school-surface)",
-      }}
-    >
-
-      <div className="aspect-[16/9] overflow-hidden bg-slate-100">
-        {article?.gambarUtama ? (
-          <img
-            src={article.gambarUtama}
-            alt={article.judul || "Artikel"}
-            className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
-          />
-        ) : (
-          <div
-            className="flex h-full items-center justify-center"
-            style={{
-              background:
-                "linear-gradient(135deg, color-mix(in srgb, var(--school-primary) 10%, white), var(--school-background))",
-              color:
-                "color-mix(in srgb, var(--school-primary) 35%, white)",
-            }}
-          >
-            <Newspaper size={46} />
-          </div>
-        )}
-      </div>
-
-
-      <div className="p-6">
-        <div className="flex flex-wrap items-center gap-2">
-          {article?.kategoriArtikel?.nama && (
-            <span
-              className="rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide"
+            <Link
+              href={informasiCtaLink}
+              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border bg-white px-6 py-3 text-sm font-bold shadow-sm transition hover:-translate-y-0.5"
               style={{
-                backgroundColor:
-                  "color-mix(in srgb, var(--school-primary) 10%, white)",
-                color: "var(--school-primary)",
+                color: "var(--school-primary, #2563EB)",
+                borderColor: "var(--school-border, #E2E8F0)",
               }}
             >
-              {article.kategoriArtikel.nama}
-            </span>
+              {informasiCtaText} <ArrowRight size={16} />
+            </Link>
+          </div>
+
+          {articles.length > 0 ? (
+            <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+              {articles.map((artikel, index) => (
+                <ArticleCard
+                  key={
+                    artikel.id ??
+                    artikel.slug ??
+                    artikel.slugArtikel ??
+                    `artikel-${index}`
+                  }
+                  artikel={artikel}
+                  subdomain={tenant}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-3xl border-2 border-dashed border-slate-200 bg-white px-6 py-20 text-center shadow-sm">
+              <Newspaper size={56} className="mx-auto mb-4 text-slate-300" />
+              <h3 className="text-xl font-bold text-slate-800">
+                Belum Ada Artikel Terbaru
+              </h3>
+              <p className="mx-auto mt-3 max-w-md text-slate-500">
+                Artikel akan ditampilkan di sini setelah tersedia dan
+                dipublikasikan melalui CMS sekolah.
+              </p>
+            </div>
           )}
-
-          <span className="inline-flex items-center gap-1 text-[11px] text-slate-400">
-            <CalendarDays size={12} />
-
-            {formatDate(article?.dibuatPada)}
-          </span>
         </div>
-
-        <h3
-          className="mt-4 line-clamp-2 text-lg font-bold leading-7 transition"
-          style={{
-            color: "var(--school-text)",
-          }}
-        >
-          {article?.judul || "Artikel sekolah"}
-        </h3>
-
-        <p className="mt-2 line-clamp-3 text-sm leading-6 text-slate-500">
-          {article?.ringkasan ||
-            "Baca informasi lengkap mengenai artikel ini."}
-        </p>
-
-        <div
-          className="mt-5 inline-flex items-center gap-2 text-xs font-bold"
-          style={{
-            color: "var(--school-primary)",
-          }}
-        >
-          Baca Selengkapnya
-
-          <ArrowRight size={14} />
-        </div>
-      </div>
-    </Link>
+      </section>
+    </main>
   );
-}
-
-
-function FeatureItem({ icon, text }) {
-  return (
-    <div className="flex items-center gap-3">
-      <div
-        className="flex h-7 w-7 items-center justify-center rounded-lg"
-        style={{
-          backgroundColor: "rgba(255,255,255,0.10)",
-          color:
-            "color-mix(in srgb, var(--school-accent) 70%, white)",
-        }}
-      >
-        {icon}
-      </div>
-
-      <span className="text-sm text-blue-100">
-        {text}
-      </span>
-    </div>
-  );
-}
-
-
-function FooterLink({ href, label }) {
-  return (
-    <Link
-      href={href}
-      className="block text-sm text-slate-400 transition hover:text-white"
-    >
-      {label}
-    </Link>
-  );
-}
-
-
-function ArticleSkeleton() {
-  return (
-    <div
-      className="overflow-hidden rounded-2xl border bg-white"
-      style={{
-        borderColor: "var(--school-border)",
-      }}
-    >
-      <div className="aspect-[16/9] animate-pulse bg-slate-100" />
-
-      <div className="space-y-3 p-6">
-        <div className="h-3 w-24 animate-pulse bg-slate-100" />
-
-        <div className="h-5 w-full animate-pulse bg-slate-100" />
-
-        <div className="h-5 w-4/5 animate-pulse bg-slate-100" />
-
-        <div className="h-4 w-full animate-pulse bg-slate-100" />
-
-        <div className="h-4 w-3/4 animate-pulse bg-slate-100" />
-      </div>
-    </div>
-  );
-}
-
-
-function formatDate(date) {
-  if (!date) {
-    return "-";
-  }
-
-  try {
-    const parsedDate = new Date(date);
-
-    if (Number.isNaN(parsedDate.getTime())) {
-      return "-";
-    }
-
-    return new Intl.DateTimeFormat("id-ID", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    }).format(parsedDate);
-  } catch {
-    return "-";
-  }
 }

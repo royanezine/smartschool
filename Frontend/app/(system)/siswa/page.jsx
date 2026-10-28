@@ -510,41 +510,29 @@ async function fetchJumlahTugas(kelasMapelId) {
 }
 
 
+
 async function fetchSemuaMateri() {
   try {
-    const response = await fetch(
-      `${API_URL}/api/materi-pembelajaran`,
-      {
-        method: "GET",
-        headers: getHeaders(),
-        cache: "no-store",
-      }
-    );
+    const response = await getMateriPembelajaran();
 
-    let result = null;
-    try {
-      result = await response.json();
-    } catch {
-      result = null;
-    }
-
-    if (!response.ok) {
-      console.error(
-        "[MATA PELAJARAN] Gagal fetch materi:",
-        result
-      );
-      return [];
-    }
-
-    return extractArray(result);
+    return extractArray(response);
   } catch (error) {
     console.error(
-      "[MATA PELAJARAN] Error fetch materi:",
+      "[MATA PELAJARAN] Gagal mengambil materi:",
       error
     );
-    return [];
+
+    // Jangan menyamarkan kegagalan autentikasi sebagai data kosong.
+    if (error?.status === 401) {
+      throw new Error(
+        "Sesi login sudah berakhir. Silakan login kembali."
+      );
+    }
+
+    throw error;
   }
 }
+
 
 
 function normalizeKelasMapel(
@@ -766,17 +754,36 @@ export default function SiswaDashboardPage() {
         if (!cancelled) {
           setMataPelajaranList(normalized);
         }
-      } catch (error) {
-        console.error("[MAPEL] GAGAL:", error);
+      
+} catch (error) {
+  console.error("[MAPEL] GAGAL:", error);
 
-        if (!cancelled) {
-          setMataPelajaranList([]);
-          setMapelError(
-            error?.message ||
-              "Gagal mengambil data mata pelajaran dari server."
-          );
-        }
-      } finally {
+  if (cancelled) return;
+
+  if (error?.status === 401) {
+    router.replace("/login?sessionExpired=1");
+    return;
+  }
+
+  if (
+    error?.message?.includes(
+      "Sesi login sudah berakhir"
+    ) ||
+    error?.message?.includes(
+      "Token login tidak ditemukan"
+    )
+  ) {
+    router.replace("/login?sessionExpired=1");
+    return;
+  }
+
+  setMataPelajaranList([]);
+  setMapelError(
+    error?.message ||
+      "Gagal mengambil data mata pelajaran dari server."
+  );
+}
+finally {
         if (!cancelled) {
           setLoadingMapel(false);
         }

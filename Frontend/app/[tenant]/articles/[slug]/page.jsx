@@ -1,395 +1,624 @@
 import Link from "next/link";
-import Image from "next/image";
 import { notFound } from "next/navigation";
-import PublicLayout, {
-  loadPublicLayout,
-} from "../../../components/tenant/PublicLayout";
 import { publikService } from "@/services/publik.service";
+import {
+  ArrowLeft,
+  CalendarDays,
+  User,
+  Tag,
+  AlertCircle,
+  Newspaper,
+} from "lucide-react";
 
-function formatTanggal(iso) {
-  if (!iso) return "";
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
-  const tanggal = new Date(iso);
+const theme = {
+  primary: "var(--school-primary, #2563EB)",
+  secondary: "var(--school-secondary, #64748B)",
+  accent: "var(--school-accent, #F59E0B)",
+  background: "var(--school-background, #F8FAFC)",
+  surface: "var(--school-surface, #FFFFFF)",
+  text: "var(--school-text, #0F172A)",
+  border: "var(--school-border, #E2E8F0)",
+};
 
-  if (Number.isNaN(tanggal.getTime())) return "";
+function unwrapResponse(value) {
+  let result = value;
 
-  return tanggal.toLocaleDateString("id-ID", {
+  for (let i = 0; i < 6; i += 1) {
+    if (
+      result &&
+      typeof result === "object" &&
+      !Array.isArray(result) &&
+      Object.prototype.hasOwnProperty.call(result, "data")
+    ) {
+      result = result.data;
+    } else {
+      break;
+    }
+  }
+
+  return result;
+}
+
+function normalizeArticles(response) {
+  const data = unwrapResponse(response);
+
+  if (Array.isArray(data)) return data;
+  if (!data || typeof data !== "object") return [];
+
+  const candidates = [
+    data.artikel,
+    data.articles,
+    data.items,
+    data.results,
+    data.data,
+  ];
+
+  for (const candidate of candidates) {
+    if (Array.isArray(candidate)) return candidate;
+
+    if (candidate && typeof candidate === "object") {
+      const nested = normalizeArticles(candidate);
+      if (nested.length > 0) return nested;
+    }
+  }
+
+  return [];
+}
+
+function formatTanggal(value) {
+  if (!value) return "";
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+
+  return new Intl.DateTimeFormat("id-ID", {
     day: "numeric",
     month: "long",
     year: "numeric",
-  });
+    timeZone: "Asia/Jakarta",
+  }).format(date);
 }
 
-function normalizeParam(value) {
-  if (typeof value !== "string") return "";
-
-  try {
-    return decodeURIComponent(value).trim();
-  } catch {
-    return value.trim();
-  }
-}
-
-function cariArtikel(daftarArtikel, slugOrId) {
-  if (!Array.isArray(daftarArtikel)) return null;
-
-  const target = normalizeParam(slugOrId);
-  if (!target) return null;
-
+function getArticleImage(article) {
   return (
-    daftarArtikel.find((item) => {
-      if (!item) return false;
-      const matchSlug =
-        typeof item.slug === "string" &&
-        normalizeParam(item.slug).toLowerCase() === target.toLowerCase();
-      const matchId = String(item.id) === target;
-      return matchSlug || matchId;
-    }) || null
+    article?.gambarUtama ||
+    article?.gambarUrl ||
+    article?.gambar_utama ||
+    article?.gambar_url ||
+    article?.imageUrl ||
+    article?.image_url ||
+    null
   );
 }
 
-function getGambarArtikel(artikel) {
-  return artikel?.gambarUtama || artikel?.gambarUrl || null;
+function getArticleCategory(article) {
+  const category =
+    article?.kategoriArtikel ??
+    article?.kategori_artikel ??
+    article?.kategori ??
+    article?.category;
+
+  if (typeof category === "string") return category;
+  return category?.nama ?? category?.name ?? "";
 }
 
-export async function generateMetadata({ params }) {
-  const { tenant, slug } = await params;
-
-  try {
-    const [profil, daftarArtikel] = await Promise.all([
-      publikService.getProfil(tenant),
-      publikService.getArtikel(tenant),
-    ]);
-
-    const artikel = cariArtikel(daftarArtikel, slug);
-
-    if (!artikel) {
-      return {
-        title: `Artikel — ${profil?.nama || "Sekolah"}`,
-      };
-    }
-
-    return {
-      title: `${artikel.judul || "Artikel"} — ${
-        profil?.nama || "Sekolah"
-      }`,
-      description:
-        artikel.ringkasan || artikel.judul || "Artikel sekolah",
-    };
-  } catch {
-    return {
-      title: "Artikel Sekolah",
-    };
-  }
-}
-
-export default async function ArticleDetailPage({ params }) {
-  const { tenant, slug } = await params;
-
-  let layout;
-  let daftarArtikel;
-
-  try {
-    [layout, daftarArtikel] = await Promise.all([
-      loadPublicLayout(tenant),
-      publikService.getArtikel(tenant),
-    ]);
-  } catch (error) {
-    console.error("[CMS DETAIL] Gagal memuat data:", error);
-    throw error;
-  }
-
-  const {
-    profil,
-    tema,
-    halaman = [],
-    konfigurasi = [],
-  } = layout || {};
-
-  if (!profil) {
-    notFound();
-  }
-
-  const artikel = cariArtikel(daftarArtikel, slug);
-
-  if (!artikel) {
-    notFound();
-  }
-
-  const base = `/${tenant}`;
-  const gambar = getGambarArtikel(artikel);
-
+function getArticleDate(article) {
   return (
-    <PublicLayout
-      profil={profil}
-      tema={tema}
-      halaman={halaman}
-      konfigurasi={konfigurasi}
+    article?.tanggalPublikasi ||
+    article?.tanggal_publikasi ||
+    article?.dipublikasikanPada ||
+    article?.dibuatPada ||
+    article?.createdAt ||
+    article?.created_at ||
+    null
+  );
+}
+
+function getArticleAuthor(article) {
+  return (
+    article?.penulis?.nama ||
+    article?.penulis?.name ||
+    article?.author?.nama ||
+    article?.author?.name ||
+    article?.namaPenulis ||
+    article?.nama_penulis ||
+    article?.penulis ||
+    article?.author ||
+    "Admin Sekolah"
+  );
+}
+
+function ErrorState({ title, description, children }) {
+  return (
+    <main
+      className="flex min-h-[70vh] items-center justify-center px-6 py-28"
+      style={{
+        backgroundColor: theme.background,
+        color: theme.text,
+      }}
     >
       <div
-        className="min-h-screen px-4 py-10 sm:px-6 lg:px-8"
+        className="w-full max-w-md rounded-3xl border p-8 text-center shadow-sm"
         style={{
-          backgroundColor: "var(--warna-netral-latar, #F8FAFC)",
+          backgroundColor: theme.surface,
+          borderColor: theme.border,
         }}
       >
-        <div className="mx-auto max-w-5xl">
-          <nav
-            className="mb-6 flex items-center gap-2 text-sm font-bold"
+        <div
+          className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full"
+          style={{
+            backgroundColor: `color-mix(in srgb, ${theme.accent} 12%, ${theme.surface})`,
+            color: theme.accent,
+          }}
+        >
+          <AlertCircle size={40} />
+        </div>
+
+        <h1 className="text-2xl font-bold" style={{ color: theme.text }}>
+          {title}
+        </h1>
+
+        <p className="mt-3 leading-relaxed" style={{ color: theme.secondary }}>
+          {description}
+        </p>
+
+        {children}
+      </div>
+    </main>
+  );
+}
+
+export default async function DetailArtikelPage({ params }) {
+  const resolvedParams = await params;
+  const tenant = resolvedParams?.tenant;
+  const slug = resolvedParams?.slug;
+
+  if (!tenant || !slug) notFound();
+
+  let article = null;
+
+  try {
+    const response = await publikService.getArtikel(tenant);
+    const articles = normalizeArticles(response);
+
+    article =
+      articles.find(
+        (item) =>
+          item &&
+          typeof item.slug === "string" &&
+          item.slug === slug
+      ) ?? null;
+  } catch (error) {
+    console.error("[DETAIL ARTIKEL PUBLIK] Gagal mengambil artikel:", error);
+
+    return (
+      <ErrorState
+        title="Artikel belum dapat dimuat"
+        description="Data artikel gagal diambil dari server. Pastikan backend aktif dan koneksi ke API berjalan dengan baik."
+      >
+        <Link
+          href={`/${tenant}/articles`}
+          className="mt-6 inline-flex items-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold transition"
+          style={{
+            backgroundColor: theme.primary,
+            color: "#FFFFFF",
+          }}
+        >
+          <ArrowLeft size={16} />
+          Kembali ke Artikel
+        </Link>
+      </ErrorState>
+    );
+  }
+
+  if (!article) notFound();
+
+  const title = article.judul || article.title || "Artikel sekolah";
+  const image = getArticleImage(article);
+  const category = getArticleCategory(article);
+  const date = formatTanggal(getArticleDate(article));
+  const author = getArticleAuthor(article);
+
+  const summary =
+    article.ringkasan ||
+    article.excerpt ||
+    article.deskripsi ||
+    article.description ||
+    "";
+
+  const content =
+    article.konten ||
+    article.content ||
+    article.isi ||
+    "";
+
+  return (
+    <main
+      className="min-h-screen pb-24 pt-28"
+      style={{
+        backgroundColor: theme.background,
+        color: theme.text,
+      }}
+    >
+      {/* HEADER ARTIKEL */}
+      <section
+        className="relative isolate overflow-hidden py-16 sm:py-20"
+        style={{
+          backgroundColor: theme.primary,
+          color: "#FFFFFF",
+        }}
+      >
+        <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+          <div
+            className="absolute -left-1/4 -top-1/4 h-full w-1/2 rounded-full blur-3xl"
             style={{
-              color: "var(--warna-netral-teksLembut, #64748B)",
+              backgroundColor: theme.accent,
+              opacity: 0.25,
+            }}
+          />
+
+          <div
+            className="absolute -right-1/4 bottom-0 h-full w-1/2 rounded-full blur-3xl"
+            style={{
+              backgroundColor: theme.secondary,
+              opacity: 0.35,
+            }}
+          />
+
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                "linear-gradient(120deg, transparent 20%, rgba(255,255,255,0.08) 50%, transparent 80%)",
+            }}
+          />
+        </div>
+
+        <div className="relative mx-auto max-w-4xl px-6">
+          <Link
+            href={`/${tenant}/articles`}
+            className="inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition"
+            style={{
+              borderColor: "rgba(255,255,255,0.3)",
+              backgroundColor: "rgba(255,255,255,0.12)",
+              color: "#FFFFFF",
             }}
           >
-            <Link
-              href={base}
-              className="transition-colors hover:text-[var(--warna-primer-utama)]"
-            >
-              Beranda
-            </Link>
+            <ArrowLeft size={16} />
+            Kembali ke Daftar Artikel
+          </Link>
 
-            <span className="text-gray-300">/</span>
+          <div className="mt-8 text-center">
+            {category && (
+              <span
+                className="mb-5 inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-widest"
+                style={{
+                  backgroundColor: `color-mix(in srgb, ${theme.accent} 25%, transparent)`,
+                  color: "#FFFFFF",
+                  border: "1px solid rgba(255,255,255,0.2)",
+                }}
+              >
+                <Tag size={14} />
+                {category}
+              </span>
+            )}
 
-            <Link
-              href={`${base}/articles`}
-              className="transition-colors hover:text-[var(--warna-primer-utama)]"
-            >
-              Artikel
-            </Link>
-          </nav>
+            <h1 className="text-3xl font-extrabold leading-tight tracking-tight text-white sm:text-4xl md:text-5xl">
+              {title}
+            </h1>
 
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-3 text-sm text-white/80">
+              {date && (
+                <span className="inline-flex items-center gap-2">
+                  <CalendarDays size={16} style={{ color: theme.accent }} />
+                  {date}
+                </span>
+              )}
+
+              <span className="inline-flex items-center gap-2">
+                <User size={16} style={{ color: theme.accent }} />
+                {typeof author === "string" ? author : "Admin Sekolah"}
+              </span>
+            </div>
+
             <div
-              className="flex flex-col justify-center rounded-[2rem] p-8 sm:p-10 lg:col-span-8"
-              style={{
-                backgroundColor: "var(--warna-netral-putih, #fff)",
-              }}
-            >
-              {artikel.kategoriArtikel?.nama && (
-                <div className="mb-4">
-                  <span
-                    className="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-black uppercase tracking-widest text-white shadow-sm"
-                    style={{
-                      backgroundColor: "var(--warna-primer-utama)",
-                    }}
-                  >
-                    <span className="h-1.5 w-1.5 rounded-full bg-white opacity-80" />
-                    {artikel.kategoriArtikel.nama}
-                  </span>
-                </div>
-              )}
+              className="mx-auto mt-8 h-1.5 w-24 rounded-full"
+              style={{ backgroundColor: theme.accent }}
+            />
+          </div>
+        </div>
+      </section>
 
-              <h1
-                className="mb-6 text-3xl font-black leading-tight sm:text-4xl lg:text-[2.75rem]"
+      {/* KONTEN ARTIKEL */}
+      <section className="relative z-10 mx-auto -mt-8 max-w-6xl px-6">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_300px]">
+          {/* KONTEN UTAMA */}
+          <article className="min-w-0">
+            {image && (
+              <figure
+                className="mb-8 overflow-hidden rounded-3xl border shadow-lg"
                 style={{
-                  color: "var(--warna-netral-teks, #0F172A)",
+                  backgroundColor: theme.surface,
+                  borderColor: theme.border,
                 }}
               >
-                {artikel.judul}
-              </h1>
-
-              <div
-                className="flex flex-wrap items-center gap-4 text-sm font-bold"
-                style={{
-                  color: "var(--warna-netral-teksLembut, #64748B)",
-                }}
-              >
-                <div className="flex items-center gap-2">
-                  <div
-                    className="flex h-10 w-10 items-center justify-center rounded-full"
-                    style={{
-                      backgroundColor: "var(--warna-netral-latar, #F8FAFC)",
-                    }}
-                  >
-                    <svg
-                      className="h-5 w-5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                      />
-                    </svg>
-                  </div>
-                  Admin Sekolah
-                </div>
-
-                <span className="h-1 w-1 rounded-full bg-gray-300" />
-
-                <div className="flex items-center gap-1.5">
-                  <svg
-                    className="h-4 w-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                    />
-                  </svg>
-                  {formatTanggal(artikel.dibuatPada)}
-                </div>
-              </div>
-            </div>
-
-            <div className="relative min-h-[300px] overflow-hidden rounded-[2rem] shadow-sm lg:col-span-4">
-              {gambar ? (
-                <Image
-                  src={gambar}
-                  alt={artikel.judul || "Gambar artikel"}
-                  fill
-                  sizes="(max-width: 1024px) 100vw, 33vw"
-                  className="object-cover"
-                  unoptimized
-                  priority
+                <img
+                  src={image}
+                  alt={title}
+                  className="aspect-video h-full w-full object-cover"
                 />
-              ) : (
-                <div
-                  className="flex h-full min-h-[300px] w-full items-center justify-center text-sm font-bold text-gray-400"
-                  style={{
-                    backgroundColor: "var(--warna-netral-garis, #E2E8F0)",
-                  }}
-                >
-                  Tanpa Gambar
-                </div>
-              )}
-            </div>
-
-            {artikel.ringkasan && (
-              <div
-                className="relative overflow-hidden rounded-[2rem] p-8 sm:p-10 lg:col-span-12"
-                style={{
-                  backgroundColor: "var(--warna-primer-utama)",
-                }}
-              >
-                <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white opacity-10" />
-                <div className="absolute -bottom-10 -left-10 h-32 w-32 rounded-full bg-black opacity-10" />
-
-                <div className="relative z-10 flex flex-col items-center text-center">
-                  <svg
-                    className="mb-4 h-8 w-8 text-white opacity-50"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
-                  </svg>
-
-                  <p className="text-lg font-bold leading-relaxed text-white sm:text-xl md:text-2xl">
-                    "{artikel.ringkasan}"
-                  </p>
-                </div>
-              </div>
+              </figure>
             )}
 
             <div
-              className="rounded-[2rem] p-8 sm:p-12 lg:col-span-12"
+              className="rounded-3xl border p-6 shadow-sm sm:p-10"
               style={{
-                backgroundColor: "var(--warna-netral-putih, #fff)",
+                backgroundColor: theme.surface,
+                borderColor: theme.border,
+                color: theme.text,
               }}
             >
-              <div
-                className="prose prose-base mx-auto max-w-4xl break-words leading-loose sm:prose-lg prose-headings:font-black prose-headings:text-gray-900 prose-a:font-bold prose-a:text-[var(--warna-primer-utama)] prose-a:no-underline hover:prose-a:underline prose-img:rounded-2xl prose-img:shadow-lg"
-                style={{
-                  color: "var(--warna-netral-teksLembut, #475569)",
-                }}
-                dangerouslySetInnerHTML={{
-                  __html: artikel.konten || "",
-                }}
-              />
-            </div>
+              {summary && (
+                <div
+                  className="mb-8 rounded-r-xl border-l-4 py-3 pl-5 pr-3"
+                  style={{
+                    borderColor: theme.primary,
+                    backgroundColor: `color-mix(in srgb, ${theme.primary} 5%, ${theme.surface})`,
+                  }}
+                >
+                  <p
+                    className="text-lg font-medium italic leading-relaxed"
+                    style={{ color: theme.secondary }}
+                  >
+                    “{summary}”
+                  </p>
+                </div>
+              )}
 
+              {content ? (
+                <div
+                  className="article-content max-w-none"
+                  dangerouslySetInnerHTML={{ __html: content }}
+                />
+              ) : !summary ? (
+                <div className="py-10 text-center">
+                  <Newspaper
+                    size={40}
+                    className="mx-auto mb-4"
+                    style={{ color: theme.secondary }}
+                  />
+                  <p style={{ color: theme.secondary }}>
+                    Konten artikel ini belum tersedia.
+                  </p>
+                </div>
+              ) : null}
+            </div>
+          </article>
+
+          {/* SIDEBAR INFORMASI */}
+          <aside className="min-w-0">
             <div
-              className="flex flex-col items-center justify-between gap-6 rounded-[2rem] p-8 sm:flex-row lg:col-span-12"
+              className="space-y-6 rounded-2xl border p-6 shadow-sm lg:sticky lg:top-28"
               style={{
-                backgroundColor: "var(--warna-netral-putih, #fff)",
+                backgroundColor: theme.surface,
+                borderColor: theme.border,
               }}
             >
-              <Link
-                href={`${base}/articles`}
-                className="group inline-flex items-center gap-3 rounded-2xl bg-gray-100 px-6 py-3.5 text-sm font-black uppercase tracking-wider transition-all hover:scale-105 hover:bg-gray-200"
+              <h2
+                className="border-b pb-4 text-sm font-bold uppercase tracking-widest"
                 style={{
-                  color: "var(--warna-netral-teks)",
+                  color: theme.text,
+                  borderColor: theme.border,
                 }}
               >
-                <svg
-                  className="h-5 w-5 transition-transform group-hover:-translate-x-1"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="3"
-                    d="M10 19l-7-7m0 0l7-7m-7 7h18"
-                  />
-                </svg>
-                Kembali
-              </Link>
+                Informasi Artikel
+              </h2>
 
-              <div className="flex items-center gap-3">
-                <span
-                  className="text-xs font-black uppercase tracking-widest"
-                  style={{
-                    color: "var(--warna-netral-teksLembut, #64748B)",
-                  }}
-                >
-                  Bagikan
-                </span>
-
-                <a
-                  href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
-                    artikel.judul || "Artikel sekolah"
-                  )}&url=${encodeURIComponent(
-                    `/${tenant}/articles/${slug}`
-                  )}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Bagikan artikel ke Twitter"
-                  className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-100 transition-all hover:-translate-y-1 hover:bg-[var(--warna-primer-utama)] hover:text-white hover:shadow-lg"
-                  style={{
-                    color: "var(--warna-netral-teks)",
-                  }}
-                >
-                  <svg
-                    className="h-5 w-5"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
+              <div className="space-y-5">
+                <div className="flex items-start gap-3">
+                  <div
+                    className="mt-0.5 rounded-lg p-2"
+                    style={{
+                      backgroundColor: `color-mix(in srgb, ${theme.primary} 10%, ${theme.surface})`,
+                      color: theme.primary,
+                    }}
                   >
-                    <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z" />
-                  </svg>
-                </a>
+                    <CalendarDays size={18} />
+                  </div>
 
-                <a
-                  href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(
-                    `/${tenant}/articles/${slug}`
-                  )}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Bagikan artikel ke LinkedIn"
-                  className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-100 transition-all hover:-translate-y-1 hover:bg-[var(--warna-primer-utama)] hover:text-white hover:shadow-lg"
+                  <div className="min-w-0">
+                    <p
+                      className="text-xs font-semibold"
+                      style={{ color: theme.secondary }}
+                    >
+                      Diterbitkan
+                    </p>
+                    <p
+                      className="mt-1 break-words text-sm font-medium"
+                      style={{ color: theme.text }}
+                    >
+                      {date || "-"}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div
+                    className="mt-0.5 rounded-lg p-2"
+                    style={{
+                      backgroundColor: `color-mix(in srgb, ${theme.primary} 10%, ${theme.surface})`,
+                      color: theme.primary,
+                    }}
+                  >
+                    <User size={18} />
+                  </div>
+
+                  <div className="min-w-0">
+                    <p
+                      className="text-xs font-semibold"
+                      style={{ color: theme.secondary }}
+                    >
+                      Penulis
+                    </p>
+                    <p
+                      className="mt-1 break-words text-sm font-medium"
+                      style={{ color: theme.text }}
+                    >
+                      {typeof author === "string" ? author : "Admin Sekolah"}
+                    </p>
+                  </div>
+                </div>
+
+                {category && (
+                  <div className="flex items-start gap-3">
+                    <div
+                      className="mt-0.5 rounded-lg p-2"
+                      style={{
+                        backgroundColor: `color-mix(in srgb, ${theme.primary} 10%, ${theme.surface})`,
+                        color: theme.primary,
+                      }}
+                    >
+                      <Tag size={18} />
+                    </div>
+
+                    <div className="min-w-0">
+                      <p
+                        className="text-xs font-semibold"
+                        style={{ color: theme.secondary }}
+                      >
+                        Kategori
+                      </p>
+                      <p
+                        className="mt-1 break-words text-sm font-medium"
+                        style={{ color: theme.text }}
+                      >
+                        {category}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="border-t pt-6" style={{ borderColor: theme.border }}>
+                <Link
+                  href={`/${tenant}/articles`}
+                  className="flex w-full items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm font-bold transition"
                   style={{
-                    color: "var(--warna-netral-teks)",
+                    borderColor: theme.border,
+                    backgroundColor: theme.background,
+                    color: theme.text,
                   }}
                 >
-                  <svg
-                    className="h-5 w-5"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
-                  </svg>
-                </a>
+                  <ArrowLeft size={16} />
+                  Lihat Artikel Lainnya
+                </Link>
+
+                <Link
+                  href={`/${tenant}`}
+                  className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-bold transition"
+                  style={{
+                    backgroundColor: theme.primary,
+                    color: "#FFFFFF",
+                  }}
+                >
+                  Kembali ke Beranda
+                </Link>
               </div>
             </div>
-          </div>
+          </aside>
         </div>
-      </div>
-    </PublicLayout>
+      </section>
+
+      {/* STYLE KONTEN DARI CMS */}
+      <style>{`
+        .article-content {
+          color: var(--school-text, #0F172A);
+          font-size: 1rem;
+          line-height: 1.9;
+          overflow-wrap: anywhere;
+        }
+
+        .article-content h1,
+        .article-content h2,
+        .article-content h3,
+        .article-content h4,
+        .article-content h5,
+        .article-content h6 {
+          color: var(--school-text, #0F172A);
+          font-weight: 700;
+          line-height: 1.35;
+          margin-top: 1.75em;
+          margin-bottom: 0.75em;
+        }
+
+        .article-content h1 { font-size: 2rem; }
+        .article-content h2 { font-size: 1.65rem; }
+        .article-content h3 { font-size: 1.35rem; }
+
+        .article-content p {
+          margin-top: 1em;
+          margin-bottom: 1em;
+        }
+
+        .article-content a {
+          color: var(--school-primary, #2563EB);
+          text-decoration: underline;
+          text-underline-offset: 3px;
+        }
+
+        .article-content ul,
+        .article-content ol {
+          margin-top: 1em;
+          margin-bottom: 1em;
+          padding-left: 1.5em;
+        }
+
+        .article-content ul { list-style: disc; }
+        .article-content ol { list-style: decimal; }
+
+        .article-content blockquote {
+          border-left: 4px solid var(--school-accent, #F59E0B);
+          margin: 1.5em 0;
+          padding: 0.5em 1em;
+          background: color-mix(in srgb, var(--school-primary, #2563EB) 5%, var(--school-surface, #FFFFFF));
+          color: var(--school-secondary, #64748B);
+          border-radius: 0 0.75rem 0.75rem 0;
+        }
+
+        .article-content img {
+          max-width: 100%;
+          height: auto;
+          border-radius: 0.75rem;
+          margin: 1.5em auto;
+        }
+
+        .article-content table {
+          display: block;
+          max-width: 100%;
+          overflow-x: auto;
+          border-collapse: collapse;
+        }
+
+        .article-content th,
+        .article-content td {
+          border: 1px solid var(--school-border, #E2E8F0);
+          padding: 0.65em 0.8em;
+          text-align: left;
+        }
+
+        .article-content th {
+          background: color-mix(in srgb, var(--school-primary, #2563EB) 8%, var(--school-surface, #FFFFFF));
+          font-weight: 700;
+        }
+
+        .article-content hr {
+          border-color: var(--school-border, #E2E8F0);
+          margin: 2em 0;
+        }
+      `}</style>
+    </main>
   );
 }
