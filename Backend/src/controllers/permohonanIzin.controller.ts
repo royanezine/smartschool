@@ -82,7 +82,16 @@ export const getDaftarIzin = async (
         take: limit,
         include: {
           pengguna: {
-            select: { id: true, namaLengkap: true, nisn: true, nip: true },
+            select: {
+              id: true,
+              namaLengkap: true,
+              nisn: true,
+              nip: true,
+              jabatan: true,
+              peran: {
+                select: { id: true, nama: true, namaTampilan: true },
+              },
+            },
           },
           penyetuju: { select: { id: true, namaLengkap: true } },
         },

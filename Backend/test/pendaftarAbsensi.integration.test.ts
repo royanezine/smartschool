@@ -6,7 +6,7 @@ import { todayDateOnly, localClockMinutes } from "../src/utils/dateOnly";
 
 const testDatabaseUrl = process.env.TEST_DATABASE_URL;
 
-test("pendaftar and attendance HTTP API with PostgreSQL", { skip: !testDatabaseUrl }, async t => {
+test("backend HTTP API regressions with PostgreSQL", { skip: !testDatabaseUrl }, async t => {
   const database = new URL(testDatabaseUrl!);
   assert.ok(["127.0.0.1", "localhost", "[::1]"].includes(database.hostname), "Integration tests require a separate local database");
   process.env.DATABASE_URL = testDatabaseUrl;
@@ -29,14 +29,19 @@ test("pendaftar and attendance HTTP API with PostgreSQL", { skip: !testDatabaseU
     server.closeAllConnections();
     await new Promise<void>(resolve => server.close(() => resolve()));
     await prisma.absensi.deleteMany({where:{penggunaId:{in:userIds}}});
+    await prisma.permohonanIzin.deleteMany({where:{sekolahId:{in:schoolIds}}});
+    await prisma.halamanCms.deleteMany({where:{sekolahId:{in:schoolIds}}});
+    await prisma.artikelCms.deleteMany({where:{sekolahId:{in:schoolIds}}});
     await prisma.berkasPpdb.deleteMany({where:{pendaftaranPpdb:{sekolahId:{in:schoolIds}}}});
     await prisma.hasilSeleksiPpdb.deleteMany({where:{pendaftaranPpdb:{sekolahId:{in:schoolIds}}}});
     await prisma.pendaftaranPpdb.deleteMany({where:{sekolahId:{in:schoolIds}}});
+    await prisma.gelombangPpdb.deleteMany({where:{sekolahId:{in:schoolIds}}});
     await prisma.jalurPpdb.deleteMany({where:{sekolahId:{in:schoolIds}}});
     await prisma.langgananSekolah.deleteMany({where:{sekolahId:{in:schoolIds}}});
     await prisma.kelas.deleteMany({where:{sekolahId:{in:schoolIds}}});
     await prisma.tahunAjaran.deleteMany({where:{sekolahId:{in:schoolIds}}});
     await prisma.pengguna.deleteMany({where:{id:{in:userIds}}});
+    await prisma.kategoriJabatan.deleteMany({where:{sekolahId:{in:schoolIds}}});
     await prisma.shiftKerja.deleteMany({where:{sekolahId:{in:schoolIds}}});
     await prisma.peranIzin.deleteMany({where:{peranId:{in:roleIds}}});
     await prisma.peran.deleteMany({where:{id:{in:roleIds}}});
@@ -63,7 +68,7 @@ test("pendaftar and attendance HTTP API with PostgreSQL", { skip: !testDatabaseU
   const studentRole = await role("siswa",schoolA.id);
   const teacherRole = await role("guru",schoolA.id);
   const otherRole = await role("siswa",schoolB.id);
-  for (const nama of ["ppdb.view","lms.view","lms.update","lms.create","laporan.view","absensi.view"]) {
+  for (const nama of ["ppdb.view","ppdb.create","ppdb.update","ppdb.delete","cms.create","cms.update","cms.view","manajemen_pengguna.view","lms.view","lms.update","lms.create","laporan.view","absensi.view"]) {
     let izin = await prisma.izin.findUnique({where:{nama}});
     if (!izin) {
       izin = await prisma.izin.create({data:{nama,modul:nama.split(".")[0],aksi:nama.split(".")[1],status:"aktif"}});
@@ -104,6 +109,8 @@ test("pendaftar and attendance HTTP API with PostgreSQL", { skip: !testDatabaseU
   const classA = await prisma.kelas.create({data:{sekolahId:schoolA.id,tahunAjaranId:yearA.id,nama:"QA A",tingkat:"10"}});
   const classB = await prisma.kelas.create({data:{sekolahId:schoolB.id,tahunAjaranId:yearB.id,nama:"QA B",tingkat:"10"}});
   const shift = await prisma.shiftKerja.create({data:{sekolahId:schoolA.id,nama:"QA Shift",jamMasuk:"00:00",jamKeluar:"23:59",toleransiTerlambatMenit:0}});
+  const kategori = await prisma.kategoriJabatan.create({data:{sekolahId:schoolA.id,nama:"Guru Mapel",kode:`QA-${suffix}`,status:"aktif"}});
+  await prisma.pengguna.update({where:{id:teacher.id},data:{jabatan:"Guru Mapel",golongan:"III/a",shiftKerja:"pagi",shiftKerjaId:shift.id,kategoriJabatanId:kategori.id}});
   const jalurA = await prisma.jalurPpdb.create({data:{sekolahId:schoolA.id,nama:"QA Reguler",kuota:100,status:"aktif"}});
   const jalurB = await prisma.jalurPpdb.create({data:{sekolahId:schoolB.id,nama:"QA Lain",kuota:100,status:"aktif"}});
   const registrationIds: string[] = [];
@@ -274,5 +281,197 @@ test("pendaftar and attendance HTTP API with PostgreSQL", { skip: !testDatabaseU
     assert.equal(checkout.status,200);
     assert.equal(checkout.body.data.id,result.body.data.id);
     assert.ok(checkout.body.data.waktuKeluar);
+  });
+
+  await t.test("leave list includes applicant identity, job and role without credentials", async () => {
+    for (const row of [teacher,student,other]) await prisma.permohonanIzin.create({data:{sekolahId:row.sekolahId,penggunaId:row.id,jenis:"izin",tanggalMulai:new Date("2026-10-29T00:00:00Z"),tanggalSelesai:new Date("2026-10-29T00:00:00Z"),alasan:"Keperluan pengujian QA"}});
+    const result = await json("/api/permohonan-izin");
+    assert.equal(result.status,200);
+    assert.equal(result.body.meta.total,2);
+    const izin = result.body.data.find((row:any)=>row.penggunaId===teacher.id);
+    assert.equal(izin.pengguna.namaLengkap,teacher.namaLengkap);
+    assert.equal(izin.pengguna.jabatan,"Guru Mapel");
+    assert.equal(izin.pengguna.peran.id,teacherRole.id);
+    assert.equal(izin.pengguna.peran.nama,"guru");
+    assert.equal(izin.pengguna.peran.namaTampilan,"guru");
+    assert.doesNotMatch(JSON.stringify(result.body),/kataSandi|pinHash|embeddingVector/);
+    assert.equal((await json("/api/permohonan-izin",null)).status,401);
+  });
+  await t.test("students only receive their own leave requests", async () => {
+    const result = await json("/api/permohonan-izin",studentToken);
+    assert.equal(result.status,200);
+    assert.equal(result.body.meta.total,1);
+    assert.equal(result.body.data[0].penggunaId,student.id);
+    assert.equal(result.body.data[0].pengguna.peran.nama,"siswa");
+  });
+  await t.test("user detail returns both shift representations and job category", async () => {
+    const result = await json(`/api/users/${teacher.id}`);
+    assert.equal(result.status,200);
+    assert.equal(result.body.data.shiftKerja,"pagi");
+    assert.equal(result.body.data.shiftKerjaId,shift.id);
+    assert.equal(result.body.data.shiftKerjaMaster.id,shift.id);
+    assert.equal(result.body.data.shiftKerjaMaster.jamMasuk,"00:00");
+    assert.equal(result.body.data.jabatan,"Guru Mapel");
+    assert.equal(result.body.data.golongan,"III/a");
+    assert.equal(result.body.data.kategoriJabatanId,kategori.id);
+    assert.equal(result.body.data.kategoriJabatan.nama,"Guru Mapel");
+    assert.doesNotMatch(JSON.stringify(result.body),/kataSandi|pinHash/);
+    assert.equal((await json(`/api/users/${other.id}`)).status,403);
+    assert.equal((await json(`/api/users/${teacher.id}`,studentToken)).status,403);
+  });
+  await t.test("unassigned users have explicit null shift/category fields", async () => {
+    const result = await json(`/api/users/${student.id}`);
+    assert.equal(result.status,200);
+    for (const key of ["shiftKerja","shiftKerjaId","shiftKerjaMaster","kategoriJabatanId","kategoriJabatan"]) {
+      assert.ok(Object.hasOwn(result.body.data,key));
+      assert.equal(result.body.data[key],null);
+    }
+  });
+
+  const publicSlugs: string[] = [];
+  const privateSlugs: string[] = [];
+  for (const [index,status] of ["dipublikasikan","publikasi","aktif","draft","nonaktif","arsip","dipublikasikan"].entries()) {
+    const slug=`qa-${suffix}-${index}`;
+    await prisma.halamanCms.create({data:{sekolahId:schoolA.id,judul:`QA page ${index}`,slug,konten:"Konten QA",status,...(index===6&&{dihapusPada:new Date()})}});
+    await prisma.artikelCms.create({data:{sekolahId:schoolA.id,judul:`QA article ${index}`,slug,konten:"Artikel QA",status,...(index===6&&{dihapusPada:new Date()})}});
+    (index<3?publicSlugs:privateSlugs).push(slug);
+  }
+  const foreignSlug=`qa-foreign-${suffix}`;
+  await prisma.halamanCms.create({data:{sekolahId:schoolB.id,judul:"QA foreign",slug:foreignSlug,status:"dipublikasikan"}});
+  const publicBase=`/api/publik/${schoolA.subdomain}`;
+  await t.test("public page list and profile use the same three published statuses", async () => {
+    const list = await json(`${publicBase}/halaman`,null);
+    const profile = await json(`${publicBase}/profil`,null);
+    assert.equal(list.status,200);
+    assert.equal(profile.status,200);
+    assert.deepEqual(list.body.data.map((row:any)=>row.slug).sort(),[...publicSlugs].sort());
+    assert.deepEqual(profile.body.data.daftarCms.map((row:any)=>row.slug).sort(),[...publicSlugs].sort());
+    assert.deepEqual(profile.body.data.halamanCms,profile.body.data.daftarCms);
+  });
+  await t.test("published page details support canonical and legacy statuses", async () => {
+    for (const slug of publicSlugs) {
+      const detail = await json(`${publicBase}/halaman/${slug}`,null);
+      assert.equal(detail.status,200);
+      assert.equal(detail.body.data.slug,slug);
+    }
+  });
+  await t.test("draft, inactive, archived, deleted and foreign pages are not public", async () => {
+    for (const slug of [...privateSlugs,foreignSlug]) assert.equal((await json(`${publicBase}/halaman/${slug}`,null)).status,404);
+  });
+  await t.test("public articles share the same published-status policy", async () => {
+    const result=await json(`${publicBase}/artikel`,null);
+    assert.equal(result.status,200);
+    assert.deepEqual(result.body.data.map((row:any)=>row.slug).sort(),[...publicSlugs].sort());
+  });
+  await t.test("public endpoints reject inactive and deleted schools", async () => {
+    try {
+      for (const data of [{status:"nonaktif"},{status:"aktif",dihapusPada:new Date()}]) {
+        await prisma.sekolah.update({where:{id:schoolA.id},data});
+        for (const endpoint of ["profil","tema","halaman",`halaman/${publicSlugs[0]}`,"artikel","konfigurasi"]) assert.equal((await json(`${publicBase}/${endpoint}`,null)).status,404);
+      }
+    } finally {
+      await prisma.sekolah.update({where:{id:schoolA.id},data:{status:"aktif",dihapusPada:null}});
+    }
+  });
+  await t.test("CMS create/update normalizes published aliases and keeps drafts private", async () => {
+    for (const endpoint of ["halaman","artikel"]) {
+      for (const status of ["dipublikasikan","publikasi","aktif"]) {
+        const result=await json(`/api/cms/${endpoint}`,adminToken,"POST",{judul:`QA ${endpoint} ${status} ${suffix}`,status});
+        assert.equal(result.status,201);
+        assert.equal(result.body.data.status,"dipublikasikan");
+        if (endpoint==="halaman") {
+          const updated=await json(`/api/cms/halaman/${result.body.data.id}`,adminToken,"PUT",{judul:`QA draft ${status} ${suffix}`,status:"draft"});
+          assert.equal(updated.status,200);
+          assert.equal((await json(`${publicBase}/halaman/${updated.body.data.slug}`,null)).status,404);
+        }
+      }
+    }
+    assert.equal((await json("/api/cms/halaman",adminToken,"POST",{judul:"QA invalid status",status:"unknown"})).status,400);
+  });
+
+  const foreignWave=await prisma.gelombangPpdb.create({data:{sekolahId:schoolB.id,jalurPpdbId:jalurB.id,nama:"Gelombang Sekolah B",tanggalMulai:new Date("2026-10-01T00:00:00Z"),tanggalSelesai:new Date("2026-11-01T00:00:00Z")}});
+  const wavePayload={nama:"Gelombang QA 1",jalurPpdbId:jalurA.id,tanggalMulai:"2026-10-01",tanggalSelesai:"2026-11-01",kuota:0,status:"aktif"};
+  let waveId="";
+  await t.test("gelombang GET route returns a scoped JSON list instead of Cannot GET", async () => {
+    const result=await json("/api/gelombang-ppdb");
+    assert.equal(result.status,200);
+    assert.equal(result.body.success,true);
+    assert.deepEqual(result.body.data,[]);
+  });
+  await t.test("gelombang create/detail preserves calendar dates, zero quota and audit identity", async () => {
+    const result=await json("/api/gelombang-ppdb",adminToken,"POST",wavePayload);
+    assert.equal(result.status,201);
+    waveId=result.body.data.id;
+    assert.equal(result.body.data.sekolahId,schoolA.id);
+    assert.equal(result.body.data.dibuatOleh,admin.id);
+    assert.equal(result.body.data.kuota,0);
+    assert.equal(result.body.data.tanggalMulai,"2026-10-01T00:00:00.000Z");
+    assert.equal(result.body.data.tanggalSelesai,"2026-11-01T00:00:00.000Z");
+    const detail=await json(`/api/gelombang-ppdb/${waveId}`);
+    assert.equal(detail.status,200);
+    assert.deepEqual(detail.body.data.jalurPpdb,{id:jalurA.id,nama:jalurA.nama});
+  });
+  await t.test("gelombang supports search, status and jalur filters", async () => {
+    const result=await json(`/api/gelombang-ppdb?search=qa%201&status=aktif&jalurPpdbId=${jalurA.id}`);
+    assert.equal(result.status,200);
+    assert.deepEqual(result.body.data.map((row:any)=>row.id),[waveId]);
+    assert.equal((await json("/api/gelombang-ppdb?status=nonaktif")).body.data.length,0);
+  });
+  await t.test("gelombang update clears optional relations/quota and persists nonaktif", async () => {
+    const result=await json(`/api/gelombang-ppdb/${waveId}`,adminToken,"PUT",{...wavePayload,nama:"Gelombang QA 2",jalurPpdbId:null,kuota:null,status:"nonaktif"});
+    assert.equal(result.status,200);
+    assert.equal(result.body.data.jalurPpdb,null);
+    assert.equal(result.body.data.kuota,null);
+    assert.equal(result.body.data.status,"nonaktif");
+    assert.equal(result.body.data.diperbaruiOleh,admin.id);
+    const saved=await prisma.gelombangPpdb.findUnique({where:{id:waveId}});
+    assert.equal(saved.nama,"Gelombang QA 2");
+  });
+  await t.test("gelombang validates dates, ranges, quotas, IDs and unexpected fields", async () => {
+    for (const body of [
+      {...wavePayload,tanggalMulai:"2026-02-30"},
+      {...wavePayload,tanggalSelesai:"2026-09-30"},
+      {...wavePayload,kuota:-1},{...wavePayload,kuota:0.5},
+      {...wavePayload,status:"unknown"},{...wavePayload,sekolahId:schoolB.id},
+    ]) assert.equal((await json("/api/gelombang-ppdb",adminToken,"POST",body)).status,400);
+    assert.equal((await json("/api/gelombang-ppdb/not-a-uuid")).status,400);
+    assert.equal((await json(`/api/gelombang-ppdb/${waveId}`,adminToken,"PUT",{...wavePayload,tanggalSelesai:"bad-date"})).status,400);
+  });
+  await t.test("gelombang cannot reference foreign or deleted jalur", async () => {
+    assert.equal((await json("/api/gelombang-ppdb",adminToken,"POST",{...wavePayload,jalurPpdbId:jalurB.id})).status,404);
+    assert.equal((await json(`/api/gelombang-ppdb/${waveId}`,adminToken,"PUT",{...wavePayload,jalurPpdbId:jalurB.id})).status,404);
+    try {
+      await prisma.jalurPpdb.update({where:{id:jalurA.id},data:{dihapusPada:new Date()}});
+      assert.equal((await json("/api/gelombang-ppdb",adminToken,"POST",wavePayload)).status,404);
+    } finally {await prisma.jalurPpdb.update({where:{id:jalurA.id},data:{dihapusPada:null}});}
+  });
+  await t.test("gelombang authorization and tenant boundaries protect all CRUD methods", async () => {
+    assert.equal((await json("/api/gelombang-ppdb",null)).status,401);
+    assert.equal((await json("/api/gelombang-ppdb",studentToken)).status,403);
+    assert.equal((await json("/api/gelombang-ppdb",studentToken,"POST",wavePayload)).status,403);
+    assert.equal((await json(`/api/gelombang-ppdb/${waveId}`,studentToken,"PUT",wavePayload)).status,403);
+    assert.equal((await json(`/api/gelombang-ppdb/${waveId}`,studentToken,"DELETE")).status,403);
+    assert.equal((await json(`/api/gelombang-ppdb?sekolahId=${schoolB.id}`)).status,403);
+    assert.equal((await json(`/api/gelombang-ppdb/${foreignWave.id}`)).status,404);
+    assert.equal((await json(`/api/gelombang-ppdb/${foreignWave.id}`,adminToken,"PUT",wavePayload)).status,404);
+    assert.equal((await json(`/api/gelombang-ppdb/${foreignWave.id}`,adminToken,"DELETE")).status,404);
+  });
+  await t.test("gelombang can apply to all school jalur with an optional unlimited quota", async () => {
+    const result=await json("/api/gelombang-ppdb",adminToken,"POST",{nama:"Gelombang Umum",tanggalMulai:"2026-10-29",tanggalSelesai:"2026-10-29"});
+    assert.equal(result.status,201);
+    assert.equal(result.body.data.status,"aktif");
+    assert.equal(result.body.data.jalurPpdbId,null);
+    assert.equal(result.body.data.kuota,null);
+  });
+  await t.test("gelombang deletion is soft and hides the record on subsequent reads", async () => {
+    assert.equal((await json(`/api/gelombang-ppdb/${waveId}`,adminToken,"DELETE")).status,200);
+    assert.equal((await json(`/api/gelombang-ppdb/${waveId}`)).status,404);
+    assert.equal((await json(`/api/gelombang-ppdb/${waveId}`,adminToken,"DELETE")).status,404);
+    assert.ok((await json("/api/gelombang-ppdb")).body.data.every((row:any)=>row.id!==waveId));
+    const deleted=await prisma.gelombangPpdb.findUnique({where:{id:waveId}});
+    assert.ok(deleted.dihapusPada);
+    assert.equal(deleted.dihapusOleh,admin.id);
+    assert.equal(deleted.status,"nonaktif");
+    assert.equal((await prisma.gelombangPpdb.findUnique({where:{id:foreignWave.id}})).dihapusPada,null);
   });
 });

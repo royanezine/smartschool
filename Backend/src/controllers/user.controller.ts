@@ -926,7 +926,6 @@ export const getUserById = async (req: AuthRequest, res: Response) => {
   try {
     const id = req.params.id as string;
     const sekolahId = req.user?.sekolahId;
-    const roleId = req.user?.roleId;
 
     const user = await prisma.pengguna.findUnique({
       where: { id },
@@ -943,7 +942,11 @@ export const getUserById = async (req: AuthRequest, res: Response) => {
         nik: true,
         jabatan: true,
         golongan: true,
+        kategoriJabatanId: true,
+        kategoriJabatan: true,
         shiftKerja: true,
+        shiftKerjaId: true,
+        shiftKerjaMaster: true,
         jenisKelamin: true,
         tempatLahir: true,
         tanggalLahir: true,

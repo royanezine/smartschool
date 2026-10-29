@@ -3,6 +3,11 @@ import { prisma } from "../config/db";
 import { AppError } from "../utils/appError";
 import { successResponse } from "../utils/responseFormatter";
 import { bangunTema } from "../utils/temaDefault";
+import { CMS_PUBLIC_STATUSES } from "../utils/cmsPublication";
+
+const publicSchoolWhere = (subdomain: string) => ({
+  subdomain, status: "aktif", dihapusPada: null,
+});
 
 export const getPublicProfil = async (
   req: Request,
@@ -12,8 +17,8 @@ export const getPublicProfil = async (
   try {
     const subdomain = req.params.subdomain as string;
 
-    const sekolah = await prisma.sekolah.findUnique({
-      where: { subdomain },
+    const sekolah = await prisma.sekolah.findFirst({
+      where: publicSchoolWhere(subdomain),
       select: {
         id: true,
         nama: true,
@@ -30,7 +35,7 @@ export const getPublicProfil = async (
         status: true,
         halamanCms: {
           where: {
-            status: "aktif",
+            status: { in: [...CMS_PUBLIC_STATUSES] },
             dihapusPada: null,
           },
           select: {
@@ -65,8 +70,8 @@ export const getPublicTema = async (
   try {
     const subdomain = req.params.subdomain as string;
 
-    const sekolah = await prisma.sekolah.findUnique({
-      where: { subdomain },
+    const sekolah = await prisma.sekolah.findFirst({
+      where: publicSchoolWhere(subdomain),
       select: { id: true },
     });
 
@@ -114,8 +119,8 @@ export const getPublicArtikel = async (
   try {
     const subdomain = req.params.subdomain as string;
 
-    const sekolah = await prisma.sekolah.findUnique({
-      where: { subdomain },
+    const sekolah = await prisma.sekolah.findFirst({
+      where: publicSchoolWhere(subdomain),
     });
     if (!sekolah) throw new AppError("Sekolah tidak ditemukan", 404);
 
@@ -123,7 +128,7 @@ export const getPublicArtikel = async (
       where: {
         sekolahId: sekolah.id,
         dihapusPada: null,
-        status: { in: ["dipublikasikan", "aktif"] },
+        status: { in: [...CMS_PUBLIC_STATUSES] },
       },
       include: { kategoriArtikel: true },
       orderBy: { dibuatPada: "desc" },
@@ -149,8 +154,8 @@ export const getPublicHalamanBySlug = async (
     const subdomain = req.params.subdomain as string;
     const slug = req.params.slug as string;
 
-    const sekolah = await prisma.sekolah.findUnique({
-      where: { subdomain },
+    const sekolah = await prisma.sekolah.findFirst({
+      where: publicSchoolWhere(subdomain),
     });
     if (!sekolah) throw new AppError("Sekolah tidak ditemukan", 404);
 
@@ -159,6 +164,7 @@ export const getPublicHalamanBySlug = async (
         sekolahId: sekolah.id,
         slug,
         dihapusPada: null,
+        status: { in: [...CMS_PUBLIC_STATUSES] },
       },
     });
     if (!halaman) throw new AppError("Halaman tidak ditemukan", 404);
@@ -186,8 +192,8 @@ export const getHalamanPublikBySubdomain = async (
       throw new AppError("Subdomain wajib disertakan", 400);
     }
 
-    const sekolah = await prisma.sekolah.findUnique({
-      where: { subdomain },
+    const sekolah = await prisma.sekolah.findFirst({
+      where: publicSchoolWhere(subdomain),
       select: { id: true, status: true },
     });
 
@@ -202,7 +208,7 @@ export const getHalamanPublikBySubdomain = async (
       where: {
         sekolahId: sekolah.id,
         dihapusPada: null,
-        status: "publikasi",
+        status: { in: [...CMS_PUBLIC_STATUSES] },
       },
       select: {
         id: true,
@@ -235,8 +241,8 @@ export const getKonfigurasiPublikBySubdomain = async (
       throw new AppError("Subdomain wajib disertakan", 400);
     }
 
-    const sekolah = await prisma.sekolah.findUnique({
-      where: { subdomain },
+    const sekolah = await prisma.sekolah.findFirst({
+      where: publicSchoolWhere(subdomain),
       select: { id: true, status: true },
     });
 
