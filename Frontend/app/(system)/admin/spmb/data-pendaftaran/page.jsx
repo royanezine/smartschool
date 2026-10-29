@@ -425,7 +425,7 @@ export default function PendaftaranPage() {
       />
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <div className="shrink-0">
+        <div className="shrink-0 border-b theme-border">
           <Header
             toggleSidebar={() =>
               setCollapsed((v) => !v)
@@ -439,8 +439,8 @@ export default function PendaftaranPage() {
           />
         </div>
 
-        <main className="min-h-0 flex-1 overflow-hidden">
-          <div className="flex h-full min-h-0 flex-col p-4 sm:p-5 lg:p-6">
+        <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto">
+          <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
 
 
             <div className="mb-4 flex shrink-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -556,7 +556,7 @@ export default function PendaftaranPage() {
 
 
             <div
-              className={`theme-card ${themeNeutralBorder} flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border ${themeCardShadow}`}
+              className={`theme-card ${themeNeutralBorder} overflow-hidden rounded-xl border ${themeCardShadow}`}
             >
 
 
@@ -677,7 +677,7 @@ export default function PendaftaranPage() {
               </div>
 
 
-              <div className="min-h-0 flex-1 overflow-auto">
+              <div className="overflow-x-auto">
                 {loading ? (
                   <div className="flex min-h-[400px] items-center justify-center">
                     <div className="text-center">

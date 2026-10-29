@@ -10,9 +10,13 @@ export interface GelombangPpdb {
   tanggalMulai: string;
   tanggalSelesai: string;
   kuota?: number | null;
-  status?: string | null;
+  status: "aktif" | "nonaktif" | string;
+  dibuatOleh?: string | null;
+  diperbaruiOleh?: string | null;
+  dihapusOleh?: string | null;
   dibuatPada?: string;
   diperbaruiPada?: string;
+  dihapusPada?: string | null;
   jalurPpdb?: {
     id: string;
     nama: string;
@@ -25,7 +29,7 @@ export interface GelombangPpdbPayload {
   tanggalMulai: string;
   tanggalSelesai: string;
   kuota?: number | null;
-  status?: string;
+  status?: "aktif" | "nonaktif" | string;
 }
 
 export interface GelombangPpdbFilters {
@@ -46,21 +50,37 @@ export interface GelombangPpdbResponse {
   data: GelombangPpdb;
 }
 
+const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+
 function assertPayload(payload: GelombangPpdbPayload) {
-  if (!payload?.nama?.trim()) {
+  const nama = String(payload?.nama || "").trim();
+  if (!nama) {
     throw new Error("Nama gelombang wajib diisi.");
   }
+  if (nama.length < 2) {
+    throw new Error("Nama gelombang minimal 2 karakter.");
+  }
+  if (nama.length > 50) {
+    throw new Error("Nama gelombang maksimal 50 karakter.");
+  }
 
-  if (!payload.tanggalMulai || !payload.tanggalSelesai) {
+  const tanggalMulai = String(payload?.tanggalMulai || "").trim();
+  const tanggalSelesai = String(payload?.tanggalSelesai || "").trim();
+
+  if (!tanggalMulai || !tanggalSelesai) {
     throw new Error(
       "Tanggal mulai dan tanggal selesai wajib diisi."
     );
   }
 
-  if (
-    new Date(payload.tanggalSelesai).getTime() <
-    new Date(payload.tanggalMulai).getTime()
-  ) {
+  if (!DATE_REGEX.test(tanggalMulai)) {
+    throw new Error("Format tanggal mulai harus YYYY-MM-DD.");
+  }
+  if (!DATE_REGEX.test(tanggalSelesai)) {
+    throw new Error("Format tanggal selesai harus YYYY-MM-DD.");
+  }
+
+  if (tanggalSelesai < tanggalMulai) {
     throw new Error(
       "Tanggal selesai tidak boleh sebelum tanggal mulai."
     );
@@ -69,28 +89,38 @@ function assertPayload(payload: GelombangPpdbPayload) {
   if (
     payload.kuota !== undefined &&
     payload.kuota !== null &&
-    (!Number.isInteger(Number(payload.kuota)) ||
-      Number(payload.kuota) < 0)
+    String(payload.kuota).trim() !== ""
   ) {
-    throw new Error(
-      "Kuota harus berupa bilangan bulat minimal 0."
-    );
+    const kuotaNum = Number(payload.kuota);
+    if (!Number.isInteger(kuotaNum) || kuotaNum < 0) {
+      throw new Error(
+        "Kuota harus berupa bilangan bulat minimal 0."
+      );
+    }
+  }
+
+  if (
+    payload.status &&
+    payload.status !== "aktif" &&
+    payload.status !== "nonaktif"
+  ) {
+    throw new Error("Status harus 'aktif' atau 'nonaktif'.");
   }
 }
 
 function serialize(payload: GelombangPpdbPayload) {
   return {
-    nama: payload.nama.trim(),
-    jalurPpdbId: payload.jalurPpdbId || null,
-    tanggalMulai: payload.tanggalMulai,
-    tanggalSelesai: payload.tanggalSelesai,
+    nama: String(payload.nama || "").trim(),
+    jalurPpdbId: payload.jalurPpdbId ? String(payload.jalurPpdbId).trim() : null,
+    tanggalMulai: String(payload.tanggalMulai || "").trim(),
+    tanggalSelesai: String(payload.tanggalSelesai || "").trim(),
     kuota:
       payload.kuota === undefined ||
       payload.kuota === null ||
-      String(payload.kuota) === ""
+      String(payload.kuota).trim() === ""
         ? null
         : Number(payload.kuota),
-    status: payload.status || "aktif",
+    status: payload.status === "nonaktif" ? "nonaktif" : "aktif",
   };
 }
 
@@ -130,19 +160,14 @@ export function isGelombangEndpointMissing(
     return false;
   }
 
+  // If server responded with a string (HTML error page, e.g. "Cannot GET /api/gelombang-ppdb")
   if (typeof err.raw === "string") {
     return true;
   }
 
-  if (
-    err.raw &&
-    typeof err.raw === "object" &&
-    "errorCode" in err.raw
-  ) {
-    return false;
-  }
-
-  return true;
+  // If server responded with JSON, the route exists and handled the request
+  // (e.g. { success: false, message: "Gelombang PPDB tidak ditemukan" })
+  return false;
 }
 
 export async function getGelombangPpdbById(

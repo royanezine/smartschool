@@ -205,20 +205,22 @@ export default function KuotaSpmbPage() {
       />
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <Header
-          toggleSidebar={() =>
-            setCollapsed((value) => !value)
-          }
-          notifications={[]}
-          user={{
-            name: "Admin Sekolah",
-            email: "admin@smartschool.com",
-            avatar: "AD",
-          }}
-        />
+        <div className="shrink-0 border-b theme-border">
+          <Header
+            toggleSidebar={() =>
+              setCollapsed((value) => !value)
+            }
+            notifications={[]}
+            user={{
+              name: "Admin Sekolah",
+              email: "admin@smartschool.com",
+              avatar: "AD",
+            }}
+          />
+        </div>
 
-        <main className="min-h-0 flex-1 overflow-y-auto">
-          <div className="w-full p-4 sm:p-6 lg:p-8">
+        <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto">
+          <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
             <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h1 className="theme-text text-xl font-bold sm:text-2xl">

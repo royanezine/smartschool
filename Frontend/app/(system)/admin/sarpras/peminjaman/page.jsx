@@ -314,20 +314,22 @@ export default function AdminSarprasPeminjamanPage() {
         }
       />
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        <Header
-          toggleSidebar={() =>
-            setSidebarOpen((v) => !v)
-          }
-          user={{
-            name: "Admin Sekolah",
-            email: "admin@smartschool.com",
-            avatar: "AS",
-          }}
-        />
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        <div className="shrink-0 border-b theme-border">
+          <Header
+            toggleSidebar={() =>
+              setSidebarOpen((v) => !v)
+            }
+            user={{
+              name: "Admin Sekolah",
+              email: "admin@smartschool.com",
+              avatar: "AS",
+            }}
+          />
+        </div>
 
-        <main className="theme-page flex-1 overflow-y-auto">
-          <div className="mx-auto w-full max-w-[1600px] space-y-6 p-4 sm:p-6 lg:p-8">
+        <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto">
+          <div className="w-full space-y-6 px-4 py-6 sm:px-6 lg:px-8">
 
 
             <section className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">

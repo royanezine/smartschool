@@ -197,18 +197,20 @@ export default function LaporanKeuanganPage() {
       />
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <Header
-          toggleSidebar={toggleSidebar}
-          notifications={[]}
-          user={{
-            name: "Admin Sekolah",
-            email: "admin@smartschool.com",
-            avatar: "AD",
-          }}
-        />
+        <div className="shrink-0 border-b theme-border">
+          <Header
+            toggleSidebar={toggleSidebar}
+            notifications={[]}
+            user={{
+              name: "Admin Sekolah",
+              email: "admin@smartschool.com",
+              avatar: "AD",
+            }}
+          />
+        </div>
 
-        <main className="theme-page min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
-          <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8 xl:px-10">
+        <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
+          <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
             <section
               className="
                 theme-card
@@ -460,7 +462,7 @@ export default function LaporanKeuanganPage() {
               "
             >
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+                <table className="w-full min-w-[760px] text-sm">
                   <thead>
                     <tr className="bg-[color-mix(in_srgb,var(--color-primary)_4%,var(--color-card))]">
                       <TableHead>Tanggal</TableHead>

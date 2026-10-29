@@ -186,7 +186,7 @@ export default function SiswaRaportPage() {
   return (
     <div className="theme-page min-h-full w-full">
       <main className="theme-page min-h-full w-full overflow-x-hidden">
-        <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:px-8 xl:px-10">
+        <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
           <div className="theme-card theme-border mb-6 overflow-hidden rounded-2xl border p-6 shadow-[0_10px_30px_color-mix(in_srgb,var(--color-text)_8%,transparent)] sm:p-8">
             <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex min-w-0 items-center gap-4">

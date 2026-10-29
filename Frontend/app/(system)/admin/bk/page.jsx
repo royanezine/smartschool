@@ -154,7 +154,7 @@ function SectionCard({
   onAction,
 }) {
   return (
-    <div className="theme-card theme-border flex min-h-0 flex-col rounded-xl border shadow-sm">
+    <div className="theme-card theme-border overflow-hidden rounded-xl border shadow-sm">
       <div className="theme-border-soft flex shrink-0 items-center justify-between border-b px-4 py-3">
         <div className="flex min-w-0 items-center gap-2.5">
           <div className="theme-info flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
@@ -182,7 +182,7 @@ function SectionCard({
         )}
       </div>
 
-      <div className="min-h-0 flex-1 overflow-auto">
+      <div className="overflow-x-auto">
         {children}
       </div>
     </div>
@@ -423,7 +423,7 @@ export default function BKPage() {
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
 
-        <div className="sticky top-0 z-40 shrink-0">
+        <div className="shrink-0 border-b theme-border">
           <Header
             toggleSidebar={toggleSidebar}
             notifications={[]}
@@ -436,8 +436,8 @@ export default function BKPage() {
         </div>
 
 
-        <main className="theme-page min-h-0 flex-1 overflow-hidden">
-          <div className="flex h-full min-h-0 flex-col px-4 py-4 sm:px-5 lg:px-6">
+        <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto">
+          <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
 
             <div className="mb-4 shrink-0">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -588,9 +588,9 @@ export default function BKPage() {
             </div>
 
 
-            <div className="min-h-0 flex-1">
+            <div className="w-full">
               {activeTab === "konseling" && (
-                <div className="theme-card theme-border flex h-full min-h-0 flex-col rounded-xl border shadow-sm">
+                <div className="theme-card theme-border overflow-hidden rounded-xl border shadow-sm">
 
                   <div className="theme-border-soft shrink-0 border-b p-3 sm:p-4">
                     <div className="flex flex-col gap-3 xl:flex-row xl:items-center">
@@ -684,7 +684,7 @@ export default function BKPage() {
                   </div>
 
 
-                  <div className="min-h-0 flex-1 overflow-auto">
+                  <div className="overflow-x-auto">
                     <table className="w-full min-w-[950px] border-collapse">
                       <thead className="theme-table-header sticky top-0 z-10">
                         <tr className="theme-border border-b">
@@ -1430,7 +1430,7 @@ export default function BKPage() {
               </button>
             </div>
 
-            <div className="p-5">
+            <div className="max-h-[75vh] overflow-y-auto p-5">
               <div className="theme-danger theme-border flex items-center gap-3 rounded-xl border p-4">
                 <div className="theme-card flex h-11 w-11 items-center justify-center rounded-xl text-xs font-bold">
                   {selectedPelanggaran.avatar}
@@ -1518,7 +1518,7 @@ export default function BKPage() {
               </button>
             </div>
 
-            <div className="p-5">
+            <div className="max-h-[75vh] overflow-y-auto p-5">
               <div className="theme-success theme-border flex items-center gap-3 rounded-xl border p-4">
                 <div className="theme-card flex h-11 w-11 items-center justify-center rounded-xl text-xs font-bold">
                   {selectedPrestasi.avatar}

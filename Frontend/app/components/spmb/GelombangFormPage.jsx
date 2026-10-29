@@ -6,6 +6,7 @@ import {
   useState,
 } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
@@ -14,6 +15,7 @@ import {
   ArrowLeft,
   CalendarDays,
   Loader2,
+  Route,
   Save,
 } from "lucide-react";
 
@@ -44,6 +46,10 @@ const themeFocus =
 function toDateInput(value) {
   if (!value) {
     return "";
+  }
+
+  if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}/.test(value)) {
+    return value.slice(0, 10);
   }
 
   const date = new Date(value);
@@ -78,7 +84,7 @@ export default function GelombangFormPage({
   const [collapsed, setCollapsed] = useState(false);
   const [form, setForm] = useState(FORM_KOSONG);
   const [jalurList, setJalurList] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(modeEdit);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [endpointUnavailable, setEndpointUnavailable] =
@@ -99,26 +105,18 @@ export default function GelombangFormPage({
   }, []);
 
   const loadDetail = useCallback(async () => {
+    if (!modeEdit) {
+      setForm(FORM_KOSONG);
+      setDetailLoaded(true);
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
       setError("");
       setEndpointUnavailable(false);
       setDetailLoaded(false);
-
-      if (!modeEdit) {
-        const cekEndpoint = await getGelombangPpdb();
-
-        if (!cekEndpoint?.success) {
-          throw new Error(
-            cekEndpoint?.message ||
-              "Endpoint gelombang PPDB tidak merespons dengan benar."
-          );
-        }
-
-        setForm(FORM_KOSONG);
-        setDetailLoaded(true);
-        return;
-      }
 
       const response =
         await getGelombangPpdbById(gelombangId);
@@ -250,253 +248,220 @@ export default function GelombangFormPage({
         role="admin"
       />
 
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <Header
-          toggleSidebar={() =>
-            setCollapsed((value) => !value)
-          }
-          notifications={[]}
-          user={{
-            name: "Admin Sekolah",
-            email: "admin@smartschool.com",
-            avatar: "AD",
-          }}
-        />
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+        <div className="shrink-0 border-b theme-border">
+          <Header
+            toggleSidebar={() =>
+              setCollapsed((value) => !value)
+            }
+            notifications={[]}
+            user={{
+              name: "Admin Sekolah",
+              email: "admin@smartschool.com",
+              avatar: "AD",
+            }}
+          />
+        </div>
 
-        <main className="min-h-0 flex-1 overflow-y-auto">
-          <div className="mx-auto w-full max-w-2xl p-4 sm:p-6 lg:p-8">
-            <button
-              type="button"
-              onClick={() =>
-                router.push("/admin/spmb/gelombang")
-              }
-              className="mb-4 inline-flex items-center gap-2 text-xs font-semibold theme-text-secondary transition hover:text-[var(--color-primary)]"
-            >
-              <ArrowLeft size={15} />
-              Kembali ke Gelombang
-            </button>
+        <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto">
+          <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
+            <div className="mx-auto w-full max-w-4xl">
+              <div className="mb-6 flex flex-col gap-4">
+                <Link
+                  href="/admin/spmb/gelombang"
+                  className="theme-text-muted inline-flex w-fit items-center gap-2 text-sm font-medium transition hover:opacity-70"
+                >
+                  <ArrowLeft size={16} />
+                  Kembali ke Daftar Gelombang
+                </Link>
 
-            <div className="mb-6 flex items-start gap-3">
-              <div
-                className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${themePrimarySoft} ${themePrimaryText}`}
-              >
-                <CalendarDays size={21} />
-              </div>
-
-              <div>
-                <h1 className="theme-text text-xl font-bold sm:text-2xl">
-                  {modeEdit
-                    ? "Edit Gelombang"
-                    : "Tambah Gelombang"}
-                </h1>
-
-                <p className="theme-text-secondary mt-1 text-sm leading-6">
-                  Kelola nama, tanggal periode, dan kuota gelombang pendaftaran PPDB.
-                </p>
-              </div>
-            </div>
-
-            {error && (
-              <div className="mb-4 flex items-start gap-3 rounded-xl border border-[color-mix(in_srgb,var(--color-danger)_24%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_9%,transparent)] px-4 py-3">
-                <AlertCircle
-                  size={18}
-                  className="mt-0.5 shrink-0 theme-danger"
-                />
-
-                <p className="text-xs theme-danger">
-                  {error}
-                </p>
-              </div>
-            )}
-
-            <form
-              onSubmit={simpan}
-              className={`theme-card ${themeNeutralBorder} overflow-hidden rounded-2xl border ${themeCardShadow}`}
-            >
-              {loading ? (
-                <div className="flex min-h-[320px] items-center justify-center">
-                  <div className="text-center">
-                    <Loader2
-                      size={26}
-                      className={`${themePrimaryText} mx-auto animate-spin`}
-                    />
-
-                    <p className="theme-text-muted mt-3 text-xs font-medium">
-                      Memuat gelombang...
-                    </p>
-                  </div>
+                <div>
+                  <h1 className="theme-text text-2xl font-bold">
+                    {modeEdit ? "Edit Gelombang" : "Tambah Gelombang"}
+                  </h1>
+                  <p className="theme-text-muted mt-1 text-sm">
+                    {modeEdit
+                      ? "Perbarui periode pendaftaran, kuota, atau status gelombang PPDB."
+                      : "Buat gelombang baru untuk mengatur jadwal dan kuota pendaftaran."}
+                  </p>
                 </div>
-              ) : (
-                <div className="space-y-4 p-5 sm:p-6">
-                  <label className="block">
-                    <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wide theme-text-muted">
-                      Nama Gelombang
-                    </span>
+              </div>
 
-                    <input
-                      value={form.nama}
-                      onChange={(event) =>
-                        ubah("nama", event.target.value)
-                      }
-                      required
-                      maxLength={100}
-                      placeholder="Contoh: Gelombang 1"
-                      className={`theme-input theme-text theme-neutral-border h-10 w-full rounded-lg border ${themeNeutralSurface} px-3 text-xs outline-none transition ${themeFocus}`}
-                    />
-                  </label>
-
-                  <label className="block">
-                    <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wide theme-text-muted">
-                      Jalur (opsional)
-                    </span>
-
-                    <select
-                      value={form.jalurPpdbId}
-                      onChange={(event) =>
-                        ubah(
-                          "jalurPpdbId",
-                          event.target.value
-                        )
-                      }
-                      className={`theme-input theme-text theme-neutral-border h-10 w-full rounded-lg border ${themeNeutralSurface} px-3 text-xs outline-none transition ${themeFocus}`}
-                    >
-                      <option value="">
-                        Semua jalur sekolah
-                      </option>
-
-                      {jalurList.map((jalur) => (
-                        <option
-                          key={jalur.id}
-                          value={jalur.id}
-                        >
-                          {jalur.nama}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <label className="block">
-                      <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wide theme-text-muted">
-                        Tanggal Mulai
-                      </span>
-
-                      <input
-                        type="date"
-                        value={form.tanggalMulai}
-                        onChange={(event) =>
-                          ubah(
-                            "tanggalMulai",
-                            event.target.value
-                          )
-                        }
-                        required
-                        className={`theme-input theme-text theme-neutral-border h-10 w-full rounded-lg border ${themeNeutralSurface} px-3 text-xs outline-none transition ${themeFocus}`}
-                      />
-                    </label>
-
-                    <label className="block">
-                      <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wide theme-text-muted">
-                        Tanggal Selesai
-                      </span>
-
-                      <input
-                        type="date"
-                        value={form.tanggalSelesai}
-                        onChange={(event) =>
-                          ubah(
-                            "tanggalSelesai",
-                            event.target.value
-                          )
-                        }
-                        required
-                        className={`theme-input theme-text theme-neutral-border h-10 w-full rounded-lg border ${themeNeutralSurface} px-3 text-xs outline-none transition ${themeFocus}`}
-                      />
-                    </label>
-                  </div>
-
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <label className="block">
-                      <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wide theme-text-muted">
-                        Kuota (opsional)
-                      </span>
-
-                      <input
-                        type="number"
-                        min="0"
-                        step="1"
-                        value={form.kuota}
-                        onChange={(event) =>
-                          ubah(
-                            "kuota",
-                            event.target.value
-                          )
-                        }
-                        placeholder="Kosongkan bila tidak dibatasi"
-                        className={`theme-input theme-text theme-neutral-border h-10 w-full rounded-lg border ${themeNeutralSurface} px-3 text-xs outline-none transition ${themeFocus}`}
-                      />
-                    </label>
-
-                    <label className="block">
-                      <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wide theme-text-muted">
-                        Status
-                      </span>
-
-                      <select
-                        value={form.status}
-                        onChange={(event) =>
-                          ubah(
-                            "status",
-                            event.target.value
-                          )
-                        }
-                        className={`theme-input theme-text theme-neutral-border h-10 w-full rounded-lg border ${themeNeutralSurface} px-3 text-xs outline-none transition ${themeFocus}`}
-                      >
-                        <option value="aktif">
-                          Aktif
-                        </option>
-                        <option value="nonaktif">
-                          Nonaktif
-                        </option>
-                      </select>
-                    </label>
-                  </div>
-
-                  <div className="flex justify-end gap-2 pt-2">
-                    <button
-                      type="button"
-                      onClick={() =>
-                        router.push(
-                          "/admin/spmb/gelombang"
-                        )
-                      }
-                      className={`theme-neutral-border theme-text-secondary inline-flex items-center justify-center gap-2 rounded-lg border px-4 py-2.5 text-xs font-semibold transition hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]`}
-                    >
-                      Batal
-                    </button>
-
-                    <button
-                      type="submit"
-                      disabled={saving || !detailLoaded}
-                      className={`${themePrimaryGradient} inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-xs font-semibold text-[var(--color-card)] transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50`}
-                    >
-                      {saving ? (
-                        <Loader2
-                          size={15}
-                          className="animate-spin"
-                        />
-                      ) : (
-                        <Save size={15} />
-                      )}
-
-                      {saving
-                        ? "Menyimpan..."
-                        : "Simpan Gelombang"}
-                    </button>
-                  </div>
+              {error && (
+                <div className="theme-danger mb-6 flex items-start gap-3 rounded-xl border p-4">
+                  <AlertCircle size={18} className="mt-0.5 shrink-0" />
+                  <p className="text-sm">{error}</p>
                 </div>
               )}
-            </form>
+
+              <form
+                onSubmit={simpan}
+                className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm"
+              >
+                {loading ? (
+                  <div className="flex min-h-[320px] items-center justify-center p-8">
+                    <div className="text-center">
+                      <Loader2
+                        size={28}
+                        className="mx-auto animate-spin text-[var(--color-primary)]"
+                      />
+                      <p className="theme-text-muted mt-3 text-sm font-medium">
+                        Memuat data gelombang...
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="grid grid-cols-1 gap-6 p-6 sm:p-8 md:grid-cols-2">
+                      <div className="md:col-span-2">
+                        <label className="theme-text-secondary mb-2 block text-sm font-semibold">
+                          Nama Gelombang{" "}
+                          <span className="text-[var(--color-danger)]">*</span>
+                        </label>
+                        <div className="relative">
+                          <CalendarDays
+                            size={18}
+                            className="theme-text-muted absolute left-3 top-1/2 -translate-y-1/2"
+                          />
+                          <input
+                            type="text"
+                            value={form.nama}
+                            onChange={(event) =>
+                              ubah("nama", event.target.value)
+                            }
+                            required
+                            maxLength={50}
+                            placeholder="Contoh: Gelombang 1 - Reguler"
+                            className="theme-input h-11 w-full rounded-xl border pl-10 pr-4 text-sm outline-none transition focus:border-[var(--color-primary)]"
+                            autoFocus={!modeEdit}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="md:col-span-2">
+                        <label className="theme-text-secondary mb-2 block text-sm font-semibold">
+                          Jalur SPMB (opsional)
+                        </label>
+                        <div className="relative">
+                          <Route
+                            size={18}
+                            className="theme-text-muted absolute left-3 top-1/2 -translate-y-1/2"
+                          />
+                          <select
+                            value={form.jalurPpdbId}
+                            onChange={(event) =>
+                              ubah("jalurPpdbId", event.target.value)
+                            }
+                            className="theme-input h-11 w-full rounded-xl border pl-10 pr-4 text-sm outline-none transition focus:border-[var(--color-primary)]"
+                          >
+                            <option value="">
+                              Semua jalur pendaftaran
+                            </option>
+                            {jalurList.map((jalur) => (
+                              <option key={jalur.id} value={jalur.id}>
+                                {jalur.nama}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="theme-text-secondary mb-2 block text-sm font-semibold">
+                          Tanggal Mulai{" "}
+                          <span className="text-[var(--color-danger)]">*</span>
+                        </label>
+                        <input
+                          type="date"
+                          value={form.tanggalMulai}
+                          onChange={(event) =>
+                            ubah("tanggalMulai", event.target.value)
+                          }
+                          required
+                          className="theme-input h-11 w-full rounded-xl border px-4 text-sm outline-none transition focus:border-[var(--color-primary)]"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="theme-text-secondary mb-2 block text-sm font-semibold">
+                          Tanggal Selesai{" "}
+                          <span className="text-[var(--color-danger)]">*</span>
+                        </label>
+                        <input
+                          type="date"
+                          value={form.tanggalSelesai}
+                          onChange={(event) =>
+                            ubah("tanggalSelesai", event.target.value)
+                          }
+                          required
+                          className="theme-input h-11 w-full rounded-xl border px-4 text-sm outline-none transition focus:border-[var(--color-primary)]"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="theme-text-secondary mb-2 block text-sm font-semibold">
+                          Kuota Pendaftar (opsional)
+                        </label>
+                        <input
+                          type="number"
+                          min="0"
+                          step="1"
+                          value={form.kuota}
+                          onChange={(event) =>
+                            ubah("kuota", event.target.value)
+                          }
+                          placeholder="Kosongkan jika tidak dibatasi"
+                          className="theme-input h-11 w-full rounded-xl border px-4 text-sm outline-none transition focus:border-[var(--color-primary)]"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="theme-text-secondary mb-2 block text-sm font-semibold">
+                          Status Gelombang
+                        </label>
+                        <select
+                          value={form.status}
+                          onChange={(event) =>
+                            ubah("status", event.target.value)
+                          }
+                          className="theme-input h-11 w-full rounded-xl border px-4 text-sm outline-none transition focus:border-[var(--color-primary)]"
+                        >
+                          <option value="aktif">Aktif</option>
+                          <option value="nonaktif">Nonaktif</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="theme-card-soft theme-border-soft flex flex-col-reverse gap-3 border-t p-4 sm:flex-row sm:justify-end sm:px-8 sm:py-5">
+                      <Link
+                        href="/admin/spmb/gelombang"
+                        className="theme-card theme-border theme-text-secondary inline-flex h-11 items-center justify-center rounded-xl border px-5 text-sm font-semibold transition hover:opacity-80"
+                      >
+                        Batal
+                      </Link>
+
+                      <button
+                        type="submit"
+                        disabled={saving || !detailLoaded}
+                        className="theme-primary inline-flex h-11 items-center justify-center gap-2 rounded-xl px-6 text-sm font-semibold shadow-sm transition disabled:opacity-60"
+                      >
+                        {saving ? (
+                          <>
+                            <Loader2 size={17} className="animate-spin" />
+                            <span>Menyimpan...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Save size={17} />
+                            <span>Simpan Gelombang</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </>
+                )}
+              </form>
+            </div>
           </div>
         </main>
       </div>

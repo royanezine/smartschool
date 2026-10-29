@@ -835,26 +835,28 @@ export default function SarprasLantaiPage() {
       />
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <Header
-          toggleSidebar={() =>
-            setIsCollapsed(!isCollapsed)
-          }
-          notifications={[]}
-          user={{
-            name: "Admin Sekolah",
-            email: "admin@smartschool.com",
-            avatar: "AD",
-          }}
-        />
+        <div className="shrink-0 border-b theme-border">
+          <Header
+            toggleSidebar={() =>
+              setIsCollapsed(!isCollapsed)
+            }
+            notifications={[]}
+            user={{
+              name: "Admin Sekolah",
+              email: "admin@smartschool.com",
+              avatar: "AD",
+            }}
+          />
+        </div>
 
         <Toast
           toast={toast}
           onClose={() => setToast(null)}
         />
 
-        <main className="theme-page min-h-0 flex-1 overflow-y-auto">
-          <div className="w-full p-3 sm:p-5 lg:p-7">
-            <div className="mx-auto w-full max-w-[1600px] space-y-5">
+        <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto">
+          <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
+            <div className="w-full space-y-5">
 
 
               <section

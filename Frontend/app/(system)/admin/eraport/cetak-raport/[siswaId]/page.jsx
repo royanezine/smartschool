@@ -1227,8 +1227,8 @@ export default function DetailRaportPage() {
                     </h2>
                   </div>
 
-                  <div className="print-table theme-card overflow-hidden rounded-lg border">
-                    <table className="w-full text-left">
+                  <div className="print-table theme-card overflow-x-auto rounded-lg border">
+                    <table className="w-full min-w-[540px] text-left">
                       <thead className="theme-table-header">
                         <tr>
                           <th className="theme-border w-14 border-b px-4 py-3 text-center text-xs font-bold uppercase tracking-wide">
@@ -1350,7 +1350,7 @@ export default function DetailRaportPage() {
                     </h2>
                   </div>
 
-                  <div className="theme-card overflow-hidden rounded-lg border">
+                  <div className="theme-card overflow-x-auto rounded-lg border">
                     {loadingNilaiUjian ? (
                       <div className="theme-text-muted flex items-center justify-center gap-2 px-4 py-8 text-sm">
                         <Loader2
@@ -1361,7 +1361,7 @@ export default function DetailRaportPage() {
                         Mengambil nilai ujian...
                       </div>
                     ) : nilaiUjianSiswa.length > 0 ? (
-                      <table className="w-full text-left">
+                      <table className="w-full min-w-[540px] text-left">
                         <thead className="theme-table-header">
                           <tr>
                             <th className="theme-border w-14 border-b px-4 py-3 text-center text-xs font-bold uppercase tracking-wide">

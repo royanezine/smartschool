@@ -275,11 +275,11 @@ const handlePengembalian = async () => {
       <Sidebar />
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <div className="shrink-0">
+        <div className="shrink-0 border-b theme-border">
           <Header />
         </div>
 
-        <main className="min-w-0 flex-1 overflow-y-auto">
+        <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto">
           <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
            
 

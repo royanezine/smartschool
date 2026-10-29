@@ -240,18 +240,20 @@ export default function AdminSarprasAsetPage() {
       />
 
       <div className="flex h-full min-w-0 flex-1 flex-col overflow-hidden">
-        <Header
-          toggleSidebar={toggleSidebar}
-          notifications={[]}
-          user={{
-            name: "Admin Sekolah",
-            email: "admin@smartschool.com",
-            avatar: "AD",
-          }}
-        />
+        <div className="shrink-0 border-b theme-border">
+          <Header
+            toggleSidebar={toggleSidebar}
+            notifications={[]}
+            user={{
+              name: "Admin Sekolah",
+              email: "admin@smartschool.com",
+              avatar: "AD",
+            }}
+          />
+        </div>
 
-        <main className="flex-1 overflow-y-auto">
-          <div className="w-full p-4 md:p-6 lg:p-8">
+        <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto">
+          <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
             <div className="w-full space-y-5">
 
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -414,7 +416,7 @@ export default function AdminSarprasAsetPage() {
                 className={`theme-card theme-border overflow-hidden rounded-xl border ${themeCardShadow}`}
               >
                 <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
+                  <table className="w-full min-w-[1000px] text-sm">
 
                     <thead>
                       <tr

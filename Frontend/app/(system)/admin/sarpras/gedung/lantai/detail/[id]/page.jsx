@@ -181,17 +181,19 @@ export default function DetailLantaiPage() {
         />
 
         <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-          <Header
-            toggleSidebar={() => {}}
-            notifications={[]}
-            user={{
-              name: "Admin Sekolah",
-              email: "admin@smartschool.com",
-              avatar: "AD",
-            }}
-          />
+          <div className="shrink-0 border-b theme-border">
+            <Header
+              toggleSidebar={() => {}}
+              notifications={[]}
+              user={{
+                name: "Admin Sekolah",
+                email: "admin@smartschool.com",
+                avatar: "AD",
+              }}
+            />
+          </div>
 
-          <main className="theme-page flex min-h-0 flex-1 items-center justify-center overflow-hidden">
+          <main className="theme-page flex min-h-0 min-w-0 flex-1 items-center justify-center overflow-y-auto">
             <div className="flex flex-col items-center gap-3 text-center">
               <Loader2
                 size={34}
@@ -220,17 +222,19 @@ export default function DetailLantaiPage() {
         />
 
         <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-          <Header
-            toggleSidebar={() => {}}
-            notifications={[]}
-            user={{
-              name: "Admin Sekolah",
-              email: "admin@smartschool.com",
-              avatar: "AD",
-            }}
-          />
+          <div className="shrink-0 border-b theme-border">
+            <Header
+              toggleSidebar={() => {}}
+              notifications={[]}
+              user={{
+                name: "Admin Sekolah",
+                email: "admin@smartschool.com",
+                avatar: "AD",
+              }}
+            />
+          </div>
 
-          <main className="theme-page flex min-h-0 flex-1 items-center justify-center overflow-hidden p-6">
+          <main className="theme-page flex min-h-0 min-w-0 flex-1 items-center justify-center overflow-y-auto p-6">
             <div className="w-full max-w-2xl">
               <button
                 onClick={() =>
@@ -285,17 +289,19 @@ export default function DetailLantaiPage() {
       />
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <Header
-          toggleSidebar={() => {}}
-          notifications={[]}
-          user={{
-            name: "Admin Sekolah",
-            email: "admin@smartschool.com",
-            avatar: "AD",
-          }}
-        />
+        <div className="shrink-0 border-b theme-border">
+          <Header
+            toggleSidebar={() => {}}
+            notifications={[]}
+            user={{
+              name: "Admin Sekolah",
+              email: "admin@smartschool.com",
+              avatar: "AD",
+            }}
+          />
+        </div>
 
-        <main className="theme-page min-h-0 flex-1 overflow-y-auto">
+        <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto">
           <div className="w-full p-4 sm:p-6 lg:p-8">
             <div className="mx-auto w-full max-w-6xl space-y-6">
 

@@ -399,7 +399,7 @@ export default function Header({ notifications = [], user: userProp = null }) {
   return (
     <header
       className="
-        h-16 sticky top-0 z-30
+        h-16 shrink-0 sticky top-0 z-30
         theme-header
         border-b
         backdrop-blur-xl

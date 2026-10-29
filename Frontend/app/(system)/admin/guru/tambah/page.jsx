@@ -378,14 +378,16 @@ async function handleSubmit(event) {
   }
 
   return (
-    <div className="theme-page flex h-screen overflow-hidden">
+    <div className="theme-page flex h-screen w-full overflow-hidden">
       <Sidebar role="admin" />
 
-      <div className="flex h-screen flex-1 flex-col overflow-hidden">
-        <Header />
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        <div className="shrink-0 border-b theme-border">
+          <Header />
+        </div>
 
-        <main className="flex-1 overflow-y-auto px-6 py-6 lg:px-8">
-          <div className="mx-auto max-w-7xl">
+        <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto px-4 py-6 sm:px-6 lg:px-8">
+          <div className="mx-auto w-full max-w-5xl">
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <button

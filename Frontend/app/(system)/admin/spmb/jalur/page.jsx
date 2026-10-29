@@ -681,21 +681,23 @@ export default function JalurPPDBPage() {
       />
 
       <div className="flex h-full min-w-0 flex-1 flex-col overflow-hidden">
-        <Header
-          toggleSidebar={
-            toggleSidebar
-          }
-          notifications={[]}
-          user={{
-            name: "Admin PPDB",
-            email:
-              "adminppdb@smartschool.com",
-            avatar: "PP",
-          }}
-        />
+        <div className="shrink-0 border-b theme-border">
+          <Header
+            toggleSidebar={
+              toggleSidebar
+            }
+            notifications={[]}
+            user={{
+              name: "Admin PPDB",
+              email:
+                "adminppdb@smartschool.com",
+              avatar: "PP",
+            }}
+          />
+        </div>
 
-        <main className="flex-1 overflow-y-auto">
-          <div className="mx-auto w-full max-w-[1320px] space-y-5 p-4 md:p-6 lg:p-8">
+        <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto">
+          <div className="w-full space-y-5 px-4 py-6 sm:px-6 lg:px-8">
 
 
             <div className="theme-text-muted flex items-center gap-1.5 text-xs">
@@ -890,7 +892,7 @@ export default function JalurPPDBPage() {
               </div>
 
 
-              <div className="grid grid-cols-1 gap-4 p-5 md:grid-cols-2">
+              <div className="grid grid-cols-1 gap-4 p-5 md:grid-cols-2 2xl:grid-cols-3">
 
 
                 {(checkingAccess || (loading && canView)) && (

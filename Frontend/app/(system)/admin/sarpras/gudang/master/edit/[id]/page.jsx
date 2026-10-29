@@ -274,7 +274,7 @@ export default function EditGudangPage() {
 
 
         <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-          <div className="shrink-0">
+          <div className="shrink-0 border-b theme-border">
             <Header
               toggleSidebar={() =>
                 setCollapsed(
@@ -291,7 +291,7 @@ export default function EditGudangPage() {
             />
           </div>
 
-          <main className="flex min-h-0 flex-1 items-center justify-center overflow-hidden p-4">
+          <main className="theme-page flex min-h-0 min-w-0 flex-1 items-center justify-center overflow-y-auto p-4">
             <div
               className={`theme-card w-full max-w-md rounded-3xl border ${themeBorderClass} p-8 ${themeCardShadow}`}
             >
@@ -338,7 +338,7 @@ export default function EditGudangPage() {
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
 
-        <div className="shrink-0">
+        <div className="shrink-0 border-b theme-border">
           <Header
             toggleSidebar={() =>
               setCollapsed(
@@ -356,7 +356,7 @@ export default function EditGudangPage() {
         </div>
 
 
-        <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
+        <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
           <div className="w-full p-4 sm:p-5 lg:p-7 xl:p-8">
             <div className="mx-auto w-full max-w-[1250px]">
 

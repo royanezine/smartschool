@@ -329,7 +329,7 @@ export default function MasterGudangPage() {
       >
 
 
-        <div className="z-30 flex-shrink-0">
+        <div className="z-30 shrink-0 border-b theme-border">
           <Header
             toggleSidebar={toggleSidebar}
             notifications={[]}
@@ -343,11 +343,11 @@ export default function MasterGudangPage() {
         </div>
 
 
-        <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
+        <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
 
-          <div className="w-full p-4 md:p-6 lg:p-8">
+          <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
 
-            <div className="mx-auto w-full max-w-[1600px] space-y-5">
+            <div className="w-full space-y-5">
 
 
               <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">

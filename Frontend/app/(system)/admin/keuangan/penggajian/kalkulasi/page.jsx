@@ -176,11 +176,11 @@ export default function KalkulasiPenggajianPage() {
       />
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <div className="shrink-0">
+        <div className="shrink-0 border-b theme-border">
           <Header onMenuClick={() => setSidebarOpen(true)} />
         </div>
 
-        <main className="min-w-0 flex-1 overflow-y-auto theme-page theme-text">
+        <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto theme-text">
           <div className="mx-auto w-full max-w-5xl px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
             <button
               type="button"

@@ -580,7 +580,7 @@ export default function EditAsetPage() {
               : "lg:ml-[260px]"
           }`}
         >
-          <div className="shrink-0">
+          <div className="shrink-0 border-b theme-border">
             <Header
               toggleSidebar={() =>
                 setIsCollapsed(
@@ -597,7 +597,7 @@ export default function EditAsetPage() {
             />
           </div>
 
-          <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6 lg:p-8">
+          <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6 lg:p-8">
             <div className="mx-auto flex min-h-[500px] w-full max-w-7xl items-center justify-center">
               <div
                 className={`theme-card w-full max-w-md rounded-3xl border theme-border p-10 text-center ${themeCardShadow}`}
@@ -649,7 +649,7 @@ export default function EditAsetPage() {
         }`}
       >
 
-        <div className="shrink-0">
+        <div className="shrink-0 border-b theme-border">
           <Header
             toggleSidebar={() =>
               setIsCollapsed(
@@ -667,9 +667,9 @@ export default function EditAsetPage() {
         </div>
 
 
-        <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
+        <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
           <div className="w-full px-4 pb-8 pt-5 sm:px-6 sm:pt-6 lg:px-8 lg:pt-7">
-            <div className="mx-auto w-full max-w-[1380px]">
+            <div className="mx-auto w-full max-w-6xl">
 
 
               <div className="mb-6">

@@ -343,14 +343,16 @@ export default function GuruRaporPage() {
       />
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <Header
-          toggleSidebar={toggleSidebar}
-          notifications={[]}
-          user={{ name: "Guru", email: "guru@smartschool.com", avatar: "GR" }}
-        />
+        <div className="shrink-0 border-b theme-border">
+          <Header
+            toggleSidebar={toggleSidebar}
+            notifications={[]}
+            user={{ name: "Guru", email: "guru@smartschool.com", avatar: "GR" }}
+          />
+        </div>
 
-        <main className="theme-page min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
-          <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8 xl:px-10">
+        <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
+          <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
             <div className="theme-card theme-border mb-6 overflow-hidden rounded-2xl border p-6 shadow-[0_10px_30px_color-mix(in_srgb,var(--color-text)_8%,transparent)] sm:p-8">
               <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-4">

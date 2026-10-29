@@ -690,21 +690,23 @@ export default function PerpustakaanPage() {
   }, [loans]);
 
   return (
-    <div className="theme-page flex h-screen min-h-0 overflow-hidden">
+    <div className="theme-page flex h-screen w-full min-h-0 overflow-hidden">
       <Sidebar role="admin" active="perpustakaan" setActive={() => {}} />
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <Header
-          notifications={[]}
-          user={{
-            name: "Admin Sekolah",
-            email: "admin@smartschool.com",
-            avatar: "AS",
-          }}
-        />
+        <div className="shrink-0 border-b theme-border">
+          <Header
+            notifications={[]}
+            user={{
+              name: "Admin Sekolah",
+              email: "admin@smartschool.com",
+              avatar: "AS",
+            }}
+          />
+        </div>
 
-        <main className="min-h-0 flex-1 overflow-y-auto">
-          <div className="mx-auto w-full max-w-[1600px] px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
+        <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto">
+          <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
             <section
               className={`relative mb-6 overflow-hidden rounded-[28px] border ${themePrimaryBorder} ${themePrimaryShadow} bg-[color-mix(in_srgb,var(--color-primary)_12%,var(--color-card))]`}
             >

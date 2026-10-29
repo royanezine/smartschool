@@ -272,7 +272,7 @@ export default function EditLantaiPage() {
         </div>
 
         <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-          <div className="shrink-0">
+          <div className="shrink-0 border-b theme-border">
             <Header
               toggleSidebar={() => {}}
               notifications={[]}
@@ -284,7 +284,7 @@ export default function EditLantaiPage() {
             />
           </div>
 
-          <main className="theme-page flex min-h-0 flex-1 items-center justify-center overflow-hidden">
+          <main className="theme-page flex min-h-0 min-w-0 flex-1 items-center justify-center overflow-y-auto">
             <div className="flex flex-col items-center gap-4">
               <div
                 className={`flex h-14 w-14 items-center justify-center rounded-2xl border ${themePrimarySoftBorder} ${themePrimarySoft} ${themeCardShadow}`}
@@ -327,7 +327,7 @@ export default function EditLantaiPage() {
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
 
-        <div className="shrink-0">
+        <div className="shrink-0 border-b theme-border">
           <Header
             toggleSidebar={() => {}}
             notifications={[]}
@@ -340,7 +340,7 @@ export default function EditLantaiPage() {
         </div>
 
 
-        <main className="theme-page min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
+        <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
           <div className="w-full px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-7 xl:px-10">
             <div className="mx-auto w-full max-w-[1280px]">
 
