@@ -68,67 +68,9 @@ function normalizeGedungPayload(data: GedungPayload) {
 
 
 export async function getGedung() {
-  try {
-    if (!API_URL) {
-      console.error("NEXT_PUBLIC_API_URL belum dikonfigurasi.");
-
-      return {
-        success: false,
-        data: [],
-        message: "API URL belum dikonfigurasi.",
-      };
-    }
-
-    const token = getToken();
-
-    const headers: HeadersInit = {
-      "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    };
-
-    const response = await fetch(
-      `${API_URL}/api/infrastruktur/gedung`,
-      {
-        method: "GET",
-        headers,
-      }
-    );
-
-    let result: any = null;
-
-    try {
-      result = await response.json();
-    } catch {
-      result = null;
-    }
-
-    if (response.status === 401) {
-      return {
-        success: false,
-        data: [],
-        message: "Token belum valid. Silakan login kembali.",
-      };
-    }
-
-    if (!response.ok) {
-      return {
-        success: false,
-        data: [],
-        message:
-          result?.message || "Gagal mengambil data gedung.",
-      };
-    }
-
-    return result;
-  } catch (error) {
-    console.error("Error getGedung:", error);
-
-    return {
-      success: false,
-      data: [],
-      message: "Backend belum dapat diakses.",
-    };
-  }
+  return apiFetch("/api/infrastruktur/gedung", {
+    method: "GET",
+  });
 }
 
 

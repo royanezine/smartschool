@@ -22,6 +22,7 @@ import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
 import {
   getTunggakan,
+  getDetailTagihan,
   batalkanTagihan,
 } from "@/services/tagihan.service";
 
@@ -101,18 +102,24 @@ export default function DetailTunggakanPage() {
     setError("");
 
     try {
-      const response = await getTunggakan({
-        page: 1,
-        limit: 500,
-      });
+      let found = null;
+      try {
+        const detailRes = await getDetailTagihan(id);
+        found = detailRes?.data || detailRes || null;
+      } catch {
+        const response = await getTunggakan({
+          page: 1,
+          limit: 500,
+        });
 
-      const list = Array.isArray(response?.data)
-        ? response.data
-        : [];
+        const list = Array.isArray(response?.data)
+          ? response.data
+          : [];
 
-      const found = list.find(
-        (row) => String(row.id) === String(id)
-      );
+        found = list.find(
+          (row) => String(row.id) === String(id)
+        );
+      }
 
       if (!found) {
         throw new Error(
@@ -169,16 +176,16 @@ export default function DetailTunggakanPage() {
   const siswa = item?.siswa;
   const kategori = item?.kategoriTagihan;
 
-  const namaSiswa = siswa?.nama || "-";
+  const namaSiswa = siswa?.namaLengkap || siswa?.nama || "-";
   const nisn = siswa?.nisn || siswa?.nis || "-";
   const kelas = siswa?.kelas?.nama || "-";
 
   const namaTagihan =
     kategori?.nama ||
-    `Tagihan #${item?.kode || item?.id || "-"}`;
+    (item?.nomorTagihan ? `Tagihan #${item.nomorTagihan}` : `Tagihan #${item?.kode || item?.id || "-"}`);
 
-  const nominal = Number(item?.jumlah) || 0;
-  const terbayar = Number(item?.terbayar) || 0;
+  const nominal = Number(item?.totalTagihan ?? item?.nominal ?? item?.jumlah) || 0;
+  const terbayar = Number(item?.totalDibayar ?? item?.terbayar) || 0;
   const sisa = Number(item?.sisa) || 0;
 
   const status =
@@ -373,7 +380,7 @@ export default function DetailTunggakanPage() {
 
                       <DetailField
                         label="Kode Tagihan"
-                        value={item?.kode || item?.id || "-"}
+                        value={item?.nomorTagihan || item?.kode || item?.id || "-"}
                       />
 
                       <DetailField
@@ -384,7 +391,7 @@ export default function DetailTunggakanPage() {
                       <DetailField
                         label="Jatuh Tempo"
                         value={formatTanggal(
-                          item?.jatuhTempo
+                          item?.tanggalJatuhTempo || item?.jatuhTempo
                         )}
                         icon={<Calendar size={14} />}
                       />

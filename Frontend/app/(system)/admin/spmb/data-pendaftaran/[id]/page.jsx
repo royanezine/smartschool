@@ -189,7 +189,7 @@ function getFotoUrl(item) {
   }
 
   const baseUrl =
-    process.env.NEXT_PUBLIC_API_URL || "";
+    process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
   return `${baseUrl.replace(/\/+$/, "")}/${value.replace(/^\/+/, "")}`;
 }
@@ -426,7 +426,7 @@ export default function DetailPendaftaranPage() {
   const fotoUrl = getFotoUrl(data);
 
   const apiUrl =
-    process.env.NEXT_PUBLIC_API_URL || "";
+    process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
   const getFileUrl = (urlFile) => {
     if (!urlFile) {

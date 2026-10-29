@@ -61,17 +61,17 @@ export default function TrackingTunggakanPage() {
       const list = Array.isArray(response?.data) ? response.data : [];
       const mapped = list.map((item) => ({
         id: item.id,
-        siswa: item.siswa?.nama || "-",
-        kelas: item.siswa?.kelas?.nama || "-",
+        siswa: item.siswa?.namaLengkap || item.siswa?.nama || "-",
+        kelas: item.siswa?.kelas?.nama || item.kelas?.nama || "-",
         nisn: item.siswa?.nisn || item.siswa?.nis || "-",
         tagihan:
           item.kategoriTagihan?.nama ||
-          `Tagihan #${item.kode || item.id}`,
-        nominal: Number(item.jumlah) || 0,
-        terbayar: Number(item.terbayar) || 0,
+          (item.nomorTagihan ? `Tagihan #${item.nomorTagihan}` : `Tagihan #${item.kode || item.id}`),
+        nominal: Number(item.totalTagihan ?? item.nominal ?? item.jumlah) || 0,
+        terbayar: Number(item.totalDibayar ?? item.terbayar) || 0,
         sisa: Number(item.sisa) || 0,
-        jatuhTempo: item.jatuhTempo
-          ? String(item.jatuhTempo).slice(0, 10)
+        jatuhTempo: (item.tanggalJatuhTempo || item.jatuhTempo)
+          ? String(item.tanggalJatuhTempo || item.jatuhTempo).slice(0, 10)
           : "-",
         hari: Number(item.hariTerlambat) || 0,
         status:
@@ -84,9 +84,9 @@ export default function TrackingTunggakanPage() {
         totalTagihan:
           Number(item.sisa) > 0
             ? Number(item.sisa)
-            : Number(item.jumlah) || 0,
-        tanggalTagihan: item.createdAt
-          ? String(item.createdAt).slice(0, 10)
+            : Number(item.totalTagihan ?? item.nominal ?? item.jumlah) || 0,
+        tanggalTagihan: (item.createdAt || item.dibuatPada)
+          ? String(item.createdAt || item.dibuatPada).slice(0, 10)
           : "-",
       }));
 

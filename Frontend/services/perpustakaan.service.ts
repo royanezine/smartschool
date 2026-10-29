@@ -181,11 +181,16 @@ export async function pinjamBuku(payload: PeminjamanPayload) {
 
 
 
-export async function kembalikanBuku(id: string) {
+export async function kembalikanBuku(id: string, catatan?: string) {
   const response = await apiFetch(
     `${BASE_PATH}/peminjaman/${encodeURIComponent(id)}/kembali`,
     {
       method: "PUT",
+      body: JSON.stringify({
+        body: { catatan: catatan || undefined },
+        params: { id },
+        query: {},
+      }),
     }
   );
 
