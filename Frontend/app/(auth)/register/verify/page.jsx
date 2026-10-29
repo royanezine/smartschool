@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 
 import { setSession, clearSession, getRoleHome } from "@/lib/auth";
+import { verifyRegister } from "@/services/auth.service";
 
 function VerifyRegisterPageContent() {
   const router = useRouter();
@@ -35,16 +36,6 @@ function VerifyRegisterPageContent() {
     if (emailFromUrl) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setEmail(emailFromUrl);
-      return;
-    }
-
-    try {
-      const savedEmail = sessionStorage.getItem("register_email");
-
-      if (savedEmail) {
-        setEmail(savedEmail);
-      }
-    } catch {
     }
   }, [searchParams]);
 
@@ -86,41 +77,10 @@ function VerifyRegisterPageContent() {
 
       const currentRequestId = ++requestIdRef.current;
 
-      const API_URL =
-        process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-
-      const response = await fetch(
-        `${API_URL}/api/auth/verify-register`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            email,
-            kodeOtp,
-          }),
-        }
-      );
-
-      let result;
-
-      try {
-        result = await response.json();
-      } catch {
-        throw new Error(
-          "Response dari server bukan JSON yang valid."
-        );
-      }
+      const result = await verifyRegister(email, kodeOtp);
 
       if (currentRequestId !== requestIdRef.current) {
         return;
-      }
-
-      if (!response.ok) {
-        throw new Error(
-          result?.message || "Verifikasi OTP gagal."
-        );
       }
 
       if (result?.requiresPinSetup === true) {
@@ -160,11 +120,6 @@ function VerifyRegisterPageContent() {
         console.warn(
           "[AUTH] Verifikasi register berhasil tetapi tidak mengembalikan token."
         );
-      }
-
-      try {
-        sessionStorage.removeItem("register_email");
-      } catch {
       }
 
       setSuccess(

@@ -1,8 +1,8 @@
 
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useEffect, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -92,8 +92,10 @@ function getPaketArray(result) {
   return [];
 }
 
-export default function DaftarSekolahPage() {
+function DaftarSekolahContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const queryPaketId = searchParams.get("paketId") || searchParams.get("paket") || "";
 
   const [formData, setFormData] = useState(initialForm);
   const [paketList, setPaketList] = useState([]);
@@ -150,6 +152,20 @@ export default function DaftarSekolahPage() {
         if (!cancelled) {
           setPaketList(data);
 
+          if (queryPaketId) {
+            const found = data.find(
+              (p) =>
+                String(p.id) === String(queryPaketId) ||
+                String(p.nama || "").toLowerCase() === String(queryPaketId).toLowerCase()
+            );
+            if (found) {
+              setFormData((prev) => ({
+                ...prev,
+                paket: found.id,
+              }));
+            }
+          }
+
           if (data.length === 0) {
             console.warn(
               "Respons API paket tidak berisi daftar paket:",
@@ -176,7 +192,27 @@ export default function DaftarSekolahPage() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [queryPaketId]);
+
+  useEffect(() => {
+    if (!queryPaketId || paketList.length === 0) return;
+
+    const found = paketList.find(
+      (p) =>
+        String(p.id) === String(queryPaketId) ||
+        String(p.nama || "").toLowerCase() === String(queryPaketId).toLowerCase()
+    );
+
+    if (found) {
+      setFormData((prev) => {
+        if (prev.paket === found.id) return prev;
+        return {
+          ...prev,
+          paket: found.id,
+        };
+      });
+    }
+  }, [queryPaketId, paketList]);
 
   function handleChange(event) {
     const { name, value } = event.target;
@@ -944,5 +980,19 @@ async function handleSubmit(event) {
         </div>
       </footer>
     </main>
+  );
+}
+
+export default function DaftarSekolahPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-[#f5f8fc]">
+          <RefreshCw className="animate-spin text-blue-600" size={28} />
+        </div>
+      }
+    >
+      <DaftarSekolahContent />
+    </Suspense>
   );
 }

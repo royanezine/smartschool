@@ -2,7 +2,7 @@
 
 import { Suspense } from "react";
 import { useParams } from "next/navigation";
-
+import { uploadBerkasPpdb } from "@/services/ppdb.service";
 import PpdbUploadBerkas from "@/app/components/ppdb/PpdbUploadBerkas";
 
 function UploadBerkasTenantContent() {

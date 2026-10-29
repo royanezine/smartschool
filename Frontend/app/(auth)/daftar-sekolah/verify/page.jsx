@@ -132,6 +132,8 @@ function VerifyTenantPageContent() {
           order_id: data.order_id,
           gross_amount: data.gross_amount,
           bank: data.bank || normalizedBank,
+          snap_token: data.snap_token || null,
+          redirect_url: data.redirect_url || null,
           va_number: data.va_number || null,
           biller_code: data.biller_code || null,
           bill_key: data.bill_key || null,
@@ -600,6 +602,20 @@ function VerifyTenantPageContent() {
                           {resultData.order_id}
                         </p>
                       </div>
+
+                      {resultData.redirect_url && (
+                        <div className="pt-2">
+                          <a
+                            href={resultData.redirect_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#155DFC] px-5 py-3 text-sm font-bold text-white shadow-md transition hover:bg-[#0D47C9]"
+                          >
+                            <span>Bayar Sekarang (Midtrans)</span>
+                            <ArrowRight className="h-4 w-4" />
+                          </a>
+                        </div>
+                      )}
 
                       {copied && (
                         <p className="text-xs font-semibold text-emerald-700">

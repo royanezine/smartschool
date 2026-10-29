@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
-
+import { getGelombangPpdbById, updateGelombangPpdb } from "@/services/gelombangPpdb.service";
 import GelombangFormPage from "@/app/components/spmb/GelombangFormPage";
 
 export default function EditGelombangPage() {

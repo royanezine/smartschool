@@ -317,19 +317,19 @@ export default function LaporanAnalitikPage() {
 
   const tabs = [
     {
-      id: "ringkasan",
+      key: "ringkasan",
       label: "Ringkasan",
     },
     {
-      id: "sekolah",
+      key: "sekolah",
       label: "Data Sekolah",
     },
     {
-      id: "keuangan",
+      key: "keuangan",
       label: "Keuangan",
     },
     {
-      id: "pengguna",
+      key: "pengguna",
       label: "Pengguna",
     },
   ];
@@ -439,14 +439,14 @@ export default function LaporanAnalitikPage() {
 
             {tabs.map((tab) => {
               const isActive =
-                activeTab === tab.id;
+                activeTab === tab.key;
 
               return (
                 <button
-                  key={tab.id}
+                  key={tab.key}
                   type="button"
                   onClick={() => {
-                    setActiveTab(tab.id);
+                    setActiveTab(tab.key);
                     setCurrentPage(1);
                   }}
                   className={`border-b-2 px-4 py-2.5 text-sm font-medium transition-colors ${
@@ -535,19 +535,19 @@ function RingkasanTab({
 
   const metrics = [
     {
-      id: "sekolah",
+      key: "sekolah",
       label: "Sekolah",
       dataKey: "sekolah",
       max: maxSekolah,
     },
     {
-      id: "pendapatan",
+      key: "pendapatan",
       label: "Pendapatan (Juta)",
       dataKey: "pendapatan",
       max: maxPendapatan,
     },
     {
-      id: "pengguna",
+      key: "pengguna",
       label: "Pengguna",
       dataKey: "pengguna",
       max: maxPengguna,
@@ -556,7 +556,7 @@ function RingkasanTab({
 
   const currentMetric =
     metrics.find(
-      (m) => m.id === selectedMetric
+      (m) => m.key === selectedMetric
     ) || metrics[0];
 
   const maxVal =
@@ -575,15 +575,15 @@ function RingkasanTab({
 
         {metrics.map((metric) => {
           const active =
-            selectedMetric === metric.id;
+            selectedMetric === metric.key;
 
           return (
             <button
-              key={metric.id}
+              key={metric.key}
               type="button"
               onClick={() =>
                 setSelectedMetric(
-                  metric.id
+                  metric.key
                 )
               }
               className={
@@ -982,10 +982,10 @@ function RingkasanTab({
 
           return (
             <div
-              key={metric.id}
+              key={metric.key}
               onClick={() =>
                 setSelectedMetric(
-                  metric.id
+                  metric.key
                 )
               }
               className={`theme-card cursor-pointer rounded-xl border ${themeNeutralBorder} p-3 ${themeCardShadow} transition-shadow hover:shadow-[0_8px_24px_color-mix(in_srgb,var(--color-text)_8%,transparent)]`}
@@ -1014,7 +1014,7 @@ function RingkasanTab({
 
               <p className="mt-1 text-lg font-bold theme-text">
                 {currentVal}
-                {metric.id ===
+                {metric.key ===
                   "pendapatan" &&
                   " Jt"}
               </p>

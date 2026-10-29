@@ -16,6 +16,7 @@ import {
   EyeOff,
   AtSign,
 } from "lucide-react";
+import { registerAuth } from "@/services/auth.service";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -61,33 +62,14 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      const API_URL = process.env.NEXT_PUBLIC_API_URL;
-
-      if (!API_URL) {
-        throw new Error("NEXT_PUBLIC_API_URL belum dikonfigurasi.");
-      }
-
-      const response = await fetch(`${API_URL}/api/auth/register`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          namaLengkap,
-          namaPengguna,
-          email,
-          kataSandi,
-        }),
+      await registerAuth({
+        namaLengkap,
+        namaPengguna,
+        email,
+        kataSandi,
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data?.message || "Registrasi gagal.");
-      }
-
-      sessionStorage.setItem("register_email", email);
-      router.push("/register/verify");
+      router.push(`/register/verify?email=${encodeURIComponent(email)}`);
     } catch (error) {
       setError(
         error instanceof Error

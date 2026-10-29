@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense } from "react";
-
+import { daftarPpdb } from "@/services/ppdb.service";
 import PpdbForm from "@/app/components/ppdb/PpdbForm";
 
 export default function DaftarPage() {

@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense } from "react";
-
+import { uploadBerkasPpdb } from "@/services/ppdb.service";
 import PpdbUploadBerkas from "@/app/components/ppdb/PpdbUploadBerkas";
 
 export default function UploadBerkasPage() {

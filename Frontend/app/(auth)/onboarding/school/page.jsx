@@ -204,10 +204,6 @@ export default function SchoolOnboardingPage() {
             return;
           }
         }
-
-        if (isMounted && storedPaket) {
-          setPaket(storedPaket);
-        }
       } catch (err) {
         console.error("Gagal mengambil detail paket:", err);
       } finally {

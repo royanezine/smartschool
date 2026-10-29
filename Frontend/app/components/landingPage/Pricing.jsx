@@ -156,24 +156,12 @@ export default function PricingSection() {
 
 
   function handlePilihPaket(item) {
-    try {
-      sessionStorage.setItem(
-        "selected_paket_id",
-        String(item.id)
-      );
-
-      sessionStorage.setItem(
-        "selected_paket",
-        JSON.stringify(item)
-      );
-    } catch (err) {
-      console.error("Gagal menyimpan paket:", err);
-    }
+    if (!item?.id) return;
 
     if (typeof window !== "undefined") {
       router.push(
-        `/onboarding/school?paketId=${encodeURIComponent(
-          item.id
+        `/daftar-sekolah?paketId=${encodeURIComponent(
+          String(item.id)
         )}`
       );
     }

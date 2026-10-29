@@ -383,22 +383,22 @@ export default function BKPage() {
 
   const tabs = [
     {
-      id: "konseling",
+      key: "konseling",
       label: "Sesi Konseling",
       icon: MessageSquare,
     },
     {
-      id: "pelanggaran",
+      key: "pelanggaran",
       label: "Pelanggaran",
       icon: AlertTriangle,
     },
     {
-      id: "prestasi",
+      key: "prestasi",
       label: "Prestasi",
       icon: Award,
     },
     {
-      id: "asesmen",
+      key: "asesmen",
       label: "Asesmen & Minat Bakat",
       icon: Brain,
     },
@@ -559,13 +559,13 @@ export default function BKPage() {
               <div className="flex min-w-max">
                 {tabs.map((tab) => {
                   const Icon = tab.icon;
-                  const active = activeTab === tab.id;
+                  const active = activeTab === tab.key;
 
                   return (
                     <button
-                      key={tab.id}
+                      key={tab.key}
                       onClick={() => {
-                        setActiveTab(tab.id);
+                        setActiveTab(tab.key);
                         setCurrentPage(1);
                       }}
                       className={`relative flex items-center gap-2 px-4 py-3 text-xs font-semibold transition ${

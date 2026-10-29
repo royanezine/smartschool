@@ -120,11 +120,11 @@ const initialProfil = {
 };
 
 const initialYayasan = {
-  nama: "Yayasan Smart School",
-  npwp: "01.234.567.8-901.000",
-  alamat: "Jl. Pendidikan No. 45, Jakarta Selatan",
-  email: "info@smartschool.sch.id",
-  telepon: "(021) 555-0123",
+  nama: "",
+  npwp: "",
+  alamat: "",
+  email: "",
+  telepon: "",
 };
 
 const initialNotifikasi = [

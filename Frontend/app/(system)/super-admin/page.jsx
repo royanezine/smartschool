@@ -95,32 +95,7 @@ const themeFocus =
 
 
 
-const upcomingTasks = [
-  {
-    id: 1,
-    title: "Backup Database",
-    description: "Backup otomatis database utama",
-    due: "Hari ini · 23:00",
-    priority: "high",
-    icon: Database,
-  },
-  {
-    id: 2,
-    title: "Review Langganan Expired",
-    description: "5 sekolah perlu ditinjau",
-    due: "Besok · 09:00",
-    priority: "medium",
-    icon: CreditCard,
-  },
-  {
-    id: 3,
-    title: "Update Sistem",
-    description: "Persiapan deployment versi 2.1",
-    due: "15 Agu · 10:00",
-    priority: "low",
-    icon: Server,
-  },
-];
+const upcomingTasks = [];
 
 
 const quickActions = [
@@ -1153,7 +1128,12 @@ export default function DashboardPage() {
                 </div>
 
                 <div className="mt-4 space-y-2">
-                  {upcomingTasks.map((task) => {
+                  {upcomingTasks.length === 0 ? (
+                    <div className="py-6 text-center text-xs theme-text-muted">
+                      Tidak ada tugas mendatang saat ini.
+                    </div>
+                  ) : (
+                    upcomingTasks.map((task) => {
                     const priority = getPriority(
                       task.priority
                     );
@@ -1193,7 +1173,8 @@ export default function DashboardPage() {
                         </span>
                       </div>
                     );
-                  })}
+                  })
+                )}
                 </div>
               </div>
 

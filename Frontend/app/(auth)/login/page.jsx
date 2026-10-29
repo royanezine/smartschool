@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import { GraduationCap, ArrowLeft } from "lucide-react";
 
+import { login } from "@/services/auth.service";
 import LoginForm from "@/app/components/auth/LoginForm";
 
 const jakarta = Plus_Jakarta_Sans({

@@ -253,14 +253,14 @@ export default function YayasanDashboardPage() {
 
   const kpiStrip = [
     {
-      id: "sekolah",
+      key: "sekolah",
       label: "Unit Sekolah",
       value: summary?.totalSekolah ?? (loading ? "-" : schools.length),
       icon: Building2,
       color: "primary",
     },
     {
-      id: "pengguna",
+      key: "pengguna",
       label: "Total Pengguna Aktif",
       value:
         summary?.totalPenggunaAktif ??
@@ -269,14 +269,14 @@ export default function YayasanDashboardPage() {
       color: "info",
     },
     {
-      id: "aktif",
+      key: "aktif",
       label: "Sekolah Aktif",
       value: summary?.sekolahAktif ?? "-",
       icon: Users,
       color: "success",
     },
     {
-      id: "ujiCoba",
+      key: "ujiCoba",
       label: "Sekolah Uji Coba",
       value: summary?.sekolahUjiCoba ?? "-",
       icon: ClipboardCheck,
@@ -287,7 +287,7 @@ export default function YayasanDashboardPage() {
 
   const quickMenu = [
     {
-      id: "sekolah",
+      key: "sekolah",
       title: "Sekolah",
       desc: "Kelola profil dan data seluruh unit sekolah di bawah yayasan",
       icon: Building2,
@@ -297,7 +297,7 @@ export default function YayasanDashboardPage() {
       featured: true,
     },
     {
-      id: "laporan",
+      key: "laporan",
       title: "Laporan & Analitik",
       desc: "Ringkasan laporan akademik, guru, inventaris, dan siswa",
       icon: FileText,
@@ -307,7 +307,7 @@ export default function YayasanDashboardPage() {
       featured: true,
     },
     {
-      id: "guru",
+      key: "guru",
       title: "Guru",
       desc: "Data induk tenaga pendidik",
       icon: GraduationCap,
@@ -316,7 +316,7 @@ export default function YayasanDashboardPage() {
       stat: loading ? "Memuat data..." : `${totalGuru} guru aktif`,
     },
     {
-      id: "siswa",
+      key: "siswa",
       title: "Siswa",
       desc: "Data induk siswa lintas unit",
       icon: UserSquare2,
@@ -413,7 +413,7 @@ export default function YayasanDashboardPage() {
 
               return (
                 <div
-                  key={kpi.id}
+                  key={kpi.key}
                   className="p-3.5 sm:p-5 flex items-center gap-3 sm:gap-3.5 min-w-0"
                 >
                   <div

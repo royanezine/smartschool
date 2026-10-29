@@ -320,10 +320,10 @@ export default function ProfilePage() {
   };
 
   const tabs = [
-    { id: "profile", label: "Profil", icon: User },
-    { id: "security", label: "Keamanan", icon: Lock },
-    { id: "activity", label: "Aktivitas", icon: Activity },
-    { id: "sessions", label: "Sesi Aktif", icon: Smartphone },
+    { key: "profile", label: "Profil", icon: User },
+    { key: "security", label: "Keamanan", icon: Lock },
+    { key: "activity", label: "Aktivitas", icon: Activity },
+    { key: "sessions", label: "Sesi Aktif", icon: Smartphone },
   ];
 
   const roleName = getRoleName(profile);
@@ -660,15 +660,15 @@ export default function ProfilePage() {
             <nav className="flex gap-0.5 min-w-max px-2">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
-                const isActiveTab = activeTab === tab.id;
+                const isActiveTab = activeTab === tab.key;
 
                 return (
                   <button
-                    key={tab.id}
+                    key={tab.key}
                     type="button"
                     onClick={() => {
-                      setActiveTab(tab.id);
-                      if (tab.id !== "profile") {
+                      setActiveTab(tab.key);
+                      if (tab.key !== "profile") {
                         setIsEditing(false);
                         setForm(profile);
                       }

@@ -3,7 +3,6 @@
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
-import Link from "next/link";
 import {
   ArrowRight,
   CheckCircle2,
@@ -23,21 +22,13 @@ function MenungguPendaftaranContent() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      const emailFromUrl = searchParams.get("email");
+    const emailFromUrl = searchParams.get("email") || "";
 
-      const savedEmail =
-        localStorage.getItem("remembered_identifier") || "";
+    if (emailFromUrl) {
+      setEmail(emailFromUrl);
+    }
 
-      const currentEmail = emailFromUrl || savedEmail;
-
-      if (currentEmail) {
-        setEmail(currentEmail);
-      }
-
-      setLoading(false);
-    }, 0);
-    return () => clearTimeout(timer);
+    setLoading(false);
   }, [searchParams]);
 
   function lanjutVerifikasi() {
@@ -96,7 +87,7 @@ function MenungguPendaftaranContent() {
 
       <div className="relative mx-auto max-w-2xl">
         <div className="mb-8 flex justify-center">
-          <Link
+          <a
             href="/"
             className="relative block h-12 w-48"
             aria-label="SmartSchool"
@@ -109,7 +100,7 @@ function MenungguPendaftaranContent() {
               sizes="192px"
               className="object-contain"
             />
-          </Link>
+          </a>
         </div>
 
         <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_15px_50px_rgba(15,23,42,0.07)]">

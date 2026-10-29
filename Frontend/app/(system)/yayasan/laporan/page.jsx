@@ -22,7 +22,7 @@ import { getLaporanOverview } from "@/services/yayasan.service";
 
 const categories = [
   {
-    id: "akademik",
+    key: "akademik",
     title: "Akademik",
     desc: "Rekap nilai, kehadiran, dan capaian belajar per unit sekolah",
     icon: BookOpen,
@@ -31,7 +31,7 @@ const categories = [
     stat: "6 unit sekolah",
   },
   {
-    id: "guru",
+    key: "guru",
     title: "Guru",
     desc: "Rekap kinerja, kehadiran, dan beban mengajar tenaga pendidik",
     icon: GraduationCap,
@@ -40,7 +40,7 @@ const categories = [
     stat: "237 guru aktif",
   },
   {
-    id: "iventaris",
+    key: "iventaris",
     title: "Inventaris",
     desc: "Kondisi aset dan sarana-prasarana tiap unit sekolah",
     icon: Package,
@@ -49,7 +49,7 @@ const categories = [
     stat: "Update bulanan",
   },
   {
-    id: "siswa",
+    key: "siswa",
     title: "Siswa",
     desc: "Rekap data induk, mutasi, dan demografi siswa lintas unit",
     icon: UserSquare2,
@@ -58,38 +58,6 @@ const categories = [
     stat: "4.312 siswa",
   },
 ];
-
-const recentReports = [
-  {
-    id: 1,
-    title: "Rekap Nilai Semester Ganjil 2025/2026",
-    category: "Akademik",
-    date: "12 Agu 2026",
-    trend: "up",
-  },
-  {
-    id: 2,
-    title: "Laporan Kehadiran Guru Bulan Juli",
-    category: "Guru",
-    date: "3 Agu 2026",
-    trend: "up",
-  },
-  {
-    id: 3,
-    title: "Audit Inventaris Triwulan II",
-    category: "Inventaris",
-    date: "28 Jul 2026",
-    trend: "down",
-  },
-  {
-    id: 4,
-    title: "Data Mutasi Siswa Semester Ganjil",
-    category: "Siswa",
-    date: "15 Jul 2026",
-    trend: "same",
-  },
-];
-
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -253,13 +221,13 @@ export default function LaporanYayasanPage() {
 
   const dynamicCategories = categories.map((cat) => {
     let statText = cat.stat;
-    if (cat.id === "akademik") {
+    if (cat.key === "akademik") {
       statText = `${stats.totalSekolah} unit sekolah`;
-    } else if (cat.id === "guru") {
+    } else if (cat.key === "guru") {
       statText = `${stats.totalGuru} guru aktif`;
-    } else if (cat.id === "iventaris") {
+    } else if (cat.key === "iventaris") {
       statText = `${stats.totalAset} aset terdata`;
-    } else if (cat.id === "siswa") {
+    } else if (cat.key === "siswa") {
       statText = `${stats.totalSiswa} siswa`;
     }
     return { ...cat, stat: statText };
@@ -267,30 +235,30 @@ export default function LaporanYayasanPage() {
 
   const liveReports = [
     {
-      id: 1,
+      key: 1,
       title: "Rekapitulasi Data Induk Siswa Unit Binaan",
       category: "Siswa",
       date: "Real-time Sync",
       trend: "up",
     },
     {
-      id: 2,
+      key: 2,
       title: "Distribusi Penugasan Guru & Rombel",
       category: "Guru",
       date: "Real-time Sync",
       trend: "up",
     },
     {
-      id: 3,
+      key: 3,
       title: "Inventarisasi Sarana & Prasarana Sekolah",
       category: "Inventaris",
       date: "Real-time Sync",
       trend: "same",
     },
     {
-      id: 4,
-      title: "Laporan Capaian Pembelajaran & Kehadiran",
-      category: "Akademik",
+      key: 4,
+      title: "Monitoring Satuan Pendidikan Aktif",
+      category: "Sekolah",
       date: "Real-time Sync",
       trend: "up",
     },
@@ -342,7 +310,7 @@ export default function LaporanYayasanPage() {
 
             return (
               <button
-                key={item.id}
+                key={item.key}
                 onClick={() => router.push(item.path)}
                 className={`
                   group
@@ -492,7 +460,7 @@ export default function LaporanYayasanPage() {
           <div>
             {liveReports.map((r, index) => (
               <div
-                key={r.id}
+                key={r.key}
                 className={`
                   p-4
                   sm:p-5

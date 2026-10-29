@@ -90,8 +90,15 @@ async function requestTenant(
 ): Promise<Response> {
   try {
     return await fetch(getTenantEndpoint(path), init);
-  } catch {
-    throw new TenantApiError(NETWORK_ERROR_MESSAGE, 0, "NETWORK_ERROR");
+  } catch (fetchErr: unknown) {
+    const errorDetail =
+      fetchErr instanceof Error ? fetchErr.message : String(fetchErr);
+    throw new TenantApiError(
+      NETWORK_ERROR_MESSAGE,
+      0,
+      "NETWORK_ERROR",
+      errorDetail
+    );
   }
 }
 
@@ -127,20 +134,23 @@ async function parseResponse<T = unknown>(
               response.status +
               "). Silakan coba lagi nanti.",
             response.status,
-            "UPSTREAM_UNAVAILABLE"
+            "UPSTREAM_UNAVAILABLE",
+            text
           );
         }
         throw new TenantApiError(
           `Terjadi kesalahan pada server (HTTP ${response.status}).`,
           response.status,
-          "HTTP_ERROR"
+          "HTTP_ERROR",
+          text
         );
       }
 
       throw new TenantApiError(
         `Respons backend tidak valid (HTTP ${response.status}).`,
         response.status,
-        "INVALID_RESPONSE"
+        "INVALID_RESPONSE",
+        text
       );
     }
   }

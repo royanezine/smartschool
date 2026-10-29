@@ -2,7 +2,7 @@
 
 import { Suspense } from "react";
 import { useParams } from "next/navigation";
-
+import { daftarPpdb } from "@/services/ppdb.service";
 import PpdbForm from "@/app/components/ppdb/PpdbForm";
 
 function DaftarTenantContent() {

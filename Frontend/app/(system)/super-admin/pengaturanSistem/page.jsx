@@ -407,12 +407,12 @@ export default function PengaturanSistemPage() {
 
   const tabs = [
     {
-      id: "pengaturan",
+      key: "pengaturan",
       label: "Pengaturan",
       icon: Settings,
     },
     {
-      id: "aktivitas",
+      key: "aktivitas",
       label: "Aktivitas",
       icon: Clock,
     },
@@ -550,13 +550,13 @@ export default function PengaturanSistemPage() {
             <div className="flex min-w-max">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
-                const isActive = activeTab === tab.id;
+                const isActive = activeTab === tab.key;
 
                 return (
                   <button
-                    key={tab.id}
+                    key={tab.key}
                     type="button"
-                    onClick={() => setActiveTab(tab.id)}
+                    onClick={() => setActiveTab(tab.key)}
                     className={`flex items-center gap-2 px-4 sm:px-5 py-3.5 text-sm font-medium border-b-2 transition whitespace-nowrap ${
                       isActive
                         ? `${themePrimaryText} border-[var(--color-primary)] ${themePrimarySoft}`
