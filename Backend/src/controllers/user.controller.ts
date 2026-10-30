@@ -940,13 +940,7 @@ export const getUserById = async (req: AuthRequest, res: Response) => {
         nuptk: true,
         nisn: true,
         nik: true,
-        jabatan: true,
         golongan: true,
-        kategoriJabatanId: true,
-        kategoriJabatan: true,
-        shiftKerja: true,
-        shiftKerjaId: true,
-        shiftKerjaMaster: true,
         jenisKelamin: true,
         tempatLahir: true,
         tanggalLahir: true,
@@ -958,6 +952,25 @@ export const getUserById = async (req: AuthRequest, res: Response) => {
         sekolah: { select: { id: true, nama: true, kode: true } },
         peran: { select: { id: true, nama: true, namaTampilan: true } },
         biometrikWajah: true,
+        jabatan: true,
+        shiftKerja: true,
+        shiftKerjaId: true,
+        shiftKerjaMaster: {
+          select: {
+            id: true,
+            nama: true,
+            kode: true,
+            jamMasuk: true,
+            jamKeluar: true,
+          },
+        },
+        kategoriJabatanId: true,
+        kategoriJabatan: {
+          select: {
+            id: true,
+            nama: true,
+          },
+        },
       },
     });
 
