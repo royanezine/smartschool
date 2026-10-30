@@ -514,8 +514,8 @@ export default function TambahAsetPage() {
             <Header />
           </div>
 
-          <main className="min-w-0 flex-1 overflow-x-hidden">
-            <div className="mx-auto w-full max-w-6xl px-4 py-5 sm:px-6 lg:px-8">
+          <main className="min-h-0 min-w-0 flex-1 overflow-y-auto">
+            <div className="w-full p-4 sm:p-6 lg:p-8 space-y-6 min-w-0">
 
               <div className="mb-6">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

@@ -349,7 +349,7 @@ export default function RiwayatPage() {
           }}
         />
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-8">
+        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           <div className="w-full space-y-6">
 
             <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">

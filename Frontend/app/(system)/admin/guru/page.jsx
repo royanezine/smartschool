@@ -72,9 +72,6 @@ export default function AdminGuruPage() {
     totalPages: 0,
   });
 
-  const [showModal, setShowModal] = useState(false);
-
-
   const getResponseData = (response) => {
     if (Array.isArray(response)) return response;
     if (Array.isArray(response?.data)) return response.data;
@@ -858,7 +855,7 @@ export default function AdminGuruPage() {
           }}
         />
 
-        <main className="flex-1 overflow-y-auto">
+        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto">
           <div className="w-full p-4 md:p-6 lg:p-8">
             <div className="w-full space-y-5">
 
@@ -935,7 +932,7 @@ export default function AdminGuruPage() {
 
                   <button
                     type="button"
-                    onClick={() => setShowModal(true)}
+                    onClick={() => router.push("/admin/guru/tambah")}
                     className="flex items-center gap-2 px-5 py-2.5 theme-primary rounded-xl transition-all shadow-sm hover:shadow-md font-medium"
                   >
                     <Plus size={18} />
@@ -1530,95 +1527,6 @@ export default function AdminGuruPage() {
         </main>
       </div>
 
-      {showModal && (
-        <div
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
-          onClick={() => setShowModal(false)}
-        >
-          <div
-            className="theme-card rounded-2xl shadow-2xl max-w-md w-full p-6"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className="text-center mb-6">
-              <div className="w-16 h-16 rounded-full theme-info flex items-center justify-center mx-auto mb-3">
-                <UserPlus size={28} />
-              </div>
-
-              <h3 className="text-xl font-bold theme-text">
-                Tambah Guru
-              </h3>
-
-              <p className="text-sm theme-text-muted mt-1">
-                Pilih metode penambahan guru
-              </p>
-            </div>
-
-            <div className="space-y-3">
-              <button
-                type="button"
-                onClick={() => {
-                  setShowModal(false);
-                  router.push("/admin/guru/tambah?mode=form");
-                }}
-                className="w-full flex items-center gap-4 p-4 border theme-border rounded-xl hover:border-[var(--color-primary)] hover:bg-[var(--color-info-background)] transition-all group"
-              >
-                <div className="p-2.5 rounded-xl theme-info">
-                  <User size={20} />
-                </div>
-
-                <div className="flex-1 text-left">
-                  <p className="font-semibold theme-text-secondary">
-                    Form Biasa
-                  </p>
-                  <p className="text-xs theme-text-muted mt-0.5">
-                    Isi data guru secara manual
-                  </p>
-                </div>
-
-                <ChevronRight
-                  size={18}
-                  className="theme-text-muted group-hover:text-[var(--color-primary)]"
-                />
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setShowModal(false);
-                  router.push("/admin/guru/tambah?mode=import");
-                }}
-                className="w-full flex items-center gap-4 p-4 border theme-border rounded-xl hover:border-[var(--color-info)] hover:bg-[var(--color-info-background)] transition-all group"
-              >
-                <div className="p-2.5 rounded-xl theme-info">
-                  <Upload size={20} />
-                </div>
-
-                <div className="flex-1 text-left">
-                  <p className="font-semibold theme-text-secondary">
-                    Import Data
-                  </p>
-                  <p className="text-xs theme-text-muted mt-0.5">
-                    Upload file Excel atau CSV
-                  </p>
-                </div>
-
-                <ChevronRight
-                  size={18}
-                  className="theme-text-muted group-hover:text-[var(--color-info)]"
-                />
-              </button>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setShowModal(false)}
-              className="mt-4 w-full py-2.5 text-sm theme-text-muted hover:text-[var(--color-primary)]"
-            >
-              Batal
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

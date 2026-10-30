@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Edit,
   Plus,
@@ -128,6 +129,7 @@ function tahunAjaranLabel(item) {
 
 
 export default function SettingTarifPage() {
+  const router = useRouter();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [tab, setTab] = useState("kategori");
 
@@ -311,25 +313,13 @@ export default function SettingTarifPage() {
 
 
   const openTambahKategori = () => {
-    setKategoriModalMode("tambah");
-    setKategoriForm(INITIAL_KATEGORI_FORM);
-    setKategoriSelectedId(null);
-    setError("");
-    setShowKategoriModal(true);
+    router.push("/admin/keuangan/setting-tarif/kategori/tambah");
   };
 
   const openEditKategori = (item) => {
-    setKategoriModalMode("edit");
-    setKategoriForm({
-      kode: item?.kode || "",
-      nama: item?.nama || "",
-      siklus: item?.siklus || "bulanan",
-      deskripsi: item?.deskripsi || "",
-      status: isAktif(item?.status) ? "aktif" : "tidak_aktif",
-    });
-    setKategoriSelectedId(item?.id || null);
-    setError("");
-    setShowKategoriModal(true);
+    if (item?.id) {
+      router.push(`/admin/keuangan/setting-tarif/kategori/${item.id}/edit`);
+    }
   };
 
   const handleKategoriChange = (event) => {
@@ -375,39 +365,13 @@ export default function SettingTarifPage() {
 
 
   const openTambahTarif = () => {
-    setTarifModalMode("tambah");
-    setTarifForm({
-      ...INITIAL_TARIF_FORM,
-      kategoriTagihanId: tarifFilterKategori || "",
-      tahunAjaranId:
-        tarifFilterTahun ||
-        String(tahunAjaranList.find((item) => isAktif(item?.status))?.id || ""),
-    });
-    setTarifSelectedId(null);
-    setError("");
-    setShowTarifModal(true);
+    router.push("/admin/keuangan/setting-tarif/tarif/tambah");
   };
 
   const openEditTarif = (item) => {
-    setTarifModalMode("edit");
-    setTarifForm({
-      ...INITIAL_TARIF_FORM,
-      kategoriTagihanId: item?.kategoriTagihanId || "",
-      tahunAjaranId: item?.tahunAjaranId || "",
-      cakupan: item?.kelasId
-        ? "kelas"
-        : item?.tingkat
-          ? "tingkat"
-          : "semua",
-      tingkat: item?.tingkat ? String(item.tingkat) : "",
-      kelasId: item?.kelasId || "",
-      nominal: String(Number(item?.nominal) || ""),
-      keterangan: item?.keterangan || "",
-      status: isAktif(item?.status) ? "aktif" : "tidak_aktif",
-    });
-    setTarifSelectedId(item?.id || null);
-    setError("");
-    setShowTarifModal(true);
+    if (item?.id) {
+      router.push(`/admin/keuangan/setting-tarif/tarif/${item.id}/edit`);
+    }
   };
 
   const handleTarifChange = (event) => {
@@ -533,7 +497,7 @@ export default function SettingTarifPage() {
           />
         </div>
 
-        <main className="theme-page min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
+        <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
           
           <div className="w-full px-4 py-6 sm:px-6 lg:px-8 xl:px-10">
             
@@ -721,215 +685,6 @@ export default function SettingTarifPage() {
           </div>
         </main>
       </div>
-
-      {showKategoriModal && (
-        <Modal
-          title={
-            kategoriModalMode === "tambah"
-              ? "Tambah Kategori"
-              : "Edit Kategori"
-          }
-          icon={
-            kategoriModalMode === "tambah" ? (
-              <Plus size={20} />
-            ) : (
-              <Edit size={20} />
-            )
-          }
-          onClose={() => setShowKategoriModal(false)}
-          onSave={handleKategoriSave}
-          saveLabel={
-            submitting
-              ? "Menyimpan..."
-              : kategoriModalMode === "tambah"
-                ? "Simpan"
-                : "Perbarui"
-          }
-          disabled={submitting}
-        >
-          <FormInput
-            label="Kode Kategori"
-            name="kode"
-            value={kategoriForm.kode}
-            onChange={handleKategoriChange}
-            placeholder="Contoh: SPP"
-          />
-
-          <FormInput
-            label="Nama Kategori"
-            name="nama"
-            value={kategoriForm.nama}
-            onChange={handleKategoriChange}
-            placeholder="Contoh: SPP Bulanan"
-          />
-
-          <FormSelect
-            label="Siklus"
-            name="siklus"
-            value={kategoriForm.siklus}
-            onChange={handleKategoriChange}
-            options={SIKLUS_OPTIONS}
-          />
-
-          <FormInput
-            label="Deskripsi (opsional)"
-            name="deskripsi"
-            value={kategoriForm.deskripsi}
-            onChange={handleKategoriChange}
-            placeholder="Keterangan kategori"
-          />
-
-          {kategoriModalMode === "edit" && (
-            <FormSelect
-              label="Status"
-              name="status"
-              value={kategoriForm.status}
-              onChange={handleKategoriChange}
-              options={STATUS_OPTIONS}
-            />
-          )}
-        </Modal>
-      )}
-
-      {showTarifModal && (
-        <Modal
-          title={
-            tarifModalMode === "tambah" ? "Tambah Tarif" : "Edit Tarif"
-          }
-          icon={
-            tarifModalMode === "tambah" ? (
-              <Plus size={20} />
-            ) : (
-              <Edit size={20} />
-            )
-          }
-          onClose={() => setShowTarifModal(false)}
-          onSave={handleTarifSave}
-          saveLabel={
-            submitting
-              ? "Menyimpan..."
-              : tarifModalMode === "tambah"
-                ? "Simpan"
-                : "Perbarui"
-          }
-          disabled={submitting}
-        >
-          {tarifModalMode === "tambah" ? (
-            <>
-              <FormSelect
-                label="Kategori Tagihan"
-                name="kategoriTagihanId"
-                value={tarifForm.kategoriTagihanId}
-                onChange={handleTarifChange}
-                placeholder="Pilih kategori"
-                options={kategoriList.map((item) => ({
-                  value: item.id,
-                  label: `${item.kode ? `${item.kode} - ` : ""}${item.nama}`,
-                }))}
-              />
-
-              <FormSelect
-                label="Tahun Ajaran"
-                name="tahunAjaranId"
-                value={tarifForm.tahunAjaranId}
-                onChange={handleTarifChange}
-                placeholder="Pilih tahun ajaran"
-                options={tahunAjaranList.map((item) => ({
-                  value: item.id,
-                  label: `${tahunAjaranLabel(item)}${
-                    item?.semester ? ` · ${item.semester}` : ""
-                  }`,
-                }))}
-              />
-
-              <FormSelect
-                label="Cakupan Tarif"
-                name="cakupan"
-                value={tarifForm.cakupan}
-                onChange={handleTarifChange}
-                options={[
-                  { value: "semua", label: "Semua Kelas (Global)" },
-                  { value: "tingkat", label: "Per Tingkat" },
-                  { value: "kelas", label: "Per Kelas" },
-                ]}
-              />
-
-              {tarifForm.cakupan === "tingkat" && (
-                <FormSelect
-                  label="Tingkat"
-                  name="tingkat"
-                  value={tarifForm.tingkat}
-                  onChange={handleTarifChange}
-                  placeholder="Pilih tingkat"
-                  options={TINGKAT_OPTIONS}
-                />
-              )}
-
-              {tarifForm.cakupan === "kelas" && (
-                <FormSelect
-                  label="Kelas"
-                  name="kelasId"
-                  value={tarifForm.kelasId}
-                  onChange={handleTarifChange}
-                  placeholder="Pilih kelas"
-                  options={kelasList.map((item) => ({
-                    value: item.id,
-                    label: item.nama || item.namaKelas || item.id,
-                  }))}
-                />
-              )}
-            </>
-          ) : (
-            <div className="theme-card-soft rounded-xl px-4 py-3 text-sm">
-              <p className="theme-text font-semibold">
-                {kategoriList.find(
-                  (item) =>
-                    String(item.id) ===
-                    String(tarifForm.kategoriTagihanId),
-                )?.nama || "Tarif"}
-              </p>
-              <p className="theme-text-muted mt-0.5 text-xs">
-                {tahunAjaranLabel(
-                  tahunAjaranList.find(
-                    (item) =>
-                      String(item.id) === String(tarifForm.tahunAjaranId),
-                  ),
-                )}
-                {tarifForm.cakupan !== "semua"
-                  ? " • Cakupan terbatas"
-                  : " • Semua kelas"}
-              </p>
-            </div>
-          )}
-
-          <FormInput
-            label="Nominal"
-            name="nominal"
-            type="number"
-            value={tarifForm.nominal}
-            onChange={handleTarifChange}
-            placeholder="Contoh: 150000"
-          />
-
-          <FormInput
-            label="Keterangan (opsional)"
-            name="keterangan"
-            value={tarifForm.keterangan}
-            onChange={handleTarifChange}
-            placeholder="Catatan tarif"
-          />
-
-          {tarifModalMode === "edit" && (
-            <FormSelect
-              label="Status"
-              name="status"
-              value={tarifForm.status}
-              onChange={handleTarifChange}
-              options={STATUS_OPTIONS}
-            />
-          )}
-        </Modal>
-      )}
 
       {showDeleteModal && deleteTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">

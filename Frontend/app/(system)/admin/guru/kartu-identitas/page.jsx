@@ -415,7 +415,7 @@ function KartuIdentitasPageContent() {
               "
             >
               <div className="overflow-x-auto">
-                <table className="w-full text-sm border-collapse">
+                <table className="w-full min-w-[700px] text-sm border-collapse">
                   <thead>
                     <tr className="theme-table-header">
                       <th className="text-left font-semibold px-4 py-3 min-w-[220px]">

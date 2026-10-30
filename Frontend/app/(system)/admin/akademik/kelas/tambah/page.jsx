@@ -18,7 +18,6 @@ import {
   ChevronDown,
   ArrowLeft,
   Info,
-  Hash,
   Building2,
   Layers3,
   Loader2,
@@ -50,24 +49,19 @@ function FormInput({
   required = false,
   type = "text",
   min,
+  className = "",
 }) {
   return (
-    <div className="min-w-0 w-full">
-      <label className="theme-text-secondary mb-2 block text-xs font-semibold uppercase tracking-wide">
-        {label}
+    <div className={`min-w-0 w-full ${className}`}>
+      <label className="flex items-center gap-1.5 text-sm font-medium theme-text-secondary mb-1.5">
+        {Icon && <Icon size={14} className="theme-text-muted shrink-0" />}
+        <span>{label}</span>
         {required && (
-          <span className="ml-1 text-[var(--color-danger)]">
-            *
-          </span>
+          <span className="text-[var(--color-danger)]">*</span>
         )}
       </label>
 
-      <div className="relative w-full">
-        <Icon
-          size={17}
-          className="theme-text-placeholder pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2"
-        />
-
+      <div className="relative w-full min-w-0">
         <input
           type={type}
           name={name}
@@ -76,13 +70,17 @@ function FormInput({
           placeholder={placeholder}
           min={min}
           className="
-            theme-input
-            w-full rounded-xl border
-            py-3 pl-11 pr-4
-            text-sm
-            outline-none transition-all
-            disabled:cursor-not-allowed
+            w-full px-3.5 py-2.5 text-sm rounded-lg
+            theme-input border
+            focus:outline-none
+            focus:ring-2
+            focus:ring-[var(--color-primary)]
+            focus:ring-opacity-25
+            focus:border-[var(--color-primary)]
             disabled:opacity-60
+            disabled:cursor-not-allowed
+            transition-all
+            min-w-0
           "
         />
       </div>
@@ -99,46 +97,44 @@ function FormSelect({
   children,
   required = false,
   disabled = false,
+  className = "",
 }) {
   return (
-    <div className="min-w-0 w-full">
-      <label className="theme-text-secondary mb-2 block text-xs font-semibold uppercase tracking-wide">
-        {label}
+    <div className={`min-w-0 w-full ${className}`}>
+      <label className="flex items-center gap-1.5 text-sm font-medium theme-text-secondary mb-1.5">
+        {Icon && <Icon size={14} className="theme-text-muted shrink-0" />}
+        <span>{label}</span>
         {required && (
-          <span className="ml-1 text-[var(--color-danger)]">
-            *
-          </span>
+          <span className="text-[var(--color-danger)]">*</span>
         )}
       </label>
 
-      <div className="relative w-full">
-        <Icon
-          size={17}
-          className="theme-text-placeholder pointer-events-none absolute left-3.5 top-1/2 z-10 -translate-y-1/2"
-        />
-
+      <div className="relative w-full min-w-0">
         <select
           name={name}
           value={value}
           onChange={onChange}
           disabled={disabled}
           className="
-            theme-input
-            w-full appearance-none rounded-xl
-            border
-            py-3 pl-11 pr-10
-            text-sm
-            outline-none transition-all
-            disabled:cursor-not-allowed
+            w-full px-3.5 py-2.5 pr-9 text-sm rounded-lg appearance-none
+            theme-input border
+            focus:outline-none
+            focus:ring-2
+            focus:ring-[var(--color-primary)]
+            focus:ring-opacity-25
+            focus:border-[var(--color-primary)]
             disabled:opacity-60
+            disabled:cursor-not-allowed
+            transition-all
+            min-w-0
           "
         >
           {children}
         </select>
 
         <ChevronDown
-          size={17}
-          className="theme-text-placeholder pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2"
+          size={16}
+          className="theme-text-placeholder pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
         />
       </div>
     </div>
@@ -459,16 +455,33 @@ export default function AdminKelasTambahPage() {
     }
   }
 
+  const selectedTahunAjaran = tahunAjaranList.find(
+    (item) => item.id === form.tahunAjaranId
+  );
+  const selectedGuru = guruList.find(
+    (guru) => guru.id === form.waliKelasId
+  );
+  const selectedGedung = gedungList.find(
+    (item) => item.id === form.gedungId
+  );
+  const selectedLantai = lantaiList.find(
+    (item) => item.id === form.lantaiId
+  );
+  const selectedTingkat = TINGKAT_OPTIONS.find(
+    (item) => item.value === Number(form.tingkat)
+  );
+
   return (
-    <div className="theme-page flex h-screen w-full overflow-hidden">
+    <div className="flex h-screen w-full theme-page overflow-hidden">
       <Sidebar
         active="kelas"
         setActive={() => {}}
         collapsed={isCollapsed}
         setCollapsed={setIsCollapsed}
+        role="admin"
       />
 
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
         <Header
           toggleSidebar={() =>
             setIsCollapsed((prev) => !prev)
@@ -481,121 +494,124 @@ export default function AdminKelasTambahPage() {
           }}
         />
 
-        <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
-          <div className="w-full px-4 py-5 sm:px-5 sm:py-6 md:px-6 lg:px-8 xl:px-10">
-            <div className="mx-auto w-full max-w-[1200px]">
+        <main className="flex-1 overflow-y-auto min-w-0">
+          <div className="p-4 sm:p-6 lg:p-8 space-y-6">
+            {/* Header & Back Navigation */}
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() =>
+                  router.push("/admin/akademik/kelas")
+                }
+                className="
+                  p-2.5 rounded-xl
+                  theme-card theme-border theme-text-muted
+                  theme-header-hover
+                  transition-colors shrink-0
+                "
+                title="Kembali ke daftar kelas"
+              >
+                <ArrowLeft size={20} />
+              </button>
 
-
-              <div className="mb-5">
-                <button
-                  type="button"
-                  onClick={() =>
-                    router.push(
-                      "/admin/akademik/kelas"
-                    )
-                  }
-                  className="theme-text-muted theme-sidebar-hover group inline-flex items-center gap-2 rounded-lg px-2 py-1 text-sm font-medium transition-colors"
-                >
-                  <ArrowLeft
-                    size={18}
-                    className="transition-transform duration-200 group-hover:-translate-x-1"
-                  />
-
-                  <span>
-                    Kembali ke Daftar Kelas
-                  </span>
-                </button>
+              <div
+                className="
+                  p-2.5 rounded-xl
+                  bg-[image:var(--color-brand-logo-bg)]
+                  text-white
+                  shadow-lg
+                  shrink-0
+                "
+              >
+                <GraduationCap size={20} />
               </div>
 
+              <div>
+                <h1 className="text-2xl font-bold theme-text">
+                  Tambah Kelas
+                </h1>
 
-              <div className="mb-6 flex min-w-0 items-center gap-3 sm:gap-4">
-                <div className="theme-primary flex h-11 w-11 shrink-0 items-center justify-center rounded-xl shadow-md sm:h-12 sm:w-12">
-                  <Plus size={21} />
-                </div>
+                <p className="text-sm theme-text-muted">
+                  Tambahkan data kelas baru beserta lokasi ruangannya.
+                </p>
+              </div>
+            </div>
 
-                <div className="min-w-0 flex-1">
-                  <h1 className="theme-text text-xl font-bold tracking-tight sm:text-2xl">
-                    Tambah Kelas
-                  </h1>
+            {/* Success Alert */}
+            {success && (
+              <div className="flex items-center gap-3 p-4 rounded-xl theme-success">
+                <CheckCircle
+                  size={20}
+                  className="shrink-0"
+                />
 
-                  <p className="theme-text-muted mt-1 text-sm">
-                    Tambahkan data kelas baru
-                    beserta lokasi ruangannya.
+                <p className="text-sm font-medium">
+                  {success} Mengalihkan...
+                </p>
+              </div>
+            )}
+
+            {/* Error Alert */}
+            {error && (
+              <div className="flex items-start gap-3 p-4 rounded-xl theme-danger">
+                <AlertCircle
+                  size={20}
+                  className="mt-0.5 shrink-0"
+                />
+
+                <div className="flex-1">
+                  <p className="text-sm font-semibold">
+                    Gagal menambahkan kelas
+                  </p>
+
+                  <p className="text-sm mt-1 leading-relaxed break-words">
+                    {error}
                   </p>
                 </div>
+
+                <button
+                  type="button"
+                  onClick={() => setError("")}
+                  className="theme-header-hover rounded-lg p-1 transition shrink-0"
+                >
+                  <X size={17} />
+                </button>
               </div>
+            )}
 
-
-              {error && (
-                <div className="theme-danger mb-5 flex items-start gap-3 rounded-xl border p-4">
-                  <div className="theme-danger flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
-                    <AlertCircle size={17} />
-                  </div>
-
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold">
-                      Gagal menyimpan
-                    </p>
-
-                    <p className="mt-1 text-sm leading-relaxed">
-                      {error}
-                    </p>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => setError("")}
-                    className="theme-header-hover rounded-lg p-1 transition"
-                  >
-                    <X size={17} />
-                  </button>
-                </div>
-              )}
-
-
-              {success && (
-                <div className="theme-success mb-5 flex items-start gap-3 rounded-xl border p-4">
-                  <div className="theme-success flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
-                    <CheckCircle size={17} />
-                  </div>
-
-                  <div>
-                    <p className="text-sm font-semibold">
-                      Berhasil
-                    </p>
-
-                    <p className="mt-1 text-sm">
-                      {success}
-                    </p>
-                  </div>
-                </div>
-              )}
-
-
+            {/* Main Responsive Grid Layout (matches Tambah Wali Kelas pattern) */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+              {/* Form Card (lg:col-span-2) */}
               <form
                 onSubmit={handleSubmit}
-                className="theme-card theme-border w-full overflow-hidden rounded-2xl border shadow-sm"
+                className="
+                  lg:col-span-2
+                  theme-card
+                  rounded-xl
+                  border
+                  shadow-sm
+                  overflow-hidden
+                "
               >
-                <div className="theme-card-soft theme-border-soft flex items-center gap-3 border-b px-5 py-4 sm:px-6 md:px-7">
-                  <div className="theme-info flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
-                    <GraduationCap size={18} />
-                  </div>
+                <div
+                  className="
+                    px-6 py-4
+                    border-b
+                    theme-border-soft
+                    theme-card-soft
+                  "
+                >
+                  <h2 className="text-sm font-semibold theme-text-secondary">
+                    Informasi Kelas
+                  </h2>
 
-                  <div>
-                    <h2 className="theme-text text-sm font-semibold">
-                      Informasi Kelas
-                    </h2>
-
-                    <p className="theme-text-muted mt-0.5 text-sm">
-                      Lengkapi data kelas dan lokasi ruangannya.
-                    </p>
-                  </div>
+                  <p className="text-xs theme-text-muted mt-0.5">
+                    Lengkapi data kelas dan lokasi ruangannya.
+                  </p>
                 </div>
 
-                <div className="w-full p-5 sm:p-6 md:p-7 lg:p-8">
-                  <div className="grid w-full grid-cols-1 gap-x-6 gap-y-5 md:grid-cols-2 lg:gap-x-8">
-
-
+                <div className="p-6 space-y-5">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <FormInput
                       label="Nama Kelas"
                       name="nama"
@@ -605,7 +621,6 @@ export default function AdminKelasTambahPage() {
                       icon={GraduationCap}
                       required
                     />
-
 
                     <FormSelect
                       label="Tingkat"
@@ -619,18 +634,15 @@ export default function AdminKelasTambahPage() {
                         Pilih tingkat
                       </option>
 
-                      {TINGKAT_OPTIONS.map(
-                        (item) => (
-                          <option
-                            key={item.value}
-                            value={item.value}
-                          >
-                            {item.label}
-                          </option>
-                        )
-                      )}
+                      {TINGKAT_OPTIONS.map((item) => (
+                        <option
+                          key={item.value}
+                          value={item.value}
+                        >
+                          {item.label}
+                        </option>
+                      ))}
                     </FormSelect>
-
 
                     <FormSelect
                       label="Tahun Ajaran"
@@ -647,23 +659,18 @@ export default function AdminKelasTambahPage() {
                           : "Pilih tahun ajaran"}
                       </option>
 
-                      {tahunAjaranList.map(
-                        (item) => (
-                          <option
-                            key={item.id}
-                            value={item.id}
-                          >
-                            {item.nama} -{" "}
-                            {item.semester}
-                            {item.status ===
-                            "aktif"
-                              ? " (Aktif)"
-                              : ""}
-                          </option>
-                        )
-                      )}
+                      {tahunAjaranList.map((item) => (
+                        <option
+                          key={item.id}
+                          value={item.id}
+                        >
+                          {item.nama} - {item.semester}
+                          {item.status === "aktif"
+                            ? " (Aktif)"
+                            : ""}
+                        </option>
+                      ))}
                     </FormSelect>
-
 
                     <FormInput
                       label="Kapasitas Kelas"
@@ -677,7 +684,6 @@ export default function AdminKelasTambahPage() {
                       required
                     />
 
-
                     <FormSelect
                       label="Wali Kelas"
                       name="waliKelasId"
@@ -685,6 +691,7 @@ export default function AdminKelasTambahPage() {
                       onChange={handleChange}
                       icon={UserCheck}
                       disabled={loadingGuru}
+                      className="sm:col-span-2"
                     >
                       <option value="">
                         {loadingGuru
@@ -707,7 +714,6 @@ export default function AdminKelasTambahPage() {
                       ))}
                     </FormSelect>
 
-
                     <FormSelect
                       label="Gedung"
                       name="gedungId"
@@ -722,21 +728,18 @@ export default function AdminKelasTambahPage() {
                           : "Pilih gedung"}
                       </option>
 
-                      {gedungList.map(
-                        (gedung) => (
-                          <option
-                            key={gedung.id}
-                            value={gedung.id}
-                          >
-                            {gedung.nama}
-                            {gedung.kode
-                              ? ` (${gedung.kode})`
-                              : ""}
-                          </option>
-                        )
-                      )}
+                      {gedungList.map((gedung) => (
+                        <option
+                          key={gedung.id}
+                          value={gedung.id}
+                        >
+                          {gedung.nama}
+                          {gedung.kode
+                            ? ` (${gedung.kode})`
+                            : ""}
+                        </option>
+                      ))}
                     </FormSelect>
-
 
                     <FormSelect
                       label="Lantai"
@@ -745,8 +748,7 @@ export default function AdminKelasTambahPage() {
                       onChange={handleChange}
                       icon={Layers3}
                       disabled={
-                        !form.gedungId ||
-                        loadingLantai
+                        !form.gedungId || loadingLantai
                       }
                     >
                       <option value="">
@@ -759,158 +761,257 @@ export default function AdminKelasTambahPage() {
                           : "Pilih lantai"}
                       </option>
 
-                      {lantaiList.map(
-                        (lantai) => (
-                          <option
-                            key={lantai.id}
-                            value={lantai.id}
-                          >
-                            {lantai.nama}
-                          </option>
-                        )
-                      )}
+                      {lantaiList.map((lantai) => (
+                        <option
+                          key={lantai.id}
+                          value={lantai.id}
+                        >
+                          {lantai.nama}
+                        </option>
+                      ))}
                     </FormSelect>
                   </div>
+                </div>
 
+                {/* Action Buttons Footer */}
+                <div
+                  className="
+                    flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-3
+                    px-6 py-4
+                    border-t
+                    theme-border-soft
+                    theme-card-soft
+                  "
+                >
+                  <button
+                    type="button"
+                    onClick={() =>
+                      router.push("/admin/akademik/kelas")
+                    }
+                    disabled={loading}
+                    className="
+                      w-full sm:w-auto
+                      px-5 py-2.5
+                      rounded-xl
+                      border
+                      theme-border
+                      theme-text-secondary
+                      theme-header-hover
+                      transition-all
+                      font-medium
+                      text-sm
+                      disabled:opacity-60
+                      flex items-center justify-center gap-2
+                    "
+                  >
+                    <X size={17} />
+                    Batal
+                  </button>
 
-                  <div className="theme-info mt-7 flex items-start gap-3 rounded-xl border p-4">
-                    <div className="theme-info flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
-                      <Info size={16} />
-                    </div>
-
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold">
-                        Lokasi Kelas
-                      </p>
-
-                      <p className="mt-1 text-sm leading-relaxed">
-                        Pilih gedung dan lantai jika
-                        kelas memiliki lokasi ruang.
-                        Lokasi tersebut akan tersimpan
-                        pada kolom{" "}
-                        <b>lantaiId</b> di
-                        database.
-                      </p>
-                    </div>
-                  </div>
-
-
-                  <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
-
-
-                    <div className="theme-card-soft theme-border flex items-center gap-3 rounded-xl border p-4">
-                      <div className="theme-card theme-border flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border">
-                        <Hash
+                  <button
+                    type="submit"
+                    disabled={
+                      loading ||
+                      loadingTahun ||
+                      loadingGedung
+                    }
+                    className="
+                      w-full sm:w-auto
+                      flex items-center justify-center gap-2
+                      px-6 py-2.5
+                      theme-primary
+                      rounded-xl
+                      transition-all
+                      shadow-sm
+                      font-medium
+                      text-sm
+                      disabled:opacity-60
+                      disabled:cursor-not-allowed
+                    "
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2
                           size={17}
-                          className="theme-text-secondary"
+                          className="animate-spin"
                         />
-                      </div>
-
-                      <div>
-                        <p className="theme-text-muted text-xs font-semibold uppercase tracking-wide">
-                          Tingkat
-                        </p>
-
-                        <p className="theme-text-secondary mt-0.5 text-sm">
-                          X, XI, XII
-                        </p>
-                      </div>
-                    </div>
-
-
-                    <div className="theme-card-soft theme-border flex items-center gap-3 rounded-xl border p-4">
-                      <div className="theme-card theme-border flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border">
-                        <Building2
-                          size={17}
-                          className="theme-text-secondary"
-                        />
-                      </div>
-
-                      <div className="min-w-0">
-                        <p className="theme-text-muted text-xs font-semibold uppercase tracking-wide">
-                          Gedung
-                        </p>
-
-                        <p className="theme-text-secondary mt-0.5 truncate text-sm">
-                          {form.gedungId
-                            ? gedungList.find(
-                                (item) =>
-                                  item.id ===
-                                  form.gedungId
-                              )?.nama ||
-                              "Dipilih"
-                            : "Belum dipilih"}
-                        </p>
-                      </div>
-                    </div>
-
-
-                    <div className="theme-success flex items-center gap-3 rounded-xl border p-4">
-                      <div className="theme-card theme-border flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border">
-                        <CheckCircle size={17} />
-                      </div>
-
-                      <div className="min-w-0">
-                        <p className="text-xs font-semibold uppercase tracking-wide">
-                          Backend
-                        </p>
-
-                        <p className="mt-0.5 truncate text-sm">
-                          Database Sekolah
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-
-                  <div className="theme-border-soft mt-7 flex w-full flex-col-reverse gap-3 border-t pt-6 sm:flex-row sm:items-center sm:justify-end">
-                    <button
-                      type="button"
-                      onClick={() =>
-                        router.push(
-                          "/admin/akademik/kelas"
-                        )
-                      }
-                      disabled={loading}
-                      className="theme-card theme-border theme-text-secondary theme-header-hover inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border px-6 py-2.5 text-sm font-medium transition disabled:opacity-50 sm:w-auto"
-                    >
-                      <X size={17} />
-                      Batal
-                    </button>
-
-                    <button
-                      type="submit"
-                      disabled={
-                        loading ||
-                        loadingTahun ||
-                        loadingGedung
-                      }
-                      className="theme-primary inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl px-7 py-2.5 text-sm font-semibold shadow-md transition hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
-                    >
-                      {loading ? (
-                        <>
-                          <Loader2
-                            size={17}
-                            className="animate-spin"
-                          />
-                          Menyimpan...
-                        </>
-                      ) : (
-                        <>
-                          <Save size={17} />
-                          Simpan Kelas
-                        </>
-                      )}
-                    </button>
-                  </div>
+                        Menyimpan...
+                      </>
+                    ) : (
+                      <>
+                        <Save size={17} />
+                        Simpan Kelas
+                      </>
+                    )}
+                  </button>
                 </div>
               </form>
 
+              {/* Side Preview & Information (1 Column in lg:grid-cols-3) */}
+              <div className="space-y-6">
+                {/* Pratinjau Card */}
+                <div
+                  className="
+                    theme-card
+                    rounded-xl
+                    border
+                    shadow-sm
+                    overflow-hidden
+                  "
+                >
+                  <div
+                    className="
+                      px-5 py-4
+                      border-b
+                      theme-border-soft
+                      theme-card-soft
+                    "
+                  >
+                    <h2 className="text-sm font-semibold theme-text-secondary">
+                      Pratinjau
+                    </h2>
 
-              <div className="pb-5 pt-6 text-center">
-                <p className="theme-text-muted text-sm">
-                  © 2026 SmartSchool • Tambah Kelas
-                </p>
+                    <p className="text-xs theme-text-muted mt-0.5">
+                      Tampilan data ini di daftar kelas.
+                    </p>
+                  </div>
+
+                  <div
+                    className="
+                      bg-[image:var(--color-brand-logo-bg)]
+                      px-5 py-5
+                      flex items-center gap-3
+                    "
+                  >
+                    <div
+                      className="
+                        w-12 h-12 rounded-full
+                        flex items-center justify-center
+                        font-bold text-sm shrink-0
+                        bg-[color:color-mix(in_srgb,var(--color-card)_20%,transparent)]
+                        text-[var(--color-card)]
+                      "
+                    >
+                      <GraduationCap size={22} />
+                    </div>
+
+                    <div className="min-w-0">
+                      <p
+                        className="
+                          text-xs
+                          text-[color:color-mix(in_srgb,var(--color-card)_80%,transparent)]
+                        "
+                      >
+                        Kelas {selectedTingkat?.label || "-"}
+                      </p>
+
+                      <p className="font-bold text-[var(--color-card)] text-sm leading-tight truncate">
+                        {form.nama || "Nama Kelas"}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="p-5 space-y-3 text-sm">
+                    <div className="flex items-center justify-between">
+                      <span className="theme-text-muted text-xs">
+                        Tingkat
+                      </span>
+
+                      <span className="font-medium text-xs theme-text-secondary">
+                        {selectedTingkat?.label || "-"}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <span className="theme-text-muted text-xs">
+                        Tahun Ajaran
+                      </span>
+
+                      <span className="theme-text-secondary font-medium text-xs">
+                        {selectedTahunAjaran
+                          ? `${selectedTahunAjaran.nama} (${selectedTahunAjaran.semester})`
+                          : "-"}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <span className="theme-text-muted text-xs">
+                        Kapasitas
+                      </span>
+
+                      <span className="theme-text-secondary font-medium inline-flex items-center gap-1.5 text-xs">
+                        <Users size={12} />
+                        {form.kapasitas ? `${form.kapasitas} siswa` : "-"}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <span className="theme-text-muted text-xs">
+                        Wali Kelas
+                      </span>
+
+                      <span className="theme-text-secondary font-medium text-xs truncate max-w-[180px] text-right">
+                        {selectedGuru?.namaLengkap ||
+                          selectedGuru?.namaPengguna ||
+                          selectedGuru?.email ||
+                          "Belum ditentukan"}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <span className="theme-text-muted text-xs">
+                        Lokasi Ruangan
+                      </span>
+
+                      <span className="theme-text-secondary font-medium text-xs truncate max-w-[180px] text-right">
+                        {selectedGedung
+                          ? `${selectedGedung.nama}${
+                              selectedLantai
+                                ? ` • ${selectedLantai.nama}`
+                                : ""
+                            }`
+                          : "Belum dipilih"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Informasi Box */}
+                <div className="theme-info rounded-xl border p-5">
+                  <div className="flex items-center gap-2 mb-2.5">
+                    <Info
+                      size={16}
+                      className="shrink-0"
+                    />
+
+                    <h2 className="text-sm font-semibold">
+                      Informasi Kelas
+                    </h2>
+                  </div>
+
+                  <ul
+                    className="
+                      space-y-2
+                      text-xs
+                      theme-text-secondary
+                      list-disc
+                      list-inside
+                    "
+                  >
+                    <li>
+                      Nama kelas dan tingkat wajib diisi untuk penataan rombongan belajar.
+                    </li>
+                    <li>
+                      Wali kelas bersifat opsional dan dapat disesuaikan kemudian.
+                    </li>
+                    <li>
+                      Pemilihan gedung dan lantai akan menyimpan relasi lokasi ke lantaiId.
+                    </li>
+                    <li>
+                      Kapasitas kelas minimal 1 siswa.
+                    </li>
+                  </ul>
+                </div>
               </div>
             </div>
           </div>

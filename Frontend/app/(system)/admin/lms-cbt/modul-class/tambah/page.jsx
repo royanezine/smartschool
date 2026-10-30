@@ -138,7 +138,7 @@ export default function TambahModulClassPage() {
       <div className="flex-1 min-w-0 flex flex-col">
         <Header />
 
-        <main className="flex-1 px-4 md:px-6 lg:px-8 py-6">
+        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto px-4 py-6 sm:px-6 lg:px-8">
           <div className="flex items-center gap-2 text-sm theme-text-secondary mb-4">
             <Link
               href="/admin/lms-cbt/modul-class"

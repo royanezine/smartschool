@@ -1155,7 +1155,7 @@ function SekolahTab({
 
       <div className="overflow-x-auto">
 
-        <table className="w-full text-sm">
+        <table className="w-full min-w-[700px] text-sm">
 
           <thead>
             <tr
@@ -1455,7 +1455,7 @@ function KeuanganTab({
 
         <div className="overflow-x-auto">
 
-          <table className="w-full text-sm">
+          <table className="w-full min-w-[700px] text-sm">
 
             <thead>
               <tr

@@ -21,7 +21,6 @@ import {
   Loader2,
   RefreshCw,
   CheckCircle2,
-  BriefcaseBusiness,
 } from "lucide-react";
 
 import {
@@ -466,18 +465,6 @@ export default function MasterShiftDetailPage() {
                 </div>
               </section>
 
-
-              <section className="theme-card overflow-hidden rounded-xl border theme-border shadow-sm">
-                <SectionHeader
-                  icon={<BriefcaseBusiness size={15} />}
-                  title="Kategori Jabatan"
-                  description="Informasi penugasan kategori jabatan tidak dikirim oleh endpoint detail shift."
-                />
-
-                <EmptyInfo message="Endpoint GET /api/shift-kerja/:id tidak mengembalikan daftar kategori jabatan. Kategori jabatan tidak dapat ditampilkan dari data shift ini." />
-              </section>
-
-
               <section className="theme-card overflow-hidden rounded-xl border theme-border shadow-sm">
                 <div className="flex items-center justify-between gap-4 border-b theme-border theme-card-soft px-5 py-4">
                   <div className="flex items-center gap-3">
@@ -646,17 +633,6 @@ function InfoField({ label, value }) {
       </p>
       <p className="mt-1.5 break-words text-sm font-semibold theme-text">
         {value || "—"}
-      </p>
-    </div>
-  );
-}
-
-function EmptyInfo({ message }) {
-  return (
-    <div className="px-5 py-8 text-center">
-      <Info size={20} className="mx-auto theme-text-muted" />
-      <p className="mx-auto mt-2 max-w-lg text-xs leading-5 theme-text-muted">
-        {message}
       </p>
     </div>
   );

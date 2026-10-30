@@ -660,9 +660,8 @@ export default function DetailKelasPage() {
         />
 
 
-        <main className="theme-page min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
-          <div className="w-full px-4 py-5 sm:px-5 md:px-7 lg:px-8 xl:px-10">
-            <div className="mx-auto w-full max-w-[1600px] space-y-6">
+        <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto">
+          <div className="w-full p-4 sm:p-6 lg:p-8 space-y-6 min-w-0">
 
 
               <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -1603,7 +1602,6 @@ export default function DetailKelasPage() {
                   </div>
                 )}
               </section>
-            </div>
           </div>
         </main>
       </div>

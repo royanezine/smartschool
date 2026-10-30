@@ -693,7 +693,7 @@ export default function DetailSiswaPage() {
       isCollapsed={isCollapsed}
       setIsCollapsed={setIsCollapsed}
     >
-      <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
+      <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
         <div className="w-full px-4 py-5 sm:px-6 md:px-7 lg:px-8 xl:px-10">
           <div className="mx-auto w-full max-w-[1500px]">
 

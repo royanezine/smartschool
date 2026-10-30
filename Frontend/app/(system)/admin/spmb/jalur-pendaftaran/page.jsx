@@ -377,7 +377,7 @@ export default function JalurPendaftaranPage() {
           }}
         />
 
-        <main className="theme-page flex-1 overflow-y-auto">
+        <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto">
           <div className="w-full p-4 sm:p-6 lg:p-8">
 
 

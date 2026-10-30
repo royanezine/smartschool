@@ -340,7 +340,7 @@ export default function AdminTahunAjaranPage() {
           />
         </div>
 
-        <main className="min-w-0 flex-1 overflow-y-auto">
+        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto">
           <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
             <div className="space-y-5">
 

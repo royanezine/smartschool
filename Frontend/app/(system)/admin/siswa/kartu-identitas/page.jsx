@@ -338,7 +338,7 @@ export default function KartuIdentitasSiswaPage() {
         />
 
 
-        <main className="flex-1 overflow-y-auto">
+        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto">
 
           <div className="p-4 sm:p-6 lg:p-8 space-y-6">
 
@@ -564,7 +564,7 @@ export default function KartuIdentitasSiswaPage() {
 
               <div className="overflow-x-auto">
 
-                <table className="w-full text-sm border-collapse">
+                <table className="w-full min-w-[700px] text-sm border-collapse">
 
 
                   <thead>

@@ -20,7 +20,6 @@ import {
   ArrowUpRight,
   CalendarDays,
   School,
-  Split,
   RefreshCw,
 } from "lucide-react";
 
@@ -245,11 +244,6 @@ export default function AkademikPage() {
       path: "/admin/akademik/kelas",
     },
     {
-      label: "Jurusan",
-      icon: Split,
-      path: "/admin/akademik/jurusan",
-    },
-    {
       label: "Entry Nilai e-Rapor",
       icon: NotebookPen,
       path: "/admin/eraport/entry-nilai",
@@ -286,7 +280,7 @@ export default function AkademikPage() {
         />
 
 
-        <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
+        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
           <div className="mx-auto w-full max-w-[1500px] px-4 py-5 sm:px-6 sm:py-6 lg:px-8 xl:px-10">
             <div className="space-y-6">
 

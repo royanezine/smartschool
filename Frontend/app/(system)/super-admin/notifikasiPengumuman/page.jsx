@@ -349,7 +349,7 @@ export default function NotifikasiPengumumanPage() {
               {activeTab === "pengumuman" && (
                 <button
                   onClick={() =>
-                    setShowNewAnnouncement(true)
+                    router.push("/super-admin/notifikasiPengumuman/tambah")
                   }
                   className={`flex items-center gap-2 px-4 py-2 text-sm font-medium text-[var(--color-card)] ${themePrimaryGradient} rounded-lg transition-all ${themePrimaryShadow}`}
                 >
@@ -794,7 +794,7 @@ export default function NotifikasiPengumumanPage() {
 
                     <button
                       onClick={() =>
-                        setShowNewAnnouncement(true)
+                        router.push("/super-admin/notifikasiPengumuman/tambah")
                       }
                       className={`mt-3 px-4 py-2 text-sm font-medium text-[var(--color-card)] ${themePrimaryGradient} rounded-lg ${themePrimaryShadow} transition-all`}
                     >
@@ -964,177 +964,6 @@ export default function NotifikasiPengumumanPage() {
       </div>
 
 
-      {showNewAnnouncement && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[color-mix(in_srgb,var(--color-text)_42%,transparent)] backdrop-blur-sm p-4">
-
-          <div
-            className={`theme-card rounded-xl ${themeCardShadow} w-full max-w-lg max-h-[90vh] overflow-y-auto border theme-border`}
-          >
-
-
-            <div
-              className={`flex items-center justify-between px-5 py-4 border-b ${themeDivider} sticky top-0 theme-card z-10`}
-            >
-              <div className="flex items-center gap-2.5">
-
-                <div
-                  className={`p-1.5 rounded-lg ${themePrimarySoft} ${themePrimaryText} border ${themePrimarySoftBorder}`}
-                >
-                  <Megaphone size={18} />
-                </div>
-
-                <h3 className="text-sm font-semibold theme-text">
-                  Buat Pengumuman Baru
-                </h3>
-              </div>
-
-              <button
-                onClick={() =>
-                  setShowNewAnnouncement(false)
-                }
-                className={`p-1.5 rounded-lg theme-text-muted ${themeNeutralHover} hover:theme-text transition-colors`}
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-
-            <div className="p-5 space-y-4">
-
-
-              <div>
-                <label className="block text-xs font-medium theme-text-secondary mb-1.5">
-                  Judul Pengumuman{" "}
-                  <span className="text-[var(--color-warning)]">
-                    *
-                  </span>
-                </label>
-
-                <input
-                  type="text"
-                  value={newAnnouncement.judul}
-                  onChange={(e) =>
-                    setNewAnnouncement({
-                      ...newAnnouncement,
-                      judul: e.target.value,
-                    })
-                  }
-                  placeholder="Masukkan judul pengumuman"
-                  className={`theme-input theme-text w-full px-3 py-2 text-sm rounded-lg ${themeFocus} transition placeholder:text-[var(--color-text-placeholder)]`}
-                />
-              </div>
-
-
-              <div>
-                <label className="block text-xs font-medium theme-text-secondary mb-1.5">
-                  Isi Pengumuman{" "}
-                  <span className="text-[var(--color-warning)]">
-                    *
-                  </span>
-                </label>
-
-                <textarea
-                  value={newAnnouncement.isi}
-                  onChange={(e) =>
-                    setNewAnnouncement({
-                      ...newAnnouncement,
-                      isi: e.target.value,
-                    })
-                  }
-                  rows={4}
-                  placeholder="Tulis isi pengumuman di sini..."
-                  className={`theme-input theme-text w-full px-3 py-2 text-sm rounded-lg ${themeFocus} transition resize-none placeholder:text-[var(--color-text-placeholder)]`}
-                />
-              </div>
-
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
-                <div>
-                  <label className="block text-xs font-medium theme-text-secondary mb-1.5">
-                    Kategori
-                  </label>
-
-                  <select
-                    value={newAnnouncement.kategori}
-                    onChange={(e) =>
-                      setNewAnnouncement({
-                        ...newAnnouncement,
-                        kategori: e.target.value,
-                      })
-                    }
-                    className={`theme-input theme-text w-full px-3 py-2 text-sm rounded-lg ${themeFocus} transition cursor-pointer`}
-                  >
-                    <option value="Pengumuman">
-                      Pengumuman
-                    </option>
-                    <option value="Acara">
-                      Acara
-                    </option>
-                    <option value="Kebijakan">
-                      Kebijakan
-                    </option>
-                    <option value="Peringatan">
-                      Peringatan
-                    </option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-medium theme-text-secondary mb-1.5">
-                    Prioritas
-                  </label>
-
-                  <select
-                    value={newAnnouncement.prioritas}
-                    onChange={(e) =>
-                      setNewAnnouncement({
-                        ...newAnnouncement,
-                        prioritas: e.target.value,
-                      })
-                    }
-                    className={`theme-input theme-text w-full px-3 py-2 text-sm rounded-lg ${themeFocus} transition cursor-pointer`}
-                  >
-                    <option value="low">
-                      Rendah
-                    </option>
-                    <option value="medium">
-                      Sedang
-                    </option>
-                    <option value="high">
-                      Penting
-                    </option>
-                  </select>
-                </div>
-              </div>
-
-
-              <div
-                className={`flex flex-col-reverse sm:flex-row items-center gap-3 pt-2 border-t ${themeDivider}`}
-              >
-                <button
-                  type="button"
-                  onClick={() =>
-                    setShowNewAnnouncement(false)
-                  }
-                  className={`w-full sm:flex-1 py-2 rounded-lg text-sm font-medium theme-text-secondary border ${themeNeutralBorder} ${themeNeutralHover} transition-colors`}
-                >
-                  Batal
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleCreateAnnouncement}
-                  className={`w-full sm:flex-1 py-2 rounded-lg text-sm font-medium text-[var(--color-card)] ${themePrimaryGradient} transition-all ${themePrimaryShadow} flex items-center justify-center gap-2`}
-                >
-                  <Save size={16} />
-                  Simpan Sebagai Draf
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

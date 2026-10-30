@@ -351,7 +351,7 @@ function AksiContent() {
           }}
         />
 
-        <main className="flex-1 overflow-y-auto theme-page">
+        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto theme-page">
           <div className="mx-auto w-full max-w-[900px] space-y-5 p-4 sm:p-6 lg:p-8">
 
 

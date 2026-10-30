@@ -168,9 +168,8 @@ export default function TambahTahunAjaranPage() {
           }}
         />
 
-        <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
-          <div className="w-full px-3 py-4 sm:px-5 sm:py-6 md:px-6 lg:px-8 xl:px-10">
-            <div className="mx-auto w-full max-w-[1200px]">
+        <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto">
+          <div className="w-full p-4 sm:p-6 lg:p-8 space-y-6 min-w-0">
 
 
               <div className="mb-5">
@@ -679,7 +678,6 @@ export default function TambahTahunAjaranPage() {
                 </p>
               </footer>
 
-            </div>
           </div>
         </main>
       </div>

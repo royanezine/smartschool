@@ -926,7 +926,7 @@ export default function PengaturanSistemPage() {
                 <div
                   className={`overflow-x-auto rounded-lg border ${themeNeutralBorder}`}
                 >
-                  <table className="w-full text-sm">
+                  <table className="w-full min-w-[750px] text-sm">
                     <thead>
                       <tr
                         className={`${themeNeutralSurface} border-b ${themeDivider}`}

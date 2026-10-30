@@ -8,6 +8,7 @@ import {
   useSyncExternalStore,
 } from "react";
 
+import Link from "next/link";
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
 
@@ -21,6 +22,7 @@ import {
   Search,
   RefreshCw,
   CheckCircle2,
+  Eye,
 } from "lucide-react";
 
 import TautanPendaftaranModal from "@/app/components/spmb/TautanPendaftaranModal";
@@ -33,8 +35,6 @@ import {
 import {
   getJalurPpdb,
   getJalurPpdbById,
-  createJalurPpdb,
-  updateJalurPpdb,
   deleteJalurPpdb,
 } from "@/services/jalurPpdb.service";
 
@@ -90,69 +90,6 @@ const PRESET_COLORS = [
 
 function formatNumber(n) {
   return Number(n || 0).toLocaleString("id-ID");
-}
-
-const NAMA_MIN = 2;
-const NAMA_MAX = 50;
-const DESKRIPSI_MAX = 500;
-
-function emptyForm() {
-  return {
-    id: null,
-    nama: "",
-    deskripsi: "",
-    kuota: "",
-    status: "aktif",
-    tanggalMulai: "",
-    tanggalSelesai: "",
-  };
-}
-
-function validateJalurForm(form) {
-  const nama = String(form.nama || "").trim();
-
-  if (nama.length < NAMA_MIN) {
-    return `Nama jalur minimal ${NAMA_MIN} karakter.`;
-  }
-
-  if (nama.length > NAMA_MAX) {
-    return `Nama jalur maksimal ${NAMA_MAX} karakter.`;
-  }
-
-  if (String(form.deskripsi || "").trim().length > DESKRIPSI_MAX) {
-    return `Deskripsi maksimal ${DESKRIPSI_MAX} karakter.`;
-  }
-
-  if (form.kuota === "" || form.kuota === null) {
-    return "Kuota wajib diisi.";
-  }
-
-  const kuota = Number(form.kuota);
-
-  if (!Number.isFinite(kuota) || !Number.isInteger(kuota) || kuota <= 0) {
-    return "Kuota harus berupa bilangan bulat lebih dari 0.";
-  }
-
-  if (form.tanggalMulai && Number.isNaN(new Date(form.tanggalMulai).getTime())) {
-    return "Tanggal mulai tidak valid.";
-  }
-
-  if (
-    form.tanggalSelesai &&
-    Number.isNaN(new Date(form.tanggalSelesai).getTime())
-  ) {
-    return "Tanggal selesai tidak valid.";
-  }
-
-  if (
-    form.tanggalMulai &&
-    form.tanggalSelesai &&
-    new Date(form.tanggalSelesai) < new Date(form.tanggalMulai)
-  ) {
-    return "Tanggal selesai tidak boleh sebelum tanggal mulai.";
-  }
-
-  return "";
 }
 
 const AKSES_DITOLAK_VIEW =
@@ -232,12 +169,6 @@ export default function JalurPPDBPage() {
   const [search, setSearch] =
     useState("");
 
-  const [showModal, setShowModal] =
-    useState(false);
-
-  const [form, setForm] =
-    useState(emptyForm());
-
   const [deleteTarget, setDeleteTarget] =
     useState(null);
 
@@ -246,9 +177,6 @@ export default function JalurPPDBPage() {
 
   const [loading, setLoading] =
     useState(true);
-
-  const [saving, setSaving] =
-    useState(false);
 
   const [deleting, setDeleting] =
     useState(false);
@@ -391,58 +319,6 @@ export default function JalurPPDBPage() {
 
 
 
-  const openTambah = () => {
-    if (!izin?.create) {
-      setError(
-        "Akses ditolak: akun ini tidak memiliki izin ppdb.create untuk menambah jalur PPDB."
-      );
-      return;
-    }
-
-    setError("");
-    setSuccessMessage("");
-    setForm(emptyForm());
-    setShowModal(true);
-  };
-
-
-  const openEdit = (j) => {
-    if (!izin?.update) {
-      setError(
-        "Akses ditolak: akun ini tidak memiliki izin ppdb.update untuk mengubah jalur PPDB."
-      );
-      return;
-    }
-
-    setError("");
-    setSuccessMessage("");
-
-    setForm({
-      id: j.id,
-      nama: j.nama || "",
-      deskripsi: j.deskripsi || "",
-      kuota: j.kuota ?? "",
-      status: normalizeStatus(
-        j.status
-      ),
-      tanggalMulai:
-        j.tanggalMulai
-          ? String(
-              j.tanggalMulai
-            ).slice(0, 10)
-          : "",
-      tanggalSelesai:
-        j.tanggalSelesai
-          ? String(
-              j.tanggalSelesai
-            ).slice(0, 10)
-          : "",
-    });
-
-    setShowModal(true);
-  };
-
-
   const openTautan = (jalur) => {
     if (!jalur?.id) {
       setError(
@@ -495,115 +371,6 @@ export default function JalurPPDBPage() {
           );
         }
       });
-  };
-
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!izin?.view) {
-      setError(
-        "Akses ditolak: akun ini tidak memiliki izin ppdb.view."
-      );
-      return;
-    }
-
-    if (
-      (form.id && !izin.update) ||
-      (!form.id && !izin.create)
-    ) {
-      setError(
-        form.id
-          ? "Akses ditolak: akun ini tidak memiliki izin ppdb.update untuk mengubah jalur PPDB."
-          : "Akses ditolak: akun ini tidak memiliki izin ppdb.create untuk menambah jalur PPDB."
-      );
-      return;
-    }
-
-    const validationError = validateJalurForm(form);
-
-    if (validationError) {
-      setError(validationError);
-      return;
-    }
-
-    try {
-      setSaving(true);
-      setError("");
-      setSuccessMessage("");
-
-      const payload = {
-        nama: form.nama.trim(),
-        deskripsi:
-          form.deskripsi.trim() ||
-          undefined,
-        kuota: Number(
-          form.kuota
-        ),
-        tanggalMulai:
-          form.tanggalMulai ||
-          undefined,
-        tanggalSelesai:
-          form.tanggalSelesai ||
-          undefined,
-        status: form.status,
-      };
-
-      const isEdit = Boolean(form.id);
-
-      const response = isEdit
-        ? await updateJalurPpdb(
-            form.id,
-            payload
-          )
-        : await createJalurPpdb(
-            payload
-          );
-
-      if (response?.success === false) {
-        throw new Error(
-          response?.message ||
-            "Gagal menyimpan jalur PPDB"
-        );
-      }
-
-      const savedId = response?.data?.id || form.id;
-
-      setShowModal(false);
-      setForm(emptyForm());
-
-      const rows = await fetchJalur();
-
-      if (
-        savedId &&
-        !rows.some(
-          (row) => String(row.id) === String(savedId)
-        )
-      ) {
-        setError(
-          "Jalur tersimpan, tetapi tidak muncul pada daftar hasil GET /api/jalur-ppdb. Muat ulang halaman untuk memeriksa data."
-        );
-        return;
-      }
-
-      setSuccessMessage(
-        isEdit
-          ? `Jalur "${payload.nama}" berhasil diperbarui.`
-          : `Jalur "${payload.nama}" berhasil dibuat dan sudah muncul pada daftar jalur.`
-      );
-    } catch (err) {
-      console.error(
-        "Error simpan jalur PPDB:",
-        err
-      );
-
-      setError(
-        err?.message ||
-          "Gagal menyimpan jalur PPDB"
-      );
-    } finally {
-      setSaving(false);
-    }
   };
 
 
@@ -872,22 +639,18 @@ export default function JalurPPDBPage() {
                     />
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={
-                      openTambah
-                    }
-                    disabled={!izin?.create}
+                  <Link
+                    href="/admin/spmb/jalur/tambah"
                     title={
                       izin?.create
                         ? "Tambah jalur PPDB"
                         : "Butuh izin ppdb.create"
                     }
-                    className={`${themePrimaryGradient} flex items-center gap-1.5 rounded-md px-3.5 py-2 text-xs font-medium text-[var(--color-card)] transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50`}
+                    className={`${themePrimaryGradient} flex items-center gap-1.5 rounded-md px-3.5 py-2 text-xs font-medium text-[var(--color-card)] transition hover:brightness-95 ${!izin?.create ? "pointer-events-none opacity-50" : ""}`}
                   >
                     <Plus size={14} />
                     Tambah Jalur
-                  </button>
+                  </Link>
                 </div>
               </div>
 
@@ -1034,6 +797,15 @@ export default function JalurPPDBPage() {
                           <div
                             className={`mt-3.5 flex items-center justify-end gap-2 border-t ${themeDivider} pt-3`}
                           >
+                            <Link
+                              href={`/admin/spmb/jalur/${encodeURIComponent(j.id)}`}
+                              className="theme-text-muted flex items-center gap-1 rounded-md px-2 py-1 text-xs transition-colors hover:bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)] hover:text-[var(--color-primary)]"
+                              title="Lihat Detail Jalur"
+                            >
+                              <Eye size={12} />
+                              Detail
+                            </Link>
+
                             <button
                               type="button"
                               onClick={() =>
@@ -1045,26 +817,20 @@ export default function JalurPPDBPage() {
                               Tautan
                             </button>
 
-                            <button
-                              type="button"
-                              onClick={() =>
-                                openEdit(
-                                  j
-                                )
-                              }
-                              disabled={!izin?.update}
+                            <Link
+                              href={`/admin/spmb/jalur/${encodeURIComponent(j.id)}/edit`}
                               title={
                                 izin?.update
                                   ? "Edit jalur"
                                   : "Butuh izin ppdb.update"
                               }
-                              className={`theme-text-muted flex items-center gap-1 rounded-md px-2 py-1 text-xs transition-colors hover:bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)] hover:text-[var(--color-primary)] disabled:cursor-not-allowed disabled:opacity-40`}
+                              className={`theme-text-muted flex items-center gap-1 rounded-md px-2 py-1 text-xs transition-colors hover:bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)] hover:text-[var(--color-primary)] ${!izin?.update ? "pointer-events-none opacity-40" : ""}`}
                             >
                               <Pencil
                                 size={12}
                               />
                               Edit
-                            </button>
+                            </Link>
 
                             <button
                               type="button"
@@ -1108,240 +874,6 @@ export default function JalurPPDBPage() {
           </div>
         </main>
       </div>
-
-
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[color-mix(in_srgb,var(--color-text)_38%,transparent)] p-4 backdrop-blur-sm">
-          <div
-            className={`theme-card max-h-[90vh] w-full max-w-md overflow-y-auto rounded-xl ${themeCardShadow}`}
-          >
-            <div className="p-6">
-
-
-              <div className="mb-5 flex items-center justify-between">
-                <h3 className="theme-text text-sm font-semibold">
-                  {form.id
-                    ? "Edit Jalur"
-                    : "Tambah Jalur"}
-                </h3>
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    !saving &&
-                    setShowModal(
-                      false
-                    )
-                  }
-                  className="theme-text-muted transition hover:text-[var(--color-text)] disabled:opacity-50"
-                  disabled={saving}
-                >
-                  <X size={18} />
-                </button>
-              </div>
-
-              <form
-                onSubmit={
-                  handleSubmit
-                }
-                className="space-y-4"
-              >
-
-                {error && (
-                  <div className="rounded-md border border-[color-mix(in_srgb,var(--color-danger)_22%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_8%,transparent)] px-3 py-2 text-xs text-[var(--color-danger)]">
-                    {error}
-                  </div>
-                )}
-
-
-                <div>
-                  <label className="theme-text-secondary mb-1 block text-xs">
-                    Nama Jalur
-                  </label>
-
-                  <input
-                    value={form.nama}
-                    onChange={(e) =>
-                      setForm({
-                        ...form,
-                        nama: e.target.value,
-                      })
-                    }
-                    placeholder="Contoh: Jalur Zonasi"
-                    maxLength={NAMA_MAX}
-                    className={`theme-input theme-text w-full rounded-md border px-3 py-2 text-sm outline-none placeholder:text-[var(--color-text-placeholder)] ${themeFocus}`}
-                    required
-                    disabled={saving}
-                  />
-
-                  <p className="theme-text-muted mt-1 text-[10px]">
-                    {form.nama.trim().length}/{NAMA_MAX} karakter
-                    (minimal {NAMA_MIN})
-                  </p>
-                </div>
-
-
-                <div>
-                  <label className="theme-text-secondary mb-1 block text-xs">
-                    Deskripsi
-                  </label>
-
-                  <textarea
-                    value={
-                      form.deskripsi
-                    }
-                    onChange={(e) =>
-                      setForm({
-                        ...form,
-                        deskripsi:
-                          e.target.value,
-                      })
-                    }
-                    placeholder="Penjelasan singkat mengenai jalur ini"
-                    rows={2}
-                    maxLength={DESKRIPSI_MAX}
-                    className={`theme-input theme-text w-full resize-none rounded-md border px-3 py-2 text-sm outline-none placeholder:text-[var(--color-text-placeholder)] ${themeFocus}`}
-                    disabled={saving}
-                  />
-
-                  <p className="theme-text-muted mt-1 text-[10px]">
-                    {form.deskripsi.length}/{DESKRIPSI_MAX} karakter
-                  </p>
-                </div>
-
-
-                <div>
-                  <label className="theme-text-secondary mb-1 block text-xs">
-                    Kuota
-                  </label>
-
-                  <input
-                    type="number"
-                    min="1"
-                    step="1"
-                    value={form.kuota}
-                    onChange={(e) =>
-                      setForm({
-                        ...form,
-                        kuota:
-                          e.target.value,
-                      })
-                    }
-                    placeholder="500"
-                    className={`theme-input theme-text w-full rounded-md border px-3 py-2 text-sm outline-none placeholder:text-[var(--color-text-placeholder)] ${themeFocus}`}
-                    required
-                    disabled={saving}
-                  />
-                </div>
-
-
-                <div>
-                  <label className="theme-text-secondary mb-1 block text-xs">
-                    Tanggal Mulai
-                  </label>
-
-                  <input
-                    type="date"
-                    value={
-                      form.tanggalMulai
-                    }
-                    onChange={(e) =>
-                      setForm({
-                        ...form,
-                        tanggalMulai:
-                          e.target.value,
-                      })
-                    }
-                    className={`theme-input theme-text w-full rounded-md border px-3 py-2 text-sm outline-none ${themeFocus}`}
-                    disabled={saving}
-                  />
-                </div>
-
-
-                <div>
-                  <label className="theme-text-secondary mb-1 block text-xs">
-                    Tanggal Selesai
-                  </label>
-
-                  <input
-                    type="date"
-                    value={
-                      form.tanggalSelesai
-                    }
-                    onChange={(e) =>
-                      setForm({
-                        ...form,
-                        tanggalSelesai:
-                          e.target.value,
-                      })
-                    }
-                    className={`theme-input theme-text w-full rounded-md border px-3 py-2 text-sm outline-none ${themeFocus}`}
-                    disabled={saving}
-                  />
-                </div>
-
-
-                <div>
-                  <label className="theme-text-secondary mb-1 block text-xs">
-                    Status
-                  </label>
-
-                  <select
-                    value={
-                      form.status
-                    }
-                    onChange={(e) =>
-                      setForm({
-                        ...form,
-                        status:
-                          e.target.value,
-                      })
-                    }
-                    className={`theme-input theme-text w-full rounded-md border px-3 py-2 text-sm outline-none ${themeFocus}`}
-                    disabled={saving}
-                  >
-                    <option value="aktif">
-                      Aktif
-                    </option>
-
-                    <option value="nonaktif">
-                      Nonaktif
-                    </option>
-                  </select>
-                </div>
-
-
-                <div className="flex items-center justify-end gap-2 pt-2">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setShowModal(
-                        false
-                      )
-                    }
-                    className="theme-text-secondary rounded-md px-4 py-2 text-xs font-medium transition hover:text-[var(--color-text)] disabled:opacity-50"
-                    disabled={saving}
-                  >
-                    Batal
-                  </button>
-
-                  <button
-                    type="submit"
-                    disabled={saving}
-                    className={`${themePrimaryGradient} rounded-md px-4 py-2 text-xs font-medium text-[var(--color-card)] transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60`}
-                  >
-                    {saving
-                      ? "Menyimpan..."
-                      : form.id
-                      ? "Simpan Perubahan"
-                      : "Tambah Jalur"}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      )}
 
 
       {deleteTarget && (

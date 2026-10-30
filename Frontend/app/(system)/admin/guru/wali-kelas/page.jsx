@@ -525,7 +525,7 @@ export default function WaliKelasPage() {
 
             <div className="theme-card rounded-xl border shadow-sm overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="w-full text-sm border-collapse">
+                <table className="w-full min-w-[700px] text-sm border-collapse">
                   <thead>
                     <tr
                       className="

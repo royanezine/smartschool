@@ -472,7 +472,7 @@ export default function DetailPendaftaranPage() {
           }}
         />
 
-        <main className="min-h-0 flex-1 overflow-y-auto">
+        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto">
           <div className="w-full p-4 sm:p-6 lg:p-8">
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>

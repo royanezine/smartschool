@@ -217,9 +217,9 @@ export default function TambahMasterGudangPage() {
         </div>
 
 
-        <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
+        <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto">
 
-          <div className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
+          <div className="w-full p-4 sm:p-6 lg:p-8 space-y-6 min-w-0">
 
 
             <Link

@@ -188,8 +188,7 @@ export default function TambahLantaiPage() {
 
 
         <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto">
-          <div className="w-full p-4 sm:p-6 lg:p-8">
-            <div className="mx-auto w-full max-w-4xl space-y-6">
+          <div className="w-full p-4 sm:p-6 lg:p-8 space-y-6 min-w-0">
 
 
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -587,7 +586,6 @@ export default function TambahLantaiPage() {
                   </div>
                 </div>
               </form>
-            </div>
           </div>
         </main>
       </div>

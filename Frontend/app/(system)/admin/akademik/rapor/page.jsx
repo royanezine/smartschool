@@ -129,7 +129,7 @@ export default function RaporPage() {
           }}
         />
 
-        <main className="flex-1 overflow-y-auto theme-page">
+        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto theme-page">
           <div className="p-4 sm:p-6 lg:p-8 space-y-6">
             <div className="flex items-center gap-3">
               <div className="p-2.5 rounded-xl theme-primary shadow-lg">
@@ -277,7 +277,7 @@ export default function RaporPage() {
 
                 <div className="theme-card rounded-xl border theme-border shadow-sm overflow-hidden">
                   <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
+                    <table className="w-full min-w-[750px] text-sm">
                       <thead>
                         <tr className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
                           <th className="text-left font-semibold px-4 py-3 whitespace-nowrap">

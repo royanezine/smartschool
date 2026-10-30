@@ -380,8 +380,8 @@ export default function EditSiswaPage() {
 
   return (
     <PageLayout>
-      <main className="flex-1 overflow-y-auto">
-        <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
+      <main className="min-h-0 min-w-0 flex-1 overflow-y-auto">
+        <div className="w-full p-4 sm:p-6 lg:p-8 space-y-6 min-w-0">
           <button
             type="button"
             onClick={() => router.push("/admin/siswa")}

@@ -466,7 +466,7 @@ export default function LMSCBTDashboardPage() {
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <Header />
 
-        <main className="min-h-0 flex-1 overflow-y-auto">
+        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto">
           <div className="mx-auto w-full max-w-[1600px] px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
             <section
               className="

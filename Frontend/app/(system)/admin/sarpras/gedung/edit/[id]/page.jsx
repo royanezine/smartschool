@@ -354,8 +354,7 @@ export default function EditGedungPage() {
         </div>
 
         <main className="theme-page min-w-0 flex-1 overflow-y-auto">
-          <div className="w-full p-3 sm:p-5 lg:p-6 xl:p-7">
-            <div className="mx-auto w-full max-w-[1250px] space-y-5">
+          <div className="w-full p-4 sm:p-6 lg:p-8 space-y-6 min-w-0">
               <div className="flex items-center justify-between">
                 <button
                   type="button"
@@ -858,7 +857,6 @@ export default function EditGedungPage() {
                   © 2026 SmartSchool • Edit Gedung • Sarana & Prasarana
                 </p>
               </div>
-            </div>
           </div>
         </main>
       </div>

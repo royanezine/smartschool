@@ -256,7 +256,7 @@ export default function TabunganSiswaPage() {
           <Header onMenuClick={() => setSidebarOpen(true)} />
         </div>
 
-        <main className="min-w-0 flex-1 overflow-y-auto theme-page theme-text">
+        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto theme-page theme-text">
           <div className="w-full px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
             <div className="mx-auto w-full max-w-[1500px] space-y-5">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">

@@ -251,7 +251,7 @@ export default function TambahJurnalKasPage() {
           }}
         />
 
-        <main className="theme-page min-h-0 flex-1 overflow-y-auto">
+        <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto">
           <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
             <div className="w-full space-y-6">
 
@@ -453,7 +453,7 @@ export default function TambahJurnalKasPage() {
                         <label className="theme-text-secondary mb-2.5 block text-xs font-bold">
                           Jenis Transaksi
                         </label>
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           {[
                             {
                               value: "masuk",

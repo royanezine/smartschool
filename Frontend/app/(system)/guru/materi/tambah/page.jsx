@@ -766,7 +766,7 @@ export default function UploadMateriPage() {
         />
 
 
-        <main className="flex-1 overflow-x-hidden overflow-y-auto">
+        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
 
           <div className="mx-auto w-full max-w-[1600px] p-4 sm:p-6 lg:p-8">
 
