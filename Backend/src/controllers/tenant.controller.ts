@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { TipePaket } from "@prisma/client";
+import { Prisma, TipePaket } from "@prisma/client";
 import { prisma } from "../config/db";
 import { AppError } from "../utils/appError";
 import { successResponse } from "../utils/responseFormatter";
@@ -11,6 +11,7 @@ import bcrypt from "bcryptjs";
 import { generateOtp } from "../utils/generateOtp";
 import { sendOtpEmail } from "../utils/email";
 import crypto from "crypto";
+import { CMS_PUBLISHED_STATUS } from "../utils/cmsPublication";
 
 const MIDTRANS_SNAP_URL = "https://app.sandbox.midtrans.com/snap/v1/transactions";
 
@@ -143,7 +144,7 @@ export interface KonversiTenantOptions {
 }
 
 export const konversiPendaftaranTenant = async (
-  tx: any,
+  tx: Prisma.TransactionClient,
   pendaftaranId: string,
   options: KonversiTenantOptions,
 ) => {
@@ -319,6 +320,18 @@ export const konversiPendaftaranTenant = async (
         peranId: peranAdminSekolah.id,
         status: "aktif",
       },
+    });
+
+    // Use the caller's transaction so pages roll back together with onboarding.
+    // Slugs are globally unique, so keep them readable with the school's subdomain.
+    await tx.halamanCms.createMany({
+      data: ["Beranda", "Tentang", "Kontak"].map((judul) => ({
+        sekolahId: sekolah.id,
+        judul,
+        slug: `${judul.toLowerCase()}-${sekolah.subdomain}`,
+        status: CMS_PUBLISHED_STATUS,
+        dibuatOleh: pengguna.id,
+      })),
     });
 
     const endDate = new Date();

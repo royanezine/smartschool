@@ -24,6 +24,7 @@ test("backend HTTP API regressions with PostgreSQL", { skip: !testDatabaseUrl },
   const roleIds: string[] = [];
   const userIds: string[] = [];
   const createdIzin: string[] = [];
+  const tenantRegistrationIds: string[] = [];
   let paketId: string | undefined;
   t.after(async () => {
     server.closeAllConnections();
@@ -49,6 +50,7 @@ test("backend HTTP API regressions with PostgreSQL", { skip: !testDatabaseUrl },
     await prisma.peranIzin.deleteMany({where:{peranId:{in:roleIds}}});
     await prisma.peran.deleteMany({where:{id:{in:roleIds}}});
     await prisma.sekolah.deleteMany({where:{id:{in:schoolIds}}});
+    await prisma.pendaftaranTenant.deleteMany({where:{id:{in:tenantRegistrationIds}}});
     if (paketId) await prisma.paket.delete({where:{id:paketId}});
     await prisma.izin.deleteMany({where:{id:{in:createdIzin}}});
     await prisma.$disconnect();
@@ -590,5 +592,92 @@ test("backend HTTP API regressions with PostgreSQL", { skip: !testDatabaseUrl },
     assert.equal(deleted.dihapusOleh,admin.id);
     assert.equal(deleted.status,"nonaktif");
     assert.equal((await prisma.gelombangPpdb.findUnique({where:{id:foreignWave.id}})).dihapusPada,null);
+  });
+
+  const {konversiPendaftaranTenant}=require("../src/controllers/tenant.controller");
+  async function tenantRegistration(label: string) {
+    const row=await prisma.pendaftaranTenant.create({data:{
+      jenisPendaftaran:"sekolah",namaPendaftar:`QA Tenant ${label}`,
+      emailPendaftar:`qa_tenant_${label}_${suffix}@example.test`,kataSandiPendaftar:kataSandi,
+      namaSekolah:`QA Tenant ${label}`,subdomain:`qa-tenant-${label}-${suffix}`,
+      jenjangSekolah:"SMA",paketId:paket.id,kodeOtp:"123456",
+      otpTimeout:new Date(Date.now()+300000),status:"menunggu_verifikasi",
+    }});
+    tenantRegistrationIds.push(row.id);
+    return row;
+  }
+  function trackConvertedTenant(result: any) {
+    schoolIds.push(result.sekolah.id);
+    userIds.push(result.pengguna.id);
+  }
+  let approvedRegistrationId="";
+  let approvedSchoolId="";
+  await t.test("tenant conversion creates three published pages accessible on the public site", async () => {
+    const registration=await tenantRegistration("paid");
+    approvedRegistrationId=registration.id;
+    const result=await prisma.$transaction((tx:any)=>konversiPendaftaranTenant(tx,registration.id,{isTrial:false}));
+    trackConvertedTenant(result);
+    approvedSchoolId=result.sekolah.id;
+    const pages=await prisma.halamanCms.findMany({where:{sekolahId:approvedSchoolId},orderBy:{judul:"asc"}});
+    assert.deepEqual(pages.map((page:any)=>page.judul),["Beranda","Kontak","Tentang"]);
+    for (const page of pages) {
+      assert.equal(page.status,"dipublikasikan");
+      assert.equal(page.slug,`${page.judul.toLowerCase()}-${registration.subdomain}`);
+      assert.equal(page.dibuatOleh,result.pengguna.id);
+      assert.equal((await json(`/api/publik/${registration.subdomain}/halaman/${page.slug}`,null)).status,200);
+    }
+    const published=await json(`/api/publik/${registration.subdomain}/halaman`,null);
+    assert.equal(published.status,200);
+    assert.deepEqual(published.body.data.map((page:any)=>page.slug).sort(),pages.map((page:any)=>page.slug).sort());
+  });
+  await t.test("trial OTP verification also inserts three published default pages", async () => {
+    const registration=await tenantRegistration("trial");
+    const verified=await json("/api/tenant/verify",null,"POST",{email:registration.emailPendaftar,kodeOtp:"123456"});
+    const saved=await prisma.pendaftaranTenant.findUnique({where:{id:registration.id}});
+    if (saved.sekolahTerbuatId) schoolIds.push(saved.sekolahTerbuatId);
+    if (saved.penggunaTerbuatId) userIds.push(saved.penggunaTerbuatId);
+    assert.equal(verified.status,200);
+    assert.equal(saved.status,"aktif");
+    const pages=await prisma.halamanCms.findMany({where:{sekolahId:saved.sekolahTerbuatId}});
+    assert.equal(pages.length,3);
+    assert.ok(pages.every((page:any)=>page.status==="dipublikasikan"));
+    assert.ok(pages.every((page:any)=>page.slug.endsWith(`-${registration.subdomain}`)));
+  });
+  await t.test("reprocessing an active tenant does not duplicate its default pages", async () => {
+    const result=await prisma.$transaction((tx:any)=>konversiPendaftaranTenant(tx,approvedRegistrationId,{isTrial:false}));
+    assert.equal(result.alreadyActive,true);
+    assert.equal(result.sekolahTerbuatId,approvedSchoolId);
+    assert.equal(await prisma.halamanCms.count({where:{sekolahId:approvedSchoolId}}),3);
+  });
+  await t.test("a failed default-page insert rolls back the school, user and tenant conversion", async () => {
+    const registration=await tenantRegistration("collision");
+    const collision=await prisma.halamanCms.create({data:{sekolahId:schoolA.id,judul:"Existing page",slug:`kontak-${registration.subdomain}`,status:"dipublikasikan"}});
+    await assert.rejects(
+      prisma.$transaction((tx:any)=>konversiPendaftaranTenant(tx,registration.id,{isTrial:false})),
+      (error:any)=>error.code==="P2002",
+    );
+    assert.equal(await prisma.sekolah.count({where:{subdomain:registration.subdomain}}),0);
+    assert.equal(await prisma.pengguna.count({where:{email:registration.emailPendaftar}}),0);
+    assert.equal(await prisma.halamanCms.count({where:{slug:`beranda-${registration.subdomain}`}}),0);
+    const saved=await prisma.pendaftaranTenant.findUnique({where:{id:registration.id}});
+    assert.equal(saved.status,"menunggu_verifikasi");
+    assert.equal(saved.sekolahTerbuatId,null);
+    assert.equal(saved.penggunaTerbuatId,null);
+    assert.equal((await prisma.halamanCms.findUnique({where:{id:collision.id}})).sekolahId,schoolA.id);
+  });
+  await t.test("a later transaction failure rolls back the newly inserted pages as well", async () => {
+    const registration=await tenantRegistration("rollback");
+    let createdSchoolId="";
+    await assert.rejects(prisma.$transaction(async (tx:any)=>{
+      const result=await konversiPendaftaranTenant(tx,registration.id,{isTrial:false});
+      createdSchoolId=result.sekolah.id;
+      throw new Error("QA forced transaction rollback");
+    }),/QA forced transaction rollback/);
+    assert.ok(createdSchoolId);
+    assert.equal(await prisma.halamanCms.count({where:{sekolahId:createdSchoolId}}),0);
+    assert.equal(await prisma.sekolah.count({where:{id:createdSchoolId}}),0);
+    assert.equal(await prisma.langgananSekolah.count({where:{sekolahId:createdSchoolId}}),0);
+    assert.equal(await prisma.pengguna.count({where:{email:registration.emailPendaftar}}),0);
+    assert.equal((await prisma.pendaftaranTenant.findUnique({where:{id:registration.id}})).status,"menunggu_verifikasi");
   });
 });
