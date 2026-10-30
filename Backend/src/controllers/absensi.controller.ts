@@ -21,6 +21,13 @@ import { attendanceDateFilter, localClockMinutes, todayDateOnly } from "../utils
 import { attendanceInclude, attendanceListFilter, attendanceSchoolFilter } from "../services/absensiQuery.service";
 import { resolveSchoolId } from "../utils/schoolScope";
 
+const JENDELA_CHECK_IN_AWAL_MENIT = 120;
+
+const clockToMinutes = (value: string): number => {
+  const parts = value.split(":");
+  return Number(parts[0] || 0) * 60 + Number(parts[1] || 0);
+};
+
 export const registerFaceIdByAdmin = async (
   req: AuthRequest,
   res: Response,
@@ -93,7 +100,7 @@ export const registerFaceIdByAdmin = async (
       where: { penggunaId: targetUserId },
       update: {
         urlFotoReferensi: `/uploads/biometrik/${file.filename}`,
-        embeddingVector: aiResponse.data.embedding, // Prisma akan otomatis menyimpan sebagai JSON
+        embeddingVector: aiResponse.data.embedding,
         perangkat: "Didaftarkan Admin",
         status: "aktif",
         diperbaruiOleh: req.user?.userId,
@@ -168,7 +175,6 @@ export const createAbsensi = async (
       );
     }
 
-    // Pastikan kelas berada pada sekolah yang sama
     const kelas = await prisma.kelas.findFirst({
       where: {
         id: data.kelasId,
@@ -559,20 +565,26 @@ export const checkInShift = async (req: AuthRequest, res: Response) => {
 
   const data = checkInShiftSchema.parse(req.body);
 
-  const pegawai = await prisma.pengguna.findUnique({
-    where: { id: userId },
-    include: { shiftKerjaMaster: true },
+  const pegawai = await prisma.pengguna.findFirst({
+    where: { id: userId, sekolahId, dihapusPada: null },
   });
 
   if (!pegawai) {
     throw new AppError("Data pegawai tidak ditemukan", 404);
   }
 
-  const targetShiftId = data.shiftKerjaId || pegawai.shiftKerjaId;
+  const targetShiftId = pegawai.shiftKerjaId;
   if (!targetShiftId) {
     throw new AppError(
-      "Shift kerja belum ditentukan. Silakan pilih shift kerja atau hubungi admin.",
+      "Shift kerja belum ditentukan. Silakan hubungi admin untuk penugasan shift.",
       400,
+    );
+  }
+
+  if (data.shiftKerjaId && data.shiftKerjaId !== targetShiftId) {
+    throw new AppError(
+      "Shift yang dipilih tidak sesuai dengan penugasan shift Anda",
+      403,
     );
   }
 
@@ -630,27 +642,39 @@ export const checkInShift = async (req: AuthRequest, res: Response) => {
   const waktuMasuk = new Date();
   const hariIni = todayDateOnly(waktuMasuk);
 
+  const menitJadwalMasuk = clockToMinutes(shift.jamMasuk);
+  const menitJadwalKeluar = clockToMinutes(shift.jamKeluar);
+  const menitSekarang = localClockMinutes(waktuMasuk);
+  const shiftLintasHari = menitJadwalKeluar <= menitJadwalMasuk;
+
+  if (!shiftLintasHari) {
+    if (menitSekarang > menitJadwalKeluar) {
+      throw new AppError(
+        `Check-in ditolak: shift ${shift.nama} (${shift.jamMasuk} - ${shift.jamKeluar}) sudah berakhir`,
+        400,
+      );
+    }
+    if (menitSekarang < menitJadwalMasuk - JENDELA_CHECK_IN_AWAL_MENIT) {
+      throw new AppError(
+        `Check-in ditolak: shift ${shift.nama} baru dimulai pukul ${shift.jamMasuk}`,
+        400,
+      );
+    }
+  }
+
   const sudahAda = await prisma.absensi.findFirst({
     where: {
       penggunaId: userId,
-      shiftKerjaId: shift.id,
       tanggal: hariIni,
+      shiftKerjaId: { not: null },
     },
   });
 
   if (sudahAda) {
-    throw new AppError(
-      "Anda sudah melakukan check-in untuk shift ini hari ini",
-      400,
-    );
+    throw new AppError("Anda sudah melakukan check-in hari ini", 400);
   }
 
-  const partsMasuk = shift.jamMasuk.split(":");
-  const jamJadwal = Number(partsMasuk[0] || 0);
-  const menitJadwal = Number(partsMasuk[1] || 0);
-  const totalMenitJadwal = jamJadwal * 60 + menitJadwal;
-  const totalMenitAktual = localClockMinutes(waktuMasuk);
-  const selisihMenit = totalMenitAktual - totalMenitJadwal;
+  const selisihMenit = menitSekarang - menitJadwalMasuk;
 
   let terlambatMenit = 0;
   let statusShift = "tepat_waktu";
@@ -697,12 +721,13 @@ export const checkOutShift = async (req: AuthRequest, res: Response) => {
       penggunaId: userId,
       tanggal: hariIni,
       shiftKerjaId: { not: null },
+      waktuMasuk: { not: null },
       waktuKeluar: null,
     },
     include: {
       shiftKerja: true,
     },
-    orderBy: { dibuatPada: "desc" },
+    orderBy: { waktuMasuk: "desc" },
   });
 
   if (!absensiAktif || !absensiAktif.waktuMasuk) {
@@ -723,13 +748,16 @@ export const checkOutShift = async (req: AuthRequest, res: Response) => {
   let statusShift = absensiAktif.statusShift || "tepat_waktu";
 
   if (shift) {
-    const partsPulang = shift.jamKeluar.split(":");
-    const jamPulang = Number(partsPulang[0] || 0);
-    const menitPulang = Number(partsPulang[1] || 0);
-    const jadwalPulangMenit = jamPulang * 60 + menitPulang;
+    const jadwalPulangMenit = clockToMinutes(shift.jamKeluar);
+    const jadwalMasukMenit = clockToMinutes(shift.jamMasuk);
+    const shiftLintasHari = jadwalPulangMenit <= jadwalMasukMenit;
     const waktuKeluarMenit = localClockMinutes(waktuKeluar);
 
-    if (waktuKeluarMenit < jadwalPulangMenit) {
+    const pulangCepat = shiftLintasHari
+      ? waktuKeluarMenit >= jadwalMasukMenit
+      : waktuKeluarMenit < jadwalPulangMenit;
+
+    if (pulangCepat) {
       statusShift =
         statusShift === "terlambat"
           ? "terlambat_dan_pulang_cepat"
@@ -878,7 +906,8 @@ export const getMonitoringGuru = async (
             nip: true,
             nuptk: true,
             jabatan: true,
-            shiftKerja: true,
+            shiftKerjaId: true,
+            shiftKerjaMaster: true,
             peran: {
               select: {
                 id: true,

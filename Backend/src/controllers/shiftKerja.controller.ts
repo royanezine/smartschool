@@ -9,6 +9,8 @@ import {
 } from "../validations/shiftKerja.validation";
 import { z } from "zod";
 
+const MAX_LIMIT = 100;
+
 const getTenantSekolahId = (req: AuthRequest, targetSekolahId?: string): string => {
   const actorRole = req.user?.role?.toLowerCase();
   if (actorRole === "super_admin" || actorRole === "superadmin") {
@@ -22,6 +24,13 @@ const getTenantSekolahId = (req: AuthRequest, targetSekolahId?: string): string 
     throw new AppError("Akses ditolak: Anda tidak terhubung dengan sekolah manapun", 403);
   }
   return req.user.sekolahId;
+};
+
+const getRequestedSekolahId = (req: AuthRequest): string | undefined => {
+  const fromQuery = typeof req.query?.sekolahId === "string" ? req.query.sekolahId : undefined;
+  const fromBody =
+    req.body && typeof req.body.sekolahId === "string" ? (req.body.sekolahId as string) : undefined;
+  return fromQuery || fromBody;
 };
 
 export const createShiftKerja = async (req: AuthRequest, res: Response) => {
@@ -49,8 +58,8 @@ export const getShiftKerja = async (req: AuthRequest, res: Response) => {
   const targetSekolahId = req.query.sekolahId as string | undefined;
   const sekolahId = getTenantSekolahId(req, targetSekolahId);
 
-  const page = parseInt(req.query.page as string) || 1;
-  const limit = parseInt(req.query.limit as string) || 20;
+  const page = Math.max(1, parseInt(req.query.page as string) || 1);
+  const limit = Math.min(MAX_LIMIT, Math.max(1, parseInt(req.query.limit as string) || 20));
   const search = req.query.search as string | undefined;
   const status = req.query.status as string | undefined;
 
@@ -98,7 +107,7 @@ export const getShiftKerja = async (req: AuthRequest, res: Response) => {
 
 export const getShiftKerjaById = async (req: AuthRequest, res: Response) => {
   const id = req.params.id as string;
-  const sekolahId = getTenantSekolahId(req);
+  const sekolahId = getTenantSekolahId(req, getRequestedSekolahId(req));
 
   const item = await prisma.shiftKerja.findFirst({
     where: { id, sekolahId, dihapusPada: null },
@@ -122,8 +131,8 @@ export const getShiftKerjaById = async (req: AuthRequest, res: Response) => {
 
 export const updateShiftKerja = async (req: AuthRequest, res: Response) => {
   const id = req.params.id as string;
-  const sekolahId = getTenantSekolahId(req);
   const data = updateShiftKerjaSchema.parse(req.body);
+  const sekolahId = getTenantSekolahId(req, getRequestedSekolahId(req));
 
   const existing = await prisma.shiftKerja.findFirst({
     where: { id, sekolahId, dihapusPada: null },
@@ -151,7 +160,7 @@ export const updateShiftKerja = async (req: AuthRequest, res: Response) => {
 
 export const deleteShiftKerja = async (req: AuthRequest, res: Response) => {
   const id = req.params.id as string;
-  const sekolahId = getTenantSekolahId(req);
+  const sekolahId = getTenantSekolahId(req, getRequestedSekolahId(req));
 
   const existing = await prisma.shiftKerja.findFirst({
     where: { id, sekolahId, dihapusPada: null },
@@ -192,7 +201,7 @@ const assignUserShiftSchema = z.object({
 
 export const assignUserShiftAndJabatan = async (req: AuthRequest, res: Response) => {
   const data = assignUserShiftSchema.parse(req.body);
-  const sekolahId = getTenantSekolahId(req);
+  const sekolahId = getTenantSekolahId(req, getRequestedSekolahId(req));
 
   const targetUser = await prisma.pengguna.findFirst({
     where: { id: data.penggunaId, sekolahId, dihapusPada: null },
@@ -213,6 +222,12 @@ export const assignUserShiftAndJabatan = async (req: AuthRequest, res: Response)
     });
     if (!shift) {
       throw new AppError("Shift kerja tidak ditemukan di sekolah ini", 404);
+    }
+    if (shift.status !== "aktif") {
+      throw new AppError(
+        "Shift kerja tidak aktif dan tidak dapat ditugaskan. Aktifkan shift terlebih dahulu.",
+        400,
+      );
     }
   }
 
