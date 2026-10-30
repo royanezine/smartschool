@@ -264,6 +264,12 @@ export const getHalamanCms = async (
     const sekolahId = (req as any).user.sekolahId;
     const halaman = await prisma.halamanCms.findMany({
       where: { sekolahId, dihapusPada: null },
+      include: {
+        menuKonfigurasi: {
+          where: { sekolahId, status: "aktif" },
+          orderBy: [{ urutan: "asc" }, { id: "asc" }],
+        },
+      },
     });
     return successResponse(res, "Berhasil mengambil halaman", halaman, 200);
   } catch (error) {
@@ -319,10 +325,17 @@ export const deleteHalamanCms = async (
     });
     if (!halaman) throw new AppError("Halaman tidak ditemukan", 404);
 
-    await prisma.halamanCms.update({
-      where: { id },
-      data: { dihapusPada: new Date() },
-    });
+    const userId = (req as any).user.userId;
+    await prisma.$transaction([
+      prisma.menuKonfigurasi.updateMany({
+        where: { halamanCmsId: id, sekolahId },
+        data: { status: "nonaktif", dihapusOleh: userId, diperbaruiOleh: userId },
+      }),
+      prisma.halamanCms.update({
+        where: { id },
+        data: { dihapusPada: new Date(), dihapusOleh: userId },
+      }),
+    ]);
     return successResponse(res, "Halaman berhasil dihapus", null, 200);
   } catch (error) {
     next(error);
@@ -453,11 +466,9 @@ export const getMenuKonfigurasi = async (req: Request, res: Response, next: Next
   try {
     const sekolahId = (req as any).user.sekolahId;
     const menu = await prisma.menuKonfigurasi.findMany({
-      where: { sekolahId, status: "aktif" }, 
-      orderBy: [
-        { halaman: "asc" },
-        { urutan: "asc" }
-      ]
+      where: { sekolahId, status: "aktif", halamanCms: { sekolahId, dihapusPada: null } },
+      include: { halamanCms: { select: { id: true, judul: true, slug: true } } },
+      orderBy: [{ halamanCms: { judul: "asc" } }, { urutan: "asc" }, { id: "asc" }],
     });
     return successResponse(res, "Berhasil mengambil data menu konfigurasi", menu, 200);
   } catch (error) {
@@ -473,31 +484,42 @@ export const upsertMenuKonfigurasi = async (
   try {
     const sekolahId = (req as any).user.sekolahId;
     const userId = (req as any).user.userId;
+    if (!sekolahId) throw new AppError("Sekolah tidak ditemukan", 400);
 
     const id = req.params.id as string | undefined;
 
     const validatedData = menuKonfigurasiSchema.parse(req.body);
 
+    const halaman = await prisma.halamanCms.findFirst({
+      where: { id: validatedData.halamanCmsId, sekolahId, dihapusPada: null },
+      select: { id: true },
+    });
+    if (!halaman) throw new AppError("Halaman CMS tidak ditemukan di sekolah Anda", 404);
+
+    const existing = await prisma.menuKonfigurasi.findFirst({
+      where: { sekolahId, halamanCmsId: halaman.id, section: validatedData.section },
+      orderBy: [{ dibuatPada: "asc" }, { id: "asc" }],
+    });
+
     let menu;
 
     if (id) {
+      const target = await prisma.menuKonfigurasi.findFirst({
+        where: { id, sekolahId, halamanCms: { sekolahId, dihapusPada: null } },
+      });
+      if (!target) throw new AppError("Menu konfigurasi tidak ditemukan", 404);
+      if (existing && existing.id !== id) {
+        throw new AppError("Section sudah digunakan pada halaman tersebut", 409);
+      }
       menu = await prisma.menuKonfigurasi.update({
         where: { id: String(id) },
-        data: { ...validatedData, diperbaruiOleh: userId },
+        data: { ...validatedData, diperbaruiOleh: userId, dihapusOleh: null },
       });
     } else {
-      const existing = await prisma.menuKonfigurasi.findFirst({
-        where: {
-          sekolahId,
-          halaman: validatedData.halaman,
-          section: validatedData.section,
-        },
-      });
-
       if (existing) {
         menu = await prisma.menuKonfigurasi.update({
           where: { id: existing.id }, 
-          data: { ...validatedData, diperbaruiOleh: userId },
+          data: { ...validatedData, diperbaruiOleh: userId, dihapusOleh: null },
         });
       } else {
         menu = await prisma.menuKonfigurasi.create({
@@ -524,14 +546,14 @@ export const deleteMenuKonfigurasi = async (req: Request, res: Response, next: N
     const userId = (req as any).user.userId;
 
     const menu = await prisma.menuKonfigurasi.findFirst({
-      where: { id, sekolahId }, 
+      where: { id, sekolahId, halamanCms: { sekolahId, dihapusPada: null } },
     });
     
     if (!menu) throw new AppError("Menu konfigurasi tidak ditemukan", 404);
 
     await prisma.menuKonfigurasi.update({
       where: { id },
-      data: { status: "nonaktif", dihapusOleh: userId }, 
+      data: { status: "nonaktif", dihapusOleh: userId, diperbaruiOleh: userId },
     });
     
     return successResponse(res, "Menu konfigurasi berhasil dihapus", null, 200);

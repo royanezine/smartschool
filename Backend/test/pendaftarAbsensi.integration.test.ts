@@ -30,6 +30,7 @@ test("backend HTTP API regressions with PostgreSQL", { skip: !testDatabaseUrl },
     await new Promise<void>(resolve => server.close(() => resolve()));
     await prisma.absensi.deleteMany({where:{penggunaId:{in:userIds}}});
     await prisma.permohonanIzin.deleteMany({where:{sekolahId:{in:schoolIds}}});
+    await prisma.menuKonfigurasi.deleteMany({where:{sekolahId:{in:schoolIds}}});
     await prisma.halamanCms.deleteMany({where:{sekolahId:{in:schoolIds}}});
     await prisma.artikelCms.deleteMany({where:{sekolahId:{in:schoolIds}}});
     await prisma.berkasPpdb.deleteMany({where:{pendaftaranPpdb:{sekolahId:{in:schoolIds}}}});
@@ -39,6 +40,8 @@ test("backend HTTP API regressions with PostgreSQL", { skip: !testDatabaseUrl },
     await prisma.jalurPpdb.deleteMany({where:{sekolahId:{in:schoolIds}}});
     await prisma.langgananSekolah.deleteMany({where:{sekolahId:{in:schoolIds}}});
     await prisma.kelas.deleteMany({where:{sekolahId:{in:schoolIds}}});
+    await prisma.lantai.deleteMany({where:{gedung:{sekolahId:{in:schoolIds}}}});
+    await prisma.gedung.deleteMany({where:{sekolahId:{in:schoolIds}}});
     await prisma.tahunAjaran.deleteMany({where:{sekolahId:{in:schoolIds}}});
     await prisma.pengguna.deleteMany({where:{id:{in:userIds}}});
     await prisma.kategoriJabatan.deleteMany({where:{sekolahId:{in:schoolIds}}});
@@ -68,7 +71,7 @@ test("backend HTTP API regressions with PostgreSQL", { skip: !testDatabaseUrl },
   const studentRole = await role("siswa",schoolA.id);
   const teacherRole = await role("guru",schoolA.id);
   const otherRole = await role("siswa",schoolB.id);
-  for (const nama of ["ppdb.view","ppdb.create","ppdb.update","ppdb.delete","cms.create","cms.update","cms.view","manajemen_pengguna.view","lms.view","lms.update","lms.create","laporan.view","absensi.view"]) {
+  for (const nama of ["ppdb.view","ppdb.create","ppdb.update","ppdb.delete","cms.create","cms.update","cms.view","cms.delete","manajemen_aset.view","manajemen_aset.create","manajemen_pengguna.view","lms.view","lms.update","lms.create","laporan.view","absensi.view"]) {
     let izin = await prisma.izin.findUnique({where:{nama}});
     if (!izin) {
       izin = await prisma.izin.create({data:{nama,modul:nama.split(".")[0],aksi:nama.split(".")[1],status:"aktif"}});
@@ -387,6 +390,120 @@ test("backend HTTP API regressions with PostgreSQL", { skip: !testDatabaseUrl },
       }
     }
     assert.equal((await json("/api/cms/halaman",adminToken,"POST",{judul:"QA invalid status",status:"unknown"})).status,400);
+  });
+
+  await t.test("creating a building persists exactly one linked default floor", async () => {
+    const result = await json("/api/infrastruktur/gedung",adminToken,"POST",{nama:"Gedung QA",kode:"QA"});
+    assert.equal(result.status,201);
+    const gedung = result.body.data;
+    assert.equal(gedung.sekolahId,schoolA.id);
+    assert.equal(gedung.lantai.length,1);
+    assert.equal(gedung.lantai[0].nama,"Lantai 1");
+    assert.equal(gedung.lantai[0].nomorLantai,1);
+    assert.equal(gedung.lantai[0].status,"aktif");
+    assert.equal(gedung.lantai[0].gedungId,gedung.id);
+    assert.equal(await prisma.lantai.count({where:{gedungId:gedung.id}}),1);
+    const listed = await json(`/api/infrastruktur/lantai/gedung/${gedung.id}`);
+    assert.deepEqual(listed.body.data.map((row:any)=>row.id),[gedung.lantai[0].id]);
+    assert.equal((await json("/api/infrastruktur/gedung",studentToken,"POST",{nama:"Forbidden"})).status,403);
+  });
+
+  const cmsPage=await prisma.halamanCms.findUnique({where:{slug:publicSlugs[0]}});
+  const foreignPage=await prisma.halamanCms.findUnique({where:{slug:foreignSlug}});
+  const menuPayload={halamanCmsId:cmsPage.id,section:"hero",judul:"Menu QA",konten:"Konten hero",urutan:2};
+  let menuId="";
+  await t.test("menu upsert uses the page ID and updates an existing section", async () => {
+    const first=await json("/api/cms/menu-konfigurasi",adminToken,"POST",menuPayload);
+    assert.equal(first.status,200);
+    menuId=first.body.data.id;
+    assert.equal(first.body.data.halamanCmsId,cmsPage.id);
+    assert.equal(Object.hasOwn(first.body.data,"halaman"),false);
+    const updated=await json("/api/cms/menu-konfigurasi",adminToken,"POST",{...menuPayload,judul:"Menu QA updated"});
+    assert.equal(updated.status,200);
+    assert.equal(updated.body.data.id,menuId);
+    assert.equal(updated.body.data.judul,"Menu QA updated");
+    assert.equal(await prisma.menuKonfigurasi.count({where:{halamanCmsId:cmsPage.id,section:"hero"}}),1);
+    const list=await json("/api/cms/menu-konfigurasi");
+    assert.equal(list.body.data[0].halamanCms.id,cmsPage.id);
+  });
+  await t.test("page GET responses include their ordered active menu sections", async () => {
+    for (const endpoint of ["/api/cms/halaman",`${publicBase}/halaman`,`${publicBase}/profil`,`${publicBase}/halaman/${cmsPage.slug}`]) {
+      const result=await json(endpoint,endpoint.startsWith("/api/cms")?adminToken:null);
+      assert.equal(result.status,200);
+      const page=Array.isArray(result.body.data)
+        ? result.body.data.find((row:any)=>row.id===cmsPage.id)
+        : result.body.data.halamanCms?.find((row:any)=>row.id===cmsPage.id) || result.body.data;
+      assert.equal(page.menuKonfigurasi[0].id,menuId);
+      assert.equal(page.menuKonfigurasi[0].halamanCmsId,cmsPage.id);
+    }
+    const config=await json(`${publicBase}/konfigurasi`,null);
+    assert.equal(config.body.data[cmsPage.id].hero.id,menuId);
+    assert.equal(config.body.data[cmsPage.id].hero.halamanCms.slug,cmsPage.slug);
+    assert.doesNotMatch(JSON.stringify(config.body),/dibuatOleh|dihapusOleh/);
+  });
+  await t.test("menu validation rejects free text, malformed and foreign page IDs", async () => {
+    for (const body of [
+      {halaman:"beranda",section:"hero",judul:"Legacy"},
+      {...menuPayload,halaman:"beranda"},
+      {...menuPayload,halamanCmsId:"beranda"},
+      {...menuPayload,section:" "},
+      {...menuPayload,status:"draft"},
+    ]) assert.equal((await json("/api/cms/menu-konfigurasi",adminToken,"POST",body)).status,400);
+    for (const halamanCmsId of [foreignPage.id,randomUUID()]) {
+      assert.equal((await json("/api/cms/menu-konfigurasi",adminToken,"POST",{...menuPayload,halamanCmsId})).status,404);
+      assert.equal((await json(`/api/cms/menu-konfigurasi/${menuId}`,adminToken,"PUT",{...menuPayload,halamanCmsId})).status,404);
+    }
+    const foreignMenu=await prisma.menuKonfigurasi.create({data:{...menuPayload,sekolahId:schoolB.id,halamanCmsId:foreignPage.id}});
+    assert.equal((await json(`/api/cms/menu-konfigurasi/${foreignMenu.id}`,adminToken,"PUT",menuPayload)).status,404);
+    assert.equal((await json(`/api/cms/menu-konfigurasi/${foreignMenu.id}`,adminToken,"DELETE")).status,404);
+    assert.equal((await prisma.menuKonfigurasi.findUnique({where:{id:foreignMenu.id}})).judul,menuPayload.judul);
+    assert.equal((await json("/api/cms/menu-konfigurasi",studentToken,"POST",menuPayload)).status,403);
+  });
+  await t.test("menu edits, deactivation and restoration retain their page relation", async () => {
+    const edited=await json(`/api/cms/menu-konfigurasi/${menuId}`,adminToken,"PUT",{...menuPayload,judul:"Edited",urutan:1});
+    assert.equal(edited.status,200);
+    assert.equal(edited.body.data.halamanCmsId,cmsPage.id);
+    assert.equal((await json(`/api/cms/menu-konfigurasi/${menuId}`,adminToken,"DELETE")).status,200);
+    assert.equal((await json(`${publicBase}/konfigurasi`,null)).body.data[cmsPage.id],undefined);
+    const pages=await json("/api/cms/halaman");
+    assert.deepEqual(pages.body.data.find((row:any)=>row.id===cmsPage.id).menuKonfigurasi,[]);
+    const restored=await json("/api/cms/menu-konfigurasi",adminToken,"POST",menuPayload);
+    assert.equal(restored.body.data.id,menuId);
+    assert.equal(restored.body.data.dihapusOleh,null);
+  });
+  await t.test("draft pages cannot expose active menu content through public configuration", async () => {
+    await prisma.halamanCms.update({where:{id:cmsPage.id},data:{status:"draft"}});
+    assert.equal((await json(`${publicBase}/konfigurasi`,null)).body.data[cmsPage.id],undefined);
+    await prisma.halamanCms.update({where:{id:cmsPage.id},data:{status:"dipublikasikan"}});
+    assert.equal((await json(`${publicBase}/konfigurasi`,null)).body.data[cmsPage.id].hero.id,menuId);
+  });
+  await t.test("deleting a CMS page deactivates its menus and prevents reattachment", async () => {
+    assert.equal((await json(`/api/cms/halaman/${cmsPage.id}`,adminToken,"DELETE")).status,200);
+    const menu=await prisma.menuKonfigurasi.findUnique({where:{id:menuId}});
+    assert.equal(menu.status,"nonaktif");
+    assert.equal(menu.dihapusOleh,admin.id);
+    assert.equal(menu.halamanCmsId,cmsPage.id);
+    assert.equal((await json(`${publicBase}/konfigurasi`,null)).body.data[cmsPage.id],undefined);
+    assert.equal((await json("/api/cms/menu-konfigurasi",adminToken,"POST",menuPayload)).status,404);
+    assert.equal((await json(`/api/cms/menu-konfigurasi/${menuId}`,adminToken,"PUT",menuPayload)).status,404);
+  });
+  await t.test("default page seeding is tenant-scoped, repeatable and preserves edited content", async () => {
+    const {seedDefaultHalamanCms}=require("../prisma/seedCms");
+    for (const sekolahId of schoolIds) await prisma.$transaction((tx:any)=>seedDefaultHalamanCms(tx,sekolahId,admin.id));
+    const defaults=await prisma.halamanCms.findMany({where:{sekolahId:schoolA.id,judul:{in:["Beranda","Tentang","Kontak"]}}});
+    assert.equal(defaults.length,3);
+    const beranda=defaults.find((row:any)=>row.judul==="Beranda");
+    await prisma.halamanCms.update({where:{id:beranda.id},data:{konten:"Edited by admin",status:"dipublikasikan"}});
+    for (const sekolahId of schoolIds) await prisma.$transaction((tx:any)=>seedDefaultHalamanCms(tx,sekolahId,admin.id));
+    const saved=await prisma.halamanCms.findUnique({where:{id:beranda.id}});
+    assert.equal(saved.konten,"Edited by admin");
+    assert.equal(saved.status,"dipublikasikan");
+    for (const sekolahId of schoolIds) {
+      const rows=await prisma.halamanCms.findMany({where:{sekolahId,judul:{in:["Beranda","Tentang","Kontak"]}}});
+      assert.equal(rows.length,3);
+      assert.equal(new Set(rows.map((row:any)=>row.slug)).size,3);
+    }
+    assert.equal(await prisma.halamanCms.count({where:{judul:{in:["Beranda","Tentang","Kontak"]},sekolahId:{in:schoolIds}}}),6);
   });
 
   const foreignWave=await prisma.gelombangPpdb.create({data:{sekolahId:schoolB.id,jalurPpdbId:jalurB.id,nama:"Gelombang Sekolah B",tanggalMulai:new Date("2026-10-01T00:00:00Z"),tanggalSelesai:new Date("2026-11-01T00:00:00Z")}});

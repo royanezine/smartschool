@@ -30,14 +30,14 @@ export const halamanCmsSchema = z.object({
 });
 
 export const menuKonfigurasiSchema = z.object({
-  halaman: z.string().min(1, "Halaman wajib diisi"),
-  section: z.string().min(1, "Section wajib diisi"),
-  judul: z.string().min(1, "Judul wajib diisi"),
-  subJudul: z.string().nullable().optional(),
+  halamanCmsId: z.string().uuid("ID Halaman CMS tidak valid"),
+  section: z.string().trim().min(1, "Section wajib diisi").max(50),
+  judul: z.string().trim().min(1, "Judul wajib diisi").max(100),
+  subJudul: z.string().max(255).nullable().optional(),
   konten: z.string().nullable().optional(),
-  gambarUrl: z.string().nullable().optional(),
-  ctaText: z.string().nullable().optional(),
-  ctaLink: z.string().nullable().optional(),
-  urutan: z.number().int().default(1),
-  status: z.string().default("aktif"),
-});
+  gambarUrl: z.string().max(255).nullable().optional(),
+  ctaText: z.string().max(50).nullable().optional(),
+  ctaLink: z.string().max(255).nullable().optional(),
+  urutan: z.number().int().min(0).max(2147483647).default(1),
+  status: z.enum(["aktif", "nonaktif"]).default("aktif"),
+}).strict();

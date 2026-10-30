@@ -532,22 +532,24 @@ model MenuKonfigurasi {
   diperbaruiOleh String? @map("diperbarui_oleh")
   dihapusOleh    String? @map("dihapus_oleh")
 
-  halaman   String  @db.VarChar(50)
-  section   String  @db.VarChar(50)
-  judul     String  @db.VarChar(100)
-  subJudul  String? @map("sub_judul") @db.VarChar(255)
-  konten    String? @db.Text
-  gambarUrl String? @map("gambar_url") @db.VarChar(255)
-  ctaText   String? @map("cta_text") @db.VarChar(50)
-  ctaLink   String? @map("cta_link") @db.VarChar(255)
-  urutan    Int
-  status    String? @db.VarChar(20)
+  halamanCmsId String  @map("halaman_cms_id")
+  section      String  @db.VarChar(50)
+  judul        String  @db.VarChar(100)
+  subJudul     String? @map("sub_judul") @db.VarChar(255)
+  konten       String? @db.Text
+  gambarUrl    String? @map("gambar_url") @db.VarChar(255)
+  ctaText      String? @map("cta_text") @db.VarChar(50)
+  ctaLink      String? @map("cta_link") @db.VarChar(255)
+  urutan       Int
+  status       String? @db.VarChar(20)
 
   dibuatPada     DateTime @default(now()) @map("dibuat_pada") @db.Timestamp()
   diperbaruiPada DateTime @updatedAt @map("diperbarui_pada") @db.Timestamp()
 
-  sekolah Sekolah @relation(fields: [sekolahId], references: [id])
+  sekolah    Sekolah    @relation(fields: [sekolahId], references: [id])
+  halamanCms HalamanCms @relation(fields: [halamanCmsId], references: [id], onDelete: Restrict)
 
+  @@index([halamanCmsId, section])
   @@map("menu_konfigurasi")
 }
 
@@ -1294,7 +1296,8 @@ model HalamanCms {
   diperbaruiPada DateTime  @updatedAt @map("diperbarui_pada") @db.Timestamp()
   dihapusPada    DateTime? @map("dihapus_pada") @db.Timestamp()
 
-  sekolah Sekolah @relation(fields: [sekolahId], references: [id])
+  sekolah         Sekolah           @relation(fields: [sekolahId], references: [id])
+  menuKonfigurasi MenuKonfigurasi[]
 
   @@map("halaman_cms")
 }

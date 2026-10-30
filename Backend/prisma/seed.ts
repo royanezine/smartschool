@@ -1,6 +1,7 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient, TipePaket } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import { seedDefaultHalamanCms } from "./seedCms";
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
@@ -417,22 +418,26 @@ async function main() {
   });
   console.log("Admin Yayasan dummy dibuat");
 
-  const sekolah = await prisma.sekolah.upsert({
-    where: { subdomain: "smart" },
-    update: {},
-    create: {
-      nama: "SMA Smart School",
-      subdomain: "smart",
-      kode: "SMART",
-      jenjang: "SMA",
-      alamat: "Jl. Pendidikan No. 1, Jakarta",
-      telepon: "021-1234567",
-      email: "info@smartschool.com",
-      status: "aktif",
-      yayasanId: yayasan.id,
-      dibuatOleh: superAdmin.id,
-      diperbaruiOleh: superAdmin.id,
-    },
+  const sekolah = await prisma.$transaction(async (tx) => {
+    const sekolah = await tx.sekolah.upsert({
+      where: { subdomain: "smart" },
+      update: {},
+      create: {
+        nama: "SMA Smart School",
+        subdomain: "smart",
+        kode: "SMART",
+        jenjang: "SMA",
+        alamat: "Jl. Pendidikan No. 1, Jakarta",
+        telepon: "021-1234567",
+        email: "info@smartschool.com",
+        status: "aktif",
+        yayasanId: yayasan.id,
+        dibuatOleh: superAdmin.id,
+        diperbaruiOleh: superAdmin.id,
+      },
+    });
+    await seedDefaultHalamanCms(tx, sekolah.id, superAdmin.id);
+    return sekolah;
   });
   console.log("Sekolah dummy dibuat");
 

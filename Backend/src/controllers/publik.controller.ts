@@ -9,6 +9,19 @@ const publicSchoolWhere = (subdomain: string) => ({
   subdomain, status: "aktif", dihapusPada: null,
 });
 
+const publicMenuSelect = {
+  id: true,
+  halamanCmsId: true,
+  section: true,
+  judul: true,
+  subJudul: true,
+  konten: true,
+  gambarUrl: true,
+  ctaText: true,
+  ctaLink: true,
+  urutan: true,
+} as const;
+
 export const getPublicProfil = async (
   req: Request,
   res: Response,
@@ -39,8 +52,14 @@ export const getPublicProfil = async (
             dihapusPada: null,
           },
           select: {
+            id: true,
             judul: true,
             slug: true,
+            menuKonfigurasi: {
+              where: { status: "aktif", sekolah: { subdomain } },
+              select: publicMenuSelect,
+              orderBy: [{ urutan: "asc" }, { id: "asc" }],
+            },
           },
         },
       },
@@ -166,6 +185,13 @@ export const getPublicHalamanBySlug = async (
         dihapusPada: null,
         status: { in: [...CMS_PUBLIC_STATUSES] },
       },
+      include: {
+        menuKonfigurasi: {
+          where: { sekolahId: sekolah.id, status: "aktif" },
+          select: publicMenuSelect,
+          orderBy: [{ urutan: "asc" }, { id: "asc" }],
+        },
+      },
     });
     if (!halaman) throw new AppError("Halaman tidak ditemukan", 404);
 
@@ -214,6 +240,11 @@ export const getHalamanPublikBySubdomain = async (
         id: true,
         judul: true,
         slug: true,
+        menuKonfigurasi: {
+          where: { sekolahId: sekolah.id, status: "aktif" },
+          select: publicMenuSelect,
+          orderBy: [{ urutan: "asc" }, { id: "asc" }],
+        },
       },
       orderBy: { dibuatPada: "asc" },
     });
@@ -257,29 +288,26 @@ export const getKonfigurasiPublikBySubdomain = async (
       where: {
         sekolahId: sekolah.id,
         status: "aktif",
-        // HAPUS dihapusPada: null
+        halamanCms: {
+          sekolahId: sekolah.id,
+          dihapusPada: null,
+          status: { in: [...CMS_PUBLIC_STATUSES] },
+        },
       },
       select: {
-        halaman: true,
-        section: true,
-        judul: true,
-        subJudul: true,
-        konten: true,
-        gambarUrl: true,
-        ctaText: true,
-        ctaLink: true,
-        urutan: true,
+        ...publicMenuSelect,
+        halamanCms: { select: { id: true, judul: true, slug: true } },
       },
-      orderBy: [{ halaman: "asc" }, { urutan: "asc" }],
+      orderBy: [{ halamanCmsId: "asc" }, { urutan: "asc" }, { id: "asc" }],
     });
 
     const formattedConfig = konfigurasi.reduce((acc: any, curr) => {
-      if (!acc[curr.halaman]) {
-        acc[curr.halaman] = {};
+      if (!acc[curr.halamanCmsId]) {
+        acc[curr.halamanCmsId] = Object.create(null);
       }
-      acc[curr.halaman][curr.section] = curr;
+      acc[curr.halamanCmsId][curr.section] = curr;
       return acc;
-    }, {});
+    }, Object.create(null));
 
     return successResponse(
       res,

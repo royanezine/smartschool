@@ -40,6 +40,9 @@ export const createGedung = async (req: AuthRequest, res: Response) => {
     data: {
       ...data,
       sekolahId,
+      lantai: {
+        create: { nama: "Lantai 1", nomorLantai: 1, status: "aktif" },
+      },
     },
     include: { lantai: true },
   });
