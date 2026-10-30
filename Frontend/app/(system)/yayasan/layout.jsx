@@ -75,7 +75,7 @@ export default function YayasanLayout({ children }) {
           />
 
 
-          <main className="flex-1 min-w-0 overflow-y-auto theme-page">
+          <main className="min-h-0 min-w-0 flex-1 overflow-y-auto theme-page">
             {children}
           </main>
         </div>

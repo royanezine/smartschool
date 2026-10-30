@@ -624,7 +624,7 @@ export default function AbsenSiswaPage() {
           }}
         />
 
-        <main className="flex-1 overflow-y-auto">
+        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto">
           <div className="p-4 sm:p-6 lg:p-8 space-y-6">
             <div className="flex items-center justify-between gap-3 flex-wrap">
               <div className="flex items-center gap-3">
@@ -850,7 +850,7 @@ export default function AbsenSiswaPage() {
 
             <div className="theme-card rounded-xl border theme-border shadow-sm overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="w-full text-sm border-collapse">
+                <table className="w-full min-w-[800px] text-sm border-collapse">
                   <thead>
                     <tr className="theme-primary">
                       <th className="text-center font-semibold px-4 py-3 w-[60px]">

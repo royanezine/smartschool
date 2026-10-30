@@ -791,7 +791,7 @@ export default function TambahJadwalMengajarPage() {
         />
 
 
-        <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
+        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
 
           <div className="mx-auto w-full max-w-[1600px] px-4 py-5 sm:px-6 sm:py-6 lg:px-8 xl:px-10">
 

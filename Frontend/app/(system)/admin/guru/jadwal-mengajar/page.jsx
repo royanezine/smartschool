@@ -605,7 +605,7 @@ export default function JadwalMengajarPage() {
           }}
         />
 
-        <main className="flex-1 overflow-y-auto">
+        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto">
           <div className="p-4 sm:p-6 lg:p-8">
             <div className="max-w-[1500px] mx-auto space-y-6">
 
@@ -1170,7 +1170,7 @@ export default function JadwalMengajarPage() {
 
                     <div className="overflow-x-auto">
 
-                      <table className="w-full text-sm">
+                      <table className="w-full min-w-[800px] text-sm">
 
                         <thead>
                           <tr className="theme-table-header border-b theme-border">

@@ -6,7 +6,6 @@ import {
   LayoutTemplate,
   ScanFace,
   GraduationCap,
-  Split,
   FolderOpen,
   WalletCards,
   Landmark,
@@ -277,12 +276,6 @@ export const adminSidebarConfig = {
           icon: UserCheck,
           label: "Wali Kelas",
           path: "/admin/guru/wali-kelas",
-        },
-        {
-          key: "jurusan",
-          icon: Split,
-          label: "Jurusan",
-          path: "/admin/akademik/jurusan",
         },
         {
           key: "mataPelajaran",

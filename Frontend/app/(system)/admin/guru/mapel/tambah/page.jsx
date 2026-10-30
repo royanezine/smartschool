@@ -588,11 +588,9 @@ export default function TambahMapelPage() {
           }}
         />
 
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto min-w-0">
 
-          <div className="p-4 sm:p-6 lg:p-8">
-
-            <div className="max-w-7xl mx-auto space-y-6">
+          <div className="p-4 sm:p-6 lg:p-8 space-y-6 min-w-0 w-full">
 
 
               <div className="flex items-center gap-3">
@@ -1935,8 +1933,6 @@ export default function TambahMapelPage() {
                 </div>
 
               </div>
-
-            </div>
 
           </div>
 

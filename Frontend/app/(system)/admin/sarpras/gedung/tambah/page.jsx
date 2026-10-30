@@ -215,8 +215,8 @@ export default function TambahGedungPage() {
           }}
         />
 
-        <main className="flex-1 p-3 sm:p-5 lg:p-7 xl:p-8">
-          <div className="mx-auto w-full max-w-[1200px] space-y-4 sm:space-y-5 lg:space-y-6">
+        <main className="flex-1 overflow-y-auto min-w-0">
+          <div className="p-4 sm:p-6 lg:p-8 space-y-6 min-w-0 w-full">
             <button
               type="button"
               onClick={handleBack}

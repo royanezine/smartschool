@@ -352,7 +352,7 @@ export default function DetailJalurPendaftaranPage() {
           }}
         />
 
-        <main className="flex-1 overflow-y-auto">
+        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto">
           <div className="w-full p-4 sm:p-6 lg:p-8">
             <div className="mx-auto w-full max-w-[1320px]">
 

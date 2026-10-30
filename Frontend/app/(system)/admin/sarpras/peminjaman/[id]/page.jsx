@@ -266,7 +266,7 @@ export default function DetailPeminjamanPage() {
           }}
         />
 
-        <main className="theme-page flex-1 overflow-y-auto">
+        <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto">
           <div className="mx-auto w-full max-w-[1400px] space-y-5 p-4 sm:p-6 lg:p-8">
 
             <button

@@ -226,7 +226,7 @@ export default function DetailTugasAdminPage() {
       <div className="flex-1 min-w-0 flex flex-col">
         <Header />
 
-        <main className="flex-1 px-4 md:px-6 lg:px-8 py-6">
+        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto px-4 py-6 sm:px-6 lg:px-8">
           <div className="flex items-center gap-2 text-sm theme-text-secondary mb-4">
             <Link
               href="/admin/lms-cbt/tugas-siswa"
@@ -529,7 +529,7 @@ export default function DetailTugasAdminPage() {
                   </div>
                 ) : (
                   <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
+                    <table className="w-full min-w-[750px] text-left border-collapse">
                       <thead>
                         <tr className="theme-card-soft border-b theme-border text-xs font-semibold theme-text-secondary uppercase tracking-wider">
                           <th className="px-4 py-3.5 w-12 text-center">No</th>

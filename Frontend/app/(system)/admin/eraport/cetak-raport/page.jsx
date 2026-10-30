@@ -1528,7 +1528,7 @@ export default function CetakRaportPage() {
           <Header />
         </div>
 
-        <main className="flex-1 overflow-y-auto print:overflow-visible">
+        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto print:overflow-visible">
           <div className="mx-auto w-full max-w-[1400px] space-y-6 p-4 sm:p-6 lg:p-8 print:max-w-full print:p-0">
 
 

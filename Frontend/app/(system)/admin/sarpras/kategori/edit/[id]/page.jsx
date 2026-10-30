@@ -229,7 +229,7 @@ export default function EditKategoriPage() {
           />
         </div>
 
-        <main className="min-w-0 flex-1 overflow-y-auto">
+        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto">
           <div className="w-full px-4 py-5 sm:px-6 lg:px-8">
 
             <div className="theme-text-muted mb-4 flex items-center gap-2 text-xs">

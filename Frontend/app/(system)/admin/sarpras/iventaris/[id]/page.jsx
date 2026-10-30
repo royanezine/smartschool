@@ -168,8 +168,8 @@ export default function InventarisDetailPage() {
           }}
         />
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-8">
-          <div className="mx-auto w-full max-w-6xl space-y-5">
+        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+          <div className="w-full space-y-5 min-w-0">
             <button
               type="button"
               onClick={() => router.push("/admin/sarpras/iventaris")}

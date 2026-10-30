@@ -26,6 +26,7 @@ import {
   ChevronDown,
   Eye,
   RefreshCw,
+  AlertCircle,
 } from "lucide-react";
 
 
@@ -41,107 +42,7 @@ const ICONS = {
 };
 
 
-const initialData = [
-  {
-    id: 1,
-    kode: "IPA",
-    nama: "Ilmu Pengetahuan Alam",
-    jenjang: "SMA",
-    kepala: "Dra. Siti Marlina, M.Pd.",
-    kelas: 6,
-    siswa: 214,
-    status: "Aktif",
-    icon: "FlaskConical",
-  },
-  {
-    id: 2,
-    kode: "IPS",
-    nama: "Ilmu Pengetahuan Sosial",
-    jenjang: "SMA",
-    kepala: "Drs. Bambang Hartono",
-    kelas: 5,
-    siswa: 178,
-    status: "Aktif",
-    icon: "Landmark",
-  },
-  {
-    id: 3,
-    kode: "BHS",
-    nama: "Bahasa dan Budaya",
-    jenjang: "SMA",
-    kepala: "Rina Kusuma, S.Pd.",
-    kelas: 2,
-    siswa: 61,
-    status: "Aktif",
-    icon: "Languages",
-  },
-  {
-    id: 4,
-    kode: "RPL",
-    nama: "Rekayasa Perangkat Lunak",
-    jenjang: "SMK",
-    kepala: "Ahmad Fauzi, S.Kom.",
-    kelas: 4,
-    siswa: 142,
-    status: "Aktif",
-    icon: "Code2",
-  },
-  {
-    id: 5,
-    kode: "TKJ",
-    nama: "Teknik Komputer & Jaringan",
-    jenjang: "SMK",
-    kepala: "Yusuf Prasetyo, S.T.",
-    kelas: 3,
-    siswa: 109,
-    status: "Aktif",
-    icon: "Code2",
-  },
-  {
-    id: 6,
-    kode: "MM",
-    nama: "Multimedia",
-    jenjang: "SMK",
-    kepala: "Dewi Anggraini, S.Sn.",
-    kelas: 3,
-    siswa: 96,
-    status: "Aktif",
-    icon: "Palette",
-  },
-  {
-    id: 7,
-    kode: "AK",
-    nama: "Akuntansi & Keuangan",
-    jenjang: "SMK",
-    kepala: "Hendra Wijaya, S.E.",
-    kelas: 3,
-    siswa: 88,
-    status: "Nonaktif",
-    icon: "Calculator",
-  },
-  {
-    id: 8,
-    kode: "TKR",
-    nama: "Teknik Kendaraan Ringan",
-    jenjang: "SMK",
-    kepala: "Slamet Riyadi, S.T.",
-    kelas: 2,
-    siswa: 64,
-    status: "Aktif",
-    icon: "Wrench",
-  },
-  {
-    id: 9,
-    kode: "TB",
-    nama: "Tata Boga",
-    jenjang: "SMK",
-    kepala: "Ratna Sari, S.Pd.",
-    kelas: 2,
-    siswa: 57,
-    status: "Nonaktif",
-    icon: "UtensilsCrossed",
-  },
-];
+const initialData = [];
 
 const emptyForm = {
   kode: "",
@@ -667,7 +568,8 @@ export default function ListJurusanPage() {
 
                 <button
                   type="button"
-                  onClick={openAdd}
+                  disabled
+                  title="Fitur ini belum dapat digunakan karena endpoint Backend Jurusan belum tersedia"
                   className="
                     theme-primary
                     flex h-10 items-center gap-2
@@ -675,6 +577,7 @@ export default function ListJurusanPage() {
                     px-4
                     text-sm font-semibold
                     shadow-sm transition
+                    opacity-50 cursor-not-allowed
                   "
                 >
                   <Plus size={17} />
@@ -683,6 +586,17 @@ export default function ListJurusanPage() {
               </div>
             </div>
 
+            <div className="mb-5 flex items-start gap-3 rounded-xl border border-[color-mix(in_srgb,var(--color-warning)_25%,transparent)] bg-[color-mix(in_srgb,var(--color-warning)_8%,transparent)] p-4 text-[var(--color-warning)]">
+              <AlertCircle size={20} className="mt-0.5 shrink-0" />
+              <div className="flex-1 text-sm">
+                <p className="font-semibold text-xs sm:text-sm">
+                  Integrasi Backend Belum Tersedia
+                </p>
+                <p className="mt-1 text-xs opacity-90 leading-relaxed theme-text-secondary">
+                  Modul Jurusan belum didukung oleh model, tabel, atau rute API di Backend SmartSchool. Sesuai kebijakan integritas data bisnis, data tiruan (dummy/mock) telah dihilangkan dan penambahan data dinonaktifkan sementara hingga endpoint resmi disediakan oleh Backend.
+                </p>
+              </div>
+            </div>
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
               <StatCard
@@ -1039,16 +953,19 @@ export default function ListJurusanPage() {
                               rounded-full
                             "
                           >
-                            <Search size={21} />
+                            <GraduationCap size={21} />
                           </div>
 
                           <p className="mt-3 text-sm font-semibold theme-text-secondary">
-                            Jurusan tidak ditemukan
+                            {data.length === 0
+                              ? "Belum ada data jurusan"
+                              : "Jurusan tidak ditemukan"}
                           </p>
 
                           <p className="mt-1 text-xs theme-text-muted">
-                            Coba ubah kata kunci atau filter
-                            pencarian.
+                            {data.length === 0
+                              ? "Data jurusan belum tersedia dari Backend server."
+                              : "Coba ubah kata kunci atau filter pencarian."}
                           </p>
                         </td>
                       </tr>

@@ -308,7 +308,7 @@ export default function TambahPendaftarPage() {
             }}
           />
 
-          <main className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+          <main className="min-h-0 min-w-0 flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
             <div className="mx-auto max-w-2xl">
               <div
                 className={`theme-card ${themeNeutralBorder} ${themeCardShadow} overflow-hidden rounded-2xl border p-6 sm:p-8`}
@@ -417,7 +417,7 @@ export default function TambahPendaftarPage() {
           }}
         />
 
-        <main className="min-h-0 flex-1 overflow-y-auto">
+        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto">
           <div className="mx-auto w-full max-w-4xl p-4 sm:p-6 lg:p-8">
             <button
               type="button"

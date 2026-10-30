@@ -366,9 +366,8 @@ export default function EditMapelPage() {
           }}
         />
 
-        <main className="flex-1 overflow-y-auto">
-          <div className="p-4 sm:p-6 lg:p-8">
-            <div className="max-w-7xl mx-auto space-y-6">
+        <main className="flex-1 overflow-y-auto min-w-0">
+          <div className="p-4 sm:p-6 lg:p-8 space-y-6 min-w-0 w-full">
 
               <div className="flex items-center gap-3">
                 <button
@@ -880,7 +879,6 @@ export default function EditMapelPage() {
                   menyimpan.
                 </span>
               </div>
-            </div>
           </div>
         </main>
       </div>

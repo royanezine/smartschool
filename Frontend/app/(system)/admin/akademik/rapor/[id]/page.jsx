@@ -202,7 +202,7 @@ export default function RaporDetailPage() {
           }}
         />
 
-        <main className="flex-1 overflow-y-auto print:overflow-visible theme-page">
+        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto print:overflow-visible theme-page">
           <div className="p-4 sm:p-6 lg:p-8 space-y-6 max-w-4xl mx-auto print:max-w-full">
             <div className="flex items-center justify-between print:hidden">
               <button
@@ -322,7 +322,7 @@ export default function RaporDetailPage() {
               </div>
 
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+                <table className="w-full min-w-[800px] text-sm">
                   <thead>
                     <tr className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white print:bg-slate-100 print:text-slate-900">
                       <th className="text-left font-semibold px-4 py-3 w-10">

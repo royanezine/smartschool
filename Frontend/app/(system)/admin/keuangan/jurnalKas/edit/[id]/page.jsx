@@ -32,7 +32,7 @@ export default function EditJurnalKasPage() {
           toggleSidebar={() => setIsCollapsed((prev) => !prev)}
         />
 
-        <main className="theme-page min-h-0 flex-1 overflow-y-auto">
+        <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto">
           <div className="mx-auto w-full max-w-[800px] px-4 py-10 sm:px-6">
             <div className="theme-card overflow-hidden rounded-2xl border p-8 shadow-sm text-center">
               <div className="theme-info mx-auto flex h-14 w-14 items-center justify-center rounded-2xl">

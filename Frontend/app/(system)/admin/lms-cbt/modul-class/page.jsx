@@ -178,7 +178,7 @@ export default function ModulClassPage() {
       <div className="flex-1 min-w-0 flex flex-col">
         <Header />
 
-        <main className="flex-1 overflow-y-auto">
+        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto">
           <div className="p-5 md:p-7 lg:p-8">
             <div className="flex items-center gap-2 text-sm mb-3">
               <span className="theme-text-muted">LMS & CBT</span>
