@@ -1,6 +1,7 @@
-import { publikService } from "@/services/publik.service";
+
 import Link from "next/link";
-import { ArrowRight, Newspaper, BookOpen, CheckCircle2 } from "lucide-react";
+import { publikService } from "@/services/publik.service";
+import { ArrowRight, Newspaper, BookOpen } from "lucide-react";
 import ArticleCard from "@/app/components/tenant/ArticleCard";
 
 export const dynamic = "force-dynamic";
@@ -18,100 +19,155 @@ function unwrap(value) {
     ) {
       break;
     }
-
     result = result.data;
   }
 
   return result;
 }
 
-function getText(value) {
-  if (typeof value === "string" || typeof value === "number") {
-    return String(value);
-  }
-
-  return "";
+function text(value) {
+  return typeof value === "string" || typeof value === "number"
+    ? String(value).trim()
+    : "";
 }
 
-function getValue(item, ...keys) {
+function getField(item, ...keys) {
   for (const key of keys) {
-    const value = getText(item?.[key]);
-
-    if (value.trim()) return value;
+    const value = text(item?.[key]);
+    if (value) return value;
   }
-
   return "";
 }
 
+function visible(item) {
+  const status = text(item?.status).toLowerCase();
+  return status !== "nonaktif" && status !== "draft";
+}
 
-function normalizeSections(response) {
-  const config = unwrap(response);
+function getPageList(response) {
+  const result = unwrap(response);
 
-  if (!config || typeof config !== "object") {
-    return [];
+  if (Array.isArray(result)) return result;
+
+  for (const key of ["daftarCms", "halamanCms", "halaman", "pages", "items"]) {
+    if (Array.isArray(result?.[key])) return result[key];
   }
 
-  // Mendukung struktur response konfigurasi publik.
-  const beranda =
-    config?.beranda ??
-    config?.Beranda ??
-    config?.home ??
-    config?.homepage ??
-    config?.konfigurasi?.beranda ??
-    config?.konfigurasi?.home;
+  return [];
+}
 
-  if (!beranda || typeof beranda !== "object") {
-    return [];
+function normalizeSectionList(value) {
+  const result = unwrap(value);
+  let items = [];
+
+  if (Array.isArray(result)) {
+    items = result;
+  } else if (result && typeof result === "object") {
+    for (const key of ["menuKonfigurasi", "sections", "section", "items"]) {
+      if (Array.isArray(result[key])) {
+        items = result[key];
+        break;
+      }
+    }
+
+    if (!items.length) {
+      const values = Object.values(result);
+
+      if (
+        values.length > 0 &&
+        values.every((item) => item && typeof item === "object")
+      ) {
+        items = values.map((item, index) => ({
+          ...item,
+          section: item.section ?? Object.keys(result)[index],
+        }));
+      }
+    }
   }
 
-  const sections = Array.isArray(beranda)
-    ? beranda
-    : Object.entries(beranda).map(([key, item]) => ({
-        ...item,
-        section: item?.section ?? key,
-      }));
-
-  return sections
+  return items
     .filter(
       (item) =>
         item &&
         typeof item === "object" &&
-        String(item.status ?? "aktif").toLowerCase() !== "nonaktif"
+        visible(item)
     )
     .map((item, index) => ({
       ...item,
-      section: String(item.section ?? `section-${index + 1}`)
-        .trim()
-        .toLowerCase(),
-      urutan: Number(item.urutan ?? item.order ?? index + 1),
+      section: text(item.section).toLowerCase() || `section-${index + 1}`,
+      urutan: Number(item.urutan ?? index + 1),
     }))
     .sort((a, b) => {
-      const aHero = a.section === "hero";
-      const bHero = b.section === "hero";
-
-      if (aHero && !bHero) return -1;
-      if (!aHero && bHero) return 1;
-
+      if (a.section === "hero" && b.section !== "hero") return -1;
+      if (b.section === "hero" && a.section !== "hero") return 1;
       return a.urutan - b.urutan;
     });
 }
 
+function findHomePage(pages) {
+  return pages.find((page) => {
+    const slug = text(page.slug).toLowerCase();
+    const title = text(page.judul ?? page.title).toLowerCase();
+
+    return (
+      ["beranda", "home", "homepage"].includes(slug) ||
+      ["beranda", "home"].includes(title)
+    );
+  });
+}
+
+function findHomeSections(response, homePage) {
+  const config = unwrap(response);
+
+  if (!homePage || !config) return [];
+
+  // Bentuk response berupa daftar konfigurasi langsung.
+  if (Array.isArray(config)) {
+    return normalizeSectionList(
+      config.filter(
+        (item) => item.halamanCmsId === homePage.id
+      )
+    );
+  }
+
+  // Bentuk response dikelompokkan berdasarkan halamanCmsId.
+  const candidates = [
+    config[homePage.id],
+    config.konfigurasi?.[homePage.id],
+    config.data?.[homePage.id],
+    config.halamanCms?.[homePage.id],
+    config.halaman?.[homePage.id],
+  ];
+
+  for (const candidate of candidates) {
+    const sections = normalizeSectionList(candidate);
+    if (sections.length) return sections;
+  }
+
+  // Bentuk response berupa daftar halaman yang memiliki menuKonfigurasi.
+  const pages = getPageList(config);
+  const matchingPage = pages.find((page) => page.id === homePage.id);
+
+  if (matchingPage) {
+    return normalizeSectionList(
+      matchingPage.menuKonfigurasi ??
+      matchingPage.konfigurasi ??
+      matchingPage.sections ??
+      []
+    );
+  }
+
+  // Jangan mengambil konfigurasi halaman lain secara sembarangan.
+  return [];
+}
 
 function getArticles(response) {
   const result = unwrap(response);
 
   if (Array.isArray(result)) return result;
-  if (!result || typeof result !== "object") return [];
 
-  for (const key of [
-    "artikel",
-    "artikels",
-    "articles",
-    "daftarArtikel",
-    "items",
-    "results",
-  ]) {
-    if (Array.isArray(result[key])) return result[key];
+  for (const key of ["artikel", "artikels", "articles", "daftarArtikel", "items", "results"]) {
+    if (Array.isArray(result?.[key])) return result[key];
   }
 
   return [];
@@ -128,183 +184,81 @@ function getArticleDate(article) {
   );
 }
 
-const themeStyles = {
-  primary: { color: "var(--school-primary, #2563EB)" },
-  primaryBackground: { backgroundColor: "var(--school-primary, #2563EB)" },
-  accentBackground: { backgroundColor: "var(--school-accent, #F59E0B)" },
-  text: { color: "var(--school-text, #0F172A)" },
-  mutedText: { color: "var(--school-secondary, #64748B)" },
-};
+function tenantLink(tenant, value) {
+  const target = text(value);
 
-function SectionItem({ item }) {
-  const sectionName = String(item.section || "").toLowerCase();
+  if (!target) return `/${tenant}/articles`;
+  if (/^(https?:\/\/|mailto:|tel:)/i.test(target)) return target;
 
-  const title = getValue(item, "judul", "title", "nama", "heading", "label");
-  const subtitle = getValue(
-    item,
-    "subJudul",
-    "subjudul",
-    "subtitle",
-    "sub_title"
-  );
-  const content = getValue(
-    item,
-    "konten",
-    "content",
-    "deskripsi",
-    "deskripsiSection",
-    "isi",
-    "text",
-    "value"
-  );
-  const image = getValue(
-    item,
-    "gambarUrl",
-    "gambar",
-    "gambarUtama",
-    "image",
-    "imageUrl",
-    "urlGambar"
-  );
-  const ctaText = getValue(
-    item,
-    "ctaText",
-    "teksTombol",
-    "buttonText",
-    "tombolText"
-  );
-  const ctaLink = getValue(
-    item,
-    "ctaLink",
-    "tautan",
-    "buttonLink",
-    "urlTombol"
-  );
+  const path = target.startsWith("/") ? target : `/${target}`;
+  const prefix = `/${tenant}`;
 
-  const sectionId = sectionName.replace(/[^a-z0-9-_]/g, "-");
+  if (path === prefix || path.startsWith(`${prefix}/`)) return path;
 
-  if (!title && !subtitle && !content && !image && !ctaText) {
+  return `${prefix}${path === "/" ? "" : path}`;
+}
+
+function CmsSection({ item, tenant }) {
+  const section = text(item.section).toLowerCase();
+  const title = getField(item, "judul", "title", "nama", "heading");
+  const subtitle = getField(item, "subJudul", "subjudul", "subtitle");
+  const content = getField(item, "konten", "content", "deskripsi", "isi");
+  const image = getField(item, "gambarUrl", "gambar", "gambarUtama", "imageUrl");
+  const ctaText = getField(item, "ctaText", "teksTombol", "buttonText");
+  const ctaLink = getField(item, "ctaLink", "tautan", "buttonLink");
+  const hero = section === "hero";
+
+  if (!visible(item) || !(title || subtitle || content || image || ctaText)) {
     return null;
-  }
-
-  const isHero = sectionName === "hero";
-
-  if (isHero) {
-    return (
-      <section
-        id={sectionId || "hero"}
-        className="relative flex min-h-[90vh] w-full items-center justify-center overflow-hidden bg-slate-900 pt-32 pb-20 sm:pb-28"
-      >
-        {image && (
-          <div className="absolute inset-0 h-full w-full">
-            <img
-              src={image}
-              alt={title || "Foto sekolah"}
-              className="h-full w-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-slate-900/40 to-transparent" />
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-transparent opacity-50" />
-          </div>
-        )}
-
-        <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-col items-start px-6 sm:px-8 lg:px-12">
-          <div className="max-w-3xl">
-            {subtitle && (
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-black/30 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-white backdrop-blur-md">
-                <span
-                  className="h-2 w-2 rounded-full animate-pulse"
-                  style={{
-                    backgroundColor: "var(--school-primary, #3B82F6)",
-                  }}
-                />
-                {subtitle}
-              </div>
-            )}
-
-            {title && (
-              <h1 className="text-4xl font-extrabold leading-[1.1] tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl drop-shadow-lg">
-                {title}
-              </h1>
-            )}
-
-            {content && (
-              <p className="mt-6 max-w-2xl text-lg leading-relaxed text-slate-200 sm:text-xl drop-shadow-md">
-                {content}
-              </p>
-            )}
-
-            <div className="mt-8 flex flex-wrap items-center gap-4 text-sm font-medium text-slate-200">
-              <div className="flex items-center gap-2">
-                <CheckCircle2
-                  size={18}
-                  style={{ color: "var(--school-primary, #10B981)" }}
-                />
-                Akreditasi A
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle2
-                  size={18}
-                  style={{ color: "var(--school-primary, #10B981)" }}
-                />
-                Fasilitas Modern
-              </div>
-            </div>
-
-            {ctaText && ctaLink && (
-              <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-                <Link
-                  href={ctaLink}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl px-8 py-4 text-sm font-bold text-white shadow-xl transition hover:opacity-90 hover:-translate-y-0.5"
-                  style={{
-                    backgroundColor: "var(--school-primary, #2563EB)",
-                    boxShadow:
-                      "0 10px 25px -5px var(--school-primary, rgba(37, 99, 235, 0.5))",
-                  }}
-                >
-                  {ctaText} <ArrowRight size={18} />
-                </Link>
-              </div>
-            )}
-          </div>
-        </div>
-      </section>
-    );
   }
 
   return (
     <section
-      id={sectionId}
-      className="w-full border-t px-6 py-20 sm:px-8 sm:py-28"
-      style={{
-        backgroundColor: "var(--school-surface, #FFFFFF)",
-        borderColor: "var(--school-border, #E2E8F0)",
-      }}
+      id={section.replace(/[^a-z0-9_-]/g, "-")}
+      className={
+        hero
+          ? "relative flex min-h-[75vh] items-center overflow-hidden bg-slate-900 px-6 py-24 sm:px-10 lg:px-16"
+          : "border-t border-slate-200 bg-white px-6 py-16 sm:px-10 sm:py-20"
+      }
     >
+      {hero && image && (
+        <>
+          <img
+            src={image}
+            alt={title || "Foto sekolah"}
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-950/85 via-slate-900/55 to-transparent" />
+        </>
+      )}
+
       <div
-        className={`mx-auto grid max-w-6xl gap-12 sm:gap-16 ${
-          image ? "md:grid-cols-2 md:items-center" : ""
-        }`}
+        className={
+          hero
+            ? "relative z-10 mx-auto w-full max-w-7xl"
+            : "mx-auto grid w-full max-w-6xl gap-10 md:grid-cols-2 md:items-center"
+        }
       >
         <div className="min-w-0">
           {subtitle && (
-            <div className="mb-4 flex items-center gap-3">
-              <span
-                className="h-1 w-8 rounded-full"
-                style={themeStyles.accentBackground}
-              />
-              <p
-                className="text-sm font-bold uppercase tracking-widest"
-                style={themeStyles.primary}
-              >
-                {subtitle}
-              </p>
-            </div>
+            <p
+              className={
+                hero
+                  ? "mb-4 text-sm font-bold uppercase tracking-widest text-blue-200"
+                  : "mb-4 text-sm font-bold uppercase tracking-widest text-blue-700"
+              }
+            >
+              {subtitle}
+            </p>
           )}
 
           {title && (
             <h2
-              className="text-3xl font-extrabold tracking-tight sm:text-4xl"
-              style={themeStyles.text}
+              className={
+                hero
+                  ? "text-4xl font-extrabold leading-tight text-white sm:text-5xl lg:text-6xl"
+                  : "text-3xl font-extrabold leading-tight text-slate-900 sm:text-4xl"
+              }
             >
               {title}
             </h2>
@@ -312,99 +266,68 @@ function SectionItem({ item }) {
 
           {content && (
             <p
-              className="mt-5 whitespace-pre-line text-base leading-relaxed sm:text-lg"
-              style={themeStyles.mutedText}
+              className={
+                hero
+                  ? "mt-6 max-w-3xl whitespace-pre-line text-lg leading-8 text-slate-100"
+                  : "mt-5 whitespace-pre-line text-base leading-8 text-slate-600"
+              }
             >
               {content}
             </p>
           )}
 
           {ctaText && ctaLink && (
-            <div className="mt-8">
-              <Link
-                href={ctaLink}
-                className="inline-flex items-center gap-2 rounded-xl px-6 py-3.5 text-sm font-bold text-white transition hover:opacity-90"
-                style={themeStyles.primaryBackground}
-              >
-                {ctaText} <ArrowRight size={17} />
-              </Link>
-            </div>
+            <Link
+              href={tenantLink(tenant, ctaLink)}
+              className="mt-8 inline-flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-3.5 font-semibold text-white hover:bg-blue-700"
+            >
+              {ctaText} <ArrowRight size={17} />
+            </Link>
           )}
         </div>
 
-        {image && (
-          <div
-            className="relative aspect-[4/3] w-full overflow-hidden rounded-3xl shadow-xl"
-            style={{ border: "1px solid var(--school-border, #E2E8F0)" }}
-          >
-            <img
-              src={image}
-              alt={title || "Informasi sekolah"}
-              className="h-full w-full object-cover transition-transform duration-700 hover:scale-105"
-              loading="lazy"
-            />
-          </div>
+        {!hero && image && (
+          <img
+            src={image}
+            alt={title || "Informasi sekolah"}
+            className="max-h-[420px] w-full rounded-2xl border border-slate-200 object-cover"
+            loading="lazy"
+          />
         )}
       </div>
     </section>
   );
 }
 
-function getTenantArticleLink(tenant, link) {
-  const target = link.trim();
-
-  if (!target) return `/${tenant}/articles`;
-
-  // URL eksternal tetap digunakan sebagaimana dikonfigurasi.
-  if (/^(https?:\/\/|mailto:|tel:)/i.test(target)) {
-    return target;
-  }
-
-  // Pertahankan subdomain pada navigasi website sekolah.
-  const path = target.startsWith("/") ? target : `/${target}`;
-  const tenantPrefix = `/${tenant}`;
-
-  if (path === tenantPrefix || path.startsWith(`${tenantPrefix}/`)) {
-    return path;
-  }
-
-  return `${tenantPrefix}${path === "/" ? "" : path}`;
-}
-
 export default async function TenantHomePage({ params }) {
-  const resolvedParams = await params;
-  const tenant = resolvedParams?.tenant;
+  const { tenant } = await params;
 
-  if (!tenant) {
-    return (
-      <section className="flex min-h-screen items-center justify-center px-5 pt-32">
-        <div className="text-center">
-          <BookOpen size={48} className="mx-auto mb-4 text-slate-300" />
-          <h1 className="text-2xl font-bold text-slate-900">
-            Subdomain sekolah tidak ditemukan
-          </h1>
-          <p className="mt-2 text-slate-500">
-            Pastikan alamat website sekolah sudah benar.
-          </p>
-        </div>
-      </section>
-    );
-  }
+  if (!tenant) notFound();
 
-  const [konfigurasiResult, artikelResult] = await Promise.allSettled([
-    publikService.getKonfigurasi(tenant),
-    publikService.getArtikel(tenant),
-  ]);
+  const [profileResult, configResult, articlesResult] =
+    await Promise.allSettled([
+      publikService.getProfil(tenant),
+      publikService.getKonfigurasi(tenant),
+      publikService.getArtikel(tenant),
+    ]);
+
+  const profile =
+    profileResult.status === "fulfilled"
+      ? unwrap(profileResult.value)
+      : null;
+
+  const pages = getPageList(profile);
+  const homePage = findHomePage(pages);
 
   const sections =
-    konfigurasiResult.status === "fulfilled"
-      ? normalizeSections(konfigurasiResult.value)
+    configResult.status === "fulfilled"
+      ? findHomeSections(configResult.value, homePage)
       : [];
 
   const articles =
-    artikelResult.status === "fulfilled"
-      ? getArticles(artikelResult.value)
-          .filter((item) => item && typeof item === "object")
+    articlesResult.status === "fulfilled"
+      ? getArticles(articlesResult.value)
+          .filter((item) => item && typeof item === "object" && visible(item))
           .sort((a, b) => {
             const dateA = new Date(getArticleDate(a)).getTime() || 0;
             const dateB = new Date(getArticleDate(b)).getTime() || 0;
@@ -413,51 +336,50 @@ export default async function TenantHomePage({ params }) {
           .slice(0, 3)
       : [];
 
-  // Ambil konfigurasi section informasi dari data CMS.
-  const informasiConfig = sections.find(
-    (item) =>
-      String(item.section || "").toLowerCase() === "informasi-terbaru"
+  const informationSection = sections.find(
+    (item) => item.section === "informasi-terbaru"
   );
 
-  const informasiTitle =
-    getValue(informasiConfig, "judul", "title") ||
+  const infoTitle =
+    getField(informationSection, "judul", "title") ||
     "Informasi & Artikel Terbaru";
 
-  const informasiSubtitle =
-    getValue(informasiConfig, "subJudul", "subjudul", "subtitle") ||
+  const infoSubtitle =
+    getField(informationSection, "subJudul", "subjudul", "subtitle") ||
     "Kabar Sekolah";
 
-  const informasiContent =
-    getValue(informasiConfig, "konten", "content", "deskripsi") ||
-    "Ikuti informasi, kegiatan, prestasi, dan artikel terbaru yang dipublikasikan oleh sekolah.";
+  const infoContent =
+    getField(informationSection, "konten", "content", "deskripsi") ||
+    "Ikuti informasi, kegiatan, prestasi, dan artikel terbaru sekolah.";
 
-  const informasiCtaText =
-    getValue(informasiConfig, "ctaText", "teksTombol", "buttonText") ||
+  const infoButton =
+    getField(informationSection, "ctaText", "teksTombol", "buttonText") ||
     "Lihat Semua";
 
-  const informasiCtaLink = getTenantArticleLink(
+  const infoLink = tenantLink(
     tenant,
-    getValue(informasiConfig, "ctaLink", "tautan", "buttonLink") ||
+    getField(informationSection, "ctaLink", "tautan", "buttonLink") ||
       "/articles"
   );
 
-  // Jangan menghapus informasi-terbaru. Semua section konfigurasi dirender.
-  const visibleSections = sections;
-
   return (
     <main className="min-h-screen w-full bg-white">
-      {visibleSections.length > 0 ? (
-        visibleSections.map((item, index) => (
-          <SectionItem key={`${item.section}-${index}`} item={item} />
+      {sections.length ? (
+        sections.map((item, index) => (
+          <CmsSection
+            key={item.id ?? `${item.section}-${index}`}
+            item={item}
+            tenant={tenant}
+          />
         ))
       ) : (
-        <section className="flex min-h-[70vh] items-center justify-center bg-slate-50 px-6 pt-32 pb-20 text-center">
+        <section className="flex min-h-[65vh] items-center justify-center bg-slate-50 px-6 py-20 text-center">
           <div className="max-w-2xl">
-            <BookOpen size={56} className="mx-auto mb-5 text-blue-600" />
+            <BookOpen size={52} className="mx-auto mb-5 text-blue-600" />
             <h1 className="text-4xl font-extrabold text-slate-900 sm:text-5xl">
               Selamat Datang
             </h1>
-            <p className="mt-5 leading-relaxed text-slate-600">
+            <p className="mt-5 leading-8 text-slate-600">
               Informasi sekolah, kegiatan, dan berita terbaru dapat dilihat
               melalui website resmi sekolah ini.
             </p>
@@ -467,76 +389,46 @@ export default async function TenantHomePage({ params }) {
 
       <section
         id="artikel-terbaru"
-        className="w-full bg-slate-50 px-6 py-20 sm:px-8 sm:py-28"
-        style={{ borderColor: "var(--school-border, #E2E8F0)" }}
+        className="bg-slate-50 px-6 py-16 sm:px-10 sm:py-20"
       >
         <div className="mx-auto max-w-7xl">
-          <div className="mb-12 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+          <div className="mb-10 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
             <div className="max-w-2xl">
-              <div className="mb-3 flex items-center gap-3">
-                <span
-                  className="h-1 w-8 rounded-full"
-                  style={themeStyles.accentBackground}
-                />
-                <span
-                  className="text-sm font-bold uppercase tracking-widest"
-                  style={themeStyles.primary}
-                >
-                  {informasiSubtitle}
-                </span>
-              </div>
-
-              <h2
-                className="text-3xl font-extrabold tracking-tight sm:text-4xl"
-                style={themeStyles.text}
-              >
-                {informasiTitle}
-              </h2>
-
-              <p
-                className="mt-4 text-base leading-relaxed"
-                style={themeStyles.mutedText}
-              >
-                {informasiContent}
+              <p className="mb-3 text-sm font-bold uppercase tracking-widest text-blue-700">
+                {infoSubtitle}
               </p>
+              <h2 className="text-3xl font-extrabold text-slate-900 sm:text-4xl">
+                {infoTitle}
+              </h2>
+              <p className="mt-4 leading-7 text-slate-600">{infoContent}</p>
             </div>
 
             <Link
-              href={informasiCtaLink}
-              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border bg-white px-6 py-3 text-sm font-bold shadow-sm transition hover:-translate-y-0.5"
-              style={{
-                color: "var(--school-primary, #2563EB)",
-                borderColor: "var(--school-border, #E2E8F0)",
-              }}
+              href={infoLink}
+              className="inline-flex shrink-0 items-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3 font-semibold text-blue-700 hover:bg-blue-50"
             >
-              {informasiCtaText} <ArrowRight size={16} />
+              {infoButton} <ArrowRight size={16} />
             </Link>
           </div>
 
-          {articles.length > 0 ? (
+          {articles.length ? (
             <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-              {articles.map((artikel, index) => (
+              {articles.map((article, index) => (
                 <ArticleCard
-                  key={
-                    artikel.id ??
-                    artikel.slug ??
-                    artikel.slugArtikel ??
-                    `artikel-${index}`
-                  }
-                  artikel={artikel}
+                  key={article.id ?? article.slug ?? `artikel-${index}`}
+                  artikel={article}
                   subdomain={tenant}
                 />
               ))}
             </div>
           ) : (
-            <div className="rounded-3xl border-2 border-dashed border-slate-200 bg-white px-6 py-20 text-center shadow-sm">
-              <Newspaper size={56} className="mx-auto mb-4 text-slate-300" />
+            <div className="rounded-2xl border-2 border-dashed border-slate-200 bg-white px-6 py-14 text-center">
+              <Newspaper size={48} className="mx-auto mb-4 text-slate-300" />
               <h3 className="text-xl font-bold text-slate-800">
                 Belum Ada Artikel Terbaru
               </h3>
-              <p className="mx-auto mt-3 max-w-md text-slate-500">
-                Artikel akan ditampilkan di sini setelah tersedia dan
-                dipublikasikan melalui CMS sekolah.
+              <p className="mt-3 text-slate-500">
+                Artikel akan muncul di sini setelah dipublikasikan melalui CMS.
               </p>
             </div>
           )}

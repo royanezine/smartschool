@@ -2,6 +2,7 @@ import PublicNavbar from "./PublicNavbar";
 import PublicFooter from "./PublicFooter";
 import { publikService } from "@/services/publik.service";
 import { AlertTriangle } from "lucide-react";
+import { normalizePublicConfig } from "./normalizePublicConfig";
 
 /* =========================================================
    MEMUAT DATA WEBSITE PUBLIK BERDASARKAN SUBDOMAIN
@@ -144,12 +145,7 @@ export default function PublicLayout({
 
   const daftarHalaman = Array.isArray(halaman) ? halaman : [];
 
-  const daftarKonfigurasi = Array.isArray(konfigurasi)
-    ? konfigurasi
-    : konfigurasi && typeof konfigurasi === "object"
-      ? konfigurasi
-      : [];
-
+  const daftarKonfigurasi = normalizePublicConfig(konfigurasi);
   /* -------------------------------------------------------
      RENDER LAYOUT
   ------------------------------------------------------- */
@@ -167,9 +163,23 @@ export default function PublicLayout({
         halaman={daftarHalaman}
       />
 
-      <main className="flex w-full flex-1 flex-col">
-        {children}
-      </main>
+     
+<main className="flex w-full flex-1 flex-col">
+  {children}
+
+  {daftarKonfigurasi
+    .filter(
+      (item) =>
+        String(item.status || "").toLowerCase() === "aktif"
+    )
+    .map((item) => (
+      <PublicSection
+        key={item.id || `${item.halaman}-${item.section}-${item.urutan}`}
+        config={item}
+      />
+    ))}
+</main>
+
 
       <PublicFooter
         sekolah={profil}

@@ -2,7 +2,6 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
@@ -19,16 +18,25 @@ import {
   Loader2,
   AlertCircle,
   CheckCircle2,
-  ExternalLink,
   Eye,
   Image as ImageIcon,
   ArrowUpDown,
 } from "lucide-react";
 
 const API_URL = "/api/cms/menu-konfigurasi";
+const HALAMAN_API_URL = "/api/cms/halaman";
+
+const SECTION_OPTIONS = [
+  { value: "hero", label: "Hero / Banner Utama" },
+  { value: "tentang", label: "Tentang Sekolah" },
+  { value: "keunggulan", label: "Keunggulan Sekolah" },
+  { value: "program", label: "Program Sekolah" },
+  { value: "informasi-terbaru", label: "Informasi Terbaru" },
+  { value: "cta", label: "Call to Action" },
+];
 
 const INITIAL_FORM = {
-  halaman: "beranda",
+  halamanCmsId: "",
   section: "hero",
   judul: "",
   subJudul: "",
@@ -74,13 +82,10 @@ function getStatusLabel(status) {
 }
 
 function getStatusStyle(status) {
-  if (String(status || "").toLowerCase() === "aktif") {
-    return "theme-success border";
-  }
+  const value = String(status || "").toLowerCase();
 
-  if (String(status || "").toLowerCase() === "draft") {
-    return "theme-warning border";
-  }
+  if (value === "aktif") return "theme-success border";
+  if (value === "draft") return "theme-warning border";
 
   return "theme-card-soft theme-text-secondary border";
 }
@@ -91,21 +96,35 @@ function formatLabel(value) {
     .replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
-export default function CmsMenuPage() {
-  const router = useRouter();
+function normalizeId(value) {
+  return value === null || value === undefined ? "" : String(value);
+}
 
+function getPageTitle(page) {
+  return page?.judul || page?.title || "Halaman tanpa judul";
+}
+
+function getPageSlug(page) {
+  return page?.slug || "";
+}
+
+export default function CmsMenuPage() {
   const [active, setActive] = useState("menu");
   const [collapsed, setCollapsed] = useState(false);
 
   const [items, setItems] = useState([]);
+  const [halamanList, setHalamanList] = useState([]);
+
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [loadingHalaman, setLoadingHalaman] = useState(true);
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
 
   const [search, setSearch] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [halamanError, setHalamanError] = useState("");
 
   const [formOpen, setFormOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
@@ -113,7 +132,6 @@ export default function CmsMenuPage() {
 
   const [previewItem, setPreviewItem] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
-
 
   const fetchItems = useCallback(async (showRefresh = false) => {
     try {
@@ -128,11 +146,18 @@ export default function CmsMenuPage() {
       const result = await apiFetch(API_URL);
       const data = unwrapData(result);
 
-      setItems(Array.isArray(data) ? data : []);
+      if (!Array.isArray(data)) {
+        throw new Error("Format data konfigurasi menu dari server tidak valid.");
+      }
+
+      setItems(data);
     } catch (err) {
       console.error("Gagal mengambil konfigurasi menu:", err);
       setError(
-        getErrorMessage(err, "Gagal mengambil konfigurasi menu dari server.")
+        getErrorMessage(
+          err,
+          "Gagal mengambil konfigurasi menu dari server."
+        )
       );
     } finally {
       setLoading(false);
@@ -140,23 +165,52 @@ export default function CmsMenuPage() {
     }
   }, []);
 
+  const fetchHalaman = useCallback(async () => {
+    try {
+      setLoadingHalaman(true);
+      setHalamanError("");
+
+      const result = await apiFetch(HALAMAN_API_URL);
+      const data = unwrapData(result);
+
+      if (!Array.isArray(data)) {
+        throw new Error("Format daftar halaman CMS dari server tidak valid.");
+      }
+
+      setHalamanList(data);
+    } catch (err) {
+      console.error("Gagal mengambil daftar halaman CMS:", err);
+      setHalamanError(
+        getErrorMessage(err, "Gagal mengambil daftar halaman CMS.")
+      );
+    } finally {
+      setLoadingHalaman(false);
+    }
+  }, []);
+
   useEffect(() => {
     fetchItems();
-  }, [fetchItems]);
-
+    fetchHalaman();
+  }, [fetchItems, fetchHalaman]);
 
   const filteredItems = items.filter((item) => {
     const keyword = search.trim().toLowerCase();
 
     if (!keyword) return true;
 
-    return [
-      item?.halaman,
+    const searchableValues = [
+      item?.halamanCms?.judul,
+      item?.halamanCms?.slug,
+      item?.halamanCmsId,
       item?.section,
       item?.judul,
       item?.subJudul,
       item?.status,
-    ].some((value) => String(value || "").toLowerCase().includes(keyword));
+    ];
+
+    return searchableValues.some((value) =>
+      String(value ?? "").toLowerCase().includes(keyword)
+    );
   });
 
   const activeCount = items.filter(
@@ -166,7 +220,6 @@ export default function CmsMenuPage() {
   const inactiveCount = items.filter(
     (item) => String(item?.status || "").toLowerCase() === "nonaktif"
   ).length;
-
 
   const openCreateForm = () => {
     setEditingItem(null);
@@ -180,7 +233,9 @@ export default function CmsMenuPage() {
     setEditingItem(item);
 
     setFormData({
-      halaman: item?.halaman || "beranda",
+      halamanCmsId: normalizeId(
+        item?.halamanCmsId ?? item?.halamanCms?.id
+      ),
       section: item?.section || "hero",
       judul: item?.judul || "",
       subJudul: item?.subJudul || "",
@@ -203,6 +258,7 @@ export default function CmsMenuPage() {
     setFormOpen(false);
     setEditingItem(null);
     setFormData({ ...INITIAL_FORM });
+    setError("");
   };
 
   const handleChange = (event) => {
@@ -214,26 +270,27 @@ export default function CmsMenuPage() {
     }));
   };
 
-
   const handleSave = async (event) => {
     event.preventDefault();
 
-    const halaman = formData.halaman.trim();
+    if (saving) return;
+
+    const halamanCmsId = formData.halamanCmsId;
     const section = formData.section.trim();
     const judul = formData.judul.trim();
 
-    if (!halaman) {
-      setError("Nama halaman wajib diisi.");
+    if (!halamanCmsId) {
+      setError("Halaman CMS wajib dipilih.");
       return;
     }
 
     if (!section) {
-      setError("Section wajib diisi.");
+      setError("Section wajib dipilih.");
       return;
     }
 
     if (!judul) {
-      setError("Judul menu atau konten wajib diisi.");
+      setError("Judul wajib diisi.");
       return;
     }
 
@@ -244,12 +301,17 @@ export default function CmsMenuPage() {
       return;
     }
 
+    if (!["aktif", "nonaktif", "draft"].includes(formData.status)) {
+      setError("Status konfigurasi tidak valid.");
+      return;
+    }
+
     const payload = {
-      halaman,
+      halamanCmsId,
       section,
       judul,
       subJudul: formData.subJudul.trim() || null,
-      konten: formData.konten || null,
+      konten: formData.konten.trim() || null,
       gambarUrl: formData.gambarUrl.trim() || null,
       ctaText: formData.ctaText.trim() || null,
       ctaLink: formData.ctaLink.trim() || null,
@@ -263,26 +325,25 @@ export default function CmsMenuPage() {
       setSuccess("");
 
       if (editingItem?.id) {
-        await apiFetch(`${API_URL}/${editingItem.id}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
-        });
+        await apiFetch(
+          `${API_URL}/${encodeURIComponent(editingItem.id)}`,
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          }
+        );
       } else {
         await apiFetch(API_URL, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         });
       }
 
       const message = editingItem
         ? "Konfigurasi menu berhasil diperbarui."
-        : "Konfigurasi menu berhasil ditambahkan.";
+        : "Konfigurasi menu berhasil disimpan.";
 
       setFormOpen(false);
       setEditingItem(null);
@@ -292,40 +353,53 @@ export default function CmsMenuPage() {
       setSuccess(message);
     } catch (err) {
       console.error("Gagal menyimpan konfigurasi menu:", err);
-      setError(getErrorMessage(err, "Gagal menyimpan konfigurasi menu."));
+      setError(
+        getErrorMessage(err, "Gagal menyimpan konfigurasi menu.")
+      );
     } finally {
       setSaving(false);
     }
   };
 
-
   const handleDelete = async () => {
-    if (!deleteTarget?.id) return;
+    if (!deleteTarget?.id || deletingId !== null) return;
 
     try {
       setDeletingId(deleteTarget.id);
       setError("");
       setSuccess("");
 
-      await apiFetch(`${API_URL}/${deleteTarget.id}`, {
-        method: "DELETE",
-      });
+      await apiFetch(
+        `${API_URL}/${encodeURIComponent(deleteTarget.id)}`,
+        { method: "DELETE" }
+      );
 
       const title = deleteTarget.judul || "Konfigurasi menu";
 
       setDeleteTarget(null);
-      setPreviewItem(null);
+
+      if (previewItem?.id === deleteTarget.id) {
+        setPreviewItem(null);
+      }
 
       await fetchItems(true);
       setSuccess(`Konfigurasi "${title}" berhasil dinonaktifkan.`);
     } catch (err) {
       console.error("Gagal menonaktifkan konfigurasi menu:", err);
-      setError(getErrorMessage(err, "Gagal menonaktifkan konfigurasi menu."));
+      setError(
+        getErrorMessage(err, "Gagal menonaktifkan konfigurasi menu.")
+      );
     } finally {
       setDeletingId(null);
     }
   };
 
+  const halamanLabel = (item) =>
+    item?.halamanCms?.judul || "Halaman tidak ditemukan";
+
+  const refreshAll = async () => {
+    await Promise.all([fetchItems(true), fetchHalaman()]);
+  };
 
   if (loading) {
     return (
@@ -360,7 +434,6 @@ export default function CmsMenuPage() {
     );
   }
 
-
   return (
     <div className="theme-page flex min-h-screen w-full">
       <Sidebar
@@ -382,7 +455,6 @@ export default function CmsMenuPage() {
 
         <main className="theme-page min-w-0 flex-1 overflow-y-auto">
           <div className="mx-auto w-full max-w-[1700px] px-3 py-5 sm:px-6 lg:px-9">
-
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-3">
                 <div className="theme-info flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border">
@@ -394,7 +466,7 @@ export default function CmsMenuPage() {
                     Pengaturan Menu Website
                   </h1>
                   <p className="theme-text-secondary mt-1 text-sm">
-                    Kelola konfigurasi bagian menu dan konten website sekolah.
+                    Kelola konten pada bagian-bagian template website sekolah.
                   </p>
                 </div>
               </div>
@@ -402,29 +474,30 @@ export default function CmsMenuPage() {
               <div className="flex flex-wrap gap-2">
                 <button
                   type="button"
-                  onClick={() => fetchItems(true)}
-                  disabled={refreshing}
+                  onClick={refreshAll}
+                  disabled={refreshing || loadingHalaman}
                   className="theme-card theme-border theme-text-secondary inline-flex h-10 items-center gap-2 rounded-xl border px-4 text-sm font-semibold disabled:opacity-60"
                 >
                   <RefreshCw
-                    className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`}
+                    className={`h-4 w-4 ${
+                      refreshing || loadingHalaman ? "animate-spin" : ""
+                    }`}
                   />
                   Refresh
                 </button>
 
-<button
-  type="button"
-  onClick={() => router.push("/admin/cms/menu/tambah")}
-  className="theme-primary inline-flex h-10 items-center gap-2 rounded-xl px-4 text-sm font-semibold"
->
-  <Plus className="h-4 w-4" />
-  Tambah Konfigurasi
-</button>
+                <button
+                  type="button"
+                  onClick={openCreateForm}
+                  className="theme-primary inline-flex h-10 items-center gap-2 rounded-xl px-4 text-sm font-semibold"
+                >
+                  <Plus className="h-4 w-4" />
+                  Tambah Konfigurasi
+                </button>
               </div>
             </div>
 
-
-            {error && (
+            {error && !formOpen && (
               <div className="theme-danger mb-4 flex items-start gap-3 rounded-xl border p-4">
                 <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
                 <div className="min-w-0 flex-1 text-sm">{error}</div>
@@ -444,32 +517,52 @@ export default function CmsMenuPage() {
               </div>
             )}
 
+            {halamanError && (
+              <div className="theme-danger mb-4 flex items-start gap-3 rounded-xl border p-4">
+                <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
+                <div className="min-w-0 flex-1 text-sm">
+                  Gagal mengambil daftar halaman CMS: {halamanError}
+                </div>
+                <button type="button" onClick={fetchHalaman}>
+                  <RefreshCw className="h-4 w-4" />
+                </button>
+              </div>
+            )}
 
             <section className="theme-card theme-border mb-6 rounded-2xl border p-5">
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                 <div className="theme-card-soft rounded-xl border p-4">
-                  <p className="theme-text-muted text-xs">Total konfigurasi</p>
+                  <p className="theme-text-muted text-xs">
+                    Total konfigurasi
+                  </p>
                   <p className="theme-text mt-2 text-2xl font-bold">
                     {items.length}
                   </p>
                 </div>
 
                 <div className="theme-card-soft rounded-xl border p-4">
-                  <p className="theme-text-muted text-xs">Konfigurasi aktif</p>
+                  <p className="theme-text-muted text-xs">
+                    Konfigurasi aktif
+                  </p>
                   <p className="theme-text mt-2 text-2xl font-bold">
                     {activeCount}
                   </p>
                 </div>
 
                 <div className="theme-card-soft rounded-xl border p-4">
-                  <p className="theme-text-muted text-xs">Konfigurasi nonaktif</p>
+                  <p className="theme-text-muted text-xs">
+                    Konfigurasi nonaktif
+                  </p>
                   <p className="theme-text mt-2 text-2xl font-bold">
                     {inactiveCount}
                   </p>
                 </div>
               </div>
+              <p className="theme-text-muted mt-3 text-xs">
+                Statistik dihitung berdasarkan data yang dikembalikan endpoint
+                konfigurasi menu.
+              </p>
             </section>
-
 
             <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
@@ -477,7 +570,7 @@ export default function CmsMenuPage() {
                   Daftar Konfigurasi
                 </h2>
                 <p className="theme-text-secondary mt-1 text-xs">
-                  Pengaturan diambil dari endpoint CMS backend.
+                  Konten disimpan melalui API backend CMS.
                 </p>
               </div>
 
@@ -501,7 +594,6 @@ export default function CmsMenuPage() {
                 )}
               </div>
             </div>
-
 
             <section className="theme-card theme-border overflow-hidden rounded-2xl border">
               <div className="theme-card-soft theme-border flex items-center justify-between border-b px-5 py-4">
@@ -546,11 +638,16 @@ export default function CmsMenuPage() {
                         >
                           <td className="px-5 py-4">
                             <p className="theme-text text-sm font-semibold">
-                              {formatLabel(item.halaman)}
+                              {halamanLabel(item)}
                             </p>
                             <p className="theme-text-muted mt-1 text-xs">
                               Section: {formatLabel(item.section)}
                             </p>
+                            {item.halamanCms?.slug && (
+                              <p className="theme-text-muted mt-1 text-xs">
+                                Slug: {item.halamanCms.slug}
+                              </p>
+                            )}
                           </td>
 
                           <td className="px-5 py-4">
@@ -636,7 +733,9 @@ export default function CmsMenuPage() {
                 <div className="px-5 py-14 text-center">
                   <Menu className="theme-text-muted mx-auto mb-3 h-8 w-8" />
                   <h3 className="theme-text text-sm font-bold">
-                    {search ? "Konfigurasi tidak ditemukan" : "Belum ada konfigurasi"}
+                    {search
+                      ? "Konfigurasi tidak ditemukan"
+                      : "Belum ada konfigurasi"}
                   </h3>
                   <p className="theme-text-secondary mx-auto mt-2 max-w-md text-xs leading-5">
                     {search
@@ -645,14 +744,14 @@ export default function CmsMenuPage() {
                   </p>
 
                   {!search && (
-<button
-  type="button"
-  onClick={() => router.push("/admin/cms/menu/tambah")}
-  className="theme-primary inline-flex h-10 items-center gap-2 rounded-xl px-4 text-sm font-semibold"
->
-  <Plus className="h-4 w-4" />
-  Tambah Konfigurasi
-</button>
+                    <button
+                      type="button"
+                      onClick={openCreateForm}
+                      className="theme-primary mt-4 inline-flex h-10 items-center gap-2 rounded-xl px-4 text-sm font-semibold"
+                    >
+                      <Plus className="h-4 w-4" />
+                      Tambah Konfigurasi
+                    </button>
                   )}
                 </div>
               )}
@@ -667,7 +766,6 @@ export default function CmsMenuPage() {
         </main>
       </div>
 
-
       {formOpen && (
         <div className="fixed inset-0 z-[120] flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm">
           <form
@@ -680,7 +778,7 @@ export default function CmsMenuPage() {
                   {editingItem ? "Edit Konfigurasi" : "Tambah Konfigurasi"}
                 </h2>
                 <p className="theme-text-secondary mt-1 text-xs">
-                  Data akan disimpan melalui backend CMS.
+                  Atur konten untuk bagian template website sekolah.
                 </p>
               </div>
 
@@ -700,33 +798,73 @@ export default function CmsMenuPage() {
                   <label className="theme-text mb-2 block text-sm font-semibold">
                     Halaman <span className="text-red-500">*</span>
                   </label>
-                  <input
+
+                  <select
                     required
-                    name="halaman"
-                    value={formData.halaman}
+                    name="halamanCmsId"
+                    value={formData.halamanCmsId}
                     onChange={handleChange}
-                    placeholder="Contoh: beranda"
-                    className="theme-input w-full rounded-xl border px-3 py-3 text-sm outline-none focus:border-[var(--color-primary)]"
-                  />
-                  <p className="theme-text-muted mt-1 text-xs">
-                    Contoh: beranda, profil, kontak.
-                  </p>
+                    disabled={loadingHalaman || halamanList.length === 0}
+                    className="theme-input w-full rounded-xl border px-3 py-3 text-sm outline-none focus:border-[var(--color-primary)] disabled:opacity-60"
+                  >
+                    <option value="">
+                      {loadingHalaman
+                        ? "Memuat halaman..."
+                        : halamanList.length === 0
+                          ? "Belum ada halaman CMS"
+                          : "Pilih halaman CMS"}
+                    </option>
+
+                    {halamanList.map((halaman) => (
+                      <option
+                        key={halaman.id}
+                        value={normalizeId(halaman.id)}
+                      >
+                        {getPageTitle(halaman)}
+                        {getPageSlug(halaman)
+                          ? ` (${getPageSlug(halaman)})`
+                          : ""}
+                      </option>
+                    ))}
+                  </select>
+
+                  {halamanError && (
+                    <p className="mt-1 text-xs text-red-500">
+                      {halamanError}
+                    </p>
+                  )}
                 </div>
 
                 <div>
                   <label className="theme-text mb-2 block text-sm font-semibold">
                     Section <span className="text-red-500">*</span>
                   </label>
-                  <input
+
+                  <select
                     required
                     name="section"
                     value={formData.section}
                     onChange={handleChange}
-                    placeholder="Contoh: hero"
                     className="theme-input w-full rounded-xl border px-3 py-3 text-sm outline-none focus:border-[var(--color-primary)]"
-                  />
+                  >
+                    {formData.section &&
+                      !SECTION_OPTIONS.some(
+                        (option) => option.value === formData.section
+                      ) && (
+                        <option value={formData.section}>
+                          {formatLabel(formData.section)} (konfigurasi lama)
+                        </option>
+                      )}
+
+                    {SECTION_OPTIONS.map((section) => (
+                      <option key={section.value} value={section.value}>
+                        {section.label}
+                      </option>
+                    ))}
+                  </select>
+
                   <p className="theme-text-muted mt-1 text-xs">
-                    Contoh: hero, sambutan, fasilitas.
+                    Pilih bagian yang sesuai dengan template halaman website.
                   </p>
                 </div>
               </div>
@@ -740,7 +878,7 @@ export default function CmsMenuPage() {
                   name="judul"
                   value={formData.judul}
                   onChange={handleChange}
-                  placeholder="Contoh: Selamat Datang di Website Sekolah"
+                  placeholder="Contoh: Selamat Datang di Sekolah Kami"
                   className="theme-input w-full rounded-xl border px-3 py-3 text-sm outline-none focus:border-[var(--color-primary)]"
                 />
               </div>
@@ -753,7 +891,7 @@ export default function CmsMenuPage() {
                   name="subJudul"
                   value={formData.subJudul}
                   onChange={handleChange}
-                  placeholder="Masukkan subjudul jika diperlukan"
+                  placeholder="Masukkan subjudul atau deskripsi singkat"
                   className="theme-input w-full rounded-xl border px-3 py-3 text-sm outline-none focus:border-[var(--color-primary)]"
                 />
               </div>
@@ -767,7 +905,7 @@ export default function CmsMenuPage() {
                   name="konten"
                   value={formData.konten}
                   onChange={handleChange}
-                  placeholder="Masukkan isi konten..."
+                  placeholder="Masukkan isi konten yang akan ditampilkan pada website..."
                   className="theme-input w-full rounded-xl border px-3 py-3 text-sm leading-6 outline-none focus:border-[var(--color-primary)]"
                 />
               </div>
@@ -793,6 +931,9 @@ export default function CmsMenuPage() {
                       className="max-h-56 w-full rounded-lg object-contain"
                       onError={(event) => {
                         event.currentTarget.style.display = "none";
+                      }}
+                      onLoad={(event) => {
+                        event.currentTarget.style.display = "block";
                       }}
                     />
                   </div>
@@ -821,7 +962,7 @@ export default function CmsMenuPage() {
                     name="ctaLink"
                     value={formData.ctaLink}
                     onChange={handleChange}
-                    placeholder="/profil atau https://..."
+                    placeholder="/profil atau https://contoh.com"
                     className="theme-input w-full rounded-xl border px-3 py-3 text-sm outline-none focus:border-[var(--color-primary)]"
                   />
                 </div>
@@ -830,7 +971,7 @@ export default function CmsMenuPage() {
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                   <label className="theme-text mb-2 block text-sm font-semibold">
-                    Urutan
+                    Urutan <span className="text-red-500">*</span>
                   </label>
                   <input
                     required
@@ -881,7 +1022,11 @@ export default function CmsMenuPage() {
 
               <button
                 type="submit"
-                disabled={saving}
+                disabled={
+                  saving ||
+                  loadingHalaman ||
+                  halamanList.length === 0
+                }
                 className="theme-primary inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {saving ? (
@@ -892,7 +1037,9 @@ export default function CmsMenuPage() {
                 ) : (
                   <>
                     <CheckCircle2 className="h-4 w-4" />
-                    {editingItem ? "Simpan Perubahan" : "Simpan Konfigurasi"}
+                    {editingItem
+                      ? "Simpan Perubahan"
+                      : "Simpan Konfigurasi"}
                   </>
                 )}
               </button>
@@ -900,7 +1047,6 @@ export default function CmsMenuPage() {
           </form>
         </div>
       )}
-
 
       {previewItem && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm">
@@ -911,7 +1057,7 @@ export default function CmsMenuPage() {
                   Preview Konfigurasi
                 </h2>
                 <p className="theme-text-muted mt-1 text-xs">
-                  {formatLabel(previewItem.halaman)} /{" "}
+                  {halamanLabel(previewItem)} /{" "}
                   {formatLabel(previewItem.section)}
                 </p>
               </div>
@@ -1008,7 +1154,6 @@ export default function CmsMenuPage() {
           </div>
         </div>
       )}
-
 
       {deleteTarget && (
         <div className="fixed inset-0 z-[130] flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm">

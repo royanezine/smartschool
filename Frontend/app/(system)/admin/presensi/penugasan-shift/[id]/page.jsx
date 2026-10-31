@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
@@ -27,37 +28,59 @@ import {
   assignUserShiftAndJabatan,
 } from "@/services/shiftKerja.service";
 
+const REDIRECT_PATH = "/admin/presensi/penugasan-shift";
+
+const inputClass =
+  "theme-input h-11 w-full rounded-xl border px-3.5 text-sm outline-none transition disabled:opacity-50";
+
+const buttonSecondary =
+  "inline-flex items-center justify-center gap-2 rounded-xl border theme-border theme-card px-4 py-2.5 text-sm font-medium theme-text-secondary hover:bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] disabled:cursor-not-allowed disabled:opacity-50 transition";
+
+const buttonPrimary =
+  "inline-flex items-center justify-center gap-2 rounded-xl theme-primary px-4 py-2.5 text-sm font-semibold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 transition";
+
 function getId(value) {
   if (value === null || value === undefined || value === "") {
     return "";
   }
 
   if (typeof value === "object") {
-    return String(value.id ?? value.shiftKerjaId ?? "");
+    return String(
+      value.id ??
+        value.shiftKerjaId ??
+        value.kategoriJabatanId ??
+        ""
+    );
   }
 
   return String(value);
 }
 
-function unwrapData(response) {
+function getErrorMessage(error, fallback) {
+  return error instanceof Error && error.message
+    ? error.message
+    : fallback;
+}
+
+function getArray(response, keys = []) {
   let current = response;
 
   for (let i = 0; i < 8 && current != null; i++) {
     if (Array.isArray(current)) return current;
-
-    if (typeof current !== "object") return current;
+    if (typeof current !== "object") return [];
 
     if (current.success === false) {
-      throw new Error(current.message || "Permintaan API gagal.");
+      throw new Error(current.message || "Gagal mengambil data.");
     }
 
-    if (
-      current.id ||
-      current.shiftKerjaId ||
-      current.kategoriJabatanId
-    ) {
-      return current;
+    for (const key of keys) {
+      if (Array.isArray(current[key])) {
+        return current[key];
+      }
     }
+
+    if (Array.isArray(current.items)) return current.items;
+    if (Array.isArray(current.results)) return current.results;
 
     if ("data" in current) {
       current = current.data;
@@ -69,40 +92,55 @@ function unwrapData(response) {
       continue;
     }
 
-    return current;
-  }
-
-  return current;
-}
-
-function getArray(response, keys = []) {
-  let current = response;
-
-  for (let i = 0; i < 8 && current != null; i++) {
-    if (Array.isArray(current)) return current;
-
-    if (typeof current !== "object") return [];
-
-    for (const key of keys) {
-      if (Array.isArray(current[key])) {
-        return current[key];
-      }
-    }
-
-    if (Array.isArray(current.items)) {
-      return current.items;
-    }
-
-    if (Array.isArray(current.results)) {
-      return current.results;
-    }
-
-    if (!("data" in current)) return [];
-
-    current = current.data;
+    return [];
   }
 
   return Array.isArray(current) ? current : [];
+}
+
+function unwrapUserResponse(response) {
+  let current = response;
+
+  for (let i = 0; i < 8 && current != null; i++) {
+    if (Array.isArray(current)) return null;
+    if (typeof current !== "object") return null;
+
+    if (current.success === false) {
+      throw new Error(current.message || "Gagal memuat data pegawai.");
+    }
+
+    if (current.id) return current;
+
+    if ("data" in current) {
+      current = current.data;
+      continue;
+    }
+
+    if ("result" in current) {
+      current = current.result;
+      continue;
+    }
+
+    return null;
+  }
+
+  return current?.id ? current : null;
+}
+
+function getShiftIdFromUser(user) {
+  return getId(
+    user?.shiftKerjaId ??
+      user?.shiftKerjaMaster?.id ??
+      user?.shiftKerja?.id ??
+      user?.shiftKerja
+  );
+}
+
+function getCategoryIdFromUser(user) {
+  return getId(
+    user?.kategoriJabatanId ??
+      user?.kategoriJabatan?.id
+  );
 }
 
 function getNamaJabatan(value) {
@@ -140,53 +178,6 @@ function formatJam(value) {
 
   return text;
 }
-
-function getErrorMessage(error, fallback) {
-  return error instanceof Error && error.message
-    ? error.message
-    : fallback;
-}
-
-function unwrapUserResponse(response) {
-  let current = response;
-
-  for (let i = 0; i < 8 && current != null; i++) {
-    if (typeof current !== "object" || Array.isArray(current)) {
-      return null;
-    }
-
-    if (current.id) return current;
-
-    if (current.success === false) {
-      throw new Error(current.message || "Penyimpanan gagal.");
-    }
-
-    if ("data" in current) {
-      current = current.data;
-      continue;
-    }
-
-    if ("result" in current) {
-      current = current.result;
-      continue;
-    }
-
-    return null;
-  }
-
-  return current?.id ? current : null;
-}
-
-const inputClass =
-  "theme-input h-11 w-full rounded-xl border px-3.5 text-sm outline-none transition disabled:opacity-50";
-
-const buttonSecondary =
-  "inline-flex items-center justify-center gap-2 rounded-xl border theme-border theme-card px-4 py-2.5 text-sm font-medium theme-text-secondary hover:bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] disabled:cursor-not-allowed disabled:opacity-50 transition";
-
-const buttonPrimary =
-  "inline-flex items-center justify-center gap-2 rounded-xl theme-primary px-4 py-2.5 text-sm font-semibold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 transition";
-
-const REDIRECT_PATH = "/admin/presensi/penugasan-shift";
 
 function Field({ label, required, hint, children }) {
   return (
@@ -247,7 +238,6 @@ export default function AturShiftPegawaiPage() {
     setShiftList([]);
     setJabatanList([]);
     setCategoryTouched(false);
-
     setForm({
       shiftKerjaId: "",
       kategoriJabatanId: "",
@@ -268,18 +258,22 @@ export default function AturShiftPegawaiPage() {
         ]);
 
       const warnings = [];
-
       let user = null;
 
       if (userResult.status === "fulfilled") {
         try {
           user = unwrapUserResponse(userResult.value);
-        } catch {
-          user = null;
+        } catch (err) {
+          warnings.push(
+            `Data detail pegawai: ${getErrorMessage(
+              err,
+              "respons tidak valid"
+            )}`
+          );
         }
       }
 
-      // Fallback ke daftar pengguna jika detail tidak mengembalikan data.
+      // Jika detail pengguna belum tersedia, cari melalui daftar pengguna.
       if (!user?.id) {
         try {
           const response = await getUsers({
@@ -297,8 +291,13 @@ export default function AturShiftPegawaiPage() {
             users.find(
               (item) => getId(item?.id) === getId(id)
             ) ?? null;
-        } catch {
-          // Error detail akan ditampilkan jika fallback tidak berhasil.
+        } catch (err) {
+          warnings.push(
+            `Daftar pegawai: ${getErrorMessage(
+              err,
+              "gagal dimuat"
+            )}`
+          );
         }
       }
 
@@ -308,12 +307,15 @@ export default function AturShiftPegawaiPage() {
         }
 
         throw new Error(
-          "Data pegawai tidak ditemukan. Periksa ID pada URL dan akses akun."
+          "Data pegawai tidak ditemukan. Periksa ID URL dan akses akun."
         );
       }
 
       const roleName = String(
-        user.peran?.nama ?? user.role ?? ""
+        user.peran?.nama ??
+          user.role ??
+          user.roleName ??
+          ""
       )
         .trim()
         .toLowerCase()
@@ -321,17 +323,20 @@ export default function AturShiftPegawaiPage() {
 
       if (roleName === "siswa") {
         throw new Error(
-          "Penugasan shift kerja dan kategori jabatan tidak berlaku untuk akun siswa."
+          "Penugasan shift kerja tidak berlaku untuk akun siswa."
         );
       }
 
-      const shifts =
+      const shiftResponse =
         shiftsResult.status === "fulfilled"
-          ? getArray(shiftsResult.value, [
-              "shifts",
-              "shiftKerja",
-            ])
-          : [];
+          ? shiftsResult.value
+          : null;
+
+      const shifts = getArray(shiftResponse, [
+        "shifts",
+        "shiftKerja",
+        "items",
+      ]);
 
       const categories =
         categoriesResult.status === "fulfilled"
@@ -340,6 +345,7 @@ export default function AturShiftPegawaiPage() {
               "kategoriJabatans",
               "kategori",
               "jabatan",
+              "items",
             ])
           : [];
 
@@ -361,26 +367,15 @@ export default function AturShiftPegawaiPage() {
         );
       }
 
-      const currentShiftId = getId(
-        user.shiftKerjaId ??
-          user.shiftKerjaMaster?.id ??
-          ""
-      );
-
-      const currentCategoryId = getId(
-        user.kategoriJabatanId ??
-          user.kategoriJabatan?.id ??
-          ""
-      );
+      const currentShiftId = getShiftIdFromUser(user);
+      const currentCategoryId = getCategoryIdFromUser(user);
 
       if (
-        !user.shiftKerjaId &&
-        !user.shiftKerjaMaster &&
-        !user.kategoriJabatanId &&
-        !user.kategoriJabatan
+        !currentShiftId &&
+        !currentCategoryId
       ) {
         warnings.push(
-          "Data penugasan sebelumnya belum tersedia pada respons pengguna. Pastikan endpoint GET pengguna mengirim shiftKerjaId, shiftKerjaMaster, kategoriJabatanId, dan kategoriJabatan."
+          "Data shift dan kategori jabatan sebelumnya tidak ditemukan pada respons pengguna."
         );
       }
 
@@ -420,7 +415,11 @@ export default function AturShiftPegawaiPage() {
     ) ?? null;
 
   const currentShift =
-    selectedShift ?? pegawai?.shiftKerjaMaster ?? null;
+    selectedShift ??
+    pegawai?.shiftKerjaMaster ??
+    (typeof pegawai?.shiftKerja === "object"
+      ? pegawai.shiftKerja
+      : null);
 
   const currentCategory =
     selectedCategory ?? pegawai?.kategoriJabatan ?? null;
@@ -439,7 +438,7 @@ export default function AturShiftPegawaiPage() {
     saveBlockedMessage = "Sedang memuat data.";
   } else if (!shiftList.length) {
     saveBlockedMessage =
-      "Daftar shift belum tersedia. Periksa master shift dan coba muat ulang.";
+      "Daftar shift belum tersedia. Periksa master shift dan muat ulang.";
   } else if (!form.shiftKerjaId) {
     saveBlockedMessage = "Pilih shift kerja sebelum menyimpan.";
   } else if (!selectedShift) {
@@ -478,7 +477,7 @@ export default function AturShiftPegawaiPage() {
         shiftKerjaId: form.shiftKerjaId,
       };
 
-      // Jangan mengubah kategori jika pengguna tidak menyentuh dropdown.
+      // Kategori hanya dikirim jika dropdown memang diubah.
       if (categoryTouched) {
         payload.kategoriJabatanId =
           form.kategoriJabatanId || null;
@@ -492,8 +491,34 @@ export default function AturShiftPegawaiPage() {
         );
       }
 
-      // Redirect langsung ke halaman daftar penugasan setelah berhasil simpan.
+      /*
+       * Ambil ulang data pengguna.
+       * Jangan langsung menyatakan data tersimpan jika respons detail
+       * menunjukkan ID shift yang berbeda.
+       */
+      const refreshedResponse = await getUserById(pegawai.id);
+      const refreshedUser = unwrapUserResponse(refreshedResponse);
+
+      if (!refreshedUser?.id) {
+        throw new Error(
+          "Penyimpanan telah dikirim, tetapi data pegawai terbaru tidak berhasil dibaca."
+        );
+      }
+
+      const savedShiftId = getShiftIdFromUser(refreshedUser);
+
+      if (savedShiftId !== getId(form.shiftKerjaId)) {
+        throw new Error(
+          "Shift terbaru belum terkonfirmasi pada data pegawai. Periksa respons API sebelum mencoba menyimpan ulang."
+        );
+      }
+
+      setPegawai(refreshedUser);
+      setSuccess("Penugasan berhasil disimpan dan dikonfirmasi.");
+
+      // Kembali ke daftar setelah ID shift terkonfirmasi.
       router.push(REDIRECT_PATH);
+      router.refresh();
     } catch (saveError) {
       setError(
         getErrorMessage(
@@ -501,7 +526,7 @@ export default function AturShiftPegawaiPage() {
           "Penugasan gagal disimpan. Periksa koneksi dan coba lagi."
         )
       );
-
+    } finally {
       setSaving(false);
     }
   }
@@ -528,14 +553,12 @@ export default function AturShiftPegawaiPage() {
         <main className="min-h-0 min-w-0 flex-1 overflow-y-auto theme-page theme-text">
           <div className="w-full px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
             <div className="w-full space-y-6">
-              {/* Header halaman — tombol Kembali di kiri atas */}
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
                 <button
                   type="button"
                   onClick={handleBack}
                   disabled={saving}
                   className={`${buttonSecondary} shrink-0`}
-                  title="Kembali ke daftar penugasan"
                 >
                   <ArrowLeft size={17} />
                   Kembali
@@ -547,11 +570,9 @@ export default function AturShiftPegawaiPage() {
                   </div>
 
                   <div className="min-w-0">
-                   
                     <h1 className="text-2xl font-bold tracking-tight theme-text">
                       Atur Penugasan Pegawai
                     </h1>
-
                     <p className="mt-1 text-sm theme-text-secondary">
                       Tentukan shift kerja dan kategori jabatan pegawai.
                     </p>
@@ -565,12 +586,10 @@ export default function AturShiftPegawaiPage() {
                   className="flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-300"
                 >
                   <AlertCircle size={19} className="mt-0.5 shrink-0" />
-
                   <div className="min-w-0 flex-1">
                     <p className="font-semibold">Permintaan gagal</p>
                     <p className="mt-1 break-words">{error}</p>
                   </div>
-
                   <button
                     type="button"
                     aria-label="Tutup pesan error"
@@ -588,7 +607,6 @@ export default function AturShiftPegawaiPage() {
                   className="flex items-start gap-3 rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-800 dark:border-green-900/60 dark:bg-green-950/30 dark:text-green-300"
                 >
                   <CheckCircle2 size={19} className="mt-0.5 shrink-0" />
-
                   <div className="min-w-0 flex-1">
                     <p className="font-semibold">
                       Penugasan berhasil disimpan
@@ -604,12 +622,10 @@ export default function AturShiftPegawaiPage() {
                   className="flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-200"
                 >
                   <AlertCircle size={19} className="mt-0.5 shrink-0" />
-
                   <div className="min-w-0 flex-1">
                     <p className="font-semibold">
                       Informasi pemuatan data
                     </p>
-
                     <ul className="mt-1 list-disc space-y-1 pl-4 text-xs leading-5">
                       {loadWarnings.map((warning) => (
                         <li key={warning}>{warning}</li>
@@ -635,15 +651,12 @@ export default function AturShiftPegawaiPage() {
               ) : !pegawai ? (
                 <div className="theme-card flex min-h-[300px] flex-col items-center justify-center rounded-xl border theme-border p-6 text-center">
                   <AlertCircle size={28} className="text-red-500" />
-
                   <p className="mt-4 font-semibold theme-text">
                     Pegawai tidak ditemukan
                   </p>
-
                   <p className="mt-1 max-w-sm text-sm theme-text-muted">
                     Pastikan akun pegawai terdaftar dan kamu memiliki akses.
                   </p>
-
                   <button
                     type="button"
                     onClick={loadData}
@@ -655,7 +668,6 @@ export default function AturShiftPegawaiPage() {
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-6">
-                  {/* Kartu informasi pegawai */}
                   <section className="theme-card overflow-hidden rounded-xl border theme-border shadow-sm">
                     <div className="flex items-start gap-4 border-b theme-border p-5 sm:p-6">
                       <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
@@ -666,12 +678,10 @@ export default function AturShiftPegawaiPage() {
                         <h2 className="text-lg font-bold theme-text">
                           {pegawai.namaLengkap || "Tanpa nama"}
                         </h2>
-
                         <p className="mt-1 flex items-center gap-1.5 text-sm theme-text-muted">
                           <Mail size={14} />
                           {pegawai.email || "Email tidak tersedia"}
                         </p>
-
                         {pegawai.peran?.nama && (
                           <p className="mt-1 text-xs theme-text-muted">
                             Peran:{" "}
@@ -682,21 +692,18 @@ export default function AturShiftPegawaiPage() {
                       </div>
                     </div>
 
-                    {/* Stat cards responsif dengan breakpoint 2xl:grid-cols-6 */}
                     <div className="grid grid-cols-1 gap-4 p-5 sm:grid-cols-2 sm:p-6 2xl:grid-cols-6">
                       <div className="rounded-xl border theme-border bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] p-4 2xl:col-span-3">
                         <p className="text-xs theme-text-muted">
-                          Shift kerja
+                          Shift kerja saat ini
                         </p>
-
                         <p className="mt-2 text-sm font-semibold theme-text">
                           {currentShift?.nama ||
                             currentShift?.kode ||
-                            (pegawai.shiftKerja
-                              ? `Shift ${pegawai.shiftKerja}`
+                            (getShiftIdFromUser(pegawai)
+                              ? `Shift ID: ${getShiftIdFromUser(pegawai)}`
                               : "Belum ditentukan")}
                         </p>
-
                         {currentShift && (
                           <p className="mt-1 flex items-center gap-1.5 text-xs theme-text-muted">
                             <Clock3 size={12} />
@@ -710,7 +717,6 @@ export default function AturShiftPegawaiPage() {
                         <p className="text-xs theme-text-muted">
                           Kategori jabatan
                         </p>
-
                         <p className="mt-2 text-sm font-semibold theme-text">
                           {getNamaJabatan(currentCategory) ||
                             "Belum ditentukan"}
@@ -719,18 +725,15 @@ export default function AturShiftPegawaiPage() {
                     </div>
                   </section>
 
-                  {/* Kartu form penugasan */}
                   <section className="theme-card overflow-hidden rounded-xl border theme-border shadow-sm">
                     <div className="flex items-start gap-3 border-b theme-border p-5 sm:p-6">
                       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                         <CalendarClock size={19} />
                       </div>
-
                       <div>
                         <h2 className="font-semibold theme-text">
                           Penugasan Shift & Jabatan
                         </h2>
-
                         <p className="mt-1 text-sm theme-text-muted">
                           Pilih shift aktif dan kategori jabatan pegawai.
                         </p>
@@ -757,7 +760,6 @@ export default function AturShiftPegawaiPage() {
                           disabled={saving || shiftList.length === 0}
                         >
                           <option value="">Pilih shift kerja</option>
-
                           {shiftList.map((shift) => (
                             <option
                               key={shift.id}
@@ -787,7 +789,6 @@ export default function AturShiftPegawaiPage() {
                           onChange={(event) => {
                             setCategoryTouched(true);
                             setSuccess("");
-
                             setForm((previous) => ({
                               ...previous,
                               kategoriJabatanId: event.target.value,
@@ -797,12 +798,10 @@ export default function AturShiftPegawaiPage() {
                           disabled={saving}
                         >
                           <option value="">
-                            {pegawai.kategoriJabatanId ||
-                            pegawai.kategoriJabatan
+                            {getCategoryIdFromUser(pegawai)
                               ? "Kosongkan kategori jabatan"
                               : "Pilih kategori jabatan (opsional)"}
                           </option>
-
                           {jabatanList.map((jabatan) => (
                             <option
                               key={jabatan.id}
@@ -824,26 +823,26 @@ export default function AturShiftPegawaiPage() {
 
                       <div className="flex items-start gap-2 rounded-lg border border-blue-200 bg-blue-50/70 p-4 text-sm text-blue-900 dark:border-blue-900/60 dark:bg-blue-950/30 dark:text-blue-200">
                         <Info size={18} className="mt-0.5 shrink-0" />
-
-                       
+                        <p>
+                          Pastikan shift yang dipilih sesuai jadwal kerja
+                          pegawai. Perubahan dikirim ke server saat tombol
+                          Simpan Penugasan ditekan.
+                        </p>
                       </div>
                     </div>
                   </section>
 
-                  {/* Tabel ringkasan penugasan */}
                   <section className="theme-card overflow-hidden rounded-xl border theme-border shadow-sm">
                     <div className="flex items-start gap-3 border-b theme-border p-5 sm:p-6">
                       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                         <Clock3 size={19} />
                       </div>
-
                       <div>
                         <h2 className="font-semibold theme-text">
                           Ringkasan Penugasan
                         </h2>
-
                         <p className="mt-1 text-sm theme-text-muted">
-                          Data penugasan aktif pegawai saat ini.
+                          Data penugasan pegawai saat ini.
                         </p>
                       </div>
                     </div>
@@ -866,13 +865,14 @@ export default function AturShiftPegawaiPage() {
                             </th>
                           </tr>
                         </thead>
-
                         <tbody>
                           <tr className="border-b theme-border last:border-b-0">
                             <td className="px-5 py-3 theme-text">
                               {currentShift?.nama ||
                                 currentShift?.kode ||
-                                "-"}
+                                (getShiftIdFromUser(pegawai)
+                                  ? `Shift ID: ${getShiftIdFromUser(pegawai)}`
+                                  : "-")}
                             </td>
                             <td className="px-5 py-3 theme-text-secondary">
                               {formatJam(currentShift?.jamMasuk)}
@@ -922,7 +922,6 @@ export default function AturShiftPegawaiPage() {
                         ) : (
                           <Save size={17} />
                         )}
-
                         {saving ? "Menyimpan..." : "Simpan Penugasan"}
                       </button>
                     </div>
