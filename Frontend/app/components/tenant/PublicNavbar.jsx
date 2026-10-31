@@ -3,8 +3,9 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { usePathname } from "next/navigation";
+import { publikService } from "@/services/publik.service";
 
 function normalizeText(value) {
   return typeof value === "string" ? value.trim() : "";
@@ -14,13 +15,124 @@ function normalizeSlug(value) {
   return normalizeText(value).replace(/^\/+|\/+$/g, "");
 }
 
-export default function PublicNavbar({ sekolah = {}, halaman = [] }) {
+function isPageActive(item) {
+  if (!item || typeof item !== "object") return false;
+
+  const slug = normalizeSlug(item.slug).toLowerCase();
+  const title = normalizeText(item.judul ?? item.title);
+
+  if (!slug || !title) return false;
+
+  if (
+    item.dihapusPada ||
+    item.deletedAt ||
+    item.deleted_at ||
+    item.isDeleted === true ||
+    item.is_deleted === true
+  ) {
+    return false;
+  }
+
+  const status = normalizeText(item.status).toLowerCase();
+
+  if (
+    status &&
+    !["aktif", "publikasi", "dipublikasikan"].includes(status)
+  ) {
+    return false;
+  }
+
+  if (
+    item.aktif === false ||
+    item.isActive === false ||
+    item.is_active === false
+  ) {
+    return false;
+  }
+
+  if (
+    ["beranda", "home", "homepage", "articles", "artikel", "berita", "tentang"].includes(slug) ||
+    ["beranda", "home", "tentang", "artikel"].includes(title.toLowerCase())
+  ) {
+    return false;
+  }
+
+  return true;
+}
+
+function unwrap(value) {
+  let result = value;
+
+  for (let i = 0; i < 8; i++) {
+    if (
+      !result ||
+      typeof result !== "object" ||
+      Array.isArray(result) ||
+      !Object.prototype.hasOwnProperty.call(result, "data")
+    ) {
+      break;
+    }
+
+    result = result.data;
+  }
+
+  return result;
+}
+
+function getPageList(response) {
+  const result = unwrap(response);
+
+  if (Array.isArray(result)) return result;
+
+  for (const key of [
+    "daftarCms",
+    "halamanCms",
+    "halaman",
+    "pages",
+    "items",
+  ]) {
+    if (Array.isArray(result?.[key])) return result[key];
+  }
+
+  return [];
+}
+
+export default function PublicNavbar({
+  sekolah = {},
+  halaman = [],
+}) {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [halamanApi, setHalamanApi] = useState([]);
   const pathname = usePathname();
 
   const subdomain = normalizeText(sekolah.subdomain);
   const base = subdomain ? `/${subdomain}` : "/";
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadPages() {
+      if (!subdomain) return;
+
+      try {
+        const response = await publikService.getDaftarHalaman(subdomain);
+        const pages = getPageList(response);
+
+        if (!cancelled) {
+          setHalamanApi(pages);
+        }
+      } catch (error) {
+        console.error("[PublicNavbar] Gagal mengambil halaman CMS:", error);
+      }
+    }
+
+    loadPages();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [subdomain]);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 12);
@@ -32,38 +144,59 @@ export default function PublicNavbar({ sekolah = {}, halaman = [] }) {
   }, []);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setOpen(false);
-    }, 0);
-    return () => clearTimeout(timer);
+    setOpen(false);
   }, [pathname]);
 
-  const menuItems = [
-    { label: "Beranda", href: base, key: "home" },
-    { label: "Tentang", href: `${base}/tentang`, key: "about" },
-    { label: "Artikel", href: `${base}/articles`, key: "articles" },
-    ...(Array.isArray(halaman) ? halaman : [])
-      .filter((item) => item?.slug && item?.judul)
+  const menuItems = useMemo(() => {
+    const combined = [
+      ...(Array.isArray(halaman) ? halaman : []),
+      ...halamanApi,
+    ];
+
+    const seen = new Set();
+
+    const pages = combined
+      .filter(isPageActive)
       .filter((item) => {
         const slug = normalizeSlug(item.slug).toLowerCase();
-        return !["articles", "artikel", "berita", "tentang"].includes(slug);
+
+        if (seen.has(slug)) return false;
+
+        seen.add(slug);
+        return true;
       })
-      .map((item) => ({
-        label: item.judul,
+      .sort((a, b) => {
+        const orderA = Number(a.urutan ?? a.order ?? 9999);
+        const orderB = Number(b.urutan ?? b.order ?? 9999);
+        return orderA - orderB;
+      });
+
+    return [
+      { label: "Beranda", href: base, key: "home" },
+      { label: "Tentang", href: `${base}/tentang`, key: "about" },
+      { label: "Artikel", href: `${base}/articles`, key: "articles" },
+      ...pages.map((item) => ({
+        label: normalizeText(item.judul ?? item.title),
         href: `${base}/${normalizeSlug(item.slug)}`,
         key: `page-${item.id || item.slug}`,
       })),
-  ];
+    ];
+  }, [halaman, halamanApi, base]);
 
   const isActive = (href) => {
     if (!pathname) return false;
-    if (href === base) return pathname === base || pathname === `${base}/`;
+
+    if (href === base) {
+      return pathname === base || pathname === `${base}/`;
+    }
+
     return pathname === href || pathname.startsWith(`${href}/`);
   };
 
   const logo = normalizeText(sekolah.logoKecilUrl);
   const namaSekolah = normalizeText(sekolah.nama) || "Sekolah";
   const jenjang = normalizeText(sekolah.jenjang) || "Sekolah";
+  const ppdbHref = `${base}/PPDB`;
 
   return (
     <div
@@ -82,7 +215,7 @@ export default function PublicNavbar({ sekolah = {}, halaman = [] }) {
       >
         <Link
           href={base}
-          className="flex min-w-0 shrink items-center gap-3 rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-[var(--warna-primer-utama,#2563EB)]"
+          className="flex min-w-0 shrink items-center gap-3 rounded-lg"
           aria-label={`Beranda ${namaSekolah}`}
         >
           {logo ? (
@@ -126,7 +259,10 @@ export default function PublicNavbar({ sekolah = {}, halaman = [] }) {
           </div>
         </Link>
 
-        <nav className="hidden items-center gap-1 xl:flex" aria-label="Navigasi utama">
+        <nav
+          className="hidden items-center gap-1 xl:flex"
+          aria-label="Navigasi utama"
+        >
           {menuItems.map((item) => {
             const active = isActive(item.href);
 
@@ -151,11 +287,9 @@ export default function PublicNavbar({ sekolah = {}, halaman = [] }) {
           })}
 
           <Link
-            href={`${base}/PPDB`}
-            className="ml-2 inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-            style={{
-              backgroundColor: "var(--warna-primer-utama, #2563EB)",
-            }}
+            href={ppdbHref}
+            className="ml-2 inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white transition hover:opacity-90"
+            style={{ backgroundColor: "var(--warna-primer-utama, #2563EB)" }}
           >
             Daftar PPDB
             <svg
@@ -241,12 +375,10 @@ export default function PublicNavbar({ sekolah = {}, halaman = [] }) {
             />
 
             <Link
-              href={`${base}/PPDB`}
+              href={ppdbHref}
               onClick={() => setOpen(false)}
               className="flex items-center justify-center rounded-xl px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90"
-              style={{
-                backgroundColor: "var(--warna-primer-utama, #2563EB)",
-              }}
+              style={{ backgroundColor: "var(--warna-primer-utama, #2563EB)" }}
             >
               Daftar PPDB
             </Link>

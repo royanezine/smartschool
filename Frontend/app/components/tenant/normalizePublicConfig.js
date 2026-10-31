@@ -1,5 +1,6 @@
 
 
+
 export function normalizePublicConfig(response) {
   let data = response;
 
@@ -16,42 +17,65 @@ export function normalizePublicConfig(response) {
     }
   }
 
+  let items = [];
+
   if (Array.isArray(data)) {
-    return data;
-  }
+    items = data;
+  } else if (data && typeof data === "object") {
+    for (const [halaman, sections] of Object.entries(data)) {
+      if (!sections || typeof sections !== "object") continue;
 
-  if (!data || typeof data !== "object") {
-    return [];
-  }
-
-  const result = [];
-
-  for (const [halaman, sections] of Object.entries(data)) {
-    if (!sections || typeof sections !== "object") {
-      continue;
-    }
-
-    if ("section" in sections) {
-      result.push({
-        ...sections,
-        halaman: sections.halaman || halaman,
-      });
-      continue;
-    }
-
-    for (const [section, config] of Object.entries(sections)) {
-      if (!config || typeof config !== "object") {
+      if (Array.isArray(sections)) {
+        items.push(
+          ...sections.map((config) => ({
+            ...config,
+            halaman:
+              config.halaman ||
+              config.halamanCms?.slug ||
+              halaman,
+          }))
+        );
         continue;
       }
 
-      result.push({
-        ...config,
-        halaman: config.halaman || halaman,
-        section: config.section || section,
-      });
+      if ("section" in sections) {
+        items.push({
+          ...sections,
+          halaman:
+            sections.halaman ||
+            sections.halamanCms?.slug ||
+            halaman,
+        });
+        continue;
+      }
+
+      for (const [section, config] of Object.entries(sections)) {
+        if (!config || typeof config !== "object") continue;
+
+        items.push({
+          ...config,
+          halaman:
+            config.halaman ||
+            config.halamanCms?.slug ||
+            halaman,
+          section: config.section || section,
+        });
+      }
     }
   }
 
-  return result;
+  return items
+    .map((item) => ({
+      ...item,
+      halaman:
+        item.halaman ||
+        item.halamanCms?.slug ||
+        item.halamanCms?.judul ||
+        "",
+      section: item.section || "content",
+      urutan: Number(item.urutan) || 1,
+    }))
+    .sort((a, b) => a.urutan - b.urutan);
 }
+
 

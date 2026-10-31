@@ -1,9 +1,10 @@
-
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import Link from "next/link";
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
+import { cmsService } from "@/services/cms.service";
 import {
   FileText,
   CheckCircle,
@@ -18,55 +19,224 @@ import {
   ExternalLink,
   BarChart3,
   Clock3,
+  RefreshCw,
 } from "lucide-react";
 
-import { dummyStats, dummyArticles } from "../../../../lib/dummyData";
+// Mengambil array dari beberapa kemungkinan bentuk response API.
+function extractList(response) {
+  let result = response;
+
+  for (let i = 0; i < 4; i += 1) {
+    if (Array.isArray(result)) return result;
+
+    if (result && typeof result === "object") {
+      if (Array.isArray(result.data)) return result.data;
+      if (Array.isArray(result.items)) return result.items;
+      if (Array.isArray(result.results)) return result.results;
+
+      if (result.data && typeof result.data === "object") {
+        result = result.data;
+        continue;
+      }
+    }
+
+    break;
+  }
+
+  return [];
+}
+
+function getArticleTitle(article) {
+  return article?.judul || article?.title || "Tanpa judul";
+}
+
+function getArticleStatus(article) {
+  const status = String(article?.status || "").toLowerCase();
+
+  return ["dipublikasikan", "published", "aktif", "publikasi"].includes(
+    status
+  )
+    ? "published"
+    : "draft";
+}
+
+function getArticleCategory(article) {
+  return (
+    article?.kategoriArtikel?.nama ||
+    article?.kategori?.nama ||
+    article?.category ||
+    article?.kategoriArtikel?.slug ||
+    "Belum berkategori"
+  );
+}
+
+function getArticleDate(article) {
+  const date =
+    article?.createdAt ||
+    article?.created_at ||
+    article?.tanggalDibuat ||
+    article?.updatedAt;
+
+  if (!date) return "-";
+
+  const parsedDate = new Date(date);
+
+  if (Number.isNaN(parsedDate.getTime())) return "-";
+
+  return parsedDate.toLocaleDateString("id-ID", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+function getViewCount(item) {
+  const possibleFields = [
+    "views",
+    "viewCount",
+    "jumlahViews",
+    "totalViews",
+    "jumlahDilihat",
+  ];
+
+  for (const field of possibleFields) {
+    const value = item?.[field];
+
+    if (value !== undefined && value !== null && value !== "") {
+      const number = Number(value);
+
+      if (Number.isFinite(number) && number >= 0) {
+        return number;
+      }
+    }
+  }
+
+  return null;
+}
+
+function isPagePublished(page) {
+  const status = String(page?.status || "").toLowerCase();
+
+  return ["dipublikasikan", "published", "aktif", "publikasi"].includes(
+    status
+  );
+}
+
+function formatNumber(value) {
+  return Number(value || 0).toLocaleString("id-ID");
+}
 
 export default function CmsDashboardPage() {
   const [active, setActive] = useState("dashboard");
   const [collapsed, setCollapsed] = useState(false);
 
-  const {
-    totalArticles,
-    publishedArticles,
-    totalPages,
-    totalViews,
-  } = dummyStats;
+  const [articles, setArticles] = useState([]);
+  const [pages, setPages] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState("");
 
-  const latestArticles = dummyArticles.slice(0, 5);
+  async function fetchDashboardData(isRefresh = false) {
+    if (isRefresh) {
+      setRefreshing(true);
+    } else {
+      setLoading(true);
+    }
 
+    setError("");
+
+    try {
+      const [articleResponse, pageResponse] = await Promise.all([
+        cmsService.getArtikel(),
+        cmsService.getHalaman(),
+      ]);
+
+      setArticles(extractList(articleResponse));
+      setPages(extractList(pageResponse));
+    } catch (err) {
+      console.error("Gagal mengambil data Dashboard CMS:", err);
+      setError(
+        err?.message ||
+          "Data dashboard gagal dimuat. Periksa koneksi API dan sesi login."
+      );
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const publishedArticles = articles.filter(
+    (article) => getArticleStatus(article) === "published"
+  );
+
+  const draftArticles = articles.filter(
+    (article) => getArticleStatus(article) === "draft"
+  );
+
+  const publishedPages = pages.filter(isPagePublished);
+
+  const latestArticles = [...articles]
+    .sort((a, b) => {
+      const dateA = new Date(
+        a?.createdAt || a?.created_at || a?.tanggalDibuat || 0
+      ).getTime();
+
+      const dateB = new Date(
+        b?.createdAt || b?.created_at || b?.tanggalDibuat || 0
+      ).getTime();
+
+      return dateB - dateA;
+    })
+    .slice(0, 5);
+
+  // Views hanya dihitung jika data jumlah views memang tersedia di response API.
+  const viewCounts = [
+    ...articles.map(getViewCount),
+    ...pages.map(getViewCount),
+  ].filter((value) => value !== null);
+
+  const totalViews =
+    viewCounts.length > 0
+      ? viewCounts.reduce((total, value) => total + value, 0)
+      : null;
 
   const statCards = [
     {
       title: "Total Artikel",
-      value: totalArticles,
-      subtitle: `${publishedArticles} artikel dipublikasikan`,
+      value: formatNumber(articles.length),
+      subtitle: `${publishedArticles.length} artikel dipublikasikan`,
       icon: FileText,
       color: "info",
     },
     {
       title: "Artikel Terbit",
-      value: publishedArticles,
-      subtitle: "artikel aktif",
+      value: formatNumber(publishedArticles.length),
+      subtitle: `${draftArticles.length} artikel belum terbit`,
       icon: CheckCircle,
       color: "success",
     },
     {
       title: "Halaman Statis",
-      value: totalPages,
-      subtitle: "halaman aktif",
+      value: formatNumber(pages.length),
+      subtitle: `${publishedPages.length} halaman aktif`,
       icon: File,
       color: "primary",
     },
     {
       title: "Total Dilihat",
-      value: totalViews,
-      subtitle: "views sepanjang waktu",
+      value: totalViews === null ? "—" : formatNumber(totalViews),
+      subtitle:
+        totalViews === null
+          ? "Data views belum tersedia dari API"
+          : "Total views dari data yang tersedia",
       icon: Eye,
       color: "warning",
     },
   ];
-
 
   const tips = [
     {
@@ -91,38 +261,36 @@ export default function CmsDashboardPage() {
     },
   ];
 
-
   const colorClasses = {
     info: {
       icon: "text-[var(--color-info)]",
       iconBg: "theme-info",
-      border: "theme-border",
       accent: "bg-[var(--color-info)]",
     },
     success: {
       icon: "text-[var(--color-success)]",
       iconBg: "theme-success",
-      border: "theme-border",
       accent: "bg-[var(--color-success)]",
     },
     primary: {
       icon: "text-[var(--color-primary)]",
       iconBg: "theme-card-soft",
-      border: "theme-border",
       accent: "bg-[var(--color-primary)]",
     },
     warning: {
       icon: "text-[var(--color-warning)]",
       iconBg: "theme-warning",
-      border: "theme-border",
       accent: "bg-[var(--color-warning)]",
     },
   };
 
+  const publishPercentage =
+    articles.length > 0
+      ? Math.min((publishedArticles.length / articles.length) * 100, 100)
+      : 0;
 
   return (
     <div className="theme-page flex min-h-screen w-full">
-
       <Sidebar
         active={active}
         setActive={setActive}
@@ -130,9 +298,7 @@ export default function CmsDashboardPage() {
         setCollapsed={setCollapsed}
       />
 
-
       <div className="flex min-w-0 flex-1 flex-col">
-
         <Header
           user={{
             name: "CMS Admin",
@@ -142,147 +308,83 @@ export default function CmsDashboardPage() {
           notifications={[]}
         />
 
-
-        <main className="theme-page flex-1 min-w-0 p-4 sm:p-6 lg:p-8">
-          <div className="w-full max-w-[1600px] mx-auto">
-
-
+        <main className="theme-page min-w-0 flex-1 p-4 sm:p-6 lg:p-8">
+          <div className="mx-auto w-full max-w-[1600px]">
             <section className="mb-7">
               <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+                <div className="flex min-w-0 items-center gap-3">
+                  <div className="theme-card theme-border flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border text-[var(--color-primary)] shadow-sm">
+                    <LayoutDashboard size={21} strokeWidth={2} />
+                  </div>
 
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2.5">
+                      <h1 className="theme-text text-2xl font-semibold tracking-tight sm:text-3xl">
+                        Dashboard CMS
+                      </h1>
 
-                <div className="min-w-0">
-
-                  <div className="flex items-center gap-3">
-                    <div
-                      className="
-                        w-11
-                        h-11
-                        shrink-0
-                        rounded-xl
-                        border
-                        theme-border
-                        theme-card
-                        flex
-                        items-center
-                        justify-center
-                        text-[var(--color-primary)]
-                        shadow-sm
-                      "
-                    >
-                      <LayoutDashboard
-                        size={21}
-                        strokeWidth={2}
-                      />
+                      <span className="theme-card-soft theme-border rounded-md border px-2.5 py-1 text-[11px] font-semibold text-[var(--color-primary)]">
+                        Admin
+                      </span>
                     </div>
 
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2.5 flex-wrap">
-                        <h1
-                          className="
-                            text-2xl
-                            sm:text-3xl
-                            font-semibold
-                            tracking-tight
-                            theme-text
-                          "
-                        >
-                          Dashboard CMS
-                        </h1>
-
-                        <span
-                          className="
-                            inline-flex
-                            items-center
-                            px-2.5
-                            py-1
-                            rounded-md
-                            theme-card-soft
-                            border
-                            theme-border
-                            text-[11px]
-                            font-semibold
-                            text-[var(--color-primary)]
-                          "
-                        >
-                          Admin
-                        </span>
-                      </div>
-
-                      <p
-                        className="
-                          mt-1
-                          text-sm
-                          theme-text-muted
-                        "
-                      >
-                        Kelola dan pantau konten website SmartSchool.
-                      </p>
-                    </div>
+                    <p className="theme-text-muted mt-1 text-sm">
+                      Kelola dan pantau konten website SmartSchool.
+                    </p>
                   </div>
                 </div>
 
-
                 <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => fetchDashboardData(true)}
+                    disabled={loading || refreshing}
+                    className="theme-card theme-border theme-text-secondary inline-flex items-center justify-center gap-2 rounded-lg border px-3.5 py-2.5 text-sm font-medium shadow-sm transition-all hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <RefreshCw
+                      size={16}
+                      className={refreshing ? "animate-spin" : ""}
+                    />
+                    <span>{refreshing ? "Memuat..." : "Refresh Data"}</span>
+                  </button>
+
                   <a
                     href="/"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="
-                      inline-flex
-                      items-center
-                      justify-center
-                      gap-2
-                      px-3.5
-                      py-2.5
-                      rounded-lg
-                      border
-                      theme-border
-                      theme-card
-                      text-sm
-                      font-medium
-                      theme-text-secondary
-                      theme-sidebar-hover
-                      transition-all
-                      shadow-sm
-                    "
+                    className="theme-card theme-border theme-text-secondary inline-flex items-center justify-center gap-2 rounded-lg border px-3.5 py-2.5 text-sm font-medium shadow-sm transition-all hover:opacity-80"
                   >
                     <ExternalLink size={16} />
-
                     <span>Preview Website</span>
                   </a>
 
-                  <a
-                    href="/cmsAdmin/articles/create"
-                    className="
-                      inline-flex
-                      items-center
-                      justify-center
-                      gap-2
-                      px-4
-                      py-2.5
-                      rounded-lg
-                      theme-primary
-                      text-white
-                      text-sm
-                      font-medium
-                      transition-all
-                      shadow-sm
-                    "
+                  <Link
+                    href="/admin/cms/articles/tambah"
+                    className="theme-primary inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-all"
                   >
                     <Plus size={17} />
-
                     <span>Buat Artikel</span>
-                  </a>
+                  </Link>
                 </div>
               </div>
 
-
-              <div className="mt-6 border-b theme-border" />
+              <div className="theme-border mt-6 border-b" />
             </section>
 
+            {error && (
+              <div className="theme-warning mb-6 flex flex-col gap-3 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-sm">{error}</p>
+                <button
+                  type="button"
+                  onClick={() => fetchDashboardData(true)}
+                  className="shrink-0 text-sm font-semibold underline"
+                >
+                  Coba lagi
+                </button>
+              </div>
+            )}
 
-            <section className="grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4 mb-6">
+            <section className="mb-6 grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
               {statCards.map((stat) => {
                 const Icon = stat.icon;
                 const color = colorClasses[stat.color];
@@ -290,85 +392,29 @@ export default function CmsDashboardPage() {
                 return (
                   <div
                     key={stat.title}
-                    className={`
-                      relative
-                      overflow-hidden
-                      theme-card
-                      border
-                      ${color.border}
-                      rounded-xl
-                      p-4
-                      sm:p-5
-                      shadow-sm
-                      hover:shadow-md
-                      transition-all
-                      duration-200
-                    `}
+                    className={`theme-card theme-border relative overflow-hidden rounded-xl border p-4 shadow-sm transition-all duration-200 hover:shadow-md sm:p-5`}
                   >
-
                     <div
-                      className={`
-                        absolute
-                        left-0
-                        top-0
-                        bottom-0
-                        w-1
-                        ${color.accent}
-                      `}
+                      className={`absolute bottom-0 left-0 top-0 w-1 ${color.accent}`}
                     />
 
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <p
-                          className="
-                            text-[11px]
-                            sm:text-xs
-                            font-semibold
-                            uppercase
-                            tracking-wide
-                            theme-text-muted
-                          "
-                        >
+                        <p className="theme-text-muted text-[11px] font-semibold uppercase tracking-wide sm:text-xs">
                           {stat.title}
                         </p>
 
-                        <p
-                          className="
-                            mt-2
-                            text-2xl
-                            sm:text-3xl
-                            font-semibold
-                            tracking-tight
-                            theme-text
-                          "
-                        >
-                          {stat.value}
+                        <p className="theme-text mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">
+                          {loading ? "..." : stat.value}
                         </p>
 
-                        <p
-                          className="
-                            mt-1
-                            text-xs
-                            theme-text-muted
-                            truncate
-                          "
-                        >
-                          {stat.subtitle}
+                        <p className="theme-text-muted mt-1 text-xs">
+                          {loading ? "Mengambil data..." : stat.subtitle}
                         </p>
                       </div>
 
                       <div
-                        className={`
-                          w-10
-                          h-10
-                          shrink-0
-                          rounded-lg
-                          ${color.iconBg}
-                          ${color.icon}
-                          flex
-                          items-center
-                          justify-center
-                        `}
+                        className={`${color.iconBg} ${color.icon} flex h-10 w-10 shrink-0 items-center justify-center rounded-lg`}
                       >
                         <Icon size={19} />
                       </div>
@@ -378,620 +424,223 @@ export default function CmsDashboardPage() {
               })}
             </section>
 
-
-            <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
-
-
-              <section
-                className="
-                  xl:col-span-2
-                  theme-card
-                  border
-                  theme-border
-                  rounded-xl
-                  shadow-sm
-                  overflow-hidden
-                "
-              >
-
-                <div
-                  className="
-                    px-5
-                    sm:px-6
-                    py-5
-                    border-b
-                    theme-border-soft
-                  "
-                >
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-
+            <div className="mb-6 grid grid-cols-1 gap-5 xl:grid-cols-3">
+              <section className="theme-card theme-border overflow-hidden rounded-xl border shadow-sm xl:col-span-2">
+                <div className="theme-border-soft border-b px-5 py-5 sm:px-6">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex items-center gap-3">
-                      <div
-                        className="
-                          w-9
-                          h-9
-                          rounded-lg
-                          theme-info
-                          flex
-                          items-center
-                          justify-center
-                        "
-                      >
+                      <div className="theme-info flex h-9 w-9 items-center justify-center rounded-lg">
                         <FileText size={18} />
                       </div>
 
                       <div>
-                        <h2
-                          className="
-                            text-sm
-                            sm:text-base
-                            font-semibold
-                            theme-text
-                          "
-                        >
+                        <h2 className="theme-text text-sm font-semibold sm:text-base">
                           Artikel Terbaru
                         </h2>
-
-                        <p
-                          className="
-                            text-xs
-                            theme-text-muted
-                            mt-0.5
-                          "
-                        >
-                          Konten yang baru ditambahkan
+                        <p className="theme-text-muted mt-0.5 text-xs">
+                          Artikel dari data CMS
                         </p>
                       </div>
                     </div>
 
-                    <span
-                      className="
-                        inline-flex
-                        w-fit
-                        items-center
-                        gap-1.5
-                        px-2.5
-                        py-1
-                        rounded-md
-                        theme-card-soft
-                        border
-                        theme-border
-                        text-xs
-                        font-medium
-                        theme-text-secondary
-                      "
-                    >
+                    <span className="theme-card-soft theme-border theme-text-secondary inline-flex w-fit items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-medium">
                       <FileText size={12} />
-
-                      {latestArticles.length} artikel
+                      {loading ? "Memuat..." : `${latestArticles.length} artikel`}
                     </span>
                   </div>
                 </div>
 
-
                 <div className="px-5 sm:px-6">
-                  {latestArticles.length > 0 ? (
+                  {loading ? (
+                    <div className="theme-text-muted py-12 text-center text-sm">
+                      Memuat artikel dari server...
+                    </div>
+                  ) : latestArticles.length > 0 ? (
                     <div className="divide-y divide-[var(--color-border-soft)]">
-                      {latestArticles.map((article) => (
-                        <div
-                          key={article.id}
-                          className="
-                            group
-                            py-4
-                            flex
-                            items-center
-                            gap-4
-                            theme-table-hover
-                          "
-                        >
+                      {latestArticles.map((article, index) => {
+                        const published =
+                          getArticleStatus(article) === "published";
 
+                        return (
                           <div
-                            className="
-                              hidden
-                              sm:flex
-                              w-9
-                              h-9
-                              shrink-0
-                              rounded-lg
-                              theme-card-soft
-                              border
-                              theme-border
-                              items-center
-                              justify-center
-                              theme-text-muted
-                              group-hover:text-[var(--color-primary)]
-                              group-hover:bg-[var(--color-sidebar-active)]
-                              transition-all
-                            "
+                            key={article.id || article.slug || index}
+                            className="theme-table-hover group flex items-center gap-4 py-4"
                           >
-                            <PenLine size={16} />
-                          </div>
-
-
-                          <div className="flex-1 min-w-0">
-                            <p
-                              className="
-                                text-sm
-                                font-medium
-                                theme-text-secondary
-                                group-hover:text-[var(--color-primary)]
-                                transition-colors
-                                truncate
-                              "
-                            >
-                              {article.title}
-                            </p>
-
-                            <div className="flex items-center flex-wrap gap-2 mt-1.5">
-
-                              <span
-                                className={`
-                                  inline-flex
-                                  items-center
-                                  gap-1
-                                  px-2
-                                  py-0.5
-                                  rounded-md
-                                  text-[10px]
-                                  font-semibold
-                                  border
-                                  ${
-                                    article.status === "published"
-                                      ? "theme-success"
-                                      : "theme-warning"
-                                  }
-                                `}
-                              >
-                                {article.status === "published" ? (
-                                  <CheckCircle size={11} />
-                                ) : (
-                                  <Clock3 size={11} />
-                                )}
-
-                                {article.status === "published"
-                                  ? "Published"
-                                  : "Draft"}
-                              </span>
-
-
-                              <span className="text-[11px] theme-text-muted">
-                                {article.category || "Uncategorized"}
-                              </span>
+                            <div className="theme-card-soft theme-border theme-text-muted hidden h-9 w-9 shrink-0 items-center justify-center rounded-lg border transition-all group-hover:text-[var(--color-primary)] sm:flex">
+                              <PenLine size={16} />
                             </div>
+
+                            <div className="min-w-0 flex-1">
+                              <p className="theme-text-secondary truncate text-sm font-medium transition-colors group-hover:text-[var(--color-primary)]">
+                                {getArticleTitle(article)}
+                              </p>
+
+                              <div className="mt-1.5 flex flex-wrap items-center gap-2">
+                                <span
+                                  className={`inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[10px] font-semibold ${
+                                    published ? "theme-success" : "theme-warning"
+                                  }`}
+                                >
+                                  {published ? (
+                                    <CheckCircle size={11} />
+                                  ) : (
+                                    <Clock3 size={11} />
+                                  )}
+                                  {published ? "Terbit" : "Draft"}
+                                </span>
+
+                                <span className="theme-text-muted text-[11px]">
+                                  {getArticleCategory(article)}
+                                </span>
+                              </div>
+                            </div>
+
+                            <div className="theme-text-muted hidden shrink-0 items-center gap-1.5 text-xs md:flex">
+                              <Clock3 size={13} />
+                              {getArticleDate(article)}
+                            </div>
+
+                            <ArrowRight
+                              size={15}
+                              className="theme-text-placeholder shrink-0 transition-all group-hover:translate-x-0.5 group-hover:text-[var(--color-primary)]"
+                            />
                           </div>
-
-
-                          <div
-                            className="
-                              hidden
-                              md:flex
-                              shrink-0
-                              items-center
-                              gap-1.5
-                              text-xs
-                              theme-text-muted
-                            "
-                          >
-                            <Clock3 size={13} />
-
-                            {new Date(
-                              article.created_at
-                            ).toLocaleDateString("id-ID", {
-                              day: "numeric",
-                              month: "short",
-                              year: "numeric",
-                            })}
-                          </div>
-
-
-                          <ArrowRight
-                            size={15}
-                            className="
-                              shrink-0
-                              theme-text-placeholder
-                              group-hover:text-[var(--color-primary)]
-                              group-hover:translate-x-0.5
-                              transition-all
-                            "
-                          />
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   ) : (
                     <div className="py-12 text-center">
                       <FileText
                         size={30}
-                        className="mx-auto theme-text-placeholder"
+                        className="theme-text-placeholder mx-auto"
                       />
-
-                      <p
-                        className="
-                          mt-3
-                          text-sm
-                          font-medium
-                          theme-text-secondary
-                        "
-                      >
+                      <p className="theme-text-secondary mt-3 text-sm font-medium">
                         Belum ada artikel
                       </p>
-
-                      <p
-                        className="
-                          mt-1
-                          text-xs
-                          theme-text-muted
-                        "
-                      >
-                        Mulai buat artikel pertama Anda.
+                      <p className="theme-text-muted mt-1 text-xs">
+                        Artikel yang tersimpan akan ditampilkan di sini.
                       </p>
                     </div>
                   )}
                 </div>
 
-
-                <div
-                  className="
-                    px-5
-                    sm:px-6
-                    py-4
-                    border-t
-                    theme-border-soft
-                    theme-card-soft
-                  "
-                >
-                  <a
-                    href="/cmsAdmin/articles"
-                    className="
-                      inline-flex
-                      items-center
-                      gap-1.5
-                      text-sm
-                      font-medium
-                      text-[var(--color-primary)]
-                      hover:text-[var(--color-primary-hover)]
-                      transition-colors
-                    "
+                <div className="theme-border-soft theme-card-soft border-t px-5 py-4 sm:px-6">
+                  <Link
+                    href="/admin/cms/articles"
+                    className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--color-primary)] transition-colors hover:opacity-80"
                   >
                     Lihat semua artikel
-
                     <ArrowRight size={15} />
-                  </a>
+                  </Link>
                 </div>
               </section>
 
-
-              <section
-                className="
-                  theme-card
-                  border
-                  theme-border
-                  rounded-xl
-                  shadow-sm
-                  overflow-hidden
-                "
-              >
-
-                <div
-                  className="
-                    px-5
-                    sm:px-6
-                    py-5
-                    border-b
-                    theme-border-soft
-                  "
-                >
+              <section className="theme-card theme-border overflow-hidden rounded-xl border shadow-sm">
+                <div className="theme-border-soft border-b px-5 py-5 sm:px-6">
                   <div className="flex items-center gap-3">
-                    <div
-                      className="
-                        w-9
-                        h-9
-                        rounded-lg
-                        theme-card-soft
-                        text-[var(--color-primary)]
-                        flex
-                        items-center
-                        justify-center
-                      "
-                    >
+                    <div className="theme-card-soft flex h-9 w-9 items-center justify-center rounded-lg text-[var(--color-primary)]">
                       <BarChart3 size={18} />
                     </div>
 
                     <div>
-                      <h2
-                        className="
-                          text-sm
-                          sm:text-base
-                          font-semibold
-                          theme-text
-                        "
-                      >
+                      <h2 className="theme-text text-sm font-semibold sm:text-base">
                         Ringkasan Konten
                       </h2>
-
-                      <p
-                        className="
-                          text-xs
-                          theme-text-muted
-                          mt-0.5
-                        "
-                      >
-                        Gambaran konten website
+                      <p className="theme-text-muted mt-0.5 text-xs">
+                        Berdasarkan data CMS
                       </p>
                     </div>
                   </div>
                 </div>
 
-
-                <div className="p-5 sm:p-6 space-y-5">
-
-
+                <div className="space-y-5 p-5 sm:p-6">
                   <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <span
-                        className="
-                          text-xs
-                          font-medium
-                          theme-text-secondary
-                        "
-                      >
+                    <div className="mb-2 flex items-center justify-between">
+                      <span className="theme-text-secondary text-xs font-medium">
                         Artikel Terbit
                       </span>
-
-                      <span
-                        className="
-                          text-xs
-                          font-semibold
-                          theme-text-secondary
-                        "
-                      >
-                        {publishedArticles}/{totalArticles}
+                      <span className="theme-text-secondary text-xs font-semibold">
+                        {loading
+                          ? "..."
+                          : `${publishedArticles.length}/${articles.length}`}
                       </span>
                     </div>
 
-                    <div
-                      className="
-                        h-2
-                        theme-card-soft
-                        rounded-full
-                        overflow-hidden
-                      "
-                    >
+                    <div className="theme-card-soft h-2 overflow-hidden rounded-full">
                       <div
-                        className="
-                          h-full
-                          bg-[var(--color-success)]
-                          rounded-full
-                          transition-all
-                        "
+                        className="h-full rounded-full bg-[var(--color-success)] transition-all"
                         style={{
-                          width: `${
-                            totalArticles > 0
-                              ? Math.min(
-                                  (publishedArticles /
-                                    totalArticles) *
-                                    100,
-                                  100
-                                )
-                              : 0
-                          }%`,
+                          width: loading ? "0%" : `${publishPercentage}%`,
                         }}
                       />
                     </div>
                   </div>
 
-
-                  <div
-                    className="
-                      flex
-                      items-center
-                      justify-between
-                      p-3.5
-                      rounded-lg
-                      theme-card-soft
-                      border
-                      theme-border-soft
-                    "
-                  >
+                  <div className="theme-card-soft theme-border-soft flex items-center justify-between rounded-lg border p-3.5">
                     <div className="flex items-center gap-3">
-                      <div
-                        className="
-                          w-8
-                          h-8
-                          rounded-lg
-                          theme-card
-                          border
-                          theme-border
-                          flex
-                          items-center
-                          justify-center
-                          text-[var(--color-primary)]
-                        "
-                      >
+                      <div className="theme-card theme-border flex h-8 w-8 items-center justify-center rounded-lg border text-[var(--color-primary)]">
                         <File size={15} />
                       </div>
-
                       <div>
-                        <p
-                          className="
-                            text-xs
-                            font-medium
-                            theme-text-secondary
-                          "
-                        >
+                        <p className="theme-text-secondary text-xs font-medium">
                           Halaman Statis
                         </p>
-
-                        <p
-                          className="
-                            text-[11px]
-                            theme-text-muted
-                          "
-                        >
+                        <p className="theme-text-muted text-[11px]">
                           Halaman aktif
                         </p>
                       </div>
                     </div>
-
-                    <span
-                      className="
-                        text-lg
-                        font-semibold
-                        theme-text
-                      "
-                    >
-                      {totalPages}
+                    <span className="theme-text text-lg font-semibold">
+                      {loading ? "..." : formatNumber(publishedPages.length)}
                     </span>
                   </div>
 
-
-                  <div
-                    className="
-                      flex
-                      items-center
-                      justify-between
-                      p-3.5
-                      rounded-lg
-                      theme-card-soft
-                      border
-                      theme-border-soft
-                    "
-                  >
+                  <div className="theme-card-soft theme-border-soft flex items-center justify-between rounded-lg border p-3.5">
                     <div className="flex items-center gap-3">
-                      <div
-                        className="
-                          w-8
-                          h-8
-                          rounded-lg
-                          theme-card
-                          border
-                          theme-border
-                          flex
-                          items-center
-                          justify-center
-                          text-[var(--color-warning)]
-                        "
-                      >
+                      <div className="theme-card theme-border flex h-8 w-8 items-center justify-center rounded-lg border text-[var(--color-warning)]">
                         <Eye size={15} />
                       </div>
-
                       <div>
-                        <p
-                          className="
-                            text-xs
-                            font-medium
-                            theme-text-secondary
-                          "
-                        >
+                        <p className="theme-text-secondary text-xs font-medium">
                           Total Views
                         </p>
-
-                        <p
-                          className="
-                            text-[11px]
-                            theme-text-muted
-                          "
-                        >
-                          Semua konten
+                        <p className="theme-text-muted text-[11px]">
+                          Jika disediakan oleh API
                         </p>
                       </div>
                     </div>
-
-                    <span
-                      className="
-                        text-lg
-                        font-semibold
-                        theme-text
-                      "
-                    >
-                      {totalViews}
+                    <span className="theme-text text-lg font-semibold">
+                      {loading
+                        ? "..."
+                        : totalViews === null
+                          ? "—"
+                          : formatNumber(totalViews)}
                     </span>
                   </div>
 
-
-                  <a
-                    href="/cmsAdmin/articles/create"
-                    className="
-                      w-full
-                      inline-flex
-                      items-center
-                      justify-center
-                      gap-2
-                      px-4
-                      py-2.5
-                      rounded-lg
-                      theme-primary
-                      text-white
-                      text-sm
-                      font-medium
-                      transition-all
-                    "
+                  <Link
+                    href="/admin/cms/articles/tambah"
+                    className="theme-primary inline-flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-white transition-all"
                   >
                     <PenLine size={16} />
-
                     Tulis Artikel Baru
-                  </a>
+                  </Link>
                 </div>
               </section>
             </div>
 
-
-            <section className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-
-
-              <div
-                className="
-                  lg:col-span-2
-                  theme-card
-                  border
-                  theme-border
-                  rounded-xl
-                  shadow-sm
-                  overflow-hidden
-                "
-              >
-                <div
-                  className="
-                    px-5
-                    sm:px-6
-                    py-5
-                    border-b
-                    theme-border-soft
-                  "
-                >
+            <section className="mb-6 grid grid-cols-1 gap-5 lg:grid-cols-3">
+              <div className="theme-card theme-border overflow-hidden rounded-xl border shadow-sm lg:col-span-2">
+                <div className="theme-border-soft border-b px-5 py-5 sm:px-6">
                   <div className="flex items-center gap-3">
-                    <div
-                      className="
-                        w-9
-                        h-9
-                        rounded-lg
-                        theme-warning
-                        flex
-                        items-center
-                        justify-center
-                      "
-                    >
+                    <div className="theme-warning flex h-9 w-9 items-center justify-center rounded-lg">
                       <Lightbulb size={18} />
                     </div>
-
                     <div>
-                      <h2
-                        className="
-                          text-sm
-                          sm:text-base
-                          font-semibold
-                          theme-text
-                        "
-                      >
+                      <h2 className="theme-text text-sm font-semibold sm:text-base">
                         Panduan Menulis Konten
                       </h2>
-
-                      <p
-                        className="
-                          text-xs
-                          theme-text-muted
-                          mt-0.5
-                        "
-                      >
+                      <p className="theme-text-muted mt-0.5 text-xs">
                         Beberapa hal yang perlu diperhatikan
                       </p>
                     </div>
@@ -999,66 +648,23 @@ export default function CmsDashboardPage() {
                 </div>
 
                 <div className="p-5 sm:p-6">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     {tips.map((tip) => (
                       <div
                         key={tip.number}
-                        className="
-                          flex
-                          gap-3.5
-                          p-4
-                          rounded-lg
-                          border
-                          theme-border-soft
-                          theme-card-soft
-                          hover:theme-card
-                          transition-all
-                        "
+                        className="theme-card-soft theme-border-soft flex gap-3.5 rounded-lg border p-4 transition-all"
                       >
-                        <div
-                          className="
-                            w-8
-                            h-8
-                            shrink-0
-                            rounded-lg
-                            theme-card
-                            border
-                            theme-border
-                            flex
-                            items-center
-                            justify-center
-                          "
-                        >
-                          <span
-                            className="
-                              text-[11px]
-                              font-bold
-                              text-[var(--color-primary)]
-                            "
-                          >
+                        <div className="theme-card theme-border flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border">
+                          <span className="text-[11px] font-bold text-[var(--color-primary)]">
                             {tip.number}
                           </span>
                         </div>
 
                         <div className="min-w-0">
-                          <h3
-                            className="
-                              text-sm
-                              font-semibold
-                              theme-text-secondary
-                            "
-                          >
+                          <h3 className="theme-text-secondary text-sm font-semibold">
                             {tip.title}
                           </h3>
-
-                          <p
-                            className="
-                              mt-1
-                              text-xs
-                              leading-relaxed
-                              theme-text-muted
-                            "
-                          >
+                          <p className="theme-text-muted mt-1 text-xs leading-relaxed">
                             {tip.desc}
                           </p>
                         </div>
@@ -1068,123 +674,50 @@ export default function CmsDashboardPage() {
                 </div>
               </div>
 
-
-              <div
-                className="
-                  rounded-xl
-                  shadow-sm
-                  overflow-hidden
-                  bg-[var(--color-sidebar)]
-                  border
-                  theme-border
-                "
-              >
+              <div className="theme-border overflow-hidden rounded-xl border bg-[var(--color-sidebar)] shadow-sm">
                 <div className="p-5 sm:p-6">
-                  <div
-                    className="
-                      w-9
-                      h-9
-                      rounded-lg
-                      theme-card-soft
-                      text-[var(--color-primary)]
-                      flex
-                      items-center
-                      justify-center
-                      mb-4
-                    "
-                  >
+                  <div className="theme-card-soft mb-4 flex h-9 w-9 items-center justify-center rounded-lg text-[var(--color-primary)]">
                     <TrendingUp size={18} />
                   </div>
 
-                  <h2
-                    className="
-                      text-base
-                      font-semibold
-                      theme-text
-                    "
-                  >
+                  <h2 className="theme-text text-base font-semibold">
                     Kelola Konten
                   </h2>
-
-                  <p
-                    className="
-                      text-xs
-                      theme-text-muted
-                      mt-1
-                      leading-relaxed
-                    "
-                  >
-                    Kelola artikel, halaman statis, dan seluruh
-                    konten website dari satu tempat.
+                  <p className="theme-text-muted mt-1 text-xs leading-relaxed">
+                    Kelola artikel, halaman statis, dan konten website dari
+                    satu tempat.
                   </p>
 
                   <div className="mt-5 space-y-2">
-                    <a
-                      href="/cmsAdmin/articles"
-                      className="
-                        flex
-                        items-center
-                        justify-between
-                        w-full
-                        px-3.5
-                        py-2.5
-                        rounded-lg
-                        theme-card-soft
-                        hover:bg-[var(--color-sidebar-hover)]
-                        text-sm
-                        theme-text
-                        transition-all
-                      "
+                    <Link
+                      href="/admin/cms/articles"
+                      className="theme-card-soft theme-text flex w-full items-center justify-between rounded-lg px-3.5 py-2.5 text-sm transition-all hover:opacity-80"
                     >
                       <span className="flex items-center gap-2">
                         <FileText size={15} />
                         Kelola Artikel
                       </span>
-
                       <ArrowRight size={15} />
-                    </a>
+                    </Link>
 
-                    <a
-                      href="/cmsAdmin/pages"
-                      className="
-                        flex
-                        items-center
-                        justify-between
-                        w-full
-                        px-3.5
-                        py-2.5
-                        rounded-lg
-                        theme-card-soft
-                        hover:bg-[var(--color-sidebar-hover)]
-                        text-sm
-                        theme-text
-                        transition-all
-                      "
+                    <Link
+                      href="/admin/cms/pages"
+                      className="theme-card-soft theme-text flex w-full items-center justify-between rounded-lg px-3.5 py-2.5 text-sm transition-all hover:opacity-80"
                     >
                       <span className="flex items-center gap-2">
                         <File size={15} />
                         Kelola Halaman
                       </span>
-
                       <ArrowRight size={15} />
-                    </a>
+                    </Link>
                   </div>
                 </div>
               </div>
             </section>
 
-
-            <footer
-              className="
-                pt-5
-                pb-2
-                border-t
-                theme-border
-                text-center
-              "
-            >
-              <p className="text-xs theme-text-muted">
-                © 2026 SmartSchool • CMS Dashboard
+            <footer className="theme-border border-t pb-2 pt-5 text-center">
+              <p className="theme-text-muted text-xs">
+                © {new Date().getFullYear()} SmartSchool • CMS Dashboard
               </p>
             </footer>
           </div>
