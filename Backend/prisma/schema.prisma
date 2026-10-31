@@ -228,6 +228,7 @@ model Sekolah {
   gedung            Gedung[]
   auditLogs         AuditLog[]
   pengaturanSistem  PengaturanSistem[]
+  pengaturanSpmb    PengaturanSpmb?
   menuKonfigurasi   MenuKonfigurasi[]
   peran             Peran[]
 
@@ -1351,20 +1352,25 @@ model KategoriArtikel {
 }
 
 model JalurPpdb {
-  id             String    @id @default(uuid())
-  sekolahId      String    @map("sekolah_id")
-  dibuatOleh     String?   @map("dibuat_oleh")
-  diperbaruiOleh String?   @map("diperbarui_oleh")
-  dihapusOleh    String?   @map("dihapus_oleh")
-  nama           String    @db.VarChar(50)
-  deskripsi      String?   @db.Text
-  kuota          Int
-  tanggalMulai   DateTime? @map("tanggal_mulai") @db.Date
-  tanggalSelesai DateTime? @map("tanggal_selesai") @db.Date
-  status         String?   @db.VarChar(20)
-  dibuatPada     DateTime  @default(now()) @map("dibuat_pada") @db.Timestamp()
-  diperbaruiPada DateTime  @updatedAt @map("diperbarui_pada") @db.Timestamp()
-  dihapusPada    DateTime? @map("dihapus_pada") @db.Timestamp()
+  id              String    @id @default(uuid())
+  sekolahId       String    @map("sekolah_id")
+  dibuatOleh      String?   @map("dibuat_oleh")
+  diperbaruiOleh  String?   @map("diperbarui_oleh")
+  dihapusOleh     String?   @map("dihapus_oleh")
+  nama            String    @db.VarChar(50)
+  deskripsi       String?   @db.Text
+  kuota           Int
+  kategori        String    @default("reguler") @db.VarChar(20)
+  jarakMaksimalKm Decimal?  @map("jarak_maksimal_km") @db.Decimal(6, 2)
+  metodeRanking   String    @default("jarak") @map("metode_ranking") @db.VarChar(10)
+  nilaiMinimal    Decimal?  @map("nilai_minimal") @db.Decimal(5, 2)
+  berkasWajib     Json      @default("[\"KK\",\"AKTE\",\"IJAZAH\"]") @map("berkas_wajib")
+  tanggalMulai    DateTime? @map("tanggal_mulai") @db.Date
+  tanggalSelesai  DateTime? @map("tanggal_selesai") @db.Date
+  status          String?   @db.VarChar(20)
+  dibuatPada      DateTime  @default(now()) @map("dibuat_pada") @db.Timestamp()
+  diperbaruiPada  DateTime  @updatedAt @map("diperbarui_pada") @db.Timestamp()
+  dihapusPada     DateTime? @map("dihapus_pada") @db.Timestamp()
 
   sekolah         Sekolah           @relation(fields: [sekolahId], references: [id])
   pendaftaranPpdb PendaftaranPpdb[]
@@ -1403,6 +1409,7 @@ model PendaftaranPpdb {
   id                     String    @id @default(uuid())
   sekolahId              String    @map("sekolah_id")
   jalurPpdbId            String    @map("jalur_ppdb_id")
+  jurusanId              String?   @map("jurusan_id")
   gelombang              String?   @db.VarChar(50)
   dibuatOleh             String?   @map("dibuat_oleh")
   diperbaruiOleh         String?   @map("diperbarui_oleh")
@@ -1420,6 +1427,9 @@ model PendaftaranPpdb {
   namaIbu                String?   @map("nama_ibu") @db.VarChar(100)
   asalSekolah            String?   @map("asal_sekolah") @db.VarChar(100)
   nilaiRapor             Decimal?  @map("nilai_rapor") @db.Decimal(5, 2)
+  lintang                Decimal?  @db.Decimal(10, 8)
+  bujur                  Decimal?  @db.Decimal(11, 8)
+  jarakKm                Decimal?  @map("jarak_km") @db.Decimal(8, 3)
   status                 String?   @db.VarChar(20)
   kelasId                String?   @map("kelas_id")
   dikonversiKePenggunaId String?   @map("dikonversi_ke_pengguna_id")
@@ -1430,6 +1440,7 @@ model PendaftaranPpdb {
 
   sekolah          Sekolah           @relation(fields: [sekolahId], references: [id])
   jalurPpdb        JalurPpdb         @relation(fields: [jalurPpdbId], references: [id])
+  jurusan          Jurusan?          @relation(fields: [jurusanId], references: [id])
   pengguna         Pengguna?         @relation(fields: [dikonversiKePenggunaId], references: [id])
   berkasPpdb       BerkasPpdb[]
   hasilSeleksiPpdb HasilSeleksiPpdb?
@@ -1439,6 +1450,7 @@ model PendaftaranPpdb {
   @@index([sekolahId])
   @@index([jalurPpdbId])
   @@index([gelombangPpdbId])
+  @@index([jurusanId])
   @@map("pendaftaran_ppdb")
 }
 
@@ -2003,20 +2015,21 @@ model JurnalKas {
 }
 
 model Jurusan {
-  id             String    @id @default(uuid())
-  sekolahId      String    @map("sekolah_id")
-  kode           String    @db.VarChar(20)
-  nama           String    @db.VarChar(100)
-  deskripsi      String?   @db.Text
-  status         String    @default("aktif") @db.VarChar(20)
-  dibuatOleh     String?   @map("dibuat_oleh")
-  diperbaruiOleh String?   @map("diperbarui_oleh")
-  dihapusOleh    String?   @map("dihapus_oleh")
-  dibuatPada     DateTime  @default(now()) @map("dibuat_pada") @db.Timestamp()
-  diperbaruiPada DateTime  @updatedAt @map("diperbarui_pada") @db.Timestamp()
-  dihapusPada    DateTime? @map("dihapus_pada") @db.Timestamp()
-  sekolah        Sekolah   @relation(fields: [sekolahId], references: [id])
-  kelas          Kelas[]
+  id              String            @id @default(uuid())
+  sekolahId       String            @map("sekolah_id")
+  kode            String            @db.VarChar(20)
+  nama            String            @db.VarChar(100)
+  deskripsi       String?           @db.Text
+  status          String            @default("aktif") @db.VarChar(20)
+  dibuatOleh      String?           @map("dibuat_oleh")
+  diperbaruiOleh  String?           @map("diperbarui_oleh")
+  dihapusOleh     String?           @map("dihapus_oleh")
+  dibuatPada      DateTime          @default(now()) @map("dibuat_pada") @db.Timestamp()
+  diperbaruiPada  DateTime          @updatedAt @map("diperbarui_pada") @db.Timestamp()
+  dihapusPada     DateTime?         @map("dihapus_pada") @db.Timestamp()
+  sekolah         Sekolah           @relation(fields: [sekolahId], references: [id])
+  kelas           Kelas[]
+  pendaftaranPpdb PendaftaranPpdb[]
 
   @@unique([sekolahId, kode])
   @@map("jurusan")
@@ -2065,4 +2078,22 @@ model PengumumanPpdb {
 
   @@index([sekolahId, status, dipublikasikanPada])
   @@map("pengumuman_ppdb")
+}
+
+model PengaturanSpmb {
+  id                         String   @id @default(uuid())
+  sekolahId                  String   @unique @map("sekolah_id")
+  pendaftaranDibuka          Boolean  @default(true) @map("pendaftaran_dibuka")
+  wajibLokasi                Boolean  @default(true) @map("wajib_lokasi")
+  batasiPendaftarSesuaiKuota Boolean  @default(false) @map("batasi_pendaftar_sesuai_kuota")
+  rankingTerbuka             Boolean  @default(true) @map("ranking_terbuka")
+  kirimEmailKonfirmasi       Boolean  @default(true) @map("kirim_email_konfirmasi")
+  dibuatOleh                 String?  @map("dibuat_oleh")
+  diperbaruiOleh             String?  @map("diperbarui_oleh")
+  dibuatPada                 DateTime @default(now()) @map("dibuat_pada") @db.Timestamp()
+  diperbaruiPada             DateTime @updatedAt @map("diperbarui_pada") @db.Timestamp()
+
+  sekolah Sekolah @relation(fields: [sekolahId], references: [id])
+
+  @@map("pengaturan_spmb")
 }

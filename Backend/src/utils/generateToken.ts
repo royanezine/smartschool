@@ -106,3 +106,36 @@ export const verifyPpdbUploadToken = (token: string): PpdbUploadTokenPayload => 
 
   return payload;
 };
+
+export interface PpdbAccessTokenPayload {
+  pendaftaranId: string;
+  nomorPendaftaran: string;
+  sekolahId: string;
+  purpose: "ppdb_access";
+}
+
+export const generatePpdbAccessToken = (
+  pendaftaranId: string,
+  nomorPendaftaran: string,
+  sekolahId: string,
+): string => {
+  return jwt.sign(
+    { pendaftaranId, nomorPendaftaran, sekolahId, purpose: "ppdb_access" },
+    JWT_SECRET!,
+    { expiresIn: "1d" },
+  );
+};
+
+export const verifyPpdbAccessToken = (token: string): PpdbAccessTokenPayload => {
+  const payload = jwt.verify(token, JWT_SECRET!) as PpdbAccessTokenPayload;
+
+  if (
+    !payload.pendaftaranId ||
+    !payload.sekolahId ||
+    payload.purpose !== "ppdb_access"
+  ) {
+    throw new Error("Token akses pendaftar tidak valid");
+  }
+
+  return payload;
+};
