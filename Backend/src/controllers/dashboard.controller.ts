@@ -4,6 +4,8 @@ import { AuthRequest } from "../middlewares/auth.middleware";
 import { successResponse } from "../utils/responseFormatter";
 import { normalizeRole } from "../utils/rbac";
 import { cekLanggananYayasan } from "../utils/yayasanLangganan";
+import { attendanceSchoolFilter } from "../services/absensiQuery.service";
+import { todayDateOnly } from "../utils/dateOnly";
 
 export const getDashboardSekolah = async (req: AuthRequest, res: Response) => {
   try {
@@ -48,21 +50,10 @@ export const getDashboardSekolah = async (req: AuthRequest, res: Response) => {
           ? { sekolahId }
           : null;
 
-    const today = new Date();
-    const startOfDay = new Date(
-      Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()),
-    );
-    const endOfDay = new Date(
-      Date.UTC(
-        today.getUTCFullYear(),
-        today.getUTCMonth(),
-        today.getUTCDate(),
-        23,
-        59,
-        59,
-        999,
-      ),
-    );
+    const today = todayDateOnly();
+    const schoolIds = isAdminYayasan && yayasanId
+      ? (await prisma.sekolah.findMany({ where: { yayasanId, dihapusPada: null }, select: { id: true } })).map(s => s.id)
+      : sekolahId ? [sekolahId] : [];
 
     const [totalSiswa, totalGuru, totalKelas, absensiHariIni, totalSekolah] =
       await Promise.all([
@@ -95,8 +86,8 @@ export const getDashboardSekolah = async (req: AuthRequest, res: Response) => {
           ? prisma.absensi.groupBy({
               by: ["status"],
               where: {
-                kelas: scope,
-                tanggal: { gte: startOfDay, lte: endOfDay },
+                OR: schoolIds.map(id => attendanceSchoolFilter(id)),
+                tanggal: today,
               },
               _count: true,
             })
@@ -111,20 +102,20 @@ export const getDashboardSekolah = async (req: AuthRequest, res: Response) => {
     absensiHariIni.forEach((absensi) => {
       const status = absensi.status.toLowerCase();
 
-      if (status === "h") {
+      if (["h", "hadir", "terlambat"].includes(status)) {
         rekapKehadiran.hadir += absensi._count;
-      } else if (status === "i") {
+      } else if (["i", "izin"].includes(status)) {
         rekapKehadiran.izin += absensi._count;
-      } else if (status === "s") {
+      } else if (["s", "sakit"].includes(status)) {
         rekapKehadiran.sakit += absensi._count;
-      } else if (status === "a") {
+      } else if (["a", "alpha", "alpa"].includes(status)) {
         rekapKehadiran.alpha += absensi._count;
       }
     });
 
     const persentaseHadir =
-      totalSiswa > 0
-        ? ((rekapKehadiran.hadir / totalSiswa) * 100).toFixed(1)
+      totalSiswa + totalGuru > 0
+        ? Math.min(100, (rekapKehadiran.hadir / (totalSiswa + totalGuru)) * 100).toFixed(1)
         : "0";
 
     const yayasan = isAdminYayasan

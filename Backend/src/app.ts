@@ -42,6 +42,8 @@ import peminjamanAsetRoutes from "./routes/peminjamanAset.routes";
 import raportRoutes from "./routes/raport.routes";
 import kkmRoutes from "./routes/kkm.routes";
 import keuanganRoutes from "./routes/keuangan.routes";
+import { jurusanRoutes, asesmenMinatRoutes, pengumumanRoutes } from "./routes/qaResources.routes";
+import platformRoutes from "./routes/platform.routes";
 
 // IMPORT ROUTES BARU (YANG SEBELUMNYA HILANG)
 import auditLogRoutes from "./routes/auditLog.routes";
@@ -99,6 +101,7 @@ app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 // Pendaftaran Routes Utama
 app.use("/api/auth", authRoutes);
+app.use("/api/platform", platformRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/langganan/sekolah", subscriptionRoutes);
 app.use("/api/tenant", tenantRoutes);
@@ -124,6 +127,9 @@ app.use("/api/nilai", nilaiRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/role", roleRoutes);
 app.use("/api/bk", bkRoutes);
+app.use("/api/jurusan", jurusanRoutes);
+app.use("/api/bk/asesmen-minat-bakat", asesmenMinatRoutes);
+app.use("/api/ppdb/pengumuman", pengumumanRoutes);
 app.use("/api/yayasan", yayasanRoutes);
 app.use("/api/ppdb", ppdbRoutes);
 app.use("/api/jalur-ppdb", jalurPpdbRoutes);

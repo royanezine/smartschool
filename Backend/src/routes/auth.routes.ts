@@ -14,6 +14,8 @@ import {
 } from "../controllers/auth.controller";
 import { authenticate } from "../middlewares/auth.middleware";
 import { authorizeRoles } from "../middlewares/role.middleware";
+import { changePassword } from "../controllers/changePassword.controller";
+import { requestLimit } from "../middlewares/requestLimit.middleware";
 
 const router = Router();
 
@@ -21,6 +23,7 @@ router.post("/register", register);
 router.post("/verify-register", verifyRegister);
 router.post("/login", login);
 router.post("/logout", authenticate, logout);
+router.post("/ubah-kata-sandi", authenticate, requestLimit(10), changePassword);
 router.post("/lupa-kata-sandi", forgotPassword);
 router.post("/atur-ulang-kata-sandi", resetPassword);
 

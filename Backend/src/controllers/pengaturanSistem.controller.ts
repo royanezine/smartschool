@@ -4,6 +4,7 @@ import { AppError } from "../utils/appError";
 import { successResponse } from "../utils/responseFormatter";
 import { AuthRequest } from "../middlewares/auth.middleware";
 import { normalizeRole } from "../utils/rbac";
+import { z } from "zod";
 
 export const getPengaturanSekolah = async (
   req: AuthRequest,
@@ -47,7 +48,18 @@ export const upsertPengaturanSekolah = async (
       sekolahId = (req.body.sekolahId || req.query.sekolahId) as string;
     }
     const userId = req.user?.userId;
-    const { kunci, nilai, tipeData, kelompok, keterangan } = req.body;
+    const { kunci, nilai, tipeData, kelompok, keterangan } = z.object({
+      kunci: z.string().trim().min(1).max(100), nilai: z.union([z.string().max(100000), z.number().finite(), z.boolean(), z.record(z.string(), z.unknown()), z.array(z.unknown())]),
+      tipeData: z.enum(["string", "number", "boolean", "json"]).default("string"),
+      kelompok: z.string().max(20).default("general"), keterangan: z.string().max(10000).optional(), sekolahId: z.string().uuid().optional(),
+    }).strict().parse(req.body);
+    if (kunci === "hari_aktif_presensi" || kunci === "kkm_mapel" || kunci.startsWith("agregat_rapor:")) throw new AppError("Gunakan endpoint pengaturan khusus agar validasi dan scope tetap konsisten", 400);
+    if (typeof nilai === "object" && tipeData !== "json") throw new AppError("Nilai object/array harus memakai tipeData json", 400);
+    if (tipeData === "number" && (typeof nilai !== "number" || !Number.isFinite(nilai))) throw new AppError("Nilai harus berupa angka", 400);
+    if (tipeData === "boolean" && typeof nilai !== "boolean") throw new AppError("Nilai harus berupa boolean", 400);
+    let storedValue: string;
+    try { storedValue = tipeData === "json" ? JSON.stringify(typeof nilai === "string" ? JSON.parse(nilai) : nilai) : String(nilai); }
+    catch { throw new AppError("Nilai JSON tidak valid", 400); }
 
     if (!sekolahId) throw new AppError("Akses ditolak", 403);
 
@@ -59,14 +71,14 @@ export const upsertPengaturanSekolah = async (
     if (existing) {
       pengaturan = await prisma.pengaturanSistem.update({
         where: { id: existing.id },
-        data: { nilai: String(nilai), diperbaruiOleh: userId },
+        data: { nilai: storedValue, tipeData, kelompok, keterangan, diperbaruiOleh: userId },
       });
     } else {
       pengaturan = await prisma.pengaturanSistem.create({
         data: {
           sekolahId,
           kunci,
-          nilai: String(nilai),
+          nilai: storedValue,
           tipeData: tipeData || "string",
           kelompok: kelompok || "general",
           keterangan,

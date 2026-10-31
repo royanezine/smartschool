@@ -11,6 +11,7 @@ export async function ambilIzinDanModul(
   if (isSuperAdmin) {
     const [semuaModul, semuaIzin] = await Promise.all([
       prisma.modul.findMany({
+        where: { status: "aktif", dihapusPada: null },
         select: { kode: true },
       }),
       prisma.izin.findMany({
@@ -23,7 +24,7 @@ export async function ambilIzinDanModul(
   } else {
     if (peranId) {
       const rowsPeran = await prisma.peranIzin.findMany({
-        where: { peranId, dihapusPada: null },
+        where: { peranId, dihapusPada: null, izin: { status: "aktif", dihapusPada: null } },
         select: { izin: { select: { nama: true } } },
       });
       izin = rowsPeran.map((p) => p.izin.nama);
@@ -31,7 +32,7 @@ export async function ambilIzinDanModul(
 
     if (sekolahId) {
       const rowsModul = await prisma.sekolahModul.findMany({
-        where: { sekolahId, status: "aktif", dihapusPada: null },
+        where: { sekolahId, status: "aktif", dihapusPada: null, modul: { status: "aktif", dihapusPada: null }, OR: [{ kedaluwarsaPada: null }, { kedaluwarsaPada: { gte: new Date() } }] },
         select: { modul: { select: { kode: true } } },
       });
       modulAktif = rowsModul.map((m) => m.modul.kode);

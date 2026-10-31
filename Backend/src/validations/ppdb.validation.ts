@@ -3,6 +3,8 @@ import { z } from "zod";
 export const pendaftaranPpdbSchema = z.object({
   sekolahId: z.string().uuid(),
   jalurPpdbId: z.string().uuid(),
+  nik: z.string().regex(/^\d{16}$/, "NIK harus 16 digit").optional(),
+  gelombangPpdbId: z.string().uuid().optional(),
 
   namaLengkap: z
     .string()

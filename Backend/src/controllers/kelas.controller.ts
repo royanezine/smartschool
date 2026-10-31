@@ -71,6 +71,7 @@ export const getKelas = async (req: AuthRequest, res: Response) => {
         take: limit,
         include: {
           tahunAjaran: true,
+          jurusan: true,
           waliKelas: {
             select: {
               id: true,
@@ -123,6 +124,7 @@ export const getDetailKelas = async (req: AuthRequest, res: Response) => {
       where: { id, sekolahId, dihapusPada: null },
       include: {
         tahunAjaran: true,
+        jurusan: true,
         waliKelas: {
           select: {
             id: true,
@@ -181,6 +183,8 @@ export const createKelas = async (req: AuthRequest, res: Response) => {
     if (!sekolahId) throw new AppError("Sekolah tidak ditemukan", 400);
 
     const validated = createKelasSchema.parse(req.body);
+    if (validated.jurusanId && !await prisma.jurusan.findFirst({ where: { id: validated.jurusanId, sekolahId, dihapusPada: null, status: "aktif" } })) throw new AppError("Jurusan tidak ditemukan di sekolah ini", 400);
+    if (!await prisma.tahunAjaran.findFirst({ where: { id: validated.tahunAjaranId, sekolahId, dihapusPada: null } })) throw new AppError("Tahun ajaran tidak ditemukan di sekolah ini", 400);
 
     const sekolah = await prisma.sekolah.findUnique({
       where: { id: sekolahId },
@@ -222,6 +226,7 @@ export const createKelas = async (req: AuthRequest, res: Response) => {
       data: {
         nama: validated.nama,
         tingkat: String(validated.tingkat),
+        jurusanId: validated.jurusanId,
         tahunAjaranId: validated.tahunAjaranId,
         waliKelasId: validated.waliKelasId || null,
         kapasitas: validated.kapasitas,
@@ -255,6 +260,8 @@ export const updateKelas = async (req: AuthRequest, res: Response) => {
     if (!existing) throw new AppError("Kelas tidak ditemukan", 404);
 
     const validated = updateKelasSchema.parse(req.body);
+    if (validated.jurusanId && !await prisma.jurusan.findFirst({ where: { id: validated.jurusanId, sekolahId, dihapusPada: null, status: "aktif" } })) throw new AppError("Jurusan tidak ditemukan di sekolah ini", 400);
+    if (validated.tahunAjaranId && !await prisma.tahunAjaran.findFirst({ where: { id: validated.tahunAjaranId, sekolahId, dihapusPada: null } })) throw new AppError("Tahun ajaran tidak ditemukan di sekolah ini", 400);
     const { tingkat, fotoKelasUrl, ...rest } = validated;
 
     const data = await prisma.kelas.update({

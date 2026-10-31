@@ -213,7 +213,7 @@ export const login = async (req: Request, res: Response) => {
     throw new AppError("Kredensial tidak valid", 401);
   }
 
-  if (user.status !== "aktif") {
+  if (user.status !== "aktif" || user.dihapusPada) {
     throw new AppError("Akun belum diverifikasi atau tidak aktif", 401);
   }
 
@@ -225,6 +225,9 @@ export const login = async (req: Request, res: Response) => {
   }
 
   const roleName = user.peran?.nama?.trim().toLowerCase();
+  if (!user.peran || user.peran.status !== "aktif" || user.peran.dihapusPada) {
+    throw new AppError("Peran akun tidak aktif. Hubungi administrator.", 403);
+  }
 
   // 2. KHUSUS ROLE SISWA: Terapkan alur autentikasi PIN
   if (roleName === "siswa") {

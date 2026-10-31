@@ -2,6 +2,7 @@ import { NextFunction, Response } from "express";
 import { Prisma } from "@prisma/client";
 
 import { prisma } from "../config/db";
+import { getAggregateSubject, aggregateWeights } from "../utils/schoolSettings";
 import { AuthRequest } from "../middlewares/auth.middleware";
 import { AppError } from "../utils/appError";
 import { successResponse } from "../utils/responseFormatter";
@@ -598,16 +599,25 @@ export const getDataRaportSiswa = async (
       string,
       { mapel: string; totalNilai: number; kkm: number }
     > = {};
+    const effectiveWeights = new Map<string, Map<string, number>>();
+    const effectiveKkm = new Map<string, number>();
+    for (const kelasMapelId of new Set(nilai.map(n => n.kelasMapelId))) {
+      const sample = nilai.find(n => n.kelasMapelId === kelasMapelId)!;
+      const aggregate = await getAggregateSubject(sekolahId, tahunAjaranId, sample.kelasMapel.mataPelajaranId);
+      const components = await prisma.komponenNilai.findMany({ where: { kelasMapelId, dihapusOleh: null } });
+      effectiveWeights.set(kelasMapelId, aggregateWeights(components, aggregate));
+      if (aggregate) effectiveKkm.set(kelasMapelId, aggregate.kkm);
+    }
     nilai.forEach((n) => {
       const namaMapel = n.kelasMapel.mataPelajaran.nama;
       if (!rekapNilai[namaMapel]) {
         rekapNilai[namaMapel] = {
           mapel: namaMapel,
           totalNilai: 0,
-          kkm: resolveKkm(config, namaMapel),
+          kkm: effectiveKkm.get(n.kelasMapelId) ?? resolveKkm(config, namaMapel),
         };
       }
-      const bobot = Number(n.komponenNilai.bobot) / 100;
+      const bobot = (effectiveWeights.get(n.kelasMapelId)?.get(n.komponenNilaiId) ?? Number(n.komponenNilai.bobot)) / 100;
       rekapNilai[namaMapel].totalNilai += Number(n.nilai) * bobot;
     });
 

@@ -86,7 +86,7 @@ export const authenticate = async (
             status: true,
             dihapusPada: true,
             sekolahModul: {
-              where: { status: "aktif", dihapusPada: null },
+              where: { status: "aktif", dihapusPada: null, modul: { status: "aktif", dihapusPada: null }, OR: [{ kedaluwarsaPada: null }, { kedaluwarsaPada: { gte: new Date() } }] },
               select: {
                 modul: {
                   select: { kode: true },

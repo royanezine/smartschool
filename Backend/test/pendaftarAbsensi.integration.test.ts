@@ -594,6 +594,8 @@ test("backend HTTP API regressions with PostgreSQL", { skip: !testDatabaseUrl },
     assert.equal((await prisma.gelombangPpdb.findUnique({where:{id:foreignWave.id}})).dihapusPada,null);
   });
 
+  const tenantAdminRole = await prisma.peran.create({data:{nama:"admin_sekolah",namaTampilan:"Admin sekolah global",sekolahId:null,status:"aktif"}});
+  roleIds.push(tenantAdminRole.id);
   const {konversiPendaftaranTenant}=require("../src/controllers/tenant.controller");
   async function tenantRegistration(label: string) {
     const row=await prisma.pendaftaranTenant.create({data:{

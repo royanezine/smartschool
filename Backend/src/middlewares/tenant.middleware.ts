@@ -3,6 +3,7 @@ import { AuthRequest } from "./auth.middleware";
 import { prisma } from "../config/db";
 import { isSuperAdmin } from "../utils/rbac";
 import { cekLanggananYayasan } from "../utils/yayasanLangganan";
+import { availableSchoolWhere } from "../utils/schoolAvailability";
 
 export const requireTenant = async (
   req: AuthRequest,
@@ -51,7 +52,9 @@ export const requireTenant = async (
       });
     }
 
-    if (sekolah.status !== "aktif") {
+    if (sekolah.status !== "aktif" && !await prisma.sekolah.findFirst({
+      where: { id: sekolahId, ...availableSchoolWhere() }, select: { id: true },
+    })) {
       return res.status(403).json({
         success: false,
         message: "Akses Ditolak: Sekolah tidak aktif",
@@ -148,6 +151,10 @@ export const requireSubscription = async (
         message: "Langganan sekolah tidak aktif",
         errorCode: "SUBSCRIPTION_INACTIVE",
       });
+    }
+
+    if (langganan.tanggalMulai && langganan.tanggalMulai > new Date()) {
+      return res.status(403).json({ success: false, message: "Langganan belum dimulai", errorCode: "SUBSCRIPTION_NOT_STARTED" });
     }
 
     if (

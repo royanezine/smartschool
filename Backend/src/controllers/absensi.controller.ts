@@ -18,6 +18,7 @@ import { NextFunction } from "express";
 import { normalizeRole, canManageRole, isSuperAdmin } from "../utils/rbac";
 import { postToFaceAi } from "../services/faceAi.service";
 import { attendanceDateFilter, localClockMinutes, todayDateOnly } from "../utils/dateOnly";
+import { assertActiveAttendanceDay } from "../utils/schoolSettings";
 import { attendanceInclude, attendanceListFilter, attendanceSchoolFilter } from "../services/absensiQuery.service";
 import { resolveSchoolId } from "../utils/schoolScope";
 
@@ -302,6 +303,7 @@ export const createAbsensi = async (
 
     const waktuMasuk = new Date();
     const hariIni = todayDateOnly(waktuMasuk);
+    await assertActiveAttendanceDay(sekolah.id, hariIni);
 
     const absensiSudahAda = await prisma.absensi.findFirst({
       where: {
@@ -641,6 +643,7 @@ export const checkInShift = async (req: AuthRequest, res: Response) => {
 
   const waktuMasuk = new Date();
   const hariIni = todayDateOnly(waktuMasuk);
+  await assertActiveAttendanceDay(sekolahId, hariIni);
 
   const menitJadwalMasuk = clockToMinutes(shift.jamMasuk);
   const menitJadwalKeluar = clockToMinutes(shift.jamKeluar);

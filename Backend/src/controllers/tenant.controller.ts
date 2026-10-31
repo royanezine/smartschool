@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from "express";
+import { provisionSchoolModules } from "../../prisma/provisionSchoolModules";
 import { Prisma, TipePaket } from "@prisma/client";
 import { prisma } from "../config/db";
 import { AppError } from "../utils/appError";
@@ -175,7 +176,7 @@ export const konversiPendaftaranTenant = async (
 
   if (pendaftaran.jenisPendaftaran === "yayasan") {
     const peranAdminYayasan = await tx.peran.findFirst({
-      where: { nama: "admin_yayasan" },
+      where: { nama: "admin_yayasan", sekolahId: null, status: "aktif", dihapusPada: null },
     });
     if (!peranAdminYayasan) {
       throw new AppError(
@@ -257,7 +258,7 @@ export const konversiPendaftaranTenant = async (
     };
   } else {
     const peranAdminSekolah = await tx.peran.findFirst({
-      where: { nama: "admin_sekolah" },
+      where: { nama: "admin_sekolah", sekolahId: null, status: "aktif", dihapusPada: null },
     });
     if (!peranAdminSekolah) {
       throw new AppError(
@@ -357,6 +358,9 @@ export const konversiPendaftaranTenant = async (
         tanggalBerakhir: endDate,
       },
     });
+
+    await tx.sekolah.update({ where: { id: sekolah.id }, data: { langgananAktifId: langganan.id } });
+    await provisionSchoolModules(tx, sekolah.id, pendaftaran.paketId, pengguna.id, endDate);
 
     await tx.pendaftaranTenant.update({
       where: { id: pendaftaran.id },

@@ -7,6 +7,7 @@ export const shiftSiswaSchema = z
   .pipe(z.enum(["pagi", "siang"], { message: "Shift harus pagi atau siang" }));
 
 export const createKelasSchema = z.object({
+  jurusanId: z.string().uuid().nullable().optional(),
   nama: z
     .string()
     .min(1, "Nama kelas wajib diisi")

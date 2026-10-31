@@ -25,9 +25,9 @@ import {
 
 const router = Router();
 
-router.use(authenticate, requireTenant);
-
+router.use(authenticate);
 router.get("/tema", getTemaWarna);
+router.use(requireTenant);
 router.put("/tema", requireIzin("cms.update"), updateTemaWarna);
 router.delete("/tema", requireIzin("cms.delete"), resetTemaWarna);
 

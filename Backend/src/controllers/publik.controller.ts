@@ -4,9 +4,10 @@ import { AppError } from "../utils/appError";
 import { successResponse } from "../utils/responseFormatter";
 import { bangunTema } from "../utils/temaDefault";
 import { CMS_PUBLIC_STATUSES } from "../utils/cmsPublication";
+import { availableSchoolWhere } from "../utils/schoolAvailability";
 
 const publicSchoolWhere = (subdomain: string) => ({
-  subdomain, status: "aktif", dihapusPada: null,
+  subdomain, ...availableSchoolWhere(),
 });
 
 const publicMenuSelect = {

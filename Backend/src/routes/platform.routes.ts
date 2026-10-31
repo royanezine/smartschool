@@ -1,0 +1,12 @@
+import { Router } from "express";
+import { authenticate } from "../middlewares/auth.middleware";
+import { authorizeRoles } from "../middlewares/role.middleware";
+import { platformSchools, platformFoundations, platformSummary } from "../controllers/platformDirectory.controller";
+const router = Router();
+router.use(authenticate, authorizeRoles("super_admin"));
+router.get("/sekolah", platformSchools);
+router.get("/sekolah/:id", platformSchools);
+router.get("/yayasan", platformFoundations);
+router.get("/yayasan/:id", platformFoundations);
+router.get("/ringkasan", platformSummary);
+export default router;

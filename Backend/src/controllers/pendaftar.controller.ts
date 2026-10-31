@@ -51,13 +51,14 @@ export async function getPendaftar(req: AuthRequest, res: Response, next: NextFu
         where,
         skip: (query.page - 1) * query.limit,
         take: query.limit,
-        include: { jalurPpdb: true, gelombangPpdb: true },
+        include: { jalurPpdb: true, gelombangPpdb: true, hasilSeleksiPpdb: true },
         orderBy: [{ dibuatPada: "desc" }, { id: "asc" }],
       }),
       countPendaftar(where),
     ]);
     return res.json({
-      success: true, message: "Data pendaftar berhasil diambil", data,
+      success: true, message: "Data pendaftar berhasil diambil",
+      data: data.map(row => ({ ...row, hasilSeleksiPpdb: row.hasilSeleksiPpdb?.dihapusPada ? null : row.hasilSeleksiPpdb })),
       meta: paginationMeta(query.page, query.limit, statistik.total), statistik,
     });
   } catch (error) { next(error); }

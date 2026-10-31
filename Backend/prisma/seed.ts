@@ -2,6 +2,7 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient, TipePaket } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { seedDefaultHalamanCms } from "./seedCms";
+import { provisionSchoolModules } from "./provisionSchoolModules";
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
@@ -35,26 +36,27 @@ async function main() {
     });
     if (!existing) {
       await prisma.peran.create({
-        data: { ...peran, sekolahId: null },
+        data: { ...peran, sekolahId: null, status: "aktif" },
       });
     }
   }
+  await prisma.peran.updateMany({ where: { status: null, dihapusPada: null }, data: { status: "aktif" } });
   console.log("Data Peran (Role) berhasil dibuat");
 
   const peranSuperAdmin = await prisma.peran.findFirst({
-    where: { nama: "super_admin" },
+    where: { nama: "super_admin", sekolahId: null, dihapusPada: null },
   });
   const peranAdminSekolah = await prisma.peran.findFirst({
-    where: { nama: "admin_sekolah" },
+    where: { nama: "admin_sekolah", sekolahId: null, dihapusPada: null },
   });
   const peranGuru = await prisma.peran.findFirst({
-    where: { nama: "guru" },
+    where: { nama: "guru", sekolahId: null, dihapusPada: null },
   });
   const peranSiswa = await prisma.peran.findFirst({
-    where: { nama: "siswa" },
+    where: { nama: "siswa", sekolahId: null, dihapusPada: null },
   });
   const peranAdminYayasan = await prisma.peran.findFirst({
-    where: { nama: "admin_yayasan" },
+    where: { nama: "admin_yayasan", sekolahId: null, dihapusPada: null },
   });
 
   if (!peranSuperAdmin) throw new Error("Peran super_admin tidak ditemukan");
@@ -151,10 +153,11 @@ async function main() {
     const mod = await prisma.modul.upsert({
       where: { kode: m.kode },
       update: {},
-      create: m,
+      create: { ...m, status: "aktif" },
     });
     createdModuls.push(mod);
   }
+  await prisma.modul.updateMany({ where: { status: null, dihapusPada: null }, data: { status: "aktif" } });
   console.log("Data Modul berhasil dibuat");
 
   const modulMap = Object.fromEntries(createdModuls.map((m) => [m.kode, m.id]));
@@ -172,6 +175,10 @@ async function main() {
     }
   }
 
+  izinData.push(
+    { nama: "peminjaman_aset.view_own", modul: "manajemen_aset", aksi: "view_own", status: "aktif" },
+    { nama: "peminjaman_aset.create_own", modul: "manajemen_aset", aksi: "create_own", status: "aktif" },
+  );
   const createdIzin = [];
   for (const izin of izinData) {
     const i = await prisma.izin.upsert({
@@ -185,8 +192,7 @@ async function main() {
 
   const izinMap = Object.fromEntries(createdIzin.map((i) => [i.nama, i.id]));
 
-  await prisma.peranIzin.deleteMany({});
-  console.log("Data PeranIzin lama dihapus");
+
 
   const peranIzinMapping = {
     super_admin: { modul: modulList.map((m) => m.kode), aksi: aksiList },
@@ -252,8 +258,12 @@ async function main() {
     }
   }
 
+  for (const nama of ["peminjaman_aset.view_own", "peminjaman_aset.create_own"]) {
+    peranIzinEntries.push({ peranId: peranGuru.id, izinId: izinMap[nama]!, dibuatOleh: superAdmin.id, diperbaruiOleh: superAdmin.id });
+  }
+  const existingPermissions = new Set((await prisma.peranIzin.findMany({ select: { peranId: true, izinId: true } })).map(p => `${p.peranId}:${p.izinId}`));
   await prisma.peranIzin.createMany({
-    data: peranIzinEntries,
+    data: peranIzinEntries.filter(p => !existingPermissions.has(`${p.peranId}:${p.izinId}`)),
     skipDuplicates: true,
   });
   console.log(`${peranIzinEntries.length} data PeranIzin berhasil dibuat`);
@@ -314,7 +324,7 @@ async function main() {
 
   const paketMap = Object.fromEntries(createdPaket.map((p) => [p.nama, p.id]));
 
-  await prisma.paketModul.deleteMany({});
+
   console.log("Data PaketModul lama dihapus");
 
   const paketModulMapping: Record<string, string[]> = {
@@ -356,8 +366,9 @@ async function main() {
     }
   }
 
+  const existingPackageModules = new Set((await prisma.paketModul.findMany({ select: { paketId: true, modulId: true } })).map(p => `${p.paketId}:${p.modulId}`));
   await prisma.paketModul.createMany({
-    data: paketModulEntries,
+    data: paketModulEntries.filter(p => !existingPackageModules.has(`${p.paketId}:${p.modulId}`)),
     skipDuplicates: true,
   });
   console.log(`${paketModulEntries.length} data PaketModul berhasil dibuat`);
@@ -470,6 +481,9 @@ async function main() {
 
     console.log("Langganan Enterprise untuk sekolah dummy diaktifkan");
   }
+
+  const schoolSubscription = await prisma.langgananSekolah.findFirst({ where: { sekolahId: sekolah.id }, orderBy: { dibuatPada: "desc" } });
+  if (schoolSubscription) await prisma.$transaction(tx => provisionSchoolModules(tx, sekolah.id, schoolSubscription.paketId, superAdmin.id, schoolSubscription.tanggalBerakhir));
 
   let tahunAjaran = await prisma.tahunAjaran.findFirst({
     where: {
@@ -700,8 +714,9 @@ async function main() {
   }
 
   if (kelasMapelData.length > 0) {
+    const existingKelasMapel = new Set((await prisma.kelasMapel.findMany({ where: { kelasId: { in: kelasMapelData.map(m => m.kelasId) } }, select: { kelasId: true, mataPelajaranId: true } })).map(m => `${m.kelasId}:${m.mataPelajaranId}`));
     await prisma.kelasMapel.createMany({
-      data: kelasMapelData,
+      data: kelasMapelData.filter(m => !existingKelasMapel.has(`${m.kelasId}:${m.mataPelajaranId}`)),
       skipDuplicates: true,
     });
   }
@@ -722,6 +737,7 @@ async function main() {
         kelasId: kelas.id,
         penggunaId: item.siswa.id,
         tahunAjaranId: kelas.tahunAjaranId,
+        status: "aktif",
       });
     }
   }

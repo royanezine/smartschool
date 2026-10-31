@@ -178,6 +178,12 @@ export const getUsers = async (req: AuthRequest, res: Response) => {
           jabatan: true,
           golongan: true,
           shiftKerja: true,
+          shiftKerjaId: true,
+          shiftKerjaMaster: true,
+          kategoriJabatanId: true,
+          kategoriJabatan: true,
+          terakhirLogin: true,
+          pinHash: true,
           sekolahId: true,
 
           sekolah: {
@@ -196,7 +202,7 @@ export const getUsers = async (req: AuthRequest, res: Response) => {
             },
           },
 
-          biometrikWajah: true,
+          biometrikWajah: { select: { id: true, status: true, urlFotoReferensi: true, dibuatPada: true, diperbaruiPada: true, dihapusPada: true } },
         },
       }),
 
@@ -208,7 +214,7 @@ export const getUsers = async (req: AuthRequest, res: Response) => {
     return paginatedResponse(
       res,
       "Berhasil mengambil data pengguna",
-      users,
+      users.map(({ pinHash, ...user }) => ({ ...user, pinSudahDiatur: Boolean(pinHash) })),
       page,
       limit,
       totalData,

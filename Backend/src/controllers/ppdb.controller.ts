@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import fs from "fs";
 import { prisma } from "../config/db";
 import bcrypt from "bcryptjs";
@@ -13,15 +13,20 @@ import {
   verifyAccessToken,
 } from "../utils/generateToken";
 import { isSuperAdmin } from "../utils/rbac";
+import { availableSchoolWhere } from "../utils/schoolAvailability";
+import { todayDateOnly } from "../utils/dateOnly";
+import { AppError } from "../utils/appError";
 
 export const daftarPpdb = async (
   req: Request,
-  res: Response
+  res: Response, next: NextFunction
 ) => {
   try {
     const {
       sekolahId,
       jalurPpdbId,
+      nik,
+      gelombangPpdbId,
       namaLengkap,
       nisn,
       tempatLahir,
@@ -53,7 +58,7 @@ export const daftarPpdb = async (
       await prisma.sekolah.findFirst({
         where: {
           id: sekolahId,
-          dihapusPada: null,
+          ...availableSchoolWhere(),
         },
       });
 
@@ -69,6 +74,7 @@ export const daftarPpdb = async (
         where: {
           id: jalurPpdbId,
           sekolahId,
+          status: "aktif",
           dihapusPada: null,
         },
       });
@@ -80,7 +86,7 @@ export const daftarPpdb = async (
       });
     }
 
-    const sekarang = new Date();
+    const sekarang = todayDateOnly();
 
     if (
       jalur.tanggalMulai &&
@@ -167,11 +173,22 @@ export const daftarPpdb = async (
     const nomorPendaftaran =
       generateNomorPendaftaran();
 
-    const pendaftaran =
-      await prisma.pendaftaranPpdb.create({
+    const pendaftaran = await prisma.$transaction(async tx => {
+      await tx.$executeRaw`SELECT id FROM jalur_ppdb WHERE id = ${jalurPpdbId} FOR UPDATE`;
+      const occupied = await tx.pendaftaranPpdb.count({ where: { jalurPpdbId, dihapusPada: null, status: { not: "ditolak" } } });
+      if (occupied >= jalur.kuota) throw new AppError("Kuota jalur PPDB sudah penuh", 409);
+      if (gelombangPpdbId) {
+        await tx.$executeRaw`SELECT id FROM gelombang_ppdb WHERE id = ${gelombangPpdbId} FOR UPDATE`;
+        const wave = await tx.gelombangPpdb.findFirst({ where: { id: gelombangPpdbId, sekolahId, dihapusPada: null, status: "aktif", OR: [{ jalurPpdbId }, { jalurPpdbId: null }] } });
+        if (!wave || sekarang < wave.tanggalMulai || sekarang > wave.tanggalSelesai) throw new AppError("Gelombang PPDB tidak tersedia untuk jalur ini", 400);
+        if (wave.kuota !== null && await tx.pendaftaranPpdb.count({ where: { gelombangPpdbId, dihapusPada: null, status: { not: "ditolak" } } }) >= wave.kuota) throw new AppError("Kuota gelombang PPDB penuh", 409);
+      }
+      return tx.pendaftaranPpdb.create({
         data: {
           sekolahId,
           jalurPpdbId,
+          nik,
+          gelombangPpdbId,
           nomorPendaftaran,
           namaLengkap,
           nisn,
@@ -191,6 +208,7 @@ export const daftarPpdb = async (
           status: "menunggu",
         },
       });
+    });
 
     const uploadToken = generatePpdbUploadToken(
       pendaftaran.id,
@@ -207,12 +225,7 @@ export const daftarPpdb = async (
       },
     });
   } catch (error) {
-    console.error(error);
-
-    return res.status(500).json({
-      success: false,
-      message: "Gagal melakukan pendaftaran PPDB",
-    });
+    next(error);
   }
 };
 

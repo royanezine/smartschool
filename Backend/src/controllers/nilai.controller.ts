@@ -7,6 +7,7 @@ import { AuthRequest } from "../middlewares/auth.middleware";
 import { AppError } from "../utils/appError";
 import { successResponse } from "../utils/responseFormatter";
 import { getKkmConfig, hitungPredikat, resolveKkm, round2 } from "../utils/kkm";
+import { getAggregateSubject, aggregateWeights } from "../utils/schoolSettings";
 
 const getAuth = (req: AuthRequest) => {
   const userId = req.user?.userId;
@@ -655,9 +656,9 @@ export const finalisasiNilai = async (
     if (komponen.length === 0)
       throw new AppError("Belum ada komponen nilai", 400);
 
-    const totalBobot = round2(
-      komponen.reduce((acc, k) => acc + Number(k.bobot), 0),
-    );
+    const aggregate = await getAggregateSubject(sekolahId, km.kelas.tahunAjaranId, km.mataPelajaran.id);
+    const weights = aggregateWeights(komponen, aggregate);
+    const totalBobot = round2(komponen.reduce((acc, k) => acc + weights.get(k.id)!, 0));
     if (totalBobot !== 100) {
       return res.status(400).json({
         success: false,
@@ -706,15 +707,20 @@ export const finalisasiNilai = async (
     }
 
     const config = await getKkmConfig(sekolahId);
-    const kkm = resolveKkm(config, km.mataPelajaran.nama);
+    const kkm = aggregate?.kkm ?? resolveKkm(config, km.mataPelajaran.nama);
     const sekarang = new Date();
 
-    const ops = siswa.map((s) => {
+    await prisma.$transaction(async tx => {
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`${sekolahId}:nilai:${km.kelas.tahunAjaranId}`}))`;
+      const latest = await getAggregateSubject(sekolahId, km.kelas.tahunAjaranId, km.mataPelajaran.id, tx);
+      if (JSON.stringify(latest) !== JSON.stringify(aggregate)) throw new AppError("Agregat berubah selama finalisasi; muat ulang dan coba lagi", 409);
+      if (await tx.nilaiAkhirMapel.count({ where: { kelasMapelId, status: "final", dihapusOleh: null } })) throw new AppError("Nilai sudah difinalisasi", 409);
+      await Promise.all(siswa.map((s) => {
       const detail = komponen.map((k) => ({
         komponenId: k.id,
         nama: k.nama,
         nilai: nilaiMap.get(`${s.id}:${k.id}`) as number,
-        bobot: Number(k.bobot),
+        bobot: weights.get(k.id)!,
       }));
       const nilaiAkhir = round2(
         detail.reduce((acc, d) => acc + (d.nilai * d.bobot) / 100, 0),
@@ -733,16 +739,15 @@ export const finalisasiNilai = async (
         dihapusPada: null,
       };
 
-      return prisma.nilaiAkhirMapel.upsert({
+      return tx.nilaiAkhirMapel.upsert({
         where: {
           kelasMapelId_penggunaId: { kelasMapelId, penggunaId: s.id },
         },
         update: { ...data, diperbaruiOleh: userId },
         create: { ...data, kelasMapelId, penggunaId: s.id, dibuatOleh: userId },
       });
+      }));
     });
-
-    await prisma.$transaction(ops);
 
     return successResponse(res, "Nilai berhasil difinalisasi", {
       kelasMapelId,

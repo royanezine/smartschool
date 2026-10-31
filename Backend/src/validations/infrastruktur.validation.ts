@@ -1,9 +1,9 @@
 import { z } from "zod";
 
 export const createGedungSchema = z.object({
-  nama: z.string(),
-  kode: z.string().optional(),
-  fotoGedung: z.string().optional(), 
+  nama: z.string().trim().min(1).max(100),
+  kode: z.string().trim().max(20).nullable().optional(),
+  fotoGedung: z.string().trim().max(255).nullable().optional(),
   status: z.string().optional(),
 });
 

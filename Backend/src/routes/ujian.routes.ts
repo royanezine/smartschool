@@ -10,6 +10,7 @@ import {
   deleteUjian,
   mulaiPercobaanUjian,
   submitJawabanDanSelesai,
+  getHasilUjian,
 } from "../controllers/ujian.controller";
 
 const router = Router();
@@ -26,6 +27,7 @@ router.get(
   getUjianByKelasMapel,
 );
 router.get("/:id", requireIzin("ujian.view"), getDetailUjian);
+router.get("/:id/hasil", requireIzin("ujian.view"), getHasilUjian);
 router.post("/:id/mulai", requireIzin("ujian.view"), mulaiPercobaanUjian);
 router.post(
   "/sesi/:sesiId/submit",

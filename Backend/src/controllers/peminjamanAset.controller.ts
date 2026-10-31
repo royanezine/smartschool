@@ -381,7 +381,7 @@ export const getDaftarPeminjaman = async (
     const skip = (page - 1) * limit;
     const where: any = { sekolahId, dihapusPada: null };
 
-    if (role === "guru") {
+    if (!["admin_sekolah", "super_admin"].includes(role || "") || (!req.user?.izin.includes("manajemen_aset.view") && role !== "super_admin")) {
       where.peminjamId = userId;
     }
 
@@ -439,7 +439,7 @@ export const getDetailPeminjaman = async (
     const role = req.user?.role;
 
     const where: any = { id, sekolahId, dihapusPada: null };
-    if (role === "guru") {
+    if (!["admin_sekolah", "super_admin"].includes(role || "") || (!req.user?.izin.includes("manajemen_aset.view") && role !== "super_admin")) {
       where.peminjamId = userId;
     }
 

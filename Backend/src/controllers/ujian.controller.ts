@@ -11,6 +11,30 @@ import {
 } from "../validations/ujian.validation";
 
 import { isSuperAdmin, normalizeRole } from "../utils/rbac";
+import { z } from "zod";
+import { paginationQuery, paginationMeta } from "../utils/pagination";
+
+export const getHasilUjian = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const id = z.string().uuid().parse(req.params.id);
+    const query = z.object(paginationQuery).parse(req.query);
+    const role = normalizeRole(req.user?.role);
+    const exam = await prisma.asesmen.findFirst({ where: { id, dihapusPada: null, ...(!isSuperAdmin(role) && { kelasMapel: { kelas: { sekolahId: req.user!.sekolahId } } }) }, include: { kelasMapel: { select: { guruPengajarId: true, kelasId: true } } } });
+    if (!exam) throw new AppError("Ujian tidak ditemukan", 404);
+    if (role === "guru" && exam.kelasMapel.guruPengajarId !== req.user!.userId) throw new AppError("Hanya guru pengajar dapat melihat hasil kelas", 403);
+    if (!["guru", "siswa", "admin_sekolah", "super_admin"].includes(role)) throw new AppError("Akses ditolak", 403);
+    if (role === "siswa" && !exam.dipublikasikan) throw new AppError("Ujian tidak ditemukan", 404);
+    const where = { asesmenId: id, dihapusPada: null, ...(role === "siswa" && { siswaId: req.user!.userId }) };
+    const [data, total] = await Promise.all([
+      prisma.percobaanAsesmen.findMany({ where, select: { id: true, siswaId: true, status: true, dimulaiPada: true, selesaiPada: true, nilai: true,
+        pengguna: { select: { id: true, namaLengkap: true, nisn: true, nis: true } },
+        hasilAsesmen: { select: { totalNilai: true, jumlahBenar: true, jumlahSalah: true, jumlahLewati: true } },
+      }, skip: (query.page - 1) * query.limit, take: query.limit, orderBy: [{ dibuatPada: "asc" }, { id: "asc" }] }),
+      prisma.percobaanAsesmen.count({ where }),
+    ]);
+    return res.json({ success: true, data, meta: paginationMeta(query.page, query.limit, total) });
+  } catch (error) { next(error); }
+};
 
 export const createUjian = async (
   req: Request,

@@ -34,9 +34,9 @@ router.use(authenticate, requireTenant, requireSubscription);
 router.get("/peminjaman/ketersediaan", getKetersediaanAset);
 
 // === ALUR PEMINJAMAN ASET ===
-router.post("/peminjaman", requireIzin("manajemen_aset.create"), ajukanPeminjaman);
-router.get("/peminjaman", requireIzin("manajemen_aset.view"), getDaftarPeminjaman);
-router.get("/peminjaman/:id", requireIzin("manajemen_aset.view"), getDetailPeminjaman);
+router.post("/peminjaman", requireIzin("manajemen_aset.create", "peminjaman_aset.create_own"), ajukanPeminjaman);
+router.get("/peminjaman", requireIzin("manajemen_aset.view", "peminjaman_aset.view_own"), getDaftarPeminjaman);
+router.get("/peminjaman/:id", requireIzin("manajemen_aset.view", "peminjaman_aset.view_own"), getDetailPeminjaman);
 router.patch("/peminjaman/:id/persetujuan", requireIzin("manajemen_aset.update"), verifikasiPengajuan);
 router.patch("/peminjaman/:id/ambil", requireIzin("manajemen_aset.update"), serahkanKeSiswa);
 router.patch("/peminjaman/:id/kembali", requireIzin("manajemen_aset.update"), kembalikanAset);
@@ -55,7 +55,10 @@ router.delete("/kategori/:id", requireIzin("manajemen_aset.delete"), deleteKateg
 
 // === DATA ASET ===
 router.post("/aset", requireIzin("manajemen_aset.create"), createAset);
-router.get("/aset", requireIzin("manajemen_aset.view"), getAset);
+router.get("/aset", requireIzin("manajemen_aset.view", "peminjaman_aset.view_own"), (req, res, next) => {
+  if ((req as import("../middlewares/auth.middleware").AuthRequest).user?.izin.includes("manajemen_aset.view") || (req as import("../middlewares/auth.middleware").AuthRequest).user?.role === "super_admin") return getAset(req, res, next);
+  return getKetersediaanAset(req, res, next);
+});
 router.put("/aset/:id", requireIzin("manajemen_aset.update"), updateAset);
 router.delete("/aset/:id", requireIzin("manajemen_aset.delete"), deleteAset);
 
