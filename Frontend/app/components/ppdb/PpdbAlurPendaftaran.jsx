@@ -12,7 +12,6 @@ import {
   ChevronRight,
 } from "lucide-react";
 
-import PpdbNavbar from "@/app/components/ppdb/PpdbNavbar";
 
 
 
@@ -102,9 +101,7 @@ export default function AlurPendaftaranPage() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <PpdbNavbar />
-
-      <main className="mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-10">
+            <main className="mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-10">
         <div className="mb-8">
           <div className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-600">
             <Clock size={13} />

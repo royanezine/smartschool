@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 
 import { getDaftarIzin } from "@/services/izin.service";
+import { getSessionUser } from "@/lib/auth";
 
 
 const themePrimaryGradient =
@@ -213,6 +214,8 @@ function normalizeResponseData(response) {
 export default function GuruIzinPage() {
   const router = useRouter();
 
+  const sessionUser = getSessionUser();
+
   const [sidebarOpen, setSidebarOpen] =
     useState(true);
 
@@ -246,10 +249,14 @@ export default function GuruIzinPage() {
       const response =
   await getDaftarIzin({ mine: true });
 
-      const daftar =
-        normalizeResponseData(
-          response
+      let daftar = normalizeResponseData(response);
+
+      // Filter izin berdasarkan pengguna yang sedang login (penggunaId session === row.penggunaId)
+      if (sessionUser?.id) {
+        daftar = daftar.filter(
+          (item) => String(item.penggunaId) === String(sessionUser.id)
         );
+      }
 
       setRiwayatIzin(daftar);
     } catch (error) {

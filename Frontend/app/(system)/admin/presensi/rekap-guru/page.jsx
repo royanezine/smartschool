@@ -131,12 +131,27 @@ function unwrapMonitoring(response) {
 }
 
 function getUserId(user) {
+  // Dipakai untuk entitas pengguna (mis. daftar `/api/users`), di mana
+  // `id` memang id pengguna.
   return (
-    user?.id ??
     user?.penggunaId ??
-    user?.userId ??
     user?.pengguna?.id ??
+    user?.userId ??
     user?.user?.id ??
+    user?.id ??
+    null
+  );
+}
+
+function getMonitoringUserId(item) {
+  // Baris `/api/absensi/monitoring-guru` adalah record `Absensi`: `id`
+  // pada baris itu adalah id absensi, BUKAN id pengguna. Hanya
+  // `penggunaId`/`pengguna.id` yang boleh dipakai.
+  return (
+    item?.penggunaId ??
+    item?.pengguna?.id ??
+    item?.userId ??
+    item?.user?.id ??
     null
   );
 }
@@ -360,7 +375,6 @@ function AttendanceDetails({ attendance }) {
 export default function RekapGuruPage() {
   const [teachers, setTeachers] = useState([]);
   const [shifts, setShifts] = useState([]);
-  const [monitoring, setMonitoring] = useState(null);
 
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -408,18 +422,37 @@ export default function RekapGuruPage() {
         const monitoringData = monitoringPayload.data;
 
         const monitoringById = new Map(
-          monitoringData.map((item) => [
-            String(item.id),
-            item,
-          ]),
+          monitoringData
+            .filter((item) => getMonitoringUserId(item) != null)
+            .map((item) => [
+              String(getMonitoringUserId(item)),
+              item,
+            ]),
         );
 
         const hasMonitoringSummary =
           Number.isFinite(Number(monitoringPayload.totalGuru));
 
+        // Endpoint monitoring hanya mengembalikan guru yang SUDAH punya
+        // catatan absensi, jadi daftar guru utama tetap berasal dari
+        // `/api/users`. Guru yang hanya muncul di monitoring tetap
+        // ditambahkan agar catatannya tidak hilang.
+        const rosterIds = new Set(
+          rawUsers
+            .map((user) => getUserId(user))
+            .filter((id) => id != null)
+            .map((id) => String(id)),
+        );
+
+        const monitoringOnly = monitoringData.filter((item) => {
+          const id = getMonitoringUserId(item);
+
+          return id != null && !rosterIds.has(String(id));
+        });
+
         const sourceTeachers = hasMonitoringSummary
           ? monitoringData
-          : rawUsers;
+          : [...rawUsers, ...monitoringOnly];
 
         const normalizedTeachers = sourceTeachers.map(
           (user, index) => {
@@ -432,20 +465,26 @@ export default function RekapGuruPage() {
 
             const monitoringItem = monitoringById.get(teacherId);
 
+            // Baris monitoring berasal langsung dari tabel `Absensi`,
+            // sehingga `monitoringItem` itu sendiri adalah catatan absensinya.
             const attendance =
               monitoringItem?.absensi ??
+              monitoringItem ??
               user?.absensi ??
               null;
 
             const assignedShiftId =
               user?.shiftKerjaId ??
+              user?.pengguna?.shiftKerjaId ??
               user?.shiftKerjaMaster?.id ??
+              user?.pengguna?.shiftKerjaMaster?.id ??
               user?.shiftKerja?.id ??
               attendance?.shiftKerjaId ??
               null;
 
             const assignedShiftName =
               user?.shiftKerjaMaster?.nama ??
+              user?.pengguna?.shiftKerjaMaster?.nama ??
               user?.shiftKerja?.nama ??
               attendance?.shiftKerja?.nama ??
               "";
@@ -467,6 +506,7 @@ export default function RekapGuruPage() {
 
             const fallbackShift = normalizeShift(
               user?.shiftKerjaMaster ??
+                user?.pengguna?.shiftKerjaMaster ??
                 user?.shiftKerja ??
                 attendance?.shiftKerja ??
                 null,
@@ -487,7 +527,9 @@ export default function RekapGuruPage() {
                 monitoringItem?.statusMonitoring ??
                 user?.statusMonitoring ??
                 (attendance
-                  ? attendance.statusShift || attendance.status
+                  ? attendance.statusShift ||
+                    attendance.status ||
+                    "belum_absen"
                   : "belum_absen"),
             };
           },
@@ -495,9 +537,6 @@ export default function RekapGuruPage() {
 
         setTeachers(normalizedTeachers);
         setShifts(activeShifts);
-        setMonitoring(
-          hasMonitoringSummary ? monitoringPayload : null,
-        );
         setPage(1);
       } catch (err) {
         console.error("Gagal memuat rekap guru:", err);
@@ -572,15 +611,20 @@ export default function RekapGuruPage() {
     setPage(1);
   }
 
-  const sudahAbsen =
-    monitoring?.sudahAbsen ??
-    teachers.filter((teacher) => teacher.attendance).length;
+  // Ringkasan dihitung dari daftar guru yang benar-benar dimuat
+  // (`/api/users` + baris monitoring). Endpoint monitoring-guru tidak
+  // mengirim total guru sekolah, sehingga angka "belum absen" tidak
+  // boleh dikarang dari summary Backend yang tidak ada.
+  const totalGuru = teachers.length;
 
-  const totalGuru = monitoring?.totalGuru ?? teachers.length;
+  const sudahAbsen = teachers.filter(
+    (teacher) => teacher.attendance,
+  ).length;
 
-  const belumAbsen =
-    monitoring?.belumAbsen ??
-    Math.max(0, totalGuru - sudahAbsen);
+  const belumAbsen = Math.max(
+    0,
+    totalGuru - sudahAbsen,
+  );
 
   return (
     <div className="flex h-dvh overflow-hidden bg-slate-50 dark:bg-slate-950">

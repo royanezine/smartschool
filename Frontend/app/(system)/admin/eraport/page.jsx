@@ -1181,7 +1181,7 @@ export default function ERaportPage() {
                 <div className="p-5 sm:p-6">
                   <div className="space-y-5">
                     {subjectProgress.map((item, index) => (
-                      <div key={item.subject}>
+                      <div key={item.id}>
                         <div className="flex items-center gap-3">
                           <div
                             className="

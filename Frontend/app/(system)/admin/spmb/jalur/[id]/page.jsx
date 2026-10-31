@@ -17,13 +17,17 @@ import {
   CheckCircle2,
   Clock3,
   Copy,
+  FileCheck2,
   FileText,
   Link2,
   Loader2,
+  MapPin,
   Pencil,
   RefreshCw,
   Route,
   ShieldCheck,
+  Sparkles,
+  Trophy,
   Users,
 } from "lucide-react";
 
@@ -34,7 +38,10 @@ import {
   hasPermission,
   subscribeAuth,
 } from "@/lib/auth";
-import { getJalurPpdbById } from "@/services/jalurPpdb.service";
+import {
+  getJalurPpdbById,
+  getRankingJalurPpdb,
+} from "@/services/jalurPpdb.service";
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -118,6 +125,7 @@ export default function DetailJalurPage() {
 
   const [collapsed, setCollapsed] = useState(false);
   const [jalur, setJalur] = useState(null);
+  const [ranking, setRanking] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
@@ -151,7 +159,10 @@ export default function DetailJalurPage() {
           setLoading(true);
         }
 
-        const response = await getJalurPpdbById(id);
+        const [response, rankingRes] = await Promise.all([
+          getJalurPpdbById(id),
+          getRankingJalurPpdb(id).catch(() => null),
+        ]);
 
         if (!response?.success || !response?.data) {
           throw new Error(
@@ -160,6 +171,9 @@ export default function DetailJalurPage() {
         }
 
         setJalur(response.data);
+        if (rankingRes?.success && rankingRes?.data) {
+          setRanking(rankingRes.data);
+        }
       } catch (err) {
         console.error("GET DETAIL JALUR ERROR:", err);
         setError(
@@ -176,6 +190,7 @@ export default function DetailJalurPage() {
   );
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadData();
   }, [loadData]);
 
@@ -252,6 +267,14 @@ export default function DetailJalurPage() {
                   </div>
 
                   <div className="flex flex-wrap items-center gap-2.5">
+                    <Link
+                      href={`/admin/spmb/seleksi?jalurId=${encodeURIComponent(id)}`}
+                      className="theme-card theme-border inline-flex h-10 items-center justify-center gap-2 rounded-xl border px-3.5 text-xs font-semibold transition hover:opacity-80"
+                    >
+                      <Trophy size={15} className="text-[var(--color-primary)]" />
+                      Ranking Seleksi
+                    </Link>
+
                     <button
                       type="button"
                       onClick={() => setLinkOpen(true)}
@@ -430,6 +453,204 @@ export default function DetailJalurPage() {
                         </div>
                       </div>
                     </div>
+                  </div>
+
+                  {/* Bagian 2.5: Konfigurasi Seleksi & Persyaratan Berkas */}
+                  <div className="border-t theme-border bg-[color-mix(in_srgb,var(--color-text)_1%,transparent)] p-6 sm:p-8">
+                    <div className="flex items-center gap-2 mb-5">
+                      <Sparkles size={16} className="text-[var(--color-primary)]" />
+                      <h3 className="theme-text text-xs font-semibold uppercase tracking-wider">
+                        Konfigurasi Seleksi & Persyaratan Berkas
+                      </h3>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-6">
+                      {/* Kategori */}
+                      <div className="rounded-xl border theme-border p-4 theme-card">
+                        <span className="theme-text-muted text-[11px] font-medium block">
+                          Kategori Seleksi
+                        </span>
+                        <span className="theme-text text-sm font-bold capitalize mt-1 block">
+                          {jalur.kategori || "Reguler"}
+                        </span>
+                      </div>
+
+                      {/* Metode Ranking */}
+                      <div className="rounded-xl border theme-border p-4 theme-card">
+                        <span className="theme-text-muted text-[11px] font-medium block">
+                          Metode Pemeringkatan
+                        </span>
+                        <span className="theme-text text-sm font-bold capitalize mt-1 block">
+                          {jalur.metodeRanking === "jarak" ? "Jarak Terdekat" : "Nilai / Rapor"}
+                        </span>
+                      </div>
+
+                      {/* Jarak Maksimal */}
+                      <div className="rounded-xl border theme-border p-4 theme-card">
+                        <span className="theme-text-muted text-[11px] font-medium block">
+                          Radius Maksimal
+                        </span>
+                        <span className="theme-text text-sm font-bold mt-1 block">
+                          {jalur.jarakMaksimalKm !== null && jalur.jarakMaksimalKm !== undefined
+                            ? `${jalur.jarakMaksimalKm} Km`
+                            : "Tanpa Batas Radius"}
+                        </span>
+                      </div>
+
+                      {/* Nilai Minimal */}
+                      <div className="rounded-xl border theme-border p-4 theme-card">
+                        <span className="theme-text-muted text-[11px] font-medium block">
+                          Ambang Nilai Minimal
+                        </span>
+                        <span className="theme-text text-sm font-bold mt-1 block">
+                          {jalur.nilaiMinimal !== null && jalur.nilaiMinimal !== undefined
+                            ? Number(jalur.nilaiMinimal).toLocaleString("id-ID")
+                            : "Tanpa Ambang Nilai"}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Berkas Wajib */}
+                    <div>
+                      <span className="theme-text-muted text-[11px] font-medium block mb-2">
+                        Dokumen Berkas Wajib Calon Peserta
+                      </span>
+                      {Array.isArray(jalur.berkasWajib) && jalur.berkasWajib.length > 0 ? (
+                        <div className="flex flex-wrap items-center gap-2">
+                          {jalur.berkasWajib.map((b) => (
+                            <span
+                              key={b}
+                              className="inline-flex items-center gap-1.5 rounded-lg border theme-border bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)] px-3 py-1 text-xs font-semibold theme-text"
+                            >
+                              <FileCheck2 size={13} className="text-[var(--color-primary)]" />
+                              {b}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="theme-text-muted text-xs">
+                          Tidak ada persyaratan berkas khusus.
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Bagian 2.6: Ringkasan Pemeringkatan & Ranking Calon Peserta */}
+                  <div className="border-t theme-border p-6 sm:p-8">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-4">
+                      <div className="flex items-center gap-2">
+                        <Trophy
+                          size={16}
+                          className="text-[var(--color-primary)]"
+                        />
+                        <h3 className="theme-text text-xs font-semibold uppercase tracking-wider">
+                          Pemeringkatan & Hasil Seleksi Jalur
+                        </h3>
+                      </div>
+                      <Link
+                        href={`/admin/spmb/seleksi?jalurId=${encodeURIComponent(id)}`}
+                        className={`${themePrimaryText} inline-flex items-center gap-1 text-xs font-semibold hover:underline`}
+                      >
+                        Buka Seleksi & Pemeringkatan Lengkap &rarr;
+                      </Link>
+                    </div>
+
+                    {ranking ? (
+                      <div>
+                        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 mb-4">
+                          <div className={`theme-card ${themeNeutralBorder} rounded-xl border p-3`}>
+                            <p className="theme-text-muted text-[11px]">Total Pendaftar</p>
+                            <p className="theme-text text-lg font-bold mt-0.5">{ranking.totalPendaftar}</p>
+                          </div>
+                          <div className={`theme-card ${themeNeutralBorder} rounded-xl border p-3`}>
+                            <p className="theme-text-muted text-[11px]">Daya Tampung Kuota</p>
+                            <p className="theme-text text-lg font-bold mt-0.5">{ranking.kuota}</p>
+                          </div>
+                          <div className={`theme-card ${themeNeutralBorder} rounded-xl border p-3`}>
+                            <p className="theme-text-muted text-[11px]">Masuk Kuota</p>
+                            <p className="theme-text text-lg font-bold mt-0.5 text-[var(--color-primary)]">
+                              {ranking.daftar?.filter((d) => d.masukKuota).length ?? 0}
+                            </p>
+                          </div>
+                          <div className={`theme-card ${themeNeutralBorder} rounded-xl border p-3`}>
+                            <p className="theme-text-muted text-[11px]">Metode Seleksi</p>
+                            <p className="theme-text text-xs font-semibold mt-1.5">
+                              {ranking.metodeRanking === "jarak" ? "Jarak Terdekat" : "Nilai Rapor"}
+                            </p>
+                          </div>
+                        </div>
+
+                        {ranking.daftar && ranking.daftar.length > 0 ? (
+                          <div className="overflow-x-auto rounded-xl border theme-border">
+                            <table className="w-full text-xs">
+                              <thead>
+                                <tr className={`border-b theme-border ${themeNeutralSurface}`}>
+                                  <th className="px-3 py-2 text-left text-[10px] font-semibold uppercase theme-text-muted">Peringkat</th>
+                                  <th className="px-3 py-2 text-left text-[10px] font-semibold uppercase theme-text-muted">Nomor & Nama</th>
+                                  <th className="px-3 py-2 text-left text-[10px] font-semibold uppercase theme-text-muted">
+                                    {ranking.metodeRanking === "jarak" ? "Jarak" : "Nilai Rapor"}
+                                  </th>
+                                  <th className="px-3 py-2 text-left text-[10px] font-semibold uppercase theme-text-muted">Berkas</th>
+                                  <th className="px-3 py-2 text-left text-[10px] font-semibold uppercase theme-text-muted">Status</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {ranking.daftar.slice(0, 5).map((item) => (
+                                  <tr key={item.id || item.nomorPendaftaran} className={`border-b theme-border last:border-0 ${themeNeutralHover}`}>
+                                    <td className="px-3 py-2 font-bold">
+                                      <span
+                                        className={`inline-flex h-6 min-w-6 items-center justify-center rounded px-1.5 text-[11px] font-bold ${
+                                          item.masukKuota
+                                            ? "bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] text-[var(--color-primary)]"
+                                            : "bg-[color-mix(in_srgb,var(--color-text)_8%,transparent)] theme-text-muted"
+                                        }`}
+                                      >
+                                        #{item.peringkat}
+                                      </span>
+                                    </td>
+                                    <td className="px-3 py-2">
+                                      <p className="font-semibold theme-text">{item.namaLengkap}</p>
+                                      <p className="theme-text-muted font-mono text-[10px]">{item.nomorPendaftaran}</p>
+                                    </td>
+                                    <td className="px-3 py-2">
+                                      {ranking.metodeRanking === "jarak"
+                                        ? (item.jarakKm !== null ? `${item.jarakKm} km` : "-")
+                                        : (item.nilaiRapor !== null ? item.nilaiRapor : "-")}
+                                    </td>
+                                    <td className="px-3 py-2">
+                                      {item.berkasLengkap ? (
+                                        <span className="text-[10px] font-semibold text-[var(--color-success)]">Lengkap</span>
+                                      ) : (
+                                        <span className="text-[10px] text-[var(--color-danger)]">Kurang</span>
+                                      )}
+                                    </td>
+                                    <td className="px-3 py-2">
+                                      {item.masukKuota ? (
+                                        <span className="inline-flex rounded bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] px-2 py-0.5 text-[10px] font-semibold text-[var(--color-primary)]">
+                                          Masuk Kuota
+                                        </span>
+                                      ) : (
+                                        <span className="inline-flex rounded bg-[color-mix(in_srgb,var(--color-text)_8%,transparent)] px-2 py-0.5 text-[10px] font-semibold theme-text-muted">
+                                          Di Luar Kuota
+                                        </span>
+                                      )}
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        ) : (
+                          <p className="theme-text-muted text-xs italic">
+                            Belum ada calon peserta yang mendaftar pada jalur ini.
+                          </p>
+                        )}
+                      </div>
+                    ) : (
+                      <p className="theme-text-muted text-xs italic">
+                        Memuat data ranking pendaftar...
+                      </p>
+                    )}
                   </div>
 
                   {/* Bagian 3: Informasi Sistem & Audit (Menyatu di bagian bawah) */}

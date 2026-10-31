@@ -15,6 +15,28 @@ function normalizeSlug(value) {
   return normalizeText(value).replace(/^\/+|\/+$/g, "");
 }
 
+// Menentukan prefix tenant saat halaman PPDB dibuka.
+// "" = PPDB diakses langsung dari subdomain sekolah, null = bukan halaman PPDB.
+function getPpdbBasePath(pathname) {
+  if (typeof pathname !== "string" || !pathname.startsWith("/")) {
+    return null;
+  }
+
+  const denganTenant = pathname.match(/^\/([^/]+)\/PPDB(?:\/|$)/i);
+
+  if (denganTenant) {
+    return denganTenant[1].toLowerCase() === "ppdb"
+      ? null
+      : `/${denganTenant[1]}`;
+  }
+
+  if (/^\/PPDB(?:\/|$)/i.test(pathname)) {
+    return "";
+  }
+
+  return null;
+}
+
 function isPageActive(item) {
   if (!item || typeof item !== "object") return false;
 
@@ -105,9 +127,22 @@ export default function PublicNavbar({
   const [scrolled, setScrolled] = useState(false);
   const [halamanApi, setHalamanApi] = useState([]);
   const pathname = usePathname();
+  const [pathnameTerakhir, setPathnameTerakhir] = useState(pathname);
+
+  // Tutup menu mobile setiap kali rute berubah. Dilakukan saat render
+  // (pola adjust state), bukan di dalam effect, agar tidak memicu
+  // cascading render.
+  if (pathname !== pathnameTerakhir) {
+    setPathnameTerakhir(pathname);
+    setOpen(false);
+  }
 
   const subdomain = normalizeText(sekolah.subdomain);
   const base = subdomain ? `/${subdomain}` : "/";
+
+  const ppdbBase = getPpdbBasePath(pathname);
+  const diHalamanPpdb = ppdbBase !== null;
+  const ppdbHome = `${ppdbBase}/PPDB`;
 
   useEffect(() => {
     let cancelled = false;
@@ -143,11 +178,29 @@ export default function PublicNavbar({
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  useEffect(() => {
-    setOpen(false);
-  }, [pathname]);
-
   const menuItems = useMemo(() => {
+    // Di halaman PPDB, navbar sekolah yang sama berpindah konteks ke menu PPDB.
+    if (diHalamanPpdb) {
+      return [
+        { label: "Beranda", href: ppdbHome, key: "ppdb-beranda" },
+        {
+          label: "Jalur Pendaftaran",
+          href: `${ppdbHome}/jalurPendaftaran`,
+          key: "ppdb-jalur",
+        },
+        {
+          label: "Alur Pendaftaran",
+          href: `${ppdbHome}/alurPendaftaran`,
+          key: "ppdb-alur",
+        },
+        {
+          label: "Pengumuman",
+          href: `${ppdbHome}/pengumuman`,
+          key: "ppdb-pengumuman",
+        },
+      ];
+    }
+
     const combined = [
       ...(Array.isArray(halaman) ? halaman : []),
       ...halamanApi,
@@ -181,13 +234,13 @@ export default function PublicNavbar({
         key: `page-${item.id || item.slug}`,
       })),
     ];
-  }, [halaman, halamanApi, base]);
+  }, [halaman, halamanApi, base, diHalamanPpdb, ppdbHome]);
 
-  const isActive = (href) => {
+  const isActive = (href, isRoot) => {
     if (!pathname) return false;
 
-    if (href === base) {
-      return pathname === base || pathname === `${base}/`;
+    if (isRoot) {
+      return pathname === href || pathname === `${href}/`;
     }
 
     return pathname === href || pathname.startsWith(`${href}/`);
@@ -197,6 +250,8 @@ export default function PublicNavbar({
   const namaSekolah = normalizeText(sekolah.nama) || "Sekolah";
   const jenjang = normalizeText(sekolah.jenjang) || "Sekolah";
   const ppdbHref = `${base}/PPDB`;
+  const ctaHref = diHalamanPpdb ? `${ppdbHome}/cek-pendaftaran` : ppdbHref;
+  const ctaLabel = diHalamanPpdb ? "Cek Pendaftaran" : "Daftar PPDB";
 
   return (
     <div
@@ -263,8 +318,8 @@ export default function PublicNavbar({
           className="hidden items-center gap-1 xl:flex"
           aria-label="Navigasi utama"
         >
-          {menuItems.map((item) => {
-            const active = isActive(item.href);
+          {menuItems.map((item, index) => {
+            const active = isActive(item.href, index === 0);
 
             return (
               <Link
@@ -287,11 +342,11 @@ export default function PublicNavbar({
           })}
 
           <Link
-            href={ppdbHref}
+            href={ctaHref}
             className="ml-2 inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-white transition hover:opacity-90"
             style={{ backgroundColor: "var(--warna-primer-utama, #2563EB)" }}
           >
-            Daftar PPDB
+            {ctaLabel}
             <svg
               width="15"
               height="15"
@@ -345,8 +400,8 @@ export default function PublicNavbar({
           }}
         >
           <div className="flex max-h-[70vh] flex-col gap-1 overflow-y-auto">
-            {menuItems.map((item) => {
-              const active = isActive(item.href);
+            {menuItems.map((item, index) => {
+              const active = isActive(item.href, index === 0);
 
               return (
                 <Link
@@ -375,12 +430,12 @@ export default function PublicNavbar({
             />
 
             <Link
-              href={ppdbHref}
+              href={ctaHref}
               onClick={() => setOpen(false)}
               className="flex items-center justify-center rounded-xl px-4 py-3 text-sm font-semibold text-white transition hover:opacity-90"
               style={{ backgroundColor: "var(--warna-primer-utama, #2563EB)" }}
             >
-              Daftar PPDB
+              {ctaLabel}
             </Link>
           </div>
         </nav>

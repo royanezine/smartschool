@@ -113,15 +113,60 @@ function getInitials(name) {
     .join("");
 }
 
-function getNamaGuru(item) {
+// `GET /api/permohonan-izin` mengirim relasi `pengguna`
+// { namaLengkap, nisn, nip, jabatan, peran{ nama, namaTampilan } }.
+function getNamaPemohon(item) {
   return (
+    item?.pengguna?.namaLengkap ||
+    item?.pengguna?.nama ||
     item?.guru?.namaLengkap ||
-    item?.guru?.nama ||
-    item?.user?.namaLengkap ||
-    item?.user?.nama ||
-    item?.namaGuru ||
-    item?.nama ||
-    "Guru"
+    item?.siswa?.namaLengkap ||
+    item?.namaLengkap ||
+    "-"
+  );
+}
+
+function getNomorIndukSiswa(item) {
+  return (
+    item?.pengguna?.nisn ||
+    item?.pengguna?.nis ||
+    item?.siswa?.nisn ||
+    item?.nisn ||
+    "-"
+  );
+}
+
+function getPeranPemohon(item) {
+  return String(
+    item?.pengguna?.peran?.nama ||
+      item?.peran?.nama ||
+      item?.pengguna?.peran?.namaTampilan ||
+      ""
+  )
+    .trim()
+    .toLowerCase();
+}
+
+function getLabelPeranPemohon(item) {
+  return (
+    item?.pengguna?.peran?.namaTampilan ||
+    item?.pengguna?.peran?.nama ||
+    "-"
+  );
+}
+
+// Halaman ini khusus pemohon siswa; baris guru/admin tidak ditampilkan.
+function isPemohonSiswa(item) {
+  const peran = getPeranPemohon(item);
+
+  if (!peran) {
+    return Boolean(item?.pengguna?.nisn);
+  }
+
+  return (
+    peran.includes("siswa") ||
+    peran.includes("student") ||
+    peran.includes("peserta didik")
   );
 }
 
@@ -346,7 +391,7 @@ function JenisBadge({ jenis }) {
 }
 
 
-export default function PermohonanIzinGuruPage() {
+export default function PermohonanIzinSiswaPage() {
   const [data, setData] = useState([]);
 
   const [loading, setLoading] = useState(true);
@@ -388,7 +433,7 @@ export default function PermohonanIzinGuruPage() {
 
       setError(
         err?.message ||
-          "Gagal mengambil data permohonan izin guru."
+          "Gagal mengambil data permohonan izin siswa."
       );
     } finally {
       setLoading(false);
@@ -401,11 +446,18 @@ export default function PermohonanIzinGuruPage() {
   }, [fetchData]);
 
 
+  // Hanya permohonan milik pemohon siswa yang ditampilkan.
+  const dataSiswa = useMemo(
+    () => data.filter(isPemohonSiswa),
+    [data]
+  );
+
   const filteredData = useMemo(() => {
     const keyword = search.trim().toLowerCase();
 
-    return data.filter((item) => {
-      const namaGuru = getNamaGuru(item).toLowerCase();
+    return dataSiswa.filter((item) => {
+      const namaSiswa = getNamaPemohon(item).toLowerCase();
+      const nomorInduk = getNomorIndukSiswa(item).toLowerCase();
       const alasan = getAlasan(item).toLowerCase();
 
       const status = getStatus(item);
@@ -413,7 +465,8 @@ export default function PermohonanIzinGuruPage() {
 
       const matchesSearch =
         !keyword ||
-        namaGuru.includes(keyword) ||
+        namaSiswa.includes(keyword) ||
+        nomorInduk.includes(keyword) ||
         alasan.includes(keyword) ||
         jenis.includes(keyword);
 
@@ -431,14 +484,14 @@ export default function PermohonanIzinGuruPage() {
         matchesJenis
       );
     });
-  }, [data, search, statusFilter, jenisFilter]);
+  }, [dataSiswa, search, statusFilter, jenisFilter]);
 
 
   const statistics = useMemo(() => {
     return {
-      total: data.length,
+      total: dataSiswa.length,
 
-      menunggu: data.filter((item) => {
+      menunggu: dataSiswa.filter((item) => {
         const status = getStatus(item);
 
         return (
@@ -448,15 +501,15 @@ export default function PermohonanIzinGuruPage() {
         );
       }).length,
 
-      disetujui: data.filter(
+      disetujui: dataSiswa.filter(
         (item) => getStatus(item) === "disetujui"
       ).length,
 
-      ditolak: data.filter(
+      ditolak: dataSiswa.filter(
         (item) => getStatus(item) === "ditolak"
       ).length,
     };
-  }, [data]);
+  }, [dataSiswa]);
 
 
   const handleOpenDetail = (item) => {
@@ -616,7 +669,7 @@ export default function PermohonanIzinGuruPage() {
           <div className="mx-auto w-full max-w-[1600px]">
 
             <div className="theme-text-muted mb-5 flex items-center gap-2 text-sm">
-              <span>Guru</span>
+              <span>Presensi</span>
 
               <span>/</span>
 
@@ -639,7 +692,7 @@ export default function PermohonanIzinGuruPage() {
                     </h1>
 
                     <p className="theme-text-secondary mt-1 text-sm">
-                      Kelola dan verifikasi pengajuan izin guru.
+                      Kelola dan verifikasi pengajuan izin siswa.
                     </p>
                   </div>
                 </div>
@@ -752,7 +805,7 @@ export default function PermohonanIzinGuruPage() {
                     onChange={(event) =>
                       setSearch(event.target.value)
                     }
-                    placeholder="Cari nama guru atau alasan..."
+                    placeholder="Cari nama siswa, NISN, atau alasan..."
                     className="theme-input h-11 w-full rounded-xl border py-2 pl-10 pr-4 text-sm outline-none transition focus:ring-2 focus:ring-[var(--color-primary)]/20"
                   />
                 </div>
@@ -917,7 +970,7 @@ export default function PermohonanIzinGuruPage() {
                     <thead className="theme-table-header border-b">
                       <tr>
                         <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wide">
-                          Guru
+                          Siswa
                         </th>
 
                         <th className="px-5 py-3 text-xs font-semibold uppercase tracking-wide">
@@ -945,7 +998,7 @@ export default function PermohonanIzinGuruPage() {
                     <tbody className="divide-y divide-[var(--color-border)]">
                       {filteredData.map((item) => {
                         const id = getId(item);
-                        const nama = getNamaGuru(item);
+                        const nama = getNamaPemohon(item);
                         const jenis = getJenis(item);
                         const status = getStatus(item);
 
@@ -979,7 +1032,7 @@ export default function PermohonanIzinGuruPage() {
                                   </p>
 
                                   <p className="theme-text-muted mt-0.5 text-xs">
-                                    Pengajuan izin guru
+                                    NISN: {getNomorIndukSiswa(item)}
                                   </p>
                                 </div>
                               </div>
@@ -1089,7 +1142,7 @@ export default function PermohonanIzinGuruPage() {
                   </h2>
 
                   <p className="theme-text-muted mt-0.5 text-xs">
-                    Informasi pengajuan izin guru
+                    Informasi pengajuan izin siswa
                   </p>
                 </div>
               </div>
@@ -1110,17 +1163,17 @@ export default function PermohonanIzinGuruPage() {
                 <div className="flex items-center gap-4">
                   <div className="theme-primary flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl text-lg font-bold">
                     {getInitials(
-                      getNamaGuru(selected)
+                      getNamaPemohon(selected)
                     )}
                   </div>
 
                   <div className="min-w-0 flex-1">
                     <p className="theme-text text-base font-bold">
-                      {getNamaGuru(selected)}
+                      {getNamaPemohon(selected)}
                     </p>
 
                     <p className="theme-text-muted mt-1 text-sm">
-                      Guru
+                      NISN: {getNomorIndukSiswa(selected)} · {getLabelPeranPemohon(selected)}
                     </p>
                   </div>
 
@@ -1350,7 +1403,7 @@ export default function PermohonanIzinGuruPage() {
                 <p className="theme-text-secondary mt-1 text-sm leading-5">
                   Permohonan izin dari{" "}
                   <span className="theme-text font-semibold">
-                    {getNamaGuru(selected)}
+                    {getNamaPemohon(selected)}
                   </span>{" "}
                   akan disetujui.
                 </p>
@@ -1446,7 +1499,7 @@ export default function PermohonanIzinGuruPage() {
                 <p className="theme-text-secondary mt-1 text-sm leading-5">
                   Permohonan dari{" "}
                   <span className="theme-text font-semibold">
-                    {getNamaGuru(selected)}
+                    {getNamaPemohon(selected)}
                   </span>{" "}
                   akan ditolak.
                 </p>

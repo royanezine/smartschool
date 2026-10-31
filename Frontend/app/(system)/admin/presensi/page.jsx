@@ -1,7 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { getToken } from "@/lib/auth";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import Sidebar from "@/app/components/Sidebar";
@@ -32,8 +31,45 @@ import {
   Database,
 } from "lucide-react";
 
-import { getAbsensiKelas } from "@/services/absensi.service";
+import {
+  exportAbsensiFile,
+  getAbsensiSekolah,
+  updateAbsensi,
+} from "@/services/absensi.service";
 import { getKelas } from "@/services/kelas.service";
+
+
+const STATUS_TO_BACKEND = {
+  Hadir: "hadir",
+  Terlambat: "terlambat",
+  Izin: "izin",
+  Sakit: "sakit",
+  "Tidak Hadir": "alpha",
+};
+
+// Filter peran di UI memakai label Indonesia, sedangkan
+// `GET /api/absensi?role=` membandingkan `peran.nama` di database.
+const ROLE_FILTER_TO_BACKEND = {
+  Siswa: "siswa",
+  Guru: "guru",
+  Staff: "staff",
+};
+
+const KOSONG_STATISTIK = {
+  total: 0,
+  hadir: 0,
+  terlambat: 0,
+  izin: 0,
+  sakit: 0,
+  alpha: 0,
+};
+
+const KOSONG_META = {
+  page: 1,
+  limit: 7,
+  total: 0,
+  totalPages: 1,
+};
 
 
 function formatTanggal(tanggal) {
@@ -148,6 +184,15 @@ function normalizeRole(value) {
     return "Siswa";
   }
 
+  if (
+    text.includes("admin") ||
+    text.includes("kepala sekolah") ||
+    text.includes("operator") ||
+    text.includes("yayasan")
+  ) {
+    return "Admin";
+  }
+
   return null;
 }
 
@@ -237,63 +282,6 @@ function normalizeMetode(metode) {
 }
 
 
-async function fetchUserById(userId) {
-  if (!userId) return null;
-
-  const API_URL =
-    process.env.NEXT_PUBLIC_API_URL ||
-    "http://localhost:5000";
-
-  const token =
-    typeof window !== "undefined"
-      ? getToken()
-      : null;
-
-  if (!token) {
-    return null;
-  }
-
-  try {
-    const response = await fetch(
-      `${API_URL}/api/users/${userId}`,
-      {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      },
-    );
-
-    if (!response.ok) {
-      console.warn(
-        `Gagal mengambil user ${userId}:`,
-        response.status,
-      );
-
-      return null;
-    }
-
-    const result = await response.json();
-
-    return (
-      result?.data ||
-      result?.data?.data ||
-      result?.user ||
-      result?.result ||
-      null
-    );
-  } catch (error) {
-    console.error(
-      `Error mengambil detail user ${userId}:`,
-      error,
-    );
-
-    return null;
-  }
-}
-
-
 function normalizeAbsensiItem(
   item,
   fallbackKelas = null,
@@ -320,15 +308,23 @@ function normalizeAbsensiItem(
     item?.nama ||
     "Pengguna";
 
+  // Siswa memakai NISN/NIS, guru & staff memakai NIP (field yang
+  // benar-benar dikirim `attendanceInclude` pada GET /api/absensi).
   const nomorInduk =
-    pengguna?.nip ||
-    pengguna?.nipd ||
-    pengguna?.nisn ||
-    pengguna?.nik ||
-    item?.nip ||
-    item?.nisn ||
-    item?.nomorInduk ||
-    "-";
+    role === "Siswa"
+      ? pengguna?.nisn ||
+        pengguna?.nis ||
+        pengguna?.nipd ||
+        item?.nisn ||
+        item?.nis ||
+        item?.nomorInduk ||
+        "-"
+      : pengguna?.nip ||
+        item?.nip ||
+        pengguna?.nisn ||
+        item?.nisn ||
+        item?.nomorInduk ||
+        "-";
 
   const kelas =
     item?.kelas?.nama ||
@@ -337,7 +333,18 @@ function normalizeAbsensiItem(
     fallbackKelas?.nama ||
     "-";
 
-  const status = normalizeStatus(item?.status);
+  // Backend menyimpan keterlambatan pada `statusShift`/`terlambatMenit`
+  // walaupun `status` utamanya "hadir"; agregat `statistik` menghitungnya
+  // sebagai terlambat, jadi baris disamakan agar tidak bertentangan.
+  const statusShiftText = String(item?.statusShift || "").toLowerCase();
+  const isTerlambat =
+    item?.status === "terlambat" ||
+    statusShiftText.includes("terlambat") ||
+    Number(item?.terlambatMenit || 0) > 0;
+
+  const status = isTerlambat
+    ? "Terlambat"
+    : normalizeStatus(item?.status);
 
   const metode = normalizeMetode(item?.metode);
 
@@ -370,6 +377,10 @@ function normalizeAbsensiItem(
       fallbackKelas?.id ||
       null,
 
+    // Status mentah dari Backend ("hadir"/"terlambat"/...) dipakai untuk
+    // membandingkan perubahan sebelum PATCH.
+    _statusRaw: item?.status ?? null,
+
     nama,
     nomorInduk,
     kelas,
@@ -380,12 +391,15 @@ function normalizeAbsensiItem(
       item?.dibuatPada ||
       null,
 
-    jamMasuk:
-      item?.dibuatPada
-        ? formatJam(item.dibuatPada)
-        : "-",
+    // waktuMasuk/waktuKeluar adalah kolom presensi sebenarnya;
+    // dibuatPada hanya waktu baris dibuat.
+    jamMasuk: item?.waktuMasuk
+      ? formatJam(item.waktuMasuk)
+      : "-",
 
-    jamPulang: "-",
+    jamPulang: item?.waktuKeluar
+      ? formatJam(item.waktuKeluar)
+      : "-",
 
     status,
     metode,
@@ -612,6 +626,20 @@ export default function PresensiPage() {
   const [currentPage, setCurrentPage] =
     useState(1);
 
+  // Metadata & statistik berasal dari response Backend
+  // (GET /api/absensi mengirim `meta` dan `statistik`).
+  const [statistik, setStatistik] =
+    useState(KOSONG_STATISTIK);
+
+  const [metaAbsensi, setMetaAbsensi] =
+    useState(KOSONG_META);
+
+  const [searchDebounce, setSearchDebounce] =
+    useState("");
+
+  const [isExporting, setIsExporting] =
+    useState(false);
+
   const [selectedPresensi, setSelectedPresensi] =
     useState(null);
 
@@ -669,118 +697,84 @@ export default function PresensiPage() {
 
   const fetchAbsensi = useCallback(
     async () => {
-      if (kelas.length === 0) {
-        setAbsensi([]);
-        return;
-      }
-
       try {
         setLoadingAbsensi(true);
         setErrorAbsensi("");
 
-        const selectedClasses =
-          classFilter === "Semua"
-            ? kelas
-            : kelas.filter(
-                (item) =>
-                  item?.id === classFilter,
-              );
+        // Satu request per tampilan. Filter dikerjakan Backend supaya
+        // `meta` (total/totalPages) dan `statistik` yang dipakai UI
+        // benar-benar berasal dari server, bukan hasil menjumlahkan
+        // halaman yang sedang tampil.
+        const response =
+          await getAbsensiSekolah({
+            tanggal:
+              dateFilter || undefined,
+            kelasId:
+              classFilter === "Semua"
+                ? undefined
+                : classFilter,
+            role: ROLE_FILTER_TO_BACKEND[
+              roleFilter
+            ],
+            status:
+              statusFilter === "Semua"
+                ? undefined
+                : STATUS_TO_BACKEND[
+                    statusFilter
+                  ],
+            search:
+              searchDebounce || undefined,
+            page: currentPage,
+            limit: itemsPerPage,
+          });
 
-        const responses =
-          await Promise.all(
-            selectedClasses.map(
-              async (kelasItem) => {
-                try {
-                  const response =
-                    await getAbsensiKelas(
-                      kelasItem.id,
-                      dateFilter || null,
-                    );
+        const batch = Array.isArray(
+          response?.data,
+        )
+          ? response.data
+          : [];
 
-                  const records =
-                    normalizeListResponse(
-                      response,
-                    );
-
-                  const normalized =
-                    await Promise.all(
-                      records.map(
-                        async (item) => {
-                          const userId =
-                            item?.penggunaId ||
-                            item?.pengguna?.id ||
-                            item?.siswa?.id ||
-                            null;
-
-                          let userDetail = null;
-
-                          if (userId) {
-                            userDetail =
-                              await fetchUserById(
-                                userId,
-                              );
-                          }
-
-                          return normalizeAbsensiItem(
-                            item,
-                            kelasItem,
-                            userDetail,
-                          );
-                        },
-                      ),
-                    );
-
-                  return normalized;
-                } catch (err) {
-                  console.error(
-                    `Error absensi kelas ${
-                      kelasItem?.nama ||
-                      kelasItem?.id
-                    }:`,
-                    err,
-                  );
-
-                  throw err;
-                }
-              },
+        setAbsensi(
+          batch.map((item) =>
+            normalizeAbsensiItem(
+              item,
+              item?.kelas || null,
+              item?.pengguna || null,
             ),
-          );
-
-        const finalData =
-          responses.flat();
-
-        console.log(
-          "=== DATA PRESENSI ADMIN ===",
-          finalData,
+          ),
         );
 
-        const siti =
-          finalData.find((item) =>
-            String(item.nama)
-              .toLowerCase()
-              .includes("siti rahayu"),
-          );
+        setStatistik(
+          response?.statistik ??
+            KOSONG_STATISTIK,
+        );
 
-        if (siti) {
-          console.log(
-            "=== DATA SITI RAHAYU ===",
-            {
-              id: siti.id,
-              penggunaId:
-                siti.penggunaId,
-              nama: siti.nama,
-              role: siti.role,
-              nomorInduk:
-                siti.nomorInduk,
-              status: siti.status,
-              metode: siti.metode,
-              pengguna:
-                siti.penggunaDetail,
-            },
-          );
-        }
+        const total = Number(
+          response?.meta?.total ?? 0,
+        );
+        const limit = Number(
+          response?.meta?.limit ??
+            itemsPerPage,
+        );
 
-        setAbsensi(finalData);
+        setMetaAbsensi({
+          page: Number(
+            response?.meta?.page ??
+              currentPage,
+          ),
+          limit,
+          total,
+          totalPages: Math.max(
+            1,
+            Number(
+              response?.meta?.totalPages ??
+                Math.ceil(
+                  total /
+                    Math.max(limit, 1),
+                ),
+            ),
+          ),
+        });
       } catch (err) {
         console.error(
           "Error fetch absensi:",
@@ -788,6 +782,8 @@ export default function PresensiPage() {
         );
 
         setAbsensi([]);
+        setStatistik(KOSONG_STATISTIK);
+        setMetaAbsensi(KOSONG_META);
 
         setErrorAbsensi(
           err?.message ||
@@ -798,117 +794,101 @@ export default function PresensiPage() {
       }
     },
     [
-      kelas,
       classFilter,
       dateFilter,
+      roleFilter,
+      statusFilter,
+      searchDebounce,
+      currentPage,
+      itemsPerPage,
     ],
   );
 
 
   useEffect(() => {
-    fetchKelas();
+    // Ditunda ke macrotask agar setState tidak dipanggil sinkron di dalam
+    // effect body (react-hooks/set-state-in-effect).
+    const timer = window.setTimeout(
+      () => {
+        fetchKelas();
+      },
+      0,
+    );
+
+    return () =>
+      window.clearTimeout(timer);
   }, [fetchKelas]);
 
+  // Pencarian dikirim ke Backend (`?search=`) setelah jeda singkat agar
+  // tidak memicu request pada setiap ketikan.
   useEffect(() => {
-    fetchAbsensi();
+    const timer = window.setTimeout(
+      () => {
+        setSearchDebounce(
+          searchQuery.trim(),
+        );
+      },
+      350,
+    );
+
+    return () =>
+      window.clearTimeout(timer);
+  }, [searchQuery]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(
+      () => {
+        fetchAbsensi();
+      },
+      0,
+    );
+
+    return () =>
+      window.clearTimeout(timer);
   }, [fetchAbsensi]);
 
 
-  const filteredData = useMemo(() => {
-    return absensi.filter((item) => {
-      const search =
-        searchQuery
-          .toLowerCase()
-          .trim();
-
-      const matchesSearch =
-        !search ||
-        String(item.nama)
-          .toLowerCase()
-          .includes(search) ||
-        String(item.nomorInduk)
-          .toLowerCase()
-          .includes(search) ||
-        String(item.kelas)
-          .toLowerCase()
-          .includes(search);
-
-      const matchesRole =
-        roleFilter === "Semua" ||
-        item.role === roleFilter;
-
-      const matchesStatus =
-        statusFilter === "Semua" ||
-        item.status === statusFilter;
-
-      const matchesClass =
-        classFilter === "Semua" ||
-        item._kelasId === classFilter ||
-        item.kelasId === classFilter;
-
-      return (
-        matchesSearch &&
-        matchesRole &&
-        matchesStatus &&
-        matchesClass
-      );
-    });
-  }, [
-    absensi,
-    searchQuery,
-    roleFilter,
-    statusFilter,
-    classFilter,
-  ]);
-
-
+  // Data halaman ini sudah difilter & dipotong oleh Backend.
   const totalPages = Math.max(
     1,
-    Math.ceil(
-      filteredData.length /
-        itemsPerPage,
-    ),
+    metaAbsensi.totalPages || 1,
   );
 
-  const safeCurrentPage =
-    Math.min(
-      currentPage,
-      totalPages,
-    );
+  const safeCurrentPage = Math.min(
+    currentPage,
+    totalPages,
+  );
 
-  const paginatedData =
-    filteredData.slice(
-      (safeCurrentPage - 1) *
-        itemsPerPage,
-      safeCurrentPage *
-        itemsPerPage,
-    );
+  const paginatedData = absensi;
 
-
+  // Statistik dihitung Backend dari seluruh baris yang cocok dengan
+  // filter yang sama (`response.statistik`), bukan dari halaman aktif.
   const totalPresensi =
-    absensi.length;
+    statistik.total;
 
-  const totalHadir =
-    absensi.filter(
-      (item) =>
-        item.status === "Hadir",
-    ).length;
+  const totalHadir = statistik.hadir;
 
   const totalTerlambat =
-    absensi.filter(
-      (item) =>
-        item.status ===
-        "Terlambat",
-    ).length;
+    statistik.terlambat;
 
   const totalTidakHadir =
-    absensi.filter(
-      (item) =>
-        item.status ===
-          "Tidak Hadir" ||
-        item.status === "Izin" ||
-        item.status === "Sakit",
-    ).length;
+    statistik.izin +
+    statistik.sakit +
+    statistik.alpha;
+
+  const totalData = metaAbsensi.total;
+
+  const startItem = totalData
+    ? (safeCurrentPage - 1) *
+        metaAbsensi.limit +
+      1
+    : 0;
+
+  const endItem = Math.min(
+    safeCurrentPage *
+      metaAbsensi.limit,
+    totalData,
+  );
 
   const attendancePercentage =
     totalPresensi
@@ -966,22 +946,96 @@ export default function PresensiPage() {
   const handleSaveEdit = async () => {
     if (!editPresensi) return;
 
+    const absensiId =
+      editPresensi.absensiId ||
+      editPresensi.id;
+
+    if (!absensiId) {
+      setErrorAbsensi(
+        "Data presensi tidak memiliki ID, perubahan tidak dapat disimpan.",
+      );
+      return;
+    }
+
+    const currentStatus =
+      STATUS_TO_BACKEND[
+        editPresensi.status
+      ] ?? null;
+
+    const nextStatus =
+      STATUS_TO_BACKEND[editStatus] ??
+      null;
+
+    const originalKeterangan =
+      editPresensi.keterangan === "-"
+        ? ""
+        : String(
+            editPresensi.keterangan ?? "",
+          );
+
+    const nextKeterangan =
+      editKeterangan.trim();
+
+    const payload = {};
+
+    // Status hanya dikirim bila benar-benar berubah, supaya catatan
+    // terlambat tidak direset menjadi "tepat_waktu" saat hanya
+    // keterangan yang diedit.
+    if (
+      nextStatus &&
+      nextStatus !== currentStatus
+    ) {
+      payload.status = nextStatus;
+    }
+
+    if (
+      nextKeterangan !==
+      originalKeterangan
+    ) {
+      payload.keterangan =
+        nextKeterangan || null;
+    }
+
+    if (
+      Object.keys(payload).length === 0
+    ) {
+      setEditPresensi(null);
+      return;
+    }
+
     setIsSaving(true);
+    setErrorAbsensi("");
 
-    setErrorAbsensi(
-      "Backend saat ini belum menyediakan endpoint update absensi admin, jadi perubahan tidak disimpan.",
-    );
+    try {
+      await updateAbsensi(
+        absensiId,
+        payload,
+      );
 
-    setIsSaving(false);
+      setEditPresensi(null);
 
-    setEditPresensi(null);
+      await fetchAbsensi();
+    } catch (err) {
+      console.error(
+        "Error update absensi:",
+        err,
+      );
+
+      setErrorAbsensi(
+        err?.message ||
+          "Gagal menyimpan perubahan presensi.",
+      );
+    } finally {
+      setIsSaving(false);
+    }
   };
 
 
-  const handleExport = () => {
-    if (
-      filteredData.length === 0
-    ) {
+  // Export memakai endpoint resmi Backend (`GET /api/absensi/export`)
+  // sehingga seluruh baris yang cocok filter ikut terekspor, bukan hanya
+  // halaman yang sedang tampil.
+  const handleExport = async () => {
+    if (totalData === 0) {
       setErrorAbsensi(
         "Tidak ada data absensi untuk diekspor.",
       );
@@ -989,83 +1043,57 @@ export default function PresensiPage() {
       return;
     }
 
-    const headers = [
-      "Nama",
-      "Nomor Induk",
-      "Kelas",
-      "Peran",
-      "Tanggal",
-      "Jam Masuk",
-      "Status",
-      "Metode",
-      "Lokasi",
-      "Keterangan",
-    ];
+    try {
+      setIsExporting(true);
+      setErrorAbsensi("");
 
-    const rows =
-      filteredData.map(
-        (item) => [
-          item.nama,
-          item.nomorInduk,
-          item.kelas,
-          item.role,
-          formatTanggal(
-            item.tanggal,
-          ),
-          item.jamMasuk,
-          item.status,
-          item.metode,
-          item.lokasi,
-          item.keterangan,
-        ],
+      const { blob, fileName } =
+        await exportAbsensiFile({
+          tanggal:
+            dateFilter || undefined,
+          kelasId:
+            classFilter === "Semua"
+              ? undefined
+              : classFilter,
+          role: ROLE_FILTER_TO_BACKEND[
+            roleFilter
+          ],
+          status:
+            statusFilter === "Semua"
+              ? undefined
+              : STATUS_TO_BACKEND[
+                  statusFilter
+                ],
+          search: searchDebounce || undefined,
+        });
+
+      const url =
+        URL.createObjectURL(blob);
+
+      const link =
+        document.createElement("a");
+
+      link.href = url;
+      link.download = fileName;
+
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error(
+        "Error export absensi:",
+        err,
       );
 
-    const csv = [
-      headers,
-      ...rows,
-    ]
-      .map((row) =>
-        row
-          .map(
-            (value) =>
-              `"${String(
-                value ?? "",
-              ).replace(
-                /"/g,
-                '""',
-              )}"`,
-          )
-          .join(","),
-      )
-      .join("\n");
-
-    const blob = new Blob(
-      ["\ufeff" + csv],
-      {
-        type: "text/csv;charset=utf-8;",
-      },
-    );
-
-    const url =
-      URL.createObjectURL(blob);
-
-    const link =
-      document.createElement("a");
-
-    link.href = url;
-
-    link.download =
-      `presensi-${dateFilter || "semua"}.csv`;
-
-    document.body.appendChild(
-      link,
-    );
-
-    link.click();
-
-    link.remove();
-
-    URL.revokeObjectURL(url);
+      setErrorAbsensi(
+        err?.message ||
+          "Gagal mengekspor rekap absensi.",
+      );
+    } finally {
+      setIsExporting(false);
+    }
   };
 
 
@@ -1117,12 +1145,23 @@ export default function PresensiPage() {
                 type="button"
                 onClick={handleExport}
                 disabled={
-                  filteredData.length === 0
+                  isExporting ||
+                  loadingAbsensi ||
+                  totalData === 0
                 }
                 className="theme-primary inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                <Download size={15} />
-                Export Data
+                {isExporting ? (
+                  <Loader2
+                    size={15}
+                    className="animate-spin"
+                  />
+                ) : (
+                  <Download size={15} />
+                )}
+                {isExporting
+                  ? "Mengekspor..."
+                  : "Export Data"}
               </button>
             </div>
 
@@ -1720,29 +1759,20 @@ export default function PresensiPage() {
 
 
               {!loadingAbsensi &&
-                filteredData.length >
-                  0 && (
+                totalData > 0 && (
                   <div className="theme-card-soft theme-border flex flex-col gap-3 border-t px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
                     <p className="theme-text-secondary text-xs">
                       Menampilkan{" "}
                       <span className="theme-text font-semibold">
-                        {(safeCurrentPage - 1) *
-                          itemsPerPage +
-                          1}
+                        {startItem}
                       </span>{" "}
                       -{" "}
                       <span className="theme-text font-semibold">
-                        {Math.min(
-                          safeCurrentPage *
-                            itemsPerPage,
-                          filteredData.length,
-                        )}
+                        {endItem}
                       </span>{" "}
                       dari{" "}
                       <span className="theme-text font-semibold">
-                        {
-                          filteredData.length
-                        }
+                        {totalData}
                       </span>{" "}
                       data
                     </p>
@@ -2098,36 +2128,35 @@ export default function PresensiPage() {
                 </div>
               </div>
 
+              {/* PATCH /api/absensi/:id hanya menerima `status` dan
+                  `keterangan` (lihat absensi.validation.ts), jadi jam
+                  masuk/pulang ditampilkan sebagai informasi, bukan input. */}
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
                 <div>
-                  <label className="theme-text-secondary mb-2 block text-xs font-semibold">
+                  <span className="theme-text-secondary mb-2 block text-xs font-semibold">
                     Jam Masuk
-                  </label>
+                  </span>
 
-                  <input
-                    type="time"
-                    defaultValue={
-                      editPresensi.jamMasuk !==
-                      "-"
-                        ? editPresensi.jamMasuk
-                        : ""
-                    }
-                    className="theme-input h-11 w-full rounded-xl border px-3 text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20"
-                  />
+                  <div className="theme-card-soft theme-text-secondary theme-border flex h-11 items-center rounded-xl border px-3 text-sm">
+                    {editPresensi.jamMasuk}
+                  </div>
                 </div>
 
                 <div>
-                  <label className="theme-text-secondary mb-2 block text-xs font-semibold">
+                  <span className="theme-text-secondary mb-2 block text-xs font-semibold">
                     Jam Pulang
-                  </label>
+                  </span>
 
-                  <input
-                    type="time"
-                    defaultValue=""
-                    className="theme-input h-11 w-full rounded-xl border px-3 text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20"
-                  />
+                  <div className="theme-card-soft theme-text-secondary theme-border flex h-11 items-center rounded-xl border px-3 text-sm">
+                    {editPresensi.jamPulang}
+                  </div>
                 </div>
               </div>
+
+              <p className="theme-text-muted mt-2 text-[11px] leading-relaxed">
+                Jam masuk/pulang tercatat dari proses presensi
+                (check-in/check-out) dan tidak dapat diubah dari form ini.
+              </p>
 
               <div className="mt-5">
                 <label className="theme-text-secondary mb-2 block text-xs font-semibold">
@@ -2156,7 +2185,7 @@ export default function PresensiPage() {
                 />
 
                 <p className="theme-text-secondary text-[11px] leading-relaxed">
-                  Backend saat ini belum menyediakan endpoint update presensi dari halaman admin.
+                  Perubahan status dan keterangan disimpan ke data presensi melalui endpoint PATCH /api/absensi/:id, lalu data dan statistik dimuat ulang dari server.
                 </p>
               </div>
             </div>

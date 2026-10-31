@@ -6,6 +6,9 @@ const ENDPOINT = "/api/ppdb";
 export interface DaftarPpdbPayload {
   sekolahId: string;
   jalurPpdbId: string;
+  jurusanId?: string;
+  gelombangPpdbId?: string;
+  nik: string;
   namaLengkap: string;
   nisn: string;
   tempatLahir: string;
@@ -13,11 +16,13 @@ export interface DaftarPpdbPayload {
   jenisKelamin: string;
   alamat: string;
   telepon?: string;
-  email?: string;
+  email: string;
   namaAyah?: string;
   namaIbu?: string;
   asalSekolah?: string;
   nilaiRapor?: number;
+  lintang?: number;
+  bujur?: number;
 }
 
 export interface PendaftaranPpdb {
@@ -61,7 +66,21 @@ export interface DaftarPpdbResponse {
 export type NamaBerkasPpdb =
   | "KK"
   | "AKTE"
-  | "IJAZAH";
+  | "IJAZAH"
+  | "SERTIFIKAT"
+  | "SKTM"
+  | "KIP"
+  | "SURAT_TUGAS";
+
+export const BERKAS_PPDB_LIST: readonly NamaBerkasPpdb[] = [
+  "KK",
+  "AKTE",
+  "IJAZAH",
+  "SERTIFIKAT",
+  "SKTM",
+  "KIP",
+  "SURAT_TUGAS",
+] as const;
 
 export interface BerkasPpdb {
   id: string;
@@ -85,6 +104,32 @@ export interface HasilSeleksiPpdb {
   dibuatPada?: string;
   diperbaruiPada?: string;
   dihapusPada?: string | null;
+}
+
+export interface EntriRanking {
+  id: string;
+  nomorPendaftaran: string;
+  namaLengkap: string;
+  jarakKm: number | null;
+  nilaiRapor: number | null;
+  status: string | null;
+  berkasLengkap: boolean;
+  berkasKurang: string[];
+  memenuhiKriteria: boolean;
+  alasanTidakMemenuhi: string[];
+  peringkat: number;
+  masukKuota: boolean;
+}
+
+export interface HasilRanking {
+  jalurId: string;
+  namaJalur: string;
+  kategori: string;
+  metodeRanking: string;
+  kuota: number;
+  berkasWajib: string[];
+  totalPendaftar: number;
+  daftar: EntriRanking[];
 }
 
 export interface PendaftarPpdb extends PendaftaranPpdb {
@@ -169,8 +214,10 @@ export interface UploadBerkasPpdbResponse {
 }
 
 export interface VerifikasiPpdbPayload {
-  status: "lulus" | "ditolak";
+  status: "lulus" | "ditolak" | "diverifikasi";
   kelasId?: string;
+  abaikanKuota?: boolean;
+  catatan?: string;
 }
 
 export interface VerifikasiPpdbData {
@@ -191,6 +238,60 @@ export interface VerifikasiPpdbResponse {
   data?: VerifikasiPpdbData;
 }
 
+export interface OpsiPpdbSekolah {
+  sekolah: {
+    id: string;
+    nama: string;
+    jenjang: string | null;
+    koordinatTersedia: boolean;
+  };
+  wajibJurusan: boolean;
+  pendaftaranDibuka: boolean;
+  rankingTerbuka: boolean;
+  jurusan: Array<{
+    id: string;
+    kode: string;
+    nama: string;
+    deskripsi: string | null;
+  }>;
+  gelombang: Array<{
+    id: string;
+    nama: string;
+    jalurPpdbId: string | null;
+    tanggalMulai: string | null;
+    tanggalSelesai: string | null;
+    kuota: number | null;
+  }>;
+  jalur: Array<{
+    id: string;
+    sekolahId: string;
+    nama: string;
+    deskripsi: string | null;
+    kategori: string;
+    kuota: number;
+    metodeRanking: string;
+    jarakMaksimalKm: number | null;
+    nilaiMinimal: number | null;
+    berkasWajib: string[];
+    tanggalMulai: string | null;
+    tanggalSelesai: string | null;
+    status: string;
+    jumlahPendaftar: number;
+    pendaftaranBuka: boolean;
+  }>;
+}
+
+export async function getOpsiPpdbSekolah(
+  sekolahId: string
+): Promise<{ success: boolean; data: OpsiPpdbSekolah; message?: string }> {
+  if (!sekolahId) {
+    throw new Error("ID sekolah wajib disertakan.");
+  }
+  return apiFetch(`${ENDPOINT}/sekolah/${encodeURIComponent(sekolahId)}/opsi`, {
+    method: "GET",
+  });
+}
+
 export async function daftarPpdb(
   payload: DaftarPpdbPayload
 ): Promise<DaftarPpdbResponse> {
@@ -200,6 +301,10 @@ export async function daftarPpdb(
 
   if (!payload?.jalurPpdbId) {
     throw new Error("Jalur PPDB wajib dipilih.");
+  }
+
+  if (!payload?.nik || !/^\d{16}$/.test(payload.nik)) {
+    throw new Error("NIK wajib diisi dengan 16 digit angka.");
   }
 
   if (!payload?.namaLengkap?.trim()) {
@@ -212,6 +317,10 @@ export async function daftarPpdb(
 
   if (!payload?.tanggalLahir) {
     throw new Error("Tanggal lahir wajib diisi.");
+  }
+
+  if (!payload?.email?.trim()) {
+    throw new Error("Email wajib diisi.");
   }
 
   return apiFetch(`${ENDPOINT}/daftar`, {
@@ -500,90 +609,79 @@ export async function getProfilSekolahPublik(subdomain: string): Promise<any> {
   });
 }
 
+export interface PengaturanSpmb {
+  id?: string;
+  sekolahId?: string;
+  pendaftaranDibuka: boolean;
+  wajibLokasi: boolean;
+  batasiPendaftarSesuaiKuota: boolean;
+  rankingTerbuka: boolean;
+  kirimEmailKonfirmasi: boolean;
+  jenjang?: string | null;
+  lintangSekolah?: number | null;
+  bujurSekolah?: number | null;
+}
+
+export interface PengaturanSpmbPayload {
+  pendaftaranDibuka?: boolean;
+  wajibLokasi?: boolean;
+  batasiPendaftarSesuaiKuota?: boolean;
+  rankingTerbuka?: boolean;
+  kirimEmailKonfirmasi?: boolean;
+  lintangSekolah?: number | null;
+  bujurSekolah?: number | null;
+}
+
 export async function getPengaturanSpmb(): Promise<{
   success: boolean;
   message?: string;
-  data: {
-    statusPenerimaan: "buka" | "tutup";
-    prefixNomorPendaftaran: string;
-    verifikasiBerkasWajib: boolean;
-  };
+  data: PengaturanSpmb;
 }> {
-  const response = await apiFetch("/api/pengaturan", { method: "GET" });
-
-  const list = Array.isArray(response?.data) ? response.data : null;
-
-  if (!list) {
-    throw new Error(
-      "Format respons GET /api/pengaturan tidak dikenali."
-    );
-  }
-
-  const map = new Map<string, string>();
-  list.forEach((item: any) => {
-    if (item?.kunci) map.set(item.kunci, String(item.nilai ?? ""));
-  });
-
-  const statusPenerimaan =
-    map.get("spmb_status_penerimaan") === "tutup" ? "tutup" : "buka";
-  const prefixNomorPendaftaran =
-    map.get("spmb_prefix_nomor_pendaftaran") || "PPDB";
-  const verifikasiBerkasWajib =
-    map.get("spmb_verifikasi_berkas_wajib") === "true";
-
-  return {
-    success: true,
-    data: {
-      statusPenerimaan,
-      prefixNomorPendaftaran,
-      verifikasiBerkasWajib,
-    },
-  };
+  return apiFetch("/api/ppdb/pengaturan", { method: "GET" });
 }
 
-export async function updatePengaturanSpmb(payload: {
-  statusPenerimaan: "buka" | "tutup";
-  prefixNomorPendaftaran: string;
-  verifikasiBerkasWajib: boolean;
-}): Promise<any> {
-  await Promise.all([
-    apiFetch("/api/pengaturan", {
-      method: "POST",
-      body: JSON.stringify({
-        kunci: "spmb_status_penerimaan",
-        nilai: payload.statusPenerimaan,
-        tipeData: "string",
-        kelompok: "spmb",
-        keterangan: "Status penerimaan PPDB/SPMB (buka/tutup)",
-      }),
-    }),
-    apiFetch("/api/pengaturan", {
-      method: "POST",
-      body: JSON.stringify({
-        kunci: "spmb_prefix_nomor_pendaftaran",
-        nilai: payload.prefixNomorPendaftaran,
-        tipeData: "string",
-        kelompok: "spmb",
-        keterangan: "Prefix nomor pendaftaran PPDB/SPMB",
-      }),
-    }),
-    apiFetch("/api/pengaturan", {
-      method: "POST",
-      body: JSON.stringify({
-        kunci: "spmb_verifikasi_berkas_wajib",
-        nilai: String(Boolean(payload.verifikasiBerkasWajib)),
-        tipeData: "boolean",
-        kelompok: "spmb",
-        keterangan: "Wajib verifikasi berkas PPDB",
-      }),
-    }),
-  ]);
+export async function updatePengaturanSpmb(
+  payload: PengaturanSpmbPayload
+): Promise<{
+  success: boolean;
+  message?: string;
+  data: PengaturanSpmb;
+}> {
+  const cleanPayload: Record<string, unknown> = {};
 
-  return {
-    success: true,
-    message: "Pengaturan SPMB berhasil disimpan.",
-    data: payload,
-  };
+  if (payload.pendaftaranDibuka !== undefined) {
+    cleanPayload.pendaftaranDibuka = Boolean(payload.pendaftaranDibuka);
+  }
+  if (payload.wajibLokasi !== undefined) {
+    cleanPayload.wajibLokasi = Boolean(payload.wajibLokasi);
+  }
+  if (payload.batasiPendaftarSesuaiKuota !== undefined) {
+    cleanPayload.batasiPendaftarSesuaiKuota = Boolean(
+      payload.batasiPendaftarSesuaiKuota
+    );
+  }
+  if (payload.rankingTerbuka !== undefined) {
+    cleanPayload.rankingTerbuka = Boolean(payload.rankingTerbuka);
+  }
+  if (payload.kirimEmailKonfirmasi !== undefined) {
+    cleanPayload.kirimEmailKonfirmasi = Boolean(payload.kirimEmailKonfirmasi);
+  }
+
+  // Jika lintang dan bujur diisi bersamaan
+  if (
+    payload.lintangSekolah !== undefined &&
+    payload.lintangSekolah !== null &&
+    payload.bujurSekolah !== undefined &&
+    payload.bujurSekolah !== null
+  ) {
+    cleanPayload.lintangSekolah = Number(payload.lintangSekolah);
+    cleanPayload.bujurSekolah = Number(payload.bujurSekolah);
+  }
+
+  return apiFetch("/api/ppdb/pengaturan", {
+    method: "PATCH",
+    body: JSON.stringify(cleanPayload),
+  });
 }
 
 function sanitizeErrorMessage(rawMessage: any, fallback = "Terjadi kesalahan."): string {
@@ -620,12 +718,12 @@ export async function uploadBerkasPpdb(
   }
 
   if (
-    !["KK", "AKTE", "IJAZAH"].includes(
+    !BERKAS_PPDB_LIST.includes(
       namaBerkas
     )
   ) {
     throw new Error(
-      "Jenis berkas harus KK, AKTE, atau IJAZAH."
+      `Jenis berkas harus salah satu dari: ${BERKAS_PPDB_LIST.join(", ")}.`
     );
   }
 
@@ -642,6 +740,7 @@ export async function uploadBerkasPpdb(
 
   formData.append("file", file);
   formData.append("namaBerkas", namaBerkas);
+  formData.append("jenis", namaBerkas);
 
   const headers = new Headers();
 
@@ -766,23 +865,33 @@ export async function verifikasiPpdb(
     );
   }
 
+  const normalizedStatus =
+    payload.status === "diverifikasi" ? "lulus" : payload.status;
+
   if (
-    payload.status !== "lulus" &&
-    payload.status !== "ditolak"
+    normalizedStatus !== "lulus" &&
+    normalizedStatus !== "ditolak"
   ) {
     throw new Error(
-      "Status hanya boleh lulus atau ditolak."
+      "Status hanya boleh diverifikasi/lulus atau ditolak."
     );
   }
 
   if (
-    payload.status === "lulus" &&
+    normalizedStatus === "lulus" &&
     !payload.kelasId
   ) {
     throw new Error(
-      "Kelas wajib dipilih untuk pendaftar yang lulus."
+      "Kelas wajib dipilih untuk pendaftar yang lulus/diverifikasi."
     );
   }
+
+  const body: Record<string, unknown> = {
+    status: normalizedStatus,
+    ...(payload.kelasId ? { kelasId: payload.kelasId } : {}),
+    ...(payload.abaikanKuota !== undefined ? { abaikanKuota: payload.abaikanKuota } : {}),
+    ...(payload.catatan ? { catatan: payload.catatan } : {}),
+  };
 
   return apiFetch(
     `${ENDPOINT}/${encodeURIComponent(
@@ -790,13 +899,179 @@ export async function verifikasiPpdb(
     )}/verifikasi`,
     {
       method: "PATCH",
-      body: JSON.stringify(payload),
+      body: JSON.stringify(body),
     }
   );
 }
 
+export async function getRankingJalur(
+  jalurId: string
+): Promise<{ success: boolean; data: HasilRanking; message?: string }> {
+  if (!jalurId) {
+    throw new Error("ID jalur wajib disertakan.");
+  }
+  return apiFetch(`${ENDPOINT}/jalur/${encodeURIComponent(jalurId)}/ranking`, {
+    method: "GET",
+  });
+}
+
+export async function getDetailSaya(
+  tokenPendaftar?: string
+): Promise<{
+  success: boolean;
+  data: {
+    pendaftar: PendaftaranPpdb;
+    sekolah: any;
+    jalur: {
+      id: string;
+      nama: string;
+      kategori: string;
+      berkasWajib: string[];
+      [key: string]: any;
+    };
+    jurusan: any;
+    gelombang: any;
+    berkas: {
+      wajib: string[];
+      terunggah: Array<{
+        id: string;
+        namaBerkas: string;
+        urlFile: string;
+        status: string;
+        keterangan?: string;
+        dibuatPada: string;
+      }>;
+      kurang: string[];
+    };
+    ranking: any;
+    hasilSeleksi: any;
+  };
+  message?: string;
+}> {
+  const API_URL =
+    process.env.NEXT_PUBLIC_API_URL ||
+    "http://localhost:5000";
+  const baseUrl = API_URL.replace(/\/+$/, "").replace(/\/api(?:\/v\d+)?$/, "");
+  const headers = new Headers();
+  headers.set("Accept", "application/json");
+
+  let token = tokenPendaftar ? String(tokenPendaftar).trim() : "";
+  if (!token && typeof window !== "undefined") {
+    token = String(sessionStorage.getItem("ppdb_token_pendaftaran") || "").trim();
+  }
+
+  if (token) {
+    headers.set("Authorization", `Bearer ${token}`);
+  }
+
+  const response = await fetch(`${baseUrl}/api/ppdb/saya`, {
+    method: "GET",
+    headers,
+    cache: "no-store",
+  });
+
+  return response.json();
+}
+
+export interface PengumumanPpdb {
+  id: string;
+  sekolahId: string;
+  judul: string;
+  konten: string;
+  status: "draft" | "dipublikasikan";
+  dipublikasikanPada?: string | null;
+  dibuatOleh?: string | null;
+  diperbaruiOleh?: string | null;
+  dihapusPada?: string | null;
+  dihapusOleh?: string | null;
+  dibuatPada: string;
+  diperbaruiPada: string;
+}
+
+export interface CreatePengumumanPayload {
+  judul: string;
+  konten: string;
+  status?: "draft" | "dipublikasikan";
+  dipublikasikanPada?: string | null;
+}
+
+export interface UpdatePengumumanPayload {
+  judul?: string;
+  konten?: string;
+  status?: "draft" | "dipublikasikan";
+  dipublikasikanPada?: string | null;
+}
+
+export async function getPengumumanPpdb(params?: {
+  page?: number;
+  limit?: number;
+}): Promise<{
+  success: boolean;
+  data: PengumumanPpdb[];
+  meta: {
+    page: number;
+    limit: number;
+    total: number;
+    totalData: number;
+    totalPages: number;
+    hasNext: boolean;
+    hasPrev: boolean;
+  };
+}> {
+  const query = new URLSearchParams();
+  if (params?.page) query.set("page", String(params.page));
+  if (params?.limit) query.set("limit", String(params.limit));
+  const qs = query.toString() ? `?${query.toString()}` : "";
+  return apiFetch(`${ENDPOINT}/pengumuman${qs}`);
+}
+
+export async function getPengumumanPpdbById(id: string): Promise<{
+  success: boolean;
+  data: PengumumanPpdb;
+  message?: string;
+}> {
+  return apiFetch(`${ENDPOINT}/pengumuman/${id}`);
+}
+
+export async function createPengumumanPpdb(
+  payload: CreatePengumumanPayload
+): Promise<{
+  success: boolean;
+  data: PengumumanPpdb;
+  message?: string;
+}> {
+  return apiFetch(`${ENDPOINT}/pengumuman`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function updatePengumumanPpdb(
+  id: string,
+  payload: UpdatePengumumanPayload
+): Promise<{
+  success: boolean;
+  data: PengumumanPpdb;
+  message?: string;
+}> {
+  return apiFetch(`${ENDPOINT}/pengumuman/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function deletePengumumanPpdb(id: string): Promise<{
+  success: boolean;
+  message?: string;
+}> {
+  return apiFetch(`${ENDPOINT}/pengumuman/${id}`, {
+    method: "DELETE",
+  });
+}
+
 const ppdbService = {
   daftarPpdb,
+  getOpsiPpdbSekolah,
   getPendaftarPpdb,
   getStatistikPpdb,
   getAllPendaftarPpdb,
@@ -807,6 +1082,13 @@ const ppdbService = {
   getPengaturanSpmb,
   updatePengaturanSpmb,
   getProfilSekolahPublik,
+  getRankingJalur,
+  getDetailSaya,
+  getPengumumanPpdb,
+  getPengumumanPpdbById,
+  createPengumumanPpdb,
+  updatePengumumanPpdb,
+  deletePengumumanPpdb,
 };
 
 export default ppdbService;

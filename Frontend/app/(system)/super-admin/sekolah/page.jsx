@@ -4,14 +4,13 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import {
-  getSekolahBinaan,
-  getYayasanSummary,
-} from "@/services/yayasan.service";
+  getPlatformRingkasan,
+  getSemuaSekolahPlatform,
+} from "@/services/platform.service";
 
 import {
   Building2,
   Users,
-  GraduationCap,
   Plus,
   Search,
   Eye,
@@ -132,38 +131,6 @@ const paketColorMap = {
   },
 };
 
-
-function unwrapArrayResponse(result) {
-  if (Array.isArray(result)) {
-    return result;
-  }
-
-  if (Array.isArray(result?.data)) {
-    return result.data;
-  }
-
-  if (Array.isArray(result?.data?.data)) {
-    return result.data.data;
-  }
-
-  if (Array.isArray(result?.result)) {
-    return result.result;
-  }
-
-  if (Array.isArray(result?.result?.data)) {
-    return result.result.data;
-  }
-
-  if (Array.isArray(result?.response)) {
-    return result.response;
-  }
-
-  if (Array.isArray(result?.response?.data)) {
-    return result.response.data;
-  }
-
-  return [];
-}
 
 function unwrapObjectResponse(result) {
   if (!result) {
@@ -331,10 +298,7 @@ function normalizeSchool(item, index) {
       item?.yayasanNama
     ),
 
-    paket:
-      paketNama === "-"
-        ? "Starter"
-        : paketNama,
+    paket: paketNama,
 
     status: normalizeStatus(rawStatus),
 
@@ -366,32 +330,11 @@ function normalizeSchool(item, index) {
       item?.logo
     ),
 
-    totalGuru:
-      Number(
-        firstValue(
-          item?.totalGuru,
-          item?.jumlahGuru,
-          0
-        )
-      ) || 0,
-
-    totalSiswa:
-      Number(
-        firstValue(
-          item?.totalSiswa,
-          item?.jumlahSiswa,
-          0
-        )
-      ) || 0,
+    totalPengguna:
+      Number(item?._count?.pengguna) || 0,
 
     totalKelas:
-      Number(
-        firstValue(
-          item?.totalKelas,
-          item?.jumlahKelas,
-          0
-        )
-      ) || 0,
+      Number(item?._count?.kelas) || 0,
 
     tanggalMulai:
       langganan?.tanggalMulai ||
@@ -534,8 +477,7 @@ export default function DataSekolahPage() {
       aktif: 0,
       nonaktif: 0,
       trial: 0,
-      totalGuru: 0,
-      totalSiswa: 0,
+      totalPengguna: 0,
     });
 
   const [loading, setLoading] =
@@ -599,24 +541,14 @@ export default function DataSekolahPage() {
         sekolahResponse,
         summaryResponse,
       ] = await Promise.all([
-        getSekolahBinaan(),
-        getYayasanSummary(),
+        getSemuaSekolahPlatform(),
+        getPlatformRingkasan(),
       ]);
 
-      console.log(
-        "RAW SEKOLAH RESPONSE:",
-        sekolahResponse
-      );
-
-      console.log(
-        "RAW SUMMARY RESPONSE:",
-        summaryResponse
-      );
-
       const rawSchools =
-        unwrapArrayResponse(
-          sekolahResponse
-        );
+        Array.isArray(sekolahResponse)
+          ? sekolahResponse
+          : [];
 
       const normalizedSchools =
         rawSchools.map(
@@ -648,7 +580,7 @@ export default function DataSekolahPage() {
 
       const trialFromSummary =
         Number(
-          summary?.sekolahUjiCoba
+          summary?.langgananTrialAktif
         );
 
       const aktif =
@@ -681,35 +613,10 @@ export default function DataSekolahPage() {
           total - aktif - trial
         );
 
-      const totalGuru =
+      const totalPengguna =
         Number(
           firstValue(
-            summary?.totalGuru,
-            normalizedSchools.reduce(
-              (sum, item) =>
-                sum +
-                (Number(
-                  item.totalGuru
-                ) || 0),
-              0
-            ),
-            0
-          )
-        ) || 0;
-
-      const totalSiswa =
-        Number(
-          firstValue(
-            summary?.totalSiswa,
-            summary?.totalPenggunaAktif,
-            normalizedSchools.reduce(
-              (sum, item) =>
-                sum +
-                (Number(
-                  item.totalSiswa
-                ) || 0),
-              0
-            ),
+            summary?.totalPengguna,
             0
           )
         ) || 0;
@@ -719,8 +626,7 @@ export default function DataSekolahPage() {
         aktif,
         nonaktif,
         trial,
-        totalGuru,
-        totalSiswa,
+        totalPengguna,
       });
     } catch (err) {
       console.error(
@@ -1083,17 +989,10 @@ export default function DataSekolahPage() {
             />
 
             <StatCard
-              label="Total Guru"
-              value={stats.totalGuru}
+              label="Total Pengguna"
+              value={stats.totalPengguna}
               icon={Users}
               color="info"
-            />
-
-            <StatCard
-              label="Total Siswa"
-              value={stats.totalSiswa}
-              icon={GraduationCap}
-              color="primary"
             />
           </section>
 

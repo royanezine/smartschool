@@ -12,7 +12,6 @@ import {
   Sparkles,
 } from "lucide-react";
 
-import PpdbNavbar from "@/app/components/ppdb/PpdbNavbar";
 
 const jalurPendaftaran = [
   {
@@ -113,9 +112,7 @@ export default function PPDBLandingPage() {
   return (
     <div className="min-h-screen bg-slate-50">
 
-      <PpdbNavbar />
-
-
+      
       <section className="mx-auto max-w-6xl px-4 pb-8 pt-10 sm:px-6 sm:pt-14">
         <div className="grid grid-cols-1 items-stretch gap-6 lg:grid-cols-3">
 

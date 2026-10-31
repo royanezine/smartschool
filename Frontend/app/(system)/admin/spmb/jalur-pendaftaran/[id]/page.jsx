@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   ArrowLeft,
   MapPin,
@@ -19,6 +20,7 @@ import {
   FileText,
   ClipboardList,
   ShieldCheck,
+  Trophy,
 } from "lucide-react";
 
 import Header from "@/app/components/Header";
@@ -231,7 +233,7 @@ export default function DetailJalurPendaftaranPage() {
   };
 
 
-  async function loadData(isRefresh = false) {
+  const loadData = useCallback(async (isRefresh = false) => {
     try {
       setError("");
 
@@ -266,7 +268,7 @@ export default function DetailJalurPendaftaranPage() {
       setLoading(false);
       setRefreshing(false);
     }
-  }
+  }, [id]);
 
   useEffect(() => {
     if (id) {
@@ -578,37 +580,32 @@ export default function DetailJalurPendaftaranPage() {
                         </div>
                       </div>
 
-                      <div className="mt-5 flex items-start gap-2.5 rounded-xl border border-[color-mix(in_srgb,var(--color-warning)_28%,transparent)] bg-[color-mix(in_srgb,var(--color-warning)_8%,transparent)] p-4">
-                        <AlertCircle
-                          size={17}
-                          className="mt-0.5 shrink-0 text-[var(--color-warning)]"
-                        />
+                      <div className="mt-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between rounded-xl border border-[color-mix(in_srgb,var(--color-primary)_28%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)] p-4">
+                        <div className="flex items-start gap-2.5">
+                          <Trophy
+                            size={18}
+                            className="mt-0.5 shrink-0 text-[var(--color-primary)]"
+                          />
 
-                        <div>
-                          <p className="theme-text text-xs font-bold">
-                            Endpoint data pendaftar belum tersedia
-                          </p>
+                          <div>
+                            <p className="theme-text text-xs font-bold">
+                              Pemeringkatan & Ranking Seleksi Tersedia
+                            </p>
 
-                          <p className="theme-text-secondary mt-1 text-xs leading-5">
-                            Backend belum menyediakan
-                            endpoint untuk membaca daftar
-                            pendaftar PPDB. Karena itu
-                            halaman ini tidak menampilkan
-                            data siswa, status seleksi,
-                            atau berkas pendaftar. Data
-                            contoh sengaja tidak
-                            ditampilkan agar tidak
-                            menyesatkan.
-                          </p>
+                            <p className="theme-text-secondary mt-1 text-xs leading-5">
+                              Daftar calon peserta didik dan pemeringkatan resmi jalur ini terintegrasi langsung dengan server backend di menu Seleksi & Pemeringkatan SPMB.
+                            </p>
+                          </div>
                         </div>
-                      </div>
 
-                      <p className="theme-text-muted mt-4 text-xs leading-5">
-                        Setelah endpoint daftar pendaftar
-                        tersedia, tabel pendaftar dapat
-                        ditambahkan di bagian ini tanpa
-                        mengubah data jalur.
-                      </p>
+                        <Link
+                          href={`/admin/spmb/seleksi?jalurId=${encodeURIComponent(id)}`}
+                          className={`${themePrimaryGradient} shrink-0 inline-flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-xs font-semibold text-[var(--color-card)]`}
+                        >
+                          <Trophy size={14} />
+                          Lihat Ranking Seleksi
+                        </Link>
+                      </div>
                     </div>
                   </section>
 

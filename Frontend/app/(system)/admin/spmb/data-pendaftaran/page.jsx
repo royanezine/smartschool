@@ -27,7 +27,11 @@ import {
   AlertCircle,
 } from "lucide-react";
 
-import { getPendaftarPpdb, isPpdbEndpointMissing } from "@/services/ppdb.service";
+import {
+  getPendaftarPpdb,
+  getStatistikPpdb,
+  isPpdbEndpointMissing,
+} from "@/services/ppdb.service";
 import { getJalurPpdb } from "@/services/jalurPpdb.service";
 import {
   formatTanggal,
@@ -159,7 +163,7 @@ export default function PendaftaranPage() {
           setLoading(true);
         }
 
-        const response = await getPendaftarPpdb({
+        const filterParams = {
           search: search.trim() || undefined,
           jalurPpdbId:
             jalur === "Semua" ? undefined : jalur,
@@ -167,9 +171,16 @@ export default function PendaftaranPage() {
             status === "Semua"
               ? undefined
               : statusPendaftaranKeApi(status),
-          page,
-          limit: LIMIT_PENDAFTAR,
-        });
+        };
+
+        const [response, statResponse] = await Promise.all([
+          getPendaftarPpdb({
+            ...filterParams,
+            page,
+            limit: LIMIT_PENDAFTAR,
+          }),
+          getStatistikPpdb(filterParams).catch(() => null),
+        ]);
 
         const daftar = Array.isArray(response?.data)
           ? response.data
@@ -205,7 +216,8 @@ export default function PendaftaranPage() {
             pagination.hasPrev ?? page > 1,
         });
 
-        const statistikResponse = response?.statistik;
+        const statistikResponse =
+          statResponse?.data || response?.statistik;
 
         setStatistik({
           total:

@@ -30,6 +30,8 @@ export default function RaporDetailPage() {
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
   const [raporData, setRaporData] = useState(null);
+  const [tahunAjaranInfo, setTahunAjaranInfo] =
+    useState(null);
 
   const siswaId = params?.id;
   const paramTaId = searchParams.get("tahunAjaranId");
@@ -46,15 +48,32 @@ export default function RaporDetailPage() {
         setErrorMsg("");
 
         let taId = paramTaId;
-        if (!taId) {
-          const taRes = await getTahunAjaran();
-          const taList = Array.isArray(taRes?.data)
-            ? taRes.data
-            : Array.isArray(taRes)
-            ? taRes
-            : [];
-          const activeTa = taList.find((t) => t.aktif) || taList[0];
-          taId = activeTa?.id;
+
+        const taRes = await getTahunAjaran();
+        const taList = Array.isArray(taRes?.data)
+          ? taRes.data
+          : Array.isArray(taRes)
+          ? taRes
+          : [];
+
+        // Field resmi tahun ajaran adalah `status` (contoh:
+        // "aktif"/"tidak_aktif"), bukan `aktif`.
+        const taAktif =
+          taList.find(
+            (t) =>
+              String(t?.status || "").toLowerCase() === "aktif"
+          ) || taList[0];
+
+        const taTerpilih = taId
+          ? taList.find(
+              (t) => String(t?.id) === String(taId)
+            ) || taAktif
+          : taAktif;
+
+        taId = taTerpilih?.id || taId;
+
+        if (active) {
+          setTahunAjaranInfo(taTerpilih || null);
         }
 
         if (!taId) {
@@ -88,24 +107,26 @@ export default function RaporDetailPage() {
     window.print();
   };
 
-  const siswa = raporData?.siswa;
-  const kelas = raporData?.kelas;
-  const waliKelas = raporData?.waliKelas;
-  const absensi = raporData?.absensi;
-  const catatan = raporData?.catatan;
+  // Kontrak GET /api/raport/:siswaId/tahun-ajaran/:tahunAjaranId adalah
+  // { identitas, akademik, kehadiran, catatanWaliKelas }.
+  const identitas = raporData?.identitas || null;
+  const kehadiran = raporData?.kehadiran || null;
+  const catatanWaliKelas =
+    raporData?.catatanWaliKelas || "";
 
   const nilaiList = useMemo(() => {
-    const raw = raporData?.nilai;
-    if (!raw || typeof raw !== "object") return [];
-    return Object.values(raw).map((item) => ({
-      mapel: item.mapel || "Mata Pelajaran",
-      kkm: item.kkm ?? 75,
-      totalNilai: Number(item.totalNilai || 0),
+    const raw = raporData?.akademik;
+    if (!Array.isArray(raw)) return [];
+    return raw.map((item) => ({
+      mapel: item?.mapel || "Mata Pelajaran",
+      kkm: item?.kkm ?? null,
+      totalNilai: Number(item?.totalNilai || 0),
+      predikat: item?.predikat || null,
     }));
   }, [raporData]);
 
   const rataRata = useMemo(() => {
-    if (nilaiList.length === 0) return "0.00";
+    if (nilaiList.length === 0) return null;
     const total = nilaiList.reduce((acc, curr) => acc + curr.totalNilai, 0);
     return (total / nilaiList.length).toFixed(2);
   }, [nilaiList]);
@@ -141,7 +162,7 @@ export default function RaporDetailPage() {
     );
   }
 
-  if (errorMsg || !siswa) {
+  if (errorMsg || !identitas) {
     return (
       <div className="flex h-screen w-full theme-page overflow-hidden">
         <Sidebar
@@ -233,7 +254,10 @@ export default function RaporDetailPage() {
                 </h2>
 
                 <p className="text-xs text-blue-100 mt-1">
-                  Tahun Ajaran: {kelas?.tahunAjaran?.nama || "Aktif"} &bull; Semester: Ganjil/Genap
+                  Tahun Ajaran:{" "}
+                  {tahunAjaranInfo?.tahunAjaran || "Belum tersedia"} &bull;
+                  Semester:{" "}
+                  {tahunAjaranInfo?.semester || "Belum tersedia"}
                 </p>
               </div>
 
@@ -249,7 +273,7 @@ export default function RaporDetailPage() {
                     </p>
 
                     <p className="text-sm font-semibold theme-text">
-                      {siswa.namaLengkap || siswa.nama}
+                      {identitas.nama || "-"}
                     </p>
                   </div>
                 </div>
@@ -265,7 +289,7 @@ export default function RaporDetailPage() {
                     </p>
 
                     <p className="text-sm font-semibold theme-text">
-                      {kelas?.nama || "-"}
+                      {identitas.kelas || "-"}
                     </p>
                   </div>
                 </div>
@@ -276,7 +300,7 @@ export default function RaporDetailPage() {
                   </p>
 
                   <p className="text-sm font-semibold theme-text">
-                    {siswa.nis || siswa.nisn || "-"}
+                    {identitas.nis || identitas.nisn || "-"}
                   </p>
                 </div>
 
@@ -286,9 +310,7 @@ export default function RaporDetailPage() {
                   </p>
 
                   <p className="text-sm font-semibold theme-text">
-                    {siswa.jenisKelamin?.toLowerCase().startsWith("p")
-                      ? "Perempuan"
-                      : "Laki-laki"}
+                    Belum tersedia
                   </p>
                 </div>
 
@@ -298,7 +320,7 @@ export default function RaporDetailPage() {
                   </p>
 
                   <p className="text-sm font-semibold theme-text">
-                    {waliKelas?.namaLengkap || waliKelas?.nama || "-"}
+                    Belum tersedia
                   </p>
                 </div>
 
@@ -308,7 +330,7 @@ export default function RaporDetailPage() {
                   </p>
 
                   <p className="text-sm font-semibold theme-text">
-                    {rataRata}
+                    {rataRata ?? "Belum tersedia"}
                   </p>
                 </div>
               </div>
@@ -372,15 +394,15 @@ export default function RaporDetailPage() {
                           </td>
 
                           <td className="px-4 py-2.5 text-center theme-text-secondary">
-                            {m.kkm}
+                            {m.kkm ?? "-"}
                           </td>
 
                           <td className="px-4 py-2.5 text-center theme-text font-semibold">
-                            {m.totalNilai.toFixed(2)}
+                            {m.totalNilai}
                           </td>
 
                           <td className="px-4 py-2.5 text-center theme-text-secondary font-medium">
-                            {getPredikat(m.totalNilai)}
+                            {m.predikat || getPredikat(m.totalNilai)}
                           </td>
                         </tr>
                       ))
@@ -405,7 +427,7 @@ export default function RaporDetailPage() {
                     </p>
 
                     <p className="text-sm font-semibold theme-text">
-                      {absensi?.hadir || 0} hari
+                      {kehadiran?.hadir ?? "Belum tersedia"}
                     </p>
                   </div>
 
@@ -415,7 +437,7 @@ export default function RaporDetailPage() {
                     </p>
 
                     <p className="text-sm font-semibold theme-text">
-                      {absensi?.sakit || 0} hari
+                      {kehadiran?.sakit ?? "Belum tersedia"}
                     </p>
                   </div>
 
@@ -425,7 +447,7 @@ export default function RaporDetailPage() {
                     </p>
 
                     <p className="text-sm font-semibold theme-text">
-                      {absensi?.izin || 0} hari
+                      {kehadiran?.izin ?? "Belum tersedia"}
                     </p>
                   </div>
 
@@ -435,7 +457,7 @@ export default function RaporDetailPage() {
                     </p>
 
                     <p className="text-sm font-semibold theme-text">
-                      {absensi?.alpha || 0} hari
+                      {kehadiran?.alpha ?? "Belum tersedia"}
                     </p>
                   </div>
                 </div>
@@ -450,7 +472,8 @@ export default function RaporDetailPage() {
 
                 <div className="px-6 py-4">
                   <p className="text-sm theme-text-secondary leading-relaxed">
-                    {catatan || "Tidak ada catatan khusus dari wali kelas."}
+                    {catatanWaliKelas ||
+                      "Tidak ada catatan khusus dari wali kelas."}
                   </p>
                 </div>
               </div>

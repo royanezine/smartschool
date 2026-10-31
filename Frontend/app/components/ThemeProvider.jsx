@@ -7,8 +7,14 @@ import {
   useCallback,
   useMemo,
   useEffect,
+  useLayoutEffect,
   useSyncExternalStore,
 } from "react";
+
+// Layout effect agar kelas .dark dipulihkan SEBELUM paint pertama setelah
+// hidrasi (mencegah flash light bila React menimpa className <html>).
+const useIsomorphicLayoutEffect =
+  typeof window === "undefined" ? useEffect : useLayoutEffect;
 
 
 const STORAGE_KEY = "theme";
@@ -46,6 +52,30 @@ function getServerSnapshot() {
   return "light";
 }
 
+// Dijalankan saat HTML diparse (sebelum React hidrasi) agar kelas .dark
+// sudah terpasang di <html> sejak paint pertama. Script hanya dirender
+// di dalam area system, jadi area public tidak terpengaruh.
+const THEME_BOOTSTRAP_SCRIPT = `
+(function () {
+  try {
+    var tema =
+      window.localStorage.getItem("theme") === "dark"
+        ? "dark"
+        : "light";
+    var root = document.documentElement;
+
+    if (tema === "dark") {
+      root.classList.add("dark");
+    } else {
+      root.classList.remove("dark");
+    }
+
+    root.setAttribute("data-theme", tema);
+    root.style.colorScheme = tema === "dark" ? "dark" : "light";
+  } catch (error) {}
+})();
+`;
+
 const ThemeContext = createContext({
   theme: "light",
   resolvedTheme: "light",
@@ -63,10 +93,26 @@ export default function ThemeProvider({ children }) {
     getServerSnapshot
   );
 
-  useEffect(() => {
-    document.documentElement.classList.remove("dark");
-    document.body.classList.remove("dark");
-  }, []);
+  useIsomorphicLayoutEffect(() => {
+    const root = document.documentElement;
+
+    if (theme === "dark") {
+      root.classList.add("dark");
+    } else {
+      root.classList.remove("dark");
+    }
+
+    root.setAttribute("data-theme", theme);
+    root.style.colorScheme = theme === "dark" ? "dark" : "light";
+    document.body.classList.toggle("dark", theme === "dark");
+
+    return () => {
+      root.classList.remove("dark");
+      root.removeAttribute("data-theme");
+      root.style.removeProperty("color-scheme");
+      document.body.classList.remove("dark");
+    };
+  }, [theme]);
 
   const setTheme = useCallback((next) => {
     const current = getSnapshot();
@@ -92,6 +138,11 @@ export default function ThemeProvider({ children }) {
 
   return (
     <ThemeContext.Provider value={value}>
+      <script
+        suppressHydrationWarning
+        dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP_SCRIPT }}
+      />
+
       <div
         id="system-theme-root"
         className={`system-scope min-h-screen w-full ${

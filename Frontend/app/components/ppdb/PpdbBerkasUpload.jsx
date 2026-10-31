@@ -7,11 +7,11 @@ import {
   X,
   Loader2,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 
 import { uploadBerkasPpdb } from "@/services/ppdb.service";
 
-const jenisBerkas = [
+export const DAFTAR_BERKAS_LENGKAP = [
   {
     kode: "KK",
     label: "Kartu Keluarga",
@@ -22,13 +22,30 @@ const jenisBerkas = [
   },
   {
     kode: "IJAZAH",
-    label: "Ijazah",
+    label: "Ijazah / Surat Keterangan Lulus",
+  },
+  {
+    kode: "SERTIFIKAT",
+    label: "Sertifikat Prestasi",
+  },
+  {
+    kode: "SKTM",
+    label: "Surat Keterangan Tidak Mampu (SKTM)",
+  },
+  {
+    kode: "KIP",
+    label: "Kartu Indonesia Pintar (KIP)",
+  },
+  {
+    kode: "SURAT_TUGAS",
+    label: "Surat Penugasan Orang Tua",
   },
 ];
 
 export default function PpdbBerkasUpload({
   pendaftaranId,
   tokenPendaftaran,
+  berkasWajib,
   onSuccess,
 }) {
   const [files, setFiles] =
@@ -42,6 +59,16 @@ export default function PpdbBerkasUpload({
 
   const [error, setError] =
     useState("");
+
+  const jenisBerkas = useMemo(() => {
+    if (Array.isArray(berkasWajib) && berkasWajib.length > 0) {
+      return berkasWajib.map((kode) => {
+        const found = DAFTAR_BERKAS_LENGKAP.find((item) => item.kode === kode);
+        return found || { kode, label: kode };
+      });
+    }
+    return DAFTAR_BERKAS_LENGKAP;
+  }, [berkasWajib]);
 
   async function handleUpload(
     jenis,

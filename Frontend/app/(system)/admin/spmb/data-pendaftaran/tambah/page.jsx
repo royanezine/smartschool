@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
+import { basePathTenantSaatIni } from "@/app/components/spmb/tautanPendaftaran";
 
 import {
   ArrowLeft,
@@ -279,13 +280,19 @@ export default function TambahPendaftarPage() {
 
 
   if (successData) {
-    const uploadUrl = `/PPDB/daftar/uploadBerkas?id=${encodeURIComponent(
-      successData.id
-    )}${
-      successData.tokenPendaftaran
-        ? `&token=${encodeURIComponent(successData.tokenPendaftaran)}`
-        : ""
-    }`;
+    // PPDB hanya ada di bawah tenant sekolah, jadi tautan unggah berkas wajib
+    // memakai prefix tenant yang terdeteksi dari URL yang sedang dibuka.
+    const basePathTenant = basePathTenantSaatIni();
+
+    const uploadUrl = basePathTenant
+      ? `${basePathTenant}/PPDB/daftar/uploadBerkas?id=${encodeURIComponent(
+          successData.id
+        )}${
+          successData.tokenPendaftaran
+            ? `&token=${encodeURIComponent(successData.tokenPendaftaran)}`
+            : ""
+        }`
+      : "";
 
     return (
       <div className="theme-page flex h-screen w-full overflow-hidden">
@@ -362,12 +369,22 @@ export default function TambahPendaftarPage() {
                 <div className="mt-6 flex flex-wrap gap-2.5">
                   <button
                     type="button"
-                    onClick={() => router.push(uploadUrl)}
-                    className={`${themePrimaryGradient} inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-xs font-semibold text-white transition hover:brightness-95`}
+                    onClick={() => uploadUrl && router.push(uploadUrl)}
+                    disabled={!uploadUrl}
+                    className={`${themePrimaryGradient} inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-xs font-semibold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60`}
                   >
                     <UploadCloud size={15} />
                     Unggah Berkas Calon Siswa
                   </button>
+
+                  {!uploadUrl && (
+                    <p className="w-full text-[11px] leading-5 text-amber-700">
+                      Tautan unggah berkas hanya tersedia dari subdomain
+                      sekolah (mis. smart.localhost:3000). Buka halaman ini
+                      melalui subdomain sekolah untuk melanjutkan unggah
+                      berkas calon siswa.
+                    </p>
+                  )}
 
                   <button
                     type="button"

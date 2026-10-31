@@ -30,6 +30,7 @@ import {
   NotebookPen,
   School,
   Layers,
+  DoorOpen,
   PenLine,
   Printer,
   Award,
@@ -439,6 +440,12 @@ export const adminSidebarConfig = {
           icon: Layers,
           label: "Lantai",
           path: "/admin/sarpras/gedung/lantai",
+        },
+        {
+          key: "ruangan",
+          icon: DoorOpen,
+          label: "Ruangan",
+          path: "/admin/sarpras/ruangan",
         },
         {
           key: "gudang",

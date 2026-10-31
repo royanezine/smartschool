@@ -1037,7 +1037,7 @@ export default function SiswaAbsensiPage() {
 
                 {cameraOpen ? (
                   <div className="space-y-3">
-                    <div className="relative overflow-hidden rounded-xl bg-[color-mix(in_srgb,var(--color-text)_92%,var(--color-card))]">
+                    <div className="relative overflow-hidden rounded-xl theme-card-soft">
                       <video
                         ref={videoRef}
                         autoPlay

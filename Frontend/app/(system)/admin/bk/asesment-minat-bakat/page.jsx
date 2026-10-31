@@ -18,6 +18,7 @@ export default function AsesmenMinatBakatPage() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
+  const [backendGap, setBackendGap] = useState(false);
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("tanggal_desc");
 
@@ -33,11 +34,28 @@ export default function AsesmenMinatBakatPage() {
       const result = await getAsesmenMinatBakat();
 
       setData(Array.isArray(result) ? result : []);
+      setBackendGap(false);
     } catch (err) {
-      setError(
-        err?.message ||
-          "Gagal mengambil data asesmen."
-      );
+      const status = err?.status;
+
+      // Endpoint /api/bk/asesmen-minat-bakat belum tersedia di backend.
+      // Pesan error mentah server tidak ditampilkan ke pengguna.
+      if (
+        status === 400 ||
+        status === 404 ||
+        status === 500 ||
+        status === 501 ||
+        status === 503
+      ) {
+        setData([]);
+        setBackendGap(true);
+        setError("");
+      } else {
+        setError(
+          err?.message ||
+            "Gagal mengambil data asesmen."
+        );
+      }
     } finally {
       setLoading(false);
     }
@@ -57,11 +75,26 @@ export default function AsesmenMinatBakatPage() {
           ? result
           : []
       );
+      setBackendGap(false);
     } catch (err) {
-      setError(
-        err?.message ||
-          "Gagal memuat ulang data."
-      );
+      const status = err?.status;
+
+      if (
+        status === 400 ||
+        status === 404 ||
+        status === 500 ||
+        status === 501 ||
+        status === 503
+      ) {
+        setData([]);
+        setBackendGap(true);
+        setError("");
+      } else {
+        setError(
+          err?.message ||
+            "Gagal memuat ulang data."
+        );
+      }
     } finally {
       setRefreshing(false);
     }
@@ -359,7 +392,13 @@ export default function AsesmenMinatBakatPage() {
                       "/admin/bk/asesment-minat-bakat/tambah"
                     )
                   }
-                  className="theme-primary inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold shadow-lg transition"
+                  disabled={backendGap}
+                  title={
+                    backendGap
+                      ? "Fitur ini belum dapat digunakan karena endpoint Backend Asesmen Minat & Bakat belum tersedia"
+                      : "Tambah asesmen"
+                  }
+                  className="theme-primary inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold shadow-lg transition disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   <svg
                     className="h-4 w-4"
@@ -388,6 +427,43 @@ export default function AsesmenMinatBakatPage() {
             )}
 
 
+            {backendGap ? (
+              <div className="theme-card theme-border rounded-2xl border p-6 shadow-sm">
+                <div className="flex items-start gap-3">
+                  <div className="theme-warning flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
+                    <svg
+                      className="h-5 w-5"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"
+                      />
+                    </svg>
+                  </div>
+
+                  <div className="min-w-0">
+                    <p className="theme-text text-sm font-bold">
+                      Belum tersedia
+                    </p>
+
+                    <p className="theme-text-muted mt-1 text-sm leading-6">
+                      Endpoint /api/bk/asesmen-minat-bakat belum tersedia di
+                      Backend SmartSchool, sehingga daftar asesmen minat dan
+                      bakat belum dapat dimuat. Sesuai kebijakan integritas
+                      data bisnis, data tiruan (dummy/mock) tidak ditampilkan
+                      dan penambahan data dinonaktifkan sampai endpoint resmi
+                      disediakan oleh Backend.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <>
             <div className="mb-7 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
 
               <Stat
@@ -935,6 +1011,8 @@ export default function AsesmenMinatBakatPage() {
                   </div>
                 )}
             </div>
+              </>
+            )}
           </div>
         </main>
       </div>

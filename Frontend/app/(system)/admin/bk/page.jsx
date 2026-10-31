@@ -18,7 +18,6 @@ import {
   Award,
   AlertTriangle,
   Brain,
-  ClipboardCheck,
   TrendingUp,
   TrendingDown,
   Clock3,
@@ -31,7 +30,6 @@ import {
   Target,
   MessageSquare,
   FileText,
-  Star,
   Activity,
   ShieldCheck,
 } from "lucide-react";
@@ -1099,7 +1097,7 @@ export default function BKPage() {
               {activeTab === "asesmen" && (
                 <div className="grid h-full min-h-0 gap-4 lg:grid-cols-3">
 
-                  <div className="theme-card theme-border rounded-xl border p-5 shadow-sm">
+                  <div className="theme-card theme-border rounded-xl border p-5 shadow-sm lg:col-span-2">
                     <div className="flex items-center gap-3">
                       <div className="theme-info flex h-10 w-10 items-center justify-center rounded-xl">
                         <Brain size={20} />
@@ -1107,110 +1105,38 @@ export default function BKPage() {
 
                       <div>
                         <h3 className="theme-text text-sm font-bold">
-                          Asesmen Siswa
+                          Asesmen Minat &amp; Bakat
                         </h3>
 
                         <p className="theme-text-placeholder text-[10px]">
-                          Ringkasan pengisian asesmen
+                          Belum tersedia
                         </p>
                       </div>
                     </div>
 
-                    <div className="mt-6">
-                      <div className="flex items-end justify-between">
-                        <div>
-                          <p className="theme-text text-3xl font-bold">
-                            92%
+                    <div className="theme-card-soft theme-border mt-5 rounded-xl border p-4">
+                      <div className="flex items-start gap-3">
+                        <AlertTriangle
+                          size={18}
+                          className="theme-text-muted mt-0.5 shrink-0"
+                        />
+
+                        <div className="min-w-0">
+                          <p className="theme-text text-sm font-semibold">
+                            Belum tersedia
                           </p>
 
-                          <p className="theme-text-placeholder mt-1 text-xs">
-                            Kelengkapan data
+                          <p className="theme-text-placeholder mt-1 text-xs leading-5">
+                            Endpoint /api/bk/asesmen-minat-bakat belum
+                            tersedia di Backend SmartSchool, sehingga
+                            ringkasan kelengkapan asesmen, hasil minat, dan
+                            rekomendasi bakat siswa belum dapat ditampilkan.
+                            Sesuai kebijakan integritas data bisnis, angka
+                            perkiraan tidak ditampilkan sampai endpoint resmi
+                            disediakan oleh Backend.
                           </p>
                         </div>
-
-                        <ClipboardCheck
-                          size={28}
-                          className="text-[var(--color-info)]"
-                        />
                       </div>
-
-                      <div className="theme-card-soft mt-4 h-2 overflow-hidden rounded-full">
-                        <div
-                          className="h-full rounded-full bg-[var(--color-info)]"
-                          style={{
-                            width: "92%",
-                          }}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="mt-6 space-y-3">
-                      <ProgressRow
-                        label="Minat & Bakat"
-                        value="96%"
-                      />
-
-                      <ProgressRow
-                        label="Kepribadian"
-                        value="91%"
-                      />
-
-                      <ProgressRow
-                        label="Akademik"
-                        value="94%"
-                      />
-
-                      <ProgressRow
-                        label="Karier"
-                        value="87%"
-                      />
-                    </div>
-                  </div>
-
-
-                  <div className="theme-card theme-border rounded-xl border p-5 shadow-sm">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="theme-text text-sm font-bold">
-                          Minat Dominan
-                        </h3>
-
-                        <p className="theme-text-placeholder mt-0.5 text-[10px]">
-                          Hasil asesmen siswa
-                        </p>
-                      </div>
-
-                      <Star
-                        size={18}
-                        className="text-[var(--color-warning)]"
-                      />
-                    </div>
-
-                    <div className="mt-5 space-y-4">
-                      <InterestRow
-                        label="Teknologi"
-                        value="82"
-                      />
-
-                      <InterestRow
-                        label="Sains"
-                        value="74"
-                      />
-
-                      <InterestRow
-                        label="Seni & Kreativitas"
-                        value="68"
-                      />
-
-                      <InterestRow
-                        label="Sosial"
-                        value="61"
-                      />
-
-                      <InterestRow
-                        label="Bahasa"
-                        value="57"
-                      />
                     </div>
                   </div>
 
@@ -1274,12 +1200,9 @@ export default function BKPage() {
                       <QuickAction
                         icon={Brain}
                         title="Asesmen & Minat Bakat"
-                        description="Hasil asesmen siswa"
-                        onClick={() =>
-                          router.push(
-                            "/admin/bk/asesmen"
-                          )
-                        }
+                        description="Belum tersedia di backend"
+                        badge="Belum tersedia"
+                        disabled
                       />
                     </div>
                   </div>
@@ -1651,68 +1574,24 @@ function DetailItem({
 }
 
 
-function ProgressRow({ label, value }) {
-  return (
-    <div>
-      <div className="mb-1.5 flex items-center justify-between">
-        <span className="theme-text-secondary text-xs font-medium">
-          {label}
-        </span>
-
-        <span className="theme-text text-xs font-semibold">
-          {value}
-        </span>
-      </div>
-
-      <div className="theme-card-soft h-1.5 overflow-hidden rounded-full">
-        <div
-          className="h-full rounded-full bg-[var(--color-primary)]"
-          style={{
-            width: value,
-          }}
-        />
-      </div>
-    </div>
-  );
-}
-
-
-function InterestRow({ label, value }) {
-  return (
-    <div>
-      <div className="mb-1.5 flex items-center justify-between">
-        <span className="theme-text-secondary text-xs font-medium">
-          {label}
-        </span>
-
-        <span className="theme-text text-xs font-bold">
-          {value}%
-        </span>
-      </div>
-
-      <div className="theme-card-soft h-1.5 overflow-hidden rounded-full">
-        <div
-          className="h-full rounded-full bg-[var(--color-info)]"
-          style={{
-            width: `${value}%`,
-          }}
-        />
-      </div>
-    </div>
-  );
-}
-
-
 function QuickAction({
   icon: Icon,
   title,
   description,
   onClick,
+  disabled = false,
+  badge = null,
 }) {
   return (
     <button
-      onClick={onClick}
-      className="theme-card theme-border theme-header-hover group flex w-full items-center gap-3 rounded-xl border p-3 text-left transition"
+      type="button"
+      onClick={disabled ? undefined : onClick}
+      disabled={disabled}
+      className={`group flex w-full items-center gap-3 rounded-xl border p-3 text-left transition ${
+        disabled
+          ? "theme-border theme-card-soft cursor-not-allowed opacity-70"
+          : "theme-card theme-border theme-header-hover"
+      }`}
     >
       <div className="theme-info flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
         <Icon size={16} />
@@ -1728,10 +1607,16 @@ function QuickAction({
         </p>
       </div>
 
-      <ChevronRight
-        size={15}
-        className="theme-text-muted shrink-0 transition group-hover:text-[var(--color-primary)]"
-      />
+      {badge ? (
+        <span className="theme-text-placeholder shrink-0 text-[9px] font-semibold">
+          {badge}
+        </span>
+      ) : (
+        <ChevronRight
+          size={15}
+          className="theme-text-muted shrink-0 transition group-hover:text-[var(--color-primary)]"
+        />
+      )}
     </button>
   );
 }

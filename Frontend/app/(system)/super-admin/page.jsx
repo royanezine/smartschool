@@ -204,6 +204,35 @@ const getPriority = (priority) => {
 };
 
 
+function formatPersen(nilai) {
+  const angka = Number(nilai);
+
+  if (!Number.isFinite(angka)) {
+    return null;
+  }
+
+  return `${angka.toFixed(1).replace(".", ",")}%`;
+}
+
+const LABEL_STATUS_LANGGANAN = {
+  active: "Aktif",
+  aktif: "Aktif",
+  trialing: "Trial",
+  trial: "Trial",
+  expired: "Kedaluwarsa",
+  kedaluwarsa: "Kedaluwarsa",
+  nonaktif: "Nonaktif",
+  inactive: "Nonaktif",
+  tanpa_status: "Tanpa status",
+};
+
+const TONE_BREAKDOWN = [
+  "bg-[var(--color-primary)]",
+  "bg-[color-mix(in_srgb,var(--color-text)_40%,transparent)]",
+  "bg-[var(--color-warning)]",
+];
+
+
 export default function DashboardPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
@@ -211,12 +240,20 @@ export default function DashboardPage() {
   const [pakets, setPakets] = useState([]);
   const [logs, setLogs] = useState([]);
   const [notifications, setNotifications] = useState([]);
+  const [tanggalHariIni, setTanggalHariIni] = useState("");
 
   useEffect(() => {
     let active = true;
     const timer = setTimeout(async () => {
       try {
         setLoading(true);
+        setTanggalHariIni(
+          new Date().toLocaleDateString("id-ID", {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+          })
+        );
         const [subRes, paketRes, logRes, notifRes] = await Promise.allSettled([
           getAllLangganan(),
           getPaket(),
@@ -434,6 +471,102 @@ export default function DashboardPage() {
     ...monthlySeries.pertumbuhan.map((item) => item.value)
   );
 
+  // Ringkasan langganan diturunkan dari respons
+  // GET /api/langganan/sekolah. Tidak ada angka statis, dan
+  // status yang tidak dikenal tetap ditampilkan apa adanya.
+  const langgananRingkas = useMemo(() => {
+    const hitung = new Map();
+
+    subscriptions.forEach((item) => {
+      const mentah = String(
+        item?.statusLangganan ?? item?.status ?? ""
+      )
+        .trim()
+        .toLowerCase();
+
+      const kunci = mentah || "tanpa_status";
+
+      hitung.set(kunci, (hitung.get(kunci) || 0) + 1);
+    });
+
+    const urutan = [
+      "active",
+      "aktif",
+      "trialing",
+      "trial",
+      "expired",
+      "kedaluwarsa",
+      "nonaktif",
+    ];
+
+    const kunciTerurut = [...hitung.keys()].sort((a, b) => {
+      const posisiA = urutan.indexOf(a);
+      const posisiB = urutan.indexOf(b);
+
+      return (
+        (posisiA === -1 ? 99 : posisiA) -
+        (posisiB === -1 ? 99 : posisiB)
+      );
+    });
+
+    return {
+      total: subscriptions.length,
+      aktif:
+        (hitung.get("active") || 0) +
+        (hitung.get("aktif") || 0),
+      breakdown: kunciTerurut.map((kunci, index) => ({
+        label: LABEL_STATUS_LANGGANAN[kunci] || kunci,
+        value: String(hitung.get(kunci) || 0),
+        color: TONE_BREAKDOWN[index % TONE_BREAKDOWN.length],
+      })),
+    };
+  }, [subscriptions]);
+
+  const persenAktif =
+    langgananRingkas.total > 0
+      ? Math.round(
+          (langgananRingkas.aktif / langgananRingkas.total) *
+            100
+        )
+      : null;
+
+  const langgananBaruBulanIni =
+    monthlySeries.pertumbuhan[
+      monthlySeries.pertumbuhan.length - 1
+    ]?.value || 0;
+
+  const hitungPertumbuhan = (seri) => {
+    const terakhir = seri[seri.length - 1]?.value || 0;
+    const sebelumnya = seri[seri.length - 2]?.value || 0;
+
+    if (sebelumnya <= 0) {
+      return {
+        persen: null,
+        arah: null,
+        teks: "Belum tersedia",
+      };
+    }
+
+    const persen =
+      ((terakhir - sebelumnya) / sebelumnya) * 100;
+
+    return {
+      persen,
+      arah: persen >= 0 ? "up" : "down",
+      teks: `${formatPersen(
+        Math.abs(persen)
+      )} dibanding bulan sebelumnya`,
+    };
+  };
+
+  const pertumbuhanSekolah = hitungPertumbuhan(
+    monthlySeries.pertumbuhan
+  );
+
+  const pertumbuhanPendapatan = hitungPertumbuhan(
+    monthlySeries.pendapatan
+  );
+
   return (
     <div className="theme-page theme-text min-h-full">
       <div className="mx-auto w-full max-w-[1700px] px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
@@ -478,7 +611,7 @@ export default function DashboardPage() {
                 className={`hidden items-center gap-2 rounded-lg border ${themeNeutralBorder} ${themeNeutralSurface} px-3 py-2 text-xs theme-text-secondary sm:flex`}
               >
                 <Clock3 size={14} />
-                <span>26 Agustus 2026</span>
+                <span>{tanggalHariIni || "—"}</span>
               </div>
 
               <button
@@ -662,9 +795,30 @@ export default function DashboardPage() {
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-1 text-[10px] font-medium text-[var(--color-success)]">
-                    <ArrowUpRight size={11} />
-                    18,4% pertumbuhan
+                  <div
+                    className={`flex items-center gap-1 text-[10px] font-medium ${
+                      pertumbuhanSekolah.persen === null
+                        ? "theme-text-muted"
+                        : pertumbuhanSekolah.persen >= 0
+                          ? "text-[var(--color-success)]"
+                          : "theme-danger"
+                    }`}
+                  >
+                    {pertumbuhanSekolah.persen === null ? (
+                      "Belum tersedia"
+                    ) : (
+                      <>
+                        <ArrowUpRight
+                          size={11}
+                          className={
+                            pertumbuhanSekolah.arah === "up"
+                              ? ""
+                              : "rotate-90"
+                          }
+                        />
+                        {pertumbuhanSekolah.teks}
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
@@ -713,13 +867,21 @@ export default function DashboardPage() {
                     </p>
 
                     <p className="mt-1 text-3xl font-semibold tracking-tight theme-text">
-                      128
+                      {String(langgananRingkas.total)}
                     </p>
                   </div>
 
-                  <div className="flex items-center gap-1 text-xs font-medium text-[var(--color-success)]">
-                    <ArrowUpRight size={13} />
-                    8,2%
+                  <div
+                    className={`flex items-center gap-1 text-xs font-medium ${
+                      langgananBaruBulanIni > 0
+                        ? "text-[var(--color-success)]"
+                        : "theme-text-muted"
+                    }`}
+                  >
+                    {langgananBaruBulanIni > 0 && (
+                      <ArrowUpRight size={13} />
+                    )}
+                    {langgananBaruBulanIni} bulan ini
                   </div>
                 </div>
 
@@ -728,34 +890,28 @@ export default function DashboardPage() {
                 >
                   <div
                     className="h-full rounded-full bg-[var(--color-primary)]"
-                    style={{ width: "82%" }}
+                    style={{
+                      width: `${persenAktif ?? 0}%`,
+                    }}
                   />
                 </div>
 
                 <p className="mt-2 text-[10px] theme-text-muted">
-                  82% sekolah memiliki langganan aktif
+                  {persenAktif === null
+                    ? "Belum tersedia"
+                    : `${persenAktif}% sekolah memiliki langganan aktif`}
                 </p>
               </div>
 
               <div className={`mt-6 divide-y ${themeDivider}`}>
-                {[
-                  {
-                    label: "Aktif",
-                    value: "105",
-                    color: "bg-[var(--color-primary)]",
-                  },
-                  {
-                    label: "Trial",
-                    value: "18",
-                    color:
-                      "bg-[color-mix(in_srgb,var(--color-text)_40%,transparent)]",
-                  },
-                  {
-                    label: "Expired",
-                    value: "5",
-                    color: "bg-[var(--color-warning)]",
-                  },
-                ].map((item) => (
+                {langgananRingkas.breakdown.length === 0 ? (
+                  <div className="flex items-center justify-between py-3">
+                    <span className="text-xs theme-text-secondary">
+                      Belum tersedia
+                    </span>
+                  </div>
+                ) : (
+                  langgananRingkas.breakdown.map((item) => (
                   <div
                     key={item.label}
                     className="flex items-center justify-between py-3"
@@ -774,7 +930,8 @@ export default function DashboardPage() {
                       {item.value}
                     </span>
                   </div>
-                ))}
+                  ))
+                )}
               </div>
 
               <button
@@ -890,9 +1047,30 @@ export default function DashboardPage() {
                   |
                 </span>
 
-                <span className="flex items-center gap-1 text-[10px] font-medium text-[var(--color-success)]">
-                  <ArrowUpRight size={11} />
-                  14,8% dibanding bulan lalu
+                <span
+                  className={`flex items-center gap-1 text-[10px] font-medium ${
+                    pertumbuhanPendapatan.persen === null
+                      ? "theme-text-muted"
+                      : pertumbuhanPendapatan.persen >= 0
+                        ? "text-[var(--color-success)]"
+                        : "theme-danger"
+                  }`}
+                >
+                  {pertumbuhanPendapatan.persen === null ? (
+                    "Belum tersedia"
+                  ) : (
+                    <>
+                      <ArrowUpRight
+                        size={11}
+                        className={
+                          pertumbuhanPendapatan.arah === "up"
+                            ? ""
+                            : "rotate-90"
+                        }
+                      />
+                      {pertumbuhanPendapatan.teks}
+                    </>
+                  )}
                 </span>
               </div>
             </div>
@@ -921,31 +1099,29 @@ export default function DashboardPage() {
 
               <div className="mt-6 space-y-3">
                 <div
-                  className={`rounded-lg border ${themeSuccessBorder} ${themeSuccessSurface} p-3`}
+                  className={`rounded-lg border ${themeNeutralBorder} ${themeNeutralSurface} p-3`}
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-xs theme-text-secondary">
                       Server
                     </span>
 
-                    <span className="flex items-center gap-1.5 text-[10px] font-medium text-[var(--color-success)]">
-                      <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-success)]" />
-                      Online
+                    <span className="text-[10px] font-medium theme-text-secondary">
+                      Belum tersedia
                     </span>
                   </div>
                 </div>
 
                 <div
-                  className={`rounded-lg border ${themeSuccessBorder} ${themeSuccessSurface} p-3`}
+                  className={`rounded-lg border ${themeNeutralBorder} ${themeNeutralSurface} p-3`}
                 >
                   <div className="flex items-center justify-between">
                     <span className="text-xs theme-text-secondary">
                       Database
                     </span>
 
-                    <span className="flex items-center gap-1.5 text-[10px] font-medium text-[var(--color-success)]">
-                      <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-success)]" />
-                      Normal
+                    <span className="text-[10px] font-medium theme-text-secondary">
+                      Belum tersedia
                     </span>
                   </div>
                 </div>
@@ -959,7 +1135,7 @@ export default function DashboardPage() {
                     </span>
 
                     <span className="text-[10px] font-medium theme-text-secondary">
-                      08:00 WIB
+                      Belum tersedia
                     </span>
                   </div>
                 </div>
@@ -973,7 +1149,7 @@ export default function DashboardPage() {
                     </span>
 
                     <span className="text-[10px] font-medium theme-text-secondary">
-                      v2.0.4
+                      Belum tersedia
                     </span>
                   </div>
                 </div>

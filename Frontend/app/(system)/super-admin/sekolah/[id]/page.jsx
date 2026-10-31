@@ -24,7 +24,7 @@ import {
     AlertCircle,
 } from "lucide-react";
 import { useState, useEffect } from "react";
-import { getDetailSekolahBinaan } from "@/services/yayasan.service";
+import { getPlatformSekolahDetail } from "@/services/platform.service";
 
 
 const themeCardShadow =
@@ -82,6 +82,23 @@ const themeDangerBorder =
     "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
 
 
+function angkaAtauNull(value) {
+    if (value === null || value === undefined || value === "") {
+        return null;
+    }
+
+    const angka = Number(value);
+
+    return Number.isFinite(angka) ? angka : null;
+}
+
+function tampilAngka(value) {
+    return value === null || value === undefined
+        ? "-"
+        : value;
+}
+
+
 export default function DetailSekolahPage() {
     const params = useParams();
     const router = useRouter();
@@ -136,7 +153,7 @@ export default function DetailSekolahPage() {
                 );
 
                 const response =
-                    await getDetailSekolahBinaan(id);
+                    await getPlatformSekolahDetail(id);
 
                 console.log(
                     "Response detail sekolah:",
@@ -164,12 +181,20 @@ export default function DetailSekolahPage() {
                     result?.profil ||
                     result?.sekolah ||
                     result?.school ||
+                    result ||
                     null;
 
                 const statistik =
                     result?.statistik ||
                     result?.statistics ||
-                    {};
+                    {
+                        totalPengguna:
+                            profil?._count?.pengguna ??
+                            null,
+                        totalKelas:
+                            profil?._count?.kelas ??
+                            null,
+                    };
 
                 if (!profil) {
                     console.error(
@@ -322,39 +347,41 @@ export default function DetailSekolahPage() {
                         null,
 
                     totalGuru:
-                        Number(
+                        angkaAtauNull(
                             statistik?.totalGuru ??
-                                profil?.totalGuru ??
-                                0
-                        ) || 0,
+                                profil?.totalGuru
+                        ),
 
                     totalSiswa:
-                        Number(
+                        angkaAtauNull(
                             statistik?.totalSiswa ??
-                                profil?.totalSiswa ??
-                                0
-                        ) || 0,
+                                profil?.totalSiswa
+                        ),
 
                     totalKelas:
-                        Number(
+                        angkaAtauNull(
                             statistik?.totalKelas ??
                                 profil?.totalKelas ??
-                                0
-                        ) || 0,
+                                profil?._count?.kelas
+                        ),
+
+                    totalPengguna:
+                        angkaAtauNull(
+                            statistik?.totalPengguna ??
+                                profil?._count?.pengguna
+                        ),
 
                     totalMapel:
-                        Number(
+                        angkaAtauNull(
                             statistik?.totalMapel ??
-                                profil?.totalMapel ??
-                                0
-                        ) || 0,
+                                profil?.totalMapel
+                        ),
 
                     totalAdmin:
-                        Number(
+                        angkaAtauNull(
                             statistik?.totalAdmin ??
-                                profil?.totalAdmin ??
-                                0
-                        ) || 0,
+                                profil?.totalAdmin
+                        ),
                 };
 
                 console.log(
@@ -854,12 +881,16 @@ export default function DetailSekolahPage() {
                             Statistik Sekolah
                         </h3>
 
-                        <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 sm:gap-3">
+                        <p className="mb-2 text-[11px] theme-text-secondary">
+                            Guru, Siswa, Mapel, dan Admin belum tersedia dari API platform.
+                        </p>
+
+                        <div className="grid grid-cols-3 sm:grid-cols-3 xl:grid-cols-6 gap-2 sm:gap-3">
                             <StatCard
                                 label="Guru"
-                                value={
+                                value={tampilAngka(
                                     school.totalGuru
-                                }
+                                )}
                                 icon={Users}
                                 color="primary"
                                 isMobile={
@@ -869,9 +900,9 @@ export default function DetailSekolahPage() {
 
                             <StatCard
                                 label="Siswa"
-                                value={
+                                value={tampilAngka(
                                     school.totalSiswa
-                                }
+                                )}
                                 icon={
                                     GraduationCap
                                 }
@@ -883,9 +914,9 @@ export default function DetailSekolahPage() {
 
                             <StatCard
                                 label="Kelas"
-                                value={
+                                value={tampilAngka(
                                     school.totalKelas
-                                }
+                                )}
                                 icon={
                                     LayoutGrid
                                 }
@@ -897,9 +928,9 @@ export default function DetailSekolahPage() {
 
                             <StatCard
                                 label="Mapel"
-                                value={
+                                value={tampilAngka(
                                     school.totalMapel
-                                }
+                                )}
                                 icon={BookOpen}
                                 color="warning"
                                 isMobile={
@@ -908,10 +939,10 @@ export default function DetailSekolahPage() {
                             />
 
                             <StatCard
-                                label="Admin"
-                                value={
-                                    school.totalAdmin
-                                }
+                                label="Pengguna"
+                                value={tampilAngka(
+                                    school.totalPengguna
+                                )}
                                 icon={UserCog}
                                 color="danger"
                                 isMobile={

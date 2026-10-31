@@ -12,12 +12,18 @@ import {
 
 import {
   alasanTautanTidakTersedia,
+  basePathTenantSaatIni,
   buatTautanPendaftaran,
+  dapatkanSubdomainDariKonteks,
 } from "@/app/components/spmb/tautanPendaftaran";
+
+import { getProfile } from "@/services/user.service";
 
 export {
   alasanTautanTidakTersedia,
+  basePathTenantSaatIni,
   buatTautanPendaftaran,
+  dapatkanSubdomainDariKonteks,
 };
 
 export default function TautanPendaftaranModal({
@@ -25,19 +31,45 @@ export default function TautanPendaftaranModal({
   open,
   onClose,
   basePath,
+  subdomain,
+  sekolah,
 }) {
   const inputRef = useRef(null);
 
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState("");
+  const [profileSubdomain, setProfileSubdomain] = useState("");
+  const [loadingProfile, setLoadingProfile] = useState(false);
 
   const alasanModal = open
     ? alasanTautanTidakTersedia(jalur)
     : "";
 
-  const tautan = open
-    ? buatTautanPendaftaran(jalur, { basePath })
+  const subdomainSync = open
+    ? dapatkanSubdomainDariKonteks(jalur, {
+        basePath,
+        subdomain,
+        sekolah,
+      })
     : "";
+
+  const subdomainAktif = subdomainSync || profileSubdomain;
+  const basePathAktif = subdomainAktif ? `/${subdomainAktif}` : "";
+
+  const alasanTenant =
+    open && !alasanModal && !subdomainAktif
+      ? loadingProfile
+        ? "Memeriksa subdomain sekolah..."
+        : "Subdomain sekolah tidak ditemukan untuk konteks akun saat ini. Pastikan akun terhubung ke data sekolah dengan subdomain yang valid."
+      : "";
+
+  const tautan =
+    open && basePathAktif
+      ? buatTautanPendaftaran(jalur, {
+          basePath: basePathAktif,
+          subdomain: subdomainAktif,
+        })
+      : "";
 
   useEffect(() => {
     if (open) {
@@ -47,6 +79,37 @@ export default function TautanPendaftaranModal({
       });
     }
   }, [open, jalur?.id]);
+
+  useEffect(() => {
+    if (!open) return;
+    if (subdomainSync) return;
+
+    let cancelled = false;
+    Promise.resolve().then(() => {
+      if (!cancelled) setLoadingProfile(true);
+    });
+
+    getProfile()
+      .then((response) => {
+        if (cancelled) return;
+        const sub = response?.data?.sekolah?.subdomain;
+        if (sub && typeof sub === "string") {
+          setProfileSubdomain(sub.trim().replace(/^\/+|\/+$/g, ""));
+        }
+      })
+      .catch((err) => {
+        console.error("Gagal mengambil profil sekolah untuk tautan PPDB:", err);
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setLoadingProfile(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [open, subdomainSync]);
 
   useEffect(() => {
     if (!open) {
@@ -76,6 +139,7 @@ export default function TautanPendaftaranModal({
     if (!tautan) {
       setError(
         alasanModal ||
+          alasanTenant ||
           "Tautan tidak dapat dibuat karena ID sekolah atau ID jalur tidak valid."
       );
 
@@ -83,12 +147,17 @@ export default function TautanPendaftaranModal({
     }
 
     try {
-      if (!navigator.clipboard?.writeText) {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(tautan);
+        setCopied(true);
+      } else if (inputRef.current) {
+        inputRef.current.select();
+        const ok = document.execCommand("copy");
+        if (!ok) throw new Error("Gagal menyalin tautan.");
+        setCopied(true);
+      } else {
         throw new Error("Clipboard tidak tersedia.");
       }
-
-      await navigator.clipboard.writeText(tautan);
-      setCopied(true);
     } catch {
       setCopied(false);
       setError(
@@ -170,6 +239,7 @@ export default function TautanPendaftaranModal({
             value={
               tautan ||
               alasanModal ||
+              alasanTenant ||
               "ID sekolah atau ID jalur tidak tersedia"
             }
             onFocus={(event) => event.target.select()}
@@ -177,7 +247,7 @@ export default function TautanPendaftaranModal({
           />
         </div>
 
-        {(alasanModal || error) && (
+        {(alasanModal || alasanTenant || error) && (
           <div className="mt-3 flex items-start gap-2 rounded-md border border-[color-mix(in_srgb,var(--color-warning)_28%,transparent)] bg-[color-mix(in_srgb,var(--color-warning)_8%,transparent)] px-3 py-2 text-xs text-[var(--color-warning)]">
             <AlertCircle
               size={14}
@@ -185,12 +255,12 @@ export default function TautanPendaftaranModal({
             />
 
             <span className="leading-5">
-              {error || alasanModal}
+              {error || alasanModal || alasanTenant}
             </span>
           </div>
         )}
 
-        {statusNonaktif && !alasanModal && (
+        {statusNonaktif && !alasanModal && !alasanTenant && (
           <div className="mt-3 rounded-md border border-[color-mix(in_srgb,var(--color-warning)_28%,transparent)] bg-[color-mix(in_srgb,var(--color-warning)_8%,transparent)] px-3 py-2 text-xs leading-5 text-[var(--color-warning)]">
             Jalur ini berstatus nonaktif. Formulir tetap dapat dibuka,
             tetapi pendaftaran akan ditolak Backend bila jalur tidak

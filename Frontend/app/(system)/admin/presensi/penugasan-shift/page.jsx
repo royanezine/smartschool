@@ -1161,7 +1161,7 @@ export default function PenugasanShiftPage() {
                             </td>
                             <td className="px-5 py-4">
                               <div className="font-medium theme-text">
-                                {jabatan || "Pegawai"}
+                                {jabatan || "-"}
                               </div>
                               {item.nip && (
                                 <p className="mt-1 text-xs theme-text-muted">

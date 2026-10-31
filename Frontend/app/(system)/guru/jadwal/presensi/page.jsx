@@ -2009,7 +2009,7 @@ export default function PresensiGuruPage() {
           className="
             fixed inset-0 z-[100]
             flex items-center justify-center
-            bg-[color-mix(in_srgb,var(--color-text)_82%,transparent)]
+            bg-[color-mix(in_srgb,var(--color-background)_82%,transparent)]
             p-4
             backdrop-blur-sm
           "
@@ -2079,7 +2079,7 @@ export default function PresensiGuruPage() {
 
             <div
               className="
-                bg-[color-mix(in_srgb,var(--color-text)_88%,var(--color-card))]
+                theme-card-soft
                 p-4
                 sm:p-6
               "

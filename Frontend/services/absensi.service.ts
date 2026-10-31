@@ -1,4 +1,5 @@
 import { apiFetch } from "../lib/api";
+import { getToken } from "../lib/auth";
 
 
 export type AbsensiStatus = "hadir" | "izin" | "sakit" | "alpha";
@@ -13,11 +14,24 @@ export type StatusShiftKerjaAbsensi =
   | "pulang_cepat"
   | "terlambat_dan_pulang_cepat";
 
+export interface AbsensiPeraan {
+  id?: string;
+  nama?: string | null;
+  namaTampilan?: string | null;
+}
+
 export interface AbsensiPengguna {
   id?: string;
   namaLengkap?: string;
+  namaPengguna?: string | null;
   nisn?: string | null;
   nis?: string | null;
+  nip?: string | null;
+  nipd?: string | null;
+  nuptk?: string | null;
+  jabatan?: string | null;
+  avatar?: string | null;
+  peran?: AbsensiPeraan | null;
 }
 
 export interface AbsensiShiftKerja {
@@ -61,6 +75,7 @@ export interface Absensi {
 
   pengguna?: AbsensiPengguna | null;
   shiftKerja?: AbsensiShiftKerja | null;
+  kelas?: { id: string; nama?: string | null; tingkat?: string | number | null } | null;
 }
 
 export interface CreateAbsensiData {
@@ -124,6 +139,7 @@ export interface AbsensiListParams {
   sekolahId?: string;
   kelasId?: string;
   penggunaId?: string;
+  shiftKerjaId?: string;
   tanggal?: string;
   tanggalMulai?: string;
   tanggalSelesai?: string;
@@ -218,6 +234,52 @@ export async function getAbsensiSekolah(
   };
 }
 
+
+
+export interface UpdateAbsensiPayload {
+  status?: AbsensiFilterStatus;
+  keterangan?: string | null;
+}
+
+/**
+ * PATCH /api/absensi/:id — hanya `status` dan `keterangan` yang boleh dikirim
+ * (lihat Backend/src/validations/absensi.validation.ts).
+ */
+export async function updateAbsensi(
+  id: string,
+  payload: UpdateAbsensiPayload,
+): Promise<Absensi> {
+  if (!id) {
+    throw new Error("ID absensi tidak ditemukan.");
+  }
+
+  const body: Record<string, unknown> = {};
+
+  if (payload?.status !== undefined) {
+    body.status = payload.status;
+  }
+
+  if (payload?.keterangan !== undefined) {
+    body.keterangan = payload.keterangan;
+  }
+
+  if (Object.keys(body).length === 0) {
+    throw new Error("Tidak ada perubahan yang perlu disimpan.");
+  }
+
+  const response = await apiFetch(
+    `/api/absensi/${encodeURIComponent(id)}`,
+    {
+      method: "PATCH",
+      body: JSON.stringify(body),
+    },
+  );
+
+  const result = unwrapObject(response);
+  const data = unwrapObject(result.data);
+
+  return (Object.keys(data).length > 0 ? data : result) as Absensi;
+}
 
 
 function unwrapArray<T>(value: unknown): T[] {
@@ -580,6 +642,8 @@ export async function getRiwayatShiftSaya(
 
 export interface MonitoringKehadiranGuru {
   id: string;
+  penggunaId?: string | null;
+  absensiId?: string | null;
   namaLengkap: string;
   nip?: string | null;
   email?: string | null;
@@ -605,6 +669,15 @@ export interface MonitoringGuruParams {
   shiftKerjaId?: string;
 }
 
+/**
+ * Endpoint `GET /api/absensi/monitoring-guru` mengembalikan baris `Absensi`
+ * mentah (relasi `pengguna`, `shiftKerja`, `kelas`). Struct di sini
+ * menormalkannya agar `id` = penggunaId, sehingga rekap per guru tidak lagi
+ * mencocokkan penggunaId dengan id baris absensi.
+ *
+ * Endpoint ini hanya berisi guru yang SUDAH punya catatan absensi; daftar guru
+ * yang belum absen tidak dapat diturunkan dari respons ini.
+ */
 export async function getMonitoringKehadiranGuru(
   params: string | MonitoringGuruParams,
 ): Promise<MonitoringGuruResponse> {
@@ -638,18 +711,47 @@ export async function getMonitoringKehadiranGuru(
   const result = unwrapObject(response);
   const payload = unwrapObject(result.data);
 
-  const data = Array.isArray(payload.data)
-    ? payload.data
-    : Array.isArray(result.data)
-      ? result.data
-      : [];
+  const rows = [
+    result.data,
+    payload.data,
+    payload.items,
+    result.items,
+  ].find(Array.isArray) as Record<string, any>[] | undefined;
+
+  const data: MonitoringKehadiranGuru[] = (rows ?? []).map((item) => {
+    const record = unwrapObject(item);
+    const pengguna = unwrapObject(record.pengguna);
+
+    const penggunaId =
+      record.penggunaId ?? pengguna.id ?? record.pengguna?.id ?? null;
+
+    return {
+      // Pertahankan field mentah agar konsumen lama tetap membaca
+      // waktuMasuk/status/metode apa adanya.
+      ...record,
+      id: String(penggunaId ?? record.id ?? ""),
+      absensiId: record.id ?? null,
+      penggunaId,
+      namaLengkap:
+        pengguna.namaLengkap ?? record.namaLengkap ?? "-",
+      nip: pengguna.nip ?? pengguna.nuptk ?? record.nip ?? null,
+      email: pengguna.email ?? record.email ?? null,
+      shiftKerja:
+        record.shiftKerja ?? pengguna.shiftKerjaMaster ?? null,
+      absensi: record as unknown as Absensi,
+      statusMonitoring: String(
+        record.statusShift ?? record.status ?? "hadir",
+      ),
+    };
+  });
 
   return {
     tanggal: String(payload.tanggal ?? tanggal),
-    totalGuru: Number(payload.totalGuru ?? data.length),
-    sudahAbsen: Number(payload.sudahAbsen ?? 0),
-    belumAbsen: Number(payload.belumAbsen ?? 0),
-    data: data as MonitoringKehadiranGuru[],
+    // Hanya baris yang benar-benar dikembalikan Backend yang dihitung.
+    totalGuru: data.length,
+    sudahAbsen: data.length,
+    belumAbsen: 0,
+    data,
   };
 }
 
@@ -671,11 +773,96 @@ export async function getMetodeAbsensiAktif(): Promise<string[]> {
 
 
 
+export interface AbsensiExportResult {
+  blob: Blob;
+  fileName: string;
+}
+
+function resolveExportBaseUrl(): string {
+  const base = (
+    process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
+  ).replace(/\/+$/, "");
+
+  return base.endsWith("/api") ? base : `${base}/api`;
+}
+
+function buildAbsensiQuery(params: AbsensiListParams): string {
+  const query = new URLSearchParams();
+
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== "") {
+      query.set(key, String(value));
+    }
+  });
+
+  return query.toString();
+}
+
+/**
+ * GET /api/absensi/export — rekap absensi (XLSX) memakai filter yang sama
+ * dengan daftar absensi. Dipakai agar export tetap mencakup seluruh baris
+ * yang cocok dengan filter, bukan hanya halaman yang sedang tampil.
+ */
+export async function exportAbsensiFile(
+  params: AbsensiListParams = {},
+): Promise<AbsensiExportResult> {
+  const token = typeof window !== "undefined" ? getToken() : null;
+
+  if (!token) {
+    throw new Error("Token login tidak ditemukan. Silakan login kembali.");
+  }
+
+  const query = buildAbsensiQuery(params);
+  const url = `${resolveExportBaseUrl()}/absensi/export${query ? `?${query}` : ""}`;
+
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept:
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel, application/octet-stream",
+    },
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    let message = `Gagal export rekap absensi (${response.status})`;
+
+    try {
+      const contentType = response.headers.get("content-type");
+
+      if (contentType?.includes("application/json")) {
+        const json = await response.json();
+        message = json?.message || json?.error || message;
+      }
+    } catch {
+      // Gunakan pesan default.
+    }
+
+    throw new Error(message);
+  }
+
+  const blob = await response.blob();
+
+  if (!blob.size) {
+    throw new Error("File rekap absensi dari backend kosong.");
+  }
+
+  const disposition = response.headers.get("content-disposition") || "";
+  const match = disposition.match(/filename\*?=(?:UTF-8'')?"?([^";]+)"?/i);
+
+  return {
+    blob,
+    fileName: match?.[1] || `rekap-absensi-${new Date().toISOString().slice(0, 10)}.xlsx`,
+  };
+}
+
 const absensiService = {
   getAbsensiSaya,
   getAbsensiKelas,
   getAbsensiSekolah,
   createAbsensi,
+  updateAbsensi,
   absenDenganLokasi,
   absenDenganBarcode,
   absenDenganFace,
@@ -687,6 +874,7 @@ const absensiService = {
   getRiwayatShiftSaya,
   getMonitoringKehadiranGuru,
   getMetodeAbsensiAktif,
+  exportAbsensiFile,
 };
 
 export default absensiService;

@@ -19,7 +19,15 @@ export type LantaiPayload = {
 };
 
 
-function normalizeGedungPayload(data: GedungPayload) {
+/**
+ * `createGedungSchema` di Backend memakai `z.string().optional()`, sehingga
+ * `null` ditolak sebagai 400. Field opsional yang kosong harus dihilangkan
+ * (create) atau dikirim sebagai string kosong (update, agar bisa dikosongkan).
+ */
+function normalizeGedungPayload(
+  data: GedungPayload,
+  { forUpdate = false }: { forUpdate?: boolean } = {},
+) {
   const nama = String(data.nama ?? "").trim();
   const kode = String(data.kode ?? "").trim();
   const fotoGedung = String(data.fotoGedung ?? "").trim();
@@ -59,12 +67,18 @@ function normalizeGedungPayload(data: GedungPayload) {
     }
   }
 
-  return {
-    nama,
-    kode: kode || null,
-    fotoGedung: fotoGedung || null,
-  };
-}
+  if (forUpdate) {
+      // PUT memakai `createGedungSchema.partial()`; string kosong valid dan
+      // membuat field opsional benar-benar dikosongkan.
+      return { nama, kode, fotoGedung };
+    }
+
+    return {
+      nama,
+      ...(kode ? { kode } : {}),
+      ...(fotoGedung ? { fotoGedung } : {}),
+    };
+  }
 
 
 export async function getGedung() {
@@ -92,16 +106,16 @@ export async function updateGedung(
     throw new Error("ID gedung tidak ditemukan.");
   }
 
-  const payload = normalizeGedungPayload(data);
+  const payload = normalizeGedungPayload(data, { forUpdate: true });
 
-  return apiFetch(
-    `/api/infrastruktur/gedung/${encodeURIComponent(id)}`,
-    {
-      method: "PUT",
-      body: JSON.stringify(payload),
-    }
-  );
-}
+    return apiFetch(
+      `/api/infrastruktur/gedung/${encodeURIComponent(id)}`,
+      {
+        method: "PUT",
+        body: JSON.stringify(payload),
+      }
+    );
+  }
 
 
 export async function deleteGedung(id: string) {

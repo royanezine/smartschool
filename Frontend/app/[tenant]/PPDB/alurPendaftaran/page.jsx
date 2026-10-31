@@ -1,1 +1,1 @@
-export { default } from "@/app/(public)/PPDB/alurPendaftaran/page";
+export { default } from "@/app/components/ppdb/PpdbAlurPendaftaran";

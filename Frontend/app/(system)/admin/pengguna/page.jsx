@@ -1,7 +1,6 @@
 "use client";
 
 import { getUsers, updateUserStatus } from "@/services/user.service";
-import { getToken } from "@/lib/auth";
 
 import {
   useCallback,
@@ -47,6 +46,8 @@ const API_URL = (
   process.env.NEXT_PUBLIC_API_URL ||
   "http://localhost:5000"
 ).replace(/\/$/, "");
+
+
 
 
 
@@ -545,93 +546,33 @@ export default function PenggunaPage() {
 
         setError("");
 
-        const token = getToken();
+        const roleMap = {
+          Guru: "guru",
+          Siswa: "siswa",
+          Staff: "staff",
+          Admin: "admin",
+        };
 
-        const params =
-          new URLSearchParams();
+        // Memakai service resmi pengguna (services/user.service.ts) agar
+        // kontrak endpoint /api/users konsisten dengan backend.
+        const result = await getUsers({
+          page: pageNumber,
+          limit: LIMIT,
 
-        params.set(
-          "page",
-          String(pageNumber),
-        );
+          search: searchValue.trim() || undefined,
 
-        params.set(
-          "limit",
-          String(LIMIT),
-        );
+          role:
+            roleValue && roleValue !== "Semua"
+              ? roleMap[roleValue] || roleValue.toLowerCase()
+              : undefined,
 
-        if (
-          searchValue.trim()
-        ) {
-          params.set(
-            "search",
-            searchValue.trim(),
-          );
-        }
-
-        if (
-          roleValue &&
-          roleValue !== "Semua"
-        ) {
-          const roleMap = {
-            Guru: "guru",
-            Siswa: "siswa",
-            Staff: "staff",
-            Admin: "admin",
-          };
-
-          params.set(
-            "role",
-            roleMap[
-              roleValue
-            ] ||
-              roleValue.toLowerCase(),
-          );
-        }
-
-        if (
-          statusValue &&
-          statusValue !== "Semua"
-        ) {
-          params.set(
-            "status",
-            statusValue ===
-              "Aktif"
-              ? "aktif"
-              : "nonaktif",
-          );
-        }
-
-        const response =
-          await fetch(
-            `${USERS_ENDPOINT}?${params.toString()}`,
-            {
-              method: "GET",
-
-              headers: {
-                Accept:
-                  "application/json",
-
-                ...(token
-                  ? {
-                      Authorization: `Bearer ${token}`,
-                    }
-                  : {}),
-              },
-
-              cache: "no-store",
-            },
-          );
-
-        const result =
-          await response.json();
-
-        if (!response.ok) {
-          throw new Error(
-            result?.message ||
-              "Gagal mengambil data pengguna",
-          );
-        }
+          status:
+            statusValue && statusValue !== "Semua"
+              ? statusValue === "Aktif"
+                ? "aktif"
+                : "nonaktif"
+              : undefined,
+        });
 
         const rawUsers =
           extractUsers(result);

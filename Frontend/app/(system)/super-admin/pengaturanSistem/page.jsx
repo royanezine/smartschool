@@ -17,10 +17,7 @@ import {
 
 import { getPengaturan, upsertPengaturan } from "@/services/pengaturan.service";
 import { getAuditLogs } from "@/services/auditLog.service";
-import {
-  getSekolahBinaan,
-} from "@/services/yayasan.service";
-import { getAllLangganan } from "@/services/langganan.service";
+import { getSemuaSekolahPlatform } from "@/services/platform.service";
 
 
 const themePrimaryGradient =
@@ -149,34 +146,15 @@ export default function PengaturanSistemPage() {
         setLoadingSchools(true);
         setSchoolError("");
 
-        let items = [];
+        // Super Admin memakai resource platform global (bukan endpoint yayasan
+        // yang mensyaratkan yayasanId).
+        const daftarSekolah =
+          await getSemuaSekolahPlatform();
 
-        try {
-          const response = await getSekolahBinaan();
-          const payload = unwrapData(response);
-          items = Array.isArray(payload?.items) ? payload.items : [];
-        } catch (err) {
-          if (err?.status !== 403) {
-            throw err;
-          }
-
-          // Super Admin tidak memiliki yayasanId, sehingga endpoint
-          // /api/yayasan/sekolah mengembalikan 403. Daftar sekolah yang
-          // dapat diakses Super Admin diambil dari data langganan.
-          const langganan = await getAllLangganan();
-          const unique = new Map();
-
-          langganan.forEach((item) => {
-            if (item?.sekolah?.id) {
-              unique.set(item.sekolah.id, {
-                id: item.sekolah.id,
-                nama: item.sekolah.nama,
-              });
-            }
-          });
-
-          items = Array.from(unique.values());
-        }
+        const items = daftarSekolah.map((item) => ({
+          id: item.id,
+          nama: item.nama,
+        }));
 
         if (!mounted) return;
 

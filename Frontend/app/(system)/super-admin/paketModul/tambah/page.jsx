@@ -249,6 +249,8 @@ function TambahPaketPageContent() {
     searchParams.get("duplikatId") ||
     (searchParams.get("duplikat") === "true" ? searchParams.get("id") : null);
 
+  const isDuplikat = Boolean(duplikatId);
+
 
   const [fiturList, setFiturList] = useState([]);
   const [loadingFitur, setLoadingFitur] = useState(true);

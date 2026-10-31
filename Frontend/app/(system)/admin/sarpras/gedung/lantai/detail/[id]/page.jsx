@@ -13,6 +13,10 @@ import {
   Loader2,
   AlertCircle,
   Users,
+  DoorOpen,
+  Plus,
+  Boxes,
+  ExternalLink,
 } from "lucide-react";
 
 import Header from "@/app/components/Header";
@@ -495,6 +499,122 @@ export default function DetailLantaiPage() {
                       </p>
                     </div>
                   </div>
+                </div>
+              </div>
+
+
+              {/* Section Daftar Ruangan */}
+              <div
+                className={`theme-card theme-border overflow-hidden rounded-2xl border ${themeCardShadow}`}
+              >
+                <div
+                  className={`theme-border flex flex-col gap-3 border-b px-6 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-8 ${themeSoftSurface}`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] text-[var(--color-primary)]">
+                      <DoorOpen size={20} />
+                    </div>
+                    <div>
+                      <h2 className="theme-text text-base font-semibold">
+                        Daftar Ruangan
+                      </h2>
+                      <p className="theme-text-muted mt-0.5 text-xs">
+                        Ruangan fisik dan alokasi fasilitas pada lantai ini.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        router.push(
+                          `/admin/sarpras/gedung/lantai/${data.id}/ruangan`
+                        )
+                      }
+                      className="inline-flex items-center gap-1.5 rounded-xl border theme-border px-3.5 py-2 text-xs font-semibold theme-text-secondary hover:text-[var(--color-primary)] hover:bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)] transition"
+                    >
+                      Kelola Ruangan
+                      <ExternalLink size={13} />
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        router.push(
+                          `/admin/sarpras/gedung/lantai/${data.id}/ruangan/tambah`
+                        )
+                      }
+                      className={`inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-semibold text-[var(--color-card)] ${themePrimaryGradient} ${themePrimaryShadow} hover:brightness-95 transition`}
+                    >
+                      <Plus size={14} />
+                      Tambah Ruangan
+                    </button>
+                  </div>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[650px] border-collapse text-left">
+                    <thead>
+                      <tr className={`theme-border border-b ${themeSoftSurface}`}>
+                        <th className="theme-text-muted px-6 py-3 text-[10px] font-semibold uppercase tracking-[0.08em]">
+                          No
+                        </th>
+                        <th className="theme-text-muted px-6 py-3 text-[10px] font-semibold uppercase tracking-[0.08em]">
+                          Nama Ruangan
+                        </th>
+                        <th className="theme-text-muted px-6 py-3 text-[10px] font-semibold uppercase tracking-[0.08em]">
+                          Kode
+                        </th>
+                        <th className="theme-text-muted px-6 py-3 text-[10px] font-semibold uppercase tracking-[0.08em]">
+                          Status
+                        </th>
+                        <th className="theme-text-muted px-6 py-3 text-[10px] font-semibold uppercase tracking-[0.08em]">
+                          Kelas Terhubung
+                        </th>
+                        <th className="theme-text-muted px-6 py-3 text-[10px] font-semibold uppercase tracking-[0.08em]">
+                          Jumlah Asset
+                        </th>
+                        <th className="theme-text-muted px-6 py-3 text-[10px] font-semibold uppercase tracking-[0.08em] text-right">
+                          Aksi
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td colSpan={7} className="px-6 py-12 text-center">
+                          <div
+                            className={`theme-text-muted mx-auto flex h-14 w-14 items-center justify-center rounded-2xl ${themeSoftSurface}`}
+                          >
+                            <DoorOpen size={26} className="text-[var(--color-primary)]" />
+                          </div>
+
+                          <h3 className="theme-text-secondary mt-3.5 text-sm font-semibold">
+                            Belum Ada Data Ruangan
+                          </h3>
+
+                          <p className="theme-text-muted mt-1 text-xs max-w-sm mx-auto leading-relaxed">
+                            Data ruangan pada lantai ini belum tersedia. Modul Pengelolaan Ruangan siap digunakan dan sedang menunggu endpoint integrasi Backend.
+                          </p>
+
+                          <div className="mt-4 flex justify-center gap-2.5">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                router.push(
+                                  `/admin/sarpras/gedung/lantai/${data.id}/ruangan/tambah`
+                                )
+                              }
+                              className={`inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-semibold text-[var(--color-card)] ${themePrimaryGradient} ${themePrimaryShadow} hover:brightness-95 transition`}
+                            >
+                              <Plus size={14} />
+                              Tambah Ruangan Pertama
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
               </div>
 

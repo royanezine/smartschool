@@ -29,9 +29,9 @@ import {
 } from "lucide-react";
 
 import {
-  getYayasanSummary,
-  getSekolahBinaan,
-} from "@/services/yayasan.service";
+  getPlatformRingkasan,
+  getSemuaSekolahPlatform,
+} from "@/services/platform.service";
 
 
 const ITEMS_PER_PAGE = 5;
@@ -383,8 +383,8 @@ export default function DataYayasanPage() {
           summaryResponse,
           sekolahResponse,
         ] = await Promise.all([
-          getYayasanSummary(),
-          getSekolahBinaan(),
+          getPlatformRingkasan(),
+          getSemuaSekolahPlatform(),
         ]);
 
         const summaryData =
@@ -412,12 +412,12 @@ export default function DataYayasanPage() {
 
           sekolahUjiCoba:
             Number(
-              summaryData.sekolahUjiCoba
+              summaryData.langgananTrialAktif
             ) || 0,
 
           totalPenggunaAktif:
             Number(
-              summaryData.totalPenggunaAktif
+              summaryData.totalPengguna
             ) || 0,
         });
 

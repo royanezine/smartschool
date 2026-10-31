@@ -24,32 +24,51 @@ import PpdbHeader from "@/app/components/ppdb/PpdbHeader";
 import PpdbFooter from "@/app/components/ppdb/PpdbFooter";
 import { urlFormulirPendaftaran } from "@/app/components/ppdb/rutePpdb";
 
-import { uploadBerkasPpdb } from "@/services/ppdb.service";
+import {
+  uploadBerkasPpdb,
+  getDetailSaya,
+  getPendaftarPpdbById,
+  getOpsiPpdbSekolah,
+} from "@/services/ppdb.service";
+import { getJalurPpdbById } from "@/services/jalurPpdb.service";
 
-
-const dokumenList = [
-  {
+export const SEMUA_BERKAS_PPDB = {
+  KK: {
     id: "KK",
-    number: "01",
     label: "Kartu Keluarga",
-    description:
-      "Unggah Kartu Keluarga yang memuat data calon siswa.",
+    description: "Unggah Kartu Keluarga yang memuat data calon siswa.",
   },
-  {
+  AKTE: {
     id: "AKTE",
-    number: "02",
     label: "Akta Kelahiran",
     description: "Unggah Akta Kelahiran calon siswa.",
   },
-  {
+  IJAZAH: {
     id: "IJAZAH",
-    number: "03",
     label: "Ijazah / Surat Keterangan Lulus",
-    description:
-      "Unggah Ijazah atau dokumen kelulusan calon siswa.",
+    description: "Unggah Ijazah atau dokumen kelulusan calon siswa.",
   },
-];
-
+  SERTIFIKAT: {
+    id: "SERTIFIKAT",
+    label: "Sertifikat Prestasi",
+    description: "Unggah sertifikat atau piagam prestasi calon siswa.",
+  },
+  SKTM: {
+    id: "SKTM",
+    label: "Surat Keterangan Tidak Mampu (SKTM)",
+    description: "Unggah Surat Keterangan Tidak Mampu dari kelurahan/desa setempat.",
+  },
+  KIP: {
+    id: "KIP",
+    label: "Kartu Indonesia Pintar (KIP)",
+    description: "Unggah Kartu Indonesia Pintar (KIP) atau KPS calon siswa.",
+  },
+  SURAT_TUGAS: {
+    id: "SURAT_TUGAS",
+    label: "Surat Penugasan Orang Tua",
+    description: "Unggah surat penugasan kerja atau mutasi instansi orang tua/wali.",
+  },
+};
 
 const ALLOWED_TYPES = [
   "image/jpeg",
@@ -171,8 +190,8 @@ function simpanBuktiBerkas(pendaftaranId, namaBerkas, berkas) {
 
 function buatStatusAwal() {
   return Object.fromEntries(
-    dokumenList.map((document) => [
-      document.id,
+    Object.keys(SEMUA_BERKAS_PPDB).map((id) => [
+      id,
       {
         file: null,
         status: "idle",
@@ -237,6 +256,31 @@ export default function PpdbUploadBerkas({ basePath = "" }) {
   const [nomorPendaftaran, setNomorPendaftaran] = useState("");
   const [idStatus, setIdStatus] = useState("checking");
   const [idError, setIdError] = useState("");
+
+  const [berkasWajib, setBerkasWajib] = useState([
+    "KK",
+    "AKTE",
+    "IJAZAH",
+  ]);
+
+  const dokumenList = useMemo(() => {
+    const list =
+      Array.isArray(berkasWajib) && berkasWajib.length > 0
+        ? berkasWajib
+        : ["KK", "AKTE", "IJAZAH"];
+
+    return list.map((id, index) => {
+      const meta = SEMUA_BERKAS_PPDB[id] || {
+        id,
+        label: id,
+        description: `Unggah dokumen ${id} calon siswa.`,
+      };
+      return {
+        ...meta,
+        number: String(index + 1).padStart(2, "0"),
+      };
+    });
+  }, [berkasWajib]);
 
   const [dokumen, setDokumen] = useState(buatStatusAwal);
   const [submitError, setSubmitError] = useState("");
@@ -339,13 +383,137 @@ export default function PpdbUploadBerkas({ basePath = "" }) {
     setIdError("");
   }, [queryId, searchParams]);
 
+  useEffect(() => {
+    let cancelled = false;
+
+    async function muatDataBackend() {
+      const jalurId =
+        searchParams.get("jalurPpdbId") || searchParams.get("jalurId");
+      const sekolahId = searchParams.get("sekolahId");
+
+      // 1. Ambil berkas wajib langsung dari jalurPpdb jika ID jalur ada di URL
+      if (jalurId) {
+        try {
+          const jalurRes = await getJalurPpdbById(jalurId);
+          if (
+            !cancelled &&
+            jalurRes?.success &&
+            Array.isArray(jalurRes?.data?.berkasWajib) &&
+            jalurRes.data.berkasWajib.length > 0
+          ) {
+            setBerkasWajib(jalurRes.data.berkasWajib);
+          }
+        } catch {}
+      }
+
+      // 2. Ambil detail pendaftar saya via token pendaftaran
+      if (tokenPendaftaran) {
+        try {
+          const detailRes = await getDetailSaya(tokenPendaftaran);
+          if (!cancelled && detailRes?.success && detailRes?.data) {
+            const wajib =
+              detailRes.data.berkas?.wajib ||
+              detailRes.data.jalur?.berkasWajib;
+            if (Array.isArray(wajib) && wajib.length > 0) {
+              setBerkasWajib(wajib);
+            }
+            if (detailRes.data.pendaftar?.nomorPendaftaran) {
+              setNomorPendaftaran(detailRes.data.pendaftar.nomorPendaftaran);
+            }
+            if (Array.isArray(detailRes.data.berkas?.terunggah)) {
+              setDokumen((current) => {
+                const next = { ...current };
+                for (const item of detailRes.data.berkas.terunggah) {
+                  if (item?.namaBerkas && next[item.namaBerkas]) {
+                    next[item.namaBerkas] = {
+                      ...next[item.namaBerkas],
+                      status: "success",
+                      berkas: item,
+                      error: "",
+                    };
+                  }
+                }
+                return next;
+              });
+            }
+            return;
+          }
+        } catch {}
+      }
+
+      // 3. Ambil detail pendaftar sebagai admin jika ID pendaftaran tersedia
+      if (pendaftaranId) {
+        try {
+          const pendaftarRes = await getPendaftarPpdbById(pendaftaranId);
+          if (!cancelled && pendaftarRes?.success && pendaftarRes?.data) {
+            const wajib = pendaftarRes.data.jalurPpdb?.berkasWajib;
+            if (Array.isArray(wajib) && wajib.length > 0) {
+              setBerkasWajib(wajib);
+            }
+            if (pendaftarRes.data.nomorPendaftaran) {
+              setNomorPendaftaran(pendaftarRes.data.nomorPendaftaran);
+            }
+            if (Array.isArray(pendaftarRes.data.berkasPpdb)) {
+              setDokumen((current) => {
+                const next = { ...current };
+                for (const item of pendaftarRes.data.berkasPpdb) {
+                  if (item?.namaBerkas && next[item.namaBerkas]) {
+                    next[item.namaBerkas] = {
+                      ...next[item.namaBerkas],
+                      status: "success",
+                      berkas: item,
+                      error: "",
+                    };
+                  }
+                }
+                return next;
+              });
+            }
+            return;
+          }
+        } catch {}
+      }
+
+      // 4. Jika sekolahId tersedia, ambil opsi PPDB sekolah
+      if (sekolahId) {
+        try {
+          const opsiRes = await getOpsiPpdbSekolah(sekolahId);
+          if (
+            !cancelled &&
+            opsiRes?.success &&
+            Array.isArray(opsiRes?.data?.jalur)
+          ) {
+            const target = jalurId
+              ? opsiRes.data.jalur.find((j) => j.id === jalurId)
+              : opsiRes.data.jalur[0];
+            if (
+              target &&
+              Array.isArray(target.berkasWajib) &&
+              target.berkasWajib.length > 0
+            ) {
+              setBerkasWajib(target.berkasWajib);
+            }
+          }
+        } catch {}
+      }
+    }
+
+    if (pendaftaranId || tokenPendaftaran || searchParams.get("jalurPpdbId")) {
+      muatDataBackend();
+    }
+
+    return () => {
+      cancelled = true;
+    };
+  }, [pendaftaranId, tokenPendaftaran, searchParams]);
+
   const berhasilCount = useMemo(
     () =>
       dokumenList.filter(
         (document) =>
           dokumen[document.id]?.status === "success"
       ).length,
-    [dokumen]
+    [dokumen, dokumenList]
   );
 
   const selectedCount = useMemo(
@@ -353,7 +521,7 @@ export default function PpdbUploadBerkas({ basePath = "" }) {
       dokumenList.filter(
         (document) => Boolean(dokumen[document.id]?.file)
       ).length,
-    [dokumen]
+    [dokumen, dokumenList]
   );
 
   const allSuccess = berhasilCount === dokumenList.length;

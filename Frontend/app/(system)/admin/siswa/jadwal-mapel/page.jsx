@@ -109,6 +109,22 @@ function cellStyle(tipe) {
 }
 
 
+function StatCard({ icon: Icon, title, value }) {
+  return (
+    <section className={`theme-card border ${themeNeutralBorder} ${themeCardShadow} min-w-0 rounded-xl p-3 sm:p-4`}>
+      <div className="flex items-center gap-2.5">
+        <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${themePrimarySoft} ${themePrimaryText}`}>
+          <Icon size={18} />
+        </span>
+        <div className="min-w-0">
+          <p className="truncate text-[11px] font-medium theme-text-muted">{title}</p>
+          <p className="mt-0.5 text-lg font-bold theme-text">{value}</p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function JadwalPelajaranPage() {
   const [isCollapsed, setIsCollapsed] =
     useState(false);

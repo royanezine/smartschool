@@ -1,5 +1,7 @@
 "use client";
 
+/* eslint-disable @next/next/no-img-element */
+
 import {
   useCallback,
   useEffect,
@@ -306,6 +308,7 @@ export default function DetailPendaftaranPage() {
 
   const [kelasList, setKelasList] = useState([]);
   const [kelasId, setKelasId] = useState("");
+  const [catatan, setCatatan] = useState("");
   const [memproses, setMemproses] = useState(false);
   const [actionError, setActionError] = useState("");
   const [actionSuccess, setActionSuccess] = useState("");
@@ -394,8 +397,9 @@ export default function DetailPendaftaranPage() {
 
       const response = await verifikasiPpdb(id, {
         status: statusVerifikasi,
-        ...(statusVerifikasi === "lulus" && kelasId
-          ? { kelasId }
+        catatan: catatan.trim() || undefined,
+        ...(statusVerifikasi === "lulus" || statusVerifikasi === "diverifikasi"
+          ? (kelasId ? { kelasId } : {})
           : {}),
       });
 
@@ -610,6 +614,63 @@ export default function DetailPendaftaranPage() {
                       Kembali
                     </button>
                   </div>
+                </div>
+              </div>
+            ) : !data ? (
+              <div
+                className={`
+                  flex min-h-[400px]
+                  items-center justify-center
+                  rounded-2xl
+                  border ${themeNeutralBorder}
+                  theme-card
+                  ${themeCardShadow}
+                  p-6
+                `}
+              >
+                <div className="text-center">
+                  <div
+                    className={`
+                      mx-auto
+                      flex h-12 w-12
+                      items-center justify-center
+                      rounded-full
+                      ${themeNeutralSurface}
+                    `}
+                  >
+                    <AlertCircle
+                      size={24}
+                      className="theme-text-muted"
+                    />
+                  </div>
+                  <h2 className="mt-4 text-sm font-bold theme-text">
+                    Data Pendaftar Tidak Ditemukan
+                  </h2>
+                  <p className="mt-1 text-xs theme-text-muted">
+                    Pendaftar dengan ID tersebut tidak tersedia atau sudah dihapus.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      router.push(
+                        "/admin/spmb/data-pendaftaran"
+                      )
+                    }
+                    className={`
+                      mt-4
+                      inline-flex items-center gap-2
+                      rounded-lg
+                      ${themePrimaryGradient}
+                      px-4 py-2
+                      text-xs font-semibold
+                      text-[var(--color-card)]
+                      transition
+                      hover:opacity-90
+                    `}
+                  >
+                    <ArrowLeft size={14} />
+                    Kembali ke Data Pendaftaran
+                  </button>
                 </div>
               </div>
             ) : (
@@ -969,18 +1030,26 @@ export default function DetailPendaftaranPage() {
                         )}
 
                         {sudahDiputuskan ? (
-                          <p className="text-xs theme-text-secondary">
-                            Pendaftar sudah memiliki status{" "}
-                            <strong>
-                              {statusInfo.label}
-                            </strong>
-                            . Perubahan status tidak lagi
-                            ditampilkan di sini.
-                          </p>
+                          <div className="space-y-2">
+                            <p className="text-xs theme-text-secondary">
+                              Pendaftar sudah memiliki status{" "}
+                              <strong>
+                                {statusInfo.label}
+                              </strong>
+                              . Perubahan status tidak lagi
+                              dapat dilakukan di sini.
+                            </p>
+                            {data?.hasilSeleksiPpdb?.catatan && (
+                              <div className="rounded-lg border border-[color-mix(in_srgb,var(--color-text)_10%,transparent)] bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)] p-2.5 text-xs">
+                                <span className="font-semibold theme-text">Catatan: </span>
+                                <span className="theme-text-secondary">{data.hasilSeleksiPpdb.catatan}</span>
+                              </div>
+                            )}
+                          </div>
                         ) : (
                           <>
                             <p className="text-xs leading-5 theme-text-secondary">
-                              Kelulusan akan membuat akun
+                              Kelulusan/verifikasi akan membuat akun
                               siswa dan menempatkan pendaftar
                               pada kelas yang dipilih.
                               Penolakan tidak memerlukan
@@ -989,7 +1058,7 @@ export default function DetailPendaftaranPage() {
 
                             <label className="block">
                               <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wide theme-text-muted">
-                                Kelas untuk pendaftar lulus
+                                Kelas untuk pendaftar lulus / diverifikasi
                               </span>
 
                               <select
@@ -999,6 +1068,7 @@ export default function DetailPendaftaranPage() {
                                     event.target.value
                                   )
                                 }
+                                disabled={memproses}
                                 className={`theme-input theme-text theme-neutral-border h-9 w-full rounded-lg border ${themeNeutralSurface} px-2 text-xs outline-none ${themeFocus}`}
                               >
                                 <option value="">
@@ -1019,6 +1089,25 @@ export default function DetailPendaftaranPage() {
                               </select>
                             </label>
 
+                            <label className="block">
+                              <span className="mb-1 block text-[10px] font-semibold uppercase tracking-wide theme-text-muted">
+                                Catatan Verifikasi / Penolakan
+                              </span>
+
+                              <textarea
+                                rows={2}
+                                value={catatan}
+                                onChange={(e) =>
+                                  setCatatan(
+                                    e.target.value
+                                  )
+                                }
+                                disabled={memproses}
+                                placeholder="Tambahkan catatan kelulusan atau alasan penolakan..."
+                                className={`theme-input theme-text theme-neutral-border w-full rounded-lg border ${themeNeutralSurface} p-2 text-xs outline-none ${themeFocus}`}
+                              />
+                            </label>
+
                             <div className="flex flex-col gap-2">
                               <button
                                 type="button"
@@ -1028,7 +1117,7 @@ export default function DetailPendaftaranPage() {
                                 onClick={() =>
                                   proses(
                                     "lulus",
-                                    "Terima pendaftar ini dan buat akun siswa?"
+                                    "Verifikasi dan terima pendaftar ini serta buat akun siswa?"
                                   )
                                 }
                                 className={`${themePrimaryGradient} inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold text-[var(--color-card)] transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50`}
@@ -1043,7 +1132,7 @@ export default function DetailPendaftaranPage() {
                                     size={14}
                                   />
                                 )}
-                                Terima &amp; Jadikan Siswa
+                                Verifikasi &amp; Terima Siswa
                               </button>
 
                               <button
@@ -1052,7 +1141,7 @@ export default function DetailPendaftaranPage() {
                                 onClick={() =>
                                   proses(
                                     "ditolak",
-                                    "Tolak pendaftar ini?"
+                                    "Tolak pendaftaran calon siswa ini?"
                                   )
                                 }
                                 className="inline-flex items-center justify-center gap-2 rounded-lg border border-[color-mix(in_srgb,var(--color-danger)_24%,transparent)] px-3 py-2 text-xs font-semibold theme-danger transition hover:bg-[color-mix(in_srgb,var(--color-danger)_8%,transparent)] disabled:cursor-not-allowed disabled:opacity-50"

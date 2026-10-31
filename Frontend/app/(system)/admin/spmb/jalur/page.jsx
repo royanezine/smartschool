@@ -28,6 +28,7 @@ import {
 import TautanPendaftaranModal from "@/app/components/spmb/TautanPendaftaranModal";
 
 import {
+  getSessionUser,
   hasPermission,
   subscribeAuth,
 } from "@/lib/auth";
@@ -174,6 +175,15 @@ export default function JalurPPDBPage() {
 
   const [linkTarget, setLinkTarget] =
     useState(null);
+
+  const sessionUser = useMemo(() => {
+    try {
+      return getSessionUser();
+    } catch {
+      return null;
+    }
+  }, []);
+  const schoolSubdomain = sessionUser?.sekolah?.subdomain || "";
 
   const [loading, setLoading] =
     useState(true);
@@ -747,7 +757,25 @@ export default function JalurPPDBPage() {
                           </div>
 
 
-                          <p className="theme-text-secondary mt-2.5 text-xs leading-relaxed">
+                          <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                            {j.kategori && (
+                              <span className="inline-flex items-center rounded-md border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[var(--color-primary)] bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)]">
+                                {j.kategori}
+                              </span>
+                            )}
+                            {j.metodeRanking && (
+                              <span className="inline-flex items-center rounded-md border border-[color-mix(in_srgb,var(--color-text)_10%,transparent)] px-2 py-0.5 text-[10px] font-medium theme-text-muted">
+                                {j.metodeRanking === "jarak" ? "Ranking: Jarak" : "Ranking: Nilai"}
+                              </span>
+                            )}
+                            {Array.isArray(j.berkasWajib) && j.berkasWajib.length > 0 && (
+                              <span className="inline-flex items-center rounded-md border border-[color-mix(in_srgb,var(--color-text)_10%,transparent)] px-2 py-0.5 text-[10px] font-medium theme-text-muted">
+                                {j.berkasWajib.length} Berkas Wajib
+                              </span>
+                            )}
+                          </div>
+
+                          <p className="theme-text-secondary mt-2 text-xs leading-relaxed">
                             {j.deskripsi ||
                               "Tidak ada deskripsi."}
                           </p>
@@ -933,6 +961,7 @@ export default function JalurPPDBPage() {
       <TautanPendaftaranModal
         open={Boolean(linkTarget)}
         jalur={linkTarget}
+        subdomain={schoolSubdomain}
         onClose={() => setLinkTarget(null)}
       />
     </div>

@@ -136,16 +136,33 @@ function normalizeArticles(value: any): PublicArtikel[] {
 
 async function pubFetch<T>(
   path: string,
-  options: { noStore?: boolean } = {}
+  options: {
+    method?: string;
+    body?: any;
+    headers?: Record<string, string>;
+    noStore?: boolean;
+  } = {}
 ): Promise<T> {
   const url = `${cleanBase}/api/publik${path}`;
 
+  const isJsonBody = options.body && typeof options.body === "object";
+
   const res = await fetch(url, {
+    method: options.method || "GET",
+    ...(options.body
+      ? {
+          body: isJsonBody
+            ? JSON.stringify(options.body)
+            : options.body,
+        }
+      : {}),
     ...(options.noStore
       ? { cache: "no-store" as const }
       : { next: { revalidate: 60 } }),
     headers: {
       Accept: "application/json",
+      ...(isJsonBody ? { "Content-Type": "application/json" } : {}),
+      ...options.headers,
     },
   });
 
@@ -223,9 +240,42 @@ export const publikService = {
     ),
 
       getKonfigurasi: (subdomain: string) =>
-    pubFetch<Record<string, any>>(
-      `/${encodeURIComponent(subdomain)}/konfigurasi`
-    ),
-};
+        pubFetch<Record<string, any>>(
+          `/${encodeURIComponent(subdomain)}/konfigurasi`
+        ),
+
+      getPpdbOptions: (subdomain: string) =>
+        pubFetch<any>(
+          `/${encodeURIComponent(subdomain)}/ppdb`,
+          { noStore: true }
+        ),
+
+      getPpdbPengumuman: (
+        subdomain: string,
+        query: { page?: number; limit?: number } = {}
+      ) => {
+        const qs = new URLSearchParams();
+        if (query.page) qs.set("page", String(query.page));
+        if (query.limit) qs.set("limit", String(query.limit));
+        const qsStr = qs.toString();
+        return pubFetch<any>(
+          `/${encodeURIComponent(subdomain)}/ppdb/pengumuman${qsStr ? `?${qsStr}` : ""}`,
+          { noStore: true }
+        );
+      },
+
+      cekPendaftaran: (
+        subdomain: string,
+        payload: { nomorPendaftaran: string; nik: string }
+      ) =>
+        pubFetch<any>(
+          `/${encodeURIComponent(subdomain)}/ppdb/cek-pendaftaran`,
+          {
+            method: "POST",
+            body: payload,
+            noStore: true,
+          }
+        ),
+      };
 
 

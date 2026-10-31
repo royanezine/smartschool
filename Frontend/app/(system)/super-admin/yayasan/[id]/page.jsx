@@ -1,7 +1,10 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { getDetailSekolahBinaan } from "@/services/yayasan.service";
+import {
+    getPlatformYayasanDetail,
+    getSemuaSekolahPlatform,
+} from "@/services/platform.service";
 import {
     Building2,
     School,
@@ -74,6 +77,23 @@ const themeDangerSurface =
 const themeDangerBorder =
     "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
 
+function angkaAtauNull(value) {
+    if (value === null || value === undefined || value === "") {
+        return null;
+    }
+
+    const angka = Number(value);
+
+    return Number.isFinite(angka) ? angka : null;
+}
+
+function tampilAngka(value) {
+    return value === null || value === undefined
+        ? "-"
+        : value;
+}
+
+
 export default function DetailYayasanPage() {
     const params = useParams();
     const router = useRouter();
@@ -102,11 +122,24 @@ export default function DetailYayasanPage() {
                 setLoading(true);
                 setError("");
 
-                const result = await getDetailSekolahBinaan(id);
+                const [result, sekolahPlatform] =
+                    await Promise.all([
+                        getPlatformYayasanDetail(id),
+                        getSemuaSekolahPlatform(),
+                    ]);
 
                 if (cancelled) return;
 
                 const data = unwrapResponse(result);
+
+                const sekolahMilikYayasan = (
+                    Array.isArray(sekolahPlatform)
+                        ? sekolahPlatform
+                        : []
+                ).filter(
+                    (item) =>
+                        item?.yayasan?.id === id
+                );
 
                 console.log(
                     "DETAIL YAYASAN DATA:",
@@ -145,9 +178,10 @@ export default function DetailYayasanPage() {
                     [];
 
                 const daftarSekolah =
-                    Array.isArray(rawSekolah)
+                    Array.isArray(rawSekolah) &&
+                    rawSekolah.length > 0
                         ? rawSekolah
-                        : [];
+                        : sekolahMilikYayasan;
 
                 const normalized = {
                     id:
@@ -237,36 +271,49 @@ export default function DetailYayasanPage() {
                                 statistik?.totalSekolah ??
                                 rawYayasan?.jumlahSekolah ??
                                 rawYayasan?.totalSekolah ??
+                                rawYayasan?._count?.sekolah ??
                                 daftarSekolah.length ??
                                 0
                         ) || 0,
 
                     totalGuru:
-                        Number(
+                        angkaAtauNull(
                             statistik?.totalGuru ??
                                 statistik?.jumlahGuru ??
                                 rawYayasan?.totalGuru ??
-                                rawYayasan?.jumlahGuru ??
-                                0
-                        ) || 0,
+                                rawYayasan?.jumlahGuru
+                        ),
 
                     totalSiswa:
-                        Number(
+                        angkaAtauNull(
                             statistik?.totalSiswa ??
                                 statistik?.jumlahSiswa ??
                                 rawYayasan?.totalSiswa ??
-                                rawYayasan?.jumlahSiswa ??
-                                0
-                        ) || 0,
+                                rawYayasan?.jumlahSiswa
+                        ),
 
                     totalAdmin:
-                        Number(
+                        angkaAtauNull(
                             statistik?.totalAdmin ??
                                 statistik?.jumlahAdmin ??
                                 rawYayasan?.totalAdmin ??
-                                rawYayasan?.jumlahAdmin ??
-                                0
-                        ) || 0,
+                                rawYayasan?.jumlahAdmin
+                        ),
+
+                    totalPengguna:
+                        angkaAtauNull(
+                            statistik?.totalPengguna ??
+                                rawYayasan?.totalPengguna ??
+                                sekolahMilikYayasan.reduce(
+                                    (total, item) =>
+                                        total +
+                                        (Number(
+                                            item?._count
+                                                ?.pengguna
+                                        ) || 0),
+                                    0
+                                )
+                        ),
 
                     sekolah: daftarSekolah,
                 };
@@ -406,9 +453,10 @@ export default function DetailYayasanPage() {
     const StatusIcon = statusStyle.icon;
 
     const totalPengguna =
-        Number(yayasan.totalGuru || 0) +
-        Number(yayasan.totalSiswa || 0) +
-        Number(yayasan.totalAdmin || 0);
+        yayasan.totalPengguna === null ||
+        yayasan.totalPengguna === undefined
+            ? "-"
+            : yayasan.totalPengguna;
 
     return (
         <div className="theme-page theme-text min-h-full">
@@ -616,24 +664,34 @@ export default function DetailYayasanPage() {
                     </div>
                 </div>
 
+                <p className="mb-2 text-[11px] theme-text-secondary">
+                    Guru, Siswa, dan Admin belum tersedia dari API platform.
+                </p>
+
                 <div className="grid grid-cols-3 gap-4 mb-6">
                     <StatCard
                         icon={Users}
-                        value={yayasan.totalGuru}
+                        value={tampilAngka(
+                            yayasan.totalGuru
+                        )}
                         label="Guru"
                         color="primary"
                     />
 
                     <StatCard
                         icon={UserCheck}
-                        value={yayasan.totalSiswa}
+                        value={tampilAngka(
+                            yayasan.totalSiswa
+                        )}
                         label="Siswa"
                         color="success"
                     />
 
                     <StatCard
                         icon={User}
-                        value={yayasan.totalAdmin}
+                        value={tampilAngka(
+                            yayasan.totalAdmin
+                        )}
                         label="Admin"
                         color="info"
                     />

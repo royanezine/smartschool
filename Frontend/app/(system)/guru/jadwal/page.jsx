@@ -1239,7 +1239,7 @@ export default function PresensiGuruPage() {
 
 
       {cameraOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[color-mix(in_srgb,var(--color-text)_78%,transparent)] p-4 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[color-mix(in_srgb,var(--color-background)_78%,transparent)] p-4 backdrop-blur-sm">
           <div
             className={`theme-card w-full max-w-2xl overflow-hidden rounded-2xl ${themeCardShadow}`}
           >
@@ -1275,8 +1275,8 @@ export default function PresensiGuruPage() {
             </div>
 
 
-            <div className="bg-[color-mix(in_srgb,var(--color-text)_92%,var(--color-card))] p-4 sm:p-6">
-              <div className="relative mx-auto w-full max-w-[620px] overflow-hidden rounded-2xl bg-[color-mix(in_srgb,var(--color-text)_96%,var(--color-card))]">
+            <div className="theme-card-soft p-4 sm:p-6">
+              <div className="relative mx-auto w-full max-w-[620px] overflow-hidden rounded-2xl bg-[var(--color-card)]">
                 {!capturedPhoto ? (
                   <>
                     <video

@@ -1258,7 +1258,7 @@ export default function DetailRaportPage() {
                           akademik.map(
                             (item, index) => (
                               <tr
-                                key={`${item?.mapel || "mapel"}-${index}`}
+                                key={item?.mapel || `mapel-${index}`}
                                 className="theme-table-hover"
                               >
                                 <td className="theme-border theme-text-secondary border-b px-4 py-3 text-center text-sm">
