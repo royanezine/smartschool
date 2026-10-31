@@ -1079,7 +1079,7 @@ DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conrelid = '"asesme
 
 DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conrelid = '"pengumuman_ppdb"'::regclass AND conname = 'pengumuman_ppdb_sekolah_id_fkey') THEN ALTER TABLE "pengumuman_ppdb" ADD CONSTRAINT "pengumuman_ppdb_sekolah_id_fkey" FOREIGN KEY ("sekolah_id") REFERENCES "sekolah"("id") ON DELETE RESTRICT ON UPDATE CASCADE; END IF; END $$;
 
-ALTER INDEX "hasil_ujian_percobaan_ujian_id_key" RENAME TO "hasil_asesmen_percobaan_asesmen_id_key";
+ALTER INDEX IF EXISTS "hasil_ujian_percobaan_ujian_id_key" RENAME TO "hasil_asesmen_percobaan_asesmen_id_key";
 
 -- The old and current tables can coexist after previous db-push deployments.
 -- Copy matching columns with explicit name mapping, retaining source tables.

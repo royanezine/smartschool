@@ -7,6 +7,10 @@ import {
   buatSekolahCabang,
   listSekolahCabang,
 } from "../controllers/yayasanSekolah.controller";
+import {
+  getPengaturanSekolahBinaan,
+  listUsersLintasSekolah,
+} from "../controllers/yayasanMonitoring.controller";
 import { authenticate } from "../middlewares/auth.middleware";
 import { requireIzin } from "../middlewares/izin.middleware";
 import {
@@ -37,5 +41,21 @@ router.get(
 );
 
 router.get("/sekolah/:id", requireIzin("yayasan.view"), getDetailSekolahBinaan);
+
+router.get(
+  "/monitoring/users",
+  requireIzin("yayasan.view"),
+  hanyaAdminYayasan,
+  wajibLanggananYayasan,
+  listUsersLintasSekolah,
+);
+
+router.get(
+  "/monitoring/sekolah/:id/pengaturan",
+  requireIzin("yayasan.view"),
+  hanyaAdminYayasan,
+  wajibLanggananYayasan,
+  getPengaturanSekolahBinaan,
+);
 
 export default router;
