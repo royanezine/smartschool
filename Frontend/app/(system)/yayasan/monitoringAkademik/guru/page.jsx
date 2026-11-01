@@ -308,11 +308,11 @@ export default function LaporanGuruPage() {
 
               <div>
                 <p className="text-sm theme-text-secondary">
-                  Guru Cuti
+                  Guru Nonaktif
                 </p>
 
-                <p className="mt-1 text-2xl font-semibold text-[var(--color-warning)]">
-                  {guruCuti}
+                <p className="mt-1 text-2xl font-semibold text-[var(--color-warning)]" title="Status cuti spesifik belum didukung Backend">
+                  {guruNonaktif}
                 </p>
               </div>
             </div>

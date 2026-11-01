@@ -287,6 +287,7 @@ export default function YayasanDashboardPage() {
 
   const quickMenu = [
     {
+      id: "sekolah",
       key: "sekolah",
       title: "Sekolah",
       desc: "Kelola profil dan data seluruh unit sekolah di bawah yayasan",
@@ -297,6 +298,7 @@ export default function YayasanDashboardPage() {
       featured: true,
     },
     {
+      id: "laporan",
       key: "laporan",
       title: "Laporan & Analitik",
       desc: "Ringkasan laporan akademik, guru, inventaris, dan siswa",
@@ -307,6 +309,7 @@ export default function YayasanDashboardPage() {
       featured: true,
     },
     {
+      id: "guru",
       key: "guru",
       title: "Guru",
       desc: "Data induk tenaga pendidik",
@@ -316,6 +319,7 @@ export default function YayasanDashboardPage() {
       stat: loading ? "Memuat data..." : `${totalGuru} guru aktif`,
     },
     {
+      id: "siswa",
       key: "siswa",
       title: "Siswa",
       desc: "Data induk siswa lintas unit",
@@ -326,6 +330,7 @@ export default function YayasanDashboardPage() {
     },
     {
       id: "monitoringAkademik",
+      key: "monitoringAkademik",
       title: "Monitoring Akademik",
       desc: "Kehadiran, nilai, LMS, mapel",
       icon: ClipboardCheck,
@@ -335,6 +340,7 @@ export default function YayasanDashboardPage() {
     },
     {
       id: "pengaturan",
+      key: "pengaturan",
       title: "Pengaturan",
       desc: "Konfigurasi sistem yayasan",
       icon: Settings,
@@ -456,7 +462,7 @@ export default function YayasanDashboardPage() {
               if (item.featured) {
                 return (
                   <button
-                    key={item.id}
+                    key={item.id || item.key || item.path}
                     type="button"
                     onClick={() => router.push(item.path)}
                     className={`group text-left theme-card rounded-2xl border ${c.border} ${c.hoverBorder} p-5 sm:p-6 ${themeCardShadow} hover:shadow-[0_10px_30px_color-mix(in_srgb,var(--color-text)_10%,transparent)] transition-all duration-300 sm:col-span-1 lg:col-span-2 relative overflow-hidden min-w-0`}
@@ -500,7 +506,7 @@ export default function YayasanDashboardPage() {
 
               return (
                 <button
-                  key={item.id}
+                  key={item.id || item.key || item.path}
                   type="button"
                   onClick={() => router.push(item.path)}
                   className={`group text-left theme-card rounded-2xl border ${c.border} ${c.hoverBorder} p-4 ${themeSmallShadow} hover:shadow-[0_8px_24px_color-mix(in_srgb,var(--color-text)_9%,transparent)] hover:-translate-y-0.5 transition-all duration-300 min-w-0`}

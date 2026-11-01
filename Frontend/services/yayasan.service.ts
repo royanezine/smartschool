@@ -30,7 +30,8 @@ export const getSekolahBinaan = async (params?: Record<string, any>) => {
     const query = new URLSearchParams();
     if (params?.page) query.append("page", String(params.page));
     if (params?.limit) query.append("limit", String(params.limit));
-    if (params?.q) query.append("q", String(params.q));
+    const searchTerm = params?.search || params?.q;
+    if (searchTerm) query.append("search", String(searchTerm));
     if (params?.status) query.append("status", String(params.status));
 
     const qs = query.toString();
@@ -112,6 +113,7 @@ export const getMonitoringUsers = async (params?: {
   page?: number;
   limit?: number;
   q?: string;
+  search?: string;
   peran?: string;
   sekolahId?: string;
 }) => {
@@ -119,7 +121,8 @@ export const getMonitoringUsers = async (params?: {
     const query = new URLSearchParams();
     if (params?.page) query.append("page", String(params.page));
     if (params?.limit) query.append("limit", String(params.limit));
-    if (params?.q) query.append("q", String(params.q));
+    const searchTerm = params?.search || params?.q;
+    if (searchTerm) query.append("q", String(searchTerm));
     if (params?.peran) query.append("peran", String(params.peran));
     if (params?.sekolahId) query.append("sekolahId", String(params.sekolahId));
 
