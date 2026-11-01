@@ -41,7 +41,7 @@ export const handleMidtransWebhook = async (
           .json({ success: false, message: "Pendaftaran not found" });
 
       // Idempotensi: jika tenant sudah aktif, jangan proses ulang
-      if (pendaftaran.status === "aktif") {
+      if (pendaftaran.status === "aktif" && pendaftaran.penggunaTerbuatId && await prisma.pengguna.findUnique({ where: { id: pendaftaran.penggunaTerbuatId }, select: { id: true } })) {
         return res
           .status(200)
           .json({ received: true, message: "Tenant already activated" });

@@ -30,10 +30,11 @@ export async function platformFoundations(req: AuthRequest, res: Response, next:
   try {
     const query = querySchema.parse(req.query);
     const id = req.params.id ? z.string().uuid().parse(req.params.id) : undefined;
-    const where = { dihapusPada: null, ...(id && { id }), ...(query.status && { status: query.status }), ...(query.search && { nama: { contains: query.search, mode: "insensitive" as const } }) };
+    const subscribed = z.enum(["true", "false"]).optional().parse(req.query.berlangganan);
+    const where = { dihapusPada: null, ...(id && { id }), ...(subscribed === "true" ? { paketId: { not: null } } : subscribed === "false" ? { paketId: null } : {}), ...(query.status && { status: query.status }), ...(query.search && { nama: { contains: query.search, mode: "insensitive" as const } }) };
     const select = { id: true, nama: true, npyp: true, status: true, alamat: true, telepon: true, email: true, dibuatPada: true,
       statusLangganan: true, tanggalMulaiLangganan: true, tanggalBerakhirLangganan: true,
-      paket: { select: { id: true, nama: true } }, _count: { select: { sekolah: { where: { dihapusPada: null } } } },
+      paket: true, sekolah: { where: { dihapusPada: null }, orderBy: { nama: "asc" as const } }, _count: { select: { sekolah: { where: { dihapusPada: null } } } },
     };
     if (id) {
       const data = await prisma.yayasan.findFirst({ where, select });

@@ -36,7 +36,7 @@ const baseOnboardingSchema = z.object({
   emailYayasan: z.string().email("Format email yayasan tidak valid").optional(),
   teleponYayasan: z.string().min(8, "Nomor telepon yayasan minimal 8 digit").optional(),
   alamatYayasan: z.string().min(5, "Alamat yayasan minimal 5 karakter").optional(),
-  npypYayasan: z.string().min(3, "NPYP yayasan minimal 3 karakter").optional(),
+  npypYayasan: z.string().trim().min(3, "NPYP yayasan minimal 3 karakter").max(50).optional(),
 });
 
 export const tenantOnboardingSchema = baseOnboardingSchema.superRefine((data, ctx) => {

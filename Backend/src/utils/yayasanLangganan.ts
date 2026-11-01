@@ -9,6 +9,7 @@ export const cekLanggananYayasan = async (yayasanId: string) => {
       paketId: true,
       statusLangganan: true,
       tanggalBerakhirLangganan: true,
+      tanggalMulaiLangganan: true,
     },
   });
 
@@ -18,6 +19,7 @@ export const cekLanggananYayasan = async (yayasanId: string) => {
     !!yayasan.paketId &&
     ["active", "trialing"].includes(yayasan.statusLangganan ?? "") &&
     !!yayasan.tanggalBerakhirLangganan &&
+    (!yayasan.tanggalMulaiLangganan || yayasan.tanggalMulaiLangganan.getTime() <= Date.now()) &&
     yayasan.tanggalBerakhirLangganan.getTime() > Date.now();
 
   return { aktif, yayasan };

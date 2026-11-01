@@ -50,7 +50,7 @@ export const registerTenant = async (
       const existingNpyp = await prisma.yayasan.findUnique({
         where: { npyp: validatedData.npypYayasan },
       });
-      if (existingNpyp) throw new AppError("NPYP Yayasan sudah terdaftar", 400);
+      if (existingNpyp) throw new AppError("NPYP Yayasan sudah terdaftar", 409);
     }
 
     const paket = await prisma.paket.findUnique({
@@ -72,6 +72,14 @@ export const registerTenant = async (
     const otp = generateOtp();
 
     await prisma.$transaction(async (tx) => {
+      if (isYayasan) {
+        const npyp = validatedData.npypYayasan!;
+        await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`npyp:${npyp}`}))`;
+        if (await tx.yayasan.findUnique({ where: { npyp } }) || await tx.pendaftaranTenant.findFirst({ where: {
+          npypYayasan: npyp, jenisPendaftaran: "yayasan", status: { in: ["menunggu_verifikasi", "menunggu_pembayaran"] },
+          OR: [{ emailPendaftar: { not: validatedData.email } }, { status: "menunggu_pembayaran" }],
+        } })) throw new AppError("NPYP Yayasan sudah terdaftar atau sedang diproses", 409);
+      }
       await tx.pendaftaranTenant.deleteMany({
         where: {
           emailPendaftar: validatedData.email,
@@ -149,6 +157,7 @@ export const konversiPendaftaranTenant = async (
   pendaftaranId: string,
   options: KonversiTenantOptions,
 ) => {
+  await tx.$executeRaw`SELECT id FROM pendaftaran_tenant WHERE id = ${pendaftaranId} FOR UPDATE`;
   const pendaftaran = await tx.pendaftaranTenant.findUnique({
     where: { id: pendaftaranId },
     include: { paket: true },
@@ -159,6 +168,23 @@ export const konversiPendaftaranTenant = async (
   }
 
   if (pendaftaran.status === "aktif") {
+    // Repair historical approvals only against the foundation already linked
+    // to this registration; never adopt a foundation merely by matching NPYP.
+    if (pendaftaran.jenisPendaftaran === "yayasan" && (!pendaftaran.penggunaTerbuatId || !await tx.pengguna.findUnique({ where: { id: pendaftaran.penggunaTerbuatId }, select: { id: true } }))) {
+      const foundation = pendaftaran.yayasanTerbuatId ? await tx.yayasan.findFirst({ where: { id: pendaftaran.yayasanTerbuatId, dihapusPada: null } }) : null;
+      if (!foundation || foundation.npyp !== pendaftaran.npypYayasan?.trim()) throw new AppError("Relasi pendaftaran yayasan perlu direkonsiliasi administrator", 409);
+      const role = await tx.peran.findFirst({ where: { nama: "admin_yayasan", sekolahId: null, status: "aktif", dihapusPada: null } });
+      if (!role) throw new AppError("Role admin_yayasan aktif belum dikonfigurasi", 409);
+      let admin = await tx.pengguna.findUnique({ where: { email: pendaftaran.emailPendaftar } });
+      if (admin && (admin.yayasanId !== foundation.id || admin.sekolahId || admin.peranId !== role.id || admin.dihapusPada)) throw new AppError("Email admin sudah digunakan akun lain", 409);
+      if (!admin) admin = await tx.pengguna.create({ data: {
+        namaPengguna: `${pendaftaran.emailPendaftar.split("@")[0]!.replace(/[^a-zA-Z0-9_]/g, "").slice(0,43)}_${crypto.randomBytes(3).toString("hex")}`,
+        email: pendaftaran.emailPendaftar, kataSandi: pendaftaran.kataSandiPendaftar, namaLengkap: pendaftaran.namaPendaftar,
+        yayasanId: foundation.id, sekolahId: null, peranId: role.id, status: "aktif",
+      } });
+      await tx.pendaftaranTenant.update({ where: { id: pendaftaran.id }, data: { penggunaTerbuatId: admin.id } });
+      pendaftaran.penggunaTerbuatId = admin.id;
+    }
     return {
       alreadyActive: true,
       jenisPendaftaran: pendaftaran.jenisPendaftaran,
@@ -172,7 +198,7 @@ export const konversiPendaftaranTenant = async (
   const baseUsername =
     pendaftaran.emailPendaftar.split("@")[0]?.replace(/[^a-zA-Z0-9_]/g, "") ||
     "user";
-  const namaPengguna = `${baseUsername}_${randomChars.toLowerCase()}`;
+  const namaPengguna = `${baseUsername.slice(0, 43)}_${randomChars.toLowerCase()}`;
 
   if (pendaftaran.jenisPendaftaran === "yayasan") {
     const peranAdminYayasan = await tx.peran.findFirst({
@@ -185,26 +211,20 @@ export const konversiPendaftaranTenant = async (
       );
     }
 
-    let yayasan = null;
-    if (pendaftaran.npypYayasan) {
-      yayasan = await tx.yayasan.findUnique({
-        where: { npyp: pendaftaran.npypYayasan },
-      });
-    }
-
-    if (!yayasan) {
-      yayasan = await tx.yayasan.create({
+    const npyp = pendaftaran.npypYayasan?.trim();
+    if (!npyp || npyp.length < 3 || npyp.length > 50) throw new AppError("NPYP Yayasan wajib diisi (3–50 karakter)", 400);
+    if (pendaftaran.paket.tipe !== TipePaket.YAYASAN) throw new AppError("Pendaftaran yayasan wajib memakai paket yayasan", 400);
+    if (await tx.yayasan.findUnique({ where: { npyp } })) throw new AppError("NPYP Yayasan sudah terdaftar", 409);
+    let yayasan = await tx.yayasan.create({
         data: {
           nama: pendaftaran.namaYayasan || pendaftaran.namaPendaftar,
           alamat: pendaftaran.alamatYayasan ?? null,
           telepon: pendaftaran.teleponYayasan ?? null,
           email: pendaftaran.emailYayasan ?? pendaftaran.emailPendaftar,
-          npyp: pendaftaran.npypYayasan ?? null,
+          npyp,
           status: "aktif",
         },
       });
-    }
-
     const mulaiLangganan = new Date();
     const berakhirLangganan = new Date(mulaiLangganan);
     if (options.isTrial) {

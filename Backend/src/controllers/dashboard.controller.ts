@@ -48,12 +48,12 @@ export const getDashboardSekolah = async (req: AuthRequest, res: Response) => {
         ? { sekolah: { yayasanId, dihapusPada: null } }
         : sekolahId
           ? { sekolahId }
-          : null;
+          : actorRole === "super_admin" ? {} : null;
 
     const today = todayDateOnly();
     const schoolIds = isAdminYayasan && yayasanId
       ? (await prisma.sekolah.findMany({ where: { yayasanId, dihapusPada: null }, select: { id: true } })).map(s => s.id)
-      : sekolahId ? [sekolahId] : [];
+      : sekolahId ? [sekolahId] : actorRole === "super_admin" ? (await prisma.sekolah.findMany({ where: { dihapusPada: null }, select: { id: true } })).map(s => s.id) : [];
 
     const [totalSiswa, totalGuru, totalKelas, absensiHariIni, totalSekolah] =
       await Promise.all([
@@ -122,7 +122,17 @@ export const getDashboardSekolah = async (req: AuthRequest, res: Response) => {
       ? { totalSekolah, totalSiswa, totalGuru, totalKelas }
       : null;
 
+    const daftarSekolah = isAdminYayasan ? await prisma.sekolah.findMany({ where: { id: { in: schoolIds } }, select: { id: true, nama: true } }) : [];
+    const [siswaPerSekolah, guruPerSekolah, kelasPerSekolah] = isAdminYayasan ? await Promise.all([
+      prisma.pengguna.groupBy({ by: ["sekolahId"], where: { sekolahId: { in: schoolIds }, dihapusPada: null, status: "aktif", peran: { nama: "siswa" } }, _count: true }),
+      prisma.pengguna.groupBy({ by: ["sekolahId"], where: { sekolahId: { in: schoolIds }, dihapusPada: null, status: "aktif", peran: { nama: "guru" } }, _count: true }),
+      prisma.kelas.groupBy({ by: ["sekolahId"], where: { sekolahId: { in: schoolIds }, dihapusPada: null }, _count: true }),
+    ]) : [[], [], []];
+
     return successResponse(res, "Berhasil mengambil statistik dashboard", {
+      scope: isAdminYayasan ? "yayasan" : sekolahId ? "sekolah" : "platform",
+      platform: actorRole === "super_admin" && !sekolahId ? { totalSekolah: schoolIds.length, totalSiswa, totalGuru, totalKelas } : null,
+      sekolah: !isAdminYayasan && sekolahId ? { id: sekolahId, totalSiswa, totalGuru, totalKelas, persentaseHadir: `${persentaseHadir}%`, rekapKehadiran } : null,
       cabang: {
         totalSiswa,
         totalGuru,
@@ -130,7 +140,9 @@ export const getDashboardSekolah = async (req: AuthRequest, res: Response) => {
         persentaseHadir: `${persentaseHadir}%`,
         rekapKehadiran,
       },
-      yayasan,
+      yayasan: yayasan ? { id: yayasanId, ...yayasan, persentaseHadir: `${persentaseHadir}%`, rekapKehadiran,
+        sekolah: daftarSekolah.map(s => ({ ...s, totalSiswa: siswaPerSekolah.find(g => g.sekolahId === s.id)?._count ?? 0, totalGuru: guruPerSekolah.find(g => g.sekolahId === s.id)?._count ?? 0, totalKelas: kelasPerSekolah.find(g => g.sekolahId === s.id)?._count ?? 0 })),
+      } : null,
     });
   } catch (error) {
     console.error(error);
