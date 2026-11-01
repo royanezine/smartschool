@@ -7,6 +7,7 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight,
+  Building,
   Building2,
   Check,
   CheckCircle2,
@@ -15,12 +16,15 @@ import {
   Eye,
   EyeOff,
   Globe2,
+  Landmark,
   LockKeyhole,
   Mail,
   MapPin,
   MessageCircle,
   Package,
+  Phone,
   RefreshCw,
+  School,
   ShieldCheck,
   Sparkles,
   UserRound,
@@ -43,11 +47,23 @@ function getApiBaseUrl() {
 }
 
 const initialForm = {
+  // Mode Sekolah
   namaSekolah: "",
   jenjang: "",
   jumlahSiswa: "",
   kota: "",
   provinsi: "",
+  namaYayasanNaungan: "",
+  npypYayasanNaungan: "",
+
+  // Mode Yayasan
+  namaYayasan: "",
+  npypYayasan: "",
+  alamatYayasan: "",
+  teleponYayasan: "",
+  emailYayasan: "",
+
+  // Akun Administrator
   namaLengkap: "",
   jabatan: "",
   email: "",
@@ -92,11 +108,24 @@ function getPaketArray(result) {
   return [];
 }
 
+function isPaketYayasan(paket) {
+  if (!paket) return false;
+  if (paket.tipe) {
+    return String(paket.tipe).toUpperCase() === "YAYASAN";
+  }
+  const text = `${paket.nama || ""} ${paket.deskripsi || ""}`.toLowerCase();
+  return text.includes("yayasan");
+}
+
 function DaftarSekolahContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const queryPaketId = searchParams.get("paketId") || searchParams.get("paket") || "";
+  const queryJenis = searchParams.get("jenis") || "";
 
+  const [jenisPendaftaran, setJenisPendaftaran] = useState(
+    queryJenis === "yayasan" ? "yayasan" : "sekolah"
+  );
   const [formData, setFormData] = useState(initialForm);
   const [paketList, setPaketList] = useState([]);
   const [loadingPaket, setLoadingPaket] = useState(true);
@@ -110,6 +139,13 @@ function DaftarSekolahContent() {
     () => generateSubdomain(formData.namaSekolah),
     [formData.namaSekolah]
   );
+
+  const availablePaketList = useMemo(() => {
+    const filtered = paketList.filter((p) =>
+      jenisPendaftaran === "yayasan" ? isPaketYayasan(p) : !isPaketYayasan(p)
+    );
+    return filtered.length > 0 ? filtered : paketList;
+  }, [paketList, jenisPendaftaran]);
 
   useEffect(() => {
     let cancelled = false;
@@ -163,6 +199,11 @@ function DaftarSekolahContent() {
                 ...prev,
                 paket: found.id,
               }));
+              if (isPaketYayasan(found)) {
+                setJenisPendaftaran("yayasan");
+              } else {
+                setJenisPendaftaran("sekolah");
+              }
             }
           }
 
@@ -194,25 +235,22 @@ function DaftarSekolahContent() {
     };
   }, [queryPaketId]);
 
-  useEffect(() => {
-    if (!queryPaketId || paketList.length === 0) return;
+  function handleSelectJenis(nextJenis) {
+    if (nextJenis === jenisPendaftaran) return;
+    setJenisPendaftaran(nextJenis);
+    setError("");
 
-    const found = paketList.find(
-      (p) =>
-        String(p.id) === String(queryPaketId) ||
-        String(p.nama || "").toLowerCase() === String(queryPaketId).toLowerCase()
+    const targetPakets = paketList.filter((p) =>
+      nextJenis === "yayasan" ? isPaketYayasan(p) : !isPaketYayasan(p)
     );
-
-    if (found) {
-      setFormData((prev) => {
-        if (prev.paket === found.id) return prev;
-        return {
-          ...prev,
-          paket: found.id,
-        };
-      });
+    const isCurrentValid = targetPakets.some((p) => p.id === formData.paket);
+    if (!isCurrentValid && targetPakets.length > 0) {
+      setFormData((prev) => ({
+        ...prev,
+        paket: targetPakets[0].id,
+      }));
     }
-  }, [queryPaketId, paketList]);
+  }
 
   function handleChange(event) {
     const { name, value } = event.target;
@@ -236,102 +274,165 @@ function DaftarSekolahContent() {
     setSuccess("");
   }
 
- 
-async function handleSubmit(event) {
-  event.preventDefault();
+  async function handleSubmit(event) {
+    event.preventDefault();
 
-  setError("");
-  setSuccess("");
+    setError("");
+    setSuccess("");
 
-  const namaSekolah = formData.namaSekolah.trim();
-  const nama = formData.namaLengkap.trim();
-  const email = formData.email.trim().toLowerCase();
-  const kataSandi = formData.kataSandi;
-  const teleponSekolah = formData.whatsapp.trim();
-  const kota = formData.kota.trim();
-  const provinsi = formData.provinsi.trim();
+    const nama = formData.namaLengkap.trim();
+    const email = formData.email.trim().toLowerCase();
+    const kataSandi = formData.kataSandi;
 
-  if (namaSekolah.length < 3) {
-    setError("Nama sekolah minimal 3 karakter.");
-    return;
-  }
+    if (!nama || nama.length < 3) {
+      setError("Nama administrator minimal 3 karakter.");
+      return;
+    }
 
-  if (!formData.jenjang) {
-    setError("Jenjang sekolah wajib dipilih.");
-    return;
-  }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setError("Format email administrator tidak valid.");
+      return;
+    }
 
-  if (!subdomain || subdomain.length < 3) {
-    setError("Subdomain minimal 3 karakter.");
-    return;
-  }
+    if (kataSandi.length < 8) {
+      setError("Kata sandi minimal 8 karakter.");
+      return;
+    }
 
-  if (!nama) {
-    setError("Nama administrator wajib diisi.");
-    return;
-  }
+    if (!/[A-Z]/.test(kataSandi)) {
+      setError("Kata sandi harus memiliki minimal satu huruf besar.");
+      return;
+    }
 
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    setError("Format email tidak valid.");
-    return;
-  }
+    if (!/\d/.test(kataSandi)) {
+      setError("Kata sandi harus memiliki minimal satu angka.");
+      return;
+    }
 
-  if (teleponSekolah.length < 8) {
-    setError("Nomor WhatsApp minimal 8 karakter.");
-    return;
-  }
+    if (kataSandi !== formData.konfirmasiKataSandi) {
+      setError("Konfirmasi kata sandi tidak sesuai.");
+      return;
+    }
 
-  if (!kota || !provinsi) {
-    setError("Kota dan provinsi wajib diisi.");
-    return;
-  }
+    if (!formData.paket) {
+      setError("Silakan pilih paket SmartSchool.");
+      return;
+    }
 
-  if (!formData.paket) {
-    setError("Silakan pilih paket SmartSchool.");
-    return;
-  }
+    const selectedPaket = paketList.find(
+      (paket) => paket.id === formData.paket
+    );
 
-  if (kataSandi.length < 8) {
-    setError("Kata sandi minimal 8 karakter.");
-    return;
-  }
+    if (!selectedPaket) {
+      setError("Paket tidak ditemukan. Silakan muat ulang halaman.");
+      return;
+    }
 
-  if (!/[A-Z]/.test(kataSandi)) {
-    setError("Kata sandi harus memiliki minimal satu huruf besar.");
-    return;
-  }
+    let payload;
 
-  if (!/\d/.test(kataSandi)) {
-    setError("Kata sandi harus memiliki minimal satu angka.");
-    return;
-  }
+    if (jenisPendaftaran === "sekolah") {
+      const namaSekolah = formData.namaSekolah.trim();
+      const teleponSekolah = (formData.whatsapp || "").trim();
+      const kota = formData.kota.trim();
+      const provinsi = formData.provinsi.trim();
 
-  if (kataSandi !== formData.konfirmasiKataSandi) {
-    setError("Konfirmasi kata sandi tidak sesuai.");
-    return;
-  }
+      if (namaSekolah.length < 3) {
+        setError("Nama sekolah minimal 3 karakter.");
+        return;
+      }
 
-  const selectedPaket = paketList.find(
-    (paket) => paket.id === formData.paket
-  );
+      if (!formData.jenjang) {
+        setError("Jenjang sekolah wajib dipilih.");
+        return;
+      }
 
-  if (!selectedPaket) {
-    setError("Paket tidak ditemukan. Silakan muat ulang halaman.");
-    return;
-  }
+      if (!subdomain || subdomain.length < 3) {
+        setError("Subdomain minimal 3 karakter.");
+        return;
+      }
 
-  const payload = {
-    jenisPendaftaran: "sekolah",
-    paketId: selectedPaket.id,
-    nama,
-    email,
-    kataSandi,
-    namaSekolah,
-    jenjang: formData.jenjang,
-    subdomain,
-    alamatSekolah: `${kota}, ${provinsi}`,
-    teleponSekolah,
-  };
+      if (!/^[a-z0-9-]+$/.test(subdomain)) {
+        setError("Subdomain hanya boleh huruf kecil, angka, dan strip.");
+        return;
+      }
+
+      if (!kota || !provinsi) {
+        setError("Kota dan provinsi sekolah wajib diisi.");
+        return;
+      }
+
+      if (teleponSekolah.length < 8) {
+        setError("Nomor telepon/WhatsApp sekolah minimal 8 karakter.");
+        return;
+      }
+
+      payload = {
+        jenisPendaftaran: "sekolah",
+        paketId: selectedPaket.id,
+        nama,
+        email,
+        kataSandi,
+        namaSekolah,
+        jenjang: formData.jenjang,
+        subdomain,
+        alamatSekolah: `${kota}, ${provinsi}`,
+        teleponSekolah,
+      };
+
+      if (formData.namaYayasanNaungan?.trim()) {
+        payload.namaYayasan = formData.namaYayasanNaungan.trim();
+      }
+      if (formData.npypYayasanNaungan?.trim()) {
+        payload.npypYayasan = formData.npypYayasanNaungan.trim();
+      }
+    } else if (jenisPendaftaran === "yayasan") {
+      const namaYayasan = formData.namaYayasan.trim();
+      const npypYayasan = formData.npypYayasan.trim();
+      const alamatYayasan = formData.alamatYayasan.trim();
+      const teleponYayasan = formData.teleponYayasan.trim();
+      const emailYayasan = formData.emailYayasan.trim().toLowerCase();
+
+      if (namaYayasan.length < 3) {
+        setError("Nama yayasan minimal 3 karakter.");
+        return;
+      }
+
+      if (npypYayasan.length < 3) {
+        setError("NPYP yayasan minimal 3 karakter.");
+        return;
+      }
+
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailYayasan)) {
+        setError("Format email resmi yayasan tidak valid.");
+        return;
+      }
+
+      if (teleponYayasan.length < 8) {
+        setError("Nomor telepon yayasan minimal 8 digit.");
+        return;
+      }
+
+      if (alamatYayasan.length < 5) {
+        setError("Alamat lengkap yayasan minimal 5 karakter.");
+        return;
+      }
+
+      payload = {
+        jenisPendaftaran: "yayasan",
+        paketId: selectedPaket.id,
+        nama,
+        email,
+        kataSandi,
+        namaYayasan,
+        npypYayasan,
+        alamatYayasan,
+        teleponYayasan,
+        emailYayasan,
+      };
+    } else {
+      setError("Jenis pendaftaran tidak valid.");
+      return;
+    }
 
   try {
     setLoadingSubmit(true);
@@ -458,18 +559,29 @@ async function handleSubmit(event) {
           <div className="max-w-3xl">
             <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.07] px-3.5 py-2 text-xs font-semibold text-blue-200">
               <Sparkles size={14} />
-              Pendaftaran Sekolah
+              {jenisPendaftaran === "yayasan" ? "Pendaftaran Yayasan" : "Pendaftaran Sekolah"}
             </div>
 
             <h1 className="text-3xl font-bold leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl">
-              Mulai kelola sekolah
-              <br />
-              bersama <span className="text-blue-400">SmartSchool</span>
+              {jenisPendaftaran === "yayasan" ? (
+                <>
+                  Kelola multi-unit yayasan
+                  <br />
+                  bersama <span className="text-blue-400">SmartSchool</span>
+                </>
+              ) : (
+                <>
+                  Mulai kelola sekolah
+                  <br />
+                  bersama <span className="text-blue-400">SmartSchool</span>
+                </>
+              )}
             </h1>
 
             <p className="mt-5 max-w-2xl text-sm leading-7 text-slate-300 sm:text-base">
-              Lengkapi informasi sekolah dan administrator untuk memulai
-              penggunaan platform manajemen sekolah terintegrasi SmartSchool.
+              {jenisPendaftaran === "yayasan"
+                ? "Lengkapi informasi yayasan dan administrator untuk mengelola seluruh unit sekolah binaan dalam satu sistem terpusat."
+                : "Lengkapi informasi sekolah dan administrator untuk memulai penggunaan platform manajemen sekolah terintegrasi SmartSchool."}
             </p>
 
             <div className="mt-7 flex flex-wrap gap-3">
@@ -494,12 +606,16 @@ async function handleSubmit(event) {
             <div className="border-b border-slate-100 px-5 py-5 sm:px-7 sm:py-6">
               <div className="flex items-start gap-3">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-                  <Building2 size={19} />
+                  {jenisPendaftaran === "yayasan" ? <Landmark size={19} /> : <Building2 size={19} />}
                 </div>
                 <div>
-                  <h2 className="text-base font-bold sm:text-lg">Informasi Pendaftaran</h2>
+                  <h2 className="text-base font-bold sm:text-lg">
+                    {jenisPendaftaran === "yayasan" ? "Pendaftaran Akun Yayasan" : "Pendaftaran Akun Sekolah"}
+                  </h2>
                   <p className="mt-1 text-xs leading-5 text-slate-500 sm:text-sm">
-                    Isi data berikut dengan informasi yang benar.
+                    {jenisPendaftaran === "yayasan"
+                      ? "Pilih jenis pendaftaran dan lengkapi data legalitas yayasan pengelola."
+                      : "Pilih jenis pendaftaran dan lengkapi data satuan pendidikan."}
                   </p>
                 </div>
               </div>
@@ -526,105 +642,347 @@ async function handleSubmit(event) {
                 </div>
               )}
 
-              <section>
-                <div className="mb-5 flex items-center gap-3">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
-                    <Building2 size={16} />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-bold">Data Sekolah</h3>
-                    <p className="text-xs text-slate-400">Informasi dasar sekolah</p>
-                  </div>
+              {/* Pilihan Jenis Pendaftaran */}
+              <div className="mb-8">
+                <div className="mb-3 flex items-center justify-between">
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                    Pilih Jenis Pendaftaran
+                  </span>
+                  <span className="text-[11px] font-medium text-slate-400">
+                    Pilih sesuai entitas yang didaftarkan
+                  </span>
                 </div>
 
-                <div className="grid gap-5 md:grid-cols-2">
-                  <div className="md:col-span-2">
-                    <label className={labelClass}>Nama Sekolah</label>
-                    <input
-                      required
-                      minLength={3}
-                      name="namaSekolah"
-                      value={formData.namaSekolah}
-                      onChange={handleChange}
-                      placeholder="Contoh: SMA SmartSchool"
-                      className={inputClass}
-                    />
-                    {subdomain && (
-                      <div className="mt-2.5 flex items-center gap-2 rounded-lg bg-blue-50 px-3 py-2">
-                        <Globe2 size={14} className="shrink-0 text-blue-600" />
-                        <p className="text-xs text-slate-500">
-                          Subdomain:
-                          <span className="ml-1 font-semibold text-blue-600">
-                            {subdomain}.smartschool.id
-                          </span>
-                        </p>
-                      </div>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className={labelClass}>Jenjang</label>
-                    <select
-                      required
-                      name="jenjang"
-                      value={formData.jenjang}
-                      onChange={handleChange}
-                      className={inputClass}
+                <div className="grid gap-3.5 sm:grid-cols-2">
+                  <button
+                    type="button"
+                    onClick={() => handleSelectJenis("sekolah")}
+                    className={`relative flex items-start gap-3.5 rounded-2xl border p-4 text-left transition ${
+                      jenisPendaftaran === "sekolah"
+                        ? "border-blue-600 bg-blue-50/70 ring-2 ring-blue-600/15 shadow-sm"
+                        : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50"
+                    }`}
+                  >
+                    <div
+                      className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition ${
+                        jenisPendaftaran === "sekolah"
+                          ? "bg-blue-600 text-white shadow-md shadow-blue-500/25"
+                          : "bg-slate-100 text-slate-600"
+                      }`}
                     >
-                      <option value="">Pilih jenjang</option>
-                      <option value="SD">SD</option>
-                      <option value="SMP">SMP</option>
-                      <option value="SMA">SMA</option>
-                      <option value="SMK">SMK</option>
-                      <option value="SLB">SLB</option>
-                      <option value="Lainnya">Lainnya</option>
-                    </select>
-                  </div>
+                      <School size={20} />
+                    </div>
 
-                  <div>
-                    <label className={labelClass}>Jumlah Siswa (opsional)</label>
-                    <div className="relative">
-                      <Users size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                      <input
-                        type="number"
-                        min="1"
-                        name="jumlahSiswa"
-                        value={formData.jumlahSiswa}
-                        onChange={handleChange}
-                        placeholder="Contoh: 500"
-                        className={`${inputClass} pl-10`}
-                      />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <h4 className="text-sm font-bold text-slate-900">
+                          Daftar sebagai Sekolah
+                        </h4>
+                        {jenisPendaftaran === "sekolah" && (
+                          <div className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-white">
+                            <Check size={12} strokeWidth={3} />
+                          </div>
+                        )}
+                      </div>
+                      <p className="mt-1 text-xs leading-relaxed text-slate-500">
+                        Untuk satuan pendidikan mandiri atau cabang (SD, SMP, SMA, SMK, SLB).
+                      </p>
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleSelectJenis("yayasan")}
+                    className={`relative flex items-start gap-3.5 rounded-2xl border p-4 text-left transition ${
+                      jenisPendaftaran === "yayasan"
+                        ? "border-blue-600 bg-blue-50/70 ring-2 ring-blue-600/15 shadow-sm"
+                        : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50"
+                    }`}
+                  >
+                    <div
+                      className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition ${
+                        jenisPendaftaran === "yayasan"
+                          ? "bg-blue-600 text-white shadow-md shadow-blue-500/25"
+                          : "bg-slate-100 text-slate-600"
+                      }`}
+                    >
+                      <Landmark size={20} />
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <h4 className="text-sm font-bold text-slate-900">
+                          Daftar sebagai Yayasan
+                        </h4>
+                        {jenisPendaftaran === "yayasan" && (
+                          <div className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-white">
+                            <Check size={12} strokeWidth={3} />
+                          </div>
+                        )}
+                      </div>
+                      <p className="mt-1 text-xs leading-relaxed text-slate-500">
+                        Untuk badan pengelola yayasan yang menaungi banyak unit sekolah binaan.
+                      </p>
+                    </div>
+                  </button>
+                </div>
+              </div>
+
+              <div className="my-6 h-px bg-slate-100" />
+
+              {/* Data Instansi (Berdasarkan Mode) */}
+              {jenisPendaftaran === "sekolah" ? (
+                <section>
+                  <div className="mb-5 flex items-center gap-3">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
+                      <Building2 size={16} />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-bold">Data Sekolah</h3>
+                      <p className="text-xs text-slate-400">Informasi dasar satuan pendidikan</p>
                     </div>
                   </div>
 
-                  <div>
-                    <label className={labelClass}>Kota</label>
-                    <div className="relative">
-                      <MapPin size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <div className="grid gap-5 md:grid-cols-2">
+                    <div className="md:col-span-2">
+                      <label className={labelClass}>
+                        Nama Sekolah <span className="text-rose-500">*</span>
+                      </label>
                       <input
                         required
-                        name="kota"
-                        value={formData.kota}
+                        minLength={3}
+                        name="namaSekolah"
+                        value={formData.namaSekolah}
                         onChange={handleChange}
-                        placeholder="Contoh: Depok"
-                        className={`${inputClass} pl-10`}
+                        placeholder="Contoh: SMA SmartSchool"
+                        className={inputClass}
+                      />
+                      {subdomain && (
+                        <div className="mt-2.5 flex items-center gap-2 rounded-lg bg-blue-50 px-3 py-2">
+                          <Globe2 size={14} className="shrink-0 text-blue-600" />
+                          <p className="text-xs text-slate-500">
+                            Subdomain:
+                            <span className="ml-1 font-semibold text-blue-600">
+                              {subdomain}.smartschool.id
+                            </span>
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className={labelClass}>
+                        Jenjang <span className="text-rose-500">*</span>
+                      </label>
+                      <select
+                        required
+                        name="jenjang"
+                        value={formData.jenjang}
+                        onChange={handleChange}
+                        className={inputClass}
+                      >
+                        <option value="">Pilih jenjang</option>
+                        <option value="SD">SD</option>
+                        <option value="SMP">SMP</option>
+                        <option value="SMA">SMA</option>
+                        <option value="SMK">SMK</option>
+                        <option value="SLB">SLB</option>
+                        <option value="Lainnya">Lainnya</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className={labelClass}>Jumlah Siswa (opsional)</label>
+                      <div className="relative">
+                        <Users size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                        <input
+                          type="number"
+                          min="1"
+                          name="jumlahSiswa"
+                          value={formData.jumlahSiswa}
+                          onChange={handleChange}
+                          placeholder="Contoh: 500"
+                          className={`${inputClass} pl-10`}
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className={labelClass}>
+                        Kota <span className="text-rose-500">*</span>
+                      </label>
+                      <div className="relative">
+                        <MapPin size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                        <input
+                          required
+                          name="kota"
+                          value={formData.kota}
+                          onChange={handleChange}
+                          placeholder="Contoh: Depok"
+                          className={`${inputClass} pl-10`}
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className={labelClass}>
+                        Provinsi <span className="text-rose-500">*</span>
+                      </label>
+                      <input
+                        required
+                        name="provinsi"
+                        value={formData.provinsi}
+                        onChange={handleChange}
+                        placeholder="Contoh: Jawa Barat"
+                        className={inputClass}
+                      />
+                    </div>
+
+                    <div className="md:col-span-2">
+                      <label className={labelClass}>
+                        Telepon / WhatsApp Sekolah <span className="text-rose-500">*</span>
+                      </label>
+                      <div className="relative">
+                        <Phone size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                        <input
+                          required
+                          type="tel"
+                          name="whatsapp"
+                          value={formData.whatsapp}
+                          onChange={handleChange}
+                          placeholder="08xxxxxxxxxx atau 021-xxxxxxx"
+                          className={`${inputClass} pl-10`}
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className={labelClass}>
+                        Nama Yayasan Naungan <span className="font-normal text-slate-400">(opsional)</span>
+                      </label>
+                      <input
+                        name="namaYayasanNaungan"
+                        value={formData.namaYayasanNaungan}
+                        onChange={handleChange}
+                        placeholder="Contoh: Yayasan Pendidikan Al-Hikmah"
+                        className={inputClass}
+                      />
+                    </div>
+
+                    <div>
+                      <label className={labelClass}>
+                        NPYP Yayasan Naungan <span className="font-normal text-slate-400">(opsional)</span>
+                      </label>
+                      <input
+                        name="npypYayasanNaungan"
+                        value={formData.npypYayasanNaungan}
+                        onChange={handleChange}
+                        placeholder="Contoh: P-12345678"
+                        className={inputClass}
                       />
                     </div>
                   </div>
-
-                  <div>
-                    <label className={labelClass}>Provinsi</label>
-                    <input
-                      required
-                      name="provinsi"
-                      value={formData.provinsi}
-                      onChange={handleChange}
-                      placeholder="Contoh: Jawa Barat"
-                      className={inputClass}
-                    />
+                </section>
+              ) : (
+                <section>
+                  <div className="mb-5 flex items-center gap-3">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
+                      <Landmark size={16} />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-bold">Data Lembaga Yayasan</h3>
+                      <p className="text-xs text-slate-400">Informasi identitas dan legalitas yayasan</p>
+                    </div>
                   </div>
-                </div>
-              </section>
+
+                  <div className="grid gap-5 md:grid-cols-2">
+                    <div className="md:col-span-2">
+                      <label className={labelClass}>
+                        Nama Yayasan <span className="text-rose-500">*</span>
+                      </label>
+                      <input
+                        required
+                        minLength={3}
+                        name="namaYayasan"
+                        value={formData.namaYayasan}
+                        onChange={handleChange}
+                        placeholder="Contoh: Yayasan Pendidikan Al-Hikmah"
+                        className={inputClass}
+                      />
+                    </div>
+
+                    <div>
+                      <label className={labelClass}>
+                        NPYP Yayasan <span className="text-rose-500">*</span>
+                      </label>
+                      <input
+                        required
+                        minLength={3}
+                        name="npypYayasan"
+                        value={formData.npypYayasan}
+                        onChange={handleChange}
+                        placeholder="Nomor Pokok Yayasan (min. 3 karakter)"
+                        className={inputClass}
+                      />
+                    </div>
+
+                    <div>
+                      <label className={labelClass}>
+                        Nomor Telepon Yayasan <span className="text-rose-500">*</span>
+                      </label>
+                      <div className="relative">
+                        <Phone size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                        <input
+                          required
+                          type="tel"
+                          name="teleponYayasan"
+                          value={formData.teleponYayasan}
+                          onChange={handleChange}
+                          placeholder="Contoh: 022-1234567 atau 08123456789"
+                          className={`${inputClass} pl-10`}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="md:col-span-2">
+                      <label className={labelClass}>
+                        Email Resmi Yayasan <span className="text-rose-500">*</span>
+                      </label>
+                      <div className="relative">
+                        <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                        <input
+                          required
+                          type="email"
+                          name="emailYayasan"
+                          value={formData.emailYayasan}
+                          onChange={handleChange}
+                          placeholder="info@yayasan-alhikmah.sch.id"
+                          className={`${inputClass} pl-10`}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="md:col-span-2">
+                      <label className={labelClass}>
+                        Alamat Lengkap Yayasan <span className="text-rose-500">*</span>
+                      </label>
+                      <div className="relative">
+                        <MapPin size={16} className="absolute left-3.5 top-3.5 text-slate-400" />
+                        <textarea
+                          required
+                          minLength={5}
+                          rows={3}
+                          name="alamatYayasan"
+                          value={formData.alamatYayasan}
+                          onChange={handleChange}
+                          placeholder="Contoh: Jl. Pendidikan No. 10, Kel. Dago, Kec. Coblong, Kota Bandung, Jawa Barat"
+                          className={`${inputClass} pl-10 resize-none`}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </section>
+              )}
 
               <div className="my-8 h-px bg-slate-100" />
 
@@ -634,20 +992,26 @@ async function handleSubmit(event) {
                     <UserRound size={16} />
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold">Data Administrator</h3>
-                    <p className="text-xs text-slate-400">Akun pengelola sekolah</p>
+                    <h3 className="text-sm font-bold">
+                      {jenisPendaftaran === "yayasan" ? "Data Administrator Yayasan" : "Data Administrator Sekolah"}
+                    </h3>
+                    <p className="text-xs text-slate-400">
+                      Akun pengelola yang akan menerima kode verifikasi OTP
+                    </p>
                   </div>
                 </div>
 
                 <div className="grid gap-5 md:grid-cols-2">
                   <div>
-                    <label className={labelClass}>Nama Lengkap</label>
+                    <label className={labelClass}>
+                      Nama Lengkap <span className="text-rose-500">*</span>
+                    </label>
                     <input
                       required
                       name="namaLengkap"
                       value={formData.namaLengkap}
                       onChange={handleChange}
-                      placeholder="Nama lengkap administrator"
+                      placeholder={jenisPendaftaran === "yayasan" ? "Contoh: Ahmad Fauzi" : "Nama lengkap administrator"}
                       className={inputClass}
                     />
                   </div>
@@ -658,13 +1022,15 @@ async function handleSubmit(event) {
                       name="jabatan"
                       value={formData.jabatan}
                       onChange={handleChange}
-                      placeholder="Contoh: Kepala Sekolah"
+                      placeholder={jenisPendaftaran === "yayasan" ? "Contoh: Ketua Yayasan" : "Contoh: Kepala Sekolah"}
                       className={inputClass}
                     />
                   </div>
 
-                  <div>
-                    <label className={labelClass}>Email</label>
+                  <div className="md:col-span-2">
+                    <label className={labelClass}>
+                      Email Administrator (Penerima OTP) <span className="text-rose-500">*</span>
+                    </label>
                     <div className="relative">
                       <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                       <input
@@ -673,30 +1039,16 @@ async function handleSubmit(event) {
                         name="email"
                         value={formData.email}
                         onChange={handleChange}
-                        placeholder="admin@sekolah.sch.id"
+                        placeholder={jenisPendaftaran === "yayasan" ? "ahmad@yayasan-alhikmah.sch.id" : "admin@sekolah.sch.id"}
                         className={`${inputClass} pl-10`}
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className={labelClass}>WhatsApp</label>
-                    <div className="relative">
-                      <MessageCircle size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                      <input
-                        required
-                        type="tel"
-                        name="whatsapp"
-                        value={formData.whatsapp}
-                        onChange={handleChange}
-                        placeholder="08xxxxxxxxxx"
-                        className={`${inputClass} pl-10`}
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className={labelClass}>Kata Sandi</label>
+                    <label className={labelClass}>
+                      Kata Sandi <span className="text-rose-500">*</span>
+                    </label>
                     <div className="relative">
                       <LockKeyhole size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                       <input
@@ -722,7 +1074,9 @@ async function handleSubmit(event) {
                   </div>
 
                   <div>
-                    <label className={labelClass}>Konfirmasi Kata Sandi</label>
+                    <label className={labelClass}>
+                      Konfirmasi Kata Sandi <span className="text-rose-500">*</span>
+                    </label>
                     <div className="relative">
                       <LockKeyhole size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                       <input
@@ -757,7 +1111,11 @@ async function handleSubmit(event) {
                   </div>
                   <div>
                     <h3 className="text-sm font-bold">Pilih Paket SmartSchool</h3>
-                    <p className="text-xs text-slate-400">Sesuaikan dengan kebutuhan sekolah</p>
+                    <p className="text-xs text-slate-400">
+                      {jenisPendaftaran === "yayasan"
+                        ? "Pilih paket khusus pengelolaan multi-sekolah yayasan"
+                        : "Sesuaikan dengan skala dan kebutuhan satuan pendidikan"}
+                    </p>
                   </div>
                 </div>
 
@@ -766,19 +1124,19 @@ async function handleSubmit(event) {
                     <RefreshCw size={17} className="animate-spin text-blue-600" />
                     Memuat daftar paket...
                   </div>
-                ) : paketList.length === 0 ? (
+                ) : availablePaketList.length === 0 ? (
                   <div className="flex items-start gap-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-4 text-sm text-rose-700">
                     <XCircle size={18} className="mt-0.5 shrink-0" />
                     <div>
                       <p className="font-semibold">Paket belum tersedia</p>
                       <p className="mt-1 text-xs leading-5">
-                        Periksa endpoint GET /api/paket dan data paket di backend.
+                        Belum ada paket aktif untuk pendaftaran {jenisPendaftaran}.
                       </p>
                     </div>
                   </div>
                 ) : (
                   <div className="grid gap-4 md:grid-cols-2">
-                    {paketList.map((paket) => {
+                    {availablePaketList.map((paket) => {
                       const selected = formData.paket === paket.id;
                       const harga = formatHarga(paket.harga);
 
@@ -870,7 +1228,7 @@ async function handleSubmit(event) {
               <div className="mt-8 border-t border-slate-100 pt-6">
                 <button
                   type="submit"
-                  disabled={loadingSubmit || loadingPaket || paketList.length === 0}
+                  disabled={loadingSubmit || loadingPaket || availablePaketList.length === 0}
                   className="group flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#155DFC] px-6 text-sm font-bold text-white shadow-lg transition hover:bg-[#0D47C9] disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {loadingSubmit ? (
@@ -880,7 +1238,7 @@ async function handleSubmit(event) {
                     </>
                   ) : (
                     <>
-                      Daftar Sekolah
+                      {jenisPendaftaran === "yayasan" ? "Daftar Yayasan" : "Daftar Sekolah"}
                       <ArrowRight size={17} className="transition-transform group-hover:translate-x-0.5" />
                     </>
                   )}

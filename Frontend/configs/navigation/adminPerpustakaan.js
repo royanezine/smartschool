@@ -40,9 +40,8 @@ export const adminPerpustakaanNavigation = {
       key: "dataBuku",
       icon: Library,
       label: "Data Buku",
-      path: "/admin/perpustakaan/buku",
+      path: "/admin/perpustakaan/data-buku",
     },
-
     {
       type: "item",
       key: "bukuDigital",
@@ -71,20 +70,6 @@ export const adminPerpustakaanNavigation = {
       icon: BookDown,
       label: "Pengembalian",
       path: "/admin/perpustakaan/pengembalian",
-    },
-
-
-    {
-      type: "header",
-      label: "LAPORAN",
-    },
-
-    {
-      type: "item",
-      key: "riwayatPeminjaman",
-      icon: History,
-      label: "Riwayat Peminjaman",
-      path: "/admin/perpustakaan/riwayat",
     },
   ],
 };

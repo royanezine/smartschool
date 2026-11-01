@@ -278,6 +278,12 @@ export async function registerTenant(
     if (data.logo?.trim()) {
       payload.logo = data.logo.trim();
     }
+    if (data.namaYayasan?.trim()) {
+      payload.namaYayasan = data.namaYayasan.trim();
+    }
+    if (data.npypYayasan?.trim()) {
+      payload.npypYayasan = data.npypYayasan.trim();
+    }
   } else {
     payload.namaYayasan = data.namaYayasan?.trim();
     payload.alamatYayasan = data.alamatYayasan?.trim();

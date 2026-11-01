@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
@@ -88,7 +89,7 @@ const QUICK_MODULES = [
     title: "Peminjaman",
     description:
       "Pantau transaksi peminjaman buku oleh siswa dan warga sekolah.",
-    href: "/admin/perpustakaan/pinjam",
+    href: "/admin/perpustakaan/peminjaman",
     icon: BookOpenCheck,
     tone: "indigo",
   },
@@ -489,6 +490,7 @@ function SectionHeader({ eyebrow, title, description, href, action = "Lihat semu
 
 
 export default function PerpustakaanPage() {
+  const router = useRouter();
   const [books, setBooks] = useState([]);
   const [loans, setLoans] = useState([]);
 
@@ -751,7 +753,7 @@ export default function PerpustakaanPage() {
                     </Link>
 
                     <Link
-                      href="/admin/perpustakaan/pinjam"
+                      href="/admin/perpustakaan/peminjaman"
                       className={`inline-flex items-center gap-2 rounded-xl border ${themePrimaryBorder} ${themePrimarySoft} px-4 py-2.5 text-sm font-semibold text-[var(--color-primary)] backdrop-blur-md transition ${themePrimarySoftHover}`}
                     >
                       <BookOpenCheck size={17} />
@@ -919,7 +921,7 @@ export default function PerpustakaanPage() {
                   description="Transaksi aktif saat ini"
                   icon={BookOpenCheck}
                   tone="indigo"
-                  href="/admin/perpustakaan/pinjam"
+                  href="/admin/perpustakaan/peminjaman"
                 />
 
                 <StatCard
@@ -928,7 +930,7 @@ export default function PerpustakaanPage() {
                   description="Jatuh tempo hari ini atau sudah lewat"
                   icon={Clock3}
                   tone="amber"
-                  href="/admin/perpustakaan/pinjam"
+                  href="/admin/perpustakaan/peminjaman"
                 />
               </div>
             </section>
@@ -1142,7 +1144,7 @@ export default function PerpustakaanPage() {
                           type="button"
                           title="Buka peminjaman"
                           onClick={() => {
-                            window.location.href = "/admin/perpustakaan/pinjam";
+                            router.push("/admin/perpustakaan/peminjaman");
                           }}
                           className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg theme-text-muted transition ${themePrimarySoftHover} hover:text-[var(--color-primary)]`}
                         >
@@ -1160,7 +1162,7 @@ export default function PerpustakaanPage() {
                 </div>
 
                 <div className="border-t theme-border-soft px-5 py-4 sm:px-6">
-                  <Link href="/admin/perpustakaan/pinjam" className="inline-flex items-center gap-1 text-xs font-semibold text-[var(--color-primary)]">
+                  <Link href="/admin/perpustakaan/peminjaman" className="inline-flex items-center gap-1 text-xs font-semibold text-[var(--color-primary)]">
                     Lihat seluruh transaksi
                     <ChevronRight size={14} />
                   </Link>
@@ -1250,7 +1252,7 @@ export default function PerpustakaanPage() {
                     </Link>
 
                     <Link
-                      href="/admin/perpustakaan/pinjam"
+                      href="/admin/perpustakaan/peminjaman"
                       className={`inline-flex items-center gap-2 rounded-xl border theme-border theme-card px-4 py-2.5 text-xs font-semibold theme-text-secondary transition ${themePrimarySoftHover} hover:text-[var(--color-primary)]`}
                     >
                       <BookOpenCheck size={15} />

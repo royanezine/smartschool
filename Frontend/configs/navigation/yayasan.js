@@ -33,8 +33,10 @@ export const yayasanSidebarConfig = {
       label: "Monitoring Akademik",
       path: "/yayasan/monitoringAkademik",
       children: [
+        { key: "monitoringGuru", icon: GraduationCap, label: "Guru", path: "/yayasan/monitoringAkademik/guru" },
         { key: "monitoringKehadiran", icon: ClipboardCheck, label: "Kehadiran", path: "/yayasan/monitoringAkademik/kehadiran" },
         { key: "monitoringLms", icon: Layers, label: "LMS", path: "/yayasan/monitoringAkademik/lms" },
+        { key: "monitoringNilai", icon: BookOpen, label: "Nilai", path: "/yayasan/monitoringAkademik/nilai" },
       ],
     },
     {

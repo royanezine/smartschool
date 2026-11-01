@@ -148,12 +148,16 @@ export default function DataInventarisPage() {
   const [dataInventaris, setDataInventaris] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isBackendGap, setIsBackendGap] = useState(false);
 
   const fetchInventaris = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
       const res = await getLaporanInventaris();
+      if (res?.backendGap) {
+        setIsBackendGap(true);
+      }
       const list = Array.isArray(res?.data?.items)
         ? res.data.items
         : Array.isArray(res?.data)
@@ -179,6 +183,9 @@ export default function DataInventarisPage() {
       try {
         const res = await getLaporanInventaris();
         if (cancelled) return;
+        if (res?.backendGap) {
+          setIsBackendGap(true);
+        }
         const list = Array.isArray(res?.data?.items)
           ? res.data.items
           : Array.isArray(res?.data)
@@ -315,6 +322,20 @@ export default function DataInventarisPage() {
             </button>
           </div>
 
+
+          {isBackendGap && (
+            <div className="rounded-xl border border-[color-mix(in_srgb,var(--color-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--color-warning)_10%,transparent)] p-4 flex items-start gap-3">
+              <AlertCircle className="text-[var(--color-warning)] shrink-0 mt-0.5" size={18} />
+              <div>
+                <h4 className="text-sm font-semibold text-[var(--color-warning)]">
+                  Halaman Dalam Pengembangan (Backend Gap)
+                </h4>
+                <p className="text-xs text-[var(--color-text-secondary)] mt-0.5 leading-relaxed">
+                  Endpoint inventaris sekolah binaan yayasan (<code className="font-mono text-[11px]">/api/yayasan/laporan/inventaris</code>) belum tersedia pada API Backend saat ini.
+                </p>
+              </div>
+            </div>
+          )}
 
           <div
             className={`theme-card rounded-xl theme-border border p-4 ${themeCardShadow}`}
@@ -540,9 +561,16 @@ export default function DataInventarisPage() {
                           className="mx-auto theme-text-placeholder mb-2"
                         />
 
-                        <p className="text-sm theme-text-muted">
-                          Tidak ada barang yang cocok.
+                        <p className="text-sm font-semibold theme-text">
+                          {isBackendGap
+                            ? "Data Inventaris Belum Tersedia (Backend Gap)"
+                            : "Tidak ada barang yang cocok."}
                         </p>
+                        {isBackendGap && (
+                          <p className="text-xs text-[var(--color-text-muted)] mt-1">
+                            API inventaris sekolah binaan belum disediakan oleh backend saat ini.
+                          </p>
+                        )}
                       </td>
                     </tr>
                   ) : (

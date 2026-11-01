@@ -99,12 +99,16 @@ export default function LaporanAkademikPage() {
   const [unitAkademik, setUnitAkademik] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isBackendGap, setIsBackendGap] = useState(false);
 
   const fetchAkademik = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
       const res = await getLaporanAkademik();
+      if (res?.backendGap) {
+        setIsBackendGap(true);
+      }
       const list = Array.isArray(res?.data?.items)
         ? res.data.items
         : Array.isArray(res?.data)
@@ -124,6 +128,9 @@ export default function LaporanAkademikPage() {
       try {
         const res = await getLaporanAkademik();
         if (cancelled) return;
+        if (res?.backendGap) {
+          setIsBackendGap(true);
+        }
         const list = Array.isArray(res?.data?.items)
           ? res.data.items
           : Array.isArray(res?.data)
@@ -321,6 +328,20 @@ export default function LaporanAkademikPage() {
             </button>
           </div>
 
+
+          {isBackendGap && (
+            <div className="rounded-xl border border-[color-mix(in_srgb,var(--color-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--color-warning)_10%,transparent)] p-4 flex items-start gap-3">
+              <AlertCircle className="text-[var(--color-warning)] shrink-0 mt-0.5" size={18} />
+              <div>
+                <h4 className="text-sm font-semibold text-[var(--color-warning)]">
+                  Halaman Dalam Pengembangan (Backend Gap)
+                </h4>
+                <p className="text-xs text-[var(--color-text-secondary)] mt-0.5 leading-relaxed">
+                  Endpoint agregasi laporan akademik sekolah naungan yayasan (<code className="font-mono text-[11px]">/api/yayasan/laporan/akademik</code>) belum tersedia pada API Backend saat ini.
+                </p>
+              </div>
+            </div>
+          )}
 
           <div
             className={`theme-card rounded-xl border theme-border p-4 ${themeCardShadow}`}
@@ -569,9 +590,16 @@ export default function LaporanAkademikPage() {
                           className="mx-auto text-[var(--color-text-placeholder)] mb-2"
                         />
 
-                        <p className="text-sm text-[var(--color-text-muted)]">
-                          Tidak ada unit sekolah yang cocok.
+                        <p className="text-sm font-semibold theme-text">
+                          {isBackendGap
+                            ? "Data Laporan Akademik Belum Tersedia (Backend Gap)"
+                            : "Tidak ada unit sekolah yang cocok."}
                         </p>
+                        {isBackendGap && (
+                          <p className="text-xs text-[var(--color-text-muted)] mt-1">
+                            API agregasi akademik sekolah binaan belum disediakan oleh backend saat ini.
+                          </p>
+                        )}
                       </td>
                     </tr>
                   ) : (

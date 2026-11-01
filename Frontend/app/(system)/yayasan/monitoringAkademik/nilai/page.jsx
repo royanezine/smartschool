@@ -1,12 +1,11 @@
 "use client";
 
 import {
-  BarChart3,
+  GraduationCap,
   ArrowLeft,
   Construction,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -26,7 +25,7 @@ const themeCardShadow =
 const themeNeutralHover =
   "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
 
-export default function MonitoringAkademikNilaiPage() {
+export default function MonitoringNilaiPage() {
   const router = useRouter();
 
   const handleBack = () => {
@@ -36,8 +35,6 @@ export default function MonitoringAkademikNilaiPage() {
   return (
     <div className="theme-page theme-text min-h-full">
       <div className="w-full max-w-[1500px] mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
-
-
         <div className="mb-5 flex items-center">
           <button
             type="button"
@@ -63,7 +60,6 @@ export default function MonitoringAkademikNilaiPage() {
           </button>
         </div>
 
-
         <section
           className={`
             relative mb-6 overflow-hidden rounded-2xl
@@ -88,7 +84,6 @@ export default function MonitoringAkademikNilaiPage() {
 
           <div className="relative p-5 sm:p-6 md:p-8">
             <div className="flex items-start gap-4">
-
               <div
                 className="
                   flex
@@ -108,7 +103,7 @@ export default function MonitoringAkademikNilaiPage() {
                   sm:w-14
                 "
               >
-                <BarChart3 className="h-6 w-6 sm:h-7 sm:w-7" />
+                <GraduationCap className="h-6 w-6 sm:h-7 sm:w-7" />
               </div>
 
               <div className="min-w-0">
@@ -127,7 +122,7 @@ export default function MonitoringAkademikNilaiPage() {
                 </p>
 
                 <h1 className="text-2xl font-bold tracking-tight text-[var(--color-card)] sm:text-3xl lg:text-4xl">
-                  Monitoring Nilai
+                  Monitoring Nilai &amp; Prestasi
                 </h1>
 
                 <p
@@ -140,14 +135,12 @@ export default function MonitoringAkademikNilaiPage() {
                     sm:text-sm
                   "
                 >
-                  Pantau perkembangan nilai siswa di seluruh
-                  sekolah jenjang.
+                  Pantau rata-rata capaian nilai akademik dan ketuntasan belajar siswa di seluruh unit naungan yayasan.
                 </p>
               </div>
             </div>
           </div>
         </section>
-
 
         <div
           className={`
@@ -182,12 +175,11 @@ export default function MonitoringAkademikNilaiPage() {
           </div>
 
           <h3 className="mt-4 text-sm font-bold theme-text">
-            Halaman dalam pengembangan
+            Halaman Dalam Pengembangan (Backend Gap)
           </h3>
 
           <p className="mt-1 max-w-sm text-sm leading-relaxed theme-text-muted">
-            Fitur monitoring nilai per sekolah dan per mata
-            pelajaran belum tersedia saat ini.
+            Endpoint agregasi nilai dan ketuntasan belajar lintas sekolah belum tersedia pada API Backend saat ini.
           </p>
 
           <button

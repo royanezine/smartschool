@@ -1,58 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import {
   Search,
   Download,
   GraduationCap,
   Mail,
-  Phone,
+  Loader2,
+  AlertCircle,
+  RefreshCw,
 } from "lucide-react";
-
-
-const dummyGuru = [
-  {
-    id: 1,
-    nama: "Siti Aminah",
-    nip: "198501012010012001",
-    mapel: "Matematika",
-    sekolah: "SMA Harapan 1",
-    status: "Aktif",
-    email: "siti.aminah@smartschool.com",
-    telp: "0812-3456-7890",
-  },
-  {
-    id: 2,
-    nama: "Budi Santoso",
-    nip: "198703152011011002",
-    mapel: "Bahasa Indonesia",
-    sekolah: "SMA Harapan 1",
-    status: "Aktif",
-    email: "budi.santoso@smartschool.com",
-    telp: "0813-4567-8901",
-  },
-  {
-    id: 3,
-    nama: "Dewi Lestari",
-    nip: "199002202012012003",
-    mapel: "Fisika",
-    sekolah: "SMA Harapan 2",
-    status: "Aktif",
-    email: "dewi.lestari@smartschool.com",
-    telp: "0814-5678-9012",
-  },
-  {
-    id: 4,
-    nama: "Ahmad Fauzi",
-    nip: "198812252013011004",
-    mapel: "Bahasa Inggris",
-    sekolah: "SMA Harapan 2",
-    status: "Cuti",
-    email: "ahmad.fauzi@smartschool.com",
-    telp: "0815-6789-0123",
-  },
-];
-
+import { getMonitoringUsers } from "@/services/yayasan.service";
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -90,28 +48,99 @@ const themeDivider =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-
 export default function LaporanGuruPage() {
   const [search, setSearch] = useState("");
+  const [guruList, setGuruList] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
+  const fetchGuru = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await getMonitoringUsers({ peran: "guru" });
+      const raw = Array.isArray(res?.data)
+        ? res.data
+        : Array.isArray(res?.data?.items)
+        ? res.data.items
+        : Array.isArray(res?.data?.users)
+        ? res.data.users
+        : [];
+      const mapped = raw.map((g) => ({
+        id: g.id,
+        nama: g.namaLengkap || g.namaPengguna || "Guru",
+        nip: g.nip || g.namaPengguna || "-",
+        mapel: g.mapel || "Guru Pengajar",
+        sekolah: g.sekolah?.nama || "-",
+        status: g.status === "aktif" ? "Aktif" : "Nonaktif",
+        email: g.email || "-",
+        telp: g.nomorTelepon || "-",
+      }));
+      setGuruList(mapped);
+    } catch (err) {
+      setError(err?.message || "Gagal memuat data guru yayasan.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-  const filteredGuru = dummyGuru.filter(
-    (g) =>
-      g.nama.toLowerCase().includes(search.toLowerCase()) ||
-      g.mapel.toLowerCase().includes(search.toLowerCase()) ||
-      g.sekolah.toLowerCase().includes(search.toLowerCase())
-  );
+  useEffect(() => {
+    let cancelled = false;
 
+    async function load() {
+      try {
+        const res = await getMonitoringUsers({ peran: "guru", limit: 100 });
+        if (cancelled) return;
 
-  const totalGuru = dummyGuru.length;
+        const users = Array.isArray(res?.data)
+          ? res.data
+          : Array.isArray(res?.data?.items)
+          ? res.data.items
+          : Array.isArray(res?.data?.users)
+          ? res.data.users
+          : [];
+        const mapped = users.map((g) => ({
+          id: g.id,
+          nama: g.namaLengkap || g.username || "-",
+          nip: g.nip || g.namaPengguna || "-",
+          mapel: g.mapel || "Guru Pengajar",
+          sekolah: g.sekolah?.nama || "-",
+          status: g.status === "aktif" ? "Aktif" : "Nonaktif",
+          email: g.email || "-",
+          telp: g.nomorTelepon || "-",
+        }));
+        setGuruList(mapped);
+      } catch (err) {
+        if (!cancelled) {
+          setError(err?.message || "Gagal memuat data guru yayasan.");
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    }
 
-  const guruAktif = dummyGuru.filter(
-    (g) => g.status === "Aktif"
-  ).length;
+    load();
 
-  const guruCuti = dummyGuru.filter(
-    (g) => g.status === "Cuti"
-  ).length;
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const filteredGuru = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return guruList.filter(
+      (g) =>
+        g.nama.toLowerCase().includes(q) ||
+        g.mapel.toLowerCase().includes(q) ||
+        g.sekolah.toLowerCase().includes(q)
+    );
+  }, [guruList, search]);
+
+  const totalGuru = guruList.length;
+  const guruAktif = guruList.filter((g) => g.status === "Aktif").length;
+  const guruNonaktif = guruList.filter((g) => g.status !== "Aktif").length;
 
   return (
     <div className="theme-page theme-text min-h-full">
@@ -378,7 +407,56 @@ export default function LaporanGuruPage() {
               </thead>
 
               <tbody>
-                {filteredGuru.map((g, index) => (
+                {loading ? (
+                  <tr>
+                    <td colSpan={6} className="px-4 py-12 text-center">
+                      <Loader2 size={24} className="mx-auto text-[var(--color-primary)] animate-spin mb-2" />
+                      <p className="text-sm theme-text-muted">Memuat data guru dari server...</p>
+                    </td>
+                  </tr>
+                ) : error ? (
+                  <tr>
+                    <td colSpan={6} className="px-4 py-10 text-center text-[var(--color-danger)]">
+                      <AlertCircle size={24} className="mx-auto mb-2" />
+                      <p className="text-sm font-medium">{error}</p>
+                      <button
+                        type="button"
+                        onClick={fetchGuru}
+                        className="mt-3 text-xs font-semibold underline"
+                      >
+                        Coba Lagi
+                      </button>
+                    </td>
+                  </tr>
+                ) : filteredGuru.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={6}
+                      className="px-4 py-10 text-center"
+                    >
+                      <div
+                        className={`
+                          mx-auto
+                          flex
+                          h-10
+                          w-10
+                          items-center
+                          justify-center
+                          rounded-full
+                          ${themeNeutralSurface}
+                          theme-text-muted
+                        `}
+                      >
+                        <Search size={18} />
+                      </div>
+
+                      <p className="mt-3 text-sm theme-text-muted">
+                        Tidak ada data guru yang cocok.
+                      </p>
+                    </td>
+                  </tr>
+                ) : (
+                  filteredGuru.map((g, index) => (
                   <tr
                     key={g.id}
                     className={`
@@ -446,21 +524,6 @@ export default function LaporanGuruPage() {
                           </span>
                         </span>
 
-                        <span className="flex items-center gap-1.5">
-                          <Phone
-                            className="
-                              h-3
-                              w-3
-                              shrink-0
-                              theme-text-muted
-                            "
-                          />
-
-                          <span>
-                            {g.telp}
-                          </span>
-                        </span>
-
                       </div>
                     </td>
 
@@ -490,35 +553,7 @@ export default function LaporanGuruPage() {
                       </span>
                     </td>
                   </tr>
-                ))}
-
-                {filteredGuru.length === 0 && (
-                  <tr>
-                    <td
-                      colSpan={6}
-                      className="px-4 py-10 text-center"
-                    >
-                      <div
-                        className={`
-                          mx-auto
-                          flex
-                          h-10
-                          w-10
-                          items-center
-                          justify-center
-                          rounded-full
-                          ${themeNeutralSurface}
-                          theme-text-muted
-                        `}
-                      >
-                        <Search size={18} />
-                      </div>
-
-                      <p className="mt-3 text-sm theme-text-muted">
-                        Tidak ada data guru yang cocok.
-                      </p>
-                    </td>
-                  </tr>
+                ))
                 )}
               </tbody>
             </table>

@@ -697,6 +697,12 @@ export default function PengaturanPage() {
 
             {activeTab === "yayasan" && (
               <SectionCard>
+                <div className="mb-4 rounded-xl border border-[color-mix(in_srgb,var(--color-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--color-warning)_10%,transparent)] p-3.5 flex items-start gap-2.5">
+                  <AlertCircle className="text-[var(--color-warning)] shrink-0 mt-0.5" size={16} />
+                  <p className="text-xs text-[var(--color-text-secondary)] leading-relaxed">
+                    <span className="font-semibold text-[var(--color-warning)]">Status Backend Gap:</span> Endpoint pengelolaan identitas lembaga yayasan belum tersedia di API Backend. Saat ini hanya data profil pengguna yang dapat diperbarui.
+                  </p>
+                </div>
                 <h3 className="text-sm font-semibold theme-text-secondary mb-4">
                   Informasi Lembaga
                 </h3>

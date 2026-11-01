@@ -28,7 +28,7 @@ const categories = [
     icon: BookOpen,
     color: "primary",
     path: "/yayasan/laporan/akademik",
-    stat: "6 unit sekolah",
+    stat: "-",
   },
   {
     key: "guru",
@@ -37,7 +37,7 @@ const categories = [
     icon: GraduationCap,
     color: "info",
     path: "/yayasan/laporan/guru",
-    stat: "237 guru aktif",
+    stat: "-",
   },
   {
     key: "iventaris",
@@ -46,7 +46,7 @@ const categories = [
     icon: Package,
     color: "warning",
     path: "/yayasan/laporan/iventaris",
-    stat: "Update bulanan",
+    stat: "-",
   },
   {
     key: "siswa",
@@ -55,7 +55,7 @@ const categories = [
     icon: UserSquare2,
     color: "success",
     path: "/yayasan/laporan/siswa",
-    stat: "4.312 siswa",
+    stat: "-",
   },
 ];
 
@@ -224,11 +224,11 @@ export default function LaporanYayasanPage() {
     if (cat.key === "akademik") {
       statText = `${stats.totalSekolah} unit sekolah`;
     } else if (cat.key === "guru") {
-      statText = `${stats.totalGuru} guru aktif`;
+      statText = `${stats.totalGuru} guru terdata`;
     } else if (cat.key === "iventaris") {
       statText = `${stats.totalAset} aset terdata`;
     } else if (cat.key === "siswa") {
-      statText = `${stats.totalSiswa} siswa`;
+      statText = `${stats.totalSiswa} siswa terdata`;
     }
     return { ...cat, stat: statText };
   });

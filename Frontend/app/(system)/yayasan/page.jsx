@@ -312,7 +312,7 @@ export default function YayasanDashboardPage() {
       desc: "Data induk tenaga pendidik",
       icon: GraduationCap,
       color: "info",
-      path: "/yayasan/guru",
+      path: "/yayasan/laporan/guru",
       stat: loading ? "Memuat data..." : `${totalGuru} guru aktif`,
     },
     {
@@ -321,7 +321,7 @@ export default function YayasanDashboardPage() {
       desc: "Data induk siswa lintas unit",
       icon: UserSquare2,
       color: "success",
-      path: "/yayasan/siswa",
+      path: "/yayasan/laporan/siswa",
       stat: loading ? "Memuat data..." : `${totalSiswa} siswa aktif`,
     },
     {

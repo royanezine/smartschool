@@ -69,7 +69,6 @@ export default function YayasanLayout({ children }) {
             toggleSidebar={() => setSidebarOpen((prev) => !prev)}
             user={{
               name: "Admin Yayasan",
-              email: "admin@smartschool.com",
               avatar: "Y",
             }}
           />

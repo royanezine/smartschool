@@ -6,10 +6,12 @@ import {
   useContext,
   useCallback,
   useMemo,
+  useRef,
   useEffect,
   useLayoutEffect,
   useSyncExternalStore,
 } from "react";
+import { useServerInsertedHTML } from "next/navigation";
 
 // Layout effect agar kelas .dark dipulihkan SEBELUM paint pertama setelah
 // hidrasi (mencegah flash light bila React menimpa className <html>).
@@ -87,6 +89,20 @@ export function useTheme() {
 }
 
 export default function ThemeProvider({ children }) {
+  const isInserted = useRef(false);
+
+  useServerInsertedHTML(() => {
+    if (isInserted.current) return null;
+    isInserted.current = true;
+    return (
+      <script
+        key="theme-bootstrap"
+        suppressHydrationWarning
+        dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP_SCRIPT }}
+      />
+    );
+  });
+
   const theme = useSyncExternalStore(
     subscribe,
     getSnapshot,
@@ -138,11 +154,6 @@ export default function ThemeProvider({ children }) {
 
   return (
     <ThemeContext.Provider value={value}>
-      <script
-        suppressHydrationWarning
-        dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP_SCRIPT }}
-      />
-
       <div
         id="system-theme-root"
         className={`system-scope min-h-screen w-full ${

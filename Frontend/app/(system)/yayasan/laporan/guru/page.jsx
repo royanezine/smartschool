@@ -17,7 +17,7 @@ import {
   AlertCircle,
   RefreshCw,
 } from "lucide-react";
-import { getLaporanGuru } from "@/services/yayasan.service";
+import { getLaporanGuru, getSekolahBinaan } from "@/services/yayasan.service";
 
 const SEMESTER_OPTIONS = [
   "Ganjil 2025/2026",
@@ -109,15 +109,35 @@ export default function LaporanGuruPage() {
     try {
       setLoading(true);
       setError(null);
-      const res = await getLaporanGuru();
-      const list = Array.isArray(res?.data?.items)
-        ? res.data.items
-        : Array.isArray(res?.data)
+      const [res, sekolahRes] = await Promise.all([
+        getLaporanGuru(),
+        getSekolahBinaan(),
+      ]);
+      const rawList = Array.isArray(res?.data)
         ? res.data
+        : Array.isArray(res?.data?.items)
+        ? res.data.items
+        : Array.isArray(res?.data?.users)
+        ? res.data.users
         : [];
-      setDataGuru(list);
-      if (Array.isArray(res?.data?.unitOptions) && res.data.unitOptions.length > 0) {
-        setUnitOptions(res.data.unitOptions);
+      const formattedList = rawList.map((u) => ({
+        id: u.id,
+        nama: u.namaLengkap || u.namaPengguna || "Guru",
+        mapel: u.mapel || "Guru Pengajar",
+        unit: u.sekolah?.nama || "Semua Unit",
+        kelasDiampu: u.kelasDiampu ?? 0,
+        berlakuSejak: u.dibuatPada ? new Date(u.dibuatPada).toLocaleDateString("id-ID") : "-",
+        status: u.status === "aktif" ? "Aktif" : "Nonaktif",
+      }));
+      setDataGuru(formattedList);
+
+      const sekolahList = Array.isArray(sekolahRes?.data?.items)
+        ? sekolahRes.data.items
+        : Array.isArray(sekolahRes?.data)
+        ? sekolahRes.data
+        : [];
+      if (sekolahList.length > 0) {
+        setUnitOptions(["Semua Unit", ...sekolahList.map((s) => s.nama)]);
       }
     } catch (err) {
       setError(err?.message || "Gagal memuat laporan data guru yayasan.");
@@ -128,18 +148,42 @@ export default function LaporanGuruPage() {
 
   useEffect(() => {
     let cancelled = false;
+
     async function load() {
       try {
-        const res = await getLaporanGuru();
+        const [guruRes, sekolahRes] = await Promise.all([
+          getMonitoringUsers({ peran: "guru", limit: 100 }),
+          getSekolahBinaan(),
+        ]);
         if (cancelled) return;
-        const list = Array.isArray(res?.data?.items)
-          ? res.data.items
-          : Array.isArray(res?.data)
-          ? res.data
+
+        const users = Array.isArray(guruRes?.data)
+          ? guruRes.data
+          : Array.isArray(guruRes?.data?.items)
+          ? guruRes.data.items
+          : Array.isArray(guruRes?.data?.users)
+          ? guruRes.data.users
           : [];
-        setDataGuru(list);
-        if (Array.isArray(res?.data?.unitOptions) && res.data.unitOptions.length > 0) {
-          setUnitOptions(res.data.unitOptions);
+        const formattedList = users.map((u) => ({
+          id: u.id,
+          nama: u.namaLengkap || u.namaPengguna || u.username || "-",
+          unit: u.sekolah?.nama || "-",
+          mapel: u.mapel || "Guru Pengajar",
+          kelasDiampu: u.kelasDiampu ?? 0,
+          berlakuSejak: u.dibuatPada
+            ? new Date(u.dibuatPada).toLocaleDateString("id-ID")
+            : "-",
+          status: u.status === "aktif" ? "Aktif" : "Nonaktif",
+        }));
+        setDataGuru(formattedList);
+
+        const sekolahList = Array.isArray(sekolahRes?.data?.items)
+          ? sekolahRes.data.items
+          : Array.isArray(sekolahRes?.data)
+          ? sekolahRes.data
+          : [];
+        if (sekolahList.length > 0) {
+          setUnitOptions(["Semua Unit", ...sekolahList.map((s) => s.nama)]);
         }
       } catch (err) {
         if (!cancelled) {
@@ -151,7 +195,9 @@ export default function LaporanGuruPage() {
         }
       }
     }
+
     load();
+
     return () => {
       cancelled = true;
     };
