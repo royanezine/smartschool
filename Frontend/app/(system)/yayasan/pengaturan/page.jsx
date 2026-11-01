@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { getProfile, updateProfile } from "@/services/user.service";
+import { getYayasanById, updateYayasan } from "@/services/yayasan.service";
+import { getAuthPayload, getStoredUser } from "@/lib/auth";
 import {
   Settings,
   ChevronLeft,
@@ -120,8 +122,9 @@ const initialProfil = {
 };
 
 const initialYayasan = {
+  id: "",
   nama: "",
-  npwp: "",
+  npyp: "",
   alamat: "",
   email: "",
   telepon: "",
@@ -291,6 +294,30 @@ export default function PengaturanPage() {
             jabatan: u.role?.nama || u.role || u.jabatan || "Admin Yayasan",
           });
         }
+
+        // Muat profil yayasan jika user terafiliasi yayasan
+        const authPayload = getAuthPayload();
+        const storedUser = getStoredUser();
+        const yId = authPayload?.yayasanId || storedUser?.yayasanId || u?.yayasanId;
+
+        if (active && yId) {
+          try {
+            const yRes = await getYayasanById(yId);
+            const yData = yRes?.data || yRes;
+            if (active && yData) {
+              setYayasan({
+                id: yData.id || yId,
+                nama: yData.nama || "",
+                npyp: yData.npyp || "",
+                alamat: yData.alamat || "",
+                email: yData.email || "",
+                telepon: yData.telepon || "",
+              });
+            }
+          } catch (yErr) {
+            console.warn("Gagal memuat data lembaga yayasan:", yErr);
+          }
+        }
       } catch (err) {
         if (active) {
           console.error("Gagal memuat profil:", err);
@@ -323,20 +350,45 @@ export default function PengaturanPage() {
     try {
       setSaving(true);
       setErrorMsg("");
-      if (activeTab !== "profil") {
-        // Tab ini belum memiliki endpoint Backend (tidak ada route update
-        // yayasan/preferensi), jadi jangan tampilkan status "tersimpan" palsu.
+
+      if (activeTab === "profil") {
+        await updateProfile({
+          namaLengkap: profil.nama,
+          noTelepon: profil.telepon,
+        });
+      } else if (activeTab === "yayasan") {
+        const authPayload = getAuthPayload();
+        const storedUser = getStoredUser();
+        const yId = yayasan.id || authPayload?.yayasanId || storedUser?.yayasanId;
+
+        if (!yId) {
+          throw new Error("ID Yayasan tidak ditemukan.");
+        }
+
+        if (!yayasan.nama || yayasan.nama.trim().length < 3) {
+          throw new Error("Nama yayasan minimal 3 karakter.");
+        }
+        if (!yayasan.npyp || yayasan.npyp.trim().length < 3) {
+          throw new Error("NPYP yayasan minimal 3 karakter.");
+        }
+
+        // Endpoint: PUT /api/yayasan/:yayasanId
+        // Payload: { nama, npyp, alamat, telepon, email } (menggunakan field 'npyp', BUKAN 'npypYayasan')
+        await updateYayasan(yId, {
+          nama: yayasan.nama.trim(),
+          npyp: yayasan.npyp.trim(),
+          alamat: yayasan.alamat ? yayasan.alamat.trim() : null,
+          telepon: yayasan.telepon ? yayasan.telepon.trim() : null,
+          email: yayasan.email ? yayasan.email.trim() : null,
+        });
+      } else {
+        // Tab notifikasi/tampilan/keamanan
         setErrorMsg(
           "Pengaturan pada tab ini belum memiliki endpoint Backend. "
-            + "Hanya data profil yang dapat disimpan saat ini."
+            + "Hanya data profil dan informasi yayasan yang dapat disimpan saat ini."
         );
         return;
       }
-
-      await updateProfile({
-        namaLengkap: profil.nama,
-        noTelepon: profil.telepon,
-      });
 
       setSaved(true);
       setTimeout(() => {
@@ -344,7 +396,13 @@ export default function PengaturanPage() {
       }, 2500);
     } catch (err) {
       console.error("Gagal menyimpan:", err);
-      setErrorMsg(err?.message || "Gagal menyimpan perubahan");
+      // Tangani HTTP 409 atau duplicate error
+      const is409 = err?.status === 409 || err?.statusCode === 409 || /409/.test(String(err));
+      if (is409) {
+        setErrorMsg(err?.message || "Konflik Data (HTTP 409): NPYP Yayasan sudah terdaftar pada lembaga lain.");
+      } else {
+        setErrorMsg(err?.message || "Gagal menyimpan perubahan. Periksa kembali isian form.");
+      }
     } finally {
       setSaving(false);
     }
@@ -697,21 +755,21 @@ export default function PengaturanPage() {
 
             {activeTab === "yayasan" && (
               <SectionCard>
-                <div className="mb-4 rounded-xl border border-[color-mix(in_srgb,var(--color-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--color-warning)_10%,transparent)] p-3.5 flex items-start gap-2.5">
-                  <AlertCircle className="text-[var(--color-warning)] shrink-0 mt-0.5" size={16} />
+                <div className="mb-4 rounded-xl border border-[color-mix(in_srgb,var(--color-primary)_30%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)] p-3.5 flex items-start gap-2.5">
+                  <Building2 className="text-[var(--color-primary)] shrink-0 mt-0.5" size={16} />
                   <p className="text-xs text-[var(--color-text-secondary)] leading-relaxed">
-                    <span className="font-semibold text-[var(--color-warning)]">Status Backend Gap:</span> Endpoint pengelolaan identitas lembaga yayasan belum tersedia di API Backend. Saat ini hanya data profil pengguna yang dapat diperbarui.
+                    Pengaturan identitas resmi yayasan naungan. Data tersinkronisasi langsung dengan sistem backend yayasan.
                   </p>
                 </div>
                 <h3 className="text-sm font-semibold theme-text-secondary mb-4">
-                  Informasi Lembaga
+                  Informasi Lembaga Yayasan
                 </h3>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
                   <div className="sm:col-span-2">
                     <FieldLabel>
-                      Nama Yayasan
+                      Nama Yayasan *
                     </FieldLabel>
 
                     <input
@@ -724,25 +782,30 @@ export default function PengaturanPage() {
                         })
                       }
                       className={inputClass}
+                      placeholder="Masukkan nama resmi yayasan"
                     />
                   </div>
 
                   <div>
                     <FieldLabel>
-                      NPWP
+                      NPYP (Nomor Pokok Yayasan Pendidikan) *
                     </FieldLabel>
 
                     <input
                       type="text"
-                      value={yayasan.npwp}
+                      value={yayasan.npyp}
                       onChange={(e) =>
                         setYayasan({
                           ...yayasan,
-                          npwp: e.target.value,
+                          npyp: e.target.value,
                         })
                       }
                       className={inputClass}
+                      placeholder="Contoh: NPYP-998877"
                     />
+                    <p className="text-[11px] theme-text-muted mt-1">
+                      NPYP unik terdaftar pada kementerian / dinas terkait.
+                    </p>
                   </div>
 
                   <div>
@@ -760,6 +823,7 @@ export default function PengaturanPage() {
                         })
                       }
                       className={inputClass}
+                      placeholder="Nomor telepon kantor yayasan"
                     />
                   </div>
 
@@ -778,12 +842,13 @@ export default function PengaturanPage() {
                         })
                       }
                       className={inputClass}
+                      placeholder="email@yayasan.org"
                     />
                   </div>
 
-                  <div>
+                  <div className="sm:col-span-2">
                     <FieldLabel>
-                      Alamat
+                      Alamat Kantor Yayasan
                     </FieldLabel>
 
                     <input
@@ -796,12 +861,12 @@ export default function PengaturanPage() {
                         })
                       }
                       className={inputClass}
+                      placeholder="Alamat lengkap domisili kantor yayasan"
                     />
                   </div>
                 </div>
               </SectionCard>
             )}
-
 
             {activeTab === "keamanan" && (
               <>

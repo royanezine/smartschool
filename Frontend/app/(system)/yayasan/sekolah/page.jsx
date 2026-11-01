@@ -14,6 +14,7 @@ import {
   Mail,
   Users,
   BadgeCheck,
+  Plus,
 } from "lucide-react";
 
 
@@ -179,6 +180,16 @@ export default function DataMasterSekolahPage() {
                   Kelola data unit sekolah di lingkungan yayasan.
                 </span>
               </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Link
+                href="/yayasan/sekolah/tambah"
+                className="inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:opacity-95"
+              >
+                <Plus size={16} />
+                Tambah Sekolah Cabang
+              </Link>
             </div>
           </div>
 

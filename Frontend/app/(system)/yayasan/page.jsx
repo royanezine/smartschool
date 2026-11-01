@@ -15,11 +15,16 @@ import {
   Sparkles,
   Bell,
   Info,
+  Activity,
+  CheckCircle2,
+  PlusCircle,
+  MapPin,
 } from "lucide-react";
 
 import {
   getYayasanSummary,
   getSekolahBinaan,
+  getYayasanDashboardAgregat,
 } from "@/services/yayasan.service";
 import { getNotifikasi } from "@/services/notifikasi.service";
 
@@ -160,6 +165,7 @@ export default function YayasanDashboardPage() {
   const router = useRouter();
 
   const [summary, setSummary] = useState(null);
+  const [agregat, setAgregat] = useState(null);
   const [schools, setSchools] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -175,11 +181,12 @@ export default function YayasanDashboardPage() {
         setLoading(true);
         setLoadError(null);
 
-        const [summaryResult, schoolsResult, notifResult] =
+        const [summaryResult, schoolsResult, notifResult, agregatResult] =
           await Promise.allSettled([
             getYayasanSummary(),
             getSekolahBinaan(),
             getNotifikasi(),
+            getYayasanDashboardAgregat(),
           ]);
 
         if (!mounted) return;
@@ -202,7 +209,31 @@ export default function YayasanDashboardPage() {
           setUnreadCount(Number(notifResult.value?.unreadCount) || 0);
         }
 
-        const failures = [summaryResult, schoolsResult, notifResult].filter(
+        if (agregatResult.status === "fulfilled") {
+          const payload = unwrapData(agregatResult.value);
+          // Backend GET /api/dashboard terbaru menggunakan data.scope
+          if (payload?.scope === "yayasan") {
+            const yayasanData = payload.yayasan || payload.cabang;
+            setAgregat({
+              totalSiswa: yayasanData?.totalSiswa ?? 0,
+              totalGuru: yayasanData?.totalGuru ?? 0,
+              totalKelas: yayasanData?.totalKelas ?? 0,
+              kehadiranHariIni: yayasanData?.persentaseHadir ?? "0.0%",
+              detailKehadiran: yayasanData?.rekapKehadiran ?? {
+                hadir: 0,
+                izin: 0,
+                sakit: 0,
+                alpha: 0,
+              },
+              sekolah: Array.isArray(yayasanData?.sekolah) ? yayasanData.sekolah : [],
+            });
+          } else {
+            // Jika scope bukan yayasan, jangan anggap sebagai response dashboard yayasan
+            setAgregat(null);
+          }
+        }
+
+        const failures = [summaryResult, schoolsResult, notifResult, agregatResult].filter(
           (result) => result.status === "rejected"
         );
 
@@ -289,8 +320,8 @@ export default function YayasanDashboardPage() {
     {
       id: "sekolah",
       key: "sekolah",
-      title: "Sekolah",
-      desc: "Kelola profil dan data seluruh unit sekolah di bawah yayasan",
+      title: "Sekolah Binaan",
+      desc: "Kelola profil dan data seluruh unit sekolah di bawah naungan yayasan",
       icon: Building2,
       color: "primary",
       path: "/yayasan/sekolah",
@@ -298,55 +329,47 @@ export default function YayasanDashboardPage() {
       featured: true,
     },
     {
-      id: "laporan",
-      key: "laporan",
-      title: "Laporan & Analitik",
-      desc: "Ringkasan laporan akademik, guru, inventaris, dan siswa",
-      icon: FileText,
+      id: "tambahSekolah",
+      key: "tambahSekolah",
+      title: "Tambah Cabang Sekolah",
+      desc: "Daftarkan unit sekolah binaan baru di bawah naungan yayasan",
+      icon: PlusCircle,
       color: "info",
-      path: "/yayasan/laporan",
-      stat: "Laporan per modul",
+      path: "/yayasan/sekolah/tambah",
+      stat: "Pendaftaran Cabang Baru",
       featured: true,
     },
     {
-      id: "guru",
-      key: "guru",
-      title: "Guru",
-      desc: "Data induk tenaga pendidik",
-      icon: GraduationCap,
-      color: "info",
-      path: "/yayasan/laporan/guru",
-      stat: loading ? "Memuat data..." : `${totalGuru} guru aktif`,
-    },
-    {
-      id: "siswa",
-      key: "siswa",
-      title: "Siswa",
-      desc: "Data induk siswa lintas unit",
-      icon: UserSquare2,
-      color: "success",
-      path: "/yayasan/laporan/siswa",
-      stat: loading ? "Memuat data..." : `${totalSiswa} siswa aktif`,
-    },
-    {
-      id: "monitoringAkademik",
-      key: "monitoringAkademik",
-      title: "Monitoring Akademik",
-      desc: "Kehadiran, nilai, LMS, mapel",
-      icon: ClipboardCheck,
+      id: "lokasi",
+      key: "lokasi",
+      title: "Lokasi Sekolah",
+      desc: "Pemetaan koordinat geografis dan alamat unit sekolah binaan",
+      icon: MapPin,
       color: "warning",
-      path: "/yayasan/monitoringAkademik",
-      stat: "Data per unit",
+      path: "/yayasan/lokasi",
+      stat: loading ? "Memuat..." : `${schools.length} lokasi terdata`,
+    },
+    {
+      id: "monitoringUsers",
+      key: "monitoringUsers",
+      title: "Monitoring Pengguna",
+      desc: "Pantau akun guru, siswa, staf, dan admin lintas unit sekolah",
+      icon: Users,
+      color: "success",
+      path: "/yayasan/monitoring/users",
+      stat: loading
+        ? "Memuat..."
+        : `${summary?.totalPenggunaAktif ?? totalSiswa + totalGuru} pengguna aktif`,
     },
     {
       id: "pengaturan",
       key: "pengaturan",
-      title: "Pengaturan",
-      desc: "Konfigurasi sistem yayasan",
+      title: "Pengaturan Yayasan",
+      desc: "Konfigurasi profil yayasan, NPYP, kontak, dan alamat resmi",
       icon: Settings,
       color: "neutral",
       path: "/yayasan/pengaturan",
-      stat: "Per sekolah",
+      stat: "Profil & NPYP",
     },
   ];
 
@@ -450,6 +473,67 @@ export default function YayasanDashboardPage() {
                 </div>
               );
             })}
+          </div>
+
+
+          {/* Agregat Statistik Lintas Sekolah Cabang (GET /api/dashboard/) */}
+          <div className="theme-card rounded-2xl border theme-border p-5 sm:p-6 shadow-sm space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] text-[var(--color-primary)]">
+                  <Activity size={18} />
+                </div>
+                <div>
+                  <h2 className="text-base font-semibold theme-text">
+                    Statistik Operasional Agregat Cabang
+                  </h2>
+                  <p className="text-xs theme-text-secondary">
+                    Metrik terpusat seluruh unit sekolah di bawah naungan yayasan
+                  </p>
+                </div>
+              </div>
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[color-mix(in_srgb,var(--color-success)_12%,transparent)] text-[var(--color-success)] border border-[color-mix(in_srgb,var(--color-success)_20%,transparent)] self-start sm:self-auto">
+                <CheckCircle2 size={13} />
+                <span>Kehadiran Hari Ini: {agregat?.kehadiranHariIni || "0.0%"}</span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
+              <div className="p-3.5 rounded-xl border theme-border bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)]">
+                <p className="text-xs theme-text-muted">Total Siswa Aktif</p>
+                <p className="text-lg font-bold theme-text mt-1">
+                  {loading ? "..." : (agregat?.totalSiswa ?? totalSiswa)}
+                </p>
+                <p className="text-[11px] theme-text-muted mt-0.5">Lintas seluruh cabang</p>
+              </div>
+
+              <div className="p-3.5 rounded-xl border theme-border bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)]">
+                <p className="text-xs theme-text-muted">Total Guru & Tendik</p>
+                <p className="text-lg font-bold theme-text mt-1">
+                  {loading ? "..." : (agregat?.totalGuru ?? totalGuru)}
+                </p>
+                <p className="text-[11px] theme-text-muted mt-0.5">Pengajar terdaftar</p>
+              </div>
+
+              <div className="p-3.5 rounded-xl border theme-border bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)]">
+                <p className="text-xs theme-text-muted">Total Rombel / Kelas</p>
+                <p className="text-lg font-bold theme-text mt-1">
+                  {loading ? "..." : (agregat?.totalKelas ?? totalKelas)}
+                </p>
+                <p className="text-[11px] theme-text-muted mt-0.5">Rombongan belajar</p>
+              </div>
+
+              <div className="p-3.5 rounded-xl border theme-border bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)]">
+                <p className="text-xs theme-text-muted">Rekap Presensi Hari Ini</p>
+                <div className="flex items-center gap-2 mt-1 text-xs font-semibold">
+                  <span className="text-[var(--color-success)]" title="Hadir">H: {agregat?.detailKehadiran?.hadir ?? 0}</span>
+                  <span className="text-[var(--color-info)]" title="Izin">I: {agregat?.detailKehadiran?.izin ?? 0}</span>
+                  <span className="text-[var(--color-warning)]" title="Sakit">S: {agregat?.detailKehadiran?.sakit ?? 0}</span>
+                  <span className="text-[var(--color-text-muted)]" title="Alpha">A: {agregat?.detailKehadiran?.alpha ?? 0}</span>
+                </div>
+                <p className="text-[11px] theme-text-muted mt-0.5">Detail kehadiran harian</p>
+              </div>
+            </div>
           </div>
 
 

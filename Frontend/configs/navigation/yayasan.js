@@ -1,16 +1,9 @@
 import {
   LayoutDashboard,
   Building2,
-  FileText,
-  GraduationCap,
-  UserSquare2,
-  ClipboardCheck,
-  Package,
-  BookOpen,
-  Layers,
-  Settings,
-  User,
   MapPin,
+  Users,
+  Settings,
 } from "lucide-react";
 
 export const yayasanSidebarConfig = {
@@ -26,32 +19,7 @@ export const yayasanSidebarConfig = {
     { type: "item", key: "lokasi", icon: MapPin, label: "Lokasi Sekolah", path: "/yayasan/lokasi" },
 
     { type: "header", label: "MONITORING" },
-    {
-      type: "item",
-      key: "monitoringAkademik",
-      icon: ClipboardCheck,
-      label: "Monitoring Akademik",
-      path: "/yayasan/monitoringAkademik",
-      children: [
-        { key: "monitoringGuru", icon: GraduationCap, label: "Guru", path: "/yayasan/monitoringAkademik/guru" },
-        { key: "monitoringKehadiran", icon: ClipboardCheck, label: "Kehadiran", path: "/yayasan/monitoringAkademik/kehadiran" },
-        { key: "monitoringLms", icon: Layers, label: "LMS", path: "/yayasan/monitoringAkademik/lms" },
-        { key: "monitoringNilai", icon: BookOpen, label: "Nilai", path: "/yayasan/monitoringAkademik/nilai" },
-      ],
-    },
-    {
-      type: "item",
-      key: "laporan",
-      icon: FileText,
-      label: "Laporan & Analitik",
-      path: "/yayasan/laporan",
-      children: [
-        { key: "laporanAkademik", icon: BookOpen, label: "Akademik", path: "/yayasan/laporan/akademik" },
-        { key: "laporanGuru", icon: GraduationCap, label: "Guru", path: "/yayasan/laporan/guru" },
-        { key: "laporanIventaris", icon: Package, label: "Inventaris", path: "/yayasan/laporan/iventaris" },
-        { key: "laporanSiswa", icon: UserSquare2, label: "Siswa", path: "/yayasan/laporan/siswa" },
-      ],
-    },
+    { type: "item", key: "monitoringUsers", icon: Users, label: "Monitoring Pengguna", path: "/yayasan/monitoring/users" },
 
     { type: "header", label: "SISTEM" },
     { type: "item", key: "pengaturan", icon: Settings, label: "Pengaturan", path: "/yayasan/pengaturan" },

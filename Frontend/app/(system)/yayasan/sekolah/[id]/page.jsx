@@ -3,7 +3,10 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { getDetailSekolahBinaan } from "@/services/yayasan.service";
+import {
+  getDetailSekolahBinaan,
+  getPengaturanSekolahBinaan,
+} from "@/services/yayasan.service";
 
 import {
   School,
@@ -16,6 +19,7 @@ import {
   BadgeCheck,
   Sparkles,
   CalendarClock,
+  Settings,
 } from "lucide-react";
 
 
@@ -60,6 +64,7 @@ export default function DetailSekolahPage() {
   const { id } = useParams();
 
   const [data, setData] = useState(null);
+  const [pengaturan, setPengaturan] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -71,10 +76,16 @@ export default function DetailSekolahPage() {
         setLoading(true);
         setError(null);
 
-        const res = await getDetailSekolahBinaan(id);
+        const [resDetail, resPengaturan] = await Promise.all([
+          getDetailSekolahBinaan(id),
+          getPengaturanSekolahBinaan(id),
+        ]);
 
-        if (res) {
-          setData(res.data);
+        if (resDetail) {
+          setData(resDetail.data);
+        }
+        if (resPengaturan?.data) {
+          setPengaturan(resPengaturan.data);
         }
       } catch (err) {
         setError(err.message);
@@ -509,6 +520,101 @@ export default function DetailSekolahPage() {
                             </p>
                           </div>
                         )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Pengaturan Cabang dari Backend GET /api/yayasan/monitoring/sekolah/:id/pengaturan */}
+                  <div
+                    className={`
+                      theme-card
+                      overflow-hidden
+                      rounded-2xl
+                      border
+                      theme-border
+                      ${themeCardShadow}
+                    `}
+                  >
+                    <div
+                      className={`
+                        flex
+                        items-center
+                        gap-2.5
+                        border-b
+                        ${themeDivider}
+                        p-4
+                        sm:p-5
+                      `}
+                    >
+                      <div
+                        className={`
+                          flex
+                          h-8
+                          w-8
+                          shrink-0
+                          items-center
+                          justify-center
+                          rounded-lg
+                          border
+                          ${themePrimarySoftBorder}
+                          ${themePrimarySoft}
+                          text-[var(--color-primary)]
+                        `}
+                      >
+                        <Settings size={16} />
+                      </div>
+
+                      <div>
+                        <h3 className="text-sm font-semibold theme-text">
+                          Pengaturan & Konfigurasi Cabang
+                        </h3>
+                        <p className="text-xs theme-text-muted">
+                          Parameter teknis sistem sekolah binaan yang dikelola yayasan
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4 sm:p-5">
+                      <div className="rounded-xl border theme-border p-3.5 bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)]">
+                        <p className="text-xs theme-text-muted">Kode Sekolah</p>
+                        <p className="mt-1 font-mono font-semibold text-sm theme-text">
+                          {pengaturan?.kode || profil.kode || "-"}
+                        </p>
+                      </div>
+
+                      <div className="rounded-xl border theme-border p-3.5 bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)]">
+                        <p className="text-xs theme-text-muted">Subdomain Sistem</p>
+                        <p className="mt-1 font-mono font-semibold text-sm text-[var(--color-primary)] truncate">
+                          {pengaturan?.subdomain ? `${pengaturan.subdomain}.smartschool.id` : profil.subdomain || "-"}
+                        </p>
+                      </div>
+
+                      <div className="rounded-xl border theme-border p-3.5 bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)]">
+                        <p className="text-xs theme-text-muted">Jenjang Pendidikan</p>
+                        <p className="mt-1 font-semibold text-sm theme-text">
+                          {pengaturan?.jenjang || profil.jenjang || "-"}
+                        </p>
+                      </div>
+
+                      <div className="rounded-xl border theme-border p-3.5 bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)]">
+                        <p className="text-xs theme-text-muted">Status Operasional</p>
+                        <p className="mt-1 font-semibold text-sm capitalize theme-text">
+                          {pengaturan?.status || profil.status || "-"}
+                        </p>
+                      </div>
+
+                      <div className="rounded-xl border theme-border p-3.5 bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)]">
+                        <p className="text-xs theme-text-muted">ID Langganan Aktif</p>
+                        <p className="mt-1 font-mono text-xs theme-text truncate">
+                          {pengaturan?.langgananAktifId || profil.langgananAktifId || "-"}
+                        </p>
+                      </div>
+
+                      <div className="rounded-xl border theme-border p-3.5 bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)]">
+                        <p className="text-xs theme-text-muted">Alamat Unit</p>
+                        <p className="mt-1 text-xs theme-text line-clamp-2">
+                          {pengaturan?.alamat || profil.alamat || "-"}
+                        </p>
                       </div>
                     </div>
                   </div>

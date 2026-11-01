@@ -3,11 +3,9 @@
 import {
   useState,
   useEffect,
-  useMemo,
   useCallback,
 } from "react";
-import { useRouter } from "next/navigation";
-
+import Link from "next/link";
 import {
   Landmark,
   CheckCircle2,
@@ -15,27 +13,21 @@ import {
   Search,
   Eye,
   FileSpreadsheet,
-  ArrowUp,
-  ArrowDown,
   School,
-  Clock3,
   ChevronLeft,
   ChevronRight,
   SlidersHorizontal,
   RotateCcw,
-  ArrowDownAZ,
-  Users,
   Plus,
+  Trash2,
+  Edit,
+  AlertTriangle,
+  Loader2,
+  Building,
 } from "lucide-react";
 
-import {
-  getPlatformRingkasan,
-  getSemuaSekolahPlatform,
-} from "@/services/platform.service";
-
-
-const ITEMS_PER_PAGE = 5;
-
+import { listYayasan, deleteYayasan } from "@/services/yayasan.service";
+import { getPlatformRingkasan } from "@/services/platform.service";
 
 const themeCardShadow =
   "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
@@ -55,9 +47,6 @@ const themePrimaryHover =
 const themeInfoSoft =
   "bg-[color-mix(in_srgb,var(--color-info)_9%,transparent)]";
 
-const themeInfoBorder =
-  "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
-
 const themeSuccessSoft =
   "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
 
@@ -67,23 +56,17 @@ const themeSuccessBorder =
 const themeWarningSoft =
   "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]";
 
-const themeWarningBorder =
-  "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
-
 const themeDangerSoft =
-  "bg-[color-mix(in_srgb,var(--color-warning)_8%,transparent)]";
+  "bg-[color-mix(in_srgb,var(--color-danger,_#ef4444)_9%,transparent)]";
 
 const themeDangerBorder =
-  "border-[color-mix(in_srgb,var(--color-warning)_22%,transparent)]";
+  "border-[color-mix(in_srgb,var(--color-danger,_#ef4444)_22%,transparent)]";
 
 const themeNeutralSurface =
   "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
 
 const themeNeutralHover =
   "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
-
-const themeNeutralBorder =
-  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
 
 const themeDivider =
   "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
@@ -93,2073 +76,6 @@ const themeFocus =
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
-
-
-const statusColorMap = {
-  Aktif: {
-    bg: themeSuccessSoft,
-    text: "text-[var(--color-success)]",
-    border: themeSuccessBorder,
-    dot: "bg-[var(--color-success)]",
-  },
-
-  Trial: {
-    bg: themeWarningSoft,
-    text: "text-[var(--color-warning)]",
-    border: themeWarningBorder,
-    dot: "bg-[var(--color-warning)]",
-  },
-
-  Nonaktif: {
-    bg: themeDangerSoft,
-    text: "text-[var(--color-warning)]",
-    border: themeDangerBorder,
-    dot: "bg-[var(--color-warning)]",
-  },
-};
-
-
-const sortOptions = [
-  {
-    value: "nama-asc",
-    label: "Nama Sekolah — A → Z",
-    field: "nama",
-    order: "asc",
-  },
-  {
-    value: "nama-desc",
-    label: "Nama Sekolah — Z → A",
-    field: "nama",
-    order: "desc",
-  },
-  {
-    value: "kode-asc",
-    label: "Kode Sekolah — A → Z",
-    field: "kode",
-    order: "asc",
-  },
-  {
-    value: "kode-desc",
-    label: "Kode Sekolah — Z → A",
-    field: "kode",
-    order: "desc",
-  },
-  {
-    value: "status-asc",
-    label: "Status — A → Z",
-    field: "status",
-    order: "asc",
-  },
-  {
-    value: "status-desc",
-    label: "Status — Z → A",
-    field: "status",
-    order: "desc",
-  },
-];
-
-
-function normalizeStatus(status) {
-  const value = String(status ?? "")
-    .trim()
-    .toLowerCase();
-
-  if (
-    value === "aktif" ||
-    value === "active" ||
-    value === "berlangganan aktif"
-  ) {
-    return "Aktif";
-  }
-
-  if (
-    value === "trial" ||
-    value === "uji coba" ||
-    value === "masa trial"
-  ) {
-    return "Trial";
-  }
-
-  if (
-    value === "nonaktif" ||
-    value === "inactive" ||
-    value === "non-active"
-  ) {
-    return "Nonaktif";
-  }
-
-  return status ? String(status) : "Nonaktif";
-}
-
-
-function normalizeSekolah(item) {
-  if (!item || typeof item !== "object") {
-    return null;
-  }
-
-  const subscription =
-    Array.isArray(item.langgananSekolah) &&
-    item.langgananSekolah.length > 0
-      ? item.langgananSekolah[0]
-      : null;
-
-  return {
-    ...item,
-
-    id: item.id ?? null,
-
-    nama: item.nama ?? "-",
-
-    kode: item.subdomain ?? "-",
-
-    subdomain: item.subdomain ?? "-",
-
-    status: normalizeStatus(item.status),
-
-    telepon: item.telepon ?? "",
-
-    email: item.email ?? "",
-
-    logo: item.logo ?? null,
-
-    paket: subscription?.paket?.nama ?? "-",
-
-    statusLangganan:
-      subscription?.statusLangganan ?? null,
-
-    tanggalBerakhir:
-      subscription?.tanggalBerakhir ?? null,
-  };
-}
-
-
-function extractData(response) {
-  if (!response) {
-    return null;
-  }
-
-  if (response.data !== undefined) {
-    return response.data;
-  }
-
-  return response;
-}
-
-
-function extractSekolahList(response) {
-  const data = extractData(response);
-
-  if (Array.isArray(data)) {
-    return data;
-  }
-
-  if (data && Array.isArray(data.data)) {
-    return data.data;
-  }
-
-  if (data && Array.isArray(data.items)) {
-    return data.items;
-  }
-
-  if (data && Array.isArray(data.results)) {
-    return data.results;
-  }
-
-  if (response && Array.isArray(response.items)) {
-    return response.items;
-  }
-
-  return [];
-}
-
-
-function extractSummary(response) {
-  const data = extractData(response);
-
-  if (
-    data &&
-    typeof data === "object" &&
-    !Array.isArray(data)
-  ) {
-    return data;
-  }
-
-  return {};
-}
-
-
-function extractErrorMessage(error) {
-  if (!error) {
-    return "Terjadi kesalahan pada server.";
-  }
-
-  if (typeof error === "string") {
-    return error;
-  }
-
-  return (
-    error?.message ||
-    error?.response?.data?.message ||
-    error?.response?.data?.error ||
-    "Terjadi kesalahan pada server."
-  );
-}
-
-
-export default function DataYayasanPage() {
-  const router = useRouter();
-
-
-  const [sekolahList, setSekolahList] =
-    useState([]);
-
-  const [summary, setSummary] =
-    useState({
-      totalSekolah: 0,
-      sekolahAktif: 0,
-      sekolahUjiCoba: 0,
-      totalPenggunaAktif: 0,
-    });
-
-  const [loading, setLoading] =
-    useState(true);
-
-  const [error, setError] =
-    useState("");
-
-
-  const [searchQuery, setSearchQuery] =
-    useState("");
-
-  const [selectedStatus, setSelectedStatus] =
-    useState("Semua");
-
-
-  const [currentPage, setCurrentPage] =
-    useState(1);
-
-  const [isMobile, setIsMobile] =
-    useState(false);
-
-
-  const [sortField, setSortField] =
-    useState("nama");
-
-  const [sortOrder, setSortOrder] =
-    useState("asc");
-
-  const [sortValue, setSortValue] =
-    useState("nama-asc");
-
-
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-
-    checkMobile();
-
-    window.addEventListener(
-      "resize",
-      checkMobile
-    );
-
-    return () => {
-      window.removeEventListener(
-        "resize",
-        checkMobile
-      );
-    };
-  }, []);
-
-
-  const fetchYayasan = useCallback(
-    async () => {
-      try {
-        setLoading(true);
-        setError("");
-
-        const [
-          summaryResponse,
-          sekolahResponse,
-        ] = await Promise.all([
-          getPlatformRingkasan(),
-          getSemuaSekolahPlatform(),
-        ]);
-
-        const summaryData =
-          extractSummary(
-            summaryResponse
-          );
-
-        const sekolahData =
-          extractSekolahList(
-            sekolahResponse
-          )
-            .map(normalizeSekolah)
-            .filter(Boolean);
-
-        setSummary({
-          totalSekolah:
-            Number(
-              summaryData.totalSekolah
-            ) || 0,
-
-          sekolahAktif:
-            Number(
-              summaryData.sekolahAktif
-            ) || 0,
-
-          sekolahUjiCoba:
-            Number(
-              summaryData.langgananTrialAktif
-            ) || 0,
-
-          totalPenggunaAktif:
-            Number(
-              summaryData.totalPengguna
-            ) || 0,
-        });
-
-        setSekolahList(
-          sekolahData
-        );
-
-        setCurrentPage(1);
-      } catch (err) {
-        console.error(
-          "Error fetch data sekolah binaan:",
-          err
-        );
-
-        setError(
-          extractErrorMessage(err)
-        );
-
-        setSekolahList([]);
-
-        setSummary({
-          totalSekolah: 0,
-          sekolahAktif: 0,
-          sekolahUjiCoba: 0,
-          totalPenggunaAktif: 0,
-        });
-      } finally {
-        setLoading(false);
-      }
-    },
-    []
-  );
-
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      fetchYayasan();
-    }, 0);
-    return () => clearTimeout(timer);
-  }, [fetchYayasan]);
-
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setCurrentPage(1);
-    }, 0);
-    return () => clearTimeout(timer);
-  }, [
-    searchQuery,
-    selectedStatus,
-    sortValue,
-  ]);
-
-
-  const statusOptions = useMemo(
-    () => [
-      "Semua",
-      "Aktif",
-      "Nonaktif",
-      "Trial",
-    ],
-    []
-  );
-
-
-  const stats = useMemo(() => {
-    const total =
-      Number(
-        summary.totalSekolah
-      ) || 0;
-
-    const aktif =
-      Number(
-        summary.sekolahAktif
-      ) || 0;
-
-    const trial =
-      Number(
-        summary.sekolahUjiCoba
-      ) || 0;
-
-    const nonaktif =
-      Math.max(
-        total - aktif - trial,
-        0
-      );
-
-    return {
-      total,
-      aktif,
-      trial,
-      nonaktif,
-
-      totalPengguna:
-        Number(
-          summary.totalPenggunaAktif
-        ) || 0,
-
-      ditampilkan:
-        sekolahList.length,
-    };
-  }, [
-    summary,
-    sekolahList.length,
-  ]);
-
-
-  const sortedData = useMemo(() => {
-    const search =
-      searchQuery
-        .toLowerCase()
-        .trim();
-
-    const filtered =
-      sekolahList.filter(
-        (item) => {
-          const matchSearch =
-            !search ||
-            String(
-              item.nama ?? ""
-            )
-              .toLowerCase()
-              .includes(search) ||
-            String(
-              item.kode ?? ""
-            )
-              .toLowerCase()
-              .includes(search) ||
-            String(
-              item.subdomain ?? ""
-            )
-              .toLowerCase()
-              .includes(search) ||
-            String(
-              item.email ?? ""
-            )
-              .toLowerCase()
-              .includes(search) ||
-            String(
-              item.paket ?? ""
-            )
-              .toLowerCase()
-              .includes(search);
-
-          const matchStatus =
-            selectedStatus ===
-              "Semua" ||
-            item.status ===
-              selectedStatus;
-
-          return (
-            matchSearch &&
-            matchStatus
-          );
-        }
-      );
-
-    return [...filtered].sort(
-      (a, b) => {
-        let valA =
-          a[sortField];
-
-        let valB =
-          b[sortField];
-
-        valA = String(
-          valA ?? ""
-        )
-          .toLowerCase()
-          .trim();
-
-        valB = String(
-          valB ?? ""
-        )
-          .toLowerCase()
-          .trim();
-
-        const result =
-          valA.localeCompare(
-            valB,
-            "id",
-            {
-              numeric: true,
-              sensitivity:
-                "base",
-            }
-          );
-
-        return sortOrder ===
-          "asc"
-          ? result
-          : -result;
-      }
-    );
-  }, [
-    sekolahList,
-    searchQuery,
-    selectedStatus,
-    sortField,
-    sortOrder,
-  ]);
-
-
-  const totalPages = Math.ceil(
-    sortedData.length /
-      ITEMS_PER_PAGE
-  );
-
-  const safeCurrentPage =
-    totalPages > 0
-      ? Math.min(
-          currentPage,
-          totalPages
-        )
-      : 1;
-
-  const startIndex =
-    (safeCurrentPage - 1) *
-    ITEMS_PER_PAGE;
-
-  const paginatedData =
-    sortedData.slice(
-      startIndex,
-      startIndex +
-        ITEMS_PER_PAGE
-    );
-
-
-  const handleSort = (field) => {
-    if (
-      sortField === field
-    ) {
-      const newOrder =
-        sortOrder === "asc"
-          ? "desc"
-          : "asc";
-
-      setSortOrder(
-        newOrder
-      );
-
-      setSortValue(
-        `${field}-${newOrder}`
-      );
-    } else {
-      setSortField(field);
-      setSortOrder("asc");
-
-      setSortValue(
-        `${field}-asc`
-      );
-    }
-  };
-
-
-  const handleSortChange = (
-    value
-  ) => {
-    const selected =
-      sortOptions.find(
-        (option) =>
-          option.value ===
-          value
-      );
-
-    if (!selected) return;
-
-    setSortValue(value);
-
-    setSortField(
-      selected.field
-    );
-
-    setSortOrder(
-      selected.order
-    );
-  };
-
-
-  const renderSortIcon = (
-    field
-  ) => {
-    if (
-      sortField !== field
-    ) {
-      return (
-        <ArrowUp
-          size={12}
-          className="ml-1.5 theme-text-placeholder"
-        />
-      );
-    }
-
-    return sortOrder ===
-      "asc" ? (
-      <ArrowUp
-        size={12}
-        className="ml-1.5 text-[var(--color-primary)]"
-      />
-    ) : (
-      <ArrowDown
-        size={12}
-        className="ml-1.5 text-[var(--color-primary)]"
-      />
-    );
-  };
-
-
-  const handleViewDetail = (
-    id
-  ) => {
-    if (!id) return;
-
-    router.push(
-      `/super-admin/yayasan/${id}`
-    );
-  };
-
-
-  const handleTambahYayasan = () => {
-    router.push(
-      "/super-admin/yayasan/tambah"
-    );
-  };
-
-
-  const resetFilters = () => {
-    setSearchQuery("");
-
-    setSelectedStatus(
-      "Semua"
-    );
-
-    setSortField("nama");
-    setSortOrder("asc");
-    setSortValue(
-      "nama-asc"
-    );
-
-    setCurrentPage(1);
-  };
-
-
-  const activeFilterCount =
-    selectedStatus !==
-    "Semua"
-      ? 1
-      : 0;
-
-
-  const handleExport = () => {
-    if (
-      sortedData.length === 0
-    ) {
-      window.alert(
-        "Tidak ada data sekolah untuk diekspor."
-      );
-
-      return;
-    }
-
-    const headers = [
-      "No",
-      "Nama Sekolah",
-      "Subdomain",
-      "Email",
-      "Telepon",
-      "Paket",
-      "Status Langganan",
-      "Tanggal Berakhir",
-      "Status Sekolah",
-    ];
-
-    const rows =
-      sortedData.map(
-        (item, index) => [
-          index + 1,
-          item.nama,
-          item.subdomain,
-          item.email,
-          item.telepon,
-          item.paket,
-          item.statusLangganan,
-          item.tanggalBerakhir
-            ? formatDate(
-                item.tanggalBerakhir
-              )
-            : "-",
-          item.status,
-        ]
-      );
-
-    const escapeCSV = (
-      value
-    ) => {
-      const text =
-        String(
-          value ?? ""
-        );
-
-      return `"${text.replace(
-        /"/g,
-        '""'
-      )}"`;
-    };
-
-    const csv = [
-      headers
-        .map(escapeCSV)
-        .join(","),
-
-      ...rows.map(
-        (row) =>
-          row
-            .map(
-              escapeCSV
-            )
-            .join(",")
-      ),
-    ].join("\n");
-
-    const blob =
-      new Blob(
-        [
-          "\uFEFF" +
-            csv,
-        ],
-        {
-          type: "text/csv;charset=utf-8;",
-        }
-      );
-
-    const url =
-      URL.createObjectURL(
-        blob
-      );
-
-    const link =
-      document.createElement(
-        "a"
-      );
-
-    link.href = url;
-
-    link.download =
-      "data-sekolah-binaan.csv";
-
-    document.body.appendChild(
-      link
-    );
-
-    link.click();
-
-    document.body.removeChild(
-      link
-    );
-
-    URL.revokeObjectURL(
-      url
-    );
-  };
-
-
-  return (
-    <div className="theme-page theme-text min-h-full">
-      <main className="w-full">
-        <div className="mx-auto w-full max-w-[1800px] space-y-6 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
-
-
-          <section
-            className={`relative overflow-hidden rounded-2xl border theme-border theme-card ${themeCardShadow}`}
-          >
-            <div
-              className={`pointer-events-none absolute right-0 top-0 h-72 w-72 rounded-full ${themePrimarySoft} opacity-70 blur-3xl`}
-            />
-
-            <div
-              className={`pointer-events-none absolute bottom-0 right-24 h-40 w-40 rounded-full ${themeInfoSoft} opacity-60 blur-3xl`}
-            />
-
-            <div className="relative p-5 sm:p-6 lg:p-7">
-              <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
-
-
-                <div className="min-w-0">
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-[var(--color-card)] sm:h-12 sm:w-12 ${themePrimaryGradient} ${themeSmallShadow}`}
-                    >
-                      <Landmark
-                        size={22}
-                        strokeWidth={1.8}
-                      />
-                    </div>
-
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h1 className="text-xl font-semibold tracking-tight theme-text sm:text-2xl">
-                          Sekolah Binaan
-                        </h1>
-
-                        <span
-                          className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-semibold sm:text-xs ${themePrimarySoft} ${themePrimarySoftBorder} text-[var(--color-primary)]`}
-                        >
-                          <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-primary)]" />
-                          Yayasan
-                        </span>
-                      </div>
-
-                      <p className="mt-1 text-xs theme-text-secondary sm:text-sm">
-                        Kelola dan pantau seluruh sekolah yang berada di bawah naungan yayasan.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={
-                      handleTambahYayasan
-                    }
-                    className={`inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-4 py-2.5 text-sm font-medium text-[var(--color-card)] ${themeSmallShadow} transition-all hover:opacity-90`}
-                  >
-                    <Plus
-                      size={16}
-                      strokeWidth={2}
-                    />
-
-                    <span>
-                      Tambah Yayasan
-                    </span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={
-                      handleExport
-                    }
-                    className={`inline-flex items-center justify-center gap-2 rounded-xl border theme-border theme-card px-4 py-2.5 text-sm font-medium theme-text-secondary ${themeSmallShadow} transition-all ${themeNeutralHover}`}
-                  >
-                    <FileSpreadsheet
-                      size={16}
-                      strokeWidth={1.8}
-                    />
-
-                    <span className="hidden sm:inline">
-                      Export
-                    </span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </section>
-
-
-          {error && (
-            <section
-              className={`rounded-2xl border px-4 py-3 ${themeDangerSoft} ${themeDangerBorder}`}
-            >
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex items-start gap-3">
-                  <div
-                    className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${themeDangerSoft} text-[var(--color-warning)]`}
-                  >
-                    <XCircle size={17} />
-                  </div>
-
-                  <div>
-                    <p className="text-sm font-semibold theme-text">
-                      Gagal memuat data sekolah
-                    </p>
-
-                    <p className="mt-0.5 text-xs theme-text-secondary">
-                      {error}
-                    </p>
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={
-                    fetchYayasan
-                  }
-                  className={`inline-flex items-center justify-center gap-2 rounded-lg border ${themeDangerBorder} theme-card px-3 py-2 text-xs font-semibold text-[var(--color-warning)] transition-colors hover:bg-[color-mix(in_srgb,var(--color-warning)_8%,transparent)]`}
-                >
-                  <RotateCcw size={14} />
-                  Coba Lagi
-                </button>
-              </div>
-            </section>
-          )}
-
-
-          <section className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5">
-            <StatCard
-              label="Total Sekolah"
-              value={
-                loading
-                  ? "..."
-                  : stats.total
-              }
-              icon={School}
-              color="primary"
-            />
-
-            <StatCard
-              label="Sekolah Aktif"
-              value={
-                loading
-                  ? "..."
-                  : stats.aktif
-              }
-              icon={CheckCircle2}
-              color="success"
-            />
-
-            <StatCard
-              label="Masa Trial"
-              value={
-                loading
-                  ? "..."
-                  : stats.trial
-              }
-              icon={Clock3}
-              color="warning"
-            />
-
-            <StatCard
-              label="Nonaktif"
-              value={
-                loading
-                  ? "..."
-                  : stats.nonaktif
-              }
-              icon={XCircle}
-              color="danger"
-            />
-
-            <StatCard
-              label="Pengguna Aktif"
-              value={
-                loading
-                  ? "..."
-                  : stats.totalPengguna
-              }
-              icon={Users}
-              color="info"
-            />
-          </section>
-
-
-          <section
-            className={`overflow-hidden rounded-2xl border theme-border theme-card ${themeCardShadow}`}
-          >
-            <div
-              className={`border-b ${themeDivider} px-4 py-4 sm:px-5`}
-            >
-              <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-                <div className="flex items-center gap-2">
-                  <div
-                    className={`flex h-8 w-8 items-center justify-center rounded-lg ${themeNeutralSurface} theme-text-secondary`}
-                  >
-                    <SlidersHorizontal size={16} />
-                  </div>
-
-                  <div>
-                    <h2 className="text-sm font-semibold theme-text">
-                      Filter & Urutkan Data
-                    </h2>
-
-                    <p className="text-[11px] theme-text-muted">
-                      Gunakan pencarian, filter, dan urutan sekolah binaan
-                    </p>
-                  </div>
-                </div>
-
-                {activeFilterCount > 0 && (
-                  <span
-                    className={`inline-flex w-fit items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium ${themePrimarySoft} ${themePrimarySoftBorder} text-[var(--color-primary)]`}
-                  >
-                    {activeFilterCount} filter aktif
-                  </span>
-                )}
-              </div>
-            </div>
-
-            <div className="p-4 sm:p-5">
-              <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-[minmax(260px,1.8fr)_1fr_auto]">
-
-
-                <div className="relative">
-                  <Search
-                    size={17}
-                    strokeWidth={1.8}
-                    className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 theme-text-muted"
-                  />
-
-                  <input
-                    type="text"
-                    placeholder="Cari nama sekolah, kode, subdomain, email, atau paket..."
-                    value={searchQuery}
-                    onChange={(e) =>
-                      setSearchQuery(
-                        e.target.value
-                      )
-                    }
-                    className={inputClass}
-                  />
-                </div>
-
-
-                <FilterSelect
-                  value={
-                    selectedStatus
-                  }
-                  onChange={
-                    setSelectedStatus
-                  }
-                  options={
-                    statusOptions
-                  }
-                  icon={
-                    CheckCircle2
-                  }
-                  label="Status"
-                />
-
-
-                <SortSelect
-                  value={sortValue}
-                  onChange={
-                    handleSortChange
-                  }
-                />
-              </div>
-
-              <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-xs theme-text-muted">
-                  Menampilkan{" "}
-                  <span className="font-semibold theme-text-secondary">
-                    {
-                      paginatedData.length
-                    }
-                  </span>{" "}
-                  dari{" "}
-                  <span className="font-semibold theme-text-secondary">
-                    {
-                      sortedData.length
-                    }
-                  </span>{" "}
-                  sekolah
-                </p>
-
-                <div className="flex items-center gap-2 text-xs theme-text-muted">
-                  <span>
-                    Diurutkan:
-                  </span>
-
-                  <span
-                    className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 font-medium ${themePrimarySoft} ${themePrimarySoftBorder} text-[var(--color-primary)]`}
-                  >
-                    {sortOrder ===
-                    "asc" ? (
-                      <ArrowUp
-                        size={12}
-                      />
-                    ) : (
-                      <ArrowDown
-                        size={12}
-                      />
-                    )}
-
-                    {
-                      sortOptions.find(
-                        (
-                          option
-                        ) =>
-                          option.value ===
-                          sortValue
-                      )?.label
-                    }
-                  </span>
-
-                  <button
-                    type="button"
-                    onClick={
-                      resetFilters
-                    }
-                    className={`inline-flex h-8 items-center gap-1.5 rounded-lg border theme-border theme-card px-3 theme-text-secondary transition-colors ${themeNeutralHover}`}
-                  >
-                    <RotateCcw
-                      size={13}
-                    />
-                    Reset
-                  </button>
-                </div>
-              </div>
-            </div>
-          </section>
-
-
-          <section
-            className={`overflow-hidden rounded-2xl border theme-border theme-card ${themeCardShadow}`}
-          >
-
-            <div
-              className={`flex flex-col gap-3 border-b ${themeDivider} px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5`}
-            >
-              <div className="flex items-center gap-3">
-                <div
-                  className={`flex h-9 w-9 items-center justify-center rounded-xl ${themePrimarySoft} text-[var(--color-primary)]`}
-                >
-                  <School
-                    size={17}
-                    strokeWidth={1.8}
-                  />
-                </div>
-
-                <div>
-                  <h2 className="text-sm font-semibold theme-text">
-                    Daftar Sekolah Binaan
-                  </h2>
-
-                  <p className="text-[11px] theme-text-muted">
-                    Data sekolah yang berada di bawah yayasan
-                  </p>
-                </div>
-              </div>
-
-              <div className="inline-flex items-center gap-2 text-xs theme-text-muted">
-                <Users size={14} />
-
-                <span>
-                  {sortedData.length} data
-                </span>
-              </div>
-            </div>
-
-
-            {isMobile ? (
-              <div className={`divide-y ${themeDivider}`}>
-                {loading ? (
-                  <LoadingMobile />
-                ) : paginatedData.length ===
-                  0 ? (
-                  <EmptyState />
-                ) : (
-                  paginatedData.map(
-                    (
-                      item,
-                      index
-                    ) => {
-                      const rowNumber =
-                        startIndex +
-                        index +
-                        1;
-
-                      return (
-                        <div
-                          key={
-                            item.id ||
-                            `${item.nama}-${index}`
-                          }
-                          className={`p-4 transition-colors ${themeNeutralHover}`}
-                        >
-                          <div className="flex items-start gap-3">
-                            <div className="w-6 pt-2 text-center text-xs font-medium theme-text-muted">
-                              {rowNumber}
-                            </div>
-
-                            <div
-                              className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border ${themePrimarySoft} ${themePrimarySoftBorder} text-[var(--color-primary)]`}
-                            >
-                              <School
-                                size={20}
-                                strokeWidth={1.7}
-                              />
-                            </div>
-
-                            <div className="min-w-0 flex-1">
-                              <div className="flex items-start justify-between gap-2">
-                                <div className="min-w-0">
-                                  <p className="truncate text-sm font-semibold theme-text">
-                                    {
-                                      item.nama
-                                    }
-                                  </p>
-
-                                  <p className="mt-0.5 truncate font-mono text-[11px] theme-text-muted">
-                                    {
-                                      item.subdomain
-                                    }
-                                  </p>
-                                </div>
-
-                                <StatusBadge
-                                  status={
-                                    item.status
-                                  }
-                                />
-                              </div>
-
-                              <div className="mt-3 flex flex-wrap gap-2">
-                                <span
-                                  className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-[10px] font-medium ${themePrimarySoft} ${themePrimarySoftBorder} text-[var(--color-primary)]`}
-                                >
-                                  <School
-                                    size={12}
-                                  />
-
-                                  {item.paket !==
-                                  "-" ? (
-                                    item.paket
-                                  ) : (
-                                    "Belum ada paket"
-                                  )}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="ml-9 mt-3">
-                            <button
-                              type="button"
-                              onClick={() =>
-                                handleViewDetail(
-                                  item.id
-                                )
-                              }
-                              className={`inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-lg border ${themePrimarySoftBorder} ${themePrimarySoft} text-xs font-medium text-[var(--color-primary)] transition-colors ${themePrimaryHover}`}
-                            >
-                              <Eye
-                                size={14}
-                              />
-                              Detail
-                            </button>
-                          </div>
-                        </div>
-                      );
-                    }
-                  )
-                )}
-              </div>
-            ) : (
-
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[900px] text-sm">
-                  <thead>
-                    <tr
-                      className={`border-b ${themeDivider} ${themeNeutralSurface}`}
-                    >
-                      <TableHeader>
-                        No
-                      </TableHeader>
-
-                      <TableHeader
-                        sortable
-                        onClick={() =>
-                          handleSort(
-                            "nama"
-                          )
-                        }
-                      >
-                        <span className="inline-flex items-center">
-                          Sekolah
-                          {
-                            renderSortIcon(
-                              "nama"
-                            )
-                          }
-                        </span>
-                      </TableHeader>
-
-                      <TableHeader
-                        sortable
-                        onClick={() =>
-                          handleSort(
-                            "kode"
-                          )
-                        }
-                      >
-                        <span className="inline-flex items-center">
-                          Kode Sekolah
-                          {
-                            renderSortIcon(
-                              "kode"
-                            )
-                          }
-                        </span>
-                      </TableHeader>
-
-                      <TableHeader>
-                        Paket
-                      </TableHeader>
-
-                      <TableHeader
-                        sortable
-                        onClick={() =>
-                          handleSort(
-                            "status"
-                          )
-                        }
-                      >
-                        <span className="inline-flex items-center">
-                          Status
-                          {
-                            renderSortIcon(
-                              "status"
-                            )
-                          }
-                        </span>
-                      </TableHeader>
-
-                      <TableHeader>
-                        Kontak
-                      </TableHeader>
-
-                      <TableHeader align="right">
-                        Aksi
-                      </TableHeader>
-                    </tr>
-                  </thead>
-
-                  <tbody
-                    className={`divide-y ${themeDivider}`}
-                  >
-                    {loading ? (
-                      <LoadingTable />
-                    ) : paginatedData.length ===
-                      0 ? (
-                      <tr>
-                        <td colSpan={7}>
-                          <EmptyState />
-                        </td>
-                      </tr>
-                    ) : (
-                      paginatedData.map(
-                        (
-                          item,
-                          index
-                        ) => {
-                          const rowNumber =
-                            startIndex +
-                            index +
-                            1;
-
-                          return (
-                            <tr
-                              key={
-                                item.id ||
-                                `${item.nama}-${index}`
-                              }
-                              className={`group transition-colors ${themeNeutralHover}`}
-                            >
-
-                              <td className="w-14 px-5 py-4 text-xs theme-text-muted">
-                                {rowNumber
-                                  .toString()
-                                  .padStart(
-                                    2,
-                                    "0"
-                                  )}
-                              </td>
-
-
-                              <td className="px-5 py-4">
-                                <div className="flex min-w-[250px] items-center gap-3">
-                                  <div
-                                    className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${themePrimarySoft} ${themePrimarySoftBorder} text-[var(--color-primary)]`}
-                                  >
-                                    <School
-                                      size={19}
-                                      strokeWidth={
-                                        1.7
-                                      }
-                                    />
-                                  </div>
-
-                                  <div className="min-w-0">
-                                    <p className="max-w-[260px] truncate font-semibold theme-text">
-                                      {
-                                        item.nama
-                                      }
-                                    </p>
-
-                                    <p className="mt-0.5 max-w-[260px] truncate text-[11px] theme-text-muted">
-                                      {
-                                        item.subdomain
-                                      }
-                                    </p>
-                                  </div>
-                                </div>
-                              </td>
-
-
-                              <td className="px-5 py-4">
-                                <span
-                                  className={`inline-flex items-center rounded-lg border ${themeNeutralBorder} ${themeNeutralSurface} px-2.5 py-1 font-mono text-xs theme-text-secondary`}
-                                >
-                                  {
-                                    item.kode
-                                  }
-                                </span>
-                              </td>
-
-
-                              <td className="px-5 py-4">
-                                <div className="flex flex-col gap-1">
-                                  <span className="text-sm font-medium theme-text-secondary">
-                                    {
-                                      item.paket
-                                    }
-                                  </span>
-
-                                  {item.tanggalBerakhir && (
-                                    <span className="text-[10px] theme-text-muted">
-                                      Berakhir:{" "}
-                                      {formatDate(
-                                        item.tanggalBerakhir
-                                      )}
-                                    </span>
-                                  )}
-                                </div>
-                              </td>
-
-
-                              <td className="px-5 py-4">
-                                <StatusBadge
-                                  status={
-                                    item.status
-                                  }
-                                />
-                              </td>
-
-
-                              <td className="px-5 py-4">
-                                <div className="min-w-[170px]">
-                                  <p className="max-w-[190px] truncate text-xs theme-text-secondary">
-                                    {
-                                      item.email ||
-                                      "-"
-                                    }
-                                  </p>
-
-                                  <p className="mt-0.5 text-[10px] theme-text-muted">
-                                    {
-                                      item.telepon ||
-                                      "-"
-                                    }
-                                  </p>
-                                </div>
-                              </td>
-
-
-                              <td className="px-5 py-4">
-                                <div className="flex items-center justify-end gap-1 opacity-80 transition-opacity group-hover:opacity-100">
-                                  <ActionButton
-                                    icon={
-                                      Eye
-                                    }
-                                    title="Lihat detail sekolah"
-                                    color="primary"
-                                    onClick={() =>
-                                      handleViewDetail(
-                                        item.id
-                                      )
-                                    }
-                                  />
-                                </div>
-                              </td>
-                            </tr>
-                          );
-                        }
-                      )
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            )}
-
-
-            <div
-              className={`flex flex-col items-center justify-between gap-3 border-t ${themeDivider} px-4 py-4 sm:flex-row sm:px-5`}
-            >
-              <p className="text-xs theme-text-muted">
-                Menampilkan{" "}
-                <span className="font-semibold theme-text-secondary">
-                  {sortedData.length ===
-                  0
-                    ? 0
-                    : startIndex +
-                      1}
-                </span>{" "}
-                –{" "}
-                <span className="font-semibold theme-text-secondary">
-                  {Math.min(
-                    startIndex +
-                      paginatedData.length,
-                    sortedData.length
-                  )}
-                </span>{" "}
-                dari{" "}
-                <span className="font-semibold theme-text-secondary">
-                  {
-                    sortedData.length
-                  }
-                </span>{" "}
-                data
-              </p>
-
-              <div className="flex items-center gap-1">
-                <button
-                  type="button"
-                  disabled={
-                    safeCurrentPage ===
-                    1
-                  }
-                  onClick={() =>
-                    setCurrentPage(
-                      Math.max(
-                        1,
-                        safeCurrentPage -
-                          1
-                      )
-                    )
-                  }
-                  className={`flex h-9 w-9 items-center justify-center rounded-lg border theme-border theme-card theme-text-secondary transition-colors ${themeNeutralHover} disabled:cursor-not-allowed disabled:opacity-40`}
-                >
-                  <ChevronLeft
-                    size={16}
-                  />
-                </button>
-
-                {totalPages >
-                  0 &&
-                  getPaginationPages(
-                    safeCurrentPage,
-                    totalPages
-                  ).map(
-                    (
-                      page,
-                      index
-                    ) =>
-                      page ===
-                      "..." ? (
-                        <span
-                          key={`ellipsis-${index}`}
-                          className="w-8 text-center text-xs theme-text-muted"
-                        >
-                          ...
-                        </span>
-                      ) : (
-                        <button
-                          key={
-                            page
-                          }
-                          type="button"
-                          onClick={() =>
-                            setCurrentPage(
-                              page
-                            )
-                          }
-                          className={
-                            safeCurrentPage ===
-                            page
-                              ? "h-9 w-9 rounded-lg bg-[var(--color-primary)] text-xs font-medium text-[var(--color-card)] transition-all"
-                              : `h-9 w-9 rounded-lg text-xs font-medium theme-text-secondary transition-all ${themeNeutralHover}`
-                          }
-                        >
-                          {
-                            page
-                          }
-                        </button>
-                      )
-                  )}
-
-                <button
-                  type="button"
-                  disabled={
-                    totalPages ===
-                      0 ||
-                    safeCurrentPage ===
-                      totalPages
-                  }
-                  onClick={() =>
-                    setCurrentPage(
-                      Math.min(
-                        totalPages,
-                        safeCurrentPage +
-                          1
-                      )
-                    )
-                  }
-                  className={`flex h-9 w-9 items-center justify-center rounded-lg border theme-border theme-card theme-text-secondary transition-colors ${themeNeutralHover} disabled:cursor-not-allowed disabled:opacity-40`}
-                >
-                  <ChevronRight
-                    size={16}
-                  />
-                </button>
-              </div>
-            </div>
-          </section>
-
-
-          <div
-            className={`flex flex-col items-center justify-between gap-2 border-t ${themeDivider} py-2 sm:flex-row`}
-          >
-            <p className="text-[11px] theme-text-muted">
-              SmartSchool Management System
-            </p>
-
-            <div className="flex items-center gap-1.5 text-[11px] theme-text-muted">
-              <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-success)]" />
-
-              Sistem berjalan normal
-            </div>
-          </div>
-        </div>
-      </main>
-    </div>
-  );
-}
-
-
-function formatDate(value) {
-  if (!value) {
-    return "-";
-  }
-
-  try {
-    const date = new Date(value);
-
-    if (Number.isNaN(date.getTime())) {
-      return "-";
-    }
-
-    return new Intl.DateTimeFormat(
-      "id-ID",
-      {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      }
-    ).format(date);
-  } catch {
-    return "-";
-  }
-}
-
-
-function StatCard({
-  label,
-  value,
-  icon: Icon,
-  color,
-}) {
-  const colorClasses = {
-    primary: {
-      icon: `${themePrimarySoft} text-[var(--color-primary)]`,
-      accent:
-        "bg-[var(--color-primary)]",
-    },
-
-    success: {
-      icon: `${themeSuccessSoft} text-[var(--color-success)]`,
-      accent:
-        "bg-[var(--color-success)]",
-    },
-
-    warning: {
-      icon: `${themeWarningSoft} text-[var(--color-warning)]`,
-      accent:
-        "bg-[var(--color-warning)]",
-    },
-
-    danger: {
-      icon: `${themeDangerSoft} text-[var(--color-warning)]`,
-      accent:
-        "bg-[var(--color-warning)]",
-    },
-
-    info: {
-      icon: `${themeInfoSoft} text-[var(--color-info)]`,
-      accent:
-        "bg-[var(--color-info)]",
-    },
-  };
-
-  const current =
-    colorClasses[color] ||
-    colorClasses.primary;
-
-  return (
-    <div
-      className={`group relative overflow-hidden rounded-2xl border theme-border theme-card p-4 ${themeSmallShadow} transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md`}
-    >
-      <div
-        className={`absolute left-0 right-0 top-0 h-[2px] ${current.accent} opacity-70`}
-      />
-
-      <div className="flex items-center gap-3">
-        <div
-          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${current.icon}`}
-        >
-          <Icon
-            size={18}
-            strokeWidth={1.8}
-          />
-        </div>
-
-        <div className="min-w-0">
-          <p className="truncate text-[10px] font-medium uppercase tracking-wide theme-text-muted sm:text-[11px]">
-            {label}
-          </p>
-
-          <p className="mt-0.5 text-lg font-bold tracking-tight theme-text sm:text-xl">
-            {value}
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-
-function FilterSelect({
-  value,
-  onChange,
-  options,
-  icon: Icon,
-  label,
-}) {
-  return (
-    <div className="relative">
-      <Icon
-        size={15}
-        className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 theme-text-muted"
-      />
-
-      <select
-        value={value}
-        onChange={(e) =>
-          onChange(
-            e.target.value
-          )
-        }
-        aria-label={label}
-        className={selectClass}
-      >
-        {options.map(
-          (option) => (
-            <option
-              key={option}
-              value={option}
-            >
-              {option}
-            </option>
-          )
-        )}
-      </select>
-
-      <ChevronRight
-        size={14}
-        className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 rotate-90 theme-text-muted"
-      />
-    </div>
-  );
-}
-
-
-function SortSelect({
-  value,
-  onChange,
-}) {
-  return (
-    <div className="relative">
-      <ArrowDownAZ
-        size={16}
-        className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 theme-text-muted"
-      />
-
-      <select
-        value={value}
-        onChange={(e) =>
-          onChange(
-            e.target.value
-          )
-        }
-        aria-label="Urutkan data"
-        className={selectClass}
-      >
-        {sortOptions.map(
-          (option) => (
-            <option
-              key={option.value}
-              value={
-                option.value
-              }
-            >
-              {option.label}
-            </option>
-          )
-        )}
-      </select>
-
-      <ChevronRight
-        size={14}
-        className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 rotate-90 theme-text-muted"
-      />
-    </div>
-  );
-}
-
-
-function TableHeader({
-  children,
-  sortable = false,
-  onClick,
-  align = "left",
-}) {
-  const alignClass =
-    align === "right"
-      ? "text-right"
-      : "text-left";
-
-  return (
-    <th
-      onClick={onClick}
-      className={`px-5 py-3.5 ${alignClass} text-[10px] font-semibold uppercase tracking-[0.08em] theme-text-muted ${
-        sortable
-          ? "cursor-pointer select-none hover:text-[var(--color-primary)]"
-          : ""
-      }`}
-    >
-      {children}
-    </th>
-  );
-}
-
-
-function StatusBadge({
-  status,
-}) {
-  const style =
-    statusColorMap[
-      status
-    ] ||
-    statusColorMap.Nonaktif;
-
-  return (
-    <span
-      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-semibold sm:text-xs ${style.bg} ${style.text} ${style.border}`}
-    >
-      <span
-        className={`h-1.5 w-1.5 rounded-full ${style.dot}`}
-      />
-
-      {status}
-    </span>
-  );
-}
-
-
-function ActionButton({
-  icon: Icon,
-  title,
-  color,
-  onClick,
-}) {
-  const colors = {
-    primary:
-      "hover:bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)] hover:text-[var(--color-primary)]",
-
-    warning:
-      "hover:bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)] hover:text-[var(--color-warning)]",
-
-    danger:
-      "hover:bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)] hover:text-[var(--color-warning)]",
-  };
-
-  return (
-    <button
-      type="button"
-      title={title}
-      onClick={onClick}
-      className={`flex h-8 w-8 items-center justify-center rounded-lg theme-text-muted transition-all ${
-        colors[color] ||
-        colors.primary
-      }`}
-    >
-      <Icon
-        size={15}
-        strokeWidth={1.8}
-      />
-    </button>
-  );
-}
-
-
-function EmptyState() {
-  return (
-    <div className="flex flex-col items-center justify-center px-5 py-16">
-      <div
-        className={`mb-4 flex h-14 w-14 items-center justify-center rounded-2xl ${themeNeutralSurface} theme-text-muted`}
-      >
-        <Search
-          size={24}
-          strokeWidth={1.7}
-        />
-      </div>
-
-      <h3 className="text-sm font-semibold theme-text">
-        Data tidak ditemukan
-      </h3>
-
-      <p className="mt-1 max-w-sm text-center text-xs theme-text-muted">
-        Tidak ada sekolah yang sesuai dengan pencarian atau filter yang dipilih.
-      </p>
-    </div>
-  );
-}
-
-
-function LoadingMobile() {
-  return (
-    <div
-      className={`divide-y ${themeDivider}`}
-    >
-      {Array.from({
-        length: 5,
-      }).map(
-        (_, index) => (
-          <div
-            key={index}
-            className="animate-pulse p-4"
-          >
-            <div className="flex items-start gap-3">
-              <div
-                className={`mt-2 h-4 w-6 rounded ${themeNeutralSurface}`}
-              />
-
-              <div
-                className={`h-11 w-11 rounded-xl ${themeNeutralSurface}`}
-              />
-
-              <div className="flex-1">
-                <div
-                  className={`h-4 w-2/3 rounded ${themeNeutralSurface}`}
-                />
-
-                <div
-                  className={`mt-2 h-3 w-1/3 rounded ${themeNeutralSurface}`}
-                />
-
-                <div
-                  className={`mt-3 h-6 w-24 rounded ${themeNeutralSurface}`}
-                />
-              </div>
-            </div>
-          </div>
-        )
-      )}
-    </div>
-  );
-}
-
-
-function LoadingTable() {
-  return (
-    <>
-      {Array.from({
-        length: 5,
-      }).map(
-        (_, index) => (
-          <tr
-            key={index}
-            className="animate-pulse"
-          >
-            <td className="px-5 py-4">
-              <div
-                className={`h-3 w-5 rounded ${themeNeutralSurface}`}
-              />
-            </td>
-
-            <td className="px-5 py-4">
-              <div className="flex items-center gap-3">
-                <div
-                  className={`h-10 w-10 rounded-xl ${themeNeutralSurface}`}
-                />
-
-                <div className="space-y-2">
-                  <div
-                    className={`h-4 w-36 rounded ${themeNeutralSurface}`}
-                  />
-
-                  <div
-                    className={`h-3 w-20 rounded ${themeNeutralSurface}`}
-                  />
-                </div>
-              </div>
-            </td>
-
-            <td className="px-5 py-4">
-              <div
-                className={`h-6 w-24 rounded-lg ${themeNeutralSurface}`}
-              />
-            </td>
-
-            <td className="px-5 py-4">
-              <div
-                className={`h-4 w-28 rounded ${themeNeutralSurface}`}
-              />
-            </td>
-
-            <td className="px-5 py-4">
-              <div
-                className={`h-6 w-16 rounded-full ${themeNeutralSurface}`}
-              />
-            </td>
-
-            <td className="px-5 py-4">
-              <div
-                className={`h-4 w-32 rounded ${themeNeutralSurface}`}
-              />
-            </td>
-
-            <td className="px-5 py-4">
-              <div className="flex justify-end">
-                <div
-                  className={`h-8 w-10 rounded-lg ${themeNeutralSurface}`}
-                />
-              </div>
-            </td>
-          </tr>
-        )
-      )}
-    </>
-  );
-}
-
 
 const inputClass = `
   h-10
@@ -2178,7 +94,6 @@ const inputClass = `
   ${themeFocus}
 `.replace(/\s+/g, " ").trim();
 
-
 const selectClass = `
   h-10
   w-full
@@ -2188,7 +103,7 @@ const selectClass = `
   border
   theme-border
   ${themeNeutralSurface}
-  pl-9
+  pl-3
   pr-8
   text-sm
   theme-text-secondary
@@ -2197,58 +112,838 @@ const selectClass = `
   ${themeFocus}
 `.replace(/\s+/g, " ").trim();
 
-
-function getPaginationPages(
-  currentPage,
-  totalPages
-) {
-  if (
-    totalPages <= 5
-  ) {
-    return Array.from(
-      {
-        length:
-          totalPages,
-      },
-      (_, i) =>
-        i + 1
-    );
+function formatDate(value) {
+  if (!value) return "-";
+  try {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return "-";
+    return new Intl.DateTimeFormat("id-ID", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    }).format(date);
+  } catch {
+    return "-";
   }
+}
 
-  if (
-    currentPage <= 3
-  ) {
-    return [
-      1,
-      2,
-      3,
-      4,
-      "...",
-      totalPages,
+export default function SuperAdminYayasanPage() {
+  const [yayasanList, setYayasanList] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+
+  const [summary, setSummary] = useState({
+    totalYayasan: 0,
+    yayasanAktif: 0,
+    yayasanNonaktif: 0,
+    yayasanBerlangganan: 0,
+  });
+
+  // Filters & Pagination
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState("Semua");
+  const [selectedBerlangganan, setSelectedBerlangganan] = useState("Semua");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(10);
+  const [meta, setMeta] = useState({
+    page: 1,
+    limit: 10,
+    total: 0,
+    totalPages: 1,
+  });
+
+  // Delete modal state
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
+
+  // Debounce search input
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      setCurrentPage(1);
+    }, 400);
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
+
+  // Fetch summary
+  useEffect(() => {
+    let mounted = true;
+    async function loadRingkasan() {
+      try {
+        const res = await getPlatformRingkasan();
+        if (mounted && res?.data) {
+          setSummary((prev) => ({
+            ...prev,
+            totalYayasan: Number(res.data.totalYayasan) || 0,
+          }));
+        }
+      } catch (err) {
+        console.warn("Gagal memuat ringkasan platform:", err);
+      }
+    }
+    loadRingkasan();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  // Fetch list yayasan from backend
+  const fetchYayasanData = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError("");
+
+      const params = {
+        page: currentPage,
+        limit: pageSize,
+      };
+
+      if (debouncedSearch.trim()) {
+        params.search = debouncedSearch.trim();
+      }
+
+      if (selectedStatus !== "Semua") {
+        params.status = selectedStatus.toLowerCase();
+      }
+
+      if (selectedBerlangganan === "Berlangganan") {
+        params.berlangganan = "true";
+      } else if (selectedBerlangganan === "Tanpa Paket") {
+        params.berlangganan = "false";
+      }
+
+      const res = await listYayasan(params);
+
+      const items = Array.isArray(res?.data)
+        ? res.data
+        : Array.isArray(res?.items)
+        ? res.items
+        : [];
+
+      setYayasanList(items);
+
+      if (res?.meta) {
+        setMeta(res.meta);
+      } else if (res?.pagination) {
+        setMeta({
+          page: res.pagination.page || 1,
+          limit: res.pagination.limit || pageSize,
+          total: res.pagination.total || items.length,
+          totalPages: res.pagination.totalPages || 1,
+        });
+      } else {
+        setMeta({
+          page: currentPage,
+          limit: pageSize,
+          total: items.length,
+          totalPages: Math.ceil(items.length / pageSize) || 1,
+        });
+      }
+
+      const aktifCount = items.filter((y) => y.status === "aktif").length;
+      const nonaktifCount = items.filter((y) => y.status === "nonaktif").length;
+      const berlanggananCount = items.filter((y) => Boolean(y.paketId || y.paket)).length;
+
+      setSummary((prev) => ({
+        ...prev,
+        yayasanAktif: aktifCount,
+        yayasanNonaktif: nonaktifCount,
+        yayasanBerlangganan: berlanggananCount,
+      }));
+    } catch (err) {
+      console.error("Gagal memuat daftar yayasan:", err);
+      setError(
+        err?.message ||
+          err?.response?.data?.message ||
+          "Gagal memuat data yayasan dari server."
+      );
+      setYayasanList([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [currentPage, pageSize, debouncedSearch, selectedStatus, selectedBerlangganan]);
+
+  useEffect(() => {
+    let active = true;
+    void Promise.resolve().then(async () => {
+      if (active) {
+        await fetchYayasanData();
+      }
+    });
+    return () => {
+      active = false;
+    };
+  }, [fetchYayasanData]);
+
+  const handleResetFilter = () => {
+    setSearchQuery("");
+    setDebouncedSearch("");
+    setSelectedStatus("Semua");
+    setSelectedBerlangganan("Semua");
+    setCurrentPage(1);
+  };
+
+  // Handle Delete Confirmation
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+
+    try {
+      setDeleting(true);
+      setDeleteError("");
+
+      const res = await deleteYayasan(deleteTarget.id);
+
+      setSuccessMessage(
+        res?.message || `Yayasan "${deleteTarget.nama}" berhasil dinonaktifkan.`
+      );
+      setDeleteTarget(null);
+
+      // Refresh list from backend
+      await fetchYayasanData();
+
+      setTimeout(() => {
+        setSuccessMessage("");
+      }, 5000);
+    } catch (err) {
+      console.error("Gagal menonaktifkan yayasan:", err);
+      const msg =
+        err?.response?.data?.message ||
+        err?.message ||
+        "Gagal menonaktifkan yayasan.";
+      setDeleteError(msg);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  // Export to CSV
+  const handleExportCSV = () => {
+    if (yayasanList.length === 0) {
+      alert("Tidak ada data yayasan untuk diekspor.");
+      return;
+    }
+
+    const headers = [
+      "No",
+      "Nama Yayasan",
+      "NPYP",
+      "Status",
+      "Paket Langganan",
+      "Status Langganan",
+      "Jumlah Sekolah",
+      "Email",
+      "Telepon",
+      "Alamat",
+      "Tanggal Terdaftar",
     ];
-  }
 
-  if (
-    currentPage >=
-    totalPages - 2
-  ) {
-    return [
-      1,
-      "...",
-      totalPages - 3,
-      totalPages - 2,
-      totalPages - 1,
-      totalPages,
-    ];
-  }
+    const escapeCSV = (val) => {
+      const text = String(val ?? "");
+      return `"${text.replace(/"/g, '""')}"`;
+    };
 
-  return [
-    1,
-    "...",
-    currentPage - 1,
-    currentPage,
-    currentPage + 1,
-    "...",
-    totalPages,
-  ];
+    const rows = yayasanList.map((item, idx) => [
+      (currentPage - 1) * pageSize + idx + 1,
+      item.nama || "-",
+      item.npyp || "-",
+      item.status || "aktif",
+      item.paket?.nama || "Tanpa Paket",
+      item.statusLangganan || "-",
+      item._count?.sekolah ?? (item.sekolah?.length || 0),
+      item.email || "-",
+      item.telepon || "-",
+      item.alamat || "-",
+      formatDate(item.dibuatPada),
+    ]);
+
+    const csvContent =
+      "\uFEFF" +
+      [headers.map(escapeCSV).join(","), ...rows.map((r) => r.map(escapeCSV).join(","))].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `data-yayasan-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  return (
+    <div className="theme-page theme-text min-h-full">
+      <main className="w-full">
+        <div className="mx-auto w-full max-w-[1800px] space-y-6 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
+          {/* Header Banner */}
+          <section
+            className={`relative overflow-hidden rounded-2xl border theme-border theme-card ${themeCardShadow}`}
+          >
+            <div
+              className={`pointer-events-none absolute right-0 top-0 h-72 w-72 rounded-full ${themePrimarySoft} opacity-70 blur-3xl`}
+            />
+            <div
+              className={`pointer-events-none absolute bottom-0 right-24 h-40 w-40 rounded-full ${themeInfoSoft} opacity-60 blur-3xl`}
+            />
+
+            <div className="relative p-5 sm:p-6 lg:p-7">
+              <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-[var(--color-card)] sm:h-12 sm:w-12 ${themePrimaryGradient} ${themeSmallShadow}`}
+                    >
+                      <Landmark size={22} strokeWidth={1.8} />
+                    </div>
+
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h1 className="text-xl font-semibold tracking-tight theme-text sm:text-2xl">
+                          Data Master Yayasan
+                        </h1>
+                        <span
+                          className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-semibold sm:text-xs ${themePrimarySoft} ${themePrimarySoftBorder} text-[var(--color-primary)]`}
+                        >
+                          <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-primary)]" />
+                          Super Admin
+                        </span>
+                      </div>
+
+                      <p className="mt-1 text-xs theme-text-secondary sm:text-sm">
+                        Kelola data lembaga yayasan pendidikan, relasi sekolah naungan, dan akun pengelola yayasan.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <Link
+                    href="/super-admin/yayasan/tambah"
+                    className={`inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-4 py-2.5 text-sm font-medium text-[var(--color-card)] ${themeSmallShadow} transition-all hover:opacity-90`}
+                  >
+                    <Plus size={16} strokeWidth={2} />
+                    <span>Tambah Yayasan</span>
+                  </Link>
+
+                  <button
+                    type="button"
+                    onClick={handleExportCSV}
+                    className={`inline-flex items-center justify-center gap-2 rounded-xl border theme-border theme-card px-4 py-2.5 text-sm font-medium theme-text-secondary ${themeSmallShadow} transition-all ${themeNeutralHover}`}
+                  >
+                    <FileSpreadsheet size={16} strokeWidth={1.8} />
+                    <span className="hidden sm:inline">Export CSV</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Success Banner */}
+          {successMessage && (
+            <section
+              className={`rounded-2xl border px-4 py-3 ${themeSuccessSoft} ${themeSuccessBorder}`}
+            >
+              <div className="flex items-center gap-3">
+                <CheckCircle2 size={18} className="text-[var(--color-success)] shrink-0" />
+                <p className="text-sm font-medium theme-text">{successMessage}</p>
+              </div>
+            </section>
+          )}
+
+          {/* Error Banner */}
+          {error && (
+            <section
+              className={`rounded-2xl border px-4 py-3 ${themeDangerSoft} ${themeDangerBorder}`}
+            >
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-start gap-3">
+                  <div
+                    className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${themeDangerSoft} text-red-500`}
+                  >
+                    <XCircle size={17} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold theme-text">
+                      Gagal memuat data yayasan
+                    </p>
+                    <p className="mt-0.5 text-xs theme-text-secondary">{error}</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={fetchYayasanData}
+                  className={`inline-flex items-center justify-center gap-2 rounded-lg border ${themeDangerBorder} theme-card px-3 py-2 text-xs font-semibold text-red-500 transition-colors hover:bg-red-50 dark:hover:bg-red-950/30`}
+                >
+                  <RotateCcw size={14} />
+                  Coba Lagi
+                </button>
+              </div>
+            </section>
+          )}
+
+          {/* Stat Cards */}
+          <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <StatCard
+              label="Total Yayasan"
+              value={loading ? "..." : meta.total || summary.totalYayasan || yayasanList.length}
+              icon={Landmark}
+              color="primary"
+            />
+            <StatCard
+              label="Yayasan Aktif"
+              value={loading ? "..." : summary.yayasanAktif}
+              icon={CheckCircle2}
+              color="success"
+            />
+            <StatCard
+              label="Yayasan Nonaktif"
+              value={loading ? "..." : summary.yayasanNonaktif}
+              icon={XCircle}
+              color="danger"
+            />
+            <StatCard
+              label="Berlangganan Paket"
+              value={loading ? "..." : summary.yayasanBerlangganan}
+              icon={Building}
+              color="info"
+            />
+          </section>
+
+          {/* Filter & Search Bar */}
+          <section
+            className={`overflow-hidden rounded-2xl border theme-border theme-card ${themeCardShadow}`}
+          >
+            <div className={`border-b ${themeDivider} px-4 py-4 sm:px-5`}>
+              <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                <div className="flex items-center gap-2">
+                  <div
+                    className={`flex h-8 w-8 items-center justify-center rounded-lg ${themeNeutralSurface} theme-text-secondary`}
+                  >
+                    <SlidersHorizontal size={16} />
+                  </div>
+                  <div>
+                    <h2 className="text-sm font-semibold theme-text">Filter & Pencarian Yayasan</h2>
+                    <p className="text-[11px] theme-text-muted">
+                      Cari nama yayasan, NPYP, atau saring berdasarkan status dan status paket
+                    </p>
+                  </div>
+                </div>
+
+                {(selectedStatus !== "Semua" || selectedBerlangganan !== "Semua" || debouncedSearch) && (
+                  <button
+                    type="button"
+                    onClick={handleResetFilter}
+                    className={`inline-flex h-8 items-center gap-1.5 rounded-lg border theme-border theme-card px-3 text-xs theme-text-secondary transition-colors ${themeNeutralHover}`}
+                  >
+                    <RotateCcw size={13} />
+                    Reset Filter
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className="p-4 sm:p-5">
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                <div className="relative">
+                  <Search
+                    size={17}
+                    strokeWidth={1.8}
+                    className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 theme-text-muted"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Cari nama yayasan atau NPYP..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className={`${inputClass} pl-10`}
+                  />
+                </div>
+
+                <div className="relative">
+                  <select
+                    value={selectedStatus}
+                    onChange={(e) => {
+                      setSelectedStatus(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                    aria-label="Filter Status"
+                    className={selectClass}
+                  >
+                    <option value="Semua">Semua Status</option>
+                    <option value="aktif">Status: Aktif</option>
+                    <option value="nonaktif">Status: Nonaktif</option>
+                  </select>
+                </div>
+
+                <div className="relative">
+                  <select
+                    value={selectedBerlangganan}
+                    onChange={(e) => {
+                      setSelectedBerlangganan(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                    aria-label="Filter Berlangganan"
+                    className={selectClass}
+                  >
+                    <option value="Semua">Semua Langganan</option>
+                    <option value="Berlangganan">Memiliki Paket Aktif</option>
+                    <option value="Tanpa Paket">Tanpa Paket Langganan</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="mt-4 flex items-center justify-between text-xs theme-text-muted">
+                <span>
+                  Menampilkan <strong className="theme-text">{yayasanList.length}</strong> dari{" "}
+                  <strong className="theme-text">{meta.total}</strong> yayasan
+                </span>
+                <span>Halaman {meta.page} dari {meta.totalPages || 1}</span>
+              </div>
+            </div>
+          </section>
+
+          {/* Table List Yayasan */}
+          <section
+            className={`overflow-hidden rounded-2xl border theme-border theme-card ${themeCardShadow}`}
+          >
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[900px] text-sm">
+                <thead>
+                  <tr className={`border-b ${themeDivider} ${themeNeutralSurface}`}>
+                    <th className="px-5 py-3.5 text-left text-[10px] font-semibold uppercase tracking-wider theme-text-muted">
+                      No
+                    </th>
+                    <th className="px-5 py-3.5 text-left text-[10px] font-semibold uppercase tracking-wider theme-text-muted">
+                      Yayasan & NPYP
+                    </th>
+                    <th className="px-5 py-3.5 text-left text-[10px] font-semibold uppercase tracking-wider theme-text-muted">
+                      Paket & Langganan
+                    </th>
+                    <th className="px-5 py-3.5 text-left text-[10px] font-semibold uppercase tracking-wider theme-text-muted">
+                      Sekolah Naungan
+                    </th>
+                    <th className="px-5 py-3.5 text-left text-[10px] font-semibold uppercase tracking-wider theme-text-muted">
+                      Kontak
+                    </th>
+                    <th className="px-5 py-3.5 text-left text-[10px] font-semibold uppercase tracking-wider theme-text-muted">
+                      Status
+                    </th>
+                    <th className="px-5 py-3.5 text-right text-[10px] font-semibold uppercase tracking-wider theme-text-muted">
+                      Aksi
+                    </th>
+                  </tr>
+                </thead>
+
+                <tbody className={`divide-y ${themeDivider}`}>
+                  {loading ? (
+                    <tr>
+                      <td colSpan={7} className="px-5 py-12 text-center">
+                        <div className="flex flex-col items-center justify-center gap-2">
+                          <Loader2 size={24} className="animate-spin text-[var(--color-primary)]" />
+                          <p className="text-xs theme-text-muted">Memuat data yayasan...</p>
+                        </div>
+                      </td>
+                    </tr>
+                  ) : yayasanList.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="px-5 py-12 text-center">
+                        <div className="flex flex-col items-center justify-center gap-2">
+                          <Landmark size={32} className="theme-text-muted opacity-40" />
+                          <p className="text-sm font-medium theme-text">Tidak ada data yayasan</p>
+                          <p className="text-xs theme-text-muted">
+                            {debouncedSearch
+                              ? "Coba gunakan kata kunci pencarian yang lain."
+                              : "Belum ada yayasan terdaftar di sistem."}
+                          </p>
+                        </div>
+                      </td>
+                    </tr>
+                  ) : (
+                    yayasanList.map((item, index) => {
+                      const rowNum = (currentPage - 1) * pageSize + index + 1;
+                      const schoolCount = item._count?.sekolah ?? (item.sekolah?.length || 0);
+
+                      return (
+                        <tr
+                          key={item.id}
+                          className={`transition-colors ${themeNeutralHover}`}
+                        >
+                          <td className="w-14 px-5 py-4 text-xs theme-text-muted">
+                            {rowNum.toString().padStart(2, "0")}
+                          </td>
+
+                          <td className="px-5 py-4">
+                            <div className="flex items-center gap-3">
+                              <div
+                                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${themePrimarySoft} ${themePrimarySoftBorder} text-[var(--color-primary)]`}
+                              >
+                                <Landmark size={18} strokeWidth={1.8} />
+                              </div>
+                              <div className="min-w-0">
+                                <Link
+                                  href={`/super-admin/yayasan/${item.id}`}
+                                  className="font-semibold theme-text hover:text-[var(--color-primary)] hover:underline truncate block"
+                                >
+                                  {item.nama}
+                                </Link>
+                                <div className="flex items-center gap-2 mt-0.5">
+                                  <span className="font-mono text-[11px] theme-text-muted bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)] px-1.5 py-0.5 rounded">
+                                    NPYP: {item.npyp || "-"}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+
+                          <td className="px-5 py-4">
+                            <div className="text-xs">
+                              <p className="font-medium theme-text">
+                                {item.paket?.nama || "Tanpa Paket"}
+                              </p>
+                              {item.statusLangganan && (
+                                <p className="text-[11px] theme-text-muted capitalize">
+                                  Status: {item.statusLangganan}
+                                </p>
+                              )}
+                              {item.tanggalBerakhirLangganan && (
+                                <p className="text-[10px] theme-text-muted">
+                                  s.d {formatDate(item.tanggalBerakhirLangganan)}
+                                </p>
+                              )}
+                            </div>
+                          </td>
+
+                          <td className="px-5 py-4">
+                            <div className="inline-flex items-center gap-1.5 rounded-lg border theme-border px-2.5 py-1 text-xs font-medium theme-text-secondary">
+                              <School size={13} className="text-[var(--color-primary)]" />
+                              <span>{schoolCount} Sekolah</span>
+                            </div>
+                          </td>
+
+                          <td className="px-5 py-4 text-xs">
+                            <p className="theme-text truncate max-w-[180px]">{item.email || "-"}</p>
+                            <p className="theme-text-muted text-[11px]">{item.telepon || "-"}</p>
+                          </td>
+
+                          <td className="px-5 py-4">
+                            <span
+                              className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold ${
+                                item.status === "aktif"
+                                  ? `${themeSuccessSoft} ${themeSuccessBorder} text-[var(--color-success)]`
+                                  : `${themeDangerSoft} ${themeDangerBorder} text-red-500`
+                              }`}
+                            >
+                              <span
+                                className={`h-1.5 w-1.5 rounded-full ${
+                                  item.status === "aktif" ? "bg-[var(--color-success)]" : "bg-red-500"
+                                }`}
+                              />
+                              {item.status === "aktif" ? "Aktif" : "Nonaktif"}
+                            </span>
+                          </td>
+
+                          <td className="px-5 py-4 text-right">
+                            <div className="flex items-center justify-end gap-1.5">
+                              <Link
+                                href={`/super-admin/yayasan/${item.id}`}
+                                title="Lihat detail yayasan"
+                                className={`flex h-8 w-8 items-center justify-center rounded-lg theme-text-muted transition-colors ${themePrimaryHover} hover:text-[var(--color-primary)]`}
+                              >
+                                <Eye size={15} />
+                              </Link>
+
+                              <Link
+                                href={`/super-admin/yayasan/${item.id}/edit`}
+                                title="Edit profil yayasan"
+                                className={`flex h-8 w-8 items-center justify-center rounded-lg theme-text-muted transition-colors hover:bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)] hover:text-[var(--color-warning)]`}
+                              >
+                                <Edit size={15} />
+                              </Link>
+
+                              <button
+                                type="button"
+                                title="Nonaktifkan yayasan"
+                                onClick={() => {
+                                  setDeleteTarget(item);
+                                  setDeleteError("");
+                                }}
+                                className={`flex h-8 w-8 items-center justify-center rounded-lg theme-text-muted transition-colors hover:bg-red-50 hover:text-red-500 dark:hover:bg-red-950/30`}
+                              >
+                                <Trash2 size={15} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Pagination Controls */}
+            <div
+              className={`flex flex-col items-center justify-between gap-3 border-t ${themeDivider} px-4 py-4 sm:flex-row sm:px-5`}
+            >
+              <p className="text-xs theme-text-muted">
+                Halaman <strong className="theme-text">{meta.page}</strong> dari{" "}
+                <strong className="theme-text">{meta.totalPages || 1}</strong> (Total{" "}
+                <strong className="theme-text">{meta.total}</strong> yayasan)
+              </p>
+
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  disabled={currentPage <= 1 || loading}
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  className={`flex h-9 w-9 items-center justify-center rounded-lg border theme-border theme-card theme-text-secondary transition-colors ${themeNeutralHover} disabled:cursor-not-allowed disabled:opacity-40`}
+                >
+                  <ChevronLeft size={16} />
+                </button>
+
+                <span className="px-3 text-xs font-semibold theme-text">
+                  {meta.page}
+                </span>
+
+                <button
+                  type="button"
+                  disabled={currentPage >= (meta.totalPages || 1) || loading}
+                  onClick={() => setCurrentPage((p) => p + 1)}
+                  className={`flex h-9 w-9 items-center justify-center rounded-lg border theme-border theme-card theme-text-secondary transition-colors ${themeNeutralHover} disabled:cursor-not-allowed disabled:opacity-40`}
+                >
+                  <ChevronRight size={16} />
+                </button>
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
+
+      {/* Delete / Deactivate Confirmation Dialog */}
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+          <div
+            className={`w-full max-w-md rounded-2xl border theme-border theme-card p-6 ${themeCardShadow}`}
+          >
+            <div className="flex items-start gap-4">
+              <div
+                className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${themeDangerSoft} text-red-500`}
+              >
+                <AlertTriangle size={22} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <h3 className="text-base font-semibold theme-text">
+                  Nonaktifkan Yayasan?
+                </h3>
+                <p className="mt-1 text-xs theme-text-secondary">
+                  Anda akan menonaktifkan yayasan{" "}
+                  <strong className="theme-text">{deleteTarget.nama}</strong> (NPYP:{" "}
+                  {deleteTarget.npyp || "-"}).
+                </p>
+                <p className="mt-2 text-[11px] theme-text-muted">
+                  Perhatian: Backend tidak mengizinkan penonaktifan jika yayasan masih memiliki sekolah terhubung.
+                </p>
+              </div>
+            </div>
+
+            {deleteError && (
+              <div
+                className={`mt-4 rounded-xl border p-3 text-xs text-red-600 dark:text-red-400 ${themeDangerSoft} ${themeDangerBorder}`}
+              >
+                <strong>Gagal:</strong> {deleteError}
+              </div>
+            )}
+
+            <div className="mt-6 flex items-center justify-end gap-2.5">
+              <button
+                type="button"
+                disabled={deleting}
+                onClick={() => {
+                  setDeleteTarget(null);
+                  setDeleteError("");
+                }}
+                className={`rounded-xl border theme-border theme-card px-4 py-2 text-xs font-semibold theme-text-secondary transition-colors ${themeNeutralHover} disabled:opacity-50`}
+              >
+                Batal
+              </button>
+
+              <button
+                type="button"
+                disabled={deleting}
+                onClick={confirmDelete}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-red-600 px-4 py-2 text-xs font-semibold text-white shadow transition-all hover:bg-red-700 disabled:opacity-50"
+              >
+                {deleting ? (
+                  <>
+                    <Loader2 size={14} className="animate-spin" />
+                    Memproses...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 size={14} />
+                    Ya, Nonaktifkan
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function StatCard({ label, value, icon: Icon, color }) {
+  const colorClasses = {
+    primary: {
+      icon: `${themePrimarySoft} text-[var(--color-primary)]`,
+      accent: "bg-[var(--color-primary)]",
+    },
+    success: {
+      icon: `${themeSuccessSoft} text-[var(--color-success)]`,
+      accent: "bg-[var(--color-success)]",
+    },
+    warning: {
+      icon: `${themeWarningSoft} text-[var(--color-warning)]`,
+      accent: "bg-[var(--color-warning)]",
+    },
+    danger: {
+      icon: `${themeDangerSoft} text-red-500`,
+      accent: "bg-red-500",
+    },
+    info: {
+      icon: `${themeInfoSoft} text-[var(--color-info)]`,
+      accent: "bg-[var(--color-info)]",
+    },
+  };
+
+  const current = colorClasses[color] || colorClasses.primary;
+
+  return (
+    <div
+      className={`group relative overflow-hidden rounded-2xl border theme-border theme-card p-4 ${themeSmallShadow} transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md`}
+    >
+      <div
+        className={`absolute left-0 right-0 top-0 h-[2px] ${current.accent} opacity-70`}
+      />
+      <div className="flex items-center gap-3">
+        <div
+          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${current.icon}`}
+        >
+          <Icon size={18} strokeWidth={1.8} />
+        </div>
+        <div className="min-w-0">
+          <p className="truncate text-[10px] font-medium uppercase tracking-wide theme-text-muted sm:text-[11px]">
+            {label}
+          </p>
+          <p className="mt-0.5 text-lg font-bold tracking-tight theme-text sm:text-xl">
+            {value}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
 }

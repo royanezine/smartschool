@@ -1,1026 +1,1303 @@
 "use client";
 
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
 import {
-    getPlatformYayasanDetail,
-    getSemuaSekolahPlatform,
-} from "@/services/platform.service";
-import {
-    Building2,
-    School,
-    Users,
-    UserCheck,
-    Mail as MailIcon,
-    Phone,
-    Globe as GlobeIcon,
-    MapPin,
-    ArrowLeft,
-    User,
-    Edit,
-    Calendar,
-    Clock,
-    CheckCircle,
-    XCircle,
-    AlertCircle,
-    Loader2,
+  Landmark,
+  School,
+  Users,
+  Building2,
+  Mail,
+  Phone,
+  MapPin,
+  ArrowLeft,
+  Edit,
+  Trash2,
+  Plus,
+  CheckCircle2,
+  XCircle,
+  AlertTriangle,
+  AlertCircle,
+  Loader2,
+  Calendar,
+  KeyRound,
+  ShieldCheck,
+  UserPlus,
+  Unlink,
+  Link2,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+
+import {
+  getYayasanById,
+  deleteYayasan,
+  getSekolahYayasan,
+  updateSekolahYayasan,
+  deleteSekolahYayasan,
+  getAdminYayasan,
+  createAdminYayasan,
+  updateAdminYayasan,
+  deleteAdminYayasan,
+} from "@/services/yayasan.service";
+import { getPlatformSekolah } from "@/services/platform.service";
 
 const themeCardShadow =
-    "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
 
 const themeSmallShadow =
-    "shadow-[0_2px_10px_color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+  "shadow-[0_2px_10px_color-mix(in_srgb,var(--color-text)_4%,transparent)]";
 
 const themeFocus =
-    "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
+  "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
 const themePrimarySoft =
-    "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
 
 const themePrimarySoftBorder =
-    "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
 
 const themeNeutralSurface =
-    "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
 
 const themeNeutralHover =
-    "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
-
-const themeNeutralBorder =
-    "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
 
 const themeDivider =
-    "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
 
-const themeInfoSurface =
-    "bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)]";
-
-const themeInfoBorder =
-    "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
-
-const themeSuccessSurface =
-    "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
+const themeSuccessSoft =
+  "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
 
 const themeSuccessBorder =
-    "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
+  "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
 
-const themeWarningSurface =
-    "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]";
+const themeWarningSoft =
+  "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]";
 
 const themeWarningBorder =
-    "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
+  "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
 
-const themeDangerSurface =
-    "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+const themeDangerSoft =
+  "bg-[color-mix(in_srgb,var(--color-danger,_#ef4444)_9%,transparent)]";
 
 const themeDangerBorder =
-    "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
+  "border-[color-mix(in_srgb,var(--color-danger,_#ef4444)_22%,transparent)]";
 
-function angkaAtauNull(value) {
-    if (value === null || value === undefined || value === "") {
-        return null;
+const inputClass = `
+  h-10
+  w-full
+  rounded-xl
+  border
+  theme-border
+  ${themeNeutralSurface}
+  px-3
+  text-sm
+  theme-text
+  outline-none
+  transition-all
+  placeholder:text-[var(--color-text-placeholder)]
+  ${themeFocus}
+`.replace(/\s+/g, " ").trim();
+
+const selectClass = `
+  h-10
+  w-full
+  cursor-pointer
+  appearance-none
+  rounded-xl
+  border
+  theme-border
+  ${themeNeutralSurface}
+  pl-3
+  pr-8
+  text-sm
+  theme-text
+  outline-none
+  transition-all
+  ${themeFocus}
+`.replace(/\s+/g, " ").trim();
+
+function formatDate(value) {
+  if (!value) return "-";
+  try {
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) return "-";
+    return new Intl.DateTimeFormat("id-ID", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    }).format(d);
+  } catch {
+    return "-";
+  }
+}
+
+export default function DetailYayasanSuperAdminPage() {
+  const params = useParams();
+  const router = useRouter();
+
+  const yayasanId = Array.isArray(params?.id) ? params.id[0] : params?.id;
+
+  // Active Tab: "profil", "sekolah", "admin"
+  const [activeTab, setActiveTab] = useState("profil");
+
+  // Main state
+  const [yayasan, setYayasan] = useState(null);
+  const [sekolahList, setSekolahList] = useState([]);
+  const [adminList, setAdminList] = useState([]);
+
+  // Unassigned schools available in platform for linking
+  const [platformSchools, setPlatformSchools] = useState([]);
+  const [selectedSchoolToLink, setSelectedSchoolToLink] = useState("");
+  const [linkingSchool, setLinkingSchool] = useState(false);
+  const [linkSchoolError, setLinkSchoolError] = useState("");
+
+  // Loading & Global feedback
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+
+  // Dialog & Modal states
+  // 1. Delete Yayasan
+  const [showDeleteYayasanModal, setShowDeleteYayasanModal] = useState(false);
+  const [deletingYayasan, setDeletingYayasan] = useState(false);
+  const [deleteYayasanError, setDeleteYayasanError] = useState("");
+
+  // 2. Remove Sekolah from Yayasan
+  const [sekolahToRemove, setSekolahToRemove] = useState(null);
+  const [removingSekolah, setRemovingSekolah] = useState(false);
+  const [removeSekolahError, setRemoveSekolahError] = useState("");
+
+  // 3. Admin Yayasan (Add / Edit / Delete)
+  const [adminModalMode, setAdminModalMode] = useState(null); // 'create' | 'edit' | null
+  const [selectedAdmin, setSelectedAdmin] = useState(null);
+  const [adminForm, setAdminForm] = useState({
+    namaPengguna: "",
+    namaLengkap: "",
+    email: "",
+    kataSandi: "",
+    status: "aktif",
+  });
+  const [adminSubmitting, setAdminSubmitting] = useState(false);
+  const [adminFormError, setAdminFormError] = useState("");
+
+  // 4. Delete Admin
+  const [adminToDelete, setAdminToDelete] = useState(null);
+  const [deletingAdmin, setDeletingAdmin] = useState(false);
+  const [deleteAdminError, setDeleteAdminError] = useState("");
+
+  const notifySuccess = (msg) => {
+    setSuccessMessage(msg);
+    setTimeout(() => setSuccessMessage(""), 5000);
+  };
+
+  // Load all detail data
+  const loadYayasanData = useCallback(async () => {
+    if (!yayasanId) return;
+
+    try {
+      setLoading(true);
+      setError("");
+
+      // 1. Fetch Yayasan Detail
+      const yysRes = await getYayasanById(yayasanId);
+      const yysData = yysRes?.data || yysRes;
+      setYayasan(yysData);
+
+      // 2. Fetch Sekolah Naungan
+      try {
+        const schRes = await getSekolahYayasan(yayasanId);
+        setSekolahList(Array.isArray(schRes?.data) ? schRes.data : Array.isArray(schRes) ? schRes : []);
+      } catch (err) {
+        console.warn("Gagal memuat sekolah naungan:", err);
+        setSekolahList(yysData?.sekolah || []);
+      }
+
+      // 3. Fetch Admin Yayasan
+      try {
+        const admRes = await getAdminYayasan(yayasanId);
+        setAdminList(Array.isArray(admRes?.data) ? admRes.data : Array.isArray(admRes) ? admRes : []);
+      } catch (err) {
+        console.warn("Gagal memuat admin yayasan:", err);
+        setAdminList([]);
+      }
+
+      // 4. Fetch platform schools for link selector
+      try {
+        const pSch = await getPlatformSekolah({ limit: 100 });
+        const list = Array.isArray(pSch?.data) ? pSch.data : [];
+        // Filter schools not already in this yayasan
+        const available = list.filter((s) => s.yayasanId !== yayasanId);
+        setPlatformSchools(available);
+      } catch (err) {
+        console.warn("Gagal memuat daftar sekolah platform:", err);
+      }
+    } catch (err) {
+      console.error("Gagal mengambil detail yayasan:", err);
+      setError(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Gagal mengambil informasi detail yayasan."
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, [yayasanId]);
+
+  useEffect(() => {
+    let active = true;
+    void Promise.resolve().then(async () => {
+      if (active) {
+        await loadYayasanData();
+      }
+    });
+    return () => {
+      active = false;
+    };
+  }, [loadYayasanData]);
+
+  // ==========================================
+  // ACTION: Delete Yayasan
+  // ==========================================
+  const handleConfirmDeleteYayasan = async () => {
+    try {
+      setDeletingYayasan(true);
+      setDeleteYayasanError("");
+
+      const res = await deleteYayasan(yayasanId);
+      notifySuccess(res?.message || `Yayasan "${yayasan?.nama}" berhasil dinonaktifkan.`);
+      setShowDeleteYayasanModal(false);
+
+      setTimeout(() => {
+        router.push("/super-admin/yayasan");
+      }, 1200);
+    } catch (err) {
+      console.error("Gagal menghapus yayasan:", err);
+      const msg =
+        err?.response?.data?.message ||
+        err?.message ||
+        "Gagal menonaktifkan yayasan.";
+      setDeleteYayasanError(msg);
+    } finally {
+      setDeletingYayasan(false);
+    }
+  };
+
+  // ==========================================
+  // ACTION: Hubungkan / Assign Sekolah
+  // ==========================================
+  const handleAssignSekolah = async () => {
+    if (!selectedSchoolToLink) return;
+
+    try {
+      setLinkingSchool(true);
+      setLinkSchoolError("");
+
+      const res = await updateSekolahYayasan(yayasanId, selectedSchoolToLink);
+      notifySuccess(res?.message || "Sekolah berhasil dihubungkan ke yayasan.");
+      setSelectedSchoolToLink("");
+
+      // Refresh sekolah list
+      await loadYayasanData();
+    } catch (err) {
+      console.error("Gagal menghubungkan sekolah:", err);
+      setLinkSchoolError(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Gagal menghubungkan sekolah ke yayasan."
+      );
+    } finally {
+      setLinkingSchool(false);
+    }
+  };
+
+  // ==========================================
+  // ACTION: Lepaskan / Remove Sekolah
+  // ==========================================
+  const handleConfirmRemoveSekolah = async () => {
+    if (!sekolahToRemove) return;
+
+    try {
+      setRemovingSekolah(true);
+      setRemoveSekolahError("");
+
+      const res = await deleteSekolahYayasan(yayasanId, sekolahToRemove.id);
+      notifySuccess(res?.message || `Sekolah "${sekolahToRemove.nama}" berhasil dilepaskan dari yayasan.`);
+      setSekolahToRemove(null);
+
+      // Refresh sekolah list
+      await loadYayasanData();
+    } catch (err) {
+      console.error("Gagal melepaskan sekolah:", err);
+      setRemoveSekolahError(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Gagal melepaskan sekolah dari yayasan."
+      );
+    } finally {
+      setRemovingSekolah(false);
+    }
+  };
+
+  // ==========================================
+  // ACTION: Admin Yayasan (Create & Edit)
+  // ==========================================
+  const openCreateAdminModal = () => {
+    setAdminForm({
+      namaPengguna: "",
+      namaLengkap: "",
+      email: "",
+      kataSandi: "",
+      status: "aktif",
+    });
+    setSelectedAdmin(null);
+    setAdminFormError("");
+    setAdminModalMode("create");
+  };
+
+  const openEditAdminModal = (admin) => {
+    setSelectedAdmin(admin);
+    setAdminForm({
+      namaPengguna: admin.namaPengguna || "",
+      namaLengkap: admin.namaLengkap || "",
+      email: admin.email || "",
+      kataSandi: "",
+      status: admin.status || "aktif",
+    });
+    setAdminFormError("");
+    setAdminModalMode("edit");
+  };
+
+  const handleAdminFormSubmit = async (e) => {
+    e.preventDefault();
+    setAdminFormError("");
+
+    if (!adminForm.namaPengguna.trim() || adminForm.namaPengguna.trim().length < 3) {
+      setAdminFormError("Nama pengguna minimal 3 karakter.");
+      return;
+    }
+    if (!adminForm.namaLengkap.trim() || adminForm.namaLengkap.trim().length < 3) {
+      setAdminFormError("Nama lengkap minimal 3 karakter.");
+      return;
+    }
+    if (!adminForm.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(adminForm.email.trim())) {
+      setAdminFormError("Alamat email tidak valid.");
+      return;
     }
 
-    const angka = Number(value);
+    try {
+      setAdminSubmitting(true);
 
-    return Number.isFinite(angka) ? angka : null;
-}
-
-function tampilAngka(value) {
-    return value === null || value === undefined
-        ? "-"
-        : value;
-}
-
-
-export default function DetailYayasanPage() {
-    const params = useParams();
-    const router = useRouter();
-
-    const id = Array.isArray(params?.id)
-        ? params.id[0]
-        : params?.id;
-
-    const [yayasan, setYayasan] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState("");
-
-    useEffect(() => {
-        if (!id) {
-            const timer = setTimeout(() => {
-                setError("ID yayasan tidak ditemukan.");
-                setLoading(false);
-            }, 0);
-            return () => clearTimeout(timer);
+      if (adminModalMode === "create") {
+        if (!adminForm.kataSandi || adminForm.kataSandi.length < 8) {
+          setAdminFormError("Kata sandi wajib diisi minimal 8 karakter.");
+          setAdminSubmitting(false);
+          return;
         }
 
-        let cancelled = false;
-
-        const loadDetailYayasan = async () => {
-            try {
-                setLoading(true);
-                setError("");
-
-                const [result, sekolahPlatform] =
-                    await Promise.all([
-                        getPlatformYayasanDetail(id),
-                        getSemuaSekolahPlatform(),
-                    ]);
-
-                if (cancelled) return;
-
-                const data = unwrapResponse(result);
-
-                const sekolahMilikYayasan = (
-                    Array.isArray(sekolahPlatform)
-                        ? sekolahPlatform
-                        : []
-                ).filter(
-                    (item) =>
-                        item?.yayasan?.id === id
-                );
-
-                console.log(
-                    "DETAIL YAYASAN DATA:",
-                    data
-                );
-
-                const rawYayasan =
-                    data?.yayasan ||
-                    data?.profil ||
-                    data?.data?.yayasan ||
-                    data?.data?.profil ||
-                    data;
-
-                if (
-                    !rawYayasan ||
-                    typeof rawYayasan !== "object"
-                ) {
-                    throw new Error(
-                        "Data yayasan tidak ditemukan."
-                    );
-                }
-
-                const statistik =
-                    data?.statistik ||
-                    data?.statistics ||
-                    rawYayasan?.statistik ||
-                    rawYayasan?.statistics ||
-                    {};
-
-                const rawSekolah =
-                    rawYayasan?.sekolah ||
-                    rawYayasan?.sekolahs ||
-                    rawYayasan?.sekolahList ||
-                    data?.sekolah ||
-                    data?.sekolahs ||
-                    [];
-
-                const daftarSekolah =
-                    Array.isArray(rawSekolah) &&
-                    rawSekolah.length > 0
-                        ? rawSekolah
-                        : sekolahMilikYayasan;
-
-                const normalized = {
-                    id:
-                        rawYayasan?.id ||
-                        id,
-
-                    nama:
-                        rawYayasan?.nama ||
-                        rawYayasan?.namaYayasan ||
-                        rawYayasan?.nama_yayasan ||
-                        "-",
-
-                    npyp:
-                        rawYayasan?.npyp ||
-                        rawYayasan?.NPYP ||
-                        "-",
-
-                    status:
-                        normalizeStatus(
-                            rawYayasan?.status
-                        ),
-
-                    ketua:
-                        rawYayasan?.ketua ||
-                        rawYayasan?.ketuaYayasan ||
-                        rawYayasan?.namaKetua ||
-                        rawYayasan?.pimpinan ||
-                        "-",
-
-                    email:
-                        rawYayasan?.email ||
-                        "-",
-
-                    telepon:
-                        rawYayasan?.telepon ||
-                        rawYayasan?.noTelepon ||
-                        rawYayasan?.nomorTelepon ||
-                        "-",
-
-                    website:
-                        rawYayasan?.website ||
-                        rawYayasan?.urlWebsite ||
-                        "-",
-
-                    alamat:
-                        rawYayasan?.alamat ||
-                        "-",
-
-                    kelurahan:
-                        rawYayasan?.kelurahan ||
-                        rawYayasan?.desa ||
-                        "-",
-
-                    kecamatan:
-                        rawYayasan?.kecamatan ||
-                        "-",
-
-                    kota:
-                        rawYayasan?.kota ||
-                        rawYayasan?.kabupaten ||
-                        "-",
-
-                    provinsi:
-                        rawYayasan?.provinsi ||
-                        "-",
-
-                    kodePos:
-                        rawYayasan?.kodePos ||
-                        rawYayasan?.kode_pos ||
-                        "-",
-
-                    logo:
-                        rawYayasan?.logoUrl ||
-                        rawYayasan?.logo ||
-                        rawYayasan?.logoBesarUrl ||
-                        null,
-
-                    bergabung:
-                        rawYayasan?.dibuatPada ||
-                        rawYayasan?.createdAt ||
-                        rawYayasan?.tanggalDaftar ||
-                        null,
-
-                    jumlahSekolah:
-                        Number(
-                            statistik?.jumlahSekolah ??
-                                statistik?.totalSekolah ??
-                                rawYayasan?.jumlahSekolah ??
-                                rawYayasan?.totalSekolah ??
-                                rawYayasan?._count?.sekolah ??
-                                daftarSekolah.length ??
-                                0
-                        ) || 0,
-
-                    totalGuru:
-                        angkaAtauNull(
-                            statistik?.totalGuru ??
-                                statistik?.jumlahGuru ??
-                                rawYayasan?.totalGuru ??
-                                rawYayasan?.jumlahGuru
-                        ),
-
-                    totalSiswa:
-                        angkaAtauNull(
-                            statistik?.totalSiswa ??
-                                statistik?.jumlahSiswa ??
-                                rawYayasan?.totalSiswa ??
-                                rawYayasan?.jumlahSiswa
-                        ),
-
-                    totalAdmin:
-                        angkaAtauNull(
-                            statistik?.totalAdmin ??
-                                statistik?.jumlahAdmin ??
-                                rawYayasan?.totalAdmin ??
-                                rawYayasan?.jumlahAdmin
-                        ),
-
-                    totalPengguna:
-                        angkaAtauNull(
-                            statistik?.totalPengguna ??
-                                rawYayasan?.totalPengguna ??
-                                sekolahMilikYayasan.reduce(
-                                    (total, item) =>
-                                        total +
-                                        (Number(
-                                            item?._count
-                                                ?.pengguna
-                                        ) || 0),
-                                    0
-                                )
-                        ),
-
-                    sekolah: daftarSekolah,
-                };
-
-                console.log(
-                    "DETAIL YAYASAN NORMALIZED:",
-                    normalized
-                );
-
-                setYayasan(normalized);
-            } catch (err) {
-                console.error(
-                    "ERROR DETAIL YAYASAN:",
-                    err
-                );
-
-                if (cancelled) return;
-
-                setError(
-                    err?.message ||
-                        "Gagal mengambil data yayasan."
-                );
-
-                setYayasan(null);
-            } finally {
-                if (!cancelled) {
-                    setLoading(false);
-                }
-            }
+        const payload = {
+          namaPengguna: adminForm.namaPengguna.trim(),
+          namaLengkap: adminForm.namaLengkap.trim(),
+          email: adminForm.email.trim(),
+          kataSandi: adminForm.kataSandi,
+          status: adminForm.status,
         };
 
-        loadDetailYayasan();
-
-        return () => {
-            cancelled = true;
+        const res = await createAdminYayasan(yayasanId, payload);
+        notifySuccess(res?.message || "Admin yayasan berhasil ditambahkan.");
+      } else if (adminModalMode === "edit" && selectedAdmin) {
+        const payload = {
+          namaPengguna: adminForm.namaPengguna.trim(),
+          namaLengkap: adminForm.namaLengkap.trim(),
+          email: adminForm.email.trim(),
+          status: adminForm.status,
         };
-    }, [id]);
 
-    if (loading) {
-        return (
-            <div className="theme-page theme-text min-h-full">
-                <div className="w-full min-h-[70vh] flex items-center justify-center px-4">
-                    <div className="text-center">
-                        <div
-                            className={`w-14 h-14 rounded-full ${themeInfoSurface} flex items-center justify-center mx-auto mb-4`}
-                        >
-                            <Loader2
-                                size={28}
-                                className="text-[var(--color-info)] animate-spin"
-                            />
-                        </div>
+        const res = await updateAdminYayasan(yayasanId, selectedAdmin.id, payload);
+        notifySuccess(res?.message || "Data admin yayasan berhasil diperbarui.");
+      }
 
-                        <h2 className="text-lg font-semibold theme-text">
-                            Memuat data yayasan...
-                        </h2>
-
-                        <p className="text-sm theme-text-muted mt-1">
-                            Sedang mengambil data dari server.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        );
+      setAdminModalMode(null);
+      await loadYayasanData();
+    } catch (err) {
+      console.error("Gagal menyimpan data admin:", err);
+      setAdminFormError(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Gagal menyimpan data admin yayasan."
+      );
+    } finally {
+      setAdminSubmitting(false);
     }
+  };
 
-    if (!yayasan) {
-        return (
-            <div className="theme-page theme-text min-h-full">
-                <div className="w-full min-h-[70vh] flex items-center justify-center px-4">
-                    <div
-                        className={`theme-card rounded-2xl p-8 ${themeCardShadow} border theme-border max-w-md w-full text-center`}
-                    >
-                        <div
-                            className={`w-16 h-16 rounded-full ${themeDangerSurface} flex items-center justify-center mx-auto mb-4`}
-                        >
-                            <AlertCircle
-                                size={48}
-                                className="theme-danger"
-                            />
-                        </div>
+  // ==========================================
+  // ACTION: Delete Admin
+  // ==========================================
+  const handleConfirmDeleteAdmin = async () => {
+    if (!adminToDelete) return;
 
-                        <h2 className="text-2xl font-semibold theme-text">
-                            Yayasan tidak ditemukan
-                        </h2>
+    try {
+      setDeletingAdmin(true);
+      setDeleteAdminError("");
 
-                        <p className="theme-text-secondary text-sm mt-2">
-                            {error ||
-                                "Data yang Anda cari mungkin telah dihapus."}
-                        </p>
+      const res = await deleteAdminYayasan(yayasanId, adminToDelete.id);
+      notifySuccess(res?.message || `Admin "${adminToDelete.namaLengkap}" berhasil dinonaktifkan.`);
+      setAdminToDelete(null);
 
-                        <button
-                            onClick={() =>
-                                router.push(
-                                    "/super-admin/yayasan"
-                                )
-                            }
-                            className={`mt-5 px-5 py-2.5 text-sm font-medium rounded-lg transition-all ${themePrimarySoft} ${themePrimarySoftBorder} border text-[var(--color-primary)] hover:bg-[color-mix(in_srgb,var(--color-primary)_14%,transparent)] ${themeSmallShadow}`}
-                        >
-                            Kembali ke Daftar Yayasan
-                        </button>
-                    </div>
-                </div>
-            </div>
-        );
+      // Refresh list
+      await loadYayasanData();
+    } catch (err) {
+      console.error("Gagal menghapus admin yayasan:", err);
+      setDeleteAdminError(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Gagal menonaktifkan admin yayasan."
+      );
+    } finally {
+      setDeletingAdmin(false);
     }
+  };
 
-    const statusThemeMap = {
-        Aktif: {
-            bg: themeSuccessSurface,
-            text: "text-[var(--color-success)]",
-            border: themeSuccessBorder,
-            dot: "bg-[var(--color-success)]",
-            icon: CheckCircle,
-        },
-
-        Trial: {
-            bg: themeWarningSurface,
-            text: "text-[var(--color-warning)]",
-            border: themeWarningBorder,
-            dot: "bg-[var(--color-warning)]",
-            icon: Clock,
-        },
-
-        Nonaktif: {
-            bg: themeDangerSurface,
-            text: "theme-danger",
-            border: themeDangerBorder,
-            dot: "bg-[var(--color-text-muted)]",
-            icon: XCircle,
-        },
-    };
-
-    const statusStyle =
-        statusThemeMap[yayasan.status] ||
-        statusThemeMap.Nonaktif;
-
-    const StatusIcon = statusStyle.icon;
-
-    const totalPengguna =
-        yayasan.totalPengguna === null ||
-        yayasan.totalPengguna === undefined
-            ? "-"
-            : yayasan.totalPengguna;
-
+  if (loading) {
     return (
-        <div className="theme-page theme-text min-h-full">
-            <div className="w-full max-w-[1100px] mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
-                <button
-                    onClick={() => router.back()}
-                    className="flex items-center gap-2 text-sm theme-text-secondary hover:text-[var(--color-primary)] transition-colors mb-5 group"
-                >
-                    <ArrowLeft
-                        size={16}
-                        className="group-hover:-translate-x-0.5 transition-transform"
-                    />
-
-                    Kembali
-                </button>
-
-                <div
-                    className={`theme-card rounded-xl border theme-border p-5 sm:p-6 ${themeCardShadow} mb-6`}
-                >
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                        <div className="flex items-center gap-4 min-w-0">
-                            <div
-                                className={`w-16 h-16 rounded-xl ${themeNeutralSurface} border ${themeNeutralBorder} flex items-center justify-center ${themeSmallShadow} flex-shrink-0 overflow-hidden`}
-                            >
-                                {yayasan.logo ? (
-                                    <img
-                                        src={yayasan.logo}
-                                        alt={`Logo ${yayasan.nama}`}
-                                        className="w-full h-full object-contain"
-                                        onError={(event) => {
-                                            event.currentTarget.style.display =
-                                                "none";
-                                        }}
-                                    />
-                                ) : (
-                                    <Building2
-                                        size={30}
-                                        className="theme-text-muted"
-                                    />
-                                )}
-                            </div>
-
-                            <div className="min-w-0">
-                                <h1 className="text-xl sm:text-2xl font-semibold theme-text truncate">
-                                    {yayasan.nama}
-                                </h1>
-
-                                <div className="flex flex-wrap items-center gap-2 mt-1">
-                                    <span className="text-sm theme-text-secondary font-mono">
-                                        NPYP:{" "}
-                                        {yayasan.npyp ||
-                                            "-"}
-                                    </span>
-
-                                    <span
-                                        className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium border ${statusStyle.bg} ${statusStyle.text} ${statusStyle.border}`}
-                                    >
-                                        <StatusIcon
-                                            size={12}
-                                        />
-
-                                        {yayasan.status}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="flex items-center gap-2 ml-auto sm:ml-0">
-                            <button
-                                onClick={() =>
-                                    router.push(
-                                        `/super-admin/sekolah/${yayasan.id}`
-                                    )
-                                }
-                                className="flex items-center justify-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg transition-all bg-[var(--color-primary)] text-[var(--color-card)] hover:opacity-90 shadow-[0_6px_16px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]"
-                            >
-                                <Edit size={15} />
-
-                                <span>
-                                    Edit
-                                </span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div
-                        className={`flex flex-wrap items-center gap-3 mt-3 pt-3 border-t ${themeDivider} text-sm theme-text-secondary`}
-                    >
-                        {yayasan.bergabung && (
-                            <span className="flex items-center gap-1.5">
-                                <Calendar
-                                    size={14}
-                                    className="theme-text-muted"
-                                />
-
-                                Bergabung:{" "}
-                                {formatDate(
-                                    yayasan.bergabung
-                                )}
-                            </span>
-                        )}
-
-                        <span className="flex items-center gap-1.5">
-                            <Building2
-                                size={14}
-                                className="theme-text-muted"
-                            />
-
-                            {
-                                yayasan.jumlahSekolah
-                            }{" "}
-                            Sekolah
-                        </span>
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    <InfoBox
-                        icon={User}
-                        color="primary"
-                        label="Ketua Yayasan"
-                        value={yayasan.ketua}
-                    />
-
-                    <InfoBox
-                        icon={School}
-                        color="success"
-                        label="Jumlah Sekolah"
-                        value={`${yayasan.jumlahSekolah} Sekolah`}
-                    />
-
-                    <InfoBox
-                        icon={Users}
-                        color="info"
-                        label="Total Pengguna"
-                        value={totalPengguna}
-                    />
-                </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                    <div
-                        className={`theme-card rounded-xl border theme-border p-5 ${themeCardShadow}`}
-                    >
-                        <h3 className="text-sm font-semibold theme-text mb-4 flex items-center gap-2">
-                            <MailIcon
-                                size={16}
-                                className="theme-text-muted"
-                            />
-
-                            Kontak
-                        </h3>
-
-                        <div className="space-y-3">
-                            <ContactRow
-                                icon={MailIcon}
-                                value={yayasan.email}
-                            />
-
-                            <ContactRow
-                                icon={Phone}
-                                value={yayasan.telepon}
-                            />
-
-                            <ContactRow
-                                icon={GlobeIcon}
-                                value={yayasan.website}
-                            />
-                        </div>
-                    </div>
-
-                    <div
-                        className={`theme-card rounded-xl border theme-border p-5 ${themeCardShadow}`}
-                    >
-                        <h3 className="text-sm font-semibold theme-text mb-4 flex items-center gap-2">
-                            <MapPin
-                                size={16}
-                                className="theme-text-muted"
-                            />
-
-                            Alamat
-                        </h3>
-
-                        <div className="space-y-2 text-sm">
-                            <p
-                                className={`theme-text-secondary ${themeNeutralSurface} px-3 py-2 rounded-lg border ${themeNeutralBorder}`}
-                            >
-                                {yayasan.alamat ||
-                                    "-"}
-                            </p>
-
-                            <p
-                                className={`theme-text-secondary ${themeNeutralSurface} px-3 py-2 rounded-lg border ${themeNeutralBorder}`}
-                            >
-                                {buildAddress(
-                                    yayasan
-                                )}
-
-                                <span className="block text-xs theme-text-muted mt-0.5">
-                                    Kode Pos:{" "}
-                                    {yayasan.kodePos ||
-                                        "-"}
-                                </span>
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <p className="mb-2 text-[11px] theme-text-secondary">
-                    Guru, Siswa, dan Admin belum tersedia dari API platform.
-                </p>
-
-                <div className="grid grid-cols-3 gap-4 mb-6">
-                    <StatCard
-                        icon={Users}
-                        value={tampilAngka(
-                            yayasan.totalGuru
-                        )}
-                        label="Guru"
-                        color="primary"
-                    />
-
-                    <StatCard
-                        icon={UserCheck}
-                        value={tampilAngka(
-                            yayasan.totalSiswa
-                        )}
-                        label="Siswa"
-                        color="success"
-                    />
-
-                    <StatCard
-                        icon={User}
-                        value={tampilAngka(
-                            yayasan.totalAdmin
-                        )}
-                        label="Admin"
-                        color="info"
-                    />
-                </div>
-
-                <div
-                    className={`theme-card rounded-xl border theme-border p-5 ${themeCardShadow} mb-6`}
-                >
-                    <h3 className="text-sm font-semibold theme-text mb-4 flex items-center gap-2">
-                        <School
-                            size={16}
-                            className="theme-text-muted"
-                        />
-
-                        Sekolah Di Bawah Naungan
-                    </h3>
-
-                    {yayasan.sekolah.length > 0 ? (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                            {yayasan.sekolah.map(
-                                (
-                                    sekolah,
-                                    index
-                                ) => {
-                                    const sekolahNama =
-                                        typeof sekolah ===
-                                        "string"
-                                            ? sekolah
-                                            : sekolah?.nama ||
-                                              sekolah?.namaSekolah ||
-                                              "-";
-
-                                    return (
-                                        <div
-                                            key={
-                                                sekolah?.id ||
-                                                index
-                                            }
-                                            className={`flex items-center gap-2 text-sm theme-text-secondary ${themeNeutralSurface} px-3 py-2 rounded-lg border ${themeNeutralBorder}`}
-                                        >
-                                            <Building2
-                                                size={14}
-                                                className="theme-text-muted flex-shrink-0"
-                                            />
-
-                                            <span className="truncate">
-                                                {
-                                                    sekolahNama
-                                                }
-                                            </span>
-                                        </div>
-                                    );
-                                }
-                            )}
-                        </div>
-                    ) : (
-                        <div className="text-center py-8">
-                            <School
-                                size={32}
-                                className="mx-auto theme-text-muted mb-2"
-                            />
-
-                            <p className="text-sm theme-text-muted">
-                                Belum ada sekolah di bawah yayasan ini.
-                            </p>
-                        </div>
-                    )}
-                </div>
-
-                <div
-                    className={`flex flex-col-reverse sm:flex-row items-center justify-end gap-3 pt-4 border-t ${themeDivider}`}
-                >
-                    <button
-                        onClick={() => router.back()}
-                        className={`w-full sm:w-auto px-5 py-2.5 text-sm font-medium theme-text-secondary ${themeNeutralHover} rounded-lg transition-colors`}
-                    >
-                        Tutup
-                    </button>
-
-                    <button
-                        onClick={() =>
-                            router.push(
-                                `/super-admin/sekolah/${yayasan.id}`
-                            )
-                        }
-                        className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-2.5 text-sm font-medium rounded-lg transition-all bg-[var(--color-primary)] text-[var(--color-card)] hover:opacity-90 shadow-[0_6px_16px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]"
-                    >
-                        <Edit size={16} />
-
-                        Edit Yayasan
-                    </button>
-                </div>
-            </div>
+      <div className="theme-page theme-text min-h-full flex items-center justify-center p-8">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 size={32} className="animate-spin text-[var(--color-primary)]" />
+          <p className="text-sm theme-text-muted">Memuat rincian yayasan dari backend...</p>
         </div>
+      </div>
     );
-}
+  }
 
-function unwrapResponse(response) {
-    if (!response) {
-        return null;
-    }
-
-    if (
-        response.data !== undefined &&
-        response.data !== null
-    ) {
-        if (
-            response.data?.profil ||
-            response.data?.yayasan ||
-            response.data?.statistik ||
-            response.data?.statistics
-        ) {
-            return response.data;
-        }
-
-        if (
-            response.data?.data !== undefined
-        ) {
-            return response.data.data;
-        }
-
-        return response.data;
-    }
-
-    return response;
-}
-
-function normalizeStatus(status) {
-    if (!status) {
-        return "Nonaktif";
-    }
-
-    const value = String(status)
-        .trim()
-        .toLowerCase();
-
-    if (
-        value === "aktif" ||
-        value === "active"
-    ) {
-        return "Aktif";
-    }
-
-    if (
-        value === "trial" ||
-        value === "uji coba" ||
-        value === "uji_coba"
-    ) {
-        return "Trial";
-    }
-
-    if (
-        value === "nonaktif" ||
-        value === "inactive" ||
-        value === "tidak aktif"
-    ) {
-        return "Nonaktif";
-    }
-
+  if (error || !yayasan) {
     return (
-        String(status).charAt(0).toUpperCase() +
-        String(status).slice(1)
+      <div className="theme-page theme-text min-h-full flex items-center justify-center p-8">
+        <div className={`w-full max-w-md rounded-2xl border theme-border theme-card p-6 text-center ${themeCardShadow}`}>
+          <AlertCircle size={40} className="mx-auto text-red-500 mb-3" />
+          <h2 className="text-lg font-bold theme-text">Yayasan Tidak Ditemukan</h2>
+          <p className="mt-1 text-xs theme-text-secondary">{error || "Data yayasan tidak tersedia di server."}</p>
+          <Link
+            href="/super-admin/yayasan"
+            className={`mt-5 inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-4 py-2 text-xs font-semibold text-[var(--color-card)] ${themeSmallShadow}`}
+          >
+            <ArrowLeft size={14} />
+            Kembali ke Daftar Yayasan
+          </Link>
+        </div>
+      </div>
     );
-}
+  }
 
-function formatDate(date) {
-    if (!date) {
-        return "-";
-    }
+  return (
+    <div className="theme-page theme-text min-h-full">
+      <div className="mx-auto w-full max-w-[1600px] space-y-6 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
+        {/* Breadcrumb */}
+        <div className="flex items-center gap-2 text-xs">
+          <Link
+            href="/super-admin/yayasan"
+            className="font-medium text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-primary)]"
+          >
+            Yayasan
+          </Link>
+          <span className="text-[var(--color-text-placeholder)]">/</span>
+          <span className="font-semibold theme-text truncate max-w-[200px]">{yayasan.nama}</span>
+        </div>
 
-    const parsedDate = new Date(date);
+        {/* Success Banner */}
+        {successMessage && (
+          <div className={`rounded-2xl border p-4 ${themeSuccessSoft} ${themeSuccessBorder} flex items-center gap-3`}>
+            <CheckCircle2 size={18} className="text-[var(--color-success)] shrink-0" />
+            <p className="text-sm font-semibold theme-text">{successMessage}</p>
+          </div>
+        )}
 
-    if (
-        Number.isNaN(
-            parsedDate.getTime()
-        )
-    ) {
-        return "-";
-    }
-
-    return parsedDate.toLocaleDateString(
-        "id-ID",
-        {
-            day: "numeric",
-            month: "long",
-            year: "numeric",
-        }
-    );
-}
-
-function buildAddress(yayasan) {
-    const parts = [
-        yayasan?.kelurahan,
-        yayasan?.kecamatan,
-        yayasan?.kota,
-        yayasan?.provinsi,
-    ].filter(
-        (item) =>
-            item &&
-            item !== "-"
-    );
-
-    return parts.length > 0
-        ? parts.join(", ")
-        : "-";
-}
-
-function InfoBox({
-    icon: Icon,
-    color,
-    label,
-    value,
-}) {
-    const colorMap = {
-        primary: {
-            bg: themePrimarySoft,
-            text: "text-[var(--color-primary)]",
-            border: themePrimarySoftBorder,
-        },
-
-        success: {
-            bg: themeSuccessSurface,
-            text: "text-[var(--color-success)]",
-            border: themeSuccessBorder,
-        },
-
-        info: {
-            bg: themeInfoSurface,
-            text: "text-[var(--color-info)]",
-            border: themeInfoBorder,
-        },
-    };
-
-    const selected =
-        colorMap[color] ||
-        colorMap.primary;
-
-    return (
-        <div
-            className={`theme-card rounded-xl border theme-border p-4 ${themeCardShadow}`}
+        {/* Top Header Card */}
+        <section
+          className={`relative overflow-hidden rounded-2xl border theme-border theme-card ${themeCardShadow}`}
         >
-            <div className="flex items-center gap-3">
+          <div className="relative p-5 sm:p-6 lg:p-7">
+            <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+              <div className="flex items-start gap-4">
                 <div
-                    className={`p-2 rounded-lg ${selected.bg} ${selected.text} border ${selected.border}`}
+                  className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border ${themePrimarySoft} ${themePrimarySoftBorder} text-[var(--color-primary)] ${themeSmallShadow}`}
                 >
-                    <Icon size={16} />
+                  <Landmark size={26} strokeWidth={1.8} />
                 </div>
 
                 <div className="min-w-0">
-                    <p className="text-xs theme-text-muted font-medium">
-                        {label}
-                    </p>
+                  <div className="flex flex-wrap items-center gap-2.5">
+                    <h1 className="text-xl font-bold tracking-tight theme-text sm:text-2xl">
+                      {yayasan.nama}
+                    </h1>
+                    <span
+                      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold ${
+                        yayasan.status === "aktif"
+                          ? `${themeSuccessSoft} ${themeSuccessBorder} text-[var(--color-success)]`
+                          : `${themeDangerSoft} ${themeDangerBorder} text-red-500`
+                      }`}
+                    >
+                      <span
+                        className={`h-1.5 w-1.5 rounded-full ${
+                          yayasan.status === "aktif" ? "bg-[var(--color-success)]" : "bg-red-500"
+                        }`}
+                      />
+                      {yayasan.status === "aktif" ? "Aktif" : "Nonaktif"}
+                    </span>
+                  </div>
 
-                    <p className="text-sm font-semibold theme-text truncate">
-                        {value || "-"}
-                    </p>
+                  <div className="mt-2 flex flex-wrap items-center gap-3 text-xs theme-text-secondary">
+                    <span className="font-mono bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] px-2 py-0.5 rounded font-semibold">
+                      NPYP: {yayasan.npyp || "-"}
+                    </span>
+                    <span>•</span>
+                    <span className="flex items-center gap-1">
+                      <Calendar size={13} className="theme-text-muted" />
+                      Terdaftar: {formatDate(yayasan.dibuatPada)}
+                    </span>
+                    <span>•</span>
+                    <span className="flex items-center gap-1">
+                      <School size={13} className="theme-text-muted" />
+                      {sekolahList.length} Sekolah Naungan
+                    </span>
+                    <span>•</span>
+                    <span className="flex items-center gap-1">
+                      <Users size={13} className="theme-text-muted" />
+                      {adminList.length} Admin Yayasan
+                    </span>
+                  </div>
                 </div>
-            </div>
-        </div>
-    );
-}
+              </div>
 
-function ContactRow({
-    icon: Icon,
-    value,
-}) {
-    return (
-        <div
-            className={`flex items-center gap-3 text-sm ${themeNeutralSurface} px-3 py-2 rounded-lg border ${themeNeutralBorder}`}
-        >
-            <Icon
-                size={15}
-                className="theme-text-muted flex-shrink-0"
-            />
+              {/* Actions Header */}
+              <div className="flex items-center gap-2.5 flex-wrap">
+                <Link
+                  href={`/super-admin/yayasan/${yayasan.id}/edit`}
+                  className={`inline-flex items-center gap-1.5 rounded-xl border theme-border theme-card px-4 py-2.5 text-xs font-semibold theme-text-secondary ${themeSmallShadow} transition-all ${themeNeutralHover}`}
+                >
+                  <Edit size={14} />
+                  <span>Edit Yayasan</span>
+                </Link>
 
-            <span className="theme-text-secondary truncate">
-                {value || "-"}
-            </span>
-        </div>
-    );
-}
-
-function StatCard({
-    icon: Icon,
-    value,
-    label,
-    color,
-}) {
-    const colorMap = {
-        primary: {
-            bg: themePrimarySoft,
-            text: "text-[var(--color-primary)]",
-            border: themePrimarySoftBorder,
-        },
-
-        success: {
-            bg: themeSuccessSurface,
-            text: "text-[var(--color-success)]",
-            border: themeSuccessBorder,
-        },
-
-        info: {
-            bg: themeInfoSurface,
-            text: "text-[var(--color-info)]",
-            border: themeInfoBorder,
-        },
-    };
-
-    const selected =
-        colorMap[color] ||
-        colorMap.primary;
-
-    return (
-        <div
-            className={`theme-card rounded-xl border theme-border p-4 text-center ${themeCardShadow}`}
-        >
-            <div
-                className={`p-2 rounded-lg ${selected.bg} ${selected.text} border ${selected.border} w-fit mx-auto mb-1.5`}
-            >
-                <Icon size={18} />
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowDeleteYayasanModal(true);
+                    setDeleteYayasanError("");
+                  }}
+                  className={`inline-flex items-center gap-1.5 rounded-xl border ${themeDangerBorder} theme-card px-4 py-2.5 text-xs font-semibold text-red-500 ${themeSmallShadow} transition-all hover:bg-red-50 dark:hover:bg-red-950/30`}
+                >
+                  <Trash2 size={14} />
+                  <span>Nonaktifkan Yayasan</span>
+                </button>
+              </div>
             </div>
 
-            <p className="text-xl font-bold theme-text">
-                {Number(value) || 0}
+            {/* Navigation Tabs */}
+            <div className={`mt-6 flex items-center gap-2 border-t ${themeDivider} pt-4`}>
+              <button
+                type="button"
+                onClick={() => setActiveTab("profil")}
+                className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold transition-all ${
+                  activeTab === "profil"
+                    ? "bg-[var(--color-primary)] text-[var(--color-card)]"
+                    : `theme-text-secondary ${themeNeutralHover}`
+                }`}
+              >
+                <Landmark size={14} />
+                <span>Profil & Kontak</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveTab("sekolah")}
+                className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold transition-all ${
+                  activeTab === "sekolah"
+                    ? "bg-[var(--color-primary)] text-[var(--color-card)]"
+                    : `theme-text-secondary ${themeNeutralHover}`
+                }`}
+              >
+                <School size={14} />
+                <span>Sekolah Naungan</span>
+                <span className={`rounded-full px-2 py-0.2 text-[10px] ${
+                  activeTab === "sekolah" ? "bg-white/20" : "bg-[color-mix(in_srgb,var(--color-text)_8%,transparent)]"
+                }`}>
+                  {sekolahList.length}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveTab("admin")}
+                className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold transition-all ${
+                  activeTab === "admin"
+                    ? "bg-[var(--color-primary)] text-[var(--color-card)]"
+                    : `theme-text-secondary ${themeNeutralHover}`
+                }`}
+              >
+                <ShieldCheck size={14} />
+                <span>Admin Pengelola Yayasan</span>
+                <span className={`rounded-full px-2 py-0.2 text-[10px] ${
+                  activeTab === "admin" ? "bg-white/20" : "bg-[color-mix(in_srgb,var(--color-text)_8%,transparent)]"
+                }`}>
+                  {adminList.length}
+                </span>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        {/* TAB 1: PROFIL & INFORMASI */}
+        {activeTab === "profil" && (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+              {/* Card 1: Data Kontak & Legalitas */}
+              <div className={`rounded-2xl border theme-border theme-card p-5 sm:p-6 ${themeCardShadow}`}>
+                <h3 className="text-sm font-bold theme-text mb-4 flex items-center gap-2">
+                  <Landmark size={16} className="text-[var(--color-primary)]" />
+                  Identitas & Kontak Lembaga
+                </h3>
+
+                <div className="space-y-3.5 text-xs">
+                  <div className="flex justify-between py-2 border-b theme-border">
+                    <span className="theme-text-muted">Nama Yayasan</span>
+                    <span className="font-semibold theme-text">{yayasan.nama}</span>
+                  </div>
+
+                  <div className="flex justify-between py-2 border-b theme-border">
+                    <span className="theme-text-muted">NPYP Resmi</span>
+                    <span className="font-mono font-semibold theme-text">{yayasan.npyp || "-"}</span>
+                  </div>
+
+                  <div className="flex justify-between py-2 border-b theme-border">
+                    <span className="theme-text-muted">Status Kelembagaan</span>
+                    <span className="font-semibold capitalize theme-text">{yayasan.status}</span>
+                  </div>
+
+                  <div className="flex justify-between py-2 border-b theme-border">
+                    <span className="theme-text-muted">Email Resmi</span>
+                    <span className="font-medium theme-text">{yayasan.email || "-"}</span>
+                  </div>
+
+                  <div className="flex justify-between py-2 border-b theme-border">
+                    <span className="theme-text-muted">Hotline / No. Telepon</span>
+                    <span className="font-medium theme-text">{yayasan.telepon || "-"}</span>
+                  </div>
+
+                  <div className="py-2">
+                    <span className="theme-text-muted block mb-1">Alamat Kantor Yayasan</span>
+                    <p className={`p-3 rounded-xl border theme-border ${themeNeutralSurface} font-medium theme-text`}>
+                      {yayasan.alamat || "Alamat kantor belum dilengkapi."}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Card 2: Paket Langganan & Info Lisensi */}
+              <div className={`rounded-2xl border theme-border theme-card p-5 sm:p-6 ${themeCardShadow}`}>
+                <h3 className="text-sm font-bold theme-text mb-4 flex items-center gap-2">
+                  <Building2 size={16} className="text-[var(--color-info)]" />
+                  Paket Langganan & Layanan
+                </h3>
+
+                <div className="space-y-3.5 text-xs">
+                  <div className="flex justify-between py-2 border-b theme-border">
+                    <span className="theme-text-muted">Paket Saat Ini</span>
+                    <span className="font-bold theme-text">{yayasan.paket?.nama || "Tanpa Paket"}</span>
+                  </div>
+
+                  <div className="flex justify-between py-2 border-b theme-border">
+                    <span className="theme-text-muted">Status Langganan</span>
+                    <span className="font-semibold capitalize theme-text">{yayasan.statusLangganan || "-"}</span>
+                  </div>
+
+                  <div className="flex justify-between py-2 border-b theme-border">
+                    <span className="theme-text-muted">Mulai Berlaku</span>
+                    <span className="font-medium theme-text">{formatDate(yayasan.tanggalMulaiLangganan)}</span>
+                  </div>
+
+                  <div className="flex justify-between py-2 border-b theme-border">
+                    <span className="theme-text-muted">Berlaku Sampai</span>
+                    <span className="font-medium theme-text">{formatDate(yayasan.tanggalBerakhirLangganan)}</span>
+                  </div>
+
+                  <div className="flex justify-between py-2 border-b theme-border">
+                    <span className="theme-text-muted">Terakhir Diperbarui</span>
+                    <span className="font-medium theme-text">{formatDate(yayasan.diperbaruiPada)}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 2: SEKOLAH DALAM NAUNGAN */}
+        {activeTab === "sekolah" && (
+          <div className="space-y-6">
+            {/* Link School Form */}
+            <div className={`rounded-2xl border theme-border theme-card p-5 ${themeCardShadow}`}>
+              <h3 className="text-sm font-bold theme-text mb-2 flex items-center gap-2">
+                <Link2 size={16} className="text-[var(--color-primary)]" />
+                Hubungkan Sekolah ke Yayasan
+              </h3>
+              <p className="text-xs theme-text-secondary mb-4">
+                Tetapkan sekolah yang terdaftar di platform SmartSchool agar berada di bawah naungan yayasan ini.
+              </p>
+
+              {linkSchoolError && (
+                <div className={`mb-4 rounded-xl border p-3 text-xs text-red-600 dark:text-red-400 ${themeDangerSoft} ${themeDangerBorder}`}>
+                  <strong>Gagal:</strong> {linkSchoolError}
+                </div>
+              )}
+
+              <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
+                <div className="flex-1">
+                  <select
+                    value={selectedSchoolToLink}
+                    onChange={(e) => setSelectedSchoolToLink(e.target.value)}
+                    className={selectClass}
+                  >
+                    <option value="">-- Pilih Sekolah untuk Dihubungkan --</option>
+                    {platformSchools.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.nama} (NPSN: {s.npsn || "-"}) {s.yayasan ? `[Saat ini: ${s.yayasan.nama}]` : "[Mandiri]"}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <button
+                  type="button"
+                  disabled={!selectedSchoolToLink || linkingSchool}
+                  onClick={handleAssignSekolah}
+                  className={`inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-5 py-2.5 text-xs font-semibold text-[var(--color-card)] ${themeSmallShadow} transition-all hover:opacity-90 disabled:opacity-50`}
+                >
+                  {linkingSchool ? (
+                    <>
+                      <Loader2 size={14} className="animate-spin" />
+                      Menghubungkan...
+                    </>
+                  ) : (
+                    <>
+                      <Plus size={14} />
+                      Hubungkan ke Yayasan
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* List Sekolah Naungan */}
+            <div className={`overflow-hidden rounded-2xl border theme-border theme-card ${themeCardShadow}`}>
+              <div className={`border-b ${themeDivider} px-5 py-4 flex items-center justify-between`}>
+                <div>
+                  <h3 className="text-sm font-bold theme-text">Daftar Sekolah Naungan</h3>
+                  <p className="text-xs theme-text-muted mt-0.5">
+                    Sumber data: <span className="font-mono">GET /api/yayasan/:yayasanId/sekolah</span>
+                  </p>
+                </div>
+                <span className="text-xs font-semibold px-2.5 py-1 rounded-lg border theme-border theme-text-secondary">
+                  {sekolahList.length} Unit Sekolah
+                </span>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className={`border-b ${themeDivider} ${themeNeutralSurface}`}>
+                      <th className="px-5 py-3.5 text-left text-[10px] font-semibold uppercase tracking-wider theme-text-muted">
+                        No
+                      </th>
+                      <th className="px-5 py-3.5 text-left text-[10px] font-semibold uppercase tracking-wider theme-text-muted">
+                        Nama Sekolah & NPSN
+                      </th>
+                      <th className="px-5 py-3.5 text-left text-[10px] font-semibold uppercase tracking-wider theme-text-muted">
+                        Paket Langganan
+                      </th>
+                      <th className="px-5 py-3.5 text-left text-[10px] font-semibold uppercase tracking-wider theme-text-muted">
+                        Status
+                      </th>
+                      <th className="px-5 py-3.5 text-right text-[10px] font-semibold uppercase tracking-wider theme-text-muted">
+                        Aksi
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className={`divide-y ${themeDivider}`}>
+                    {sekolahList.length === 0 ? (
+                      <tr>
+                        <td colSpan={5} className="px-5 py-10 text-center">
+                          <School size={28} className="mx-auto theme-text-muted opacity-40 mb-2" />
+                          <p className="text-sm font-medium theme-text">Belum ada sekolah naungan</p>
+                          <p className="text-xs theme-text-muted mt-0.5">
+                            Gunakan dropdown di atas untuk menghubungkan sekolah ke yayasan ini.
+                          </p>
+                        </td>
+                      </tr>
+                    ) : (
+                      sekolahList.map((sch, idx) => {
+                        const paketInfo = sch.langgananSekolah?.[0]?.paket?.nama || "Tanpa Paket";
+                        return (
+                          <tr key={sch.id} className={`transition-colors ${themeNeutralHover}`}>
+                            <td className="px-5 py-4 text-xs theme-text-muted">{(idx + 1).toString().padStart(2, "0")}</td>
+                            <td className="px-5 py-4">
+                              <p className="font-semibold theme-text">{sch.nama}</p>
+                              <p className="text-[11px] font-mono theme-text-muted">NPSN: {sch.npsn || "-"}</p>
+                            </td>
+                            <td className="px-5 py-4 text-xs font-medium theme-text">
+                              {paketInfo}
+                            </td>
+                            <td className="px-5 py-4">
+                              <span
+                                className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${
+                                  sch.status === "aktif"
+                                    ? `${themeSuccessSoft} ${themeSuccessBorder} text-[var(--color-success)]`
+                                    : `${themeDangerSoft} ${themeDangerBorder} text-red-500`
+                                }`}
+                              >
+                                {sch.status === "aktif" ? "Aktif" : "Nonaktif"}
+                              </span>
+                            </td>
+                            <td className="px-5 py-4 text-right">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setSekolahToRemove(sch);
+                                  setRemoveSekolahError("");
+                                }}
+                                title="Keluarkan dari naungan yayasan"
+                                className="inline-flex items-center gap-1 rounded-lg border border-red-200 dark:border-red-900/50 px-2.5 py-1.5 text-xs font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+                              >
+                                <Unlink size={13} />
+                                <span>Lepaskan</span>
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 3: ADMIN YAYASAN */}
+        {activeTab === "admin" && (
+          <div className="space-y-6">
+            {/* Header Admin Yayasan */}
+            <div className={`overflow-hidden rounded-2xl border theme-border theme-card ${themeCardShadow}`}>
+              <div className={`border-b ${themeDivider} px-5 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3`}>
+                <div>
+                  <h3 className="text-sm font-bold theme-text">Akun Pengelola Yayasan (Admin)</h3>
+                  <p className="text-xs theme-text-muted mt-0.5">
+                    Sumber data: <span className="font-mono">GET /api/yayasan/:yayasanId/admin</span>
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={openCreateAdminModal}
+                  className={`inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-4 py-2 text-xs font-semibold text-[var(--color-card)] ${themeSmallShadow} transition-all hover:opacity-90`}
+                >
+                  <UserPlus size={15} />
+                  <span>Tambah Admin Yayasan</span>
+                </button>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className={`border-b ${themeDivider} ${themeNeutralSurface}`}>
+                      <th className="px-5 py-3.5 text-left text-[10px] font-semibold uppercase tracking-wider theme-text-muted">
+                        No
+                      </th>
+                      <th className="px-5 py-3.5 text-left text-[10px] font-semibold uppercase tracking-wider theme-text-muted">
+                        Nama Lengkap & Username
+                      </th>
+                      <th className="px-5 py-3.5 text-left text-[10px] font-semibold uppercase tracking-wider theme-text-muted">
+                        Email
+                      </th>
+                      <th className="px-5 py-3.5 text-left text-[10px] font-semibold uppercase tracking-wider theme-text-muted">
+                        Status
+                      </th>
+                      <th className="px-5 py-3.5 text-left text-[10px] font-semibold uppercase tracking-wider theme-text-muted">
+                        Terakhir Login
+                      </th>
+                      <th className="px-5 py-3.5 text-right text-[10px] font-semibold uppercase tracking-wider theme-text-muted">
+                        Aksi
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className={`divide-y ${themeDivider}`}>
+                    {adminList.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} className="px-5 py-10 text-center">
+                          <Users size={28} className="mx-auto theme-text-muted opacity-40 mb-2" />
+                          <p className="text-sm font-medium theme-text">Belum ada akun admin yayasan</p>
+                          <p className="text-xs theme-text-muted mt-0.5">
+                            Klik &quot;Tambah Admin Yayasan&quot; untuk membuat kredensial baru.
+                          </p>
+                        </td>
+                      </tr>
+                    ) : (
+                      adminList.map((adm, idx) => (
+                        <tr key={adm.id} className={`transition-colors ${themeNeutralHover}`}>
+                          <td className="px-5 py-4 text-xs theme-text-muted">{(idx + 1).toString().padStart(2, "0")}</td>
+                          <td className="px-5 py-4">
+                            <p className="font-semibold theme-text">{adm.namaLengkap}</p>
+                            <p className="text-[11px] font-mono theme-text-muted">@{adm.namaPengguna}</p>
+                          </td>
+                          <td className="px-5 py-4 text-xs theme-text">{adm.email}</td>
+                          <td className="px-5 py-4">
+                            <span
+                              className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${
+                                adm.status === "aktif"
+                                  ? `${themeSuccessSoft} ${themeSuccessBorder} text-[var(--color-success)]`
+                                  : `${themeDangerSoft} ${themeDangerBorder} text-red-500`
+                              }`}
+                            >
+                              {adm.status === "aktif" ? "Aktif" : "Nonaktif"}
+                            </span>
+                          </td>
+                          <td className="px-5 py-4 text-xs theme-text-muted">
+                            {formatDate(adm.terakhirLogin)}
+                          </td>
+                          <td className="px-5 py-4 text-right">
+                            <div className="flex items-center justify-end gap-1.5">
+                              <button
+                                type="button"
+                                onClick={() => openEditAdminModal(adm)}
+                                title="Edit data admin"
+                                className="p-1.5 rounded-lg theme-text-muted hover:text-[var(--color-primary)] transition-colors"
+                              >
+                                <Edit size={15} />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setAdminToDelete(adm);
+                                  setDeleteAdminError("");
+                                }}
+                                title="Hapus / Cabut akses admin"
+                                className="p-1.5 rounded-lg theme-text-muted hover:text-red-500 transition-colors"
+                              >
+                                <Trash2 size={15} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* MODAL 1: Delete Yayasan Confirmation */}
+      {showDeleteYayasanModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+          <div className={`w-full max-w-md rounded-2xl border theme-border theme-card p-6 ${themeCardShadow}`}>
+            <div className="flex items-start gap-4">
+              <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${themeDangerSoft} text-red-500`}>
+                <AlertTriangle size={22} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <h3 className="text-base font-semibold theme-text">Nonaktifkan Yayasan?</h3>
+                <p className="mt-1 text-xs theme-text-secondary">
+                  Anda akan menonaktifkan yayasan <strong className="theme-text">{yayasan.nama}</strong>.
+                </p>
+                <p className="mt-2 text-[11px] theme-text-muted">
+                  Perhatian: Backend mewajibkan semua sekolah naungan dilepaskan terlebih dahulu sebelum yayasan dapat dinonaktifkan.
+                </p>
+              </div>
+            </div>
+
+            {deleteYayasanError && (
+              <div className={`mt-4 rounded-xl border p-3 text-xs text-red-600 dark:text-red-400 ${themeDangerSoft} ${themeDangerBorder}`}>
+                <strong>Gagal:</strong> {deleteYayasanError}
+              </div>
+            )}
+
+            <div className="mt-6 flex items-center justify-end gap-2.5">
+              <button
+                type="button"
+                disabled={deletingYayasan}
+                onClick={() => {
+                  setShowDeleteYayasanModal(false);
+                  setDeleteYayasanError("");
+                }}
+                className={`rounded-xl border theme-border theme-card px-4 py-2 text-xs font-semibold theme-text-secondary ${themeNeutralHover} disabled:opacity-50`}
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                disabled={deletingYayasan}
+                onClick={handleConfirmDeleteYayasan}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-red-600 px-4 py-2 text-xs font-semibold text-white transition-all hover:bg-red-700 disabled:opacity-50"
+              >
+                {deletingYayasan ? (
+                  <>
+                    <Loader2 size={14} className="animate-spin" />
+                    Memproses...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 size={14} />
+                    Ya, Nonaktifkan
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 2: Remove Sekolah Confirmation */}
+      {sekolahToRemove && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+          <div className={`w-full max-w-md rounded-2xl border theme-border theme-card p-6 ${themeCardShadow}`}>
+            <div className="flex items-start gap-4">
+              <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${themeDangerSoft} text-red-500`}>
+                <Unlink size={22} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <h3 className="text-base font-semibold theme-text">Lepaskan Sekolah dari Yayasan?</h3>
+                <p className="mt-1 text-xs theme-text-secondary">
+                  Sekolah <strong className="theme-text">{sekolahToRemove.nama}</strong> akan dilepaskan dari naungan yayasan ini.
+                </p>
+                <p className="mt-2 text-[11px] theme-text-muted">
+                  Endpoint: <span className="font-mono">DELETE /api/yayasan/:yayasanId/sekolah/:sekolahId</span>
+                </p>
+              </div>
+            </div>
+
+            {removeSekolahError && (
+              <div className={`mt-4 rounded-xl border p-3 text-xs text-red-600 dark:text-red-400 ${themeDangerSoft} ${themeDangerBorder}`}>
+                <strong>Gagal:</strong> {removeSekolahError}
+              </div>
+            )}
+
+            <div className="mt-6 flex items-center justify-end gap-2.5">
+              <button
+                type="button"
+                disabled={removingSekolah}
+                onClick={() => {
+                  setSekolahToRemove(null);
+                  setRemoveSekolahError("");
+                }}
+                className={`rounded-xl border theme-border theme-card px-4 py-2 text-xs font-semibold theme-text-secondary ${themeNeutralHover} disabled:opacity-50`}
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                disabled={removingSekolah}
+                onClick={handleConfirmRemoveSekolah}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-red-600 px-4 py-2 text-xs font-semibold text-white transition-all hover:bg-red-700 disabled:opacity-50"
+              >
+                {removingSekolah ? (
+                  <>
+                    <Loader2 size={14} className="animate-spin" />
+                    Melepaskan...
+                  </>
+                ) : (
+                  <>
+                    <Unlink size={14} />
+                    Lepaskan Sekolah
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 3: Admin Yayasan Form (Create / Edit) */}
+      {adminModalMode && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+          <div className={`w-full max-w-lg rounded-2xl border theme-border theme-card p-6 ${themeCardShadow}`}>
+            <h3 className="text-base font-bold theme-text mb-1">
+              {adminModalMode === "create" ? "Tambah Admin Pengelola Yayasan" : "Edit Data Admin Yayasan"}
+            </h3>
+            <p className="text-xs theme-text-secondary mb-4">
+              {adminModalMode === "create"
+                ? "Daftarkan akun admin baru untuk mengelola yayasan ini."
+                : `Perbarui profil admin @${selectedAdmin?.namaPengguna}.`}
             </p>
 
-            <p className="text-xs theme-text-muted font-medium">
-                {label}
-            </p>
+            {adminFormError && (
+              <div className={`mb-4 rounded-xl border p-3 text-xs text-red-600 dark:text-red-400 ${themeDangerSoft} ${themeDangerBorder}`}>
+                <strong>Gagal:</strong> {adminFormError}
+              </div>
+            )}
+
+            <form onSubmit={handleAdminFormSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold theme-text-secondary mb-1">
+                  Nama Pengguna (Username) <span className="text-[var(--color-primary)]">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={adminForm.namaPengguna}
+                  onChange={(e) => setAdminForm((prev) => ({ ...prev, namaPengguna: e.target.value }))}
+                  placeholder="admin_yayasan_01"
+                  className={inputClass}
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold theme-text-secondary mb-1">
+                  Nama Lengkap <span className="text-[var(--color-primary)]">*</span>
+                </label>
+                <input
+                  type="text"
+                  value={adminForm.namaLengkap}
+                  onChange={(e) => setAdminForm((prev) => ({ ...prev, namaLengkap: e.target.value }))}
+                  placeholder="Budi Santoso, M.Pd."
+                  className={inputClass}
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold theme-text-secondary mb-1">
+                  Alamat Email <span className="text-[var(--color-primary)]">*</span>
+                </label>
+                <input
+                  type="email"
+                  value={adminForm.email}
+                  onChange={(e) => setAdminForm((prev) => ({ ...prev, email: e.target.value }))}
+                  placeholder="admin@yayasan.sch.id"
+                  className={inputClass}
+                  required
+                />
+              </div>
+
+              {adminModalMode === "create" && (
+                <div>
+                  <label className="block text-xs font-semibold theme-text-secondary mb-1">
+                    Kata Sandi Awal <span className="text-[var(--color-primary)]">*</span>
+                  </label>
+                  <input
+                    type="password"
+                    value={adminForm.kataSandi}
+                    onChange={(e) => setAdminForm((prev) => ({ ...prev, kataSandi: e.target.value }))}
+                    placeholder="Minimal 8 karakter"
+                    className={inputClass}
+                    required
+                  />
+                </div>
+              )}
+
+              <div>
+                <label className="block text-xs font-semibold theme-text-secondary mb-1">Status Akun</label>
+                <select
+                  value={adminForm.status}
+                  onChange={(e) => setAdminForm((prev) => ({ ...prev, status: e.target.value }))}
+                  className={selectClass}
+                >
+                  <option value="aktif">Aktif</option>
+                  <option value="nonaktif">Nonaktif</option>
+                </select>
+              </div>
+
+              <div className="mt-6 flex items-center justify-end gap-2.5 pt-3 border-t theme-border">
+                <button
+                  type="button"
+                  disabled={adminSubmitting}
+                  onClick={() => setAdminModalMode(null)}
+                  className={`rounded-xl border theme-border theme-card px-4 py-2 text-xs font-semibold theme-text-secondary ${themeNeutralHover} disabled:opacity-50`}
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  disabled={adminSubmitting}
+                  className={`inline-flex items-center gap-1.5 rounded-xl bg-[var(--color-primary)] px-5 py-2 text-xs font-semibold text-[var(--color-card)] ${themeSmallShadow} transition-all hover:opacity-90 disabled:opacity-60`}
+                >
+                  {adminSubmitting ? (
+                    <>
+                      <Loader2 size={14} className="animate-spin" />
+                      Menyimpan...
+                    </>
+                  ) : (
+                    <>
+                      <ShieldCheck size={14} />
+                      Simpan Admin
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-    );
+      )}
+
+      {/* MODAL 4: Delete Admin Confirmation */}
+      {adminToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+          <div className={`w-full max-w-md rounded-2xl border theme-border theme-card p-6 ${themeCardShadow}`}>
+            <div className="flex items-start gap-4">
+              <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${themeDangerSoft} text-red-500`}>
+                <Trash2 size={22} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <h3 className="text-base font-semibold theme-text">Cabut Akses Admin?</h3>
+                <p className="mt-1 text-xs theme-text-secondary">
+                  Anda akan menonaktifkan akun admin <strong className="theme-text">{adminToDelete.namaLengkap}</strong> (@{adminToDelete.namaPengguna}).
+                </p>
+                <p className="mt-2 text-[11px] theme-text-muted">
+                  Perhatian: Backend menolak jika admin ini adalah satu-satunya admin aktif pada yayasan.
+                </p>
+              </div>
+            </div>
+
+            {deleteAdminError && (
+              <div className={`mt-4 rounded-xl border p-3 text-xs text-red-600 dark:text-red-400 ${themeDangerSoft} ${themeDangerBorder}`}>
+                <strong>Gagal:</strong> {deleteAdminError}
+              </div>
+            )}
+
+            <div className="mt-6 flex items-center justify-end gap-2.5">
+              <button
+                type="button"
+                disabled={deletingAdmin}
+                onClick={() => {
+                  setAdminToDelete(null);
+                  setDeleteAdminError("");
+                }}
+                className={`rounded-xl border theme-border theme-card px-4 py-2 text-xs font-semibold theme-text-secondary ${themeNeutralHover} disabled:opacity-50`}
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                disabled={deletingAdmin}
+                onClick={handleConfirmDeleteAdmin}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-red-600 px-4 py-2 text-xs font-semibold text-white transition-all hover:bg-red-700 disabled:opacity-50"
+              >
+                {deletingAdmin ? (
+                  <>
+                    <Loader2 size={14} className="animate-spin" />
+                    Memproses...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 size={14} />
+                    Ya, Cabut Akses
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }

@@ -25,6 +25,22 @@ export const getYayasanSummary = async () => {
   }
 };
 
+export const getYayasanDashboardAgregat = async () => {
+  try {
+    const result = await apiFetch("/api/dashboard", {
+      method: "GET",
+      cache: "no-store",
+    });
+    return result;
+  } catch (err: any) {
+    if (isNotFoundError(err)) {
+      console.warn("[YayasanService] /api/dashboard 404 Not Found. Returning null safely.");
+      return { success: true, data: null };
+    }
+    throw err;
+  }
+};
+
 export const getSekolahBinaan = async (params?: Record<string, any>) => {
   try {
     const query = new URLSearchParams();
@@ -141,166 +157,161 @@ export const getMonitoringUsers = async (params?: {
   }
 };
 
-export const getLaporanOverview = async () => {
-  try {
-    const [summaryRes, sekolahRes] = await Promise.all([
-      getYayasanSummary(),
-      getSekolahBinaan(),
-    ]);
+// ==========================================
+// ENDPOINT BACKEND TERBARU (CRUD YAYASAN, SEKOLAH NAUNGAN & ADMIN YAYASAN)
+// ==========================================
 
-    const summary = summaryRes?.data || summaryRes || {};
-    const sekolahList = Array.isArray(sekolahRes?.data?.items)
-      ? sekolahRes.data.items
-      : Array.isArray(sekolahRes?.data)
-      ? sekolahRes.data
-      : [];
+export interface ListYayasanParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  status?: string;
+  berlangganan?: boolean | string;
+}
 
-    let totalSiswa = 0;
-    let totalGuru = 0;
-    for (const s of sekolahList) {
-      if (s?.statistik) {
-        totalSiswa += Number(s.statistik.totalSiswa || 0);
-        totalGuru += Number(s.statistik.totalGuru || 0);
-      }
-    }
-
-    return {
-      success: true,
-      data: {
-        totalSekolah: Number(summary.totalSekolah || sekolahList.length || 0),
-        sekolahAktif: Number(summary.sekolahAktif || 0),
-        totalPenggunaAktif: Number(summary.totalPenggunaAktif || 0),
-        totalSiswa,
-        totalGuru,
-        totalAset: 0,
-      },
-    };
-  } catch (error) {
-    try {
-      return await apiFetch("/api/yayasan/laporan/overview", {
-        method: "GET",
-        cache: "no-store",
-      });
-    } catch (err: any) {
-      if (isNotFoundError(err)) {
-        return {
-          success: true,
-          data: {
-            totalSekolah: 0,
-            sekolahAktif: 0,
-            totalPenggunaAktif: 0,
-            totalSiswa: 0,
-            totalGuru: 0,
-            totalAset: 0,
-          },
-        };
-      }
-      throw err;
-    }
+export const listYayasan = async (params?: ListYayasanParams) => {
+  const query = new URLSearchParams();
+  if (params?.page) query.append("page", String(params.page));
+  if (params?.limit) query.append("limit", String(params.limit));
+  if (params?.search) query.append("search", params.search);
+  if (params?.status) query.append("status", params.status);
+  if (params?.berlangganan !== undefined && params?.berlangganan !== null && params?.berlangganan !== "") {
+    query.append("berlangganan", String(params.berlangganan));
   }
-};
 
-export const getLaporanSiswa = async () => {
-  return await getSekolahBinaan();
-};
-
-export const getLaporanGuru = async (params?: { unitId?: string; search?: string; status?: string }) => {
-  return await getMonitoringUsers({
-    peran: "guru",
-    q: params?.search,
-    sekolahId: params?.unitId,
+  const qs = query.toString();
+  const url = `/api/yayasan${qs ? `?${qs}` : ""}`;
+  return await apiFetch(url, {
+    method: "GET",
+    cache: "no-store",
   });
 };
 
-export const getLaporanInventaris = async (params?: {
-  unitId?: string;
-  kategoriId?: string;
-  kondisi?: string;
-  search?: string;
-}) => {
-  try {
-    const query = new URLSearchParams();
-    if (params?.unitId) query.append("unitId", params.unitId);
-    if (params?.kategoriId) query.append("kategoriId", params.kategoriId);
-    if (params?.kondisi && params.kondisi !== "Semua Kondisi") query.append("kondisi", params.kondisi);
-    if (params?.search) query.append("search", params.search);
-
-    const qs = query.toString();
-    const url = `/api/yayasan/laporan/inventaris${qs ? `?${qs}` : ""}`;
-    const result = await apiFetch(url, {
-      method: "GET",
-      cache: "no-store",
-    });
-    return result;
-  } catch (err: any) {
-    if (isNotFoundError(err)) {
-      console.warn("[YayasanService] /api/yayasan/laporan/inventaris 404. Returning empty list safely.");
-      return { success: true, backendGap: true, data: { items: [], total: 0 } };
-    }
-    throw err;
-  }
+export const getYayasanById = async (yayasanId: string) => {
+  if (!yayasanId) throw new Error("ID Yayasan wajib disediakan.");
+  return await apiFetch(`/api/yayasan/${yayasanId}`, {
+    method: "GET",
+    cache: "no-store",
+  });
 };
 
-export const getLaporanAkademik = async () => {
-  try {
-    const result = await apiFetch("/api/yayasan/laporan/akademik", {
-      method: "GET",
-      cache: "no-store",
-    });
-    return result;
-  } catch (err: any) {
-    if (isNotFoundError(err)) {
-      console.warn("[YayasanService] /api/yayasan/laporan/akademik 404. Returning empty list safely.");
-      return { success: true, backendGap: true, data: { items: [], total: 0 } };
-    }
-    throw err;
-  }
+export interface CreateYayasanPayload {
+  nama: string;
+  npyp: string;
+  alamat?: string | null;
+  telepon?: string | null;
+  email?: string | null;
+  status?: "aktif" | "nonaktif";
+}
+
+export const createYayasan = async (data: CreateYayasanPayload) => {
+  return await apiFetch("/api/yayasan", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
 };
 
-export const getMonitoringAkademik = async () => {
-  try {
-    const result = await apiFetch("/api/yayasan/monitoring/akademik", {
-      method: "GET",
-      cache: "no-store",
-    });
-    return result;
-  } catch (err: any) {
-    if (isNotFoundError(err)) {
-      console.warn("[YayasanService] /api/yayasan/monitoring/akademik 404. Returning empty list safely.");
-      return { success: true, backendGap: true, data: { items: [], mapelOverview: [] } };
-    }
-    throw err;
-  }
+export interface UpdateYayasanPayload {
+  nama?: string;
+  npyp?: string;
+  alamat?: string | null;
+  telepon?: string | null;
+  email?: string | null;
+  status?: "aktif" | "nonaktif";
+}
+
+export const updateYayasan = async (yayasanId: string, data: UpdateYayasanPayload) => {
+  if (!yayasanId) throw new Error("ID Yayasan wajib disediakan.");
+  return await apiFetch(`/api/yayasan/${yayasanId}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
 };
 
-export const getMonitoringKehadiran = async () => {
-  try {
-    const result = await apiFetch("/api/yayasan/monitoring/kehadiran", {
-      method: "GET",
-      cache: "no-store",
-    });
-    return result;
-  } catch (err: any) {
-    if (isNotFoundError(err)) {
-      console.warn("[YayasanService] /api/yayasan/monitoring/kehadiran 404. Returning empty list safely.");
-      return { success: true, backendGap: true, data: { items: [] } };
-    }
-    throw err;
-  }
+export const deleteYayasan = async (yayasanId: string) => {
+  if (!yayasanId) throw new Error("ID Yayasan wajib disediakan.");
+  return await apiFetch(`/api/yayasan/${yayasanId}`, {
+    method: "DELETE",
+  });
 };
 
-export const getMonitoringLMS = async () => {
-  try {
-    const result = await apiFetch("/api/yayasan/monitoring/lms", {
-      method: "GET",
-      cache: "no-store",
-    });
-    return result;
-  } catch (err: any) {
-    if (isNotFoundError(err)) {
-      console.warn("[YayasanService] /api/yayasan/monitoring/lms 404. Returning empty list safely.");
-      return { success: true, backendGap: true, data: { items: [] } };
-    }
-    throw err;
-  }
+export const getSekolahYayasan = async (yayasanId: string) => {
+  if (!yayasanId) throw new Error("ID Yayasan wajib disediakan.");
+  return await apiFetch(`/api/yayasan/${yayasanId}/sekolah`, {
+    method: "GET",
+    cache: "no-store",
+  });
 };
+
+export const updateSekolahYayasan = async (yayasanId: string, sekolahId: string) => {
+  if (!yayasanId || !sekolahId) throw new Error("ID Yayasan dan ID Sekolah wajib disediakan.");
+  return await apiFetch(`/api/yayasan/${yayasanId}/sekolah/${sekolahId}`, {
+    method: "PUT",
+  });
+};
+
+export const deleteSekolahYayasan = async (yayasanId: string, sekolahId: string) => {
+  if (!yayasanId || !sekolahId) throw new Error("ID Yayasan dan ID Sekolah wajib disediakan.");
+  return await apiFetch(`/api/yayasan/${yayasanId}/sekolah/${sekolahId}`, {
+    method: "DELETE",
+  });
+};
+
+export const getAdminYayasan = async (yayasanId: string) => {
+  if (!yayasanId) throw new Error("ID Yayasan wajib disediakan.");
+  return await apiFetch(`/api/yayasan/${yayasanId}/admin`, {
+    method: "GET",
+    cache: "no-store",
+  });
+};
+
+export interface CreateAdminYayasanPayload {
+  namaPengguna: string;
+  namaLengkap: string;
+  email: string;
+  kataSandi: string;
+  status?: "aktif" | "nonaktif";
+}
+
+export const createAdminYayasan = async (yayasanId: string, data: CreateAdminYayasanPayload) => {
+  if (!yayasanId) throw new Error("ID Yayasan wajib disediakan.");
+  return await apiFetch(`/api/yayasan/${yayasanId}/admin`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+};
+
+export interface UpdateAdminYayasanPayload {
+  namaPengguna?: string;
+  namaLengkap?: string;
+  email?: string;
+  status?: "aktif" | "nonaktif";
+}
+
+export const updateAdminYayasan = async (
+  yayasanId: string,
+  adminId: string,
+  data: UpdateAdminYayasanPayload
+) => {
+  if (!yayasanId || !adminId) throw new Error("ID Yayasan dan ID Admin wajib disediakan.");
+  return await apiFetch(`/api/yayasan/${yayasanId}/admin/${adminId}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+};
+
+export const deleteAdminYayasan = async (yayasanId: string, adminId: string) => {
+  if (!yayasanId || !adminId) throw new Error("ID Yayasan dan ID Admin wajib disediakan.");
+  return await apiFetch(`/api/yayasan/${yayasanId}/admin/${adminId}`, {
+    method: "DELETE",
+  });
+};
+
+export const getSekolahNaunganYayasan = getSekolahYayasan;
+export const assignSekolahKeYayasan = updateSekolahYayasan;
+export const removeSekolahDariYayasan = deleteSekolahYayasan;
+export const getAllYayasan = listYayasan;

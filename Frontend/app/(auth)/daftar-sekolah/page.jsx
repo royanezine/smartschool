@@ -465,6 +465,11 @@ function DaftarSekolahContent() {
         ? err
         : null;
 
+    const isConflict =
+      errorObject?.status === 409 ||
+      err?.status === 409 ||
+      /409/.test(String(err));
+
     const errorMessage =
       err instanceof Error
         ? err.message
@@ -482,9 +487,11 @@ function DaftarSekolahContent() {
       status: errorObject?.status,
       errorCode: errorObject?.errorCode,
       payload: errorObject?.payload,
+      isConflict,
       error: err,
     });
 
+    // Tangani HTTP 409 secara khusus: tampilkan pesan spesifik dari Backend tanpa masking
     setError(errorMessage);
   } finally {
     setLoadingSubmit(false);

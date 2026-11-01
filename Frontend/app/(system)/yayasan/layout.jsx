@@ -22,24 +22,16 @@ export default function YayasanLayout({ children }) {
       return "sekolah";
     }
 
-    if (pathname.startsWith("/yayasan/laporan")) {
-      return "laporan";
+    if (pathname.startsWith("/yayasan/lokasi")) {
+      return "lokasi";
     }
 
-    if (pathname.startsWith("/yayasan/monitoringAkademik")) {
-      return "monitoringAkademik";
+    if (pathname.startsWith("/yayasan/monitoring")) {
+      return "monitoringUsers";
     }
 
     if (pathname.startsWith("/yayasan/pengaturan")) {
       return "pengaturan";
-    }
-
-    if (pathname.startsWith("/yayasan/guru")) {
-      return "guru";
-    }
-
-    if (pathname.startsWith("/yayasan/siswa")) {
-      return "siswa";
     }
 
     return "dashboard";
