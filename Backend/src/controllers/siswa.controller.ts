@@ -1,3 +1,4 @@
+import { publicUser } from "../utils/publicUser";
 // src/controllers/siswa.controller.ts
 import { Request, Response, NextFunction } from "express";
 import { prisma } from "../config/db";
@@ -41,6 +42,7 @@ export const getSiswaList = async (
         skip,
         take: limit,
         select: {
+          pinHash: true,
           id: true,
           namaLengkap: true,
           email: true,
@@ -56,7 +58,7 @@ export const getSiswaList = async (
     return paginatedResponse(
       res,
       "Data siswa berhasil diambil",
-      data,
+      data.map(publicUser),
       page,
       limit,
       totalData,
@@ -88,6 +90,7 @@ export const updateSiswa = async (
         diperbaruiOleh: req.user?.userId,
       },
       select: {
+          pinHash: true,
         id: true,
         namaLengkap: true,
         email: true,
@@ -97,7 +100,7 @@ export const updateSiswa = async (
       },
     });
 
-    return successResponse(res, "Data siswa berhasil diperbarui", siswa);
+    return successResponse(res, "Data siswa berhasil diperbarui", publicUser(siswa));
   } catch (error) {
     next(error);
   }
@@ -140,6 +143,7 @@ export const getMySiswa = async (
         dihapusPada: null,
       },
       select: {
+          pinHash: true,
         id: true,
         namaLengkap: true,
         email: true,
@@ -151,7 +155,7 @@ export const getMySiswa = async (
     });
 
     if (!siswa) throw new AppError("Data siswa tidak ditemukan", 404);
-    return successResponse(res, "Data siswa berhasil diambil", siswa);
+    return successResponse(res, "Data siswa berhasil diambil", publicUser(siswa));
   } catch (error) {
     next(error);
   }
@@ -211,6 +215,7 @@ export const createSiswa = async (
         dibuatOleh: req.user?.userId,
       },
       select: {
+          pinHash: true,
         id: true,
         namaPengguna: true,
         email: true,
@@ -221,7 +226,7 @@ export const createSiswa = async (
       },
     });
 
-    return successResponse(res, "Data siswa berhasil dibuat", siswa, 201);
+    return successResponse(res, "Data siswa berhasil dibuat", publicUser(siswa), 201);
   } catch (error) {
     next(error);
   }
@@ -259,6 +264,7 @@ export const getSemuaSiswaAdmin = async (
         skip,
         take: limit,
         select: {
+          pinHash: true,
           id: true,
           namaLengkap: true,
           email: true,
@@ -275,7 +281,7 @@ export const getSemuaSiswaAdmin = async (
     return paginatedResponse(
       res,
       "Data siswa berhasil diambil",
-      data,
+      data.map(publicUser),
       page,
       limit,
       totalData,
@@ -309,6 +315,7 @@ export const updateSiswaAdmin = async (
         diperbaruiOleh: (req as AuthRequest).user?.userId,
       },
       select: {
+          pinHash: true,
         id: true,
         namaLengkap: true,
         email: true,
@@ -319,7 +326,7 @@ export const updateSiswaAdmin = async (
         noTelepon: true,
       },
     });
-    return successResponse(res, "Data siswa berhasil diperbarui", siswa);
+    return successResponse(res, "Data siswa berhasil diperbarui", publicUser(siswa));
   } catch (error) {
     next(error);
   }

@@ -1,3 +1,4 @@
+import { publicUser } from "../utils/publicUser";
 import { Response } from "express";
 import { AuthRequest } from "../middlewares/auth.middleware";
 import { prisma } from "../config/db";
@@ -214,7 +215,7 @@ export const getUsers = async (req: AuthRequest, res: Response) => {
     return paginatedResponse(
       res,
       "Berhasil mengambil data pengguna",
-      users.map(({ pinHash, ...user }) => ({ ...user, pinSudahDiatur: Boolean(pinHash) })),
+      users.map(publicUser),
       page,
       limit,
       totalData,
@@ -770,6 +771,7 @@ export const profile = async (req: AuthRequest, res: Response) => {
         id: req.user.userId,
       },
       select: {
+        pinHash: true,
         id: true,
         email: true,
         namaPengguna: true,
@@ -838,14 +840,14 @@ export const profile = async (req: AuthRequest, res: Response) => {
       return res.status(200).json({
         success: true,
         message: "Profile berhasil diambil",
-        data: { ...user, ...akademik },
+        data: { ...publicUser(user), ...akademik },
       });
     }
 
     return res.status(200).json({
       success: true,
       message: "Profile berhasil diambil",
-      data: user,
+      data: publicUser(user),
     });
   } catch (error) {
     console.error(error);
@@ -936,6 +938,7 @@ export const getUserById = async (req: AuthRequest, res: Response) => {
     const user = await prisma.pengguna.findUnique({
       where: { id },
       select: {
+        pinHash: true,
         id: true,
         email: true,
         namaPengguna: true,
@@ -1018,7 +1021,7 @@ export const getUserById = async (req: AuthRequest, res: Response) => {
     return res.status(200).json({
       success: true,
       message: "Detail pengguna berhasil diambil",
-      data: user,
+      data: publicUser(user),
     });
   } catch (error) {
     console.error("Error getUserById:", error);

@@ -1,0 +1,1 @@
+DROP TABLE IF EXISTS "asesmen_minat_bakat";

@@ -42,7 +42,7 @@ import peminjamanAsetRoutes from "./routes/peminjamanAset.routes";
 import raportRoutes from "./routes/raport.routes";
 import kkmRoutes from "./routes/kkm.routes";
 import keuanganRoutes from "./routes/keuangan.routes";
-import { jurusanRoutes, asesmenMinatRoutes, pengumumanRoutes } from "./routes/qaResources.routes";
+import { jurusanRoutes, pengumumanRoutes } from "./routes/qaResources.routes";
 import platformRoutes from "./routes/platform.routes";
 
 // IMPORT ROUTES BARU (YANG SEBELUMNYA HILANG)
@@ -61,6 +61,7 @@ dotenv.config();
 
 const app: Application = express();
 
+app.set("json replacer", (key: string, value: unknown) => key === "pinHash" ? undefined : value);
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -131,7 +132,6 @@ app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/role", roleRoutes);
 app.use("/api/bk", bkRoutes);
 app.use("/api/jurusan", jurusanRoutes);
-app.use("/api/bk/asesmen-minat-bakat", asesmenMinatRoutes);
 app.use("/api/ppdb/pengumuman", pengumumanRoutes);
 app.use("/api/yayasan", yayasanRoutes);
 app.use("/api/ppdb", ppdbRoutes);

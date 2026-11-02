@@ -40,7 +40,6 @@ test("backend completion API contracts and tenant isolation", { skip: !databaseU
     await prisma.aset.deleteMany({where:{sekolahId:inSchools}});
     await prisma.gudang.deleteMany({where:{sekolahId:inSchools}});
     await prisma.kategoriAset.deleteMany({where:{sekolahId:inSchools}});
-    await prisma.asesmenMinatBakat.deleteMany({where:{sekolahId:inSchools}});
     await prisma.pengumumanPpdb.deleteMany({where:{sekolahId:inSchools}});
     await prisma.absensi.deleteMany({where:{pengguna:{sekolahId:inSchools}}});
     await prisma.biometrikWajah.deleteMany({where:{pengguna:{sekolahId:inSchools}}});
@@ -131,16 +130,22 @@ test("backend completion API contracts and tenant isolation", { skip: !databaseU
   await t.test("user lists expose safe shift/category/login/PIN projections",async()=>{
     await prisma.biometrikWajah.create({data:{penggunaId:student.id,status:"aktif",embeddingVector:[0.1,0.2]}});
     const r=await http("GET","/api/users?limit=100"); assert.equal(r.status,200);
-    const row=r.body.data.find((u:any)=>u.id===student.id); assert.equal(row.pinSudahDiatur,false);
+    const row=r.body.data.find((u:any)=>u.id===student.id); assert.equal(row.pinConfigured,false);
     for (const key of ["shiftKerjaId","shiftKerjaMaster","kategoriJabatanId","kategoriJabatan","terakhirLogin"]) assert.ok(Object.hasOwn(row,key),key);
     assert.equal(row.pinHash,undefined); assert.equal(row.kataSandi,undefined);
+    await prisma.pengguna.update({where:{id:student.id},data:{pinHash:await bcrypt.hash("123456",10)}});
+    for (const path of [`/api/users/${student.id}`, `/api/siswa/${student.id}`]) {
+      const detail=await http("GET",path); assert.equal(detail.status,200); assert.equal(detail.body.data.pinConfigured,true); assert.equal(detail.body.data.pinHash,undefined);
+    }
+    const me=await http("GET","/api/siswa/me",student); assert.equal(me.body.data.pinConfigured,true); assert.equal(me.body.data.pinHash,undefined);
+    const profile=await http("GET","/api/users/profile",student); assert.equal(profile.body.data.pinConfigured,true); assert.equal(profile.body.data.pinHash,undefined);
     assert.equal(row.biometrikWajah.status,"aktif"); assert.equal(row.biometrikWajah.embeddingVector,undefined);
   });
   await t.test("dashboard counts canonical and legacy attendance including classless teacher rows",async()=>{
     await prisma.absensi.createMany({data:[{penggunaId:student.id,sekolahId:a.id,kelasId:kelas.id,tanggal:todayDateOnly(),status:"hadir"},{penggunaId:teacher.id,sekolahId:a.id,tanggal:todayDateOnly(),status:"h"}]});
     const r=await http("GET","/api/dashboard"); assert.equal(r.status,200); assert.equal(r.body.data.cabang.rekapKehadiran.hadir,2); assert.equal(r.body.data.cabang.persentaseHadir,"100.0%");
   });
-  let jurusanId="", assessmentId="";
+  let jurusanId="";
   await t.test("jurusan CRUD validates data, paginates, and prevents cross-school access",async()=>{
     let r=await http("POST","/api/jurusan",admin,{kode:"IPA",nama:"Ilmu Pengetahuan Alam"}); assert.equal(r.status,201); jurusanId=r.body.data.id;
     assert.equal((await http("GET",`/api/jurusan/${jurusanId}`,outsider)).status,404);
@@ -149,13 +154,11 @@ test("backend completion API contracts and tenant isolation", { skip: !databaseU
     r=await http("PUT",`/api/jurusan/${jurusanId}`,admin,{nama:"IPA baru"}); assert.equal(r.status,200);
     r=await http("GET","/api/jurusan?limit=1"); assert.equal(r.body.meta.total,1);
   });
-  await t.test("assessments persist real student relations and students see only completed own records",async()=>{
-    let r=await http("POST","/api/bk/asesmen-minat-bakat",teacher,{siswaId:student.id,tanggal:"2026-10-30",jenis:"Minat",minat:"Sains",skor:88,status:"draft"}); assert.equal(r.status,201); assessmentId=r.body.data.id; assert.equal(r.body.data.siswa.namaLengkap,student.namaLengkap);
-    assert.equal((await http("GET","/api/bk/asesmen-minat-bakat",student)).body.data.length,0);
-    r=await http("PUT",`/api/bk/asesmen-minat-bakat/${assessmentId}`,teacher,{status:"selesai"}); assert.equal(r.status,200);
-    assert.equal((await http("GET","/api/bk/asesmen-minat-bakat",student)).body.data.length,1);
-    assert.equal((await http("GET",`/api/bk/asesmen-minat-bakat/${assessmentId}`,outsider)).status,404);
-    assert.equal((await http("POST","/api/bk/asesmen-minat-bakat",teacher,{siswaId:outsider.id,tanggal:"2026-02-30",jenis:"Invalid"})).status,400);
+  await t.test("removed assessment endpoints return 404", async()=>{
+    for (const method of ["GET", "POST", "PUT", "DELETE"]) {
+      const response = await fetch(base+"/api/bk/asesmen-minat-bakat"+(method === "PUT" || method === "DELETE" ? "/"+randomUUID() : ""), {method,headers:{Authorization:`Bearer ${admin.token}`}});
+      assert.equal(response.status,404);
+    }
   });
   await t.test("student create persists identity, parents, address and enrollment in one transaction",async()=>{
     const data={namaPengguna:`new_${suffix}`,email:`new_${suffix}@example.test`,kataSandi:password,namaLengkap:"New Student",nisn:`10${Date.now()}`,kelasId:kelas.id,alamat:"Alamat siswa",namaAyah:"Ayah dummy",namaIbu:"Ibu dummy",kotaKabupaten:"Jakarta",nik:"1234567890123456"};
@@ -251,7 +254,7 @@ test("backend completion API contracts and tenant isolation", { skip: !databaseU
     let r=await http("POST","/api/yayasan",root,{nama:"Foundation CRUD",npyp:`NP-${suffix}`}); assert.equal(r.status,201); const id=r.body.data.id; extraFoundations.push(id);
     assert.equal((await http("GET",`/api/yayasan/${id}`,yayasan)).status,403);
     assert.equal((await http("PUT",`/api/yayasan/${id}/sekolah/${a.id}`,root,{})).status,200);
-    r=await http("GET","/api/yayasan",root); assert.equal(r.status,200); assert.equal(r.body.data.find((f:any)=>f.id===id).sekolah[0].id,a.id);
+    r=await http("GET","/api/platform/yayasan",root); assert.equal(r.status,200); assert.equal(r.body.data.find((f:any)=>f.id===id).sekolah[0].id,a.id);
     assert.equal((await http("PUT",`/api/yayasan/${foundationId}/sekolah/${a.id}`,root,{})).status,404);
     r=await http("POST",`/api/yayasan/${id}/admin`,root,{namaPengguna:`foundation_admin_${suffix}`,namaLengkap:"Foundation Admin",email:`foundation_admin_${suffix}@example.test`,kataSandi:password}); assert.equal(r.status,201); users.push(r.body.data.id); const adminId=r.body.data.id; assert.equal(r.body.data.kataSandi,undefined);
     assert.equal((await http("DELETE",`/api/yayasan/${id}/admin/${adminId}`,root)).status,409);

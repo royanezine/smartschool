@@ -8,7 +8,6 @@ datasource db {
 
 // 1. SHARED TABLES (Public Schema)
 model Pengguna {
-  asesmenMinatBakat AsesmenMinatBakat[]
   id                String              @id @default(uuid())
   sekolahId         String?             @map("sekolah_id")
   yayasanId         String?             @map("yayasan_id")
@@ -216,7 +215,6 @@ model Sekolah {
   sekolahModul      SekolahModul[]
   aset              Aset[]
   jurusan           Jurusan[]
-  asesmenMinatBakat AsesmenMinatBakat[]
   pengumumanPpdb    PengumumanPpdb[]
   halamanCms        HalamanCms[]
   artikelCms        ArtikelCms[]
@@ -2036,31 +2034,6 @@ model Jurusan {
   @@map("jurusan")
 }
 
-model AsesmenMinatBakat {
-  id             String    @id @default(uuid())
-  sekolahId      String    @map("sekolah_id")
-  siswaId        String    @map("siswa_id")
-  tanggal        DateTime  @db.Date
-  jenis          String    @db.VarChar(100)
-  minat          String?   @db.Text
-  bakat          String?   @db.Text
-  hasil          String?   @db.Text
-  rekomendasi    String?   @db.Text
-  skor           Decimal?  @db.Decimal(5, 2)
-  status         String    @default("draft") @db.VarChar(20)
-  catatan        String?   @db.Text
-  dibuatOleh     String?   @map("dibuat_oleh")
-  diperbaruiOleh String?   @map("diperbarui_oleh")
-  dihapusOleh    String?   @map("dihapus_oleh")
-  dibuatPada     DateTime  @default(now()) @map("dibuat_pada") @db.Timestamp()
-  diperbaruiPada DateTime  @updatedAt @map("diperbarui_pada") @db.Timestamp()
-  dihapusPada    DateTime? @map("dihapus_pada") @db.Timestamp()
-  sekolah        Sekolah   @relation(fields: [sekolahId], references: [id])
-  siswa          Pengguna  @relation(fields: [siswaId], references: [id])
-
-  @@index([sekolahId, siswaId, tanggal])
-  @@map("asesmen_minat_bakat")
-}
 
 model PengumumanPpdb {
   id                 String    @id @default(uuid())

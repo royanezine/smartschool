@@ -1,3 +1,4 @@
+import { publicUser } from "../utils/publicUser";
 import { NextFunction, Response } from "express";
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
@@ -28,6 +29,7 @@ const fields = {
 const createSchema = z.object({ ...fields, kataSandi: z.string().min(8).max(72).refine(v => Buffer.byteLength(v) <= 72) }).strict();
 const updateSchema = z.object(fields).partial().strict();
 const select = {
+  pinHash: true,
   id: true, sekolahId: true, namaPengguna: true, email: true, namaLengkap: true,
   nisn: true, nis: true, nipd: true, nik: true, status: true, jenisKelamin: true,
   tempatLahir: true, tanggalLahir: true, alamat: true, alamatKtp: true, alamatDomisili: true,
@@ -47,14 +49,14 @@ export async function studentProfiles(req: AuthRequest, res: Response, next: Nex
       if (id) {
         const data = await prisma.pengguna.findFirst({ where: { ...where, id }, select });
         if (!data) throw new AppError("Siswa tidak ditemukan", 404);
-        return successResponse(res, "Detail siswa", data);
+        return successResponse(res, "Detail siswa", publicUser(data));
       }
       if (query.search) where.OR = [{ namaLengkap: { contains: query.search, mode: "insensitive" } }, { nisn: { contains: query.search, mode: "insensitive" } }];
       const [data, total] = await Promise.all([
         prisma.pengguna.findMany({ where, select, skip: (query.page - 1) * query.limit, take: query.limit, orderBy: [{ namaLengkap: "asc" }, { id: "asc" }] }),
         prisma.pengguna.count({ where }),
       ]);
-      return res.json({ success: true, message: "Data siswa berhasil diambil", data, meta: paginationMeta(query.page, query.limit, total) });
+      return res.json({ success: true, message: "Data siswa berhasil diambil", data: data.map(publicUser), meta: paginationMeta(query.page, query.limit, total) });
     }
     const parsed = id ? updateSchema.parse(req.body) : createSchema.parse(req.body);
     const { kelasId, tahunAjaranId, ...profile } = parsed;
@@ -90,6 +92,6 @@ export async function studentProfiles(req: AuthRequest, res: Response, next: Nex
       }
       return tx.pengguna.findUniqueOrThrow({ where: { id: userId }, select });
     });
-    return successResponse(res, id ? "Siswa diperbarui" : "Siswa dibuat", result, id ? 200 : 201);
+    return successResponse(res, id ? "Siswa diperbarui" : "Siswa dibuat", publicUser(result), id ? 200 : 201);
   } catch (error) { next(error); }
 }
