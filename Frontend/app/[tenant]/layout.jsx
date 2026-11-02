@@ -66,10 +66,8 @@ export default async function TenantLayout({ children, params }) {
 
   return (
     <>
-      {/* Mengambil tema berdasarkan subdomain sekolah */}
       <PublicTheme tenant={tenant} />
 
-      {/* Pesan error hanya ditampilkan ketika development */}
       {loadError && process.env.NODE_ENV === "development" && (
         <div className="border-b border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
           <strong>Data website gagal dimuat.</strong>
@@ -78,7 +76,6 @@ export default async function TenantLayout({ children, params }) {
         </div>
       )}
 
-      {/* Layout publik tetap menangani profil, navbar, dan footer */}
       <PublicLayout
         profil={data.profil}
         tema={data.tema}

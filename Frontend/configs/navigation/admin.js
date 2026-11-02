@@ -550,12 +550,7 @@ export const adminSidebarConfig = {
     },
    
    
-     {
-      key: "cmsPages",
-      icon: FileText,
-      label: "Konfigurasi Konten",
-      path: "/admin/cms/menu",
-    },
+     
     {
       key: "cmsSettings",
       icon: Settings2,

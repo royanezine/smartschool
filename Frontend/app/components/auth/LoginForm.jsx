@@ -535,7 +535,7 @@ export default function LoginForm() {
             </>
           ) : (
             <>
-              <ArrowRight strokeWidth={2.4} style={{ width: u(21), height: u(21) }} />
+             
               Masuk
             </>
           )}
@@ -546,31 +546,10 @@ export default function LoginForm() {
           style={{ marginTop: u(17), height: u(20) }}
         >
           <div className="absolute inset-x-0 top-1/2 border-t border-[#E3E8F0]" />
-          <span
-            className="relative bg-[#FDFDFE] text-[#64748B]"
-            style={{ padding: `0 ${u(16)}`, fontSize: u(14) }}
-          >
-            atau
-          </span>
+      
         </div>
 
-        <button
-          type="button"
-          disabled={loading}
-          onClick={() =>
-            setError("Login dengan Google belum tersedia pada backend saat ini.")
-          }
-          className="flex w-full items-center justify-center rounded-full border border-[#E3E8F0] bg-white font-bold text-[#0F2A66] transition-colors duration-200 hover:border-slate-300 hover:bg-slate-50 disabled:cursor-not-allowed disabled:bg-slate-50"
-          style={{
-            marginTop: u(16),
-            height: u(49),
-            fontSize: u(15.5),
-            gap: u(12),
-          }}
-        >
-          <GoogleIcon />
-          Masuk dengan Google
-        </button>
+       
       </form>
     </div>
   );

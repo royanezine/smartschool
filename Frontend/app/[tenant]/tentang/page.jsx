@@ -8,6 +8,8 @@ import {
   BookOpen,
   Building2,
   AlertCircle,
+  ArrowUpRight,
+  Globe,
 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -24,57 +26,91 @@ const theme = {
 };
 
 function getText(value, fallback = "") {
-  return typeof value === "string" && value.trim()
-    ? value.trim()
-    : fallback;
-}
+  if (typeof value === "string" && value.trim()) {
+    return value.trim();
+  }
 
-function getInitial(value) {
-  return getText(value, "S").charAt(0).toUpperCase();
+  if (typeof value === "number") {
+    return String(value);
+  }
+
+  return fallback;
 }
 
 function ThemeIcon({ children, className = "" }) {
   return (
     <span
       className={`inline-flex shrink-0 items-center justify-center ${className}`}
-      style={{
-        color: theme.primary,
-      }}
+      style={{ color: theme.primary }}
     >
       {children}
     </span>
   );
 }
 
-function InfoLabel({ children }) {
+function SectionHeading({ icon, children, description }) {
   return (
-    <p
-      className="text-xs font-semibold uppercase tracking-wider"
-      style={{ color: theme.secondary }}
-    >
-      {children}
-    </p>
+    <div className="mb-6 flex items-start gap-3">
+      <div
+        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg"
+        style={{
+          backgroundColor:
+            "color-mix(in srgb, var(--school-primary, #2563EB) 8%, var(--school-surface, #FFFFFF))",
+          color: theme.primary,
+        }}
+      >
+        {icon}
+      </div>
+
+      <div className="min-w-0 pt-0.5">
+        <h2
+          className="text-sm font-semibold uppercase tracking-[0.12em] sm:text-[13px]"
+          style={{ color: theme.text }}
+        >
+          {children}
+        </h2>
+
+        {description && (
+          <p
+            className="mt-1.5 text-sm leading-6"
+            style={{ color: theme.secondary }}
+          >
+            {description}
+          </p>
+        )}
+      </div>
+    </div>
   );
 }
 
-function InfoValue({ children }) {
+function InfoItem({ label, value }) {
   return (
-    <p
-      className="mt-1 break-words text-sm font-medium leading-6"
-      style={{ color: theme.text }}
-    >
-      {children}
-    </p>
+    <div className="min-w-0">
+      <p
+        className="text-[11px] font-semibold uppercase tracking-[0.12em]"
+        style={{ color: theme.secondary }}
+      >
+        {label}
+      </p>
+
+      <p
+        className="mt-2 break-words text-sm font-semibold leading-6"
+        style={{ color: theme.text }}
+      >
+        {value || "-"}
+      </p>
+    </div>
   );
 }
 
 function ProfileCard({ children, className = "" }) {
   return (
     <section
-      className={`min-w-0 rounded-2xl border p-6 shadow-sm sm:p-7 ${className}`}
+      className={`min-w-0 rounded-xl border p-5 transition-shadow duration-300 sm:p-7 ${className}`}
       style={{
         backgroundColor: theme.surface,
         borderColor: theme.border,
+        boxShadow: "0 1px 2px rgba(15, 23, 42, 0.04)",
       }}
     >
       {children}
@@ -82,46 +118,87 @@ function ProfileCard({ children, className = "" }) {
   );
 }
 
-function SectionHeading({ icon, children }) {
+function ContactItem({ icon, label, value, href }) {
   return (
-    <h2
-      className="mb-6 flex items-center gap-3 text-lg font-bold sm:text-xl"
-      style={{ color: theme.text }}
-    >
-      <ThemeIcon>{icon}</ThemeIcon>
-      <span>{children}</span>
-    </h2>
+    <div className="flex min-w-0 items-start gap-3">
+      <div
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg"
+        style={{
+          backgroundColor:
+            "color-mix(in srgb, var(--school-primary, #2563EB) 7%, var(--school-surface, #FFFFFF))",
+          color: theme.primary,
+        }}
+      >
+        {icon}
+      </div>
+
+      <div className="min-w-0 flex-1 pt-0.5">
+        <p
+          className="text-[11px] font-semibold uppercase tracking-[0.12em]"
+          style={{ color: theme.secondary }}
+        >
+          {label}
+        </p>
+
+        {value ? (
+          href ? (
+            <a
+              href={href}
+              className="mt-1 block break-words text-sm font-medium leading-6 transition-colors duration-200 hover:underline"
+              style={{ color: theme.text }}
+            >
+              {value}
+            </a>
+          ) : (
+            <p
+              className="mt-1 break-words text-sm font-medium leading-6"
+              style={{ color: theme.text }}
+            >
+              {value}
+            </p>
+          )
+        ) : (
+          <p
+            className="mt-1 text-sm"
+            style={{ color: theme.secondary }}
+          >
+            Belum tersedia
+          </p>
+        )}
+      </div>
+    </div>
   );
 }
 
 function ErrorState({ tenant, notFound = false }) {
   return (
     <main
-      className="flex min-h-screen items-center justify-center px-6 pt-32 pb-16"
+      className="flex min-h-[60vh] items-center justify-center px-5 py-16"
       style={{
         backgroundColor: theme.background,
         color: theme.text,
       }}
     >
       <div
-        className="w-full max-w-md rounded-2xl border p-8 text-center shadow-sm"
+        className="w-full max-w-md rounded-xl border p-8 text-center"
         style={{
           backgroundColor: theme.surface,
           borderColor: theme.border,
+          boxShadow: "0 1px 2px rgba(15, 23, 42, 0.04)",
         }}
       >
         <div
-          className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full"
+          className="mx-auto mb-5 flex h-12 w-12 items-center justify-center rounded-lg"
           style={{
             backgroundColor:
-              "color-mix(in srgb, var(--school-accent, #F59E0B) 12%, var(--school-surface, #FFFFFF))",
+              "color-mix(in srgb, var(--school-accent, #F59E0B) 10%, var(--school-surface, #FFFFFF))",
             color: theme.accent,
           }}
         >
-          <AlertCircle size={32} />
+          <AlertCircle size={24} />
         </div>
 
-        <h1 className="text-xl font-bold" style={{ color: theme.text }}>
+        <h1 className="text-lg font-semibold tracking-tight">
           {notFound
             ? "Profil sekolah tidak ditemukan"
             : "Profil sekolah belum dapat dimuat"}
@@ -133,7 +210,7 @@ function ErrorState({ tenant, notFound = false }) {
         >
           {notFound
             ? "Data profil untuk sekolah ini belum tersedia."
-            : `Terjadi kendala saat mengambil data profil sekolah ${tenant}. Periksa koneksi backend dan pastikan subdomain terdaftar.`}
+            : `Terjadi kendala saat mengambil profil sekolah ${tenant}. Silakan periksa koneksi server dan coba kembali.`}
         </p>
       </div>
     </main>
@@ -148,268 +225,398 @@ export default async function ProfilSekolahPage({ params }) {
     return <ErrorState tenant="" notFound />;
   }
 
-  let profil = null;
+  let response;
 
   try {
-    profil = await publikService.getProfil(tenant);
+    response = await publikService.getProfil(tenant);
   } catch (error) {
     console.error("[PROFIL SEKOLAH] Gagal mengambil data:", error);
     return <ErrorState tenant={tenant} />;
   }
 
-  if (!profil || typeof profil !== "object") {
+  let profil = response;
+
+  for (let i = 0; i < 8; i++) {
+    if (
+      !profil ||
+      typeof profil !== "object" ||
+      Array.isArray(profil) ||
+      !Object.prototype.hasOwnProperty.call(profil, "data")
+    ) {
+      break;
+    }
+
+    profil = profil.data;
+  }
+
+  if (
+    profil?.sekolah &&
+    typeof profil.sekolah === "object" &&
+    !Array.isArray(profil.sekolah)
+  ) {
+    profil = profil.sekolah;
+  }
+
+  if (!profil || typeof profil !== "object" || Array.isArray(profil)) {
     return <ErrorState tenant={tenant} notFound />;
   }
 
   const namaSekolah = getText(profil.nama, "Sekolah");
   const jenjang = getText(profil.jenjang, "Institusi Pendidikan");
-  const logo = getText(profil.logoBesarUrl) || getText(profil.logoKecilUrl);
+
+  const logo =
+    getText(profil.logoBesarUrl) ||
+    getText(profil.logoKecilUrl);
+
   const alamat = getText(profil.alamat);
   const telepon = getText(profil.telepon);
   const email = getText(profil.email);
   const npsn = getText(profil.npsn);
-
   const deskripsi = getText(profil.deskripsi);
   const visi = getText(profil.visi);
   const misi = getText(profil.misi);
+  const website = getText(profil.website);
+
+  const nomorTelepon = telepon.replace(/[^\d+]/g, "");
 
   return (
     <main
-      className="min-h-screen pb-20 pt-32 sm:pb-24"
+      className="min-h-screen w-full overflow-x-clip pb-14 sm:pb-20"
       style={{
         backgroundColor: theme.background,
         color: theme.text,
       }}
     >
       <section
-        className="relative isolate overflow-hidden py-16 sm:py-20 lg:py-24"
+        className="relative isolate w-full overflow-hidden"
         style={{
           backgroundColor: theme.primary,
         }}
       >
         <div
-          className="pointer-events-none absolute -left-24 -top-24 h-72 w-72 rounded-full blur-3xl"
+          aria-hidden="true"
+          className="pointer-events-none absolute -left-40 -top-40 h-[460px] w-[460px] rounded-full blur-3xl"
           style={{
             backgroundColor: theme.accent,
-            opacity: 0.18,
+            opacity: 0.1,
           }}
         />
 
         <div
-          className="pointer-events-none absolute -bottom-32 -right-20 h-80 w-80 rounded-full blur-3xl"
+          aria-hidden="true"
+          className="pointer-events-none absolute -bottom-48 right-[-8%] h-[520px] w-[520px] rounded-full blur-3xl"
           style={{
             backgroundColor: theme.surface,
-            opacity: 0.12,
+            opacity: 0.1,
           }}
         />
 
-        <div className="relative mx-auto flex max-w-5xl flex-col items-center gap-7 px-5 text-center sm:px-6 md:flex-row md:gap-10 md:text-left">
-          {logo ? (
-            <div
-              className="flex h-28 w-28 shrink-0 items-center justify-center overflow-hidden rounded-3xl border p-3 shadow-xl sm:h-36 sm:w-36"
-              style={{
-                backgroundColor: theme.surface,
-                borderColor:
-                  "color-mix(in srgb, var(--school-border, #E2E8F0) 75%, transparent)",
-              }}
-            >
-              <img
-                src={logo}
-                alt={`Logo ${namaSekolah}`}
-                className="h-full w-full object-contain"
-              />
-            </div>
-          ) : (
-            <div
-              className="flex h-28 w-28 shrink-0 items-center justify-center rounded-3xl border text-white shadow-xl sm:h-36 sm:w-36"
-              style={{
-                backgroundColor:
-                  "color-mix(in srgb, var(--school-surface, #FFFFFF) 15%, transparent)",
-                borderColor:
-                  "color-mix(in srgb, var(--school-surface, #FFFFFF) 25%, transparent)",
-              }}
-            >
-              <School size={56} />
-            </div>
-          )}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(115deg, rgba(15,23,42,0.15) 0%, transparent 55%)",
+          }}
+        />
 
-          <div className="min-w-0">
+        <div className="relative mx-auto flex w-full max-w-7xl flex-col items-center gap-8 px-5 py-16 sm:px-8 sm:py-20 md:flex-row md:gap-10 md:py-24 lg:gap-14 lg:px-12 lg:py-28">
+          <div className="flex h-24 w-24 shrink-0 items-center justify-center sm:h-28 sm:w-28 md:h-32 md:w-32">
+            {logo ? (
+              <div
+                className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-2xl border p-4"
+                style={{
+                  backgroundColor: "rgba(255,255,255,0.12)",
+                  borderColor: "rgba(255,255,255,0.22)",
+                  boxShadow: "0 12px 35px rgba(15,23,42,0.12)",
+                  backdropFilter: "blur(6px)",
+                }}
+              >
+                <img
+                  src={logo}
+                  alt={`Logo ${namaSekolah}`}
+                  className="h-full w-full object-contain"
+                />
+              </div>
+            ) : (
+              <div
+                className="flex h-full w-full items-center justify-center rounded-2xl border text-white"
+                style={{
+                  backgroundColor: "rgba(255,255,255,0.12)",
+                  borderColor: "rgba(255,255,255,0.22)",
+                  backdropFilter: "blur(6px)",
+                }}
+              >
+                <School size={48} strokeWidth={1.6} />
+              </div>
+            )}
+          </div>
+
+          <div className="min-w-0 flex-1 text-center md:text-left">
             <div
-              className="inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-bold uppercase tracking-widest"
+              className="inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] sm:text-[11px]"
               style={{
                 color: "#FFFFFF",
-                backgroundColor: "rgba(255,255,255,0.12)",
-                borderColor: "rgba(255,255,255,0.25)",
+                backgroundColor: "rgba(255,255,255,0.1)",
+                borderColor: "rgba(255,255,255,0.2)",
               }}
             >
-              <Building2 size={14} />
+              <Building2 size={13} />
               Profil Institusi
             </div>
 
-            <h1 className="mt-5 break-words text-3xl font-extrabold tracking-tight text-white sm:text-4xl md:text-5xl">
+            <h1 className="mt-5 break-words text-3xl font-bold leading-[1.15] tracking-tight text-white sm:text-4xl md:text-5xl lg:text-[52px]">
               {namaSekolah}
             </h1>
 
-            <p className="mt-3 text-sm font-semibold sm:text-base" style={{ color: "#FFFFFF" }}>
-              {jenjang}
-            </p>
+            <div
+              className="mt-4 flex flex-wrap items-center justify-center gap-2 text-sm font-medium md:justify-start sm:text-base"
+              style={{ color: "rgba(255,255,255,0.9)" }}
+            >
+              <School size={16} />
+              <span>{jenjang}</span>
+            </div>
 
             <p
-              className="mt-4 max-w-2xl text-sm leading-7 sm:text-base"
-              style={{
-                color: "rgba(255,255,255,0.85)",
-              }}
+              className="mx-auto mt-6 max-w-2xl whitespace-pre-line text-sm leading-7 sm:text-base md:mx-0"
+              style={{ color: "rgba(255,255,255,0.85)" }}
             >
               {deskripsi ||
                 `Informasi identitas, lokasi, dan kontak resmi ${namaSekolah}.`}
             </p>
+
+            {alamat && (
+              <div
+                className="mt-5 flex items-start justify-center gap-2 text-sm md:justify-start"
+                style={{ color: "rgba(255,255,255,0.85)" }}
+              >
+                <MapPin size={16} className="mt-0.5 shrink-0" />
+                <span className="max-w-xl whitespace-pre-line break-words">
+                  {alamat}
+                </span>
+              </div>
+            )}
+          </div>
+
+          <div
+            className="hidden min-w-[160px] shrink-0 rounded-xl border p-5 lg:block"
+            style={{
+              backgroundColor: "rgba(255,255,255,0.08)",
+              borderColor: "rgba(255,255,255,0.18)",
+              backdropFilter: "blur(6px)",
+            }}
+          >
+            <p
+              className="text-[10px] font-semibold uppercase tracking-[0.18em]"
+              style={{ color: "rgba(255,255,255,0.72)" }}
+            >
+              Jenjang
+            </p>
+
+            <p className="mt-2 break-words text-base font-semibold text-white">
+              {jenjang}
+            </p>
+
+            {npsn && (
+              <>
+                <div
+                  className="my-4 border-t"
+                  style={{ borderColor: "rgba(255,255,255,0.2)" }}
+                />
+
+                <p
+                  className="text-[10px] font-semibold uppercase tracking-[0.18em]"
+                  style={{ color: "rgba(255,255,255,0.72)" }}
+                >
+                  NPSN
+                </p>
+
+                <p className="mt-2 break-words text-sm font-semibold text-white">
+                  {npsn}
+                </p>
+              </>
+            )}
           </div>
         </div>
+
+        <div
+          className="absolute inset-x-0 bottom-0 h-px"
+          style={{ backgroundColor: "rgba(255,255,255,0.15)" }}
+        />
       </section>
 
-      <section className="relative z-10 mx-auto -mt-8 max-w-5xl px-4 sm:px-6">
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
-          <ProfileCard className="sm:col-span-2 lg:col-span-3">
-            <SectionHeading icon={<Award size={22} />}>
+      <section className="relative mx-auto w-full max-w-7xl px-4 pt-8 sm:px-8 sm:pt-10 lg:px-12">
+        <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-3 lg:gap-6">
+          <ProfileCard className="lg:col-span-2">
+            <SectionHeading
+              icon={<Award size={18} />}
+              description="Informasi resmi dan identitas institusi pendidikan."
+            >
               Identitas & Legalitas
             </SectionHeading>
 
-            <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3">
-              <div className="min-w-0">
-                <InfoLabel>Nama Sekolah</InfoLabel>
-                <InfoValue>{namaSekolah}</InfoValue>
-              </div>
+            <div
+              className="mb-6 h-px w-full"
+              style={{ backgroundColor: theme.border }}
+            />
 
-              <div className="min-w-0">
-                <InfoLabel>NPSN</InfoLabel>
-                <InfoValue>{npsn || "-"}</InfoValue>
-              </div>
-
-              <div className="min-w-0">
-                <InfoLabel>Jenjang Pendidikan</InfoLabel>
-                <InfoValue>{jenjang}</InfoValue>
-              </div>
+            <div className="grid gap-x-6 gap-y-6 sm:grid-cols-2 xl:grid-cols-3">
+              <InfoItem label="Nama Sekolah" value={namaSekolah} />
+              <InfoItem label="NPSN" value={npsn} />
+              <InfoItem label="Jenjang Pendidikan" value={jenjang} />
             </div>
           </ProfileCard>
 
-          <ProfileCard className="sm:col-span-2 lg:col-span-2">
-            <SectionHeading icon={<MapPin size={22} />}>
-              Lokasi & Alamat
+          <ProfileCard>
+            <SectionHeading
+              icon={<Phone size={18} />}
+              description="Saluran komunikasi resmi sekolah."
+            >
+              Informasi Kontak
             </SectionHeading>
 
-            <InfoLabel>Alamat Lengkap</InfoLabel>
+            <div
+              className="mb-6 h-px w-full"
+              style={{ backgroundColor: theme.border }}
+            />
+
+            <div className="space-y-5">
+              <ContactItem
+                icon={<Phone size={15} />}
+                label="Nomor Telepon"
+                value={telepon}
+                href={telepon ? `tel:${nomorTelepon}` : undefined}
+              />
+
+              <ContactItem
+                icon={<Mail size={15} />}
+                label="Alamat Email"
+                value={email}
+                href={email ? `mailto:${email}` : undefined}
+              />
+
+              {website && (
+                <ContactItem
+                  icon={<Globe size={15} />}
+                  label="Website"
+                  value={website}
+                  href={
+                    /^https?:\/\//i.test(website)
+                      ? website
+                      : `https://${website}`
+                  }
+                />
+              )}
+            </div>
+          </ProfileCard>
+
+          <ProfileCard className="lg:col-span-1">
+            <SectionHeading
+              icon={<MapPin size={18} />}
+              description="Lokasi dan alamat institusi."
+            >
+              Lokasi Sekolah
+            </SectionHeading>
+
+            <div
+              className="mb-5 h-px w-full"
+              style={{ backgroundColor: theme.border }}
+            />
+
             <p
-              className="mt-2 whitespace-pre-line break-words text-sm leading-7"
+              className="whitespace-pre-line break-words text-sm leading-7"
               style={{ color: theme.secondary }}
             >
               {alamat || "Alamat sekolah belum diisi."}
             </p>
+
+            {alamat && (
+              <a
+                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(alamat)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group/loc mt-5 inline-flex items-center gap-2 text-sm font-semibold transition-opacity duration-200 hover:opacity-75"
+                style={{ color: theme.primary }}
+              >
+                Lihat lokasi
+                <ArrowUpRight
+                  size={15}
+                  className="transition-transform duration-300 group-hover/loc:translate-x-0.5 group-hover/loc:-translate-y-0.5"
+                />
+              </a>
+            )}
           </ProfileCard>
 
-          <ProfileCard>
-            <SectionHeading icon={<Phone size={22} />}>
-              Kontak
-            </SectionHeading>
-
-            <div className="space-y-5">
-              <div className="flex min-w-0 items-start gap-3">
-                <span
-                  className="mt-0.5 inline-flex shrink-0 items-center justify-center rounded-lg p-2"
-                  style={{
-                    color: theme.primary,
-                    backgroundColor:
-                      "color-mix(in srgb, var(--school-primary, #2563EB) 10%, var(--school-surface, #FFFFFF))",
-                  }}
-                >
-                  <Phone size={15} />
-                </span>
-
-                <div className="min-w-0">
-                  <InfoLabel>Telepon</InfoLabel>
-                  {telepon ? (
-                    <a
-                      href={`tel:${telepon.replace(/[^\d+]/g, "")}`}
-                      className="mt-1 block break-words text-sm font-medium hover:underline"
-                      style={{ color: theme.text }}
-                    >
-                      {telepon}
-                    </a>
-                  ) : (
-                    <InfoValue>-</InfoValue>
-                  )}
-                </div>
-              </div>
-
-              <div className="flex min-w-0 items-start gap-3">
-                <span
-                  className="mt-0.5 inline-flex shrink-0 items-center justify-center rounded-lg p-2"
-                  style={{
-                    color: theme.primary,
-                    backgroundColor:
-                      "color-mix(in srgb, var(--school-primary, #2563EB) 10%, var(--school-surface, #FFFFFF))",
-                  }}
-                >
-                  <Mail size={15} />
-                </span>
-
-                <div className="min-w-0">
-                  <InfoLabel>Email</InfoLabel>
-                  {email ? (
-                    <a
-                      href={`mailto:${email}`}
-                      className="mt-1 block break-all text-sm font-medium hover:underline"
-                      style={{ color: theme.text }}
-                    >
-                      {email}
-                    </a>
-                  ) : (
-                    <InfoValue>-</InfoValue>
-                  )}
-                </div>
-              </div>
-            </div>
-          </ProfileCard>
-
-          <ProfileCard className="sm:col-span-2 lg:col-span-3">
-            <SectionHeading icon={<BookOpen size={22} />}>
+          <ProfileCard className="lg:col-span-2">
+            <SectionHeading
+              icon={<BookOpen size={18} />}
+              description="Kenali visi, misi, dan informasi institusi."
+            >
               Tentang Sekolah
             </SectionHeading>
 
             <div
-              className="max-w-none whitespace-pre-line break-words text-sm leading-7 sm:text-base"
-              style={{ color: theme.secondary }}
-            >
-              {deskripsi ? (
-                <p>{deskripsi}</p>
-              ) : (
-                <p>
-                  Selamat datang di portal resmi {namaSekolah}. Informasi
-                  mengenai profil dan kegiatan sekolah akan ditampilkan
-                  melalui halaman ini.
+              className="mb-6 h-px w-full"
+              style={{ backgroundColor: theme.border }}
+            />
+
+            <div className="space-y-7">
+              <div>
+                <h3
+                  className="text-[11px] font-semibold uppercase tracking-[0.12em]"
+                  style={{ color: theme.secondary }}
+                >
+                  Deskripsi Sekolah
+                </h3>
+
+                <p
+                  className="mt-2.5 whitespace-pre-line break-words text-sm leading-7"
+                  style={{ color: theme.text }}
+                >
+                  {deskripsi ||
+                    `Selamat datang di portal resmi ${namaSekolah}. Informasi mengenai profil dan kegiatan sekolah akan ditampilkan melalui website ini.`}
                 </p>
-              )}
+              </div>
 
               {visi && (
-                <div className="mt-6">
+                <div
+                  className="border-t pt-6"
+                  style={{ borderColor: theme.border }}
+                >
                   <h3
-                    className="text-base font-bold"
-                    style={{ color: theme.text }}
+                    className="text-[11px] font-semibold uppercase tracking-[0.12em]"
+                    style={{ color: theme.secondary }}
                   >
                     Visi
                   </h3>
-                  <p className="mt-2">{visi}</p>
+
+                  <p
+                    className="mt-2.5 whitespace-pre-line break-words text-sm leading-7"
+                    style={{ color: theme.text }}
+                  >
+                    {visi}
+                  </p>
                 </div>
               )}
 
               {misi && (
-                <div className="mt-6">
+                <div
+                  className="border-t pt-6"
+                  style={{ borderColor: theme.border }}
+                >
                   <h3
-                    className="text-base font-bold"
-                    style={{ color: theme.text }}
+                    className="text-[11px] font-semibold uppercase tracking-[0.12em]"
+                    style={{ color: theme.secondary }}
                   >
                     Misi
                   </h3>
-                  <p className="mt-2">{misi}</p>
+
+                  <p
+                    className="mt-2.5 whitespace-pre-line break-words text-sm leading-7"
+                    style={{ color: theme.text }}
+                  >
+                    {misi}
+                  </p>
                 </div>
               )}
             </div>
@@ -417,14 +624,15 @@ export default async function ProfilSekolahPage({ params }) {
         </div>
 
         <div
-          className="mt-6 flex items-start gap-3 rounded-xl border p-4"
+          className="mt-6 flex items-start gap-3 rounded-xl border px-4 py-4 sm:px-5"
           style={{
             backgroundColor: theme.surface,
             borderColor: theme.border,
+            boxShadow: "0 1px 2px rgba(15, 23, 42, 0.04)",
           }}
         >
           <ThemeIcon className="mt-0.5">
-            <School size={18} />
+            <School size={16} />
           </ThemeIcon>
 
           <p

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -23,6 +24,7 @@ import {
 
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
+
 import { getUsers } from "@/services/user.service";
 import { getShiftKerja } from "@/services/shiftKerja.service";
 import {
@@ -30,11 +32,17 @@ import {
   getShiftKelas,
   updateShiftKelas,
 } from "@/services/kelas.service";
+import { getTahunAjaran } from "@/services/tahunAjaran.service";
 
 const PAGE_SIZE = 10;
 
+const DEFAULT_JAM_BELAJAR = {
+  pagi: { masuk: "07:00", keluar: "12:00" },
+  siang: { masuk: "13:00", keluar: "17:00" },
+};
+
 /* =========================================================
-   HELPERS
+   HELPER
 ========================================================= */
 
 function normalizeText(value) {
@@ -91,6 +99,14 @@ function unwrapResponse(response) {
 
   return current;
 }
+
+function getErrorMessage(error, fallback) {
+  return error?.message || fallback;
+}
+
+/* =========================================================
+   ROLE PENGGUNA
+========================================================= */
 
 function getRole(user) {
   if (!isObject(user)) return "";
@@ -195,6 +211,10 @@ function isGuruAtauPegawai(user) {
   );
 }
 
+/* =========================================================
+   SHIFT GURU / PEGAWAI
+========================================================= */
+
 function getShiftId(value) {
   if (value == null || value === "") return "";
 
@@ -221,14 +241,10 @@ function getShiftName(value, shiftList = []) {
     const id = getShiftId(value);
 
     if (id) {
-      const matched = shiftList.find(
-        (item) => String(item.id) === id
-      );
+      const matched = shiftList.find((item) => String(item.id) === id);
 
       if (matched) {
-        return String(
-          matched.nama ?? matched.namaShift ?? matched.kode ?? ""
-        );
+        return String(matched.nama ?? matched.namaShift ?? matched.kode ?? "");
       }
     }
 
@@ -257,9 +273,7 @@ function getShiftName(value, shiftList = []) {
   );
 
   if (matched) {
-    return String(
-      matched.nama ?? matched.namaShift ?? matched.kode ?? ""
-    );
+    return String(matched.nama ?? matched.namaShift ?? matched.kode ?? "");
   }
 
   const looksLikeUuid =
@@ -276,15 +290,11 @@ function getShiftDetail(shiftList, value) {
   const id = getShiftId(value);
 
   if (id) {
-    const matchedById = shiftList.find(
-      (item) => String(item.id) === id
-    );
-
+    const matchedById = shiftList.find((item) => String(item.id) === id);
     if (matchedById) return matchedById;
   }
 
   const name = getShiftName(value, shiftList);
-
   if (!name) return null;
 
   return (
@@ -298,10 +308,6 @@ function getShiftDetail(shiftList, value) {
   );
 }
 
-/**
- * Membaca shift pengguna dari berbagai bentuk respons API.
- * Backend getUsers saat ini mengirimkan field shiftKerja.
- */
 function getUserShift(user) {
   if (!user) return null;
 
@@ -347,6 +353,10 @@ function normalizeUser(user) {
   };
 }
 
+/* =========================================================
+   SHIFT KELAS DAN JAM BELAJAR
+========================================================= */
+
 function getShiftKelasValue(value) {
   if (value == null || value === "") return "";
 
@@ -360,6 +370,31 @@ function getShiftKelasValue(value) {
   if (normalized === "siang") return "siang";
 
   return "";
+}
+
+/**
+ * Cari master shift berdasarkan nama atau kode pagi/siang.
+ * Nilai shift kelas tetap "pagi"/"siang" agar kompatibel
+ * dengan updateShiftKelas yang sudah digunakan.
+ */
+function getMasterShiftKelas(shiftList = [], shift) {
+  const normalized = normalizeText(shift);
+
+  if (!normalized) return null;
+
+  return (
+    shiftList.find((item) => {
+      const nama = normalizeText(item.nama ?? item.namaShift);
+      const kode = normalizeText(item.kode);
+      const jenis = normalizeText(item.jenisShift);
+
+      return (
+        nama === normalized ||
+        kode === normalized ||
+        jenis === normalized
+      );
+    }) ?? null
+  );
 }
 
 function formatJam(value) {
@@ -382,6 +417,92 @@ function formatJam(value) {
   return String(value);
 }
 
+/**
+ * Prioritas jam:
+ * 1. Jam dari master shift API.
+ * 2. Jam default sebagai fallback.
+ */
+function getJamBelajar(shift, shiftList = []) {
+  const normalized = normalizeText(shift);
+
+  if (!normalized) return null;
+
+  const master = getMasterShiftKelas(shiftList, normalized);
+
+  const defaultJam = DEFAULT_JAM_BELAJAR[normalized];
+
+  const masuk = master?.jamMasuk ?? defaultJam?.masuk;
+  const keluar = master?.jamKeluar ?? defaultJam?.keluar;
+
+  if (!masuk && !keluar) return null;
+
+  return {
+    masuk: formatJam(masuk),
+    keluar: formatJam(keluar),
+  };
+}
+
+function getShiftKelasOptionLabel(shift, shiftList = []) {
+  const jam = getJamBelajar(shift, shiftList);
+
+  const nama = shift === "pagi" ? "Pagi" : "Siang";
+
+  if (!jam) return nama;
+
+  return `${nama} (${jam.masuk} - ${jam.keluar})`;
+}
+
+/* =========================================================
+   TAHUN AJARAN
+========================================================= */
+
+function getTahunAjaranId(kelas) {
+  return String(
+    kelas?.tahunAjaranId ??
+      kelas?.tahun_ajaran_id ??
+      kelas?.tahunAjaran?.id ??
+      kelas?.tahun_ajaran?.id ??
+      ""
+  );
+}
+
+function getTahunAjaranDetail(kelas, tahunAjaranList = []) {
+  const tahunAjaranId = getTahunAjaranId(kelas);
+
+  if (tahunAjaranId) {
+    const matched = tahunAjaranList.find(
+      (item) => String(item.id) === tahunAjaranId
+    );
+
+    if (matched) return matched;
+  }
+
+  if (isObject(kelas?.tahunAjaran)) return kelas.tahunAjaran;
+  if (isObject(kelas?.tahun_ajaran)) return kelas.tahun_ajaran;
+
+  if (typeof kelas?.tahunAjaran === "string") {
+    return { nama: kelas.tahunAjaran };
+  }
+
+  return null;
+}
+
+function getTahunAjaranLabel(kelas, tahunAjaranList = []) {
+  const tahun = getTahunAjaranDetail(kelas, tahunAjaranList);
+
+  if (!tahun) return "-";
+
+  const nama = tahun.nama ?? tahun.tahun ?? tahun.namaTahunAjaran ?? "";
+  const semester = tahun.semester ? `Semester ${tahun.semester}` : "";
+  const label = [nama, semester].filter(Boolean).join(" - ");
+
+  return label || "-";
+}
+
+/* =========================================================
+   DATA KELAS
+========================================================= */
+
 function getJumlahSiswa(kelas) {
   return (
     Number(
@@ -392,19 +513,6 @@ function getJumlahSiswa(kelas) {
         0
     ) || 0
   );
-}
-
-function getTahunAjaran(kelas) {
-  return (
-    kelas?.tahunAjaran?.nama ??
-    kelas?.tahunAjaran?.tahun ??
-    kelas?.tahunAjaran?.namaTahunAjaran ??
-    "-"
-  );
-}
-
-function getErrorMessage(error, fallback) {
-  return error?.message || fallback;
 }
 
 /* =========================================================
@@ -444,7 +552,9 @@ function StatCard({
 
       <div className="mt-4">
         <p className="text-3xl font-bold tracking-tight theme-text">
-          {typeof value === "number" ? value.toLocaleString("id-ID") : value}
+          {typeof value === "number"
+            ? value.toLocaleString("id-ID")
+            : value}
         </p>
         <p className="mt-1 text-xs leading-relaxed theme-text-muted">
           {description}
@@ -491,6 +601,41 @@ function ShiftBadge({ shift }) {
   );
 }
 
+function JamBelajar({ shift, shiftList = [] }) {
+  const jam = getJamBelajar(shift, shiftList);
+
+  if (!jam) {
+    return (
+      <span className="text-xs theme-text-muted">
+        Belum ditentukan
+      </span>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-2">
+      <div
+        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
+          shift === "pagi"
+            ? "bg-blue-50 text-blue-600 dark:bg-blue-950/50 dark:text-blue-300"
+            : "bg-orange-50 text-orange-600 dark:bg-orange-950/50 dark:text-orange-300"
+        }`}
+      >
+        <Clock3 size={16} />
+      </div>
+
+      <div>
+        <p className="text-sm font-semibold theme-text">
+          {jam.masuk} - {jam.keluar}
+        </p>
+        <p className="mt-0.5 text-[11px] theme-text-muted">
+          Jam belajar
+        </p>
+      </div>
+    </div>
+  );
+}
+
 /* =========================================================
    MAIN PAGE
 ========================================================= */
@@ -504,6 +649,7 @@ export default function PenugasanShiftPage() {
   const [pegawaiList, setPegawaiList] = useState([]);
   const [shiftList, setShiftList] = useState([]);
   const [kelasList, setKelasList] = useState([]);
+  const [tahunAjaranList, setTahunAjaranList] = useState([]);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -515,6 +661,10 @@ export default function PenugasanShiftPage() {
   const [filterShift, setFilterShift] = useState("semua");
   const [page, setPage] = useState(1);
 
+  /* =========================================================
+     LOAD DATA
+  ========================================================= */
+
   const loadData = useCallback(async (showLoading = true) => {
     if (showLoading) setLoading(true);
 
@@ -522,23 +672,29 @@ export default function PenugasanShiftPage() {
     setWarnings([]);
 
     try {
-      const [usersResult, shiftsResult, kelasResult] =
-        await Promise.allSettled([
-          getUsers({ page: 1, limit: 100 }),
-          getShiftKerja({ page: 1, limit: 100, status: "aktif" }),
-          getKelas({
-            page: 1,
-            limit: 100,
-            sortBy: "tingkat",
-            sortOrder: "asc",
-          }),
-        ]);
+      const [
+        usersResult,
+        shiftsResult,
+        kelasResult,
+        tahunAjaranResult,
+      ] = await Promise.allSettled([
+        getUsers({ page: 1, limit: 100 }),
+        getShiftKerja({ page: 1, limit: 100, status: "aktif" }),
+        getKelas({
+          page: 1,
+          limit: 100,
+          sortBy: "tingkat",
+          sortOrder: "asc",
+        }),
+        getTahunAjaran(),
+      ]);
 
       const nextWarnings = [];
 
       let users = [];
       let shifts = [];
       let kelas = [];
+      let tahunAjaran = [];
 
       if (usersResult.status === "fulfilled") {
         users = getArray(usersResult.value, [
@@ -582,6 +738,20 @@ export default function PenugasanShiftPage() {
         );
       }
 
+      if (tahunAjaranResult.status === "fulfilled") {
+        tahunAjaran = getArray(tahunAjaranResult.value, [
+          "tahunAjaran",
+          "tahun_ajaran",
+        ]).filter((item) => isObject(item) && item.id);
+      } else {
+        nextWarnings.push(
+          `Data tahun ajaran gagal dimuat: ${getErrorMessage(
+            tahunAjaranResult.reason,
+            "Terjadi kesalahan."
+          )}`
+        );
+      }
+
       const normalizedUsers = users
         .filter((user) => isObject(user))
         .map(normalizeUser);
@@ -611,8 +781,11 @@ export default function PenugasanShiftPage() {
           try {
             const response = await getShiftKelas(item.id);
             const detail = unwrapResponse(response);
+
             const shiftValue =
-              detail?.shift ?? detail?.kelas?.shift ?? null;
+              detail?.shift ??
+              detail?.kelas?.shift ??
+              null;
 
             return {
               ...item,
@@ -661,15 +834,27 @@ export default function PenugasanShiftPage() {
         }
       }
 
+      if (
+        kelas.length > 0 &&
+        tahunAjaran.length === 0 &&
+        tahunAjaranResult.status === "fulfilled"
+      ) {
+        nextWarnings.push(
+          "Data tahun ajaran belum tersedia. Periksa data pada menu Tahun Ajaran."
+        );
+      }
+
       setPegawaiList(employeeUsers);
       setShiftList(shifts.filter(isObject));
       setKelasList(kelasWithShift);
+      setTahunAjaranList(tahunAjaran);
       setWarnings(nextWarnings);
 
       if (
         usersResult.status === "rejected" &&
         shiftsResult.status === "rejected" &&
-        kelasResult.status === "rejected"
+        kelasResult.status === "rejected" &&
+        tahunAjaranResult.status === "rejected"
       ) {
         setError(
           "Data penugasan tidak dapat dimuat. Periksa koneksi API, sesi login, dan hak akses akun."
@@ -689,6 +874,10 @@ export default function PenugasanShiftPage() {
     loadData();
   }, [loadData]);
 
+  /* =========================================================
+     REFRESH SAAT KEMBALI KE TAB
+  ========================================================= */
+
   useEffect(() => {
     const handleFocus = () => {
       if (document.visibilityState === "visible") {
@@ -705,12 +894,20 @@ export default function PenugasanShiftPage() {
     };
   }, [loadData]);
 
+  /* =========================================================
+     NOTIFICATION
+  ========================================================= */
+
   useEffect(() => {
     if (!notice) return undefined;
 
     const timeout = setTimeout(() => setNotice(""), 4000);
     return () => clearTimeout(timeout);
   }, [notice]);
+
+  /* =========================================================
+     RESET FILTER
+  ========================================================= */
 
   useEffect(() => {
     setPage(1);
@@ -720,8 +917,13 @@ export default function PenugasanShiftPage() {
     setNotice("");
   }, [activeTab]);
 
+  /* =========================================================
+     UPDATE SHIFT KELAS
+  ========================================================= */
+
   async function handleSaveShiftKelas(kelasId, newShift) {
     const shift = newShift || null;
+
     const previousKelas = kelasList.find(
       (item) => String(item.id) === String(kelasId)
     );
@@ -747,24 +949,40 @@ export default function PenugasanShiftPage() {
       setKelasList((previous) =>
         previous.map((item) =>
           String(item.id) === String(kelasId)
-            ? { ...item, shift, shiftLoadError: false }
+            ? {
+                ...item,
+                shift,
+                shiftLoadError: false,
+              }
             : item
         )
       );
 
+      const namaShift =
+        shift === "pagi"
+          ? getShiftKelasOptionLabel("pagi", shiftList)
+          : shift === "siang"
+            ? getShiftKelasOptionLabel("siang", shiftList)
+            : "";
+
       setNotice(
         shift
-          ? `Shift kelas ${previousKelas.nama || ""} berhasil diubah menjadi ${shift}.`
+          ? `Shift kelas ${previousKelas.nama || ""} berhasil diubah menjadi ${namaShift}.`
           : `Shift kelas ${previousKelas.nama || ""} berhasil dihapus.`
       );
     } catch (saveError) {
       setError(
-        saveError?.message || "Gagal menyimpan perubahan shift kelas."
+        saveError?.message ||
+          "Gagal menyimpan perubahan shift kelas."
       );
     } finally {
       setUpdatingKelasId(null);
     }
   }
+
+  /* =========================================================
+     FILTER DATA
+  ========================================================= */
 
   const activeData = activeTab === "pegawai" ? pegawaiList : kelasList;
 
@@ -791,7 +1009,10 @@ export default function PenugasanShiftPage() {
       } else {
         matchSearch =
           normalizeText(item.nama).includes(keyword) ||
-          normalizeText(item.tingkat).includes(keyword);
+          normalizeText(item.tingkat).includes(keyword) ||
+          normalizeText(getTahunAjaranLabel(item, tahunAjaranList)).includes(
+            keyword
+          );
       }
 
       if (!matchSearch) return false;
@@ -815,15 +1036,34 @@ export default function PenugasanShiftPage() {
         normalizeText(assignedShift) === filterShift
       );
     });
-  }, [activeData, activeTab, search, filterShift, shiftList]);
+  }, [
+    activeData,
+    activeTab,
+    search,
+    filterShift,
+    shiftList,
+    tahunAjaranList,
+  ]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredData.length / PAGE_SIZE));
+  /* =========================================================
+     PAGINATION
+  ========================================================= */
+
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredData.length / PAGE_SIZE)
+  );
+
   const currentPage = Math.min(page, totalPages);
 
   const visibleData = filteredData.slice(
     (currentPage - 1) * PAGE_SIZE,
     currentPage * PAGE_SIZE
   );
+
+  /* =========================================================
+     STATISTIK
+  ========================================================= */
 
   const pegawaiWithShift = pegawaiList.filter((item) => {
     const assignedShift = getUserShift(item);
@@ -835,8 +1075,17 @@ export default function PenugasanShiftPage() {
   }).length;
 
   const pegawaiWithoutShift = pegawaiList.length - pegawaiWithShift;
+
   const kelasWithShift = kelasList.filter((item) => Boolean(item.shift)).length;
   const kelasWithoutShift = kelasList.length - kelasWithShift;
+
+  const tahunAjaranAktif = tahunAjaranList.find(
+    (item) => item.status === "aktif"
+  );
+
+  /* =========================================================
+     RENDER
+  ========================================================= */
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
@@ -853,14 +1102,17 @@ export default function PenugasanShiftPage() {
 
         <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto">
           <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
+            {/* HEADER */}
+
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <h1 className="text-2xl font-bold tracking-tight theme-text sm:text-3xl">
                   Penugasan Shift
                 </h1>
+
                 <p className="mt-2 max-w-2xl text-sm leading-6 theme-text-secondary">
-                  Kelola shift kerja guru dan pegawai serta shift belajar siswa
-                  berdasarkan kelas.
+                  Kelola shift kerja guru dan pegawai serta shift belajar
+                  siswa berdasarkan kelas.
                 </p>
               </div>
 
@@ -877,6 +1129,8 @@ export default function PenugasanShiftPage() {
                 Muat Ulang
               </button>
             </div>
+
+            {/* TAB */}
 
             <div className="mb-6 overflow-x-auto border-b theme-border">
               <div className="flex min-w-max">
@@ -916,6 +1170,8 @@ export default function PenugasanShiftPage() {
               </div>
             </div>
 
+            {/* INFORMASI */}
+
             <div className="theme-card mb-6 flex items-start gap-3 rounded-lg border theme-border p-4">
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                 <Info size={18} />
@@ -927,19 +1183,57 @@ export default function PenugasanShiftPage() {
                     ? "Penugasan Shift Guru dan Pegawai"
                     : "Penugasan Shift Belajar Siswa"}
                 </p>
+
                 <p className="mt-1 text-xs leading-5 theme-text-muted">
                   {activeTab === "pegawai"
                     ? "Penugasan shift kerja ditampilkan berdasarkan field shiftKerja dari API pengguna dan dicocokkan dengan master shift."
-                    : "Shift belajar disimpan pada data kelas menggunakan nilai pagi, siang, atau tanpa shift."}
+                    : "Atur shift belajar setiap kelas. Dropdown menampilkan jam masuk dan pulang dari master shift, dengan jam default sebagai fallback."}
                 </p>
               </div>
             </div>
 
+            {/* TAHUN AJARAN AKTIF */}
+
+            {activeTab === "siswa" && (
+              <div className="theme-card mb-6 flex flex-col gap-3 rounded-xl border theme-border p-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300">
+                    <CalendarClock size={19} />
+                  </div>
+
+                  <div>
+                    <p className="text-xs font-semibold theme-text-muted">
+                      Tahun Ajaran Aktif
+                    </p>
+
+                    <p className="mt-1 text-sm font-bold theme-text">
+                      {loading
+                        ? "Memuat tahun ajaran..."
+                        : tahunAjaranAktif
+                          ? `${tahunAjaranAktif.nama} - Semester ${tahunAjaranAktif.semester}`
+                          : "Belum ada tahun ajaran aktif"}
+                    </p>
+                  </div>
+                </div>
+
+                {tahunAjaranAktif && (
+                  <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">
+                    <CheckCircle2 size={14} />
+                    Aktif
+                  </span>
+                )}
+              </div>
+            )}
+
+            {/* WARNING */}
+
             {warnings.length > 0 && (
               <div className="mb-5 flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-200">
                 <AlertCircle size={19} className="mt-0.5 shrink-0" />
+
                 <div className="min-w-0 flex-1">
                   <p className="font-semibold">Informasi pemuatan data</p>
+
                   <ul className="mt-1 list-disc space-y-1 pl-4 text-xs leading-5">
                     {warnings.map((warning, index) => (
                       <li key={`${index}-${warning}`}>{warning}</li>
@@ -949,16 +1243,20 @@ export default function PenugasanShiftPage() {
               </div>
             )}
 
+            {/* ERROR */}
+
             {error && (
               <div
                 role="alert"
                 className="mb-5 flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-300"
               >
                 <AlertCircle size={19} className="mt-0.5 shrink-0" />
+
                 <div className="min-w-0 flex-1">
                   <p className="font-semibold">Permintaan gagal</p>
                   <p className="mt-1 break-words">{error}</p>
                 </div>
+
                 <button
                   type="button"
                   onClick={() => setError("")}
@@ -970,6 +1268,8 @@ export default function PenugasanShiftPage() {
               </div>
             )}
 
+            {/* SUCCESS */}
+
             {notice && (
               <div
                 role="status"
@@ -977,6 +1277,7 @@ export default function PenugasanShiftPage() {
               >
                 <CheckCircle2 size={18} className="shrink-0" />
                 <p className="min-w-0 flex-1">{notice}</p>
+
                 <button
                   type="button"
                   onClick={() => setNotice("")}
@@ -987,6 +1288,8 @@ export default function PenugasanShiftPage() {
                 </button>
               </div>
             )}
+
+            {/* STATISTIK */}
 
             <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
               {activeTab === "pegawai" ? (
@@ -1008,7 +1311,7 @@ export default function PenugasanShiftPage() {
                   <StatCard
                     title="Belum Memiliki Shift"
                     value={loading ? "—" : pegawaiWithoutShift}
-                    description="Pengguna tanpa penugasan shift yang teridentifikasi"
+                    description="Pengguna tanpa penugasan shift"
                     icon={CalendarClock}
                     tone="amber"
                   />
@@ -1040,6 +1343,8 @@ export default function PenugasanShiftPage() {
               )}
             </div>
 
+            {/* TABEL */}
+
             <section className="theme-card overflow-hidden rounded-xl border theme-border shadow-sm">
               <div className="border-b theme-border p-4 sm:p-5">
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -1049,6 +1354,7 @@ export default function PenugasanShiftPage() {
                         ? "Daftar Penugasan Guru / Pegawai"
                         : "Daftar Penugasan Shift Kelas"}
                     </h2>
+
                     <p className="mt-1 text-xs theme-text-muted">
                       {filteredData.length.toLocaleString("id-ID")} data ditemukan
                     </p>
@@ -1060,6 +1366,7 @@ export default function PenugasanShiftPage() {
                         size={17}
                         className="absolute left-3 top-1/2 -translate-y-1/2 theme-text-muted"
                       />
+
                       <input
                         type="search"
                         value={search}
@@ -1070,7 +1377,7 @@ export default function PenugasanShiftPage() {
                         placeholder={
                           activeTab === "pegawai"
                             ? "Cari nama, email, atau jabatan..."
-                            : "Cari nama atau tingkat kelas..."
+                            : "Cari kelas atau tahun ajaran..."
                         }
                         className="theme-input h-10 w-full rounded-lg border pl-10 pr-3 text-sm outline-none transition"
                       />
@@ -1094,6 +1401,8 @@ export default function PenugasanShiftPage() {
                 </div>
               </div>
 
+              {/* ISI TABEL */}
+
               <div className="relative overflow-x-auto">
                 {loading ? (
                   <div className="flex min-h-[300px] flex-col items-center justify-center">
@@ -1114,6 +1423,8 @@ export default function PenugasanShiftPage() {
                     </p>
                   </div>
                 ) : activeTab === "pegawai" ? (
+                  /* TABEL GURU / PEGAWAI */
+
                   <table className="w-full min-w-[760px] text-left text-sm">
                     <thead className="border-b theme-border bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] text-xs uppercase tracking-wide theme-text-muted">
                       <tr>
@@ -1124,6 +1435,7 @@ export default function PenugasanShiftPage() {
                         <th className="px-5 py-4 text-right font-semibold">Aksi</th>
                       </tr>
                     </thead>
+
                     <tbody className="divide-y divide-[color-mix(in_srgb,var(--color-text)_5%,transparent)]">
                       {visibleData.map((item) => {
                         const assignedShift = getUserShift(item);
@@ -1159,19 +1471,20 @@ export default function PenugasanShiftPage() {
                                 </div>
                               </div>
                             </td>
+
                             <td className="px-5 py-4">
-                              <div className="font-medium theme-text">
-                                {jabatan || "-"}
-                              </div>
+                              <div className="font-medium theme-text">{jabatan || "-"}</div>
                               {item.nip && (
                                 <p className="mt-1 text-xs theme-text-muted">
                                   NIP: {item.nip}
                                 </p>
                               )}
                             </td>
+
                             <td className="px-5 py-4">
                               <ShiftBadge shift={shiftName} />
                             </td>
+
                             <td className="px-5 py-4 text-xs theme-text-muted">
                               {shift
                                 ? `${formatJam(shift.jamMasuk)} - ${formatJam(shift.jamKeluar)}`
@@ -1179,6 +1492,7 @@ export default function PenugasanShiftPage() {
                                   ? "Detail jam tidak tersedia"
                                   : "Belum memiliki shift"}
                             </td>
+
                             <td className="px-5 py-4 text-right">
                               <button
                                 type="button"
@@ -1199,7 +1513,9 @@ export default function PenugasanShiftPage() {
                     </tbody>
                   </table>
                 ) : (
-                  <table className="w-full min-w-[700px] text-left text-sm">
+                  /* TABEL KELAS */
+
+                  <table className="w-full min-w-[1050px] text-left text-sm">
                     <thead className="border-b theme-border bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] text-xs uppercase tracking-wide theme-text-muted">
                       <tr>
                         <th className="px-5 py-4 font-semibold">Nama Kelas</th>
@@ -1207,84 +1523,149 @@ export default function PenugasanShiftPage() {
                         <th className="px-5 py-4 font-semibold">Tahun Ajaran</th>
                         <th className="px-5 py-4 font-semibold">Jumlah Siswa</th>
                         <th className="px-5 py-4 font-semibold">Shift Belajar</th>
+                        <th className="px-5 py-4 font-semibold">Jam Belajar</th>
                       </tr>
                     </thead>
+
                     <tbody className="divide-y divide-[color-mix(in_srgb,var(--color-text)_5%,transparent)]">
-                      {visibleData.map((item) => (
-                        <tr
-                          key={item.id}
-                          className="transition hover:bg-[color-mix(in_srgb,var(--color-text)_2%,transparent)]"
-                        >
-                          <td className="px-5 py-4">
-                            <div className="flex items-center gap-3">
-                              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-purple-100 text-purple-600 dark:bg-purple-950/50 dark:text-purple-300">
-                                <BookOpen size={19} />
-                              </div>
-                              <div>
-                                <p className="font-semibold theme-text">
-                                  {item.nama || "-"}
-                                </p>
-                                {item.waliKelas?.namaLengkap && (
-                                  <p className="mt-1 text-xs theme-text-muted">
-                                    Wali kelas: {item.waliKelas.namaLengkap}
+                      {visibleData.map((item) => {
+                        const tahunAjaran = getTahunAjaranDetail(
+                          item,
+                          tahunAjaranList
+                        );
+
+                        const tahunAjaranLabel = getTahunAjaranLabel(
+                          item,
+                          tahunAjaranList
+                        );
+
+                        return (
+                          <tr
+                            key={item.id}
+                            className="transition hover:bg-[color-mix(in_srgb,var(--color-text)_2%,transparent)]"
+                          >
+                            {/* NAMA KELAS */}
+
+                            <td className="px-5 py-4">
+                              <div className="flex items-center gap-3">
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-purple-100 text-purple-600 dark:bg-purple-950/50 dark:text-purple-300">
+                                  <BookOpen size={19} />
+                                </div>
+                                <div>
+                                  <p className="font-semibold theme-text">
+                                    {item.nama || "-"}
                                   </p>
+                                  {item.waliKelas?.namaLengkap && (
+                                    <p className="mt-1 text-xs theme-text-muted">
+                                      Wali kelas: {item.waliKelas.namaLengkap}
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                            </td>
+
+                            {/* TINGKAT */}
+
+                            <td className="px-5 py-4 font-medium theme-text">
+                              Tingkat {item.tingkat || "-"}
+                            </td>
+
+                            {/* TAHUN AJARAN */}
+
+                            <td className="px-5 py-4">
+                              <div className="flex flex-col items-start gap-1">
+                                <span className="text-xs font-semibold theme-text">
+                                  {tahunAjaranLabel}
+                                </span>
+                                {tahunAjaran?.status === "aktif" && (
+                                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">
+                                    <CheckCircle2 size={11} />
+                                    Aktif
+                                  </span>
                                 )}
                               </div>
-                            </div>
-                          </td>
-                          <td className="px-5 py-4 font-medium theme-text">
-                            Tingkat {item.tingkat || "-"}
-                          </td>
-                          <td className="px-5 py-4 text-xs theme-text-muted">
-                            {getTahunAjaran(item)}
-                          </td>
-                          <td className="px-5 py-4 theme-text-muted">
-                            {getJumlahSiswa(item).toLocaleString("id-ID")} siswa
-                          </td>
-                          <td className="px-5 py-4">
-                            <div className="flex items-center gap-2">
-                              <select
-                                value={item.shift || ""}
-                                disabled={
-                                  updatingKelasId === item.id ||
-                                  item.shiftLoadError
-                                }
-                                onChange={(event) =>
-                                  handleSaveShiftKelas(item.id, event.target.value)
-                                }
-                                aria-label={`Shift kelas ${item.nama}`}
-                                className={`theme-input h-9 min-w-[140px] rounded-lg border px-2 text-sm outline-none transition disabled:cursor-not-allowed disabled:opacity-60 ${
-                                  item.shift === "pagi"
-                                    ? "border-blue-300 bg-blue-50 font-semibold text-blue-700 dark:border-blue-800 dark:bg-blue-950/50 dark:text-blue-300"
-                                    : item.shift === "siang"
-                                      ? "border-orange-300 bg-orange-50 font-semibold text-orange-700 dark:border-orange-800 dark:bg-orange-950/50 dark:text-orange-300"
-                                      : "theme-border theme-text-muted"
-                                }`}
-                              >
-                                {item.shiftLoadError ? (
-                                  <option value="">Gagal memuat shift</option>
-                                ) : (
-                                  <>
-                                    <option value="">Tanpa Shift</option>
-                                    <option value="pagi">Pagi</option>
-                                    <option value="siang">Siang</option>
-                                  </>
+                            </td>
+
+                            {/* JUMLAH SISWA */}
+
+                            <td className="px-5 py-4 theme-text-muted">
+                              {getJumlahSiswa(item).toLocaleString("id-ID")} siswa
+                            </td>
+
+                            {/* DROPDOWN SHIFT + JAM */}
+
+                            <td className="px-5 py-4">
+                              <div className="flex items-center gap-2">
+                                <select
+                                  value={item.shift || ""}
+                                  disabled={
+                                    updatingKelasId === item.id ||
+                                    item.shiftLoadError
+                                  }
+                                  onChange={(event) =>
+                                    handleSaveShiftKelas(
+                                      item.id,
+                                      event.target.value
+                                    )
+                                  }
+                                  aria-label={`Pilih shift dan jam belajar kelas ${item.nama}`}
+                                  className={`theme-input h-10 min-w-[230px] rounded-lg border px-3 text-sm font-medium outline-none transition focus:ring-2 focus:ring-[var(--color-primary)]/20 disabled:cursor-not-allowed disabled:opacity-60 ${
+                                    item.shift === "pagi"
+                                      ? "border-blue-300 bg-blue-50 text-blue-700 dark:border-blue-800 dark:bg-blue-950/50 dark:text-blue-300"
+                                      : item.shift === "siang"
+                                        ? "border-orange-300 bg-orange-50 text-orange-700 dark:border-orange-800 dark:bg-orange-950/50 dark:text-orange-300"
+                                        : "theme-border theme-text-muted"
+                                  }`}
+                                >
+                                  {item.shiftLoadError ? (
+                                    <option value="">Gagal memuat shift</option>
+                                  ) : (
+                                    <>
+                                      <option value="">
+                                        Tanpa Shift
+                                      </option>
+                                      <option value="pagi">
+                                        {getShiftKelasOptionLabel("pagi", shiftList)}
+                                      </option>
+                                      <option value="siang">
+                                        {getShiftKelasOptionLabel("siang", shiftList)}
+                                      </option>
+                                    </>
+                                  )}
+                                </select>
+
+                                {updatingKelasId === item.id && (
+                                  <LoaderCircle
+                                    size={16}
+                                    className="animate-spin text-[var(--color-primary)]"
+                                  />
                                 )}
-                              </select>
-                              {updatingKelasId === item.id && (
-                                <LoaderCircle
-                                  size={16}
-                                  className="animate-spin text-[var(--color-primary)]"
-                                />
+                              </div>
+
+                              {!item.shiftLoadError && (
+                                <p className="mt-1.5 text-[11px] theme-text-muted">
+                                  Pilih shift beserta jam belajarnya.
+                                </p>
                               )}
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
+                            </td>
+
+                            {/* JAM BELAJAR */}
+
+                            <td className="px-5 py-4">
+                              <JamBelajar
+                                shift={item.shift}
+                                shiftList={shiftList}
+                              />
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 )}
               </div>
+
+              {/* PAGINATION */}
 
               {!loading && filteredData.length > 0 && (
                 <div className="flex flex-col gap-3 border-t theme-border px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
@@ -1293,6 +1674,7 @@ export default function PenugasanShiftPage() {
                     {Math.min(currentPage * PAGE_SIZE, filteredData.length)} dari{" "}
                     {filteredData.length} data
                   </p>
+
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
@@ -1305,9 +1687,11 @@ export default function PenugasanShiftPage() {
                       <ChevronLeft size={14} />
                       Sebelumnya
                     </button>
+
                     <span className="px-2 text-xs theme-text-muted">
                       {currentPage} / {totalPages}
                     </span>
+
                     <button
                       type="button"
                       disabled={currentPage >= totalPages}
@@ -1325,13 +1709,6 @@ export default function PenugasanShiftPage() {
                 </div>
               )}
             </section>
-
-            <p className="mt-4 text-xs leading-5 theme-text-muted">
-              Catatan: penugasan shift kerja guru dan pegawai ditampilkan dari
-              field shiftKerja pengguna dan dicocokkan dengan master shift jika
-              tersedia. Shift belajar siswa disimpan pada data kelas. Perubahan
-              shift kelas tidak otomatis mengubah field shiftKerja pada akun siswa.
-            </p>
           </div>
         </main>
       </div>

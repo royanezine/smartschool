@@ -179,8 +179,25 @@ export default function CreatePagePage() {
             <div className="mx-auto w-full max-w-[1450px]">
 
 
-              <div className="mb-6 flex flex-col gap-4 sm:mb-7 lg:flex-row lg:items-center lg:justify-between">
-                <div className="flex min-w-0 flex-wrap items-center gap-2 text-sm">
+              {/* Baris atas: Kembali (kiri) + Breadcrumb (kanan) */}
+              <div className="mb-6 flex flex-col-reverse gap-4 sm:mb-7 sm:flex-row sm:items-center sm:justify-between">
+                <Link
+                  href="/admin/cms/pages"
+                  className="
+                    theme-card theme-border theme-text-secondary
+                    inline-flex w-fit items-center gap-2 rounded-xl
+                    border px-4 py-2.5 text-sm font-semibold shadow-sm
+                    transition
+                    hover:border-[var(--color-primary)]
+                    hover:bg-[var(--color-sidebar-active)]
+                    hover:text-[var(--color-primary)]
+                  "
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  Kembali
+                </Link>
+
+                <div className="flex min-w-0 flex-wrap items-center gap-2 text-sm sm:justify-end">
                   <Link
                     href="/admin/cms"
                     className="theme-text-muted transition hover:text-[var(--color-primary)]"
@@ -203,22 +220,6 @@ export default function CreatePagePage() {
                     Tambah Halaman
                   </span>
                 </div>
-
-                <Link
-                  href="/admin/cms/pages"
-                  className="
-                    theme-card theme-border theme-text-secondary
-                    inline-flex w-fit items-center gap-2 rounded-xl
-                    border px-4 py-2.5 text-sm font-semibold shadow-sm
-                    transition
-                    hover:border-[var(--color-primary)]
-                    hover:bg-[var(--color-sidebar-active)]
-                    hover:text-[var(--color-primary)]
-                  "
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                  Kembali
-                </Link>
               </div>
 
 
@@ -719,7 +720,7 @@ export default function CreatePagePage() {
                           </p>
 
                           <p className="theme-text-secondary mt-1 text-xs leading-5">
-                            Backend membuat slug berdasarkan judul halaman.
+                            Sistem membuat slug berdasarkan judul halaman.
                           </p>
 
                         </div>
@@ -755,7 +756,7 @@ export default function CreatePagePage() {
                             </p>
 
                             <p>
-                              Slug dibuat otomatis oleh backend.
+                              Slug dibuat otomatis oleh sistem.
                             </p>
 
                             <p>
@@ -783,7 +784,7 @@ export default function CreatePagePage() {
                         <Layout className="h-4 w-4" />
 
                         <span>
-                          Data akan dikirim langsung ke CMS backend.
+                          Data akan dikirim langsung ke sistem CMS.
                         </span>
                       </div>
 

@@ -71,9 +71,24 @@ export type PublicHalaman = {
   id: string;
   judul: string;
   slug: string;
-  konten?: string;
+  konten?: string | null;
   status?: string;
   dibuatPada?: string;
+  diperbaruiPada?: string;
+  subJudul?: string | null;
+  gambarUrl?: string | null;
+  menuKonfigurasi?: Array<{
+    id: string;
+    section: string;
+    judul?: string | null;
+    subJudul?: string | null;
+    konten?: string | null;
+    gambarUrl?: string | null;
+    ctaText?: string | null;
+    ctaLink?: string | null;
+    urutan?: number;
+    status?: string;
+  }>;
 };
 
 type ApiError = Error & {

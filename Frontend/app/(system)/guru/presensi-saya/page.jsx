@@ -29,23 +29,49 @@ import {
   checkInShift,
   checkOutShift,
   getRiwayatShiftSaya,
+  getMetodeAbsensiAktif,
 } from "@/services/absensi.service";
 
 const PAGE_SIZE = 10;
 const TIME_ZONE = "Asia/Jakarta";
 const REFRESH_INTERVAL = 10000;
-const MAX_GPS_ACCURACY_METERS = 100;
+const MAX_GPS_ACCURACY_METERS = 200;
 const GPS_TIMEOUT_MS = 30000;
 
-const METODE_ABSENSI = [
-  {
+const METODE_CONFIG = {
+  lokasi: {
+    value: "lokasi",
+    label: "Lokasi GPS",
+    description:
+      "Presensi menggunakan koordinat GPS perangkat dan validasi lokasi oleh Backend.",
+    icon: Clock3,
+    requiresLocation: true,
+  },
+  face: {
     value: "face",
     label: "Face ID",
     description:
-      "Metode yang diizinkan sekolah. Verifikasi wajah harus didukung dan dijalankan oleh endpoint Backend yang sesuai.",
+      "Metode Face ID yang diaktifkan sekolah. Endpoint presensi shift yang digunakan belum memverifikasi foto wajah.",
     icon: ShieldCheck,
+    requiresLocation: true,
   },
-];
+  barcode: {
+    value: "barcode",
+    label: "Barcode",
+    description:
+      "Metode barcode sesuai konfigurasi sekolah. Pastikan Backend mendukung validasi barcode pada endpoint presensi shift.",
+    icon: ClipboardCheck,
+    requiresLocation: false,
+  },
+  manual: {
+    value: "manual",
+    label: "Manual",
+    description:
+      "Metode presensi manual sesuai konfigurasi sekolah.",
+    icon: CalendarClock,
+    requiresLocation: false,
+  },
+};
 
 const getDateParts = (value = new Date()) => {
   const parts = new Intl.DateTimeFormat("en-CA", {
@@ -80,15 +106,14 @@ const formatDate = (value) => {
   ) {
     const [year, month, day] = value.split("-").map(Number);
 
-    return new Date(Date.UTC(year, month - 1, day, 12)).toLocaleDateString(
-      "id-ID",
-      {
-        timeZone: "UTC",
-        day: "2-digit",
-        month: "long",
-        year: "numeric",
-      }
-    );
+    return new Date(
+      Date.UTC(year, month - 1, day, 12)
+    ).toLocaleDateString("id-ID", {
+      timeZone: "UTC",
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    });
   }
 
   const date = new Date(value);
@@ -256,9 +281,8 @@ const getShiftEnd = (record) =>
   null;
 
 const getMethodLabel = (method) => {
-  const found = METODE_ABSENSI.find(
-    (item) => normalizeText(item.value) === normalizeText(method)
-  );
+  const normalized = normalizeText(method);
+  const found = METODE_CONFIG[normalized];
 
   return found?.label ?? method ?? "-";
 };
@@ -278,7 +302,7 @@ const getErrorMessage = (error) => {
     lowerMessage.includes("meter dari sekolah") ||
     lowerMessage.includes("radius")
   ) {
-    return `${message} Periksa koordinat sekolah di database dan pastikan lokasi GPS perangkat akurat.`;
+    return `${message} Periksa koordinat sekolah di database dan pastikan GPS perangkat akurat.`;
   }
 
   if (
@@ -289,16 +313,14 @@ const getErrorMessage = (error) => {
   }
 
   if (
-    lowerMessage.includes("lokasi perangkat tidak tersedia") ||
     lowerMessage.includes("akurasi gps") ||
     lowerMessage.includes("akurasi lokasi") ||
-    lowerMessage.includes("koordinat lokasi") ||
     lowerMessage.includes("lokasi belum cukup akurat") ||
     lowerMessage.includes("lokasi belum berhasil diperoleh") ||
-    lowerMessage.includes("pengambilan lokasi") ||
-    lowerMessage.includes("browser tidak memberikan informasi akurasi") ||
+    lowerMessage.includes("lokasi tidak dapat diakses") ||
     lowerMessage.includes("izin lokasi ditolak") ||
     lowerMessage.includes("browser tidak mendukung akses lokasi") ||
+    lowerMessage.includes("browser gagal memulai gps") ||
     lowerMessage.includes("layanan lokasi") ||
     lowerMessage.includes("gagal mendapatkan lokasi")
   ) {
@@ -309,15 +331,6 @@ const getErrorMessage = (error) => {
 };
 
 
-/**
- * Mengambil koordinat GPS asli perangkat.
- *
- * - Meminta akurasi tinggi.
- * - Menunggu pembacaan dengan akurasi maksimal 100 meter.
- * - Mencoba kembali jika GPS belum tersedia.
- * - Berhenti setelah maksimal 30 detik.
- * - Tidak memalsukan koordinat dan tidak melewati validasi Backend.
- */
 const getCurrentLocation = () =>
   new Promise((resolve, reject) => {
     if (
@@ -360,19 +373,7 @@ const getCurrentLocation = () =>
     const handlePosition = (position) => {
       if (finished) return;
 
-      const {
-        latitude,
-        longitude,
-        accuracy,
-      } = position.coords;
-
-      console.info("[GPS] Pembacaan lokasi:", {
-        latitude,
-        longitude,
-        accuracyMeter: Number.isFinite(accuracy)
-          ? Math.round(accuracy)
-          : null,
-      });
+      const { latitude, longitude, accuracy } = position.coords;
 
       if (
         !Number.isFinite(latitude) ||
@@ -394,13 +395,17 @@ const getCurrentLocation = () =>
         bestPosition = position;
       }
 
-      if (accuracy <= MAX_GPS_ACCURACY_METERS) {
-        console.info("[GPS] Akurasi memenuhi batas presensi.");
+      console.info("[GPS PRESENSI]", {
+        lintang: latitude,
+        bujur: longitude,
+        akurasiMeter: Math.round(accuracy),
+      });
 
+      if (accuracy <= MAX_GPS_ACCURACY_METERS) {
         finish(resolve, {
-          lintang: latitude,
-          bujur: longitude,
-          akurasi: accuracy,
+          lintang: Number(latitude),
+          bujur: Number(longitude),
+          akurasi: Number(accuracy),
         });
       }
     };
@@ -408,7 +413,7 @@ const getCurrentLocation = () =>
     const handlePositionError = (error) => {
       if (finished) return;
 
-      console.warn("[GPS] Pembacaan lokasi gagal:", {
+      console.warn("[GPS PRESENSI] Gagal membaca lokasi:", {
         code: error.code,
         message: error.message,
       });
@@ -417,15 +422,10 @@ const getCurrentLocation = () =>
         finish(
           reject,
           new Error(
-            "Izin lokasi ditolak. Izinkan akses lokasi untuk website SmartSchool melalui pengaturan browser."
+            "Izin lokasi ditolak. Izinkan akses lokasi untuk SmartSchool melalui pengaturan browser."
           )
         );
       }
-
-      // Kode 2: lokasi sementara tidak tersedia.
-      // Kode 3: pembacaan melewati timeout browser.
-      // Keduanya tidak langsung menggagalkan proses karena
-      // pembacaan berikutnya mungkin berhasil.
     };
 
     try {
@@ -438,42 +438,47 @@ const getCurrentLocation = () =>
           timeout: GPS_TIMEOUT_MS,
         }
       );
-    } catch (error) {
+    } catch {
       finish(
         reject,
         new Error(
-          "Browser gagal memulai GPS. Periksa izin lokasi perangkat."
+          "Browser gagal memulai GPS. Periksa pengaturan lokasi perangkat."
         )
       );
       return;
     }
 
     timeoutId = setTimeout(() => {
-      if (finished) return;
-
-      const bestAccuracy = bestPosition?.coords?.accuracy;
-
-      if (
-        bestPosition &&
-        Number.isFinite(bestAccuracy) &&
-        bestAccuracy <= MAX_GPS_ACCURACY_METERS
-      ) {
-        finish(resolve, {
-          lintang: bestPosition.coords.latitude,
-          bujur: bestPosition.coords.longitude,
-          akurasi: bestAccuracy,
-        });
+      if (!bestPosition) {
+        finish(
+          reject,
+          new Error(
+            "Lokasi belum berhasil diperoleh dalam 30 detik. Aktifkan GPS dan izinkan akses lokasi, lalu coba kembali."
+          )
+        );
         return;
       }
 
-      const message =
-        bestPosition && Number.isFinite(bestAccuracy)
-          ? `Lokasi perangkat belum cukup akurat. Akurasi terbaik sekitar ${Math.round(
-              bestAccuracy
-            )} meter, sedangkan presensi membutuhkan maksimal ${MAX_GPS_ACCURACY_METERS} meter. Aktifkan layanan lokasi dan coba di area terbuka.`
-          : "Lokasi belum berhasil diperoleh. Aktifkan layanan lokasi perangkat dan izinkan akses lokasi pada browser.";
+      const { latitude, longitude, accuracy } =
+        bestPosition.coords;
 
-      finish(reject, new Error(message));
+      if (accuracy > MAX_GPS_ACCURACY_METERS) {
+        finish(
+          reject,
+          new Error(
+            `Akurasi GPS masih sekitar ${Math.round(
+              accuracy
+            )} meter setelah 30 detik. Presensi membutuhkan akurasi maksimal ${MAX_GPS_ACCURACY_METERS} meter.`
+          )
+        );
+        return;
+      }
+
+      finish(resolve, {
+        lintang: Number(latitude),
+        bujur: Number(longitude),
+        akurasi: Number(accuracy),
+      });
     }, GPS_TIMEOUT_MS);
   });
 
@@ -520,6 +525,24 @@ const getShiftFromRecord = (record) => {
   return null;
 };
 
+const normalizeMethodResponse = (response) => {
+  if (Array.isArray(response)) return response;
+
+  if (Array.isArray(response?.metodeAktif)) {
+    return response.metodeAktif;
+  }
+
+  if (Array.isArray(response?.data?.metodeAktif)) {
+    return response.data.metodeAktif;
+  }
+
+  if (Array.isArray(response?.data)) {
+    return response.data;
+  }
+
+  return [];
+};
+
 export default function AbsensiGuruPage() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [records, setRecords] = useState([]);
@@ -537,6 +560,54 @@ export default function AbsensiGuruPage() {
   const [keterangan, setKeterangan] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [today, setToday] = useState(() => getToday());
+
+  const [metodeAktif, setMetodeAktif] = useState([]);
+  const [metodeTerpilih, setMetodeTerpilih] = useState("");
+  const [metodeLoading, setMetodeLoading] = useState(true);
+  const [metodeError, setMetodeError] = useState("");
+
+  const fetchMetodeAbsensi = useCallback(async () => {
+    try {
+      setMetodeLoading(true);
+      setMetodeError("");
+
+      const response = await getMetodeAbsensiAktif();
+      const rawMethods = normalizeMethodResponse(response);
+
+      const normalizedMethods = [
+        ...new Set(
+          rawMethods
+            .map((method) =>
+              String(method ?? "").trim().toLowerCase()
+            )
+            .filter((method) => Boolean(METODE_CONFIG[method]))
+        ),
+      ];
+
+      setMetodeAktif(normalizedMethods);
+
+      setMetodeTerpilih((current) => {
+        if (current && normalizedMethods.includes(current)) {
+          return current;
+        }
+
+        return normalizedMethods[0] ?? "";
+      });
+
+      if (normalizedMethods.length === 0) {
+        setMetodeError(
+          "Belum ada metode presensi aktif yang tersedia dari konfigurasi sekolah."
+        );
+      }
+    } catch (err) {
+      console.error("Gagal mengambil metode presensi:", err);
+      setMetodeAktif([]);
+      setMetodeTerpilih("");
+      setMetodeError(getErrorMessage(err));
+    } finally {
+      setMetodeLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     const updateToday = () => setToday(getToday());
@@ -640,6 +711,10 @@ export default function AbsensiGuruPage() {
   }, []);
 
   useEffect(() => {
+    fetchMetodeAbsensi();
+  }, [fetchMetodeAbsensi]);
+
+  useEffect(() => {
     fetchHistory(true);
 
     const intervalId = setInterval(() => {
@@ -657,11 +732,13 @@ export default function AbsensiGuruPage() {
       }
     };
 
-    document.addEventListener("visibilitychange", handleVisibilityChange);
+    document.addEventListener(
+      "visibilitychange",
+      handleVisibilityChange
+    );
 
     return () => {
       clearInterval(intervalId);
-
       document.removeEventListener(
         "visibilitychange",
         handleVisibilityChange
@@ -673,7 +750,9 @@ export default function AbsensiGuruPage() {
     () =>
       records
         .filter((record) => getRecordDate(record) === today)
-        .sort((a, b) => getRecordTimestamp(b) - getRecordTimestamp(a)),
+        .sort(
+          (a, b) => getRecordTimestamp(b) - getRecordTimestamp(a)
+        ),
     [records, today]
   );
 
@@ -723,90 +802,171 @@ export default function AbsensiGuruPage() {
     };
   }, [records]);
 
-  const handleCheckIn = async () => {
-    if (submitting || loading || !canCheckIn) return;
+ 
+const handleCheckIn = async () => {
+  if (submitting || loading || !canCheckIn) return;
 
-    if (
-      !window.confirm(
-        "Lanjutkan check-in? Backend akan memvalidasi metode presensi dan lokasi."
-      )
-    ) {
-      return;
+  if (metodeLoading) {
+    setError("Sedang memuat konfigurasi metode presensi.");
+    return;
+  }
+
+  if (!metodeTerpilih || !metodeAktif.includes(metodeTerpilih)) {
+    setError("Pilih metode presensi yang aktif terlebih dahulu.");
+    return;
+  }
+
+  if (
+    !window.confirm(
+      `Lanjutkan check-in menggunakan metode ${
+        METODE_CONFIG[metodeTerpilih]?.label ?? metodeTerpilih
+      }?`
+    )
+  ) {
+    return;
+  }
+
+  try {
+    setSubmitting(true);
+    setActiveAction("checkin");
+    setError("");
+    setNotice("");
+
+    let lokasi = null;
+
+    if (METODE_CONFIG[metodeTerpilih]?.requiresLocation) {
+      lokasi = await getCurrentLocation();
+
+      if (
+        !Number.isFinite(lokasi.lintang) ||
+        !Number.isFinite(lokasi.bujur)
+      ) {
+        throw new Error(
+          "Koordinat GPS tidak valid. Coba perbarui lokasi perangkat."
+        );
+      }
     }
 
-    try {
-      setSubmitting(true);
-      setActiveAction("checkin");
-      setError("");
-      setNotice("");
+    const payload = {
+      status: "hadir",
+      metode: metodeTerpilih,
+      ...(lokasi
+        ? {
+            lintang: Number(lokasi.lintang),
+            bujur: Number(lokasi.bujur),
+          }
+        : {}),
+      ...(keterangan.trim()
+        ? { keterangan: keterangan.trim() }
+        : {}),
+    };
 
-      const lokasi = await getCurrentLocation();
+    console.info("[PRESENSI SHIFT] Payload check-in:", {
+      ...payload,
+      akurasiGPS: lokasi?.akurasi ?? null,
+    });
 
-      await checkInShift({
-        status: "hadir",
-        metode: "face",
-        lintang: lokasi.lintang,
-        bujur: lokasi.bujur,
-        ...(keterangan.trim()
-          ? { keterangan: keterangan.trim() }
-          : {}),
-      });
+    await checkInShift(payload);
 
-      setNotice(
-        "Check-in berhasil dicatat. Riwayat presensi diperbarui."
-      );
+    setNotice(
+      lokasi
+        ? `Check-in berhasil dicatat menggunakan ${
+            METODE_CONFIG[metodeTerpilih]?.label ?? metodeTerpilih
+          }. Akurasi GPS ±${Math.round(lokasi.akurasi)} meter.`
+        : `Check-in berhasil dicatat menggunakan ${
+            METODE_CONFIG[metodeTerpilih]?.label ?? metodeTerpilih
+          }.`
+    );
 
-      setKeterangan("");
+    setKeterangan("");
+    await fetchHistory(false);
+  } catch (err) {
+    console.error("[PRESENSI SHIFT] Check-in gagal:", err);
+    setError(getErrorMessage(err));
+  } finally {
+    setSubmitting(false);
+    setActiveAction("");
+  }
+};
 
-      await fetchHistory(false);
-    } catch (err) {
-      console.error("Gagal check-in:", err);
-      setError(getErrorMessage(err));
-    } finally {
-      setSubmitting(false);
-      setActiveAction("");
+
+ 
+const handleCheckOut = async () => {
+  if (submitting || loading || !canCheckOut) return;
+
+  if (metodeLoading) {
+    setError("Sedang memuat konfigurasi metode presensi.");
+    return;
+  }
+
+  if (!metodeTerpilih || !metodeAktif.includes(metodeTerpilih)) {
+    setError("Pilih metode presensi yang aktif terlebih dahulu.");
+    return;
+  }
+
+  if (
+    !window.confirm(
+      `Lakukan check-out menggunakan metode ${
+        METODE_CONFIG[metodeTerpilih]?.label ?? metodeTerpilih
+      }?`
+    )
+  ) {
+    return;
+  }
+
+  try {
+    setSubmitting(true);
+    setActiveAction("checkout");
+    setError("");
+    setNotice("");
+
+    let lokasi = null;
+
+    if (METODE_CONFIG[metodeTerpilih]?.requiresLocation) {
+      lokasi = await getCurrentLocation();
     }
-  };
 
-  const handleCheckOut = async () => {
-    if (submitting || loading || !canCheckOut) return;
+    const payload = {
+      metode: metodeTerpilih,
+      ...(lokasi
+        ? {
+            lintang: Number(lokasi.lintang),
+            bujur: Number(lokasi.bujur),
+          }
+        : {}),
+      ...(keterangan.trim()
+        ? { keterangan: keterangan.trim() }
+        : {}),
+    };
 
-    if (!window.confirm("Lakukan check-out sekarang?")) {
-      return;
-    }
+    console.info("[PRESENSI SHIFT] Payload check-out:", {
+      ...payload,
+      akurasiGPS: lokasi?.akurasi ?? null,
+    });
 
-    try {
-      setSubmitting(true);
-      setActiveAction("checkout");
-      setError("");
-      setNotice("");
+    await checkOutShift(payload);
 
-      const lokasi = await getCurrentLocation();
+    setNotice(
+      `Check-out berhasil dicatat menggunakan ${
+        METODE_CONFIG[metodeTerpilih]?.label ?? metodeTerpilih
+      }${
+        lokasi
+          ? `. Akurasi GPS ±${Math.round(lokasi.akurasi)} meter.`
+          : "."
+      }`
+    );
 
-      await checkOutShift({
-        metode: "face",
-        lintang: lokasi.lintang,
-        bujur: lokasi.bujur,
-        ...(keterangan.trim()
-          ? { keterangan: keterangan.trim() }
-          : {}),
-      });
+    setKeterangan("");
+    await fetchHistory(false);
+  } catch (err) {
+    console.error("[PRESENSI SHIFT] Check-out gagal:", err);
+    setError(getErrorMessage(err));
+  } finally {
+    setSubmitting(false);
+    setActiveAction("");
+  }
+};
 
-      setNotice(
-        "Check-out berhasil dicatat. Riwayat presensi diperbarui."
-      );
-
-      setKeterangan("");
-
-      await fetchHistory(false);
-    } catch (err) {
-      console.error("Gagal check-out:", err);
-      setError(getErrorMessage(err));
-    } finally {
-      setSubmitting(false);
-      setActiveAction("");
-    }
-  };
 
   const totalPages = Math.max(
     1,
@@ -839,7 +999,7 @@ export default function AbsensiGuruPage() {
           className: "theme-success",
         };
 
-  const selectedMethodInfo = METODE_ABSENSI[0];
+  const selectedMethodInfo = METODE_CONFIG[metodeTerpilih];
 
   return (
     <div className="flex h-screen w-full theme-page overflow-hidden">
@@ -879,14 +1039,19 @@ export default function AbsensiGuruPage() {
 
                 <button
                   type="button"
-                  onClick={() => fetchHistory(true)}
+                  onClick={() => {
+                    fetchHistory(true);
+                    fetchMetodeAbsensi();
+                  }}
                   disabled={loading || shiftLoading || submitting}
                   className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border theme-border theme-card theme-text-secondary hover:text-[var(--color-primary)] transition disabled:opacity-50"
                 >
                   <RefreshCw
                     size={16}
                     className={
-                      loading || shiftLoading ? "animate-spin" : ""
+                      loading || shiftLoading || metodeLoading
+                        ? "animate-spin"
+                        : ""
                     }
                   />
                   Perbarui data
@@ -995,40 +1160,79 @@ export default function AbsensiGuruPage() {
                       Metode yang dikonfigurasi oleh sekolah.
                     </p>
 
-                    <div className="grid grid-cols-1 gap-3">
-                      {METODE_ABSENSI.map((method) => {
-                        const Icon = method.icon;
+                    {metodeLoading ? (
+                      <div className="flex items-center gap-2 p-4 rounded-xl border theme-border theme-card">
+                        <Loader2
+                          size={17}
+                          className="animate-spin text-[var(--color-primary)]"
+                        />
+                        <span className="text-sm theme-text-secondary">
+                          Memuat metode presensi...
+                        </span>
+                      </div>
+                    ) : metodeError ? (
+                      <div className="flex items-start gap-2 p-4 rounded-xl border theme-warning">
+                        <CircleAlert
+                          size={18}
+                          className="shrink-0 mt-0.5"
+                        />
+                        <p className="text-sm">{metodeError}</p>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 gap-3">
+                        {metodeAktif.map((methodValue) => {
+                          const method = METODE_CONFIG[methodValue];
 
-                        return (
-                          <div
-                            key={method.value}
-                            className="text-left p-4 rounded-xl border border-[var(--color-primary)] ring-1 ring-[var(--color-primary)] theme-card"
-                          >
-                            <div className="flex items-start gap-3">
-                              <div className="p-2.5 rounded-lg theme-primary">
-                                <Icon size={19} />
-                              </div>
+                          if (!method) return null;
 
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center justify-between gap-2">
-                                  <p className="text-sm font-semibold theme-text">
-                                    {method.label}
-                                  </p>
-                                  <CheckCircle2
-                                    size={17}
-                                    className="text-[var(--color-primary)] shrink-0"
-                                  />
+                          const Icon = method.icon;
+                          const selected =
+                            metodeTerpilih === method.value;
+
+                          return (
+                            <button
+                              key={method.value}
+                              type="button"
+                              onClick={() =>
+                                setMetodeTerpilih(method.value)
+                              }
+                              disabled={submitting}
+                              aria-pressed={selected}
+                              className={`text-left p-4 rounded-xl border transition disabled:opacity-50 ${
+                                selected
+                                  ? "border-[var(--color-primary)] ring-1 ring-[var(--color-primary)] theme-card"
+                                  : "theme-border theme-card hover:border-[var(--color-primary)]"
+                              }`}
+                            >
+                              <div className="flex items-start gap-3">
+                                <div className="p-2.5 rounded-lg theme-primary">
+                                  <Icon size={19} />
                                 </div>
 
-                                <p className="text-xs theme-text-muted mt-1 leading-5">
-                                  {method.description}
-                                </p>
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center justify-between gap-2">
+                                    <p className="text-sm font-semibold theme-text">
+                                      {method.label}
+                                    </p>
+
+                                    {selected && (
+                                      <CheckCircle2
+                                        size={17}
+                                        className="text-[var(--color-primary)] shrink-0"
+                                      />
+                                    )}
+                                  </div>
+
+                                  <p className="text-xs theme-text-muted mt-1 leading-5">
+                                    {method.description}
+                                  </p>
+                                </div>
                               </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
 
                     <div className="mt-4">
                       <label
@@ -1059,13 +1263,23 @@ export default function AbsensiGuruPage() {
                         size={17}
                         className="theme-text-muted shrink-0 mt-0.5"
                       />
+
                       <p className="text-xs theme-text-secondary leading-5">
-                        Metode terpilih:{" "}
-                        <strong>{selectedMethodInfo.label}</strong>. Koordinat
-                        GPS asli perangkat dikirim ke Backend untuk validasi
-                        lokasi. Endpoint check-in shift saat ini belum mengirim
-                        foto atau melakukan verifikasi wajah. Verifikasi Face ID
-                        memerlukan integrasi endpoint Backend yang mendukungnya.
+                        {selectedMethodInfo ? (
+                          <>
+                            Metode terpilih:{" "}
+                            <strong>{selectedMethodInfo.label}</strong>.
+                            {selectedMethodInfo.requiresLocation
+                              ? " GPS perangkat digunakan sesuai validasi Backend."
+                              : " Metode akan dikirim ke endpoint presensi Backend."}
+                            {metodeTerpilih === "face" &&
+                              " Endpoint shift yang digunakan belum melakukan verifikasi foto wajah."}
+                            {metodeTerpilih === "barcode" &&
+                              " Pastikan Backend memvalidasi barcode untuk endpoint shift."}
+                          </>
+                        ) : (
+                          "Belum ada metode presensi yang dapat dipilih."
+                        )}
                       </p>
                     </div>
                   </div>
@@ -1074,11 +1288,20 @@ export default function AbsensiGuruPage() {
                     <button
                       type="button"
                       onClick={handleCheckIn}
-                      disabled={loading || submitting || !canCheckIn}
+                      disabled={
+                        loading ||
+                        submitting ||
+                        metodeLoading ||
+                        !metodeTerpilih ||
+                        !canCheckIn
+                      }
                       className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl theme-primary font-semibold text-sm transition disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {activeAction === "checkin" ? (
-                        <Loader2 size={17} className="animate-spin" />
+                        <Loader2
+                          size={17}
+                          className="animate-spin"
+                        />
                       ) : (
                         <ShieldCheck size={17} />
                       )}
@@ -1093,11 +1316,20 @@ export default function AbsensiGuruPage() {
                     <button
                       type="button"
                       onClick={handleCheckOut}
-                      disabled={loading || submitting || !canCheckOut}
+                      disabled={
+                        loading ||
+                        submitting ||
+                        metodeLoading ||
+                        !metodeTerpilih ||
+                        !canCheckOut
+                      }
                       className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl border theme-border theme-card theme-text-secondary font-semibold text-sm hover:border-[var(--color-primary)] transition disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {activeAction === "checkout" ? (
-                        <Loader2 size={17} className="animate-spin" />
+                        <Loader2
+                          size={17}
+                          className="animate-spin"
+                        />
                       ) : (
                         <LogOut size={17} />
                       )}
@@ -1130,7 +1362,9 @@ export default function AbsensiGuruPage() {
                   {displayedShift ? (
                     <div className="mt-6 space-y-4">
                       <div>
-                        <p className="text-xs theme-text-muted">Nama shift</p>
+                        <p className="text-xs theme-text-muted">
+                          Nama shift
+                        </p>
                         <p className="text-base font-semibold theme-text mt-1">
                           {getShiftName(displayedShift)}
                         </p>
@@ -1188,7 +1422,9 @@ export default function AbsensiGuruPage() {
                     <div className="p-2 rounded-lg theme-info">
                       <History size={17} />
                     </div>
-                    <p className="text-xs theme-text-muted">Total catatan</p>
+                    <p className="text-xs theme-text-muted">
+                      Total catatan
+                    </p>
                   </div>
                   <p className="text-2xl font-bold theme-text mt-3">
                     {loading ? "—" : summary.total}
@@ -1212,7 +1448,9 @@ export default function AbsensiGuruPage() {
                     <div className="p-2 rounded-lg theme-warning">
                       <Timer size={17} />
                     </div>
-                    <p className="text-xs theme-text-muted">Terlambat</p>
+                    <p className="text-xs theme-text-muted">
+                      Terlambat
+                    </p>
                   </div>
                   <p className="text-2xl font-bold theme-text mt-3">
                     {loading ? "—" : summary.terlambat}
@@ -1281,7 +1519,10 @@ export default function AbsensiGuruPage() {
                     <tbody>
                       {loading ? (
                         <tr>
-                          <td colSpan={7} className="px-5 py-14 text-center">
+                          <td
+                            colSpan={7}
+                            className="px-5 py-14 text-center"
+                          >
                             <Loader2
                               size={26}
                               className="animate-spin mx-auto text-[var(--color-primary)]"
@@ -1293,7 +1534,10 @@ export default function AbsensiGuruPage() {
                         </tr>
                       ) : paginatedRecords.length === 0 ? (
                         <tr>
-                          <td colSpan={7} className="px-5 py-14 text-center">
+                          <td
+                            colSpan={7}
+                            className="px-5 py-14 text-center"
+                          >
                             <div className="w-12 h-12 rounded-full theme-info mx-auto flex items-center justify-center">
                               <History size={23} />
                             </div>
@@ -1367,9 +1611,13 @@ export default function AbsensiGuruPage() {
                 {!loading && records.length > 0 && (
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-5 py-4 border-t theme-border theme-card-soft">
                     <p className="text-xs theme-text-muted">
-                      Menampilkan {(currentPage - 1) * PAGE_SIZE + 1}
+                      Menampilkan{" "}
+                      {(currentPage - 1) * PAGE_SIZE + 1}
                       {" – "}
-                      {Math.min(currentPage * PAGE_SIZE, records.length)}
+                      {Math.min(
+                        currentPage * PAGE_SIZE,
+                        records.length
+                      )}
                       {" dari "}
                       {records.length} catatan
                     </p>
@@ -1414,9 +1662,10 @@ export default function AbsensiGuruPage() {
                   </p>
                   <p className="text-xs theme-text-muted mt-1 leading-5">
                     Riwayat diperbarui otomatis setiap 10 detik saat halaman
-                    aktif. Metode presensi mengikuti pengaturan Backend sekolah.
-                    Verifikasi wajah harus dilakukan oleh layanan Face ID yang
-                    terintegrasi dengan endpoint presensi yang digunakan.
+                    aktif. Metode presensi mengikuti pengaturan Backend
+                    sekolah. Verifikasi wajah dan barcode harus benar-benar
+                    didukung oleh endpoint Backend sebelum dianggap
+                    terverifikasi.
                   </p>
                 </div>
               </div>

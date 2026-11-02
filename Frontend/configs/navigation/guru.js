@@ -1,3 +1,4 @@
+
 "use client";
 
 import {
@@ -15,9 +16,7 @@ import {
   ShieldCheck,
   Library,
   Package,
-  Settings,
-  User,
-   Wallet,
+  Wallet,
 } from "lucide-react";
 
 export const guruSidebarConfig = {
@@ -26,6 +25,7 @@ export const guruSidebarConfig = {
   brandName: "Guru",
 
   menuSections: [
+    // MENU UTAMA
     {
       type: "item",
       key: "dashboard",
@@ -34,6 +34,25 @@ export const guruSidebarConfig = {
       path: "/guru",
     },
 
+    {
+      type: "item",
+      key: "presensi-saya",
+      label: "Presensi Saya",
+      icon: UserCheck,
+      path: "/guru/presensi-saya",
+      permission: "akademik.view",
+    },
+
+    {
+      type: "item",
+      key: "jadwal",
+      label: "Jadwal",
+      icon: CalendarDays,
+      path: "/guru/jadwal",
+      permission: "akademik.view",
+    },
+
+    // PROSES BELAJAR
     {
       type: "header",
       key: "proses-belajar-header",
@@ -77,12 +96,6 @@ export const guruSidebarConfig = {
     },
 
     {
-      type: "header",
-      key: "akademik-header",
-      label: "Akademik",
-    },
-
-    {
       type: "item",
       key: "absensi-siswa",
       label: "Absensi Siswa",
@@ -91,9 +104,16 @@ export const guruSidebarConfig = {
       permission: "akademik.view",
     },
 
+    // AKADEMIK
+    {
+      type: "header",
+      key: "akademik-header",
+      label: "Akademik",
+    },
+
     {
       type: "item",
-      key: "input nilai",
+      key: "input-nilai",
       label: "Input Nilai",
       icon: FileBarChart,
       path: "/guru/nilaiUjian",
@@ -107,7 +127,6 @@ export const guruSidebarConfig = {
       icon: Award,
       path: "/guru/nilai/rapor",
       permission: "akademik.view",
-
       children: [
         {
           type: "item",
@@ -136,39 +155,11 @@ export const guruSidebarConfig = {
       ],
     },
 
-    
-
-    {
-      type: "item",
-      key: "jadwal",
-      label: "Jadwal",
-      icon: CalendarDays,
-      path: "/guru/jadwal",
-      permission: "akademik.view",
-    },
-
-    {
-      type: "item",
-      key: "kalender",
-      label: "Kalender",
-      icon: CalendarRange,  
-      path: "/guru/jadwal/kalender",
-      permission: "akademik.view",
-    },
-
+    // PERSONAL / KEPEGAWAIAN
     {
       type: "header",
-      key: "kehadiran-header",
-      label: "Kehadiran",
-    },
-
-    {
-      type: "item",
-      key: "presensi-saya",
-      label: "Presensi Saya",
-      icon: UserCheck,
-      path: "/guru/presensi-saya",
-      permission: "akademik.view",
+      key: "personal-kepegawaian-header",
+      label: "Personal / Kepegawaian",
     },
 
     {
@@ -180,6 +171,25 @@ export const guruSidebarConfig = {
       permission: "akademik.view",
     },
 
+    {
+      type: "item",
+      key: "slip-gaji",
+      label: "Slip Gaji",
+      icon: Wallet,
+      path: "/guru/slip-gaji",
+      permission: "akademik.view",
+    },
+
+    {
+      type: "item",
+      key: "kalender",
+      label: "Kalender",
+      icon: CalendarRange,
+      path: "/guru/jadwal/kalender",
+      permission: "akademik.view",
+    },
+
+    // LAINNYA
     {
       type: "header",
       key: "lainnya-header",
@@ -196,26 +206,12 @@ export const guruSidebarConfig = {
     },
 
     {
-      type: "header",
-      key: "keuangan-header",
-      label: "Keuangan",
-    },
-
-    {
       type: "item",
-      key: "slip-gaji",
-      label: "Slip Gaji",
-      icon: Wallet,
-      path: "/guru/slip-gaji",
+      key: "perpustakaan",
+      label: "Perpustakaan",
+      icon: Library,
+      path: "/guru/perpustakaan",
       permission: "akademik.view",
     },
-
-    {
-      type: "header",
-      key: "akun-header",
-      label: "Akun",
-    },
-
-  
   ],
 };

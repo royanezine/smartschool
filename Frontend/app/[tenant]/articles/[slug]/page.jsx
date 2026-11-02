@@ -1,3 +1,4 @@
+
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { publikService } from "@/services/publik.service";
@@ -237,20 +238,21 @@ export default async function DetailArtikelPage({ params }) {
 
   return (
     <main
-      className="min-h-screen pb-24 pt-28"
+      className="min-h-screen pb-24"
       style={{
         backgroundColor: theme.background,
         color: theme.text,
       }}
     >
-      {/* HEADER ARTIKEL */}
+      {/* HERO ARTIKEL FULL WIDTH */}
       <section
-        className="relative isolate overflow-hidden py-16 sm:py-20"
+        className="relative isolate w-full overflow-hidden py-16 sm:py-20 lg:py-24"
         style={{
           backgroundColor: theme.primary,
           color: "#FFFFFF",
         }}
       >
+        {/* Background dekoratif */}
         <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
           <div
             className="absolute -left-1/4 -top-1/4 h-full w-1/2 rounded-full blur-3xl"
@@ -277,10 +279,11 @@ export default async function DetailArtikelPage({ params }) {
           />
         </div>
 
-        <div className="relative mx-auto max-w-4xl px-6">
+        {/* Isi hero dibatasi agar teks tetap rapi */}
+        <div className="relative mx-auto w-full max-w-6xl px-5 sm:px-8">
           <Link
             href={`/${tenant}/articles`}
-            className="inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition"
+            className="inline-flex items-center gap-2 rounded-full border px-4 py-2.5 text-sm font-semibold transition hover:bg-white/20"
             style={{
               borderColor: "rgba(255,255,255,0.3)",
               backgroundColor: "rgba(255,255,255,0.12)",
@@ -291,14 +294,14 @@ export default async function DetailArtikelPage({ params }) {
             Kembali ke Daftar Artikel
           </Link>
 
-          <div className="mt-8 text-center">
+          <div className="mx-auto mt-10 max-w-4xl text-center sm:mt-12">
             {category && (
               <span
-                className="mb-5 inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-widest"
+                className="mb-6 inline-flex items-center gap-2 rounded-full border px-4 py-2 text-xs font-bold uppercase tracking-widest sm:text-sm"
                 style={{
                   backgroundColor: `color-mix(in srgb, ${theme.accent} 25%, transparent)`,
                   color: "#FFFFFF",
-                  border: "1px solid rgba(255,255,255,0.2)",
+                  borderColor: "rgba(255,255,255,0.2)",
                 }}
               >
                 <Tag size={14} />
@@ -306,14 +309,17 @@ export default async function DetailArtikelPage({ params }) {
               </span>
             )}
 
-            <h1 className="text-3xl font-extrabold leading-tight tracking-tight text-white sm:text-4xl md:text-5xl">
+            <h1 className="break-words text-3xl font-extrabold leading-tight tracking-tight text-white sm:text-4xl md:text-5xl lg:text-6xl">
               {title}
             </h1>
 
-            <div className="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-3 text-sm text-white/80">
+            <div className="mt-7 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-sm text-white/85">
               {date && (
                 <span className="inline-flex items-center gap-2">
-                  <CalendarDays size={16} style={{ color: theme.accent }} />
+                  <CalendarDays
+                    size={16}
+                    style={{ color: theme.accent }}
+                  />
                   {date}
                 </span>
               )}
@@ -325,7 +331,7 @@ export default async function DetailArtikelPage({ params }) {
             </div>
 
             <div
-              className="mx-auto mt-8 h-1.5 w-24 rounded-full"
+              className="mx-auto mt-9 h-1.5 w-24 rounded-full"
               style={{ backgroundColor: theme.accent }}
             />
           </div>
@@ -333,13 +339,13 @@ export default async function DetailArtikelPage({ params }) {
       </section>
 
       {/* KONTEN ARTIKEL */}
-      <section className="relative z-10 mx-auto -mt-8 max-w-6xl px-6">
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_300px]">
+      <section className="relative z-10 mx-auto -mt-8 w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_300px] lg:gap-10">
           {/* KONTEN UTAMA */}
           <article className="min-w-0">
             {image && (
               <figure
-                className="mb-8 overflow-hidden rounded-3xl border shadow-lg"
+                className="mb-8 overflow-hidden rounded-2xl border shadow-lg sm:rounded-3xl"
                 style={{
                   backgroundColor: theme.surface,
                   borderColor: theme.border,
@@ -348,13 +354,13 @@ export default async function DetailArtikelPage({ params }) {
                 <img
                   src={image}
                   alt={title}
-                  className="aspect-video h-full w-full object-cover"
+                  className="block aspect-video w-full object-cover"
                 />
               </figure>
             )}
 
             <div
-              className="rounded-3xl border p-6 shadow-sm sm:p-10"
+              className="rounded-2xl border p-5 shadow-sm sm:rounded-3xl sm:p-8 lg:p-10"
               style={{
                 backgroundColor: theme.surface,
                 borderColor: theme.border,
@@ -363,14 +369,14 @@ export default async function DetailArtikelPage({ params }) {
             >
               {summary && (
                 <div
-                  className="mb-8 rounded-r-xl border-l-4 py-3 pl-5 pr-3"
+                  className="mb-8 rounded-r-xl border-l-4 py-3 pl-5 pr-3 sm:pl-6"
                   style={{
                     borderColor: theme.primary,
                     backgroundColor: `color-mix(in srgb, ${theme.primary} 5%, ${theme.surface})`,
                   }}
                 >
                   <p
-                    className="text-lg font-medium italic leading-relaxed"
+                    className="text-base font-medium italic leading-relaxed sm:text-lg"
                     style={{ color: theme.secondary }}
                   >
                     “{summary}”
@@ -401,7 +407,7 @@ export default async function DetailArtikelPage({ params }) {
           {/* SIDEBAR INFORMASI */}
           <aside className="min-w-0">
             <div
-              className="space-y-6 rounded-2xl border p-6 shadow-sm lg:sticky lg:top-28"
+              className="space-y-6 rounded-2xl border p-6 shadow-sm lg:sticky lg:top-8"
               style={{
                 backgroundColor: theme.surface,
                 borderColor: theme.border,
@@ -502,10 +508,13 @@ export default async function DetailArtikelPage({ params }) {
                 )}
               </div>
 
-              <div className="border-t pt-6" style={{ borderColor: theme.border }}>
+              <div
+                className="border-t pt-6"
+                style={{ borderColor: theme.border }}
+              >
                 <Link
                   href={`/${tenant}/articles`}
-                  className="flex w-full items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm font-bold transition"
+                  className="flex w-full items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm font-bold transition hover:opacity-80"
                   style={{
                     borderColor: theme.border,
                     backgroundColor: theme.background,
@@ -518,7 +527,7 @@ export default async function DetailArtikelPage({ params }) {
 
                 <Link
                   href={`/${tenant}`}
-                  className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-bold transition"
+                  className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-bold transition hover:opacity-90"
                   style={{
                     backgroundColor: theme.primary,
                     color: "#FFFFFF",
@@ -532,7 +541,7 @@ export default async function DetailArtikelPage({ params }) {
         </div>
       </section>
 
-      {/* STYLE KONTEN DARI CMS */}
+      {/* STYLE KONTEN CMS */}
       <style>{`
         .article-content {
           color: var(--school-text, #0F172A);
@@ -589,6 +598,7 @@ export default async function DetailArtikelPage({ params }) {
         }
 
         .article-content img {
+          display: block;
           max-width: 100%;
           height: auto;
           border-radius: 0.75rem;
