@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 
@@ -12,8 +12,10 @@ import {
   ArrowLeft,
   Pencil,
   Trash2,
+    ChevronRight,
   Eye,
   ExternalLink,
+   Menu,
   Globe2,
   FileText,
   LayoutTemplate,
@@ -24,30 +26,31 @@ import {
   AlertCircle,
   X,
   RefreshCw,
+  Copy,
 } from "lucide-react";
 
 export default function PageDetail() {
   const params = useParams();
   const router = useRouter();
-
   const id = params?.id;
 
   const [active, setActive] = useState("pages");
   const [collapsed, setCollapsed] = useState(false);
-
   const [page, setPage] = useState(null);
+  const [menuKonfigurasi, setMenuKonfigurasi] = useState([]);
 
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-
   const [error, setError] = useState("");
-
   const [deleteTarget, setDeleteTarget] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [copySuccess, setCopySuccess] = useState(false);
 
-
-  const fetchPage = async (showRefresh = false) => {
-    if (!id) return;
+  const fetchPage = useCallback(async (showRefresh = false) => {
+    if (!id) {
+      setLoading(false);
+      return;
+    }
 
     try {
       setError("");
@@ -58,10 +61,7 @@ export default function PageDetail() {
         setLoading(true);
       }
 
-     
-
       const result = await apiFetch("/api/cms/halaman");
-
       const responseData = result?.data;
 
       let pages = [];
@@ -70,6 +70,8 @@ export default function PageDetail() {
         pages = responseData;
       } else if (Array.isArray(responseData?.data)) {
         pages = responseData.data;
+      } else if (Array.isArray(result)) {
+        pages = result;
       }
 
       const foundPage = pages.find(
@@ -77,38 +79,116 @@ export default function PageDetail() {
       );
 
       if (!foundPage) {
-        setPage(null);
-        setError("Halaman yang kamu cari tidak ditemukan.");
-        return;
-      }
+  setPage(null);
+  setMenuKonfigurasi([]);
+  setError("Halaman yang kamu cari tidak ditemukan.");
+  return;
+}
 
-      setPage(foundPage);
+setPage(foundPage);
+
+const menus = Array.isArray(foundPage?.menuKonfigurasi)
+  ? foundPage.menuKonfigurasi
+  : [];
+
+setMenuKonfigurasi(menus);
     } catch (err) {
       console.error("Gagal mengambil detail halaman:", err);
-
       setError(
-        err?.message ||
-          "Gagal mengambil detail halaman dari server."
+        err?.message || "Gagal mengambil detail halaman dari server."
       );
-
       setPage(null);
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  };
+  }, [id]);
 
   useEffect(() => {
     fetchPage();
-  }, [id]);
+  }, [fetchPage]);
 
+  const getTitle = () => page?.judul || "Tanpa Judul";
+  const getSlug = () => page?.slug || "-";
 
-  const getTitle = () => {
-    return page?.judul || "Tanpa Judul";
+  const getTenantSubdomain = () => {
+    const candidates = [
+      page?.subdomain,
+      page?.tenantSubdomain,
+      page?.tenantSlug,
+      page?.sekolahSubdomain,
+      page?.sekolah?.subdomain,
+      page?.tenant?.subdomain,
+      page?.yayasan?.subdomain,
+      page?.sekolah?.tenant?.subdomain,
+      page?.yayasan?.tenant?.subdomain,
+    ];
+
+    const value = candidates.find(
+      (item) => typeof item === "string" && item.trim() !== ""
+    );
+
+    return value ? value.trim() : "";
   };
 
-  const getSlug = () => {
-    return page?.slug || "-";
+const getWebsiteUrl = () => {
+  const slug = String(page?.slug || "").trim();
+  const tenant = getTenantSubdomain();
+
+  if (!slug || !tenant) return "";
+
+  return `/${encodeURIComponent(tenant)}/${encodeURIComponent(slug)}`;
+};
+
+const handleOpenWebsite = () => {
+  const slug = String(page?.slug || "").trim();
+  const tenant = getTenantSubdomain();
+
+  console.log("CMS PAGE:", page);
+  console.log("TENANT:", tenant);
+  console.log("SLUG:", slug);
+
+  if (!tenant) {
+    setError(
+      "Subdomain tenant tidak ditemukan dari data halaman CMS. Periksa respons GET /api/cms/halaman."
+    );
+    return;
+  }
+
+  if (!slug) {
+    setError("Slug halaman belum tersedia.");
+    return;
+  }
+
+  const url = `${window.location.origin}/${encodeURIComponent(
+    tenant
+  )}/${encodeURIComponent(slug)}`;
+
+  console.log("TARGET WEBSITE:", url);
+
+  window.open(url, "_blank", "noopener,noreferrer");
+};
+
+  const handleCopyUrl = async () => {
+    const url = getWebsiteUrl();
+
+    if (!url) {
+      setError(
+        "URL website belum dapat dibuat karena subdomain tenant belum tersedia."
+      );
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(
+        new URL(url, window.location.origin).toString()
+      );
+      setCopySuccess(true);
+      window.setTimeout(() => setCopySuccess(false), 2000);
+    } catch (err) {
+      console.error("Gagal menyalin URL:", err);
+      setError("URL gagal disalin. Silakan salin URL secara manual.");
+    }
   };
 
   const getStatusLabel = () => {
@@ -122,10 +202,7 @@ export default function PageDetail() {
       return "Dipublikasikan";
     }
 
-    if (value === "draft") {
-      return "Draft";
-    }
-
+    if (value === "draft") return "Draft";
     return page?.status || "-";
   };
 
@@ -147,9 +224,7 @@ export default function PageDetail() {
       };
     }
 
-    const value = String(page?.status || "").toLowerCase();
-
-    if (value === "draft") {
+    if (String(page?.status || "").toLowerCase() === "draft") {
       return {
         wrapper: "theme-warning border",
         dot: "bg-[var(--color-warning)]",
@@ -165,66 +240,30 @@ export default function PageDetail() {
   const formatDate = (date) => {
     if (!date) return "-";
 
-    try {
-      return new Date(date).toLocaleDateString(
-        "id-ID",
-        {
-          day: "2-digit",
-          month: "long",
-          year: "numeric",
-        }
-      );
-    } catch {
-      return "-";
-    }
+    const parsed = new Date(date);
+    if (Number.isNaN(parsed.getTime())) return "-";
+
+    return parsed.toLocaleDateString("id-ID", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    });
   };
 
   const formatDateTime = (date) => {
     if (!date) return "-";
 
-    try {
-      return new Date(date).toLocaleString(
-        "id-ID",
-        {
-          day: "2-digit",
-          month: "long",
-          year: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        }
-      );
-    } catch {
-      return "-";
-    }
+    const parsed = new Date(date);
+    if (Number.isNaN(parsed.getTime())) return "-";
+
+    return parsed.toLocaleString("id-ID", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
   };
-
-  
-
-  const getWebsiteUrl = () => {
-    const slug = String(page?.slug || "").toLowerCase();
-
-    if (!slug) {
-      return "/website";
-    }
-
-    if (slug.includes("kontak")) {
-      return "/website/kontak";
-    }
-
-    if (slug.includes("akademik")) {
-      return "/website/akademik";
-    }
-
-    if (
-      slug.includes("tentang") ||
-      slug.includes("profil")
-    ) {
-      return "/website/tentang";
-    }
-
-    return `/website/${page.slug}`;
-  };
-
 
   const handleDelete = async () => {
     if (!page?.id) return;
@@ -233,28 +272,23 @@ export default function PageDetail() {
       setDeleting(true);
       setError("");
 
-      await apiFetch(
-        `/api/cms/halaman/${page.id}`,
-        {
-          method: "DELETE",
-        }
-      );
+      await apiFetch(`/api/cms/halaman/${page.id}`, {
+        method: "DELETE",
+      });
 
       router.push("/admin/cms/pages");
     } catch (err) {
       console.error("Gagal menghapus halaman:", err);
-
-      setError(
-        err?.message ||
-          "Gagal menghapus halaman."
-      );
-
+      setError(err?.message || "Gagal menghapus halaman.");
       setDeleteTarget(false);
     } finally {
       setDeleting(false);
     }
   };
 
+  const statusStyle = getStatusStyle();
+  const websiteUrl = getWebsiteUrl();
+  const tenantSubdomain = getTenantSubdomain();
 
   if (loading) {
     return (
@@ -281,11 +315,9 @@ export default function PageDetail() {
               <div className="theme-info mb-4 flex h-14 w-14 items-center justify-center rounded-2xl">
                 <Loader2 className="h-6 w-6 animate-spin" />
               </div>
-
               <h2 className="theme-text text-sm font-bold">
                 Memuat detail halaman...
               </h2>
-
               <p className="theme-text-muted mt-1 text-xs">
                 Mengambil data dari CMS backend.
               </p>
@@ -295,7 +327,6 @@ export default function PageDetail() {
       </div>
     );
   }
-
 
   if (!page) {
     return (
@@ -328,8 +359,7 @@ export default function PageDetail() {
               </h2>
 
               <p className="theme-text-secondary mt-2 text-sm leading-6">
-                {error ||
-                  "Data halaman tidak tersedia atau sudah dihapus."}
+                {error || "Data halaman tidak tersedia atau sudah dihapus."}
               </p>
 
               <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:justify-center">
@@ -357,12 +387,8 @@ export default function PageDetail() {
     );
   }
 
-
-  const statusStyle = getStatusStyle();
-
   return (
     <div className="theme-page flex min-h-screen w-full">
-
       <Sidebar
         active={active}
         setActive={setActive}
@@ -370,9 +396,7 @@ export default function PageDetail() {
         setCollapsed={setCollapsed}
       />
 
-
       <div className="flex min-w-0 flex-1 flex-col">
-
         <Header
           title="Detail Halaman"
           user={{
@@ -382,12 +406,9 @@ export default function PageDetail() {
           }}
         />
 
-
         <main className="min-w-0 flex-1 overflow-y-auto">
           <div className="w-full px-3 py-4 sm:px-5 sm:py-6 md:px-7 lg:px-9 xl:px-10">
             <div className="mx-auto w-full max-w-[1500px]">
-
-
               <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <Link
                   href="/admin/cms/pages"
@@ -404,15 +425,11 @@ export default function PageDetail() {
                   className="theme-card theme-border theme-text-secondary inline-flex w-fit items-center gap-2 rounded-xl border px-3.5 py-2 text-xs font-semibold shadow-sm transition theme-sidebar-hover disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   <RefreshCw
-                    className={`h-3.5 w-3.5 ${
-                      refreshing ? "animate-spin" : ""
-                    }`}
+                    className={`h-3.5 w-3.5 ${refreshing ? "animate-spin" : ""}`}
                   />
-
                   Refresh
                 </button>
               </div>
-
 
               {error && (
                 <div className="theme-danger mb-5 flex items-start gap-3 rounded-2xl border p-4">
@@ -424,22 +441,19 @@ export default function PageDetail() {
                     <h3 className="text-sm font-bold">
                       Terjadi kesalahan
                     </h3>
-
-                    <p className="mt-1 text-xs leading-5">
-                      {error}
-                    </p>
+                    <p className="mt-1 text-xs leading-5">{error}</p>
                   </div>
 
                   <button
                     type="button"
                     onClick={() => setError("")}
                     className="transition hover:opacity-70"
+                    aria-label="Tutup pesan"
                   >
                     <X className="h-4 w-4" />
                   </button>
                 </div>
               )}
-
 
               <section className="theme-card theme-border mb-6 overflow-hidden rounded-3xl border shadow-sm">
                 <div className="relative overflow-hidden bg-gradient-to-br from-[var(--color-sidebar)] via-[var(--color-sidebar-active)] to-[var(--color-card-soft)] px-5 py-7 sm:px-7 sm:py-8 lg:px-9">
@@ -450,7 +464,6 @@ export default function PageDetail() {
                         "color-mix(in srgb, var(--color-primary) 10%, transparent)",
                     }}
                   />
-
                   <div
                     className="pointer-events-none absolute -bottom-32 left-1/3 h-72 w-72 rounded-full blur-3xl"
                     style={{
@@ -469,10 +482,7 @@ export default function PageDetail() {
                       <span
                         className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-semibold ${statusStyle.wrapper}`}
                       >
-                        <span
-                          className={`h-1.5 w-1.5 rounded-full ${statusStyle.dot}`}
-                        />
-
+                        <span className={`h-1.5 w-1.5 rounded-full ${statusStyle.dot}`} />
                         {getStatusLabel()}
                       </span>
                     </div>
@@ -486,29 +496,27 @@ export default function PageDetail() {
                         <div className="theme-text-secondary mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs">
                           <span className="inline-flex items-center gap-1.5">
                             <Globe2 className="h-3.5 w-3.5" />
-
                             /{getSlug()}
                           </span>
+
+                          {tenantSubdomain && (
+                            <span className="inline-flex items-center gap-1.5">
+                              <Globe2 className="h-3.5 w-3.5" />
+                              Tenant: {tenantSubdomain}
+                            </span>
+                          )}
 
                           <span className="theme-text-muted hidden h-1 w-1 rounded-full sm:block" />
 
                           <span className="inline-flex items-center gap-1.5">
                             <FileText className="h-3.5 w-3.5" />
-
                             Static Page
                           </span>
                         </div>
                       </div>
 
                       <div className="flex flex-col gap-2 sm:flex-row lg:shrink-0">
-                        <Link
-                          href={getWebsiteUrl()}
-                          target="_blank"
-                          className="theme-card theme-border theme-text-secondary inline-flex items-center justify-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold shadow-sm transition theme-sidebar-hover"
-                        >
-                          <ExternalLink className="h-4 w-4" />
-                          Buka Website
-                        </Link>
+                      
 
                         <Link
                           href={`/admin/cms/pages/${page.id}/edit`}
@@ -522,18 +530,15 @@ export default function PageDetail() {
                   </div>
                 </div>
 
-
                 <div className="theme-card grid grid-cols-1 divide-y divide-[var(--color-border-soft)] sm:grid-cols-3 sm:divide-x sm:divide-y-0">
                   <div className="flex items-center gap-3 px-5 py-4 sm:px-6">
                     <div className="theme-info flex h-9 w-9 shrink-0 items-center justify-center rounded-xl">
                       <CalendarDays className="h-4 w-4" />
                     </div>
-
                     <div>
                       <p className="theme-text-muted text-[10px] font-bold uppercase tracking-wider">
                         Dibuat
                       </p>
-
                       <p className="theme-text-secondary mt-0.5 text-xs font-semibold">
                         {formatDate(page?.dibuatPada)}
                       </p>
@@ -544,12 +549,10 @@ export default function PageDetail() {
                     <div className="theme-card-soft theme-text-secondary flex h-9 w-9 shrink-0 items-center justify-center rounded-xl">
                       <Clock3 className="h-4 w-4" />
                     </div>
-
                     <div>
                       <p className="theme-text-muted text-[10px] font-bold uppercase tracking-wider">
                         Diperbarui
                       </p>
-
                       <p className="theme-text-secondary mt-0.5 text-xs font-semibold">
                         {formatDate(page?.diubahPada)}
                       </p>
@@ -560,12 +563,10 @@ export default function PageDetail() {
                     <div className="theme-success flex h-9 w-9 shrink-0 items-center justify-center rounded-xl">
                       <CheckCircle2 className="h-4 w-4" />
                     </div>
-
                     <div>
                       <p className="theme-text-muted text-[10px] font-bold uppercase tracking-wider">
                         Status
                       </p>
-
                       <p className="theme-text-secondary mt-0.5 text-xs font-semibold">
                         {getStatusLabel()}
                       </p>
@@ -574,28 +575,22 @@ export default function PageDetail() {
                 </div>
               </section>
 
-
               <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_330px]">
-
-
                 <section className="theme-card theme-border min-w-0 overflow-hidden rounded-2xl border shadow-sm">
                   <div className="theme-border flex items-center justify-between border-b px-5 py-4 sm:px-6">
                     <div className="flex items-center gap-3">
                       <div className="theme-info flex h-9 w-9 items-center justify-center rounded-xl">
                         <FileText className="h-4 w-4" />
                       </div>
-
                       <div>
                         <h2 className="theme-text text-sm font-bold">
                           Konten Halaman
                         </h2>
-
                         <p className="theme-text-muted text-[11px]">
                           Isi halaman yang tersimpan di CMS
                         </p>
                       </div>
                     </div>
-
                     <span className="theme-text-muted hidden text-[10px] font-semibold uppercase tracking-wider sm:block">
                       CMS Content
                     </span>
@@ -604,114 +599,36 @@ export default function PageDetail() {
                   <div className="p-5 sm:p-7 lg:p-8">
                     {page?.konten ? (
                       <article
-                        className="
-                          cms-content
-                          theme-text-secondary
-                          max-w-none
-                          text-[15px]
-                          leading-8
-
+                        className="cms-content theme-text-secondary max-w-none text-[15px] leading-8
                           [&_p]:mb-5
-
-                          [&_h1]:mb-5
-                          [&_h1]:mt-8
-                          [&_h1]:text-3xl
-                          [&_h1]:font-bold
-                          [&_h1]:leading-tight
-                          [&_h1]:text-[var(--color-text)]
-
-                          [&_h2]:mb-4
-                          [&_h2]:mt-8
-                          [&_h2]:text-2xl
-                          [&_h2]:font-bold
-                          [&_h2]:leading-tight
-                          [&_h2]:text-[var(--color-text)]
-
-                          [&_h3]:mb-3
-                          [&_h3]:mt-6
-                          [&_h3]:text-xl
-                          [&_h3]:font-bold
-                          [&_h3]:text-[var(--color-text)]
-
-                          [&_h4]:mb-2
-                          [&_h4]:mt-5
-                          [&_h4]:text-lg
-                          [&_h4]:font-bold
-                          [&_h4]:text-[var(--color-text)]
-
-                          [&_ul]:mb-5
-                          [&_ul]:list-disc
-                          [&_ul]:space-y-2
-                          [&_ul]:pl-6
-
-                          [&_ol]:mb-5
-                          [&_ol]:list-decimal
-                          [&_ol]:space-y-2
-                          [&_ol]:pl-6
-
+                          [&_h1]:mb-5 [&_h1]:mt-8 [&_h1]:text-3xl [&_h1]:font-bold [&_h1]:leading-tight [&_h1]:text-[var(--color-text)]
+                          [&_h2]:mb-4 [&_h2]:mt-8 [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:leading-tight [&_h2]:text-[var(--color-text)]
+                          [&_h3]:mb-3 [&_h3]:mt-6 [&_h3]:text-xl [&_h3]:font-bold [&_h3]:text-[var(--color-text)]
+                          [&_h4]:mb-2 [&_h4]:mt-5 [&_h4]:text-lg [&_h4]:font-bold [&_h4]:text-[var(--color-text)]
+                          [&_ul]:mb-5 [&_ul]:list-disc [&_ul]:space-y-2 [&_ul]:pl-6
+                          [&_ol]:mb-5 [&_ol]:list-decimal [&_ol]:space-y-2 [&_ol]:pl-6
                           [&_li]:pl-1
-
-                          [&_a]:font-semibold
-                          [&_a]:text-[var(--color-primary)]
-                          [&_a]:underline
-                          [&_a]:underline-offset-2
-                          [&_a]:hover:text-[var(--color-primary-hover)]
-
-                          [&_strong]:font-bold
-                          [&_strong]:text-[var(--color-text)]
-
-                          [&_blockquote]:my-6
-                          [&_blockquote]:border-l-4
-                          [&_blockquote]:border-[var(--color-primary)]
-                          [&_blockquote]:bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)]
-                          [&_blockquote]:px-5
-                          [&_blockquote]:py-4
-                          [&_blockquote]:text-[var(--color-text-secondary)]
-
-                          [&_img]:my-6
-                          [&_img]:h-auto
-                          [&_img]:max-w-full
-                          [&_img]:rounded-2xl
-                          [&_img]:border
-                          [&_img]:border-[var(--color-border)]
-
-                          [&_table]:my-6
-                          [&_table]:w-full
-                          [&_table]:border-collapse
-
-                          [&_th]:border
-                          [&_th]:border-[var(--color-border)]
-                          [&_th]:bg-[var(--color-table-header)]
-                          [&_th]:px-4
-                          [&_th]:py-3
-                          [&_th]:text-left
-                          [&_th]:font-semibold
-
-                          [&_td]:border
-                          [&_td]:border-[var(--color-border)]
-                          [&_td]:px-4
-                          [&_td]:py-3
-                        "
-                        dangerouslySetInnerHTML={{
-                          __html: page.konten,
-                        }}
+                          [&_a]:font-semibold [&_a]:text-[var(--color-primary)] [&_a]:underline [&_a]:underline-offset-2 [&_a]:hover:text-[var(--color-primary-hover)]
+                          [&_strong]:font-bold [&_strong]:text-[var(--color-text)]
+                          [&_blockquote]:my-6 [&_blockquote]:border-l-4 [&_blockquote]:border-[var(--color-primary)] [&_blockquote]:bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)] [&_blockquote]:px-5 [&_blockquote]:py-4 [&_blockquote]:text-[var(--color-text-secondary)]
+                          [&_img]:my-6 [&_img]:h-auto [&_img]:max-w-full [&_img]:rounded-2xl [&_img]:border [&_img]:border-[var(--color-border)]
+                          [&_table]:my-6 [&_table]:w-full [&_table]:border-collapse
+                          [&_th]:border [&_th]:border-[var(--color-border)] [&_th]:bg-[var(--color-table-header)] [&_th]:px-4 [&_th]:py-3 [&_th]:text-left [&_th]:font-semibold
+                          [&_td]:border [&_td]:border-[var(--color-border)] [&_td]:px-4 [&_td]:py-3"
+                        dangerouslySetInnerHTML={{ __html: page.konten }}
                       />
                     ) : (
                       <div className="flex min-h-[300px] flex-col items-center justify-center text-center">
                         <div className="theme-card-soft flex h-14 w-14 items-center justify-center rounded-2xl">
                           <FileText className="theme-text-muted h-6 w-6" />
                         </div>
-
                         <h3 className="theme-text-secondary mt-4 text-sm font-bold">
                           Belum ada konten
                         </h3>
-
                         <p className="theme-text-muted mt-1 max-w-sm text-xs leading-5">
-                          Halaman ini belum memiliki isi.
-                          Silakan edit halaman untuk menambahkan
-                          konten.
+                          Halaman ini belum memiliki isi. Silakan edit halaman
+                          untuk menambahkan konten.
                         </p>
-
                         <Link
                           href={`/admin/cms/pages/${page.id}/edit`}
                           className="theme-primary mt-5 inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-semibold transition"
@@ -724,21 +641,16 @@ export default function PageDetail() {
                   </div>
                 </section>
 
-
                 <aside className="space-y-5">
-
-
                   <section className="theme-card theme-border rounded-2xl border p-5 shadow-sm">
                     <div className="flex items-center gap-3">
                       <div className="theme-info flex h-9 w-9 items-center justify-center rounded-xl">
                         <Eye className="h-4 w-4" />
                       </div>
-
                       <div>
                         <h3 className="theme-text text-sm font-bold">
                           Status Publikasi
                         </h3>
-
                         <p className="theme-text-muted text-[11px]">
                           Status halaman saat ini
                         </p>
@@ -746,13 +658,8 @@ export default function PageDetail() {
                     </div>
 
                     <div className="mt-5">
-                      <span
-                        className={`inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-semibold ${statusStyle.wrapper}`}
-                      >
-                        <span
-                          className={`h-1.5 w-1.5 rounded-full ${statusStyle.dot}`}
-                        />
-
+                      <span className={`inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-semibold ${statusStyle.wrapper}`}>
+                        <span className={`h-1.5 w-1.5 rounded-full ${statusStyle.dot}`} />
                         {getStatusLabel()}
                       </span>
                     </div>
@@ -766,52 +673,213 @@ export default function PageDetail() {
                     </div>
                   </section>
 
+                  
+<section className="theme-card theme-border rounded-2xl border p-5 shadow-sm">
+  <div className="flex items-center gap-3">
+    <div className="theme-info flex h-9 w-9 items-center justify-center rounded-xl">
+      <Menu className="h-4 w-4" />
+    </div>
+
+    <div className="min-w-0">
+      <h3 className="theme-text text-sm font-bold">
+        Menu Konfigurasi
+      </h3>
+      <p className="theme-text-muted text-[11px]">
+        Menu navigasi yang menggunakan halaman ini
+      </p>
+    </div>
+
+    <span className="theme-card-soft theme-text-secondary ml-auto rounded-lg px-2.5 py-1 text-xs font-bold">
+      {menuKonfigurasi.length}
+    </span>
+  </div>
+
+  {menuKonfigurasi.length > 0 ? (
+    <div className="mt-4 space-y-3">
+      {menuKonfigurasi.map((menu, index) => {
+        const namaMenu =
+          menu?.nama ||
+          menu?.judul ||
+          menu?.label ||
+          menu?.namaMenu ||
+          menu?.title ||
+          "Menu tanpa nama";
+
+        const urlMenu =
+          menu?.url ||
+          menu?.link ||
+          menu?.path ||
+          menu?.href ||
+          "";
+
+        const statusMenu = String(
+          menu?.status || menu?.aktif || ""
+        ).toLowerCase();
+
+        const aktif =
+          menu?.aktif === true ||
+          menu?.isActive === true ||
+          menu?.status === "aktif" ||
+          menu?.status === "active";
+
+        return (
+          <div
+            key={menu?.id || `${namaMenu}-${index}`}
+            className="theme-card-soft theme-border rounded-xl border p-3"
+          >
+            <div className="flex items-start gap-3">
+              <div className="theme-card theme-border flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border">
+                <Menu className="theme-text-secondary h-4 w-4" />
+              </div>
+
+              <div className="min-w-0 flex-1">
+                <p className="theme-text break-words text-sm font-semibold">
+                  {namaMenu}
+                </p>
+
+                {urlMenu ? (
+                  <p className="theme-text-muted mt-1 break-all text-xs">
+                    {urlMenu}
+                  </p>
+                ) : (
+                  <p className="theme-text-muted mt-1 text-xs">
+                    URL menu tidak tersedia
+                  </p>
+                )}
+
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  {menu?.urutan !== undefined && (
+                    <span className="theme-text-muted text-[10px]">
+                      Urutan: {menu.urutan}
+                    </span>
+                  )}
+
+                  {menu?.posisi && (
+                    <span className="theme-card theme-border theme-text-secondary rounded-md border px-2 py-1 text-[10px]">
+                      {menu.posisi}
+                    </span>
+                  )}
+
+                  {(menu?.aktif !== undefined ||
+                    menu?.isActive !== undefined ||
+                    menu?.status !== undefined) && (
+                    <span
+                      className={`rounded-md px-2 py-1 text-[10px] font-semibold ${
+                        aktif
+                          ? "theme-success"
+                          : "theme-card theme-text-muted"
+                      }`}
+                    >
+                      {aktif ? "Aktif" : "Nonaktif"}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <ChevronRight className="theme-text-muted mt-1 h-4 w-4 shrink-0" />
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  ) : (
+    <div className="theme-card-soft mt-4 rounded-xl p-4 text-center">
+      <Menu className="theme-text-muted mx-auto h-6 w-6" />
+
+      <p className="theme-text-secondary mt-2 text-xs font-semibold">
+        Belum ada menu konfigurasi
+      </p>
+
+      <p className="theme-text-muted mt-1 text-[11px] leading-5">
+        Belum ada menu navigasi yang terhubung dengan halaman ini.
+      </p>
+    </div>
+  )}
+
+  <div className="theme-border mt-4 border-t pt-3">
+    <Link
+      href="/admin/cms/menu"
+      className="theme-text-secondary inline-flex items-center gap-2 text-xs font-semibold transition hover:text-[var(--color-primary)]"
+    >
+      Kelola Menu Konfigurasi
+      <ChevronRight className="h-3.5 w-3.5" />
+    </Link>
+  </div>
+</section>
+
 
                   <section className="theme-card theme-border rounded-2xl border p-5 shadow-sm">
                     <div className="flex items-center gap-3">
                       <div className="theme-info flex h-9 w-9 items-center justify-center rounded-xl">
                         <Globe2 className="h-4 w-4" />
                       </div>
-
                       <div>
                         <h3 className="theme-text text-sm font-bold">
                           URL Halaman
                         </h3>
-
                         <p className="theme-text-muted text-[11px]">
-                          Slug dari backend CMS
+                          URL berdasarkan subdomain tenant
                         </p>
                       </div>
                     </div>
 
                     <div className="theme-card-soft mt-4 rounded-xl p-3">
-                      <p className="theme-text-secondary break-all text-xs leading-5">
+                      <p className="theme-text-muted text-[10px] font-semibold">
+                        SUBDOMAIN
+                      </p>
+                      <p className="theme-text-secondary mt-1 break-all text-xs leading-5">
+                        {tenantSubdomain || "Belum tersedia dari backend"}
+                      </p>
+
+                      <p className="theme-text-muted mt-3 text-[10px] font-semibold">
+                        SLUG
+                      </p>
+                      <p className="theme-text-secondary mt-1 break-all text-xs leading-5">
                         /{getSlug()}
+                      </p>
+
+                      <p className="theme-text-muted mt-3 text-[10px] font-semibold">
+                        URL WEBSITE
+                      </p>
+                      <p className="theme-text-secondary mt-1 break-all text-xs leading-5">
+                        {websiteUrl
+                          ? new URL(websiteUrl, typeof window !== "undefined" ? window.location.origin : "http://localhost").toString()
+                          : "URL belum dapat dibuat karena subdomain tidak tersedia"}
                       </p>
                     </div>
 
-                    <Link
-                      href={getWebsiteUrl()}
-                      target="_blank"
-                      className="theme-card theme-border theme-text-secondary mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl border px-4 py-2.5 text-xs font-semibold transition theme-sidebar-hover"
-                    >
-                      <ExternalLink className="h-3.5 w-3.5" />
-                      Lihat di Website
-                    </Link>
-                  </section>
+                    <div className="mt-3 flex flex-col gap-2">
+                      <button
+                        type="button"
+                        onClick={handleOpenWebsite}
+                        disabled={!websiteUrl}
+                        className="theme-card theme-border theme-text-secondary inline-flex w-full items-center justify-center gap-2 rounded-xl border px-4 py-2.5 text-xs font-semibold transition theme-sidebar-hover disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        <ExternalLink className="h-3.5 w-3.5" />
+                        Lihat di Website
+                      </button>
 
+                      <button
+                        type="button"
+                        onClick={handleCopyUrl}
+                        disabled={!websiteUrl}
+                        className="theme-card theme-border theme-text-secondary inline-flex w-full items-center justify-center gap-2 rounded-xl border px-4 py-2.5 text-xs font-semibold transition theme-sidebar-hover disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        <Copy className="h-3.5 w-3.5" />
+                        {copySuccess ? "URL Disalin" : "Salin URL"}
+                      </button>
+                    </div>
+                  </section>
 
                   <section className="theme-card theme-border rounded-2xl border p-5 shadow-sm">
                     <div className="flex items-center gap-3">
                       <div className="theme-card-soft theme-text-secondary flex h-9 w-9 items-center justify-center rounded-xl">
                         <CalendarDays className="h-4 w-4" />
                       </div>
-
                       <div>
                         <h3 className="theme-text text-sm font-bold">
                           Informasi
                         </h3>
-
                         <p className="theme-text-muted text-[11px]">
                           Metadata halaman
                         </p>
@@ -823,27 +891,22 @@ export default function PageDetail() {
                         <p className="theme-text-muted text-[10px] font-bold uppercase tracking-wider">
                           ID
                         </p>
-
                         <p className="theme-text-secondary mt-1 break-all text-xs font-medium">
                           {page?.id || "-"}
                         </p>
                       </div>
-
                       <div>
                         <p className="theme-text-muted text-[10px] font-bold uppercase tracking-wider">
                           Dibuat Pada
                         </p>
-
                         <p className="theme-text-secondary mt-1 text-xs font-medium">
                           {formatDateTime(page?.dibuatPada)}
                         </p>
                       </div>
-
                       <div>
                         <p className="theme-text-muted text-[10px] font-bold uppercase tracking-wider">
                           Diubah Pada
                         </p>
-
                         <p className="theme-text-secondary mt-1 text-xs font-medium">
                           {formatDateTime(page?.diubahPada)}
                         </p>
@@ -851,18 +914,15 @@ export default function PageDetail() {
                     </div>
                   </section>
 
-
                   <section className="theme-card theme-border rounded-2xl border p-5 shadow-sm">
                     <div className="flex items-center gap-3">
                       <div className="theme-danger flex h-9 w-9 items-center justify-center rounded-xl">
                         <Trash2 className="h-4 w-4" />
                       </div>
-
                       <div>
                         <h3 className="theme-text text-sm font-bold">
                           Zona Tindakan
                         </h3>
-
                         <p className="theme-text-muted text-[11px]">
                           Tindakan pada halaman
                         </p>
@@ -870,8 +930,7 @@ export default function PageDetail() {
                     </div>
 
                     <p className="theme-text-secondary mt-4 text-xs leading-5">
-                      Hapus halaman jika sudah tidak diperlukan
-                      lagi dari CMS.
+                      Hapus halaman jika sudah tidak diperlukan lagi dari CMS.
                     </p>
 
                     <button
@@ -886,7 +945,6 @@ export default function PageDetail() {
                 </aside>
               </div>
 
-
               <footer className="py-8 text-center">
                 <p className="theme-text-muted text-[11px]">
                   © 2026 SmartSchool • CMS Management
@@ -897,11 +955,9 @@ export default function PageDetail() {
         </main>
       </div>
 
-
       {deleteTarget && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm">
           <div className="theme-card theme-border w-full max-w-md overflow-hidden rounded-3xl border shadow-2xl">
-
             <div className="p-6">
               <div className="theme-danger flex h-12 w-12 items-center justify-center rounded-2xl">
                 <Trash2 className="h-5 w-5" />
@@ -921,8 +977,8 @@ export default function PageDetail() {
 
               <div className="theme-warning mt-4 rounded-xl border p-3">
                 <p className="text-xs leading-5">
-                  Pastikan halaman ini memang sudah tidak
-                  diperlukan sebelum melanjutkan.
+                  Pastikan halaman ini memang sudah tidak diperlukan sebelum
+                  melanjutkan.
                 </p>
               </div>
             </div>

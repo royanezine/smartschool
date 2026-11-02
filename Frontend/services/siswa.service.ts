@@ -106,3 +106,23 @@ export async function adminResetPin(userId: string) {
 export async function getSiswaMe(): Promise<any> {
   return apiFetch("/api/siswa/me", { method: "GET" });
 }
+
+
+export async function importSiswaExcel(file: File) {
+  if (!file) {
+    throw new Error("File Excel wajib dipilih.");
+  }
+
+  if (!file.name.toLowerCase().endsWith(".xlsx")) {
+    throw new Error("Format file harus Excel .xlsx.");
+  }
+
+  const formData = new FormData();
+  formData.append("file", file);
+
+  return apiFetch("/api/siswa/bulk-import", {
+    method: "POST",
+    body: formData,
+  });
+}
+

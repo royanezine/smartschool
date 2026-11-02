@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 
 import {
@@ -95,6 +95,12 @@ export default function EditLantaiPage() {
     gedungId: "",
     nama: "",
   });
+
+  const selectedGedung = useMemo(() => {
+  return gedung.find(
+    (item) => String(item.id) === String(form.gedungId)
+  ) || null;
+}, [gedung, form.gedungId]);
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");

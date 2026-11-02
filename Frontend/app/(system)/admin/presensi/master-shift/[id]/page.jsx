@@ -155,7 +155,7 @@ export default function MasterShiftDetailPage() {
       if (!mappedShift) {
         setShift(null);
         setErrorMessage(
-          "Data shift tidak ditemukan atau respons backend tidak sesuai."
+          "Data shift tidak ditemukan atau respons sistem tidak sesuai."
         );
         return;
       }
@@ -184,7 +184,7 @@ export default function MasterShiftDetailPage() {
     if (!shift || deleting) return;
 
     const confirmed = window.confirm(
-      `Hapus shift "${shift.nama}"? Backend akan menolak penghapusan jika shift masih digunakan oleh pengguna.`
+      `Hapus shift "${shift.nama}"? Sistem akan menolak penghapusan jika shift masih digunakan oleh pengguna.`
     );
 
     if (!confirmed) return;
@@ -356,7 +356,7 @@ export default function MasterShiftDetailPage() {
                 </p>
 
                 <p className="mt-3 max-w-3xl text-sm leading-6 theme-text-secondary">
-                  Informasi shift kerja berdasarkan data yang dikirim backend.
+                  Informasi shift kerja berdasarkan data yang dikirim sistem.
                 </p>
               </div>
             </div>
@@ -429,7 +429,7 @@ export default function MasterShiftDetailPage() {
                 <SectionHeader
                   icon={<Clock3 size={15} />}
                   title="Informasi Shift"
-                  description="Detail shift yang tersimpan pada backend."
+                  description="Detail shift yang tersimpan pada sistem."
                 />
 
                 <div className="grid grid-cols-1 gap-4 p-5 sm:grid-cols-2">
@@ -465,48 +465,7 @@ export default function MasterShiftDetailPage() {
                 </div>
               </section>
 
-              <section className="theme-card overflow-hidden rounded-xl border theme-border shadow-sm">
-                <div className="flex items-center justify-between gap-4 border-b theme-border theme-card-soft px-5 py-4">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg border theme-info">
-                      <Users size={15} />
-                    </div>
-                    <div>
-                      <p className="text-sm font-bold theme-text">
-                        Pengguna Terhubung
-                      </p>
-                      <p className="mt-0.5 text-[11px] theme-text-muted">
-                        Jumlah pengguna yang terhubung berdasarkan ringkasan BE.
-                      </p>
-                    </div>
-                  </div>
-
-                  <span className="shrink-0 rounded-full border theme-border theme-card px-2.5 py-1 text-[11px] font-semibold theme-text-muted">
-                    {shift.jumlahPegawai == null
-                      ? "—"
-                      : `${formatNumber(shift.jumlahPegawai)} pengguna`}
-                  </span>
-                </div>
-
-                <div className="p-5">
-                  <div className="flex items-start gap-3 rounded-lg border theme-border theme-card-soft p-4">
-                    <Info
-                      size={17}
-                      className="mt-0.5 shrink-0 theme-text-muted"
-                    />
-                    <div>
-                      <p className="text-sm font-semibold theme-text">
-                        Ringkasan pengguna
-                      </p>
-                      <p className="mt-1 text-xs leading-5 theme-text-muted">
-                        Backend mengirim jumlah pengguna, bukan daftar nama,
-                        email, peran, atau kategori jabatan. Informasi tersebut
-                        tidak ditampilkan agar tidak menghasilkan data perkiraan.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </section>
+             
             </div>
 
 
@@ -577,8 +536,8 @@ export default function MasterShiftDetailPage() {
                     </p>
                     <p className="mt-1 text-[11px] leading-5 theme-text-muted">
                       {isActive
-                        ? "Shift berstatus aktif berdasarkan data backend."
-                        : "Shift berstatus nonaktif berdasarkan data backend."}
+                        ? "Shift berstatus aktif berdasarkan data sistem."
+                        : "Shift berstatus nonaktif berdasarkan data sistem."}
                     </p>
                   </div>
                 </div>

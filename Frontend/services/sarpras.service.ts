@@ -1,6 +1,8 @@
 import { apiFetch } from "../lib/api";
 
 const API_ENDPOINT = "/api/sarpras";
+const PEMINJAMAN_ENDPOINT = "/api/peminjaman-aset";
+
 
 
 export async function getGudang() {
@@ -25,7 +27,7 @@ export async function updateGudang(id, data) {
     throw new Error("ID gudang tidak ditemukan.");
   }
 
-  return apiFetch(`${API_ENDPOINT}/gudang/${id}`, {
+  return apiFetch(`${API_ENDPOINT}/gudang/${encodeURIComponent(id)}`, {
     method: "PUT",
     body: JSON.stringify({
       nama: data.nama,
@@ -40,10 +42,11 @@ export async function deleteGudang(id) {
     throw new Error("ID gudang tidak ditemukan.");
   }
 
-  return apiFetch(`${API_ENDPOINT}/gudang/${id}`, {
+  return apiFetch(`${API_ENDPOINT}/gudang/${encodeURIComponent(id)}`, {
     method: "DELETE",
   });
 }
+
 
 
 export async function getKategoriAset() {
@@ -68,7 +71,7 @@ export async function updateKategoriAset(id, data) {
   }
 
   return apiFetch(
-    `/api/sarpras/kategori/${encodeURIComponent(id)}`,
+    `${API_ENDPOINT}/kategori/${encodeURIComponent(id)}`,
     {
       method: "PUT",
       body: JSON.stringify(data),
@@ -81,10 +84,14 @@ export async function deleteKategoriAset(id) {
     throw new Error("ID kategori aset tidak ditemukan.");
   }
 
-  return apiFetch(`${API_ENDPOINT}/kategori/${id}`, {
-    method: "DELETE",
-  });
+  return apiFetch(
+    `${API_ENDPOINT}/kategori/${encodeURIComponent(id)}`,
+    {
+      method: "DELETE",
+    }
+  );
 }
+
 
 
 export async function getAset() {
@@ -93,24 +100,18 @@ export async function getAset() {
   });
 }
 
-export async function getKetersediaanAset() {
-  return apiFetch(`${API_ENDPOINT}/peminjaman/ketersediaan`, {
-    method: "GET",
-  });
-}
-
 function extractAsetList(response) {
   if (Array.isArray(response)) return response;
   if (Array.isArray(response?.data)) return response.data;
-  if (Array.isArray(response?.data?.data)) return response.data.data;
+  if (Array.isArray(response?.data?.data)) {
+    return response.data.data;
+  }
+
   return [];
 }
 
-function isAsetDetailRouteMissing(error: unknown) {
-  const err = error as {
-    status?: number;
-    raw?: unknown;
-  };
+function isAsetDetailRouteMissing(error) {
+  const err = error;
 
   if (err?.status === 405) {
     return true;
@@ -129,9 +130,12 @@ export async function getAsetById(id) {
   }
 
   try {
-    return await apiFetch(`${API_ENDPOINT}/aset/${encodeURIComponent(id)}`, {
-      method: "GET",
-    });
+    return await apiFetch(
+      `${API_ENDPOINT}/aset/${encodeURIComponent(id)}`,
+      {
+        method: "GET",
+      }
+    );
   } catch (err) {
     if (!isAsetDetailRouteMissing(err)) {
       throw err;
@@ -160,37 +164,20 @@ export async function createAset(data) {
     body: JSON.stringify({
       kode: data.kode,
       nama: data.nama,
-
       kondisi: data.kondisi ?? "baik",
-
       jumlah: Number(data.jumlah),
       jumlahStok: Number(data.jumlahStok),
       stokMinimum: Number(data.stokMinimum),
-
       lokasi: data.lokasi ?? null,
-
       kategoriAsetId: data.kategoriAsetId,
       gudangId: data.gudangId,
-
       status: data.status ?? "aktif",
-
-      tanggalPembelian:
-        data.tanggalPembelian || null,
-
-      perawatanTerakhir:
-        data.perawatanTerakhir || null,
-
-      tanggalRusak:
-        data.tanggalRusak || null,
-
-      deskripsiKerusakan:
-        data.deskripsiKerusakan ?? null,
-
-      statusPerbaikan:
-        data.statusPerbaikan ?? null,
-
-      catatan:
-        data.catatan ?? null,
+      tanggalPembelian: data.tanggalPembelian || null,
+      perawatanTerakhir: data.perawatanTerakhir || null,
+      tanggalRusak: data.tanggalRusak || null,
+      deskripsiKerusakan: data.deskripsiKerusakan ?? null,
+      statusPerbaikan: data.statusPerbaikan ?? null,
+      catatan: data.catatan ?? null,
     }),
   });
 }
@@ -200,42 +187,25 @@ export async function updateAset(id, data) {
     throw new Error("ID aset tidak ditemukan.");
   }
 
-  return apiFetch(`${API_ENDPOINT}/aset/${id}`, {
+  return apiFetch(`${API_ENDPOINT}/aset/${encodeURIComponent(id)}`, {
     method: "PUT",
     body: JSON.stringify({
       kode: data.kode,
       nama: data.nama,
-
       kondisi: data.kondisi ?? "baik",
-
       jumlah: Number(data.jumlah),
       jumlahStok: Number(data.jumlahStok),
       stokMinimum: Number(data.stokMinimum),
-
       lokasi: data.lokasi ?? null,
-
       kategoriAsetId: data.kategoriAsetId,
       gudangId: data.gudangId,
-
       status: data.status ?? "aktif",
-
-      tanggalPembelian:
-        data.tanggalPembelian || null,
-
-      perawatanTerakhir:
-        data.perawatanTerakhir || null,
-
-      tanggalRusak:
-        data.tanggalRusak || null,
-
-      deskripsiKerusakan:
-        data.deskripsiKerusakan ?? null,
-
-      statusPerbaikan:
-        data.statusPerbaikan ?? null,
-
-      catatan:
-        data.catatan ?? null,
+      tanggalPembelian: data.tanggalPembelian || null,
+      perawatanTerakhir: data.perawatanTerakhir || null,
+      tanggalRusak: data.tanggalRusak || null,
+      deskripsiKerusakan: data.deskripsiKerusakan ?? null,
+      statusPerbaikan: data.statusPerbaikan ?? null,
+      catatan: data.catatan ?? null,
     }),
   });
 }
@@ -245,8 +215,16 @@ export async function deleteAset(id) {
     throw new Error("ID aset tidak ditemukan.");
   }
 
-  return apiFetch(`${API_ENDPOINT}/aset/${id}`, {
+  return apiFetch(`${API_ENDPOINT}/aset/${encodeURIComponent(id)}`, {
     method: "DELETE",
+  });
+}
+
+
+
+export async function getKetersediaanAset() {
+  return apiFetch(`${PEMINJAMAN_ENDPOINT}/ketersediaan`, {
+    method: "GET",
   });
 }
 
@@ -262,33 +240,21 @@ export async function ajukanPeminjaman(data) {
   }
 
   if (!data?.tanggalKembaliRencana) {
-    throw new Error(
-      "Tanggal rencana pengembalian wajib diisi."
-    );
+    throw new Error("Tanggal rencana pengembalian wajib diisi.");
   }
 
   const jumlah = Number(data.jumlah);
 
   if (!Number.isFinite(jumlah) || jumlah <= 0) {
-    throw new Error(
-      "Jumlah aset yang dipinjam harus lebih dari 0."
-    );
+    throw new Error("Jumlah aset yang dipinjam harus lebih dari 0.");
   }
 
-  return apiFetch(`${API_ENDPOINT}/peminjaman`, {
+  return apiFetch(PEMINJAMAN_ENDPOINT, {
     method: "POST",
-
     body: JSON.stringify({
-      keperluan:
-        data.keperluan.trim(),
-
-      tanggalKembaliRencana:
-        data.tanggalKembaliRencana,
-
-      catatanPeminjaman:
-        data.catatanPeminjaman?.trim() ||
-        null,
-
+      keperluan: data.keperluan.trim(),
+      tanggalKembaliRencana: data.tanggalKembaliRencana,
+      catatanPeminjaman: data.catatanPeminjaman?.trim() || null,
       items: [
         {
           asetId: data.asetId,
@@ -300,6 +266,7 @@ export async function ajukanPeminjaman(data) {
 }
 
 
+
 export async function getDaftarPeminjaman({
   page = 1,
   limit = 10,
@@ -308,48 +275,34 @@ export async function getDaftarPeminjaman({
 } = {}) {
   const params = new URLSearchParams();
 
-  params.set(
-    "page",
-    String(page)
-  );
-
-  params.set(
-    "limit",
-    String(limit)
-  );
+  params.set("page", String(page));
+  params.set("limit", String(limit));
 
   if (status) {
-    params.set(
-      "status",
-      status
-    );
+    params.set("status", status);
   }
 
   if (search?.trim()) {
-    params.set(
-      "search",
-      search.trim()
-    );
+    params.set("search", search.trim());
   }
 
   return apiFetch(
-    `${API_ENDPOINT}/peminjaman?${params.toString()}`,
+    `${PEMINJAMAN_ENDPOINT}?${params.toString()}`,
     {
       method: "GET",
     }
   );
 }
+
 
 
 export async function getDetailPeminjaman(id) {
   if (!id) {
-    throw new Error(
-      "ID peminjaman tidak ditemukan."
-    );
+    throw new Error("ID peminjaman tidak ditemukan.");
   }
 
   return apiFetch(
-    `${API_ENDPOINT}/peminjaman/${id}`,
+    `${PEMINJAMAN_ENDPOINT}/${encodeURIComponent(id)}`,
     {
       method: "GET",
     }
@@ -358,34 +311,24 @@ export async function getDetailPeminjaman(id) {
 
 
 
-export async function verifikasiPeminjaman(
-  id,
-  data
-) {
+export async function verifikasiPeminjaman(id, data) {
   if (!id) {
-    throw new Error(
-      "ID peminjaman tidak ditemukan."
-    );
+    throw new Error("ID peminjaman tidak ditemukan.");
   }
 
   if (!data?.status) {
-    throw new Error(
-      "Status persetujuan wajib diisi."
-    );
+    throw new Error("Status persetujuan wajib diisi.");
   }
 
   return apiFetch(
-    `${API_ENDPOINT}/peminjaman/${id}/persetujuan`,
+    `${PEMINJAMAN_ENDPOINT}/${encodeURIComponent(id)}/verifikasi`,
     {
       method: "PATCH",
-
       body: JSON.stringify({
         status: data.status,
-
         catatanPenolakan:
           data.status === "ditolak"
-            ? data.catatanPenolakan?.trim() ||
-              null
+            ? data.catatanPenolakan?.trim() || null
             : null,
       }),
     }
@@ -394,32 +337,19 @@ export async function verifikasiPeminjaman(
 
 
 
-export async function serahkanPeminjaman(
-  id,
-  data
-) {
+export async function serahkanPeminjaman(id, data) {
   if (!id) {
-    throw new Error(
-      "ID peminjaman tidak ditemukan."
-    );
+    throw new Error("ID peminjaman tidak ditemukan.");
   }
 
   return apiFetch(
-    `${API_ENDPOINT}/peminjaman/${id}/ambil`,
+    `${PEMINJAMAN_ENDPOINT}/${encodeURIComponent(id)}/serahkan`,
     {
       method: "PATCH",
-
       body: JSON.stringify({
-        siswaPengambilId:
-          data?.siswaPengambilId || null,
-
-        namaSiswaPengambil:
-          data?.namaSiswaPengambil?.trim() ||
-          null,
-
-        kondisiSaatPinjam:
-          data?.kondisiSaatPinjam ||
-          "baik",
+        siswaPengambilId: data?.siswaPengambilId || null,
+        namaSiswaPengambil: data?.namaSiswaPengambil?.trim() || null,
+        kondisiSaatPinjam: data?.kondisiSaatPinjam || "baik",
       }),
     }
   );
@@ -427,45 +357,26 @@ export async function serahkanPeminjaman(
 
 
 
-export async function kembalikanPeminjaman(
-  id,
-  data
-) {
+export async function kembalikanPeminjaman(id, data) {
   if (!id) {
-    throw new Error(
-      "ID peminjaman tidak ditemukan."
-    );
+    throw new Error("ID peminjaman tidak ditemukan.");
   }
 
-  const items =
-    Array.isArray(data?.items)
-      ? data.items.map((item) => ({
-          asetId: item.asetId,
-
-          kondisiSaatKembali:
-            item.kondisiSaatKembali ||
-            "baik",
-
-          catatanKembali:
-            item.catatanKembali?.trim() ||
-            null,
-        }))
-      : [];
+  const items = Array.isArray(data?.items)
+    ? data.items.map((item) => ({
+        asetId: item.asetId,
+        kondisiSaatKembali: item.kondisiSaatKembali || "baik",
+        catatanKembali: item.catatanKembali?.trim() || null,
+      }))
+    : [];
 
   return apiFetch(
-    `${API_ENDPOINT}/peminjaman/${id}/kembali`,
+    `${PEMINJAMAN_ENDPOINT}/${encodeURIComponent(id)}/kembalikan`,
     {
       method: "PATCH",
-
       body: JSON.stringify({
-        siswaPengembaliId:
-          data?.siswaPengembaliId ||
-          null,
-
-        namaSiswaPengembali:
-          data?.namaSiswaPengembali?.trim() ||
-          null,
-
+        siswaPengembaliId: data?.siswaPengembaliId || null,
+        namaSiswaPengembali: data?.namaSiswaPengembali?.trim() || null,
         items,
       }),
     }
