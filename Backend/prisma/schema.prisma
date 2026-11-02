@@ -1157,6 +1157,7 @@ model Aset {
   kondisi            String    @db.VarChar(20)
   jumlah             Int
   jumlahStok         Int       @map("jumlah_stok")
+  hargaSatuan        Decimal?  @map("harga_satuan") @db.Decimal(15, 2)
   stokMinimum        Int       @map("stok_minimum")
   lokasi             String?   @db.VarChar(100)
   status             String?   @db.VarChar(20)

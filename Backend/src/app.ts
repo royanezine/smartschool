@@ -54,6 +54,9 @@ import kategoriJabatanRoutes from "./routes/kategoriJabatan.routes";
 import shiftKerjaRoutes from "./routes/shiftKerja.routes";
 import penggajianRoutes from "./routes/penggajian.routes";
 
+import sekolahRoutes from "./routes/sekolah.routes";
+import dashboardSiswaRoutes from "./routes/dashboardSiswa.routes";
+
 dotenv.config();
 
 const app: Application = express();
@@ -145,6 +148,9 @@ app.use("/api/kategori-jabatan", kategoriJabatanRoutes);
 app.use("/api/shift-kerja", shiftKerjaRoutes);
 app.use("/api/penggajian", penggajianRoutes);
 app.use("/api/keuangan", keuanganRoutes);
+app.use("/api/dashboard/siswa", dashboardSiswaRoutes);
+app.use("/api/sekolah", sekolahRoutes);
+
 
 app.use(globalErrorHandler);
 

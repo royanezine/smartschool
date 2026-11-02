@@ -1,0 +1,1 @@
+ALTER TABLE "aset" ADD COLUMN "harga_satuan" DECIMAL(15,2);
