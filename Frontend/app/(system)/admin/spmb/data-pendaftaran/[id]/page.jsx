@@ -29,7 +29,6 @@ import {
 } from "lucide-react";
 import {
   getPendaftarPpdbById,
-  isPpdbEndpointMissing,
   verifikasiPpdb,
 } from "@/services/ppdb.service";
 import { getKelas } from "@/services/kelas.service";
@@ -304,7 +303,6 @@ export default function DetailPendaftaranPage() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [endpointUnavailable, setEndpointUnavailable] = useState(false);
 
   const [kelasList, setKelasList] = useState([]);
   const [kelasId, setKelasId] = useState("");
@@ -324,7 +322,6 @@ export default function DetailPendaftaranPage() {
     try {
       setLoading(true);
       setError("");
-      setEndpointUnavailable(false);
 
       const response = await getPendaftarPpdbById(id);
 
@@ -336,8 +333,6 @@ export default function DetailPendaftaranPage() {
           ? err.message
           : "Gagal memuat detail pendaftar."
       );
-
-      setEndpointUnavailable(isPpdbEndpointMissing(err));
     } finally {
       setLoading(false);
     }
@@ -574,22 +569,12 @@ export default function DetailPendaftaranPage() {
 
                   <div>
                     <h2 className="text-sm font-bold theme-text">
-                      {endpointUnavailable
-                        ? "Detail Pendaftar Belum Tersedia"
-                        : "Gagal memuat data"}
+                      Gagal memuat data
                     </h2>
 
                     <p className="mt-1 text-sm theme-text-secondary">
-                      {endpointUnavailable
-                        ? "Endpoint baca detail pendaftar (GET /api/ppdb/pendaftar/:id) belum tersedia di Backend, sehingga detail tidak dapat ditampilkan."
-                        : error}
+                      {error}
                     </p>
-
-                    {endpointUnavailable && (
-                      <p className="mt-1 text-xs theme-text-muted">
-                        Tidak ada data contoh yang ditampilkan. Formulir pendaftaran calon siswa baru tetap tersedia melalui menu Data Pendaftaran.
-                      </p>
-                    )}
 
                     <button
                       type="button"
@@ -991,6 +976,41 @@ export default function DetailPendaftaranPage() {
                         />
 
                         <DetailItem
+                          icon={FileCheck2}
+                          label="Nilai Tes Seleksi"
+                          value={
+                            data?.hasilSeleksiPpdb?.nilaiTes !== null &&
+                            data?.hasilSeleksiPpdb?.nilaiTes !== undefined
+                              ? data.hasilSeleksiPpdb.nilaiTes
+                              : "-"
+                          }
+                        />
+
+                        <DetailItem
+                          icon={MapPin}
+                          label="Jarak dari Sekolah"
+                          value={
+                            data?.jarakKm !== null &&
+                            data?.jarakKm !== undefined
+                              ? `${data.jarakKm} km`
+                              : "-"
+                          }
+                        />
+
+                        <DetailItem
+                          icon={MapPin}
+                          label="Koordinat GPS"
+                          value={
+                            data?.lintang !== null &&
+                            data?.lintang !== undefined &&
+                            data?.bujur !== null &&
+                            data?.bujur !== undefined
+                              ? `${data.lintang}, ${data.bujur}`
+                              : "-"
+                          }
+                        />
+
+                        <DetailItem
                           icon={School}
                           label="Kelas"
                           value={
@@ -998,6 +1018,14 @@ export default function DetailPendaftaranPage() {
                             "Belum ditentukan"
                           }
                         />
+
+                        {data?.dikonversiPada && (
+                          <DetailItem
+                            icon={CheckCircle2}
+                            label="Dikonversi ke Siswa"
+                            value={formatTanggalJam(data.dikonversiPada)}
+                          />
+                        )}
 
                         <DetailItem
                           icon={CalendarDays}

@@ -78,12 +78,8 @@ export default function EditPengumumanPage() {
             .slice(0, 16);
           setDipublikasikanPada(localIso);
         } else {
-          const now = new Date();
-          setDipublikasikanPada(
-            new Date(now.getTime() - now.getTimezoneOffset() * 60000)
-              .toISOString()
-              .slice(0, 16)
-          );
+          // Belum pernah terbit: biarkan kosong agar Backend memakai waktu server.
+          setDipublikasikanPada("");
         }
       } else {
         setError("Pengumuman tidak ditemukan.");
@@ -137,10 +133,10 @@ export default function EditPengumumanPage() {
       };
 
       if (status === "dipublikasikan") {
+        // Kosong = tidak dikirim: Backend memakai tanggal publikasi lama,
+        // atau waktu server bila belum pernah terbit.
         if (dipublikasikanPada) {
           payload.dipublikasikanPada = new Date(dipublikasikanPada).toISOString();
-        } else {
-          payload.dipublikasikanPada = new Date().toISOString();
         }
       } else {
         payload.dipublikasikanPada = null;
@@ -297,7 +293,7 @@ export default function EditPengumumanPage() {
                           />
                         </div>
                         <p className="mt-1.5 text-[11px] theme-text-muted">
-                          Pengumuman hanya akan tampil di publik jika tanggal publikasi telah tiba.
+                          Kosongkan untuk langsung terbit (atau mempertahankan tanggal lama). Isi tanggal mendatang untuk menjadwalkan.
                         </p>
                       </div>
                     )}

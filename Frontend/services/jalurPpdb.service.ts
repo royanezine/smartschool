@@ -93,19 +93,10 @@ export async function getJalurPpdbById(
     throw new Error("ID jalur PPDB tidak ditemukan.");
   }
 
-  // Response dari endpoint terbaru GET /api/ppdb/jalur sebagai single source of truth
-  const response = await getJalurPpdb();
-  const list = Array.isArray(response?.data) ? response.data : [];
-  const item = list.find((j) => j.id === id);
-
-  if (!item) {
-    throw new Error("Data jalur PPDB tidak ditemukan.");
-  }
-
-  return {
-    success: true,
-    data: item,
-  };
+  // Direct GET dari Backend /api/jalur-ppdb/:id (lebih efisien daripada list+filter)
+  return apiFetch(`/api/jalur-ppdb/${encodeURIComponent(id)}`, {
+    method: "GET",
+  });
 }
 
 export async function createJalurPpdb(

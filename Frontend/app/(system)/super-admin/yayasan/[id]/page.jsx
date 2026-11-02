@@ -26,6 +26,11 @@ import {
   UserPlus,
   Unlink,
   Link2,
+  Package,
+  Layers,
+  Receipt,
+  Clock,
+  RefreshCw,
 } from "lucide-react";
 
 import {
@@ -38,6 +43,7 @@ import {
   createAdminYayasan,
   updateAdminYayasan,
   deleteAdminYayasan,
+  getDetailYayasanLangganan,
 } from "@/services/yayasan.service";
 import { getPlatformSekolah } from "@/services/platform.service";
 
@@ -132,14 +138,31 @@ function formatDate(value) {
   }
 }
 
+function formatRupiah(value) {
+  if (value === null || value === undefined || value === "") return "-";
+  const num = Number(value);
+  if (Number.isNaN(num)) return "-";
+  return new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(num);
+}
+
 export default function DetailYayasanSuperAdminPage() {
   const params = useParams();
   const router = useRouter();
 
   const yayasanId = Array.isArray(params?.id) ? params.id[0] : params?.id;
 
-  // Active Tab: "profil", "sekolah", "admin"
+  // Active Tab: "profil", "langganan", "sekolah", "admin"
   const [activeTab, setActiveTab] = useState("profil");
+
+  // Detail Langganan & Modul & Riwayat Tenant
+  const [detailLangganan, setDetailLangganan] = useState(null);
+  const [loadingLangganan, setLoadingLangganan] = useState(true);
+  const [langgananError, setLanggananError] = useState("");
 
   // Main state
   const [yayasan, setYayasan] = useState(null);
@@ -231,6 +254,24 @@ export default function DetailYayasanSuperAdminPage() {
         setPlatformSchools(available);
       } catch (err) {
         console.warn("Gagal memuat daftar sekolah platform:", err);
+      }
+
+      // 5. Fetch Detail Langganan, Modul Paket, & Riwayat Tenant
+      try {
+        setLoadingLangganan(true);
+        setLanggananError("");
+        const langRes = await getDetailYayasanLangganan(yayasanId);
+        const langData = langRes?.data || langRes;
+        setDetailLangganan(langData);
+      } catch (err) {
+        console.warn("Gagal memuat detail langganan:", err);
+        setLanggananError(
+          err?.response?.data?.message ||
+            err?.message ||
+            "Gagal memuat detail langganan yayasan."
+        );
+      } finally {
+        setLoadingLangganan(false);
       }
     } catch (err) {
       console.error("Gagal mengambil detail yayasan:", err);
@@ -594,7 +635,7 @@ export default function DetailYayasanSuperAdminPage() {
             </div>
 
             {/* Navigation Tabs */}
-            <div className={`mt-6 flex items-center gap-2 border-t ${themeDivider} pt-4`}>
+            <div className={`mt-6 flex items-center gap-2 border-t ${themeDivider} pt-4 flex-wrap`}>
               <button
                 type="button"
                 onClick={() => setActiveTab("profil")}
@@ -606,6 +647,30 @@ export default function DetailYayasanSuperAdminPage() {
               >
                 <Landmark size={14} />
                 <span>Profil & Kontak</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveTab("langganan")}
+                className={`flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold transition-all ${
+                  activeTab === "langganan"
+                    ? "bg-[var(--color-primary)] text-[var(--color-card)]"
+                    : `theme-text-secondary ${themeNeutralHover}`
+                }`}
+              >
+                <Package size={14} />
+                <span>Langganan & Modul</span>
+                {detailLangganan?.langganan?.sisaHari !== null && detailLangganan?.langganan?.sisaHari !== undefined && (
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-[10px] ${
+                      activeTab === "langganan"
+                        ? "bg-white/20"
+                        : "bg-[color-mix(in_srgb,var(--color-text)_8%,transparent)]"
+                    }`}
+                  >
+                    {detailLangganan.langganan.sisaHari} hari
+                  </span>
+                )}
               </button>
 
               <button
@@ -695,30 +760,57 @@ export default function DetailYayasanSuperAdminPage() {
 
               {/* Card 2: Paket Langganan & Info Lisensi */}
               <div className={`rounded-2xl border theme-border theme-card p-5 sm:p-6 ${themeCardShadow}`}>
-                <h3 className="text-sm font-bold theme-text mb-4 flex items-center gap-2">
-                  <Building2 size={16} className="text-[var(--color-info)]" />
-                  Paket Langganan & Layanan
-                </h3>
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-sm font-bold theme-text flex items-center gap-2">
+                    <Building2 size={16} className="text-[var(--color-info)]" />
+                    Paket Langganan & Layanan
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab("langganan")}
+                    className="text-xs font-semibold text-[var(--color-primary)] hover:underline flex items-center gap-1"
+                  >
+                    <span>Detail Lengkap</span>
+                    <Package size={12} />
+                  </button>
+                </div>
 
                 <div className="space-y-3.5 text-xs">
                   <div className="flex justify-between py-2 border-b theme-border">
                     <span className="theme-text-muted">Paket Saat Ini</span>
-                    <span className="font-bold theme-text">{yayasan.paket?.nama || "Tanpa Paket"}</span>
+                    <span className="font-bold theme-text">
+                      {detailLangganan?.langganan?.paket?.nama || yayasan.paket?.nama || "Tanpa Paket"}
+                    </span>
                   </div>
 
                   <div className="flex justify-between py-2 border-b theme-border">
                     <span className="theme-text-muted">Status Langganan</span>
-                    <span className="font-semibold capitalize theme-text">{yayasan.statusLangganan || "-"}</span>
+                    <span className="font-semibold capitalize theme-text">
+                      {detailLangganan?.langganan?.statusLangganan || yayasan.statusLangganan || "-"}
+                    </span>
                   </div>
 
                   <div className="flex justify-between py-2 border-b theme-border">
                     <span className="theme-text-muted">Mulai Berlaku</span>
-                    <span className="font-medium theme-text">{formatDate(yayasan.tanggalMulaiLangganan)}</span>
+                    <span className="font-medium theme-text">
+                      {formatDate(detailLangganan?.langganan?.tanggalMulai || yayasan.tanggalMulaiLangganan)}
+                    </span>
                   </div>
 
                   <div className="flex justify-between py-2 border-b theme-border">
                     <span className="theme-text-muted">Berlaku Sampai</span>
-                    <span className="font-medium theme-text">{formatDate(yayasan.tanggalBerakhirLangganan)}</span>
+                    <span className="font-medium theme-text">
+                      {formatDate(detailLangganan?.langganan?.tanggalBerakhir || yayasan.tanggalBerakhirLangganan)}
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between py-2 border-b theme-border">
+                    <span className="theme-text-muted">Sisa Masa Aktif</span>
+                    <span className="font-semibold text-[var(--color-primary)]">
+                      {detailLangganan?.langganan?.sisaHari !== null && detailLangganan?.langganan?.sisaHari !== undefined
+                        ? `${detailLangganan.langganan.sisaHari} Hari`
+                        : "-"}
+                    </span>
                   </div>
 
                   <div className="flex justify-between py-2 border-b theme-border">
@@ -728,6 +820,208 @@ export default function DetailYayasanSuperAdminPage() {
                 </div>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* TAB 2: DETAIL LANGGANAN, MODUL PAKET, & RIWAYAT TENANT */}
+        {activeTab === "langganan" && (
+          <div className="space-y-6">
+            {loadingLangganan ? (
+              <div className={`rounded-2xl border theme-border theme-card p-12 text-center ${themeCardShadow}`}>
+                <Loader2 size={32} className="mx-auto animate-spin text-[var(--color-primary)] mb-3" />
+                <p className="text-sm font-medium theme-text">Memuat detail langganan dan modul paket...</p>
+              </div>
+            ) : langgananError ? (
+              <div className={`rounded-2xl border ${themeDangerBorder} ${themeDangerSoft} p-5 flex items-center justify-between`}>
+                <div className="flex items-center gap-3">
+                  <AlertCircle size={20} className="text-[var(--color-danger,_#ef4444)] shrink-0" />
+                  <p className="text-sm font-medium text-[var(--color-danger,_#ef4444)]">{langgananError}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={loadYayasanData}
+                  className="rounded-xl border theme-border px-3 py-1.5 text-xs font-semibold theme-text hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] transition-all flex items-center gap-1.5"
+                >
+                  <RefreshCw size={12} />
+                  <span>Coba Lagi</span>
+                </button>
+              </div>
+            ) : (
+              <>
+                {/* 1. Detail Paket & Masa Aktif */}
+                <div className={`rounded-2xl border theme-border theme-card p-5 sm:p-6 ${themeCardShadow}`}>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b theme-border pb-4 mb-5">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <Package size={18} className="text-[var(--color-primary)]" />
+                        <h3 className="text-sm font-bold theme-text">
+                          {detailLangganan?.langganan?.paket?.nama || "Paket Tidak Terikat"}
+                        </h3>
+                        <span
+                          className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+                            detailLangganan?.langganan?.statusLangganan === "active"
+                              ? `${themeSuccessSoft} text-[var(--color-success)] ${themeSuccessBorder} border`
+                              : `${themeWarningSoft} text-[var(--color-warning)] ${themeWarningBorder} border`
+                          }`}
+                        >
+                          {detailLangganan?.langganan?.statusLangganan || "Nonaktif"}
+                        </span>
+                      </div>
+                      <p className="text-xs theme-text-muted mt-1">
+                        {detailLangganan?.langganan?.paket?.deskripsi || "Tidak ada deskripsi paket untuk yayasan ini."}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-4 text-xs font-medium theme-text-muted">
+                      <div>
+                        <span>Harga Paket:</span>{" "}
+                        <span className="font-bold theme-text">
+                          {formatRupiah(detailLangganan?.langganan?.paket?.harga)}
+                        </span>
+                      </div>
+                      <div>
+                        <span>Durasi:</span>{" "}
+                        <span className="font-bold theme-text">
+                          {detailLangganan?.langganan?.paket?.durasi ? `${detailLangganan.langganan.paket.durasi} Hari` : "-"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className={`p-4 rounded-xl border theme-border ${themeNeutralSurface}`}>
+                      <div className="flex items-center gap-2 text-xs theme-text-muted mb-1">
+                        <Calendar size={14} />
+                        <span>Mulai Berlangganan</span>
+                      </div>
+                      <p className="text-sm font-bold theme-text">
+                        {formatDate(detailLangganan?.langganan?.tanggalMulai)}
+                      </p>
+                    </div>
+
+                    <div className={`p-4 rounded-xl border theme-border ${themeNeutralSurface}`}>
+                      <div className="flex items-center gap-2 text-xs theme-text-muted mb-1">
+                        <Calendar size={14} />
+                        <span>Berakhir Pada</span>
+                      </div>
+                      <p className="text-sm font-bold theme-text">
+                        {formatDate(detailLangganan?.langganan?.tanggalBerakhir)}
+                      </p>
+                    </div>
+
+                    <div className={`p-4 rounded-xl border theme-border ${themeNeutralSurface}`}>
+                      <div className="flex items-center gap-2 text-xs theme-text-muted mb-1">
+                        <Clock size={14} />
+                        <span>Sisa Masa Aktif</span>
+                      </div>
+                      <p className="text-sm font-bold text-[var(--color-primary)]">
+                        {detailLangganan?.langganan?.sisaHari !== null && detailLangganan?.langganan?.sisaHari !== undefined
+                          ? `${detailLangganan.langganan.sisaHari} Hari Kalender`
+                          : "-"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 2. Modul Termasuk dalam Paket */}
+                <div className={`rounded-2xl border theme-border theme-card p-5 sm:p-6 ${themeCardShadow}`}>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-sm font-bold theme-text flex items-center gap-2">
+                      <Layers size={16} className="text-[var(--color-primary)]" />
+                      Modul Fitur yang Diaktifkan
+                    </h3>
+                    <span className="text-xs theme-text-muted">
+                      {detailLangganan?.langganan?.paket?.modul?.length || 0} Modul Tersedia
+                    </span>
+                  </div>
+
+                  {Array.isArray(detailLangganan?.langganan?.paket?.modul) &&
+                  detailLangganan.langganan.paket.modul.length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                      {detailLangganan.langganan.paket.modul.map((mod, idx) => (
+                        <div
+                          key={mod.kode || idx}
+                          className={`p-3.5 rounded-xl border theme-border ${themeNeutralSurface} flex items-center justify-between`}
+                        >
+                          <div>
+                            <p className="text-xs font-bold theme-text">{mod.nama || mod.kode}</p>
+                            <p className="text-[10px] font-mono theme-text-muted">kode: {mod.kode}</p>
+                          </div>
+                          <CheckCircle2 size={16} className="text-[var(--color-success)] shrink-0" />
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className={`p-6 rounded-xl border border-dashed theme-border text-center ${themeNeutralSurface}`}>
+                      <Layers size={24} className="mx-auto text-[var(--color-text-muted)] mb-2" />
+                      <p className="text-xs font-semibold theme-text">Tidak ada modul khusus terpasang</p>
+                      <p className="text-[11px] theme-text-muted mt-0.5">
+                        Paket yayasan ini belum dikonfigurasikan dengan modul paket individual.
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {/* 3. Riwayat Pendaftaran Tenant */}
+                <div className={`rounded-2xl border theme-border theme-card p-5 sm:p-6 ${themeCardShadow}`}>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-sm font-bold theme-text flex items-center gap-2">
+                      <Receipt size={16} className="text-[var(--color-primary)]" />
+                      Riwayat Pendaftaran Tenant
+                    </h3>
+                    <span className="text-xs theme-text-muted">
+                      {detailLangganan?.riwayatPendaftaran?.length || 0} Catatan Pendaftaran
+                    </span>
+                  </div>
+
+                  {Array.isArray(detailLangganan?.riwayatPendaftaran) &&
+                  detailLangganan.riwayatPendaftaran.length > 0 ? (
+                    <div className="overflow-x-auto rounded-xl border theme-border">
+                      <table className="w-full text-left text-xs">
+                        <thead>
+                          <tr className={`border-b theme-border ${themeNeutralSurface} font-semibold theme-text`}>
+                            <th className="p-3">ID Registrasi / Order ID</th>
+                            <th className="p-3">Status</th>
+                            <th className="p-3">Tanggal Dibuat</th>
+                            <th className="p-3">Tanggal Dikonversi</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y theme-border">
+                          {detailLangganan.riwayatPendaftaran.map((reg) => (
+                            <tr key={reg.id} className={`${themeNeutralHover} transition-colors`}>
+                              <td className="p-3 font-mono theme-text">
+                                {reg.midtransOrderId || reg.id}
+                              </td>
+                              <td className="p-3">
+                                <span
+                                  className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${
+                                    reg.status === "selesai" || reg.status === "aktif"
+                                      ? `${themeSuccessSoft} text-[var(--color-success)]`
+                                      : `${themeNeutralSurface} theme-text-muted`
+                                  }`}
+                                >
+                                  {reg.status || "-"}
+                                </span>
+                              </td>
+                              <td className="p-3 theme-text-muted">{formatDate(reg.dibuatPada)}</td>
+                              <td className="p-3 theme-text-muted">{formatDate(reg.dikonversiPada)}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <div className={`p-6 rounded-xl border border-dashed theme-border text-center ${themeNeutralSurface}`}>
+                      <Receipt size={24} className="mx-auto text-[var(--color-text-muted)] mb-2" />
+                      <p className="text-xs font-semibold theme-text">Belum ada riwayat pendaftaran tenant</p>
+                      <p className="text-[11px] theme-text-muted mt-0.5">
+                        Yayasan ini dibuat secara manual oleh Super Administrator atau belum memiliki catatan registrasi via form pendaftaran tenant.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
           </div>
         )}
 

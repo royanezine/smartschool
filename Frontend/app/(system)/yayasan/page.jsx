@@ -6,153 +6,65 @@ import {
   LayoutDashboard,
   Building2,
   Users,
-  GraduationCap,
   UserSquare2,
   ClipboardCheck,
-  FileText,
   Settings,
   ChevronRight,
-  Sparkles,
   Bell,
-  Info,
-  Activity,
-  CheckCircle2,
   PlusCircle,
   MapPin,
+  CalendarCheck,
 } from "lucide-react";
 
 import {
   getYayasanSummary,
   getSekolahBinaan,
-  getYayasanDashboardAgregat,
+  getProfilYayasan,
 } from "@/services/yayasan.service";
 import { getNotifikasi } from "@/services/notifikasi.service";
 
-
-const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
-
-const themePrimarySoft =
-  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
-
-const themePrimarySoftBorder =
-  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
-
-const themePrimaryText =
-  "text-[var(--color-primary)]";
-
-const themeCardShadow =
+const neutralSurface = "bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)]";
+const neutralHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+const skeletonBg = "color-mix(in srgb, var(--color-text) 7%, transparent)";
+const cardShadow =
   "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
 
-const themeSmallShadow =
-  "shadow-[0_2px_8px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
-
-const themeNeutralSurface =
-  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
-
-const themeNeutralHover =
-  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
-
-const themeNeutralBorder =
-  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
-
-const themeDivider =
-  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
-
-const themeInfoSurface =
-  "bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)]";
-
-const themeInfoBorder =
-  "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
-
-const themeSuccessSurface =
-  "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
-
-const themeSuccessBorder =
-  "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
-
-const themeWarningSurface =
-  "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]";
-
-const themeWarningBorder =
-  "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
-
-const themeDangerSurface =
-  "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
-
-const themeDangerBorder =
-  "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
-
-
-const colorMap = {
-  primary: {
-    bg: themePrimarySoft,
-    text: themePrimaryText,
-    border: themePrimarySoftBorder,
-    hoverBorder:
-      "hover:border-[color-mix(in_srgb,var(--color-primary)_36%,transparent)]",
-    ring:
-      "group-hover:ring-[color-mix(in_srgb,var(--color-primary)_12%,transparent)]",
-  },
-
-  info: {
-    bg: themeInfoSurface,
-    text: "text-[var(--color-info)]",
-    border: themeInfoBorder,
-    hoverBorder:
-      "hover:border-[color-mix(in_srgb,var(--color-info)_36%,transparent)]",
-    ring:
-      "group-hover:ring-[color-mix(in_srgb,var(--color-info)_12%,transparent)]",
-  },
-
-  success: {
-    bg: themeSuccessSurface,
-    text: "text-[var(--color-success)]",
-    border: themeSuccessBorder,
-    hoverBorder:
-      "hover:border-[color-mix(in_srgb,var(--color-success)_36%,transparent)]",
-    ring:
-      "group-hover:ring-[color-mix(in_srgb,var(--color-success)_12%,transparent)]",
-  },
-
-  warning: {
-    bg: themeWarningSurface,
-    text: "text-[var(--color-warning)]",
-    border: themeWarningBorder,
-    hoverBorder:
-      "hover:border-[color-mix(in_srgb,var(--color-warning)_36%,transparent)]",
-    ring:
-      "group-hover:ring-[color-mix(in_srgb,var(--color-warning)_12%,transparent)]",
-  },
-
-  neutral: {
-    bg: themeNeutralSurface,
-    text: "text-[var(--color-text-muted)]",
-    border: themeNeutralBorder,
-    hoverBorder:
-      "hover:border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]",
-    ring:
-      "group-hover:ring-[color-mix(in_srgb,var(--color-text)_8%,transparent)]",
-  },
+const textColor = {
+  primary: "text-[var(--color-primary)]",
+  info: "text-[var(--color-info)]",
+  success: "text-[var(--color-success)]",
+  warning: "text-[var(--color-warning)]",
+  neutral: "text-[var(--color-text-muted)]",
 };
 
+const dotColor = {
+  primary: "bg-[var(--color-primary)]",
+  info: "bg-[var(--color-info)]",
+  success: "bg-[var(--color-success)]",
+  warning: "bg-[var(--color-warning)]",
+  neutral: "bg-[var(--color-text-placeholder)]",
+};
+
+const softBg = {
+  primary: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]",
+  info: "bg-[color-mix(in_srgb,var(--color-info)_10%,transparent)]",
+  success: "bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)]",
+  warning: "bg-[color-mix(in_srgb,var(--color-warning)_10%,transparent)]",
+  neutral: "bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)]",
+};
 
 function unwrapData(response) {
   if (response && typeof response === "object" && "data" in response) {
     return response.data;
   }
-
   return response;
 }
 
-
 function formatTanggal(value) {
   if (!value) return "-";
-
   const date = new Date(value);
-
   if (Number.isNaN(date.getTime())) return "-";
-
   return date.toLocaleDateString("id-ID", {
     day: "numeric",
     month: "short",
@@ -160,18 +72,28 @@ function formatTanggal(value) {
   });
 }
 
+function SectionHeader({ icon: Icon, title, color = "primary", action }) {
+  return (
+    <div className="mb-5 flex items-center justify-between gap-2">
+      <div className="flex min-w-0 items-center gap-2.5">
+        <Icon size={18} className={`shrink-0 ${textColor[color]}`} />
+        <h3 className="truncate text-sm font-semibold theme-text">{title}</h3>
+      </div>
+      {action}
+    </div>
+  );
+}
 
 export default function YayasanDashboardPage() {
   const router = useRouter();
 
   const [summary, setSummary] = useState(null);
-  const [agregat, setAgregat] = useState(null);
+  const [profilYayasan, setProfilYayasan] = useState(null);
   const [schools, setSchools] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
-
 
   useEffect(() => {
     let mounted = true;
@@ -181,18 +103,22 @@ export default function YayasanDashboardPage() {
         setLoading(true);
         setLoadError(null);
 
-        const [summaryResult, schoolsResult, notifResult, agregatResult] =
+        const [summaryResult, schoolsResult, notifResult, profilResult] =
           await Promise.allSettled([
             getYayasanSummary(),
             getSekolahBinaan(),
             getNotifikasi(),
-            getYayasanDashboardAgregat(),
+            getProfilYayasan(),
           ]);
 
         if (!mounted) return;
 
         if (summaryResult.status === "fulfilled") {
           setSummary(unwrapData(summaryResult.value) ?? null);
+        }
+
+        if (profilResult.status === "fulfilled") {
+          setProfilYayasan(unwrapData(profilResult.value) ?? null);
         }
 
         if (schoolsResult.status === "fulfilled") {
@@ -202,59 +128,31 @@ export default function YayasanDashboardPage() {
 
         if (notifResult.status === "fulfilled") {
           setNotifications(
-            Array.isArray(notifResult.value?.list)
-              ? notifResult.value.list
-              : []
+            Array.isArray(notifResult.value?.list) ? notifResult.value.list : []
           );
           setUnreadCount(Number(notifResult.value?.unreadCount) || 0);
         }
 
-        if (agregatResult.status === "fulfilled") {
-          const payload = unwrapData(agregatResult.value);
-          // Backend GET /api/dashboard terbaru menggunakan data.scope
-          if (payload?.scope === "yayasan") {
-            const yayasanData = payload.yayasan || payload.cabang;
-            setAgregat({
-              totalSiswa: yayasanData?.totalSiswa ?? 0,
-              totalGuru: yayasanData?.totalGuru ?? 0,
-              totalKelas: yayasanData?.totalKelas ?? 0,
-              kehadiranHariIni: yayasanData?.persentaseHadir ?? "0.0%",
-              detailKehadiran: yayasanData?.rekapKehadiran ?? {
-                hadir: 0,
-                izin: 0,
-                sakit: 0,
-                alpha: 0,
-              },
-              sekolah: Array.isArray(yayasanData?.sekolah) ? yayasanData.sekolah : [],
-            });
-          } else {
-            // Jika scope bukan yayasan, jangan anggap sebagai response dashboard yayasan
-            setAgregat(null);
-          }
-        }
-
-        const failures = [summaryResult, schoolsResult, notifResult, agregatResult].filter(
-          (result) => result.status === "rejected"
-        );
+        const failures = [
+          summaryResult,
+          schoolsResult,
+          notifResult,
+          profilResult,
+        ].filter((result) => result.status === "rejected");
 
         if (failures.length > 0) {
-          const firstFailure = failures[0].reason;
-
           setLoadError(
-            firstFailure?.message ||
+            failures[0].reason?.message ||
               "Sebagian data dashboard gagal dimuat."
           );
         }
       } catch (err) {
         if (!mounted) return;
-
         setLoadError(
           err?.message || "Terjadi kesalahan saat mengambil data dashboard."
         );
       } finally {
-        if (mounted) {
-          setLoading(false);
-        }
+        if (mounted) setLoading(false);
       }
     }
 
@@ -265,22 +163,30 @@ export default function YayasanDashboardPage() {
     };
   }, []);
 
+  const sumStat = (key) =>
+    schools.reduce(
+      (total, sekolah) => total + Number(sekolah?.statistik?.[key] ?? 0),
+      0
+    );
 
-  const totalSiswa = schools.reduce(
-    (total, sekolah) => total + Number(sekolah?.statistik?.totalSiswa ?? 0),
-    0
-  );
+  const totalSiswa = sumStat("totalSiswa");
+  const totalGuru = sumStat("totalGuru");
+  const totalKelas = sumStat("totalKelas");
 
-  const totalGuru = schools.reduce(
-    (total, sekolah) => total + Number(sekolah?.statistik?.totalGuru ?? 0),
-    0
-  );
-
-  const totalKelas = schools.reduce(
-    (total, sekolah) => total + Number(sekolah?.statistik?.totalKelas ?? 0),
-    0
-  );
-
+  const rekap = summary?.rekapKehadiran ?? summary?.rekapPresensi ?? {};
+  const presensiRows = [
+    { key: "hadir", label: "Hadir", value: Number(rekap.hadir ?? 0), color: "success" },
+    { key: "izin", label: "Izin", value: Number(rekap.izin ?? 0), color: "info" },
+    { key: "sakit", label: "Sakit", value: Number(rekap.sakit ?? 0), color: "warning" },
+    { key: "alpha", label: "Alpha", value: Number(rekap.alpha ?? 0), color: "neutral" },
+  ];
+  const presensiTotal = presensiRows.reduce((t, r) => t + r.value, 0);
+  const persenHadir =
+    summary?.rataKehadiranGlobal != null
+      ? Number(summary.rataKehadiranGlobal)
+      : presensiTotal > 0
+      ? (presensiRows[0].value / presensiTotal) * 100
+      : 0;
 
   const kpiStrip = [
     {
@@ -292,10 +198,9 @@ export default function YayasanDashboardPage() {
     },
     {
       key: "pengguna",
-      label: "Total Pengguna Aktif",
+      label: "Pengguna Aktif",
       value:
-        summary?.totalPenggunaAktif ??
-        (loading ? "-" : totalSiswa + totalGuru),
+        summary?.totalPenggunaAktif ?? (loading ? "-" : totalSiswa + totalGuru),
       icon: UserSquare2,
       color: "info",
     },
@@ -315,35 +220,29 @@ export default function YayasanDashboardPage() {
     },
   ];
 
-
   const quickMenu = [
     {
       id: "sekolah",
-      key: "sekolah",
       title: "Sekolah Binaan",
-      desc: "Kelola profil dan data seluruh unit sekolah di bawah naungan yayasan",
+      desc: "Kelola profil dan data seluruh unit sekolah",
       icon: Building2,
       color: "primary",
       path: "/yayasan/sekolah",
-      stat: loading ? "Memuat data..." : `${schools.length} unit sekolah`,
-      featured: true,
+      stat: loading ? "Memuat..." : `${schools.length} unit sekolah`,
     },
     {
       id: "tambahSekolah",
-      key: "tambahSekolah",
-      title: "Tambah Cabang Sekolah",
-      desc: "Daftarkan unit sekolah binaan baru di bawah naungan yayasan",
+      title: "Tambah Cabang",
+      desc: "Daftarkan unit sekolah binaan baru",
       icon: PlusCircle,
       color: "info",
       path: "/yayasan/sekolah/tambah",
-      stat: "Pendaftaran Cabang Baru",
-      featured: true,
+      stat: "Pendaftaran baru",
     },
     {
       id: "lokasi",
-      key: "lokasi",
       title: "Lokasi Sekolah",
-      desc: "Pemetaan koordinat geografis dan alamat unit sekolah binaan",
+      desc: "Pemetaan koordinat dan alamat unit sekolah",
       icon: MapPin,
       color: "warning",
       path: "/yayasan/lokasi",
@@ -351,9 +250,8 @@ export default function YayasanDashboardPage() {
     },
     {
       id: "monitoringUsers",
-      key: "monitoringUsers",
       title: "Monitoring Pengguna",
-      desc: "Pantau akun guru, siswa, staf, dan admin lintas unit sekolah",
+      desc: "Pantau akun guru, siswa, staf, dan admin",
       icon: Users,
       color: "success",
       path: "/yayasan/monitoring/users",
@@ -363,9 +261,8 @@ export default function YayasanDashboardPage() {
     },
     {
       id: "pengaturan",
-      key: "pengaturan",
       title: "Pengaturan Yayasan",
-      desc: "Konfigurasi profil yayasan, NPYP, kontak, dan alamat resmi",
+      desc: "Profil yayasan, NPYP, kontak, dan alamat",
       icon: Settings,
       color: "neutral",
       path: "/yayasan/pengaturan",
@@ -373,100 +270,82 @@ export default function YayasanDashboardPage() {
     },
   ];
 
-
   return (
     <div className="theme-page theme-text min-h-full">
-      <div className="w-full max-w-[1800px] mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
-        <div className="space-y-6">
-
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div className="min-w-0">
-              <div className="flex items-center gap-2.5">
-                <div
-                  className={`p-2 rounded-lg ${themePrimaryGradient} text-[var(--color-card)] ${themeSmallShadow} flex-shrink-0`}
-                >
-                  <LayoutDashboard size={18} />
-                </div>
-
-                <h1 className="text-xl sm:text-2xl font-semibold theme-text truncate">
-                  Dashboard Yayasan
+      <div className="mx-auto w-full max-w-[1800px] px-4 py-5 sm:px-6 lg:px-10 lg:py-8">
+        <div className="space-y-10">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div className="flex min-w-0 items-center gap-4">
+              <LayoutDashboard
+                size={28}
+                className="shrink-0 text-[var(--color-primary)]"
+              />
+              <div className="min-w-0">
+                <h1 className="truncate text-xl font-semibold theme-text sm:text-2xl">
+                  {profilYayasan?.nama || "Dashboard Yayasan"}
                 </h1>
+                <p className="mt-0.5 truncate text-xs theme-text-secondary">
+                  Ringkasan kondisi seluruh unit sekolah di bawah naungan yayasan
+                </p>
               </div>
+            </div>
 
-              <p className="theme-text-secondary text-sm mt-1 ml-[42px] flex items-center gap-1.5">
-                <Sparkles
-                  size={14}
-                  className="text-[var(--color-text-muted)] flex-shrink-0"
-                />
-
-                <span className="truncate">
-                  Ringkasan kondisi seluruh unit sekolah di bawah naungan
-                  yayasan.
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-1 text-xs theme-text-secondary">
+              {profilYayasan?.npyp && (
+                <span className="font-mono">NPYP: {profilYayasan.npyp}</span>
+              )}
+              {profilYayasan?.email && (
+                <span className="max-w-[240px] truncate">
+                  {profilYayasan.email}
                 </span>
-              </p>
+              )}
             </div>
           </div>
 
-
           {loadError && (
-            <div
-              className={`rounded-xl border ${themeDangerBorder} ${themeDangerSurface} p-3.5 sm:p-4`}
-            >
-              <div className="flex items-start gap-3">
-                <div
-                  className={`w-8 h-8 rounded-lg ${themeWarningSurface} text-[var(--color-warning)] flex items-center justify-center flex-shrink-0`}
-                >
-                  <Bell size={16} />
-                </div>
-
-                <div className="min-w-0">
-                  <p className="text-sm font-medium text-[var(--color-warning)]">
-                    Sebagian data dashboard gagal dimuat
-                  </p>
-
-                  <p className="text-xs theme-text-secondary mt-0.5 break-words">
-                    {loadError}
-                  </p>
-                </div>
+            <div className="flex items-start gap-3 border-l-2 border-[var(--color-warning)] py-1 pl-4">
+              <Bell
+                size={15}
+                className="mt-0.5 shrink-0 text-[var(--color-warning)]"
+              />
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-[var(--color-warning)]">
+                  Sebagian data dashboard gagal dimuat
+                </p>
+                <p className="mt-1 break-words text-xs theme-text-secondary">
+                  {loadError}
+                </p>
               </div>
             </div>
           )}
 
-
-          <div
-            className={`theme-card rounded-2xl border theme-border ${themeCardShadow} divide-y divide-[color-mix(in_srgb,var(--color-text)_8%,transparent)] sm:divide-y-0 sm:divide-x sm:divide-[color-mix(in_srgb,var(--color-text)_8%,transparent)] grid grid-cols-2 sm:grid-cols-4 overflow-hidden`}
-          >
+          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4 lg:gap-6">
             {kpiStrip.map((kpi) => {
               const Icon = kpi.icon;
-              const c = colorMap[kpi.color];
 
               return (
                 <div
                   key={kpi.key}
-                  className="p-3.5 sm:p-5 flex items-center gap-3 sm:gap-3.5 min-w-0"
+                  className={`theme-card theme-border flex min-w-0 items-center gap-4 rounded-2xl border px-5 py-5 ${cardShadow}`}
                 >
                   <div
-                    className={`w-10 h-10 sm:w-11 sm:h-11 rounded-xl ${c.bg} ${c.text} flex items-center justify-center flex-shrink-0`}
+                    className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${softBg[kpi.color]} ${textColor[kpi.color]}`}
                   >
-                    <Icon size={18} />
+                    <Icon size={22} />
                   </div>
 
                   <div className="min-w-0">
                     {loading ? (
                       <div
-                        className="h-5 w-10 rounded animate-pulse"
-                        style={{
-                          background:
-                            "color-mix(in srgb, var(--color-text) 7%, transparent)",
-                        }}
+                        className="h-7 w-14 animate-pulse rounded"
+                        style={{ background: skeletonBg }}
                       />
                     ) : (
-                      <p className="text-base sm:text-lg font-semibold theme-text leading-tight truncate">
+                      <p className="truncate text-3xl font-bold leading-none theme-text">
                         {kpi.value}
                       </p>
                     )}
-
-                    <p className="text-[11px] sm:text-xs theme-text-secondary mt-0.5 truncate">
+                    <p className="mt-2 truncate text-xs theme-text-secondary">
                       {kpi.label}
                     </p>
                   </div>
@@ -475,368 +354,277 @@ export default function YayasanDashboardPage() {
             })}
           </div>
 
-
-          {/* Agregat Statistik Lintas Sekolah Cabang (GET /api/dashboard/) */}
-          <div className="theme-card rounded-2xl border theme-border p-5 sm:p-6 shadow-sm space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] text-[var(--color-primary)]">
-                  <Activity size={18} />
-                </div>
-                <div>
-                  <h2 className="text-base font-semibold theme-text">
-                    Statistik Operasional Agregat Cabang
-                  </h2>
-                  <p className="text-xs theme-text-secondary">
-                    Metrik terpusat seluruh unit sekolah di bawah naungan yayasan
-                  </p>
-                </div>
-              </div>
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[color-mix(in_srgb,var(--color-success)_12%,transparent)] text-[var(--color-success)] border border-[color-mix(in_srgb,var(--color-success)_20%,transparent)] self-start sm:self-auto">
-                <CheckCircle2 size={13} />
-                <span>Kehadiran Hari Ini: {agregat?.kehadiranHariIni || "0.0%"}</span>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
-              <div className="p-3.5 rounded-xl border theme-border bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)]">
-                <p className="text-xs theme-text-muted">Total Siswa Aktif</p>
-                <p className="text-lg font-bold theme-text mt-1">
-                  {loading ? "..." : (agregat?.totalSiswa ?? totalSiswa)}
-                </p>
-                <p className="text-[11px] theme-text-muted mt-0.5">Lintas seluruh cabang</p>
-              </div>
-
-              <div className="p-3.5 rounded-xl border theme-border bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)]">
-                <p className="text-xs theme-text-muted">Total Guru & Tendik</p>
-                <p className="text-lg font-bold theme-text mt-1">
-                  {loading ? "..." : (agregat?.totalGuru ?? totalGuru)}
-                </p>
-                <p className="text-[11px] theme-text-muted mt-0.5">Pengajar terdaftar</p>
-              </div>
-
-              <div className="p-3.5 rounded-xl border theme-border bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)]">
-                <p className="text-xs theme-text-muted">Total Rombel / Kelas</p>
-                <p className="text-lg font-bold theme-text mt-1">
-                  {loading ? "..." : (agregat?.totalKelas ?? totalKelas)}
-                </p>
-                <p className="text-[11px] theme-text-muted mt-0.5">Rombongan belajar</p>
-              </div>
-
-              <div className="p-3.5 rounded-xl border theme-border bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)]">
-                <p className="text-xs theme-text-muted">Rekap Presensi Hari Ini</p>
-                <div className="flex items-center gap-2 mt-1 text-xs font-semibold">
-                  <span className="text-[var(--color-success)]" title="Hadir">H: {agregat?.detailKehadiran?.hadir ?? 0}</span>
-                  <span className="text-[var(--color-info)]" title="Izin">I: {agregat?.detailKehadiran?.izin ?? 0}</span>
-                  <span className="text-[var(--color-warning)]" title="Sakit">S: {agregat?.detailKehadiran?.sakit ?? 0}</span>
-                  <span className="text-[var(--color-text-muted)]" title="Alpha">A: {agregat?.detailKehadiran?.alpha ?? 0}</span>
-                </div>
-                <p className="text-[11px] theme-text-muted mt-0.5">Detail kehadiran harian</p>
-              </div>
-            </div>
-          </div>
-
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 auto-rows-min">
-            {quickMenu.map((item) => {
-              const Icon = item.icon;
-              const c = colorMap[item.color];
-
-
-              if (item.featured) {
-                return (
+          <div className="grid grid-cols-1 gap-12 lg:grid-cols-3 lg:gap-16">
+            <section className="flex min-w-0 flex-col lg:h-[340px]">
+              <SectionHeader
+                icon={Building2}
+                title="Ringkasan Unit Sekolah"
+                action={
                   <button
-                    key={item.id || item.key || item.path}
                     type="button"
-                    onClick={() => router.push(item.path)}
-                    className={`group text-left theme-card rounded-2xl border ${c.border} ${c.hoverBorder} p-5 sm:p-6 ${themeCardShadow} hover:shadow-[0_10px_30px_color-mix(in_srgb,var(--color-text)_10%,transparent)] transition-all duration-300 sm:col-span-1 lg:col-span-2 relative overflow-hidden min-w-0`}
+                    onClick={() => router.push("/yayasan/sekolah")}
+                    className="inline-flex shrink-0 items-center gap-0.5 text-xs font-medium text-[var(--color-primary)] transition-opacity hover:opacity-80"
                   >
-                    <div
-                      className={`absolute -right-6 -top-6 w-28 h-28 rounded-full ${c.bg} opacity-70`}
-                    />
-
-                    <div className="relative min-w-0">
-                      <div className="flex items-start justify-between">
-                        <div
-                          className={`p-3 sm:p-3.5 rounded-xl ${c.bg} ${c.text} ring-4 ring-transparent ${c.ring} transition-all duration-300 flex-shrink-0`}
-                        >
-                          <Icon size={22} />
-                        </div>
-
-                        <ChevronRight
-                          size={20}
-                          className="text-[var(--color-text-placeholder)] group-hover:text-[var(--color-text-muted)] group-hover:translate-x-0.5 transition-all duration-300 mt-1 flex-shrink-0"
-                        />
-                      </div>
-
-                      <h3 className="mt-4 sm:mt-5 text-base sm:text-lg font-semibold theme-text truncate">
-                        {item.title}
-                      </h3>
-
-                      <p className="mt-1.5 text-sm theme-text-secondary leading-relaxed line-clamp-2">
-                        {item.desc}
-                      </p>
-
-                      <div
-                        className={`mt-4 inline-flex items-center text-xs font-medium ${c.text} ${c.bg} px-2.5 py-1 rounded-full max-w-full truncate`}
-                      >
-                        {item.stat}
-                      </div>
-                    </div>
+                    Semua
+                    <ChevronRight size={12} />
                   </button>
-                );
-              }
+                }
+              />
 
-
-              return (
-                <button
-                  key={item.id || item.key || item.path}
-                  type="button"
-                  onClick={() => router.push(item.path)}
-                  className={`group text-left theme-card rounded-2xl border ${c.border} ${c.hoverBorder} p-4 ${themeSmallShadow} hover:shadow-[0_8px_24px_color-mix(in_srgb,var(--color-text)_9%,transparent)] hover:-translate-y-0.5 transition-all duration-300 min-w-0`}
-                >
-                  <div
-                    className={`w-10 h-10 rounded-lg ${c.bg} ${c.text} flex items-center justify-center flex-shrink-0`}
-                  >
-                    <Icon size={17} />
-                  </div>
-
-                  <h3 className="mt-3 text-sm font-semibold theme-text truncate">
-                    {item.title}
-                  </h3>
-
-                  <p className="mt-0.5 text-xs theme-text-secondary leading-relaxed line-clamp-2">
-                    {item.desc}
-                  </p>
-
-                  <div className="mt-3 flex items-center justify-between gap-2 min-w-0">
-                    <span className="text-[11px] font-medium text-[var(--color-text-muted)] truncate">
-                      {item.stat}
-                    </span>
-
-                    <ChevronRight
-                      size={14}
-                      className="text-[var(--color-text-placeholder)] group-hover:text-[var(--color-text-muted)] group-hover:translate-x-0.5 transition-all duration-300 flex-shrink-0"
-                    />
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-            <div
-              className={`lg:col-span-2 theme-card rounded-2xl border theme-border ${themeCardShadow} overflow-hidden`}
-            >
-              <div
-                className={`flex items-center justify-between gap-2 p-4 sm:p-5 border-b ${themeDivider}`}
-              >
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <div
-                    className={`p-1.5 rounded-lg ${themePrimarySoft} ${themePrimaryText} flex-shrink-0`}
-                  >
-                    <Building2 size={16} />
-                  </div>
-
-                  <h3 className="text-sm font-semibold theme-text truncate">
-                    Ringkasan Unit Sekolah
-                  </h3>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => router.push("/yayasan/sekolah")}
-                  className={`text-xs font-medium ${themePrimaryText} hover:opacity-80 transition-opacity inline-flex items-center gap-0.5 flex-shrink-0`}
-                >
-                  Lihat semua
-                  <ChevronRight size={12} />
-                </button>
-              </div>
-
-              <div className="p-4 sm:p-5">
+              <div className="min-h-0 flex-1 overflow-y-auto pr-1">
                 {loading ? (
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     {[1, 2, 3].map((item) => (
                       <div
                         key={item}
-                        className="h-14 rounded-lg animate-pulse"
-                        style={{
-                          background:
-                            "color-mix(in srgb, var(--color-text) 6%, transparent)",
-                        }}
+                        className="h-12 animate-pulse rounded-lg"
+                        style={{ background: skeletonBg }}
                       />
                     ))}
                   </div>
                 ) : schools.length === 0 ? (
-                  <div className="py-8 text-center">
+                  <div className="flex h-full flex-col items-center justify-center py-6 text-center">
                     <Building2
-                      size={32}
-                      className="mx-auto text-[var(--color-text-muted)]"
+                      size={30}
+                      className="text-[var(--color-text-muted)]"
                     />
-
-                    <p className="mt-2 text-sm font-medium theme-text-secondary">
+                    <p className="mt-3 text-sm font-medium theme-text-secondary">
                       Belum ada unit sekolah
                     </p>
-
                     <p className="mt-1 text-xs theme-text-muted">
                       Data sekolah binaan belum tersedia.
                     </p>
                   </div>
                 ) : (
-                  <div className="space-y-2">
+                  <div className="space-y-1">
                     {schools.map((unit) => (
                       <button
                         key={unit.id}
                         type="button"
-                        onClick={() =>
-                          router.push(`/yayasan/sekolah/${unit.id}`)
-                        }
-                        className={`w-full text-left rounded-xl border ${themeNeutralBorder} ${themeNeutralSurface} p-3 ${themeNeutralHover} transition-colors`}
+                        onClick={() => router.push(`/yayasan/sekolah/${unit.id}`)}
+                        className={`group -mx-3 flex w-[calc(100%+1.5rem)] items-center justify-between gap-3 rounded-lg px-3 py-3 text-left transition-colors ${neutralHover}`}
                       >
-                        <div className="flex flex-wrap items-center justify-between gap-2">
-                          <div className="min-w-0">
-                            <p className="text-sm font-semibold theme-text truncate">
-                              {unit.nama}
-                            </p>
-
-                            <p className="text-xs theme-text-muted truncate">
-                              {unit.jenjang || "-"}
-                              {unit.npsn ? ` · NPSN ${unit.npsn}` : ""}
-                            </p>
-                          </div>
-
-                          <div className="flex flex-wrap items-center gap-2 text-xs">
-                            <span
-                              className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 ${themeInfoSurface} text-[var(--color-info)]`}
-                            >
-                              <UserSquare2 size={12} />
-                              {Number(unit?.statistik?.totalSiswa ?? 0)} siswa
-                            </span>
-
-                            <span
-                              className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 ${themeSuccessSurface} text-[var(--color-success)]`}
-                            >
-                              <GraduationCap size={12} />
-                              {Number(unit?.statistik?.totalGuru ?? 0)} guru
-                            </span>
-
-                            <span
-                              className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 ${themeNeutralSurface} theme-text-secondary`}
-                            >
-                              <Building2 size={12} />
-                              {Number(unit?.statistik?.totalKelas ?? 0)} kelas
-                            </span>
-                          </div>
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-semibold theme-text">
+                            {unit.nama}
+                          </p>
+                          <p className="mt-0.5 truncate text-xs theme-text-muted">
+                            {unit.jenjang || "-"}
+                            {unit.npsn ? ` · NPSN ${unit.npsn}` : ""}
+                          </p>
+                          <p className="mt-1.5 text-[11px] theme-text-secondary">
+                            {Number(unit?.statistik?.totalSiswa ?? 0)} siswa ·{" "}
+                            {Number(unit?.statistik?.totalGuru ?? 0)} guru ·{" "}
+                            {Number(unit?.statistik?.totalKelas ?? 0)} kelas
+                          </p>
                         </div>
+                        <ChevronRight
+                          size={14}
+                          className="shrink-0 text-[var(--color-text-placeholder)] transition-transform group-hover:translate-x-0.5"
+                        />
                       </button>
                     ))}
-
-                    <div
-                      className={`flex flex-wrap items-center gap-4 border-t ${themeDivider} pt-3 text-xs theme-text-muted`}
-                    >
-                      <span>Total siswa: {totalSiswa}</span>
-                      <span>Total guru: {totalGuru}</span>
-                      <span>Total kelas: {totalKelas}</span>
-                    </div>
                   </div>
                 )}
               </div>
-            </div>
 
+              <p className="mt-4 text-xs theme-text-muted">
+                Total{" "}
+                <span className="font-semibold theme-text">
+                  {loading ? "..." : totalSiswa}
+                </span>{" "}
+                siswa ·{" "}
+                <span className="font-semibold theme-text">
+                  {loading ? "..." : totalGuru}
+                </span>{" "}
+                guru ·{" "}
+                <span className="font-semibold theme-text">
+                  {loading ? "..." : totalKelas}
+                </span>{" "}
+                kelas
+              </p>
+            </section>
 
-            <div
-              className={`theme-card rounded-2xl border theme-border ${themeCardShadow} overflow-hidden`}
-            >
-              <div
-                className={`flex items-center justify-between p-4 sm:p-5 border-b ${themeDivider}`}
-              >
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <div
-                    className={`p-1.5 rounded-lg ${themeInfoSurface} text-[var(--color-info)] flex-shrink-0`}
-                  >
-                    <Bell size={16} />
-                  </div>
+            <section className="flex min-w-0 flex-col lg:h-[340px]">
+              <SectionHeader
+                icon={Bell}
+                title="Notifikasi Terbaru"
+                color="info"
+                action={
+                  unreadCount > 0 ? (
+                    <span className="shrink-0 text-[11px] font-semibold text-[var(--color-warning)]">
+                      {unreadCount} baru
+                    </span>
+                  ) : null
+                }
+              />
 
-                  <h3 className="text-sm font-semibold theme-text truncate">
-                    Notifikasi Terbaru
-                  </h3>
-                </div>
-
-                {unreadCount > 0 && (
-                  <span
-                    className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${themeWarningSurface} text-[var(--color-warning)] border ${themeWarningBorder} flex-shrink-0`}
-                  >
-                    {unreadCount}
-                  </span>
-                )}
-              </div>
-
-              <div className="divide-y divide-[color-mix(in_srgb,var(--color-text)_7%,transparent)]">
+              <div className="min-h-0 flex-1 overflow-y-auto pr-1">
                 {loading ? (
-                  <div className="p-4 space-y-3">
-                    {[1, 2].map((item) => (
+                  <div className="space-y-4">
+                    {[1, 2, 3].map((item) => (
                       <div
                         key={item}
-                        className="h-12 rounded-lg animate-pulse"
-                        style={{
-                          background:
-                            "color-mix(in srgb, var(--color-text) 6%, transparent)",
-                        }}
+                        className="h-12 animate-pulse rounded-lg"
+                        style={{ background: skeletonBg }}
                       />
                     ))}
                   </div>
                 ) : notifications.length === 0 ? (
-                  <div className="p-6 text-center">
+                  <div className="flex h-full flex-col items-center justify-center py-6 text-center">
                     <Bell
                       size={28}
-                      className="mx-auto text-[var(--color-text-muted)]"
+                      className="text-[var(--color-text-muted)]"
                     />
-
-                    <p className="mt-2 text-sm font-medium theme-text-secondary">
+                    <p className="mt-3 text-sm font-medium theme-text-secondary">
                       Belum ada notifikasi
                     </p>
                   </div>
                 ) : (
-                  notifications.slice(0, 4).map((notification) => (
-                    <div
-                      key={notification.id}
-                      className={`p-4 sm:p-5 flex items-start gap-3 ${themeNeutralHover} transition-colors`}
-                    >
-                      <div
-                        className={`mt-1 w-1.5 h-1.5 rounded-full flex-shrink-0 ${
-                          notification.dibaca
-                            ? "bg-[var(--color-text-placeholder)]"
-                            : "bg-[var(--color-primary)]"
-                        }`}
-                      />
-
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium theme-text truncate">
-                          {notification.judul}
-                        </p>
-
-                        <p className="text-xs theme-text-secondary mt-0.5 line-clamp-2">
-                          {notification.isi}
-                        </p>
-
-                        <p className="text-[11px] theme-text-muted mt-1">
-                          {formatTanggal(notification.dibuatPada)}
-                        </p>
+                  <div className="space-y-5">
+                    {notifications.slice(0, 6).map((notification) => (
+                      <div key={notification.id} className="flex items-start gap-3">
+                        <span
+                          className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full ${
+                            notification.dibaca
+                              ? "bg-[var(--color-text-placeholder)]"
+                              : "bg-[var(--color-primary)]"
+                          }`}
+                        />
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-medium theme-text">
+                            {notification.judul}
+                          </p>
+                          <p className="mt-1 line-clamp-2 text-xs theme-text-secondary">
+                            {notification.isi}
+                          </p>
+                          <p className="mt-1.5 text-[11px] theme-text-muted">
+                            {formatTanggal(notification.dibuatPada)}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  ))
+                    ))}
+                  </div>
                 )}
               </div>
+            </section>
 
-              <div className={`p-3 border-t ${themeDivider}`}>
-                <p className="flex items-start gap-1.5 text-[11px] theme-text-muted">
-                  <Info size={12} className="mt-0.5 flex-shrink-0" />
-                  Notifikasi personal diambil dari endpoint /api/notifikasi.
-                </p>
+            <section className="flex min-w-0 flex-col lg:min-h-[340px]">
+              <SectionHeader
+                icon={CalendarCheck}
+                title="Rekap Presensi Hari Ini"
+                color="success"
+                action={
+                  <span className="shrink-0 text-[11px] theme-text-muted">
+                    Seluruh cabang
+                  </span>
+                }
+              />
+
+              <div className="flex flex-1 flex-col gap-6">
+                <div className="flex items-end justify-between gap-3">
+                  <div>
+                    <p className="text-5xl font-bold leading-none theme-text">
+                      {loading ? "..." : `${persenHadir.toFixed(1)}%`}
+                    </p>
+                    <p className="mt-3 text-xs theme-text-secondary">
+                      Rata-rata kehadiran global
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-2xl font-bold theme-text">
+                      {loading ? "..." : presensiTotal}
+                    </p>
+                    <p className="mt-1 text-[11px] theme-text-muted">
+                      Total tercatat
+                    </p>
+                  </div>
+                </div>
+
+                <div
+                  className={`flex h-1.5 w-full overflow-hidden rounded-full ${neutralSurface}`}
+                >
+                  {presensiTotal > 0 &&
+                    presensiRows.map((row) => (
+                      <div
+                        key={row.key}
+                        className={`${dotColor[row.color]} transition-all duration-500`}
+                        style={{
+                          width: `${(row.value / presensiTotal) * 100}%`,
+                        }}
+                      />
+                    ))}
+                </div>
+
+                <div className="space-y-4">
+                  {presensiRows.map((row) => {
+                    const pct =
+                      presensiTotal > 0 ? (row.value / presensiTotal) * 100 : 0;
+
+                    return (
+                      <div
+                        key={row.key}
+                        className="flex items-center justify-between"
+                      >
+                        <div className="flex items-center gap-3">
+                          <span
+                            className={`h-2 w-2 rounded-full ${dotColor[row.color]}`}
+                          />
+                          <span className="text-sm theme-text-secondary">
+                            {row.label}
+                          </span>
+                        </div>
+                        <div className="flex items-baseline gap-4">
+                          <span className="text-[11px] theme-text-muted">
+                            {pct.toFixed(0)}%
+                          </span>
+                          <span
+                            className={`w-12 text-right text-lg font-bold ${textColor[row.color]}`}
+                          >
+                            {loading ? "..." : row.value}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
+            </section>
+          </div>
+
+          <div className="grid grid-cols-2 gap-x-6 gap-y-6 md:grid-cols-3 xl:grid-cols-5 xl:gap-x-10">
+            {quickMenu.map((item) => {
+              const Icon = item.icon;
+
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  title={item.desc}
+                  onClick={() => router.push(item.path)}
+                  className="group flex min-w-0 items-center gap-3 text-left"
+                >
+                  <Icon
+                    size={22}
+                    className={`shrink-0 ${textColor[item.color]}`}
+                  />
+
+                  <div className="min-w-0 flex-1">
+                    <h3 className="truncate text-sm font-semibold theme-text transition-colors group-hover:text-[var(--color-primary)]">
+                      {item.title}
+                    </h3>
+                    <p className="mt-0.5 truncate text-[11px] theme-text-muted">
+                      {item.stat}
+                    </p>
+                  </div>
+
+                  <ChevronRight
+                    size={14}
+                    className="shrink-0 text-[var(--color-text-placeholder)] transition-transform duration-300 group-hover:translate-x-0.5"
+                  />
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>

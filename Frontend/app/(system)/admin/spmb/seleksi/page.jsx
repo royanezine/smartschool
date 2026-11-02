@@ -498,6 +498,7 @@ function SeleksiSpmbContent() {
                             <Th>Nomor & Nama Peserta</Th>
                             <Th>Jarak Rumah</Th>
                             <Th>Nilai Rapor</Th>
+                            <Th>Nilai Tes</Th>
                             <Th>Kelengkapan Berkas</Th>
                             <Th>Kriteria Seleksi</Th>
                             <Th>Status Penerimaan</Th>
@@ -560,6 +561,17 @@ function SeleksiSpmbContent() {
                                       }`}
                                     >
                                       {formatNilai(item.nilaiRapor)}
+                                    </span>
+                                  ) : (
+                                    <span className="theme-text-muted text-xs">-</span>
+                                  )}
+                                </td>
+
+                                {/* Nilai Tes Seleksi */}
+                                <td className="px-4 py-3 text-xs">
+                                  {item.nilaiTes !== null && item.nilaiTes !== undefined ? (
+                                    <span className="font-medium theme-text">
+                                      {formatNilai(item.nilaiTes)}
                                     </span>
                                   ) : (
                                     <span className="theme-text-muted text-xs">-</span>

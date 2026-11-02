@@ -1,6 +1,7 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useParams, usePathname, useRouter } from "next/navigation";
 import {
   FileCheck2,
   ClipboardList,
@@ -11,7 +12,7 @@ import {
   MapPin,
   Sparkles,
 } from "lucide-react";
-
+import { publikService } from "@/services/publik.service";
 
 const jalurPendaftaran = [
   {
@@ -108,6 +109,52 @@ export default function PPDBLandingPage() {
 
   const basePath =
     ppdbIndex > 0 ? pathname.slice(0, ppdbIndex) : "";
+
+  const params = useParams();
+  const tenant = Array.isArray(params?.tenant)
+    ? params.tenant[0]
+    : params?.tenant;
+  const subdomain = tenant ? String(tenant) : "";
+
+  const [pengumuman, setPengumuman] = useState([]);
+  const [pengumumanLoading, setPengumumanLoading] = useState(Boolean(subdomain));
+  const [pengumumanError, setPengumumanError] = useState("");
+
+  useEffect(() => {
+    if (!subdomain) return;
+    let aktif = true;
+
+    publikService
+      .getPpdbPengumuman(subdomain, { page: 1, limit: 3 })
+      .then((res) => {
+        if (!aktif) return;
+        setPengumuman(Array.isArray(res?.data) ? res.data : []);
+        setPengumumanError("");
+      })
+      .catch((err) => {
+        if (!aktif) return;
+        setPengumuman([]);
+        setPengumumanError(err?.message || "Gagal memuat pengumuman PPDB.");
+      })
+      .finally(() => {
+        if (aktif) setPengumumanLoading(false);
+      });
+
+    return () => {
+      aktif = false;
+    };
+  }, [subdomain]);
+
+  const formatTanggal = (value) => {
+    if (!value) return "-";
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) return "-";
+    return new Intl.DateTimeFormat("id-ID", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    }).format(d);
+  };
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -400,6 +447,41 @@ export default function PPDBLandingPage() {
           </div>
 
           <div className="divide-y divide-slate-50">
+            {pengumumanLoading ? (
+              <div className="px-4 py-8 text-center text-sm text-slate-500 sm:px-5">
+                Memuat pengumuman...
+              </div>
+            ) : pengumumanError ? (
+              <div className="px-4 py-8 text-center sm:px-5">
+                <p className="text-sm font-medium text-rose-700">
+                  Gagal memuat pengumuman
+                </p>
+                <p className="mt-1 text-xs text-rose-600">
+                  {pengumumanError}
+                </p>
+              </div>
+            ) : pengumuman.length > 0 ? (
+              pengumuman.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() =>
+                    router.push(`${basePath}/PPDB/pengumuman`)
+                  }
+                  className="block w-full px-4 py-4 text-left transition-colors hover:bg-slate-50 sm:px-5"
+                >
+                  <p className="text-[11px] text-slate-400">
+                    {formatTanggal(item.dipublikasikanPada)}
+                  </p>
+                  <p className="mt-0.5 text-sm font-semibold text-slate-800">
+                    {item.judul}
+                  </p>
+                  <p className="mt-1 line-clamp-2 text-xs leading-5 text-slate-500">
+                    {item.konten}
+                  </p>
+                </button>
+              ))
+            ) : (
             <div className="px-4 py-8 text-center sm:px-5">
               <p className="text-sm font-medium text-slate-700">
                 Belum ada pengumuman
@@ -410,6 +492,7 @@ export default function PPDBLandingPage() {
                 setelah tersedia di sistem.
               </p>
             </div>
+            )}
           </div>
         </div>
       </section>

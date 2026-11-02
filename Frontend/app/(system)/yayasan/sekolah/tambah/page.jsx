@@ -142,9 +142,12 @@ export default function TambahSekolahCabangPage() {
     }
   };
 
+  const adminCredentials = successData?.kredensialAdmin || successData?.admin;
+  const adminPassword = adminCredentials?.kataSandi || adminCredentials?.passwordDefault || "";
+
   const handleCopyCredentials = () => {
-    if (!successData?.admin) return;
-    const text = `Kredensial Admin Sekolah ${successData.sekolah?.nama || ""}:\nUsername: ${successData.admin.namaPengguna}\nEmail: ${successData.admin.email}\nPassword: ${successData.admin.passwordDefault}`;
+    if (!adminCredentials) return;
+    const text = `Kredensial Admin Sekolah ${successData.sekolah?.nama || ""}:\nUsername: ${adminCredentials.namaPengguna || ""}\nEmail: ${adminCredentials.email || ""}\nPassword: ${adminPassword}`;
     navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 3000);
@@ -195,7 +198,7 @@ export default function TambahSekolahCabangPage() {
               </div>
 
               {/* Admin credentials box */}
-              {successData.admin && (
+              {adminCredentials && (
                 <div className="rounded-xl border theme-border bg-[var(--color-card)] p-5 space-y-4">
                   <div className="flex items-center justify-between">
                     <div>
@@ -229,19 +232,19 @@ export default function TambahSekolahCabangPage() {
                     <div className="p-3 rounded-lg bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]">
                       <p className="text-xs theme-text-muted">Username</p>
                       <p className="mt-0.5 font-mono font-semibold theme-text truncate">
-                        {successData.admin.namaPengguna}
+                        {adminCredentials.namaPengguna}
                       </p>
                     </div>
                     <div className="p-3 rounded-lg bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]">
                       <p className="text-xs theme-text-muted">Email Login</p>
                       <p className="mt-0.5 font-mono font-semibold theme-text truncate">
-                        {successData.admin.email}
+                        {adminCredentials.email}
                       </p>
                     </div>
                     <div className="p-3 rounded-lg bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]">
                       <p className="text-xs theme-text-muted">Password Default</p>
                       <p className="mt-0.5 font-mono font-semibold text-[var(--color-primary)] truncate">
-                        {successData.admin.passwordDefault}
+                        {adminPassword}
                       </p>
                     </div>
                   </div>

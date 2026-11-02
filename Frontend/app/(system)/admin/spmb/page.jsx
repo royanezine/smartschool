@@ -26,7 +26,9 @@ import {
 } from "@/services/gelombangPpdb.service";
 import {
   getPendaftarPpdb,
+  getPengumumanPpdb,
   isPpdbEndpointMissing,
+  isPengumumanEndpointMissing,
 } from "@/services/ppdb.service";
 
 const themePrimaryText = "text-[var(--color-primary)]";
@@ -143,9 +145,9 @@ const modules = [
       "Pengumuman resmi PPDB.",
     href: "/admin/spmb/pengumuman",
     icon: Megaphone,
-    status: "blocked",
+    status: "partial",
     statusText:
-      "Belum ada model/route pengumuman PPDB",
+      "Memeriksa endpoint pengumuman...",
   },
   {
     title: "Laporan",
@@ -210,6 +212,83 @@ export default function SpmbOverviewPage() {
 
   const [pendaftarPesan, setPendaftarPesan] =
     useState("");
+
+  const [pengumumanStatus, setPengumumanStatus] =
+    useState({
+      status: "partial",
+      statusText:
+        "Memeriksa endpoint /api/ppdb/pengumuman...",
+    });
+
+  useEffect(() => {
+    let aktif = true;
+
+    (async () => {
+      try {
+        const response = await getPengumumanPpdb({
+          page: 1,
+          limit: 1,
+        });
+
+        if (!response?.success) {
+          throw new Error(
+            response?.message ||
+              "Endpoint pengumuman PPDB tidak merespons dengan benar."
+          );
+        }
+
+        const jumlah = Number.isFinite(response?.meta?.totalData)
+          ? response.meta.totalData
+          : Array.isArray(response?.data)
+            ? response.data.length
+            : 0;
+
+        if (!aktif) {
+          return;
+        }
+
+        // Endpoint merespons normal. Data kosong BUKAN berarti endpoint
+        // tidak tersedia, jadi status tetap "Terhubung" dengan keterangan
+        // yang jujur mengenai isi datanya.
+        setPengumumanStatus({
+          status: "ready",
+          statusText: jumlah
+            ? `CRUD /api/ppdb/pengumuman terpasang (${jumlah} pengumuman)`
+            : "Endpoint /api/ppdb/pengumuman aktif; belum ada pengumuman",
+        });
+      } catch (err) {
+        if (!aktif) {
+          return;
+        }
+
+        if (isPengumumanEndpointMissing(err)) {
+          setPengumumanStatus({
+            status: "blocked",
+            statusText:
+              "Endpoint /api/ppdb/pengumuman belum tersedia (404)",
+          });
+        } else if (err?.status === 401) {
+          setPengumumanStatus({
+            status: "partial",
+            statusText:
+              "Perlu sesi admin untuk membaca /api/ppdb/pengumuman",
+          });
+        } else {
+          setPengumumanStatus({
+            status: "partial",
+            statusText:
+              err instanceof Error
+                ? err.message
+                : "Gagal memeriksa endpoint pengumuman",
+          });
+        }
+      }
+    })();
+
+    return () => {
+      aktif = false;
+    };
+  }, []);
 
   useEffect(() => {
     let aktif = true;
@@ -307,6 +386,10 @@ export default function SpmbOverviewPage() {
   const modulesDenganStatus = modules.map((item) => {
     if (item.title === "Gelombang") {
       return { ...item, ...gelombangStatus };
+    }
+
+    if (item.title === "Pengumuman") {
+      return { ...item, ...pengumumanStatus };
     }
 
     if (!item.cekPendaftar) {
@@ -456,8 +539,8 @@ export default function SpmbOverviewPage() {
                 Endpoint PPDB yang terpasang: POST
                 /api/ppdb/daftar, POST /api/ppdb/:id/berkas,
                 PATCH /api/ppdb/:id/verifikasi, CRUD
-                /api/jalur-ppdb, dan GET/POST
-                /api/pengaturan. Dashboard, Data
+                /api/jalur-ppdb, CRUD /api/ppdb/pengumuman,
+                dan GET/POST /api/pengaturan. Dashboard, Data
                 Pendaftaran, Seleksi, Kuota, dan Laporan
                 membaca GET /api/ppdb/pendaftar beserta
                 GET /api/ppdb/pendaftar/:id; status
@@ -475,8 +558,9 @@ export default function SpmbOverviewPage() {
                   : "route belum tersedia sehingga modul ditandai terblokir"}
                 . Pengaturan SPMB dapat disimpan, tetapi
                 belum dibaca oleh alur pendaftaran Backend.
-                Pengumuman PPDB belum memiliki model
-                maupun route.
+                Status /api/ppdb/pengumuman juga diperiksa
+                langsung saat halaman dibuka:{" "}
+                {pengumumanStatus.statusText}.
               </p>
             </div>
           </div>

@@ -26,8 +26,16 @@ export default function YayasanLayout({ children }) {
       return "lokasi";
     }
 
+    if (pathname.startsWith("/yayasan/monitoringAkademik")) {
+      return "monitoringAkademik";
+    }
+
     if (pathname.startsWith("/yayasan/monitoring")) {
       return "monitoringUsers";
+    }
+
+    if (pathname.startsWith("/yayasan/laporan")) {
+      return "laporan";
     }
 
     if (pathname.startsWith("/yayasan/pengaturan")) {

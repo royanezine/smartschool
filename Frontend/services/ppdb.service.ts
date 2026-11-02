@@ -329,6 +329,46 @@ export async function daftarPpdb(
   });
 }
 
+export interface LoginPendaftarPayload {
+  nomorPendaftaran: string;
+  nik: string;
+}
+
+export interface LoginPendaftarResponse {
+  success: boolean;
+  message?: string;
+  data: {
+    token: string;
+    pendaftar: {
+      id: string;
+      nomorPendaftaran: string;
+      namaLengkap: string;
+      status: string;
+      [key: string]: any;
+    };
+  };
+}
+
+export async function loginPendaftarPpdb(
+  payload: LoginPendaftarPayload
+): Promise<LoginPendaftarResponse> {
+  const nomorTrim = String(payload?.nomorPendaftaran || "").trim();
+  const nikTrim = String(payload?.nik || "").trim();
+
+  if (!nomorTrim) {
+    throw new Error("Nomor pendaftaran wajib diisi.");
+  }
+  if (!nikTrim) {
+    throw new Error("NIK wajib diisi.");
+  }
+
+  return apiFetch(`${ENDPOINT}/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ nomorPendaftaran: nomorTrim, nik: nikTrim }),
+  });
+}
+
 export interface PendaftarPpdbFilters {
   search?: string;
   jalurPpdbId?: string;
@@ -766,6 +806,9 @@ export async function uploadBerkasPpdb(
     try {
       uploadToken = String(sessionStorage.getItem("ppdb_token_pendaftaran") || "").trim();
       if (!uploadToken) {
+        // Fallback token TEKNIS saja dari sesi pendaftaran sebelumnya.
+        // Tidak ada data bisnis (nomor pendaftaran, berkas, status) yang
+        // dibaca dari storage — semuanya berasal dari Backend.
         const sub = sessionStorage.getItem("ppdb_last_submission");
         if (sub) {
           const parsed = JSON.parse(sub);
@@ -919,6 +962,7 @@ export async function getDetailSaya(
   tokenPendaftar?: string
 ): Promise<{
   success: boolean;
+  status?: number;
   data: {
     pendaftar: PendaftaranPpdb;
     sekolah: any;
@@ -970,7 +1014,13 @@ export async function getDetailSaya(
     cache: "no-store",
   });
 
-  return response.json();
+  const payload = await response.json();
+
+  // `status` disertakan agar pemanggil bisa membedakan 401 (sesi/token
+  // pendaftar tidak valid atau sudah berakhir) dari 404 (data pendaftaran
+  // tidak ditemukan). Field ini aditif — pemanggil lama yang hanya membaca
+  // `success`/`data` tidak terdampak.
+  return { ...payload, status: response.status };
 }
 
 export interface PengumumanPpdb {
@@ -1069,8 +1119,36 @@ export async function deletePengumumanPpdb(id: string): Promise<{
   });
 }
 
+/**
+ * True hanya bila server benar-benar tidak memiliki route
+ * /api/ppdb/pengumuman (404 dengan badan non-JSON, mis. halaman HTML
+ * "Cannot GET ..."). Endpoint yang merespons JSON — termasuk 401 karena
+ * belum ada sesi admin — TIDAK dianggap hilang, karena route-nya ada.
+ */
+export function isPengumumanEndpointMissing(
+  error: unknown
+): boolean {
+  const err = error as {
+    status?: number;
+    raw?: unknown;
+  };
+
+  if (err?.status !== 404) {
+    return false;
+  }
+
+  // Server membalas non-JSON (halaman HTML): route belum terpasang.
+  if (typeof err.raw === "string") {
+    return true;
+  }
+
+  // Server membalas JSON: route ada dan sudah menangani request.
+  return false;
+}
+
 const ppdbService = {
   daftarPpdb,
+  loginPendaftarPpdb,
   getOpsiPpdbSekolah,
   getPendaftarPpdb,
   getStatistikPpdb,
