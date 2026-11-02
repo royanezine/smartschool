@@ -17,29 +17,13 @@ import {
   deleteAset,
 } from "../controllers/sarpras.controller";
 import {
-  ajukanPeminjaman,
-  verifikasiPengajuan,
-  serahkanKeSiswa,
-  kembalikanAset,
   getKetersediaanAset,
-  getDaftarPeminjaman,
-  getDetailPeminjaman,
 } from "../controllers/peminjamanAset.controller";
 
 const router = Router();
 
 router.use(authenticate, requireTenant, requireSubscription);
-
-// === KETERSEDIAAN ASET (Bisa diakses Siswa, Guru, Staff) ===
-router.get("/peminjaman/ketersediaan", getKetersediaanAset);
-
-// === ALUR PEMINJAMAN ASET ===
-router.post("/peminjaman", requireIzin("manajemen_aset.create", "peminjaman_aset.create_own"), ajukanPeminjaman);
-router.get("/peminjaman", requireIzin("manajemen_aset.view", "peminjaman_aset.view_own"), getDaftarPeminjaman);
-router.get("/peminjaman/:id", requireIzin("manajemen_aset.view", "peminjaman_aset.view_own"), getDetailPeminjaman);
-router.patch("/peminjaman/:id/persetujuan", requireIzin("manajemen_aset.update"), verifikasiPengajuan);
-router.patch("/peminjaman/:id/ambil", requireIzin("manajemen_aset.update"), serahkanKeSiswa);
-router.patch("/peminjaman/:id/kembali", requireIzin("manajemen_aset.update"), kembalikanAset);
+;
 
 // === INVENTARIS GUDANG ===
 router.post("/gudang", requireIzin("manajemen_aset.create"), createGudang);
