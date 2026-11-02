@@ -1,6 +1,9 @@
 import { Router } from "express";
 import { authenticate } from "../middlewares/auth.middleware";
-import { requireTenant, requireSubscription } from "../middlewares/tenant.middleware";
+import {
+  requireTenant,
+  requireSubscription,
+} from "../middlewares/tenant.middleware";
 import { requireIzin } from "../middlewares/izin.middleware";
 import { authorizeRoles } from "../middlewares/role.middleware";
 import {
@@ -9,6 +12,7 @@ import {
   getMapelSiswa,
   getDetailKelasMapel,
   createKelasMapel,
+  createBulkKelasMapel, 
   updateKelasMapel,
   deleteKelasMapel,
 } from "../controllers/kelasMapel.controller";
@@ -24,6 +28,8 @@ router.get(
   authorizeRoles("admin_sekolah", "guru"),
   getDetailKelasMapel,
 );
+
+router.post("/bulk", requireIzin("akademik.create"), createBulkKelasMapel);
 
 router.get("/", requireIzin("akademik.view"), getKelasMapel);
 router.post("/", requireIzin("akademik.create"), createKelasMapel);
