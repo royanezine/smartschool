@@ -151,7 +151,7 @@ app.use("/api/penggajian", penggajianRoutes);
 app.use("/api/keuangan", keuanganRoutes);
 app.use("/api/dashboard/siswa", dashboardSiswaRoutes);
 app.use("/api/sekolah", sekolahRoutes);
-app.use("/shift-siswa", shiftSiswaRoutes);
+app.use("/api/shift-siswa", shiftSiswaRoutes);
 
 app.use(globalErrorHandler);
 
