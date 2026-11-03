@@ -1,11 +1,17 @@
 import Link from "next/link";
 import Image from "next/image";
-import { CalendarDays, ArrowRight, Image as ImageIcon, Sparkles } from "lucide-react";
+import {
+  CalendarDays,
+  ArrowRight,
+  Image as ImageIcon,
+  Sparkles,
+} from "lucide-react";
 
 function formatTanggal(iso) {
   if (!iso) return "";
   const tanggal = new Date(iso);
   if (Number.isNaN(tanggal.getTime())) return "";
+
   return tanggal.toLocaleDateString("id-ID", {
     day: "numeric",
     month: "long",
@@ -17,11 +23,11 @@ function isNewArticle(iso) {
   if (!iso) return false;
   const tanggal = new Date(iso);
   if (Number.isNaN(tanggal.getTime())) return false;
-  
+
   const today = new Date();
   const diffTime = Math.abs(today - tanggal);
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  
+
   return diffDays <= 7;
 }
 
@@ -68,25 +74,30 @@ export default function ArticleCard({ artikel, subdomain }) {
   const tanggal = formatTanggal(artikel.dibuatPada || artikel.tanggalPublikasi);
   const kategori = artikel.kategoriArtikel?.nama;
   const gambarUrl = artikel.gambarUtama || artikel.gambarUrl;
-  
+
   const isNew = isNewArticle(artikel.dibuatPada || artikel.tanggalPublikasi);
 
   return (
     <article
-      className="group relative flex h-full flex-col overflow-hidden rounded-2xl border bg-white shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl"
-      style={{ borderColor: "var(--school-border, #E2E8F0)" }}
+      className="group relative flex h-full flex-col overflow-hidden rounded-xl border transition-all duration-500 ease-out hover:-translate-y-1"
+      style={{
+        borderColor: "var(--school-border, #E2E8F0)",
+        backgroundColor: "var(--school-surface, #FFFFFF)",
+        boxShadow: "0 1px 2px rgba(15,23,42,0.04)",
+      }}
     >
       <div
-        className="relative aspect-[16/9] w-full overflow-hidden"
+        className="relative aspect-[16/10] w-full overflow-hidden"
         style={{ backgroundColor: "var(--school-background, #F1F5F9)" }}
       >
-        <div className="absolute left-4 top-4 z-20 flex flex-wrap items-center gap-2">
+        <div className="absolute left-3 top-3 z-20 flex flex-wrap items-center gap-1.5">
           {kategori && (
             <span
-              className="inline-flex rounded-full px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider shadow-sm backdrop-blur-md"
+              className="inline-flex rounded-md px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] backdrop-blur-md"
               style={{
-                backgroundColor: "rgba(255, 255, 255, 0.95)",
+                backgroundColor: "rgba(255, 255, 255, 0.92)",
                 color: "var(--school-primary, #1E3A8A)",
+                border: "1px solid rgba(255,255,255,0.6)",
               }}
             >
               {kategori}
@@ -95,13 +106,13 @@ export default function ArticleCard({ artikel, subdomain }) {
 
           {isNew && (
             <span
-              className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-white shadow-sm"
+              className="inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-white"
               style={{
-                backgroundColor: "var(--school-accent, #F59E0B)", 
+                backgroundColor: "var(--school-accent, #F59E0B)",
               }}
             >
-              <Sparkles size={12} />
-              Terbaru
+              <Sparkles size={10} />
+              Baru
             </span>
           )}
         </div>
@@ -114,10 +125,16 @@ export default function ArticleCard({ artikel, subdomain }) {
                 alt={judul}
                 fill
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                className="object-cover transition-transform duration-700 group-hover:scale-110"
+                className="object-cover transition-transform duration-[900ms] ease-out group-hover:scale-[1.06]"
                 unoptimized
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+              <div
+                className="absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+                style={{
+                  background:
+                    "linear-gradient(to top, rgba(15,23,42,0.15), transparent 60%)",
+                }}
+              />
             </Link>
           ) : (
             <Image
@@ -134,14 +151,14 @@ export default function ArticleCard({ artikel, subdomain }) {
             className="flex h-full items-center justify-center"
             style={{ color: "var(--school-secondary, #94A3B8)" }}
           >
-            <ImageIcon size={40} className="opacity-50" />
+            <ImageIcon size={36} className="opacity-40" />
           </div>
         )}
       </div>
 
-      <div className="flex flex-1 flex-col p-6">
+      <div className="flex flex-1 flex-col p-5 sm:p-6">
         <h3
-          className="mb-3 line-clamp-2 text-xl font-bold leading-snug transition-colors group-hover:text-[var(--school-primary)]"
+          className="mb-2.5 line-clamp-2 text-base font-semibold leading-snug tracking-tight transition-colors duration-300 sm:text-lg group-hover:text-[var(--school-primary)]"
           style={{ color: "var(--school-text, #0F172A)" }}
         >
           {href ? (
@@ -155,7 +172,7 @@ export default function ArticleCard({ artikel, subdomain }) {
 
         {ringkasan && (
           <p
-            className="mb-6 line-clamp-3 text-sm leading-relaxed"
+            className="mb-5 line-clamp-3 text-sm leading-relaxed"
             style={{ color: "var(--school-secondary, #475569)" }}
           >
             {ringkasan}
@@ -163,32 +180,39 @@ export default function ArticleCard({ artikel, subdomain }) {
         )}
 
         <div
-          className="mt-auto flex items-center justify-between border-t pt-4"
+          className="mt-auto flex items-center justify-between gap-3 border-t pt-4"
           style={{ borderColor: "var(--school-border, #F1F5F9)" }}
         >
           <div
             className="flex items-center gap-1.5 text-xs font-medium"
             style={{ color: "var(--school-secondary, #64748B)" }}
           >
-            <CalendarDays size={14} />
-            {tanggal || "-"}
+            <CalendarDays size={13} className="shrink-0 opacity-70" />
+            <span className="truncate">{tanggal || "-"}</span>
           </div>
 
           {href && (
             <Link
               href={href}
-              className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-bold transition-all group-hover:bg-[var(--school-primary)] group-hover:text-white"
-              style={{ 
-                color: "var(--school-primary, #2563EB)",
-                backgroundColor: "color-mix(in srgb, var(--school-primary, #2563EB) 8%, transparent)"
-              }}
+              aria-label={`Baca artikel ${judul}`}
+              className="group/cta inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-semibold transition-all duration-300 hover:bg-[color-mix(in_srgb,var(--school-primary,#2563EB)_8%,transparent)]"
+              style={{ color: "var(--school-primary, #2563EB)" }}
             >
-              Baca
-              <ArrowRight size={16} />
+              <span>Baca</span>
+              <ArrowRight
+                size={14}
+                className="transition-transform duration-300 group-hover/cta:translate-x-0.5"
+              />
             </Link>
           )}
         </div>
       </div>
+
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 h-px origin-left scale-x-0 transition-transform duration-500 ease-out group-hover:scale-x-100"
+        style={{ backgroundColor: "var(--school-primary, #2563EB)" }}
+      />
     </article>
   );
 }

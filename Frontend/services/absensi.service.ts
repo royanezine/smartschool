@@ -548,19 +548,64 @@ export async function getAbsensiSiswa(
 }
 
 
+
 export async function checkInShift(
   data: CheckInShiftPayload = {},
 ): Promise<Absensi> {
+  const metode: AbsensiMetode = data.metode ?? "lokasi";
+
+  const membutuhkanLokasi =
+    metode === "lokasi" || metode === "face";
+
+  if (
+    membutuhkanLokasi &&
+    (
+      data.lintang === undefined ||
+      data.bujur === undefined ||
+      !Number.isFinite(data.lintang) ||
+      !Number.isFinite(data.bujur) ||
+      data.lintang < -90 ||
+      data.lintang > 90 ||
+      data.bujur < -180 ||
+      data.bujur > 180
+    )
+  ) {
+    throw new Error(
+      "Koordinat GPS tidak valid. Aktifkan lokasi dan coba kembali.",
+    );
+  }
+
   const body: Record<string, unknown> = {
     status: data.status ?? "hadir",
-    metode: data.metode ?? "lokasi",
+    metode,
   };
 
-  if (data.shiftKerjaId) body.shiftKerjaId = data.shiftKerjaId;
-  if (data.keterangan) body.keterangan = data.keterangan;
-  if (data.lintang !== undefined) body.lintang = data.lintang;
-  if (data.bujur !== undefined) body.bujur = data.bujur;
-  if (data.barcodeData) body.barcodeData = data.barcodeData;
+  if (data.shiftKerjaId) {
+    body.shiftKerjaId = data.shiftKerjaId;
+  }
+
+  if (data.keterangan?.trim()) {
+    body.keterangan = data.keterangan.trim();
+  }
+
+  if (data.lintang !== undefined) {
+    body.lintang = data.lintang;
+  }
+
+  if (data.bujur !== undefined) {
+    body.bujur = data.bujur;
+  }
+
+  if (data.barcodeData) {
+    body.barcodeData = data.barcodeData;
+  }
+
+  console.info("[ABSENSI SHIFT] Check-in payload", {
+    metode: body.metode,
+    lintang: body.lintang,
+    bujur: body.bujur,
+    shiftKerjaId: body.shiftKerjaId,
+  });
 
   return apiFetch("/api/absensi/check-in", {
     method: "POST",
@@ -568,24 +613,64 @@ export async function checkInShift(
   }) as Promise<Absensi>;
 }
 
-
 export async function checkOutShift(
   data: CheckOutShiftPayload = {},
 ): Promise<Absensi> {
+  const metode: AbsensiMetode = data.metode ?? "lokasi";
+
+  const membutuhkanLokasi =
+    metode === "lokasi" || metode === "face";
+
+  if (
+    membutuhkanLokasi &&
+    (
+      data.lintang === undefined ||
+      data.bujur === undefined ||
+      !Number.isFinite(data.lintang) ||
+      !Number.isFinite(data.bujur) ||
+      data.lintang < -90 ||
+      data.lintang > 90 ||
+      data.bujur < -180 ||
+      data.bujur > 180
+    )
+  ) {
+    throw new Error(
+      "Koordinat GPS tidak valid. Aktifkan lokasi dan coba kembali.",
+    );
+  }
+
   const body: Record<string, unknown> = {
-    metode: data.metode ?? "lokasi",
+    metode,
   };
 
-  if (data.keterangan) body.keterangan = data.keterangan;
-  if (data.lintang !== undefined) body.lintang = data.lintang;
-  if (data.bujur !== undefined) body.bujur = data.bujur;
-  if (data.barcodeData) body.barcodeData = data.barcodeData;
+  if (data.keterangan?.trim()) {
+    body.keterangan = data.keterangan.trim();
+  }
+
+  if (data.lintang !== undefined) {
+    body.lintang = data.lintang;
+  }
+
+  if (data.bujur !== undefined) {
+    body.bujur = data.bujur;
+  }
+
+  if (data.barcodeData) {
+    body.barcodeData = data.barcodeData;
+  }
+
+  console.info("[ABSENSI SHIFT] Check-out payload", {
+    metode: body.metode,
+    lintang: body.lintang,
+    bujur: body.bujur,
+  });
 
   return apiFetch("/api/absensi/check-out", {
     method: "POST",
     body: JSON.stringify(body),
   }) as Promise<Absensi>;
 }
+
 
 
 

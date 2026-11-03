@@ -7,6 +7,7 @@ import { useRouter, useParams } from "next/navigation";
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
 
+import { apiFetch } from "@/lib/api";
 import {
   ArrowLeft,
   Mail,
@@ -27,8 +28,10 @@ import {
 } from "lucide-react";
 
 import { getUserById, getUsers } from "@/services/user.service";
-import { getKelasMapel } from "@/services/kelasMapel.service";
-
+import {
+  getKelasMapel,
+  getKelasMapelById,
+} from "@/services/kelasMapel.service";
 
 const getInitials = (nama = "") => {
   const parts = String(nama).trim().split(/\s+/).filter(Boolean);
@@ -278,74 +281,208 @@ useEffect(() => {
 
   let mounted = true;
 
-  async function fetchStatistikGuru() {
-    setLoadingStatistik(true);
-    setMapelGuru([]);
-    setKelasDiampu("-");
-    setTotalSiswa("-");
+async function fetchStatistikGuru() {
+  setLoadingStatistik(true);
+  setMapelGuru([]);
+  setKelasDiampu("-");
+  setTotalSiswa("-");
+  setRataKehadiran("-");
 
+  try {
+    // ============================================
+    // 1. AMBIL PENUGASAN KELAS DAN MATA PELAJARAN
+    // ============================================
+    const responseKelasMapel = await getKelasMapel();
+
+    if (!mounted) return;
+
+    const semuaKelasMapel = Array.isArray(responseKelasMapel)
+      ? responseKelasMapel
+      : [];
+
+    const penugasanGuru = semuaKelasMapel.filter((item) => {
+      const guruId =
+        item.guruPengajarId ??
+        item.guruPengajar?.id;
+
+      return (
+        String(guruId) === String(id) &&
+        !item.dihapusPada
+      );
+    });
+
+    // ============================================
+    // 2. HITUNG MATA PELAJARAN UNIK
+    // ============================================
+    const mapelUnik = new Map();
+
+    penugasanGuru.forEach((item) => {
+      const mapelId =
+        item.mataPelajaranId ??
+        item.mataPelajaran?.id;
+
+      const namaMapel = item.mataPelajaran?.nama;
+
+      if (mapelId && namaMapel) {
+        mapelUnik.set(String(mapelId), namaMapel);
+      }
+    });
+
+    // ============================================
+    // 3. HITUNG KELAS UNIK
+    // ============================================
+    const kelasUnik = new Map();
+
+    penugasanGuru.forEach((item) => {
+      const kelasId =
+        item.kelasId ??
+        item.kelas?.id;
+
+      if (kelasId) {
+        kelasUnik.set(String(kelasId), {
+          id: String(kelasId),
+          nama: item.kelas?.nama ?? "-",
+          kelasMapelId: item.id,
+        });
+      }
+    });
+
+    // ============================================
+    // 4. HITUNG TOTAL SISWA UNIK
+    //    BERDASARKAN ANGGOTA KELAS
+    // ============================================
+    const siswaUnik = new Set();
+
+    const daftarKelas = [...kelasUnik.values()];
+
+    await Promise.all(
+      daftarKelas.map(async (kelas) => {
+        try {
+          const detail = await getKelasMapelById(
+            kelas.kelasMapelId
+          );
+
+          if (!mounted) return;
+
+          const dataDetail = detail?.data ?? detail;
+
+          const daftarSiswa = Array.isArray(dataDetail?.siswa)
+            ? dataDetail.siswa
+            : [];
+
+          daftarSiswa.forEach((siswa) => {
+            if (siswa?.id) {
+              siswaUnik.add(String(siswa.id));
+            }
+          });
+        } catch (error) {
+          console.error(
+            `Gagal mengambil anggota kelas ${kelas.nama}:`,
+            error
+          );
+        }
+      })
+    );
+
+    if (!mounted) return;
+
+    setMapelGuru([...mapelUnik.values()]);
+    setKelasDiampu(kelasUnik.size);
+    setTotalSiswa(siswaUnik.size);
+
+    // ============================================
+    // 5. HITUNG KEHADIRAN GURU
+    // ============================================
     try {
-      const semuaKelasMapel = await getKelasMapel();
+      const absensiResponse = await apiFetch(
+        `/api/absensi/monitoring-guru?penggunaId=${encodeURIComponent(
+          id
+        )}`,
+        {
+          method: "GET",
+        }
+      );
 
       if (!mounted) return;
 
-      const penugasanGuru = (
-        Array.isArray(semuaKelasMapel) ? semuaKelasMapel : []
-      ).filter((item) => {
-        const guruId =
-          item.guruPengajarId ?? item.guruPengajar?.id;
+      // Mendukung beberapa bentuk response API.
+      const dataAbsensi = Array.isArray(absensiResponse)
+        ? absensiResponse
+        : Array.isArray(absensiResponse?.data)
+          ? absensiResponse.data
+          : Array.isArray(absensiResponse?.data?.data)
+            ? absensiResponse.data.data
+            : Array.isArray(absensiResponse?.items)
+              ? absensiResponse.items
+              : [];
+
+      const statusValid = [
+        "hadir",
+        "izin",
+        "sakit",
+        "alpha",
+      ];
+
+      const absensiValid = dataAbsensi.filter((item) => {
+        const penggunaId =
+          item.penggunaId ??
+          item.pengguna?.id ??
+          item.guruId ??
+          item.guru?.id;
+
+        const status = String(
+          item.status ?? ""
+        ).trim().toLowerCase();
 
         return (
-          String(guruId) === String(id) &&
-          !item.dihapusPada
+          String(penggunaId) === String(id) &&
+          statusValid.includes(status)
         );
       });
 
-      const mapelUnik = new Map();
+      if (absensiValid.length === 0) {
+        setRataKehadiran("-");
+      } else {
+        const jumlahHadir = absensiValid.filter(
+          (item) =>
+            String(item.status ?? "")
+              .trim()
+              .toLowerCase() === "hadir"
+        ).length;
 
-      const kelasUnik = new Map();
+        const persentase =
+          (jumlahHadir / absensiValid.length) * 100;
 
-      penugasanGuru.forEach((item) => {
-        const mapelId =
-          item.mataPelajaranId ?? item.mataPelajaran?.id;
-
-        const namaMapel = item.mataPelajaran?.nama;
-
-        if (mapelId && namaMapel) {
-          mapelUnik.set(String(mapelId), namaMapel);
-        }
-
-        const kelasId =
-          item.kelasId ?? item.kelas?.id;
-
-        if (kelasId) {
-          kelasUnik.set(
-            String(kelasId),
-            item.kelas?.nama ?? "-"
-          );
-        }
-      });
-
-      if (!mounted) return;
-
-      setMapelGuru([...mapelUnik.values()]);
-      setKelasDiampu(kelasUnik.size);
-
-      setTotalSiswa("-");
-    } catch (err) {
-      console.error("Gagal mengambil statistik guru:", err);
-
-      if (mounted) {
-        setMapelGuru([]);
-        setKelasDiampu("-");
-        setTotalSiswa("-");
+        setRataKehadiran(`${persentase.toFixed(1)}%`);
       }
-    } finally {
+    } catch (error) {
+      console.error(
+        "Gagal mengambil statistik kehadiran guru:",
+        error
+      );
+
       if (mounted) {
-        setLoadingStatistik(false);
+        setRataKehadiran("-");
       }
     }
+  } catch (error) {
+    console.error(
+      "Gagal mengambil statistik guru:",
+      error
+    );
+
+    if (mounted) {
+      setMapelGuru([]);
+      setKelasDiampu("-");
+      setTotalSiswa("-");
+      setRataKehadiran("-");
+    }
+  } finally {
+    if (mounted) {
+      setLoadingStatistik(false);
+    }
   }
+}
 
   fetchStatistikGuru();
 
@@ -489,11 +626,11 @@ useEffect(() => {
     "-";
 
   const joinDate =
-    guru.joinDate ||
-    guru.tanggalBergabung ||
-    guru.tanggalMasuk ||
-    guru.createdAt ||
-    "-";
+  guru?.dibuatPada ||
+  guru?.tanggalBergabung ||
+  guru?.tanggalMasuk ||
+  guru?.createdAt ||
+  null;
 
   
 

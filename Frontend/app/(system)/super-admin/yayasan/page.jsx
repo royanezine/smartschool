@@ -27,7 +27,7 @@ import {
 } from "lucide-react";
 
 import { listYayasan, deleteYayasan } from "@/services/yayasan.service";
-import { getPlatformRingkasan } from "@/services/platform.service";
+import { getPlatformRingkasan, getPlatformYayasan } from "@/services/platform.service";
 
 const themeCardShadow =
   "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
@@ -215,24 +215,26 @@ export default function SuperAdminYayasanPage() {
         params.berlangganan = "false";
       }
 
-      const res = await listYayasan(params);
+      const res =
+        selectedBerlangganan === "Berlangganan"
+          ? await listYayasan(params)
+          : await getPlatformYayasan(params);
 
-      const items = Array.isArray(res?.data)
-        ? res.data
-        : Array.isArray(res?.items)
-        ? res.items
-        : [];
+      const items =
+        (Array.isArray(res?.data?.items) ? res.data.items : null) ||
+        (Array.isArray(res?.data) ? res.data : null) ||
+        (Array.isArray(res?.items) ? res.items : null) ||
+        [];
 
       setYayasanList(items);
 
-      if (res?.meta) {
-        setMeta(res.meta);
-      } else if (res?.pagination) {
+      const paginationData = res?.meta || res?.pagination || res?.data?.pagination;
+      if (paginationData) {
         setMeta({
-          page: res.pagination.page || 1,
-          limit: res.pagination.limit || pageSize,
-          total: res.pagination.total || items.length,
-          totalPages: res.pagination.totalPages || 1,
+          page: paginationData.page || currentPage,
+          limit: paginationData.limit || pageSize,
+          total: paginationData.total || items.length,
+          totalPages: paginationData.totalPages || 1,
         });
       } else {
         setMeta({
@@ -245,7 +247,9 @@ export default function SuperAdminYayasanPage() {
 
       const aktifCount = items.filter((y) => y.status === "aktif").length;
       const nonaktifCount = items.filter((y) => y.status === "nonaktif").length;
-      const berlanggananCount = items.filter((y) => Boolean(y.paketId || y.paket)).length;
+      const berlanggananCount = items.filter(
+        (y) => Boolean(y.paketId || y.paket || y.langganan?.paket)
+      ).length;
 
       setSummary((prev) => ({
         ...prev,
@@ -664,7 +668,18 @@ export default function SuperAdminYayasanPage() {
                   ) : (
                     yayasanList.map((item, index) => {
                       const rowNum = (currentPage - 1) * pageSize + index + 1;
-                      const schoolCount = item._count?.sekolah ?? (item.sekolah?.length || 0);
+                      const schoolCount =
+                        item._count?.sekolah ??
+                        (item.sekolah?.length || item.totalSekolah || 0);
+                      const namaPaket =
+                        item.paket?.nama ||
+                        item.langganan?.paket?.nama ||
+                        "Tanpa Paket";
+                      const statusLangganan =
+                        item.statusLangganan || item.langganan?.statusLangganan;
+                      const tglBerakhir =
+                        item.tanggalBerakhirLangganan ||
+                        item.langganan?.tanggalBerakhir;
 
                       return (
                         <tr
@@ -701,16 +716,16 @@ export default function SuperAdminYayasanPage() {
                           <td className="px-5 py-4">
                             <div className="text-xs">
                               <p className="font-medium theme-text">
-                                {item.paket?.nama || "Tanpa Paket"}
+                                {namaPaket}
                               </p>
-                              {item.statusLangganan && (
+                              {statusLangganan && (
                                 <p className="text-[11px] theme-text-muted capitalize">
-                                  Status: {item.statusLangganan}
+                                  Status: {statusLangganan}
                                 </p>
                               )}
-                              {item.tanggalBerakhirLangganan && (
+                              {tglBerakhir && (
                                 <p className="text-[10px] theme-text-muted">
-                                  s.d {formatDate(item.tanggalBerakhirLangganan)}
+                                  s.d {formatDate(tglBerakhir)}
                                 </p>
                               )}
                             </div>

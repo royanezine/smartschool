@@ -1,16 +1,11 @@
-
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
 import { apiFetch } from "@/lib/api";
-
 import {
   Settings2,
-  Clock3,
-  CalendarDays,
   MapPin,
   ShieldCheck,
   RefreshCw,
@@ -18,26 +13,38 @@ import {
   AlertCircle,
   CheckCircle2,
   Info,
-  Fingerprint,
+  Camera,
+  Navigation,
   Loader2,
-  ClipboardCheck,
-  ChevronRight,
-  SlidersHorizontal,
+  Fingerprint,
+  LocateFixed,
+  Building2,
+  MapPinned,
+  CircleCheck,
+  CircleX,
 } from "lucide-react";
 
-const KEYS = {
-  radius: "radiusAbsensi",
-};
+const ENDPOINT = "/api/sekolah/pengaturan-presensi";
+const METODE = [
+  {
+    value: "face",
+    title: "Face Recognition",
+    description: "Presensi menggunakan kamera dan verifikasi wajah.",
+    Icon: Camera,
+  },
+  {
+    value: "lokasi",
+    title: "Presensi Lokasi (GPS)",
+    description:
+      "Presensi menggunakan koordinat perangkat dan validasi jarak dari sekolah.",
+    Icon: Navigation,
+  },
+];
 
-const ENDPOINTS = {
-  metodeAktif: "/api/absensi/metode-aktif",
-  pengaturan: "/api/pengaturan",
-};
-
-function getData(response) {
+function unwrapResponse(response) {
   let result = response;
 
-  for (let i = 0; i < 3; i += 1) {
+  for (let i = 0; i < 5; i += 1) {
     if (
       result &&
       typeof result === "object" &&
@@ -53,56 +60,49 @@ function getData(response) {
   return result;
 }
 
-function formatMetode(value) {
-  if (value == null || value === "") {
-    return "Belum dikonfigurasi";
+function normalizeMethods(value) {
+  if (Array.isArray(value)) {
+    return value.map((item) => String(item).trim()).filter(Boolean);
   }
 
-  const methods = Array.isArray(value)
-    ? value
-    : typeof value === "string"
-      ? value.split(",").map((item) => item.trim()).filter(Boolean)
-      : [];
+  if (typeof value === "string") {
+    try {
+      const parsed = JSON.parse(value);
 
-  if (!methods.length) {
-    return String(value);
+      if (Array.isArray(parsed)) {
+        return parsed.map(String);
+      }
+    } catch {
+      // Backend juga mungkin mengirim string biasa.
+    }
+
+    return value
+      .split(",")
+      .map((item) => item.trim())
+      .filter(Boolean);
   }
 
-  return methods
-    .map((item) =>
-      String(item)
-        .replaceAll("_", " ")
-        .replace(/\b\w/g, (char) => char.toUpperCase()),
-    )
-    .join(", ");
+  return [];
 }
 
-function getSettingValue(settings, key) {
-  const item = settings.find((setting) => setting?.kunci === key);
-  return item?.nilai == null ? "" : String(item.nilai);
-}
+function extractSettings(response) {
+  const data = unwrapResponse(response);
 
-function SectionCard({ icon: Icon, title, description, children }) {
-  return (
-    <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-      <div className="flex items-start gap-3 border-b border-slate-100 px-5 py-4 sm:px-6">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-700">
-          <Icon size={20} />
-        </div>
+  // Mendukung respons berupa objek sekolah maupun objek konfigurasi.
+  const source =
+    data?.pengaturanPresensi ??
+    data?.sekolah ??
+    data?.pengaturan ??
+    data;
 
-        <div className="min-w-0">
-          <h2 className="text-base font-semibold text-slate-900">
-            {title}
-          </h2>
-          <p className="mt-1 text-sm leading-5 text-slate-500">
-            {description}
-          </p>
-        </div>
-      </div>
-
-      <div className="p-5 sm:p-6">{children}</div>
-    </section>
-  );
+  return {
+    lintang: source?.lintang ?? "",
+    bujur: source?.bujur ?? "",
+    radiusAbsensi: source?.radiusAbsensi ?? "",
+    metodeAbsensiAktif: normalizeMethods(
+      source?.metodeAbsensiAktif ?? source?.metodeAktif,
+    ),
+  };
 }
 
 function StatusMessage({ status }) {
@@ -124,8 +124,57 @@ function StatusMessage({ status }) {
       ) : (
         <AlertCircle size={18} className="mt-0.5 shrink-0" />
       )}
+      <span className="leading-6">{status.message}</span>
+    </div>
+  );
+}
 
-      <span>{status.message}</span>
+function SectionCard({ icon: Icon, title, description, children }) {
+  return (
+    <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+      <div className="flex items-start gap-3 border-b border-slate-100 px-5 py-4 sm:px-6">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-700">
+          <Icon size={20} />
+        </div>
+
+        <div className="min-w-0">
+          <h2 className="text-base font-semibold text-slate-900">
+            {title}
+          </h2>
+          <p className="mt-1 text-sm leading-5 text-slate-500">
+            {description}
+          </p>
+        </div>
+      </div>
+
+      <div className="p-5 sm:p-6">{children}</div>
+    </section>
+  );
+}
+
+function Field({ label, value, onChange, placeholder, suffix, step = "any" }) {
+  return (
+    <div>
+      <label className="mb-2 block text-sm font-semibold text-slate-700">
+        {label}
+      </label>
+
+      <div className="relative">
+        <input
+          type="number"
+          step={step}
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          placeholder={placeholder}
+          className="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-50"
+        />
+
+        {suffix && (
+          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-slate-500">
+            {suffix}
+          </span>
+        )}
+      </div>
     </div>
   );
 }
@@ -133,54 +182,38 @@ function StatusMessage({ status }) {
 export default function PengaturanPresensiPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-
-  const [metodeAktif, setMetodeAktif] = useState(null);
-  const [settings, setSettings] = useState([]);
-  const [radius, setRadius] = useState("");
-  const [originalRadius, setOriginalRadius] = useState("");
   const [status, setStatus] = useState(null);
+
+  const [form, setForm] = useState({
+    lintang: "",
+    bujur: "",
+    radiusAbsensi: "",
+    metodeAbsensiAktif: [],
+  });
+
+  const [original, setOriginal] = useState(null);
 
   const loadSettings = useCallback(async () => {
     setLoading(true);
     setStatus(null);
 
     try {
-      const [metodeResponse, settingsResponse] = await Promise.all([
-        apiFetch(ENDPOINTS.metodeAktif),
-        apiFetch(ENDPOINTS.pengaturan),
-      ]);
+      const response = await apiFetch(ENDPOINT, {
+        method: "GET",
+      });
 
-      const metodeData = getData(metodeResponse);
-      const settingsData = getData(settingsResponse);
+      const settings = extractSettings(response);
 
-      const metode =
-        metodeData?.metodeAktif ??
-        metodeData?.data?.metodeAktif ??
-        null;
-
-      const list = Array.isArray(settingsData)
-        ? settingsData
-        : Array.isArray(settingsData?.data)
-          ? settingsData.data
-          : Array.isArray(settingsData?.items)
-            ? settingsData.items
-            : [];
-
-      setMetodeAktif(metode);
-      setSettings(list);
-
-      const savedRadius = getSettingValue(list, KEYS.radius);
-
-      setRadius(savedRadius);
-      setOriginalRadius(savedRadius);
+      setForm(settings);
+      setOriginal(JSON.stringify(settings));
     } catch (error) {
-      console.error("Gagal mengambil pengaturan presensi:", error);
+      console.error("Gagal memuat pengaturan presensi:", error);
 
       setStatus({
         type: "error",
         message:
           error?.message ||
-          "Pengaturan gagal dimuat. Periksa URL API, koneksi Backend, dan izin akun.",
+          "Pengaturan presensi gagal dimuat. Periksa endpoint dan izin akun admin.",
       });
     } finally {
       setLoading(false);
@@ -191,28 +224,122 @@ export default function PengaturanPresensiPage() {
     loadSettings();
   }, [loadSettings]);
 
-  const handleSaveRadius = async (event) => {
-    event.preventDefault();
-    setStatus(null);
+  const updateField = (key, value) => {
+    setForm((previous) => ({
+      ...previous,
+      [key]: value,
+    }));
+  };
 
-    const parsedRadius = Number(radius);
+  const toggleMethod = (method) => {
+    setForm((previous) => {
+      const active = previous.metodeAbsensiAktif.includes(method);
 
-    if (
-      !radius.trim() ||
-      !Number.isFinite(parsedRadius) ||
-      parsedRadius <= 0
-    ) {
+      return {
+        ...previous,
+        metodeAbsensiAktif: active
+          ? previous.metodeAbsensiAktif.filter((item) => item !== method)
+          : [...previous.metodeAbsensiAktif, method],
+      };
+    });
+  };
+
+  const handleUseCurrentLocation = () => {
+    if (!navigator.geolocation) {
       setStatus({
         type: "error",
-        message: "Masukkan radius berupa angka yang lebih besar dari 0.",
+        message: "Browser ini tidak mendukung fitur lokasi GPS.",
       });
       return;
     }
 
-    if (!Number.isInteger(parsedRadius)) {
+    setStatus(null);
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setForm((previous) => ({
+          ...previous,
+          lintang: String(position.coords.latitude),
+          bujur: String(position.coords.longitude),
+        }));
+
+        setStatus({
+          type: "success",
+          message:
+            "Koordinat perangkat berhasil diambil. Pastikan posisi perangkat berada di lokasi sekolah sebelum menyimpan.",
+        });
+      },
+      (error) => {
+        const messages = {
+          1: "Izin lokasi ditolak. Izinkan akses lokasi pada browser.",
+          2: "Lokasi tidak tersedia. Periksa GPS atau koneksi perangkat.",
+          3: "Pengambilan lokasi melewati batas waktu. Silakan coba lagi.",
+        };
+
+        setStatus({
+          type: "error",
+          message: messages[error.code] || "Gagal mendapatkan koordinat GPS.",
+        });
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 0,
+      },
+    );
+  };
+
+  const handleSave = async (event) => {
+    event.preventDefault();
+    setStatus(null);
+
+    const lintang = Number(form.lintang);
+    const bujur = Number(form.bujur);
+    const radius = Number(form.radiusAbsensi);
+
+    if (
+      form.lintang === "" ||
+      !Number.isFinite(lintang) ||
+      lintang < -90 ||
+      lintang > 90
+    ) {
       setStatus({
         type: "error",
-        message: "Radius harus berupa bilangan bulat dalam satuan meter.",
+        message: "Lintang harus berupa angka antara -90 dan 90.",
+      });
+      return;
+    }
+
+    if (
+      form.bujur === "" ||
+      !Number.isFinite(bujur) ||
+      bujur < -180 ||
+      bujur > 180
+    ) {
+      setStatus({
+        type: "error",
+        message: "Bujur harus berupa angka antara -180 dan 180.",
+      });
+      return;
+    }
+
+    if (
+      form.radiusAbsensi === "" ||
+      !Number.isFinite(radius) ||
+      !Number.isInteger(radius) ||
+      radius <= 0
+    ) {
+      setStatus({
+        type: "error",
+        message: "Radius maksimal harus berupa bilangan bulat lebih besar dari 0 meter.",
+      });
+      return;
+    }
+
+    if (!form.metodeAbsensiAktif.length) {
+      setStatus({
+        type: "error",
+        message: "Aktifkan minimal satu metode presensi.",
       });
       return;
     }
@@ -220,72 +347,54 @@ export default function PengaturanPresensiPage() {
     setSaving(true);
 
     try {
-      await apiFetch(ENDPOINTS.pengaturan, {
-        method: "POST",
-        body: JSON.stringify({
-          kunci: KEYS.radius,
-          nilai: String(parsedRadius),
-          tipeData: "number",
-          kelompok: "presensi",
-          keterangan: "Radius lokasi presensi dalam meter",
-        }),
+      const payload = {
+        lintang,
+        bujur,
+        radiusAbsensi: radius,
+        metodeAbsensiAktif: form.metodeAbsensiAktif,
+      };
+
+      const response = await apiFetch(ENDPOINT, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
       });
 
-      const savedValue = String(parsedRadius);
-
-      setOriginalRadius(savedValue);
-      setRadius(savedValue);
-
-      setSettings((previous) => {
-        const exists = previous.some(
-          (item) => item.kunci === KEYS.radius,
-        );
-
-        if (exists) {
-          return previous.map((item) =>
-            item.kunci === KEYS.radius
-              ? { ...item, nilai: savedValue }
-              : item,
-          );
-        }
-
-        return [
-          ...previous,
-          {
-            kunci: KEYS.radius,
-            nilai: savedValue,
-            tipeData: "number",
-            kelompok: "presensi",
-            keterangan: "Radius lokasi presensi dalam meter",
-          },
-        ];
+      // Muat ulang dari Backend agar nilai yang ditampilkan sesuai
+      // dengan data yang benar-benar tersimpan.
+      const refreshedResponse = await apiFetch(ENDPOINT, {
+        method: "GET",
       });
+
+      const saved = extractSettings(refreshedResponse);
+
+      setForm(saved);
+      setOriginal(JSON.stringify(saved));
 
       setStatus({
         type: "success",
         message:
-          "Nilai radius berhasil disimpan ke pengaturan sistem. Nilai ini belum mengubah radius validasi GPS karena Backend membaca radius dari data sekolah.",
+          unwrapResponse(response)?.message ||
+          "Pengaturan presensi berhasil disimpan dan dimuat ulang dari Backend.",
       });
     } catch (error) {
-      console.error("Gagal menyimpan radius presensi:", error);
+      console.error("Gagal menyimpan pengaturan presensi:", error);
 
       setStatus({
         type: "error",
         message:
           error?.message ||
-          "Pengaturan gagal disimpan. Silakan coba lagi.",
+          "Pengaturan gagal disimpan. Pastikan Backend menerima format data yang dikirim.",
       });
     } finally {
       setSaving(false);
     }
   };
 
-  const hasRadiusChanged = radius !== originalRadius;
-
-  const hasMetode =
-    metodeAktif != null &&
-    metodeAktif !== "" &&
-    (!Array.isArray(metodeAktif) || metodeAktif.length > 0);
+  const hasChanged =
+    original !== null && JSON.stringify(form) !== original;
 
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50">
@@ -296,11 +405,9 @@ export default function PengaturanPresensiPage() {
 
         <main className="min-h-0 flex-1 overflow-y-auto">
           <div className="mx-auto w-full max-w-[1500px] px-4 py-6 sm:px-6 lg:px-8">
-          
-
             <div className="mb-7 flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
               <div>
-                <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-100 text-blue-700">
+                <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 text-blue-700">
                   <Settings2 size={25} />
                 </div>
 
@@ -309,8 +416,8 @@ export default function PengaturanPresensiPage() {
                 </h1>
 
                 <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 sm:text-base">
-                  Lihat metode presensi aktif dan kelola konfigurasi
-                  tambahan yang tersimpan pada sistem sekolah.
+                  Atur lokasi sekolah, jarak maksimal presensi, dan metode
+                  absensi yang diperbolehkan untuk pengguna sekolah.
                 </p>
               </div>
 
@@ -318,7 +425,7 @@ export default function PengaturanPresensiPage() {
                 type="button"
                 onClick={loadSettings}
                 disabled={loading || saving}
-                className="inline-flex min-h-10 items-center justify-center gap-2 self-start rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex min-h-10 items-center justify-center gap-2 self-start rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <RefreshCw
                   size={16}
@@ -335,52 +442,50 @@ export default function PengaturanPresensiPage() {
             )}
 
             {loading ? (
-              <div className="flex min-h-64 flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white">
+              <div className="flex min-h-64 flex-col items-center justify-center rounded-xl border border-slate-200 bg-white">
                 <Loader2 size={30} className="animate-spin text-blue-600" />
                 <p className="mt-3 text-sm text-slate-500">
-                  Mengambil konfigurasi dari Backend...
+                  Mengambil pengaturan presensi dari Backend...
                 </p>
               </div>
             ) : (
-              <>
-                <div className="mb-6 grid grid-cols-1 items-stretch gap-4 sm:grid-cols-2">
-                  <div className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+              <form onSubmit={handleSave}>
+                <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+                  <div className="rounded-xl border border-slate-200 bg-white p-5">
                     <div className="flex items-center justify-between gap-3">
                       <div>
-                        <p className="text-sm font-medium text-slate-500">
-                          Metode Presensi
-                        </p>
-                        <p className="mt-2 text-lg font-semibold text-slate-900">
-                          {hasMetode ? "Data tersedia" : "Belum tersedia"}
-                        </p>
-                        <p className="mt-1 text-xs text-slate-500">
-                          Konfigurasi sekolah dari Backend
+                        <p className="text-sm text-slate-500">Latitude Sekolah</p>
+                        <p className="mt-2 break-all text-lg font-semibold text-slate-900">
+                          {form.lintang !== "" ? form.lintang : "Belum diatur"}
                         </p>
                       </div>
-
-                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-blue-700">
-                        <Fingerprint size={23} />
-                      </div>
+                      <MapPin className="text-blue-600" size={22} />
                     </div>
                   </div>
 
-                  <div className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                  <div className="rounded-xl border border-slate-200 bg-white p-5">
                     <div className="flex items-center justify-between gap-3">
                       <div>
-                        <p className="text-sm font-medium text-slate-500">
-                          Konfigurasi Tambahan
-                        </p>
-                        <p className="mt-2 text-lg font-semibold text-slate-900">
-                          {settings.length} pengaturan
-                        </p>
-                        <p className="mt-1 text-xs text-slate-500">
-                          Data pengaturan sistem
+                        <p className="text-sm text-slate-500">Longitude Sekolah</p>
+                        <p className="mt-2 break-all text-lg font-semibold text-slate-900">
+                          {form.bujur !== "" ? form.bujur : "Belum diatur"}
                         </p>
                       </div>
+                      <MapPinned className="text-indigo-600" size={22} />
+                    </div>
+                  </div>
 
-                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-50 text-indigo-700">
-                        <SlidersHorizontal size={23} />
+                  <div className="rounded-xl border border-slate-200 bg-white p-5">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-sm text-slate-500">Radius Maksimal</p>
+                        <p className="mt-2 text-lg font-semibold text-slate-900">
+                          {form.radiusAbsensi !== ""
+                            ? `${form.radiusAbsensi} meter`
+                            : "Belum diatur"}
+                        </p>
                       </div>
+                      <LocateFixed className="text-emerald-600" size={22} />
                     </div>
                   </div>
                 </div>
@@ -388,298 +493,295 @@ export default function PengaturanPresensiPage() {
                 <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-3">
                   <div className="space-y-6 xl:col-span-2">
                     <SectionCard
-                      icon={ClipboardCheck}
-                      title="Metode Presensi Aktif"
-                      description="Metode yang dikembalikan Backend melalui endpoint absensi."
+                      icon={Building2}
+                      title="Lokasi dan Radius Sekolah"
+                      description="Koordinat ini menjadi titik referensi perhitungan jarak presensi GPS."
                     >
-                      <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                        <div className="flex items-start gap-3">
-                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-blue-700 shadow-sm">
-                            <Fingerprint size={20} />
-                          </div>
+                      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                        <Field
+                          label="Lintang (Latitude)"
+                          value={form.lintang}
+                          onChange={(value) => updateField("lintang", value)}
+                          placeholder="Contoh: -6.200000"
+                        />
 
-                          <div className="min-w-0 flex-1">
-                            <p className="text-sm font-semibold text-slate-900">
-                              Konfigurasi metode sekolah
-                            </p>
-                            <p className="mt-1 break-words text-sm leading-6 text-slate-600">
-                              {formatMetode(metodeAktif)}
-                            </p>
-                          </div>
-
-                          <span className="shrink-0 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-600">
-                            {hasMetode ? "Tersedia" : "Kosong"}
-                          </span>
-                        </div>
+                        <Field
+                          label="Bujur (Longitude)"
+                          value={form.bujur}
+                          onChange={(value) => updateField("bujur", value)}
+                          placeholder="Contoh: 106.816666"
+                        />
                       </div>
 
-                      <div className="mt-4 flex items-start gap-2.5 text-sm leading-6 text-slate-500">
-                        <Info
-                          size={17}
-                          className="mt-0.5 shrink-0 text-blue-600"
+                      <div className="mt-5">
+                        <Field
+                          label="Jarak Maksimal Presensi"
+                          value={form.radiusAbsensi}
+                          onChange={(value) =>
+                            updateField("radiusAbsensi", value)
+                          }
+                          placeholder="Contoh: 100"
+                          suffix="meter"
+                          step="1"
                         />
-                        <p>
-                          Endpoint{" "}
-                          <code className="rounded bg-slate-100 px-1.5 py-0.5 text-xs">
-                            GET /api/absensi/metode-aktif
-                          </code>{" "}
-                          digunakan untuk membaca metode presensi yang
-                          tersimpan pada data sekolah. Backend yang tersedia
-                          belum menyediakan endpoint untuk mengubah daftar
-                          metode melalui halaman ini.
+                        <p className="mt-2 text-xs leading-5 text-slate-500">
+                          Pengguna yang berada di luar radius ini akan ditolak
+                          saat melakukan presensi dengan validasi GPS.
                         </p>
                       </div>
-                    </SectionCard>
 
-                    <SectionCard
-                      icon={MapPin}
-                      title="Konfigurasi Radius Presensi"
-                      description="Menyimpan nilai radius sebagai pengaturan tambahan sistem. Nilai validasi GPS tetap mengikuti konfigurasi pada data sekolah."
-                    >
-                      <form onSubmit={handleSaveRadius} className="space-y-5">
-                        <div>
-                          <label
-                            htmlFor="radius"
-                            className="mb-2 block text-sm font-semibold text-slate-800"
-                          >
-                            Radius lokasi (meter)
-                          </label>
-
-                          <div className="relative">
-                            <input
-                              id="radius"
-                              name="radius"
-                              type="number"
-                              min="1"
-                              step="1"
-                              value={radius}
-                              onChange={(event) =>
-                                setRadius(event.target.value)
-                              }
-                              placeholder="Contoh: 100"
-                              disabled={saving}
-                              className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 pr-16 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 disabled:bg-slate-100"
-                            />
-
-                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-slate-500">
-                              meter
-                            </span>
-                          </div>
-
-                          <p className="mt-2 text-xs leading-5 text-slate-500">
-                            Kunci konfigurasi:{" "}
-                            <code className="rounded bg-slate-100 px-1">
-                              radiusAbsensi
-                            </code>
-                          </p>
-                        </div>
-
-                        <div className="flex items-start gap-2.5 rounded-xl border border-amber-200 bg-amber-50 p-3.5 text-sm leading-6 text-amber-900">
-                          <AlertCircle size={18} className="mt-0.5 shrink-0" />
-                          <p>
-                            Nilai ini disimpan pada tabel{" "}
-                            <code>pengaturanSistem</code>. Sementara itu,
-                            validasi GPS pada Backend membaca{" "}
-                            <code>sekolah.radiusAbsensi</code>. Karena itu,
-                            perubahan di halaman ini belum mengubah radius
-                            validasi presensi.
-                          </p>
-                        </div>
-
-                        <div className="flex flex-col-reverse gap-3 border-t border-slate-100 pt-4 sm:flex-row sm:items-center sm:justify-between">
-                          <button
-                            type="button"
-                            onClick={() => setRadius(originalRadius)}
-                            disabled={saving || !hasRadiusChanged}
-                            className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
-                          >
-                            Batalkan Perubahan
-                          </button>
-
-                          <button
-                            type="submit"
-                            disabled={saving || !hasRadiusChanged}
-                            className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
-                          >
-                            {saving ? (
-                              <Loader2 size={17} className="animate-spin" />
-                            ) : (
-                              <Save size={17} />
-                            )}
-                            {saving ? "Menyimpan..." : "Simpan Pengaturan"}
-                          </button>
-                        </div>
-                      </form>
-                    </SectionCard>
-
-                    <SectionCard
-                      icon={Settings2}
-                      title="Pengaturan Sistem Tersimpan"
-                      description="Daftar konfigurasi yang dikembalikan Backend."
-                    >
-                      {settings.length === 0 ? (
-                        <div className="rounded-xl border border-dashed border-slate-300 px-4 py-8 text-center">
-                          <Settings2
-                            size={25}
-                            className="mx-auto text-slate-400"
+                      <div className="mt-5 flex flex-col gap-3 rounded-lg border border-blue-100 bg-blue-50 p-4 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="flex items-start gap-2.5">
+                          <Info
+                            size={18}
+                            className="mt-0.5 shrink-0 text-blue-700"
                           />
-                          <p className="mt-3 text-sm font-medium text-slate-700">
-                            Belum ada pengaturan yang ditemukan
-                          </p>
-                          <p className="mt-1 text-xs leading-5 text-slate-500">
-                            Tidak ada data yang dikembalikan untuk akun sekolah
-                            ini.
+                          <p className="text-sm leading-6 text-blue-900">
+                            Koordinat harus menunjuk ke lokasi sekolah, bukan
+                            lokasi rumah admin. Gunakan GPS ketika berada di
+                            sekolah atau masukkan koordinat sekolah secara manual.
                           </p>
                         </div>
-                      ) : (
-                        <div className="overflow-x-auto">
-                          <table className="w-full min-w-[420px] text-left text-sm">
-                            <thead>
-                              <tr className="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-500">
-                                <th className="pb-3 pr-4 font-semibold">
-                                  Kunci
-                                </th>
-                                <th className="pb-3 pr-4 font-semibold">
-                                  Nilai
-                                </th>
-                                <th className="pb-3 font-semibold">
-                                  Kelompok
-                                </th>
-                              </tr>
-                            </thead>
 
-                            <tbody>
-                              {settings.map((item) => (
-                                <tr
-                                  key={item.id || item.kunci}
-                                  className="border-b border-slate-100 last:border-0"
-                                >
-                                  <td className="py-3 pr-4 font-medium text-slate-800">
-                                    <span className="break-all">
-                                      {item.kunci || "-"}
-                                    </span>
-                                    {item.keterangan && (
-                                      <p className="mt-1 max-w-xs text-xs font-normal leading-5 text-slate-500">
-                                        {item.keterangan}
-                                      </p>
-                                    )}
-                                  </td>
+                        <button
+                          type="button"
+                          onClick={handleUseCurrentLocation}
+                          disabled={saving}
+                          className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-blue-200 bg-white px-3.5 py-2.5 text-sm font-semibold text-blue-700 transition hover:bg-blue-100 disabled:opacity-50"
+                        >
+                          <LocateFixed size={16} />
+                          Ambil Koordinat
+                        </button>
+                      </div>
+                    </SectionCard>
 
-                                  <td className="max-w-56 break-words py-3 pr-4 text-slate-600">
-                                    {item.kunci === KEYS.radius
-                                      ? `${item.nilai ?? "-"} meter`
-                                      : String(item.nilai ?? "-")}
-                                  </td>
+                    <SectionCard
+                      icon={Fingerprint}
+                      title="Metode Presensi Aktif"
+                      description="Pilih metode yang boleh digunakan untuk mencatat kehadiran."
+                    >
+                      <div className="space-y-3">
+                        {METODE.map(({ value, title, description, Icon }) => {
+                          const active =
+                            form.metodeAbsensiAktif.includes(value);
 
-                                  <td className="py-3 text-slate-500">
-                                    {item.kelompok || "-"}
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
+                          return (
+                            <button
+                              key={value}
+                              type="button"
+                              onClick={() => toggleMethod(value)}
+                              disabled={saving}
+                              aria-pressed={active}
+                              className={`flex w-full items-start gap-4 rounded-xl border p-4 text-left transition ${
+                                active
+                                  ? "border-blue-300 bg-blue-50/70"
+                                  : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
+                              } disabled:cursor-not-allowed disabled:opacity-60`}
+                            >
+                              <div
+                                className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-lg ${
+                                  active
+                                    ? "bg-blue-100 text-blue-700"
+                                    : "bg-slate-100 text-slate-500"
+                                }`}
+                              >
+                                <Icon size={23} />
+                              </div>
+
+                              <div className="min-w-0 flex-1">
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <h3 className="text-sm font-semibold text-slate-900">
+                                    {title}
+                                  </h3>
+
+                                  <span
+                                    className={`rounded-md px-2 py-1 text-xs font-medium ${
+                                      active
+                                        ? "bg-emerald-100 text-emerald-700"
+                                        : "bg-slate-100 text-slate-500"
+                                    }`}
+                                  >
+                                    {active ? "Aktif" : "Nonaktif"}
+                                  </span>
+                                </div>
+
+                                <p className="mt-1 text-sm leading-5 text-slate-500">
+                                  {description}
+                                </p>
+
+                                {value === "face" && active && (
+                                  <p className="mt-2 text-xs leading-5 text-blue-700">
+                                    Membutuhkan kamera, foto wajah, dan data
+                                    Face ID yang telah didaftarkan.
+                                  </p>
+                                )}
+
+                                {value === "lokasi" && active && (
+                                  <p className="mt-2 text-xs leading-5 text-blue-700">
+                                    Membutuhkan izin GPS serta koordinat sekolah
+                                    dan radius yang valid.
+                                  </p>
+                                )}
+                              </div>
+
+                              <div
+                                className={`mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded border ${
+                                  active
+                                    ? "border-blue-600 bg-blue-600 text-white"
+                                    : "border-slate-300 bg-white"
+                                }`}
+                              >
+                                {active && <CheckCircle2 size={15} />}
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {form.metodeAbsensiAktif.length === 0 && (
+                        <p className="mt-3 text-sm text-red-600">
+                          Pilih minimal satu metode presensi sebelum menyimpan.
+                        </p>
                       )}
                     </SectionCard>
+
+                    <div className="flex flex-col-reverse gap-3 rounded-xl border border-slate-200 bg-white p-4 sm:flex-row sm:items-center sm:justify-between">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (original) {
+                            setForm(JSON.parse(original));
+                            setStatus(null);
+                          }
+                        }}
+                        disabled={saving || !hasChanged || !original}
+                        className="rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+                      >
+                        Batalkan Perubahan
+                      </button>
+
+                      <button
+                        type="submit"
+                        disabled={saving || !hasChanged}
+                        className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        {saving ? (
+                          <Loader2 size={17} className="animate-spin" />
+                        ) : (
+                          <Save size={17} />
+                        )}
+                        {saving ? "Menyimpan..." : "Simpan Pengaturan"}
+                      </button>
+                    </div>
                   </div>
 
                   <aside className="space-y-6">
-                    <div className="rounded-2xl border border-blue-100 bg-blue-50 p-5">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-blue-700">
+                    <div className="rounded-xl border border-slate-200 bg-white p-5">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-700">
                         <ShieldCheck size={21} />
                       </div>
 
                       <h2 className="mt-4 text-base font-semibold text-slate-900">
-                        Integrasi Backend
+                        Integrasi Presensi
                       </h2>
 
-                      <p className="mt-2 text-sm leading-6 text-slate-600">
-                        Halaman membaca metode presensi dan konfigurasi sistem
-                        melalui endpoint yang tersedia pada aplikasi Express.
+                      <p className="mt-2 text-sm leading-6 text-slate-500">
+                        Pengaturan lokasi, radius, dan metode dikirim melalui
+                        endpoint pengaturan presensi Backend.
                       </p>
 
                       <div className="mt-4 space-y-3">
-                        <div className="flex items-start gap-2 text-sm text-slate-700">
-                          <CheckCircle2
+                        <div className="flex items-start gap-2.5 text-sm text-slate-700">
+                          <CircleCheck
                             size={17}
                             className="mt-0.5 shrink-0 text-emerald-600"
                           />
-                          <span>
-                            Metode presensi dibaca dari API absensi.
-                          </span>
+                          <span>Koordinat sekolah dapat diedit.</span>
                         </div>
 
-                        <div className="flex items-start gap-2 text-sm text-slate-700">
-                          <CheckCircle2
+                        <div className="flex items-start gap-2.5 text-sm text-slate-700">
+                          <CircleCheck
                             size={17}
                             className="mt-0.5 shrink-0 text-emerald-600"
                           />
-                          <span>
-                            Pengaturan sistem dibaca dan disimpan melalui API
-                            pengaturan.
-                          </span>
+                          <span>Radius maksimal dapat diubah.</span>
                         </div>
 
-                        <div className="flex items-start gap-2 text-sm text-slate-700">
-                          <Info
+                        <div className="flex items-start gap-2.5 text-sm text-slate-700">
+                          <CircleCheck
                             size={17}
-                            className="mt-0.5 shrink-0 text-blue-600"
+                            className="mt-0.5 shrink-0 text-emerald-600"
                           />
-                          <span>
-                            Jam masuk, jam keluar, dan toleransi keterlambatan
-                            mengikuti konfigurasi Shift Kerja.
-                          </span>
+                          <span>Face Recognition dan GPS dapat dipilih.</span>
                         </div>
                       </div>
                     </div>
 
-                    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-700">
-                          <Clock3 size={20} />
-                        </div>
-
-                        <div>
-                          <h2 className="text-sm font-semibold text-slate-900">
-                            Shift Kerja
-                          </h2>
-                          <p className="text-xs text-slate-500">
-                            Konfigurasi jam kerja
-                          </p>
-                        </div>
+                    <div className="rounded-xl border border-amber-200 bg-amber-50 p-5">
+                      <div className="flex items-center gap-2">
+                        <Info size={19} className="text-amber-700" />
+                        <h2 className="text-sm font-semibold text-amber-900">
+                          Catatan Validasi
+                        </h2>
                       </div>
 
-                      <p className="mt-3 text-sm leading-6 text-slate-500">
-                        Ubah jam masuk, jam keluar, dan toleransi keterlambatan
-                        melalui halaman Shift Kerja.
+                      <p className="mt-3 text-sm leading-6 text-amber-900">
+                        Face Recognition tetap memerlukan kamera dan verifikasi
+                        wajah. Jika metode face diaktifkan, Backend juga
+                        memerlukan koordinat GPS sesuai implementasi validasi
+                        absensi saat ini.
+                      </p>
+
+                      <p className="mt-3 text-sm leading-6 text-amber-900">
+                        Pastikan metode yang diaktifkan sesuai dengan metode
+                        yang dikirim oleh halaman presensi siswa dan guru.
                       </p>
                     </div>
 
-                    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-700">
-                          <CalendarDays size={20} />
-                        </div>
+                    <div className="rounded-xl border border-slate-200 bg-white p-5">
+                      <h2 className="text-sm font-semibold text-slate-900">
+                        Status Metode
+                      </h2>
 
-                        <div>
-                          <h2 className="text-sm font-semibold text-slate-900">
-                            Hari Aktif
-                          </h2>
-                          <p className="text-xs text-slate-500">
-                            Jadwal presensi
-                          </p>
-                        </div>
+                      <div className="mt-4 space-y-3">
+                        {METODE.map(({ value, title, Icon }) => {
+                          const active =
+                            form.metodeAbsensiAktif.includes(value);
+
+                          return (
+                            <div
+                              key={value}
+                              className="flex items-center gap-3"
+                            >
+                              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
+                                <Icon size={18} />
+                              </div>
+
+                              <div className="min-w-0 flex-1">
+                                <p className="text-sm font-medium text-slate-800">
+                                  {title}
+                                </p>
+                              </div>
+
+                              {active ? (
+                                <CheckCircle2
+                                  size={18}
+                                  className="text-emerald-600"
+                                />
+                              ) : (
+                                <CircleX
+                                  size={18}
+                                  className="text-slate-300"
+                                />
+                              )}
+                            </div>
+                          );
+                        })}
                       </div>
-
-                      <p className="mt-3 text-sm leading-6 text-slate-500">
-                        Pengaturan hari aktif belum tersedia pada endpoint
-                        Backend yang diperiksa. Untuk saat ini, bagian ini
-                        hanya memberikan informasi.
-                      </p>
                     </div>
                   </aside>
                 </div>
-              </>
+              </form>
             )}
 
             <footer className="mt-8 border-t border-slate-200 py-5 text-center text-xs text-slate-400">

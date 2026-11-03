@@ -39,6 +39,11 @@ import {
   deleteJalurPpdb,
 } from "@/services/jalurPpdb.service";
 
+import {
+  getStatistikPpdb,
+  isPpdbEndpointMissing,
+} from "@/services/ppdb.service";
+
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -219,6 +224,132 @@ export default function JalurPPDBPage() {
     error || (izin && !izin.view ? AKSES_DITOLAK_VIEW : "");
   const summaryLoading =
     checkingAccess || (loading && canView);
+
+  const [statistikPendaftar, setStatistikPendaftar] =
+    useState({
+      status: "loading",
+      total: null,
+      message: "",
+    });
+
+  useEffect(() => {
+    if (!canView) {
+      return;
+    }
+
+    let aktif = true;
+
+    (async () => {
+      try {
+        const response =
+          await getStatistikPpdb();
+
+        if (response?.success === false) {
+          throw new Error(
+            response?.message ||
+              "Gagal mengambil statistik pendaftar PPDB"
+          );
+        }
+
+        // Angka diambil langsung dari field `total` milik Backend,
+        // tidak dihitung ulang dari daftar jalur atau data lain.
+        const total = Number(
+          response?.data?.total
+        );
+
+        if (!Number.isFinite(total)) {
+          throw new Error(
+            "Respons statistik pendaftar tidak memuat angka total."
+          );
+        }
+
+        if (!aktif) {
+          return;
+        }
+
+        setStatistikPendaftar({
+          status: "ready",
+          total,
+          message: "",
+        });
+      } catch (err) {
+        if (!aktif) {
+          return;
+        }
+
+        setStatistikPendaftar({
+          status: "error",
+          total: null,
+          message: isPpdbEndpointMissing(err)
+            ? "Endpoint statistik pendaftar belum tersedia (404)"
+            : err?.status === 401
+              ? "Perlu sesi admin untuk membaca statistik pendaftar"
+              : err?.message ||
+                  "Gagal mengambil statistik pendaftar PPDB",
+        });
+      }
+    })();
+
+    return () => {
+      aktif = false;
+    };
+  }, [canView]);
+
+  const pendaftarCard = useMemo(() => {
+    if (checkingAccess) {
+      return {
+        value: "...",
+        description: "Memeriksa akses...",
+      };
+    }
+
+    if (!canView) {
+      return {
+        value: "-",
+        description:
+          "Butuh izin ppdb.view untuk statistik pendaftar.",
+      };
+    }
+
+    if (statistikPendaftar.status === "loading") {
+      return {
+        value: "...",
+        description:
+          "Memuat statistik pendaftar...",
+      };
+    }
+
+    if (statistikPendaftar.status === "error") {
+      return {
+        value: "-",
+        description: statistikPendaftar.message,
+      };
+    }
+
+    const total = Number(
+      statistikPendaftar.total
+    );
+
+    if (!Number.isFinite(total)) {
+      return {
+        value: "-",
+        description:
+          "Statistik pendaftar tidak memuat angka total.",
+      };
+    }
+
+    return {
+      value: formatNumber(total),
+      description:
+        total > 0
+          ? "Total pendaftar PPDB terdaftar"
+          : "Belum ada pendaftar PPDB terdaftar",
+    };
+  }, [
+    checkingAccess,
+    canView,
+    statistikPendaftar,
+  ]);
 
 
   const fetchJalur = useCallback(
@@ -564,9 +695,9 @@ export default function JalurPPDBPage() {
 
               <SummaryCard
                 title="Pendaftar"
-                value="-"
+                value={pendaftarCard.value}
                 soft
-                description="Data pendaftar belum tersedia dari Backend"
+                description={pendaftarCard.description}
               />
             </section>
 

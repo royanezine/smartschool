@@ -1,9 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getProfile, updateProfile } from "@/services/user.service";
-import { getYayasanById, updateYayasan } from "@/services/yayasan.service";
-import { getAuthPayload, getStoredUser } from "@/lib/auth";
+import {
+  getProfilLengkapYayasan,
+  updateProfilLengkapYayasan,
+  updateProfilYayasan,
+} from "@/services/yayasan.service";
 import {
   Settings,
   ChevronLeft,
@@ -284,38 +286,32 @@ export default function PengaturanPage() {
       try {
         setLoading(true);
         setErrorMsg("");
-        const res = await getProfile();
-        const u = res?.data?.data || res?.data || res;
-        if (active && u) {
-          setProfil({
-            nama: u.namaLengkap || u.nama || "",
-            email: u.email || "",
-            telepon: u.noTelepon || "",
-            jabatan: u.role?.nama || u.role || u.jabatan || "Admin Yayasan",
-          });
-        }
 
-        // Muat profil yayasan jika user terafiliasi yayasan
-        const authPayload = getAuthPayload();
-        const storedUser = getStoredUser();
-        const yId = authPayload?.yayasanId || storedUser?.yayasanId || u?.yayasanId;
+        // Muat profil lengkap (user + yayasan) dari satu endpoint
+        const profilRes = await getProfilLengkapYayasan();
+        const profilData = profilRes?.data || profilRes;
 
-        if (active && yId) {
-          try {
-            const yRes = await getYayasanById(yId);
-            const yData = yRes?.data || yRes;
-            if (active && yData) {
-              setYayasan({
-                id: yData.id || yId,
-                nama: yData.nama || "",
-                npyp: yData.npyp || "",
-                alamat: yData.alamat || "",
-                email: yData.email || "",
-                telepon: yData.telepon || "",
-              });
-            }
-          } catch (yErr) {
-            console.warn("Gagal memuat data lembaga yayasan:", yErr);
+        if (active && profilData) {
+          const u = profilData.user;
+          if (u) {
+            setProfil({
+              nama: u.namaLengkap || "",
+              email: u.email || "",
+              telepon: u.noTelepon || "",
+              jabatan: "Admin Yayasan",
+            });
+          }
+
+          const y = profilData.yayasan;
+          if (y) {
+            setYayasan({
+              id: "",
+              nama: y.nama || "",
+              npyp: y.npyp || "",
+              alamat: y.alamat || "",
+              email: y.email || "",
+              telepon: y.telepon || "",
+            });
           }
         }
       } catch (err) {
@@ -352,19 +348,14 @@ export default function PengaturanPage() {
       setErrorMsg("");
 
       if (activeTab === "profil") {
-        await updateProfile({
-          namaLengkap: profil.nama,
-          noTelepon: profil.telepon,
+        // Simpan profil user via profil-lengkap
+        await updateProfilLengkapYayasan({
+          user: {
+            namaLengkap: profil.nama,
+            noTelepon: profil.telepon || null,
+          },
         });
       } else if (activeTab === "yayasan") {
-        const authPayload = getAuthPayload();
-        const storedUser = getStoredUser();
-        const yId = yayasan.id || authPayload?.yayasanId || storedUser?.yayasanId;
-
-        if (!yId) {
-          throw new Error("ID Yayasan tidak ditemukan.");
-        }
-
         if (!yayasan.nama || yayasan.nama.trim().length < 3) {
           throw new Error("Nama yayasan minimal 3 karakter.");
         }
@@ -372,9 +363,8 @@ export default function PengaturanPage() {
           throw new Error("NPYP yayasan minimal 3 karakter.");
         }
 
-        // Endpoint: PUT /api/yayasan/:yayasanId
-        // Payload: { nama, npyp, alamat, telepon, email } (menggunakan field 'npyp', BUKAN 'npypYayasan')
-        await updateYayasan(yId, {
+        // Endpoint: PUT /api/yayasan/profil
+        await updateProfilYayasan({
           nama: yayasan.nama.trim(),
           npyp: yayasan.npyp.trim(),
           alamat: yayasan.alamat ? yayasan.alamat.trim() : null,

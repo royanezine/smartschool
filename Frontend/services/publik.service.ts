@@ -71,9 +71,24 @@ export type PublicHalaman = {
   id: string;
   judul: string;
   slug: string;
-  konten?: string;
+  konten?: string | null;
   status?: string;
   dibuatPada?: string;
+  diperbaruiPada?: string;
+  subJudul?: string | null;
+  gambarUrl?: string | null;
+  menuKonfigurasi?: Array<{
+    id: string;
+    section: string;
+    judul?: string | null;
+    subJudul?: string | null;
+    konten?: string | null;
+    gambarUrl?: string | null;
+    ctaText?: string | null;
+    ctaLink?: string | null;
+    urutan?: number;
+    status?: string;
+  }>;
 };
 
 type ApiError = Error & {
@@ -250,7 +265,7 @@ export const publikService = {
           { noStore: true }
         ),
 
-      getPpdbPengumuman: (
+      getPpdbPengumuman: async (
         subdomain: string,
         query: { page?: number; limit?: number } = {}
       ) => {
@@ -258,10 +273,49 @@ export const publikService = {
         if (query.page) qs.set("page", String(query.page));
         if (query.limit) qs.set("limit", String(query.limit));
         const qsStr = qs.toString();
-        return pubFetch<any>(
-          `/${encodeURIComponent(subdomain)}/ppdb/pengumuman${qsStr ? `?${qsStr}` : ""}`,
-          { noStore: true }
-        );
+
+        // pubFetch() menjalankan unwrapResponse yang membuang `success` dan
+        // `meta`, padahal endpoint ini mengembalikan { success, data, meta }
+        // dan konsumen membutuhkan ketiganya (paginasi). Ambil respons utuh.
+        const url = `${cleanBase}/api/publik/${encodeURIComponent(subdomain)}/ppdb/pengumuman${qsStr ? `?${qsStr}` : ""}`;
+        const res = await fetch(url, {
+          method: "GET",
+          cache: "no-store",
+          headers: { Accept: "application/json" },
+        });
+
+        const contentType = res.headers.get("content-type") || "";
+        const json: any = contentType.includes("application/json")
+          ? await res.json()
+          : null;
+
+        if (!res.ok) {
+          const error = new Error(
+            json?.message || `Request gagal dengan status ${res.status}`
+          ) as ApiError;
+          error.status = res.status;
+          throw error;
+        }
+
+        if (json === null) {
+          throw new Error(`Respons API bukan JSON yang valid: ${url}`);
+        }
+
+        return json as {
+          success: boolean;
+          data: Array<{
+            id: string;
+            judul: string;
+            konten: string;
+            dipublikasikanPada: string | null;
+          }>;
+          meta?: {
+            page: number;
+            limit: number;
+            total: number;
+            totalPages: number;
+          };
+        };
       },
 
       cekPendaftaran: (

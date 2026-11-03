@@ -49,13 +49,7 @@ export default function TambahPengumumanPage() {
   const [judul, setJudul] = useState("");
   const [konten, setKonten] = useState("");
   const [status, setStatus] = useState("dipublikasikan");
-  const [dipublikasikanPada, setDipublikasikanPada] = useState(() => {
-    const now = new Date();
-    // format as YYYY-MM-DDTHH:mm
-    return new Date(now.getTime() - now.getTimezoneOffset() * 60000)
-      .toISOString()
-      .slice(0, 16);
-  });
+  const [dipublikasikanPada, setDipublikasikanPada] = useState("");
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
@@ -87,10 +81,11 @@ export default function TambahPengumumanPage() {
       };
 
       if (status === "dipublikasikan") {
+        // Kosong = terbit sekarang: field tidak dikirim sehingga Backend
+        // memakai waktu server (new Date()), bebas dari selisih jam browser.
+        // Diisi = jadwal publikasi yang dipilih admin (scheduled publishing).
         if (dipublikasikanPada) {
           payload.dipublikasikanPada = new Date(dipublikasikanPada).toISOString();
-        } else {
-          payload.dipublikasikanPada = new Date().toISOString();
         }
       } else {
         payload.dipublikasikanPada = null;
@@ -232,7 +227,7 @@ export default function TambahPengumumanPage() {
                         />
                       </div>
                       <p className="mt-1.5 text-[11px] theme-text-muted">
-                        Pengumuman hanya akan tampil di publik jika tanggal publikasi telah tiba.
+                        Kosongkan untuk langsung terbit. Isi tanggal mendatang untuk menjadwalkan; pengumuman baru tampil di publik setelah waktu tersebut tiba.
                       </p>
                     </div>
                   )}

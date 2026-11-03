@@ -362,7 +362,7 @@ export default function TambahPendaftarPage() {
                 <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-3.5 text-xs text-emerald-800">
                   <p className="font-semibold">Data Tersimpan di Backend</p>
                   <p className="mt-1 leading-5 text-emerald-700">
-                    Data calon siswa sudah tersimpan melalui POST /api/ppdb/daftar. Daftar pendaftar belum dapat ditampilkan di halaman Data Pendaftaran karena endpoint baca GET /api/ppdb/pendaftar belum tersedia di Backend.
+                    Data calon siswa sudah tersimpan melalui POST /api/ppdb/daftar. Seluruh daftar pendaftar dapat ditinjau pada halaman Data Pendaftaran yang membaca GET /api/ppdb/pendaftar.
                   </p>
                 </div>
 

@@ -145,47 +145,27 @@ function bacaRingkasan() {
   }
 }
 
-function simpanBuktiBerkas(pendaftaranId, namaBerkas, berkas) {
+function simpanTokenPendaftaran(pendaftaranId, tokenPendaftaran) {
   if (typeof window === "undefined") {
     return;
   }
 
-  const ringkasan = bacaRingkasan();
+  const token = String(tokenPendaftaran || "").trim();
 
-  const dasar =
-    ringkasan &&
-    String(ringkasan.pendaftaranId) === String(pendaftaranId)
-      ? ringkasan
-      : {
-          pendaftaranId: String(pendaftaranId),
-          nomorPendaftaran: null,
-          namaLengkap: "",
-          status: null,
-          berkas: [],
-        };
+  if (!token) {
+    return;
+  }
 
-  const berkasLain = Array.isArray(dasar.berkas)
-    ? dasar.berkas.filter(
-        (item) => item?.namaBerkas !== namaBerkas
-      )
-    : [];
-
-  sessionStorage.setItem(
-    SESI_SUBMISSION,
-    JSON.stringify({
-      ...dasar,
-      berkas: [
-        ...berkasLain,
-        {
-          namaBerkas,
-          id: berkas?.id || null,
-          urlFile: berkas?.urlFile || null,
-          status: berkas?.status || null,
-          diterimaPada: new Date().toISOString(),
-        },
-      ],
-    })
-  );
+  try {
+    sessionStorage.setItem(
+      SESI_SUBMISSION,
+      JSON.stringify({
+        pendaftaranId: String(pendaftaranId),
+        tokenPendaftaran: token,
+      })
+    );
+  } catch {
+  }
 }
 
 function buatStatusAwal() {
@@ -345,36 +325,17 @@ export default function PpdbUploadBerkas({ basePath = "" }) {
 
     const ringkasan = bacaRingkasan();
 
+    // Hanya token teknis yang diambil dari sesi pendaftaran sebelumnya.
+    // Data bisnis (nomor pendaftaran, daftar berkas terunggah) TIDAK lagi
+    // dibaca dari sessionStorage — sumbernya adalah Backend
+    // (getDetailSaya untuk pendaftar, getPendaftarPpdbById untuk admin).
     if (
       ringkasan &&
-      String(ringkasan.pendaftaranId) === id
+      String(ringkasan.pendaftaranId) === id &&
+      !effectiveToken &&
+      ringkasan.tokenPendaftaran
     ) {
-      if (!effectiveToken && ringkasan.tokenPendaftaran) {
-        effectiveToken = String(ringkasan.tokenPendaftaran).trim();
-      }
-
-      if (ringkasan.nomorPendaftaran) {
-        setNomorPendaftaran(
-          String(ringkasan.nomorPendaftaran)
-        );
-      }
-
-      if (Array.isArray(ringkasan.berkas) && ringkasan.berkas.length > 0) {
-        setDokumen((current) => {
-          const next = { ...current };
-          for (const item of ringkasan.berkas) {
-            if (item?.namaBerkas && next[item.namaBerkas]) {
-              next[item.namaBerkas] = {
-                ...next[item.namaBerkas],
-                status: "success",
-                berkas: item,
-                error: "",
-              };
-            }
-          }
-          return next;
-        });
-      }
+      effectiveToken = String(ringkasan.tokenPendaftaran).trim();
     }
 
     setTokenPendaftaran(effectiveToken);
@@ -637,10 +598,9 @@ export default function PpdbUploadBerkas({ basePath = "" }) {
         },
       }));
 
-      simpanBuktiBerkas(
+      simpanTokenPendaftaran(
         pendaftaranId,
-        documentId,
-        response.data
+        effectiveToken || tokenPendaftaran
       );
 
       return true;

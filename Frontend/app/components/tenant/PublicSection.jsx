@@ -8,6 +8,12 @@ function normalizeText(value) {
   return value.trim();
 }
 
+function normalizeKey(value) {
+  return normalizeText(value)
+    .toLowerCase()
+    .replace(/[\s_-]/g, "");
+}
+
 function normalizeUrl(value) {
   const url = normalizeText(value);
 
@@ -35,7 +41,9 @@ function isExternalUrl(url) {
 }
 
 function isInactiveStatus(status) {
-  return normalizeText(status).toLowerCase() === "nonaktif";
+  return ["nonaktif", "inactive", "draft"].includes(
+    normalizeText(status).toLowerCase()
+  );
 }
 
 function getSectionClass(section) {
@@ -47,16 +55,50 @@ function getSectionClass(section) {
 }
 
 function renderContent(content) {
-  const text = normalizeText(content);
+  const value = normalizeText(content);
 
-  if (!text) return null;
+  if (!value) return null;
 
-  return text.split(/\r?\n/).map((line, index) => (
+  return value.split(/\r?\n/).map((line, index, lines) => (
     <span key={`${index}-${line}`}>
       {line}
-      {index < text.split(/\r?\n/).length - 1 && <br />}
+      {index < lines.length - 1 && <br />}
     </span>
   ));
+}
+
+/**
+ * Section yang khusus digunakan oleh PublicFooter.
+ * Section ini tidak ditampilkan sebagai konten di tengah halaman.
+ */
+const FOOTER_ONLY_SECTIONS = [
+  "identitas",
+  "navigasi",
+  "info_utama",
+  "sosmed",
+  "kontak",
+  "mediasosial",
+].map(normalizeKey);
+
+function isFooterConfiguration(config) {
+  const section = normalizeKey(config?.section);
+
+  const halaman =
+    normalizeKey(config?.halamanCms?.slug) ||
+    normalizeKey(config?.halamanCms?.nama) ||
+    normalizeKey(config?.halamanCms?.judul) ||
+    normalizeKey(config?.halamanSlug) ||
+    normalizeKey(config?.halaman);
+
+  if (["footer", "kontak"].includes(halaman)) {
+    return true;
+  }
+
+  if (FOOTER_ONLY_SECTIONS.includes(section)) {
+    return true;
+  }
+
+  return false;
 }
 
 export default function PublicSection({
@@ -68,12 +110,22 @@ export default function PublicSection({
     return null;
   }
 
-  if (!showInactive && isInactiveStatus(config.status)) {
+  const halaman =
+    normalizeText(config.halaman) ||
+    normalizeText(config.halamanCms?.slug) ||
+    normalizeText(config.halamanCms?.judul);
+
+  const section = normalizeText(config.section);
+  const status = normalizeText(config.status).toLowerCase();
+
+  if (isFooterConfiguration(config)) {
     return null;
   }
 
-  const halaman = normalizeText(config.halaman);
-  const section = normalizeText(config.section);
+  if (!showInactive && isInactiveStatus(status)) {
+    return null;
+  }
+
   const judul = normalizeText(config.judul);
   const subJudul = normalizeText(config.subJudul);
   const konten = normalizeText(config.konten);
@@ -141,7 +193,10 @@ export default function PublicSection({
                 <span aria-hidden="true"> →</span>
               </a>
             ) : (
-              <Link href={ctaLink} className="public-section__cta">
+              <Link
+                href={ctaLink}
+                className="public-section__cta"
+              >
                 {ctaText}
                 <span aria-hidden="true"> →</span>
               </Link>
@@ -153,7 +208,7 @@ export default function PublicSection({
           <div className="public-section__image-wrapper">
             <img
               src={gambarUrl}
-              alt={judul || subJudul || "Gambar website sekolah"}
+              alt={judul || subJudul || "Informasi sekolah"}
               className="public-section__image"
               loading="lazy"
             />

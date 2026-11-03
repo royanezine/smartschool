@@ -57,6 +57,7 @@ export default function PagesPage() {
       }
 
       const result = await apiFetch("/api/cms/halaman");
+      
 
       const responseData = result?.data;
 
@@ -180,13 +181,24 @@ export default function PagesPage() {
   };
 
 
-  const getPageUrl = (page) => {
-    if (!page?.slug) {
-      return "#";
-    }
+ const getPageUrl = (page) => {
+  const slug = String(page?.slug || "").trim();
 
-    return `/website/${page.slug}`;
-  };
+  const tenant =
+    page?.subdomain ||
+    page?.tenantSubdomain ||
+    page?.tenantSlug ||
+    page?.sekolahSubdomain ||
+    page?.sekolah?.subdomain ||
+    page?.tenant?.subdomain ||
+    page?.yayasan?.subdomain;
+
+  if (!slug || !tenant) {
+    return "#";
+  }
+
+  return `/${encodeURIComponent(String(tenant).trim())}/${encodeURIComponent(slug)}`;
+};
 
 
   const handleDelete = async () => {
@@ -680,7 +692,13 @@ export default function PagesPage() {
                                   <div className="flex items-center justify-end gap-1">
 
 
-                                    
+                                    <Link
+  href={`/admin/cms/pages/${page.id}`}
+  title="Detail halaman"
+  className="theme-text-muted flex h-9 w-9 items-center justify-center rounded-lg transition hover:bg-[var(--color-sidebar-active)] hover:text-[var(--color-primary)]"
+>
+  <Eye className="h-4 w-4" />
+</Link>
 
 
                                     <Link
@@ -772,16 +790,19 @@ export default function PagesPage() {
                                   <div className="flex items-center gap-1">
 
 
-                                    <Link
-                                      href={`/cmsAdmin/pages/${page.id}`}
-                                      className="theme-text-muted flex h-8 w-8 items-center justify-center rounded-lg transition hover:bg-[var(--color-sidebar-active)] hover:text-[var(--color-primary)]"
-                                    >
-                                      <Eye className="h-4 w-4" />
-                                    </Link>
+                                    
+<Link
+  href={`/admin/cms/pages/${page.id}`}
+  title="Detail Halaman"
+  className="theme-text-muted flex h-8 w-8 items-center justify-center rounded-lg transition hover:bg-[var(--color-sidebar-active)] hover:text-[var(--color-primary)]"
+>
+  <Eye className="h-4 w-4" />
+</Link>
 
 
+
                                     <Link
-                                      href={`/cmsAdmin/pages/${page.id}/edit`}
+                                      href={`/admin/pages/${page.id}/edit`}
                                       className="theme-text-muted flex h-8 w-8 items-center justify-center rounded-lg transition hover:bg-[var(--color-sidebar-active)] hover:text-[var(--color-primary)]"
                                     >
                                       <Pencil className="h-4 w-4" />

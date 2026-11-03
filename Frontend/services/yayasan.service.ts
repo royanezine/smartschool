@@ -1,88 +1,29 @@
 import { apiFetch } from "../lib/api";
 
-function isNotFoundError(err: any): boolean {
-  return (
-    err?.status === 404 ||
-    err?.statusCode === 404 ||
-    String(err?.message || "").includes("404") ||
-    String(err?.message || "").toLowerCase().includes("not found")
-  );
-}
+// ==========================================
+// DASHBOARD & SUMMARY
+// ==========================================
 
-export const getYayasanSummary = async () => {
-  try {
-    const result = await apiFetch("/api/yayasan/summary", {
-      method: "GET",
-      cache: "no-store",
-    });
-    return result;
-  } catch (err: any) {
-    if (isNotFoundError(err)) {
-      console.warn("[YayasanService] /api/yayasan/summary 404 Not Found. Returning empty summary safely.");
-      return { success: true, data: null };
-    }
-    throw err;
-  }
-};
+export const getYayasanSummary = async () =>
+  apiFetch("/api/yayasan/summary", { method: "GET", cache: "no-store" });
 
-export const getYayasanDashboardAgregat = async () => {
-  try {
-    const result = await apiFetch("/api/dashboard", {
-      method: "GET",
-      cache: "no-store",
-    });
-    return result;
-  } catch (err: any) {
-    if (isNotFoundError(err)) {
-      console.warn("[YayasanService] /api/dashboard 404 Not Found. Returning null safely.");
-      return { success: true, data: null };
-    }
-    throw err;
-  }
-};
+export const getYayasanDashboardAgregat = async () =>
+  apiFetch("/api/yayasan/summary", { method: "GET", cache: "no-store" });
 
 export const getSekolahBinaan = async (params?: Record<string, any>) => {
-  try {
-    const query = new URLSearchParams();
-    if (params?.page) query.append("page", String(params.page));
-    if (params?.limit) query.append("limit", String(params.limit));
-    const searchTerm = params?.search || params?.q;
-    if (searchTerm) query.append("search", String(searchTerm));
-    if (params?.status) query.append("status", String(params.status));
-
-    const qs = query.toString();
-    const url = `/api/yayasan/sekolah${qs ? `?${qs}` : ""}`;
-    const result = await apiFetch(url, {
-      method: "GET",
-      cache: "no-store",
-    });
-    return result;
-  } catch (err: any) {
-    if (isNotFoundError(err)) {
-      console.warn("[YayasanService] /api/yayasan/sekolah 404 Not Found. Returning empty items safely.");
-      return { success: true, data: { items: [], total: 0, page: 1, totalPages: 1 } };
-    }
-    throw err;
-  }
+  const query = new URLSearchParams();
+  if (params?.page) query.append("page", String(params.page));
+  if (params?.limit) query.append("limit", String(params.limit));
+  const searchTerm = params?.search || params?.q;
+  if (searchTerm) query.append("search", String(searchTerm));
+  if (params?.status) query.append("status", String(params.status));
+  const qs = query.toString();
+  return apiFetch(`/api/yayasan/sekolah${qs ? `?${qs}` : ""}`, { method: "GET", cache: "no-store" });
 };
 
 export const getDetailSekolahBinaan = async (id: string) => {
-  if (!id) {
-    throw new Error("ID sekolah tidak ditemukan.");
-  }
-  try {
-    const result = await apiFetch(`/api/yayasan/sekolah/${id}`, {
-      method: "GET",
-      cache: "no-store",
-    });
-    return result;
-  } catch (err: any) {
-    if (isNotFoundError(err)) {
-      console.warn(`[YayasanService] /api/yayasan/sekolah/${id} 404 Not Found. Returning null safely.`);
-      return { success: true, data: null };
-    }
-    throw err;
-  }
+  if (!id) throw new Error("ID sekolah tidak ditemukan.");
+  return apiFetch(`/api/yayasan/sekolah/${id}`, { method: "GET", cache: "no-store" });
 };
 
 export const createSekolahBinaan = async (data: any) => {
@@ -93,36 +34,11 @@ export const createSekolahBinaan = async (data: any) => {
   });
 };
 
-export const updateSekolahBinaan = async (id: string, data: any) => {
-  if (!id) throw new Error("ID sekolah tidak ditemukan.");
-  return await apiFetch(`/api/yayasan/sekolah/${id}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  });
-};
 
-export const deleteSekolahBinaan = async (id: string) => {
-  if (!id) throw new Error("ID sekolah tidak ditemukan.");
-  return await apiFetch(`/api/yayasan/sekolah/${id}`, {
-    method: "DELETE",
-  });
-};
 
 export const getPengaturanSekolahBinaan = async (id: string) => {
   if (!id) throw new Error("ID sekolah tidak ditemukan.");
-  try {
-    return await apiFetch(`/api/yayasan/monitoring/sekolah/${id}/pengaturan`, {
-      method: "GET",
-      cache: "no-store",
-    });
-  } catch (err: any) {
-    if (isNotFoundError(err)) {
-      console.warn(`[YayasanService] /api/yayasan/monitoring/sekolah/${id}/pengaturan 404. Returning null.`);
-      return { success: true, data: null };
-    }
-    throw err;
-  }
+  return apiFetch(`/api/yayasan/monitoring/sekolah/${id}/pengaturan`, { method: "GET", cache: "no-store" });
 };
 
 export const getMonitoringUsers = async (params?: {
@@ -133,29 +49,74 @@ export const getMonitoringUsers = async (params?: {
   peran?: string;
   sekolahId?: string;
 }) => {
-  try {
-    const query = new URLSearchParams();
-    if (params?.page) query.append("page", String(params.page));
-    if (params?.limit) query.append("limit", String(params.limit));
-    const searchTerm = params?.search || params?.q;
-    if (searchTerm) query.append("q", String(searchTerm));
-    if (params?.peran) query.append("peran", String(params.peran));
-    if (params?.sekolahId) query.append("sekolahId", String(params.sekolahId));
-
-    const qs = query.toString();
-    const url = `/api/yayasan/monitoring/users${qs ? `?${qs}` : ""}`;
-    return await apiFetch(url, {
-      method: "GET",
-      cache: "no-store",
-    });
-  } catch (err: any) {
-    if (isNotFoundError(err)) {
-      console.warn("[YayasanService] /api/yayasan/monitoring/users 404 Not Found. Returning empty users.");
-      return { success: true, data: [], meta: { page: 1, limit: 10, total: 0, totalPages: 1 } };
-    }
-    throw err;
-  }
+  const query = new URLSearchParams();
+  if (params?.page) query.append("page", String(params.page));
+  if (params?.limit) query.append("limit", String(params.limit));
+  const searchTerm = params?.search || params?.q;
+  if (searchTerm) query.append("q", String(searchTerm));
+  if (params?.peran) query.append("peran", String(params.peran));
+  if (params?.sekolahId) query.append("sekolahId", String(params.sekolahId));
+  const qs = query.toString();
+  return apiFetch(`/api/yayasan/monitoring/users${qs ? `?${qs}` : ""}`, { method: "GET", cache: "no-store" });
 };
+
+export const getLaporanOverview = async () => {
+  const [summary, sekolah] = await Promise.all([getYayasanSummary(), getSekolahBinaan()]);
+  return { success: true, data: { ...(summary?.data || summary), sekolah: sekolah?.data || sekolah } };
+};
+
+export const getLaporanSiswa = async () =>
+  apiFetch("/api/yayasan/laporan/siswa", { method: "GET", cache: "no-store" });
+
+export const getLaporanGuru = async (params?: { unitId?: string; search?: string; status?: string }) =>
+  getMonitoringUsers({ peran: "guru", q: params?.search, sekolahId: params?.unitId });
+
+export const getLaporanInventaris = async (params?: Record<string, string>) => {
+  const query = new URLSearchParams();
+  Object.entries(params || {}).forEach(([key, value]) => query.append(key, value));
+  const qs = query.toString();
+  return apiFetch(`/api/yayasan/laporan/inventaris${qs ? `?${qs}` : ""}`, { method: "GET", cache: "no-store" });
+};
+
+export const getLaporanAkademik = async () =>
+  apiFetch("/api/yayasan/laporan/akademik", { method: "GET", cache: "no-store" });
+
+export const getMonitoringAkademik = async () =>
+  apiFetch("/api/yayasan/laporan/akademik", { method: "GET", cache: "no-store" });
+
+export const getMonitoringKehadiran = async () =>
+  apiFetch("/api/yayasan/monitoring/kehadiran", { method: "GET", cache: "no-store" });
+
+export const getMonitoringLMS = async () =>
+  apiFetch("/api/yayasan/monitoring/lms", { method: "GET", cache: "no-store" });
+
+export const getMonitoringNilai = async () =>
+  apiFetch("/api/yayasan/monitoring/nilai", { method: "GET", cache: "no-store" });
+
+// ==========================================
+// PROFIL YAYASAN
+// ==========================================
+
+export const getProfilYayasan = async () =>
+  apiFetch("/api/yayasan/profil", { method: "GET", cache: "no-store" });
+
+export const updateProfilYayasan = async (data: any) =>
+  apiFetch("/api/yayasan/profil", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+
+export const getProfilLengkapYayasan = async () =>
+  apiFetch("/api/yayasan/profil-lengkap", { method: "GET", cache: "no-store" });
+
+export const updateProfilLengkapYayasan = async (data: any) =>
+  apiFetch("/api/yayasan/profil-lengkap", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+
 
 // ==========================================
 // ENDPOINT BACKEND TERBARU (CRUD YAYASAN, SEKOLAH NAUNGAN & ADMIN YAYASAN)
@@ -234,6 +195,14 @@ export const deleteYayasan = async (yayasanId: string) => {
   if (!yayasanId) throw new Error("ID Yayasan wajib disediakan.");
   return await apiFetch(`/api/yayasan/${yayasanId}`, {
     method: "DELETE",
+  });
+};
+
+export const getDetailYayasanLangganan = async (yayasanId: string) => {
+  if (!yayasanId) throw new Error("ID Yayasan wajib disediakan.");
+  return await apiFetch(`/api/yayasan/${yayasanId}/langganan`, {
+    method: "GET",
+    cache: "no-store",
   });
 };
 

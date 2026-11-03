@@ -107,20 +107,28 @@ export default function TambahBukuPage() {
     try {
       setSaving(true);
 
-      const payload = {
-        kodeBuku: form.kodeBuku.trim(),
-        judul: form.judul.trim(),
-        penulis: form.penulis.trim(),
-        penerbit: form.penerbit?.trim() || "",
-        isbn: form.isbn?.trim() || "",
-        tipe: form.tipe,
-        kategori: form.kategori.trim(),
-        deskripsi: form.deskripsi?.trim() || "",
-        coverUrl: form.coverUrl?.trim() || "",
-        urlEbook: form.urlEbook?.trim() || "",
-        jumlah: form.tipe === "EBOOK" ? 0 : Number(form.jumlah || 0),
-        status: form.status || "aktif",
-      };
+     const payload = {
+  kodeBuku: form.kodeBuku.trim(),
+  judul: form.judul.trim(),
+  penulis: form.penulis.trim(),
+  penerbit: form.penerbit?.trim() || undefined,
+  isbn: form.isbn?.trim() || undefined,
+  tipe: form.tipe,
+  kategori: form.kategori.trim(),
+  deskripsi: form.deskripsi?.trim() || undefined,
+  coverUrl: form.coverUrl?.trim() || undefined,
+  urlEbook: form.urlEbook?.trim() || undefined,
+  jumlah: form.tipe === "EBOOK" ? 0 : Number(form.jumlah || 0),
+  status: form.status || "aktif",
+};
+
+if (form.tahunTerbit !== "" && form.tahunTerbit != null) {
+  const tahun = Number(form.tahunTerbit);
+
+  if (Number.isInteger(tahun) && tahun > 0) {
+    payload.tahunTerbit = tahun;
+  }
+}
 
       if (form.tahunTerbit !== "" && form.tahunTerbit != null) {
         payload.tahunTerbit = Number(form.tahunTerbit);

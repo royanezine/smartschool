@@ -15,10 +15,12 @@ import {
   Check,
   Loader2,
   LogIn,
+  FileText,
 } from "lucide-react";
 
 import { urlFormulirPendaftaran } from "@/app/components/ppdb/rutePpdb";
 import { publikService } from "@/services/publik.service";
+import { loginPendaftarPpdb } from "@/services/ppdb.service";
 
 export default function PpdbCekPendaftaran() {
   const router = useRouter();
@@ -46,11 +48,51 @@ export default function PpdbCekPendaftaran() {
   const [serverError, setServerError] = useState("");
   const [hasil, setHasil] = useState(null);
   const [copied, setCopied] = useState(false);
+  const [portalLoading, setPortalLoading] = useState(false);
 
   if (nomorDariUrl && nomorDariUrl !== prevNomorDariUrl) {
     setPrevNomorDariUrl(nomorDariUrl);
     setNomorPendaftaran(nomorDariUrl);
   }
+
+  const handleBukaPortal = async () => {
+    const nomorTrim = nomorPendaftaran.trim();
+    const nikTrim = nik.trim();
+    if (!nomorTrim || !nikTrim) return;
+
+    try {
+      setPortalLoading(true);
+      setServerError("");
+      const res = await loginPendaftarPpdb({
+        nomorPendaftaran: nomorTrim,
+        nik: nikTrim,
+      });
+
+      const token = res?.data?.token;
+      const pendaftarId = res?.data?.pendaftar?.id || hasil?.id || "";
+
+      if (token) {
+        try {
+          sessionStorage.setItem("ppdb_token_pendaftaran", token);
+        } catch {}
+        const queryParams = new URLSearchParams();
+        queryParams.set("token", token);
+        if (pendaftarId) queryParams.set("id", pendaftarId);
+        router.push(
+          `${basePath}/PPDB/daftar/kirimPendaftaran?${queryParams.toString()}`
+        );
+      } else {
+        throw new Error(
+          "Token autentikasi pendaftar tidak diterima dari server."
+        );
+      }
+    } catch (err) {
+      const msg = err?.message || "Gagal masuk ke portal pendaftar.";
+      setServerError(msg);
+    } finally {
+      setPortalLoading(false);
+    }
+  };
 
   const handleCopy = (text) => {
     if (!text || typeof navigator === "undefined" || !navigator.clipboard) return;
@@ -342,6 +384,30 @@ export default function PpdbCekPendaftaran() {
                   </p>
                 </div>
               )}
+            </div>
+
+            <div className="mt-5 border-t border-slate-100 pt-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+              <p className="text-xs text-slate-500">
+                Ingin melihat berkas, peringkat kuota, atau memperbarui dokumen?
+              </p>
+              <button
+                type="button"
+                disabled={portalLoading}
+                onClick={handleBukaPortal}
+                className="w-full sm:w-auto shrink-0 inline-flex items-center justify-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-blue-700 disabled:opacity-60"
+              >
+                {portalLoading ? (
+                  <>
+                    <Loader2 size={13} className="animate-spin" />
+                    Membuka Portal...
+                  </>
+                ) : (
+                  <>
+                    <FileText size={13} />
+                    Buka Portal Pendaftar
+                  </>
+                )}
+              </button>
             </div>
 
             {String(hasil.status).toLowerCase() === "lulus" && (
