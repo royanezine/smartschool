@@ -27,6 +27,7 @@ import {
   TrendingUp,
   TrendingDown,
   Scale,
+  BookOpen,
 } from "lucide-react";
 
 import Header from "@/app/components/Header";
@@ -36,6 +37,7 @@ import {
   getJurnalKas,
   getAkunKas,
   batalkanJurnalKas,
+  getBukuKas,
 } from "@/services/jurnalKas.service";
 
 const LIMIT = 10;
@@ -106,14 +108,63 @@ export default function JurnalKasPage() {
   const [selectedJurnal, setSelectedJurnal] = useState(null);
   const [alasan, setAlasan] = useState("");
 
+  // Tab State: "jurnal" | "bukuKas"
+  const [activeTab, setActiveTab] = useState("jurnal");
+
+  // State khusus Buku Kas (GET /api/keuangan/buku-kas)
+  const [bukuKasAkunId, setBukuKasAkunId] = useState("");
+  const [bukuKasDari, setBukuKasDari] = useState("");
+  const [bukuKasSampai, setBukuKasSampai] = useState("");
+  const [bukuKasPage, setBukuKasPage] = useState(1);
+  const [bukuKasData, setBukuKasData] = useState([]);
+  const [bukuKasRingkasan, setBukuKasRingkasan] = useState({
+    saldoAwal: 0,
+    saldoAkhir: 0,
+  });
+  const [bukuKasMeta, setBukuKasMeta] = useState({
+    page: 1,
+    limit: LIMIT,
+    total: 0,
+    totalPages: 1,
+  });
+  const [bukuKasLoading, setBukuKasLoading] = useState(false);
+  const [bukuKasError, setBukuKasError] = useState("");
+
+  // Sync query parameters on mount (?tab=bukuKas&akunKasId=...)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (typeof window !== "undefined") {
+        const sp = new URLSearchParams(window.location.search);
+        const tabParam = sp.get("tab");
+        const akunParam = sp.get("akunKasId");
+        const dariParam = sp.get("dari");
+        const sampaiParam = sp.get("sampai");
+
+        if (tabParam === "bukuKas") {
+          setActiveTab("bukuKas");
+        }
+        if (akunParam) {
+          setBukuKasAkunId(akunParam);
+        }
+        if (dariParam) {
+          setBukuKasDari(dariParam);
+        }
+        if (sampaiParam) {
+          setBukuKasSampai(sampaiParam);
+        }
+      }
+    }, 0);
+    return () => clearTimeout(timer);
+  }, []);
+
   const loadAkunKas = useCallback(async () => {
     try {
       const response = await getAkunKas();
-      setAkunKas(
-        (response.data || []).filter(
-          (akun) => akun.status === "aktif"
-        )
+      const list = (response.data || []).filter(
+        (akun) => akun.status === "aktif"
       );
+      setAkunKas(list);
+      setBukuKasAkunId((curr) => curr || (list.length > 0 ? list[0].id : ""));
     } catch (err) {
       console.error("Gagal mengambil akun kas:", err);
     }
@@ -171,7 +222,6 @@ export default function JurnalKasPage() {
     akunFilter,
     tanggalDari,
     tanggalSampai,
-    refreshKey,
   ]);
 
   useEffect(() => {
@@ -182,11 +232,63 @@ export default function JurnalKasPage() {
   }, [loadAkunKas, refreshKey]);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      loadJurnal();
-    }, 0);
-    return () => clearTimeout(timer);
-  }, [loadJurnal]);
+    if (activeTab === "jurnal") {
+      const timer = setTimeout(() => {
+        loadJurnal();
+      }, 0);
+      return () => clearTimeout(timer);
+    }
+  }, [activeTab, loadJurnal, refreshKey]);
+
+  const loadBukuKas = useCallback(async () => {
+    if (!bukuKasAkunId) return;
+
+    setBukuKasLoading(true);
+    setBukuKasError("");
+
+    try {
+      const response = await getBukuKas({
+        akunKasId: bukuKasAkunId,
+        dari: bukuKasDari || undefined,
+        sampai: bukuKasSampai || undefined,
+        page: bukuKasPage,
+        limit: LIMIT,
+      });
+
+      setBukuKasData(response?.data || []);
+      setBukuKasRingkasan(
+        response?.ringkasan || {
+          saldoAwal: 0,
+          saldoAkhir: 0,
+        }
+      );
+      setBukuKasMeta(
+        response?.meta || {
+          page: bukuKasPage,
+          limit: LIMIT,
+          total: 0,
+          totalPages: 1,
+        }
+      );
+    } catch (err) {
+      console.error("Gagal mengambil buku kas:", err);
+      setBukuKasError(
+        err instanceof Error ? err.message : "Gagal memuat buku kas."
+      );
+      setBukuKasData([]);
+    } finally {
+      setBukuKasLoading(false);
+    }
+  }, [bukuKasAkunId, bukuKasDari, bukuKasSampai, bukuKasPage]);
+
+  useEffect(() => {
+    if (activeTab === "bukuKas" && bukuKasAkunId) {
+      const timer = setTimeout(() => {
+        loadBukuKas();
+      }, 0);
+      return () => clearTimeout(timer);
+    }
+  }, [activeTab, bukuKasAkunId, loadBukuKas, refreshKey]);
 
   const totalMasuk = Number(ringkasan.totalMasuk || 0);
   const totalKeluar = Number(ringkasan.totalKeluar || 0);
@@ -199,6 +301,24 @@ export default function JurnalKasPage() {
         0
       ),
     [akunKas]
+  );
+
+  const bukuKasTotalDebit = useMemo(
+    () =>
+      bukuKasData.reduce(
+        (sum, item) => sum + Number(item.debit || 0),
+        0
+      ),
+    [bukuKasData]
+  );
+
+  const bukuKasTotalKredit = useMemo(
+    () =>
+      bukuKasData.reduce(
+        (sum, item) => sum + Number(item.kredit || 0),
+        0
+      ),
+    [bukuKasData]
   );
 
   const totalPemasukan = data.filter(
@@ -217,6 +337,76 @@ export default function JurnalKasPage() {
     setTanggalDari("");
     setTanggalSampai("");
     setPage(1);
+  };
+
+  const resetBukuKasFilter = () => {
+    setBukuKasDari("");
+    setBukuKasSampai("");
+    setBukuKasPage(1);
+  };
+
+  const handleExportBukuKas = () => {
+    const selectedAkun = akunKas.find((a) => a.id === bukuKasAkunId);
+    const akunLabel = selectedAkun
+      ? `${selectedAkun.kode} - ${selectedAkun.nama}`
+      : "Akun";
+
+    const escapeCsv = (value) =>
+      `"${String(value ?? "").replace(/"/g, '""')}"`;
+
+    const summaryRows = [
+      ["Buku Kas", akunLabel],
+      [
+        "Periode",
+        `${bukuKasDari || "Awal"} s/d ${bukuKasSampai || "Sekarang"}`,
+      ],
+      ["Saldo Awal", formatCurrency(bukuKasRingkasan.saldoAwal)],
+      ["Saldo Akhir", formatCurrency(bukuKasRingkasan.saldoAkhir)],
+      [],
+    ];
+
+    const headers = [
+      "No",
+      "Tanggal",
+      "Nomor Jurnal",
+      "Keterangan",
+      "Kategori",
+      "Debit (Masuk)",
+      "Kredit (Keluar)",
+      "Saldo Berjalan",
+    ];
+
+    const rows = bukuKasData.map((item, index) => [
+      (bukuKasPage - 1) * LIMIT + index + 1,
+      formatDate(item.tanggal),
+      item.nomorJurnal || "",
+      item.keterangan || "",
+      formatKategori(item.kategori),
+      Number(item.debit) || 0,
+      Number(item.kredit) || 0,
+      Number(item.saldo) || 0,
+    ]);
+
+    const csv = [
+      ...summaryRows.map((r) => r.map(escapeCsv).join(",")),
+      headers.map(escapeCsv).join(","),
+      ...rows.map((r) => r.map(escapeCsv).join(",")),
+    ].join("\n");
+
+    const blob = new Blob(["\uFEFF", csv], {
+      type: "text/csv;charset=utf-8;",
+    });
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = `buku-kas_${selectedAkun?.kode || "akun"}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    URL.revokeObjectURL(url);
   };
 
   const handleExport = () => {
@@ -363,11 +553,17 @@ export default function JurnalKasPage() {
                 </div>
 
                 <div className="flex flex-wrap gap-2">
-                
-
                   <button
-                    onClick={handleExport}
-                    disabled={data.length === 0}
+                    onClick={
+                      activeTab === "bukuKas"
+                        ? handleExportBukuKas
+                        : handleExport
+                    }
+                    disabled={
+                      activeTab === "bukuKas"
+                        ? bukuKasData.length === 0
+                        : data.length === 0
+                    }
                     className="theme-input inline-flex h-10 items-center gap-2 rounded-lg px-3.5 text-sm font-semibold disabled:opacity-50"
                   >
                     <Download size={16} />
@@ -376,12 +572,18 @@ export default function JurnalKasPage() {
 
                   <button
                     onClick={() => setRefreshKey((v) => v + 1)}
-                    disabled={loading}
+                    disabled={
+                      activeTab === "bukuKas" ? bukuKasLoading : loading
+                    }
                     className="theme-input inline-flex h-10 items-center gap-2 rounded-lg px-3.5 text-sm font-semibold disabled:opacity-50"
                   >
                     <RefreshCw
                       size={16}
-                      className={loading ? "animate-spin" : ""}
+                      className={
+                        (activeTab === "bukuKas" ? bukuKasLoading : loading)
+                          ? "animate-spin"
+                          : ""
+                      }
                     />
                     Muat Ulang
                   </button>
@@ -395,6 +597,42 @@ export default function JurnalKasPage() {
                   </Link>
                 </div>
               </section>
+
+              {/* Tab Selector: Jurnal Transaksi vs Buku Kas */}
+              <div className="flex items-center gap-2 border-b border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("jurnal")}
+                  className={`inline-flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-semibold transition ${
+                    activeTab === "jurnal"
+                      ? "border-[var(--color-primary)] text-[var(--color-primary)]"
+                      : "border-transparent theme-text-secondary hover:text-[var(--color-text)]"
+                  }`}
+                >
+                  <Receipt size={17} />
+                  Jurnal Transaksi
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveTab("bukuKas");
+                    if (!bukuKasAkunId && akunKas.length > 0) {
+                      setBukuKasAkunId(akunKas[0].id);
+                    }
+                  }}
+                  className={`inline-flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-semibold transition ${
+                    activeTab === "bukuKas"
+                      ? "border-[var(--color-primary)] text-[var(--color-primary)]"
+                      : "border-transparent theme-text-secondary hover:text-[var(--color-text)]"
+                  }`}
+                >
+                  <BookOpen size={17} />
+                  Buku Kas (Buku Pembantu)
+                </button>
+              </div>
+
+              {activeTab === "jurnal" ? (
+                <>
 
 
               {error && (
@@ -856,6 +1094,361 @@ export default function JurnalKasPage() {
                   </div>
                 </div>
               </section>
+            </>
+          ) : (
+            <>
+              {bukuKasError && (
+                <div className="flex items-start gap-3 rounded-xl border border-[color-mix(in_srgb,var(--color-danger)_28%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_6%,transparent)] p-4 text-sm">
+                  <AlertCircle
+                    size={19}
+                    className="mt-0.5 shrink-0 text-[var(--color-danger)]"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <p className="theme-text font-semibold">Terjadi masalah</p>
+                    <p className="theme-text-secondary mt-1 break-words">
+                      {bukuKasError}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setBukuKasError("")}
+                    aria-label="Tutup pesan"
+                    className="theme-text-muted transition hover:text-[var(--color-danger)]"
+                  >
+                    <X size={17} />
+                  </button>
+                </div>
+              )}
+
+              {/* Filter Buku Kas */}
+              <section className="theme-card rounded-2xl border p-5 shadow-sm">
+                <div className="mb-4 flex items-center gap-2">
+                  <Filter
+                    size={16}
+                    className="text-[var(--color-primary)]"
+                  />
+                  <h2 className="theme-text text-sm font-bold">
+                    Filter Buku Kas
+                  </h2>
+                </div>
+
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                  <div>
+                    <label className="theme-text-muted mb-1.5 block text-xs font-semibold">
+                      Akun Kas <span className="text-[var(--color-danger)]">*</span>
+                    </label>
+                    <select
+                      value={bukuKasAkunId}
+                      onChange={(e) => {
+                        setBukuKasAkunId(e.target.value);
+                        setBukuKasPage(1);
+                      }}
+                      className="theme-input h-11 w-full rounded-xl border px-3 text-sm font-semibold"
+                    >
+                      {akunKas.length === 0 ? (
+                        <option value="">Tidak ada akun kas aktif</option>
+                      ) : (
+                        akunKas.map((akun) => (
+                          <option key={akun.id} value={akun.id}>
+                            {akun.kode} - {akun.nama}
+                          </option>
+                        ))
+                      )}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="theme-text-muted mb-1.5 block text-xs">
+                      Tanggal dari
+                    </label>
+                    <input
+                      type="date"
+                      value={bukuKasDari}
+                      onChange={(e) => {
+                        setBukuKasDari(e.target.value);
+                        setBukuKasPage(1);
+                      }}
+                      className="theme-input h-11 w-full rounded-xl border px-3 text-sm"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="theme-text-muted mb-1.5 block text-xs">
+                      Tanggal sampai
+                    </label>
+                    <input
+                      type="date"
+                      value={bukuKasSampai}
+                      onChange={(e) => {
+                        setBukuKasSampai(e.target.value);
+                        setBukuKasPage(1);
+                      }}
+                      className="theme-input h-11 w-full rounded-xl border px-3 text-sm"
+                    />
+                  </div>
+
+                  <div className="flex items-end">
+                    <button
+                      onClick={resetBukuKasFilter}
+                      className="theme-input inline-flex h-11 items-center gap-2 rounded-xl px-4 text-sm font-semibold"
+                    >
+                      <RotateCcw size={15} />
+                      Reset Filter
+                    </button>
+                  </div>
+                </div>
+              </section>
+
+              {/* Summary Cards Buku Kas */}
+              <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                <FinanceCard
+                  label="Saldo Awal"
+                  value={formatCurrency(bukuKasRingkasan.saldoAwal)}
+                  description="Saldo kas sebelum periode yang dipilih"
+                  icon={<Wallet size={19} />}
+                  tone="primary"
+                />
+
+                <FinanceCard
+                  label="Total Debit (Masuk)"
+                  value={formatCurrency(bukuKasTotalDebit)}
+                  description="Total mutasi kas masuk pada periode ini"
+                  icon={<TrendingUp size={19} />}
+                  tone="success"
+                />
+
+                <FinanceCard
+                  label="Total Kredit (Keluar)"
+                  value={formatCurrency(bukuKasTotalKredit)}
+                  description="Total mutasi kas keluar pada periode ini"
+                  icon={<TrendingDown size={19} />}
+                  tone="danger"
+                />
+
+                <FinanceCard
+                  label="Saldo Akhir"
+                  value={formatCurrency(bukuKasRingkasan.saldoAkhir)}
+                  description="Saldo akhir setelah mutasi periode ini"
+                  icon={<Scale size={19} />}
+                  tone="info"
+                />
+              </section>
+
+              {/* Tabel Mutasi Buku Kas */}
+              <section className="theme-card overflow-hidden rounded-2xl border shadow-sm">
+                <div className="theme-border flex flex-col gap-3 border-b px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-[color-mix(in_srgb,var(--color-primary)_18%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)] text-[var(--color-primary)]">
+                        <BookOpen size={16} />
+                      </div>
+                      <h2 className="theme-text text-sm font-bold">
+                        Mutasi Buku Kas
+                      </h2>
+                    </div>
+
+                    <p className="theme-text-muted ml-10 mt-1 text-xs">
+                      {bukuKasMeta.total} transaksi mutasi ditemukan
+                      {bukuKasAkunId && (
+                        <>
+                          {" · "}
+                          <span className="font-semibold theme-text">
+                            {akunKas.find((a) => a.id === bukuKasAkunId)?.nama || "Akun"}
+                          </span>
+                        </>
+                      )}
+                    </p>
+                  </div>
+
+                  <div className="theme-text-muted flex items-center gap-2 text-xs">
+                    <span className="h-2 w-2 rounded-full bg-[var(--color-success)]" />
+                    Buku Kas Real-time
+                  </div>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[1000px]">
+                    <thead className="theme-table-header">
+                      <tr className="theme-border border-b">
+                        {[
+                          "No",
+                          "Tanggal",
+                          "Nomor Jurnal",
+                          "Keterangan",
+                          "Kategori",
+                          "Debit (Masuk)",
+                          "Kredit (Keluar)",
+                          "Saldo Berjalan",
+                        ].map((label) => (
+                          <th
+                            key={label}
+                            className={`whitespace-nowrap px-4 py-3.5 text-[10px] font-bold uppercase tracking-[0.1em] ${
+                              label === "No"
+                                ? "w-14 text-center"
+                                : [
+                                    "Debit (Masuk)",
+                                    "Kredit (Keluar)",
+                                    "Saldo Berjalan",
+                                  ].includes(label)
+                                  ? "text-right"
+                                  : "text-left"
+                            }`}
+                          >
+                            {label}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+
+                    <tbody className="divide-y divide-[var(--color-border-soft)]">
+                      {bukuKasLoading ? (
+                        <tr>
+                          <td colSpan={8} className="px-5 py-16 text-center">
+                            <Loader2
+                              size={24}
+                              className="mx-auto animate-spin text-[var(--color-primary)]"
+                            />
+                            <p className="theme-text-muted mt-3 text-sm">
+                              Memuat buku kas...
+                            </p>
+                          </td>
+                        </tr>
+                      ) : !bukuKasAkunId ? (
+                        <tr>
+                          <td colSpan={8} className="px-5 py-16 text-center">
+                            <AlertCircle
+                              size={24}
+                              className="theme-text-muted mx-auto"
+                            />
+                            <p className="theme-text mt-3 text-sm font-semibold">
+                              Pilih Akun Kas
+                            </p>
+                            <p className="theme-text-muted mt-1 text-xs">
+                              Silakan pilih salah satu akun kas di atas untuk melihat buku kas.
+                            </p>
+                          </td>
+                        </tr>
+                      ) : bukuKasData.length === 0 ? (
+                        <tr>
+                          <td colSpan={8} className="px-5 py-16 text-center">
+                            <FileText
+                              size={24}
+                              className="theme-text-muted mx-auto"
+                            />
+                            <p className="theme-text mt-3 text-sm font-semibold">
+                              Tidak ada mutasi buku kas
+                            </p>
+                            <p className="theme-text-muted mt-1 text-xs">
+                              Belum ada transaksi untuk akun dan periode ini.
+                            </p>
+                          </td>
+                        </tr>
+                      ) : (
+                        bukuKasData.map((item, index) => (
+                          <tr
+                            key={item.id || index}
+                            className="theme-table-hover transition"
+                          >
+                            <td className="px-4 py-4 text-center text-xs font-semibold tabular-nums theme-text-secondary">
+                              {(bukuKasPage - 1) * LIMIT + index + 1}
+                            </td>
+
+                            <td className="px-4 py-4">
+                              <div className="flex items-center gap-2">
+                                <CalendarDays
+                                  size={15}
+                                  className="theme-text-muted shrink-0"
+                                />
+                                <span className="theme-text-secondary whitespace-nowrap text-xs">
+                                  {formatDate(item.tanggal)}
+                                </span>
+                              </div>
+                            </td>
+
+                            <td className="theme-text-secondary px-4 py-4 text-xs font-semibold">
+                              {item.nomorJurnal || "-"}
+                            </td>
+
+                            <td className="px-4 py-4">
+                              <p className="theme-text max-w-xs truncate text-xs font-medium">
+                                {item.keterangan || "-"}
+                              </p>
+                            </td>
+
+                            <td className="theme-text-secondary px-4 py-4 text-xs">
+                              {formatKategori(item.kategori)}
+                            </td>
+
+                            <td className="px-4 py-4 text-right text-xs font-semibold tabular-nums text-[var(--color-success)]">
+                              {Number(item.debit) > 0
+                                ? formatCurrency(item.debit)
+                                : "-"}
+                            </td>
+
+                            <td className="px-4 py-4 text-right text-xs font-semibold tabular-nums text-[var(--color-danger)]">
+                              {Number(item.kredit) > 0
+                                ? formatCurrency(item.kredit)
+                                : "-"}
+                            </td>
+
+                            <td className="theme-text px-4 py-4 text-right text-xs font-bold tabular-nums">
+                              {formatCurrency(item.saldo)}
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+
+                <div className="theme-border flex flex-col gap-3 border-t px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+                  <p className="theme-text-muted text-xs">
+                    Menampilkan{" "}
+                    {bukuKasMeta.total === 0
+                      ? 0
+                      : (bukuKasMeta.page - 1) * bukuKasMeta.limit + 1}
+                    {" - "}
+                    {Math.min(
+                      bukuKasMeta.page * bukuKasMeta.limit,
+                      bukuKasMeta.total
+                    )}
+                    {" dari "}
+                    {bukuKasMeta.total} transaksi
+                  </p>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      disabled={bukuKasPage <= 1 || bukuKasLoading}
+                      onClick={() =>
+                        setBukuKasPage((value) => Math.max(1, value - 1))
+                      }
+                      className="theme-input flex h-9 w-9 items-center justify-center rounded-lg disabled:opacity-40"
+                    >
+                      <ChevronLeft size={16} />
+                    </button>
+
+                    <span className="theme-text-secondary text-xs">
+                      Halaman {bukuKasMeta.page} / {bukuKasMeta.totalPages}
+                    </span>
+
+                    <button
+                      disabled={
+                        bukuKasPage >= bukuKasMeta.totalPages ||
+                        bukuKasLoading
+                      }
+                      onClick={() =>
+                        setBukuKasPage((value) =>
+                          Math.min(bukuKasMeta.totalPages, value + 1)
+                        )
+                      }
+                      className="theme-input flex h-9 w-9 items-center justify-center rounded-lg disabled:opacity-40"
+                    >
+                      <ChevronRight size={16} />
+                    </button>
+                  </div>
+                </div>
+              </section>
+            </>
+          )}
 
               <div className="h-8" />
             </div>

@@ -41,11 +41,6 @@ export default function LoginPage() {
   const router = useRouter();
 
   const handleBack = () => {
-    if (window.history.length > 1) {
-      router.back();
-      return;
-    }
-
     router.push("/");
   };
 

@@ -211,3 +211,57 @@ export async function getJurnalKasById(
 
   return null;
 }
+
+export interface BukuKasEntry {
+  id: string;
+  nomorJurnal?: string | null;
+  tanggal: string;
+  kategori: string;
+  keterangan?: string | null;
+  debit: number | string;
+  kredit: number | string;
+  saldo: number | string;
+}
+
+export interface BukuKasRingkasan {
+  saldoAwal: number | string;
+  saldoAkhir: number | string;
+}
+
+export interface BukuKasParams {
+  akunKasId: string;
+  dari?: string;
+  sampai?: string;
+  page?: number;
+  limit?: number;
+}
+
+export interface BukuKasResponse {
+  success: boolean;
+  message: string;
+  data: BukuKasEntry[];
+  ringkasan: BukuKasRingkasan;
+  meta: JurnalKasMeta;
+}
+
+export async function getBukuKas(
+  params: BukuKasParams,
+): Promise<BukuKasResponse> {
+  if (!params?.akunKasId) {
+    throw new Error("Akun kas wajib dipilih untuk melihat buku kas.");
+  }
+
+  const query = new URLSearchParams();
+  query.set("akunKasId", String(params.akunKasId));
+  if (params.dari) query.set("dari", String(params.dari));
+  if (params.sampai) query.set("sampai", String(params.sampai));
+  if (params.page !== undefined && params.page !== null) {
+    query.set("page", String(params.page));
+  }
+  if (params.limit !== undefined && params.limit !== null) {
+    query.set("limit", String(params.limit));
+  }
+
+  return apiFetch(`/api/keuangan/buku-kas?${query.toString()}`);
+}
+

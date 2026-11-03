@@ -42,6 +42,17 @@ export interface CreateKelasMapelPayload {
   guruPengajarId: string;
 }
 
+export interface CreateBulkKelasMapelPayload {
+  kelasIds: string[];
+  mataPelajaranId: string;
+  guruPengajarId: string;
+}
+
+export interface BulkKelasMapelResponse {
+  success: boolean;
+  message: string;
+}
+
 export interface UpdateKelasMapelPayload {
   kelasId?: string;
   mataPelajaranId?: string;
@@ -87,6 +98,22 @@ export async function createKelasMapel(
 
   return result?.data;
 }
+
+export async function createBulkKelasMapel(
+  payload: CreateBulkKelasMapelPayload
+): Promise<BulkKelasMapelResponse> {
+  const result = await apiFetch("/api/kelas-mapel/bulk", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  return result;
+}
+
+export const bulkCreateKelasMapel = createBulkKelasMapel;
 
 export async function updateKelasMapel(
   id: string,

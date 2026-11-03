@@ -17,6 +17,7 @@ import {
   Users,
   AlertTriangle,
   LockKeyhole,
+  Upload,
 } from "lucide-react";
 
 import {
@@ -995,45 +996,66 @@ export default function GuruNilaiIndexPage() {
 
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={handleExportNilai}
-                    disabled={isExporting}
-                    className={`
-                      inline-flex shrink-0
-                      items-center justify-center
-                      gap-2 rounded-xl
-                      ${themePrimaryGradient}
-                      px-4 py-2.5
-                      text-xs font-bold
-                      text-[var(--color-card)]
-                      ${themePrimaryShadow}
-                      transition-all
-                      hover:opacity-90
-                      disabled:cursor-not-allowed
-                      disabled:opacity-60
-                    `}
-                  >
+                  <div className="flex flex-wrap items-center gap-2.5">
+                    <button
+                      type="button"
+                      onClick={() => router.push("/guru/nilaiUjian")}
+                      className={`
+                        inline-flex shrink-0
+                        items-center justify-center
+                        gap-2 rounded-xl
+                        theme-card border
+                        ${themeNeutralBorder}
+                        px-4 py-2.5
+                        text-xs font-bold
+                        theme-text
+                        ${themeSmallShadow}
+                        transition-all
+                        hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]
+                      `}
+                    >
+                      <Upload size={14} className="text-[var(--color-primary)]" />
+                      Import Excel
+                    </button>
 
-                    {isExporting ? (
-                      <span
-                        className="
-                          h-4 w-4 animate-spin
-                          rounded-full
-                          border-2
-                          border-[color-mix(in_srgb,var(--color-card)_35%,transparent)]
-                          border-t-[var(--color-card)]
-                        "
-                      />
-                    ) : (
-                      <Download size={14} />
-                    )}
+                    <button
+                      type="button"
+                      onClick={handleExportNilai}
+                      disabled={isExporting}
+                      className={`
+                        inline-flex shrink-0
+                        items-center justify-center
+                        gap-2 rounded-xl
+                        ${themePrimaryGradient}
+                        px-4 py-2.5
+                        text-xs font-bold
+                        text-[var(--color-card)]
+                        ${themePrimaryShadow}
+                        transition-all
+                        hover:opacity-90
+                        disabled:cursor-not-allowed
+                        disabled:opacity-60
+                      `}
+                    >
+                      {isExporting ? (
+                        <span
+                          className="
+                            h-4 w-4 animate-spin
+                            rounded-full
+                            border-2
+                            border-[color-mix(in_srgb,var(--color-card)_35%,transparent)]
+                            border-t-[var(--color-card)]
+                          "
+                        />
+                      ) : (
+                        <Download size={14} />
+                      )}
 
-                    {isExporting
-                      ? "Memproses..."
-                      : "Download Excel"}
-
-                  </button>
+                      {isExporting
+                        ? "Memproses..."
+                        : "Download Excel"}
+                    </button>
+                  </div>
 
                 </div>
 

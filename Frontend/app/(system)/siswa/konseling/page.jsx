@@ -23,11 +23,13 @@ import {
   Layers3,
   CalendarClock,
   XOctagon,
+  X,
 } from "lucide-react";
 
 import {
   ajukanSesiKonseling,
   getSesiKonseling,
+  batalkanPengajuanKonseling,
 } from "@/services/bk.service";
 
 
@@ -236,6 +238,11 @@ export default function BookingKonselingPage() {
   const [bookingError, setBookingError] = useState("");
   const [bookingSuccess, setBookingSuccess] = useState("");
 
+  const [cancellingId, setCancellingId] = useState(null);
+  const [cancelModalSesi, setCancelModalSesi] = useState(null);
+  const [cancelError, setCancelError] = useState("");
+  const [cancelSuccess, setCancelSuccess] = useState("");
+
   const loadHistory = useCallback(async () => {
     setIsLoadingHistory(true);
     setHistoryError("");
@@ -251,6 +258,30 @@ export default function BookingKonselingPage() {
       setIsLoadingHistory(false);
     }
   }, []);
+
+  const handleBatalKonseling = useCallback(async (sesi) => {
+    if (!sesi?.id) return;
+    try {
+      setCancellingId(sesi.id);
+      setCancelError("");
+      setCancelSuccess("");
+
+      const res = await batalkanPengajuanKonseling(sesi.id);
+      setCancelSuccess(
+        res?.message || "Pengajuan konseling berhasil dibatalkan.",
+      );
+      setCancelModalSesi(null);
+      await loadHistory();
+      setTimeout(() => setCancelSuccess(""), 4000);
+    } catch (err) {
+      console.error("Gagal membatalkan pengajuan konseling:", err);
+      setCancelError(
+        err?.message || "Gagal membatalkan pengajuan konseling ke server.",
+      );
+    } finally {
+      setCancellingId(null);
+    }
+  }, [loadHistory]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -1532,6 +1563,66 @@ export default function BookingKonselingPage() {
               </div>
             </div>
 
+            {cancelSuccess && (
+              <div
+                className={`
+                  flex
+                  items-center
+                  justify-between
+                  gap-3
+                  rounded-xl
+                  border
+                  ${themeSuccessBorder}
+                  ${themeSuccessSurface}
+                  p-4
+                  text-sm
+                  ${themeSuccessText}
+                `}
+              >
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 size={18} className="shrink-0" />
+                  <span>{cancelSuccess}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setCancelSuccess("")}
+                  className="hover:opacity-75 transition"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            )}
+
+            {cancelError && (
+              <div
+                className={`
+                  flex
+                  items-center
+                  justify-between
+                  gap-3
+                  rounded-xl
+                  border
+                  ${themeDangerBorder}
+                  ${themeDangerSurface}
+                  p-4
+                  text-sm
+                  ${themeDangerText}
+                `}
+              >
+                <div className="flex items-center gap-2">
+                  <CircleAlert size={18} className="shrink-0" />
+                  <span>{cancelError}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setCancelError("")}
+                  className="hover:opacity-75 transition"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            )}
+
             {isLoadingHistory ? (
               <div
                 className={`
@@ -1684,12 +1775,116 @@ export default function BookingKonselingPage() {
               <div className="space-y-4 overflow-x-auto">
                 <div className="min-w-[560px] space-y-4">
                   {filteredHistory.map((sesi) => (
-                    <HistoryCard key={sesi.id} sesi={sesi} />
+                    <HistoryCard
+                      key={sesi.id}
+                      sesi={sesi}
+                      onCancel={(item) => setCancelModalSesi(item)}
+                      isCancelling={cancellingId === sesi.id}
+                    />
                   ))}
                 </div>
               </div>
             )}
           </section>
+        )}
+
+        {cancelModalSesi && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm">
+            <div
+              className={`
+                theme-card
+                w-full
+                max-w-md
+                rounded-2xl
+                border
+                ${themeNeutralBorder}
+                p-6
+                ${themeCardShadow}
+              `}
+            >
+              <div className="flex items-start gap-4">
+                <div
+                  className={`
+                    flex
+                    h-11
+                    w-11
+                    shrink-0
+                    items-center
+                    justify-center
+                    rounded-full
+                    ${themeDangerSurface}
+                    ${themeDangerText}
+                  `}
+                >
+                  <XOctagon size={22} />
+                </div>
+
+                <div className="min-w-0 flex-1">
+                  <h3 className="theme-text text-base font-bold">
+                    Batalkan Pengajuan Konseling?
+                  </h3>
+                  <p className="theme-text-secondary mt-1.5 text-sm leading-relaxed">
+                    Apakah kamu yakin ingin membatalkan pengajuan konseling topik{" "}
+                    <strong className="theme-text">&ldquo;{cancelModalSesi.topik}&rdquo;</strong> pada{" "}
+                    {formatTanggal(cancelModalSesi.tanggal)}?
+                  </p>
+                  <p className="theme-text-muted mt-2 text-xs">
+                    Pengajuan yang dibatalkan tidak dapat diproses kembali oleh guru BK.
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                <button
+                  type="button"
+                  disabled={cancellingId === cancelModalSesi.id}
+                  onClick={() => setCancelModalSesi(null)}
+                  className={`
+                    rounded-xl
+                    border
+                    ${themeNeutralBorder}
+                    px-4
+                    py-2.5
+                    text-sm
+                    font-medium
+                    theme-text-secondary
+                    hover:bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)]
+                    transition
+                    disabled:opacity-50
+                  `}
+                >
+                  Kembali
+                </button>
+
+                <button
+                  type="button"
+                  disabled={cancellingId === cancelModalSesi.id}
+                  onClick={() => handleBatalKonseling(cancelModalSesi)}
+                  className="
+                    inline-flex
+                    items-center
+                    justify-center
+                    gap-2
+                    rounded-xl
+                    bg-[var(--color-danger)]
+                    px-4
+                    py-2.5
+                    text-sm
+                    font-semibold
+                    text-white
+                    hover:bg-[color-mix(in_srgb,var(--color-danger)_85%,black)]
+                    transition
+                    disabled:opacity-50
+                  "
+                >
+                  {cancellingId === cancelModalSesi.id && (
+                    <Loader2 size={16} className="animate-spin" />
+                  )}
+                  {cancellingId === cancelModalSesi.id ? "Membatalkan..." : "Ya, Batalkan"}
+                </button>
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </main>
@@ -1722,7 +1917,7 @@ function SummaryRow({ icon: Icon, label, value }) {
 }
 
 
-function HistoryCard({ sesi }) {
+function HistoryCard({ sesi, onCancel, isCancelling }) {
   const config = getStatusConfig(sesi.status);
   const StatusIcon = config.icon;
 
@@ -1836,8 +2031,11 @@ function HistoryCard({ sesi }) {
           className={`
             mt-4
             flex
-            items-start
-            gap-2.5
+            flex-col
+            gap-3
+            sm:flex-row
+            sm:items-center
+            sm:justify-between
             rounded-xl
             border
             p-3.5
@@ -1845,13 +2043,47 @@ function HistoryCard({ sesi }) {
             ${themeWarningSurface}
           `}
         >
-          <Clock3
-            size={17}
-            className={`mt-0.5 shrink-0 ${themeWarningText}`}
-          />
-          <p className={`text-sm leading-5 ${themeWarningText}`}>
-            Pengajuanmu sedang menunggu keputusan guru BK.
-          </p>
+          <div className="flex items-start gap-2.5">
+            <Clock3
+              size={17}
+              className={`mt-0.5 shrink-0 ${themeWarningText}`}
+            />
+            <p className={`text-sm leading-5 ${themeWarningText}`}>
+              Pengajuanmu sedang menunggu keputusan guru BK.
+            </p>
+          </div>
+          {onCancel && (
+            <button
+              type="button"
+              disabled={isCancelling}
+              onClick={() => onCancel(sesi)}
+              className="
+                inline-flex
+                items-center
+                justify-center
+                gap-1.5
+                rounded-lg
+                border
+                border-[color-mix(in_srgb,var(--color-danger)_35%,transparent)]
+                bg-[color-mix(in_srgb,var(--color-danger)_12%,transparent)]
+                px-3
+                py-1.5
+                text-xs
+                font-semibold
+                text-[var(--color-danger)]
+                hover:bg-[color-mix(in_srgb,var(--color-danger)_22%,transparent)]
+                transition
+                disabled:opacity-50
+              "
+            >
+              {isCancelling ? (
+                <Loader2 size={13} className="animate-spin" />
+              ) : (
+                <XCircle size={13} />
+              )}
+              Batalkan Pengajuan
+            </button>
+          )}
         </div>
       )}
 

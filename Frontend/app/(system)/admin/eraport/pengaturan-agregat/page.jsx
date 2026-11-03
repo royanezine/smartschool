@@ -1,9 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { getMataPelajaran } from "@/services/mataPelajaran.service";
-import { getKkm, setKkm } from "@/services/pengaturan.service";
-import { apiFetch } from "@/lib/api";
+import {
+  getAgregatRapor,
+  updateAgregatRapor,
+} from "@/services/pengaturan.service";
+import { getTahunAjaran } from "@/services/tahunAjaran.service";
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
 
@@ -133,8 +136,9 @@ function WeightInput({
 
 export default function PengaturanAgregatPage() {
   const [subjects, setSubjects] = useState([]);
-  const [tahunAjaran, setTahunAjaran] = useState("2025/2026");
-  const [semester, setSemester] = useState("Ganjil");
+  const [originalSubjects, setOriginalSubjects] = useState(null);
+  const [tahunAjaranList, setTahunAjaranList] = useState([]);
+  const [selectedTahunAjaranId, setSelectedTahunAjaranId] = useState("");
   const [kategori, setKategori] = useState("Semua");
   const [search, setSearch] = useState("");
   const [editingSubject, setEditingSubject] = useState(null);
@@ -142,6 +146,60 @@ export default function PengaturanAgregatPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const masterMapelListRef = useRef([]);
+
+  const currentTahunAjaran = useMemo(
+    () => tahunAjaranList.find((ta) => ta.id === selectedTahunAjaranId),
+    [tahunAjaranList, selectedTahunAjaranId]
+  );
+
+  const loadAgregatForYear = useCallback(async (yearId, mapelsToUse = null) => {
+    if (!yearId) return;
+    try {
+      setLoading(true);
+      setErrorMsg("");
+      setSaved(false);
+
+      const agregatRes = await getAgregatRapor(yearId);
+      const backendItems =
+        agregatRes?.data?.mataPelajaran &&
+        Array.isArray(agregatRes.data.mataPelajaran)
+          ? agregatRes.data.mataPelajaran
+          : [];
+
+      const aggregateMap = new Map();
+      backendItems.forEach((item) => {
+        aggregateMap.set(item.mataPelajaranId, item);
+      });
+
+      const list = mapelsToUse || masterMapelListRef.current;
+      const mapped = list.map((m, idx) => {
+        const savedItem = aggregateMap.get(m.id);
+        return {
+          id: m.id || `mapel-${idx}`,
+          mapel: m.nama || "Mata Pelajaran",
+          kode: m.kode || "",
+          kategori: "Umum",
+          tugas: savedItem ? Number(savedItem.tugas) : 25,
+          uts: savedItem ? Number(savedItem.uts) : 25,
+          uas: savedItem ? Number(savedItem.uas) : 30,
+          praktik: savedItem ? Number(savedItem.praktik) : 20,
+          kkm: savedItem ? Number(savedItem.kkm) : 75,
+          status: m.status === "tidak_aktif" ? "Nonaktif" : "Aktif",
+        };
+      });
+
+      setSubjects(mapped);
+      setOriginalSubjects(JSON.stringify(mapped));
+    } catch (err) {
+      console.error("Gagal memuat agregat rapor:", err);
+      setErrorMsg(
+        err?.message || "Gagal memuat konfigurasi agregat rapor dari backend"
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -149,43 +207,40 @@ export default function PengaturanAgregatPage() {
       try {
         setLoading(true);
         setErrorMsg("");
-        const [mapelRes, kkmRes] = await Promise.allSettled([
+
+        const [taRes, mapelRes] = await Promise.allSettled([
+          getTahunAjaran(),
           getMataPelajaran(),
-          getKkm(),
         ]);
+
         if (!active) return;
-        const mapelList =
+
+        const taList =
+          taRes.status === "fulfilled" && Array.isArray(taRes.value)
+            ? taRes.value
+            : [];
+        setTahunAjaranList(taList);
+
+        const mapels =
           mapelRes.status === "fulfilled" && Array.isArray(mapelRes.value?.data)
             ? mapelRes.value.data
             : [];
-        const kkmData =
-          kkmRes.status === "fulfilled" && kkmRes.value?.data
-            ? kkmRes.value.data
-            : { kkmDefault: 75, kkmPerMapel: {} };
+        masterMapelListRef.current = mapels;
 
-        const perMapel = kkmData.kkmPerMapel || {};
-        const defaultKkm = Number(kkmData.kkmDefault) || 75;
+        const activeTa =
+          taList.find((t) => t.status === "aktif") || taList[0];
 
-        const mapped = mapelList.map((m, idx) => {
-          const key = (m.nama || "").trim().toLowerCase();
-          const itemKkm = perMapel[key] !== undefined ? perMapel[key] : defaultKkm;
-          return {
-            id: m.id || idx + 1,
-            mapel: m.nama || "Mata Pelajaran",
-            kategori: "Umum",
-            tugas: 25,
-            uts: 25,
-            uas: 30,
-            praktik: 20,
-            kkm: itemKkm,
-            status: m.status === "tidak_aktif" ? "Nonaktif" : "Aktif",
-          };
-        });
-        setSubjects(mapped);
+        if (activeTa) {
+          setSelectedTahunAjaranId(activeTa.id);
+          await loadAgregatForYear(activeTa.id, mapels);
+        } else {
+          setLoading(false);
+        }
       } catch (err) {
-        setErrorMsg(err.message || "Gagal memuat data KKM dan mata pelajaran");
-      } finally {
-        if (active) setLoading(false);
+        if (active) {
+          setErrorMsg(err?.message || "Gagal memuat data awal");
+          setLoading(false);
+        }
       }
     }, 0);
 
@@ -193,7 +248,17 @@ export default function PengaturanAgregatPage() {
       active = false;
       clearTimeout(timer);
     };
-  }, []);
+  }, [loadAgregatForYear]);
+
+  const handleSelectTahunAjaran = async (yearId) => {
+    setSelectedTahunAjaranId(yearId);
+    await loadAgregatForYear(yearId, masterMapelListRef.current);
+  };
+
+  const hasChanged = useMemo(() => {
+    if (!originalSubjects) return false;
+    return JSON.stringify(subjects) !== originalSubjects;
+  }, [subjects, originalSubjects]);
 
 
   const filteredSubjects = useMemo(() => {
@@ -253,29 +318,60 @@ export default function PengaturanAgregatPage() {
 
 
   const handleSave = async () => {
+    if (!selectedTahunAjaranId) {
+      setErrorMsg("Pilih tahun ajaran terlebih dahulu.");
+      return;
+    }
+    if (subjects.length === 0) {
+      setErrorMsg("Tidak ada mata pelajaran untuk dikonfigurasi.");
+      return;
+    }
+
+    // Validate each subject
+    for (const s of subjects) {
+      const total = getTotalWeight(s);
+      if (Math.abs(total - 100) > 0.001) {
+        setErrorMsg(
+          `Bobot nilai mata pelajaran "${s.mapel}" harus berjumlah tepat 100% (saat ini ${total}%).`
+        );
+        return;
+      }
+      const kkmNum = Number(s.kkm);
+      if (isNaN(kkmNum) || kkmNum < 0 || kkmNum > 100) {
+        setErrorMsg(
+          `KKM mata pelajaran "${s.mapel}" harus berupa angka antara 0 dan 100.`
+        );
+        return;
+      }
+    }
+
     try {
       setSaving(true);
       setErrorMsg("");
-      const perMapel = {};
-      subjects.forEach((s) => {
-        if (s.mapel) {
-          perMapel[s.mapel.trim().toLowerCase()] = Number(s.kkm) || 75;
-        }
-      });
+
       const payload = {
-        kkmDefault: 75,
-        kkmPerMapel: perMapel,
+        tahunAjaranId: selectedTahunAjaranId,
+        mataPelajaran: subjects.map((s) => ({
+          mataPelajaranId: s.id,
+          tugas: Number(s.tugas),
+          uts: Number(s.uts),
+          uas: Number(s.uas),
+          praktik: Number(s.praktik),
+          kkm: Math.round(Number(s.kkm)),
+        })),
       };
-      await apiFetch("/api/pengaturan/kkm", {
-        method: "POST",
-        body: JSON.stringify(payload),
-      });
+
+      const res = await updateAgregatRapor(payload);
       setSaved(true);
+      setOriginalSubjects(JSON.stringify(subjects));
       setTimeout(() => {
         setSaved(false);
-      }, 2500);
+      }, 3500);
     } catch (err) {
-      setErrorMsg(err.message || "Gagal menyimpan pengaturan KKM");
+      console.error("Gagal menyimpan agregat rapor:", err);
+      setErrorMsg(
+        err?.message || "Gagal menyimpan konfigurasi agregat rapor ke backend."
+      );
     } finally {
       setSaving(false);
     }
@@ -285,8 +381,11 @@ export default function PengaturanAgregatPage() {
   const resetFilter = () => {
     setSearch("");
     setKategori("Semua");
-    setTahunAjaran("2025/2026");
-    setSemester("Ganjil");
+    if (originalSubjects) {
+      setSubjects(JSON.parse(originalSubjects));
+    }
+    setErrorMsg("");
+    setSaved(false);
   };
 
 
@@ -312,12 +411,13 @@ export default function PengaturanAgregatPage() {
 
             <div className="mb-5 rounded-xl border theme-border theme-card-soft px-4 py-3.5 text-xs leading-5 theme-text-secondary">
               <strong className="theme-text">
-                Catatan:
+                Info Integrasi:
               </strong>{" "}
-              konfigurasi bobot dan KKM pada halaman ini belum tersimpan ke
-              backend karena endpoint pengaturan agregat e-Raport belum
-              tersedia. Nilai yang berlaku saat ini dihitung dari komponen
-              nilai per kelas-mapel pada menu Setup Bobot.
+              Konfigurasi bobot nilai dan KKM terhubung langsung ke backend melalui{" "}
+              <code className="rounded bg-black/5 px-1.5 py-0.5 font-mono text-[11px] font-semibold text-[var(--color-primary)]">
+                GET &amp; PUT /api/pengaturan/agregat-rapor
+              </code>
+              . Perubahan bobot akan digunakan untuk proses kalkulasi nilai akhir e-Rapor pada tahun ajaran yang aktif.
             </div>
 
 
@@ -344,8 +444,9 @@ export default function PengaturanAgregatPage() {
               <div className="flex flex-wrap items-center gap-2">
                 <button
                   type="button"
+                  disabled={saving || loading || (!hasChanged && search === "" && kategori === "Semua")}
                   onClick={resetFilter}
-                  className="theme-card theme-border theme-text-secondary theme-sidebar-hover flex h-10 items-center gap-2 rounded-lg border px-3.5 text-sm font-medium transition"
+                  className="theme-card theme-border theme-text-secondary theme-sidebar-hover flex h-10 items-center gap-2 rounded-lg border px-3.5 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   <RefreshCw size={16} />
 
@@ -356,9 +457,9 @@ export default function PengaturanAgregatPage() {
 
                 <button
                   type="button"
-                  disabled={saving || loading}
+                  disabled={saving || loading || !selectedTahunAjaranId || subjects.length === 0}
                   onClick={handleSave}
-                  className="theme-primary flex h-10 items-center gap-2 rounded-lg px-4 text-sm font-semibold shadow-sm transition disabled:opacity-50"
+                  className="theme-primary flex h-10 items-center gap-2 rounded-lg px-4 text-sm font-semibold shadow-sm transition disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {saving ? <Loader2 size={17} className="animate-spin" /> : <Save size={17} />}
                   {saving ? "Menyimpan..." : "Simpan Pengaturan"}
@@ -366,6 +467,25 @@ export default function PengaturanAgregatPage() {
               </div>
             </div>
 
+
+            {errorMsg && (
+              <div className="mb-5 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+                <CircleAlert size={18} className="mt-0.5 shrink-0 text-red-600" />
+                <div className="flex-1">
+                  <p className="font-semibold">Gagal Memproses Agregat Rapor</p>
+                  <p className="mt-0.5 text-xs leading-relaxed text-red-700">
+                    {errorMsg}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setErrorMsg("")}
+                  className="text-red-500 hover:text-red-700"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            )}
 
             {saved && (
               <div className="theme-success mb-5 flex items-center gap-3 rounded-xl border px-4 py-3 text-sm">
@@ -377,7 +497,7 @@ export default function PengaturanAgregatPage() {
                   </p>
 
                   <p className="text-xs opacity-80">
-                    Konfigurasi bobot nilai telah diperbarui.
+                    Konfigurasi bobot nilai telah diperbarui ke backend.
                   </p>
                 </div>
               </div>
@@ -426,25 +546,23 @@ export default function PengaturanAgregatPage() {
 
                   <div className="relative">
                     <select
-                      value={tahunAjaran}
+                      value={selectedTahunAjaranId}
                       onChange={(e) =>
-                        setTahunAjaran(
-                          e.target.value
-                        )
+                        handleSelectTahunAjaran(e.target.value)
                       }
-                      className="theme-input h-10 w-full appearance-none rounded-lg px-3.5 pr-9 text-sm outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
+                      disabled={loading || saving || tahunAjaranList.length === 0}
+                      className="theme-input h-10 w-full appearance-none rounded-lg px-3.5 pr-9 text-sm outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 disabled:opacity-50"
                     >
-                      <option value="2025/2026">
-                        2025/2026
-                      </option>
-
-                      <option value="2024/2025">
-                        2024/2025
-                      </option>
-
-                      <option value="2023/2024">
-                        2023/2024
-                      </option>
+                      {tahunAjaranList.length === 0 ? (
+                        <option value="">Tidak ada tahun ajaran</option>
+                      ) : (
+                        tahunAjaranList.map((ta) => (
+                          <option key={ta.id} value={ta.id}>
+                            {ta.nama} - Semester {ta.semester}{" "}
+                            {ta.status === "aktif" ? "(Aktif)" : ""}
+                          </option>
+                        ))
+                      )}
                     </select>
 
                     <ChevronDown
@@ -461,27 +579,15 @@ export default function PengaturanAgregatPage() {
                   </label>
 
                   <div className="relative">
-                    <select
-                      value={semester}
-                      onChange={(e) =>
-                        setSemester(
-                          e.target.value
-                        )
+                    <input
+                      type="text"
+                      readOnly
+                      value={
+                        currentTahunAjaran
+                          ? `Semester ${currentTahunAjaran.semester}`
+                          : "-"
                       }
-                      className="theme-input h-10 w-full appearance-none rounded-lg px-3.5 pr-9 text-sm outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
-                    >
-                      <option value="Ganjil">
-                        Semester Ganjil
-                      </option>
-
-                      <option value="Genap">
-                        Semester Genap
-                      </option>
-                    </select>
-
-                    <ChevronDown
-                      size={15}
-                      className="theme-text-muted pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
+                      className="theme-input h-10 w-full cursor-not-allowed rounded-lg px-3.5 text-sm bg-black/[0.03] outline-none"
                     />
                   </div>
                 </div>
@@ -626,13 +732,18 @@ export default function PengaturanAgregatPage() {
                         <td colSpan={11} className="py-12 text-center text-sm text-[var(--color-text-muted)]">
                           <div className="flex items-center justify-center gap-2">
                             <Loader2 className="animate-spin" size={18} />
-                            <span>Memuat data mata pelajaran & KKM...</span>
+                            <span>Memuat konfigurasi agregat rapor dari server...</span>
                           </div>
                         </td>
                       </tr>
+                    ) : filteredSubjects.length === 0 ? (
+                      <tr>
+                        <td colSpan={11} className="py-12 text-center text-sm text-[var(--color-text-muted)]">
+                          Tidak ada mata pelajaran yang ditemukan.
+                        </td>
+                      </tr>
                     ) : (
-                      <>
-                        {filteredSubjects.map((subject, index) => {
+                      filteredSubjects.map((subject, index) => {
                         const total =
                           getTotalWeight(
                             subject
@@ -662,7 +773,9 @@ export default function PengaturanAgregatPage() {
                                   </p>
 
                                   <p className="theme-text-muted mt-0.5 text-xs">
-                                    Tahun {tahunAjaran}
+                                    {currentTahunAjaran
+                                      ? `${currentTahunAjaran.nama} (${currentTahunAjaran.semester})`
+                                      : "Tahun Ajaran"}
                                   </p>
                                 </div>
                               </div>
@@ -765,11 +878,7 @@ export default function PengaturanAgregatPage() {
                             </td>
                           </tr>
                         );
-                      }
-                    )}
-
-                        {}
-                      </>
+                      })
                     )}
                   </tbody>
                 </table>

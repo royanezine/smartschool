@@ -31,7 +31,7 @@ import {
 } from "@/services/mataPelajaran.service";
 
 import {
-  createKelasMapel,
+  createBulkKelasMapel,
 } from "@/services/kelasMapel.service";
 
 import {
@@ -486,44 +486,11 @@ export default function TambahMapelPage() {
       }
 
 
-      const relationResults =
-        await Promise.allSettled(
-          selectedKelasIds.map(
-            async (kelasId) => {
-              return createKelasMapel({
-                kelasId,
-                mataPelajaranId,
-                guruPengajarId:
-                  form.guruPengajarId,
-              });
-            }
-          )
-        );
-
-      const failedRelations =
-        relationResults.filter(
-          (result) =>
-            result.status ===
-            "rejected"
-        );
-
-      if (
-        failedRelations.length >
-        0
-      ) {
-        console.error(
-          "GAGAL CREATE KELAS MAPEL:",
-          failedRelations
-        );
-
-        const berhasil =
-          relationResults.length -
-          failedRelations.length;
-
-        throw new Error(
-          `Mata pelajaran berhasil dibuat, tetapi ${failedRelations.length} relasi kelas gagal dibuat. ${berhasil} relasi berhasil dibuat.`
-        );
-      }
+      await createBulkKelasMapel({
+        kelasIds: selectedKelasIds,
+        mataPelajaranId,
+        guruPengajarId: form.guruPengajarId,
+      });
 
       setSuccess(true);
 

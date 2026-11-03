@@ -114,3 +114,27 @@ export async function resetPinByAdmin(userId: string | number) {
     }
   );
 }
+
+export interface UbahKataSandiPayload {
+  kataSandiLama: string;
+  kataSandiBaru: string;
+}
+
+export interface UbahKataSandiResponse {
+  success: boolean;
+  message: string;
+}
+
+export async function changePassword(
+  payload: UbahKataSandiPayload
+): Promise<UbahKataSandiResponse> {
+  return apiFetch("/api/auth/ubah-kata-sandi", {
+    method: "POST",
+    body: JSON.stringify({
+      kataSandiLama: payload.kataSandiLama,
+      kataSandiBaru: payload.kataSandiBaru,
+    }),
+  });
+}
+
+export const ubahKataSandi = changePassword;

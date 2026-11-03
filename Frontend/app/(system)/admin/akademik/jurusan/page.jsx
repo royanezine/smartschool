@@ -1,9 +1,14 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
-
+import {
+  getJurusan,
+  createJurusan,
+  updateJurusan,
+  deleteJurusan,
+} from "@/services/jurusan.service";
 import {
   GraduationCap,
   FlaskConical,
@@ -19,7 +24,6 @@ import {
   Pencil,
   Trash2,
   X,
-  Users,
   Layers3,
   CircleCheck,
   CircleSlash,
@@ -27,8 +31,8 @@ import {
   Eye,
   RefreshCw,
   AlertCircle,
+  Loader2,
 } from "lucide-react";
-
 
 const ICONS = {
   FlaskConical,
@@ -41,20 +45,13 @@ const ICONS = {
   UtensilsCrossed,
 };
 
-
-const initialData = [];
-
 const emptyForm = {
   kode: "",
   nama: "",
-  jenjang: "SMK",
-  kepala: "",
-  kelas: "",
-  siswa: "",
+  deskripsi: "",
   status: "Aktif",
   icon: "Code2",
 };
-
 
 function StatCard({ icon: Icon, label, value, type = "blue" }) {
   const styles = {
@@ -63,19 +60,16 @@ function StatCard({ icon: Icon, label, value, type = "blue" }) {
       icon: "text-[var(--color-primary)]",
       value: "theme-text",
     },
-
     green: {
       box: "theme-success",
       icon: "text-[var(--color-success)]",
       value: "text-[var(--color-success)]",
     },
-
     red: {
       box: "theme-danger",
       icon: "text-[var(--color-danger)]",
       value: "text-[var(--color-danger)]",
     },
-
     purple: {
       box: "theme-card-soft",
       icon: "text-[var(--color-info)]",
@@ -83,7 +77,7 @@ function StatCard({ icon: Icon, label, value, type = "blue" }) {
     },
   };
 
-  const style = styles[type];
+  const style = styles[type] || styles.blue;
 
   return (
     <div className="min-w-0 rounded-xl border theme-border theme-card px-4 py-4 shadow-sm sm:px-5">
@@ -110,9 +104,8 @@ function StatCard({ icon: Icon, label, value, type = "blue" }) {
   );
 }
 
-
 function StatusBadge({ status }) {
-  const active = status === "Aktif";
+  const active = status === "Aktif" || status === "aktif";
 
   return (
     <span
@@ -127,31 +120,14 @@ function StatusBadge({ status }) {
       ) : (
         <CircleSlash size={13} strokeWidth={2} />
       )}
-
-      {status}
+      {active ? "Aktif" : "Nonaktif"}
     </span>
   );
 }
 
-
-function JenjangBadge({ jenjang }) {
-  return (
-    <span
-      className="
-        inline-flex rounded-md
-        theme-info
-        px-3 py-1
-        text-xs font-medium
-      "
-    >
-      {jenjang}
-    </span>
-  );
-}
-
-
-function JurusanForm({ initial, onCancel, onSave }) {
-  const [form, setForm] = useState(initial);
+function JurusanForm({ initial, onCancel, onSave, saving }) {
+  const [form, setForm] = useState(initial || emptyForm);
+  const [error, setError] = useState("");
 
   const update = (key) => (e) => {
     setForm((current) => ({
@@ -162,150 +138,61 @@ function JurusanForm({ initial, onCancel, onSave }) {
 
   const submit = (e) => {
     e.preventDefault();
+    setError("");
 
-    if (!form.kode.trim() || !form.nama.trim()) return;
+    const kodeTrim = form.kode.trim();
+    const namaTrim = form.nama.trim();
+
+    if (!kodeTrim) {
+      setError("Kode jurusan wajib diisi.");
+      return;
+    }
+    if (kodeTrim.length > 20) {
+      setError("Kode jurusan maksimal 20 karakter.");
+      return;
+    }
+    if (!namaTrim) {
+      setError("Nama jurusan wajib diisi.");
+      return;
+    }
+    if (namaTrim.length > 100) {
+      setError("Nama jurusan maksimal 100 karakter.");
+      return;
+    }
 
     onSave({
       ...form,
-      kode: form.kode.toUpperCase(),
-      kelas: Number(form.kelas) || 0,
-      siswa: Number(form.siswa) || 0,
+      kode: kodeTrim.toUpperCase(),
+      nama: namaTrim,
     });
   };
 
   return (
     <form onSubmit={submit} className="space-y-5">
+      {error && (
+        <div className="flex items-center gap-2 rounded-lg border border-red-500/20 bg-red-500/10 p-3 text-xs text-red-500">
+          <AlertCircle size={16} className="shrink-0" />
+          <span>{error}</span>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
           <label className="mb-2 block text-xs font-semibold theme-text-secondary">
-            Kode Jurusan
+            Kode Jurusan <span className="text-red-500">*</span>
           </label>
 
           <input
             required
+            maxLength={20}
             value={form.kode}
             onChange={update("kode")}
-            placeholder="Contoh: RPL"
-            className="
-              theme-input
-              h-11 w-full rounded-lg
-              px-3.5 text-sm
-              outline-none transition
-              focus:outline-none
-            "
+            placeholder="Contoh: RPL, TKJ, IPA"
+            className="theme-input h-11 w-full rounded-lg px-3.5 text-sm uppercase outline-none transition focus:outline-none"
           />
-        </div>
-
-        <div>
-          <label className="mb-2 block text-xs font-semibold theme-text-secondary">
-            Jenjang
-          </label>
-
-          <div className="relative">
-            <select
-              value={form.jenjang}
-              onChange={update("jenjang")}
-              className="
-                theme-input
-                h-11 w-full appearance-none rounded-lg
-                px-3.5 pr-10 text-sm
-                outline-none
-                focus:outline-none
-              "
-            >
-              <option value="SMA">SMA</option>
-              <option value="SMK">SMK</option>
-            </select>
-
-            <ChevronDown
-              size={16}
-              className="
-                pointer-events-none absolute right-3 top-1/2
-                -translate-y-1/2 theme-text-placeholder
-              "
-            />
-          </div>
-        </div>
-      </div>
-
-      <div>
-        <label className="mb-2 block text-xs font-semibold theme-text-secondary">
-          Nama Jurusan
-        </label>
-
-        <input
-          required
-          value={form.nama}
-          onChange={update("nama")}
-          placeholder="Contoh: Rekayasa Perangkat Lunak"
-          className="
-            theme-input
-            h-11 w-full rounded-lg
-            px-3.5 text-sm
-            outline-none transition
-            focus:outline-none
-          "
-        />
-      </div>
-
-      <div>
-        <label className="mb-2 block text-xs font-semibold theme-text-secondary">
-          Kepala Jurusan
-        </label>
-
-        <input
-          value={form.kepala}
-          onChange={update("kepala")}
-          placeholder="Nama lengkap beserta gelar"
-          className="
-            theme-input
-            h-11 w-full rounded-lg
-            px-3.5 text-sm
-            outline-none transition
-            focus:outline-none
-          "
-        />
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div>
-          <label className="mb-2 block text-xs font-semibold theme-text-secondary">
-            Jumlah Kelas
-          </label>
-
-          <input
-            type="number"
-            min="0"
-            value={form.kelas}
-            onChange={update("kelas")}
-            className="
-              theme-input
-              h-11 w-full rounded-lg
-              px-3.5 text-sm
-              outline-none
-              focus:outline-none
-            "
-          />
-        </div>
-
-        <div>
-          <label className="mb-2 block text-xs font-semibold theme-text-secondary">
-            Jumlah Siswa
-          </label>
-
-          <input
-            type="number"
-            min="0"
-            value={form.siswa}
-            onChange={update("siswa")}
-            className="
-              theme-input
-              h-11 w-full rounded-lg
-              px-3.5 text-sm
-              outline-none
-              focus:outline-none
-            "
-          />
+          <p className="mt-1 text-[11px] theme-text-muted">
+            Maksimal 20 karakter (unik per sekolah)
+          </p>
         </div>
 
         <div>
@@ -317,13 +204,7 @@ function JurusanForm({ initial, onCancel, onSave }) {
             <select
               value={form.status}
               onChange={update("status")}
-              className="
-                theme-input
-                h-11 w-full appearance-none rounded-lg
-                px-3.5 pr-10 text-sm
-                outline-none
-                focus:outline-none
-              "
+              className="theme-input h-11 w-full appearance-none rounded-lg px-3.5 pr-10 text-sm outline-none focus:outline-none"
             >
               <option value="Aktif">Aktif</option>
               <option value="Nonaktif">Nonaktif</option>
@@ -331,13 +212,42 @@ function JurusanForm({ initial, onCancel, onSave }) {
 
             <ChevronDown
               size={16}
-              className="
-                pointer-events-none absolute right-3 top-1/2
-                -translate-y-1/2 theme-text-placeholder
-              "
+              className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 theme-text-placeholder"
             />
           </div>
         </div>
+      </div>
+
+      <div>
+        <label className="mb-2 block text-xs font-semibold theme-text-secondary">
+          Nama Jurusan / Program Keahlian <span className="text-red-500">*</span>
+        </label>
+
+        <input
+          required
+          maxLength={100}
+          value={form.nama}
+          onChange={update("nama")}
+          placeholder="Contoh: Rekayasa Perangkat Lunak"
+          className="theme-input h-11 w-full rounded-lg px-3.5 text-sm outline-none transition focus:outline-none"
+        />
+        <p className="mt-1 text-[11px] theme-text-muted">
+          Maksimal 100 karakter
+        </p>
+      </div>
+
+      <div>
+        <label className="mb-2 block text-xs font-semibold theme-text-secondary">
+          Deskripsi (Opsional)
+        </label>
+
+        <textarea
+          rows={3}
+          value={form.deskripsi || ""}
+          onChange={update("deskripsi")}
+          placeholder="Ringkasan kompetensi keahlian atau keterangan jurusan..."
+          className="theme-input w-full rounded-lg p-3 text-sm outline-none transition focus:outline-none resize-none"
+        />
       </div>
 
       <div>
@@ -375,50 +285,72 @@ function JurusanForm({ initial, onCancel, onSave }) {
       <div className="flex flex-col-reverse gap-2 border-t theme-border pt-5 sm:flex-row sm:justify-end">
         <button
           type="button"
+          disabled={saving}
           onClick={onCancel}
-          className="
-            theme-card
-            theme-border
-            theme-text-secondary
-            theme-header-hover
-            h-10 rounded-lg
-            border px-5
-            text-sm font-medium
-            transition
-          "
+          className="theme-card theme-border theme-text-secondary theme-header-hover h-10 rounded-lg border px-5 text-sm font-medium transition disabled:opacity-50"
         >
           Batal
         </button>
 
         <button
           type="submit"
-          className="
-            theme-primary
-            h-10 rounded-lg
-            px-5
-            text-sm font-semibold
-            shadow-sm transition
-          "
+          disabled={saving}
+          className="theme-primary flex h-10 items-center justify-center gap-2 rounded-lg px-5 text-sm font-semibold shadow-sm transition disabled:opacity-50"
         >
-          Simpan Jurusan
+          {saving && <Loader2 className="animate-spin" size={16} />}
+          {saving ? "Menyimpan..." : "Simpan Jurusan"}
         </button>
       </div>
     </form>
   );
 }
 
-
 export default function ListJurusanPage() {
-  const [data, setData] = useState(initialData);
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const [search, setSearch] = useState("");
-  const [jenjangFilter, setJenjangFilter] = useState("Semua");
   const [statusFilter, setStatusFilter] = useState("Semua");
 
   const [modalMode, setModalMode] = useState(null);
   const [activeItem, setActiveItem] = useState(null);
-  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+  const [viewItem, setViewItem] = useState(null);
+  const [confirmDeleteItem, setConfirmDeleteItem] = useState(null);
 
+  const [errorMsg, setErrorMsg] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
+
+  const loadJurusan = useCallback(async () => {
+    try {
+      setLoading(true);
+      setErrorMsg("");
+      const res = await getJurusan({ limit: 100 });
+      if (res?.data && Array.isArray(res.data)) {
+        setData(res.data);
+      } else if (Array.isArray(res)) {
+        setData(res);
+      } else {
+        setData([]);
+      }
+    } catch (err) {
+      console.error("Gagal memuat jurusan:", err);
+      setErrorMsg(
+        err?.message || "Gagal memuat data jurusan dari server Backend."
+      );
+      setData([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      loadJurusan();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [loadJurusan]);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -426,39 +358,36 @@ export default function ListJurusanPage() {
     return data.filter((j) => {
       const matchSearch =
         !q ||
-        j.nama.toLowerCase().includes(q) ||
-        j.kode.toLowerCase().includes(q) ||
-        j.kepala.toLowerCase().includes(q);
+        (j.nama || "").toLowerCase().includes(q) ||
+        (j.kode || "").toLowerCase().includes(q) ||
+        (j.deskripsi || "").toLowerCase().includes(q);
 
-      const matchJenjang =
-        jenjangFilter === "Semua" || j.jenjang === jenjangFilter;
-
+      const itemStatus = (j.status || "").toLowerCase() === "aktif" ? "Aktif" : "Nonaktif";
       const matchStatus =
-        statusFilter === "Semua" || j.status === statusFilter;
+        statusFilter === "Semua" || itemStatus === statusFilter;
 
-      return matchSearch && matchJenjang && matchStatus;
+      return matchSearch && matchStatus;
     });
-  }, [data, search, jenjangFilter, statusFilter]);
+  }, [data, search, statusFilter]);
 
+  const totalAktif = useMemo(() => {
+    return data.filter(
+      (item) => (item.status || "").toLowerCase() === "aktif"
+    ).length;
+  }, [data]);
 
-  const totalSiswa = data.reduce(
-    (total, item) => total + item.siswa,
-    0
-  );
+  const totalNonaktif = useMemo(() => {
+    return data.filter(
+      (item) => (item.status || "").toLowerCase() === "nonaktif"
+    ).length;
+  }, [data]);
 
-  const totalAktif = data.filter(
-    (item) => item.status === "Aktif"
-  ).length;
-
-  const totalNonaktif = data.filter(
-    (item) => item.status === "Nonaktif"
-  ).length;
-
-  const totalKelas = data.reduce(
-    (total, item) => total + item.kelas,
-    0
-  );
-
+  const totalKelas = useMemo(() => {
+    return data.reduce(
+      (total, item) => total + (item._count?.kelas ?? item.kelas ?? 0),
+      0
+    );
+  }, [data]);
 
   const openAdd = () => {
     setActiveItem(emptyForm);
@@ -466,7 +395,14 @@ export default function ListJurusanPage() {
   };
 
   const openEdit = (item) => {
-    setActiveItem(item);
+    setActiveItem({
+      id: item.id,
+      kode: item.kode || "",
+      nama: item.nama || "",
+      deskripsi: item.deskripsi || "",
+      status: (item.status || "").toLowerCase() === "nonaktif" ? "Nonaktif" : "Aktif",
+      icon: item.icon || "Code2",
+    });
     setModalMode("edit");
   };
 
@@ -475,43 +411,67 @@ export default function ListJurusanPage() {
     setActiveItem(null);
   };
 
+  const saveItem = async (form) => {
+    try {
+      setSaving(true);
+      setErrorMsg("");
+      setSuccessMsg("");
 
-  const saveItem = (form) => {
-    if (modalMode === "add") {
-      setData((current) => [
-        ...current,
-        {
-          ...form,
-          id: Date.now(),
-        },
-      ]);
-    } else {
-      setData((current) =>
-        current.map((item) =>
-          item.id === form.id ? { ...form } : item
-        )
-      );
+      const payload = {
+        kode: form.kode.trim().toUpperCase(),
+        nama: form.nama.trim(),
+        deskripsi: form.deskripsi ? form.deskripsi.trim() : null,
+        status:
+          form.status.toLowerCase() === "nonaktif" ? "nonaktif" : "aktif",
+      };
+
+      if (modalMode === "add") {
+        const res = await createJurusan(payload);
+        setSuccessMsg(res?.message || "Jurusan baru berhasil dibuat di backend.");
+      } else if (modalMode === "edit" && activeItem?.id) {
+        const res = await updateJurusan(activeItem.id, payload);
+        setSuccessMsg(res?.message || "Jurusan berhasil diperbarui di backend.");
+      }
+
+      closeModal();
+      await loadJurusan();
+      setTimeout(() => setSuccessMsg(""), 4000);
+    } catch (err) {
+      console.error("Gagal menyimpan jurusan:", err);
+      setErrorMsg(err?.message || "Gagal menyimpan jurusan ke backend.");
+    } finally {
+      setSaving(false);
     }
-
-    closeModal();
   };
 
+  const removeItem = async (item) => {
+    if (!item?.id) return;
+    try {
+      setDeleting(true);
+      setErrorMsg("");
+      setSuccessMsg("");
 
-  const removeItem = (id) => {
-    setData((current) =>
-      current.filter((item) => item.id !== id)
-    );
-
-    setConfirmDeleteId(null);
+      const res = await deleteJurusan(item.id);
+      setSuccessMsg(res?.message || "Jurusan berhasil dihapus dari backend.");
+      setConfirmDeleteItem(null);
+      await loadJurusan();
+      setTimeout(() => setSuccessMsg(""), 4000);
+    } catch (err) {
+      console.error("Gagal menghapus jurusan:", err);
+      setErrorMsg(
+        err?.message ||
+          "Gagal menghapus jurusan dari backend. Pastikan tidak ada kelas yang terhubung dengan jurusan ini."
+      );
+    } finally {
+      setDeleting(false);
+    }
   };
-
 
   const resetFilter = () => {
     setSearch("");
-    setJenjangFilter("Semua");
     setStatusFilter("Semua");
+    loadJurusan();
   };
-
 
   return (
     <div className="flex min-h-screen theme-page">
@@ -522,14 +482,11 @@ export default function ListJurusanPage() {
 
         <main className="min-w-0 flex-1 px-4 py-5 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-[1280px]">
-
+            {/* Header Title & Actions */}
             <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex min-w-0 items-center gap-3">
                 <div className="theme-primary flex h-12 w-12 shrink-0 items-center justify-center rounded-xl shadow-sm">
-                  <GraduationCap
-                    size={23}
-                    strokeWidth={2}
-                  />
+                  <GraduationCap size={23} strokeWidth={2} />
                 </div>
 
                 <div className="min-w-0">
@@ -538,7 +495,7 @@ export default function ListJurusanPage() {
                   </h1>
 
                   <p className="text-sm theme-text-muted">
-                    Kelola program keahlian dan data jurusan sekolah
+                    Kelola program keahlian dan data jurusan sekolah secara terintegrasi dengan Backend
                   </p>
                 </div>
               </div>
@@ -547,38 +504,18 @@ export default function ListJurusanPage() {
                 <button
                   type="button"
                   onClick={resetFilter}
-                  className="
-                    theme-card
-                    theme-border
-                    theme-text-secondary
-                    theme-header-hover
-                    flex h-10 items-center gap-2
-                    rounded-lg border
-                    px-3.5
-                    text-sm font-medium
-                    transition
-                  "
+                  disabled={loading}
+                  className="theme-card theme-border theme-text-secondary theme-header-hover flex h-10 items-center gap-2 rounded-lg border px-3.5 text-sm font-medium transition disabled:opacity-50"
                 >
-                  <RefreshCw size={16} />
-
-                  <span className="hidden sm:inline">
-                    Reset
-                  </span>
+                  <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
+                  <span className="hidden sm:inline">Refresh</span>
                 </button>
 
                 <button
                   type="button"
-                  disabled
-                  title="Fitur ini belum dapat digunakan karena endpoint Backend Jurusan belum tersedia"
-                  className="
-                    theme-primary
-                    flex h-10 items-center gap-2
-                    rounded-lg
-                    px-4
-                    text-sm font-semibold
-                    shadow-sm transition
-                    opacity-50 cursor-not-allowed
-                  "
+                  onClick={openAdd}
+                  disabled={loading}
+                  className="theme-primary flex h-10 items-center gap-2 rounded-lg px-4 text-sm font-semibold shadow-sm transition disabled:opacity-50"
                 >
                   <Plus size={17} />
                   Tambah Jurusan
@@ -586,18 +523,41 @@ export default function ListJurusanPage() {
               </div>
             </div>
 
-            <div className="mb-5 flex items-start gap-3 rounded-xl border border-[color-mix(in_srgb,var(--color-warning)_25%,transparent)] bg-[color-mix(in_srgb,var(--color-warning)_8%,transparent)] p-4 text-[var(--color-warning)]">
-              <AlertCircle size={20} className="mt-0.5 shrink-0" />
-              <div className="flex-1 text-sm">
-                <p className="font-semibold text-xs sm:text-sm">
-                  Integrasi Backend Belum Tersedia
-                </p>
-                <p className="mt-1 text-xs opacity-90 leading-relaxed theme-text-secondary">
-                  Modul Jurusan belum didukung oleh model, tabel, atau rute API di Backend SmartSchool. Sesuai kebijakan integritas data bisnis, data tiruan (dummy/mock) telah dihilangkan dan penambahan data dinonaktifkan sementara hingga endpoint resmi disediakan oleh Backend.
-                </p>
+            {/* Error Banner */}
+            {errorMsg && (
+              <div className="mb-5 flex items-center justify-between gap-3 rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-500">
+                <div className="flex items-center gap-2.5">
+                  <AlertCircle size={18} className="shrink-0" />
+                  <span>{errorMsg}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setErrorMsg("")}
+                  className="rounded p-1 text-red-500 hover:bg-red-500/20 transition"
+                >
+                  <X size={16} />
+                </button>
               </div>
-            </div>
+            )}
 
+            {/* Success Banner */}
+            {successMsg && (
+              <div className="mb-5 flex items-center justify-between gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-4 text-sm text-emerald-500">
+                <div className="flex items-center gap-2.5">
+                  <CircleCheck size={18} className="shrink-0" />
+                  <span>{successMsg}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSuccessMsg("")}
+                  className="rounded p-1 text-emerald-500 hover:bg-emerald-500/20 transition"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            )}
+
+            {/* Stat Cards */}
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
               <StatCard
                 icon={Layers3}
@@ -621,145 +581,59 @@ export default function ListJurusanPage() {
               />
 
               <StatCard
-                icon={Users}
-                label="Total Siswa"
-                value={totalSiswa.toLocaleString("id-ID")}
+                icon={Layers3}
+                label="Total Kelas"
+                value={totalKelas}
                 type="purple"
               />
             </div>
 
-
-            <div
-              className="
-                theme-card
-                theme-border
-                mt-5 rounded-xl border
-                p-4 shadow-sm sm:p-5
-              "
-            >
-
+            {/* Filter & Search Bar */}
+            <div className="theme-card theme-border mt-5 rounded-xl border p-4 shadow-sm sm:p-5">
               <div className="relative">
                 <Search
                   size={18}
-                  className="
-                    pointer-events-none absolute left-3.5
-                    top-1/2 -translate-y-1/2
-                    text-[var(--color-primary)]
-                  "
+                  className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--color-primary)]"
                 />
 
                 <input
                   value={search}
-                  onChange={(e) =>
-                    setSearch(e.target.value)
-                  }
-                  placeholder="Cari nama, kode, atau kepala jurusan..."
-                  className="
-                    theme-input
-                    h-11 w-full rounded-lg
-                    pl-10 pr-4
-                    text-sm
-                    outline-none transition
-                    focus:outline-none
-                  "
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Cari berdasarkan nama jurusan, kode, atau deskripsi..."
+                  className="theme-input h-11 w-full rounded-lg pl-10 pr-4 text-sm outline-none transition focus:outline-none"
                 />
               </div>
 
-              <div className="mt-3 flex flex-col gap-2 lg:flex-row lg:items-center">
-                <div className="relative w-full lg:w-48">
+              <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center">
+                <div className="relative w-full sm:w-48">
                   <select
                     value={statusFilter}
-                    onChange={(e) =>
-                      setStatusFilter(e.target.value)
-                    }
-                    className="
-                      theme-input
-                      h-10 w-full appearance-none
-                      rounded-lg
-                      px-3.5 pr-9
-                      text-sm
-                      outline-none
-                      focus:outline-none
-                    "
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    className="theme-input h-10 w-full appearance-none rounded-lg px-3.5 pr-9 text-sm outline-none focus:outline-none"
                   >
-                    <option value="Semua">
-                      Semua Status
-                    </option>
-
-                    <option value="Aktif">
-                      Aktif
-                    </option>
-
-                    <option value="Nonaktif">
-                      Nonaktif
-                    </option>
+                    <option value="Semua">Semua Status</option>
+                    <option value="Aktif">Aktif</option>
+                    <option value="Nonaktif">Nonaktif</option>
                   </select>
 
                   <ChevronDown
                     size={15}
-                    className="
-                      pointer-events-none absolute right-3
-                      top-1/2 -translate-y-1/2
-                      theme-text-placeholder
-                    "
-                  />
-                </div>
-
-                <div className="relative w-full lg:w-48">
-                  <select
-                    value={jenjangFilter}
-                    onChange={(e) =>
-                      setJenjangFilter(e.target.value)
-                    }
-                    className="
-                      theme-input
-                      h-10 w-full appearance-none
-                      rounded-lg
-                      px-3.5 pr-9
-                      text-sm
-                      outline-none
-                      focus:outline-none
-                    "
-                  >
-                    <option value="Semua">
-                      Semua Jenjang
-                    </option>
-
-                    <option value="SMA">
-                      SMA
-                    </option>
-
-                    <option value="SMK">
-                      SMK
-                    </option>
-                  </select>
-
-                  <ChevronDown
-                    size={15}
-                    className="
-                      pointer-events-none absolute right-3
-                      top-1/2 -translate-y-1/2
-                      theme-text-placeholder
-                    "
+                    className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 theme-text-placeholder"
                   />
                 </div>
 
                 <button
                   type="button"
-                  onClick={resetFilter}
-                  className="
-                    theme-sidebar-text-active
-                    theme-sidebar-hover
-                    h-10 rounded-lg
-                    px-3
-                    text-sm font-medium
-                    transition
-                  "
+                  onClick={() => {
+                    setSearch("");
+                    setStatusFilter("Semua");
+                  }}
+                  className="theme-sidebar-text-active theme-sidebar-hover h-10 rounded-lg px-3 text-sm font-medium transition"
                 >
                   Reset Filter
                 </button>
 
-                <div className="lg:ml-auto">
+                <div className="sm:ml-auto">
                   <span className="text-sm font-medium theme-text-muted">
                     {filtered.length} jurusan ditemukan
                   </span>
@@ -767,192 +641,122 @@ export default function ListJurusanPage() {
               </div>
             </div>
 
-
-            <div
-              className="
-                theme-card
-                theme-border
-                mt-5 overflow-hidden
-                rounded-xl border shadow-sm
-              "
-            >
+            {/* Data Table */}
+            <div className="theme-card theme-border mt-5 overflow-hidden rounded-xl border shadow-sm">
               <div className="overflow-x-auto">
-                <table className="w-full min-w-[1050px] border-collapse text-left">
+                <table className="w-full min-w-[800px] border-collapse text-left">
                   <thead>
                     <tr className="theme-primary text-xs font-semibold uppercase tracking-wide">
-                      <th className="w-16 px-5 py-3.5 text-center">
-                        No
-                      </th>
-
-                      <th className="px-5 py-3.5">
-                        Jurusan
-                      </th>
-
-                      <th className="px-5 py-3.5">
-                        Jenjang
-                      </th>
-
-                      <th className="px-5 py-3.5">
-                        Kepala Jurusan
-                      </th>
-
-                      <th className="px-5 py-3.5 text-center">
-                        Kelas
-                      </th>
-
-                      <th className="px-5 py-3.5 text-center">
-                        Siswa
-                      </th>
-
-                      <th className="px-5 py-3.5">
-                        Status
-                      </th>
-
-                      <th className="px-5 py-3.5 text-right">
-                        Aksi
-                      </th>
+                      <th className="w-16 px-5 py-3.5 text-center">No</th>
+                      <th className="px-5 py-3.5">Jurusan</th>
+                      <th className="px-5 py-3.5">Deskripsi</th>
+                      <th className="px-5 py-3.5 text-center">Jumlah Kelas</th>
+                      <th className="px-5 py-3.5">Status</th>
+                      <th className="px-5 py-3.5 text-right">Aksi</th>
                     </tr>
                   </thead>
 
                   <tbody>
-                    {filtered.map((j, index) => {
-                      const Icon =
-                        ICONS[j.icon] || GraduationCap;
-
-                      return (
-                        <tr
-                          key={j.id}
-                          className="
-                            theme-table-hover
-                            border-b
-                            theme-border-soft
-                            transition
-                            last:border-0
-                          "
-                        >
-                          <td className="px-5 py-4 text-center text-sm font-medium theme-text-muted">
-                            {index + 1}
-                          </td>
-
-                          <td className="px-5 py-4">
-                            <div className="flex items-center gap-3">
-                              <div className="theme-info flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
-                                <Icon
-                                  size={18}
-                                  strokeWidth={2}
-                                />
-                              </div>
-
-                              <div className="min-w-0">
-                                <p className="truncate text-sm font-semibold theme-text">
-                                  {j.nama}
-                                </p>
-
-                                <p className="mt-0.5 text-xs theme-text-muted">
-                                  Kode {j.kode}
-                                </p>
-                              </div>
-                            </div>
-                          </td>
-
-                          <td className="px-5 py-4">
-                            <JenjangBadge
-                              jenjang={j.jenjang}
-                            />
-                          </td>
-
-                          <td className="px-5 py-4">
-                            <p className="max-w-[220px] truncate text-sm theme-text-secondary">
-                              {j.kepala || "-"}
-                            </p>
-                          </td>
-
-                          <td className="px-5 py-4 text-center text-sm font-medium theme-text-secondary">
-                            {j.kelas}
-                          </td>
-
-                          <td className="px-5 py-4 text-center text-sm font-medium theme-text-secondary">
-                            {j.siswa.toLocaleString("id-ID")}
-                          </td>
-
-                          <td className="px-5 py-4">
-                            <StatusBadge
-                              status={j.status}
-                            />
-                          </td>
-
-                          <td className="px-5 py-4">
-                            <div className="flex items-center justify-end gap-1">
-                              <button
-                                type="button"
-                                title="Lihat detail"
-                                className="
-                                  theme-header-hover
-                                  theme-text-muted
-                                  flex h-8 w-8
-                                  items-center justify-center
-                                  rounded-md
-                                  transition
-                                "
-                              >
-                                <Eye size={16} />
-                              </button>
-
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  openEdit(j)
-                                }
-                                title="Edit jurusan"
-                                className="
-                                  theme-header-hover
-                                  theme-text-muted
-                                  flex h-8 w-8
-                                  items-center justify-center
-                                  rounded-md
-                                  transition
-                                "
-                              >
-                                <Pencil size={16} />
-                              </button>
-
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  setConfirmDeleteId(j.id)
-                                }
-                                title="Hapus jurusan"
-                                className="
-                                  theme-danger
-                                  flex h-8 w-8
-                                  items-center justify-center
-                                  rounded-md
-                                  transition
-                                "
-                              >
-                                <Trash2 size={16} />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-
-                    {filtered.length === 0 && (
+                    {loading && (
                       <tr>
                         <td
-                          colSpan={8}
-                          className="px-5 py-16 text-center"
+                          colSpan={6}
+                          className="px-5 py-14 text-center text-sm theme-text-muted"
                         >
-                          <div
-                            className="
-                              theme-card-soft
-                              theme-text-muted
-                              mx-auto flex h-12 w-12
-                              items-center justify-center
-                              rounded-full
-                            "
+                          <div className="flex flex-col items-center justify-center gap-2">
+                            <Loader2
+                              className="animate-spin text-[var(--color-primary)]"
+                              size={24}
+                            />
+                            <span>Memuat data jurusan dari server...</span>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+
+                    {!loading &&
+                      filtered.map((j, index) => {
+                        const Icon = ICONS[j.icon] || GraduationCap;
+
+                        return (
+                          <tr
+                            key={j.id}
+                            className="theme-table-hover border-b theme-border-soft transition last:border-0"
                           >
+                            <td className="px-5 py-4 text-center text-sm font-medium theme-text-muted">
+                              {index + 1}
+                            </td>
+
+                            <td className="px-5 py-4">
+                              <div className="flex items-center gap-3">
+                                <div className="theme-info flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
+                                  <Icon size={18} strokeWidth={2} />
+                                </div>
+
+                                <div className="min-w-0">
+                                  <p className="truncate text-sm font-semibold theme-text">
+                                    {j.nama}
+                                  </p>
+
+                                  <p className="mt-0.5 text-xs font-mono theme-text-muted">
+                                    {j.kode}
+                                  </p>
+                                </div>
+                              </div>
+                            </td>
+
+                            <td className="px-5 py-4">
+                              <p className="max-w-[320px] truncate text-sm theme-text-secondary">
+                                {j.deskripsi || "-"}
+                              </p>
+                            </td>
+
+                            <td className="px-5 py-4 text-center text-sm font-medium theme-text-secondary">
+                              {j._count?.kelas ?? j.kelas ?? 0}
+                            </td>
+
+                            <td className="px-5 py-4">
+                              <StatusBadge status={j.status} />
+                            </td>
+
+                            <td className="px-5 py-4">
+                              <div className="flex items-center justify-end gap-1">
+                                <button
+                                  type="button"
+                                  onClick={() => setViewItem(j)}
+                                  title="Lihat detail jurusan"
+                                  className="theme-header-hover theme-text-muted flex h-8 w-8 items-center justify-center rounded-md transition"
+                                >
+                                  <Eye size={16} />
+                                </button>
+
+                                <button
+                                  type="button"
+                                  onClick={() => openEdit(j)}
+                                  title="Edit jurusan"
+                                  className="theme-header-hover theme-text-muted flex h-8 w-8 items-center justify-center rounded-md transition"
+                                >
+                                  <Pencil size={16} />
+                                </button>
+
+                                <button
+                                  type="button"
+                                  onClick={() => setConfirmDeleteItem(j)}
+                                  title="Hapus jurusan"
+                                  className="theme-danger flex h-8 w-8 items-center justify-center rounded-md transition"
+                                >
+                                  <Trash2 size={16} />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+
+                    {!loading && filtered.length === 0 && (
+                      <tr>
+                        <td colSpan={6} className="px-5 py-16 text-center">
+                          <div className="theme-card-soft theme-text-muted mx-auto flex h-12 w-12 items-center justify-center rounded-full">
                             <GraduationCap size={21} />
                           </div>
 
@@ -964,7 +768,7 @@ export default function ListJurusanPage() {
 
                           <p className="mt-1 text-xs theme-text-muted">
                             {data.length === 0
-                              ? "Data jurusan belum tersedia dari Backend server."
+                              ? "Data jurusan belum tersedia di server. Klik tombol 'Tambah Jurusan' di atas untuk membuat jurusan baru."
                               : "Coba ubah kata kunci atau filter pencarian."}
                           </p>
                         </td>
@@ -989,29 +793,11 @@ export default function ListJurusanPage() {
               </div>
             </div>
 
-
+            {/* Modal Tambah / Edit */}
             {modalMode && (
               <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-[2px]">
-                <div
-                  className="
-                    theme-card
-                    theme-border
-                    max-h-[92vh] w-full max-w-2xl
-                    overflow-y-auto
-                    rounded-2xl border
-                    shadow-2xl
-                  "
-                >
-                  <div
-                    className="
-                      theme-card
-                      sticky top-0 z-10
-                      flex items-center justify-between
-                      border-b theme-border
-                      px-5 py-4
-                      sm:px-6
-                    "
-                  >
+                <div className="theme-card theme-border max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-2xl border shadow-2xl">
+                  <div className="theme-card sticky top-0 z-10 flex items-center justify-between border-b theme-border px-5 py-4 sm:px-6">
                     <div>
                       <h2 className="text-lg font-bold theme-text">
                         {modalMode === "add"
@@ -1020,21 +806,17 @@ export default function ListJurusanPage() {
                       </h2>
 
                       <p className="mt-0.5 text-xs theme-text-muted">
-                        Lengkapi informasi jurusan sekolah
+                        {modalMode === "add"
+                          ? "Lengkapi informasi program keahlian baru untuk disimpan ke server"
+                          : "Perbarui data jurusan di server"}
                       </p>
                     </div>
 
                     <button
                       type="button"
+                      disabled={saving}
                       onClick={closeModal}
-                      className="
-                        theme-header-hover
-                        theme-text-muted
-                        flex h-9 w-9
-                        items-center justify-center
-                        rounded-lg
-                        transition
-                      "
+                      className="theme-header-hover theme-text-muted flex h-9 w-9 items-center justify-center rounded-lg transition disabled:opacity-50"
                     >
                       <X size={18} />
                     </button>
@@ -1043,6 +825,7 @@ export default function ListJurusanPage() {
                   <div className="p-5 sm:p-6">
                     <JurusanForm
                       initial={activeItem}
+                      saving={saving}
                       onCancel={closeModal}
                       onSave={saveItem}
                     />
@@ -1051,41 +834,112 @@ export default function ListJurusanPage() {
               </div>
             )}
 
-
-            {confirmDeleteId !== null && (
-              <div className="fixed inset-0 z-[110] flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-[2px]">
-                <div
-                  className="
-                    theme-card
-                    theme-border
-                    w-full max-w-md
-                    rounded-2xl border
-                    p-6
-                    shadow-2xl
-                  "
-                >
-                  <div className="flex items-start gap-4">
-                    <div
-                      className="
-                        theme-danger
-                        flex h-11 w-11 shrink-0
-                        items-center justify-center
-                        rounded-full
-                      "
+            {/* Modal View Detail */}
+            {viewItem && (
+              <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-[2px]">
+                <div className="theme-card theme-border w-full max-w-lg rounded-2xl border p-6 shadow-2xl">
+                  <div className="flex items-center justify-between border-b theme-border pb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="theme-info flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
+                        <GraduationCap size={20} />
+                      </div>
+                      <div>
+                        <h2 className="text-base font-bold theme-text">
+                          Detail Jurusan
+                        </h2>
+                        <p className="text-xs font-mono theme-text-muted">
+                          {viewItem.kode}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setViewItem(null)}
+                      className="theme-header-hover theme-text-muted flex h-8 w-8 items-center justify-center rounded-lg transition"
                     >
+                      <X size={18} />
+                    </button>
+                  </div>
+
+                  <div className="mt-4 space-y-3 text-sm">
+                    <div>
+                      <span className="text-xs font-semibold theme-text-muted">
+                        Nama Jurusan:
+                      </span>
+                      <p className="font-medium theme-text">{viewItem.nama}</p>
+                    </div>
+                    <div>
+                      <span className="text-xs font-semibold theme-text-muted">
+                        Kode Jurusan:
+                      </span>
+                      <p className="font-mono font-medium theme-text">
+                        {viewItem.kode}
+                      </p>
+                    </div>
+                    <div>
+                      <span className="text-xs font-semibold theme-text-muted">
+                        Status:
+                      </span>
+                      <div className="mt-1">
+                        <StatusBadge status={viewItem.status} />
+                      </div>
+                    </div>
+                    <div>
+                      <span className="text-xs font-semibold theme-text-muted">
+                        Deskripsi:
+                      </span>
+                      <p className="theme-text-secondary leading-relaxed">
+                        {viewItem.deskripsi || "Tidak ada deskripsi."}
+                      </p>
+                    </div>
+                    <div>
+                      <span className="text-xs font-semibold theme-text-muted">
+                        Jumlah Kelas Terdaftar:
+                      </span>
+                      <p className="font-medium theme-text">
+                        {viewItem._count?.kelas ?? viewItem.kelas ?? 0} kelas
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="mt-6 flex justify-end border-t theme-border pt-4">
+                    <button
+                      type="button"
+                      onClick={() => setViewItem(null)}
+                      className="theme-card theme-border theme-text-secondary theme-header-hover h-9 rounded-lg border px-4 text-xs font-medium transition"
+                    >
+                      Tutup
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Modal Konfirmasi Hapus */}
+            {confirmDeleteItem && (
+              <div className="fixed inset-0 z-[110] flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-[2px]">
+                <div className="theme-card theme-border w-full max-w-md rounded-2xl border p-6 shadow-2xl">
+                  <div className="flex items-start gap-4">
+                    <div className="theme-danger flex h-11 w-11 shrink-0 items-center justify-center rounded-full">
                       <Trash2 size={20} />
                     </div>
 
                     <div>
                       <h2 className="text-lg font-bold theme-text">
-                        Hapus jurusan?
+                        Hapus Jurusan?
                       </h2>
 
                       <p className="mt-1.5 text-sm leading-6 theme-text-muted">
-                        Data jurusan ini akan dihapus dari
-                        sistem. Pastikan tidak ada data kelas
-                        atau siswa yang masih menggunakan
-                        jurusan tersebut.
+                        Apakah Anda yakin ingin menghapus jurusan{" "}
+                        <strong className="theme-text">
+                          {confirmDeleteItem.nama} ({confirmDeleteItem.kode})
+                        </strong>
+                        ?
+                      </p>
+                      <p className="mt-1 text-xs theme-text-muted">
+                        Data jurusan ini akan dihapus dari server. Pastikan tidak
+                        ada kelas atau siswa yang masih terhubung dengan jurusan
+                        ini.
                       </p>
                     </div>
                   </div>
@@ -1093,38 +947,23 @@ export default function ListJurusanPage() {
                   <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
                     <button
                       type="button"
-                      onClick={() =>
-                        setConfirmDeleteId(null)
-                      }
-                      className="
-                        theme-card
-                        theme-border
-                        theme-text-secondary
-                        theme-header-hover
-                        h-10 rounded-lg
-                        border
-                        px-5
-                        text-sm font-medium
-                        transition
-                      "
+                      disabled={deleting}
+                      onClick={() => setConfirmDeleteItem(null)}
+                      className="theme-card theme-border theme-text-secondary theme-header-hover h-10 rounded-lg border px-5 text-sm font-medium transition disabled:opacity-50"
                     >
                       Batal
                     </button>
 
                     <button
                       type="button"
-                      onClick={() =>
-                        removeItem(confirmDeleteId)
-                      }
-                      className="
-                        theme-danger
-                        h-10 rounded-lg
-                        px-5
-                        text-sm font-semibold
-                        transition
-                      "
+                      disabled={deleting}
+                      onClick={() => removeItem(confirmDeleteItem)}
+                      className="theme-danger flex h-10 items-center justify-center gap-2 rounded-lg px-5 text-sm font-semibold transition disabled:opacity-50"
                     >
-                      Ya, Hapus
+                      {deleting && (
+                        <Loader2 className="animate-spin" size={16} />
+                      )}
+                      {deleting ? "Menghapus..." : "Ya, Hapus"}
                     </button>
                   </div>
                 </div>

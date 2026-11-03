@@ -27,7 +27,7 @@ interface ApiResponse<T> {
 
 
 export async function getShiftSiswa(): Promise<ShiftSiswa[]> {
-  const response = (await apiFetch("/shift-siswa", {
+  const response = (await apiFetch("/api/shift-siswa", {
     method: "GET",
   })) as ApiResponse<ShiftSiswa[]>;
 
@@ -36,7 +36,7 @@ export async function getShiftSiswa(): Promise<ShiftSiswa[]> {
 
 /**
  * Memperbarui jam masuk, jam keluar, atau toleransi keterlambatan.
- * Backend: PUT /shift-siswa/:kode
+ * Backend: PUT /api/shift-siswa/:kode
  */
 export async function updateShiftSiswa(
   kode: string,
@@ -45,6 +45,8 @@ export async function updateShiftSiswa(
   if (!kode?.trim()) {
     throw new Error("Kode shift siswa wajib diisi.");
   }
+
+  const normalizedKode = kode.trim().toLowerCase();
 
   if (Object.keys(payload).length === 0) {
     throw new Error("Minimal satu data shift harus diperbarui.");
@@ -61,7 +63,7 @@ export async function updateShiftSiswa(
   }
 
   const response = (await apiFetch(
-    `/shift-siswa/${encodeURIComponent(kode)}`,
+    `/api/shift-siswa/${encodeURIComponent(normalizedKode)}`,
     {
       method: "PUT",
       body: JSON.stringify(payload),

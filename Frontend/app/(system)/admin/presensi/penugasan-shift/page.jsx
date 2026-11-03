@@ -19,6 +19,7 @@ import {
   GraduationCap,
   BookOpen,
   Clock3,
+  Pencil,
 } from "lucide-react";
 
 import Header from "@/app/components/Header";
@@ -32,7 +33,10 @@ import {
   updateShiftKelas,
 } from "@/services/kelas.service";
 import { getTahunAjaran } from "@/services/tahunAjaran.service";
-import { getShiftSiswa } from "@/services/shiftSiswa.service";
+import {
+  getShiftSiswa,
+  updateShiftSiswa,
+} from "@/services/shiftSiswa.service";
 
 const PAGE_SIZE = 10;
 
@@ -651,6 +655,15 @@ export default function PenugasanShiftPage() {
   const [warnings, setWarnings] = useState([]);
   const [updatingKelasId, setUpdatingKelasId] = useState(null);
 
+  const [editingShiftSiswa, setEditingShiftSiswa] = useState(null);
+  const [editShiftForm, setEditShiftForm] = useState({
+    jamMasuk: "",
+    jamKeluar: "",
+    toleransiTerlambatMenit: 15,
+  });
+  const [savingShiftSiswa, setSavingShiftSiswa] = useState(false);
+  const [editShiftError, setEditShiftError] = useState("");
+
   const [search, setSearch] = useState("");
   const [filterShift, setFilterShift] = useState("semua");
   const [page, setPage] = useState(1);
@@ -908,6 +921,7 @@ export default function PenugasanShiftPage() {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadData();
   }, [loadData]);
 
@@ -947,6 +961,7 @@ export default function PenugasanShiftPage() {
   ========================================================= */
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPage(1);
     setSearch("");
     setFilterShift("semua");
@@ -1020,6 +1035,70 @@ export default function PenugasanShiftPage() {
       );
     } finally {
       setUpdatingKelasId(null);
+    }
+  }
+
+  /* =========================================================
+     UPDATE SHIFT SISWA (KONFIGURASI MASTER SHIFT)
+  ========================================================= */
+
+  function handleOpenEditShift(shiftItem) {
+    setEditingShiftSiswa(shiftItem);
+    setEditShiftForm({
+      jamMasuk: shiftItem.jamMasuk || "07:00",
+      jamKeluar: shiftItem.jamKeluar || "14:00",
+      toleransiTerlambatMenit: shiftItem.toleransiTerlambatMenit ?? 15,
+    });
+    setEditShiftError("");
+  }
+
+  async function handleSaveShiftSiswa(e) {
+    if (e) e.preventDefault();
+    if (!editingShiftSiswa) return;
+
+    const { jamMasuk, jamKeluar, toleransiTerlambatMenit } = editShiftForm;
+    if (!jamMasuk || !jamKeluar) {
+      setEditShiftError("Jam masuk dan jam keluar wajib diisi.");
+      return;
+    }
+
+    if (jamKeluar <= jamMasuk) {
+      setEditShiftError("Jam keluar harus lebih besar dari jam masuk.");
+      return;
+    }
+
+    setSavingShiftSiswa(true);
+    setEditShiftError("");
+
+    try {
+      const updated = await updateShiftSiswa(editingShiftSiswa.kode, {
+        jamMasuk,
+        jamKeluar,
+        toleransiTerlambatMenit: Number(toleransiTerlambatMenit) || 0,
+      });
+
+      setShiftSiswaList((prev) =>
+        prev.map((item) =>
+          normalizeText(item.kode) === normalizeText(editingShiftSiswa.kode)
+            ? { ...item, ...updated }
+            : item
+        )
+      );
+
+      setNotice(
+        `Konfigurasi Shift ${editingShiftSiswa.nama || editingShiftSiswa.kode} berhasil diperbarui.`
+      );
+      setEditingShiftSiswa(null);
+    } catch (saveError) {
+      console.error("[SHIFT SISWA] Gagal menyimpan:", saveError);
+      setEditShiftError(
+        getErrorMessage(
+          saveError,
+          "Gagal memperbarui konfigurasi shift siswa."
+        )
+      );
+    } finally {
+      setSavingShiftSiswa(false);
     }
   }
 
@@ -1258,6 +1337,81 @@ export default function PenugasanShiftPage() {
                     Aktif
                   </span>
                 )}
+              </div>
+            )}
+
+            {/* MASTER SHIFT SISWA (PAGI / SIANG) */}
+
+            {activeTab === "siswa" && (
+              <div className="theme-card mb-6 rounded-xl border theme-border p-5">
+                <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <h3 className="text-sm font-bold theme-text">
+                      Konfigurasi Jam Shift Belajar Siswa
+                    </h3>
+                    <p className="text-xs theme-text-muted">
+                      Atur jam masuk, jam keluar, dan toleransi keterlambatan untuk setiap shift belajar siswa.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  {["pagi", "siang"].map((kode) => {
+                    const shiftItem = shiftSiswaList.find(
+                      (s) => normalizeText(s.kode) === kode
+                    ) || {
+                      kode,
+                      nama: kode === "pagi" ? "Pagi" : "Siang",
+                      jamMasuk: kode === "pagi" ? "07:00" : "12:00",
+                      jamKeluar: kode === "pagi" ? "14:00" : "18:00",
+                      toleransiTerlambatMenit: 15,
+                    };
+
+                    return (
+                      <div
+                        key={kode}
+                        className="flex flex-col justify-between rounded-lg border theme-border bg-[color-mix(in_srgb,var(--color-surface)_60%,var(--color-bg))] p-4 transition"
+                      >
+                        <div>
+                          <div className="flex items-center justify-between">
+                            <span className="font-semibold text-sm theme-text">
+                              Shift {shiftItem.nama || (kode === "pagi" ? "Pagi" : "Siang")}
+                            </span>
+                            <span className="inline-flex items-center rounded-md bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] px-2 py-0.5 text-[11px] font-medium theme-primary-text uppercase">
+                              {kode}
+                            </span>
+                          </div>
+
+                          <div className="mt-3 space-y-1.5 text-xs">
+                            <div className="flex items-center justify-between theme-text-muted">
+                              <span>Jam Belajar:</span>
+                              <span className="font-semibold theme-text font-mono">
+                                {shiftItem.jamMasuk} &ndash; {shiftItem.jamKeluar}
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between theme-text-muted">
+                              <span>Toleransi Terlambat:</span>
+                              <span className="font-medium theme-text">
+                                {shiftItem.toleransiTerlambatMenit ?? 15} menit
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="mt-4 pt-3 border-t theme-border">
+                          <button
+                            type="button"
+                            onClick={() => handleOpenEditShift(shiftItem)}
+                            className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg border theme-border bg-[var(--color-surface)] px-3 py-1.5 text-xs font-medium theme-text-secondary hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] transition"
+                          >
+                            <Pencil size={13} />
+                            Ubah Jam Shift
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             )}
 
@@ -1729,6 +1883,128 @@ export default function PenugasanShiftPage() {
           </div>
         </main>
       </div>
+
+      {/* MODAL EDIT KONFIGURASI SHIFT SISWA */}
+      {editingShiftSiswa && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-xl border theme-border bg-[var(--color-surface)] p-6 shadow-xl animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between pb-4 border-b theme-border">
+              <div>
+                <h3 className="text-base font-bold theme-text">
+                  Ubah Konfigurasi Shift {editingShiftSiswa.nama || editingShiftSiswa.kode}
+                </h3>
+                <p className="text-xs theme-text-muted mt-0.5">
+                  Perbarui jam masuk, jam keluar, dan toleransi keterlambatan.
+                </p>
+              </div>
+              <button
+                type="button"
+                disabled={savingShiftSiswa}
+                onClick={() => setEditingShiftSiswa(null)}
+                className="rounded-lg p-1 theme-text-muted hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] transition disabled:opacity-40"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveShiftSiswa} className="mt-4 space-y-4">
+              {editShiftError && (
+                <div className="flex items-start gap-2.5 rounded-lg border border-red-200 bg-red-50 p-3 text-xs text-red-700 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-300">
+                  <AlertCircle size={16} className="mt-0.5 shrink-0" />
+                  <span className="flex-1 break-words">{editShiftError}</span>
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold theme-text mb-1.5">
+                    Jam Masuk <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="time"
+                    required
+                    value={editShiftForm.jamMasuk}
+                    onChange={(e) =>
+                      setEditShiftForm((prev) => ({
+                        ...prev,
+                        jamMasuk: e.target.value,
+                      }))
+                    }
+                    className="w-full rounded-lg border theme-border bg-[var(--color-surface)] px-3 py-2 text-sm theme-text outline-none focus:border-[var(--color-primary)] font-mono"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold theme-text mb-1.5">
+                    Jam Keluar <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="time"
+                    required
+                    value={editShiftForm.jamKeluar}
+                    onChange={(e) =>
+                      setEditShiftForm((prev) => ({
+                        ...prev,
+                        jamKeluar: e.target.value,
+                      }))
+                    }
+                    className="w-full rounded-lg border theme-border bg-[var(--color-surface)] px-3 py-2 text-sm theme-text outline-none focus:border-[var(--color-primary)] font-mono"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold theme-text mb-1.5">
+                  Toleransi Keterlambatan (Menit)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  max="240"
+                  required
+                  value={editShiftForm.toleransiTerlambatMenit}
+                  onChange={(e) =>
+                    setEditShiftForm((prev) => ({
+                      ...prev,
+                      toleransiTerlambatMenit: e.target.value,
+                    }))
+                  }
+                  className="w-full rounded-lg border theme-border bg-[var(--color-surface)] px-3 py-2 text-sm theme-text outline-none focus:border-[var(--color-primary)]"
+                  placeholder="Contoh: 15"
+                />
+                <p className="mt-1 text-[11px] theme-text-muted">
+                  Batas waktu toleransi sebelum siswa dinyatakan terlambat (0 &ndash; 240 menit).
+                </p>
+              </div>
+
+              <div className="mt-6 flex items-center justify-end gap-2.5 pt-3 border-t theme-border">
+                <button
+                  type="button"
+                  disabled={savingShiftSiswa}
+                  onClick={() => setEditingShiftSiswa(null)}
+                  className="rounded-lg border theme-border px-4 py-2 text-xs font-medium theme-text-secondary hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] transition disabled:opacity-40"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  disabled={savingShiftSiswa}
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--color-primary)] px-4 py-2 text-xs font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {savingShiftSiswa ? (
+                    <>
+                      <LoaderCircle size={14} className="animate-spin" />
+                      Menyimpan...
+                    </>
+                  ) : (
+                    "Simpan Perubahan"
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

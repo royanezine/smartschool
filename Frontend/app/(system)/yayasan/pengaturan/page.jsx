@@ -6,6 +6,7 @@ import {
   updateProfilLengkapYayasan,
   updateProfilYayasan,
 } from "@/services/yayasan.service";
+import { changePassword } from "@/services/auth.services";
 import {
   Settings,
   ChevronLeft,
@@ -371,11 +372,38 @@ export default function PengaturanPage() {
           telepon: yayasan.telepon ? yayasan.telepon.trim() : null,
           email: yayasan.email ? yayasan.email.trim() : null,
         });
+      } else if (activeTab === "keamanan") {
+        if (!passwordForm.lama) {
+          throw new Error("Password saat ini wajib diisi.");
+        }
+        if (!passwordForm.baru) {
+          throw new Error("Password baru wajib diisi.");
+        }
+        if (passwordForm.baru.length < 8) {
+          throw new Error("Password baru minimal 8 karakter.");
+        }
+        if (passwordForm.baru === passwordForm.lama) {
+          throw new Error("Password baru harus berbeda dari password saat ini.");
+        }
+        if (passwordForm.baru !== passwordForm.konfirmasi) {
+          throw new Error("Konfirmasi password baru tidak cocok.");
+        }
+
+        await changePassword({
+          kataSandiLama: passwordForm.lama,
+          kataSandiBaru: passwordForm.baru,
+        });
+
+        setPasswordForm({
+          lama: "",
+          baru: "",
+          konfirmasi: "",
+        });
       } else {
-        // Tab notifikasi/tampilan/keamanan
+        // Tab notifikasi/tampilan
         setErrorMsg(
           "Pengaturan pada tab ini belum memiliki endpoint Backend. "
-            + "Hanya data profil dan informasi yayasan yang dapat disimpan saat ini."
+            + "Hanya data profil, informasi yayasan, dan keamanan akun yang dapat disimpan saat ini."
         );
         return;
       }
@@ -986,10 +1014,30 @@ export default function PengaturanPage() {
                     </div>
                   </div>
 
-                  <p className="text-xs theme-text-muted mt-3">
-                    Minimal 8 karakter, kombinasi huruf
-                    besar, huruf kecil, dan angka.
-                  </p>
+                  <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-3 border-t theme-border-soft">
+                    <p className="text-xs theme-text-muted">
+                      Minimal 8 karakter, kombinasi huruf besar, huruf kecil, dan angka.
+                    </p>
+
+                    <button
+                      type="button"
+                      onClick={handleSimpan}
+                      disabled={saving || loading || !passwordForm.lama || !passwordForm.baru}
+                      className="inline-flex items-center justify-center gap-2 px-4 py-2 text-xs font-semibold rounded-xl bg-[var(--color-primary)] text-white hover:opacity-90 disabled:opacity-50 transition-opacity"
+                    >
+                      {saving ? (
+                        <>
+                          <Loader2 size={14} className="animate-spin" />
+                          Menyimpan...
+                        </>
+                      ) : (
+                        <>
+                          <Save size={14} />
+                          Simpan Password
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </SectionCard>
 
                 <SectionCard>

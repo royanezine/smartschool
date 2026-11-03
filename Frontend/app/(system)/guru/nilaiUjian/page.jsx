@@ -12,12 +12,15 @@ import {
   getGridNilai, 
   getKomponenNilai,
   exportRekapNilai,
-  downloadRekapNilai
+  downloadRekapNilai,
+  importNilaiExcel
 } from "@/services/nilai.service";
+import ExcelJS from "exceljs";
 
 import {
   AlertCircle,
   ArrowLeft,
+  CheckCircle2,
   ChevronDown,
   Download,
   FileSpreadsheet,
@@ -25,6 +28,8 @@ import {
   GraduationCap,
   Loader2,
   Search,
+  Upload,
+  X,
 } from "lucide-react";
 
 
@@ -109,6 +114,16 @@ export default function NilaiUjianGuruPage() {
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
 
+  // State Import Excel
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [importFile, setImportFile] = useState(null);
+  const [importKomponenId, setImportKomponenId] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
+  const [importError, setImportError] = useState("");
+  const [importSuccess, setImportSuccess] = useState("");
+  const [importResult, setImportResult] = useState(null);
+  const [globalSuccess, setGlobalSuccess] = useState("");
+
 
   // 1. Ambil daftar kelas yang diampu
   const loadKelas = useCallback(async () => {
@@ -158,12 +173,18 @@ export default function NilaiUjianGuruPage() {
 
   // 3. Efek saat pertama kali dimuat & saat kelas berubah
   useEffect(() => {
-    loadKelas();
+    const timer = setTimeout(() => {
+      loadKelas();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadKelas]);
 
   useEffect(() => {
     if (selectedKelasId) {
-      loadGridNilai(selectedKelasId);
+      const timer = setTimeout(() => {
+        loadGridNilai(selectedKelasId);
+      }, 0);
+      return () => clearTimeout(timer);
     }
   }, [selectedKelasId, loadGridNilai]);
 
@@ -186,6 +207,146 @@ export default function NilaiUjianGuruPage() {
       alert(err?.message || "Gagal mengunduh file Excel.");
     } finally {
       setExporting(false);
+    }
+  };
+
+  // Komponen target default jika belum dipilih manual
+  const activeKomponenId =
+    importKomponenId || (komponen.length > 0 ? komponen[0].id : "");
+
+  // Handler Pilih File Excel
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    setImportError("");
+    setImportSuccess("");
+    if (!file) {
+      setImportFile(null);
+      return;
+    }
+
+    const lower = file.name.toLowerCase();
+    if (!lower.endsWith(".xlsx") && !lower.endsWith(".xls")) {
+      setImportError("Format file harus Excel (.xlsx atau .xls).");
+      setImportFile(null);
+      e.target.value = "";
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setImportError("Ukuran file melebihi batas maksimal 5 MB.");
+      setImportFile(null);
+      e.target.value = "";
+      return;
+    }
+
+    setImportFile(file);
+  };
+
+  // Handler Submit Import Excel
+  const handleImportSubmit = async (e) => {
+    e.preventDefault();
+    if (!importFile) {
+      setImportError("Pilih file Excel terlebih dahulu.");
+      return;
+    }
+    if (!activeKomponenId) {
+      setImportError("Pilih komponen nilai target terlebih dahulu.");
+      return;
+    }
+    if (!selectedKelasId) {
+      setImportError("Kelas dan Mata Pelajaran belum dipilih.");
+      return;
+    }
+
+    try {
+      setIsUploading(true);
+      setImportError("");
+      setImportSuccess("");
+
+      const result = await importNilaiExcel({
+        file: importFile,
+        kelasMapelId: selectedKelasId,
+        komponenNilaiId: activeKomponenId,
+      });
+
+      const count =
+        result?.data?.jumlahBerhasil ??
+        result?.data?.importedCount ??
+        result?.data?.jumlahBarisValid ??
+        0;
+
+      const successMsg = `${count} nilai berhasil diimport.`;
+      setImportSuccess(successMsg);
+      setGlobalSuccess(successMsg);
+      setImportResult(result?.data || null);
+
+      // Refresh data nilai yang sedang ditampilkan agar hasil import langsung terlihat
+      await loadGridNilai(selectedKelasId);
+
+      // Tutup modal setelah jeda singkat jika tidak ada baris yang dilewati
+      if (!result?.data?.detailDilewati?.length) {
+        setTimeout(() => {
+          setIsImportModalOpen(false);
+          setImportFile(null);
+        }, 1500);
+      }
+    } catch (err) {
+      console.error("Import nilai gagal:", err);
+      setImportError(err?.message || "Gagal mengimport nilai dari Excel.");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  // Handler Download Template Excel
+  const handleDownloadTemplate = async () => {
+    try {
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet("Nilai");
+
+      worksheet.columns = [
+        { header: "NISN", key: "nisn", width: 18 },
+        { header: "NIS", key: "nis", width: 14 },
+        { header: "Nama Siswa", key: "nama", width: 30 },
+        { header: "Nilai", key: "nilai", width: 12 },
+      ];
+
+      worksheet.getRow(1).font = { bold: true };
+
+      if (gridNilai?.siswa && gridNilai.siswa.length > 0) {
+        gridNilai.siswa.forEach((s) => {
+          worksheet.addRow({
+            nisn: s.nisn || "",
+            nis: s.nis || "",
+            nama: s.namaLengkap || "",
+            nilai: "",
+          });
+        });
+      } else {
+        worksheet.addRow({
+          nisn: "0012345678",
+          nis: "12345",
+          nama: "Contoh Siswa",
+          nilai: "85",
+        });
+      }
+
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      const kelasData = daftarKelas.find((k) => k.kelasMapelId === selectedKelasId);
+      const targetKomponen = komponen.find((k) => k.id === activeKomponenId);
+      a.download = `Template_Nilai_${kelasData?.kelas?.nama || "Kelas"}_${targetKomponen?.nama || "Komponen"}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Gagal membuat template:", err);
     }
   };
 
@@ -285,19 +446,60 @@ export default function NilaiUjianGuruPage() {
                   </p>
                 </div>
 
-                {/* Tombol Export */}
+                {/* Tombol Aksi Excel (Import & Export) */}
                 {selectedKelasId && (
-                  <button
-                    onClick={handleExport}
-                    disabled={exporting || loadingNilai}
-                    className={`${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow} inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60`}
-                  >
-                    {exporting ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
-                    {exporting ? "Mengunduh..." : "Export Excel"}
-                  </button>
+                  <div className="flex flex-wrap items-center gap-2.5">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsImportModalOpen(true);
+                        setImportError("");
+                        setImportSuccess("");
+                        setImportResult(null);
+                        setImportFile(null);
+                        if (komponen.length > 0 && !importKomponenId) {
+                          setImportKomponenId(komponen[0].id);
+                        }
+                      }}
+                      disabled={loadingNilai || komponen.length === 0}
+                      className={`theme-card ${themeNeutralBorder} ${themeSmallShadow} theme-text inline-flex items-center justify-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold transition hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] disabled:cursor-not-allowed disabled:opacity-60`}
+                    >
+                      <Upload size={16} className="text-[var(--color-primary)]" />
+                      Import Excel
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleExport}
+                      disabled={exporting || loadingNilai}
+                      className={`${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow} inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60`}
+                    >
+                      {exporting ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
+                      {exporting ? "Mengunduh..." : "Export Excel"}
+                    </button>
+                  </div>
                 )}
               </div>
             </div>
+
+            {globalSuccess && (
+              <div className={`mb-5 flex items-start justify-between gap-3 rounded-xl border p-4 ${themeSuccessSurface} ${themeSuccessBorder} text-[var(--color-success)]`}>
+                <div className="flex items-start gap-3">
+                  <CheckCircle2 size={18} className="mt-0.5 shrink-0" />
+                  <div>
+                    <p className="font-semibold">Berhasil</p>
+                    <p className="mt-1 text-sm opacity-90">{globalSuccess}</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setGlobalSuccess("")}
+                  className="rounded-lg p-1 hover:bg-black/5"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            )}
 
             {error && (
               <div className={`mb-5 flex items-start gap-3 rounded-xl border p-4 ${themeDangerSurface} ${themeDangerBorder} theme-danger`}>
@@ -488,6 +690,141 @@ export default function NilaiUjianGuruPage() {
           </div>
         </main>
       </div>
+
+      {/* Modal Dialog Import Excel */}
+      {isImportModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+          <div className={`theme-card ${themeNeutralBorder} ${themeCardShadow} w-full max-w-lg rounded-2xl border p-6 shadow-2xl`}>
+            <div className={`flex items-center justify-between border-b ${themeDivider} pb-4`}>
+              <div className="flex items-center gap-2.5">
+                <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${themePrimarySoft} ${themePrimaryText}`}>
+                  <FileSpreadsheet size={20} />
+                </div>
+                <div>
+                  <h3 className="theme-text text-base font-bold">Import Nilai dari Excel</h3>
+                  <p className="theme-text-secondary text-xs">Unggah file .xlsx untuk input nilai masal</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  if (!isUploading) setIsImportModalOpen(false);
+                }}
+                disabled={isUploading}
+                className="theme-text-muted rounded-lg p-1.5 transition hover:bg-black/5 disabled:opacity-50"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={handleImportSubmit} className="mt-5 space-y-4">
+              {importError && (
+                <div className={`flex items-start gap-2.5 rounded-xl border p-3.5 text-xs ${themeDangerSurface} ${themeDangerBorder} theme-danger`}>
+                  <AlertCircle size={16} className="mt-0.5 shrink-0" />
+                  <p className="flex-1 font-medium">{importError}</p>
+                </div>
+              )}
+
+              {importSuccess && (
+                <div className={`flex items-start gap-2.5 rounded-xl border p-3.5 text-xs ${themeSuccessSurface} ${themeSuccessBorder} text-[var(--color-success)]`}>
+                  <CheckCircle2 size={16} className="mt-0.5 shrink-0" />
+                  <div className="flex-1">
+                    <p className="font-semibold">{importSuccess}</p>
+                    {importResult?.detailDilewati?.length > 0 && (
+                      <p className="mt-1 opacity-80">
+                        {importResult.detailDilewati.length} baris dilewati (NISN/NIS tidak cocok).
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <label className="theme-text mb-1.5 block text-xs font-bold">
+                  Komponen Nilai Target <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <select
+                    value={activeKomponenId}
+                    onChange={(e) => setImportKomponenId(e.target.value)}
+                    disabled={isUploading || komponen.length === 0}
+                    className={`theme-input w-full appearance-none rounded-xl border px-3.5 py-2.5 pr-10 text-sm font-medium outline-none transition ${themeFocus} disabled:opacity-60`}
+                  >
+                    {komponen.map((k) => (
+                      <option key={k.id} value={k.id}>
+                        {k.nama} (Bobot: {k.bobot}%)
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="theme-text-muted pointer-events-none absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2" />
+                </div>
+                <p className="theme-text-muted mt-1 text-[11px]">
+                  Nilai dari Excel akan disimpan ke komponen penilaian ini.
+                </p>
+              </div>
+
+              <div>
+                <label className="theme-text mb-1.5 block text-xs font-bold">
+                  Pilih File Excel (.xlsx / .xls) <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="file"
+                  accept=".xlsx, .xls"
+                  onChange={handleFileChange}
+                  disabled={isUploading}
+                  className="theme-input block w-full rounded-xl border px-3 py-2 text-xs file:mr-3 file:rounded-lg file:border-0 file:bg-blue-50 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-blue-700 hover:file:bg-blue-100"
+                />
+                <p className="theme-text-muted mt-1 text-[11px]">
+                  Maksimal 5 MB. Kolom header wajib: <strong>NISN</strong> atau <strong>NIS</strong>, dan <strong>Nilai</strong>.
+                </p>
+              </div>
+
+              {/* Template Download Helper */}
+              <div className={`rounded-xl border border-dashed ${themeNeutralBorder} ${themeNeutralSurface} p-3.5 text-xs theme-text-secondary`}>
+                <div className="flex items-center justify-between">
+                  <span>Belum punya format Excel?</span>
+                  <button
+                    type="button"
+                    onClick={handleDownloadTemplate}
+                    disabled={isUploading}
+                    className="font-bold text-[var(--color-primary)] hover:underline disabled:opacity-50"
+                  >
+                    Unduh Template Siswa
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-2.5 pt-3">
+                <button
+                  type="button"
+                  onClick={() => setIsImportModalOpen(false)}
+                  disabled={isUploading}
+                  className="rounded-xl px-4 py-2.5 text-xs font-semibold theme-text-secondary hover:bg-black/5 disabled:opacity-50"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  disabled={isUploading || !importFile || !activeKomponenId}
+                  className={`${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow} inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-xs font-bold transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60`}
+                >
+                  {isUploading ? (
+                    <>
+                      <Loader2 size={14} className="animate-spin" />
+                      Mengunggah & Memproses...
+                    </>
+                  ) : (
+                    <>
+                      <Upload size={14} />
+                      Mulai Import
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -21,6 +21,7 @@ import {
   ArrowUp,
   ArrowDown,
   ArrowUpDown,
+  BookOpen,
 } from "lucide-react";
 import { getAkunKas, deleteAkunKas } from "@/services/jurnalKas.service";
 
@@ -572,6 +573,14 @@ export default function AkunKasPage() {
 
                             <td className="px-4 py-4">
                               <div className="flex items-center justify-center gap-2">
+                                <Link
+                                  href={`/admin/keuangan/jurnalKas?tab=bukuKas&akunKasId=${item.id}`}
+                                  title="Lihat Buku Kas"
+                                  aria-label={`Buku Kas ${item.nama}`}
+                                  className="theme-input inline-flex h-8 w-8 items-center justify-center rounded-lg hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
+                                >
+                                  <BookOpen size={14} />
+                                </Link>
                                 <Link
                                   href={`/admin/keuangan/akunKas/${item.id}/edit`}
                                   title="Edit akun"
