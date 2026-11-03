@@ -8,6 +8,7 @@ datasource db {
 
 // 1. SHARED TABLES (Public Schema)
 model Pengguna {
+  reviewPengguna ReviewPengguna?
   id                String              @id @default(uuid())
   sekolahId         String?             @map("sekolah_id")
   yayasanId         String?             @map("yayasan_id")
@@ -2093,4 +2094,17 @@ model PengaturanSpmb {
   sekolah Sekolah @relation(fields: [sekolahId], references: [id])
 
   @@map("pengaturan_spmb")
+}
+
+model ReviewPengguna {
+  id String @id @default(uuid())
+  penggunaId String @unique @map("pengguna_id")
+  rating Int
+  komentar String @db.Text
+  status String @default("menunggu") @db.VarChar(20)
+  dibuatPada DateTime @default(now()) @map("dibuat_pada") @db.Timestamp()
+  diperbaruiPada DateTime @updatedAt @map("diperbarui_pada") @db.Timestamp()
+  pengguna Pengguna @relation(fields: [penggunaId], references: [id], onDelete: Cascade)
+  @@index([status, dibuatPada])
+  @@map("review_pengguna")
 }

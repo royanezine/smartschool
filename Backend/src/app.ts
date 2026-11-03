@@ -6,6 +6,7 @@ import { globalErrorHandler } from "./middlewares/error.middleware";
 
 // Import Semua Routes
 import authRoutes from "./routes/auth.routes";
+import reviewRoutes from "./routes/review.routes";
 import userRoutes from "./routes/user.routes";
 import subscriptionRoutes from "./routes/subscription.routes";
 import tenantRoutes from "./routes/tenant.routes";
@@ -105,6 +106,7 @@ app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 // Pendaftaran Routes Utama
 app.use("/api/auth", authRoutes);
+app.use("/api/reviews", reviewRoutes);
 app.use("/api/platform", platformRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/langganan/sekolah", subscriptionRoutes);

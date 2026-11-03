@@ -185,6 +185,13 @@ export const konversiPendaftaranTenant = async (
       await tx.pendaftaranTenant.update({ where: { id: pendaftaran.id }, data: { penggunaTerbuatId: admin.id } });
       pendaftaran.penggunaTerbuatId = admin.id;
     }
+    if (pendaftaran.jenisPendaftaran === "yayasan") {
+      const linked = pendaftaran.penggunaTerbuatId ? await tx.pengguna.findUnique({ where: { id: pendaftaran.penggunaTerbuatId }, include: { peran: true } }) : null;
+      if (!linked || linked.yayasanId !== pendaftaran.yayasanTerbuatId || linked.email !== pendaftaran.emailPendaftar || linked.sekolahId || linked.dihapusPada ||
+        linked.peran?.nama !== "admin_yayasan" || linked.peran.sekolahId || linked.peran.dihapusPada) {
+        throw new AppError("Relasi akun Admin Yayasan tidak valid; perlu rekonsiliasi administrator", 409, "TENANT_ADMIN_LINK_INVALID");
+      }
+    }
     return {
       alreadyActive: true,
       jenisPendaftaran: pendaftaran.jenisPendaftaran,
@@ -206,8 +213,9 @@ export const konversiPendaftaranTenant = async (
     });
     if (!peranAdminYayasan) {
       throw new AppError(
-        "Sistem bermasalah: Peran admin_yayasan tidak ditemukan",
-        500,
+        "Role global admin_yayasan aktif belum dikonfigurasi. Periksa seed/status role sebelum mengulang konversi.",
+        409,
+        "TENANT_ADMIN_ROLE_UNAVAILABLE",
       );
     }
 

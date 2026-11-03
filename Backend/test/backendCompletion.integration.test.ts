@@ -271,6 +271,39 @@ test("backend completion API contracts and tenant isolation", { skip: !databaseU
     const changed=await prisma.pengguna.findUnique({where:{id:admin.id}}); assert.ok(await bcrypt.compare("Dummy-new-password1!",changed.kataSandi));
     const unchanged=await prisma.pengguna.findUnique({where:{id:teacher.id}}); assert.ok(await bcrypt.compare(password,unchanged.kataSandi));
   });
+  await t.test("review ownership, validation and default moderation work for both administrator roles",async()=>{
+    assert.equal((await http("POST","/api/users/review",null,{rating:5,komentar:"Test"})).status,401);
+    assert.equal((await http("POST","/api/users/review",teacher,{rating:5,komentar:"Test"})).status,403);
+    assert.equal((await http("POST","/api/users/review",root,{rating:5,komentar:"Test"})).status,403);
+    for (const rating of [0,6,2.5,"5"]) assert.equal((await http("POST","/api/users/review",admin,{rating,komentar:"Test"})).status,400);
+    assert.equal((await http("POST","/api/users/review",admin,{rating:5,komentar:"x".repeat(501)})).status,400);
+    assert.equal((await http("POST","/api/users/review",admin,{rating:5,komentar:"   "})).status,400);
+    assert.equal((await http("POST","/api/users/review",admin,{rating:5,komentar:"Test",status:"tampil"})).status,400);
+    let result=await http("POST","/api/users/review",admin,{rating:5,komentar:"Sekolah terbantu"}); assert.equal(result.status,201); assert.equal(result.body.data.status,"menunggu");
+    assert.equal((await http("POST","/api/users/review",admin,{rating:4,komentar:"Duplikat"})).status,409);
+    result=await http("POST","/api/users/review",yayasan,{rating:4,komentar:"Yayasan terbantu"}); assert.equal(result.status,201);
+    assert.equal((await http("GET","/api/users/review",yayasan)).body.data.penggunaId,yayasan.id);
+    assert.equal((await http("PUT","/api/users/review",admin,{penggunaId:yayasan.id,komentar:"Hijack"})).status,400);
+    assert.equal((await http("GET","/api/reviews",admin)).status,403);
+  });
+  await t.test("super admin moderation and public review projection protect private identity data",async()=>{
+    const own=(await http("GET","/api/users/review",admin)).body.data;
+    assert.equal((await http("GET","/api/publik/reviews",null)).body.data.length,0);
+    assert.equal((await http("PUT",`/api/reviews/${own.id}`,root,{status:"tampil"})).status,200);
+    let result=await http("GET","/api/publik/reviews?status=menunggu",null); assert.equal(result.status,200); assert.equal(result.body.data.length,1);
+    const published=result.body.data[0]; assert.equal(published.pengguna.namaLengkap,admin.namaLengkap); assert.equal(published.pengguna.peran.nama,"admin_sekolah"); assert.ok(Object.hasOwn(published.pengguna,"jabatan"));
+    assert.doesNotMatch(JSON.stringify(published),/pinHash|kataSandi|email|embeddingVector|penggunaId/);
+    assert.equal((await http("GET","/api/reviews?status=tampil&rating=5",root)).body.meta.total,1);
+    assert.equal((await http("PUT",`/api/reviews/${own.id}`,outsider,{status:"tampil"})).status,403);
+    assert.equal((await http("PUT","/api/users/review",admin,{komentar:"Edit harus dimoderasi ulang"})).body.data.status,"menunggu");
+    assert.equal((await http("GET","/api/publik/reviews",null)).body.data.length,0);
+    assert.equal((await http("PUT",`/api/reviews/${own.id}`,root,{status:"tampil",diperbaruiPada:"2000-01-01T00:00:00.000Z"})).status,409);
+    assert.equal((await http("PUT",`/api/reviews/${own.id}`,root,{status:"disembunyikan"})).status,200);
+    result=await http("POST","/api/reviews",root,{penggunaId:outsider.id,rating:3,komentar:"Review admin",status:"tampil"}); assert.equal(result.status,201);
+    assert.equal((await http("GET",`/api/reviews/${result.body.data.id}`,root)).status,200);
+    assert.equal((await http("DELETE",`/api/reviews/${result.body.data.id}`,root)).status,200);
+    assert.equal((await http("GET",`/api/reviews/${result.body.data.id}`,root)).status,404);
+  });
   await t.test("foundation directory, CRUD, admin ownership and school hierarchy",async()=>{
     let r=await http("POST","/api/yayasan",root,{nama:"Foundation CRUD",npyp:`NP-${suffix}`}); assert.equal(r.status,201); const id=r.body.data.id; extraFoundations.push(id);
     assert.equal((await http("GET",`/api/yayasan/${id}`,yayasan)).status,403);
@@ -305,11 +338,41 @@ test("backend completion API contracts and tenant isolation", { skip: !databaseU
     await prisma.pengguna.delete({where:{id:account.id}});
     assert.equal((await http("POST","/api/webhooks/midtrans",null,payload)).status,200);
     approved=await prisma.pendaftaranTenant.findUnique({where:{id:registration.id}}); users.push(approved.penggunaTerbuatId); assert.notEqual(approved.penggunaTerbuatId,account.id);
+    // Reproduce the old status endpoint's false success when an approved tenant
+    // has no admin. The linked foundation must survive and the account returns.
+    await prisma.pengguna.delete({where:{id:approved.penggunaTerbuatId}});
+    const recovered=await http("GET",`/api/tenant/status-pembayaran/${registration.midtransOrderId}`,null); assert.equal(recovered.status,200);
+    approved=await prisma.pendaftaranTenant.findUnique({where:{id:registration.id}}); users.push(approved.penggunaTerbuatId);
+    assert.ok(await prisma.pengguna.findUnique({where:{id:approved.penggunaTerbuatId}}));
     const login=await http("POST","/api/auth/login",null,{identifier:email,kataSandi:password}); assert.equal(login.status,200);
     await http("PUT",`/api/yayasan/${approved.yayasanTerbuatId}/sekolah/${a.id}`,root,{});
     const dashboard=await http("GET","/api/dashboard",{token:login.body.token}); assert.equal(dashboard.status,200); assert.equal(dashboard.body.data.scope,"yayasan"); assert.equal(dashboard.body.data.sekolah,null); assert.equal(dashboard.body.data.yayasan.sekolah[0].id,a.id);
     const duplicate=await prisma.pendaftaranTenant.create({data:{jenisPendaftaran:"yayasan",namaPendaftar:"Duplicate",emailPendaftar:`duplicate_${suffix}@example.test`,kataSandiPendaftar:hash,npypYayasan:registration.npypYayasan,paketId:pack.id}}); registrations.push(duplicate.id);
     await assert.rejects(prisma.$transaction((tx:any)=>konversiPendaftaranTenant(tx,duplicate.id,{isTrial:false})),/NPYP Yayasan sudah terdaftar/);
     assert.equal(await prisma.pengguna.count({where:{email:duplicate.emailPendaftar}}),0);
+  });
+  await t.test("payment polling executes foundation conversion, surfaces role failures and rolls back completely",async()=>{
+    const httpServer=require("node:http"); const oldApi=process.env.MIDTRANS_API_URL;
+    let order="";
+    const provider=httpServer.createServer((_req:any,res:any)=>{res.writeHead(200,{"Content-Type":"application/json"});res.end(JSON.stringify({order_id:order,transaction_status:"settlement",gross_amount:"100.00"}));});
+    provider.listen(0,"127.0.0.1"); await once(provider,"listening"); process.env.MIDTRANS_API_URL=`http://127.0.0.1:${provider.address().port}`;
+    const registration=await prisma.pendaftaranTenant.create({data:{jenisPendaftaran:"yayasan",namaPendaftar:"Polling admin",emailPendaftar:`polling_${suffix}@example.test`,kataSandiPendaftar:hash,namaYayasan:"Polling yayasan",npypYayasan:`POLL-${suffix}`,paketId:pack.id,status:"menunggu_pembayaran",midtransOrderId:`REG-POLL-${suffix}`}}); registrations.push(registration.id); order=registration.midtransOrderId;
+    try {
+      await prisma.peran.update({where:{id:yayasan.peranId},data:{status:"nonaktif"}});
+      let result=await http("GET",`/api/tenant/status-pembayaran/${order}`,null); assert.equal(result.status,409); assert.equal(result.body.errorCode,"TENANT_ADMIN_ROLE_UNAVAILABLE");
+      assert.equal(await prisma.yayasan.count({where:{npyp:registration.npypYayasan}}),0); assert.equal(await prisma.pengguna.count({where:{email:registration.emailPendaftar}}),0);
+      assert.equal((await prisma.pendaftaranTenant.findUnique({where:{id:registration.id}})).status,"menunggu_pembayaran");
+      await prisma.peran.update({where:{id:yayasan.peranId},data:{status:"aktif"}});
+      result=await http("GET",`/api/tenant/status-pembayaran/${order}`,null); assert.equal(result.status,200);
+      const row=await prisma.pendaftaranTenant.findUnique({where:{id:registration.id}}); extraFoundations.push(row.yayasanTerbuatId); users.push(row.penggunaTerbuatId);
+      const account=await prisma.pengguna.findUnique({where:{id:row.penggunaTerbuatId}}); assert.equal(account.yayasanId,row.yayasanTerbuatId); assert.equal(account.peranId,yayasan.peranId); assert.equal(account.sekolahId,null);
+      const {konversiPendaftaranTenant}=require("../src/controllers/tenant.controller");
+      const rollback=await prisma.pendaftaranTenant.create({data:{jenisPendaftaran:"yayasan",namaPendaftar:"Rollback admin",emailPendaftar:`yy_rollback_${suffix}@example.test`,kataSandiPendaftar:hash,namaYayasan:"Rollback yayasan",npypYayasan:`YY-ROLL-${suffix}`,paketId:pack.id,status:"menunggu_pembayaran"}}); registrations.push(rollback.id);
+      await assert.rejects(prisma.$transaction(async(tx:any)=>{await konversiPendaftaranTenant(tx,rollback.id,{isTrial:false});throw new Error("Simulated transaction failure after admin insert");}),/Simulated transaction failure/);
+      assert.equal(await prisma.yayasan.count({where:{npyp:rollback.npypYayasan}}),0);assert.equal(await prisma.pengguna.count({where:{email:rollback.emailPendaftar}}),0);
+      await prisma.pendaftaranTenant.update({where:{id:registration.id},data:{penggunaTerbuatId:admin.id}});
+      assert.equal((await http("GET",`/api/tenant/status-pembayaran/${order}`,null)).status,409);
+      await prisma.pendaftaranTenant.update({where:{id:registration.id},data:{penggunaTerbuatId:account.id}});
+    } finally { await prisma.peran.update({where:{id:yayasan.peranId},data:{status:"aktif"}});if(oldApi===undefined)delete process.env.MIDTRANS_API_URL;else process.env.MIDTRANS_API_URL=oldApi;await new Promise<void>(r=>provider.close(()=>r())); }
   });
 });

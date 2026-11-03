@@ -1,0 +1,12 @@
+import { Router } from "express";
+import { authenticate } from "../middlewares/auth.middleware";
+import { authorizeRoles } from "../middlewares/role.middleware";
+import { manageReviews } from "../controllers/review.controller";
+const router = Router();
+router.use(authenticate, authorizeRoles("super_admin"));
+router.get("/", manageReviews);
+router.post("/", manageReviews);
+router.get("/:id", manageReviews);
+router.put("/:id", manageReviews);
+router.delete("/:id", manageReviews);
+export default router;

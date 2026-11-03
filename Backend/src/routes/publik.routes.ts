@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { publicReviews } from "../controllers/review.controller";
 import { publicPpdbOptions, publicPpdbAnnouncements, publicPpdbLookup } from "../controllers/publicPpdb.controller";
 import { requestLimit } from "../middlewares/requestLimit.middleware";
 import {
@@ -11,6 +12,7 @@ import {
 } from "../controllers/publik.controller";
 
 const router = Router();
+router.get("/reviews", publicReviews);
 router.get("/:subdomain/ppdb", publicPpdbOptions);
 router.get("/:subdomain/ppdb/pengumuman", publicPpdbAnnouncements);
 router.post("/:subdomain/ppdb/cek-pendaftaran", requestLimit(10), publicPpdbLookup);

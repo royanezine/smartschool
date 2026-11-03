@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import crypto from "crypto";
 import { prisma } from "../config/db";
 import { konversiPendaftaranTenant } from "./tenant.controller";
+import { AppError } from "../utils/appError";
 
 export const handleMidtransWebhook = async (
   req: Request,
@@ -18,7 +19,9 @@ export const handleMidtransWebhook = async (
       transaction_id,
     } = req.body;
 
-    const serverKey = process.env.MIDTRANS_SERVER_KEY || "";
+    const serverKey = process.env.MIDTRANS_SERVER_KEY;
+    if (!serverKey) throw new AppError("Konfigurasi pembayaran belum lengkap", 503);
+    if (typeof order_id !== "string" || typeof signature_key !== "string") throw new AppError("Payload pembayaran tidak valid", 400);
     const hash = crypto
       .createHash("sha512")
       .update(order_id + status_code + gross_amount + serverKey)
@@ -41,7 +44,8 @@ export const handleMidtransWebhook = async (
           .json({ success: false, message: "Pendaftaran not found" });
 
       // Idempotensi: jika tenant sudah aktif, jangan proses ulang
-      if (pendaftaran.status === "aktif" && pendaftaran.penggunaTerbuatId && await prisma.pengguna.findUnique({ where: { id: pendaftaran.penggunaTerbuatId }, select: { id: true } })) {
+      if (pendaftaran.status === "aktif") {
+        await prisma.$transaction(tx => konversiPendaftaranTenant(tx, pendaftaran.id, { isTrial: false }));
         return res
           .status(200)
           .json({ received: true, message: "Tenant already activated" });
@@ -66,8 +70,8 @@ export const handleMidtransWebhook = async (
         transaction_status === "deny" ||
         transaction_status === "expire"
       ) {
-        await prisma.pendaftaranTenant.update({
-          where: { id: pendaftaran.id },
+        await prisma.pendaftaranTenant.updateMany({
+          where: { id: pendaftaran.id, status: { not: "aktif" } },
           data: { status: "pembayaran_gagal" },
         });
       }
@@ -149,8 +153,6 @@ export const handleMidtransWebhook = async (
       .json({ success: false, message: "Format Order ID tidak dikenali" });
   } catch (error) {
     console.error("Midtrans Webhook Error:", error);
-    return res
-      .status(500)
-      .json({ success: false, message: "Internal server error" });
+    next(error);
   }
 };

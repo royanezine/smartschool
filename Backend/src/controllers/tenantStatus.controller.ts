@@ -5,9 +5,6 @@ import { AppError } from "../utils/appError";
 import { successResponse } from "../utils/responseFormatter";
 import { konversiPendaftaranTenant } from "./tenant.controller";
 
-const MIDTRANS_API_URL =
-  process.env.MIDTRANS_API_URL || "https://api.sandbox.midtrans.com";
-
 export const cekStatusPembayaranTenant = async (
   req: Request,
   res: Response,
@@ -25,6 +22,9 @@ export const cekStatusPembayaranTenant = async (
     if (!pendaftaran) throw new AppError("Pendaftaran tidak ditemukan", 404);
 
     if (pendaftaran.status === "aktif") {
+      // Status alone is insufficient: historical approvals may have no admin.
+      // The shared conversion transaction validates/reconciles the linked user.
+      await prisma.$transaction(tx => konversiPendaftaranTenant(tx, pendaftaran.id, { isTrial: false }));
       return successResponse(res, "Pendaftaran sudah aktif", {
         status: "aktif",
         jenisPendaftaran: pendaftaran.jenisPendaftaran,
@@ -35,15 +35,17 @@ export const cekStatusPembayaranTenant = async (
     if (!serverKey) throw new AppError("Konfigurasi pembayaran belum lengkap", 500);
 
     const respons = await fetch(
-      `${MIDTRANS_API_URL}/v2/${encodeURIComponent(orderId)}/status`,
+      `${process.env.MIDTRANS_API_URL || "https://api.sandbox.midtrans.com"}/v2/${encodeURIComponent(orderId)}/status`,
       {
         headers: {
           Accept: "application/json",
           Authorization: `Basic ${Buffer.from(`${serverKey}:`).toString("base64")}`,
         },
+        signal: AbortSignal.timeout(15000),
       },
     );
     const body: any = await respons.json().catch(() => ({}));
+    if (!respons.ok && respons.status !== 404) throw new AppError("Gagal memeriksa pembayaran ke Midtrans", 502);
 
     if (!body || body.order_id !== orderId || !body.transaction_status) {
       return successResponse(res, "Pembayaran belum ditemukan di Midtrans", {
@@ -74,10 +76,11 @@ export const cekStatusPembayaranTenant = async (
     }
 
     if (gagal) {
-      await prisma.pendaftaranTenant.update({
-        where: { id: pendaftaran.id },
+      const changed = await prisma.pendaftaranTenant.updateMany({
+        where: { id: pendaftaran.id, status: { not: "aktif" } },
         data: { status: "pembayaran_gagal" },
       });
+      if (!changed.count) return successResponse(res, "Pendaftaran sudah aktif", { status: "aktif", jenisPendaftaran: pendaftaran.jenisPendaftaran });
       return successResponse(res, "Pembayaran gagal atau kedaluwarsa", {
         status: "pembayaran_gagal",
         jenisPendaftaran: pendaftaran.jenisPendaftaran,
