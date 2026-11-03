@@ -7,27 +7,10 @@ import { prisma } from "../config/db";
 import { AuthRequest } from "../middlewares/auth.middleware";
 import { AppError } from "../utils/appError";
 import { successResponse } from "../utils/responseFormatter";
-import { parseDateOnly } from "../utils/dateOnly";
+import { createSiswaSchema, updateSiswaSchema } from "../validations/siswa.validation";
 import { schoolContext } from "./qaResources.controller";
 import { paginationMeta } from "../utils/pagination";
 
-const optionalText = (max: number) => z.string().trim().max(max).nullable().optional();
-const fields = {
-  namaLengkap: z.string().trim().min(2).max(100), email: z.string().email().max(100),
-  namaPengguna: z.string().trim().min(1).max(50), nisn: optionalText(20), nis: optionalText(20), nipd: optionalText(20),
-  nik: z.string().regex(/^\d{16}$/).nullable().optional(), jenisKelamin: optionalText(10),
-  tempatLahir: optionalText(50), tanggalLahir: z.string().transform(v => parseDateOnly(v, "tanggalLahir")).nullable().optional(),
-  alamat: optionalText(10000), alamatKtp: optionalText(10000), alamatDomisili: optionalText(10000),
-  alamatSesuaiDomisili: z.boolean().optional(), provinsi: optionalText(50), kotaKabupaten: optionalText(50),
-  kecamatan: optionalText(50), kelurahan: optionalText(50), kodePos: optionalText(10), noTelepon: optionalText(20),
-  namaAyah: optionalText(100), nikAyah: optionalText(20), pekerjaanAyah: optionalText(50), noHpAyah: optionalText(20),
-  namaIbu: optionalText(100), nikIbu: optionalText(20), pekerjaanIbu: optionalText(50), noHpIbu: optionalText(20),
-  namaWaliPesertaDidik: optionalText(20),
-  kelasId: z.string().uuid().nullable().optional(), tahunAjaranId: z.string().uuid().optional(),
-  status: z.enum(["aktif", "nonaktif"]).optional(),
-};
-const createSchema = z.object({ ...fields, kataSandi: z.string().min(8).max(72).refine(v => Buffer.byteLength(v) <= 72) }).strict();
-const updateSchema = z.object(fields).partial().strict();
 const select = {
   pinHash: true,
   id: true, sekolahId: true, namaPengguna: true, email: true, namaLengkap: true,
@@ -58,7 +41,7 @@ export async function studentProfiles(req: AuthRequest, res: Response, next: Nex
       ]);
       return res.json({ success: true, message: "Data siswa berhasil diambil", data: data.map(publicUser), meta: paginationMeta(query.page, query.limit, total) });
     }
-    const parsed = id ? updateSchema.parse(req.body) : createSchema.parse(req.body);
+    const parsed = id ? updateSiswaSchema.parse(req.body) : createSiswaSchema.parse(req.body);
     const { kelasId, tahunAjaranId, ...profile } = parsed;
     const { kataSandi, ...data } = profile as typeof profile & { kataSandi?: string };
     const hash = kataSandi ? await bcrypt.hash(kataSandi, 12) : undefined;
@@ -82,7 +65,7 @@ export async function studentProfiles(req: AuthRequest, res: Response, next: Nex
       else {
         const role = await tx.peran.findFirst({ where: { nama: "siswa", status: "aktif", dihapusPada: null, OR: [{ sekolahId }, { sekolahId: null }] }, orderBy: { sekolahId: { sort: "desc", nulls: "last" } } });
         if (!role) throw new AppError("Role siswa belum dikonfigurasi", 409);
-        const user = await tx.pengguna.create({ data: { ...data as z.output<typeof createSchema>, kataSandi: hash!, sekolahId, peranId: role.id, status: data.status ?? "aktif", dibuatOleh: actor } });
+        const user = await tx.pengguna.create({ data: { ...data as z.output<typeof createSiswaSchema>, kataSandi: hash!, sekolahId, peranId: role.id, status: data.status ?? "aktif", dibuatOleh: actor } });
         userId = user.id;
       }
       if (kelasId !== undefined) {

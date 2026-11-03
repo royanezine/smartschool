@@ -161,9 +161,19 @@ test("backend completion API contracts and tenant isolation", { skip: !databaseU
     }
   });
   await t.test("student create persists identity, parents, address and enrollment in one transaction",async()=>{
-    const data={namaPengguna:`new_${suffix}`,email:`new_${suffix}@example.test`,kataSandi:password,namaLengkap:"New Student",nisn:`10${Date.now()}`,kelasId:kelas.id,alamat:"Alamat siswa",namaAyah:"Ayah dummy",namaIbu:"Ibu dummy",kotaKabupaten:"Jakarta",nik:"1234567890123456"};
+    const parents={namaAyah:"Ayah dummy",nikAyah:"1234567890123456",pekerjaanAyah:"Guru",noHpAyah:"081234567890",namaIbu:"Ibu dummy",nikIbu:"6543210987654321",pekerjaanIbu:"Wiraswasta",noHpIbu:"089876543210"};
+    const data={namaPengguna:`new_${suffix}`,email:`new_${suffix}@example.test`,kataSandi:password,namaLengkap:"New Student",nisn:`10${Date.now()}`,kelasId:kelas.id,alamat:"Alamat siswa",...parents,kotaKabupaten:"Jakarta",nik:"1234567890123456"};
     const r=await http("POST","/api/siswa",admin,data); assert.equal(r.status,201,JSON.stringify(r.body)); const row=r.body.data; users.push(row.id);
     assert.equal(row.namaAyah,data.namaAyah); assert.equal(row.alamat,data.alamat); assert.equal(row.kelasSiswa[0].kelasId,kelas.id); assert.equal(row.kataSandi,undefined);
+    const stored=await prisma.pengguna.findUnique({where:{id:row.id}});
+    for (const [key,value] of Object.entries(parents)) { assert.equal(row[key],value); assert.equal(stored[key],value); }
+    const updatedParents={namaAyah:"Ayah diperbarui",nikAyah:"1111222233334444",pekerjaanAyah:"Pegawai",noHpAyah:"081111111111",namaIbu:"Ibu diperbarui",nikIbu:"4444333322221111",pekerjaanIbu:"Guru",noHpIbu:"082222222222"};
+    const updated=await http("PUT",`/api/siswa/${row.id}`,admin,updatedParents); assert.equal(updated.status,200);
+    const updatedDb=await prisma.pengguna.findUnique({where:{id:row.id}});
+    for (const [key,value] of Object.entries(updatedParents)) { assert.equal(updated.body.data[key],value); assert.equal(updatedDb[key],value); }
+    const invalid=await http("PUT",`/api/siswa/${row.id}`,admin,{namaAyah:"Tidak boleh tersimpan",noHpIbu:"0".repeat(21)}); assert.equal(invalid.status,400);
+    assert.equal((await prisma.pengguna.findUnique({where:{id:row.id}})).namaAyah,updatedParents.namaAyah);
+    const clearParent=await http("PUT",`/api/siswa/${row.id}`,admin,{nikAyah:null}); assert.equal(clearParent.status,200); assert.equal(clearParent.body.data.nikAyah,null); assert.equal(clearParent.body.data.namaIbu,updatedParents.namaIbu);
     assert.equal((await http("GET",`/api/siswa/${row.id}`,outsider)).status,404);
     const bad=await http("POST","/api/siswa",admin,{...data,namaPengguna:`rollback_${suffix}`,email:`rollback_${suffix}@example.test`,nisn:`20${Date.now()}`,nik:null,kelasId:foreignClass.id}); assert.equal(bad.status,400);
     assert.equal(await prisma.pengguna.count({where:{email:`rollback_${suffix}@example.test`}}),0);
@@ -171,6 +181,17 @@ test("backend completion API contracts and tenant isolation", { skip: !databaseU
     const cleared=await http("PUT",`/api/siswa/${row.id}`,admin,{kelasId:null,tahunAjaranId:year.id,noHpAyah:"08123456"}); assert.equal(cleared.status,200); assert.equal(cleared.body.data.kelasSiswa.length,0);
     assert.equal(await prisma.anggotaKelas.count({where:{penggunaId:row.id,status:"nonaktif"}}),1);
     await prisma.pengguna.update({where:{id:row.id},data:{status:"nonaktif"}});
+  });
+  await t.test("student creation permits omitted parent fields and validates schema column limits",async()=>{
+    const baseData={namaPengguna:`no_parents_${suffix}`,email:`no_parents_${suffix}@example.test`,namaLengkap:"Siswa tanpa data orang tua",kataSandi:password,status:"nonaktif"};
+    const result=await http("POST","/api/siswa",admin,baseData); assert.equal(result.status,201); users.push(result.body.data.id);
+    for (const field of ["namaAyah","nikAyah","pekerjaanAyah","noHpAyah","namaIbu","nikIbu","pekerjaanIbu","noHpIbu"]) assert.equal(result.body.data[field],null);
+    assert.equal(result.body.data.pinConfigured,false); assert.equal(result.body.data.pinHash,undefined);
+    for (const [field,limit] of Object.entries({namaAyah:100,nikAyah:20,pekerjaanAyah:50,noHpAyah:20,namaIbu:100,nikIbu:20,pekerjaanIbu:50,noHpIbu:20})) {
+      const rejected=await http("POST","/api/siswa",admin,{...baseData,namaPengguna:`invalid_${suffix}`,email:`invalid_${suffix}@example.test`,[field]:"x".repeat(limit+1)});
+      assert.equal(rejected.status,400,field);
+    }
+    assert.equal(await prisma.pengguna.count({where:{email:`invalid_${suffix}@example.test`}}),0);
   });
   const aggregate={tahunAjaranId:year.id,mataPelajaran:[{mataPelajaranId:mapel.id,tugas:20,uts:20,uas:30,praktik:30,kkm:85}]};
   await t.test("typed settings validate active days and isolate school/global scope",async()=>{

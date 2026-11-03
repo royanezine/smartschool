@@ -288,6 +288,78 @@ test("backend HTTP API regressions with PostgreSQL", { skip: !testDatabaseUrl },
     assert.ok(checkout.body.data.waktuKeluar);
   });
 
+  await t.test("class attendance rejects teachers and administrators before creating records", async () => {
+    const previousCount=await prisma.absensi.count({where:{penggunaId:teacher.id,kelasId:{not:null}}});
+    for (const token of [teacherToken,adminToken]) {
+      const result=await json("/api/absensi",token,"POST",{kelasId:classA.id,status:"hadir",metode:"manual"});
+      assert.equal(result.status,403);
+      assert.equal(result.body.message,"Endpoint ini hanya untuk absensi siswa di kelas");
+    }
+    assert.equal(await prisma.absensi.count({where:{penggunaId:teacher.id,kelasId:{not:null}}}),previousCount);
+  });
+  await t.test("shift face check-in verifies the owner's face and manages uploaded files on every outcome", async () => {
+    const fs=require("node:fs"); const path=require("node:path"); const http=require("node:http");
+    const employee=await user("FaceGuru",teacherRole,schoolA.id);
+    await prisma.pengguna.update({where:{id:employee.id},data:{shiftKerjaId:shift.id}});
+    const token=tokenFor(employee,teacherRole);
+    const uploadDir=path.join(process.cwd(),"uploads","absensi");
+    const masterPath=path.join(process.cwd(),"uploads","biometrik",`qa-master-${suffix}.jpg`);
+    fs.mkdirSync(path.dirname(masterPath),{recursive:true}); fs.writeFileSync(masterPath,"reference-test-image");
+    const previousSchool=await prisma.sekolah.findUnique({where:{id:schoolA.id}});
+    const previousAi=process.env.AI_SERVICE_URL;
+    let mode="match", calls=0;
+    const ai=http.createServer((req:any,res:any)=>{
+      const chunks:Buffer[]=[];req.on("data",(b:Buffer)=>chunks.push(b));req.on("end",()=>{
+        calls++; const payload=Buffer.concat(chunks).toString();
+        assert.equal(req.url,"/verify-face"); assert.match(payload,/name="master_image"/);assert.match(payload,/name="snapshot_image"/);assert.match(payload,/reference-test-image/);
+        res.writeHead(mode==="error"?500:200,{"Content-Type":"application/json"});res.end(JSON.stringify({matched:mode==="match",message:"QA verification"}));
+      });
+    });
+    ai.listen(0,"127.0.0.1");await once(ai,"listening");
+    process.env.AI_SERVICE_URL=`http://127.0.0.1:${ai.address().port}`;
+    let keptFile:string|undefined;
+    const snapshotFiles=()=>new Set<string>(fs.readdirSync(uploadDir));
+    async function upload(method="face") {
+      const form=new FormData();form.set("metode",method);form.set("lintang","-6.2");form.set("bujur","106.8");
+      form.set("snapshot",new Blob(["snapshot-test-image"],{type:"image/jpeg"}),"snapshot.jpg");
+      const response=await fetch(base+"/api/absensi/check-in",{method:"POST",headers:{Authorization:`Bearer ${token}`},body:form});
+      return {status:response.status,body:await response.json() as any};
+    }
+    try {
+      await prisma.sekolah.update({where:{id:schoolA.id},data:{metodeAbsensiAktif:["face","manual"],lintang:-6.2,bujur:106.8}});
+      assert.equal((await json("/api/absensi/check-in",token,"POST",{metode:"face",lintang:-6.2,bujur:106.8})).status,400);
+      const before=snapshotFiles();
+      assert.equal((await upload()).status,400);assert.deepEqual(snapshotFiles(),before);assert.equal(calls,0);
+      await prisma.biometrikWajah.create({data:{penggunaId:employee.id,urlFotoReferensi:`/uploads/biometrik/${path.basename(masterPath)}`,status:"nonaktif"}});
+      assert.equal((await upload()).status,400);assert.deepEqual(snapshotFiles(),before);assert.equal(calls,0);
+      await prisma.biometrikWajah.update({where:{penggunaId:employee.id},data:{status:"aktif"}});
+      mode="mismatch";assert.equal((await upload()).status,400);assert.deepEqual(snapshotFiles(),before);
+      mode="error";assert.equal((await upload()).status,502);assert.deepEqual(snapshotFiles(),before);
+      assert.equal(await prisma.absensi.count({where:{penggunaId:employee.id}}),0);
+      mode="match";
+      const originalCreate=prisma.absensi.create;
+      try {
+        prisma.absensi.create=async()=>{throw new Error("Simulated local database failure");};
+        assert.equal((await upload()).status,500);assert.deepEqual(snapshotFiles(),before);
+      } finally { prisma.absensi.create=originalCreate; }
+      const result=await upload();assert.equal(result.status,201);assert.equal(result.body.data.kelasId,null);assert.equal(result.body.data.shiftKerjaId,shift.id);
+      keptFile=path.join(process.cwd(),result.body.data.urlFoto);
+      assert.ok(fs.existsSync(keptFile));assert.equal(await prisma.absensi.count({where:{penggunaId:employee.id}}),1);
+      const savedFiles=snapshotFiles();const savedCalls=calls;
+      assert.equal((await upload()).status,400);assert.deepEqual(snapshotFiles(),savedFiles);assert.equal(calls,savedCalls);
+      await prisma.absensi.deleteMany({where:{penggunaId:employee.id}});
+      const manual=await upload("manual");assert.equal(manual.status,201);assert.equal(manual.body.data.urlFoto,null);assert.deepEqual(snapshotFiles(),savedFiles);
+      const blocked=new FormData();blocked.set("snapshot",new Blob(["blocked"]),"blocked.jpg");
+      const denied=await fetch(base+"/api/absensi",{method:"POST",headers:{Authorization:`Bearer ${token}`},body:blocked});assert.equal(denied.status,403);assert.deepEqual(snapshotFiles(),savedFiles);
+    } finally {
+      if (previousAi===undefined) delete process.env.AI_SERVICE_URL;else process.env.AI_SERVICE_URL=previousAi;
+      await new Promise<void>(resolve=>ai.close(()=>resolve()));
+      await prisma.sekolah.update({where:{id:schoolA.id},data:{metodeAbsensiAktif:previousSchool.metodeAbsensiAktif,lintang:previousSchool.lintang,bujur:previousSchool.bujur}});
+      await prisma.biometrikWajah.deleteMany({where:{penggunaId:employee.id}});
+      fs.rmSync(masterPath,{force:true});if(keptFile)fs.rmSync(keptFile,{force:true});
+    }
+  });
+
   await t.test("leave list includes applicant identity, job and role without credentials", async () => {
     for (const row of [teacher,student,other]) await prisma.permohonanIzin.create({data:{sekolahId:row.sekolahId,penggunaId:row.id,jenis:"izin",tanggalMulai:new Date("2026-10-29T00:00:00Z"),tanggalSelesai:new Date("2026-10-29T00:00:00Z"),alasan:"Keperluan pengujian QA"}});
     const result = await json("/api/permohonan-izin");

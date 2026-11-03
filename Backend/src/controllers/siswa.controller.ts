@@ -1,3 +1,4 @@
+import { studentProfiles } from "./studentProfile.controller";
 import { publicUser } from "../utils/publicUser";
 // src/controllers/siswa.controller.ts
 import { Request, Response, NextFunction } from "express";
@@ -69,42 +70,10 @@ export const getSiswaList = async (
 };
 
 // === UPDATE SISWA ===
-export const updateSiswa = async (
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction,
-) => {
-  try {
-    const id = req.params.id as string;
-    const sekolahId = req.user?.sekolahId;
-    const { namaLengkap, email, nis, nisn, status } = req.body;
-
-    const siswa = await prisma.pengguna.update({
-      where: { id, sekolahId },
-      data: {
-        namaLengkap,
-        email,
-        nis,
-        nisn,
-        status,
-        diperbaruiOleh: req.user?.userId,
-      },
-      select: {
-          pinHash: true,
-        id: true,
-        namaLengkap: true,
-        email: true,
-        nis: true,
-        nisn: true,
-        status: true,
-      },
-    });
-
-    return successResponse(res, "Data siswa berhasil diperbarui", publicUser(siswa));
-  } catch (error) {
-    next(error);
-  }
-};
+// Reuse the complete validated profile/enrollment transaction; do not drop
+// parent fields by maintaining a separate, incomplete payload projection here.
+export const updateSiswa = (req: AuthRequest, res: Response, next: NextFunction) =>
+  studentProfiles(req, res, next);
 
 export const deleteSiswa = async (
   req: AuthRequest,
@@ -161,76 +130,10 @@ export const getMySiswa = async (
   }
 };
 
-export const createSiswa = async (
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction,
-) => {
-  try {
-    const sekolahId = req.user?.sekolahId;
-    const {
-      namaPengguna,
-      email,
-      kataSandi,
-      namaLengkap,
-      nisn,
-      nis,
-      jenisKelamin,
-    } = req.body;
-
-    if (!sekolahId) throw new AppError("Sekolah tidak ditemukan", 400);
-    if (!namaPengguna || !email || !kataSandi || !namaLengkap) {
-      throw new AppError(
-        "Username, email, kata sandi, dan nama lengkap wajib diisi",
-        400,
-      );
-    }
-
-    const peranSiswa = await prisma.peran.findFirst({
-      where: {
-        nama: "siswa",
-        status: "aktif",
-        dihapusPada: null,
-        OR: [{ sekolahId }, { sekolahId: null }],
-      },
-      orderBy: {
-        sekolahId: "desc",
-      },
-    });
-    if (!peranSiswa) throw new AppError("Role siswa tidak ditemukan", 500);
-
-    const passwordHash = await bcrypt.hash(kataSandi, 10);
-    const siswa = await prisma.pengguna.create({
-      data: {
-        sekolahId,
-        peranId: peranSiswa.id,
-        namaPengguna,
-        email,
-        kataSandi: passwordHash,
-        namaLengkap,
-        nisn: nisn || null,
-        nis: nis || null,
-        jenisKelamin: jenisKelamin || null,
-        status: "aktif",
-        dibuatOleh: req.user?.userId,
-      },
-      select: {
-          pinHash: true,
-        id: true,
-        namaPengguna: true,
-        email: true,
-        namaLengkap: true,
-        nisn: true,
-        nis: true,
-        status: true,
-      },
-    });
-
-    return successResponse(res, "Data siswa berhasil dibuat", publicUser(siswa), 201);
-  } catch (error) {
-    next(error);
-  }
-};
+// Reuse the complete validated profile/enrollment transaction; do not drop
+// parent fields by maintaining a separate, incomplete payload projection here.
+export const createSiswa = (req: AuthRequest, res: Response, next: NextFunction) =>
+  studentProfiles(req, res, next);
 
 export const getSemuaSiswaAdmin = async (
   req: AuthRequest,
@@ -291,46 +194,10 @@ export const getSemuaSiswaAdmin = async (
   }
 };
 
-export const updateSiswaAdmin = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
-  try {
-    const id = req.params.id as string;
-    const sekolahId = (req as AuthRequest).user?.sekolahId;
-    const { namaLengkap, email, nis, nisn, status, jenisKelamin, noTelepon } =
-      req.body;
-
-    const siswa = await prisma.pengguna.update({
-      where: { id, sekolahId },
-      data: {
-        namaLengkap,
-        email,
-        nis,
-        nisn,
-        status,
-        jenisKelamin,
-        noTelepon,
-        diperbaruiOleh: (req as AuthRequest).user?.userId,
-      },
-      select: {
-          pinHash: true,
-        id: true,
-        namaLengkap: true,
-        email: true,
-        nis: true,
-        nisn: true,
-        status: true,
-        jenisKelamin: true,
-        noTelepon: true,
-      },
-    });
-    return successResponse(res, "Data siswa berhasil diperbarui", publicUser(siswa));
-  } catch (error) {
-    next(error);
-  }
-};
+// Reuse the complete validated profile/enrollment transaction; do not drop
+// parent fields by maintaining a separate, incomplete payload projection here.
+export const updateSiswaAdmin = (req: AuthRequest, res: Response, next: NextFunction) =>
+  studentProfiles(req, res, next);
 
 export const bulkImportSiswa = async (
   req: AuthRequest,

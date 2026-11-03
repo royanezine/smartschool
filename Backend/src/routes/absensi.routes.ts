@@ -2,6 +2,7 @@ import { Router } from "express";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
+import { randomUUID } from "crypto";
 import {
   createAbsensi,
   getAbsensiSaya,
@@ -34,7 +35,7 @@ const storage = multer.diskStorage({
   destination: (_req, _file, cb) => cb(null, uploadDir),
   filename: (_req, file, cb) => {
     const ext = path.extname(file.originalname) || ".jpg";
-    cb(null, `absen-${Date.now()}${ext}`);
+    cb(null, `absen-${randomUUID()}${ext}`);
   },
 });
 const upload = multer({ storage });
@@ -61,7 +62,7 @@ router.post(
 );
 router.get("/metode-aktif", getMetodeAbsensiAktif);
 
-router.post("/check-in", checkInShift);
+router.post("/check-in", upload.single("snapshot"), checkInShift);
 router.post("/check-out", checkOutShift);
 router.get("/shift-saya", getRiwayatShiftSaya);
 router.get(
