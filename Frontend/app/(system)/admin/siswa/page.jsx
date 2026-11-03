@@ -6,7 +6,8 @@ import { useRouter } from "next/navigation";
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
 import { getKelas, getKelasById } from "@/services/kelas.service";
-import { getUsers, deleteUser } from "@/services/user.service";
+import { deleteUser } from "@/services/user.service";
+import { getSemuaSiswa } from "@/services/siswa.service";
 
 import {
   Users,
@@ -264,8 +265,10 @@ const loadSiswa = useCallback(async (isRefresh = false) => {
 
     setError("");
 
-    const response = await getUsers({ role: "siswa", page: 1, limit: 1000 });
-
+const response = await getSemuaSiswa({
+  page: 1,
+  limit: 1000,
+});
     const result =
       response && typeof response.json === "function"
         ? await response.json()

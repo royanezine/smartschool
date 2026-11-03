@@ -3,6 +3,7 @@ import {
   School,
   Building2,
   Package,
+  MessageSquareQuote,
   Users,
   ShieldCheck,
   FileText,
@@ -89,6 +90,13 @@ export const superadminSidebarConfig = {
       icon: UserCog,
       label: "Kelola User",
       path: "/super-admin/kelola-user",
+    },
+     {
+      type: "item",
+      key: "reviewTestimoni",
+      icon: MessageSquareQuote,
+      label: "Review & Testimoni",
+      path: "/super-admin/reviews",
     },
 
     {

@@ -1,7 +1,6 @@
-
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
@@ -23,6 +22,9 @@ import {
   ClipboardCheck,
   Info,
   ShieldCheck,
+  Camera,
+  CameraOff,
+  RotateCcw,
 } from "lucide-react";
 
 import {
@@ -51,18 +53,11 @@ const METODE_CONFIG = {
     value: "face",
     label: "Face ID",
     description:
-      "Metode Face ID yang diaktifkan sekolah. Endpoint presensi shift yang digunakan belum memverifikasi foto wajah.",
+      "Ambil foto wajah melalui kamera. Foto akan dikirim ke Backend untuk verifikasi wajah saat check-in.",
     icon: ShieldCheck,
     requiresLocation: true,
   },
-  barcode: {
-    value: "barcode",
-    label: "Barcode",
-    description:
-      "Metode barcode sesuai konfigurasi sekolah. Pastikan Backend mendukung validasi barcode pada endpoint presensi shift.",
-    icon: ClipboardCheck,
-    requiresLocation: false,
-  },
+
   manual: {
     value: "manual",
     label: "Manual",
@@ -84,9 +79,7 @@ const getDateParts = (value = new Date()) => {
   const result = {};
 
   for (const part of parts) {
-    if (part.type !== "literal") {
-      result[part.type] = part.value;
-    }
+    if (part.type !== "literal") result[part.type] = part.value;
   }
 
   return result;
@@ -330,7 +323,6 @@ const getErrorMessage = (error) => {
   return message || "Terjadi kesalahan. Silakan coba kembali.";
 };
 
-
 const getCurrentLocation = () =>
   new Promise((resolve, reject) => {
     if (
@@ -482,7 +474,6 @@ const getCurrentLocation = () =>
     }, GPS_TIMEOUT_MS);
   });
 
-
 const normalizeAttendanceResponse = (response) => {
   if (Array.isArray(response)) return response;
   if (Array.isArray(response?.data)) return response.data;
@@ -565,6 +556,142 @@ export default function AbsensiGuruPage() {
   const [metodeTerpilih, setMetodeTerpilih] = useState("");
   const [metodeLoading, setMetodeLoading] = useState(true);
   const [metodeError, setMetodeError] = useState("");
+
+  // State dan ref untuk Face ID
+  const [cameraStream, setCameraStream] = useState(null);
+  const [snapshot, setSnapshot] = useState(null);
+  const [cameraError, setCameraError] = useState("");
+  const videoRef = useRef(null);
+  const canvasRef = useRef(null);
+
+  const stopCamera = useCallback(() => {
+    if (cameraStream) {
+      cameraStream.getTracks().forEach((track) => track.stop());
+    }
+
+    if (videoRef.current) {
+      videoRef.current.pause();
+      videoRef.current.srcObject = null;
+    }
+
+    setCameraStream(null);
+  }, [cameraStream]);
+
+  const startCamera = useCallback(async () => {
+    try {
+      setCameraError("");
+
+      if (
+        !navigator.mediaDevices ||
+        !navigator.mediaDevices.getUserMedia
+      ) {
+        throw new Error(
+          "Browser tidak mendukung akses kamera. Gunakan browser yang mendukung kamera."
+        );
+      }
+
+      // Hentikan stream lama jika kamera dibuka kembali.
+      if (cameraStream) {
+        cameraStream.getTracks().forEach((track) => track.stop());
+      }
+
+      setSnapshot(null);
+
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: "user",
+          width: { ideal: 640 },
+          height: { ideal: 480 },
+        },
+        audio: false,
+      });
+
+      setCameraStream(stream);
+
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        await videoRef.current.play();
+      }
+    } catch (err) {
+      console.error("[FACE ID] Gagal membuka kamera:", err);
+      setCameraError(
+        err?.message ||
+          "Kamera tidak dapat diakses. Periksa izin kamera browser."
+      );
+    }
+  }, [cameraStream]);
+
+  const captureSnapshot = useCallback(() => {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+
+    if (!video || !canvas || video.videoWidth === 0) {
+      setCameraError(
+        "Kamera belum siap. Tunggu preview wajah muncul, lalu coba lagi."
+      );
+      return;
+    }
+
+    const context = canvas.getContext("2d");
+
+    if (!context) {
+      setCameraError("Browser tidak dapat memproses foto kamera.");
+      return;
+    }
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    context.drawImage(
+      video,
+      0,
+      0,
+      canvas.width,
+      canvas.height
+    );
+
+    canvas.toBlob(
+      (blob) => {
+        if (!blob) {
+          setCameraError("Gagal mengambil foto. Silakan coba lagi.");
+          return;
+        }
+
+        const file = new File([blob], "snapshot.jpg", {
+          type: "image/jpeg",
+          lastModified: Date.now(),
+        });
+
+        setSnapshot(file);
+        setCameraError("");
+        setNotice("");
+      },
+      "image/jpeg",
+      0.9
+    );
+  }, []);
+
+  // Hentikan kamera saat halaman ditutup atau komponen dilepas.
+  useEffect(() => {
+    return () => {
+      if (cameraStream) {
+        cameraStream.getTracks().forEach((track) => track.stop());
+      }
+    };
+  }, [cameraStream]);
+
+  // Hentikan kamera dan bersihkan foto ketika metode bukan Face ID.
+  useEffect(() => {
+    if (metodeTerpilih !== "face") {
+      if (cameraStream) {
+        cameraStream.getTracks().forEach((track) => track.stop());
+        setCameraStream(null);
+      }
+
+      setSnapshot(null);
+      setCameraError("");
+    }
+  }, [metodeTerpilih, cameraStream]);
 
   const fetchMetodeAbsensi = useCallback(async () => {
     try {
@@ -802,171 +929,194 @@ export default function AbsensiGuruPage() {
     };
   }, [records]);
 
- 
-const handleCheckIn = async () => {
-  if (submitting || loading || !canCheckIn) return;
+  const handleCheckIn = async () => {
+    if (submitting || loading || !canCheckIn) return;
 
-  if (metodeLoading) {
-    setError("Sedang memuat konfigurasi metode presensi.");
-    return;
-  }
+    if (metodeLoading) {
+      setError("Sedang memuat konfigurasi metode presensi.");
+      return;
+    }
 
-  if (!metodeTerpilih || !metodeAktif.includes(metodeTerpilih)) {
-    setError("Pilih metode presensi yang aktif terlebih dahulu.");
-    return;
-  }
+    if (
+      !metodeTerpilih ||
+      !metodeAktif.includes(metodeTerpilih)
+    ) {
+      setError("Pilih metode presensi yang aktif terlebih dahulu.");
+      return;
+    }
 
-  if (
-    !window.confirm(
-      `Lanjutkan check-in menggunakan metode ${
-        METODE_CONFIG[metodeTerpilih]?.label ?? metodeTerpilih
-      }?`
-    )
-  ) {
-    return;
-  }
+    // Validasi sebelum meminta konfirmasi atau membaca GPS.
+    if (metodeTerpilih === "face" && !snapshot) {
+      setError(
+        "Ambil foto wajah terlebih dahulu sebelum check-in menggunakan Face ID."
+      );
+      return;
+    }
 
-  try {
-    setSubmitting(true);
-    setActiveAction("checkin");
-    setError("");
-    setNotice("");
+    if (
+      !window.confirm(
+        `Lanjutkan check-in menggunakan metode ${
+          METODE_CONFIG[metodeTerpilih]?.label ?? metodeTerpilih
+        }?`
+      )
+    ) {
+      return;
+    }
 
-    let lokasi = null;
+    try {
+      setSubmitting(true);
+      setActiveAction("checkin");
+      setError("");
+      setNotice("");
 
-    if (METODE_CONFIG[metodeTerpilih]?.requiresLocation) {
-      lokasi = await getCurrentLocation();
+      let lokasi = null;
 
-      if (
-        !Number.isFinite(lokasi.lintang) ||
-        !Number.isFinite(lokasi.bujur)
-      ) {
-        throw new Error(
-          "Koordinat GPS tidak valid. Coba perbarui lokasi perangkat."
-        );
+      if (METODE_CONFIG[metodeTerpilih]?.requiresLocation) {
+        lokasi = await getCurrentLocation();
+
+        if (
+          !Number.isFinite(lokasi.lintang) ||
+          !Number.isFinite(lokasi.bujur)
+        ) {
+          throw new Error(
+            "Koordinat GPS tidak valid. Coba perbarui lokasi perangkat."
+          );
+        }
       }
-    }
 
-    const payload = {
-      status: "hadir",
-      metode: metodeTerpilih,
-      ...(lokasi
-        ? {
-            lintang: Number(lokasi.lintang),
-            bujur: Number(lokasi.bujur),
-          }
-        : {}),
-      ...(keterangan.trim()
-        ? { keterangan: keterangan.trim() }
-        : {}),
-    };
+      const payload = {
+        status: "hadir",
+        metode: metodeTerpilih,
+        ...(lokasi
+          ? {
+              lintang: Number(lokasi.lintang),
+              bujur: Number(lokasi.bujur),
+            }
+          : {}),
+        ...(keterangan.trim()
+          ? { keterangan: keterangan.trim() }
+          : {}),
+        ...(metodeTerpilih === "face" && snapshot
+          ? { snapshot }
+          : {}),
+      };
 
-    console.info("[PRESENSI SHIFT] Payload check-in:", {
-      ...payload,
-      akurasiGPS: lokasi?.akurasi ?? null,
-    });
+      console.info("[PRESENSI SHIFT] Check-in", {
+        status: payload.status,
+        metode: payload.metode,
+        memilikiSnapshot: Boolean(payload.snapshot),
+        ukuranSnapshotByte: payload.snapshot?.size ?? 0,
+        lintang: payload.lintang ?? null,
+        bujur: payload.bujur ?? null,
+        akurasiGPS: lokasi?.akurasi ?? null,
+      });
 
-    await checkInShift(payload);
+      await checkInShift(payload);
 
-    setNotice(
-      lokasi
-        ? `Check-in berhasil dicatat menggunakan ${
-            METODE_CONFIG[metodeTerpilih]?.label ?? metodeTerpilih
-          }. Akurasi GPS ±${Math.round(lokasi.akurasi)} meter.`
-        : `Check-in berhasil dicatat menggunakan ${
-            METODE_CONFIG[metodeTerpilih]?.label ?? metodeTerpilih
-          }.`
-    );
-
-    setKeterangan("");
-    await fetchHistory(false);
-  } catch (err) {
-    console.error("[PRESENSI SHIFT] Check-in gagal:", err);
-    setError(getErrorMessage(err));
-  } finally {
-    setSubmitting(false);
-    setActiveAction("");
-  }
-};
-
-
- 
-const handleCheckOut = async () => {
-  if (submitting || loading || !canCheckOut) return;
-
-  if (metodeLoading) {
-    setError("Sedang memuat konfigurasi metode presensi.");
-    return;
-  }
-
-  if (!metodeTerpilih || !metodeAktif.includes(metodeTerpilih)) {
-    setError("Pilih metode presensi yang aktif terlebih dahulu.");
-    return;
-  }
-
-  if (
-    !window.confirm(
-      `Lakukan check-out menggunakan metode ${
-        METODE_CONFIG[metodeTerpilih]?.label ?? metodeTerpilih
-      }?`
-    )
-  ) {
-    return;
-  }
-
-  try {
-    setSubmitting(true);
-    setActiveAction("checkout");
-    setError("");
-    setNotice("");
-
-    let lokasi = null;
-
-    if (METODE_CONFIG[metodeTerpilih]?.requiresLocation) {
-      lokasi = await getCurrentLocation();
-    }
-
-    const payload = {
-      metode: metodeTerpilih,
-      ...(lokasi
-        ? {
-            lintang: Number(lokasi.lintang),
-            bujur: Number(lokasi.bujur),
-          }
-        : {}),
-      ...(keterangan.trim()
-        ? { keterangan: keterangan.trim() }
-        : {}),
-    };
-
-    console.info("[PRESENSI SHIFT] Payload check-out:", {
-      ...payload,
-      akurasiGPS: lokasi?.akurasi ?? null,
-    });
-
-    await checkOutShift(payload);
-
-    setNotice(
-      `Check-out berhasil dicatat menggunakan ${
-        METODE_CONFIG[metodeTerpilih]?.label ?? metodeTerpilih
-      }${
+      setNotice(
         lokasi
-          ? `. Akurasi GPS ±${Math.round(lokasi.akurasi)} meter.`
-          : "."
-      }`
-    );
+          ? `Check-in berhasil dicatat menggunakan ${
+              METODE_CONFIG[metodeTerpilih]?.label ?? metodeTerpilih
+            }. Akurasi GPS ±${Math.round(lokasi.akurasi)} meter.`
+          : `Check-in berhasil dicatat menggunakan ${
+              METODE_CONFIG[metodeTerpilih]?.label ?? metodeTerpilih
+            }.`
+      );
 
-    setKeterangan("");
-    await fetchHistory(false);
-  } catch (err) {
-    console.error("[PRESENSI SHIFT] Check-out gagal:", err);
-    setError(getErrorMessage(err));
-  } finally {
-    setSubmitting(false);
-    setActiveAction("");
-  }
-};
+      setKeterangan("");
+      setSnapshot(null);
+      stopCamera();
 
+      await fetchHistory(false);
+    } catch (err) {
+      console.error("[PRESENSI SHIFT] Check-in gagal:", err);
+      setError(getErrorMessage(err));
+    } finally {
+      setSubmitting(false);
+      setActiveAction("");
+    }
+  };
+
+  const handleCheckOut = async () => {
+    if (submitting || loading || !canCheckOut) return;
+
+    if (metodeLoading) {
+      setError("Sedang memuat konfigurasi metode presensi.");
+      return;
+    }
+
+    if (
+      !metodeTerpilih ||
+      !metodeAktif.includes(metodeTerpilih)
+    ) {
+      setError("Pilih metode presensi yang aktif terlebih dahulu.");
+      return;
+    }
+
+    if (
+      !window.confirm(
+        `Lakukan check-out menggunakan metode ${
+          METODE_CONFIG[metodeTerpilih]?.label ?? metodeTerpilih
+        }?`
+      )
+    ) {
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      setActiveAction("checkout");
+      setError("");
+      setNotice("");
+
+      let lokasi = null;
+
+      if (METODE_CONFIG[metodeTerpilih]?.requiresLocation) {
+        lokasi = await getCurrentLocation();
+      }
+
+      const payload = {
+        metode: metodeTerpilih,
+        ...(lokasi
+          ? {
+              lintang: Number(lokasi.lintang),
+              bujur: Number(lokasi.bujur),
+            }
+          : {}),
+        ...(keterangan.trim()
+          ? { keterangan: keterangan.trim() }
+          : {}),
+      };
+
+      console.info("[PRESENSI SHIFT] Check-out", {
+        metode: payload.metode,
+        lintang: payload.lintang ?? null,
+        bujur: payload.bujur ?? null,
+        akurasiGPS: lokasi?.akurasi ?? null,
+      });
+
+      await checkOutShift(payload);
+
+      setNotice(
+        `Check-out berhasil dicatat menggunakan ${
+          METODE_CONFIG[metodeTerpilih]?.label ?? metodeTerpilih
+        }${
+          lokasi
+            ? `. Akurasi GPS ±${Math.round(lokasi.akurasi)} meter.`
+            : "."
+        }`
+      );
+
+      setKeterangan("");
+      await fetchHistory(false);
+    } catch (err) {
+      console.error("[PRESENSI SHIFT] Check-out gagal:", err);
+      setError(getErrorMessage(err));
+    } finally {
+      setSubmitting(false);
+      setActiveAction("");
+    }
+  };
 
   const totalPages = Math.max(
     1,
@@ -1193,9 +1343,11 @@ const handleCheckOut = async () => {
                             <button
                               key={method.value}
                               type="button"
-                              onClick={() =>
-                                setMetodeTerpilih(method.value)
-                              }
+                              onClick={() => {
+                                setMetodeTerpilih(method.value);
+                                setError("");
+                                setNotice("");
+                              }}
                               disabled={submitting}
                               aria-pressed={selected}
                               className={`text-left p-4 rounded-xl border transition disabled:opacity-50 ${
@@ -1231,6 +1383,134 @@ const handleCheckOut = async () => {
                             </button>
                           );
                         })}
+                      </div>
+                    )}
+
+                    {/* UI kamera hanya tampil saat Face ID dipilih */}
+                    {metodeTerpilih === "face" && (
+                      <div className="mt-4 p-4 rounded-xl border theme-border theme-card-soft space-y-3">
+                        <div className="flex items-start gap-3">
+                          <div className="p-2 rounded-lg theme-info shrink-0">
+                            <Camera size={19} />
+                          </div>
+
+                          <div className="min-w-0">
+                            <p className="text-sm font-semibold theme-text">
+                              Verifikasi wajah
+                            </p>
+                            <p className="text-xs theme-text-muted mt-1 leading-5">
+                              Buka kamera, posisikan wajah di tengah, lalu
+                              ambil foto sebelum melakukan check-in.
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="overflow-hidden rounded-xl border theme-border bg-black">
+                          <video
+                            ref={videoRef}
+                            autoPlay
+                            muted
+                            playsInline
+                            className="block w-full max-h-[360px] object-contain"
+                          />
+                        </div>
+
+                        <canvas
+                          ref={canvasRef}
+                          className="hidden"
+                        />
+
+                        {snapshot && (
+                          <div className="flex items-start gap-2 p-3 rounded-lg border theme-success">
+                            <CheckCircle2
+                              size={17}
+                              className="shrink-0 mt-0.5"
+                            />
+                            <div className="min-w-0">
+                              <p className="text-sm font-medium">
+                                Foto wajah berhasil diambil
+                              </p>
+                              <p className="text-xs mt-1">
+                                Ukuran foto:{" "}
+                                {Math.max(
+                                  1,
+                                  Math.round(snapshot.size / 1024)
+                                )}{" "}
+                                KB. Foto akan dikirim saat check-in.
+                              </p>
+                            </div>
+                          </div>
+                        )}
+
+                        {cameraError && (
+                          <div className="flex items-start gap-2 p-3 rounded-lg border theme-danger">
+                            <CircleAlert
+                              size={17}
+                              className="shrink-0 mt-0.5"
+                            />
+                            <p className="text-sm break-words">
+                              {cameraError}
+                            </p>
+                          </div>
+                        )}
+
+                        <div className="flex flex-col sm:flex-row gap-2">
+                          {!cameraStream ? (
+                            <button
+                              type="button"
+                              onClick={startCamera}
+                              disabled={submitting}
+                              className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl theme-primary font-semibold text-sm transition disabled:opacity-50"
+                            >
+                              <Camera size={17} />
+                              Buka kamera
+                            </button>
+                          ) : (
+                            <>
+                              <button
+                                type="button"
+                                onClick={captureSnapshot}
+                                disabled={submitting}
+                                className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl theme-primary font-semibold text-sm transition disabled:opacity-50"
+                              >
+                                <Camera size={17} />
+                                Ambil foto
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setSnapshot(null);
+                                  setCameraError("");
+                                  captureSnapshot();
+                                }}
+                                disabled={submitting}
+                                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border theme-border theme-card theme-text-secondary font-semibold text-sm transition disabled:opacity-50"
+                              >
+                                <RotateCcw size={16} />
+                                Ambil ulang
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={stopCamera}
+                                disabled={submitting}
+                                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border theme-border theme-card theme-text-secondary font-semibold text-sm transition disabled:opacity-50"
+                              >
+                                <CameraOff size={16} />
+                                Tutup kamera
+                              </button>
+                            </>
+                          )}
+                        </div>
+
+                        {!snapshot && (
+                          <p className="text-xs theme-text-muted leading-5">
+                            Foto wajib tersedia sebelum check-in dengan
+                            metode Face ID. Mengaktifkan kamera saja belum
+                            mengambil foto.
+                          </p>
+                        )}
                       </div>
                     )}
 
@@ -1273,9 +1553,9 @@ const handleCheckOut = async () => {
                               ? " GPS perangkat digunakan sesuai validasi Backend."
                               : " Metode akan dikirim ke endpoint presensi Backend."}
                             {metodeTerpilih === "face" &&
-                              " Endpoint shift yang digunakan belum melakukan verifikasi foto wajah."}
+                              " Foto wajib diambil terlebih dahulu. Backend akan memverifikasi foto ketika check-in."}
                             {metodeTerpilih === "barcode" &&
-                              " Pastikan Backend memvalidasi barcode untuk endpoint shift."}
+                              " Pastikan Backend benar-benar memvalidasi barcode pada endpoint shift."}
                           </>
                         ) : (
                           "Belum ada metode presensi yang dapat dipilih."
@@ -1293,7 +1573,8 @@ const handleCheckOut = async () => {
                         submitting ||
                         metodeLoading ||
                         !metodeTerpilih ||
-                        !canCheckIn
+                        !canCheckIn ||
+                        (metodeTerpilih === "face" && !snapshot)
                       }
                       className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl theme-primary font-semibold text-sm transition disabled:opacity-50 disabled:cursor-not-allowed"
                     >
@@ -1310,7 +1591,9 @@ const handleCheckOut = async () => {
                         ? "Sudah check-in"
                         : activeAction === "checkin"
                           ? "Memproses check-in..."
-                          : "Check-in"}
+                          : metodeTerpilih === "face" && !snapshot
+                            ? "Ambil foto untuk check-in"
+                            : "Check-in"}
                     </button>
 
                     <button
@@ -1663,9 +1946,9 @@ const handleCheckOut = async () => {
                   <p className="text-xs theme-text-muted mt-1 leading-5">
                     Riwayat diperbarui otomatis setiap 10 detik saat halaman
                     aktif. Metode presensi mengikuti pengaturan Backend
-                    sekolah. Verifikasi wajah dan barcode harus benar-benar
-                    didukung oleh endpoint Backend sebelum dianggap
-                    terverifikasi.
+                    sekolah. Face ID mengirim foto untuk verifikasi Backend.
+                    Dukungan barcode tetap bergantung pada validasi endpoint
+                    Backend.
                   </p>
                 </div>
               </div>

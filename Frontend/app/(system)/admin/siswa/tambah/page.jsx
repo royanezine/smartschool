@@ -305,34 +305,8 @@ export default function TambahSiswaPage() {
     (kelas) => String(kelas.id) === String(form.kelasId)
   );
 
-  const hasExtraData = Boolean(
-    form.kelasId ||
-      form.nipd ||
-      form.nik ||
-      form.tempatLahir ||
-      form.tanggalLahir ||
-      form.noTelepon ||
-      form.alamat ||
-      form.alamatKtp ||
-      form.alamatDomisili ||
-      !form.alamatSesuaiDomisili ||
-      form.provinsi ||
-      form.kotaKabupaten ||
-      form.kecamatan ||
-      form.kelurahan ||
-      form.kodePos ||
-      form.namaAyah ||
-      form.nikAyah ||
-      form.pekerjaanAyah ||
-      form.noHpAyah ||
-      form.namaIbu ||
-      form.nikIbu ||
-      form.pekerjaanIbu ||
-      form.noHpIbu ||
-      form.namaWaliPesertaDidik
-  );
+ 
 
-  /* ---------- IMPORT EXCEL ---------- */
   const handleDownloadTemplate = async () => {
     setImportError("");
     setImportSuccess("");
@@ -424,119 +398,188 @@ export default function TambahSiswaPage() {
     }
   };
 
-  const handleImportSiswa = async () => {
-    setImportError("");
-    setImportSuccess("");
 
-    if (!importFile) {
-      setImportError("Pilih file Excel terlebih dahulu.");
+
+const handleImportSiswa = async () => {
+  setImportError("");
+  setImportSuccess("");
+
+  if (!importFile) {
+    setImportError("Pilih file Excel terlebih dahulu.");
+    return;
+  }
+
+  setImporting(true);
+
+  try {
+    const response = await importSiswaExcel(importFile);
+
+    const message =
+      response?.message ||
+      response?.data?.message ||
+      "Import selesai. Silakan periksa daftar siswa.";
+
+    setImportSuccess(message);
+    setImportFile(null);
+
+    const input = document.getElementById("fileImportSiswa");
+    if (input) input.value = "";
+
+    // Beri waktu agar pesan sukses terlihat.
+    window.setTimeout(() => {
+      router.push("/admin/siswa");
+      router.refresh();
+    }, 1200);
+  } catch (err) {
+    console.error("Gagal mengimport siswa:", err);
+
+    setImportError(
+      err?.message || "Gagal mengimport data siswa."
+    );
+  } finally {
+    setImporting(false);
+  }
+};
+
+
+
+
+const handleSubmit = async (event) => {
+  event.preventDefault();
+  setError("");
+  setSuccess("");
+
+  if (
+    !form.namaLengkap.trim() ||
+    !form.namaPengguna.trim() ||
+    !form.email.trim() ||
+    !form.kataSandi
+  ) {
+    setError(
+      "Nama lengkap, username, email, dan kata sandi wajib diisi."
+    );
+    return;
+  }
+
+  if (form.kataSandi.length < 8) {
+    setError("Kata sandi minimal 8 karakter.");
+    return;
+  }
+
+  if (
+    form.jenisKelamin &&
+    !["laki-laki", "perempuan"].includes(form.jenisKelamin)
+  ) {
+    setError("Jenis kelamin tidak valid.");
+    return;
+  }
+
+  if (form.nisn.trim() && !/^\d+$/.test(form.nisn.trim())) {
+    setError("NISN harus berisi angka saja.");
+    return;
+  }
+
+  const validasiNIK = [
+    ["NIK", form.nik],
+    ["NIK ayah", form.nikAyah],
+    ["NIK ibu", form.nikIbu],
+  ];
+
+  for (const [label, value] of validasiNIK) {
+    if (value.trim() && !/^\d{16}$/.test(value.trim())) {
+      setError(`${label} harus terdiri dari tepat 16 angka.`);
       return;
     }
+  }
 
-    setImporting(true);
+  const validasiTelepon = [
+    ["Nomor telepon", form.noTelepon],
+    ["Nomor HP ayah", form.noHpAyah],
+    ["Nomor HP ibu", form.noHpIbu],
+  ];
 
-    try {
-      const response = await importSiswaExcel(importFile);
-
-      setImportSuccess(
-        response?.message ||
-          response?.data?.message ||
-          "Permintaan import siswa berhasil diproses."
-      );
-
-      setImportFile(null);
-
-      const input = document.getElementById("fileImportSiswa");
-
-      if (input) {
-        input.value = "";
-      }
-    } catch (err) {
-      setImportError(
-        err?.message || "Gagal mengimport data siswa."
-      );
-    } finally {
-      setImporting(false);
+  for (const [label, value] of validasiTelepon) {
+    if (value.trim() && !/^[0-9+\-\s()]+$/.test(value.trim())) {
+      setError(`${label} tidak valid.`);
+      return;
     }
+  }
+
+  setLoading(true);
+
+  const optionalText = (value) => {
+    const normalized = String(value ?? "").trim();
+    return normalized || null;
   };
 
-  /* ---------- MANUAL ---------- */
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    setError("");
-    setSuccess("");
+  try {
+    const payload = {
+      namaLengkap: form.namaLengkap.trim(),
+      namaPengguna: form.namaPengguna.trim(),
+      email: form.email.trim(),
+      kataSandi: form.kataSandi,
 
-    if (
-      !form.namaLengkap.trim() ||
-      !form.namaPengguna.trim() ||
-      !form.email.trim() ||
-      !form.kataSandi
-    ) {
-      setError(
-        "Nama lengkap, username, email, dan kata sandi wajib diisi."
-      );
-      return;
-    }
+      nisn: optionalText(form.nisn),
+      nis: optionalText(form.nis),
+      nipd: optionalText(form.nipd),
 
-    if (form.kataSandi.length < 8) {
-      setError("Kata sandi minimal 8 karakter.");
-      return;
-    }
+      // Jangan kirim null saat belum memilih kelas.
+      ...(form.kelasId ? { kelasId: form.kelasId } : {}),
 
-    if (
-      form.jenisKelamin &&
-      !["laki-laki", "perempuan"].includes(form.jenisKelamin)
-    ) {
-      setError("Jenis kelamin tidak valid.");
-      return;
-    }
+      nik: optionalText(form.nik),
+      jenisKelamin: optionalText(form.jenisKelamin),
+      tempatLahir: optionalText(form.tempatLahir),
+      tanggalLahir: form.tanggalLahir || null,
+      noTelepon: optionalText(form.noTelepon),
 
-    if (form.nisn.trim() && !/^\d+$/.test(form.nisn.trim())) {
-      setError("NISN harus berisi angka saja.");
-      return;
-    }
+      alamat: optionalText(form.alamat),
+      alamatKtp: optionalText(form.alamatKtp),
+      alamatDomisili: form.alamatSesuaiDomisili
+        ? optionalText(form.alamatKtp || form.alamat)
+        : optionalText(form.alamatDomisili),
+      alamatSesuaiDomisili: Boolean(form.alamatSesuaiDomisili),
 
-    if (form.nik.trim() && !/^\d+$/.test(form.nik.trim())) {
-      setError("NIK harus berisi angka saja.");
-      return;
-    }
+      provinsi: optionalText(form.provinsi),
+      kotaKabupaten: optionalText(form.kotaKabupaten),
+      kecamatan: optionalText(form.kecamatan),
+      kelurahan: optionalText(form.kelurahan),
+      kodePos: optionalText(form.kodePos),
 
-    if (hasExtraData) {
-      setError(
-        "Form berisi data tambahan yang belum didukung endpoint saat ini. Kosongkan field tambahan dan pilihan kelas sebelum menyimpan."
-      );
-      return;
-    }
+      namaAyah: optionalText(form.namaAyah),
+      nikAyah: optionalText(form.nikAyah),
+      pekerjaanAyah: optionalText(form.pekerjaanAyah),
+      noHpAyah: optionalText(form.noHpAyah),
 
-    setLoading(true);
+      namaIbu: optionalText(form.namaIbu),
+      nikIbu: optionalText(form.nikIbu),
+      pekerjaanIbu: optionalText(form.pekerjaanIbu),
+      noHpIbu: optionalText(form.noHpIbu),
 
-    try {
-      const payload = {
-        namaLengkap: form.namaLengkap.trim(),
-        namaPengguna: form.namaPengguna.trim(),
-        email: form.email.trim(),
-        kataSandi: form.kataSandi,
-        nisn: form.nisn.trim() || undefined,
-        nis: form.nis.trim() || undefined,
-        jenisKelamin: form.jenisKelamin || undefined,
-      };
+      namaWaliPesertaDidik: optionalText(
+        form.namaWaliPesertaDidik
+      ),
+    };
 
-      await createSiswa(payload);
+    await createSiswa(payload);
 
-      setSuccess(
-        "Data dasar siswa berhasil dibuat. Data tambahan dan penempatan kelas belum disimpan karena endpoint saat ini belum mendukungnya."
-      );
+    setSuccess("Data siswa berhasil disimpan.");
 
-      window.setTimeout(() => {
-        router.push("/admin/siswa");
-        router.refresh();
-      }, 1200);
-    } catch (err) {
-      setError(err?.message || "Gagal menambahkan data siswa.");
-    } finally {
-      setLoading(false);
-    }
-  };
+    window.setTimeout(() => {
+      router.push("/admin/siswa");
+      router.refresh();
+    }, 1200);
+  } catch (err) {
+    console.error("Gagal menambahkan siswa:", err);
+
+    setError(
+      err?.message ||
+        "Gagal menambahkan data siswa. Silakan coba kembali."
+    );
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-slate-50">
@@ -770,13 +813,12 @@ export default function TambahSiswaPage() {
                   <Info size={20} className="mt-0.5 shrink-0" />
                   <div>
                     <p className="font-semibold">Catatan</p>
-                    <p className="mt-1 leading-6">
-                      Endpoint tambah siswa saat ini baru menyimpan akun, nama,
-                      NIS, NISN, dan jenis kelamin. Field kelas, alamat,
-                      identitas tambahan, dan orang tua belum disimpan — form
-                      akan menolak pengiriman jika field tersebut diisi agar
-                      data tidak hilang.
-                    </p>
+                   <p className="mt-1 leading-6">
+  Lengkapi informasi akun dan data siswa sesuai kebutuhan.
+  Field yang tidak wajib boleh dikosongkan. Pastikan NIK
+  berisi 16 angka jika diisi, dan pilih kelas jika siswa
+  akan langsung ditempatkan ke kelas.
+</p>
                   </div>
                 </div>
 
@@ -1243,15 +1285,15 @@ export default function TambahSiswaPage() {
                     />
 
                     <div className="sm:col-span-2">
-                      <Field
-                        label="Nama Wali Peserta Didik"
-                        name="namaWaliPesertaDidik"
-                        value={form.namaWaliPesertaDidik}
-                        onChange={handleChange}
-                        placeholder="Isi jika siswa memiliki wali"
-                        maxLength={100}
-                        disabled={loading}
-                      />
+                     <Field
+  label="Nama Wali Peserta Didik"
+  name="namaWaliPesertaDidik"
+  value={form.namaWaliPesertaDidik}
+  onChange={handleChange}
+  placeholder="Isi jika siswa memiliki wali"
+  maxLength={20}
+  disabled={loading}
+/>
                     </div>
                   </Section>
 

@@ -6,9 +6,39 @@ export interface CreateSiswaData {
   email: string;
   kataSandi: string;
   namaLengkap: string;
-  nisn?: string;
-  nis?: string;
-  jenisKelamin?: string;
+
+  nisn?: string | null;
+  nis?: string | null;
+  nipd?: string | null;
+  kelasId?: string | null;
+  tahunAjaranId?: string;
+
+  nik?: string | null;
+  jenisKelamin?: string | null;
+  tempatLahir?: string | null;
+  tanggalLahir?: string | null;
+  noTelepon?: string | null;
+
+  alamat?: string | null;
+  alamatKtp?: string | null;
+  alamatDomisili?: string | null;
+  alamatSesuaiDomisili?: boolean;
+  provinsi?: string | null;
+  kotaKabupaten?: string | null;
+  kecamatan?: string | null;
+  kelurahan?: string | null;
+  kodePos?: string | null;
+
+  namaAyah?: string | null;
+  nikAyah?: string | null;
+  pekerjaanAyah?: string | null;
+  noHpAyah?: string | null;
+  namaIbu?: string | null;
+  nikIbu?: string | null;
+  pekerjaanIbu?: string | null;
+  noHpIbu?: string | null;
+  namaWaliPesertaDidik?: string | null;
+  status?: "aktif" | "nonaktif";
 }
 
 export interface KelasSaya {
@@ -18,12 +48,59 @@ export interface KelasSaya {
   tahunAjaranId: string;
 }
 
+export interface SiswaQuery {
+  page?: number;
+  limit?: number;
+  search?: string;
+}
+
+export interface UpdateSiswaData {
+  namaLengkap?: string;
+  namaPengguna?: string;
+  email?: string;
+  kataSandi?: string;
+
+  nis?: string | null;
+  nisn?: string | null;
+  nipd?: string | null;
+  kelasId?: string | null;
+  tahunAjaranId?: string;
+
+  nik?: string | null;
+  jenisKelamin?: string | null;
+  tempatLahir?: string | null;
+  tanggalLahir?: string | null;
+  noTelepon?: string | null;
+
+  alamat?: string | null;
+  alamatKtp?: string | null;
+  alamatDomisili?: string | null;
+  alamatSesuaiDomisili?: boolean;
+  provinsi?: string | null;
+  kotaKabupaten?: string | null;
+  kecamatan?: string | null;
+  kelurahan?: string | null;
+  kodePos?: string | null;
+
+  namaAyah?: string | null;
+  nikAyah?: string | null;
+  pekerjaanAyah?: string | null;
+  noHpAyah?: string | null;
+  namaIbu?: string | null;
+  nikIbu?: string | null;
+  pekerjaanIbu?: string | null;
+  noHpIbu?: string | null;
+  namaWaliPesertaDidik?: string | null;
+
+  status?: "aktif" | "nonaktif";
+}
+
 export async function createSiswa(data: CreateSiswaData) {
-  if (!data.namaPengguna.trim()) {
+  if (!data.namaPengguna?.trim()) {
     throw new Error("Username wajib diisi.");
   }
 
-  if (!data.email.trim()) {
+  if (!data.email?.trim()) {
     throw new Error("Email wajib diisi.");
   }
 
@@ -31,21 +108,27 @@ export async function createSiswa(data: CreateSiswaData) {
     throw new Error("Kata sandi wajib diisi.");
   }
 
-  if (!data.namaLengkap.trim()) {
+  if (!data.namaLengkap?.trim()) {
     throw new Error("Nama lengkap wajib diisi.");
   }
 
+  if (data.kataSandi.length < 8) {
+    throw new Error("Kata sandi minimal 8 karakter.");
+  }
+
+  // Pertahankan field profil yang dikirim oleh page.
+  // Jangan mengirim kelasId: null saat siswa belum dipilihkan kelas.
+  const payload: CreateSiswaData = {
+    ...data,
+    namaPengguna: data.namaPengguna.trim(),
+    email: data.email.trim(),
+    namaLengkap: data.namaLengkap.trim(),
+    ...(data.kelasId ? { kelasId: data.kelasId } : { kelasId: undefined }),
+  };
+
   return apiFetch("/api/siswa", {
     method: "POST",
-    body: JSON.stringify({
-      namaPengguna: data.namaPengguna.trim(),
-      email: data.email.trim(),
-      kataSandi: data.kataSandi,
-      namaLengkap: data.namaLengkap.trim(),
-      nisn: data.nisn?.trim() || undefined,
-      nis: data.nis?.trim() || undefined,
-      jenisKelamin: data.jenisKelamin || undefined,
-    }),
+    body: JSON.stringify(payload),
   });
 }
 
@@ -62,51 +145,54 @@ export async function getKelasSaya(): Promise<KelasSaya> {
   };
 }
 
-export interface SiswaQuery {
-  page?: number;
-  limit?: number;
-  search?: string;
-}
-
-export interface UpdateSiswaData {
-  namaLengkap?: string;
-  email?: string;
-  nis?: string;
-  nisn?: string;
-  status?: string;
-  jenisKelamin?: string;
-  noTelepon?: string;
-}
-
 export async function getSemuaSiswa(params: SiswaQuery = {}) {
   const query = new URLSearchParams();
+
   if (params.page) query.set("page", String(params.page));
+
   query.set("limit", String(params.limit ?? 1000));
+
   if (params.search) query.set("search", params.search);
+
   const qStr = query.toString();
+
   return apiFetch(`/api/siswa${qStr ? `?${qStr}` : ""}`, {
     method: "GET",
   });
 }
 
-export async function updateSiswa(id: string, data: UpdateSiswaData) {
-  if (!id) throw new Error("ID siswa wajib diisi.");
+export async function updateSiswa(
+  id: string,
+  data: UpdateSiswaData
+) {
+  if (!id) {
+    throw new Error("ID siswa wajib diisi.");
+  }
+
   return apiFetch(`/api/siswa/${id}`, {
     method: "PUT",
     body: JSON.stringify(data),
   });
 }
+
 export async function adminResetPin(userId: string) {
-  if (!userId) throw new Error("ID pengguna wajib diisi.");
-  return apiFetch(`/api/auth/pin/admin-reset/${encodeURIComponent(userId)}`, {
-    method: "POST",
-  });
+  if (!userId) {
+    throw new Error("ID pengguna wajib diisi.");
+  }
+
+  return apiFetch(
+    `/api/auth/pin/admin-reset/${encodeURIComponent(userId)}`,
+    {
+      method: "POST",
+    }
+  );
 }
 
 export async function getSiswaMe(): Promise<any> {
-  return apiFetch("/api/siswa/me", { method: "GET" });
+  return apiFetch("/api/siswa/me", {
+    method: "GET",
+  });
 }
-
 
 export async function importSiswaExcel(file: File) {
   if (!file) {
@@ -117,6 +203,10 @@ export async function importSiswaExcel(file: File) {
     throw new Error("Format file harus Excel .xlsx.");
   }
 
+  if (file.size === 0) {
+    throw new Error("File Excel yang dipilih kosong.");
+  }
+
   const formData = new FormData();
   formData.append("file", file);
 
@@ -125,4 +215,3 @@ export async function importSiswaExcel(file: File) {
     body: formData,
   });
 }
-
