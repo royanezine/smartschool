@@ -1010,3 +1010,4 @@ export const getRiwayatAbsensiSiswa = async (
     next(error);
   }
 };
+

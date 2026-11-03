@@ -2,24 +2,39 @@ import { z } from "zod";
 
 const tipeBuku = z.enum(["FISIK", "EBOOK"]);
 
+const kosongJadiUndefined = (value: unknown) =>
+  value === "" || value === null ? undefined : value;
+
+const angkaOpsional = (schema: z.ZodNumber) =>
+  z.preprocess(kosongJadiUndefined, z.coerce.number().pipe(schema).optional());
+
+const teksOpsional = (max?: number) => {
+  const base = max ? z.string().max(max) : z.string();
+  return z.preprocess(kosongJadiUndefined, base.optional());
+};
+
 export const createBukuSchema = z.object({
   body: z.object({
     kodeBuku: z.string().min(1).max(50),
     judul: z.string().min(1).max(150),
-    penulis: z.string().max(100).optional(),
-    penerbit: z.string().max(100).optional(),
-    tahunTerbit: z.number().int().positive().optional(),
-    isbn: z.string().max(30).optional(),
+    penulis: teksOpsional(100),
+    penerbit: teksOpsional(100),
+    tahunTerbit: angkaOpsional(z.number().int().positive()),
+    isbn: teksOpsional(30),
 
     tipe: tipeBuku,
 
-    kategori: z.string().max(50).optional(),
-    deskripsi: z.string().optional(),
-    coverUrl: z.string().url().optional(),
-    urlEbook: z.string().url().optional(),
+    kategori: teksOpsional(50),
+    mataPelajaranId: teksOpsional(),
+    deskripsi: teksOpsional(),
+    coverUrl: teksOpsional(255),
+    urlEbook: teksOpsional(255),
 
-    jumlah: z.number().int().min(0).default(0),
-    status: z.string().max(20).optional(),
+    jumlah: z.preprocess(
+      kosongJadiUndefined,
+      z.coerce.number().int().min(0).default(0),
+    ),
+    status: teksOpsional(20),
   }),
 
   params: z.object({}),
@@ -31,17 +46,18 @@ export const updateBukuSchema = z.object({
   body: z.object({
     kodeBuku: z.string().min(1).max(50).optional(),
     judul: z.string().min(1).max(150).optional(),
-    penulis: z.string().max(100).optional(),
-    penerbit: z.string().max(100).optional(),
-    tahunTerbit: z.number().int().positive().optional(),
-    isbn: z.string().max(30).optional(),
+    penulis: teksOpsional(100),
+    penerbit: teksOpsional(100),
+    tahunTerbit: angkaOpsional(z.number().int().positive()),
+    isbn: teksOpsional(30),
     tipe: tipeBuku.optional(),
-    kategori: z.string().max(50).optional(),
-    deskripsi: z.string().optional(),
-    coverUrl: z.string().url().optional(),
-    urlEbook: z.string().url().optional(),
-    jumlah: z.number().int().min(0).optional(),
-    status: z.string().max(20).optional(),
+    kategori: teksOpsional(50),
+    mataPelajaranId: teksOpsional(),
+    deskripsi: teksOpsional(),
+    coverUrl: teksOpsional(255),
+    urlEbook: teksOpsional(255),
+    jumlah: angkaOpsional(z.number().int().min(0)),
+    status: teksOpsional(20),
   }),
 
   params: z.object({
@@ -55,7 +71,7 @@ export const peminjamanBukuSchema = z.object({
   body: z.object({
     bukuId: z.string().uuid(),
     tanggalJatuhTempo: z.string().date(),
-    catatan: z.string().optional(),
+    catatan: teksOpsional(),
   }),
 
   params: z.object({}),
@@ -65,7 +81,7 @@ export const peminjamanBukuSchema = z.object({
 
 export const pengembalianBukuSchema = z.object({
   body: z.object({
-    catatan: z.string().optional(),
+    catatan: teksOpsional(),
   }),
 
   params: z.object({

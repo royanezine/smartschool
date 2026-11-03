@@ -55,6 +55,7 @@ import penggajianRoutes from "./routes/penggajian.routes";
 
 import sekolahRoutes from "./routes/sekolah.routes";
 import dashboardSiswaRoutes from "./routes/dashboardSiswa.routes";
+import shiftSiswaRoutes from "./routes/shiftSiswa.routes";
 
 dotenv.config();
 
@@ -148,7 +149,7 @@ app.use("/api/penggajian", penggajianRoutes);
 app.use("/api/keuangan", keuanganRoutes);
 app.use("/api/dashboard/siswa", dashboardSiswaRoutes);
 app.use("/api/sekolah", sekolahRoutes);
-
+app.use("/shift-siswa", shiftSiswaRoutes);
 
 app.use(globalErrorHandler);
 

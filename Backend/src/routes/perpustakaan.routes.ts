@@ -19,7 +19,7 @@ import {
   pengembalianBukuSchema,
 } from "../validations/perpustakaan.validation";
 
-import { validate } from "../middlewares/validation.middleware";
+import { validateRequest } from "../middlewares/validation.middleware";
 import { requireSekolah } from "../middlewares/perpustakaan.middleware";
 import { authenticate } from "../middlewares/auth.middleware";
 import { authorizeRoles } from "../middlewares/role.middleware";
@@ -39,7 +39,7 @@ router.post(
     { name: "coverUrl", maxCount: 1 },
     { name: "urlEbook", maxCount: 1 },
   ]),
-  validate(createBukuSchema),
+  validateRequest(createBukuSchema),
   createBuku,
 );
 
@@ -50,7 +50,7 @@ router.put(
     { name: "coverUrl", maxCount: 1 },
     { name: "urlEbook", maxCount: 1 },
   ]),
-  validate(updateBukuSchema),
+  validateRequest(updateBukuSchema),
   updateBuku,
 );
 
@@ -62,12 +62,16 @@ router.delete(
 
 router.get("/peminjaman", getPeminjaman);
 
-router.post("/peminjaman", validate(peminjamanBukuSchema), pinjamBuku);
+router.post(
+  "/peminjaman",
+  validateRequest(peminjamanBukuSchema),
+  pinjamBuku,
+);
 
 router.put(
   "/peminjaman/:id/kembali",
   authorizeRoles("super_admin", "admin_sekolah", "guru"),
-  validate(pengembalianBukuSchema),
+  validateRequest(pengembalianBukuSchema),
   kembalikanBuku,
 );
 

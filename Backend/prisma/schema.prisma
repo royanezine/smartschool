@@ -254,6 +254,7 @@ model Sekolah {
   kategoriJabatan KategoriJabatan[]
   tarifJabatan    TarifJabatan[]
   shiftKerja      ShiftKerja[]
+  shiftSiswa      ShiftSiswa[]
   penggajian      Penggajian[]
   absensi         Absensi[]
 
@@ -1757,6 +1758,28 @@ model ShiftKerja {
 
   @@index([sekolahId])
   @@map("shift_kerja")
+}
+
+model ShiftSiswa {
+  id             String  @id @default(uuid())
+  sekolahId      String  @map("sekolah_id")
+  dibuatOleh     String? @map("dibuat_oleh")
+  diperbaruiOleh String? @map("diperbarui_oleh")
+
+  kode                    String @db.VarChar(10)
+  nama                    String @db.VarChar(50)
+  jamMasuk                String @map("jam_masuk") @db.VarChar(5)
+  jamKeluar               String @map("jam_keluar") @db.VarChar(5)
+  toleransiTerlambatMenit Int    @default(15) @map("toleransi_terlambat_menit")
+
+  dibuatPada     DateTime @default(now()) @map("dibuat_pada") @db.Timestamp()
+  diperbaruiPada DateTime @updatedAt @map("diperbarui_pada") @db.Timestamp()
+
+  sekolah Sekolah @relation(fields: [sekolahId], references: [id])
+
+  @@unique([sekolahId, kode])
+  @@index([sekolahId])
+  @@map("shift_siswa")
 }
 
 model Penggajian {
