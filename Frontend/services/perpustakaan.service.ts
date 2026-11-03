@@ -16,6 +16,7 @@ export type PeminjamanParams = {
 };
 
 export type BukuPayload = {
+  sekolahId?: string;
   kodeBuku: string;
   judul: string;
   penulis?: string;
@@ -95,14 +96,37 @@ export async function getBukuById(id: string) {
 
 
 export async function createBuku(payload: BukuPayload) {
-  const cleanPayload = { ...payload };
+  const cleanPayload: Record<string, any> = { ...payload };
 
-  if (!cleanPayload.coverUrl?.trim()) {
-    delete cleanPayload.coverUrl;
+  Object.keys(cleanPayload).forEach((key) => {
+    if (typeof cleanPayload[key] === "string") {
+      const trimmed = cleanPayload[key].trim();
+      if (!trimmed) {
+        delete cleanPayload[key];
+      } else {
+        cleanPayload[key] = trimmed;
+      }
+    } else if (cleanPayload[key] === undefined) {
+      delete cleanPayload[key];
+    }
+  });
+
+  if (cleanPayload.coverUrl) {
+    if (/^(?:data:|blob:|javascript:)/i.test(cleanPayload.coverUrl)) {
+      throw new Error("Cover URL tidak boleh berupa data URL atau base64. Gunakan URL web langsung.");
+    }
+    if (cleanPayload.coverUrl.length > 255) {
+      throw new Error(`Cover URL melebihi batas 255 karakter (saat ini ${cleanPayload.coverUrl.length} karakter).`);
+    }
   }
 
-  if (!cleanPayload.urlEbook?.trim()) {
-    delete cleanPayload.urlEbook;
+  if (cleanPayload.urlEbook) {
+    if (/^(?:data:|blob:|javascript:)/i.test(cleanPayload.urlEbook)) {
+      throw new Error("URL E-Book tidak boleh berupa data URL atau base64. Gunakan URL web langsung.");
+    }
+    if (cleanPayload.urlEbook.length > 255) {
+      throw new Error(`URL E-Book melebihi batas 255 karakter (saat ini ${cleanPayload.urlEbook.length} karakter).`);
+    }
   }
 
   const response = await apiFetch(`${BASE_PATH}/buku`, {
@@ -121,11 +145,47 @@ export async function updateBuku(
   id: string,
   payload: Partial<BukuPayload>,
 ) {
+  const cleanPayload: Record<string, any> = { ...payload };
+
+  Object.keys(cleanPayload).forEach((key) => {
+    if (typeof cleanPayload[key] === "string") {
+      const trimmed = cleanPayload[key].trim();
+      if (!trimmed) {
+        delete cleanPayload[key];
+      } else {
+        cleanPayload[key] = trimmed;
+      }
+    } else if (cleanPayload[key] === undefined) {
+      delete cleanPayload[key];
+    }
+  });
+
+  if (cleanPayload.coverUrl) {
+    if (/^(?:data:|blob:|javascript:)/i.test(cleanPayload.coverUrl)) {
+      throw new Error("Cover URL tidak boleh berupa data URL atau base64. Gunakan URL web langsung.");
+    }
+    if (cleanPayload.coverUrl.length > 255) {
+      throw new Error(`Cover URL melebihi batas 255 karakter (saat ini ${cleanPayload.coverUrl.length} karakter).`);
+    }
+  }
+
+  if (cleanPayload.urlEbook) {
+    if (/^(?:data:|blob:|javascript:)/i.test(cleanPayload.urlEbook)) {
+      throw new Error("URL E-Book tidak boleh berupa data URL atau base64. Gunakan URL web langsung.");
+    }
+    if (cleanPayload.urlEbook.length > 255) {
+      throw new Error(`URL E-Book melebihi batas 255 karakter (saat ini ${cleanPayload.urlEbook.length} karakter).`);
+    }
+  }
+
   const response = await apiFetch(
     `${BASE_PATH}/buku/${encodeURIComponent(id)}`,
     {
       method: "PUT",
-      body: JSON.stringify(payload),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(cleanPayload),
     },
   );
 
@@ -159,10 +219,6 @@ export async function getPeminjaman(
 }
 
 export async function pinjamBuku(payload: PeminjamanPayload) {
-  if (!payload.tanggalJatuhTempo) {
-    throw new Error("Tanggal jatuh tempo wajib diisi.");
-  }
-
   const response = await apiFetch(`${BASE_PATH}/peminjaman`, {
     method: "POST",
     headers: {
@@ -186,10 +242,11 @@ export async function kembalikanBuku(id: string, catatan?: string) {
     `${BASE_PATH}/peminjaman/${encodeURIComponent(id)}/kembali`,
     {
       method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({
-        body: { catatan: catatan || undefined },
-        params: { id },
-        query: {},
+        catatan: catatan || "",
       }),
     }
   );

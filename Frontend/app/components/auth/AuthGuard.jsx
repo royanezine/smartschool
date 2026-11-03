@@ -85,7 +85,29 @@ export default function AuthGuard({ allowedRoles = [], children }) {
         const isExpired =
           result.reason === "TOKEN_EXPIRED" ||
           result.reason === "UNAUTHORIZED";
-        router.replace(isExpired ? "/login?sessionExpired=1" : "/login");
+
+        const currentPath =
+          typeof window !== "undefined"
+            ? `${window.location.pathname}${window.location.search}`
+            : "";
+        const safeCurrent =
+          currentPath &&
+          currentPath !== "/login" &&
+          !currentPath.startsWith("/login?") &&
+          !currentPath.startsWith("/login/")
+            ? currentPath
+            : null;
+
+        const queryParams = new URLSearchParams();
+        if (safeCurrent) {
+          queryParams.set("redirect", safeCurrent);
+        }
+        if (isExpired) {
+          queryParams.set("sessionExpired", "1");
+        }
+
+        const queryStr = queryParams.toString();
+        router.replace(queryStr ? `/login?${queryStr}` : "/login");
       }
     },
     [allowedKey, router, skipGuard]

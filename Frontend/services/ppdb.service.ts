@@ -29,10 +29,12 @@ export interface PendaftaranPpdb {
   id: string;
   sekolahId: string;
   jalurPpdbId: string;
+  jurusanId?: string | null;
   gelombangPpdbId?: string | null;
   gelombang?: string | null;
   nomorPendaftaran: string;
   namaLengkap: string;
+  nik?: string | null;
   nisn: string;
   tempatLahir: string;
   tanggalLahir: string;
@@ -141,6 +143,12 @@ export interface PendaftarPpdb extends PendaftaranPpdb {
     tanggalMulai?: string | null;
     tanggalSelesai?: string | null;
     status?: string | null;
+  } | null;
+  jurusan?: {
+    id: string;
+    kode?: string | null;
+    nama: string;
+    deskripsi?: string | null;
   } | null;
   gelombangPpdb?: {
     id: string;
@@ -373,6 +381,7 @@ export interface PendaftarPpdbFilters {
   search?: string;
   jalurPpdbId?: string;
   gelombangPpdbId?: string;
+  jurusanId?: string;
   status?: string;
   page?: number;
   limit?: number;
@@ -394,6 +403,9 @@ export async function getPendaftarPpdb(
     }
     if (filterOrJalurId.gelombangPpdbId) {
       query.set("gelombangPpdbId", filterOrJalurId.gelombangPpdbId);
+    }
+    if (filterOrJalurId.jurusanId) {
+      query.set("jurusanId", filterOrJalurId.jurusanId);
     }
     if (filterOrJalurId.status) {
       query.set("status", filterOrJalurId.status);
@@ -1023,6 +1035,71 @@ export async function getDetailSaya(
   return { ...payload, status: response.status };
 }
 
+export interface PesertaRankingSaya {
+  peringkat: number;
+  nomorPendaftaran: string;
+  nama: string;
+  jarakKm?: number | null;
+  nilaiRapor?: number | null;
+  status: string;
+  memenuhiKriteria: boolean;
+  masukKuota: boolean;
+  saya: boolean;
+}
+
+export interface RankingSayaData {
+  jalur: {
+    id: string;
+    nama: string;
+    kategori: string;
+    metodeRanking: string;
+    kuota: number;
+  };
+  totalPendaftar: number;
+  saya: PesertaRankingSaya | null;
+  daftar: PesertaRankingSaya[];
+}
+
+export interface RankingSayaResponse {
+  success: boolean;
+  data?: RankingSayaData;
+  message?: string;
+  status?: number;
+}
+
+export async function getRankingSaya(
+  tokenPendaftar?: string,
+  limit: number = 100
+): Promise<RankingSayaResponse> {
+  const API_URL =
+    process.env.NEXT_PUBLIC_API_URL ||
+    "http://localhost:5000";
+  const baseUrl = API_URL.replace(/\/+$/, "").replace(/\/api(?:\/v\d+)?$/, "");
+  const headers = new Headers();
+  headers.set("Accept", "application/json");
+
+  let token = tokenPendaftar ? String(tokenPendaftar).trim() : "";
+  if (!token && typeof window !== "undefined") {
+    token = String(sessionStorage.getItem("ppdb_token_pendaftaran") || "").trim();
+  }
+
+  if (token) {
+    headers.set("Authorization", `Bearer ${token}`);
+  }
+
+  const response = await fetch(
+    `${baseUrl}/api/ppdb/saya/ranking?limit=${encodeURIComponent(String(limit))}`,
+    {
+      method: "GET",
+      headers,
+      cache: "no-store",
+    }
+  );
+
+  const payload = await response.json();
+  return { ...payload, status: response.status };
+}
+
 export interface PengumumanPpdb {
   id: string;
   sekolahId: string;
@@ -1162,6 +1239,7 @@ const ppdbService = {
   getProfilSekolahPublik,
   getRankingJalur,
   getDetailSaya,
+  getRankingSaya,
   getPengumumanPpdb,
   getPengumumanPpdbById,
   createPengumumanPpdb,

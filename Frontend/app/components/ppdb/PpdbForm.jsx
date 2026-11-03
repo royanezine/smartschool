@@ -181,14 +181,43 @@ export default function PpdbForm({
   const rawJalurId =
     searchParams.get("jalurPpdbId") || searchParams.get("jalurId") || "";
 
-  const isSekolahValid = isUuid(rawSekolahId);
+  const [sekolahIdFromTenant, setSekolahIdFromTenant] = useState("");
+
+  // Resolusi otomatis sekolahId dari profil tenant jika tautan tidak memuat query param sekolahId
+  useEffect(() => {
+    if (rawSekolahId || !tenantSubdomain) return;
+    let active = true;
+
+    async function resolveTenantSchool() {
+      try {
+        const res = await getProfilSekolahPublik(tenantSubdomain);
+        const sid = res?.data?.id;
+        if (active && sid && isUuid(sid)) {
+          setSekolahIdFromTenant(sid);
+        }
+      } catch {
+        // Abaikan jika tidak dapat memuat profil
+      }
+    }
+
+    resolveTenantSchool();
+    return () => {
+      active = false;
+    };
+  }, [rawSekolahId, tenantSubdomain]);
+
+  const effectiveSekolahId = isUuid(rawSekolahId)
+    ? rawSekolahId
+    : sekolahIdFromTenant;
+
+  const isSekolahValid = isUuid(effectiveSekolahId);
   const isJalurValid = isUuid(rawJalurId);
 
-  const sekolahId = isSekolahValid ? rawSekolahId : "";
+  const sekolahId = effectiveSekolahId;
   const jalurPpdbId = isJalurValid ? rawJalurId : "";
 
   const parameterMasalah = [];
-  if (rawSekolahId && !isSekolahValid) parameterMasalah.push("sekolahId");
+  if (rawSekolahId && !isUuid(rawSekolahId)) parameterMasalah.push("sekolahId");
   if (rawJalurId && !isJalurValid) parameterMasalah.push("jalurPpdbId");
 
   const galatParameter =

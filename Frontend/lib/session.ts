@@ -16,6 +16,14 @@ export function expireSession(): void {
   clearSession();
 
   if (window.location.pathname !== "/login") {
-    window.location.replace("/login?sessionExpired=1");
+    const currentPath = `${window.location.pathname}${window.location.search}`;
+    const isSafe =
+      currentPath &&
+      !currentPath.startsWith("/login?") &&
+      !currentPath.startsWith("/login/");
+    const target = isSafe
+      ? `/login?sessionExpired=1&redirect=${encodeURIComponent(currentPath)}`
+      : "/login?sessionExpired=1";
+    window.location.replace(target);
   }
 }

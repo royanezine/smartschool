@@ -21,7 +21,7 @@ import {
   Plus,
 } from "lucide-react";
 
-import { daftarPpdb } from "@/services/ppdb.service";
+import { daftarPpdb, getOpsiPpdbSekolah } from "@/services/ppdb.service";
 import { getJalurPpdb } from "@/services/jalurPpdb.service";
 import { getAuthPayload, getStoredUser } from "@/lib/auth";
 
@@ -56,11 +56,15 @@ export default function TambahPendaftarPage() {
   const [saving, setSaving] = useState(false);
   const [loadingJalur, setLoadingJalur] = useState(true);
   const [jalurList, setJalurList] = useState([]);
+  const [jurusanList, setJurusanList] = useState([]);
+  const [isSmk, setIsSmk] = useState(false);
   const [sekolahId, setSekolahId] = useState("");
 
   const [form, setForm] = useState({
     jalurPpdbId: "",
+    jurusanId: "",
     namaLengkap: "",
+    nik: "",
     nisn: "",
     tempatLahir: "",
     tanggalLahir: "",
@@ -85,7 +89,7 @@ export default function TambahPendaftarPage() {
 
       const user = getStoredUser();
       const payload = getAuthPayload();
-      const sId = user?.sekolahId || payload?.sekolahId || "";
+      let sId = user?.sekolahId || payload?.sekolahId || "";
       if (sId) {
         setSekolahId(sId);
       }
@@ -95,7 +99,22 @@ export default function TambahPendaftarPage() {
       setJalurList(list);
 
       if (!sId && list.length > 0 && list[0]?.sekolahId) {
-        setSekolahId(list[0].sekolahId);
+        sId = list[0].sekolahId;
+        setSekolahId(sId);
+      }
+
+      if (sId) {
+        try {
+          const opsiRes = await getOpsiPpdbSekolah(sId);
+          if (opsiRes?.data) {
+            const jenjang = (opsiRes.data.sekolah?.jenjang || "").toUpperCase().trim();
+            const wajib = Boolean(opsiRes.data.wajibJurusan) || jenjang === "SMK";
+            setIsSmk(wajib);
+            setJurusanList(Array.isArray(opsiRes.data.jurusan) ? opsiRes.data.jurusan : []);
+          }
+        } catch {
+          // Abaikan kegagalan pemuatan opsi jurusan
+        }
       }
 
       if (list.length > 0) {
@@ -137,6 +156,10 @@ export default function TambahPendaftarPage() {
       errs.jalurPpdbId = "Jalur PPDB wajib dipilih.";
     }
 
+    if (isSmk && !form.jurusanId) {
+      errs.jurusanId = "Jurusan wajib dipilih untuk sekolah SMK.";
+    }
+
     const nama = form.namaLengkap.trim();
     if (!nama) {
       errs.namaLengkap = "Nama lengkap wajib diisi.";
@@ -144,6 +167,13 @@ export default function TambahPendaftarPage() {
       errs.namaLengkap = "Nama lengkap minimal 2 karakter.";
     } else if (nama.length > 100) {
       errs.namaLengkap = "Nama lengkap maksimal 100 karakter.";
+    }
+
+    const nik = form.nik.trim();
+    if (!nik) {
+      errs.nik = "NIK wajib diisi.";
+    } else if (!/^\d{16}$/.test(nik)) {
+      errs.nik = "NIK harus tepat 16 digit angka.";
     }
 
     const nisn = form.nisn.trim();
@@ -181,7 +211,10 @@ export default function TambahPendaftarPage() {
       errs.alamat = "Alamat minimal 5 karakter.";
     }
 
-    if (form.email.trim() && !EMAIL_REGEX.test(form.email.trim())) {
+    const email = form.email.trim();
+    if (!email) {
+      errs.email = "Email wajib diisi.";
+    } else if (!EMAIL_REGEX.test(email)) {
       errs.email = "Format email tidak valid.";
     }
 
@@ -222,14 +255,16 @@ export default function TambahPendaftarPage() {
       const payload = {
         sekolahId: targetSekolahId,
         jalurPpdbId: form.jalurPpdbId,
+        jurusanId: isSmk && form.jurusanId ? form.jurusanId : undefined,
         namaLengkap: form.namaLengkap.trim(),
+        nik: form.nik.trim(),
         nisn: form.nisn.trim(),
         tempatLahir: form.tempatLahir.trim(),
         tanggalLahir: form.tanggalLahir,
         jenisKelamin: form.jenisKelamin,
         alamat: form.alamat.trim(),
         telepon: form.telepon.trim() || undefined,
-        email: form.email.trim() || undefined,
+        email: form.email.trim(),
         namaAyah: form.namaAyah.trim() || undefined,
         namaIbu: form.namaIbu.trim() || undefined,
         asalSekolah: form.asalSekolah.trim() || undefined,
@@ -261,7 +296,9 @@ export default function TambahPendaftarPage() {
     setSuccessData(null);
     setForm({
       jalurPpdbId: jalurList[0]?.id || "",
+      jurusanId: "",
       namaLengkap: "",
+      nik: "",
       nisn: "",
       tempatLahir: "",
       tanggalLahir: "",
@@ -489,7 +526,7 @@ export default function TambahPendaftarPage() {
                   </p>
                   <button
                     type="button"
-                    onClick={() => router.push("/admin/spmb/jalur-pendaftaran")}
+                    onClick={() => router.push("/admin/spmb/jalur")}
                     className="mt-2.5 inline-flex items-center gap-1.5 rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-amber-700"
                   >
                     <Plus size={13} />
@@ -505,32 +542,58 @@ export default function TambahPendaftarPage() {
             >
               <FormSection
                 icon={GraduationCap}
-                title="Jalur PPDB"
-                description="Pilih jalur penerimaan calon siswa."
+                title="Jalur PPDB & Pilihan Jurusan"
+                description="Pilih jalur penerimaan dan jurusan calon siswa."
               >
-                <div>
-                  <label className="mb-1.5 block text-xs font-semibold theme-text-secondary">
-                    Jalur PPDB <span className="theme-danger">*</span>
-                  </label>
-                  <select
-                    value={form.jalurPpdbId}
-                    onChange={(e) => handleChange("jalurPpdbId", e.target.value)}
-                    disabled={loadingJalur || saving}
-                    className={`theme-neutral-border theme-neutral-surface theme-text h-10 w-full rounded-lg border px-3 text-xs outline-none transition ${themeFocus}`}
-                  >
-                    {jalurList.length === 0 && (
-                      <option value="">
-                        {loadingJalur ? "Memuat jalur..." : "Tidak ada jalur tersedia"}
-                      </option>
+                <div className={`grid gap-4 ${isSmk ? "sm:grid-cols-2" : "grid-cols-1"}`}>
+                  <div>
+                    <label className="mb-1.5 block text-xs font-semibold theme-text-secondary">
+                      Jalur PPDB <span className="theme-danger">*</span>
+                    </label>
+                    <select
+                      value={form.jalurPpdbId}
+                      onChange={(e) => handleChange("jalurPpdbId", e.target.value)}
+                      disabled={loadingJalur || saving}
+                      className={`theme-neutral-border theme-neutral-surface theme-text h-10 w-full rounded-lg border px-3 text-xs outline-none transition ${themeFocus}`}
+                    >
+                      {jalurList.length === 0 && (
+                        <option value="">
+                          {loadingJalur ? "Memuat jalur..." : "Tidak ada jalur tersedia"}
+                        </option>
+                      )}
+                      {jalurList.map((j) => (
+                        <option key={j.id} value={j.id}>
+                          {j.nama} {j.kuota ? `(Kuota: ${j.kuota})` : ""}
+                        </option>
+                      ))}
+                    </select>
+                    {errors.jalurPpdbId && (
+                      <p className="theme-danger mt-1 text-[11px]">{errors.jalurPpdbId}</p>
                     )}
-                    {jalurList.map((j) => (
-                      <option key={j.id} value={j.id}>
-                        {j.nama} {j.kuota ? `(Kuota: ${j.kuota})` : ""}
-                      </option>
-                    ))}
-                  </select>
-                  {errors.jalurPpdbId && (
-                    <p className="theme-danger mt-1 text-[11px]">{errors.jalurPpdbId}</p>
+                  </div>
+
+                  {isSmk && (
+                    <div>
+                      <label className="mb-1.5 block text-xs font-semibold theme-text-secondary">
+                        Pilihan Jurusan (SMK) <span className="theme-danger">*</span>
+                      </label>
+                      <select
+                        value={form.jurusanId}
+                        onChange={(e) => handleChange("jurusanId", e.target.value)}
+                        disabled={loadingJalur || saving}
+                        className={`theme-neutral-border theme-neutral-surface theme-text h-10 w-full rounded-lg border px-3 text-xs outline-none transition ${themeFocus}`}
+                      >
+                        <option value="">-- Pilih Jurusan --</option>
+                        {jurusanList.map((jur) => (
+                          <option key={jur.id} value={jur.id}>
+                            {jur.nama} {jur.kode ? `(${jur.kode})` : ""}
+                          </option>
+                        ))}
+                      </select>
+                      {errors.jurusanId && (
+                        <p className="theme-danger mt-1 text-[11px]">{errors.jurusanId}</p>
+                      )}
+                    </div>
                   )}
                 </div>
               </FormSection>
@@ -556,6 +619,27 @@ export default function TambahPendaftarPage() {
                     />
                     {errors.namaLengkap && (
                       <p className="theme-danger mt-1 text-[11px]">{errors.namaLengkap}</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="mb-1.5 block text-xs font-semibold theme-text-secondary">
+                      NIK Calon Siswa <span className="theme-danger">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={form.nik}
+                      onChange={(e) =>
+                        handleChange("nik", e.target.value.replace(/\D/g, ""))
+                      }
+                      maxLength={16}
+                      inputMode="numeric"
+                      disabled={saving}
+                      placeholder="16 digit NIK sesuai Kartu Keluarga"
+                      className={`theme-neutral-border theme-neutral-surface theme-text h-10 w-full rounded-lg border px-3 text-xs outline-none transition ${themeFocus}`}
+                    />
+                    {errors.nik && (
+                      <p className="theme-danger mt-1 text-[11px]">{errors.nik}</p>
                     )}
                   </div>
 

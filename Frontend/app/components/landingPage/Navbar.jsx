@@ -204,7 +204,7 @@ export default function Navbar() {
             }}
           >
             <Link
-              href="/login"
+              href="/login?redirect=/"
               className="text-[14px] font-semibold text-[#0B1F4F]/80 hover:text-[#1F6AE0] hover:bg-[#1F6AE0]/10 px-4 py-2 rounded-xl transition-colors"
             >
               Masuk
@@ -288,7 +288,7 @@ export default function Navbar() {
 
               <motion.div variants={mobileItemVariants}>
                 <Link
-                  href="/login"
+                  href="/login?redirect=/"
                   onClick={() => setIsOpen(false)}
                   className="text-[#0B1F4F]/80 font-semibold hover:text-[#1F6AE0] hover:bg-[#1F6AE0]/10 px-3 py-2 rounded-lg transition-colors block"
                 >

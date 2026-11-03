@@ -5,7 +5,13 @@ import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { verifyPin } from "@/services/auth.services";
-import { setSession, getRoleHome } from "@/lib/auth";
+import {
+  setSession,
+  getRoleHome,
+  getSafeRedirectUrl,
+  getRedirectContext,
+  clearRedirectContext,
+} from "@/lib/auth";
 import {
   Eye,
   EyeOff,
@@ -197,11 +203,17 @@ export default function VerifyPinPage() {
       delete window.__SMARTSCHOOL_PIN_TOKEN__;
       delete window.__SMARTSCHOOL_SETUP_TOKEN__;
 
-      const destination = getRoleHome(
+      const candidateRedirect = getRedirectContext();
+      const safeTarget = getSafeRedirectUrl(candidateRedirect);
+      clearRedirectContext();
+
+      const defaultHome = getRoleHome(
         sessionUser.role ||
           result.user.role ||
           result.user.peran?.nama
       );
+
+      const destination = safeTarget || defaultHome;
 
       router.replace(destination);
     } catch (err) {

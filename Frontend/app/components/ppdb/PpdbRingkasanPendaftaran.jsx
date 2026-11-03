@@ -7,20 +7,28 @@ import {
   AlertCircle,
   ArrowLeft,
   ArrowRight,
+  Award,
+  Check,
   CheckCircle2,
+  ChevronDown,
+  ChevronUp,
   Clock3,
+  Copy,
   FileCheck2,
   FileText,
   Hash,
   Loader2,
   RotateCcw,
+  ShieldCheck,
+  Trophy,
   UserRound,
+  Users,
 } from "lucide-react";
 
 import PpdbHeader from "@/app/components/ppdb/PpdbHeader";
 import PpdbFooter from "@/app/components/ppdb/PpdbFooter";
 import PpdbStepper from "@/app/components/ppdb/PpdbStepper";
-import { getDetailSaya } from "@/services/ppdb.service";
+import { getDetailSaya, getRankingSaya } from "@/services/ppdb.service";
 
 // Token autentikasi pendaftar (bukan data bisnis).
 const SESI_TOKEN_PENDAFTARAN = "ppdb_token_pendaftaran";
@@ -119,6 +127,50 @@ export default function PpdbRingkasanPendaftaran({ basePath = "" }) {
   const [status, setStatus] = useState("memeriksa");
   const [pesan, setPesan] = useState("");
   const [ringkasan, setRingkasan] = useState(null);
+
+  const [nomorDisalin, setNomorDisalin] = useState(false);
+  const [dataRanking, setDataRanking] = useState(null);
+  const [memuatRanking, setMemuatRanking] = useState(false);
+  const [galatRanking, setGalatRanking] = useState("");
+  const [tampilkanRanking, setTampilkanRanking] = useState(true);
+
+  const handleSalinNomor = async (teks) => {
+    if (!teks) return;
+    let berhasil = false;
+
+    if (typeof navigator !== "undefined" && navigator?.clipboard?.writeText) {
+      try {
+        await navigator.clipboard.writeText(teks);
+        berhasil = true;
+      } catch {
+        berhasil = false;
+      }
+    }
+
+    if (!berhasil && typeof document !== "undefined") {
+      try {
+        const textArea = document.createElement("textarea");
+        textArea.value = teks;
+        textArea.style.position = "fixed";
+        textArea.style.top = "0";
+        textArea.style.left = "-9999px";
+        textArea.style.opacity = "0";
+        textArea.setAttribute("readonly", "");
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        berhasil = document.execCommand("copy");
+        document.body.removeChild(textArea);
+      } catch {
+        berhasil = false;
+      }
+    }
+
+    if (berhasil) {
+      setNomorDisalin(true);
+      setTimeout(() => setNomorDisalin(false), 2500);
+    }
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -224,6 +276,49 @@ export default function PpdbRingkasanPendaftaran({ basePath = "" }) {
       cancelled = true;
     };
   }, [searchParams, idDariUrl, tokenDariUrl]);
+
+  // Muat leaderboard peringkat pendaftar dari Backend jika sesi tersedia
+  useEffect(() => {
+    if (status !== "tersedia" || !ringkasan) return;
+    let cancelled = false;
+
+    async function muatLeaderboard() {
+      const token = tokenDariUrl || bacaTokenPendaftar(searchParams);
+      if (!token) return;
+
+      setMemuatRanking(true);
+      setGalatRanking("");
+
+      try {
+        const res = await getRankingSaya(token, 200);
+        if (cancelled) return;
+
+        if (res?.success && res?.data) {
+          setDataRanking(res.data);
+        } else {
+          const pesanServer = String(res?.message || "");
+          if (res?.status === 403 || /belum dipublikasikan/i.test(pesanServer)) {
+            setGalatRanking("Peringkat belum dipublikasikan oleh sekolah.");
+          } else {
+            setGalatRanking(pesanServer || "Gagal memuat papan peringkat.");
+          }
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setGalatRanking(err?.message || "Tidak dapat memuat peringkat.");
+        }
+      } finally {
+        if (!cancelled) {
+          setMemuatRanking(false);
+        }
+      }
+    }
+
+    muatLeaderboard();
+    return () => {
+      cancelled = true;
+    };
+  }, [status, ringkasan, tokenDariUrl, searchParams]);
 
   const pendaftar = ringkasan?.pendaftar || null;
   const berkas = ringkasan?.berkas || null;
@@ -430,18 +525,38 @@ export default function PpdbRingkasanPendaftaran({ basePath = "" }) {
                   </p>
 
                   {pendaftar?.nomorPendaftaran ? (
-                    <div className="mt-6 w-full max-w-md rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-left">
-                      <p className="text-xs font-medium text-emerald-700">
-                        Nomor Pendaftaran
-                      </p>
+                    <div className="mt-6 w-full max-w-md rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-left shadow-sm">
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-xs font-semibold text-emerald-800">
+                          Nomor Pendaftaran Resmi
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => handleSalinNomor(pendaftar.nomorPendaftaran)}
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-300 bg-white px-2.5 py-1 text-xs font-medium text-emerald-800 shadow-xs transition hover:bg-emerald-100/70 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                          title="Salin nomor pendaftaran ke clipboard"
+                          aria-label="Salin nomor pendaftaran"
+                        >
+                          {nomorDisalin ? (
+                            <>
+                              <Check size={13} className="text-emerald-600" />
+                              <span className="font-semibold text-emerald-700">Disalin!</span>
+                            </>
+                          ) : (
+                            <>
+                              <Copy size={13} className="text-emerald-700" />
+                              <span>Salin</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
 
-                      <p className="mt-1 break-all text-lg font-bold text-emerald-900">
+                      <p className="mt-2 break-all font-mono text-xl font-bold tracking-wide text-emerald-950">
                         {pendaftar.nomorPendaftaran}
                       </p>
 
                       <p className="mt-1 text-xs leading-5 text-emerald-700">
-                        Simpan nomor ini. Nomor dibaca
-                        langsung dari server sekolah.
+                        Simpan nomor resmi ini. Nomor diterbitkan langsung oleh server sekolah untuk login dan mengecek hasil seleksi.
                       </p>
                     </div>
                   ) : (
@@ -507,6 +622,21 @@ export default function PpdbRingkasanPendaftaran({ basePath = "" }) {
                       </p>
                     </div>
                   </div>
+
+                  {(ringkasan?.jurusan?.nama || pendaftar?.jurusan?.nama) && (
+                    <div className="mt-4 w-full max-w-md rounded-xl border border-slate-200 bg-slate-50 p-4 text-left">
+                      <p className="text-xs text-slate-500">
+                        Pilihan Jurusan (SMK)
+                      </p>
+
+                      <p className="mt-1 text-sm font-semibold text-slate-800">
+                        {ringkasan?.jurusan?.nama || pendaftar?.jurusan?.nama}
+                        {(ringkasan?.jurusan?.kode || pendaftar?.jurusan?.kode)
+                          ? ` (${ringkasan?.jurusan?.kode || pendaftar?.jurusan?.kode})`
+                          : ""}
+                      </p>
+                    </div>
+                  )}
 
                   <div className="mt-4 grid w-full max-w-md grid-cols-1 gap-3 sm:grid-cols-2">
                     <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-left">
@@ -683,6 +813,211 @@ export default function PpdbRingkasanPendaftaran({ basePath = "" }) {
                     </p>
                   </div>
                 </div>
+              </div>
+
+              {/* Leaderboard Papan Peringkat Sementara Calon Siswa */}
+              <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-slate-100 pb-5">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
+                      <Trophy size={22} />
+                    </div>
+                    <div>
+                      <h3 className="text-base font-bold text-slate-800 sm:text-lg">
+                        Papan Peringkat Jalur PPDB
+                      </h3>
+                      <p className="mt-0.5 text-xs text-slate-500">
+                        {dataRanking?.jalur?.nama
+                          ? `Jalur: ${dataRanking.jalur.nama} • Kuota: ${dataRanking.jalur.kuota} Siswa • Total: ${dataRanking.totalPendaftar} Pendaftar`
+                          : "Peringkat sementara pendaftar berdasarkan kriteria seleksi resmi sekolah"}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setTampilkanRanking((prev) => !prev)}
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-50"
+                    >
+                      {tampilkanRanking ? (
+                        <>
+                          <ChevronUp size={14} />
+                          <span>Sembunyikan Tabel</span>
+                        </>
+                      ) : (
+                        <>
+                          <ChevronDown size={14} />
+                          <span>Lihat Tabel Peringkat</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                {memuatRanking ? (
+                  <div className="flex items-center justify-center py-10 text-xs text-slate-500 gap-2">
+                    <Loader2 size={16} className="animate-spin text-blue-600" />
+                    <span>Memuat data peringkat jalur dari server...</span>
+                  </div>
+                ) : galatRanking ? (
+                  <div className="mt-5 rounded-xl border border-amber-200 bg-amber-50/60 p-4">
+                    <div className="flex items-start gap-2.5">
+                      <AlertCircle size={17} className="mt-0.5 shrink-0 text-amber-600" />
+                      <div>
+                        <p className="text-xs font-semibold text-amber-900">
+                          Informasi Peringkat
+                        </p>
+                        <p className="mt-0.5 text-xs text-amber-700 leading-relaxed">
+                          {galatRanking}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ) : !dataRanking || !Array.isArray(dataRanking.daftar) || dataRanking.daftar.length === 0 ? (
+                  <div className="py-8 text-center text-xs text-slate-500">
+                    Belum ada data peringkat pendaftar pada jalur ini.
+                  </div>
+                ) : tampilkanRanking ? (
+                  <div className="mt-5 space-y-4">
+                    {/* Ringkasan Posisi Akun Calon Siswa */}
+                    {dataRanking.saya && (
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-blue-200 bg-blue-50/80 p-4 text-xs">
+                        <div className="flex items-center gap-3">
+                          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600 font-bold text-white text-sm">
+                            #{dataRanking.saya.peringkat}
+                          </span>
+                          <div>
+                            <p className="font-semibold text-blue-950">
+                              Posisi Anda: Peringkat #{dataRanking.saya.peringkat} dari {dataRanking.totalPendaftar} Pendaftar
+                            </p>
+                            <p className="text-blue-700 text-[11px] mt-0.5">
+                              Nomor Pendaftaran: <span className="font-mono font-medium">{dataRanking.saya.nomorPendaftaran}</span>
+                            </p>
+                          </div>
+                        </div>
+
+                        <div>
+                          {dataRanking.saya.masukKuota ? (
+                            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-300 bg-emerald-100 px-3 py-1 font-semibold text-emerald-800">
+                              <CheckCircle2 size={13} className="text-emerald-600" />
+                              Masuk Kuota ({dataRanking.jalur?.kuota || "-"})
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-300 bg-amber-100 px-3 py-1 font-semibold text-amber-800">
+                              <AlertCircle size={13} className="text-amber-600" />
+                              Di Luar Kuota
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Tabel Leaderboard Pendaftar */}
+                    <div className="overflow-x-auto rounded-xl border border-slate-200">
+                      <table className="w-full text-left text-xs">
+                        <thead className="border-b border-slate-200 bg-slate-50 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                          <tr>
+                            <th className="px-3.5 py-3 text-center w-14">Rank</th>
+                            <th className="px-3.5 py-3">No. Pendaftaran</th>
+                            <th className="px-3.5 py-3">Nama Calon Siswa</th>
+                            {dataRanking.daftar.some((d) => d.nilaiRapor !== null && d.nilaiRapor !== undefined) && (
+                              <th className="px-3.5 py-3 text-center">Nilai Rapor</th>
+                            )}
+                            {dataRanking.daftar.some((d) => d.jarakKm !== null && d.jarakKm !== undefined) && (
+                              <th className="px-3.5 py-3 text-center">Jarak Rumah</th>
+                            )}
+                            <th className="px-3.5 py-3 text-center">Status Kuota</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100 bg-white">
+                          {dataRanking.daftar.map((item) => {
+                            const isSaya = item.saya;
+                            const isJuara1 = item.peringkat === 1;
+                            const isJuara2 = item.peringkat === 2;
+                            const isJuara3 = item.peringkat === 3;
+
+                            return (
+                              <tr
+                                key={item.nomorPendaftaran || item.peringkat}
+                                className={`transition-colors ${
+                                  isSaya
+                                    ? "bg-blue-50/70 font-medium text-blue-950"
+                                    : "hover:bg-slate-50/80 text-slate-700"
+                                }`}
+                              >
+                                <td className="px-3.5 py-3 text-center">
+                                  {isJuara1 ? (
+                                    <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-amber-100 font-bold text-amber-800 text-[11px] shadow-xs">
+                                      1
+                                    </span>
+                                  ) : isJuara2 ? (
+                                    <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-slate-200 font-bold text-slate-700 text-[11px] shadow-xs">
+                                      2
+                                    </span>
+                                  ) : isJuara3 ? (
+                                    <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-amber-800/15 font-bold text-amber-900 text-[11px] shadow-xs">
+                                      3
+                                    </span>
+                                  ) : (
+                                    <span className="text-slate-500 font-semibold">{item.peringkat}</span>
+                                  )}
+                                </td>
+                                <td className="px-3.5 py-3 font-mono text-[11px]">
+                                  {item.nomorPendaftaran}
+                                </td>
+                                <td className="px-3.5 py-3">
+                                  <div className="flex items-center gap-1.5">
+                                    <span>{item.nama}</span>
+                                    {isSaya && (
+                                      <span className="rounded-full bg-blue-600 px-2 py-0.5 text-[10px] font-bold text-white shadow-xs">
+                                        Anda
+                                      </span>
+                                    )}
+                                  </div>
+                                </td>
+                                {dataRanking.daftar.some((d) => d.nilaiRapor !== null && d.nilaiRapor !== undefined) && (
+                                  <td className="px-3.5 py-3 text-center font-medium">
+                                    {item.nilaiRapor !== null && item.nilaiRapor !== undefined
+                                      ? Number(item.nilaiRapor).toFixed(2)
+                                      : "-"}
+                                  </td>
+                                )}
+                                {dataRanking.daftar.some((d) => d.jarakKm !== null && d.jarakKm !== undefined) && (
+                                  <td className="px-3.5 py-3 text-center text-slate-600">
+                                    {item.jarakKm !== null && item.jarakKm !== undefined
+                                      ? `${Number(item.jarakKm).toFixed(2)} km`
+                                      : "-"}
+                                  </td>
+                                )}
+                                <td className="px-3.5 py-3 text-center">
+                                  {item.masukKuota ? (
+                                    <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700">
+                                      <CheckCircle2 size={11} className="text-emerald-500" />
+                                      Masuk Kuota
+                                    </span>
+                                  ) : (
+                                    <span className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700">
+                                      Di Luar Kuota
+                                    </span>
+                                  )}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    {/* Kebijakan Privasi Peringkat */}
+                    <div className="flex items-start gap-2 pt-2 text-[11px] text-slate-500">
+                      <ShieldCheck size={14} className="mt-0.5 shrink-0 text-slate-400" />
+                      <p>
+                        Nama calon siswa lain disamarkan otomatis oleh sistem demi menjaga kerahasiaan data pribadi. Peringkat dihitung otomatis berdasarkan kriteria seleksi yang berlaku pada jalur ini.
+                      </p>
+                    </div>
+                  </div>
+                ) : null}
               </div>
             </>
           )}

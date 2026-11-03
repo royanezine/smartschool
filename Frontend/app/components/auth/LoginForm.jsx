@@ -16,7 +16,16 @@ import {
 } from "lucide-react";
 
 import { login } from "@/services/auth.services";
-import { setSession, clearSession, normalizeRole, getRoleHome } from "@/lib/auth";
+import {
+  setSession,
+  clearSession,
+  normalizeRole,
+  getRoleHome,
+  getSafeRedirectUrl,
+  setRedirectContext,
+  getRedirectContext,
+  clearRedirectContext,
+} from "@/lib/auth";
 
 const u = (n) => `calc(var(--u, 1px) * ${n})`;
 
@@ -39,6 +48,15 @@ export default function LoginForm() {
 
       if (email) {
         setIdentifier(email);
+      }
+
+      const redirectFromUrl =
+        params.get("redirect") ||
+        params.get("returnUrl") ||
+        params.get("callbackUrl");
+      const safeRedirect = getSafeRedirectUrl(redirectFromUrl);
+      if (safeRedirect) {
+        setRedirectContext(safeRedirect);
       }
 
       if (params.get("sessionExpired") === "1") {
@@ -196,7 +214,20 @@ export default function LoginForm() {
           throw new Error("Token pembuatan PIN tidak diterima dari server.");
         }
 
+        const params = new URLSearchParams(window.location.search);
+        const redirectParam =
+          params.get("redirect") ||
+          params.get("returnUrl") ||
+          params.get("callbackUrl");
+        const safeRedirect = getSafeRedirectUrl(
+          redirectParam || getRedirectContext()
+        );
+
         clearSession();
+
+        if (safeRedirect) {
+          setRedirectContext(safeRedirect);
+        }
 
         sessionStorage.setItem("pin_setup_token", setupToken);
         sessionStorage.removeItem("pin_access_token");
@@ -212,7 +243,20 @@ export default function LoginForm() {
           throw new Error("Token verifikasi PIN tidak diterima dari server.");
         }
 
+        const params = new URLSearchParams(window.location.search);
+        const redirectParam =
+          params.get("redirect") ||
+          params.get("returnUrl") ||
+          params.get("callbackUrl");
+        const safeRedirect = getSafeRedirectUrl(
+          redirectParam || getRedirectContext()
+        );
+
         clearSession();
+
+        if (safeRedirect) {
+          setRedirectContext(safeRedirect);
+        }
 
         sessionStorage.setItem("pin_access_token", pinToken);
         sessionStorage.removeItem("pin_setup_token");
@@ -275,7 +319,17 @@ export default function LoginForm() {
         role,
       };
 
+      const params = new URLSearchParams(window.location.search);
+      const redirectParam =
+        params.get("redirect") ||
+        params.get("returnUrl") ||
+        params.get("callbackUrl");
+      const candidateRedirect =
+        getSafeRedirectUrl(redirectParam) || getRedirectContext();
+      const safeRedirect = getSafeRedirectUrl(candidateRedirect);
+
       clearSession();
+      clearRedirectContext();
 
       setSession(token, userInfo);
 
@@ -292,7 +346,8 @@ export default function LoginForm() {
       sessionStorage.removeItem("onboarding_paket_id");
       sessionStorage.removeItem("onboarding_pendaftaran_id");
 
-      const redirectPath = getRedirectPath(role);
+      const defaultRolePath = getRedirectPath(role);
+      const redirectPath = safeRedirect || defaultRolePath;
 
       console.log("LOGIN BERHASIL:", { role, redirectPath });
 

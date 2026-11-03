@@ -94,12 +94,42 @@ export default function PpdbCekPendaftaran() {
     }
   };
 
-  const handleCopy = (text) => {
-    if (!text || typeof navigator === "undefined" || !navigator.clipboard) return;
-    navigator.clipboard.writeText(text).then(() => {
+  const handleCopy = async (text) => {
+    if (!text) return;
+    let berhasil = false;
+
+    if (typeof navigator !== "undefined" && navigator?.clipboard?.writeText) {
+      try {
+        await navigator.clipboard.writeText(text);
+        berhasil = true;
+      } catch {
+        berhasil = false;
+      }
+    }
+
+    if (!berhasil && typeof document !== "undefined") {
+      try {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        textArea.style.position = "fixed";
+        textArea.style.top = "0";
+        textArea.style.left = "-9999px";
+        textArea.style.opacity = "0";
+        textArea.setAttribute("readonly", "");
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        berhasil = document.execCommand("copy");
+        document.body.removeChild(textArea);
+      } catch {
+        berhasil = false;
+      }
+    }
+
+    if (berhasil) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2500);
-    });
+    }
   };
 
   const handleCek = async (event) => {
@@ -183,6 +213,15 @@ export default function PpdbCekPendaftaran() {
   return (
     <div className="min-h-screen bg-slate-50">
       <div className="mx-auto max-w-2xl px-4 py-8 sm:px-6 sm:py-10">
+        <button
+          type="button"
+          onClick={() => router.push(`${basePath}/PPDB`)}
+          className="mb-6 inline-flex items-center gap-1.5 text-sm text-slate-500 transition-colors hover:text-blue-600"
+        >
+          <ArrowRight size={14} className="rotate-180" />
+          Kembali ke PPDB
+        </button>
+
         <div className="mb-6 text-center">
           <div className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-600">
             <Search size={13} />
@@ -373,6 +412,17 @@ export default function PpdbCekPendaftaran() {
                   {hasil.gelombang || "Reguler"}
                 </p>
               </div>
+
+              {hasil.jurusan && (
+                <div className="sm:col-span-2 rounded-xl border border-slate-100 p-3">
+                  <span className="text-[11px] font-medium text-slate-400">
+                    Pilihan Jurusan (SMK)
+                  </span>
+                  <p className="mt-0.5 text-xs font-semibold text-slate-800">
+                    {hasil.jurusan}
+                  </p>
+                </div>
+              )}
 
               {hasil.statusSeleksi && (
                 <div className="sm:col-span-2 rounded-xl border border-slate-100 p-3">
