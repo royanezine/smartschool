@@ -787,6 +787,50 @@ async function main() {
     }
   }
 
+  // Keep lookups and awaited writes inside main(): this seed runs as CJS.
+  const reviewDummy = [
+    {
+      role: "admin_yayasan", email: "admin@yayasan.smartschool.com",
+      rating: 5, status: "tampil",
+      komentar: "SmartSchool membuat administrasi yayasan lebih efisien dan membantu kami memantau seluruh sekolah dalam satu sistem.",
+    },
+    {
+      role: "admin_sekolah", email: "admin@smartschool.com",
+      rating: 5, status: "tampil",
+      komentar: "Pengelolaan data sekolah menjadi lebih mudah, rapi, dan cepat. Informasi yang dibutuhkan dapat ditemukan dengan praktis.",
+    },
+    {
+      role: "guru", email: null,
+      rating: 4, status: "menunggu",
+      komentar: "Saya lebih mudah memantau kehadiran dan perkembangan siswa sehingga pendampingan belajar dapat dilakukan dengan lebih terarah.",
+    },
+  ];
+
+  for (const review of reviewDummy) {
+    const pengguna = await prisma.pengguna.findFirst({
+      where: {
+        ...(review.email ? { email: review.email } : { sekolahId: sekolah.id }),
+        status: "aktif", dihapusPada: null,
+        peran: { nama: review.role, status: "aktif", dihapusPada: null },
+      },
+      select: { id: true },
+      orderBy: { id: "asc" },
+    });
+    if (!pengguna) {
+      console.warn(`Review dummy dilewati: akun ${review.role} tidak ditemukan.`);
+      continue;
+    }
+    await prisma.reviewPengguna.upsert({
+      where: { penggunaId: pengguna.id },
+      update: {}, // Preserve existing reviews and moderation on repeated seeds.
+      create: {
+        penggunaId: pengguna.id, rating: review.rating,
+        komentar: review.komentar, status: review.status,
+      },
+    });
+  }
+  console.log("Review pengguna dummy selesai diproses");
+
   console.log("Data sekolah dummy selesai");
   console.log("Seeder selesai dieksekusi");
 }
