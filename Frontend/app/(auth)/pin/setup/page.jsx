@@ -5,13 +5,7 @@ import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { setupPin } from "@/services/auth.services";
-import {
-  setSession,
-  getRoleHome,
-  getSafeRedirectUrl,
-  getRedirectContext,
-  clearRedirectContext,
-} from "@/lib/auth";
+import { setSession, getRoleHome } from "@/lib/auth";
 import {
   Eye,
   EyeOff,
@@ -307,15 +301,10 @@ export default function SetupPinPage() {
         user.peran?.nama ||
         user.jabatan?.nama;
 
-      const candidateRedirect = getRedirectContext();
-      const safeTarget = getSafeRedirectUrl(candidateRedirect);
-      clearRedirectContext();
-
-      const defaultHome = getRoleHome(role);
-      const destination = safeTarget || defaultHome;
+      const destination = getRoleHome(role);
 
       setSuccess(
-        "PIN berhasil dibuat. Mengarahkan..."
+        "PIN berhasil dibuat. Mengarahkan ke dashboard..."
       );
 
       router.replace(destination || "/login");

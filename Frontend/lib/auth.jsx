@@ -1,7 +1,6 @@
 
 export const AUTH_TOKEN_KEY = "token";
 export const AUTH_USER_KEY = "user";
-export const AUTH_REDIRECT_KEY = "auth_redirect_url";
 export const AUTH_EVENT = "user-updated";
 
 const LEGACY_TOKEN_KEYS = [
@@ -14,7 +13,6 @@ const LEGACY_TOKEN_KEYS = [
 export const AUTH_SESSION_KEYS = [
   AUTH_TOKEN_KEY,
   AUTH_USER_KEY,
-  AUTH_REDIRECT_KEY,
   ...LEGACY_TOKEN_KEYS,
 ];
 
@@ -624,83 +622,4 @@ export function getRoleHome(role) {
     default:
       return "/login";
   }
-}
-
-export function getSafeRedirectUrl(url, defaultUrl = null) {
-  if (!url || typeof url !== "string") {
-    return defaultUrl;
-  }
-
-  const trimmed = url.trim();
-  if (!trimmed) {
-    return defaultUrl;
-  }
-
-  // Hanya izinkan route internal yang diawali dengan satu '/' (bukan '//' atau '/\\')
-  if (!trimmed.startsWith("/") || trimmed.startsWith("//") || trimmed.startsWith("/\\")) {
-    return defaultUrl;
-  }
-
-  // Tolak backslash di dalam URL internal
-  if (trimmed.includes("\\")) {
-    return defaultUrl;
-  }
-
-  // Tolak skema protocol (javascript:, data:, https:, dll)
-  if (/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(trimmed)) {
-    return defaultUrl;
-  }
-
-  try {
-    const dummyBase = "http://localhost";
-    const parsed = new URL(trimmed, dummyBase);
-
-    if (parsed.origin !== dummyBase) {
-      return defaultUrl;
-    }
-
-    if (!parsed.pathname.startsWith("/") || parsed.pathname.startsWith("//")) {
-      return defaultUrl;
-    }
-
-    // Jangan izinkan redirect kembali ke halaman /login itu sendiri
-    if (parsed.pathname === "/login" || parsed.pathname.startsWith("/login/")) {
-      return defaultUrl;
-    }
-
-    return `${parsed.pathname}${parsed.search}${parsed.hash}`;
-  } catch {
-    return defaultUrl;
-  }
-}
-
-export function setRedirectContext(url) {
-  if (!isBrowser()) return;
-  const safe = getSafeRedirectUrl(url);
-  if (safe) {
-    try {
-      authStore()?.setItem(AUTH_REDIRECT_KEY, safe);
-    } catch {}
-  } else {
-    try {
-      authStore()?.removeItem(AUTH_REDIRECT_KEY);
-    } catch {}
-  }
-}
-
-export function getRedirectContext() {
-  if (!isBrowser()) return null;
-  try {
-    const raw = authStore()?.getItem(AUTH_REDIRECT_KEY);
-    return getSafeRedirectUrl(raw, null);
-  } catch {
-    return null;
-  }
-}
-
-export function clearRedirectContext() {
-  if (!isBrowser()) return;
-  try {
-    authStore()?.removeItem(AUTH_REDIRECT_KEY);
-  } catch {}
 }

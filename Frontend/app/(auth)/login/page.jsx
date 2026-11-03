@@ -1,14 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import { GraduationCap, ArrowLeft } from "lucide-react";
 
 import { login } from "@/services/auth.service";
 import LoginForm from "@/app/components/auth/LoginForm";
-import { getSafeRedirectUrl } from "@/lib/auth";
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -39,20 +38,16 @@ const features = [
 const glow = "[text-shadow:0_0_14px_rgba(255,255,255,0.95),0_0_4px_rgba(255,255,255,0.9)]";
 
 export default function LoginPage() {
-  const [backHref, setBackHref] = useState("/");
+  const router = useRouter();
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      const params = new URLSearchParams(window.location.search);
-      const redirectParam =
-        params.get("redirect") ||
-        params.get("returnUrl") ||
-        params.get("callbackUrl");
-      const safe = getSafeRedirectUrl(redirectParam, "/");
-      setBackHref(safe);
-    }, 0);
-    return () => clearTimeout(timer);
-  }, []);
+  const handleBack = () => {
+    if (window.history.length > 1) {
+      router.back();
+      return;
+    }
+
+    router.push("/");
+  };
 
   return (
     <main className={`${jakarta.className} relative isolate min-h-screen overflow-hidden bg-[#EAF3FF]`}>
@@ -84,17 +79,18 @@ export default function LoginPage() {
         className="ss-logo absolute z-10 flex items-center"
         style={{ left: 20, top: 20, gap: u(16) }}
       >
-        <Link
-          href={backHref}
+        <button
+          type="button"
+          onClick={handleBack}
           aria-label="Kembali"
           className="flex items-center justify-center rounded-full bg-white text-[#0F2A66] shadow-lg shadow-[#0F2A66]/15 ring-1 ring-[#0F2A66]/10 transition-all hover:bg-[#0F2A66] hover:text-white"
           style={{ width: u(48), height: u(48) }}
         >
           <ArrowLeft style={{ width: u(24), height: u(24) }} strokeWidth={2.5} />
-        </Link>
+        </button>
 
         <Link
-          href={backHref}
+          href="/"
           aria-label="Smart School Beranda"
           className="flex items-center gap-3 transition-opacity hover:opacity-80"
         >

@@ -50,15 +50,17 @@ export default function YayasanLayout({ children }) {
       allowedRoles={["admin_yayasan", "yayasan", "super_admin"]}
     >
       <div className="theme-page theme-text flex h-screen w-full overflow-hidden">
-        <aside className="relative z-30 h-full shrink-0 overflow-hidden">
-          <Sidebar
-            role="yayasan"
-            active={activeMenu}
-            setActive={() => {}}
-            collapsed={!sidebarOpen}
-            setCollapsed={() => setSidebarOpen((prev) => !prev)}
-          />
-        </aside>
+        <Sidebar
+          role="yayasan"
+          active={activeMenu}
+          setActive={() => {}}
+          collapsed={!sidebarOpen}
+          setCollapsed={(val) =>
+            setSidebarOpen((prev) =>
+              typeof val === "function" ? !val(!prev) : !val
+            )
+          }
+        />
 
         <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
           <div className="relative z-20 shrink-0">
