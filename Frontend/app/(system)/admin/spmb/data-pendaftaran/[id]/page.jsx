@@ -13,6 +13,7 @@ import Header from "@/app/components/Header";
 import {
   ArrowLeft,
   UserRound,
+  IdCard,
   School,
   CalendarDays,
   Phone,
@@ -23,6 +24,7 @@ import {
   Clock3,
   XCircle,
   Route,
+  GraduationCap,
   Loader2,
   AlertCircle,
   Download,
@@ -779,11 +781,16 @@ export default function DetailPendaftaranPage() {
                     className={`
                       grid grid-cols-1
                       divide-y ${themeDivider}
-                      sm:grid-cols-3
+                      sm:grid-cols-4
                       sm:divide-x
                       sm:divide-y-0
                     `}
                   >
+                    <SummaryItem
+                      label="NIK"
+                      value={data?.nik || "-"}
+                    />
+
                     <SummaryItem
                       label="NISN"
                       value={data?.nisn || "-"}
@@ -827,6 +834,12 @@ export default function DetailPendaftaranPage() {
                           icon={UserRound}
                           label="Nama Lengkap"
                           value={data?.namaLengkap}
+                        />
+
+                        <DetailItem
+                          icon={IdCard}
+                          label="NIK"
+                          value={data?.nik}
                         />
 
                         <DetailItem
@@ -941,6 +954,20 @@ export default function DetailPendaftaranPage() {
                           label="Jalur PPDB"
                           value={
                             data?.jalurPpdb?.nama || "-"
+                          }
+                        />
+
+                        <DetailItem
+                          icon={GraduationCap}
+                          label="Pilihan Jurusan (SMK)"
+                          value={
+                            data?.jurusan?.nama
+                              ? data.jurusan.kode
+                                ? `${data.jurusan.nama} (${data.jurusan.kode})`
+                                : data.jurusan.nama
+                              : data?.jurusanId
+                              ? data.jurusanId
+                              : "-"
                           }
                         />
 

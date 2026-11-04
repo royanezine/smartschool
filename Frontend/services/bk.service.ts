@@ -781,3 +781,21 @@ export async function putuskanPengajuanKonseling(
 
   return handleResponse(response);
 }
+
+export async function batalkanPengajuanKonseling(id: string): Promise<any> {
+  if (!id) {
+    throw new Error("ID pengajuan konseling wajib diisi");
+  }
+
+  const response = await fetch(
+    `${API_URL}/api/bk/konseling/${encodeURIComponent(id)}/batal`,
+    {
+      method: "PUT",
+      headers: getHeaders(),
+    }
+  );
+
+  return handleResponse(response);
+}
+
+export const batalKonseling = batalkanPengajuanKonseling;

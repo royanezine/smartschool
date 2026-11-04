@@ -9,9 +9,7 @@ import AuthGuard from "@/app/components/auth/AuthGuard";
 
 export default function YayasanLayout({ children }) {
   const pathname = usePathname();
-
   const [sidebarOpen, setSidebarOpen] = useState(true);
-
 
   const getActiveMenu = () => {
     if (!pathname || pathname === "/yayasan") {
@@ -47,34 +45,45 @@ export default function YayasanLayout({ children }) {
 
   const activeMenu = getActiveMenu();
 
-
   return (
     <AuthGuard
       allowedRoles={["admin_yayasan", "yayasan", "super_admin"]}
     >
-      <div className="theme-page theme-text min-h-screen flex overflow-hidden">
-
+      <div className="theme-page theme-text flex h-screen w-full overflow-hidden">
         <Sidebar
           role="yayasan"
           active={activeMenu}
           setActive={() => {}}
           collapsed={!sidebarOpen}
-          setCollapsed={() => setSidebarOpen((prev) => !prev)}
+          setCollapsed={(val) =>
+            setSidebarOpen((prev) =>
+              typeof val === "function" ? !val(!prev) : !val
+            )
+          }
         />
 
+        <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+          <div className="relative z-20 shrink-0">
+            <Header
+              toggleSidebar={() => setSidebarOpen((prev) => !prev)}
+              user={{
+                name: "Admin Yayasan",
+                avatar: "Y",
+              }}
+            />
+          </div>
 
-        <div className="flex-1 flex flex-col min-w-0 min-h-screen">
-
-          <Header
-            toggleSidebar={() => setSidebarOpen((prev) => !prev)}
-            user={{
-              name: "Admin Yayasan",
-              avatar: "Y",
-            }}
-          />
-
-
-          <main className="min-h-0 min-w-0 flex-1 overflow-y-auto theme-page">
+          <main
+            className="
+              min-h-0
+              min-w-0
+              flex-1
+              overflow-x-hidden
+              overflow-y-auto
+              overscroll-y-contain
+              theme-page
+            "
+          >
             {children}
           </main>
         </div>

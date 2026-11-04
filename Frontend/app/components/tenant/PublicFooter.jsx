@@ -443,10 +443,8 @@ export default function PublicFooter({
   const pages = validPages(halaman);
 
   const socials = [
-    { nama: "Instagram", url: normalizeUrl(sekolah.instagramUrl) },
     { nama: "Facebook", url: normalizeUrl(sekolah.facebookUrl) },
     { nama: "YouTube", url: normalizeUrl(sekolah.youtubeUrl) },
-   
   ].filter((item) => item.url);
 
   if (socials.length === 0 && text(infoSosmed?.ctaLink)) {

@@ -478,42 +478,28 @@ export default function ForgotPasswordPage() {
 
 
   return (
-    <section className="relative flex min-h-screen items-center justify-center overflow-hidden bg-slate-950">
+    <section className="relative isolate flex min-h-screen items-center justify-center overflow-y-auto bg-[#EAF3FF] px-4 py-8 sm:px-6">
 
-      <div className="absolute inset-0">
+      {/* Background Hero */}
+      <div className="absolute inset-0 -z-30">
         <Image
-          src="/images/auth-bg.jpg"
-          alt=""
+          src="/hero/hero.png"
+          alt="Gedung Smart School"
           fill
           priority
-          className="object-cover"
+          sizes="100vw"
+          className="object-cover object-center"
         />
-
-        <div className="absolute inset-0 bg-slate-950/70" />
-
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-950/80 via-slate-950/60 to-indigo-950/80" />
       </div>
 
-
-      <div className="absolute left-0 right-0 top-0 h-1 bg-gradient-to-r from-blue-400 via-blue-500 to-indigo-500" />
-
-
-      <div className="relative z-10 w-full max-w-md px-4 py-8 sm:px-6 sm:py-10">
-
-        <div className="mb-6 flex justify-center">
-          <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl border border-white/20 bg-white shadow-xl">
-            <Image
-              src="/logo/logoSS.png"
-              alt="Smart School Logo"
-              width={36}
-              height={36}
-              className="object-contain"
-            />
-          </div>
-        </div>
+      {/* Gradient Overlays */}
+      <div className="absolute inset-0 -z-20 bg-gradient-to-r from-white/80 via-white/50 to-white/0 lg:via-white/55" />
+      <div className="absolute inset-x-0 top-0 -z-20 h-44 bg-gradient-to-b from-white/70 to-transparent" />
 
 
-        <div className="rounded-3xl bg-white p-5 shadow-2xl sm:p-7">
+      <div className="relative z-10 w-full max-w-md">
+
+        <div className="rounded-3xl bg-white p-6 shadow-2xl sm:p-8">
 
           <div className="mb-7 text-center">
             <div className="mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50">
@@ -853,7 +839,7 @@ export default function ForgotPasswordPage() {
         </div>
 
 
-        <p className="mt-5 text-center text-[11px] text-white/50">
+        <p className="mt-5 text-center text-[11px] text-slate-500">
           © 2026 Smart School. Semua hak dilindungi.
         </p>
       </div>

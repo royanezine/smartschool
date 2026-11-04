@@ -348,3 +348,69 @@ export function downloadRekapNilai(
 }
 
 
+export interface ImportNilaiExcelPayload {
+  file: File;
+  kelasMapelId: string;
+  komponenNilaiId: string;
+}
+
+export interface ImportNilaiExcelResponse {
+  success: boolean;
+  message: string;
+  data: {
+    jumlahBarisValid?: number;
+    jumlahBerhasil?: number;
+    importedCount?: number;
+    jumlahDilewati?: number;
+    detailDilewati?: Array<{ baris: number; pesan: string }>;
+  };
+}
+
+export async function importNilaiExcel(
+  payload: ImportNilaiExcelPayload | FormData
+): Promise<ImportNilaiExcelResponse> {
+  let formData: FormData;
+
+  if (payload instanceof FormData) {
+    formData = payload;
+  } else {
+    if (!payload.file) {
+      throw new Error("File Excel wajib dipilih.");
+    }
+
+    const fileName = payload.file.name.toLowerCase();
+    if (!fileName.endsWith(".xlsx") && !fileName.endsWith(".xls")) {
+      throw new Error("Format file harus Excel (.xlsx atau .xls).");
+    }
+
+    if (payload.file.size === 0) {
+      throw new Error("File Excel yang dipilih kosong.");
+    }
+
+    if (payload.file.size > 5 * 1024 * 1024) {
+      throw new Error("Ukuran file Excel maksimal 5 MB.");
+    }
+
+    if (!payload.kelasMapelId) {
+      throw new Error("Kelas & Mata Pelajaran wajib dipilih.");
+    }
+
+    if (!payload.komponenNilaiId) {
+      throw new Error("Komponen nilai wajib dipilih.");
+    }
+
+    formData = new FormData();
+    formData.append("file", payload.file);
+    formData.append("kelasMapelId", payload.kelasMapelId);
+    formData.append("komponenNilaiId", payload.komponenNilaiId);
+  }
+
+  const result = await apiFetch("/api/nilai/import-excel", {
+    method: "POST",
+    body: formData,
+  });
+
+  return result;
+}
+
+

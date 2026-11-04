@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getToken } from "@/lib/auth";
 import Link from "next/link";
 import {
@@ -867,7 +867,12 @@ export default function PerpustakaanSiswaPage() {
     [user],
   );
 
-  const loadData = async (showRefresh = false) => {
+  const requestIdRef = useRef(0);
+
+  const loadData = useCallback(async (showRefresh = false) => {
+    const requestId = ++requestIdRef.current;
+    const isLatest = () => requestId === requestIdRef.current;
+
     if (showRefresh) {
       setRefreshing(true);
     } else {
@@ -895,9 +900,17 @@ export default function PerpustakaanSiswaPage() {
         ).map(normalizeLoan);
       }
 
+      if (!isLatest()) {
+        return;
+      }
+
       setBooks(normalizedBooks);
       setLoans(normalizedLoans);
     } catch (err) {
+      if (!isLatest()) {
+        return;
+      }
+
       setError(
         getErrorMessage(
           err,
@@ -905,10 +918,12 @@ export default function PerpustakaanSiswaPage() {
         ),
       );
     } finally {
-      setLoading(false);
-      setRefreshing(false);
+      if (isLatest()) {
+        setLoading(false);
+        setRefreshing(false);
+      }
     }
-  };
+  }, [userId]);
 
   useEffect(() => {
     if (!mounted) {

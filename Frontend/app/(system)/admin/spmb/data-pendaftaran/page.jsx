@@ -31,8 +31,10 @@ import {
   getPendaftarPpdb,
   getStatistikPpdb,
   isPpdbEndpointMissing,
+  getOpsiPpdbSekolah,
 } from "@/services/ppdb.service";
 import { getJalurPpdb } from "@/services/jalurPpdb.service";
+import { getStoredUser, getAuthPayload } from "@/lib/auth";
 import {
   formatTanggal,
   normalisasiStatusPendaftaran,
@@ -126,6 +128,7 @@ export default function PendaftaranPage() {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("Semua");
   const [jalur, setJalur] = useState("Semua");
+  const [jurusan, setJurusan] = useState("Semua");
 
   const [data, setData] = useState([]);
   const [meta, setMeta] = useState({
@@ -145,6 +148,7 @@ export default function PendaftaranPage() {
   });
   const [page, setPage] = useState(1);
   const [jalurList, setJalurList] = useState([]);
+  const [jurusanList, setJurusanList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
@@ -167,6 +171,8 @@ export default function PendaftaranPage() {
           search: search.trim() || undefined,
           jalurPpdbId:
             jalur === "Semua" ? undefined : jalur,
+          jurusanId:
+            jurusan === "Semua" ? undefined : jurusan,
           status:
             status === "Semua"
               ? undefined
@@ -264,7 +270,7 @@ export default function PendaftaranPage() {
         setRefreshing(false);
       }
     },
-    [search, status, jalur, page]
+    [search, status, jalur, jurusan, page]
   );
 
   useEffect(() => {
@@ -279,13 +285,29 @@ export default function PendaftaranPage() {
     let aktif = true;
 
     getJalurPpdb()
-      .then((response) => {
-        if (aktif) {
-          setJalurList(
-            Array.isArray(response?.data)
-              ? response.data
-              : []
-          );
+      .then(async (response) => {
+        if (!aktif) return;
+        const list = Array.isArray(response?.data)
+          ? response.data
+          : [];
+        setJalurList(list);
+
+        const user = getStoredUser();
+        const payload = getAuthPayload();
+        const sId =
+          user?.sekolahId ||
+          payload?.sekolahId ||
+          (list.length > 0 ? list[0]?.sekolahId : "");
+
+        if (sId) {
+          try {
+            const opsiRes = await getOpsiPpdbSekolah(sId);
+            if (aktif && Array.isArray(opsiRes?.data?.jurusan)) {
+              setJurusanList(opsiRes.data.jurusan);
+            }
+          } catch {
+            // Abaikan jika opsi sekolah gagal dimuat
+          }
         }
       })
       .catch(() => {
@@ -312,6 +334,8 @@ export default function PendaftaranPage() {
       nomor: item?.nomorPendaftaran || "-",
       jalurNama:
         item?.jalurPpdb?.nama || "-",
+      jurusanNama:
+        item?.jurusan?.nama || "-",
       tanggal: formatTanggal(
         item?.dibuatPada
       ),
@@ -357,6 +381,7 @@ export default function PendaftaranPage() {
     const header = [
       "Nomor Pendaftaran",
       "Nama Lengkap",
+      "NIK",
       "NISN",
       "Asal Sekolah",
       "Jalur",
@@ -370,6 +395,7 @@ export default function PendaftaranPage() {
     const rows = filtered.map((item) => [
       item.nomor,
       item.nama,
+      item.nik || "",
       item.nisn || "",
       item.asalSekolah || "",
       item.jalurNama,
@@ -626,6 +652,33 @@ export default function PendaftaranPage() {
                   )}
                 </select>
 
+                {jurusanList.length > 0 && (
+                  <select
+                    value={jurusan}
+                    onChange={(e) =>
+                      ubahFilter(
+                        setJurusan,
+                        e.target.value
+                      )
+                    }
+                    disabled={isEndpointUnavailable || loading}
+                    className={`theme-input theme-text theme-neutral-border h-10 rounded-lg border ${themeNeutralSurface} px-3 text-xs outline-none transition ${themeFocus} disabled:cursor-not-allowed disabled:opacity-60`}
+                  >
+                    <option value="Semua">
+                      Semua Jurusan
+                    </option>
+                    {jurusanList.map((item) => (
+                      <option
+                        key={item.id}
+                        value={item.id}
+                      >
+                        {item.nama}
+                        {item.kode ? ` (${item.kode})` : ""}
+                      </option>
+                    ))}
+                  </select>
+                )}
+
                 <select
                   value={status}
                   onChange={(e) =>
@@ -798,6 +851,7 @@ export default function PendaftaranPage() {
                         <Th>Pendaftar</Th>
                         <Th>Asal Sekolah</Th>
                         <Th>Jalur</Th>
+                        <Th>Jurusan</Th>
                         <Th>Tanggal</Th>
                         <Th>Status</Th>
                         <Th>Aksi</Th>
@@ -845,9 +899,8 @@ export default function PendaftaranPage() {
                             </p>
 
                             <p className="theme-text-muted text-[10px]">
-                              NISN{" "}
-                              {item.nisn ||
-                                "-"}
+                              NISN {item.nisn || "-"}
+                              {item.nik ? ` • NIK ${item.nik}` : ""}
                             </p>
                           </td>
 
@@ -858,6 +911,12 @@ export default function PendaftaranPage() {
                               <Route size={11} />
 
                               {item.jalurNama}
+                            </span>
+                          </td>
+
+                          <td className="px-4 py-3">
+                            <span className="theme-text text-xs font-medium">
+                              {item.jurusanNama}
                             </span>
                           </td>
 

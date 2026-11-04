@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
 import { apiFetch } from "@/lib/api";
+import { getHariAktif, updateHariAktif } from "@/services/pengaturan.service";
 import {
   Settings2,
   MapPin,
@@ -22,6 +23,7 @@ import {
   MapPinned,
   CircleCheck,
   CircleX,
+  CalendarDays,
 } from "lucide-react";
 
 const ENDPOINT = "/api/sekolah/pengaturan-presensi";
@@ -39,6 +41,16 @@ const METODE = [
       "Presensi menggunakan koordinat perangkat dan validasi jarak dari sekolah.",
     Icon: Navigation,
   },
+];
+
+const DAFTAR_HARI = [
+  { id: 1, nama: "Senin", singkat: "Sen", kerja: true },
+  { id: 2, nama: "Selasa", singkat: "Sel", kerja: true },
+  { id: 3, nama: "Rabu", singkat: "Rab", kerja: true },
+  { id: 4, nama: "Kamis", singkat: "Kam", kerja: true },
+  { id: 5, nama: "Jumat", singkat: "Jum", kerja: true },
+  { id: 6, nama: "Sabtu", singkat: "Sab", kerja: false },
+  { id: 0, nama: "Minggu", singkat: "Min", kerja: false },
 ];
 
 function unwrapResponse(response) {
@@ -193,6 +205,13 @@ export default function PengaturanPresensiPage() {
 
   const [original, setOriginal] = useState(null);
 
+  // State khusus Hari Aktif Presensi (GET/PUT /api/pengaturan/hari-aktif)
+  const [hariAktifList, setHariAktifList] = useState([]);
+  const [originalHariAktif, setOriginalHariAktif] = useState(null);
+  const [hariAktifLoading, setHariAktifLoading] = useState(true);
+  const [hariAktifSaving, setHariAktifSaving] = useState(false);
+  const [hariAktifStatus, setHariAktifStatus] = useState(null);
+
   const loadSettings = useCallback(async () => {
     setLoading(true);
     setStatus(null);
@@ -220,9 +239,101 @@ export default function PengaturanPresensiPage() {
     }
   }, []);
 
+  const loadHariAktif = useCallback(async () => {
+    setHariAktifLoading(true);
+    setHariAktifStatus(null);
+
+    try {
+      const response = await getHariAktif();
+      const days = Array.isArray(response?.data?.hariAktif)
+        ? response.data.hariAktif
+        : [];
+
+      setHariAktifList(days);
+      setOriginalHariAktif(JSON.stringify(days));
+    } catch (error) {
+      console.error("Gagal memuat hari aktif presensi:", error);
+      setHariAktifStatus({
+        type: "error",
+        message:
+          error?.message ||
+          "Pengaturan hari aktif presensi gagal dimuat dari backend.",
+      });
+      setHariAktifList([]);
+      setOriginalHariAktif(null);
+    } finally {
+      setHariAktifLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
-    loadSettings();
-  }, [loadSettings]);
+    const timer = setTimeout(() => {
+      loadSettings();
+      loadHariAktif();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [loadSettings, loadHariAktif]);
+
+  const handleSaveHariAktif = async (event) => {
+    if (event) event.preventDefault();
+    setHariAktifStatus(null);
+
+    if (!hariAktifList.length) {
+      setHariAktifStatus({
+        type: "error",
+        message: "Pilih minimal satu hari aktif presensi.",
+      });
+      return;
+    }
+
+    setHariAktifSaving(true);
+
+    try {
+      const sortedDays = [...hariAktifList].sort((a, b) => a - b);
+      const response = await updateHariAktif({
+        hariAktif: sortedDays,
+      });
+
+      const savedDays = Array.isArray(response?.data?.hariAktif)
+        ? response.data.hariAktif
+        : sortedDays;
+
+      setHariAktifList(savedDays);
+      setOriginalHariAktif(JSON.stringify(savedDays));
+
+      setHariAktifStatus({
+        type: "success",
+        message:
+          response?.message ||
+          "Hari aktif presensi berhasil disimpan ke Backend.",
+      });
+    } catch (error) {
+      console.error("Gagal menyimpan hari aktif presensi:", error);
+      setHariAktifStatus({
+        type: "error",
+        message:
+          error?.message ||
+          "Gagal menyimpan hari aktif. Periksa izin akun Anda.",
+      });
+    } finally {
+      setHariAktifSaving(false);
+    }
+  };
+
+  const toggleHari = (id) => {
+    setHariAktifStatus(null);
+    setHariAktifList((prev) => {
+      const active = prev.includes(id);
+      return active
+        ? prev.filter((item) => item !== id)
+        : [...prev, id].sort((a, b) => a - b);
+    });
+  };
+
+  const applyPresetHari = (presetDays) => {
+    setHariAktifStatus(null);
+    setHariAktifList([...presetDays].sort((a, b) => a - b));
+  };
 
   const updateField = (key, value) => {
     setForm((previous) => ({
@@ -396,6 +507,11 @@ export default function PengaturanPresensiPage() {
   const hasChanged =
     original !== null && JSON.stringify(form) !== original;
 
+  const hariAktifChanged =
+    originalHariAktif !== null &&
+    JSON.stringify([...hariAktifList].sort((a, b) => a - b)) !==
+      originalHariAktif;
+
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50">
       <Sidebar />
@@ -416,20 +532,23 @@ export default function PengaturanPresensiPage() {
                 </h1>
 
                 <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 sm:text-base">
-                  Atur lokasi sekolah, jarak maksimal presensi, dan metode
-                  absensi yang diperbolehkan untuk pengguna sekolah.
+                  Atur lokasi sekolah, jarak maksimal presensi, metode
+                  absensi, dan hari operasional aktif sekolah.
                 </p>
               </div>
 
               <button
                 type="button"
-                onClick={loadSettings}
-                disabled={loading || saving}
+                onClick={() => {
+                  loadSettings();
+                  loadHariAktif();
+                }}
+                disabled={loading || saving || hariAktifLoading || hariAktifSaving}
                 className="inline-flex min-h-10 items-center justify-center gap-2 self-start rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <RefreshCw
                   size={16}
-                  className={loading ? "animate-spin" : ""}
+                  className={loading || hariAktifLoading ? "animate-spin" : ""}
                 />
                 Muat Ulang
               </button>
@@ -450,7 +569,7 @@ export default function PengaturanPresensiPage() {
               </div>
             ) : (
               <form onSubmit={handleSave}>
-                <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                   <div className="rounded-xl border border-slate-200 bg-white p-5">
                     <div className="flex items-center justify-between gap-3">
                       <div>
@@ -486,6 +605,20 @@ export default function PengaturanPresensiPage() {
                         </p>
                       </div>
                       <LocateFixed className="text-emerald-600" size={22} />
+                    </div>
+                  </div>
+
+                  <div className="rounded-xl border border-slate-200 bg-white p-5">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-sm text-slate-500">Hari Aktif Presensi</p>
+                        <p className="mt-2 text-lg font-semibold text-slate-900">
+                          {hariAktifLoading
+                            ? "Memuat..."
+                            : `${hariAktifList.length} Hari / Pekan`}
+                        </p>
+                      </div>
+                      <CalendarDays className="text-amber-600" size={22} />
                     </div>
                   </div>
                 </div>
@@ -645,6 +778,153 @@ export default function PengaturanPresensiPage() {
                       )}
                     </SectionCard>
 
+                    {/* Section Card Hari Aktif Presensi (GET / PUT /api/pengaturan/hari-aktif) */}
+                    <SectionCard
+                      icon={CalendarDays}
+                      title="Hari Aktif Presensi Sekolah"
+                      description="Tentukan hari-hari operasional dalam sepekan yang diizinkan untuk pencatatan presensi kehadiran siswa dan guru."
+                    >
+                      {hariAktifStatus && (
+                        <div className="mb-4">
+                          <StatusMessage status={hariAktifStatus} />
+                        </div>
+                      )}
+
+                      {/* Presets */}
+                      <div className="mb-4 flex flex-wrap items-center gap-2">
+                        <span className="text-xs font-semibold text-slate-500">
+                          Pilihan Cepat:
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => applyPresetHari([1, 2, 3, 4, 5])}
+                          disabled={hariAktifSaving || hariAktifLoading}
+                          className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-700 transition hover:bg-slate-100 disabled:opacity-50"
+                        >
+                          5 Hari (Senin - Jumat)
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => applyPresetHari([1, 2, 3, 4, 5, 6])}
+                          disabled={hariAktifSaving || hariAktifLoading}
+                          className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-700 transition hover:bg-slate-100 disabled:opacity-50"
+                        >
+                          6 Hari (Senin - Sabtu)
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => applyPresetHari([0, 1, 2, 3, 4, 5, 6])}
+                          disabled={hariAktifSaving || hariAktifLoading}
+                          className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-700 transition hover:bg-slate-100 disabled:opacity-50"
+                        >
+                          Semua Hari (7 Hari)
+                        </button>
+                      </div>
+
+                      {hariAktifLoading ? (
+                        <div className="flex min-h-32 flex-col items-center justify-center rounded-xl border border-slate-200 bg-slate-50 p-6">
+                          <Loader2 size={24} className="animate-spin text-blue-600" />
+                          <p className="mt-2 text-xs text-slate-500">
+                            Mengambil data hari aktif dari server...
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                          {DAFTAR_HARI.map(({ id, nama, singkat }) => {
+                            const active = hariAktifList.includes(id);
+
+                            return (
+                              <button
+                                key={id}
+                                type="button"
+                                onClick={() => toggleHari(id)}
+                                disabled={hariAktifSaving}
+                                aria-pressed={active}
+                                className={`flex items-center justify-between gap-3 rounded-xl border p-3.5 text-left transition ${
+                                  active
+                                    ? "border-blue-400 bg-blue-50/70"
+                                    : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
+                                } disabled:cursor-not-allowed disabled:opacity-60`}
+                              >
+                                <div className="flex items-center gap-3">
+                                  <div
+                                    className={`flex h-8 w-8 items-center justify-center rounded-lg text-xs font-bold ${
+                                      active
+                                        ? "bg-blue-600 text-white"
+                                        : "bg-slate-100 text-slate-500"
+                                    }`}
+                                  >
+                                    {singkat}
+                                  </div>
+                                  <div>
+                                    <p className="text-sm font-semibold text-slate-900">
+                                      {nama}
+                                    </p>
+                                    <span
+                                      className={`text-[11px] font-medium ${
+                                        active
+                                          ? "text-emerald-700"
+                                          : "text-slate-400"
+                                      }`}
+                                    >
+                                      {active ? "Hari Aktif" : "Libur"}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                <div
+                                  className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border ${
+                                    active
+                                      ? "border-blue-600 bg-blue-600 text-white"
+                                      : "border-slate-300 bg-white"
+                                  }`}
+                                >
+                                  {active && <CheckCircle2 size={15} />}
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+
+                      {hariAktifList.length === 0 && !hariAktifLoading && (
+                        <p className="mt-3 text-sm text-red-600">
+                          Pilih minimal satu hari aktif presensi sebelum menyimpan.
+                        </p>
+                      )}
+
+                      {/* Footer Actions for Hari Aktif */}
+                      <div className="mt-5 flex flex-col-reverse gap-3 rounded-xl border border-slate-100 bg-slate-50/70 p-4 sm:flex-row sm:items-center sm:justify-between">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (originalHariAktif) {
+                              setHariAktifList(JSON.parse(originalHariAktif));
+                              setHariAktifStatus(null);
+                            }
+                          }}
+                          disabled={hariAktifSaving || !hariAktifChanged || !originalHariAktif}
+                          className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
+                        >
+                          Batalkan Perubahan Hari
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={handleSaveHariAktif}
+                          disabled={hariAktifSaving || !hariAktifChanged || hariAktifList.length === 0}
+                          className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-700 px-4 py-2 text-xs font-semibold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          {hariAktifSaving ? (
+                            <Loader2 size={15} className="animate-spin" />
+                          ) : (
+                            <Save size={15} />
+                          )}
+                          {hariAktifSaving ? "Menyimpan Hari..." : "Simpan Hari Aktif"}
+                        </button>
+                      </div>
+                    </SectionCard>
+
                     <div className="flex flex-col-reverse gap-3 rounded-xl border border-slate-200 bg-white p-4 sm:flex-row sm:items-center sm:justify-between">
                       <button
                         type="button"
@@ -676,6 +956,49 @@ export default function PengaturanPresensiPage() {
                   </div>
 
                   <aside className="space-y-6">
+                    <div className="rounded-xl border border-slate-200 bg-white p-5">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-50 text-amber-700">
+                        <CalendarDays size={21} />
+                      </div>
+
+                      <h2 className="mt-4 text-base font-semibold text-slate-900">
+                        Status Hari Aktif
+                      </h2>
+
+                      <p className="mt-2 text-sm leading-6 text-slate-500">
+                        Presensi hanya dapat dilakukan pada hari-hari yang diaktifkan di bawah ini.
+                      </p>
+
+                      <div className="mt-4 space-y-3">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-slate-500">Total Hari:</span>
+                          <span className="font-semibold text-slate-900">
+                            {hariAktifLoading
+                              ? "Memuat..."
+                              : `${hariAktifList.length} dari 7 hari`}
+                          </span>
+                        </div>
+
+                        <div className="flex flex-wrap gap-1.5 pt-1">
+                          {DAFTAR_HARI.map(({ id, singkat }) => {
+                            const active = hariAktifList.includes(id);
+                            return (
+                              <span
+                                key={id}
+                                className={`rounded-md px-2 py-1 text-xs font-medium ${
+                                  active
+                                    ? "bg-blue-100 font-semibold text-blue-700"
+                                    : "bg-slate-100 text-slate-400"
+                                }`}
+                              >
+                                {singkat}
+                              </span>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+
                     <div className="rounded-xl border border-slate-200 bg-white p-5">
                       <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-700">
                         <ShieldCheck size={21} />

@@ -47,7 +47,17 @@ export default function JalurPendaftaranPage() {
         const data = res?.data || res;
         if (!aktif) return;
 
-        setSekolah(data?.sekolah || null);
+        let sekolahData = data?.sekolah || null;
+        if (!sekolahData?.id && tenant) {
+          try {
+            const resProfil = await publikService.getProfilSekolah(tenant);
+            sekolahData = resProfil?.data || resProfil || null;
+          } catch {
+            // Lanjutkan jika profil publik alternatif tidak dapat dimuat
+          }
+        }
+
+        setSekolah(sekolahData);
         const list = Array.isArray(data?.jalur) ? data.jalur : [];
         setJalurList(list);
         if (list.length > 0) {
@@ -68,11 +78,16 @@ export default function JalurPendaftaranPage() {
   }, [tenant]);
 
   const handleDaftarJalur = (jalurId) => {
-    if (jalurId) {
-      router.push(`${basePath}/PPDB/daftar?jalurPpdbId=${encodeURIComponent(jalurId)}`);
-    } else {
-      router.push(urlFormulirPendaftaran(basePath));
+    const params = new URLSearchParams();
+    const effectiveSekolahId = sekolah?.id ? String(sekolah.id).trim() : "";
+    if (effectiveSekolahId) {
+      params.set("sekolahId", effectiveSekolahId);
     }
+    if (jalurId) {
+      params.set("jalurPpdbId", String(jalurId).trim());
+    }
+    const query = params.toString();
+    router.push(`${basePath}/PPDB/daftar${query ? `?${query}` : ""}`);
   };
 
   const formatTanggal = (iso) => {

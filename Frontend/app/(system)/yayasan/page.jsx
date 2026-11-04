@@ -1,19 +1,22 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  LayoutDashboard,
+  ArrowUpRight,
+  Bell,
   Building2,
+  CalendarCheck,
+  CheckCircle2,
+  ChevronRight,
+  ClipboardCheck,
+  LayoutDashboard,
+  MapPin,
+  Plus,
+  Settings,
+  ShieldCheck,
   Users,
   UserSquare2,
-  ClipboardCheck,
-  Settings,
-  ChevronRight,
-  Bell,
-  PlusCircle,
-  MapPin,
-  CalendarCheck,
 } from "lucide-react";
 
 import {
@@ -23,19 +26,24 @@ import {
 } from "@/services/yayasan.service";
 import { getNotifikasi } from "@/services/notifikasi.service";
 
-const neutralSurface = "bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)]";
-const neutralHover =
-  "hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
-const skeletonBg = "color-mix(in srgb, var(--color-text) 7%, transparent)";
-const cardShadow =
-  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
-
 const textColor = {
   primary: "text-[var(--color-primary)]",
   info: "text-[var(--color-info)]",
   success: "text-[var(--color-success)]",
   warning: "text-[var(--color-warning)]",
   neutral: "text-[var(--color-text-muted)]",
+};
+
+const softBg = {
+  primary:
+    "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]",
+  info: "bg-[color-mix(in_srgb,var(--color-info)_10%,transparent)]",
+  success:
+    "bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)]",
+  warning:
+    "bg-[color-mix(in_srgb,var(--color-warning)_10%,transparent)]",
+  neutral:
+    "bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)]",
 };
 
 const dotColor = {
@@ -46,25 +54,23 @@ const dotColor = {
   neutral: "bg-[var(--color-text-placeholder)]",
 };
 
-const softBg = {
-  primary: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]",
-  info: "bg-[color-mix(in_srgb,var(--color-info)_10%,transparent)]",
-  success: "bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)]",
-  warning: "bg-[color-mix(in_srgb,var(--color-warning)_10%,transparent)]",
-  neutral: "bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)]",
-};
-
 function unwrapData(response) {
   if (response && typeof response === "object" && "data" in response) {
     return response.data;
   }
+
   return response;
 }
 
 function formatTanggal(value) {
   if (!value) return "-";
+
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "-";
+
+  if (Number.isNaN(date.getTime())) {
+    return "-";
+  }
+
   return date.toLocaleDateString("id-ID", {
     day: "numeric",
     month: "short",
@@ -72,14 +78,71 @@ function formatTanggal(value) {
   });
 }
 
-function SectionHeader({ icon: Icon, title, color = "primary", action }) {
+function SectionTitle({
+  icon: Icon,
+  title,
+  description,
+  color = "primary",
+  action,
+}) {
   return (
-    <div className="mb-5 flex items-center justify-between gap-2">
-      <div className="flex min-w-0 items-center gap-2.5">
-        <Icon size={18} className={`shrink-0 ${textColor[color]}`} />
-        <h3 className="truncate text-sm font-semibold theme-text">{title}</h3>
+    <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+      <div className="min-w-0">
+        <div className="flex items-center gap-2">
+          <div
+            className={`flex h-8 w-8 items-center justify-center rounded-lg ${softBg[color]}`}
+          >
+            <Icon size={16} className={textColor[color]} />
+          </div>
+
+          <h2 className="text-base font-semibold theme-text">
+            {title}
+          </h2>
+        </div>
+
+        {description && (
+          <p className="mt-2 text-xs leading-5 theme-text-secondary">
+            {description}
+          </p>
+        )}
       </div>
+
       {action}
+    </div>
+  );
+}
+
+function Skeleton({ className = "" }) {
+  return (
+    <div
+      className={`animate-pulse rounded-lg ${className}`}
+      style={{
+        background:
+          "color-mix(in srgb, var(--color-text) 7%, transparent)",
+      }}
+    />
+  );
+}
+
+function EmptyState({ icon: Icon, title, description }) {
+  return (
+    <div className="flex min-h-[220px] flex-col items-center justify-center text-center">
+      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)]">
+        <Icon
+          size={22}
+          className="text-[var(--color-text-muted)]"
+        />
+      </div>
+
+      <p className="mt-4 text-sm font-semibold theme-text">
+        {title}
+      </p>
+
+      {description && (
+        <p className="mt-1 max-w-xs text-xs leading-5 theme-text-secondary">
+          {description}
+        </p>
+      )}
     </div>
   );
 }
@@ -92,6 +155,7 @@ export default function YayasanDashboardPage() {
   const [schools, setSchools] = useState([]);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
+
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
 
@@ -103,34 +167,54 @@ export default function YayasanDashboardPage() {
         setLoading(true);
         setLoadError(null);
 
-        const [summaryResult, schoolsResult, notifResult, profilResult] =
-          await Promise.allSettled([
-            getYayasanSummary(),
-            getSekolahBinaan(),
-            getNotifikasi(),
-            getProfilYayasan(),
-          ]);
+        const [
+          summaryResult,
+          schoolsResult,
+          notifResult,
+          profilResult,
+        ] = await Promise.allSettled([
+          getYayasanSummary(),
+          getSekolahBinaan(),
+          getNotifikasi(),
+          getProfilYayasan(),
+        ]);
 
         if (!mounted) return;
 
         if (summaryResult.status === "fulfilled") {
-          setSummary(unwrapData(summaryResult.value) ?? null);
+          setSummary(
+            unwrapData(summaryResult.value) ?? null
+          );
         }
 
         if (profilResult.status === "fulfilled") {
-          setProfilYayasan(unwrapData(profilResult.value) ?? null);
+          setProfilYayasan(
+            unwrapData(profilResult.value) ?? null
+          );
         }
 
         if (schoolsResult.status === "fulfilled") {
           const payload = unwrapData(schoolsResult.value);
-          setSchools(Array.isArray(payload?.items) ? payload.items : []);
+
+          setSchools(
+            Array.isArray(payload?.items)
+              ? payload.items
+              : []
+          );
         }
 
         if (notifResult.status === "fulfilled") {
+          const payload = notifResult.value;
+
           setNotifications(
-            Array.isArray(notifResult.value?.list) ? notifResult.value.list : []
+            Array.isArray(payload?.list)
+              ? payload.list
+              : []
           );
-          setUnreadCount(Number(notifResult.value?.unreadCount) || 0);
+
+          setUnreadCount(
+            Number(payload?.unreadCount) || 0
+          );
         }
 
         const failures = [
@@ -138,7 +222,9 @@ export default function YayasanDashboardPage() {
           schoolsResult,
           notifResult,
           profilResult,
-        ].filter((result) => result.status === "rejected");
+        ].filter(
+          (result) => result.status === "rejected"
+        );
 
         if (failures.length > 0) {
           setLoadError(
@@ -146,13 +232,17 @@ export default function YayasanDashboardPage() {
               "Sebagian data dashboard gagal dimuat."
           );
         }
-      } catch (err) {
+      } catch (error) {
         if (!mounted) return;
+
         setLoadError(
-          err?.message || "Terjadi kesalahan saat mengambil data dashboard."
+          error?.message ||
+            "Terjadi kesalahan saat mengambil data dashboard."
         );
       } finally {
-        if (mounted) setLoading(false);
+        if (mounted) {
+          setLoading(false);
+        }
       }
     }
 
@@ -163,24 +253,82 @@ export default function YayasanDashboardPage() {
     };
   }, []);
 
-  const sumStat = (key) =>
-    schools.reduce(
-      (total, sekolah) => total + Number(sekolah?.statistik?.[key] ?? 0),
-      0
-    );
+  const totalSiswa = useMemo(
+    () =>
+      schools.reduce(
+        (total, sekolah) =>
+          total +
+          Number(
+            sekolah?.statistik?.totalSiswa ?? 0
+          ),
+        0
+      ),
+    [schools]
+  );
 
-  const totalSiswa = sumStat("totalSiswa");
-  const totalGuru = sumStat("totalGuru");
-  const totalKelas = sumStat("totalKelas");
+  const totalGuru = useMemo(
+    () =>
+      schools.reduce(
+        (total, sekolah) =>
+          total +
+          Number(
+            sekolah?.statistik?.totalGuru ?? 0
+          ),
+        0
+      ),
+    [schools]
+  );
 
-  const rekap = summary?.rekapKehadiran ?? summary?.rekapPresensi ?? {};
+  const totalKelas = useMemo(
+    () =>
+      schools.reduce(
+        (total, sekolah) =>
+          total +
+          Number(
+            sekolah?.statistik?.totalKelas ?? 0
+          ),
+        0
+      ),
+    [schools]
+  );
+
+  const rekap =
+    summary?.rekapKehadiran ??
+    summary?.rekapPresensi ??
+    {};
+
   const presensiRows = [
-    { key: "hadir", label: "Hadir", value: Number(rekap.hadir ?? 0), color: "success" },
-    { key: "izin", label: "Izin", value: Number(rekap.izin ?? 0), color: "info" },
-    { key: "sakit", label: "Sakit", value: Number(rekap.sakit ?? 0), color: "warning" },
-    { key: "alpha", label: "Alpha", value: Number(rekap.alpha ?? 0), color: "neutral" },
+    {
+      key: "hadir",
+      label: "Hadir",
+      value: Number(rekap.hadir ?? 0),
+      color: "success",
+    },
+    {
+      key: "izin",
+      label: "Izin",
+      value: Number(rekap.izin ?? 0),
+      color: "info",
+    },
+    {
+      key: "sakit",
+      label: "Sakit",
+      value: Number(rekap.sakit ?? 0),
+      color: "warning",
+    },
+    {
+      key: "alpha",
+      label: "Alpha",
+      value: Number(rekap.alpha ?? 0),
+      color: "neutral",
+    },
   ];
-  const presensiTotal = presensiRows.reduce((t, r) => t + r.value, 0);
+
+  const presensiTotal = presensiRows.reduce(
+    (total, row) => total + row.value,
+    0
+  );
+
   const persenHadir =
     summary?.rataKehadiranGlobal != null
       ? Number(summary.rataKehadiranGlobal)
@@ -188,11 +336,14 @@ export default function YayasanDashboardPage() {
       ? (presensiRows[0].value / presensiTotal) * 100
       : 0;
 
-  const kpiStrip = [
+  const kpiCards = [
     {
       key: "sekolah",
       label: "Unit Sekolah",
-      value: summary?.totalSekolah ?? (loading ? "-" : schools.length),
+      value:
+        summary?.totalSekolah ??
+        (loading ? "-" : schools.length),
+      description: "Sekolah dalam naungan",
       icon: Building2,
       color: "primary",
     },
@@ -200,226 +351,323 @@ export default function YayasanDashboardPage() {
       key: "pengguna",
       label: "Pengguna Aktif",
       value:
-        summary?.totalPenggunaAktif ?? (loading ? "-" : totalSiswa + totalGuru),
-      icon: UserSquare2,
+        summary?.totalPenggunaAktif ??
+        (loading ? "-" : totalSiswa + totalGuru),
+      description: "Siswa & tenaga pendidik",
+      icon: Users,
       color: "info",
     },
     {
       key: "aktif",
       label: "Sekolah Aktif",
       value: summary?.sekolahAktif ?? "-",
-      icon: Users,
+      description: "Status operasional aktif",
+      icon: CheckCircle2,
       color: "success",
     },
     {
       key: "ujiCoba",
       label: "Sekolah Uji Coba",
       value: summary?.sekolahUjiCoba ?? "-",
+      description: "Dalam masa uji coba",
       icon: ClipboardCheck,
       color: "warning",
     },
   ];
 
-  const quickMenu = [
+  const quickActions = [
     {
       id: "sekolah",
       title: "Sekolah Binaan",
-      desc: "Kelola profil dan data seluruh unit sekolah",
+      description: "Lihat dan kelola seluruh unit sekolah.",
       icon: Building2,
       color: "primary",
       path: "/yayasan/sekolah",
-      stat: loading ? "Memuat..." : `${schools.length} unit sekolah`,
+      value: loading
+        ? "Memuat..."
+        : `${schools.length} unit`,
     },
     {
-      id: "tambahSekolah",
-      title: "Tambah Cabang",
-      desc: "Daftarkan unit sekolah binaan baru",
-      icon: PlusCircle,
+      id: "tambah",
+      title: "Tambah Sekolah",
+      description: "Daftarkan unit sekolah binaan baru.",
+      icon: Plus,
       color: "info",
       path: "/yayasan/sekolah/tambah",
-      stat: "Pendaftaran baru",
+      value: "Pendaftaran baru",
     },
     {
       id: "lokasi",
       title: "Lokasi Sekolah",
-      desc: "Pemetaan koordinat dan alamat unit sekolah",
+      description: "Lihat lokasi dan alamat unit sekolah.",
       icon: MapPin,
       color: "warning",
       path: "/yayasan/lokasi",
-      stat: loading ? "Memuat..." : `${schools.length} lokasi terdata`,
+      value: loading
+        ? "Memuat..."
+        : `${schools.length} lokasi`,
     },
     {
-      id: "monitoringUsers",
+      id: "monitoring",
       title: "Monitoring Pengguna",
-      desc: "Pantau akun guru, siswa, staf, dan admin",
+      description: "Pantau akun pengguna di seluruh sekolah.",
       icon: Users,
       color: "success",
       path: "/yayasan/monitoring/users",
-      stat: loading
+      value: loading
         ? "Memuat..."
-        : `${summary?.totalPenggunaAktif ?? totalSiswa + totalGuru} pengguna aktif`,
+        : `${
+            summary?.totalPenggunaAktif ??
+            totalSiswa + totalGuru
+          } pengguna`,
     },
     {
       id: "pengaturan",
       title: "Pengaturan Yayasan",
-      desc: "Profil yayasan, NPYP, kontak, dan alamat",
+      description: "Kelola profil dan informasi yayasan.",
       icon: Settings,
       color: "neutral",
       path: "/yayasan/pengaturan",
-      stat: "Profil & NPYP",
+      value: "Profil & NPYP",
     },
   ];
 
   return (
-    <div className="theme-page theme-text min-h-full">
-      <div className="mx-auto w-full max-w-[1800px] px-4 py-5 sm:px-6 lg:px-10 lg:py-8">
-        <div className="space-y-10">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <div className="flex min-w-0 items-center gap-4">
-              <LayoutDashboard
-                size={28}
-                className="shrink-0 text-[var(--color-primary)]"
-              />
+    <main className="theme-page theme-text min-h-full">
+      <div className="mx-auto w-full max-w-[1680px] px-4 py-5 sm:px-6 lg:px-8 xl:px-10">
+        <div className="space-y-7">
+          {/* =========================================================
+              HEADER
+          ========================================================= */}
+          <header className="relative overflow-hidden rounded-3xl border theme-border theme-card">
+            <div className="absolute right-0 top-0 h-48 w-48 rounded-full bg-[color-mix(in_srgb,var(--color-primary)_7%,transparent)] blur-3xl" />
+
+            <div className="relative flex flex-col gap-6 p-6 sm:p-8 lg:flex-row lg:items-center lg:justify-between">
               <div className="min-w-0">
-                <h1 className="truncate text-xl font-semibold theme-text sm:text-2xl">
-                  {profilYayasan?.nama || "Dashboard Yayasan"}
+                <div className="mb-3 flex items-center gap-2">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--color-primary)] text-white shadow-sm">
+                    <LayoutDashboard size={17} />
+                  </div>
+
+                  <span className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--color-primary)]">
+                    Dashboard Yayasan
+                  </span>
+                </div>
+
+                <h1 className="text-2xl font-bold tracking-tight theme-text sm:text-3xl">
+                  {profilYayasan?.nama ||
+                    "Dashboard Yayasan"}
                 </h1>
-                <p className="mt-0.5 truncate text-xs theme-text-secondary">
-                  Ringkasan kondisi seluruh unit sekolah di bawah naungan yayasan
+
+                <p className="mt-2 max-w-2xl text-sm leading-6 theme-text-secondary">
+                  Pantau kondisi seluruh unit sekolah,
+                  pengguna, dan aktivitas yayasan dari
+                  satu tempat.
                 </p>
               </div>
-            </div>
 
-            <div className="flex flex-wrap items-center gap-x-6 gap-y-1 text-xs theme-text-secondary">
-              {profilYayasan?.npyp && (
-                <span className="font-mono">NPYP: {profilYayasan.npyp}</span>
-              )}
-              {profilYayasan?.email && (
-                <span className="max-w-[240px] truncate">
-                  {profilYayasan.email}
-                </span>
-              )}
-            </div>
-          </div>
+              <div className="flex flex-wrap items-center gap-2 lg:justify-end">
+                {profilYayasan?.npyp && (
+                  <div className="rounded-xl border theme-border px-3 py-2">
+                    <p className="text-[10px] uppercase tracking-wider theme-text-muted">
+                      NPYP
+                    </p>
+                    <p className="mt-0.5 font-mono text-xs font-semibold theme-text">
+                      {profilYayasan.npyp}
+                    </p>
+                  </div>
+                )}
 
+                {profilYayasan?.email && (
+                  <div className="max-w-[260px] rounded-xl border theme-border px-3 py-2">
+                    <p className="text-[10px] uppercase tracking-wider theme-text-muted">
+                      Email
+                    </p>
+                    <p className="mt-0.5 truncate text-xs font-medium theme-text">
+                      {profilYayasan.email}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </header>
+
+          {/* =========================================================
+              ERROR
+          ========================================================= */}
           {loadError && (
-            <div className="flex items-start gap-3 border-l-2 border-[var(--color-warning)] py-1 pl-4">
+            <div className="flex items-start gap-3 rounded-2xl border border-[color-mix(in_srgb,var(--color-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--color-warning)_7%,transparent)] px-4 py-3">
               <Bell
-                size={15}
+                size={17}
                 className="mt-0.5 shrink-0 text-[var(--color-warning)]"
               />
+
               <div className="min-w-0">
-                <p className="text-sm font-medium text-[var(--color-warning)]">
-                  Sebagian data dashboard gagal dimuat
+                <p className="text-sm font-semibold text-[var(--color-warning)]">
+                  Sebagian data belum tersedia
                 </p>
-                <p className="mt-1 break-words text-xs theme-text-secondary">
+
+                <p className="mt-1 break-words text-xs leading-5 theme-text-secondary">
                   {loadError}
                 </p>
               </div>
             </div>
           )}
 
-          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4 lg:gap-6">
-            {kpiStrip.map((kpi) => {
-              const Icon = kpi.icon;
+          {/* =========================================================
+              KPI
+          ========================================================= */}
+          <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            {kpiCards.map((card) => {
+              const Icon = card.icon;
 
               return (
                 <div
-                  key={kpi.key}
-                  className={`theme-card theme-border flex min-w-0 items-center gap-4 rounded-2xl border px-5 py-5 ${cardShadow}`}
+                  key={card.key}
+                  className="group rounded-2xl border theme-border theme-card p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_12px_30px_color-mix(in_srgb,var(--color-text)_7%,transparent)]"
                 >
-                  <div
-                    className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${softBg[kpi.color]} ${textColor[kpi.color]}`}
-                  >
-                    <Icon size={22} />
+                  <div className="flex items-start justify-between gap-4">
+                    <div
+                      className={`flex h-11 w-11 items-center justify-center rounded-xl ${softBg[card.color]} ${textColor[card.color]}`}
+                    >
+                      <Icon size={21} />
+                    </div>
+
+                    <ArrowUpRight
+                      size={15}
+                      className="text-[var(--color-text-placeholder)] opacity-0 transition-opacity group-hover:opacity-100"
+                    />
                   </div>
 
-                  <div className="min-w-0">
+                  <div className="mt-5">
                     {loading ? (
-                      <div
-                        className="h-7 w-14 animate-pulse rounded"
-                        style={{ background: skeletonBg }}
-                      />
+                      <Skeleton className="h-8 w-20" />
                     ) : (
-                      <p className="truncate text-3xl font-bold leading-none theme-text">
-                        {kpi.value}
+                      <p className="text-3xl font-bold tracking-tight theme-text">
+                        {card.value}
                       </p>
                     )}
-                    <p className="mt-2 truncate text-xs theme-text-secondary">
-                      {kpi.label}
+
+                    <p className="mt-1.5 text-sm font-semibold theme-text">
+                      {card.label}
+                    </p>
+
+                    <p className="mt-1 text-xs theme-text-muted">
+                      {card.description}
                     </p>
                   </div>
                 </div>
               );
             })}
-          </div>
+          </section>
 
-          <div className="grid grid-cols-1 gap-12 lg:grid-cols-3 lg:gap-16">
-            <section className="flex min-w-0 flex-col lg:h-[340px]">
-              <SectionHeader
-                icon={Building2}
-                title="Ringkasan Unit Sekolah"
-                action={
-                  <button
-                    type="button"
-                    onClick={() => router.push("/yayasan/sekolah")}
-                    className="inline-flex shrink-0 items-center gap-0.5 text-xs font-medium text-[var(--color-primary)] transition-opacity hover:opacity-80"
-                  >
-                    Semua
-                    <ChevronRight size={12} />
-                  </button>
-                }
-              />
+          {/* =========================================================
+              MAIN GRID
+          ========================================================= */}
+          <section className="grid grid-cols-1 gap-6 xl:grid-cols-[1.35fr_0.9fr]">
+            {/* SEKOLAH */}
+            <div className="min-w-0 rounded-2xl border theme-border theme-card">
+              <div className="border-b theme-border p-5 sm:p-6">
+                <SectionTitle
+                  icon={Building2}
+                  title="Sekolah Binaan"
+                  description="Ringkasan unit sekolah yang berada di bawah naungan yayasan."
+                  action={
+                    <button
+                      type="button"
+                      onClick={() =>
+                        router.push("/yayasan/sekolah")
+                      }
+                      className="inline-flex items-center gap-1 rounded-lg px-3 py-2 text-xs font-semibold text-[var(--color-primary)] transition-colors hover:bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)]"
+                    >
+                      Lihat semua
+                      <ChevronRight size={14} />
+                    </button>
+                  }
+                />
+              </div>
 
-              <div className="min-h-0 flex-1 overflow-y-auto pr-1">
+              <div className="p-3 sm:p-4">
                 {loading ? (
-                  <div className="space-y-4">
-                    {[1, 2, 3].map((item) => (
-                      <div
+                  <div className="space-y-2">
+                    {[1, 2, 3, 4].map((item) => (
+                      <Skeleton
                         key={item}
-                        className="h-12 animate-pulse rounded-lg"
-                        style={{ background: skeletonBg }}
+                        className="h-[76px]"
                       />
                     ))}
                   </div>
                 ) : schools.length === 0 ? (
-                  <div className="flex h-full flex-col items-center justify-center py-6 text-center">
-                    <Building2
-                      size={30}
-                      className="text-[var(--color-text-muted)]"
-                    />
-                    <p className="mt-3 text-sm font-medium theme-text-secondary">
-                      Belum ada unit sekolah
-                    </p>
-                    <p className="mt-1 text-xs theme-text-muted">
-                      Data sekolah binaan belum tersedia.
-                    </p>
-                  </div>
+                  <EmptyState
+                    icon={Building2}
+                    title="Belum ada sekolah binaan"
+                    description="Data unit sekolah belum tersedia."
+                  />
                 ) : (
                   <div className="space-y-1">
-                    {schools.map((unit) => (
+                    {schools.slice(0, 7).map((unit) => (
                       <button
                         key={unit.id}
                         type="button"
-                        onClick={() => router.push(`/yayasan/sekolah/${unit.id}`)}
-                        className={`group -mx-3 flex w-[calc(100%+1.5rem)] items-center justify-between gap-3 rounded-lg px-3 py-3 text-left transition-colors ${neutralHover}`}
+                        onClick={() =>
+                          router.push(
+                            `/yayasan/sekolah/${unit.id}`
+                          )
+                        }
+                        className="group flex w-full items-center gap-4 rounded-xl p-3 text-left transition-colors hover:bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]"
                       >
-                        <div className="min-w-0">
-                          <p className="truncate text-sm font-semibold theme-text">
-                            {unit.nama}
-                          </p>
-                          <p className="mt-0.5 truncate text-xs theme-text-muted">
-                            {unit.jenjang || "-"}
-                            {unit.npsn ? ` · NPSN ${unit.npsn}` : ""}
-                          </p>
-                          <p className="mt-1.5 text-[11px] theme-text-secondary">
-                            {Number(unit?.statistik?.totalSiswa ?? 0)} siswa ·{" "}
-                            {Number(unit?.statistik?.totalGuru ?? 0)} guru ·{" "}
-                            {Number(unit?.statistik?.totalKelas ?? 0)} kelas
-                          </p>
+                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)] text-[var(--color-primary)]">
+                          <Building2 size={19} />
                         </div>
+
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <p className="truncate text-sm font-semibold theme-text">
+                              {unit.nama}
+                            </p>
+
+                            {unit.jenjang && (
+                              <span className="rounded-md bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)] px-2 py-0.5 text-[10px] font-medium theme-text-secondary">
+                                {unit.jenjang}
+                              </span>
+                            )}
+                          </div>
+
+                          <p className="mt-1 truncate text-xs theme-text-muted">
+                            {unit.npsn
+                              ? `NPSN ${unit.npsn}`
+                              : "NPSN belum tersedia"}
+                          </p>
+
+                          <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[11px] theme-text-secondary">
+                            <span>
+                              {Number(
+                                unit?.statistik
+                                  ?.totalSiswa ?? 0
+                              )}{" "}
+                              siswa
+                            </span>
+
+                            <span>
+                              {Number(
+                                unit?.statistik
+                                  ?.totalGuru ?? 0
+                              )}{" "}
+                              guru
+                            </span>
+
+                            <span>
+                              {Number(
+                                unit?.statistik
+                                  ?.totalKelas ?? 0
+                              )}{" "}
+                              kelas
+                            </span>
+                          </div>
+                        </div>
+
                         <ChevronRight
-                          size={14}
+                          size={17}
                           className="shrink-0 text-[var(--color-text-placeholder)] transition-transform group-hover:translate-x-0.5"
                         />
                       </button>
@@ -428,206 +676,298 @@ export default function YayasanDashboardPage() {
                 )}
               </div>
 
-              <p className="mt-4 text-xs theme-text-muted">
-                Total{" "}
-                <span className="font-semibold theme-text">
-                  {loading ? "..." : totalSiswa}
-                </span>{" "}
-                siswa ·{" "}
-                <span className="font-semibold theme-text">
-                  {loading ? "..." : totalGuru}
-                </span>{" "}
-                guru ·{" "}
-                <span className="font-semibold theme-text">
-                  {loading ? "..." : totalKelas}
-                </span>{" "}
-                kelas
-              </p>
-            </section>
+              <div className="border-t theme-border px-5 py-4 sm:px-6">
+                <div className="flex flex-wrap gap-x-5 gap-y-2 text-xs theme-text-secondary">
+                  <span>
+                    <strong className="theme-text">
+                      {loading ? "..." : totalSiswa}
+                    </strong>{" "}
+                    siswa
+                  </span>
 
-            <section className="flex min-w-0 flex-col lg:h-[340px]">
-              <SectionHeader
-                icon={Bell}
-                title="Notifikasi Terbaru"
-                color="info"
-                action={
-                  unreadCount > 0 ? (
-                    <span className="shrink-0 text-[11px] font-semibold text-[var(--color-warning)]">
-                      {unreadCount} baru
-                    </span>
-                  ) : null
-                }
-              />
+                  <span>
+                    <strong className="theme-text">
+                      {loading ? "..." : totalGuru}
+                    </strong>{" "}
+                    guru
+                  </span>
 
-              <div className="min-h-0 flex-1 overflow-y-auto pr-1">
+                  <span>
+                    <strong className="theme-text">
+                      {loading ? "..." : totalKelas}
+                    </strong>{" "}
+                    kelas
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* NOTIFIKASI */}
+            <div className="min-w-0 rounded-2xl border theme-border theme-card">
+              <div className="border-b theme-border p-5 sm:p-6">
+                <SectionTitle
+                  icon={Bell}
+                  title="Notifikasi"
+                  description="Aktivitas dan informasi terbaru untuk yayasan."
+                  color="info"
+                  action={
+                    unreadCount > 0 ? (
+                      <span className="rounded-full bg-[color-mix(in_srgb,var(--color-warning)_10%,transparent)] px-2.5 py-1 text-[10px] font-bold text-[var(--color-warning)]">
+                        {unreadCount} baru
+                      </span>
+                    ) : null
+                  }
+                />
+              </div>
+
+              <div className="p-5 sm:p-6">
                 {loading ? (
-                  <div className="space-y-4">
-                    {[1, 2, 3].map((item) => (
+                  <div className="space-y-5">
+                    {[1, 2, 3, 4].map((item) => (
                       <div
                         key={item}
-                        className="h-12 animate-pulse rounded-lg"
-                        style={{ background: skeletonBg }}
-                      />
-                    ))}
-                  </div>
-                ) : notifications.length === 0 ? (
-                  <div className="flex h-full flex-col items-center justify-center py-6 text-center">
-                    <Bell
-                      size={28}
-                      className="text-[var(--color-text-muted)]"
-                    />
-                    <p className="mt-3 text-sm font-medium theme-text-secondary">
-                      Belum ada notifikasi
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-5">
-                    {notifications.slice(0, 6).map((notification) => (
-                      <div key={notification.id} className="flex items-start gap-3">
-                        <span
-                          className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full ${
-                            notification.dibaca
-                              ? "bg-[var(--color-text-placeholder)]"
-                              : "bg-[var(--color-primary)]"
-                          }`}
-                        />
-                        <div className="min-w-0">
-                          <p className="truncate text-sm font-medium theme-text">
-                            {notification.judul}
-                          </p>
-                          <p className="mt-1 line-clamp-2 text-xs theme-text-secondary">
-                            {notification.isi}
-                          </p>
-                          <p className="mt-1.5 text-[11px] theme-text-muted">
-                            {formatTanggal(notification.dibuatPada)}
-                          </p>
+                        className="flex gap-3"
+                      >
+                        <Skeleton className="mt-1 h-2 w-2 rounded-full" />
+                        <div className="flex-1 space-y-2">
+                          <Skeleton className="h-4 w-3/4" />
+                          <Skeleton className="h-3 w-full" />
+                          <Skeleton className="h-3 w-20" />
                         </div>
                       </div>
                     ))}
                   </div>
+                ) : notifications.length === 0 ? (
+                  <EmptyState
+                    icon={Bell}
+                    title="Tidak ada notifikasi"
+                    description="Belum ada informasi baru untuk ditampilkan."
+                  />
+                ) : (
+                  <div className="space-y-1">
+                    {notifications
+                      .slice(0, 6)
+                      .map((notification) => (
+                        <div
+                          key={notification.id}
+                          className="flex gap-3 rounded-xl p-3 transition-colors hover:bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]"
+                        >
+                          <span
+                            className={`mt-2 h-2 w-2 shrink-0 rounded-full ${
+                              notification.dibaca
+                                ? "bg-[var(--color-text-placeholder)]"
+                                : "bg-[var(--color-primary)]"
+                            }`}
+                          />
+
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-start justify-between gap-3">
+                              <p className="truncate text-sm font-semibold theme-text">
+                                {notification.judul}
+                              </p>
+
+                              {!notification.dibaca && (
+                                <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-primary)]" />
+                              )}
+                            </div>
+
+                            <p className="mt-1 line-clamp-2 text-xs leading-5 theme-text-secondary">
+                              {notification.isi}
+                            </p>
+
+                            <p className="mt-1.5 text-[10px] theme-text-muted">
+                              {formatTanggal(
+                                notification.dibuatPada
+                              )}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
                 )}
               </div>
-            </section>
+            </div>
+          </section>
 
-            <section className="flex min-w-0 flex-col lg:min-h-[340px]">
-              <SectionHeader
+          {/* =========================================================
+              PRESENSI
+          ========================================================= */}
+          <section className="rounded-2xl border theme-border theme-card">
+            <div className="border-b theme-border p-5 sm:p-6">
+              <SectionTitle
                 icon={CalendarCheck}
-                title="Rekap Presensi Hari Ini"
+                title="Ringkasan Kehadiran"
+                description="Rekap presensi seluruh unit sekolah."
                 color="success"
                 action={
-                  <span className="shrink-0 text-[11px] theme-text-muted">
-                    Seluruh cabang
+                  <span className="text-xs theme-text-muted">
+                    Hari ini
                   </span>
                 }
               />
+            </div>
 
-              <div className="flex flex-1 flex-col gap-6">
-                <div className="flex items-end justify-between gap-3">
-                  <div>
-                    <p className="text-5xl font-bold leading-none theme-text">
-                      {loading ? "..." : `${persenHadir.toFixed(1)}%`}
-                    </p>
-                    <p className="mt-3 text-xs theme-text-secondary">
-                      Rata-rata kehadiran global
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-2xl font-bold theme-text">
-                      {loading ? "..." : presensiTotal}
-                    </p>
-                    <p className="mt-1 text-[11px] theme-text-muted">
-                      Total tercatat
-                    </p>
-                  </div>
+            <div className="grid grid-cols-1 gap-8 p-5 sm:p-6 lg:grid-cols-[0.8fr_1.2fr] lg:items-center">
+              <div>
+                <p className="text-xs font-medium uppercase tracking-wider theme-text-muted">
+                  Rata-rata kehadiran
+                </p>
+
+                <div className="mt-2 flex items-end gap-2">
+                  <span className="text-5xl font-bold tracking-tight theme-text sm:text-6xl">
+                    {loading
+                      ? "..."
+                      : persenHadir.toFixed(1)}
+                  </span>
+
+                  {!loading && (
+                    <span className="mb-2 text-2xl font-semibold theme-text-secondary">
+                      %
+                    </span>
+                  )}
                 </div>
 
-                <div
-                  className={`flex h-1.5 w-full overflow-hidden rounded-full ${neutralSurface}`}
-                >
+                <p className="mt-3 text-xs theme-text-secondary">
+                  Berdasarkan{" "}
+                  <strong className="theme-text">
+                    {loading
+                      ? "..."
+                      : presensiTotal}
+                  </strong>{" "}
+                  catatan presensi.
+                </p>
+
+                <div className="mt-6 h-2 w-full overflow-hidden rounded-full bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]">
                   {presensiTotal > 0 &&
                     presensiRows.map((row) => (
                       <div
                         key={row.key}
-                        className={`${dotColor[row.color]} transition-all duration-500`}
+                        className={`inline-block h-full ${dotColor[row.color]}`}
                         style={{
-                          width: `${(row.value / presensiTotal) * 100}%`,
+                          width: `${
+                            (row.value /
+                              presensiTotal) *
+                            100
+                          }%`,
                         }}
                       />
                     ))}
                 </div>
-
-                <div className="space-y-4">
-                  {presensiRows.map((row) => {
-                    const pct =
-                      presensiTotal > 0 ? (row.value / presensiTotal) * 100 : 0;
-
-                    return (
-                      <div
-                        key={row.key}
-                        className="flex items-center justify-between"
-                      >
-                        <div className="flex items-center gap-3">
-                          <span
-                            className={`h-2 w-2 rounded-full ${dotColor[row.color]}`}
-                          />
-                          <span className="text-sm theme-text-secondary">
-                            {row.label}
-                          </span>
-                        </div>
-                        <div className="flex items-baseline gap-4">
-                          <span className="text-[11px] theme-text-muted">
-                            {pct.toFixed(0)}%
-                          </span>
-                          <span
-                            className={`w-12 text-right text-lg font-bold ${textColor[row.color]}`}
-                          >
-                            {loading ? "..." : row.value}
-                          </span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
               </div>
-            </section>
-          </div>
 
-          <div className="grid grid-cols-2 gap-x-6 gap-y-6 md:grid-cols-3 xl:grid-cols-5 xl:gap-x-10">
-            {quickMenu.map((item) => {
-              const Icon = item.icon;
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                {presensiRows.map((row) => {
+                  const percentage =
+                    presensiTotal > 0
+                      ? (row.value /
+                          presensiTotal) *
+                        100
+                      : 0;
 
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  title={item.desc}
-                  onClick={() => router.push(item.path)}
-                  className="group flex min-w-0 items-center gap-3 text-left"
-                >
-                  <Icon
-                    size={22}
-                    className={`shrink-0 ${textColor[item.color]}`}
-                  />
+                  return (
+                    <div
+                      key={row.key}
+                      className="rounded-xl border theme-border p-4"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`h-2 w-2 rounded-full ${dotColor[row.color]}`}
+                        />
 
-                  <div className="min-w-0 flex-1">
-                    <h3 className="truncate text-sm font-semibold theme-text transition-colors group-hover:text-[var(--color-primary)]">
+                        <span className="text-xs font-medium theme-text-secondary">
+                          {row.label}
+                        </span>
+                      </div>
+
+                      <p
+                        className={`mt-4 text-2xl font-bold ${textColor[row.color]}`}
+                      >
+                        {loading
+                          ? "..."
+                          : row.value}
+                      </p>
+
+                      <p className="mt-1 text-[10px] theme-text-muted">
+                        {loading
+                          ? "-"
+                          : `${percentage.toFixed(
+                              0
+                            )}% dari total`}
+                      </p>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </section>
+
+          {/* =========================================================
+              QUICK ACTIONS
+          ========================================================= */}
+          <section>
+            <div className="mb-5">
+              <div className="flex items-center gap-2">
+                <ShieldCheck
+                  size={18}
+                  className="text-[var(--color-primary)]"
+                />
+
+                <h2 className="text-base font-semibold theme-text">
+                  Akses Cepat
+                </h2>
+              </div>
+
+              <p className="mt-1.5 text-xs theme-text-secondary">
+                Akses fitur utama pengelolaan yayasan.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+              {quickActions.map((item) => {
+                const Icon = item.icon;
+
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() =>
+                      router.push(item.path)
+                    }
+                    className="group min-w-0 rounded-2xl border theme-border theme-card p-4 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-[color-mix(in_srgb,var(--color-primary)_25%,var(--color-border))] hover:shadow-[0_10px_25px_color-mix(in_srgb,var(--color-text)_6%,transparent)]"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div
+                        className={`flex h-10 w-10 items-center justify-center rounded-xl ${softBg[item.color]} ${textColor[item.color]}`}
+                      >
+                        <Icon size={18} />
+                      </div>
+
+                      <ChevronRight
+                        size={16}
+                        className="text-[var(--color-text-placeholder)] transition-transform group-hover:translate-x-0.5"
+                      />
+                    </div>
+
+                    <p className="mt-4 text-sm font-semibold theme-text">
                       {item.title}
-                    </h3>
-                    <p className="mt-0.5 truncate text-[11px] theme-text-muted">
-                      {item.stat}
                     </p>
-                  </div>
 
-                  <ChevronRight
-                    size={14}
-                    className="shrink-0 text-[var(--color-text-placeholder)] transition-transform duration-300 group-hover:translate-x-0.5"
-                  />
-                </button>
-              );
-            })}
-          </div>
+                    <p className="mt-1.5 min-h-[36px] text-xs leading-5 theme-text-secondary">
+                      {item.description}
+                    </p>
+
+                    <div className="mt-4 border-t theme-border pt-3">
+                      <span className="text-[10px] font-semibold uppercase tracking-wider theme-text-muted">
+                        {item.value}
+                      </span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

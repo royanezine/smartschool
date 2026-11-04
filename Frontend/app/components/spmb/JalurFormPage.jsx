@@ -182,10 +182,40 @@ export default function JalurFormPage({ jalurId }) {
   }, [loadDetail]);
 
   function ubah(field, value) {
-    setForm((current) => ({
-      ...current,
-      [field]: value,
-    }));
+    setForm((current) => {
+      const next = {
+        ...current,
+        [field]: value,
+      };
+
+      // Kriteria zonasi & jalur lainnya tersedia otomatis saat kategori dipilih
+      if (field === "kategori" && !modeEdit) {
+        if (value === "zonasi") {
+          next.metodeRanking = "jarak";
+          if (!next.jarakMaksimalKm) next.jarakMaksimalKm = "3";
+          next.nilaiMinimal = "";
+          next.berkasWajib = ["KK", "AKTE", "IJAZAH"];
+        } else if (value === "prestasi") {
+          next.metodeRanking = "nilai";
+          next.jarakMaksimalKm = "";
+          next.berkasWajib = ["KK", "AKTE", "IJAZAH", "SERTIFIKAT"];
+        } else if (value === "afirmasi") {
+          next.metodeRanking = "jarak";
+          next.nilaiMinimal = "";
+          next.berkasWajib = ["KK", "AKTE", "IJAZAH", "SKTM"];
+        } else if (value === "perpindahan") {
+          next.metodeRanking = "jarak";
+          next.nilaiMinimal = "";
+          next.berkasWajib = ["KK", "AKTE", "IJAZAH", "SURAT_TUGAS"];
+        } else if (value === "reguler") {
+          next.metodeRanking = "nilai";
+          next.jarakMaksimalKm = "";
+          next.berkasWajib = ["KK", "AKTE", "IJAZAH"];
+        }
+      }
+
+      return next;
+    });
   }
 
   function toggleBerkas(kode) {

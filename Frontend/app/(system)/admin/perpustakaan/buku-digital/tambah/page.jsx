@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
@@ -9,11 +9,13 @@ import {
   Save,
   Loader2,
   AlertCircle,
+  Info,
 } from "lucide-react";
 
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
 import { createBuku } from "@/services/perpustakaan.service";
+import { getAuthRole, subscribeAuth } from "@/lib/auth";
 
 
 const initialForm = {
@@ -23,7 +25,7 @@ const initialForm = {
   penulis: "",
   penerbit: "",
   tahunTerbit: "",
-  tipe: "FISIK",
+  tipe: "EBOOK",
   kategori: "",
   deskripsi: "",
   coverUrl: "",
@@ -70,12 +72,17 @@ export default function TambahBukuPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
+  const userRole = useSyncExternalStore(
+    subscribeAuth,
+    () => getAuthRole() || "",
+    () => ""
+  );
+
   const update = (key) => (event) => {
     const value = event.target.value;
     setForm((current) => ({
       ...current,
       [key]: value,
-      ...(key === "tipe" && value === "EBOOK" ? { jumlah: 0 } : {}),
     }));
   };
 
@@ -83,55 +90,124 @@ export default function TambahBukuPage() {
     event.preventDefault();
     setError("");
 
-    if (!form.kodeBuku?.trim()) {
+    if (userRole === "super_admin") {
+      setError(
+        "Akun Super Admin tidak terikat dengan sekolah tertentu. Modul perpustakaan dikelola pada tingkat sekolah. Silakan login atau beralih ke akun Admin Sekolah (contoh: admin@smartschool.com) atau Guru untuk menambahkan koleksi buku perpustakaan."
+      );
+      return;
+    }
+
+    const trimmedKode = form.kodeBuku?.trim() || "";
+    const trimmedJudul = form.judul?.trim() || "";
+    const trimmedPenulis = form.penulis?.trim() || "";
+    const trimmedPenerbit = form.penerbit?.trim() || "";
+    const trimmedIsbn = form.isbn?.trim() || "";
+    const trimmedKategori = form.kategori?.trim() || "";
+    const trimmedCoverUrl = form.coverUrl?.trim() || "";
+    const trimmedUrlEbook = form.urlEbook?.trim() || "";
+
+    if (!trimmedKode) {
       setError("Kode buku wajib diisi.");
       return;
     }
-    if (!form.judul?.trim()) {
+    if (trimmedKode.length > 50) {
+      setError(`Kode buku maksimal 50 karakter (saat ini ${trimmedKode.length} karakter).`);
+      return;
+    }
+
+    if (!trimmedJudul) {
       setError("Judul buku wajib diisi.");
       return;
     }
-    if (!form.penulis?.trim()) {
+    if (trimmedJudul.length > 150) {
+      setError(`Judul buku maksimal 150 karakter (saat ini ${trimmedJudul.length} karakter).`);
+      return;
+    }
+
+    if (!trimmedPenulis) {
       setError("Penulis wajib diisi.");
       return;
     }
-    if (!form.kategori?.trim()) {
+    if (trimmedPenulis.length > 100) {
+      setError(`Penulis maksimal 100 karakter (saat ini ${trimmedPenulis.length} karakter).`);
+      return;
+    }
+
+    if (trimmedPenerbit.length > 100) {
+      setError(`Penerbit maksimal 100 karakter (saat ini ${trimmedPenerbit.length} karakter).`);
+      return;
+    }
+
+    if (trimmedIsbn.length > 30) {
+      setError(`ISBN maksimal 30 karakter (saat ini ${trimmedIsbn.length} karakter).`);
+      return;
+    }
+
+    if (!trimmedKategori) {
       setError("Kategori wajib diisi.");
       return;
     }
-    if (form.tipe === "EBOOK" && !form.urlEbook?.trim()) {
-      setError("URL E-Book wajib diisi untuk tipe E-Book.");
+    if (trimmedKategori.length > 50) {
+      setError(`Kategori maksimal 50 karakter (saat ini ${trimmedKategori.length} karakter).`);
       return;
+    }
+
+    if (form.tipe === "EBOOK") {
+      if (!trimmedUrlEbook) {
+        setError("URL E-Book wajib diisi untuk tipe E-Book.");
+        return;
+      }
+    }
+
+    if (trimmedUrlEbook) {
+      if (/^(?:data:|blob:|javascript:)/i.test(trimmedUrlEbook)) {
+        setError("URL E-Book tidak boleh berupa file base64 / data URL. Masukkan URL web (http:// atau https://) yang valid.");
+        return;
+      }
+      if (trimmedUrlEbook.length > 255) {
+        setError(
+          `URL E-Book melebihi batas 255 karakter (saat ini ${trimmedUrlEbook.length} karakter). URL tidak boleh dipotong agar tautan tidak rusak. Gunakan URL yang lebih ringkas atau tautan resmi.`
+        );
+        return;
+      }
+    }
+
+    if (trimmedCoverUrl) {
+      if (/^(?:data:|blob:|javascript:)/i.test(trimmedCoverUrl)) {
+        setError("Cover URL tidak boleh berupa file base64 / data URL. Masukkan URL web (http:// atau https://) yang valid.");
+        return;
+      }
+      if (trimmedCoverUrl.length > 255) {
+        setError(
+          `Cover URL melebihi batas 255 karakter (saat ini ${trimmedCoverUrl.length} karakter). URL tidak boleh dipotong agar tautan tidak rusak. Gunakan URL gambar yang lebih ringkas.`
+        );
+        return;
+      }
     }
 
     try {
       setSaving(true);
 
-     const payload = {
-  kodeBuku: form.kodeBuku.trim(),
-  judul: form.judul.trim(),
-  penulis: form.penulis.trim(),
-  penerbit: form.penerbit?.trim() || undefined,
-  isbn: form.isbn?.trim() || undefined,
-  tipe: form.tipe,
-  kategori: form.kategori.trim(),
-  deskripsi: form.deskripsi?.trim() || undefined,
-  coverUrl: form.coverUrl?.trim() || undefined,
-  urlEbook: form.urlEbook?.trim() || undefined,
-  jumlah: form.tipe === "EBOOK" ? 0 : Number(form.jumlah || 0),
-  status: form.status || "aktif",
-};
-
-if (form.tahunTerbit !== "" && form.tahunTerbit != null) {
-  const tahun = Number(form.tahunTerbit);
-
-  if (Number.isInteger(tahun) && tahun > 0) {
-    payload.tahunTerbit = tahun;
-  }
-}
+      const payload = {
+        kodeBuku: trimmedKode,
+        judul: trimmedJudul,
+        penulis: trimmedPenulis,
+        penerbit: trimmedPenerbit || undefined,
+        isbn: trimmedIsbn || undefined,
+        tipe: form.tipe,
+        kategori: trimmedKategori,
+        deskripsi: form.deskripsi?.trim() || undefined,
+        coverUrl: trimmedCoverUrl || undefined,
+        urlEbook: trimmedUrlEbook || undefined,
+        jumlah: Number(form.jumlah || 0),
+        status: form.status || "aktif",
+      };
 
       if (form.tahunTerbit !== "" && form.tahunTerbit != null) {
-        payload.tahunTerbit = Number(form.tahunTerbit);
+        const tahun = Number(form.tahunTerbit);
+        if (Number.isInteger(tahun) && tahun > 0) {
+          payload.tahunTerbit = tahun;
+        }
       }
 
       await createBuku(payload);
@@ -188,6 +264,20 @@ if (form.tahunTerbit !== "" && form.tahunTerbit != null) {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-5">
+              {userRole === "super_admin" && (
+                <div className="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50/70 p-4 sm:p-5">
+                  <Info size={20} className="mt-0.5 shrink-0 text-amber-700" />
+                  <div>
+                    <h3 className="text-sm font-semibold text-amber-900">
+                      Perhatian Akun Super Admin
+                    </h3>
+                    <p className="mt-1 text-xs leading-relaxed text-amber-800">
+                      Akun Super Admin tidak terikat dengan sekolah manapun. Modul perpustakaan adalah modul tingkat sekolah. Untuk menambahkan koleksi buku, silakan beralih atau login menggunakan akun <strong>Admin Sekolah</strong> (contoh: <code>admin@smartschool.com</code>) atau <strong>Guru</strong>.
+                    </p>
+                  </div>
+                </div>
+              )}
+
               <section className="theme-card overflow-hidden rounded-2xl border theme-border shadow-sm">
                 <div className="border-b theme-border px-5 py-4 sm:px-6">
                   <h2 className="theme-text text-sm font-semibold">
@@ -311,19 +401,12 @@ if (form.tahunTerbit !== "" && form.tahunTerbit != null) {
                     <input
                       type="number"
                       min="0"
-                      disabled={form.tipe === "EBOOK"}
-                      value={form.tipe === "EBOOK" ? 0 : form.jumlah ?? 0}
+                      value={form.jumlah ?? 0}
                       onChange={update("jumlah")}
-                      className={`${inputClass} ${
-                        form.tipe === "EBOOK"
-                          ? "cursor-not-allowed opacity-60"
-                          : ""
-                      }`}
+                      className={inputClass}
                     />
                     <p className="theme-text-muted mt-1.5 text-[11px]">
-                      {form.tipe === "EBOOK"
-                        ? "Untuk E-Book, BE otomatis menetapkan jumlah menjadi 0."
-                        : "Jumlah tersedia dihitung otomatis oleh BE berdasarkan peminjaman."}
+                      Jumlah eksemplar buku digital / lisensi e-book.
                     </p>
                   </div>
 
@@ -359,31 +442,84 @@ if (form.tahunTerbit !== "" && form.tahunTerbit != null) {
 
                 <div className="grid grid-cols-1 gap-5 p-5 sm:p-6">
                   <div>
-                    <label className={labelClass}>
-                      URL E-Book{form.tipe === "EBOOK" ? " *" : ""}
-                    </label>
+                    <div className="flex items-center justify-between">
+                      <label className={labelClass}>
+                        URL E-Book{form.tipe === "EBOOK" ? " *" : ""}
+                      </label>
+                      <span
+                        className={`text-[11px] ${
+                          form.urlEbook?.trim().length > 255
+                            ? "font-semibold text-rose-500"
+                            : "theme-text-muted"
+                        }`}
+                      >
+                        {form.urlEbook?.trim().length || 0}/255
+                      </span>
+                    </div>
                     <input
                       type="url"
                       required={form.tipe === "EBOOK"}
                       value={form.urlEbook}
                       onChange={update("urlEbook")}
                       placeholder="https://..."
-                      className={inputClass}
+                      className={`${inputClass} ${
+                        form.urlEbook?.trim().length > 255
+                          ? "border-rose-400 focus:border-rose-500 focus:ring-rose-200"
+                          : ""
+                      }`}
                     />
+                    {form.urlEbook?.trim().length > 255 && (
+                      <p className="mt-1 text-[11px] font-medium text-rose-500">
+                        Panjang URL ({form.urlEbook.trim().length} karakter) melebihi batas 255 karakter. URL tidak akan dipotong agar tautan tidak rusak. Silakan gunakan tautan yang lebih ringkas.
+                      </p>
+                    )}
+                    {/^(?:data:|blob:|javascript:)/i.test(form.urlEbook?.trim() || "") && (
+                      <p className="mt-1 text-[11px] font-medium text-rose-500">
+                        Data URL / base64 tidak didukung. Silakan gunakan tautan web langsung (http:// atau https://).
+                      </p>
+                    )}
                     <p className="theme-text-muted mt-1.5 text-[11px]">
-                      Wajib diisi jika tipe buku adalah E-Book.
+                      Wajib diisi jika tipe buku adalah E-Book (maksimal 255 karakter).
                     </p>
                   </div>
 
                   <div>
-                    <label className={labelClass}>Cover URL</label>
+                    <div className="flex items-center justify-between">
+                      <label className={labelClass}>Cover URL</label>
+                      <span
+                        className={`text-[11px] ${
+                          form.coverUrl?.trim().length > 255
+                            ? "font-semibold text-rose-500"
+                            : "theme-text-muted"
+                        }`}
+                      >
+                        {form.coverUrl?.trim().length || 0}/255
+                      </span>
+                    </div>
                     <input
                       type="url"
                       value={form.coverUrl}
                       onChange={update("coverUrl")}
                       placeholder="https://..."
-                      className={inputClass}
+                      className={`${inputClass} ${
+                        form.coverUrl?.trim().length > 255
+                          ? "border-rose-400 focus:border-rose-500 focus:ring-rose-200"
+                          : ""
+                      }`}
                     />
+                    {form.coverUrl?.trim().length > 255 && (
+                      <p className="mt-1 text-[11px] font-medium text-rose-500">
+                        Panjang URL ({form.coverUrl.trim().length} karakter) melebihi batas 255 karakter. URL tidak akan dipotong agar tautan tidak rusak. Silakan gunakan tautan yang lebih ringkas.
+                      </p>
+                    )}
+                    {/^(?:data:|blob:|javascript:)/i.test(form.coverUrl?.trim() || "") && (
+                      <p className="mt-1 text-[11px] font-medium text-rose-500">
+                        Data URL / base64 tidak didukung. Silakan gunakan tautan web langsung (http:// atau https://).
+                      </p>
+                    )}
+                    <p className="theme-text-muted mt-1.5 text-[11px]">
+                      Opsional. Tautan gambar cover (maksimal 255 karakter).
+                    </p>
                   </div>
 
                   <div>

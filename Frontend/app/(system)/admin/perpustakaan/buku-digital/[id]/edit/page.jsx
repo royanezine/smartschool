@@ -91,7 +91,6 @@ export default function EditBukuPage() {
     setForm((current) => ({
       ...current,
       [key]: value,
-      ...(key === "tipe" && value === "EBOOK" ? { jumlah: 0 } : {}),
     }));
   };
 
@@ -99,27 +98,71 @@ export default function EditBukuPage() {
     event.preventDefault();
     setError("");
 
-    if (!form.kodeBuku?.trim()) return setError("Kode buku wajib diisi.");
-    if (!form.judul?.trim()) return setError("Judul buku wajib diisi.");
-    if (!form.penulis?.trim()) return setError("Penulis wajib diisi.");
-    if (!form.kategori?.trim()) return setError("Kategori wajib diisi.");
-    if (form.tipe === "EBOOK" && !form.urlEbook?.trim())
+    const trimmedKode = form.kodeBuku?.trim() || "";
+    const trimmedJudul = form.judul?.trim() || "";
+    const trimmedPenulis = form.penulis?.trim() || "";
+    const trimmedPenerbit = form.penerbit?.trim() || "";
+    const trimmedIsbn = form.isbn?.trim() || "";
+    const trimmedKategori = form.kategori?.trim() || "";
+    const trimmedCoverUrl = form.coverUrl?.trim() || "";
+    const trimmedUrlEbook = form.urlEbook?.trim() || "";
+
+    if (!trimmedKode) return setError("Kode buku wajib diisi.");
+    if (trimmedKode.length > 50) return setError(`Kode buku maksimal 50 karakter.`);
+
+    if (!trimmedJudul) return setError("Judul buku wajib diisi.");
+    if (trimmedJudul.length > 150) return setError(`Judul buku maksimal 150 karakter.`);
+
+    if (!trimmedPenulis) return setError("Penulis wajib diisi.");
+    if (trimmedPenulis.length > 100) return setError(`Penulis maksimal 100 karakter.`);
+
+    if (trimmedPenerbit.length > 100) return setError(`Penerbit maksimal 100 karakter.`);
+    if (trimmedIsbn.length > 30) return setError(`ISBN maksimal 30 karakter.`);
+
+    if (!trimmedKategori) return setError("Kategori wajib diisi.");
+    if (trimmedKategori.length > 50) return setError(`Kategori maksimal 50 karakter.`);
+
+    if (form.tipe === "EBOOK" && !trimmedUrlEbook) {
       return setError("URL E-Book wajib diisi untuk tipe E-Book.");
+    }
+
+    if (trimmedUrlEbook) {
+      if (/^(?:data:|blob:|javascript:)/i.test(trimmedUrlEbook)) {
+        return setError("URL E-Book tidak boleh berupa file base64 / data URL.");
+      }
+      if (trimmedUrlEbook.length > 255) {
+        return setError(`URL E-Book melebihi batas 255 karakter (saat ini ${trimmedUrlEbook.length} karakter). URL tidak boleh dipotong agar tidak rusak.`);
+      }
+    }
+
+    if (trimmedCoverUrl) {
+      if (/^(?:data:|blob:|javascript:)/i.test(trimmedCoverUrl)) {
+        return setError("Cover URL tidak boleh berupa file base64 / data URL.");
+      }
+      if (trimmedCoverUrl.length > 255) {
+        return setError(`Cover URL melebihi batas 255 karakter (saat ini ${trimmedCoverUrl.length} karakter). URL tidak boleh dipotong agar tidak rusak.`);
+      }
+    }
+
+    const jumlahAngka = Number(form.jumlah ?? 0);
+    if (!Number.isInteger(jumlahAngka) || jumlahAngka < 0) {
+      return setError("Jumlah eksemplar harus berupa angka bulat tidak negatif.");
+    }
 
     try {
       setSaving(true);
       const payload = {
-        kodeBuku: form.kodeBuku.trim(),
-        judul: form.judul.trim(),
-        penulis: form.penulis.trim(),
-        penerbit: form.penerbit?.trim() || "",
-        isbn: form.isbn?.trim() || "",
+        kodeBuku: trimmedKode,
+        judul: trimmedJudul,
+        penulis: trimmedPenulis,
+        penerbit: trimmedPenerbit || undefined,
+        isbn: trimmedIsbn || undefined,
         tipe: form.tipe,
-        kategori: form.kategori.trim(),
-        deskripsi: form.deskripsi?.trim() || "",
-        coverUrl: form.coverUrl?.trim() || "",
-        urlEbook: form.urlEbook?.trim() || "",
-        jumlah: form.tipe === "EBOOK" ? 0 : Number(form.jumlah || 0),
+        kategori: trimmedKategori,
+        deskripsi: form.deskripsi?.trim() || undefined,
+        coverUrl: trimmedCoverUrl || undefined,
+        urlEbook: trimmedUrlEbook || undefined,
+        jumlah: jumlahAngka,
         status: form.status || "aktif",
       };
 
@@ -296,19 +339,12 @@ export default function EditBukuPage() {
                       <input
                         type="number"
                         min="0"
-                        disabled={form.tipe === "EBOOK"}
-                        value={form.tipe === "EBOOK" ? 0 : form.jumlah ?? 0}
+                        value={form.jumlah ?? 0}
                         onChange={update("jumlah")}
-                        className={`${inputClass} ${
-                          form.tipe === "EBOOK"
-                            ? "cursor-not-allowed opacity-60"
-                            : ""
-                        }`}
+                        className={inputClass}
                       />
                       <p className="theme-text-muted mt-1.5 text-[11px]">
-                        {form.tipe === "EBOOK"
-                          ? "Untuk E-Book, BE otomatis menetapkan jumlah menjadi 0."
-                          : "Jumlah tersedia dihitung otomatis oleh BE berdasarkan peminjaman."}
+                        Jumlah eksemplar buku digital / lisensi e-book.
                       </p>
                     </div>
                     <div>

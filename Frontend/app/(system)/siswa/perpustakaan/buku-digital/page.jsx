@@ -334,7 +334,7 @@ function DigitalBookCard({ book }) {
 
         <div className="mt-4 flex gap-2">
           <Link
-            href={`/siswa/perpustakaan/buku-digital/${book.id}`}
+            href={`/siswa/perpustakaan/buku/${encodeURIComponent(String(book.id))}`}
             className={`inline-flex h-10 flex-1 items-center justify-center gap-2 rounded-lg border ${themeNeutralBorder} theme-card theme-text-secondary px-3 text-xs font-semibold transition ${themePrimarySoftHover} hover:text-[var(--color-primary)]`}
           >
             Detail

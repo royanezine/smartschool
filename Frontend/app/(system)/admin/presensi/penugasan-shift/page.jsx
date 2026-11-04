@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -20,6 +19,7 @@ import {
   GraduationCap,
   BookOpen,
   Clock3,
+  Pencil,
 } from "lucide-react";
 
 import Header from "@/app/components/Header";
@@ -33,13 +33,12 @@ import {
   updateShiftKelas,
 } from "@/services/kelas.service";
 import { getTahunAjaran } from "@/services/tahunAjaran.service";
+import {
+  getShiftSiswa,
+  updateShiftSiswa,
+} from "@/services/shiftSiswa.service";
 
 const PAGE_SIZE = 10;
-
-const DEFAULT_JAM_BELAJAR = {
-  pagi: { masuk: "07:00", keluar: "12:00" },
-  siang: { masuk: "13:00", keluar: "17:00" },
-};
 
 /* =========================================================
    HELPER
@@ -73,7 +72,6 @@ function getArray(response, keys = []) {
     }
 
     if (!("data" in current)) return [];
-
     current = current.data;
   }
 
@@ -93,7 +91,6 @@ function unwrapResponse(response) {
     }
 
     if (!("data" in current)) return current;
-
     current = current.data;
   }
 
@@ -101,12 +98,42 @@ function unwrapResponse(response) {
 }
 
 function getErrorMessage(error, fallback) {
-  return error?.message || fallback;
+  if (typeof error === "string" && error.trim()) return error;
+
+  return (
+    error?.message ||
+    error?.response?.data?.message ||
+    error?.data?.message ||
+    fallback
+  );
 }
 
-/* =========================================================
-   ROLE PENGGUNA
-========================================================= */
+function formatJam(value) {
+  if (value === null || value === undefined || value === "") {
+    return "-";
+  }
+
+  const text = String(value).trim();
+
+  // Format waktu dari database: HH:mm atau HH:mm:ss
+  const timeMatch = text.match(/^(\d{1,2}):(\d{2})(?::\d{2}(?:\.\d+)?)?$/);
+
+  if (timeMatch) {
+    return `${timeMatch[1].padStart(2, "0")}:${timeMatch[2]}`;
+  }
+
+  // Timestamp ISO: ambil jam yang tertulis pada timestamp,
+  // jangan konversi menggunakan timezone browser.
+  const isoMatch = text.match(/[T ](\d{2}):(\d{2})(?::\d{2})?/);
+
+  if (isoMatch) {
+    return `${isoMatch[1]}:${isoMatch[2]}`;
+  }
+
+  return text;
+}
+
+
 
 function getRole(user) {
   if (!isObject(user)) return "";
@@ -242,10 +269,7 @@ function getShiftName(value, shiftList = []) {
 
     if (id) {
       const matched = shiftList.find((item) => String(item.id) === id);
-
-      if (matched) {
-        return String(matched.nama ?? matched.namaShift ?? matched.kode ?? "");
-      }
+      if (matched) return String(matched.nama ?? matched.kode ?? "");
     }
 
     return String(
@@ -268,13 +292,10 @@ function getShiftName(value, shiftList = []) {
     (item) =>
       String(item.id) === text ||
       normalizeText(item.nama) === normalized ||
-      normalizeText(item.namaShift) === normalized ||
       normalizeText(item.kode) === normalized
   );
 
-  if (matched) {
-    return String(matched.nama ?? matched.namaShift ?? matched.kode ?? "");
-  }
+  if (matched) return String(matched.nama ?? matched.kode ?? "");
 
   const looksLikeUuid =
     /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
@@ -299,7 +320,7 @@ function getShiftDetail(shiftList, value) {
 
   return (
     shiftList.find((item) =>
-      [item.nama, item.namaShift, item.kode, item.jenisShift].some(
+      [item.nama, item.kode, item.namaShift, item.jenisShift].some(
         (candidate) =>
           candidate != null &&
           normalizeText(candidate) === normalizeText(name)
@@ -313,11 +334,9 @@ function getUserShift(user) {
 
   if (user.shiftKerjaMaster) return user.shiftKerjaMaster;
   if (user.shiftKerjaId) return user.shiftKerjaId;
-
   if (user.shiftKerja !== undefined && user.shiftKerja !== null) {
     return user.shiftKerja;
   }
-
   if (user.shift?.id) return user.shift.id;
   if (user.shift !== undefined && user.shift !== null) return user.shift;
 
@@ -354,100 +373,96 @@ function normalizeUser(user) {
 }
 
 /* =========================================================
-   SHIFT KELAS DAN JAM BELAJAR
+   SHIFT KELAS DAN KONFIGURASI JAM SISWA
 ========================================================= */
 
 function getShiftKelasValue(value) {
   if (value == null || value === "") return "";
 
-  const normalized = normalizeText(
-    isObject(value)
-      ? value.shift ?? value.nama ?? value.kode ?? ""
-      : value
-  );
+  const candidates = isObject(value)
+    ? [
+        value.kode,
+        value.shift,
+        value.nama,
+        value.jenisShift,
+      ]
+    : [value];
 
-  if (normalized === "pagi") return "pagi";
-  if (normalized === "siang") return "siang";
+  for (const candidate of candidates) {
+    const normalized = normalizeText(candidate);
+
+    if (normalized === "pagi") return "pagi";
+    if (normalized === "siang") return "siang";
+  }
 
   return "";
 }
 
 /**
- * Cari master shift berdasarkan nama atau kode pagi/siang.
- * Nilai shift kelas tetap "pagi"/"siang" agar kompatibel
- * dengan updateShiftKelas yang sudah digunakan.
+ * Service getShiftSiswa() yang dikirim mengembalikan response.data.
+ * Fungsi ini tetap mendukung respons array langsung maupun respons
+ * API yang masih dibungkus dengan { data: [...] }.
  */
-function getMasterShiftKelas(shiftList = [], shift) {
-  const normalized = normalizeText(shift);
+function normalizeShiftSiswaResponse(response) {
+  const rows = getArray(response, [
+    "shiftSiswa",
+    "shift_siswa",
+    "shifts",
+  ]);
 
+  return rows
+    .filter(
+      (item) =>
+        isObject(item) &&
+        typeof item.kode === "string" &&
+        typeof item.jamMasuk === "string" &&
+        typeof item.jamKeluar === "string"
+    )
+    .map((item) => ({
+      ...item,
+      kode: normalizeText(item.kode),
+      jamMasuk: item.jamMasuk,
+      jamKeluar: item.jamKeluar,
+    }))
+    .filter((item) => ["pagi", "siang"].includes(item.kode));
+}
+
+function getMasterShiftSiswa(shiftSiswaList = [], shift) {
+  const normalized = getShiftKelasValue(shift);
   if (!normalized) return null;
 
   return (
-    shiftList.find((item) => {
-      const nama = normalizeText(item.nama ?? item.namaShift);
-      const kode = normalizeText(item.kode);
-      const jenis = normalizeText(item.jenisShift);
-
-      return (
-        nama === normalized ||
-        kode === normalized ||
-        jenis === normalized
-      );
-    }) ?? null
+    shiftSiswaList.find(
+      (item) => normalizeText(item.kode) === normalized
+    ) ?? null
   );
 }
 
-function formatJam(value) {
-  if (!value) return "-";
+function getJamBelajar(shift, shiftSiswaList = []) {
+  const kode = getShiftKelasValue(shift);
 
-  const match = String(value).match(/^(\d{1,2}):(\d{2})/);
+  if (!kode) return null;
 
-  if (match) {
-    return `${match[1].padStart(2, "0")}:${match[2]}`;
-  }
+  const master = shiftSiswaList.find(
+    (item) => normalizeText(item.kode) === kode
+  );
 
-  const date = new Date(value);
+  if (!master) return null;
 
-  if (!Number.isNaN(date.getTime()) && String(value).includes("T")) {
-    return `${String(date.getHours()).padStart(2, "0")}:${String(
-      date.getMinutes()
-    ).padStart(2, "0")}`;
-  }
+  const masuk = formatJam(master.jamMasuk);
+  const keluar = formatJam(master.jamKeluar);
 
-  return String(value);
+  if (masuk === "-" || keluar === "-") return null;
+
+  return { masuk, keluar };
 }
 
-/**
- * Prioritas jam:
- * 1. Jam dari master shift API.
- * 2. Jam default sebagai fallback.
- */
-function getJamBelajar(shift, shiftList = []) {
-  const normalized = normalizeText(shift);
+function getShiftKelasOptionLabel(shift, shiftSiswaList = []) {
+  const normalized = getShiftKelasValue(shift);
+  const jam = getJamBelajar(normalized, shiftSiswaList);
+  const nama = normalized === "pagi" ? "Pagi" : "Siang";
 
-  if (!normalized) return null;
-
-  const master = getMasterShiftKelas(shiftList, normalized);
-
-  const defaultJam = DEFAULT_JAM_BELAJAR[normalized];
-
-  const masuk = master?.jamMasuk ?? defaultJam?.masuk;
-  const keluar = master?.jamKeluar ?? defaultJam?.keluar;
-
-  if (!masuk && !keluar) return null;
-
-  return {
-    masuk: formatJam(masuk),
-    keluar: formatJam(keluar),
-  };
-}
-
-function getShiftKelasOptionLabel(shift, shiftList = []) {
-  const jam = getJamBelajar(shift, shiftList);
-
-  const nama = shift === "pagi" ? "Pagi" : "Siang";
-
-  if (!jam) return nama;
+  if (!jam) return `${nama} (jam belum dikonfigurasi)`;
 
   return `${nama} (${jam.masuk} - ${jam.keluar})`;
 }
@@ -473,7 +488,6 @@ function getTahunAjaranDetail(kelas, tahunAjaranList = []) {
     const matched = tahunAjaranList.find(
       (item) => String(item.id) === tahunAjaranId
     );
-
     if (matched) return matched;
   }
 
@@ -489,7 +503,6 @@ function getTahunAjaranDetail(kelas, tahunAjaranList = []) {
 
 function getTahunAjaranLabel(kelas, tahunAjaranList = []) {
   const tahun = getTahunAjaranDetail(kelas, tahunAjaranList);
-
   if (!tahun) return "-";
 
   const nama = tahun.nama ?? tahun.tahun ?? tahun.namaTahunAjaran ?? "";
@@ -498,10 +511,6 @@ function getTahunAjaranLabel(kelas, tahunAjaranList = []) {
 
   return label || "-";
 }
-
-/* =========================================================
-   DATA KELAS
-========================================================= */
 
 function getJumlahSiswa(kelas) {
   return (
@@ -519,13 +528,7 @@ function getJumlahSiswa(kelas) {
    UI COMPONENTS
 ========================================================= */
 
-function StatCard({
-  title,
-  value,
-  description,
-  icon: Icon,
-  tone = "blue",
-}) {
+function StatCard({ title, value, description, icon: Icon, tone = "blue" }) {
   const tones = {
     blue: "bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300",
     emerald:
@@ -540,7 +543,6 @@ function StatCard({
         <p className="text-xs font-bold uppercase tracking-wider theme-text-muted">
           {title}
         </p>
-
         <div
           className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
             tones[tone] || tones.blue
@@ -552,9 +554,7 @@ function StatCard({
 
       <div className="mt-4">
         <p className="text-3xl font-bold tracking-tight theme-text">
-          {typeof value === "number"
-            ? value.toLocaleString("id-ID")
-            : value}
+          {typeof value === "number" ? value.toLocaleString("id-ID") : value}
         </p>
         <p className="mt-1 text-xs leading-relaxed theme-text-muted">
           {description}
@@ -601,13 +601,13 @@ function ShiftBadge({ shift }) {
   );
 }
 
-function JamBelajar({ shift, shiftList = [] }) {
-  const jam = getJamBelajar(shift, shiftList);
+function JamBelajar({ shift, shiftSiswaList = [] }) {
+  const jam = getJamBelajar(shift, shiftSiswaList);
 
   if (!jam) {
     return (
       <span className="text-xs theme-text-muted">
-        Belum ditentukan
+        {shift ? "Jam belum dikonfigurasi" : "Belum ditentukan"}
       </span>
     );
   }
@@ -616,21 +616,18 @@ function JamBelajar({ shift, shiftList = [] }) {
     <div className="flex items-center gap-2">
       <div
         className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
-          shift === "pagi"
+          getShiftKelasValue(shift) === "pagi"
             ? "bg-blue-50 text-blue-600 dark:bg-blue-950/50 dark:text-blue-300"
             : "bg-orange-50 text-orange-600 dark:bg-orange-950/50 dark:text-orange-300"
         }`}
       >
         <Clock3 size={16} />
       </div>
-
       <div>
         <p className="text-sm font-semibold theme-text">
           {jam.masuk} - {jam.keluar}
         </p>
-        <p className="mt-0.5 text-[11px] theme-text-muted">
-          Jam belajar
-        </p>
+        <p className="mt-0.5 text-[11px] theme-text-muted">Jam belajar</p>
       </div>
     </div>
   );
@@ -648,6 +645,7 @@ export default function PenugasanShiftPage() {
 
   const [pegawaiList, setPegawaiList] = useState([]);
   const [shiftList, setShiftList] = useState([]);
+  const [shiftSiswaList, setShiftSiswaList] = useState([]);
   const [kelasList, setKelasList] = useState([]);
   const [tahunAjaranList, setTahunAjaranList] = useState([]);
 
@@ -656,6 +654,15 @@ export default function PenugasanShiftPage() {
   const [notice, setNotice] = useState("");
   const [warnings, setWarnings] = useState([]);
   const [updatingKelasId, setUpdatingKelasId] = useState(null);
+
+  const [editingShiftSiswa, setEditingShiftSiswa] = useState(null);
+  const [editShiftForm, setEditShiftForm] = useState({
+    jamMasuk: "",
+    jamKeluar: "",
+    toleransiTerlambatMenit: 15,
+  });
+  const [savingShiftSiswa, setSavingShiftSiswa] = useState(false);
+  const [editShiftError, setEditShiftError] = useState("");
 
   const [search, setSearch] = useState("");
   const [filterShift, setFilterShift] = useState("semua");
@@ -677,6 +684,7 @@ export default function PenugasanShiftPage() {
         shiftsResult,
         kelasResult,
         tahunAjaranResult,
+        shiftSiswaResult,
       ] = await Promise.allSettled([
         getUsers({ page: 1, limit: 100 }),
         getShiftKerja({ page: 1, limit: 100, status: "aktif" }),
@@ -687,6 +695,7 @@ export default function PenugasanShiftPage() {
           sortOrder: "asc",
         }),
         getTahunAjaran(),
+        getShiftSiswa(),
       ]);
 
       const nextWarnings = [];
@@ -695,13 +704,10 @@ export default function PenugasanShiftPage() {
       let shifts = [];
       let kelas = [];
       let tahunAjaran = [];
+      let shiftSiswa = [];
 
       if (usersResult.status === "fulfilled") {
-        users = getArray(usersResult.value, [
-          "users",
-          "pengguna",
-          "pegawai",
-        ]);
+        users = getArray(usersResult.value, ["users", "pengguna", "pegawai"]);
       } else {
         nextWarnings.push(
           `Data pengguna gagal dimuat: ${getErrorMessage(
@@ -712,10 +718,7 @@ export default function PenugasanShiftPage() {
       }
 
       if (shiftsResult.status === "fulfilled") {
-        shifts = getArray(shiftsResult.value, [
-          "shifts",
-          "shiftKerja",
-        ]);
+        shifts = getArray(shiftsResult.value, ["shifts", "shiftKerja"]);
       } else {
         nextWarnings.push(
           `Master shift kerja gagal dimuat: ${getErrorMessage(
@@ -752,6 +755,32 @@ export default function PenugasanShiftPage() {
         );
       }
 
+     
+    if (shiftSiswaResult.status === "fulfilled") {
+      shiftSiswa = normalizeShiftSiswaResponse(
+        shiftSiswaResult.value
+      );
+
+      if (shiftSiswa.length === 0) {
+        nextWarnings.push(
+          "Data konfigurasi shift siswa kosong atau format respons API belum sesuai."
+        );
+      }
+    } else {
+      console.error(
+        "[SHIFT SISWA] Gagal mengambil konfigurasi:",
+        shiftSiswaResult.reason
+      );
+
+      nextWarnings.push(
+        `Konfigurasi jam shift siswa gagal dimuat: ${getErrorMessage(
+          shiftSiswaResult.reason,
+          "Permintaan konfigurasi shift siswa gagal."
+        )}. Jam tidak ditampilkan menggunakan nilai default.`
+      );
+    }
+
+
       const normalizedUsers = users
         .filter((user) => isObject(user))
         .map(normalizeUser);
@@ -768,12 +797,20 @@ export default function PenugasanShiftPage() {
         );
       }
 
+      /*
+       * Shift kelas:
+       * - Jika data kelas sudah memiliki shift, gunakan data tersebut.
+       * - Jika shift null atau belum disertakan, ambil detail dari API kelas.
+       */
       const kelasWithShift = await Promise.all(
         kelas.map(async (item) => {
-          if (item.shift !== undefined && item.shift !== null) {
+          const rawShift = item.shift ?? item.shiftKelas ?? null;
+          const hasUsableShift = Boolean(getShiftKelasValue(rawShift));
+
+          if (hasUsableShift) {
             return {
               ...item,
-              shift: getShiftKelasValue(item.shift) || null,
+              shift: getShiftKelasValue(rawShift),
               shiftLoadError: false,
             };
           }
@@ -785,6 +822,8 @@ export default function PenugasanShiftPage() {
             const shiftValue =
               detail?.shift ??
               detail?.kelas?.shift ??
+              detail?.shiftKelas ??
+              detail?.kelas?.shiftKelas ??
               null;
 
             return {
@@ -792,7 +831,12 @@ export default function PenugasanShiftPage() {
               shift: getShiftKelasValue(shiftValue) || null,
               shiftLoadError: false,
             };
-          } catch {
+          } catch (shiftError) {
+            console.error(
+              `[SHIFT KELAS] Gagal mengambil detail kelas ${item.id}:`,
+              shiftError
+            );
+
             return {
               ...item,
               shift: null,
@@ -804,7 +848,7 @@ export default function PenugasanShiftPage() {
 
       if (kelasWithShift.some((item) => item.shiftLoadError)) {
         nextWarnings.push(
-          "Sebagian shift kelas gagal dimuat. Muat ulang data sebelum mengubah shift kelas tersebut."
+          "Sebagian detail shift kelas gagal dimuat. Muat ulang data sebelum mengubah shift kelas tersebut."
         );
       }
 
@@ -846,6 +890,7 @@ export default function PenugasanShiftPage() {
 
       setPegawaiList(employeeUsers);
       setShiftList(shifts.filter(isObject));
+      setShiftSiswaList(shiftSiswa);
       setKelasList(kelasWithShift);
       setTahunAjaranList(tahunAjaran);
       setWarnings(nextWarnings);
@@ -854,16 +899,21 @@ export default function PenugasanShiftPage() {
         usersResult.status === "rejected" &&
         shiftsResult.status === "rejected" &&
         kelasResult.status === "rejected" &&
-        tahunAjaranResult.status === "rejected"
+        tahunAjaranResult.status === "rejected" &&
+        shiftSiswaResult.status === "rejected"
       ) {
         setError(
           "Data penugasan tidak dapat dimuat. Periksa koneksi API, sesi login, dan hak akses akun."
         );
       }
     } catch (loadError) {
+      console.error("[PENUGASAN SHIFT] Gagal memuat data:", loadError);
+
       setError(
-        loadError?.message ||
+        getErrorMessage(
+          loadError,
           "Terjadi kesalahan saat memuat data penugasan."
+        )
       );
     } finally {
       if (showLoading) setLoading(false);
@@ -871,6 +921,7 @@ export default function PenugasanShiftPage() {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadData();
   }, [loadData]);
 
@@ -910,6 +961,7 @@ export default function PenugasanShiftPage() {
   ========================================================= */
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPage(1);
     setSearch("");
     setFilterShift("semua");
@@ -923,6 +975,11 @@ export default function PenugasanShiftPage() {
 
   async function handleSaveShiftKelas(kelasId, newShift) {
     const shift = newShift || null;
+
+    if (shift !== null && !["pagi", "siang"].includes(shift)) {
+      setError("Shift kelas hanya boleh pagi, siang, atau tanpa shift.");
+      return;
+    }
 
     const previousKelas = kelasList.find(
       (item) => String(item.id) === String(kelasId)
@@ -944,25 +1001,22 @@ export default function PenugasanShiftPage() {
     setNotice("");
 
     try {
+      // Mengikuti kontrak service Backend yang sudah tersedia.
       await updateShiftKelas(kelasId, shift);
 
       setKelasList((previous) =>
         previous.map((item) =>
           String(item.id) === String(kelasId)
-            ? {
-                ...item,
-                shift,
-                shiftLoadError: false,
-              }
+            ? { ...item, shift, shiftLoadError: false }
             : item
         )
       );
 
       const namaShift =
         shift === "pagi"
-          ? getShiftKelasOptionLabel("pagi", shiftList)
+          ? getShiftKelasOptionLabel("pagi", shiftSiswaList)
           : shift === "siang"
-            ? getShiftKelasOptionLabel("siang", shiftList)
+            ? getShiftKelasOptionLabel("siang", shiftSiswaList)
             : "";
 
       setNotice(
@@ -971,12 +1025,80 @@ export default function PenugasanShiftPage() {
           : `Shift kelas ${previousKelas.nama || ""} berhasil dihapus.`
       );
     } catch (saveError) {
+      console.error("[SHIFT KELAS] Gagal menyimpan:", saveError);
+
       setError(
-        saveError?.message ||
+        getErrorMessage(
+          saveError,
           "Gagal menyimpan perubahan shift kelas."
+        )
       );
     } finally {
       setUpdatingKelasId(null);
+    }
+  }
+
+  /* =========================================================
+     UPDATE SHIFT SISWA (KONFIGURASI MASTER SHIFT)
+  ========================================================= */
+
+  function handleOpenEditShift(shiftItem) {
+    setEditingShiftSiswa(shiftItem);
+    setEditShiftForm({
+      jamMasuk: shiftItem.jamMasuk || "07:00",
+      jamKeluar: shiftItem.jamKeluar || "14:00",
+      toleransiTerlambatMenit: shiftItem.toleransiTerlambatMenit ?? 15,
+    });
+    setEditShiftError("");
+  }
+
+  async function handleSaveShiftSiswa(e) {
+    if (e) e.preventDefault();
+    if (!editingShiftSiswa) return;
+
+    const { jamMasuk, jamKeluar, toleransiTerlambatMenit } = editShiftForm;
+    if (!jamMasuk || !jamKeluar) {
+      setEditShiftError("Jam masuk dan jam keluar wajib diisi.");
+      return;
+    }
+
+    if (jamKeluar <= jamMasuk) {
+      setEditShiftError("Jam keluar harus lebih besar dari jam masuk.");
+      return;
+    }
+
+    setSavingShiftSiswa(true);
+    setEditShiftError("");
+
+    try {
+      const updated = await updateShiftSiswa(editingShiftSiswa.kode, {
+        jamMasuk,
+        jamKeluar,
+        toleransiTerlambatMenit: Number(toleransiTerlambatMenit) || 0,
+      });
+
+      setShiftSiswaList((prev) =>
+        prev.map((item) =>
+          normalizeText(item.kode) === normalizeText(editingShiftSiswa.kode)
+            ? { ...item, ...updated }
+            : item
+        )
+      );
+
+      setNotice(
+        `Konfigurasi Shift ${editingShiftSiswa.nama || editingShiftSiswa.kode} berhasil diperbarui.`
+      );
+      setEditingShiftSiswa(null);
+    } catch (saveError) {
+      console.error("[SHIFT SISWA] Gagal menyimpan:", saveError);
+      setEditShiftError(
+        getErrorMessage(
+          saveError,
+          "Gagal memperbarui konfigurasi shift siswa."
+        )
+      );
+    } finally {
+      setSavingShiftSiswa(false);
     }
   }
 
@@ -1010,9 +1132,9 @@ export default function PenugasanShiftPage() {
         matchSearch =
           normalizeText(item.nama).includes(keyword) ||
           normalizeText(item.tingkat).includes(keyword) ||
-          normalizeText(getTahunAjaranLabel(item, tahunAjaranList)).includes(
-            keyword
-          );
+          normalizeText(
+            getTahunAjaranLabel(item, tahunAjaranList)
+          ).includes(keyword);
       }
 
       if (!matchSearch) return false;
@@ -1102,14 +1224,11 @@ export default function PenugasanShiftPage() {
 
         <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto">
           <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
-            {/* HEADER */}
-
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <h1 className="text-2xl font-bold tracking-tight theme-text sm:text-3xl">
                   Penugasan Shift
                 </h1>
-
                 <p className="mt-2 max-w-2xl text-sm leading-6 theme-text-secondary">
                   Kelola shift kerja guru dan pegawai serta shift belajar
                   siswa berdasarkan kelas.
@@ -1176,18 +1295,16 @@ export default function PenugasanShiftPage() {
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                 <Info size={18} />
               </div>
-
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-semibold theme-text">
                   {activeTab === "pegawai"
                     ? "Penugasan Shift Guru dan Pegawai"
                     : "Penugasan Shift Belajar Siswa"}
                 </p>
-
                 <p className="mt-1 text-xs leading-5 theme-text-muted">
                   {activeTab === "pegawai"
-                    ? "Penugasan shift kerja ditampilkan berdasarkan field shiftKerja dari API pengguna dan dicocokkan dengan master shift."
-                    : "Atur shift belajar setiap kelas. Dropdown menampilkan jam masuk dan pulang dari master shift, dengan jam default sebagai fallback."}
+                    ? "Penugasan shift kerja ditampilkan berdasarkan data API pengguna dan dicocokkan dengan master shift kerja."
+                    : "Atur shift belajar per kelas. Jam masuk dan keluar diambil dari konfigurasi shift siswa pada backend."}
                 </p>
               </div>
             </div>
@@ -1200,12 +1317,10 @@ export default function PenugasanShiftPage() {
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300">
                     <CalendarClock size={19} />
                   </div>
-
                   <div>
                     <p className="text-xs font-semibold theme-text-muted">
                       Tahun Ajaran Aktif
                     </p>
-
                     <p className="mt-1 text-sm font-bold theme-text">
                       {loading
                         ? "Memuat tahun ajaran..."
@@ -1225,15 +1340,88 @@ export default function PenugasanShiftPage() {
               </div>
             )}
 
+            {/* MASTER SHIFT SISWA (PAGI / SIANG) */}
+
+            {activeTab === "siswa" && (
+              <div className="theme-card mb-6 rounded-xl border theme-border p-5">
+                <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <h3 className="text-sm font-bold theme-text">
+                      Konfigurasi Jam Shift Belajar Siswa
+                    </h3>
+                    <p className="text-xs theme-text-muted">
+                      Atur jam masuk, jam keluar, dan toleransi keterlambatan untuk setiap shift belajar siswa.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  {["pagi", "siang"].map((kode) => {
+                    const shiftItem = shiftSiswaList.find(
+                      (s) => normalizeText(s.kode) === kode
+                    ) || {
+                      kode,
+                      nama: kode === "pagi" ? "Pagi" : "Siang",
+                      jamMasuk: kode === "pagi" ? "07:00" : "12:00",
+                      jamKeluar: kode === "pagi" ? "14:00" : "18:00",
+                      toleransiTerlambatMenit: 15,
+                    };
+
+                    return (
+                      <div
+                        key={kode}
+                        className="flex flex-col justify-between rounded-lg border theme-border bg-[color-mix(in_srgb,var(--color-surface)_60%,var(--color-bg))] p-4 transition"
+                      >
+                        <div>
+                          <div className="flex items-center justify-between">
+                            <span className="font-semibold text-sm theme-text">
+                              Shift {shiftItem.nama || (kode === "pagi" ? "Pagi" : "Siang")}
+                            </span>
+                            <span className="inline-flex items-center rounded-md bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] px-2 py-0.5 text-[11px] font-medium theme-primary-text uppercase">
+                              {kode}
+                            </span>
+                          </div>
+
+                          <div className="mt-3 space-y-1.5 text-xs">
+                            <div className="flex items-center justify-between theme-text-muted">
+                              <span>Jam Belajar:</span>
+                              <span className="font-semibold theme-text font-mono">
+                                {shiftItem.jamMasuk} &ndash; {shiftItem.jamKeluar}
+                              </span>
+                            </div>
+                            <div className="flex items-center justify-between theme-text-muted">
+                              <span>Toleransi Terlambat:</span>
+                              <span className="font-medium theme-text">
+                                {shiftItem.toleransiTerlambatMenit ?? 15} menit
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="mt-4 pt-3 border-t theme-border">
+                          <button
+                            type="button"
+                            onClick={() => handleOpenEditShift(shiftItem)}
+                            className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg border theme-border bg-[var(--color-surface)] px-3 py-1.5 text-xs font-medium theme-text-secondary hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] transition"
+                          >
+                            <Pencil size={13} />
+                            Ubah Jam Shift
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             {/* WARNING */}
 
             {warnings.length > 0 && (
               <div className="mb-5 flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-200">
                 <AlertCircle size={19} className="mt-0.5 shrink-0" />
-
                 <div className="min-w-0 flex-1">
                   <p className="font-semibold">Informasi pemuatan data</p>
-
                   <ul className="mt-1 list-disc space-y-1 pl-4 text-xs leading-5">
                     {warnings.map((warning, index) => (
                       <li key={`${index}-${warning}`}>{warning}</li>
@@ -1251,12 +1439,10 @@ export default function PenugasanShiftPage() {
                 className="mb-5 flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-300"
               >
                 <AlertCircle size={19} className="mt-0.5 shrink-0" />
-
                 <div className="min-w-0 flex-1">
                   <p className="font-semibold">Permintaan gagal</p>
                   <p className="mt-1 break-words">{error}</p>
                 </div>
-
                 <button
                   type="button"
                   onClick={() => setError("")}
@@ -1277,7 +1463,6 @@ export default function PenugasanShiftPage() {
               >
                 <CheckCircle2 size={18} className="shrink-0" />
                 <p className="min-w-0 flex-1">{notice}</p>
-
                 <button
                   type="button"
                   onClick={() => setNotice("")}
@@ -1354,7 +1539,6 @@ export default function PenugasanShiftPage() {
                         ? "Daftar Penugasan Guru / Pegawai"
                         : "Daftar Penugasan Shift Kelas"}
                     </h2>
-
                     <p className="mt-1 text-xs theme-text-muted">
                       {filteredData.length.toLocaleString("id-ID")} data ditemukan
                     </p>
@@ -1366,7 +1550,6 @@ export default function PenugasanShiftPage() {
                         size={17}
                         className="absolute left-3 top-1/2 -translate-y-1/2 theme-text-muted"
                       />
-
                       <input
                         type="search"
                         value={search}
@@ -1423,8 +1606,6 @@ export default function PenugasanShiftPage() {
                     </p>
                   </div>
                 ) : activeTab === "pegawai" ? (
-                  /* TABEL GURU / PEGAWAI */
-
                   <table className="w-full min-w-[760px] text-left text-sm">
                     <thead className="border-b theme-border bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] text-xs uppercase tracking-wide theme-text-muted">
                       <tr>
@@ -1513,8 +1694,6 @@ export default function PenugasanShiftPage() {
                     </tbody>
                   </table>
                 ) : (
-                  /* TABEL KELAS */
-
                   <table className="w-full min-w-[1050px] text-left text-sm">
                     <thead className="border-b theme-border bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] text-xs uppercase tracking-wide theme-text-muted">
                       <tr>
@@ -1544,8 +1723,6 @@ export default function PenugasanShiftPage() {
                             key={item.id}
                             className="transition hover:bg-[color-mix(in_srgb,var(--color-text)_2%,transparent)]"
                           >
-                            {/* NAMA KELAS */}
-
                             <td className="px-5 py-4">
                               <div className="flex items-center gap-3">
                                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-purple-100 text-purple-600 dark:bg-purple-950/50 dark:text-purple-300">
@@ -1564,13 +1741,9 @@ export default function PenugasanShiftPage() {
                               </div>
                             </td>
 
-                            {/* TINGKAT */}
-
                             <td className="px-5 py-4 font-medium theme-text">
                               Tingkat {item.tingkat || "-"}
                             </td>
-
-                            {/* TAHUN AJARAN */}
 
                             <td className="px-5 py-4">
                               <div className="flex flex-col items-start gap-1">
@@ -1586,13 +1759,9 @@ export default function PenugasanShiftPage() {
                               </div>
                             </td>
 
-                            {/* JUMLAH SISWA */}
-
                             <td className="px-5 py-4 theme-text-muted">
                               {getJumlahSiswa(item).toLocaleString("id-ID")} siswa
                             </td>
-
-                            {/* DROPDOWN SHIFT + JAM */}
 
                             <td className="px-5 py-4">
                               <div className="flex items-center gap-2">
@@ -1609,7 +1778,7 @@ export default function PenugasanShiftPage() {
                                     )
                                   }
                                   aria-label={`Pilih shift dan jam belajar kelas ${item.nama}`}
-                                  className={`theme-input h-10 min-w-[230px] rounded-lg border px-3 text-sm font-medium outline-none transition focus:ring-2 focus:ring-[var(--color-primary)]/20 disabled:cursor-not-allowed disabled:opacity-60 ${
+                                  className={`theme-input h-10 min-w-[250px] rounded-lg border px-3 text-sm font-medium outline-none transition focus:ring-2 focus:ring-[var(--color-primary)]/20 disabled:cursor-not-allowed disabled:opacity-60 ${
                                     item.shift === "pagi"
                                       ? "border-blue-300 bg-blue-50 text-blue-700 dark:border-blue-800 dark:bg-blue-950/50 dark:text-blue-300"
                                       : item.shift === "siang"
@@ -1621,14 +1790,18 @@ export default function PenugasanShiftPage() {
                                     <option value="">Gagal memuat shift</option>
                                   ) : (
                                     <>
-                                      <option value="">
-                                        Tanpa Shift
-                                      </option>
+                                      <option value="">Tanpa Shift</option>
                                       <option value="pagi">
-                                        {getShiftKelasOptionLabel("pagi", shiftList)}
+                                        {getShiftKelasOptionLabel(
+                                          "pagi",
+                                          shiftSiswaList
+                                        )}
                                       </option>
                                       <option value="siang">
-                                        {getShiftKelasOptionLabel("siang", shiftList)}
+                                        {getShiftKelasOptionLabel(
+                                          "siang",
+                                          shiftSiswaList
+                                        )}
                                       </option>
                                     </>
                                   )}
@@ -1644,17 +1817,15 @@ export default function PenugasanShiftPage() {
 
                               {!item.shiftLoadError && (
                                 <p className="mt-1.5 text-[11px] theme-text-muted">
-                                  Pilih shift beserta jam belajarnya.
+                                  Jam diambil dari konfigurasi shift siswa.
                                 </p>
                               )}
                             </td>
 
-                            {/* JAM BELAJAR */}
-
                             <td className="px-5 py-4">
                               <JamBelajar
                                 shift={item.shift}
-                                shiftList={shiftList}
+                                shiftSiswaList={shiftSiswaList}
                               />
                             </td>
                           </tr>
@@ -1712,6 +1883,128 @@ export default function PenugasanShiftPage() {
           </div>
         </main>
       </div>
+
+      {/* MODAL EDIT KONFIGURASI SHIFT SISWA */}
+      {editingShiftSiswa && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-xl border theme-border bg-[var(--color-surface)] p-6 shadow-xl animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between pb-4 border-b theme-border">
+              <div>
+                <h3 className="text-base font-bold theme-text">
+                  Ubah Konfigurasi Shift {editingShiftSiswa.nama || editingShiftSiswa.kode}
+                </h3>
+                <p className="text-xs theme-text-muted mt-0.5">
+                  Perbarui jam masuk, jam keluar, dan toleransi keterlambatan.
+                </p>
+              </div>
+              <button
+                type="button"
+                disabled={savingShiftSiswa}
+                onClick={() => setEditingShiftSiswa(null)}
+                className="rounded-lg p-1 theme-text-muted hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] transition disabled:opacity-40"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveShiftSiswa} className="mt-4 space-y-4">
+              {editShiftError && (
+                <div className="flex items-start gap-2.5 rounded-lg border border-red-200 bg-red-50 p-3 text-xs text-red-700 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-300">
+                  <AlertCircle size={16} className="mt-0.5 shrink-0" />
+                  <span className="flex-1 break-words">{editShiftError}</span>
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold theme-text mb-1.5">
+                    Jam Masuk <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="time"
+                    required
+                    value={editShiftForm.jamMasuk}
+                    onChange={(e) =>
+                      setEditShiftForm((prev) => ({
+                        ...prev,
+                        jamMasuk: e.target.value,
+                      }))
+                    }
+                    className="w-full rounded-lg border theme-border bg-[var(--color-surface)] px-3 py-2 text-sm theme-text outline-none focus:border-[var(--color-primary)] font-mono"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold theme-text mb-1.5">
+                    Jam Keluar <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="time"
+                    required
+                    value={editShiftForm.jamKeluar}
+                    onChange={(e) =>
+                      setEditShiftForm((prev) => ({
+                        ...prev,
+                        jamKeluar: e.target.value,
+                      }))
+                    }
+                    className="w-full rounded-lg border theme-border bg-[var(--color-surface)] px-3 py-2 text-sm theme-text outline-none focus:border-[var(--color-primary)] font-mono"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold theme-text mb-1.5">
+                  Toleransi Keterlambatan (Menit)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  max="240"
+                  required
+                  value={editShiftForm.toleransiTerlambatMenit}
+                  onChange={(e) =>
+                    setEditShiftForm((prev) => ({
+                      ...prev,
+                      toleransiTerlambatMenit: e.target.value,
+                    }))
+                  }
+                  className="w-full rounded-lg border theme-border bg-[var(--color-surface)] px-3 py-2 text-sm theme-text outline-none focus:border-[var(--color-primary)]"
+                  placeholder="Contoh: 15"
+                />
+                <p className="mt-1 text-[11px] theme-text-muted">
+                  Batas waktu toleransi sebelum siswa dinyatakan terlambat (0 &ndash; 240 menit).
+                </p>
+              </div>
+
+              <div className="mt-6 flex items-center justify-end gap-2.5 pt-3 border-t theme-border">
+                <button
+                  type="button"
+                  disabled={savingShiftSiswa}
+                  onClick={() => setEditingShiftSiswa(null)}
+                  className="rounded-lg border theme-border px-4 py-2 text-xs font-medium theme-text-secondary hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] transition disabled:opacity-40"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  disabled={savingShiftSiswa}
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--color-primary)] px-4 py-2 text-xs font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {savingShiftSiswa ? (
+                    <>
+                      <LoaderCircle size={14} className="animate-spin" />
+                      Menyimpan...
+                    </>
+                  ) : (
+                    "Simpan Perubahan"
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

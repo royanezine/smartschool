@@ -61,8 +61,21 @@ function isPageActive(item) {
   }
 
   if (
-    ["beranda", "home", "homepage", "articles", "artikel", "berita", "tentang"].includes(slug) ||
-    ["beranda", "home", "tentang", "artikel"].includes(title)
+    [
+      "beranda",
+      "home",
+      "homepage",
+      "articles",
+      "artikel",
+      "berita",
+      "tentang",
+      "ppdb",
+      "daftar-ppdb",
+      "daftarppdb",
+    ].includes(slug) ||
+    ["beranda", "home", "tentang", "artikel", "ppdb", "daftar ppdb"].includes(
+      title
+    )
   ) {
     return false;
   }
@@ -114,6 +127,8 @@ export default function PublicNavbar({ sekolah = {}, halaman = [] }) {
   const ppdbBase = getPpdbBasePath(pathname);
   const diHalamanPpdb = ppdbBase !== null;
   const ppdbHome = `${ppdbBase}/PPDB`;
+  const cleanBase = base === "/" ? "" : base;
+  const ppdbHref = `${cleanBase}/PPDB`;
 
   // Animasi mount pertama kali
   useEffect(() => {
@@ -121,9 +136,11 @@ export default function PublicNavbar({ sekolah = {}, halaman = [] }) {
     return () => clearTimeout(t);
   }, []);
 
-  useEffect(() => {
+  const [prevPathname, setPrevPathname] = useState(pathname);
+  if (prevPathname !== pathname) {
+    setPrevPathname(pathname);
     setOpen(false);
-  }, [pathname]);
+  }
 
   // Lock scroll saat mobile menu terbuka
   useEffect(() => {
@@ -180,31 +197,6 @@ export default function PublicNavbar({ sekolah = {}, halaman = [] }) {
 
   // Menu navigasi
   const menuItems = useMemo(() => {
-    if (diHalamanPpdb) {
-      return [
-        {
-          label: "Beranda",
-          href: ppdbHome,
-          key: "ppdb-beranda",
-        },
-        {
-          label: "Jalur Pendaftaran",
-          href: `${ppdbHome}/jalurPendaftaran`,
-          key: "ppdb-jalur",
-        },
-        {
-          label: "Alur Pendaftaran",
-          href: `${ppdbHome}/alurPendaftaran`,
-          key: "ppdb-alur",
-        },
-        {
-          label: "Pengumuman",
-          href: `${ppdbHome}/pengumuman`,
-          key: "ppdb-pengumuman",
-        },
-      ];
-    }
-
     const combined = [
       ...(Array.isArray(halaman) ? halaman : []),
       ...halamanApi,
@@ -241,7 +233,7 @@ export default function PublicNavbar({ sekolah = {}, halaman = [] }) {
         return orderA - orderB;
       });
 
-    return [
+    const baseMenus = [
       {
         label: "Beranda",
         href: base,
@@ -257,14 +249,31 @@ export default function PublicNavbar({ sekolah = {}, halaman = [] }) {
         href: `${base}/articles`,
         key: "articles",
       },
-      ...pages.map((item) => ({
+      {
+        label: "PPDB",
+        href: ppdbHref,
+        key: "ppdb",
+      },
+    ];
+
+    const extraPages = pages
+      .map((item, index) => ({
         label: normalizeText(item.judul ?? item.title),
         href: `${base}/${normalizeSlug(item.slug)}`,
         // PERBAIKAN: Pastikan key unik dengan fallback ke index/slug
-        key: `page-${item.id || item.slug || Math.random()}`,
-      })),
-    ];
-  }, [halaman, halamanApi, base, diHalamanPpdb, ppdbHome]);
+        key: `page-${item.id || item.slug || index}`,
+      }))
+      .filter((page) => {
+        const normLabel = page.label.toLowerCase();
+        return (
+          page.href !== ppdbHref &&
+          normLabel !== "daftar ppdb" &&
+          normLabel !== "ppdb"
+        );
+      });
+
+    return [...baseMenus, ...extraPages];
+  }, [halaman, halamanApi, base, ppdbHref]);
 
   // Deteksi menu aktif
   function isActive(href, isRoot) {
@@ -281,14 +290,9 @@ export default function PublicNavbar({ sekolah = {}, halaman = [] }) {
   const namaSekolah = normalizeText(sekolah?.nama) || "Sekolah";
   const jenjang = normalizeText(sekolah?.jenjang) || "Sekolah";
 
-  const ppdbHref = `${base}/PPDB`;
-  const ctaHref = diHalamanPpdb
-    ? `${ppdbHome}/cek-pendaftaran`
-    : ppdbHref;
-
-  const ctaLabel = diHalamanPpdb
-    ? "Cek Pendaftaran"
-    : "Daftar PPDB";
+  const currentReturnPath = pathname || (cleanBase ? `/${cleanBase}` : "/");
+  const ctaHref = `/login?redirect=${encodeURIComponent(currentReturnPath)}`;
+  const ctaLabel = "Login";
 
   return (
     <div className="contents">

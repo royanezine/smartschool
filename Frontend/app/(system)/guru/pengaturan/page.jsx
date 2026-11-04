@@ -5,6 +5,7 @@ import Link from "next/link";
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
 import { getProfile, updateProfile } from "@/services/user.service";
+import { changePassword } from "@/services/auth.services";
 import {
   Settings,
   Lock,
@@ -20,6 +21,8 @@ import {
   Info,
   Loader2,
   ShieldCheck,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 
 
@@ -69,6 +72,212 @@ function normalizeForm(user) {
     tanggalLahir: toDateInput(user?.tanggalLahir),
     avatar: user?.avatar || "",
   };
+}
+
+function UbahKataSandiGuruSection() {
+  const [form, setForm] = useState({
+    kataSandiLama: "",
+    kataSandiBaru: "",
+    konfirmasiKataSandi: "",
+  });
+  const [showLama, setShowLama] = useState(false);
+  const [showBaru, setShowBaru] = useState(false);
+  const [showKonfirmasi, setShowKonfirmasi] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setSuccess("");
+
+    if (!form.kataSandiLama) {
+      setError("Kata sandi saat ini wajib diisi.");
+      return;
+    }
+    if (!form.kataSandiBaru) {
+      setError("Kata sandi baru wajib diisi.");
+      return;
+    }
+    if (form.kataSandiBaru.length < 8) {
+      setError("Kata sandi baru minimal 8 karakter.");
+      return;
+    }
+    if (form.kataSandiBaru === form.kataSandiLama) {
+      setError("Kata sandi baru harus berbeda dari kata sandi saat ini.");
+      return;
+    }
+    if (form.kataSandiBaru !== form.konfirmasiKataSandi) {
+      setError("Konfirmasi kata sandi baru tidak cocok.");
+      return;
+    }
+
+    try {
+      setSaving(true);
+      const res = await changePassword({
+        kataSandiLama: form.kataSandiLama,
+        kataSandiBaru: form.kataSandiBaru,
+      });
+
+      setSuccess(res?.message || "Kata sandi berhasil diubah.");
+      setForm({
+        kataSandiLama: "",
+        kataSandiBaru: "",
+        konfirmasiKataSandi: "",
+      });
+    } catch (err) {
+      console.error("Gagal mengubah kata sandi:", err);
+      setError(
+        err?.message ||
+          "Gagal mengubah kata sandi. Periksa kembali kata sandi lama Anda."
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="rounded-2xl border theme-border theme-card overflow-hidden shadow-sm">
+      <div className="flex items-center gap-3 px-5 sm:px-6 py-4 border-b theme-border-soft">
+        <div className="w-10 h-10 rounded-xl theme-info flex items-center justify-center flex-shrink-0">
+          <Lock size={18} className="text-[var(--color-info)]" />
+        </div>
+        <div className="min-w-0">
+          <h2 className="text-sm sm:text-base font-bold theme-text">
+            Ubah Kata Sandi
+          </h2>
+          <p className="text-xs theme-text-muted mt-0.5">
+            Perbarui kata sandi akun Anda secara berkala demi keamanan.
+          </p>
+        </div>
+      </div>
+
+      <form onSubmit={handleSubmit} className="p-5 sm:p-6 space-y-4">
+        {error && (
+          <div className="theme-danger flex items-start gap-3 rounded-xl px-4 py-3 text-sm">
+            <AlertCircle size={18} className="mt-0.5 shrink-0" />
+            <p>{error}</p>
+          </div>
+        )}
+
+        {success && (
+          <div className="theme-success flex items-start gap-3 rounded-xl px-4 py-3 text-sm border">
+            <Check size={18} className="mt-0.5 shrink-0 text-[var(--color-success)]" />
+            <p className="text-[var(--color-success)]">{success}</p>
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="sm:col-span-2 sm:max-w-md">
+            <label className="text-xs font-semibold theme-text-secondary">
+              Kata Sandi Saat Ini
+            </label>
+            <div className="relative mt-2">
+              <input
+                type={showLama ? "text" : "password"}
+                value={form.kataSandiLama}
+                onChange={(e) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    kataSandiLama: e.target.value,
+                  }))
+                }
+                placeholder="Masukkan kata sandi saat ini"
+                className="theme-input w-full rounded-xl px-3.5 py-3 pr-10 text-sm outline-none transition-all focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[color:var(--color-primary)/.10]"
+              />
+              <button
+                type="button"
+                onClick={() => setShowLama(!showLama)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 theme-text-muted hover:text-[var(--color-primary)]"
+              >
+                {showLama ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label className="text-xs font-semibold theme-text-secondary">
+              Kata Sandi Baru
+            </label>
+            <div className="relative mt-2">
+              <input
+                type={showBaru ? "text" : "password"}
+                value={form.kataSandiBaru}
+                onChange={(e) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    kataSandiBaru: e.target.value,
+                  }))
+                }
+                placeholder="Minimal 8 karakter"
+                className="theme-input w-full rounded-xl px-3.5 py-3 pr-10 text-sm outline-none transition-all focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[color:var(--color-primary)/.10]"
+              />
+              <button
+                type="button"
+                onClick={() => setShowBaru(!showBaru)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 theme-text-muted hover:text-[var(--color-primary)]"
+              >
+                {showBaru ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label className="text-xs font-semibold theme-text-secondary">
+              Konfirmasi Kata Sandi Baru
+            </label>
+            <div className="relative mt-2">
+              <input
+                type={showKonfirmasi ? "text" : "password"}
+                value={form.konfirmasiKataSandi}
+                onChange={(e) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    konfirmasiKataSandi: e.target.value,
+                  }))
+                }
+                placeholder="Ulangi kata sandi baru"
+                className="theme-input w-full rounded-xl px-3.5 py-3 pr-10 text-sm outline-none transition-all focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[color:var(--color-primary)/.10]"
+              />
+              <button
+                type="button"
+                onClick={() => setShowKonfirmasi(!showKonfirmasi)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 theme-text-muted hover:text-[var(--color-primary)]"
+              >
+                {showKonfirmasi ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-t theme-border-soft pt-4 mt-2">
+          <div className="flex items-center gap-2 text-xs theme-text-muted">
+            <ShieldCheck size={15} />
+            Minimal 8 karakter. Jangan bagikan kata sandi kepada siapa pun.
+          </div>
+
+          <button
+            type="submit"
+            disabled={saving || !form.kataSandiLama || !form.kataSandiBaru}
+            className="flex items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-sm font-semibold theme-primary shadow-sm transition-all hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            {saving ? (
+              <>
+                <Loader2 size={14} className="animate-spin" />
+                Menyimpan...
+              </>
+            ) : (
+              <>
+                <Save size={14} />
+                Simpan Kata Sandi
+              </>
+            )}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
 }
 
 export default function GuruPengaturanPage() {
@@ -474,61 +683,7 @@ export default function GuruPengaturanPage() {
               </div>
             )}
 
-            {tabAktif === "keamanan" && (
-              <div className="rounded-2xl border theme-border theme-card overflow-hidden shadow-sm">
-                <div className="flex items-center gap-3 px-5 sm:px-6 py-4 border-b theme-border-soft">
-                  <div className="w-10 h-10 rounded-xl theme-info flex items-center justify-center flex-shrink-0">
-                    <Lock size={18} className="text-[var(--color-info)]" />
-                  </div>
-
-                  <div className="min-w-0">
-                    <h2 className="text-sm sm:text-base font-bold theme-text">
-                      Ubah Kata Sandi
-                    </h2>
-
-                    <p className="text-xs theme-text-muted mt-0.5">
-                      Perubahan kata sandi belum dapat dilakukan dari halaman ini.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="p-5 sm:p-6 space-y-4">
-                  <div className="theme-warning flex items-start gap-3 rounded-xl px-4 py-3.5">
-                    <Info size={18} className="mt-0.5 shrink-0" />
-
-                    <div className="text-sm">
-                      <p className="font-semibold">
-                        Belum tersedia endpoint ubah kata sandi mandiri
-                      </p>
-
-                      <p className="mt-1 text-xs leading-5">
-                        Backend hanya menyediakan reset kata sandi melalui OTP
-                        email (<span className="font-mono">/api/auth/lupa-kata-sandi</span>{" "}
-                        dan{" "}
-                        <span className="font-mono">/api/auth/atur-ulang-kata-sandi</span>)
-                        serta reset oleh admin. Gunakan alur lupa kata sandi
-                        atau hubungi admin sekolah untuk mengubah kata sandi.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col gap-3 border-t theme-border-soft pt-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="flex items-center gap-2 text-xs theme-text-muted">
-                      <ShieldCheck size={15} />
-                      Jangan bagikan kata sandi kepada siapa pun.
-                    </div>
-
-                    <Link
-                      href="/forgot-password"
-                      className="theme-primary inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold shadow-sm transition hover:opacity-90"
-                    >
-                      <Mail size={15} />
-                      Buka Lupa Kata Sandi
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            )}
+            {tabAktif === "keamanan" && <UbahKataSandiGuruSection />}
 
             <div className="py-7 text-center">
               <p className="text-xs theme-text-placeholder">

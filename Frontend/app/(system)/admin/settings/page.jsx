@@ -6,6 +6,7 @@ import Link from "next/link";
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
 import { getProfile } from "@/services/user.service";
+import { getHariAktif } from "@/services/pengaturan.service";
 import {
   Settings,
   Building2,
@@ -171,6 +172,23 @@ export default function AdminPengaturanPage() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
+  const [hariAktifData, setHariAktifData] = useState(null);
+  const [hariAktifLoading, setHariAktifLoading] = useState(true);
+
+  const loadHariAktifData = useCallback(async () => {
+    setHariAktifLoading(true);
+    try {
+      const res = await getHariAktif();
+      if (Array.isArray(res?.data?.hariAktif)) {
+        setHariAktifData(res.data.hariAktif);
+      }
+    } catch (err) {
+      console.warn("Hari aktif tidak dapat dimuat di profil:", err);
+      setHariAktifData(null);
+    } finally {
+      setHariAktifLoading(false);
+    }
+  }, []);
 
   const loadProfile = useCallback(async (isRefresh = false) => {
     if (isRefresh) {
@@ -214,9 +232,10 @@ export default function AdminPengaturanPage() {
   useEffect(() => {
     const timer = setTimeout(() => {
       loadProfile();
+      loadHariAktifData();
     }, 0);
     return () => clearTimeout(timer);
-  }, [loadProfile]);
+  }, [loadProfile, loadHariAktifData]);
 
   const toggleSidebar = () => {
     setIsCollapsed((previous) => !previous);
@@ -626,6 +645,74 @@ export default function AdminPengaturanPage() {
                           className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[var(--color-primary)] hover:underline"
                         >
                           Buka menu Tahun Ajaran
+                          <ExternalLink size={15} />
+                        </Link>
+                      </div>
+                    </div>
+                  </section>
+
+                  <section className={`${cardClass} min-w-0 overflow-hidden`}>
+                    <SectionHeader
+                      icon={CalendarDays}
+                      title="Hari Aktif Presensi"
+                      description="Konfigurasi operasional hari aktif presensi sekolah."
+                    />
+
+                    <div className="p-5 sm:p-6">
+                      <div className="rounded-xl border border-[var(--color-text)]/10 p-4">
+                        <div className="flex items-start gap-3">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] text-[var(--color-primary)]">
+                            <CalendarDays size={19} />
+                          </div>
+
+                          <div className="min-w-0 flex-1">
+                            <h3 className="text-sm font-semibold theme-text">
+                              {hariAktifLoading
+                                ? "Memuat konfigurasi hari aktif..."
+                                : hariAktifData
+                                  ? `${hariAktifData.length} Hari Aktif per Pekan`
+                                  : "Konfigurasi hari aktif belum diatur"}
+                            </h3>
+
+                            {hariAktifData && (
+                              <div className="mt-2.5 flex flex-wrap gap-1.5">
+                                {[
+                                  { id: 1, nama: "Senin" },
+                                  { id: 2, nama: "Selasa" },
+                                  { id: 3, nama: "Rabu" },
+                                  { id: 4, nama: "Kamis" },
+                                  { id: 5, nama: "Jumat" },
+                                  { id: 6, nama: "Sabtu" },
+                                  { id: 0, nama: "Minggu" },
+                                ].map((hari) => {
+                                  const active = hariAktifData.includes(hari.id);
+                                  return (
+                                    <span
+                                      key={hari.id}
+                                      className={`rounded-md px-2 py-0.5 text-xs font-medium ${
+                                        active
+                                          ? "bg-[color-mix(in_srgb,var(--color-success)_15%,transparent)] text-[var(--color-success)] font-semibold"
+                                          : "bg-[var(--color-text)]/5 theme-text-muted"
+                                      }`}
+                                    >
+                                      {hari.nama}
+                                    </span>
+                                  );
+                                })}
+                              </div>
+                            )}
+
+                            <p className="mt-2.5 text-xs leading-relaxed theme-text-secondary">
+                              Hari aktif menentukan kapan presensi siswa dan guru dapat dicatat oleh sistem backend (GET /api/pengaturan/hari-aktif).
+                            </p>
+                          </div>
+                        </div>
+
+                        <Link
+                          href="/admin/presensi/pengaturan"
+                          className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[var(--color-primary)] hover:underline"
+                        >
+                          Buka Pengaturan Presensi & Hari Aktif
                           <ExternalLink size={15} />
                         </Link>
                       </div>

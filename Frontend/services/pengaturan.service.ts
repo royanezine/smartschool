@@ -39,3 +39,73 @@ export async function setKkm(nilai: number): Promise<any> {
     body: JSON.stringify({ nilai }),
   });
 }
+
+export interface HariAktifData {
+  hariAktif: number[];
+}
+
+export interface HariAktifResponse {
+  success: boolean;
+  message: string;
+  data: HariAktifData;
+}
+
+export interface UpdateHariAktifPayload {
+  hariAktif: number[];
+}
+
+export async function getHariAktif(): Promise<HariAktifResponse> {
+  return apiFetch("/api/pengaturan/hari-aktif");
+}
+
+export async function updateHariAktif(
+  payload: UpdateHariAktifPayload
+): Promise<HariAktifResponse> {
+  return apiFetch("/api/pengaturan/hari-aktif", {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+}
+
+export interface MataPelajaranAgregatItem {
+  mataPelajaranId: string;
+  tugas: number;
+  uts: number;
+  uas: number;
+  praktik: number;
+  kkm: number;
+}
+
+export interface AgregatRaporData {
+  tahunAjaranId: string;
+  mataPelajaran: MataPelajaranAgregatItem[];
+}
+
+export interface AgregatRaporResponse {
+  success: boolean;
+  message: string;
+  data: AgregatRaporData;
+}
+
+export interface UpdateAgregatRaporPayload {
+  tahunAjaranId: string;
+  mataPelajaran: MataPelajaranAgregatItem[];
+}
+
+export async function getAgregatRapor(
+  tahunAjaranId: string
+): Promise<AgregatRaporResponse> {
+  const qs = tahunAjaranId
+    ? `?tahunAjaranId=${encodeURIComponent(tahunAjaranId)}`
+    : "";
+  return apiFetch(`/api/pengaturan/agregat-rapor${qs}`);
+}
+
+export async function updateAgregatRapor(
+  payload: UpdateAgregatRaporPayload
+): Promise<AgregatRaporResponse> {
+  return apiFetch("/api/pengaturan/agregat-rapor", {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+}

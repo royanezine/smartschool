@@ -98,6 +98,7 @@ export interface CheckInShiftPayload {
   lintang?: number;
   bujur?: number;
   barcodeData?: string;
+  snapshot?: Blob | File | null;
 }
 
 export interface CheckOutShiftPayload {
@@ -575,41 +576,66 @@ export async function checkInShift(
     );
   }
 
-  const body: Record<string, unknown> = {
+  if (metode === "face" && !data.snapshot) {
+    throw new Error(
+      "Foto wajah wajib diambil untuk check-in menggunakan Face ID.",
+    );
+  }
+
+  const payload: Record<string, unknown> = {
     status: data.status ?? "hadir",
     metode,
   };
 
   if (data.shiftKerjaId) {
-    body.shiftKerjaId = data.shiftKerjaId;
+    payload.shiftKerjaId = data.shiftKerjaId;
   }
 
   if (data.keterangan?.trim()) {
-    body.keterangan = data.keterangan.trim();
+    payload.keterangan = data.keterangan.trim();
   }
 
   if (data.lintang !== undefined) {
-    body.lintang = data.lintang;
+    payload.lintang = data.lintang;
   }
 
   if (data.bujur !== undefined) {
-    body.bujur = data.bujur;
+    payload.bujur = data.bujur;
   }
 
   if (data.barcodeData) {
-    body.barcodeData = data.barcodeData;
+    payload.barcodeData = data.barcodeData;
   }
 
-  console.info("[ABSENSI SHIFT] Check-in payload", {
-    metode: body.metode,
-    lintang: body.lintang,
-    bujur: body.bujur,
-    shiftKerjaId: body.shiftKerjaId,
-  });
+  if (metode === "face") {
+    const formData = new FormData();
+
+    Object.entries(payload).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        formData.append(key, String(value));
+      }
+    });
+
+    const snapshot = data.snapshot!;
+
+    const file =
+      snapshot instanceof File
+        ? snapshot
+        : new File([snapshot], "snapshot.jpg", {
+            type: snapshot.type || "image/jpeg",
+          });
+
+    formData.append("snapshot", file);
+
+    return apiFetch("/api/absensi/check-in", {
+      method: "POST",
+      body: formData,
+    }) as Promise<Absensi>;
+  }
 
   return apiFetch("/api/absensi/check-in", {
     method: "POST",
-    body: JSON.stringify(body),
+    body: JSON.stringify(payload),
   }) as Promise<Absensi>;
 }
 

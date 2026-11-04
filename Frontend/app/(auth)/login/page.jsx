@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import { GraduationCap, ArrowLeft } from "lucide-react";
 
@@ -37,6 +38,12 @@ const features = [
 const glow = "[text-shadow:0_0_14px_rgba(255,255,255,0.95),0_0_4px_rgba(255,255,255,0.9)]";
 
 export default function LoginPage() {
+  const router = useRouter();
+
+  const handleBack = () => {
+    router.push("/");
+  };
+
   return (
     <main className={`${jakarta.className} relative isolate min-h-screen overflow-hidden bg-[#EAF3FF]`}>
       <style>{`
@@ -67,14 +74,15 @@ export default function LoginPage() {
         className="ss-logo absolute z-10 flex items-center"
         style={{ left: 20, top: 20, gap: u(16) }}
       >
-        <Link
-          href="/"
+        <button
+          type="button"
+          onClick={handleBack}
           aria-label="Kembali"
           className="flex items-center justify-center rounded-full bg-white text-[#0F2A66] shadow-lg shadow-[#0F2A66]/15 ring-1 ring-[#0F2A66]/10 transition-all hover:bg-[#0F2A66] hover:text-white"
           style={{ width: u(48), height: u(48) }}
         >
           <ArrowLeft style={{ width: u(24), height: u(24) }} strokeWidth={2.5} />
-        </Link>
+        </button>
 
         <Link
           href="/"

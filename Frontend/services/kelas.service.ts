@@ -671,3 +671,5 @@ export async function updateShiftKelasMassal(payload) {
     body: JSON.stringify(payload),
   });
 }
+
+
