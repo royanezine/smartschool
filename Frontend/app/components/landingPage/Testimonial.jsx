@@ -3,12 +3,25 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   motion,
+  useMotionTemplate,
   useMotionValue,
   useSpring,
   useTransform,
 } from "framer-motion";
-import { Quote, Star, MessageSquareQuote, AlertCircle } from "lucide-react";
+import {
+  Quote,
+  Star,
+  MessageSquareQuote,
+  AlertCircle,
+  BadgeCheck,
+  Sparkles,
+  Users,
+  ThumbsUp,
+} from "lucide-react";
 import { getPublicReviews } from "@/services/review.service";
+
+const HEADER_SPACE = "px-6 sm:px-10 lg:px-16 xl:px-20";
+const MARQUEE_SPACE = "px-4 sm:px-8 lg:px-14";
 
 function normalizeReview(review) {
   if (!review || !review.id) return null;
@@ -46,21 +59,32 @@ function normalizeReview(review) {
   };
 }
 
-function StarRating({ rating = 5 }) {
+function getInitials(name) {
+  const parts = String(name || "").trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "S";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
+function StarRating({ rating = 5, featured = false, size = 15 }) {
   const value = Math.max(0, Math.min(5, Number(rating) || 0));
 
   return (
     <div
-      className="flex items-center gap-1"
+      className="flex items-center gap-0.5"
       aria-label={`Rating ${value} dari 5`}
     >
       {[1, 2, 3, 4, 5].map((star) => (
         <Star
           key={star}
-          size={16}
-          fill={star <= value ? "currentColor" : "none"}
+          size={size}
+          fill={star <= Math.round(value) ? "currentColor" : "none"}
           className={
-            star <= value ? "text-amber-400" : "text-slate-300"
+            star <= Math.round(value)
+              ? "text-amber-400"
+              : featured
+                ? "text-white/30"
+                : "text-slate-300"
           }
         />
       ))}
@@ -68,51 +92,45 @@ function StarRating({ rating = 5 }) {
   );
 }
 
-function PremiumCard({ item, featured = false }) {
+function ReviewCard({ item, featured = false }) {
   const ref = useRef(null);
 
   const x = useMotionValue(0);
   const y = useMotionValue(0);
+  const px = useMotionValue(-200);
+  const py = useMotionValue(-200);
 
-  const mouseXSpring = useSpring(x, {
-    stiffness: 400,
-    damping: 40,
-  });
+  const sx = useSpring(x, { stiffness: 260, damping: 24 });
+  const sy = useSpring(y, { stiffness: 260, damping: 24 });
 
-  const mouseYSpring = useSpring(y, {
-    stiffness: 400,
-    damping: 40,
-  });
+  const rotateX = useTransform(sy, [-0.5, 0.5], [6, -6]);
+  const rotateY = useTransform(sx, [-0.5, 0.5], [-6, 6]);
 
-  const rotateX = useTransform(
-    mouseYSpring,
-    [-0.5, 0.5],
-    ["5deg", "-5deg"]
-  );
-
-  const rotateY = useTransform(
-    mouseXSpring,
-    [-0.5, 0.5],
-    ["-5deg", "5deg"]
-  );
+  const spotlight = useMotionTemplate`radial-gradient(260px circle at ${px}px ${py}px, ${
+    featured ? "rgba(255,255,255,0.22)" : "rgba(37,99,235,0.10)"
+  }, transparent 70%)`;
 
   const handleMouseMove = (event) => {
-    if (!ref.current) return;
+    const el = ref.current;
+    if (!el) return;
 
-    const rect = ref.current.getBoundingClientRect();
-
+    const rect = el.getBoundingClientRect();
     if (!rect.width || !rect.height) return;
 
-    const mouseX = event.clientX - rect.left;
-    const mouseY = event.clientY - rect.top;
+    const mx = event.clientX - rect.left;
+    const my = event.clientY - rect.top;
 
-    x.set(mouseX / rect.width - 0.5);
-    y.set(mouseY / rect.height - 0.5);
+    x.set(mx / rect.width - 0.5);
+    y.set(my / rect.height - 0.5);
+    px.set(mx);
+    py.set(my);
   };
 
   const handleMouseLeave = () => {
     x.set(0);
     y.set(0);
+    px.set(-200);
+    py.set(-200);
   };
 
   return (
@@ -120,63 +138,104 @@ function PremiumCard({ item, featured = false }) {
       ref={ref}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
+      whileHover={{ y: -8, scale: 1.02 }}
+      transition={{ type: "spring", stiffness: 300, damping: 22 }}
       style={{
         rotateX,
         rotateY,
-        transformStyle: "preserve-3d",
+        transformPerspective: 900,
       }}
-      className={`relative flex h-full min-h-[250px] flex-col overflow-hidden border transition-shadow duration-300 ${
+      className={`group relative flex h-full min-h-[260px] w-[300px] shrink-0 flex-col overflow-hidden rounded-2xl border p-6 transition-shadow duration-300 sm:w-[360px] sm:p-7 ${
         featured
-          ? "w-[310px] shrink-0 rounded-2xl border-blue-500/30 bg-blue-600 p-6 text-white shadow-lg shadow-blue-900/10 sm:w-[390px] sm:p-8"
-          : "w-[280px] shrink-0 rounded-xl border-slate-200 bg-white p-5 shadow-sm hover:shadow-md sm:w-[340px] sm:p-6"
+          ? "border-blue-500/40 bg-blue-600 text-white shadow-lg shadow-blue-600/15 hover:shadow-2xl hover:shadow-blue-600/30"
+          : "border-slate-200 bg-white text-slate-900 shadow-sm hover:border-blue-200 hover:shadow-xl hover:shadow-blue-600/10"
       }`}
     >
-      <Quote
-        size={featured ? 58 : 42}
+      <motion.div
         aria-hidden="true"
-        className={`absolute right-4 top-4 ${
-          featured ? "text-white/10" : "text-blue-50"
-        }`}
-        style={{ transform: "translateZ(15px)" }}
+        className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+        style={{ background: spotlight }}
       />
 
-      <div
-        className="relative z-10"
-        style={{ transform: "translateZ(25px)" }}
-      >
-        <StarRating rating={item.rating} />
+      {featured && (
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 opacity-20"
+          style={{
+            backgroundImage:
+              "linear-gradient(to right, white 1px, transparent 1px), linear-gradient(to bottom, white 1px, transparent 1px)",
+            backgroundSize: "32px 32px",
+            maskImage: "linear-gradient(135deg, transparent 40%, black 100%)",
+            WebkitMaskImage:
+              "linear-gradient(135deg, transparent 40%, black 100%)",
+          }}
+        />
+      )}
+
+      <Quote
+        size={featured ? 64 : 52}
+        aria-hidden="true"
+        className={`absolute -right-1 -top-1 rotate-6 ${
+          featured ? "text-white/10" : "text-blue-50"
+        }`}
+      />
+
+      <div className="relative z-10 flex items-center justify-between">
+        <StarRating rating={item.rating} featured={featured} />
+        <span
+          className={`text-xs font-semibold tabular-nums ${
+            featured ? "text-white/70" : "text-slate-400"
+          }`}
+        >
+          {item.rating.toFixed(1)}
+        </span>
       </div>
 
       <p
-        className={`relative z-10 mt-5 flex-1 break-words text-sm leading-7 ${
-          featured ? "text-blue-50 sm:text-base" : "text-slate-600"
+        className={`relative z-10 mt-5 line-clamp-5 flex-1 break-words text-[15px] leading-7 ${
+          featured ? "text-blue-50" : "text-slate-600"
         }`}
-        style={{ transform: "translateZ(15px)" }}
       >
         &ldquo;{item.text}&rdquo;
       </p>
 
       <div
-        className={`relative z-10 mt-6 border-t pt-4 ${
+        className={`relative z-10 mt-6 flex items-center gap-3 border-t pt-5 ${
           featured ? "border-white/20" : "border-slate-100"
         }`}
-        style={{ transform: "translateZ(20px)" }}
       >
-        <h3
-          className={`break-words text-sm font-semibold ${
-            featured ? "text-white" : "text-slate-900"
+        <div
+          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
+            featured
+              ? "bg-white/15 text-white ring-1 ring-white/30"
+              : "bg-blue-50 text-blue-700 ring-1 ring-blue-100"
           }`}
         >
-          {item.name}
-        </h3>
+          {getInitials(item.name)}
+        </div>
 
-        <p
-          className={`mt-1 text-xs ${
-            featured ? "text-blue-200" : "text-slate-500"
-          }`}
-        >
-          {item.role}
-        </p>
+        <div className="min-w-0">
+          <h3
+            className={`flex items-center gap-1.5 truncate text-sm font-semibold ${
+              featured ? "text-white" : "text-slate-900"
+            }`}
+          >
+            <span className="truncate">{item.name}</span>
+            <BadgeCheck
+              size={15}
+              className={`shrink-0 ${
+                featured ? "text-blue-100" : "text-blue-600"
+              }`}
+            />
+          </h3>
+          <p
+            className={`mt-0.5 truncate text-xs ${
+              featured ? "text-blue-100/80" : "text-slate-500"
+            }`}
+          >
+            {item.role}
+          </p>
+        </div>
       </div>
     </motion.article>
   );
@@ -185,31 +244,132 @@ function PremiumCard({ item, featured = false }) {
 function ReviewMarquee({
   items,
   direction = "left",
-  duration = 25,
+  duration = 40,
   featured = false,
 }) {
   if (!items.length) return null;
 
-  // Menggandakan item agar loop animasi tidak putus
-  const repeatedItems = [...items, ...items, ...items, ...items];
+  let base = items;
+  while (base.length < 8) {
+    base = [...base, ...items];
+  }
+
+  const repeatedItems = [...base, ...base];
   const animationClass =
-    direction === "right"
-      ? "review-marquee-right"
-      : "review-marquee-left";
+    direction === "right" ? "review-marquee-right" : "review-marquee-left";
 
   return (
-    <div className="review-marquee-wrapper group relative w-full overflow-hidden py-4">
-      <div
-        className={`review-marquee-track ${animationClass}`}
-        style={{ "--marquee-duration": `${duration}s` }}
+    <div className={`mx-auto w-full max-w-[1520px] ${MARQUEE_SPACE}`}>
+      <div className="review-marquee-wrapper relative w-full overflow-hidden py-6">
+        <div
+          className={`review-marquee-track ${animationClass}`}
+          style={{ "--marquee-duration": `${duration}s` }}
+        >
+          {repeatedItems.map((item, index) => (
+            <div key={`${item.id}-${index}`} className="shrink-0 px-3">
+              <ReviewCard item={item} featured={featured} />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 24 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
+};
+
+const popIn = {
+  hidden: { opacity: 0, scale: 0.8 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: { type: "spring", stiffness: 200, damping: 16 },
+  },
+};
+
+function RatingSummary({ testimonials, averageRating }) {
+  const total = testimonials.length;
+  const satisfied = testimonials.filter((item) => item.rating >= 4).length;
+  const satisfiedPercent =
+    total > 0 ? Math.round((satisfied / total) * 100) : 0;
+  const avatars = testimonials.slice(0, 5);
+
+  const stats = [
+    {
+      icon: Star,
+      value: averageRating.toFixed(1),
+      label: "Rata-rata rating",
+      iconBox: "bg-amber-50 text-amber-500 ring-amber-100",
+      fill: true,
+    },
+    {
+      icon: Users,
+      value: total,
+      label: "Ulasan terverifikasi",
+      iconBox: "bg-blue-50 text-blue-600 ring-blue-100",
+      fill: false,
+    },
+    {
+      icon: ThumbsUp,
+      value: `${satisfiedPercent}%`,
+      label: "Pengguna puas",
+      iconBox: "bg-emerald-50 text-emerald-600 ring-emerald-100",
+      fill: false,
+    },
+  ];
+
+  return (
+    <div className="flex w-full flex-col items-center gap-8">
+      <motion.div
+        variants={popIn}
+        initial="hidden"
+        animate="visible"
+        className="inline-flex items-center gap-3 rounded-full border border-slate-200 bg-white py-1.5 pl-1.5 pr-5 shadow-sm"
       >
-        {repeatedItems.map((item, index) => (
-          <div
-            key={`${item.id}-${index}`}
-            className="shrink-0 px-3 [transform-style:preserve-3d]"
+        <div className="flex -space-x-2">
+          {avatars.map((item) => (
+            <div
+              key={item.id}
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-50 text-[11px] font-bold text-blue-700 ring-2 ring-white"
+            >
+              {getInitials(item.name)}
+            </div>
+          ))}
+        </div>
+
+        <div className="flex flex-col items-start leading-tight">
+          <StarRating rating={averageRating} size={13} />
+          <span className="mt-0.5 text-[11px] font-medium text-slate-500">
+            Dipercaya oleh {total} pengguna
+          </span>
+        </div>
+      </motion.div>
+
+      <div className="grid w-full max-w-3xl grid-cols-1 gap-4 sm:grid-cols-3">
+        {stats.map(({ icon: Icon, value, label, iconBox, fill }) => (
+          <motion.div
+            key={label}
+            variants={fadeUp}
+            initial="hidden"
+            animate="visible"
+            className="group flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-5 text-left shadow-sm transition duration-300 hover:-translate-y-1 hover:border-blue-200 hover:shadow-xl hover:shadow-blue-600/10"
           >
-            <PremiumCard item={item} featured={featured} />
-          </div>
+            <div
+              className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ring-1 transition-transform duration-300 group-hover:rotate-3 group-hover:scale-110 ${iconBox}`}
+            >
+              <Icon size={22} fill={fill ? "currentColor" : "none"} />
+            </div>
+
+            <div>
+              <p className="text-2xl font-bold leading-none tracking-tight text-slate-900 tabular-nums">
+                {value}
+              </p>
+              <p className="mt-1.5 text-xs text-slate-500">{label}</p>
+            </div>
+          </motion.div>
         ))}
       </div>
     </div>
@@ -220,6 +380,7 @@ export default function Testimonial() {
   const [testimonials, setTestimonials] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const mountedRef = useRef(true);
 
   const loadReviews = useCallback(async () => {
     setLoading(true);
@@ -247,97 +408,60 @@ export default function Testimonial() {
         .map(normalizeReview)
         .filter(Boolean);
 
-      setTestimonials(normalizedReviews);
+      if (mountedRef.current) {
+        setTestimonials(normalizedReviews);
+      }
     } catch (err) {
       console.error("Gagal memuat testimoni publik:", err);
-      setTestimonials([]);
-      setError(
-        err?.message || "Testimoni gagal dimuat. Silakan coba lagi."
-      );
+
+      if (mountedRef.current) {
+        setTestimonials([]);
+        setError(
+          err?.message || "Testimoni gagal dimuat. Silakan coba lagi."
+        );
+      }
     } finally {
-      setLoading(false);
+      if (mountedRef.current) setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    let active = true;
-
-    async function fetchReviews() {
-      setLoading(true);
-      setError("");
-
-      try {
-        const response = await getPublicReviews({
-          page: 1,
-          limit: 100,
-        });
-
-        if (response?.success === false) {
-          throw new Error(
-            response.message || "Gagal mengambil data testimoni."
-          );
-        }
-
-        const rawReviews = Array.isArray(response?.data)
-          ? response.data
-          : Array.isArray(response?.data?.data)
-            ? response.data.data
-            : [];
-
-        const normalizedReviews = rawReviews
-          .map(normalizeReview)
-          .filter(Boolean);
-
-        if (active) {
-          setTestimonials(normalizedReviews);
-        }
-      } catch (err) {
-        console.error("Gagal memuat testimoni publik:", err);
-
-        if (active) {
-          setTestimonials([]);
-          setError(
-            err?.message || "Testimoni gagal dimuat. Silakan coba lagi."
-          );
-        }
-      } finally {
-        if (active) setLoading(false);
-      }
-    }
-
-    fetchReviews();
+    mountedRef.current = true;
+    loadReviews();
 
     return () => {
-      active = false;
+      mountedRef.current = false;
     };
-  }, []);
+  }, [loadReviews]);
 
   const firstRow = testimonials.filter((_, index) => index % 2 === 0);
   const secondRow = testimonials.filter((_, index) => index % 2 !== 0);
+  const rowTwo = secondRow.length > 0 ? secondRow : firstRow;
 
-  const rowTwo =
-    secondRow.length > 0
-      ? secondRow
-      : firstRow.length > 0
-        ? firstRow
-        : [];
+  const hasData = !loading && !error && testimonials.length > 0;
+
+  const averageRating =
+    testimonials.length > 0
+      ? testimonials.reduce((total, item) => total + item.rating, 0) /
+        testimonials.length
+      : 0;
 
   return (
-    <section className="relative overflow-hidden bg-slate-50 py-20 sm:py-24">
+    <section className="relative isolate overflow-hidden bg-white py-20 sm:py-24">
       <style>{`
         .review-marquee-wrapper {
           -webkit-mask-image: linear-gradient(
             to right,
             transparent,
-            black 8%,
-            black 92%,
+            black 6%,
+            black 94%,
             transparent
           );
           mask-image: linear-gradient(
             to right,
             transparent,
-            black 8%,
-            black 92%,
+            black 6%,
+            black 94%,
             transparent
           );
         }
@@ -345,7 +469,7 @@ export default function Testimonial() {
         .review-marquee-track {
           display: flex;
           width: max-content;
-          animation-duration: var(--marquee-duration, 25s);
+          animation-duration: var(--marquee-duration, 40s);
           animation-timing-function: linear;
           animation-iteration-count: infinite;
           will-change: transform;
@@ -359,11 +483,6 @@ export default function Testimonial() {
           animation-name: review-scroll-right;
         }
 
-        /* Berhenti saat di-hover agar pengguna bisa membaca */
-        .review-marquee-wrapper:hover .review-marquee-track {
-          animation-play-state: paused;
-        }
-
         @keyframes review-scroll-left {
           from { transform: translateX(0); }
           to { transform: translateX(-50%); }
@@ -374,23 +493,26 @@ export default function Testimonial() {
           to { transform: translateX(0); }
         }
 
+        .review-float {
+          animation: review-float 5s ease-in-out infinite;
+        }
+
+        .review-float-delay {
+          animation-delay: -2.5s;
+        }
+
+        @keyframes review-float {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-12px); }
+        }
+
         @media (prefers-reduced-motion: reduce) {
-          .review-marquee-track {
-            animation-play-state: paused !important;
+          .review-marquee-track,
+          .review-float {
+            animation: none !important;
           }
         }
       `}</style>
-
-      <div className="pointer-events-none absolute inset-0 opacity-[0.03]">
-        <div
-          className="h-full w-full"
-          style={{
-            backgroundImage:
-              "radial-gradient(#2563eb 1px, transparent 1px)",
-            backgroundSize: "24px 24px",
-          }}
-        />
-      </div>
 
       <motion.div
         initial="hidden"
@@ -400,64 +522,133 @@ export default function Testimonial() {
           hidden: { opacity: 0 },
           visible: {
             opacity: 1,
-            transition: {
-              staggerChildren: 0.15,
-              delayChildren: 0.1,
-            },
+            transition: { staggerChildren: 0.12, delayChildren: 0.05 },
           },
         }}
-        className="relative z-10 mx-auto mb-10 max-w-7xl px-5 text-center sm:mb-14 sm:px-6"
+        className={`relative mx-auto mb-4 flex max-w-7xl flex-col items-center gap-9 text-center sm:mb-6 ${HEADER_SPACE}`}
       >
-        <motion.div
-          variants={{
-            hidden: { opacity: 0, y: 20 },
-            visible: {
-              opacity: 1,
-              y: 0,
-              transition: { duration: 0.5 },
-            },
-          }}
+        {/* Floating decorative chips (desktop only) */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute left-6 top-2 hidden -rotate-6 xl:block 2xl:left-16"
         >
-          <span className="mb-4 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-xs font-semibold text-blue-700">
-            <MessageSquareQuote size={14} />
+          <motion.div variants={popIn}>
+            <div className="review-float flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-xl shadow-blue-600/10">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 text-white">
+                <Quote size={18} fill="currentColor" />
+              </div>
+              <div className="text-left">
+                <StarRating rating={5} size={12} />
+                <p className="mt-1 text-[11px] font-medium text-slate-500">
+                  Ulasan nyata
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute right-6 top-24 hidden rotate-6 xl:block 2xl:right-16"
+        >
+          <motion.div variants={popIn}>
+            <div className="review-float review-float-delay flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-xl shadow-blue-600/10">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100">
+                <BadgeCheck size={20} />
+              </div>
+              <div className="text-left">
+                <p className="text-sm font-bold leading-none text-slate-900">
+                  Terverifikasi
+                </p>
+                <p className="mt-1 text-[11px] font-medium text-slate-500">
+                  Disetujui Super Admin
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute left-24 top-64 hidden xl:block 2xl:left-48"
+        >
+          <motion.div variants={popIn}>
+            <div className="review-float review-float-delay flex h-12 w-12 items-center justify-center rounded-full border border-amber-100 bg-white text-amber-400 shadow-lg shadow-amber-500/10">
+              <Star size={20} fill="currentColor" />
+            </div>
+          </motion.div>
+        </div>
+
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute right-28 top-3 hidden xl:block 2xl:right-52"
+        >
+          <motion.div variants={popIn}>
+            <div className="review-float flex h-11 w-11 items-center justify-center rounded-full border border-blue-100 bg-white text-blue-500 shadow-lg shadow-blue-600/10">
+              <Sparkles size={18} />
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Title block */}
+        <div className="relative mx-auto flex max-w-3xl flex-col items-center">
+          <motion.span
+            variants={fadeUp}
+            className="inline-flex items-center gap-2.5 rounded-full border border-blue-200 bg-blue-50 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.16em] text-blue-700"
+          >
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-500 opacity-60" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-blue-600" />
+            </span>
             Testimoni Pengguna
-          </span>
-        </motion.div>
+            <Sparkles size={14} className="text-blue-500" />
+          </motion.span>
 
-        <motion.h2
-          variants={{
-            hidden: { opacity: 0, y: 20 },
-            visible: {
-              opacity: 1,
-              y: 0,
-              transition: { duration: 0.5 },
-            },
-          }}
-          className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl lg:text-5xl"
-        >
-          Apa Kata Pengguna{" "}
-          <span className="text-blue-600">SmartSchool?</span>
-        </motion.h2>
+          <motion.h2
+            variants={fadeUp}
+            className="mt-7 text-4xl font-extrabold leading-[1.1] tracking-tight text-slate-900 sm:text-5xl lg:text-6xl"
+          >
+            Apa kata pengguna{" "}
+            <span className="relative inline-block whitespace-nowrap">
+              <span className="text-blue-600">SmartSchool?</span>
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 300 12"
+                preserveAspectRatio="none"
+                className="absolute -bottom-2 left-0 h-3 w-full text-blue-500/60"
+              >
+                <path
+                  d="M2 8 C 40 2, 70 2, 110 7 S 190 12, 230 6 S 280 3, 298 7"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="3.5"
+                  strokeLinecap="round"
+                />
+              </svg>
+            </span>
+          </motion.h2>
 
-        <motion.p
-          variants={{
-            hidden: { opacity: 0, y: 20 },
-            visible: {
-              opacity: 1,
-              y: 0,
-              transition: { duration: 0.5 },
-            },
-          }}
-          className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-slate-500 sm:text-base"
-        >
-          Pengalaman nyata pengguna yang telah berbagi ulasan tentang
-          penggunaan SmartSchool.
-        </motion.p>
+          <motion.p
+            variants={fadeUp}
+            className="mx-auto mt-8 max-w-xl text-base leading-8 text-slate-600 sm:text-lg"
+          >
+            Pengalaman nyata dari para pengguna yang telah berbagi{" "}
+            <span className="font-semibold text-slate-800">ulasan</span>{" "}
+            tentang penggunaan SmartSchool.
+          </motion.p>
+        </div>
+
+        {hasData && (
+          <RatingSummary
+            testimonials={testimonials}
+            averageRating={averageRating}
+          />
+        )}
       </motion.div>
 
       {loading ? (
         <div
-          className="relative z-10 flex min-h-48 items-center justify-center gap-3 px-5 text-sm text-slate-500"
+          className="relative flex min-h-48 items-center justify-center gap-3 px-5 text-sm text-slate-500"
           role="status"
         >
           <span className="h-5 w-5 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
@@ -465,7 +656,7 @@ export default function Testimonial() {
         </div>
       ) : error ? (
         <div
-          className="relative z-10 mx-auto flex max-w-xl items-start justify-center gap-3 px-5 py-10 text-center text-sm text-red-700"
+          className="relative mx-auto flex max-w-xl items-start justify-center gap-3 px-5 py-10 text-center text-sm text-red-700"
           role="alert"
         >
           <AlertCircle size={18} className="mt-0.5 shrink-0" />
@@ -481,27 +672,17 @@ export default function Testimonial() {
           </div>
         </div>
       ) : testimonials.length > 0 ? (
-        <div
-          className="relative z-10 flex flex-col gap-2"
-          style={{ perspective: "1200px" }}
-        >
-          {/* Durasi dipercepat dari 45s menjadi 22s */}
+        <div className="relative flex flex-col gap-2">
           <ReviewMarquee
             items={firstRow}
             direction="left"
-            duration={22}
+            duration={45}
             featured
           />
-
-          {/* Durasi dipercepat dari 50s menjadi 26s */}
-          <ReviewMarquee
-            items={rowTwo}
-            direction="right"
-            duration={26}
-          />
+          <ReviewMarquee items={rowTwo} direction="right" duration={50} />
         </div>
       ) : (
-        <div className="relative z-10 mx-auto max-w-xl px-5 py-12 text-center">
+        <div className="relative mx-auto max-w-xl px-5 py-12 text-center">
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-slate-100">
             <MessageSquareQuote size={26} className="text-slate-400" />
           </div>

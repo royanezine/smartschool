@@ -582,7 +582,7 @@ export default function SettingTarifPage() {
               </div>
             )}
 
-            <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6">
+            <div className="mb-6 grid grid-cols-1 gap-4 min-[480px]:grid-cols-2 xl:grid-cols-4">
               <StatCard
                 icon={<Layers size={22} />}
                 label="Total Kategori"
@@ -1173,23 +1173,43 @@ function StatCard({ icon, label, value, color, subtext }) {
     danger: "theme-danger",
   };
 
+  // Ukuran font menyesuaikan panjang angka agar nominal besar tetap satu baris.
+  const valueText = String(value ?? "");
+  const valueSize =
+    valueText.length <= 9
+      ? "text-2xl"
+      : valueText.length <= 13
+        ? "text-xl"
+        : valueText.length <= 17
+          ? "text-lg"
+          : "text-base";
+
   return (
-    <div className="theme-card theme-border group rounded-2xl border p-5 shadow-[0_1px_3px_color-mix(in_srgb,var(--color-text)_8%,transparent)] transition hover:shadow-[0_8px_24px_color-mix(in_srgb,var(--color-text)_10%,transparent)]">
-      <div className="flex items-start gap-4">
+    <div className="theme-card theme-border group min-w-0 overflow-hidden rounded-2xl border p-5 shadow-[0_1px_3px_color-mix(in_srgb,var(--color-text)_8%,transparent)] transition hover:shadow-[0_8px_24px_color-mix(in_srgb,var(--color-text)_10%,transparent)]">
+      <div className="flex items-center justify-between gap-3">
+        <p className="theme-text-muted min-w-0 truncate text-xs font-semibold">
+          {label}
+        </p>
+
         <div
-          className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${colors[color] || colors.primary} transition group-hover:scale-105`}
+          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${colors[color] || colors.primary} transition group-hover:scale-105`}
         >
           {icon}
         </div>
-
-        <div className="min-w-0 flex-1">
-          <p className="theme-text-muted text-xs font-medium">{label}</p>
-          <p className="theme-text mt-1 text-lg font-bold">{value}</p>
-          {subtext && (
-            <p className="theme-text-muted mt-0.5 text-xs">{subtext}</p>
-          )}
-        </div>
       </div>
+
+      <p
+        title={valueText}
+        className={`theme-text mt-3 whitespace-nowrap font-bold tabular-nums leading-tight tracking-tight ${valueSize}`}
+      >
+        {value}
+      </p>
+
+      {subtext && (
+        <p className="theme-text-muted mt-1.5 truncate text-xs" title={subtext}>
+          {subtext}
+        </p>
+      )}
     </div>
   );
 }
