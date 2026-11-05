@@ -57,6 +57,7 @@ test("backend completion API contracts and tenant isolation", { skip: !databaseU
     await prisma.jalurPpdb.deleteMany({where:{sekolahId:inSchools}});
     await prisma.pengaturanSistem.deleteMany({where:{OR:[{sekolahId:inSchools},{dibuatOleh:{in:users}}]}});
     await prisma.langgananSekolah.deleteMany({where:{sekolahId:inSchools}});
+    await prisma.auditLog.deleteMany({where:{OR:[{penggunaId:{in:users}},{sekolahId:inSchools}]}});
     await prisma.pengguna.deleteMany({where:{OR:[{id:{in:users}},{sekolahId:inSchools}]}});
     await prisma.peranIzin.deleteMany({where:{peranId:{in:roles}}});
     await prisma.peran.deleteMany({where:{id:{in:roles}}});
@@ -79,7 +80,7 @@ test("backend completion API contracts and tenant isolation", { skip: !databaseU
   }
   const a = await school("A"), b = await school("B");
   const pack = await prisma.paket.create({data:{nama:`Completion ${suffix}`,harga:0,durasi:30,status:"aktif"}}); packageId = pack.id;
-  for (const school of [a,b]) await prisma.langgananSekolah.create({data:{sekolahId:school.id,paketId:pack.id,statusLangganan:"active",tanggalMulai:new Date(Date.now()-86400000),tanggalBerakhir:new Date(Date.now()+86400000)}});
+  for (const school of [a,b]) await prisma.langgananSekolah.create({data:{sekolahId:school.id,paketId:pack.id,statusPembayaran:"success",statusLangganan:"active",tanggalMulai:new Date(Date.now()-86400000),tanggalBerakhir:new Date(Date.now()+86400000)}});
   const foundation = await prisma.yayasan.create({data:{nama:`Completion foundation ${suffix}`}}); foundationId=foundation.id;
   async function user(role: string, schoolId: string | null, grants: string[], label: string) {
     const peran = await prisma.peran.create({data:{nama:role,namaTampilan:role,sekolahId:schoolId}}); roles.push(peran.id);

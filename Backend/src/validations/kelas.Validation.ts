@@ -40,10 +40,10 @@ export const createKelasSchema = z.object({
     .optional()
     .nullable(),
 
-  lantaiId: z.string().uuid("ID lantai tidak valid").optional().nullable(),
+  ruanganId: z.string().uuid("ID ruangan tidak valid").optional().nullable(),
 
   shift: shiftSiswaSchema.optional().nullable(),
-});
+}).strict();
 
 export const updateKelasSchema = createKelasSchema.partial();
 

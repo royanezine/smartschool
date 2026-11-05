@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { prisma } from "../config/db";
 import { AppError } from "../utils/appError";
 import { successResponse } from "../utils/responseFormatter";
+import { resolveRoomLocation } from "../services/ruanganLocation.service";
 import {
   gudangSchema,
   kategoriAsetSchema,
@@ -193,8 +194,11 @@ export const createRuangan = async (
   try {
     const sekolahId = (req as any).user.sekolahId;
     const validatedData = ruanganSchema.parse(req.body);
+    if (!sekolahId) throw new AppError("Sekolah tidak ditemukan", 400);
+    const location = await resolveRoomLocation(sekolahId, validatedData);
     const ruangan = await prisma.ruangan.create({
-      data: { ...validatedData, sekolahId },
+      data: { ...validatedData, ...location, sekolahId },
+      include: { gedung: true, lantai: true },
     });
     return successResponse(res, "Ruangan berhasil dibuat", ruangan, 201);
   } catch (error) {
@@ -209,8 +213,10 @@ export const getRuangan = async (
 ) => {
   try {
     const sekolahId = (req as any).user.sekolahId;
+    if (!sekolahId) throw new AppError("Sekolah tidak ditemukan", 400);
     const ruangan = await prisma.ruangan.findMany({
       where: { sekolahId, dihapusPada: null },
+      include: { gedung: true, lantai: true, _count: { select: { kelas: true } } },
     });
     return successResponse(
       res,
@@ -231,16 +237,19 @@ export const updateRuangan = async (
   try {
     const id = req.params.id as string;
     const sekolahId = (req as any).user.sekolahId;
-    const validatedData = ruanganSchema.parse(req.body);
+    if (!sekolahId) throw new AppError("Sekolah tidak ditemukan", 400);
+    const validatedData = ruanganSchema.partial().parse(req.body);
 
     const ruangan = await prisma.ruangan.findFirst({
       where: { id, sekolahId, dihapusPada: null },
     });
     if (!ruangan) throw new AppError("Ruangan tidak ditemukan", 404);
 
+    const location = await resolveRoomLocation(sekolahId, validatedData, ruangan);
     const updated = await prisma.ruangan.update({
       where: { id },
-      data: validatedData,
+      data: { ...validatedData, ...location },
+      include: { gedung: true, lantai: true },
     });
 
     return successResponse(res, "Ruangan berhasil diperbarui", updated, 200);
@@ -257,12 +266,16 @@ export const deleteRuangan = async (
   try {
     const id = req.params.id as string;
     const sekolahId = (req as any).user.sekolahId;
+    if (!sekolahId) throw new AppError("Sekolah tidak ditemukan", 400);
 
     const ruangan = await prisma.ruangan.findFirst({
       where: { id, sekolahId, dihapusPada: null },
     });
     if (!ruangan) throw new AppError("Ruangan tidak ditemukan", 404);
 
+    if (await prisma.kelas.count({where: {ruanganId: id, dihapusPada: null}})) {
+      throw new AppError("Ruangan masih digunakan oleh kelas. Pindahkan kelas terlebih dahulu.", 409);
+    }
     await prisma.ruangan.update({
       where: { id },
       data: { dihapusPada: new Date() },

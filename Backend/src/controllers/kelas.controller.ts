@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import { prisma } from "../config/db";
 import {
   createKelasSchema,
@@ -11,8 +11,9 @@ import { AppError } from "../utils/appError";
 import { AuthRequest } from "../middlewares/auth.middleware";
 import { normalizeShiftKerja } from "../utils/shiftKerja";
 import { buatShiftSiswa } from "../utils/profileSiswa.helper";
+import { assertRoomForSchool } from "../services/ruanganLocation.service";
 
-export const getKelas = async (req: AuthRequest, res: Response) => {
+export const getKelas = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const sekolahId = req.user?.sekolahId;
     if (!sekolahId) throw new AppError("Sekolah tidak ditemukan", 400);
@@ -80,13 +81,7 @@ export const getKelas = async (req: AuthRequest, res: Response) => {
               nip: true,
             },
           },
-          lantai: {
-            include: {
-              gedung: {
-                select: { id: true, nama: true, kode: true },
-              },
-            },
-          },
+          ruangan: { include: { gedung: true, lantai: true } },
           _count: {
             select: {
               anggota: true,
@@ -108,17 +103,15 @@ export const getKelas = async (req: AuthRequest, res: Response) => {
       totalData,
     );
   } catch (error) {
-    console.error(error);
-    return res
-      .status(500)
-      .json({ success: false, message: "Internal server error" });
+    next(error);
   }
 };
 
-export const getDetailKelas = async (req: AuthRequest, res: Response) => {
+export const getDetailKelas = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const id = req.params.id as string;
     const sekolahId = req.user?.sekolahId;
+    if (!sekolahId) throw new AppError("Sekolah tidak ditemukan", 400);
 
     const kelas = await prisma.kelas.findFirst({
       where: { id, sekolahId, dihapusPada: null },
@@ -134,9 +127,7 @@ export const getDetailKelas = async (req: AuthRequest, res: Response) => {
             noTelepon: true,
           },
         },
-        lantai: {
-          include: { gedung: true },
-        },
+        ruangan: { include: { gedung: true, lantai: true } },
         anggota: {
           include: {
             siswa: {
@@ -170,19 +161,17 @@ export const getDetailKelas = async (req: AuthRequest, res: Response) => {
 
     return successResponse(res, "Berhasil mengambil detail kelas", kelas);
   } catch (error) {
-    console.error(error);
-    return res
-      .status(500)
-      .json({ success: false, message: "Internal server error" });
+    next(error);
   }
 };
 
-export const createKelas = async (req: AuthRequest, res: Response) => {
+export const createKelas = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const sekolahId = req.user?.sekolahId;
     if (!sekolahId) throw new AppError("Sekolah tidak ditemukan", 400);
 
     const validated = createKelasSchema.parse(req.body);
+    if (validated.ruanganId) await assertRoomForSchool(validated.ruanganId, sekolahId);
     if (validated.jurusanId && !await prisma.jurusan.findFirst({ where: { id: validated.jurusanId, sekolahId, dihapusPada: null, status: "aktif" } })) throw new AppError("Jurusan tidak ditemukan di sekolah ini", 400);
     if (!await prisma.tahunAjaran.findFirst({ where: { id: validated.tahunAjaranId, sekolahId, dihapusPada: null } })) throw new AppError("Tahun ajaran tidak ditemukan di sekolah ini", 400);
 
@@ -231,27 +220,23 @@ export const createKelas = async (req: AuthRequest, res: Response) => {
         waliKelasId: validated.waliKelasId || null,
         kapasitas: validated.kapasitas,
         fotoKelas: validated.fotoKelasUrl || null,
-        lantaiId: validated.lantaiId || null,
+        ruanganId: validated.ruanganId ?? null,
         shift: validated.shift ?? null,
         sekolahId,
       },
+      include: { ruangan: { include: { gedung: true, lantai: true } } },
     });
 
     return successResponse(res, "Kelas berhasil ditambahkan", data, 201);
   } catch (error) {
-    console.error(error);
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: (error as Error).message || "Internal server error",
-      });
+    next(error);
   }
 };
 
-export const updateKelas = async (req: AuthRequest, res: Response) => {
+export const updateKelas = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const sekolahId = req.user?.sekolahId;
+    if (!sekolahId) throw new AppError("Sekolah tidak ditemukan", 400);
     const id = req.params.id as string;
 
     const existing = await prisma.kelas.findFirst({
@@ -260,6 +245,7 @@ export const updateKelas = async (req: AuthRequest, res: Response) => {
     if (!existing) throw new AppError("Kelas tidak ditemukan", 404);
 
     const validated = updateKelasSchema.parse(req.body);
+    if (validated.ruanganId) await assertRoomForSchool(validated.ruanganId, sekolahId);
     if (validated.jurusanId && !await prisma.jurusan.findFirst({ where: { id: validated.jurusanId, sekolahId, dihapusPada: null, status: "aktif" } })) throw new AppError("Jurusan tidak ditemukan di sekolah ini", 400);
     if (validated.tahunAjaranId && !await prisma.tahunAjaran.findFirst({ where: { id: validated.tahunAjaranId, sekolahId, dihapusPada: null } })) throw new AppError("Tahun ajaran tidak ditemukan di sekolah ini", 400);
     const { tingkat, fotoKelasUrl, ...rest } = validated;
@@ -271,23 +257,19 @@ export const updateKelas = async (req: AuthRequest, res: Response) => {
         ...(tingkat !== undefined && { tingkat: String(tingkat) }),
         ...(fotoKelasUrl !== undefined && { fotoKelas: fotoKelasUrl }),
       },
+      include: { ruangan: { include: { gedung: true, lantai: true } } },
     });
 
     return successResponse(res, "Kelas berhasil diperbarui", data);
   } catch (error) {
-    console.error(error);
-    return res
-      .status(500)
-      .json({
-        success: false,
-        message: (error as Error).message || "Internal server error",
-      });
+    next(error);
   }
 };
 
-export const deleteKelas = async (req: AuthRequest, res: Response) => {
+export const deleteKelas = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const sekolahId = req.user?.sekolahId;
+    if (!sekolahId) throw new AppError("Sekolah tidak ditemukan", 400);
     const id = req.params.id as string;
 
     const existing = await prisma.kelas.findFirst({
@@ -302,10 +284,7 @@ export const deleteKelas = async (req: AuthRequest, res: Response) => {
 
     return successResponse(res, "Kelas berhasil dihapus");
   } catch (error) {
-    console.error(error);
-    return res
-      .status(500)
-      .json({ success: false, message: "Internal server error" });
+    next(error);
   }
 };
 

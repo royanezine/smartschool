@@ -16,6 +16,8 @@ export const ruanganSchema = z.object({
   lokasi: z.string().trim().max(255).optional().nullable(),
   kapasitas: z.number().int().nonnegative().optional().nullable(),
   keterangan: z.string().trim().max(255).optional().nullable(),
+  gedungId: z.string().uuid("ID gedung tidak valid").optional().nullable(),
+  lantaiId: z.string().uuid("ID lantai tidak valid").optional().nullable(),
 });
 
 export const asetSchema = z.object({

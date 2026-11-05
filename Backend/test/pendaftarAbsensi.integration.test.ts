@@ -44,6 +44,7 @@ test("backend HTTP API regressions with PostgreSQL", { skip: !testDatabaseUrl },
     await prisma.lantai.deleteMany({where:{gedung:{sekolahId:{in:schoolIds}}}});
     await prisma.gedung.deleteMany({where:{sekolahId:{in:schoolIds}}});
     await prisma.tahunAjaran.deleteMany({where:{sekolahId:{in:schoolIds}}});
+    await prisma.auditLog.deleteMany({where:{OR:[{penggunaId:{in:userIds}},{sekolahId:{in:schoolIds}}]}});
     await prisma.pengguna.deleteMany({where:{id:{in:userIds}}});
     await prisma.kategoriJabatan.deleteMany({where:{sekolahId:{in:schoolIds}}});
     await prisma.shiftKerja.deleteMany({where:{sekolahId:{in:schoolIds}}});
@@ -86,7 +87,7 @@ test("backend HTTP API regressions with PostgreSQL", { skip: !testDatabaseUrl },
   }
   const paket = await prisma.paket.create({data:{nama:`QA ${suffix}`,harga:0,durasi:365,status:"aktif"}});
   paketId = paket.id;
-  for (const sekolahId of schoolIds) await prisma.langgananSekolah.create({data:{sekolahId,paketId,statusLangganan:"active",tanggalBerakhir:new Date(Date.now()+86400000)}});
+  for (const sekolahId of schoolIds) await prisma.langgananSekolah.create({data:{sekolahId,paketId,statusPembayaran:"success",statusLangganan:"active",tanggalBerakhir:new Date(Date.now()+86400000)}});
   const password = "LocalApiQa123!";
   const kataSandi = await bcrypt.hash(password,4);
   async function user(label: string, peran: any, sekolahId: string) {
@@ -263,7 +264,15 @@ test("backend HTTP API regressions with PostgreSQL", { skip: !testDatabaseUrl },
   await t.test("admin updates reject forbidden roles, foreign records and mass assignment", async () => {
     assert.equal((await json(`/api/absensi/${late.id}`,teacherToken,"PATCH",{status:"izin"})).status,403);
     assert.equal((await json(`/api/absensi/${foreign.id}`,adminToken,"PATCH",{status:"izin"})).status,404);
-    for (const body of [{},{status:"unknown"},{status:"hadir",sekolahId:schoolB.id},{penggunaId:other.id}]) assert.equal((await json(`/api/absensi/${late.id}`,adminToken,"PATCH",body)).status,400);
+    for (const body of [{},{status:"unknown"},{penggunaId:other.id}]) assert.equal((await json(`/api/absensi/${late.id}`,adminToken,"PATCH",body)).status,400);
+    // Tenant middleware strips client-supplied school IDs; prove the ownership is unchanged.
+    const before = await prisma.absensi.findUnique({where:{id:late.id}});
+    const sanitized = await json(`/api/absensi/${late.id}`,adminToken,"PATCH",{status:"hadir",sekolahId:schoolB.id});
+    assert.equal(sanitized.status,200);
+    const after = await prisma.absensi.findUnique({where:{id:late.id}});
+    assert.equal(after.sekolahId,before.sekolahId);
+    assert.equal(after.penggunaId,before.penggunaId);
+    assert.equal(after.kelasId,before.kelasId);
     assert.equal((await json(`/api/absensi/${late.id}?sekolahId=${schoolB.id}`,adminToken,"PATCH",{status:"izin"})).status,403);
   });
   await t.test("new class attendance stores today's calendar date, school and entry timestamp", async () => {

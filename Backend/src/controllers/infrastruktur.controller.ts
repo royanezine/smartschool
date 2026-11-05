@@ -20,7 +20,7 @@ export const getGedung = async (req: AuthRequest, res: Response) => {
     include: {
       lantai: {
         include: {
-          _count: { select: { kelas: true } },
+          _count: { select: { ruangan: true } },
         },
       },
     },
@@ -75,13 +75,13 @@ export const deleteGedung = async (req: AuthRequest, res: Response) => {
 
   const existing = await prisma.gedung.findFirst({
     where: { id, sekolahId },
-    include: { lantai: true },
+    include: { lantai: true, _count: { select: { ruangan: true } } },
   });
   if (!existing) throw new AppError("Gedung tidak ditemukan", 404);
 
-  if (existing.lantai.length > 0) {
+  if (existing.lantai.length > 0 || existing._count.ruangan > 0) {
     throw new AppError(
-      "Tidak dapat menghapus gedung yang masih memiliki lantai aktif",
+      "Tidak dapat menghapus gedung yang masih memiliki lantai atau ruangan",
       400,
     );
   }
@@ -104,8 +104,9 @@ export const getLantaiByGedung = async (req: AuthRequest, res: Response) => {
   const lantai = await prisma.lantai.findMany({
     where: { gedungId },
     include: {
-      kelas: {
-        select: { id: true, nama: true, tingkat: true },
+      ruangan: {
+        where: { dihapusPada: null },
+        include: { kelas: { where: { dihapusPada: null }, select: { id: true, nama: true, tingkat: true } } },
       },
     },
     orderBy: { nama: "asc" },
@@ -143,6 +144,15 @@ export const updateLantai = async (req: AuthRequest, res: Response) => {
     throw new AppError("Lantai tidak ditemukan", 404);
   }
 
+  if (data.gedungId && data.gedungId !== existing.gedungId) {
+    if (!await prisma.gedung.findFirst({where: {id: data.gedungId, sekolahId: existing.gedung.sekolahId, dihapusPada: null}})) {
+      throw new AppError("Gedung tidak ditemukan di sekolah ini", 400);
+    }
+    if (await prisma.ruangan.count({where: {lantaiId: id}})) {
+      throw new AppError("Pindahkan ruangan terlebih dahulu sebelum memindahkan lantai ke gedung lain", 409);
+    }
+  }
+
   const lantai = await prisma.lantai.update({
     where: { id },
     data,
@@ -156,15 +166,15 @@ export const deleteLantai = async (req: AuthRequest, res: Response) => {
 
   const existing = await prisma.lantai.findUnique({
     where: { id },
-    include: { gedung: true, kelas: true },
+    include: { gedung: true, _count: { select: { ruangan: true } } },
   });
   if (!existing || existing.gedung.sekolahId !== req.user?.sekolahId) {
     throw new AppError("Lantai tidak ditemukan", 404);
   }
 
-  if (existing.kelas.length > 0) {
+  if (existing._count.ruangan > 0) {
     throw new AppError(
-      "Tidak dapat menghapus lantai yang masih digunakan oleh kelas",
+      "Tidak dapat menghapus lantai yang masih memiliki ruangan",
       400,
     );
   }

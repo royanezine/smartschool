@@ -536,7 +536,6 @@ model Kelas {
   dihapusOleh    String?        @map("dihapus_oleh")
   nama           String         @db.VarChar(50)
   tingkat        String         @db.VarChar(20)
-  nomorRuangan   String?        @map("nomor_ruangan") @db.VarChar(20)
   kapasitas      Int?           @default(30)
   status         String?        @db.VarChar(20)
   dibuatPada     DateTime       @default(now()) @map("dibuat_pada") @db.Timestamp(6)
@@ -544,14 +543,12 @@ model Kelas {
   dihapusPada    DateTime?      @map("dihapus_pada") @db.Timestamp(6)
   shift          String?        @db.VarChar(10)
   fotoKelas      String?        @map("foto_kelas") @db.VarChar(255)
-  gedungId       String?        @map("gedung_id")
+  ruanganId      String?        @map("ruangan_id")
   jurusanId      String?        @map("jurusan_id")
-  lantaiId       String?        @map("lantai_id")
   absensi        Absensi[]
   anggota        AnggotaKelas[]
-  gedung         Gedung?        @relation(fields: [gedungId], references: [id])
+  ruangan        Ruangan?       @relation(fields: [ruanganId], references: [id])
   jurusan        Jurusan?       @relation(fields: [jurusanId], references: [id])
-  lantai         Lantai?        @relation(fields: [lantaiId], references: [id])
   sekolah        Sekolah        @relation(fields: [sekolahId], references: [id])
   tahunAjaran    TahunAjaran    @relation(fields: [tahunAjaranId], references: [id])
   waliKelas      Pengguna?      @relation("WaliKelas", fields: [waliKelasId], references: [id])
@@ -989,7 +986,7 @@ model Gedung {
   diperbaruiPada DateTime  @updatedAt @map("diperbarui_pada") @db.Timestamp(6)
   dihapusPada    DateTime? @map("dihapus_pada") @db.Timestamp(6)
   sekolah        Sekolah   @relation(fields: [sekolahId], references: [id])
-  kelas          Kelas[]
+  ruangan        Ruangan[]
   lantai         Lantai[]
 
   @@map("gedung")
@@ -1005,7 +1002,7 @@ model Lantai {
   dibuatPada     DateTime  @default(now()) @map("dibuat_pada") @db.Timestamp(6)
   diperbaruiPada DateTime  @updatedAt @map("diperbarui_pada") @db.Timestamp(6)
   dihapusPada    DateTime? @map("dihapus_pada") @db.Timestamp(6)
-  kelas          Kelas[]
+  ruangan        Ruangan[]
   gedung         Gedung    @relation(fields: [gedungId], references: [id])
 
   @@map("lantai")
@@ -1129,6 +1126,8 @@ model Gudang {
 model Ruangan {
   id             String    @id @default(uuid())
   sekolahId      String    @map("sekolah_id")
+  gedungId       String?   @map("gedung_id")
+  lantaiId       String?   @map("lantai_id")
   nama           String    @db.VarChar(100)
   lokasi         String?   @db.VarChar(255)
   kapasitas      Int?
@@ -1137,6 +1136,9 @@ model Ruangan {
   diperbaruiPada DateTime  @updatedAt @map("diperbarui_pada") @db.Timestamp(6)
   dihapusPada    DateTime? @map("dihapus_pada") @db.Timestamp(6)
   sekolah        Sekolah   @relation(fields: [sekolahId], references: [id])
+  gedung         Gedung?   @relation(fields: [gedungId], references: [id])
+  lantai         Lantai?   @relation(fields: [lantaiId], references: [id])
+  kelas          Kelas[]
 
   @@map("ruangan")
 }

@@ -50,34 +50,45 @@ test("login subscription, public wilayah and safe OTP diagnostics", { skip: !dat
     return {status: r.status, body: await r.json() as any};
   }
   const login = (who = admin, kataSandi = password) => http("/api/auth/login", {identifier: who.email, kataSandi});
-  const denied = (r: any) => {
-    assert.equal(r.status, 403); assert.equal(r.body.message, "Akses ditolak, masa aktif langganan sekolah telah habis");
+  const subscriptionErrors = {
+    SUBSCRIPTION_REQUIRED: "Akses ditolak, sekolah belum memiliki langganan aktif",
+    SUBSCRIPTION_EXPIRED: "Akses ditolak, masa aktif langganan sekolah telah habis",
+    SUBSCRIPTION_INACTIVE: "Akses ditolak, langganan sekolah tidak aktif",
+    SUBSCRIPTION_PENDING_PAYMENT: "Akses ditolak, pembayaran langganan belum diselesaikan",
+    SUBSCRIPTION_NOT_STARTED: "Akses ditolak, masa aktif langganan belum dimulai",
+    SUBSCRIPTION_TENANT_INACTIVE: "Akses ditolak, status sekolah tidak aktif",
+  };
+  const denied = (r: any, code: keyof typeof subscriptionErrors = "SUBSCRIPTION_EXPIRED", message = subscriptionErrors[code]) => {
+    assert.equal(r.status, 403); assert.equal(r.body.errorCode, code); assert.equal(r.body.message, message);
     for (const key of ["token", "setupToken", "pinToken"]) assert.equal(r.body[key], undefined);
   };
   let subscription: any;
   await t.test("credentials precede subscription checks; missing tenant/subscription denies tokens", async () => {
     assert.equal((await login(admin, "wrong-password")).status, 401);
-    denied(await login()); denied(await login(student)); denied(await login(foundationAdmin));
+    denied(await login(), "SUBSCRIPTION_REQUIRED"); denied(await login(student), "SUBSCRIPTION_REQUIRED");
+    denied(await login(foundationAdmin), "SUBSCRIPTION_EXPIRED", "Akses ditolak, masa aktif langganan yayasan telah habis");
     assert.equal((await prisma.pengguna.findUnique({where: {id: admin.id}})).terakhirLogin, null);
     const r = await login(root); assert.equal(r.status, 200); assert.ok(r.body.token);
   });
   await t.test("valid active/trial subscriptions allow login; expired, canceled, future and missing end dates deny", async () => {
     subscription = await prisma.langgananSekolah.create({data: {sekolahId: school.id, paketId: pack.id,
-      statusLangganan: "active", tanggalMulai: new Date(Date.now()-60000), tanggalBerakhir: new Date(Date.now()+86400000)}});
+      statusPembayaran: "success", statusLangganan: "active", tanggalMulai: new Date(Date.now()-60000), tanggalBerakhir: new Date(Date.now()+86400000)}});
     let r = await login(); assert.equal(r.status, 200); assert.ok(r.body.token);
     r = await login(student); assert.equal(r.status, 200); assert.ok(r.body.setupToken); assert.equal(r.body.token, undefined);
-    for (const changes of [
-      {tanggalBerakhir: new Date(Date.now()-1000)},
-      {tanggalBerakhir: new Date(Date.now()+86400000), statusLangganan: "canceled"},
-      {statusLangganan: "active", tanggalMulai: new Date(Date.now()+60000)},
-      {tanggalMulai: new Date(Date.now()-60000), tanggalBerakhir: null},
-    ]) {
-      await prisma.langgananSekolah.update({where: {id: subscription.id}, data: changes}); denied(await login());
+    for (const [changes, code] of [
+      [{tanggalBerakhir: new Date(Date.now()-1000)}, "SUBSCRIPTION_EXPIRED"],
+      [{tanggalBerakhir: new Date(Date.now()+86400000), statusLangganan: "canceled"}, "SUBSCRIPTION_INACTIVE"],
+      [{statusLangganan: "active", tanggalMulai: new Date(Date.now()+60000)}, "SUBSCRIPTION_NOT_STARTED"],
+      [{tanggalMulai: new Date(Date.now()-60000), tanggalBerakhir: null}, "SUBSCRIPTION_INACTIVE"],
+      [{tanggalBerakhir: new Date(Date.now()+86400000), statusPembayaran: "pending"}, "SUBSCRIPTION_PENDING_PAYMENT"],
+    ] as const) {
+      await prisma.langgananSekolah.update({where: {id: subscription.id}, data: changes});
+      denied(await login(), code);
     }
-    await prisma.langgananSekolah.update({where: {id: subscription.id}, data: {statusLangganan: "trialing", tanggalBerakhir: new Date(Date.now()+86400000)}});
+    await prisma.langgananSekolah.update({where: {id: subscription.id}, data: {statusPembayaran: "success", statusLangganan: "trialing", tanggalBerakhir: new Date(Date.now()+86400000)}});
     await prisma.sekolah.update({where: {id: school.id}, data: {status: "uji coba"}});
     assert.equal((await login()).status, 200);
-    await prisma.sekolah.update({where: {id: school.id}, data: {status: "nonaktif"}}); denied(await login());
+    await prisma.sekolah.update({where: {id: school.id}, data: {status: "nonaktif"}}); denied(await login(), "SUBSCRIPTION_TENANT_INACTIVE");
     await prisma.sekolah.update({where: {id: school.id}, data: {status: "aktif"}});
   });
   await t.test("PIN completion rechecks subscription expiry and cannot issue an access token", async () => {
@@ -96,20 +107,21 @@ test("login subscription, public wilayah and safe OTP diagnostics", { skip: !dat
     let r = await http("/api/auth/pin/verify", {pinToken: generatePinToken(student.id, "pin_access"), pin: "123456"});
     assert.equal(r.status, 200); assert.ok(r.body.token);
     await prisma.yayasan.update({where: {id: foundation.id}, data: {tanggalBerakhirLangganan: new Date(Date.now()-1000)}});
-    denied(await login(foundationAdmin)); denied(await login());
+    denied(await login(foundationAdmin), "SUBSCRIPTION_EXPIRED", "Akses ditolak, masa aktif langganan yayasan telah habis"); denied(await login());
     await prisma.yayasan.update({where: {id: foundation.id}, data: {tanggalBerakhirLangganan: new Date(Date.now()+86400000), tanggalMulaiLangganan: new Date(Date.now()+60000)}});
-    denied(await login(foundationAdmin));
+    denied(await login(foundationAdmin), "SUBSCRIPTION_EXPIRED", "Akses ditolak, masa aktif langganan yayasan telah habis");
   });
 
   await t.test("public wilayah endpoints validate, cache, coalesce, and report upstream failures", async () => {
     let calls = 0, failure = "malformed";
     const stub = t.mock.method(globalThis, "fetch", async (input: any) => {
       calls++; const url = String(input);
+      assert.equal(new URL(url).origin, "https://wilayah.id");
       if (failure === "malformed") return Response.json({data: [{id: "11"}]});
-      if (url.endsWith("provinces.json")) return Response.json({data: [{id: "11", name: "Aceh"}, {id: "31", name: "Jakarta"}, {id: "32", name: "Jawa Barat"}]});
+      if (url.endsWith("provinces.json")) return Response.json({data: [{code: "11", name: "Aceh"}, {code: "31", name: "Jakarta"}, {code: "32", name: "Jawa Barat"}]});
       if (url.endsWith("/11.json")) throw new DOMException("Timed out", "TimeoutError");
       if (url.endsWith("/31.json") && failure === "http") return new Response("unavailable", {status: 503});
-      return Response.json({data: [{id: "32.01", name: "Kabupaten Bogor", privateExtra: "discard"}]});
+      return Response.json({data: [{code: "32.01", name: "Kabupaten Bogor", privateExtra: "discard"}]});
     });
     try {
       assert.equal((await http("/api/wilayah/kota")).status, 400);
@@ -122,7 +134,10 @@ test("login subscription, public wilayah and safe OTP diagnostics", { skip: !dat
       assert.equal(a.status, 200); assert.deepEqual(a.body, b.body); assert.equal(calls, 2);
       const kota = await http("/api/wilayah/kota?provinsi_id=32"); assert.equal(kota.status, 200);
       assert.deepEqual(kota.body.data, [{id: "32.01", name: "Kabupaten Bogor", provinsi_id: "32"}]);
-      await http("/api/wilayah/kota?provinsi_id=32"); assert.equal(calls, 3);
+      const camelCase = await http("/api/wilayah/kota?provinsiId=32");
+      const pathParam = await http("/api/wilayah/kota/32");
+      assert.deepEqual(camelCase, kota); assert.deepEqual(pathParam, kota);
+      assert.equal(calls, 3);
       assert.equal((await http("/api/wilayah/kota?provinsi_id=99")).status, 404); assert.equal(calls, 3);
       failure = "http"; assert.equal((await http("/api/wilayah/kota?provinsi_id=31")).status, 502);
       failure = "none"; assert.equal((await http("/api/wilayah/kota?provinsi_id=31")).status, 200);
