@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { authenticate } from "../middlewares/auth.middleware";
 import { requireTenant } from "../middlewares/tenant.middleware";
+import { requireLangganan } from "../middlewares/langganan.middleware";
 import { requireIzin } from "../middlewares/izin.middleware";
 import {
   createKategoriArtikel,
@@ -28,6 +29,7 @@ const router = Router();
 router.use(authenticate);
 router.get("/tema", getTemaWarna);
 router.use(requireTenant);
+router.use(requireLangganan());
 router.put("/tema", requireIzin("cms.update"), updateTemaWarna);
 router.delete("/tema", requireIzin("cms.delete"), resetTemaWarna);
 

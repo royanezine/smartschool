@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { authenticate } from "../middlewares/auth.middleware";
-import { requireTenant, requireSubscription } from "../middlewares/tenant.middleware";
+import { requireTenant } from "../middlewares/tenant.middleware";
+import { requireLangganan } from "../middlewares/langganan.middleware";
 import { requireIzin } from "../middlewares/izin.middleware";
 import {
   ajukanPeminjaman,
@@ -14,7 +15,7 @@ import {
 
 const router = Router();
 
-router.use(authenticate, requireTenant, requireSubscription);
+router.use(authenticate, requireTenant, requireLangganan());
 
 router.get("/ketersediaan", getKetersediaanAset);
 router.get("/", requireIzin("manajemen_aset.view", "peminjaman_aset.view_own"), getDaftarPeminjaman);

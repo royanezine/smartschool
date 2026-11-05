@@ -17,7 +17,8 @@ import {
   getRiwayatAbsensiSiswa,
 } from "../controllers/absensi.controller";
 import { authenticate } from "../middlewares/auth.middleware";
-import { requireTenant, requireSubscription } from "../middlewares/tenant.middleware";
+import { requireTenant } from "../middlewares/tenant.middleware";
+import { requireLangganan } from "../middlewares/langganan.middleware";
 import { requireIzin } from "../middlewares/izin.middleware";
 import { uploadBiometrik } from "../middlewares/upload.middleware";
 
@@ -40,7 +41,7 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-router.use(authenticate, requireTenant, requireSubscription);
+router.use(authenticate, requireTenant, requireLangganan());
 
 router.get("/", authorizeRoles("admin_sekolah"), requireIzin("absensi.view", "lms.view"), getAbsensiSekolah);
 

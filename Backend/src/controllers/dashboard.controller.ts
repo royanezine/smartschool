@@ -6,6 +6,12 @@ import { normalizeRole } from "../utils/rbac";
 import { cekLanggananYayasan } from "../utils/yayasanLangganan";
 import { attendanceSchoolFilter } from "../services/absensiQuery.service";
 import { todayDateOnly } from "../utils/dateOnly";
+import {
+  ambilSekolahBerlangganan,
+  ambilSemuaIdSekolahBerlangganan,
+  labelStatusSekolah,
+  statusEfektifSekolah,
+} from "../utils/statusSekolah";
 
 const rekapHariIni = async (schoolIds: string[]) => {
   const rekap = { hadir: 0, izin: 0, sakit: 0, alpha: 0 };
@@ -111,7 +117,7 @@ export const getDashboardSekolah = async (req: AuthRequest, res: Response) => {
         orderBy: { nama: "asc" },
       });
       const schoolIds = daftarSekolah.map((s) => s.id);
-      const [profil, perSekolah, rekap] = await Promise.all([
+      const [profil, perSekolah, rekap, berlangganan] = await Promise.all([
         prisma.yayasan.findUnique({
           where: { id: yayasanId },
           select: {
@@ -126,9 +132,10 @@ export const getDashboardSekolah = async (req: AuthRequest, res: Response) => {
         }),
         hitungPerSekolah(schoolIds),
         rekapHariIni(schoolIds),
+        ambilSekolahBerlangganan(schoolIds),
       ]);
 
-      const daftar = daftarSekolah.map((s) => ({
+      const daftar = labelStatusSekolah(daftarSekolah, berlangganan).map((s) => ({
         ...s,
         totalSiswa: perSekolah.siswa.find((g) => g.sekolahId === s.id)?._count ?? 0,
         totalGuru: perSekolah.guru.find((g) => g.sekolahId === s.id)?._count ?? 0,
@@ -172,13 +179,14 @@ export const getDashboardSekolah = async (req: AuthRequest, res: Response) => {
     }
 
     if (sekolahId) {
-      const [profil, perSekolah, rekap] = await Promise.all([
+      const [profil, perSekolah, rekap, berlangganan] = await Promise.all([
         prisma.sekolah.findFirst({
           where: { id: sekolahId, dihapusPada: null },
           select: { id: true, nama: true, jenjang: true, status: true },
         }),
         hitungPerSekolah([sekolahId]),
         rekapHariIni([sekolahId]),
+        ambilSekolahBerlangganan([sekolahId]),
       ]);
       const totalSiswa = perSekolah.siswa[0]?._count ?? 0;
       const totalGuru = perSekolah.guru[0]?._count ?? 0;
@@ -200,7 +208,10 @@ export const getDashboardSekolah = async (req: AuthRequest, res: Response) => {
           id: sekolahId,
           nama: profil?.nama ?? null,
           jenjang: profil?.jenjang ?? null,
-          status: profil?.status ?? null,
+          status: statusEfektifSekolah(
+            profil?.status ?? null,
+            berlangganan.has(sekolahId),
+          ),
           totalSiswa,
           totalGuru,
           totalKelas,
@@ -220,6 +231,7 @@ export const getDashboardSekolah = async (req: AuthRequest, res: Response) => {
 
     const { awal, label } = buatLabelEnamBulan();
     const sekolahAktifWhere = { dihapusPada: null };
+    const idBerlangganan = await ambilSemuaIdSekolahBerlangganan();
     const [
       totalSekolah,
       sekolahAktif,
@@ -232,8 +244,12 @@ export const getDashboardSekolah = async (req: AuthRequest, res: Response) => {
       langgananBaru,
     ] = await Promise.all([
       prisma.sekolah.count({ where: sekolahAktifWhere }),
-      prisma.sekolah.count({ where: { ...sekolahAktifWhere, status: "aktif" } }),
-      prisma.sekolah.count({ where: { ...sekolahAktifWhere, status: "uji coba" } }),
+      prisma.sekolah.count({
+        where: { ...sekolahAktifWhere, status: "aktif", id: { in: idBerlangganan } },
+      }),
+      prisma.sekolah.count({
+        where: { ...sekolahAktifWhere, status: "uji coba", id: { in: idBerlangganan } },
+      }),
       prisma.pengguna.count({
         where: {
           sekolahId: { not: null },
@@ -293,6 +309,7 @@ export const getDashboardSekolah = async (req: AuthRequest, res: Response) => {
         totalSekolah,
         sekolahAktif,
         sekolahUjiCoba,
+        sekolahTidakAktif: Math.max(0, totalSekolah - sekolahAktif - sekolahUjiCoba),
         totalSiswa,
         totalGuru,
         totalKelas,

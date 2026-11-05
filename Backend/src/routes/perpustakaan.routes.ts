@@ -22,11 +22,15 @@ import {
 import { validateRequest } from "../middlewares/validation.middleware";
 import { requireSekolah } from "../middlewares/perpustakaan.middleware";
 import { authenticate } from "../middlewares/auth.middleware";
+import { requireTenant } from "../middlewares/tenant.middleware";
+import { requireLangganan } from "../middlewares/langganan.middleware";
 import { authorizeRoles } from "../middlewares/role.middleware";
 
 const router = Router();
 
 router.use(authenticate);
+router.use(requireTenant);
+router.use(requireLangganan());
 router.use(requireSekolah);
 
 router.get("/buku", getBuku);

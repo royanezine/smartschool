@@ -11,10 +11,8 @@ import { authenticate } from "../middlewares/auth.middleware";
 import { authorizeRoles } from "../middlewares/role.middleware";
 import { uploadSiswa } from "../middlewares/upload.middleware";
 import { studentProfiles } from "../controllers/studentProfile.controller";
-import {
-  requireTenant,
-  requireSubscription,
-} from "../middlewares/tenant.middleware";
+import { requireTenant } from "../middlewares/tenant.middleware";
+import { requireLangganan } from "../middlewares/langganan.middleware";
 import { requireIzin } from "../middlewares/izin.middleware";
 
 const router = Router();
@@ -26,34 +24,34 @@ router.get("/me", getMySiswa);
 router.post(
   "/",
   requireTenant,
-  requireSubscription,
+  requireLangganan(),
   authorizeRoles("super_admin", "admin_sekolah"),
   requireIzin("manajemen_pengguna.create"),
-  createSiswa, 
+  createSiswa,
 );
 
 router.get(
   "/",
   authorizeRoles("super_admin", "admin_sekolah"),
   requireTenant,
-  requireSubscription,
+  requireLangganan(),
   requireIzin("manajemen_pengguna.view"),
-  getSemuaSiswaAdmin, 
+  getSemuaSiswaAdmin,
 );
 
 router.put(
   "/:id",
   authorizeRoles("super_admin", "admin_sekolah"),
   requireTenant,
-  requireSubscription,
+  requireLangganan(),
   requireIzin("manajemen_pengguna.update"),
-  updateSiswaAdmin, 
+  updateSiswaAdmin,
 );
 
 router.get(
   "/:id",
   requireTenant,
-  requireSubscription,
+  requireLangganan(),
   authorizeRoles("admin_sekolah"),
   requireIzin("manajemen_pengguna.view"),
   studentProfiles,
@@ -62,6 +60,8 @@ router.get(
 router.post(
   "/bulk-import",
   authorizeRoles("super_admin", "admin_sekolah"),
+  requireTenant,
+  requireLangganan(),
   uploadSiswa.single("file"),
   bulkImportSiswa,
 );
@@ -70,7 +70,7 @@ router.delete(
   "/:id",
   authorizeRoles("super_admin", "admin_sekolah"),
   requireTenant,
-  requireSubscription,
+  requireLangganan(),
   requireIzin("manajemen_pengguna.delete"),
   deleteSiswa,
 );

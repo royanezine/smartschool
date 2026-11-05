@@ -1,5 +1,7 @@
 import { Router } from "express";
 import { authenticate } from "../middlewares/auth.middleware";
+import { requireTenant } from "../middlewares/tenant.middleware";
+import { requireLangganan } from "../middlewares/langganan.middleware";
 import { authorizeRoles } from "../middlewares/role.middleware";
 import { uploadBuktiIzin } from "../middlewares/upload.middleware";
 import {
@@ -10,14 +12,13 @@ import {
 
 const router = Router();
 
-// Endpoint POST menggunakan multer '.single("bukti")' untuk menangkap file dari field form 'bukti'
-router.post("/", authenticate, uploadBuktiIzin.single("bukti"), ajukanIzin);
+router.use(authenticate, requireTenant, requireLangganan());
 
-// Endpoint GET & PATCH
-router.get("/", authenticate, getDaftarIzin);
+router.post("/", uploadBuktiIzin.single("bukti"), ajukanIzin);
+
+router.get("/", getDaftarIzin);
 router.patch(
   "/:id/verifikasi",
-  authenticate,
   authorizeRoles("super_admin", "admin_sekolah", "guru"),
   verifikasiIzin,
 );

@@ -35,18 +35,3 @@ export async function aggregateSettings(req: AuthRequest, res: Response, next: N
     return successResponse(res, "Agregat rapor disimpan", data);
   } catch (error) { next(error); }
 }
-
-const globalSchema = z.object({
-  namaAplikasi: z.string().trim().min(1).max(100),
-  emailDukungan: z.string().email().max(100).nullable(),
-  teleponDukungan: z.string().trim().max(30).nullable(),
-  logoUrl: z.string().url().max(255).nullable(),
-}).strict();
-export async function globalSettings(req: AuthRequest, res: Response, next: NextFunction) {
-  try {
-    if (req.method === "GET") return successResponse(res, "Pengaturan global", await readSetting(null, "identitas_platform", { namaAplikasi: "SmartSchool", emailDukungan: null, teleponDukungan: null, logoUrl: null }));
-    const data = globalSchema.parse(req.body);
-    await prisma.$transaction(tx => writeSetting(tx, null, "identitas_platform", data, req.user!.userId));
-    return successResponse(res, "Pengaturan global disimpan", data);
-  } catch (error) { next(error); }
-}

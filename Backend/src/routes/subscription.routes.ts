@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { authenticate } from "../middlewares/auth.middleware";
-import { requireTenant } from "../middlewares/tenant.middleware";
+import { requireKepemilikanSekolah } from "../middlewares/langganan.middleware";
 import { requireIzin } from "../middlewares/izin.middleware";
 import {
   createPayment,
@@ -8,12 +8,14 @@ import {
   extendSubscription,
   getAllLanggananSekolah,
 } from "../controllers/subscription.controller";
+import { cekStatusPembayaranLangganan } from "../controllers/subscriptionStatus.controller";
 
 const router = Router();
 
 router.get(
   "/",
   authenticate,
+  requireKepemilikanSekolah,
   requireIzin("langganan.view", "langganan.view_all"),
   getAllLanggananSekolah,
 );
@@ -21,7 +23,7 @@ router.get(
 router.post(
   "/bayar",
   authenticate,
-  requireTenant,
+  requireKepemilikanSekolah,
   requireIzin("manajemen_sekolah.update"),
   createPayment,
 );
@@ -29,15 +31,23 @@ router.post(
 router.get(
   "/pending",
   authenticate,
-  requireTenant,
+  requireKepemilikanSekolah,
   requireIzin("manajemen_sekolah.view"),
   getPendingPayments,
+);
+
+router.get(
+  "/status/:orderId",
+  authenticate,
+  requireKepemilikanSekolah,
+  requireIzin("manajemen_sekolah.view"),
+  cekStatusPembayaranLangganan,
 );
 
 router.post(
   "/perpanjang",
   authenticate,
-  requireTenant,
+  requireKepemilikanSekolah,
   requireIzin("manajemen_sekolah.update"),
   extendSubscription,
 );

@@ -4,6 +4,11 @@ import { z } from "zod";
 import { prisma } from "../config/db";
 import { AppError } from "../utils/appError";
 import { successResponse } from "../utils/responseFormatter";
+import {
+  LANGGANAN_DIBAYAR_WHERE,
+  ambilSekolahBerlangganan,
+  labelStatusSekolah,
+} from "../utils/statusSekolah";
 
 const querySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
@@ -138,6 +143,7 @@ export const getDetailYayasanLangganan = async (
             jenjang: true,
             status: true,
             langgananSekolah: {
+              where: LANGGANAN_DIBAYAR_WHERE,
               orderBy: { dibuatPada: "desc" },
               take: 1,
               select: {
@@ -162,6 +168,10 @@ export const getDetailYayasanLangganan = async (
     });
 
     if (!yayasan) throw new AppError("Yayasan tidak ditemukan", 404);
+
+    const berlangganan = await ambilSekolahBerlangganan(
+      yayasan.sekolah.map((s) => s.id),
+    );
 
     const sekarang = Date.now();
     const berakhir = yayasan.tanggalBerakhirLangganan;
@@ -200,10 +210,12 @@ export const getDetailYayasanLangganan = async (
       },
       admin: yayasan.pengguna,
       totalSekolah: yayasan.sekolah.length,
-      sekolah: yayasan.sekolah.map(({ langgananSekolah, ...sekolah }) => ({
-        ...sekolah,
-        langganan: langgananSekolah[0] ?? null,
-      })),
+      sekolah: labelStatusSekolah(yayasan.sekolah, berlangganan).map(
+        ({ langgananSekolah, ...sekolah }) => ({
+          ...sekolah,
+          langganan: langgananSekolah[0] ?? null,
+        }),
+      ),
       riwayatPendaftaran: yayasan.pendaftaranTenant,
     });
   } catch (error) {

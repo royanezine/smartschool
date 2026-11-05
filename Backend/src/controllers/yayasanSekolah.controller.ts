@@ -10,6 +10,12 @@ import {
   buatSekolahCabangSchema,
   listSekolahCabangQuerySchema,
 } from "../validations/yayasan.validation";
+import {
+  LANGGANAN_DIBAYAR_WHERE,
+  ambilSekolahBerlangganan,
+  filterStatusSekolah,
+  labelStatusSekolah,
+} from "../utils/statusSekolah";
 
 export const buatSekolahCabang = async (
   req: Request,
@@ -241,20 +247,28 @@ export const listSekolahCabang = async (
     const { page, limit, search } = listSekolahCabangQuerySchema.parse(
       req.query,
     );
+    const statusQuery =
+      typeof req.query.status === "string" ? req.query.status.trim() : "";
+    const now = new Date();
 
-    const where: Prisma.SekolahWhereInput = {
-      yayasanId,
-      dihapusPada: null,
-    };
+    const kondisi: Prisma.SekolahWhereInput[] = [{ yayasanId, dihapusPada: null }];
 
     if (search) {
-      where.OR = [
-        { nama: { contains: search, mode: "insensitive" } },
-        { npsn: { contains: search, mode: "insensitive" } },
-        { subdomain: { contains: search, mode: "insensitive" } },
-        { kode: { contains: search, mode: "insensitive" } },
-      ];
+      kondisi.push({
+        OR: [
+          { nama: { contains: search, mode: "insensitive" } },
+          { npsn: { contains: search, mode: "insensitive" } },
+          { subdomain: { contains: search, mode: "insensitive" } },
+          { kode: { contains: search, mode: "insensitive" } },
+        ],
+      });
     }
+
+    if (statusQuery) {
+      kondisi.push(await filterStatusSekolah(statusQuery, now, { yayasanId }));
+    }
+
+    const where: Prisma.SekolahWhereInput = { AND: kondisi };
 
     const [total, sekolahList] = await Promise.all([
       prisma.sekolah.count({ where }),
@@ -276,6 +290,7 @@ export const listSekolahCabang = async (
           status: true,
           dibuatPada: true,
           langgananSekolah: {
+            where: LANGGANAN_DIBAYAR_WHERE,
             orderBy: { dibuatPada: "desc" },
             take: 1,
             select: {
@@ -291,7 +306,7 @@ export const listSekolahCabang = async (
 
     const ids = sekolahList.map((s) => s.id);
 
-    const [siswaRows, guruRows, kelasRows] = await Promise.all([
+    const [siswaRows, guruRows, kelasRows, berlangganan] = await Promise.all([
       prisma.pengguna.groupBy({
         by: ["sekolahId"],
         where: {
@@ -317,21 +332,24 @@ export const listSekolahCabang = async (
         where: { sekolahId: { in: ids }, dihapusPada: null },
         _count: { _all: true },
       }),
+      ambilSekolahBerlangganan(ids, now),
     ]);
 
     const siswaMap = new Map(siswaRows.map((r) => [r.sekolahId, r._count._all]));
     const guruMap = new Map(guruRows.map((r) => [r.sekolahId, r._count._all]));
     const kelasMap = new Map(kelasRows.map((r) => [r.sekolahId, r._count._all]));
 
-    const items = sekolahList.map(({ langgananSekolah, ...sekolah }) => ({
-      ...sekolah,
-      langganan: langgananSekolah[0] ?? null,
-      statistik: {
-        totalSiswa: siswaMap.get(sekolah.id) ?? 0,
-        totalGuru: guruMap.get(sekolah.id) ?? 0,
-        totalKelas: kelasMap.get(sekolah.id) ?? 0,
-      },
-    }));
+    const items = labelStatusSekolah(sekolahList, berlangganan).map(
+      ({ langgananSekolah, ...sekolah }) => ({
+        ...sekolah,
+        langganan: langgananSekolah[0] ?? null,
+        statistik: {
+          totalSiswa: siswaMap.get(sekolah.id) ?? 0,
+          totalGuru: guruMap.get(sekolah.id) ?? 0,
+          totalKelas: kelasMap.get(sekolah.id) ?? 0,
+        },
+      }),
+    );
 
     return successResponse(res, "Berhasil mengambil daftar cabang sekolah", {
       items,

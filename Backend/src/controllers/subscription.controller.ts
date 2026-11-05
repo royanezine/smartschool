@@ -1,23 +1,73 @@
 import { Response, NextFunction } from "express";
-
 import { AuthRequest } from "../middlewares/auth.middleware";
-
 import { prisma } from "../config/db";
-
 import {
   createPaymentSchema,
   extendSubscriptionSchema,
 } from "../validations/subscription.validation";
-
 import { successResponse } from "../utils/responseFormatter";
-
 import { AppError } from "../utils/appError";
 import { isSuperAdmin } from "../utils/rbac";
+import { buatOrderIdMidtrans } from "../utils/midtransOrderId";
+
+const MIDTRANS_SNAP_URL = "https://app.sandbox.midtrans.com/snap/v1/transactions";
+
+const buatTransaksiSnap = async (params: {
+  orderId: string;
+  grossAmount: number;
+  namaCustomer: string;
+  email?: string;
+  pesanGagal: string;
+}) => {
+  const serverKey = process.env.MIDTRANS_SERVER_KEY;
+  if (!serverKey) {
+    throw new AppError("MIDTRANS_SERVER_KEY belum dikonfigurasi", 500);
+  }
+
+  const auth = Buffer.from(`${serverKey}:`).toString("base64");
+
+  const response = await fetch(MIDTRANS_SNAP_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Authorization: `Basic ${auth}`,
+    },
+    body: JSON.stringify({
+      transaction_details: {
+        order_id: params.orderId,
+        gross_amount: params.grossAmount,
+      },
+      customer_details: {
+        first_name: params.namaCustomer,
+        email: params.email,
+      },
+    }),
+  });
+
+  const body: any = await response.json().catch(() => ({}));
+
+  if (!response.ok || !body.token) {
+    console.error("Midtrans API Error:", {
+      httpStatus: response.status,
+      orderId: params.orderId,
+      response: body,
+    });
+
+    const pesan = Array.isArray(body.error_messages)
+      ? body.error_messages.join(", ")
+      : body.status_message;
+
+    throw new AppError(pesan || params.pesanGagal, 502);
+  }
+
+  return body as { token: string; redirect_url: string };
+};
 
 export const createPayment = async (
   req: AuthRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     if (!req.user || !req.user.sekolahId) {
@@ -27,16 +77,11 @@ export const createPayment = async (
     const data = createPaymentSchema.parse(req.body);
 
     const paket = await prisma.paket.findUnique({
-      where: {
-        id: data.paketId,
-      },
+      where: { id: data.paketId },
     });
 
     if (!paket) {
-      throw new AppError(
-        "Paket langganan tidak ditemukan",
-        404
-      );
+      throw new AppError("Paket langganan tidak ditemukan", 404);
     }
 
     const totalHarga =
@@ -45,76 +90,36 @@ export const createPayment = async (
         : Number(paket.harga);
 
     const pengguna = await prisma.pengguna.findUnique({
-      where: {
-        id: req.user.userId,
-      },
-      select: {
-        namaLengkap: true,
-      },
+      where: { id: req.user.userId },
+      select: { namaLengkap: true },
     });
 
-    const namaCustomer =
-      pengguna?.namaLengkap || "Admin Sekolah";
+    const namaCustomer = pengguna?.namaLengkap || "Admin Sekolah";
 
-    const midtransAuth = Buffer.from(
-      process.env.MIDTRANS_SERVER_KEY + ":"
-    ).toString("base64");
+    const orderId = buatOrderIdMidtrans("INV", req.user.sekolahId);
 
-    const orderId = `INV-${req.user.sekolahId}-${Date.now()}`;
-
-    const midtransResponse = await fetch(
-      "https://app.sandbox.midtrans.com/snap/v1/transactions",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          Authorization: `Basic ${midtransAuth}`,
-        },
-        body: JSON.stringify({
-          transaction_details: {
-            order_id: orderId,
-            gross_amount: totalHarga,
-          },
-          customer_details: {
-            first_name: namaCustomer,
-            email: req.user.email,
-          },
-        }),
-      }
-    );
-
-    if (!midtransResponse.ok) {
-      const errorData = await midtransResponse.json();
-
-      console.error(
-        "Midtrans API Error:",
-        errorData
-      );
-
-      throw new AppError(
-        "Gagal memproses pembayaran",
-        500
-      );
-    }
-
-    const snap = await midtransResponse.json();
+    const snap = await buatTransaksiSnap({
+      orderId,
+      grossAmount: totalHarga,
+      namaCustomer,
+      email: req.user.email,
+      pesanGagal: "Gagal memproses pembayaran",
+    });
 
     await prisma.$transaction(async (tx) => {
-      const langganan =
-        await tx.langgananSekolah.create({
-          data: {
-            sekolahId: req.user!.sekolahId!,
-            paketId: paket.id,
-            dibuatOleh: req.user!.userId,
-            statusPembayaran: "pending",
-            statusLangganan: "trialing",
-            hargaSaatBerlangganan: totalHarga,
-            siklusPenagihan: data.siklusPenagihan,
-            midtransInvoiceId: orderId,
-            midtransPaymentLink: snap.redirect_url,
-          },
-        });
+      const langganan = await tx.langgananSekolah.create({
+        data: {
+          sekolahId: req.user!.sekolahId!,
+          paketId: paket.id,
+          dibuatOleh: req.user!.userId,
+          statusPembayaran: "pending",
+          statusLangganan: "trialing",
+          hargaSaatBerlangganan: totalHarga,
+          siklusPenagihan: data.siklusPenagihan,
+          midtransInvoiceId: orderId,
+          midtransPaymentLink: snap.redirect_url,
+        },
+      });
 
       await tx.riwayatPembayaran.create({
         data: {
@@ -132,10 +137,11 @@ export const createPayment = async (
       res,
       "Transaksi Midtrans berhasil dibuat",
       {
+        order_id: orderId,
         payment_url: snap.redirect_url,
         token: snap.token,
       },
-      201
+      201,
     );
   } catch (error) {
     next(error);
@@ -145,39 +151,38 @@ export const createPayment = async (
 export const getPendingPayments = async (
   req: AuthRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     if (!req.user || !req.user.sekolahId) {
       throw new AppError(
         "Akses Ditolak: Anda tidak terhubung dengan sekolah manapun",
-        403
+        403,
       );
     }
 
-    const pembayaranPending =
-      await prisma.riwayatPembayaran.findMany({
-        where: {
-          sekolahId: req.user.sekolahId,
-          status: "pending",
-        },
-        include: {
-          langgananSekolah: {
-            include: {
-              paket: true,
-            },
+    const pembayaranPending = await prisma.riwayatPembayaran.findMany({
+      where: {
+        sekolahId: req.user.sekolahId,
+        status: "pending",
+      },
+      include: {
+        langgananSekolah: {
+          include: {
+            paket: true,
           },
         },
-        orderBy: {
-          dibuatPada: "desc",
-        },
-      });
+      },
+      orderBy: {
+        dibuatPada: "desc",
+      },
+    });
 
     return successResponse(
       res,
       "Berhasil mendapatkan riwayat pembayaran",
       pembayaranPending,
-      200
+      200,
     );
   } catch (error) {
     next(error);
@@ -187,44 +192,36 @@ export const getPendingPayments = async (
 export const extendSubscription = async (
   req: AuthRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     if (!req.user || !req.user.sekolahId) {
       throw new AppError(
         "Akses Ditolak: Anda tidak terhubung dengan sekolah manapun",
-        403
+        403,
       );
     }
 
-    const data = extendSubscriptionSchema.parse(
-      req.body
-    );
+    const data = extendSubscriptionSchema.parse(req.body);
 
     const paket = await prisma.paket.findUnique({
-      where: {
-        id: data.paketId,
-      },
+      where: { id: data.paketId },
     });
 
     if (!paket) {
-      throw new AppError(
-        "Paket langganan tidak ditemukan",
-        404
-      );
+      throw new AppError("Paket langganan tidak ditemukan", 404);
     }
 
-    const langgananAktif =
-      await prisma.langgananSekolah.findFirst({
-        where: {
-          sekolahId: req.user.sekolahId,
-          statusLangganan: "active",
-          dihapusOleh: null,
-        },
-        orderBy: {
-          tanggalBerakhir: "desc",
-        },
-      });
+    const langgananAktif = await prisma.langgananSekolah.findFirst({
+      where: {
+        sekolahId: req.user.sekolahId,
+        statusLangganan: "active",
+        dihapusOleh: null,
+      },
+      orderBy: {
+        tanggalBerakhir: "desc",
+      },
+    });
 
     const tanggalMulai = langgananAktif?.tanggalBerakhir
       ? new Date(langgananAktif.tanggalBerakhir)
@@ -234,18 +231,12 @@ export const extendSubscription = async (
       tanggalMulai.setHours(0, 0, 0, 0);
     }
 
-    const tanggalBerakhir = new Date(
-      tanggalMulai
-    );
+    const tanggalBerakhir = new Date(tanggalMulai);
 
     if (data.siklusPenagihan === "annual") {
-      tanggalBerakhir.setFullYear(
-        tanggalBerakhir.getFullYear() + 1
-      );
+      tanggalBerakhir.setFullYear(tanggalBerakhir.getFullYear() + 1);
     } else {
-      tanggalBerakhir.setMonth(
-        tanggalBerakhir.getMonth() + 1
-      );
+      tanggalBerakhir.setMonth(tanggalBerakhir.getMonth() + 1);
     }
 
     const totalHarga =
@@ -254,115 +245,58 @@ export const extendSubscription = async (
         : Number(paket.harga);
 
     const pengguna = await prisma.pengguna.findUnique({
-      where: {
-        id: req.user.userId,
-      },
-      select: {
-        namaLengkap: true,
-      },
+      where: { id: req.user.userId },
+      select: { namaLengkap: true },
     });
 
-    const namaCustomer =
-      pengguna?.namaLengkap || "Admin Sekolah";
+    const namaCustomer = pengguna?.namaLengkap || "Admin Sekolah";
 
-    const midtransServerKey =
-      process.env.MIDTRANS_SERVER_KEY;
+    const orderId = buatOrderIdMidtrans("INV-EXT", req.user.sekolahId);
 
-    if (!midtransServerKey) {
-      throw new AppError(
-        "MIDTRANS_SERVER_KEY belum dikonfigurasi",
-        500
-      );
-    }
+    const snap = await buatTransaksiSnap({
+      orderId,
+      grossAmount: totalHarga,
+      namaCustomer,
+      email: req.user.email,
+      pesanGagal: "Gagal membuat invoice perpanjangan",
+    });
 
-    const midtransAuth = Buffer.from(
-      `${midtransServerKey}:`
-    ).toString("base64");
-
-    const orderId = `INV-EXT-${req.user.sekolahId}-${Date.now()}`;
-
-    const midtransResponse = await fetch(
-      "https://app.sandbox.midtrans.com/snap/v1/transactions",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-          Authorization: `Basic ${midtransAuth}`,
+    const result = await prisma.$transaction(async (tx) => {
+      const langganan = await tx.langgananSekolah.create({
+        data: {
+          sekolahId: req.user!.sekolahId!,
+          paketId: paket.id,
+          dibuatOleh: req.user!.userId,
+          tanggalMulai,
+          tanggalBerakhir,
+          statusPembayaran: "pending",
+          statusLangganan: "trialing",
+          hargaSaatBerlangganan: totalHarga,
+          siklusPenagihan: data.siklusPenagihan,
+          midtransInvoiceId: orderId,
+          midtransPaymentLink: snap.redirect_url,
         },
-        body: JSON.stringify({
-          transaction_details: {
-            order_id: orderId,
-            gross_amount: totalHarga,
-          },
-          customer_details: {
-            first_name: namaCustomer,
-            email: req.user.email,
-          },
-        }),
-      }
-    );
+      });
 
-    if (!midtransResponse.ok) {
-      const errorData = await midtransResponse.json();
+      const riwayatPembayaran = await tx.riwayatPembayaran.create({
+        data: {
+          langgananSekolahId: langganan.id,
+          sekolahId: req.user!.sekolahId!,
+          dibuatOleh: req.user!.userId,
+          jumlah: totalHarga,
+          status: "pending",
+          midtransInvoiceId: orderId,
+        },
+      });
 
-      console.error(
-        "Midtrans API Error:",
-        errorData
-      );
-
-      throw new AppError(
-        "Gagal membuat invoice perpanjangan",
-        500
-      );
-    }
-
-    const snap = await midtransResponse.json();
-
-    const result = await prisma.$transaction(
-      async (tx) => {
-        const langganan =
-          await tx.langgananSekolah.create({
-            data: {
-              sekolahId: req.user!.sekolahId!,
-              paketId: paket.id,
-              dibuatOleh: req.user!.userId,
-              tanggalMulai,
-              tanggalBerakhir,
-              statusPembayaran: "pending",
-              statusLangganan: "trialing",
-              hargaSaatBerlangganan: totalHarga,
-              siklusPenagihan:
-                data.siklusPenagihan,
-              midtransInvoiceId: orderId,
-              midtransPaymentLink:
-                snap.redirect_url,
-            },
-          });
-
-        const riwayatPembayaran =
-          await tx.riwayatPembayaran.create({
-            data: {
-              langgananSekolahId: langganan.id,
-              sekolahId: req.user!.sekolahId!,
-              dibuatOleh: req.user!.userId,
-              jumlah: totalHarga,
-              status: "pending",
-              midtransInvoiceId: orderId,
-            },
-          });
-
-        return {
-          langganan,
-          riwayatPembayaran,
-        };
-      }
-    );
+      return { langganan, riwayatPembayaran };
+    });
 
     return successResponse(
       res,
       "Invoice perpanjangan paket berhasil dibuat",
       {
+        order_id: orderId,
         langganan: result.langganan,
         pembayaran: result.riwayatPembayaran,
         payment_url: snap.redirect_url,
@@ -370,7 +304,7 @@ export const extendSubscription = async (
         tanggalMulai,
         tanggalBerakhir,
       },
-      201
+      201,
     );
   } catch (error) {
     next(error);
@@ -380,7 +314,7 @@ export const extendSubscription = async (
 export const getAllLanggananSekolah = async (
   req: AuthRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   try {
     const isSuper = isSuperAdmin(req.user?.role);
@@ -389,7 +323,11 @@ export const getAllLanggananSekolah = async (
     const where: any = {};
     if (!isSuper) {
       if (!sekolahId) {
-        throw new AppError("Akses ditolak: Anda tidak terhubung dengan sekolah", 403, "NO_TENANT_LINKED");
+        throw new AppError(
+          "Akses ditolak: Anda tidak terhubung dengan sekolah",
+          403,
+          "NO_TENANT_LINKED",
+        );
       }
       where.sekolahId = sekolahId;
     }
@@ -409,7 +347,7 @@ export const getAllLanggananSekolah = async (
       res,
       "Berhasil mendapatkan seluruh data langganan sekolah",
       langganan,
-      200
+      200,
     );
   } catch (error) {
     next(error);

@@ -3,6 +3,7 @@ import { ownReview } from "../controllers/review.controller";
 import { authorizeRoles } from "../middlewares/role.middleware";
 import { authenticate } from "../middlewares/auth.middleware";
 import { requireTenant } from "../middlewares/tenant.middleware";
+import { requireLangganan } from "../middlewares/langganan.middleware";
 import { requireIzin } from "../middlewares/izin.middleware";
 
 import {
@@ -23,10 +24,21 @@ router.put("/review", authenticate, authorizeRoles("admin_yayasan", "admin_sekol
 
 router.get("/profile", authenticate, profile);
 router.put("/profile", authenticate, updateProfile);
-router.get("/", authenticate, requireIzin("manajemen_pengguna.view"), getUsers);
+
+router.get(
+  "/",
+  authenticate,
+  requireTenant,
+  requireLangganan(),
+  requireIzin("manajemen_pengguna.view"),
+  getUsers,
+);
+
 router.patch(
   "/:id/reset-password",
   authenticate,
+  requireTenant,
+  requireLangganan(),
   requireIzin("manajemen_pengguna.update"),
   quickResetPassword,
 );
@@ -34,6 +46,8 @@ router.patch(
 router.get(
   "/:id",
   authenticate,
+  requireTenant,
+  requireLangganan(),
   requireIzin("manajemen_pengguna.view"),
   getUserById,
 );
@@ -42,6 +56,7 @@ router.post(
   "/",
   authenticate,
   requireTenant,
+  requireLangganan(),
   requireIzin("manajemen_pengguna.create"),
   createUser,
 );
@@ -50,6 +65,7 @@ router.put(
   "/:id",
   authenticate,
   requireTenant,
+  requireLangganan(),
   requireIzin("manajemen_pengguna.update"),
   updateUser,
 );
@@ -58,6 +74,7 @@ router.delete(
   "/:id",
   authenticate,
   requireTenant,
+  requireLangganan(),
   requireIzin("manajemen_pengguna.delete"),
   deleteUser,
 );
