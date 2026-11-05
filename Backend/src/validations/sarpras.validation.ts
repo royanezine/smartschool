@@ -1,25 +1,30 @@
 import { z } from "zod";
 
 export const gudangSchema = z.object({
-  nama: z.string().min(3, "Nama gudang minimal 3 karakter"),
-  lokasi: z.string().optional().nullable(),
-  status: z.string().default("aktif"),
+  nama: z.string().trim().min(1).max(100),
+  lokasi: z.string().trim().max(255).optional().nullable(),
+  keterangan: z.string().trim().max(255).optional().nullable(),
 });
 
 export const kategoriAsetSchema = z.object({
-  nama: z.string().min(3, "Nama kategori minimal 3 karakter"),
-  status: z.string().default("aktif"),
+  nama: z.string().trim().min(1).max(100),
+  keterangan: z.string().trim().max(255).optional().nullable(),
+});
+
+export const ruanganSchema = z.object({
+  nama: z.string().trim().min(1).max(100),
+  lokasi: z.string().trim().max(255).optional().nullable(),
+  kapasitas: z.number().int().nonnegative().optional().nullable(),
+  keterangan: z.string().trim().max(255).optional().nullable(),
 });
 
 export const asetSchema = z.object({
-  kode: z.string().min(2, "Kode aset minimal 2 karakter"),
-  nama: z.string().min(3, "Nama aset minimal 3 karakter"),
-  kondisi: z.string().default("baik"),
-  jumlah: z.number().int().min(1, "Jumlah minimal 1"),
-  jumlahStok: z.number().int().min(0, "Jumlah stok minimal 0"),
-  stokMinimum: z.number().int().min(0, "Stok minimum minimal 0"),
-  lokasi: z.string().optional().nullable(),
-  kategoriAsetId: z.string().uuid("ID Kategori Aset tidak valid"),
-  gudangId: z.string().uuid("ID Gudang tidak valid"),
-  status: z.string().default("aktif"),
+  nama: z.string().trim().min(1).max(150),
+  kode: z.string().trim().min(1).max(50),
+  gudangId: z.string().uuid().optional().nullable(),
+  kategoriAsetId: z.string().uuid().optional().nullable(),
+  ruanganId: z.string().uuid().optional().nullable(),
+  kondisi: z.string().trim().max(50).optional().nullable(),
+  jumlah: z.number().int().nonnegative().optional(),
+  keterangan: z.string().trim().max(255).optional().nullable(),
 });

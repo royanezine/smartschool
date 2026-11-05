@@ -6,10 +6,14 @@ import {
   gudangSchema,
   kategoriAsetSchema,
   asetSchema,
+  ruanganSchema,
 } from "../validations/sarpras.validation";
 
-// === GUDANG ===
-export const createGudang = async (req: Request, res: Response, next: NextFunction) => {
+export const createGudang = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const sekolahId = (req as any).user.sekolahId;
     const validatedData = gudangSchema.parse(req.body);
@@ -22,7 +26,11 @@ export const createGudang = async (req: Request, res: Response, next: NextFuncti
   }
 };
 
-export const getGudang = async (req: Request, res: Response, next: NextFunction) => {
+export const getGudang = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const sekolahId = (req as any).user.sekolahId;
     const gudang = await prisma.gudang.findMany({
@@ -34,12 +42,16 @@ export const getGudang = async (req: Request, res: Response, next: NextFunction)
   }
 };
 
-export const updateGudang = async (req: Request, res: Response, next: NextFunction) => {
+export const updateGudang = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const id = req.params.id as string;
     const sekolahId = (req as any).user.sekolahId;
     const validatedData = gudangSchema.parse(req.body);
-    
+
     const gudang = await prisma.gudang.findFirst({
       where: { id, sekolahId, dihapusPada: null },
     });
@@ -49,18 +61,22 @@ export const updateGudang = async (req: Request, res: Response, next: NextFuncti
       where: { id },
       data: validatedData,
     });
-    
+
     return successResponse(res, "Gudang berhasil diperbarui", updated, 200);
   } catch (error) {
     next(error);
   }
 };
 
-export const deleteGudang = async (req: Request, res: Response, next: NextFunction) => {
+export const deleteGudang = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const id = req.params.id as string;
     const sekolahId = (req as any).user.sekolahId;
-    
+
     const gudang = await prisma.gudang.findFirst({
       where: { id, sekolahId, dihapusPada: null },
     });
@@ -76,8 +92,11 @@ export const deleteGudang = async (req: Request, res: Response, next: NextFuncti
   }
 };
 
-// === KATEGORI ASET ===
-export const createKategoriAset = async (req: Request, res: Response, next: NextFunction) => {
+export const createKategoriAset = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const sekolahId = (req as any).user.sekolahId;
     const validatedData = kategoriAsetSchema.parse(req.body);
@@ -90,24 +109,37 @@ export const createKategoriAset = async (req: Request, res: Response, next: Next
   }
 };
 
-export const getKategoriAset = async (req: Request, res: Response, next: NextFunction) => {
+export const getKategoriAset = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const sekolahId = (req as any).user.sekolahId;
     const kategori = await prisma.kategoriAset.findMany({
       where: { sekolahId, dihapusPada: null },
     });
-    return successResponse(res, "Berhasil mengambil kategori aset", kategori, 200);
+    return successResponse(
+      res,
+      "Berhasil mengambil kategori aset",
+      kategori,
+      200,
+    );
   } catch (error) {
     next(error);
   }
 };
 
-export const updateKategoriAset = async (req: Request, res: Response, next: NextFunction) => {
+export const updateKategoriAset = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const id = req.params.id as string;
     const sekolahId = (req as any).user.sekolahId;
     const validatedData = kategoriAsetSchema.parse(req.body);
-    
+
     const kategori = await prisma.kategoriAset.findFirst({
       where: { id, sekolahId, dihapusPada: null },
     });
@@ -117,18 +149,27 @@ export const updateKategoriAset = async (req: Request, res: Response, next: Next
       where: { id },
       data: validatedData,
     });
-    
-    return successResponse(res, "Kategori aset berhasil diperbarui", updated, 200);
+
+    return successResponse(
+      res,
+      "Kategori aset berhasil diperbarui",
+      updated,
+      200,
+    );
   } catch (error) {
     next(error);
   }
 };
 
-export const deleteKategoriAset = async (req: Request, res: Response, next: NextFunction) => {
+export const deleteKategoriAset = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const id = req.params.id as string;
     const sekolahId = (req as any).user.sekolahId;
-    
+
     const kategori = await prisma.kategoriAset.findFirst({
       where: { id, sekolahId, dihapusPada: null },
     });
@@ -144,8 +185,99 @@ export const deleteKategoriAset = async (req: Request, res: Response, next: Next
   }
 };
 
-// === ASET ===
-export const createAset = async (req: Request, res: Response, next: NextFunction) => {
+export const createRuangan = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const sekolahId = (req as any).user.sekolahId;
+    const validatedData = ruanganSchema.parse(req.body);
+    const ruangan = await prisma.ruangan.create({
+      data: { ...validatedData, sekolahId },
+    });
+    return successResponse(res, "Ruangan berhasil dibuat", ruangan, 201);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getRuangan = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const sekolahId = (req as any).user.sekolahId;
+    const ruangan = await prisma.ruangan.findMany({
+      where: { sekolahId, dihapusPada: null },
+    });
+    return successResponse(
+      res,
+      "Berhasil mengambil data ruangan",
+      ruangan,
+      200,
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateRuangan = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const id = req.params.id as string;
+    const sekolahId = (req as any).user.sekolahId;
+    const validatedData = ruanganSchema.parse(req.body);
+
+    const ruangan = await prisma.ruangan.findFirst({
+      where: { id, sekolahId, dihapusPada: null },
+    });
+    if (!ruangan) throw new AppError("Ruangan tidak ditemukan", 404);
+
+    const updated = await prisma.ruangan.update({
+      where: { id },
+      data: validatedData,
+    });
+
+    return successResponse(res, "Ruangan berhasil diperbarui", updated, 200);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteRuangan = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const id = req.params.id as string;
+    const sekolahId = (req as any).user.sekolahId;
+
+    const ruangan = await prisma.ruangan.findFirst({
+      where: { id, sekolahId, dihapusPada: null },
+    });
+    if (!ruangan) throw new AppError("Ruangan tidak ditemukan", 404);
+
+    await prisma.ruangan.update({
+      where: { id },
+      data: { dihapusPada: new Date() },
+    });
+    return successResponse(res, "Ruangan berhasil dihapus", null, 200);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const createAset = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const sekolahId = (req as any).user.sekolahId;
     const validatedData = asetSchema.parse(req.body);
@@ -156,7 +288,10 @@ export const createAset = async (req: Request, res: Response, next: NextFunction
     if (existingAset) throw new AppError("Kode aset sudah digunakan", 400);
 
     const aset = await prisma.aset.create({
-      data: { ...validatedData, sekolahId },
+      data: {
+        ...validatedData,
+        sekolahId,
+      } as any,
     });
     return successResponse(res, "Aset berhasil dibuat", aset, 201);
   } catch (error) {
@@ -164,20 +299,30 @@ export const createAset = async (req: Request, res: Response, next: NextFunction
   }
 };
 
-export const getAset = async (req: Request, res: Response, next: NextFunction) => {
+export const getAset = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const sekolahId = (req as any).user.sekolahId;
     const asets = await prisma.aset.findMany({
       where: { sekolahId, dihapusPada: null },
     });
-    
-    const gudangs = await prisma.gudang.findMany({ where: { sekolahId }});
-    const kategoris = await prisma.kategoriAset.findMany({ where: { sekolahId }});
-    
-    const aset = asets.map(a => ({
+
+    const gudangs = await prisma.gudang.findMany({ where: { sekolahId } });
+    const kategoris = await prisma.kategoriAset.findMany({
+      where: { sekolahId },
+    });
+    const ruangans = await prisma.ruangan.findMany({ where: { sekolahId } });
+
+    const aset = asets.map((a) => ({
       ...a,
-      gudang: gudangs.find(g => g.id === a.gudangId) || null,
-      kategoriAset: kategoris.find(k => k.id === a.kategoriAsetId) || null
+      gudang: gudangs.find((g) => g.id === a.gudangId) || null,
+      kategoriAset: kategoris.find((k) => k.id === a.kategoriAsetId) || null,
+      ruangan: (a as any).ruanganId
+        ? ruangans.find((r) => r.id === (a as any).ruanganId) || null
+        : null,
     }));
     return successResponse(res, "Berhasil mengambil data aset", aset, 200);
   } catch (error) {
@@ -185,14 +330,23 @@ export const getAset = async (req: Request, res: Response, next: NextFunction) =
   }
 };
 
-export const updateAset = async (req: Request, res: Response, next: NextFunction) => {
+export const updateAset = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const id = req.params.id as string;
     const sekolahId = (req as any).user.sekolahId;
     const validatedData = asetSchema.parse(req.body);
 
     const existingAset = await prisma.aset.findFirst({
-      where: { kode: validatedData.kode, sekolahId, id: { not: id }, dihapusPada: null },
+      where: {
+        kode: validatedData.kode,
+        sekolahId,
+        id: { not: id },
+        dihapusPada: null,
+      },
     });
     if (existingAset) throw new AppError("Kode aset sudah digunakan", 400);
 
@@ -203,7 +357,7 @@ export const updateAset = async (req: Request, res: Response, next: NextFunction
 
     const updated = await prisma.aset.update({
       where: { id },
-      data: validatedData,
+      data: validatedData as any,
     });
     return successResponse(res, "Aset berhasil diperbarui", updated, 200);
   } catch (error) {
@@ -211,11 +365,15 @@ export const updateAset = async (req: Request, res: Response, next: NextFunction
   }
 };
 
-export const deleteAset = async (req: Request, res: Response, next: NextFunction) => {
+export const deleteAset = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const id = req.params.id as string;
     const sekolahId = (req as any).user.sekolahId;
-    
+
     const aset = await prisma.aset.findFirst({
       where: { id, sekolahId, dihapusPada: null },
     });

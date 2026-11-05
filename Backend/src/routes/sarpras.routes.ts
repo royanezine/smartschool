@@ -16,6 +16,10 @@ import {
   getAset,
   updateAset,
   deleteAset,
+  createRuangan,
+  getRuangan,
+  updateRuangan,
+  deleteRuangan,
 } from "../controllers/sarpras.controller";
 import { getKetersediaanAset } from "../controllers/peminjamanAset.controller";
 
@@ -32,6 +36,11 @@ router.post("/kategori", requireIzin("manajemen_aset.create"), createKategoriAse
 router.get("/kategori", requireIzin("manajemen_aset.view"), getKategoriAset);
 router.put("/kategori/:id", requireIzin("manajemen_aset.update"), updateKategoriAset);
 router.delete("/kategori/:id", requireIzin("manajemen_aset.delete"), deleteKategoriAset);
+
+router.post("/ruangan", requireIzin("manajemen_aset.create"), createRuangan);
+router.get("/ruangan", requireIzin("manajemen_aset.view"), getRuangan);
+router.put("/ruangan/:id", requireIzin("manajemen_aset.update"), updateRuangan);
+router.delete("/ruangan/:id", requireIzin("manajemen_aset.delete"), deleteRuangan);
 
 router.post("/aset", requireIzin("manajemen_aset.create"), createAset);
 router.get("/aset", requireIzin("manajemen_aset.view", "peminjaman_aset.view_own"), (req, res, next) => {

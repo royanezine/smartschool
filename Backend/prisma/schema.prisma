@@ -158,32 +158,33 @@ model PeranIzin {
 }
 
 model Sekolah {
-  id                  String                @id @default(uuid())
-  yayasanId           String?               @map("yayasan_id")
-  langgananAktifId    String?               @unique @map("langganan_aktif_id")
-  dibuatOleh          String?               @map("dibuat_oleh")
-  diperbaruiOleh      String?               @map("diperbarui_oleh")
-  dihapusOleh         String?               @map("dihapus_oleh")
-  nama                String                @db.VarChar(100)
-  subdomain           String                @unique @db.VarChar(50)
-  kode                String                @unique @db.VarChar(20)
-  alamat              String?
-  telepon             String?               @db.VarChar(20)
-  email               String?               @db.VarChar(100)
-  logoBesarUrl        String?               @map("logo_besar_url") @db.VarChar(255)
-  status              String?               @db.VarChar(20)
-  konfigurasi         Json?
-  dibuatPada          DateTime              @default(now()) @map("dibuat_pada") @db.Timestamp(6)
-  diperbaruiPada      DateTime              @updatedAt @map("diperbarui_pada") @db.Timestamp(6)
-  dihapusPada         DateTime?             @map("dihapus_pada") @db.Timestamp(6)
-  bujur               Decimal?              @db.Decimal(11, 8)
-  faviconUrl          String?               @map("favicon_url") @db.VarChar(255)
-  jenjang             String?               @db.VarChar(20)
-  lintang             Decimal?              @db.Decimal(10, 8)
-  logoKecilUrl        String?               @map("logo_kecil_url") @db.VarChar(255)
-  metodeAbsensiAktif  String[]              @map("metode_absensi_aktif")
-  npsn                String?               @unique @map("npsn") @db.VarChar(50)
-  radiusAbsensi       Int?                  @map("radius_absensi")
+  id                 String    @id @default(uuid())
+  yayasanId          String?   @map("yayasan_id")
+  langgananAktifId   String?   @unique @map("langganan_aktif_id")
+  dibuatOleh         String?   @map("dibuat_oleh")
+  diperbaruiOleh     String?   @map("diperbarui_oleh")
+  dihapusOleh        String?   @map("dihapus_oleh")
+  nama               String    @db.VarChar(100)
+  subdomain          String    @unique @db.VarChar(50)
+  kode               String    @unique @db.VarChar(20)
+  alamat             String?
+  telepon            String?   @db.VarChar(20)
+  email              String?   @db.VarChar(100)
+  logoBesarUrl       String?   @map("logo_besar_url") @db.VarChar(255)
+  status             String?   @db.VarChar(20)
+  konfigurasi        Json?
+  dibuatPada         DateTime  @default(now()) @map("dibuat_pada") @db.Timestamp(6)
+  diperbaruiPada     DateTime  @updatedAt @map("diperbarui_pada") @db.Timestamp(6)
+  dihapusPada        DateTime? @map("dihapus_pada") @db.Timestamp(6)
+  bujur              Decimal?  @db.Decimal(11, 8)
+  faviconUrl         String?   @map("favicon_url") @db.VarChar(255)
+  jenjang            String?   @db.VarChar(20)
+  lintang            Decimal?  @db.Decimal(10, 8)
+  logoKecilUrl       String?   @map("logo_kecil_url") @db.VarChar(255)
+  metodeAbsensiAktif String[]  @map("metode_absensi_aktif")
+  npsn               String?   @unique @db.VarChar(50)
+  radiusAbsensi      Int?      @map("radius_absensi")
+
   absensi             Absensi[]
   akunKas             AkunKas[]
   artikelCms          ArtikelCms[]
@@ -218,6 +219,7 @@ model Sekolah {
   permohonanIzin      PermohonanIzin[]
   rapot               Rapot[]
   riwayatPembayaran   RiwayatPembayaran[]
+  ruangan             Ruangan[]
   yayasan             Yayasan?              @relation(fields: [yayasanId], references: [id])
   sekolahModul        SekolahModul[]
   sesiKonseling       SesiKonseling[]
@@ -1122,6 +1124,21 @@ model Gudang {
   aset           Aset[]
 
   @@map("gudang")
+}
+
+model Ruangan {
+  id             String    @id @default(uuid())
+  sekolahId      String    @map("sekolah_id")
+  nama           String    @db.VarChar(100)
+  lokasi         String?   @db.VarChar(255)
+  kapasitas      Int?
+  keterangan     String?   @db.VarChar(255)
+  dibuatPada     DateTime  @default(now()) @map("dibuat_pada") @db.Timestamp(6)
+  diperbaruiPada DateTime  @updatedAt @map("diperbarui_pada") @db.Timestamp(6)
+  dihapusPada    DateTime? @map("dihapus_pada") @db.Timestamp(6)
+  sekolah        Sekolah   @relation(fields: [sekolahId], references: [id])
+
+  @@map("ruangan")
 }
 
 model KategoriAset {

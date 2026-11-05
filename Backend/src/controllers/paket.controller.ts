@@ -1,15 +1,34 @@
 import { Request, Response } from "express";
 import { prisma } from "../config/db";
-import { success } from "zod";
+
+const TIPE_PAKET_VALID = ["SEKOLAH", "YAYASAN"] as const;
+type TipePaketValue = (typeof TIPE_PAKET_VALID)[number];
+
+const normalisasiTipe = (tipe: unknown): TipePaketValue | null => {
+  if (typeof tipe !== "string") return null;
+  const upper = tipe.toUpperCase();
+  if (TIPE_PAKET_VALID.includes(upper as TipePaketValue)) {
+    return upper as TipePaketValue;
+  }
+  return null;
+};
 
 export const createPaket = async (req: Request, res: Response) => {
   try {
-    const { nama, deskripsi, harga, durasi, modulIds } = req.body;
+    const { nama, deskripsi, harga, durasi, modulIds, tipe } = req.body;
 
     if (!nama || harga === undefined || !durasi) {
       return res.status(400).json({
         success: false,
         message: "Nama, harga, dan durasi harus diisi",
+      });
+    }
+
+    const tipeFinal = normalisasiTipe(tipe);
+    if (tipe !== undefined && tipeFinal === null) {
+      return res.status(400).json({
+        success: false,
+        message: "Tipe paket harus SEKOLAH atau YAYASAN",
       });
     }
 
@@ -20,10 +39,11 @@ export const createPaket = async (req: Request, res: Response) => {
         harga,
         durasi,
         status: "aktif",
+        ...(tipeFinal && { tipe: tipeFinal }),
 
         paketModul: {
           create:
-            modulIds.map((modulId: string) => ({
+            (modulIds || []).map((modulId: string) => ({
               modulId,
               status: "aktif",
             })) || [],
@@ -54,10 +74,21 @@ export const createPaket = async (req: Request, res: Response) => {
 
 export const getPaketPublic = async (req: Request, res: Response) => {
   try {
+    const tipeQuery = req.query.tipe;
+    const tipeFilter = normalisasiTipe(tipeQuery);
+
+    if (tipeQuery !== undefined && tipeFilter === null) {
+      return res.status(400).json({
+        success: false,
+        message: "Filter tipe harus SEKOLAH atau YAYASAN",
+      });
+    }
+
     const paket = await prisma.paket.findMany({
       where: {
         status: "aktif",
         dihapusPada: null,
+        ...(tipeFilter && { tipe: tipeFilter }),
       },
       orderBy: {
         harga: "asc",
@@ -85,6 +116,7 @@ export const getPaketPublic = async (req: Request, res: Response) => {
       deskripsi: item.deskripsi,
       harga: item.harga,
       durasi: item.durasi,
+      tipe: item.tipe,
       fitur: item.paketModul.map((pm) => ({
         id: pm.modul.id,
         kode: pm.modul.kode,
@@ -154,6 +186,7 @@ export const getPaketPublicById = async (req: Request, res: Response) => {
       deskripsi: paket.deskripsi,
       harga: paket.harga,
       durasi: paket.durasi,
+      tipe: paket.tipe,
       fitur: paket.paketModul.map((pm) => ({
         id: pm.modul.id,
         kode: pm.modul.kode,
@@ -215,7 +248,6 @@ export const updatePaket = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
-    // Validasi ID untuk menghilangkan error TypeScript
     if (!id || typeof id !== "string") {
       return res.status(400).json({
         success: false,
@@ -223,10 +255,17 @@ export const updatePaket = async (req: Request, res: Response) => {
       });
     }
 
-    const { nama, deskripsi, harga, durasi, modulIds, status } = req.body;
+    const { nama, deskripsi, harga, durasi, modulIds, status, tipe } = req.body;
+
+    const tipeFinal = normalisasiTipe(tipe);
+    if (tipe !== undefined && tipeFinal === null) {
+      return res.status(400).json({
+        success: false,
+        message: "Tipe paket harus SEKOLAH atau YAYASAN",
+      });
+    }
 
     const paket = await prisma.paket.update({
-      // Paksa TypeScript mengenali ID sebagai string yang valid
       where: { id: String(id) },
       data: {
         nama,
@@ -234,9 +273,10 @@ export const updatePaket = async (req: Request, res: Response) => {
         harga,
         durasi,
         status,
+        ...(tipeFinal && { tipe: tipeFinal }),
         ...(modulIds && {
           paketModul: {
-            deleteMany: {}, // Hapus relasi lama
+            deleteMany: {},
             create: modulIds.map((modulId: string) => ({
               modulId,
               status: "aktif",
@@ -267,7 +307,6 @@ export const deletePaket = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
-    // Validasi ID untuk menghilangkan error TypeScript
     if (!id || typeof id !== "string") {
       return res.status(400).json({
         success: false,
@@ -275,7 +314,6 @@ export const deletePaket = async (req: Request, res: Response) => {
       });
     }
 
-    // Menggunakan Soft Delete (hanya mengubah status dan tanggal dihapus)
     await prisma.paket.update({
       where: { id: String(id) },
       data: {

@@ -173,9 +173,6 @@ export const getPendingPayments = async (
           },
         },
       },
-      orderBy: {
-        dibuatPada: "desc",
-      },
     });
 
     return successResponse(
@@ -337,9 +334,6 @@ export const getAllLanggananSekolah = async (
       include: {
         sekolah: true,
         paket: true,
-      },
-      orderBy: {
-        dibuatPada: "desc",
       },
     });
 
