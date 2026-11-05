@@ -6,6 +6,18 @@ import { bangunTema } from "../utils/temaDefault";
 import { CMS_PUBLIC_STATUSES } from "../utils/cmsPublication";
 import { availableSchoolWhere } from "../utils/schoolAvailability";
 
+/**
+ * Sanitasi subdomain dari params/query: harus berupa string non-kosong, huruf
+ * kecil, hanya alfanumerik dan tanda hubung. Mengembalikan null jika tidak valid
+ * sehingga controller dapat langsung merespons 404 tanpa menyentuh DB.
+ */
+const sanitizeSubdomain = (raw: unknown): string | null => {
+  if (!raw || typeof raw !== "string") return null;
+  const clean = raw.trim().toLowerCase();
+  if (!clean || !/^[a-z0-9]+(-[a-z0-9]+)*$/.test(clean)) return null;
+  return clean;
+};
+
 const publicSchoolWhere = (subdomain: string) => ({
   subdomain, ...availableSchoolWhere(),
 });
@@ -29,7 +41,10 @@ export const getPublicProfil = async (
   next: NextFunction,
 ) => {
   try {
-    const subdomain = req.params.subdomain as string;
+    const subdomain = sanitizeSubdomain(req.params.subdomain);
+    if (!subdomain) {
+      return res.status(404).json({ success: false, message: "Sekolah tidak ditemukan" });
+    }
 
     const sekolah = await prisma.sekolah.findFirst({
       where: publicSchoolWhere(subdomain),
@@ -88,7 +103,10 @@ export const getPublicTema = async (
   next: NextFunction,
 ) => {
   try {
-    const subdomain = req.params.subdomain as string;
+    const subdomain = sanitizeSubdomain(req.params.subdomain);
+    if (!subdomain) {
+      return res.status(404).json({ success: false, message: "Sekolah tidak ditemukan" });
+    }
 
     const sekolah = await prisma.sekolah.findFirst({
       where: publicSchoolWhere(subdomain),
@@ -213,22 +231,22 @@ export const getHalamanPublikBySubdomain = async (
   next: NextFunction,
 ) => {
   try {
-    const subdomain = req.params.subdomain || req.query.subdomain;
+    const subdomain = sanitizeSubdomain(req.params.subdomain ?? req.query.subdomain);
 
-    if (!subdomain || typeof subdomain !== "string") {
-      throw new AppError("Subdomain wajib disertakan", 400);
+    if (!subdomain) {
+      return res.status(400).json({ success: false, message: "Subdomain wajib disertakan" });
     }
 
     const sekolah = await prisma.sekolah.findFirst({
       where: publicSchoolWhere(subdomain),
-      select: { id: true, status: true },
+      select: { id: true },
     });
 
-    if (!sekolah || sekolah.status !== "aktif") {
-      throw new AppError(
-        "Sekolah tidak ditemukan atau sedang tidak aktif",
-        404,
-      );
+    if (!sekolah) {
+      return res.status(404).json({
+        success: false,
+        message: "Sekolah tidak ditemukan atau sedang tidak aktif",
+      });
     }
 
     const halaman = await prisma.halamanCms.findMany({
@@ -267,22 +285,22 @@ export const getKonfigurasiPublikBySubdomain = async (
   next: NextFunction,
 ) => {
   try {
-    const subdomain = req.params.subdomain || req.query.subdomain;
+    const subdomain = sanitizeSubdomain(req.params.subdomain ?? req.query.subdomain);
 
-    if (!subdomain || typeof subdomain !== "string") {
-      throw new AppError("Subdomain wajib disertakan", 400);
+    if (!subdomain) {
+      return res.status(400).json({ success: false, message: "Subdomain wajib disertakan" });
     }
 
     const sekolah = await prisma.sekolah.findFirst({
       where: publicSchoolWhere(subdomain),
-      select: { id: true, status: true },
+      select: { id: true },
     });
 
-    if (!sekolah || sekolah.status !== "aktif") {
-      throw new AppError(
-        "Sekolah tidak ditemukan atau sedang tidak aktif",
-        404,
-      );
+    if (!sekolah) {
+      return res.status(404).json({
+        success: false,
+        message: "Sekolah tidak ditemukan atau sedang tidak aktif",
+      });
     }
 
     const konfigurasi = await prisma.menuKonfigurasi.findMany({
