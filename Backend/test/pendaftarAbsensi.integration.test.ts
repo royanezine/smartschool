@@ -297,6 +297,33 @@ test("backend HTTP API regressions with PostgreSQL", { skip: !testDatabaseUrl },
     assert.ok(checkout.body.data.waktuKeluar);
   });
 
+  await t.test("shift checkout enforces GPS for location/face before changing attendance", async () => {
+    const previous = await prisma.sekolah.findUnique({where:{id:schoolA.id}});
+    try {
+      await prisma.sekolah.update({where:{id:schoolA.id},data:{metodeAbsensiAktif:["lokasi","face"],lintang:0,bujur:0,radiusAbsensi:100}});
+      for (const metode of ["lokasi","face"]) {
+        const active = await attendance(teacher,todayDateOnly().toISOString().slice(0,10),null,schoolA.id,"hadir",{
+          shiftKerjaId:shift.id,waktuMasuk:new Date(Date.now()-60000),waktuKeluar:null,
+        });
+        for (const coordinates of [{},{lintang:null,bujur:null},{lintang:"",bujur:""},{lintang:false,bujur:0},{lintang:91,bujur:0},{lintang:0,bujur:181}]) {
+          assert.equal((await json("/api/absensi/check-out",teacherToken,"POST",{metode,...coordinates})).status,400);
+        }
+        const far = await json("/api/absensi/check-out",teacherToken,"POST",{metode,lintang:-6.2,bujur:106.8});
+        assert.equal(far.status,403); assert.match(far.body.message,/radius 100 meter untuk check-out/);
+        assert.equal((await json("/api/absensi/check-out",teacherToken,"POST",{metode:"manual"})).status,400);
+        assert.equal((await prisma.absensi.findUnique({where:{id:active.id}})).waktuKeluar,null);
+        await prisma.sekolah.update({where:{id:schoolA.id},data:{lintang:null}});
+        assert.equal((await json("/api/absensi/check-out",teacherToken,"POST",{metode,lintang:0,bujur:0})).status,400);
+        await prisma.sekolah.update({where:{id:schoolA.id},data:{lintang:0}});
+        const near=await json("/api/absensi/check-out",teacherToken,"POST",{metode,lintang:"0",bujur:"0"});
+        assert.equal(near.status,200); assert.equal(near.body.data.id,active.id); assert.ok(near.body.data.waktuKeluar);
+      }
+      assert.equal((await json("/api/absensi/check-out",studentToken,"POST",{metode:"lokasi",lintang:0,bujur:0})).status,403);
+    } finally {
+      await prisma.sekolah.update({where:{id:schoolA.id},data:{metodeAbsensiAktif:previous.metodeAbsensiAktif,lintang:previous.lintang,bujur:previous.bujur,radiusAbsensi:previous.radiusAbsensi}});
+    }
+  });
+
   await t.test("class attendance rejects teachers and administrators before creating records", async () => {
     const previousCount=await prisma.absensi.count({where:{penggunaId:teacher.id,kelasId:{not:null}}});
     for (const token of [teacherToken,adminToken]) {

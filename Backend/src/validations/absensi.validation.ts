@@ -1,6 +1,11 @@
 import { z } from "zod";
 import { paginationQuery } from "../utils/pagination";
 
+const coordinate = (min: number, max: number) => z.preprocess(
+  value => value === null || (typeof value === "string" && !value.trim()) ? undefined : value,
+  z.union([z.number(), z.string().trim().min(1).pipe(z.coerce.number())]).pipe(z.number().min(min).max(max)).optional(),
+);
+
 export const createAbsensiSchema = z.object({
   kelasId: z.string().uuid("ID Kelas tidak valid"),
   status: z.enum(["hadir", "izin", "sakit", "alpha"]),
@@ -22,16 +27,16 @@ export const checkInShiftSchema = z.object({
   status: z.enum(["hadir", "izin", "sakit"]).default("hadir"),
   keterangan: z.string().optional(),
   metode: z.enum(["lokasi", "barcode", "face", "manual"]).default("lokasi"),
-  lintang: z.coerce.number().optional(),
-  bujur: z.coerce.number().optional(),
+  lintang: coordinate(-90, 90),
+  bujur: coordinate(-180, 180),
   barcodeData: z.string().optional(),
 });
 
 export const checkOutShiftSchema = z.object({
   keterangan: z.string().optional(),
   metode: z.enum(["lokasi", "barcode", "face", "manual"]).default("lokasi"),
-  lintang: z.coerce.number().optional(),
-  bujur: z.coerce.number().optional(),
+  lintang: coordinate(-90, 90),
+  bujur: coordinate(-180, 180),
 });
 
 export const absensiListQuerySchema = z.object({

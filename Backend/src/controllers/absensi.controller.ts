@@ -13,6 +13,7 @@ import {
 import { AppError } from "../utils/appError";
 import { AuthRequest } from "../middlewares/auth.middleware";
 import { hitungJarakMeter } from "../utils/geo";
+import { assertShiftGps } from "../services/shiftGps.service";
 import { successResponse, paginatedResponse } from "../utils/responseFormatter";
 import { NextFunction } from "express";
 import { normalizeRole, canManageRole, isSuperAdmin } from "../utils/rbac";
@@ -595,45 +596,7 @@ export const checkInShift = async (req: AuthRequest, res: Response) => {
       );
     }
 
-    if (data.metode === "lokasi" || data.metode === "face") {
-      if (!data.lintang || !data.bujur) {
-        throw new AppError(
-          "Akses lokasi (GPS) wajib diaktifkan untuk metode ini",
-          400,
-        );
-      }
-
-      const sekolah = await prisma.sekolah.findUnique({
-        where: { id: sekolahId },
-      });
-
-      if (
-        sekolah?.metodeAbsensiAktif &&
-        sekolah.metodeAbsensiAktif.length > 0 &&
-        !sekolah.metodeAbsensiAktif.includes(data.metode)
-      ) {
-        throw new AppError(
-          `Metode absensi ${data.metode} sedang dinonaktifkan oleh sekolah. Metode yang diizinkan: ${sekolah.metodeAbsensiAktif.join(", ")}`,
-          400,
-        );
-      }
-
-      if (sekolah?.lintang && sekolah?.bujur) {
-        const jarak = hitungJarakMeter(
-          data.lintang,
-          data.bujur,
-          Number(sekolah.lintang),
-          Number(sekolah.bujur),
-        );
-        const radiusMaks = sekolah.radiusAbsensi || 100;
-        if (jarak > radiusMaks) {
-          throw new AppError(
-            `Anda berada ${Math.round(jarak)} meter dari sekolah. Anda harus berada di dalam radius ${radiusMaks} meter untuk check-in.`,
-            403,
-          );
-        }
-      }
-    }
+    await assertShiftGps(sekolahId, data, "check-in");
 
     const waktuMasuk = new Date();
     const hariIni = todayDateOnly(waktuMasuk);
@@ -714,8 +677,14 @@ export const checkInShift = async (req: AuthRequest, res: Response) => {
 
 export const checkOutShift = async (req: AuthRequest, res: Response) => {
   const userId = req.user!.userId;
+  const sekolahId = req.user?.sekolahId;
+  if (!sekolahId) throw new AppError("Akses ditolak: Anda tidak terhubung dengan sekolah manapun", 403);
+  if (normalizeRole(req.user?.role) === "siswa") {
+    throw new AppError("Absensi shift kerja hanya diperuntukkan bagi guru dan staf/pegawai", 403);
+  }
 
   const data = checkOutShiftSchema.parse(req.body);
+  await assertShiftGps(sekolahId, data, "check-out");
 
   const waktuKeluar = new Date();
   const hariIni = todayDateOnly(waktuKeluar);
@@ -723,6 +692,7 @@ export const checkOutShift = async (req: AuthRequest, res: Response) => {
   const absensiAktif = await prisma.absensi.findFirst({
     where: {
       penggunaId: userId,
+      sekolahId,
       tanggal: hariIni,
       shiftKerjaId: { not: null },
       waktuMasuk: { not: null },

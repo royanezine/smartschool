@@ -3,7 +3,7 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient, TipePaket } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { seedDefaultHalamanCms } from "./seedCms";
-import { provisionSchoolModules } from "./provisionSchoolModules";
+import { provisionSchoolModules } from "../src/utils/provisionSchoolModules";
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });

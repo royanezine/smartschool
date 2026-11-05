@@ -3,6 +3,7 @@ import express, { Application, Request, Response } from "express";
 import cors from "cors";
 import path from "path";
 import { globalErrorHandler } from "./middlewares/error.middleware";
+import { ensureUploadDirectories } from "./utils/uploadDirectories";
 
 // Import Semua Routes
 import authRoutes from "./routes/auth.routes";
@@ -60,6 +61,7 @@ import dashboardSiswaRoutes from "./routes/dashboardSiswa.routes";
 import shiftSiswaRoutes from "./routes/shiftSiswa.routes";
 
 dotenv.config();
+ensureUploadDirectories();
 
 const app: Application = express();
 

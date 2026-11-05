@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { provisionSchoolModules } from "../../prisma/provisionSchoolModules";
+import { provisionSchoolModules } from "../utils/provisionSchoolModules";
 import { Prisma, TipePaket } from "@prisma/client";
 import { prisma } from "../config/db";
 import { AppError } from "../utils/appError";
