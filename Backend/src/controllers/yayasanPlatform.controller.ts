@@ -155,7 +155,6 @@ export const getDetailYayasanLangganan = async (
           },
         },
         pendaftaranTenant: {
-          orderBy: { dibuatPada: "desc" },
           select: {
             id: true,
             midtransOrderId: true,
@@ -216,7 +215,7 @@ export const getDetailYayasanLangganan = async (
           langganan: langgananSekolah[0] ?? null,
         }),
       ),
-      riwayatPendaftaran: yayasan.pendaftaranTenant,
+      riwayatPendaftaran: yayasan.pendaftaranTenant ? [yayasan.pendaftaranTenant] : [],
     });
   } catch (error) {
     next(error);

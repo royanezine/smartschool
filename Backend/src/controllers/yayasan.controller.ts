@@ -82,6 +82,7 @@ const foundationSchema = z.object({
   nama: z.string().trim().min(3).max(100), npyp: z.string().trim().min(3).max(50),
   alamat: z.string().max(10000).nullable().optional(), telepon: z.string().max(20).nullable().optional(),
   email: z.string().email().max(100).nullable().optional(), status: z.enum(["aktif", "nonaktif"]).optional(),
+  paketId: z.string().uuid().optional(),
 }).strict();
 const adminSchema = z.object({ namaPengguna: z.string().trim().min(1).max(50), namaLengkap: z.string().trim().min(2).max(100),
   email: z.string().email().max(100), kataSandi: z.string().min(8).max(72).refine(v => Buffer.byteLength(v) <= 72),
@@ -99,7 +100,8 @@ export async function manageYayasan(req: AuthRequest, res: Response, next: NextF
   try {
     if (req.method === "POST") {
       const data = foundationSchema.parse(req.body);
-      return successResponse(res, "Yayasan dibuat", await prisma.yayasan.create({ data: { ...data, status: data.status ?? "aktif", dibuatOleh: req.user!.userId } }), 201);
+      const { paketId, ...yayasanData } = data;
+      return successResponse(res, "Yayasan dibuat", await prisma.yayasan.create({ data: { ...yayasanData, status: yayasanData.status ?? "aktif", dibuatOleh: req.user!.userId, ...(paketId && { paketId }) } }), 201);
     }
     const id = await foundationScope(req);
     if (req.method === "GET") return successResponse(res, "Detail yayasan", await prisma.yayasan.findUnique({ where: { id }, include: { paket: true, sekolah: { where: { dihapusPada: null } } } }));
