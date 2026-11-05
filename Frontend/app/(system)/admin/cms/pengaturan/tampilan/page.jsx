@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
@@ -112,6 +113,19 @@ const LABELS = {
   siang: "Siang",
 };
 
+// Class khusus UI halaman, bukan warna konfigurasi CMS.
+const UI = {
+  page: "min-h-screen bg-slate-50 text-slate-900 dark:bg-[#0b1220] dark:text-slate-100",
+  card: "border border-slate-200 bg-white dark:border-slate-700 dark:bg-[#111c30]",
+  cardHeader:
+    "border-b border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-[#0d1729]",
+  muted: "text-slate-500 dark:text-slate-400",
+  input:
+    "border border-slate-200 bg-slate-50 text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-[#0b1220] dark:text-slate-100 dark:placeholder:text-slate-500",
+  secondaryButton:
+    "border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-[#111c30] dark:text-slate-300 dark:hover:bg-[#1a2940]",
+};
+
 function cloneTema(data = DEFAULT_TEMA) {
   return JSON.parse(JSON.stringify(data));
 }
@@ -154,14 +168,24 @@ function normalizeTemaResponse(data) {
     return normalized;
   }
 
+  // Mendukung beberapa bentuk response API.
+  const source =
+    data?.data?.tema
+      ? data.data
+      : data?.tema
+        ? data
+        : data?.data
+          ? data.data
+          : data;
+
   for (const group of Object.keys(normalized)) {
-    if (!data[group] || typeof data[group] !== "object") {
+    if (!source[group] || typeof source[group] !== "object") {
       continue;
     }
 
     for (const key of Object.keys(normalized[group])) {
       normalized[group][key] = extractHex(
-        data[group][key],
+        source[group][key],
         normalized[group][key]
       );
     }
@@ -218,11 +242,8 @@ export default function TampilanPage() {
     shiftKerja: true,
   });
 
-  
   const getToken = useCallback(() => {
-    if (typeof window === "undefined") {
-      return null;
-    }
+    if (typeof window === "undefined") return null;
     return getTokenFromLib();
   }, []);
 
@@ -238,6 +259,7 @@ export default function TampilanPage() {
 
       return {
         Authorization: `Bearer ${token}`,
+        Accept: "application/json",
         ...(json ? { "Content-Type": "application/json" } : {}),
       };
     },
@@ -268,6 +290,7 @@ export default function TampilanPage() {
       updateTema(normalized);
     } catch (err) {
       console.error("GET TEMA ERROR:", err);
+
       setError(
         err?.message ||
           "Terjadi kesalahan saat mengambil pengaturan tema."
@@ -406,14 +429,10 @@ export default function TampilanPage() {
       }
 
       const nextTemaAwal = cloneTema(temaAwal);
-
-      for (const change of savedChanges) {
-        nextTemaAwal[change.group][change.key] = change.value;
-      }
-
       const nextTema = cloneTema(tema);
 
       for (const change of savedChanges) {
+        nextTemaAwal[change.group][change.key] = change.value;
         nextTema[change.group][change.key] = change.value;
       }
 
@@ -469,6 +488,7 @@ export default function TampilanPage() {
       setSuccess("Tema berhasil dikembalikan ke warna default.");
     } catch (err) {
       console.error("RESET TEMA ERROR:", err);
+
       setError(
         err?.message || "Terjadi kesalahan saat mereset tema."
       );
@@ -477,6 +497,7 @@ export default function TampilanPage() {
     }
   };
 
+  // Warna ini hanya dipakai untuk Live Preview CMS.
   const preview = tema.tema;
 
   const previewBackground = isValidHex(preview.background)
@@ -508,13 +529,7 @@ export default function TampilanPage() {
     : DEFAULT_TEMA.tema.accent;
 
   return (
-    <div
-      className="flex min-h-screen w-full"
-      style={{
-        backgroundColor: previewBackground,
-        color: previewText,
-      }}
-    >
+    <div className={`flex w-full ${UI.page}`}>
       <Sidebar
         active={active}
         setActive={setActive}
@@ -533,28 +548,27 @@ export default function TampilanPage() {
           notifications={[]}
         />
 
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
+        <main className="flex-1 overflow-y-auto bg-slate-50 p-4 dark:bg-[#0b1220] md:p-6 lg:p-8">
           <div className="mx-auto w-full max-w-none space-y-6">
+            {/* Breadcrumb */}
             <nav className="flex items-center gap-2 text-sm">
               <a
                 href="/admin/cms"
-                style={{ color: previewSecondary }}
-                className="hover:opacity-70"
+                className="text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400"
               >
                 Dashboard
               </a>
 
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="h-4 w-4 text-slate-400" />
 
               <a
                 href="/admin/cms/pengaturan"
-                style={{ color: previewSecondary }}
-                className="hover:opacity-70"
+                className="text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400"
               >
                 Pengaturan
               </a>
 
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="h-4 w-4 text-slate-400" />
 
               <span
                 className="font-semibold"
@@ -564,6 +578,7 @@ export default function TampilanPage() {
               </span>
             </nav>
 
+            {/* Header halaman */}
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div className="flex items-start gap-4">
                 <div
@@ -590,14 +605,11 @@ export default function TampilanPage() {
                     Tampilan Website
                   </div>
 
-                  <h1 className="text-2xl font-bold">
+                  <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
                     Pengaturan Tampilan
                   </h1>
 
-                  <p
-                    className="mt-1 text-sm"
-                    style={{ color: previewSecondary }}
-                  >
+                  <p className={`mt-1 text-sm ${UI.muted}`}>
                     Atur warna tema SmartSchool.
                   </p>
                 </div>
@@ -607,12 +619,7 @@ export default function TampilanPage() {
                 type="button"
                 onClick={handleReset}
                 disabled={resetting || saving}
-                className="inline-flex items-center justify-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium disabled:opacity-50"
-                style={{
-                  backgroundColor: previewSurface,
-                  color: previewSecondary,
-                  borderColor: previewBorder,
-                }}
+                className={`inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium disabled:opacity-50 ${UI.secondaryButton}`}
               >
                 {resetting ? (
                   <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
@@ -624,8 +631,9 @@ export default function TampilanPage() {
               </button>
             </div>
 
+            {/* Pesan error */}
             {error && (
-              <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-red-800">
+              <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-red-800 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300">
                 <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
 
                 <div>
@@ -637,8 +645,9 @@ export default function TampilanPage() {
               </div>
             )}
 
+            {/* Pesan berhasil */}
             {success && (
-              <div className="flex items-start gap-3 rounded-xl border border-green-200 bg-green-50 p-4 text-green-800">
+              <div className="flex items-start gap-3 rounded-xl border border-green-200 bg-green-50 p-4 text-green-800 dark:border-green-900/60 dark:bg-green-950/40 dark:text-green-300">
                 <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0" />
 
                 <div>
@@ -650,20 +659,16 @@ export default function TampilanPage() {
 
             {loading ? (
               <div
-                className="flex min-h-80 items-center justify-center rounded-xl border"
-                style={{
-                  backgroundColor: previewSurface,
-                  borderColor: previewBorder,
-                  color: previewSecondary,
-                }}
+                className={`flex min-h-80 items-center justify-center rounded-xl ${UI.card}`}
               >
-                <div className="flex items-center gap-3">
+                <div className={`flex items-center gap-3 ${UI.muted}`}>
                   <span className="h-5 w-5 animate-spin rounded-full border-2 border-current border-t-transparent" />
                   Memuat pengaturan tema...
                 </div>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-5">
+                {/* Grup konfigurasi warna */}
                 {Object.entries(tema).map(([group, colors]) => {
                   const config = GROUP_LABELS[group];
                   const GroupIcon = config?.icon || Palette;
@@ -672,21 +677,12 @@ export default function TampilanPage() {
                   return (
                     <section
                       key={group}
-                      className="overflow-hidden rounded-xl border shadow-sm"
-                      style={{
-                        backgroundColor: previewSurface,
-                        borderColor: previewBorder,
-                        color: previewText,
-                      }}
+                      className={`overflow-hidden rounded-xl shadow-sm ${UI.card}`}
                     >
                       <button
                         type="button"
                         onClick={() => toggleGroup(group)}
-                        className="flex w-full items-center justify-between gap-3 border-b px-5 py-4 text-left"
-                        style={{
-                          backgroundColor: previewBackground,
-                          borderColor: previewBorder,
-                        }}
+                        className={`flex w-full items-center justify-between gap-3 px-5 py-4 text-left ${UI.cardHeader}`}
                       >
                         <div className="flex items-center gap-3">
                           <div
@@ -700,24 +696,20 @@ export default function TampilanPage() {
                           </div>
 
                           <div>
-                            <h2 className="text-sm font-semibold">
+                            <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
                               {config?.title || group}
                             </h2>
 
-                            <p
-                              className="mt-0.5 text-xs"
-                              style={{ color: previewSecondary }}
-                            >
+                            <p className={`mt-0.5 text-xs ${UI.muted}`}>
                               {config?.description || "Pengaturan warna"}
                             </p>
                           </div>
                         </div>
 
                         <ChevronRight
-                          className={`h-5 w-5 transition-transform ${
+                          className={`h-5 w-5 text-slate-500 transition-transform dark:text-slate-400 ${
                             isOpen ? "rotate-90" : ""
                           }`}
-                          style={{ color: previewSecondary }}
                         />
                       </button>
 
@@ -732,12 +724,9 @@ export default function TampilanPage() {
                               return (
                                 <div
                                   key={key}
-                                  className="overflow-hidden rounded-xl border"
-                                  style={{
-                                    backgroundColor: previewSurface,
-                                    borderColor: previewBorder,
-                                  }}
+                                  className={`overflow-hidden rounded-xl ${UI.card}`}
                                 >
+                                  {/* Sampel warna CMS */}
                                   <div
                                     className="flex h-20 items-center justify-center"
                                     style={{
@@ -762,15 +751,12 @@ export default function TampilanPage() {
                                     <div>
                                       <label
                                         htmlFor={`${group}-${key}-text`}
-                                        className="text-xs font-semibold"
+                                        className="text-xs font-semibold text-slate-900 dark:text-slate-100"
                                       >
                                         {LABELS[key] || key}
                                       </label>
 
-                                      <p
-                                        className="mt-0.5 text-[10px]"
-                                        style={{ color: previewSecondary }}
-                                      >
+                                      <p className={`mt-0.5 text-[10px] ${UI.muted}`}>
                                         {group}.{key}
                                       </p>
                                     </div>
@@ -787,11 +773,7 @@ export default function TampilanPage() {
                                             event.target.value
                                           )
                                         }
-                                        className="h-10 w-10 cursor-pointer rounded-lg border p-0.5"
-                                        style={{
-                                          backgroundColor: previewSurface,
-                                          borderColor: previewBorder,
-                                        }}
+                                        className="h-10 w-10 cursor-pointer rounded-lg border border-slate-200 bg-white p-0.5 dark:border-slate-700 dark:bg-[#0b1220]"
                                       />
 
                                       <input
@@ -809,12 +791,7 @@ export default function TampilanPage() {
                                         onBlur={() =>
                                           handleHexBlur(group, key)
                                         }
-                                        className="min-w-0 flex-1 rounded-lg border px-3 py-2 font-mono text-xs uppercase outline-none"
-                                        style={{
-                                          backgroundColor: previewBackground,
-                                          color: previewText,
-                                          borderColor: previewBorder,
-                                        }}
+                                        className={`min-w-0 flex-1 rounded-lg px-3 py-2 font-mono text-xs uppercase outline-none ${UI.input}`}
                                         placeholder="#2563EB"
                                       />
                                     </div>
@@ -829,6 +806,9 @@ export default function TampilanPage() {
                   );
                 })}
 
+                {/* LIVE PREVIEW CMS */}
+                {/* Bagian ini sengaja menggunakan warna CMS,
+                    bukan warna Dark Mode halaman admin. */}
                 <section
                   className="overflow-hidden rounded-xl border shadow-sm"
                   style={{
@@ -844,10 +824,16 @@ export default function TampilanPage() {
                       borderColor: previewBorder,
                     }}
                   >
-                    <Eye className="h-4 w-4" />
+                    <Eye
+                      className="h-4 w-4"
+                      style={{ color: previewText }}
+                    />
 
                     <div>
-                      <h2 className="text-sm font-semibold">Live Preview</h2>
+                      <h2 className="text-sm font-semibold">
+                        Live Preview
+                      </h2>
+
                       <p
                         className="mt-0.5 text-xs"
                         style={{ color: previewSecondary }}
@@ -979,17 +965,13 @@ export default function TampilanPage() {
                   </div>
                 </section>
 
+                {/* Tombol aksi */}
                 <div className="flex flex-col justify-end gap-3 pt-1 sm:flex-row">
                   <button
                     type="button"
                     onClick={fetchTema}
                     disabled={loading || saving || resetting}
-                    className="inline-flex items-center justify-center gap-2 rounded-lg border px-5 py-2.5 text-sm font-medium disabled:opacity-50"
-                    style={{
-                      backgroundColor: previewSurface,
-                      color: previewSecondary,
-                      borderColor: previewBorder,
-                    }}
+                    className={`inline-flex items-center justify-center gap-2 rounded-lg px-5 py-2.5 text-sm font-medium disabled:opacity-50 ${UI.secondaryButton}`}
                   >
                     <RotateCcw className="h-4 w-4" />
                     Muat Ulang
@@ -1020,13 +1002,7 @@ export default function TampilanPage() {
               </form>
             )}
 
-            <footer
-              className="border-t pt-4 text-center text-xs"
-              style={{
-                borderColor: previewBorder,
-                color: previewSecondary,
-              }}
-            >
+            <footer className="border-t border-slate-200 pt-4 text-center text-xs text-slate-500 dark:border-slate-700 dark:text-slate-400">
               © 2026 SmartSchool CMS • Pengaturan Tampilan
             </footer>
           </div>

@@ -451,7 +451,7 @@ export const adminSidebarConfig = {
           key: "gudang",
           icon: Boxes,
           label: "Gudang",
-          path: "/admin/sarpras/gudang/master",
+          path: "/admin/sarpras/gudang",
         },
         {
           key: "kategoriAset",

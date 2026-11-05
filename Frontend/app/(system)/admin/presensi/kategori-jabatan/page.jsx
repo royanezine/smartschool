@@ -7,7 +7,6 @@ import Sidebar from "@/app/components/Sidebar";
 
 import {
   getKategoriJabatan,
-  getKategoriJabatanById,
   createKategoriJabatan,
   updateKategoriJabatan,
   tambahTarifKategoriJabatan,
@@ -512,407 +511,414 @@ export default function KategoriJabatanPage() {
         onClose={() => setSidebarOpen(false)}
       />
 
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <div className="shrink-0">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+        <div className="shrink-0 border-b theme-border">
           <Header onMenuClick={() => setSidebarOpen(true)} />
         </div>
 
-        <main className="min-w-0 flex-1 overflow-y-auto theme-page theme-text">
-          <div className="w-full px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
-            <div className="mx-auto w-full max-w-7xl space-y-6">
-              <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
-                <div className="flex items-start gap-3">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
-                    <BriefcaseBusiness size={23} />
+        <div className="flex min-h-0 flex-1">
+          <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto">
+            <div className="w-full px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 2xl:px-12">
+              <div className="w-full space-y-6">
+                <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
+                      <BriefcaseBusiness size={23} />
+                    </div>
+
+                    <div>
+                      <h1 className="mt-1 text-2xl font-bold tracking-tight theme-text">
+                        Kategori Jabatan
+                      </h1>
+                      <p className="mt-1 max-w-2xl text-sm leading-6 theme-text-secondary">
+                        Kelola kategori jabatan pegawai dan tarif per jam
+                        sebagai dasar perhitungan penggajian.
+                      </p>
+                    </div>
                   </div>
 
-                  <div>
-                   
-                    <h1 className="mt-1 text-2xl font-bold tracking-tight theme-text">
-                      Kategori Jabatan
-                    </h1>
-                    <p className="mt-1 max-w-2xl text-sm leading-6 theme-text-secondary">
-                      Kelola kategori jabatan pegawai dan tarif per jam
-                      sebagai dasar perhitungan penggajian.
+                  <div className="flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => loadData({ quiet: true })}
+                      disabled={loading || refreshing}
+                      className={buttonSecondary}
+                    >
+                      <RefreshCw
+                        size={16}
+                        className={refreshing ? "animate-spin" : ""}
+                      />
+                      Refresh
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={openCreate}
+                      className={buttonPrimary}
+                    >
+                      <Plus size={17} />
+                      Tambah Kategori
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3 rounded-xl border theme-border theme-card p-4">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
+                    <Info size={18} />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium theme-text">
+                      Perubahan tarif disimpan sebagai riwayat baru
+                    </p>
+                    <p className="mt-1 text-xs leading-5 theme-text-muted">
+                      Perhitungan gaji mengikuti aturan sistem dan riwayat tarif
+                      yang berlaku pada periode penggajian.
                     </p>
                   </div>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => loadData({ quiet: true })}
-                    disabled={loading || refreshing}
-                    className={buttonSecondary}
+                {notice && (
+                  <div
+                    role="status"
+                    className="flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700 dark:border-emerald-900/60 dark:bg-emerald-950/30 dark:text-emerald-300"
                   >
-                    <RefreshCw
-                      size={16}
-                      className={refreshing ? "animate-spin" : ""}
-                    />
-                    Refresh
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={openCreate}
-                    className={buttonPrimary}
-                  >
-                    <Plus size={17} />
-                    Tambah Kategori
-                  </button>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3 rounded-lg border theme-border theme-card p-4">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
-                  <Info size={18} />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium theme-text">
-                    Perubahan tarif disimpan sebagai riwayat baru
-                  </p>
-                  <p className="mt-1 text-xs leading-5 theme-text-muted">
-                    Perhitungan gaji mengikuti aturan sistem dan riwayat tarif
-                    yang berlaku pada periode penggajian.
-                  </p>
-                </div>
-              </div>
-
-              {notice && (
-                <div
-                  role="status"
-                  className="flex items-start gap-3 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700 dark:border-emerald-900/60 dark:bg-emerald-950/30 dark:text-emerald-300"
-                >
-                  <CheckCircle2 size={18} className="mt-0.5 shrink-0" />
-                  <p className="flex-1">{notice}</p>
-                  <button
-                    type="button"
-                    onClick={() => setNotice("")}
-                    aria-label="Tutup pemberitahuan"
-                    className="rounded p-1 hover:bg-emerald-100 dark:hover:bg-emerald-900/40"
-                  >
-                    <X size={16} />
-                  </button>
-                </div>
-              )}
-
-              {error && !modal && (
-                <div
-                  role="alert"
-                  className="flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-300"
-                >
-                  <AlertCircle size={19} className="mt-0.5 shrink-0" />
-                  <div className="min-w-0 flex-1">
-                    <p className="font-semibold">Permintaan gagal</p>
-                    <p className="mt-1 break-words">{error}</p>
-                  </div>
-                  <button
-                    type="button"
-                    aria-label="Tutup pesan error"
-                    onClick={() => setError("")}
-                    className="rounded p-1 hover:bg-red-100 dark:hover:bg-red-900/40"
-                  >
-                    <X size={16} />
-                  </button>
-                </div>
-              )}
-
-              <div className="grid grid-cols-1 items-stretch gap-4 sm:grid-cols-3">
-                <SummaryCard
-                  title="Kategori pada halaman"
-                  value={loading ? "—" : pagination.total}
-                  description="Total sesuai hasil sistem"
-                  icon={BriefcaseBusiness}
-                  tone="blue"
-                />
-                <SummaryCard
-                  title="Kategori aktif"
-                  value={loading ? "—" : summary.active}
-                  description="Dari data halaman saat ini"
-                  icon={CheckCircle2}
-                  tone="emerald"
-                />
-                <SummaryCard
-                  title="Pegawai pada halaman"
-                  value={loading ? "—" : summary.employees}
-                  description="Berdasarkan jumlah pengguna per kategori"
-                  icon={Users}
-                  tone="indigo"
-                />
-              </div>
-
-              <section className="theme-card overflow-hidden rounded-xl border theme-border shadow-sm">
-                <div className="border-b theme-border p-4 sm:p-5">
-                  <form
-                    onSubmit={handleSearch}
-                    className="flex flex-col gap-3 md:flex-row"
-                  >
-                    <div className="relative min-w-0 flex-1">
-                      <Search
-                        size={18}
-                        className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 theme-text-muted"
-                      />
-                      <input
-                        value={searchInput}
-                        onChange={(event) =>
-                          setSearchInput(event.target.value)
-                        }
-                        placeholder="Cari nama atau kode kategori..."
-                        className={`${inputClass} pl-10`}
-                      />
-                    </div>
-
-                    <select
-                      value={statusFilter}
-                      onChange={(event) => {
-                        setStatusFilter(event.target.value);
-                        setPage(1);
-                      }}
-                      className={`${inputClass} md:w-48`}
-                      aria-label="Filter status kategori"
+                    <CheckCircle2 size={18} className="mt-0.5 shrink-0" />
+                    <p className="flex-1">{notice}</p>
+                    <button
+                      type="button"
+                      onClick={() => setNotice("")}
+                      aria-label="Tutup pemberitahuan"
+                      className="rounded p-1 hover:bg-emerald-100 dark:hover:bg-emerald-900/40"
                     >
-                      <option value="">Semua status</option>
-                      <option value="aktif">Aktif</option>
-                      <option value="nonaktif">Nonaktif</option>
-                    </select>
-
-                    <button type="submit" className={buttonPrimary}>
-                      <Search size={16} />
-                      Cari
+                      <X size={16} />
                     </button>
-                  </form>
+                  </div>
+                )}
+
+                {error && !modal && (
+                  <div
+                    role="alert"
+                    className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-300"
+                  >
+                    <AlertCircle size={19} className="mt-0.5 shrink-0" />
+                    <div className="min-w-0 flex-1">
+                      <p className="font-semibold">Permintaan gagal</p>
+                      <p className="mt-1 break-words">{error}</p>
+                    </div>
+                    <button
+                      type="button"
+                      aria-label="Tutup pesan error"
+                      onClick={() => setError("")}
+                      className="rounded p-1 hover:bg-red-100 dark:hover:bg-red-900/40"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-1 items-stretch gap-4 sm:grid-cols-3 2xl:grid-cols-6">
+                  <div className="sm:col-span-1 2xl:col-span-2">
+                    <SummaryCard
+                      title="Kategori pada halaman"
+                      value={loading ? "—" : pagination.total}
+                      description="Total sesuai hasil sistem"
+                      icon={BriefcaseBusiness}
+                      tone="blue"
+                    />
+                  </div>
+                  <div className="sm:col-span-1 2xl:col-span-2">
+                    <SummaryCard
+                      title="Kategori aktif"
+                      value={loading ? "—" : summary.active}
+                      description="Dari data halaman saat ini"
+                      icon={CheckCircle2}
+                      tone="emerald"
+                    />
+                  </div>
+                  <div className="sm:col-span-1 2xl:col-span-2">
+                    <SummaryCard
+                      title="Pegawai pada halaman"
+                      value={loading ? "—" : summary.employees}
+                      description="Berdasarkan jumlah pengguna per kategori"
+                      icon={Users}
+                      tone="indigo"
+                    />
+                  </div>
                 </div>
 
-                <div className="relative">
-                  {loading ? (
-                    <div className="flex min-h-64 flex-col items-center justify-center px-4 text-center">
-                      <LoaderCircle
-                        size={28}
-                        className="animate-spin theme-primary-text"
-                      />
-                      <p className="mt-3 text-sm font-medium theme-text">
-                        Memuat kategori jabatan...
-                      </p>
-                      <p className="mt-1 text-xs theme-text-muted">
-                        Mengambil data dari sistem
-                      </p>
-                    </div>
-                  ) : sortedItems.length === 0 ? (
-                    <div className="flex min-h-64 flex-col items-center justify-center px-4 text-center">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] theme-text-muted">
-                        <BriefcaseBusiness size={23} />
+                <section className="theme-card overflow-hidden rounded-2xl border theme-border shadow-sm">
+                  <div className="border-b theme-border p-4 sm:p-5">
+                    <form
+                      onSubmit={handleSearch}
+                      className="flex flex-col gap-3 md:flex-row"
+                    >
+                      <div className="relative min-w-0 flex-1">
+                        <Search
+                          size={18}
+                          className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 theme-text-muted"
+                        />
+                        <input
+                          value={searchInput}
+                          onChange={(event) =>
+                            setSearchInput(event.target.value)
+                          }
+                          placeholder="Cari nama atau kode kategori..."
+                          className={`${inputClass} pl-10`}
+                        />
                       </div>
-                      <p className="mt-4 font-semibold theme-text">
-                        Belum ada kategori jabatan
-                      </p>
-                      <p className="mt-1 max-w-sm text-sm theme-text-muted">
-                        Coba ubah pencarian atau tambahkan kategori baru.
-                      </p>
+
+                      <select
+                        value={statusFilter}
+                        onChange={(event) => {
+                          setStatusFilter(event.target.value);
+                          setPage(1);
+                        }}
+                        className={`${inputClass} md:w-48`}
+                        aria-label="Filter status kategori"
+                      >
+                        <option value="">Semua status</option>
+                        <option value="aktif">Aktif</option>
+                        <option value="nonaktif">Nonaktif</option>
+                      </select>
+
+                      <button type="submit" className={buttonPrimary}>
+                        <Search size={16} />
+                        Cari
+                      </button>
+                    </form>
+                  </div>
+
+                  <div className="relative">
+                    {loading ? (
+                      <div className="flex min-h-64 flex-col items-center justify-center px-4 text-center">
+                        <LoaderCircle
+                          size={28}
+                          className="animate-spin theme-primary-text"
+                        />
+                        <p className="mt-3 text-sm font-medium theme-text">
+                          Memuat kategori jabatan...
+                        </p>
+                        <p className="mt-1 text-xs theme-text-muted">
+                          Mengambil data dari sistem
+                        </p>
+                      </div>
+                    ) : sortedItems.length === 0 ? (
+                      <div className="flex min-h-64 flex-col items-center justify-center px-4 text-center">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] theme-text-muted">
+                          <BriefcaseBusiness size={23} />
+                        </div>
+                        <p className="mt-4 font-semibold theme-text">
+                          Belum ada kategori jabatan
+                        </p>
+                        <p className="mt-1 max-w-sm text-sm theme-text-muted">
+                          Coba ubah pencarian atau tambahkan kategori baru.
+                        </p>
+                        <button
+                          type="button"
+                          onClick={openCreate}
+                          className={`${buttonPrimary} mt-4`}
+                        >
+                          <Plus size={16} />
+                          Tambah Kategori
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="overflow-x-auto">
+                        <table className="w-full min-w-[900px] text-left text-sm">
+                          <thead className="bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] text-xs uppercase tracking-wide theme-text-muted border-b theme-border">
+                            <tr>
+                              <th className="px-5 py-4 font-semibold w-16">No</th>
+                              <SortableHeader
+                                label="Kategori"
+                                column="nama"
+                                sortBy={sortBy}
+                                sortOrder={sortOrder}
+                                onSort={handleSort}
+                              />
+                              <SortableHeader
+                                label="Tarif per jam"
+                                column="tarif"
+                                sortBy={sortBy}
+                                sortOrder={sortOrder}
+                                onSort={handleSort}
+                              />
+                              <SortableHeader
+                                label="Pegawai"
+                                column="pegawai"
+                                sortBy={sortBy}
+                                sortOrder={sortOrder}
+                                onSort={handleSort}
+                              />
+                              <SortableHeader
+                                label="Status"
+                                column="status"
+                                sortBy={sortBy}
+                                sortOrder={sortOrder}
+                                onSort={handleSort}
+                              />
+                              <th className="px-5 py-4 text-right font-semibold">
+                                Tindakan
+                              </th>
+                            </tr>
+                          </thead>
+
+                          <tbody className="divide-y divide-[color-mix(in_srgb,var(--color-text)_5%,transparent)]">
+                            {sortedItems.map((item, index) => (
+                              <tr
+                                key={item.id}
+                                className="hover:bg-[color-mix(in_srgb,var(--color-text)_2%,transparent)] transition"
+                              >
+                                <td className="px-5 py-4">
+                                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)] text-xs font-semibold theme-text-secondary">
+                                    {(page - 1) * limit + index + 1}
+                                  </span>
+                                </td>
+
+                                <td className="px-5 py-4">
+                                  <div className="flex items-center gap-3">
+                                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
+                                      <BriefcaseBusiness size={18} />
+                                    </div>
+                                    <div className="min-w-0">
+                                      <p className="font-semibold theme-text">
+                                        {item.nama || "-"}
+                                      </p>
+                                      <p className="mt-1 text-xs theme-text-muted">
+                                        Kode: {item.kode || "Tidak ada kode"}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </td>
+
+                                <td className="px-5 py-4">
+                                  <p className="font-semibold theme-text">
+                                    {item.tarifAktif
+                                      ? formatRupiah(item.tarifAktif.tarifPerJam)
+                                      : "Belum diatur"}
+                                  </p>
+                                  {item.tarifAktif?.berlakuMulai && (
+                                    <p className="mt-1 text-xs theme-text-muted">
+                                      Berlaku sejak{" "}
+                                      {formatTanggal(
+                                        item.tarifAktif.berlakuMulai,
+                                      )}
+                                    </p>
+                                  )}
+                                </td>
+
+                                <td className="px-5 py-4">
+                                  <span className="inline-flex items-center gap-1.5 theme-text-secondary">
+                                    <Users
+                                      size={15}
+                                      className="theme-text-muted"
+                                    />
+                                    {Number(item.jumlahPengguna ?? 0)}
+                                  </span>
+                                </td>
+
+                                <td className="px-5 py-4">
+                                  <StatusBadge status={item.status} />
+                                </td>
+
+                                <td className="px-5 py-4">
+                                  <div className="flex items-center justify-end gap-1.5">
+                                    <button
+                                      type="button"
+                                      onClick={() => openDetail(item)}
+                                      title="Detail dan riwayat tarif"
+                                      aria-label={`Detail ${item.nama}`}
+                                      className="rounded-lg p-2 theme-text-muted transition hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-blue-950/40 dark:hover:text-blue-300"
+                                    >
+                                      <Eye size={17} />
+                                    </button>
+
+                                    <button
+                                      type="button"
+                                      onClick={() => openEdit(item)}
+                                      title="Edit kategori"
+                                      aria-label={`Edit ${item.nama}`}
+                                      className="rounded-lg p-2 theme-text-muted transition hover:bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)] hover:theme-text"
+                                    >
+                                      <Pencil size={17} />
+                                    </button>
+
+                                    <button
+                                      type="button"
+                                      onClick={() => openTarif(item)}
+                                      title="Atur tarif baru"
+                                      aria-label={`Atur tarif ${item.nama}`}
+                                      className="rounded-lg p-2 theme-text-muted transition hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-emerald-950/40 dark:hover:text-emerald-300"
+                                    >
+                                      <Wallet size={17} />
+                                    </button>
+
+                                    <button
+                                      type="button"
+                                      onClick={() => handleDelete(item)}
+                                      title="Nonaktifkan kategori"
+                                      aria-label={`Nonaktifkan ${item.nama}`}
+                                      className="rounded-lg p-2 theme-text-muted transition hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-950/40 dark:hover:text-red-300"
+                                    >
+                                      <Trash2 size={17} />
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex flex-col gap-3 border-t theme-border px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+                    <p className="text-sm theme-text-muted">
+                      Menampilkan{" "}
+                      <span className="font-medium theme-text">
+                        {sortedItems.length}
+                      </span>{" "}
+                      data pada halaman ini dari{" "}
+                      <span className="font-medium theme-text">
+                        {pagination.total}
+                      </span>{" "}
+                      kategori
+                    </p>
+
+                    <div className="flex items-center gap-2">
                       <button
                         type="button"
-                        onClick={openCreate}
-                        className={`${buttonPrimary} mt-4`}
+                        disabled={page <= 1 || loading}
+                        onClick={() => setPage((current) => current - 1)}
+                        className={buttonSecondary}
                       >
-                        <Plus size={16} />
-                        Tambah Kategori
+                        <ChevronLeft size={16} />
+                        Sebelumnya
+                      </button>
+
+                      <span className="min-w-20 text-center text-sm theme-text">
+                        {page} / {pagination.totalPages}
+                      </span>
+
+                      <button
+                        type="button"
+                        disabled={page >= pagination.totalPages || loading}
+                        onClick={() => setPage((current) => current + 1)}
+                        className={buttonSecondary}
+                      >
+                        Berikutnya
+                        <ChevronRight size={16} />
                       </button>
                     </div>
-                  ) : (
-                    <div className="overflow-x-auto">
-                      <table className="w-full min-w-[900px] text-left text-sm">
-                        <thead className="bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] text-xs uppercase tracking-wide theme-text-muted border-b theme-border">
-                          <tr>
-                            <th className="px-5 py-4 font-semibold w-16">No</th>
-                            <SortableHeader
-                              label="Kategori"
-                              column="nama"
-                              sortBy={sortBy}
-                              sortOrder={sortOrder}
-                              onSort={handleSort}
-                            />
-                            <SortableHeader
-                              label="Tarif per jam"
-                              column="tarif"
-                              sortBy={sortBy}
-                              sortOrder={sortOrder}
-                              onSort={handleSort}
-                            />
-                            <SortableHeader
-                              label="Pegawai"
-                              column="pegawai"
-                              sortBy={sortBy}
-                              sortOrder={sortOrder}
-                              onSort={handleSort}
-                            />
-                            <SortableHeader
-                              label="Status"
-                              column="status"
-                              sortBy={sortBy}
-                              sortOrder={sortOrder}
-                              onSort={handleSort}
-                            />
-                            <th className="px-5 py-4 text-right font-semibold">
-                              Tindakan
-                            </th>
-                          </tr>
-                        </thead>
-
-                        <tbody className="divide-y divide-[color-mix(in_srgb,var(--color-text)_5%,transparent)]">
-                          {sortedItems.map((item, index) => (
-                            <tr
-                              key={item.id}
-                              className="hover:bg-[color-mix(in_srgb,var(--color-text)_2%,transparent)] transition"
-                            >
-                              <td className="px-5 py-4">
-                                <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)] text-xs font-semibold theme-text-secondary">
-                                  {(page - 1) * limit + index + 1}
-                                </span>
-                              </td>
-
-                              <td className="px-5 py-4">
-                                <div className="flex items-center gap-3">
-                                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
-                                    <BriefcaseBusiness size={18} />
-                                  </div>
-                                  <div className="min-w-0">
-                                    <p className="font-semibold theme-text">
-                                      {item.nama || "-"}
-                                    </p>
-                                    <p className="mt-1 text-xs theme-text-muted">
-                                      Kode: {item.kode || "Tidak ada kode"}
-                                    </p>
-                                  </div>
-                                </div>
-                              </td>
-
-                              <td className="px-5 py-4">
-                                <p className="font-semibold theme-text">
-                                  {item.tarifAktif
-                                    ? formatRupiah(item.tarifAktif.tarifPerJam)
-                                    : "Belum diatur"}
-                                </p>
-                                {item.tarifAktif?.berlakuMulai && (
-                                  <p className="mt-1 text-xs theme-text-muted">
-                                    Berlaku sejak{" "}
-                                    {formatTanggal(
-                                      item.tarifAktif.berlakuMulai,
-                                    )}
-                                  </p>
-                                )}
-                              </td>
-
-                              <td className="px-5 py-4">
-                                <span className="inline-flex items-center gap-1.5 theme-text-secondary">
-                                  <Users
-                                    size={15}
-                                    className="theme-text-muted"
-                                  />
-                                  {Number(item.jumlahPengguna ?? 0)}
-                                </span>
-                              </td>
-
-                              <td className="px-5 py-4">
-                                <StatusBadge status={item.status} />
-                              </td>
-
-                              <td className="px-5 py-4">
-                                <div className="flex items-center justify-end gap-1.5">
-                                  <button
-                                    type="button"
-                                    onClick={() => openDetail(item)}
-                                    title="Detail dan riwayat tarif"
-                                    aria-label={`Detail ${item.nama}`}
-                                    className="rounded-lg p-2 theme-text-muted transition hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-blue-950/40 dark:hover:text-blue-300"
-                                  >
-                                    <Eye size={17} />
-                                  </button>
-
-                                  <button
-                                    type="button"
-                                    onClick={() => openEdit(item)}
-                                    title="Edit kategori"
-                                    aria-label={`Edit ${item.nama}`}
-                                    className="rounded-lg p-2 theme-text-muted transition hover:bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)] hover:theme-text"
-                                  >
-                                    <Pencil size={17} />
-                                  </button>
-
-                                  <button
-                                    type="button"
-                                    onClick={() => openTarif(item)}
-                                    title="Atur tarif baru"
-                                    aria-label={`Atur tarif ${item.nama}`}
-                                    className="rounded-lg p-2 theme-text-muted transition hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-emerald-950/40 dark:hover:text-emerald-300"
-                                  >
-                                    <Wallet size={17} />
-                                  </button>
-
-                                  <button
-                                    type="button"
-                                    onClick={() => handleDelete(item)}
-                                    title="Nonaktifkan kategori"
-                                    aria-label={`Nonaktifkan ${item.nama}`}
-                                    className="rounded-lg p-2 theme-text-muted transition hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-950/40 dark:hover:text-red-300"
-                                  >
-                                    <Trash2 size={17} />
-                                  </button>
-                                </div>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex flex-col gap-3 border-t theme-border px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
-                  <p className="text-sm theme-text-muted">
-                    Menampilkan{" "}
-                    <span className="font-medium theme-text">
-                      {sortedItems.length}
-                    </span>{" "}
-                    data pada halaman ini dari{" "}
-                    <span className="font-medium theme-text">
-                      {pagination.total}
-                    </span>{" "}
-                    kategori
-                  </p>
-
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      disabled={page <= 1 || loading}
-                      onClick={() => setPage((current) => current - 1)}
-                      className={buttonSecondary}
-                    >
-                      <ChevronLeft size={16} />
-                      Sebelumnya
-                    </button>
-
-                    <span className="min-w-20 text-center text-sm theme-text">
-                      {page} / {pagination.totalPages}
-                    </span>
-
-                    <button
-                      type="button"
-                      disabled={page >= pagination.totalPages || loading}
-                      onClick={() => setPage((current) => current + 1)}
-                      className={buttonSecondary}
-                    >
-                      Berikutnya
-                      <ChevronRight size={16} />
-                    </button>
                   </div>
-                </div>
 
-                <div className="border-t theme-border px-5 py-3 text-xs theme-text-muted">
-                  Data kategori jabatan diambil dari sistem.
-                </div>
-              </section>
+                  <div className="border-t theme-border px-5 py-3 text-xs theme-text-muted">
+                    Data kategori jabatan diambil dari sistem.
+                  </div>
+                </section>
+              </div>
             </div>
-          </div>
-        </main>
+          </main>
+        </div>
       </div>
 
       {(modal === "create" || modal === "edit") && (
@@ -931,7 +937,7 @@ export default function KategoriJabatanPage() {
         >
           <form onSubmit={handleSubmit} className="space-y-5">
             {error && (
-              <div className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-300">
+              <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-300">
                 <AlertCircle size={17} className="mt-0.5 shrink-0" />
                 <span>{error}</span>
               </div>
@@ -993,7 +999,7 @@ export default function KategoriJabatanPage() {
             </Field>
 
             {modal === "create" && (
-              <div className="space-y-4 rounded-lg border theme-border bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] p-4">
+              <div className="space-y-4 rounded-xl border theme-border bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] p-4">
                 <div className="flex items-center gap-2">
                   <Wallet size={18} className="theme-primary-text" />
                   <h3 className="font-semibold theme-text">Tarif awal</h3>
@@ -1041,7 +1047,7 @@ export default function KategoriJabatanPage() {
             )}
 
             {modal === "edit" && (
-              <p className="rounded-lg border border-blue-200 bg-blue-50 p-3 text-xs leading-5 text-blue-800 dark:border-blue-900/60 dark:bg-blue-950/30 dark:text-blue-200">
+              <p className="rounded-xl border border-blue-200 bg-blue-50 p-3 text-xs leading-5 text-blue-800 dark:border-blue-900/60 dark:bg-blue-950/30 dark:text-blue-200">
                 Tarif tidak diubah dari formulir ini. Gunakan tindakan Atur
                 Tarif agar riwayat tarif lama tetap tersimpan.
               </p>
@@ -1086,13 +1092,13 @@ export default function KategoriJabatanPage() {
         >
           <form onSubmit={handleTarifSubmit} className="space-y-5">
             {error && (
-              <div className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-300">
+              <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-300">
                 <AlertCircle size={17} className="mt-0.5 shrink-0" />
                 <span>{error}</span>
               </div>
             )}
 
-            <div className="rounded-lg bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] border theme-border p-4">
+            <div className="rounded-xl bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] border theme-border p-4">
               <p className="text-xs theme-text-muted">Tarif saat ini</p>
               <p className="mt-1 text-xl font-bold tabular-nums theme-text">
                 {selected.tarifAktif
@@ -1179,14 +1185,14 @@ export default function KategoriJabatanPage() {
           wide
         >
           {error && (
-            <div className="mb-4 flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-300">
+            <div className="mb-4 flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-300">
               <AlertCircle size={17} className="mt-0.5 shrink-0" />
               <span>{error}</span>
             </div>
           )}
 
           <div className="space-y-5">
-            <div className="flex flex-col justify-between gap-3 rounded-lg border theme-border p-4 sm:flex-row sm:items-start">
+            <div className="flex flex-col justify-between gap-3 rounded-xl border theme-border p-4 sm:flex-row sm:items-start">
               <div className="flex items-start gap-3">
                 <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                   <BriefcaseBusiness size={21} />
@@ -1207,7 +1213,7 @@ export default function KategoriJabatanPage() {
             </div>
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <div className="rounded-lg bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] border theme-border p-4">
+              <div className="rounded-xl bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] border theme-border p-4">
                 <p className="text-sm theme-text-muted">Tarif aktif</p>
                 <p className="mt-2 text-xl font-bold tabular-nums theme-text">
                   {currentTarif
@@ -1221,7 +1227,7 @@ export default function KategoriJabatanPage() {
                 )}
               </div>
 
-              <div className="rounded-lg bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] border theme-border p-4">
+              <div className="rounded-xl bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] border theme-border p-4">
                 <p className="text-sm theme-text-muted">Jumlah pegawai</p>
                 <p className="mt-2 text-xl font-bold tabular-nums theme-text">
                   {Number(selected.jumlahPengguna ?? 0)}
@@ -1236,11 +1242,11 @@ export default function KategoriJabatanPage() {
               </div>
 
               {!selected.tarifRiwayat?.length ? (
-                <div className="rounded-lg border border-dashed theme-border p-6 text-center text-sm theme-text-muted">
+                <div className="rounded-xl border border-dashed theme-border p-6 text-center text-sm theme-text-muted">
                   Belum ada riwayat tarif yang tersedia.
                 </div>
               ) : (
-                <div className="overflow-x-auto rounded-lg border theme-border">
+                <div className="overflow-x-auto rounded-xl border theme-border">
                   <table className="w-full min-w-[600px] text-left text-sm">
                     <thead className="bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] text-xs theme-text-muted border-b theme-border">
                       <tr>
@@ -1310,7 +1316,6 @@ export default function KategoriJabatanPage() {
   );
 }
 
-
 function SummaryCard({ title, value, description, icon: Icon, tone = "blue" }) {
   const toneClasses = {
     blue: "bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300",
@@ -1323,7 +1328,7 @@ function SummaryCard({ title, value, description, icon: Icon, tone = "blue" }) {
   };
 
   return (
-    <div className="theme-card flex h-full flex-col rounded-xl border theme-border p-5 shadow-sm">
+    <div className="theme-card flex h-full flex-col rounded-2xl border theme-border p-5 shadow-sm">
       <div className="flex items-center justify-between gap-3">
         <span className="text-sm font-medium theme-text-muted">{title}</span>
         <div

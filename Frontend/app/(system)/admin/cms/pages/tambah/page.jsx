@@ -154,7 +154,8 @@ export default function CreatePagePage() {
 
 
   return (
-    <div className="theme-page flex min-h-screen w-full">
+    // ROOT: fixed viewport, no page-level scroll
+    <div className="theme-page flex h-screen w-full overflow-hidden">
 
       <Sidebar
         active={active}
@@ -164,19 +165,26 @@ export default function CreatePagePage() {
       />
 
 
-      <div className="flex min-w-0 flex-1 flex-col lg:ml-0">
-        <Header
-          title="Tambah Halaman Statis"
-          user={{
-            name: "CMS Admin",
-            email: "cms@smartschool.com",
-            avatar: "CA",
-          }}
-        />
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
 
-        <main className="theme-page min-h-screen w-full">
-          <div className="w-full px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
-            <div className="mx-auto w-full max-w-[1450px]">
+        {/* Header stays fixed at top */}
+        <div className="shrink-0">
+          <Header
+            title="Tambah Halaman Statis"
+            user={{
+              name: "CMS Admin",
+              email: "cms@smartschool.com",
+              avatar: "CA",
+            }}
+          />
+        </div>
+
+
+        {/* Body: only main scrolls */}
+        <div className="flex min-h-0 flex-1">
+
+          <main className="theme-page min-w-0 flex-1 overflow-y-auto">
+            <div className="w-full px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
 
 
               {/* Baris atas: Kembali (kiri) + Breadcrumb (kanan) */}
@@ -323,7 +331,8 @@ export default function CreatePagePage() {
 
 
               <form onSubmit={handleSubmit(onSubmit)}>
-                <div className="grid min-w-0 grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_310px]">
+                {/* Grid responsif: 1 kolom di bawah xl, 2 kolom di xl+ */}
+                <div className="grid min-w-0 grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
 
 
                   <div className="min-w-0 space-y-6">
@@ -334,11 +343,11 @@ export default function CreatePagePage() {
                       <div className="theme-card-soft theme-border border-b px-5 py-4 sm:px-6">
                         <div className="flex items-center gap-3">
 
-                          <div className="theme-info flex h-10 w-10 items-center justify-center rounded-xl">
+                          <div className="theme-info flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
                             <Type className="h-5 w-5" />
                           </div>
 
-                          <div>
+                          <div className="min-w-0">
                             <h2 className="theme-text text-sm font-bold sm:text-base">
                               Informasi Halaman
                             </h2>
@@ -379,7 +388,7 @@ export default function CreatePagePage() {
                           />
 
                           <div className="mt-2 flex items-start justify-between gap-3">
-                            <div>
+                            <div className="min-w-0">
                               <FieldError
                                 message={errors.judul?.message}
                               />
@@ -440,13 +449,13 @@ export default function CreatePagePage() {
                       <div className="theme-card-soft theme-border border-b px-5 py-4 sm:px-6">
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 
-                          <div className="flex items-center gap-3">
+                          <div className="flex min-w-0 items-center gap-3">
 
                             <div className="theme-info flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
                               <FileText className="h-5 w-5" />
                             </div>
 
-                            <div>
+                            <div className="min-w-0">
                               <h2 className="theme-text text-sm font-bold sm:text-base">
                                 Konten Halaman
                               </h2>
@@ -507,13 +516,13 @@ export default function CreatePagePage() {
                     <section className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
 
                       <div className="theme-card-soft theme-border border-b px-5 py-4">
-                        <div className="flex items-center gap-3">
+                        <div className="flex min-w-0 items-center gap-3">
 
-                          <div className="theme-primary flex h-9 w-9 items-center justify-center rounded-lg">
+                          <div className="theme-primary flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
                             <Globe className="h-4 w-4" />
                           </div>
 
-                          <div>
+                          <div className="min-w-0">
                             <h2 className="theme-text text-sm font-bold">
                               Publikasi
                             </h2>
@@ -609,13 +618,13 @@ export default function CreatePagePage() {
                     <section className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
 
                       <div className="theme-card-soft theme-border border-b px-5 py-4">
-                        <div className="flex items-center gap-3">
+                        <div className="flex min-w-0 items-center gap-3">
 
-                          <div className="theme-info flex h-9 w-9 items-center justify-center rounded-lg">
+                          <div className="theme-info flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
                             <Eye className="h-4 w-4" />
                           </div>
 
-                          <div>
+                          <div className="min-w-0">
                             <h2 className="theme-text text-sm font-bold">
                               Ringkasan
                             </h2>
@@ -688,13 +697,13 @@ export default function CreatePagePage() {
                     <section className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
 
                       <div className="theme-card-soft theme-border border-b px-5 py-4">
-                        <div className="flex items-center gap-3">
+                        <div className="flex min-w-0 items-center gap-3">
 
-                          <div className="theme-card-soft theme-text-secondary flex h-9 w-9 items-center justify-center rounded-lg">
+                          <div className="theme-card-soft theme-text-secondary flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
                             <Globe className="h-4 w-4" />
                           </div>
 
-                          <div>
+                          <div className="min-w-0">
                             <h2 className="theme-text text-sm font-bold">
                               URL Halaman
                             </h2>
@@ -745,7 +754,7 @@ export default function CreatePagePage() {
                           <Info className="h-4 w-4" />
                         </div>
 
-                        <div>
+                        <div className="min-w-0">
                           <h3 className="theme-text text-sm font-bold">
                             Informasi
                           </h3>
@@ -841,8 +850,8 @@ export default function CreatePagePage() {
               </footer>
 
             </div>
-          </div>
-        </main>
+          </main>
+        </div>
       </div>
     </div>
   );

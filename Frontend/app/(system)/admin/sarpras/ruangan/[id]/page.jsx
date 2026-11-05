@@ -1,60 +1,106 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
-import {
-  ArrowLeft,
-  Building2,
-  Layers3,
-  DoorOpen,
-  School,
-  Pencil,
-  Info,
-  ChevronRight,
-  Boxes,
-  Users,
-  Hash,
-  AlertCircle,
-  Armchair,
-  Table,
-  Presentation,
-  PackageOpen,
-} from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { useRouter, useParams } from "next/navigation";
 
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
 
-const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
-const themePrimaryShadow =
-  "shadow-[0_4px_14px_color-mix(in_srgb,var(--color-primary)_20%,transparent)]";
-const themeCardShadow =
-  "shadow-[0_2px_10px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
-const themeSoftSurface =
-  "bg-[color-mix(in_srgb,var(--color-text)_2%,transparent)]";
+import { getRuangan } from "@/services/sarpras.service";
 
-export default function GlobalDetailRuanganPage() {
+import {
+  ArrowLeft,
+  Loader2,
+  AlertCircle,
+  MapPin,
+  Users,
+  DoorOpen,
+  Pencil,
+  CalendarDays,
+  Info,
+  Building2,
+  LayoutGrid,
+  FileText,
+  ShieldCheck,
+  CheckCircle2,
+} from "lucide-react";
+
+function extractData(response) {
+  if (Array.isArray(response)) return response;
+  if (Array.isArray(response?.data)) return response.data;
+  if (Array.isArray(response?.data?.data)) return response.data.data;
+  return [];
+}
+
+function formatDate(value) {
+  if (!value) return "-";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "-";
+  return new Intl.DateTimeFormat("id-ID", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  }).format(date);
+}
+
+export default function DetailRuanganPage() {
   const router = useRouter();
   const params = useParams();
   const id = params?.id;
 
-  // Ruangan data placeholder state
-  const [ruangan, setRuangan] = useState({
-    id: id,
-    nama: `Ruangan ${id || ""}`.trim(),
-    kode: "R-101",
-    gedung: "Gedung Utama",
-    lantai: "Lantai 1",
-    kapasitas: 36,
-    status: "aktif",
-    kelas: null, // null = Belum ada kelas
-    asetCount: {
-      meja: 0,
-      kursi: 0,
-      papanTulis: 0,
-      lainnya: 0,
-    },
-  });
+  const [ruangan, setRuangan] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const loadData = useCallback(async () => {
+    try {
+      setLoading(true);
+      setErrorMessage("");
+      const response = await getRuangan();
+      const data = extractData(response).find(
+        (item) => String(item.id) === String(id)
+      );
+      if (!data) throw new Error("Data ruangan tidak ditemukan.");
+      setRuangan(data);
+    } catch (error) {
+      setErrorMessage(error?.message || "Gagal memuat data.");
+    } finally {
+      setLoading(false);
+    }
+  }, [id]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  if (loading) {
+    return (
+      <div className="theme-page flex h-screen w-full items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="animate-spin text-[var(--color-primary)]" size={32} />
+          <p className="theme-text-muted text-sm font-medium">Memuat data ruangan...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (errorMessage || !ruangan) {
+    return (
+      <div className="theme-page flex h-screen w-full items-center justify-center flex-col gap-3">
+        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-red-500/10 text-red-500">
+          <AlertCircle size={32} />
+        </div>
+        <p className="theme-text font-semibold">{errorMessage || "Data tidak ditemukan"}</p>
+        <button
+          onClick={() => router.push("/admin/sarpras/ruangan")}
+          className="mt-2 inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-4 py-2 text-sm font-semibold text-white transition hover:brightness-95"
+        >
+          <ArrowLeft size={16} />
+          Kembali ke Daftar Ruangan
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
@@ -65,7 +111,7 @@ export default function GlobalDetailRuanganPage() {
         setCollapsed={() => {}}
       />
 
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
         <div className="shrink-0 border-b theme-border">
           <Header
             toggleSidebar={() => {}}
@@ -78,341 +124,171 @@ export default function GlobalDetailRuanganPage() {
           />
         </div>
 
-        <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto">
-          <div className="w-full p-4 sm:p-6 lg:p-8 space-y-6 min-w-0">
-            {/* Breadcrumb Navigation */}
-            <nav className="flex flex-wrap items-center gap-2 text-xs font-medium theme-text-muted">
-              <button
-                type="button"
-                onClick={() => router.push("/admin/sarpras/ruangan")}
-                className="hover:text-[var(--color-primary)] transition"
-              >
-                Pengelolaan Ruangan
-              </button>
-              <ChevronRight size={14} />
-              <span className="theme-text font-semibold truncate max-w-[200px]">
-                {ruangan.nama}
-              </span>
-            </nav>
-
-            {/* Header Section */}
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <button
-                  type="button"
-                  onClick={() => router.push("/admin/sarpras/ruangan")}
-                  className="mb-2 inline-flex items-center gap-2 text-sm font-medium theme-text-muted hover:text-[var(--color-primary)] transition"
-                >
-                  <ArrowLeft size={16} />
-                  Kembali ke Daftar Ruangan
-                </button>
-                <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] text-[var(--color-primary)]">
-                    <DoorOpen size={24} />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2.5">
-                      <h1 className="theme-text text-2xl font-bold tracking-tight sm:text-3xl">
-                        {ruangan.nama}
-                      </h1>
-                      <span
-                        className={`px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider ${
-                          ruangan.status === "aktif"
-                            ? "bg-[color-mix(in_srgb,var(--color-success)_15%,transparent)] theme-success"
-                            : ruangan.status === "perbaikan"
-                            ? "bg-[color-mix(in_srgb,var(--color-warning)_15%,transparent)] text-[var(--color-warning)]"
-                            : "bg-[color-mix(in_srgb,var(--color-text)_10%,transparent)] theme-text-muted"
-                        }`}
-                      >
-                        {ruangan.status}
-                      </span>
-                    </div>
-                    <p className="theme-text-muted text-xs sm:text-sm mt-0.5">
-                      Informasi fisik, alokasi kelas, dan keterhubungan aset ruangan.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2.5">
-                <button
-                  type="button"
-                  onClick={() =>
-                    router.push(`/admin/sarpras/ruangan/${id}/edit`)
-                  }
-                  className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-[var(--color-card)] ${themePrimaryGradient} ${themePrimaryShadow} hover:brightness-95 transition-all`}
-                >
-                  <Pencil size={15} />
-                  <span>Edit Ruangan</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Backend Gap / Architecture Status Notice */}
-            <div className="flex items-start gap-3 rounded-2xl border border-[color-mix(in_srgb,var(--color-info)_25%,transparent)] bg-[color-mix(in_srgb,var(--color-info)_6%,transparent)] p-4 sm:p-5 text-sm theme-info">
-              <Info size={20} className="shrink-0 mt-0.5 text-[var(--color-info)]" />
-              <div className="space-y-1">
-                <p className="font-semibold text-sm">Pratinjau Struktur Detail Ruangan</p>
-                <p className="text-xs leading-relaxed opacity-95">
-                  Halaman ini menampilkan rancangan struktur detail ruangan sesuai hierarki:
-                  <strong> Gedung └── Lantai └── Ruangan ├── Kelas (opsional) └── Asset/Inventaris</strong>.
-                  Data spesifik ruangan dan relasi aset saat ini menunggu implementasi endpoint Backend (Backend Gap).
-                </p>
-              </div>
-            </div>
-
-            {/* Section 1: Informasi Ruangan */}
-            <div className={`theme-card theme-border rounded-2xl border p-5 sm:p-6 ${themeCardShadow} space-y-4`}>
-              <div className="flex items-center justify-between pb-3 border-b theme-border">
-                <div className="flex items-center gap-2.5">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] text-[var(--color-primary)]">
-                    <DoorOpen size={18} />
-                  </div>
-                  <h2 className="theme-text text-base font-bold">
-                    Informasi Detail Ruangan
-                  </h2>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="p-4 rounded-xl bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] border theme-border space-y-1">
-                  <span className="theme-text-muted text-xs flex items-center gap-1.5 font-medium">
-                    <DoorOpen size={14} className="text-[var(--color-primary)]" />
-                    Nama Ruangan
-                  </span>
-                  <p className="theme-text font-semibold text-sm sm:text-base">
-                    {ruangan.nama}
-                  </p>
-                </div>
-
-                <div className="p-4 rounded-xl bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] border theme-border space-y-1">
-                  <span className="theme-text-muted text-xs flex items-center gap-1.5 font-medium">
-                    <Hash size={14} className="text-[var(--color-primary)]" />
-                    Kode Ruangan
-                  </span>
-                  <p className="theme-text font-mono font-semibold text-sm sm:text-base">
-                    {ruangan.kode || "-"}
-                  </p>
-                </div>
-
-                <div className="p-4 rounded-xl bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] border theme-border space-y-1">
-                  <span className="theme-text-muted text-xs flex items-center gap-1.5 font-medium">
-                    <Building2 size={14} className="text-[var(--color-primary)]" />
-                    Gedung
-                  </span>
-                  <p className="theme-text font-semibold text-sm sm:text-base">
-                    {ruangan.gedung}
-                  </p>
-                </div>
-
-                <div className="p-4 rounded-xl bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] border theme-border space-y-1">
-                  <span className="theme-text-muted text-xs flex items-center gap-1.5 font-medium">
-                    <Layers3 size={14} className="text-[var(--color-primary)]" />
-                    Lantai
-                  </span>
-                  <p className="theme-text font-semibold text-sm sm:text-base">
-                    {ruangan.lantai}
-                  </p>
-                </div>
-
-                <div className="p-4 rounded-xl bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] border theme-border space-y-1">
-                  <span className="theme-text-muted text-xs flex items-center gap-1.5 font-medium">
-                    <Users size={14} className="text-[var(--color-primary)]" />
-                    Kapasitas Ruangan
-                  </span>
-                  <p className="theme-text font-semibold text-sm sm:text-base">
-                    {ruangan.kapasitas} Orang / Siswa
-                  </p>
-                </div>
-
-                <div className="p-4 rounded-xl bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] border theme-border space-y-1">
-                  <span className="theme-text-muted text-xs flex items-center gap-1.5 font-medium">
-                    Status Ruangan
-                  </span>
-                  <p className="theme-text font-semibold text-sm sm:text-base capitalize">
-                    {ruangan.status}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Section 2: Kelas yang Terhubung */}
-            <div className={`theme-card theme-border rounded-2xl border p-5 sm:p-6 ${themeCardShadow} space-y-4`}>
-              <div className="flex items-center justify-between pb-3 border-b theme-border">
-                <div className="flex items-center gap-2.5">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] text-[var(--color-primary)]">
-                    <School size={18} />
-                  </div>
-                  <div>
-                    <h2 className="theme-text text-base font-bold">
-                      Kelas yang Terhubung
-                    </h2>
-                    <p className="theme-text-muted text-xs mt-0.5">
-                      Ruangan boleh terhubung ke rombel kelas atau difungsikan sebagai ruang umum/lab.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {ruangan.kelas ? (
-                <div className="p-4 rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)] border theme-border flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <School size={20} className="text-[var(--color-primary)]" />
-                    <div>
-                      <p className="theme-text font-bold text-sm">
-                        {ruangan.kelas.nama}
-                      </p>
-                      <p className="theme-text-muted text-xs">
-                        Tingkat: {ruangan.kelas.tingkat}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="p-6 rounded-xl border border-dashed theme-border text-center space-y-2">
-                  <div className={`mx-auto flex h-10 w-10 items-center justify-center rounded-xl ${themeSoftSurface} theme-text-muted`}>
-                    <School size={20} />
-                  </div>
-                  <h3 className="theme-text text-sm font-semibold">
-                    Belum Ada Kelas Terhubung
-                  </h3>
-                  <p className="theme-text-muted text-xs max-w-sm mx-auto">
-                    Ruangan ini belum dialokasikan untuk kelas tertentu (dapat digunakan sebagai ruang praktikum, ruang guru, atau ruang umum).
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {/* Section 3: Asset/Inventaris Ruangan */}
-            <div className={`theme-card theme-border rounded-2xl border p-5 sm:p-6 ${themeCardShadow} space-y-5`}>
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-3 border-b theme-border gap-2">
-                <div className="flex items-center gap-2.5">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] text-[var(--color-primary)]">
-                    <Boxes size={18} />
-                  </div>
-                  <div>
-                    <h2 className="theme-text text-base font-bold">
-                      Asset & Inventaris Ruangan
-                    </h2>
-                    <p className="theme-text-muted text-xs mt-0.5">
-                      Sarana fisik teralokasi: Meja, Kursi, Papan Tulis, dan perlengkapan lainnya.
-                    </p>
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => router.push("/admin/sarpras/iventaris")}
-                  className="text-xs font-semibold theme-text-secondary hover:text-[var(--color-primary)] transition"
-                >
-                  Buka Master Aset →
-                </button>
-              </div>
-
-              {/* Asset Category Badges / Counters */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div className="p-3.5 rounded-xl border theme-border bg-[color-mix(in_srgb,var(--color-text)_2%,transparent)] flex items-center gap-3">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] text-[var(--color-primary)]">
-                    <Table size={18} />
-                  </div>
-                  <div>
-                    <p className="theme-text font-bold text-base leading-none">
-                      {ruangan.asetCount.meja}
-                    </p>
-                    <p className="theme-text-muted text-[11px] mt-1">
-                      Meja Siswa/Guru
-                    </p>
-                  </div>
-                </div>
-
-                <div className="p-3.5 rounded-xl border theme-border bg-[color-mix(in_srgb,var(--color-text)_2%,transparent)] flex items-center gap-3">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] text-[var(--color-primary)]">
-                    <Armchair size={18} />
-                  </div>
-                  <div>
-                    <p className="theme-text font-bold text-base leading-none">
-                      {ruangan.asetCount.kursi}
-                    </p>
-                    <p className="theme-text-muted text-[11px] mt-1">
-                      Kursi Siswa/Guru
-                    </p>
-                  </div>
-                </div>
-
-                <div className="p-3.5 rounded-xl border theme-border bg-[color-mix(in_srgb,var(--color-text)_2%,transparent)] flex items-center gap-3">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] text-[var(--color-primary)]">
-                    <Presentation size={18} />
-                  </div>
-                  <div>
-                    <p className="theme-text font-bold text-base leading-none">
-                      {ruangan.asetCount.papanTulis}
-                    </p>
-                    <p className="theme-text-muted text-[11px] mt-1">
-                      Papan Tulis / Screen
-                    </p>
-                  </div>
-                </div>
-
-                <div className="p-3.5 rounded-xl border theme-border bg-[color-mix(in_srgb,var(--color-text)_2%,transparent)] flex items-center gap-3">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] text-[var(--color-primary)]">
-                    <PackageOpen size={18} />
-                  </div>
-                  <div>
-                    <p className="theme-text font-bold text-base leading-none">
-                      {ruangan.asetCount.lainnya}
-                    </p>
-                    <p className="theme-text-muted text-[11px] mt-1">
-                      Asset Lainnya
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Empty state informatif for Asset */}
-              <div className="p-8 rounded-xl border border-dashed theme-border text-center space-y-3">
-                <div className={`mx-auto flex h-12 w-12 items-center justify-center rounded-2xl ${themeSoftSurface} theme-text-muted`}>
-                  <Boxes size={24} />
-                </div>
-                <h3 className="theme-text text-sm font-semibold">
-                  Belum Ada Asset Terhubung ke Ruangan Ini
-                </h3>
-                <p className="theme-text-muted text-xs max-w-md mx-auto leading-relaxed">
-                  Relasi spesifik <code className="px-1.5 py-0.5 rounded bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)] font-mono text-[11px]">Ruangan → Aset</code> (foreign key <code className="font-mono text-[11px]">ruanganId</code> pada tabel Aset) belum tersedia pada skema Backend. Saat ini penempatan fisik aset diisi melalui kolom teks manual di modul Inventaris Sarpras.
-                </p>
-                <div className="pt-2 flex justify-center">
+        <div className="flex min-h-0 flex-1">
+          <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto">
+            <div className="w-full p-4 sm:p-6 lg:p-8 2xl:px-12 space-y-6">
+              
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
                   <button
                     type="button"
-                    onClick={() => router.push("/admin/sarpras/iventaris")}
-                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold theme-text-secondary border theme-border hover:bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)] transition"
+                    onClick={() => router.push("/admin/sarpras/ruangan")}
+                    className="inline-flex w-fit items-center gap-2 text-sm font-medium theme-text-muted transition hover:text-[var(--color-primary)]"
                   >
-                    Kelola Inventaris Sarpras
+                    <ArrowLeft size={17} />
+                    Kembali ke Daftar Ruangan
                   </button>
+                  <div className="mt-3 flex items-center gap-3">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] text-[var(--color-primary)]">
+                      <DoorOpen size={25} />
+                    </div>
+                    <div>
+                      <h1 className="theme-text text-2xl font-bold">Detail Ruangan</h1>
+                      <p className="theme-text-muted mt-1 text-sm">
+                        Informasi lengkap mengenai ruangan dan fasilitasnya.
+                      </p>
+                    </div>
+                  </div>
                 </div>
+
+                <button
+                  type="button"
+                  onClick={() => router.push(`/admin/sarpras/ruangan/${id}/edit`)}
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-5 py-2.5 text-sm font-semibold text-white transition hover:brightness-95 shadow-sm"
+                >
+                  <Pencil size={16} />
+                  Edit Ruangan
+                </button>
               </div>
-            </div>
 
-            {/* Bottom Actions */}
-            <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
-              <button
-                type="button"
-                onClick={() => router.push("/admin/sarpras/ruangan")}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold theme-text-secondary border theme-border hover:bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)] transition"
-              >
-                <ArrowLeft size={16} />
-                <span>Kembali ke Daftar Ruangan</span>
-              </button>
+              <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+                <div className="min-w-0 space-y-6">
+                  <div className="theme-card overflow-hidden rounded-2xl border theme-border shadow-sm">
+                    <div className="bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)] p-6 sm:p-8 border-b theme-border relative overflow-hidden">
+                      <div className="absolute -right-10 -top-10 text-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] opacity-50">
+                        <DoorOpen size={200} strokeWidth={1} />
+                      </div>
+                      
+                      <div className="relative flex flex-col sm:flex-row sm:items-center gap-5">
+                        <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl bg-[var(--color-primary)] text-white shadow-lg shadow-[var(--color-primary)]/20">
+                          <DoorOpen size={36} />
+                        </div>
+                        <div>
+                          <h2 className="theme-text text-3xl font-bold tracking-tight">{ruangan.nama}</h2>
+                          <div className="mt-2 flex items-center gap-2">
+                            <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--color-primary)]/10 px-3 py-1 text-xs font-semibold text-[var(--color-primary)]">
+                              <MapPin size={14} />
+                              {ruangan.lokasi || "Lokasi belum diatur"}
+                            </span>
+                            <span className="inline-flex items-center gap-1.5 rounded-full bg-[color-mix(in_srgb,var(--color-success)_15%,transparent)] px-3 py-1 text-xs font-semibold text-[var(--color-success)]">
+                              <CheckCircle2 size={14} />
+                              Aktif
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
 
-              <button
-                type="button"
-                onClick={() => router.push(`/admin/sarpras/ruangan/${id}/edit`)}
-                className={`inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-[var(--color-card)] ${themePrimaryGradient} ${themePrimaryShadow} hover:brightness-95 transition-all`}
-              >
-                <Pencil size={15} />
-                <span>Edit Ruangan</span>
-              </button>
+                    <div className="p-6 sm:p-8">
+                      <h3 className="theme-text font-bold mb-4 flex items-center gap-2">
+                        <FileText size={18} className="text-[var(--color-primary)]" />
+                        Keterangan Ruangan
+                      </h3>
+                      <div className="rounded-xl border theme-border bg-[color-mix(in_srgb,var(--color-text)_2%,transparent)] p-5 text-sm leading-relaxed theme-text-secondary whitespace-pre-wrap">
+                        {ruangan.keterangan || "Tidak ada keterangan tambahan untuk ruangan ini."}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <aside className="flex min-w-0 flex-col gap-6">
+                  <div className="theme-card overflow-hidden rounded-2xl border theme-border shadow-sm p-6">
+                    <h3 className="theme-text font-bold mb-5 border-b theme-border pb-3">
+                      Spesifikasi Ruangan
+                    </h3>
+                    
+                    <div className="space-y-5">
+                      <div className="flex items-start gap-4">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] text-[var(--color-primary)]">
+                          <Users size={20} />
+                        </div>
+                        <div>
+                          <p className="theme-text-muted text-[11px] font-semibold uppercase tracking-wider">
+                            Kapasitas Maksimal
+                          </p>
+                          <p className="theme-text mt-1 font-semibold text-lg">
+                            {ruangan.kapasitas ? `${ruangan.kapasitas} Orang` : "Tidak dibatasi"}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="theme-border border-b" />
+
+                      <div className="flex items-start gap-4">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-info)_10%,transparent)] text-[var(--color-info)]">
+                          <Building2 size={20} />
+                        </div>
+                        <div>
+                          <p className="theme-text-muted text-[11px] font-semibold uppercase tracking-wider">
+                            Gedung / Lokasi
+                          </p>
+                          <p className="theme-text mt-1 font-semibold">
+                            {ruangan.lokasi || "-"}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="theme-border border-b" />
+
+                      <div className="flex items-start gap-4">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-warning)_10%,transparent)] text-[var(--color-warning)]">
+                          <CalendarDays size={20} />
+                        </div>
+                        <div>
+                          <p className="theme-text-muted text-[11px] font-semibold uppercase tracking-wider">
+                            Terdaftar Pada
+                          </p>
+                          <p className="theme-text mt-1 font-semibold">
+                            {formatDate(ruangan.dibuatPada || ruangan.createdAt)}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="theme-info flex items-start gap-3 rounded-2xl border p-5">
+                    <Info size={18} className="mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-sm font-semibold text-[var(--color-info)]">
+                        Informasi Aset
+                      </p>
+                      <p className="mt-1 text-xs leading-relaxed opacity-90">
+                        Untuk melihat daftar inventaris atau aset yang berada di ruangan ini, silakan buka menu <b>Manajemen Aset</b> dan filter berdasarkan lokasi ruangan.
+                      </p>
+                      <button 
+                        onClick={() => router.push("/admin/sarpras/aset")}
+                        className="mt-3 text-xs font-semibold text-[var(--color-primary)] hover:underline inline-flex items-center gap-1"
+                      >
+                        Buka Manajemen Aset &rarr;
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="theme-card rounded-2xl border theme-border p-5 shadow-sm">
+                    <div className="flex items-center gap-2 mb-3">
+                      <ShieldCheck size={17} className="text-[var(--color-success)]" />
+                      <h3 className="text-sm font-bold theme-text">Status Validasi</h3>
+                    </div>
+                    <p className="text-xs theme-text-secondary leading-relaxed">
+                      Data ruangan ini telah tersinkronisasi dengan database sekolah. Segala perubahan akan langsung tercatat pada sistem.
+                    </p>
+                  </div>
+                </aside>
+              </div>
+
             </div>
-          </div>
-        </main>
+          </main>
+        </div>
       </div>
     </div>
   );
