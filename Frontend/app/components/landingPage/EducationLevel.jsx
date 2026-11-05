@@ -6,111 +6,97 @@ import {
   ArrowRight,
 } from "lucide-react";
 
+const levels = [
+  {
+    title: "Sekolah Dasar (SD)",
+    icon: School,
+    description:
+      "Mendukung pengelolaan administrasi, absensi, nilai, dan komunikasi sekolah dasar.",
+  },
+  {
+    title: "Sekolah Menengah Pertama (SMP)",
+    icon: BookOpen,
+    description:
+      "Membantu proses pembelajaran, jadwal, penilaian, hingga monitoring akademik siswa.",
+  },
+  {
+    title: "Sekolah Menengah Atas (SMA)",
+    icon: GraduationCap,
+    description:
+      "Kelola seluruh aktivitas akademik dan administrasi sekolah dengan sistem yang terintegrasi.",
+  },
+  {
+    title: "Sekolah Menengah Kejuruan (SMK)",
+    icon: BriefcaseBusiness,
+    description:
+      "Mendukung pengelolaan kompetensi keahlian, praktik industri, dan administrasi sekolah.",
+  },
+];
+
 export default function EducationLevel() {
-  const levels = [
-    {
-      title: "Sekolah Dasar (SD)",
-      color: "bg-blue-500",
-      bg: "bg-blue-50",
-      text: "text-blue-600",
-      icon: <School size={28} />,
-      description:
-        "Mendukung pengelolaan administrasi, absensi, nilai, dan komunikasi sekolah dasar.",
-    },
-    {
-      title: "Sekolah Menengah Pertama (SMP)",
-      color: "bg-green-500",
-      bg: "bg-green-50",
-      text: "text-green-600",
-      icon: <BookOpen size={28} />,
-      description:
-        "Membantu proses pembelajaran, jadwal, penilaian, hingga monitoring akademik siswa.",
-    },
-    {
-      title: "Sekolah Menengah Atas (SMA)",
-      color: "bg-blue-600",
-      bg: "bg-blue-50",
-      text: "text-blue-600",
-      icon: <GraduationCap size={28} />,
-      description:
-        "Kelola seluruh aktivitas akademik dan administrasi sekolah dengan sistem yang terintegrasi.",
-    },
-    {
-      title: "Sekolah Menengah Kejuruan (SMK)",
-      color: "bg-orange-500",
-      bg: "bg-orange-50",
-      text: "text-orange-600",
-      icon: <BriefcaseBusiness size={28} />,
-      description:
-        "Mendukung pengelolaan kompetensi keahlian, praktik industri, dan administrasi sekolah.",
-    },
-  ];
-
   return (
-    <section className="py-24 bg-[#F8FAFC]">
-      <div className="max-w-7xl mx-auto px-6">
-
-        <div className="text-center max-w-3xl mx-auto">
-          <span className="inline-flex rounded-full bg-blue-100 px-4 py-2 text-sm font-semibold text-blue-600">
+    <section className="bg-white py-24">
+      <div className="mx-auto max-w-7xl px-6">
+        <div className="mx-auto max-w-3xl text-center">
+          <p className="inline-flex items-center gap-3 text-xs font-bold uppercase tracking-[0.16em] text-blue-600">
+            <span className="h-px w-8 bg-blue-600" />
             Jenjang Pendidikan
-          </span>
+            <span className="h-px w-8 bg-blue-600" />
+          </p>
 
-          <h2 className="mt-5 text-4xl font-bold text-slate-900">
-            Solusi untuk Semua
-            <span className="text-blue-600">
-              {" "}Jenjang Pendidikan
-            </span>
+          <h2 className="mt-5 text-3xl font-bold leading-tight tracking-tight text-slate-900 sm:text-4xl lg:text-5xl">
+            Solusi untuk Semua{" "}
+            <span className="text-blue-600">Jenjang Pendidikan</span>
           </h2>
 
-          <p className="mt-5 text-gray-500 leading-8">
-            Smart School dirancang untuk memenuhi kebutuhan setiap
-            jenjang pendidikan, mulai dari Sekolah Dasar hingga
-            Sekolah Menengah Kejuruan.
+          <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-slate-600">
+            Smart School dirancang untuk memenuhi kebutuhan setiap jenjang
+            pendidikan, mulai dari Sekolah Dasar hingga Sekolah Menengah
+            Kejuruan.
           </p>
         </div>
 
-        <div className="mt-16 grid gap-8 lg:grid-cols-2">
+        <div className="mt-16 grid gap-6 lg:grid-cols-2">
+          {levels.map((item, index) => {
+            const Icon = item.icon;
 
-          {levels.map((item, index) => (
-            <div
-              key={index}
-              className="group rounded-3xl bg-white border border-slate-200 p-8 hover:shadow-xl transition-all duration-300"
-            >
-              <div className="flex items-start gap-5">
+            return (
+              <article
+                key={item.title}
+                className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-8 transition-all duration-300 hover:border-blue-600/40 hover:shadow-lg hover:shadow-slate-900/5"
+              >
+                <span className="absolute inset-y-0 left-0 w-1 origin-top scale-y-0 bg-blue-600 transition-transform duration-300 group-hover:scale-y-100" />
 
-                <div
-                  className={`flex h-16 w-16 items-center justify-center rounded-2xl ${item.bg} ${item.text}`}
-                >
-                  {item.icon}
+                <span className="absolute right-8 top-7 text-sm font-semibold tabular-nums text-slate-300">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+
+                <div className="flex items-start gap-6">
+                  <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-700 transition-colors duration-300 group-hover:border-blue-600 group-hover:bg-blue-600 group-hover:text-white">
+                    <Icon size={26} strokeWidth={1.75} />
+                  </div>
+
+                  <div className="flex-1 pr-6">
+                    <h3 className="text-xl font-semibold tracking-tight text-slate-900">
+                      {item.title}
+                    </h3>
+
+                    <p className="mt-3 text-[15px] leading-7 text-slate-600">
+                      {item.description}
+                    </p>
+
+                    <button
+                      type="button"
+                      className="mt-6 inline-flex items-center gap-2 border-b border-transparent pb-0.5 text-sm font-semibold text-slate-900 transition-all duration-300 hover:border-blue-600 hover:text-blue-600 group-hover:gap-3"
+                    >
+                      Pelajari Selengkapnya
+                      <ArrowRight size={16} />
+                    </button>
+                  </div>
                 </div>
-
-                <div className="flex-1">
-
-                  <div
-                    className={`mb-4 h-1 w-16 rounded-full ${item.color}`}
-                  />
-
-                  <h3 className="text-2xl font-bold text-slate-900">
-                    {item.title}
-                  </h3>
-
-                  <p className="mt-4 text-gray-500 leading-7">
-                    {item.description}
-                  </p>
-
-                  <button
-                    className={`mt-6 flex items-center gap-2 font-semibold ${item.text} group-hover:gap-3 transition-all`}
-                  >
-                    Pelajari Selengkapnya
-                    <ArrowRight size={18} />
-                  </button>
-
-                </div>
-
-              </div>
-            </div>
-          ))}
-
+              </article>
+            );
+          })}
         </div>
       </div>
     </section>

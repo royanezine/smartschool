@@ -135,36 +135,21 @@ export default function Navbar() {
           whileHover="hover"
         >
           <Link href="/" className="flex items-center gap-3">
-            <motion.div
-              whileHover={{ rotate: 360 }}
-              transition={{
-                duration: 0.6,
-                ease: "easeInOut",
-              }}
-              className="w-[42px] h-[42px] bg-white flex items-center justify-center rounded-xl shadow-md shadow-[#0F2A66]/10 ring-1 ring-[#0F2A66]/10"
-            >
-              <Image
-                src="/logo/logoSS.png"
-                alt="Logo SmartSchool"
-                width={42}
-                height={42}
-                priority
-                className="object-contain"
-              />
-            </motion.div>
+            <Image
+              src="/logo/logoSS.png"
+              alt="Logo SmartSchool"
+              width={42}
+              height={42}
+              priority
+              className="object-contain"
+            />
 
             <div>
               <h1 className="text-xl font-bold text-[#0B1F4F]">
                 Smart
-                <motion.span
-                  className="text-[#1F6AE0] inline-block font-extrabold"
-                  whileHover={{
-                    scale: 1.05,
-                  }}
-                  transition={{ duration: 0.2 }}
-                >
+                <span className="text-[#1F6AE0] inline-block font-extrabold">
                   School
-                </motion.span>
+                </span>
               </h1>
             </div>
           </Link>

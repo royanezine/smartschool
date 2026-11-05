@@ -35,8 +35,6 @@ const features = [
   { icon: ICONS.kolaborasi, label: "Kolaborasi", secondLine: "Sekolah", width: undefined, padLeft: 54 },
 ];
 
-const glow = "[text-shadow:0_0_14px_rgba(255,255,255,0.95),0_0_4px_rgba(255,255,255,0.9)]";
-
 export default function LoginPage() {
   const router = useRouter();
 
@@ -67,8 +65,7 @@ export default function LoginPage() {
         />
       </div>
 
-      <div className="absolute inset-0 -z-20 bg-gradient-to-r from-white/80 via-white/50 to-white/0 lg:via-white/55" />
-      <div className="absolute inset-x-0 top-0 -z-20 h-44 bg-gradient-to-b from-white/70 to-transparent" />
+      <div className="absolute inset-0 -z-20 bg-gradient-to-r from-white/25 via-white/5 to-transparent" />
 
       <div
         className="ss-logo absolute z-10 flex items-center"
@@ -78,7 +75,7 @@ export default function LoginPage() {
           type="button"
           onClick={handleBack}
           aria-label="Kembali"
-          className="flex items-center justify-center rounded-full bg-white text-[#0F2A66] shadow-lg shadow-[#0F2A66]/15 ring-1 ring-[#0F2A66]/10 transition-all hover:bg-[#0F2A66] hover:text-white"
+          className="flex items-center justify-center rounded-full bg-white text-[#0F2A66] ring-1 ring-[#0F2A66]/10 transition-all hover:bg-[#0F2A66] hover:text-white"
           style={{ width: u(48), height: u(48) }}
         >
           <ArrowLeft style={{ width: u(24), height: u(24) }} strokeWidth={2.5} />
@@ -95,11 +92,11 @@ export default function LoginPage() {
             width={48}
             height={48}
             priority
-            className="object-contain drop-shadow-[0_2px_6px_rgba(255,255,255,0.9)]"
+            className="object-contain"
             style={{ width: u(48), height: u(48) }}
           />
           <span
-            className={`font-extrabold text-[#0B1F4F] ${glow}`}
+            className="font-extrabold text-[#0B1F4F]"
             style={{ fontSize: u(24), letterSpacing: "-0.01em", lineHeight: 1 }}
           >
             SMART <span className="text-[#1F6AE0]">SCHOOL</span>
@@ -113,7 +110,7 @@ export default function LoginPage() {
           style={{ width: "58.8%", paddingLeft: "9.1%" }}
         >
           <div
-            className="flex w-fit items-center rounded-full bg-white font-bold text-[#0B1F4F] shadow-lg shadow-[#0F2A66]/15 ring-1 ring-[#0F2A66]/10"
+            className="flex w-fit items-center rounded-full bg-white font-bold text-[#0B1F4F] ring-1 ring-[#0F2A66]/10"
             style={{
               height: u(42),
               padding: `0 ${u(20)}`,
@@ -130,7 +127,7 @@ export default function LoginPage() {
           </div>
 
           <h1
-            className={`font-extrabold text-[#0B1F4F] ${glow}`}
+            className="font-extrabold text-[#0B1F4F]"
             style={{
               marginTop: u(16),
               fontSize: `clamp(40px, ${u(64)}, 64px)`,
@@ -144,7 +141,7 @@ export default function LoginPage() {
           </h1>
 
           <p
-            className={`font-bold text-[#0B1F4F] ${glow}`}
+            className="font-bold text-[#0B1F4F]"
             style={{
               marginTop: u(8),
               fontSize: `clamp(14px, ${u(18)}, 18px)`,
@@ -174,7 +171,7 @@ export default function LoginPage() {
                 )}
 
                 <div
-                  className="flex items-center justify-center bg-white text-[#1F6AE0] shadow-lg shadow-[#0F2A66]/15 ring-1 ring-[#0F2A66]/10"
+                  className="flex items-center justify-center bg-white text-[#1F6AE0] ring-1 ring-[#0F2A66]/10"
                   style={{
                     width: u(52),
                     height: u(52),
@@ -192,7 +189,7 @@ export default function LoginPage() {
                 </div>
 
                 <p
-                  className={`font-bold text-[#0B1F4F] ${glow}`}
+                  className="font-bold text-[#0B1F4F]"
                   style={{
                     marginTop: u(10),
                     fontSize: u(15),

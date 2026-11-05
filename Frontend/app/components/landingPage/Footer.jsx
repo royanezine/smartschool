@@ -9,20 +9,53 @@ import {
   FaYoutube,
 } from "react-icons/fa";
 
+const navLinks = [
+  { label: "Beranda", href: "#" },
+  { label: "Fitur", href: "#fitur" },
+  { label: "Modul", href: "#" },
+  { label: "Harga", href: "#" },
+  { label: "FAQ", href: "#" },
+];
+
+const modules = ["Akademik", "Absensi", "Keuangan", "PPDB", "E-Learning"];
+
+const socials = [
+  { label: "Facebook", icon: FaFacebookF },
+  { label: "Instagram", icon: FaInstagram },
+  { label: "LinkedIn", icon: FaLinkedinIn },
+  { label: "YouTube", icon: FaYoutube },
+];
+
+function ColumnTitle({ children }) {
+  return (
+    <h4 className="relative inline-block pb-2 text-base font-bold tracking-wide text-white">
+      {children}
+      <span className="absolute bottom-0 left-0 h-0.5 w-8 rounded-full bg-white/70" />
+    </h4>
+  );
+}
+
 export default function Footer() {
   return (
-    <footer className="relative bg-slate-950 text-slate-300 overflow-hidden">
-      
-      <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute top-0 left-0 w-[400px] h-[400px] bg-blue-600/10 rounded-full blur-[100px] pointer-events-none" />
+    <footer className="relative overflow-hidden bg-blue-600 text-blue-100">
+      {/* Pola kisi tipis, sama seperti kartu biru di section testimoni */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 opacity-[0.12]"
+        style={{
+          backgroundImage:
+            "linear-gradient(to right, white 1px, transparent 1px), linear-gradient(to bottom, white 1px, transparent 1px)",
+          backgroundSize: "40px 40px",
+          maskImage: "linear-gradient(135deg, transparent 35%, black 100%)",
+          WebkitMaskImage: "linear-gradient(135deg, transparent 35%, black 100%)",
+        }}
+      />
 
-      <div className="relative z-10 w-full h-[1px] bg-gradient-to-r from-transparent via-blue-500 to-transparent" />
-
-      <div className="relative z-10 max-w-7xl mx-auto px-6 py-16 lg:py-20 grid gap-10 md:grid-cols-2 lg:grid-cols-4">
-        
+      <div className="relative z-10 mx-auto grid max-w-7xl gap-10 px-6 py-16 md:grid-cols-2 lg:grid-cols-4 lg:py-20">
+        {/* Brand */}
         <div className="flex flex-col">
           <div className="flex items-center gap-3">
-            <div className="bg-white p-1 rounded-full shadow-lg shadow-blue-500/20">
+            <div className="rounded-full bg-white p-1 shadow-lg shadow-blue-900/20">
               <Image
                 src="/logo/logoSS.png"
                 alt="Smart School"
@@ -32,134 +65,127 @@ export default function Footer() {
               />
             </div>
             <div>
-              <h3 className="text-xl font-bold text-white tracking-tight">
-                Smart <span className="text-blue-500">School</span>
+              <h3 className="text-xl font-bold tracking-tight text-white">
+                Smart School
               </h3>
-              <p className="text-[10px] font-medium text-slate-400 tracking-wider uppercase mt-0.5">
+              <p className="mt-0.5 text-[10px] font-medium uppercase tracking-wider text-blue-200">
                 School Management System
               </p>
             </div>
           </div>
 
-          <p className="mt-5 leading-7 text-slate-400 text-sm">
-            Platform digital terpadu untuk membantu sekolah mengelola administrasi, akademik, keuangan, absensi, dan komunikasi dalam satu sistem.
+          <p className="mt-5 text-sm leading-7 text-blue-100/90">
+            Platform digital terpadu untuk membantu sekolah mengelola
+            administrasi, akademik, keuangan, absensi, dan komunikasi dalam
+            satu sistem.
           </p>
 
           <div className="mt-6 flex gap-3">
-            <a
-              href="#"
-              target="_blank"
-              rel="noreferrer"
-              className="flex items-center justify-center w-10 h-10 rounded-xl bg-slate-800/80 text-slate-400 transition-all duration-300 hover:bg-blue-600 hover:text-white hover:scale-105 hover:shadow-lg hover:shadow-blue-500/30"
-            >
-              <FaFacebookF size={16} />
-            </a>
-            <a
-              href="#"
-              target="_blank"
-              rel="noreferrer"
-              className="flex items-center justify-center w-10 h-10 rounded-xl bg-slate-800/80 text-slate-400 transition-all duration-300 hover:bg-blue-600 hover:text-white hover:scale-105 hover:shadow-lg hover:shadow-blue-500/30"
-            >
-              <FaInstagram size={16} />
-            </a>
-            <a
-              href="#"
-              target="_blank"
-              rel="noreferrer"
-              className="flex items-center justify-center w-10 h-10 rounded-xl bg-slate-800/80 text-slate-400 transition-all duration-300 hover:bg-blue-600 hover:text-white hover:scale-105 hover:shadow-lg hover:shadow-blue-500/30"
-            >
-              <FaLinkedinIn size={16} />
-            </a>
-            <a
-              href="#"
-              target="_blank"
-              rel="noreferrer"
-              className="flex items-center justify-center w-10 h-10 rounded-xl bg-slate-800/80 text-slate-400 transition-all duration-300 hover:bg-blue-600 hover:text-white hover:scale-105 hover:shadow-lg hover:shadow-blue-500/30"
-            >
-              <FaYoutube size={16} />
-            </a>
+            {socials.map(({ label, icon: Icon }) => (
+              <a
+                key={label}
+                href="#"
+                target="_blank"
+                rel="noreferrer"
+                aria-label={label}
+                className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/20 bg-white/10 text-white transition-all duration-300 hover:-translate-y-0.5 hover:border-white hover:bg-white hover:text-blue-600"
+              >
+                <Icon size={16} />
+              </a>
+            ))}
           </div>
         </div>
 
+        {/* Navigasi */}
         <div>
-          <h4 className="text-base font-bold text-white tracking-wide relative inline-block pb-2">
-            Navigasi
-            <span className="absolute bottom-0 left-0 w-8 h-0.5 bg-blue-500 rounded-full" />
-          </h4>
+          <ColumnTitle>Navigasi</ColumnTitle>
           <ul className="mt-6 space-y-3.5">
-            <li><a href="#" className="text-slate-400 hover:text-blue-400 transition-colors duration-200">Beranda</a></li>
-            <li><a href="#fitur" className="text-slate-400 hover:text-blue-400 transition-colors duration-200">Fitur</a></li>
-            <li><a href="#" className="text-slate-400 hover:text-blue-400 transition-colors duration-200">Modul</a></li>
-            <li><a href="#" className="text-slate-400 hover:text-blue-400 transition-colors duration-200">Harga</a></li>
-            <li><a href="#" className="text-slate-400 hover:text-blue-400 transition-colors duration-200">FAQ</a></li>
+            {navLinks.map((item) => (
+              <li key={item.label}>
+                <a
+                  href={item.href}
+                  className="text-blue-100 transition-colors duration-200 hover:text-white hover:underline hover:underline-offset-4"
+                >
+                  {item.label}
+                </a>
+              </li>
+            ))}
           </ul>
         </div>
 
+        {/* Modul */}
         <div>
-          <h4 className="text-base font-bold text-white tracking-wide relative inline-block pb-2">
-            Modul
-            <span className="absolute bottom-0 left-0 w-8 h-0.5 bg-blue-500 rounded-full" />
-          </h4>
+          <ColumnTitle>Modul</ColumnTitle>
           <ul className="mt-6 space-y-3.5">
-            <li className="text-slate-400 hover:text-blue-400 transition-colors duration-200 cursor-default">Akademik</li>
-            <li className="text-slate-400 hover:text-blue-400 transition-colors duration-200 cursor-default">Absensi</li>
-            <li className="text-slate-400 hover:text-blue-400 transition-colors duration-200 cursor-default">Keuangan</li>
-            <li className="text-slate-400 hover:text-blue-400 transition-colors duration-200 cursor-default">PPDB</li>
-            <li className="text-slate-400 hover:text-blue-400 transition-colors duration-200 cursor-default">E-Learning</li>
+            {modules.map((item) => (
+              <li
+                key={item}
+                className="cursor-default text-blue-100 transition-colors duration-200 hover:text-white"
+              >
+                {item}
+              </li>
+            ))}
           </ul>
         </div>
 
+        {/* Kontak */}
         <div>
-          <h4 className="text-base font-bold text-white tracking-wide relative inline-block pb-2">
-            Hubungi Kami
-            <span className="absolute bottom-0 left-0 w-8 h-0.5 bg-blue-500 rounded-full" />
-          </h4>
-          
-          <div className="mt-6 space-y-5 bg-white/5 backdrop-blur-sm border border-white/10 p-5 rounded-2xl hover:border-blue-500/50 transition-all duration-300 shadow-lg shadow-blue-900/20">
-            <div className="flex gap-3 items-start">
-              <div className="p-2 rounded-lg bg-blue-500/20 text-blue-400 shrink-0">
+          <ColumnTitle>Hubungi Kami</ColumnTitle>
+
+          <div className="mt-6 space-y-5 rounded-2xl border border-white/20 bg-white/10 p-5 transition-colors duration-300 hover:border-white/40">
+            <div className="flex items-start gap-3">
+              <div className="shrink-0 rounded-lg bg-white/15 p-2 text-white">
                 <MapPin size={16} />
               </div>
-              <p className="text-sm text-slate-300 leading-relaxed">
-                Jl. Pendidikan No.123,<br />Jakarta, Indonesia
+              <p className="text-sm leading-relaxed text-blue-50">
+                Jl. Pendidikan No.123,
+                <br />
+                Jakarta, Indonesia
               </p>
             </div>
 
-            <div className="flex gap-3 items-center">
-              <div className="p-2 rounded-lg bg-blue-500/20 text-blue-400 shrink-0">
+            <div className="flex items-center gap-3">
+              <div className="shrink-0 rounded-lg bg-white/15 p-2 text-white">
                 <Phone size={16} />
               </div>
-              <p className="text-sm text-slate-300">+62 812 3456 7890</p>
+              <p className="text-sm text-blue-50">+62 812 3456 7890</p>
             </div>
 
-            <div className="flex gap-3 items-center">
-              <div className="p-2 rounded-lg bg-blue-500/20 text-blue-400 shrink-0">
+            <div className="flex items-center gap-3">
+              <div className="shrink-0 rounded-lg bg-white/15 p-2 text-white">
                 <Mail size={16} />
               </div>
-              <p className="text-sm text-slate-300">info@smartschool.id</p>
+              <p className="text-sm text-blue-50">info@smartschool.id</p>
             </div>
           </div>
         </div>
-
       </div>
 
-      <div className="relative z-10 border-t border-white/5">
-        <div className="max-w-7xl mx-auto px-6 py-6 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-xs text-slate-500">
-            © {new Date().getFullYear()} <span className="text-slate-300 font-medium">Smart School</span>. All Rights Reserved.
+      {/* Bar bawah */}
+      <div className="relative z-10 border-t border-white/20">
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-6 py-6 md:flex-row">
+          <p className="text-xs text-blue-100">
+            © {new Date().getFullYear()}{" "}
+            <span className="font-semibold text-white">Smart School</span>. All
+            Rights Reserved.
           </p>
 
-          <div className="flex gap-6 text-xs text-slate-500">
-            <a href="#" className="hover:text-blue-400 hover:underline transition-colors">
+          <div className="flex gap-6 text-xs text-blue-100">
+            <a
+              href="#"
+              className="transition-colors hover:text-white hover:underline hover:underline-offset-4"
+            >
               Privacy Policy
             </a>
-            <a href="#" className="hover:text-blue-400 hover:underline transition-colors">
+            <a
+              href="#"
+              className="transition-colors hover:text-white hover:underline hover:underline-offset-4"
+            >
               Terms of Service
             </a>
           </div>
         </div>
       </div>
-
     </footer>
   );
 }

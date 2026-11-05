@@ -296,7 +296,7 @@ export default function AkunKasPage() {
                 </div>
               )}
 
-              <section className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-6">
+              <section className="grid grid-cols-1 gap-4 min-[480px]:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
                 <SummaryCard
                   title="Jumlah Akun"
                   value={akun.length}
@@ -745,37 +745,52 @@ function SummaryCard({
 
   const current = toneMap[tone] || toneMap.primary;
 
+  // Ukuran font menyesuaikan panjang angka agar nominal besar
+  // (ratusan juta / miliar) tetap muat dalam satu baris.
+  const valueText = String(value ?? "");
+  const valueSize =
+    valueText.length <= 9
+      ? "text-2xl"
+      : valueText.length <= 13
+        ? "text-xl"
+        : valueText.length <= 17
+          ? "text-lg"
+          : "text-base";
+
   return (
-    <div className="theme-card rounded-2xl border p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p className="theme-text-secondary text-xs font-semibold">
-            {title}
-          </p>
-          <p className="theme-text mt-2 truncate text-xl font-bold sm:text-2xl">
-            {value}
-          </p>
-          <p className="theme-text-muted mt-2 text-xs">
-            {description}
-          </p>
-        </div>
+    <div className="theme-card min-w-0 overflow-hidden rounded-2xl border p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+      <div className="flex items-center justify-between gap-3">
+        <p className="theme-text-secondary min-w-0 truncate text-xs font-semibold">
+          {title}
+        </p>
 
         <div
           className={`
             ${current.surface}
             ${current.text}
             flex
-            h-10
-            w-10
+            h-9
+            w-9
             shrink-0
             items-center
             justify-center
             rounded-xl
           `}
         >
-          <Icon size={19} />
+          <Icon size={18} />
         </div>
       </div>
+
+      <p
+        title={valueText}
+        className={`theme-text mt-3 whitespace-nowrap font-bold tabular-nums leading-tight tracking-tight ${valueSize}`}
+      >
+        {value}
+      </p>
+
+      <p className="theme-text-muted mt-2 truncate text-xs">
+        {description}
+      </p>
     </div>
   );
 }
