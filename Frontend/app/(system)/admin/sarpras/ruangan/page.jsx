@@ -1,142 +1,134 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+
+import Header from "@/app/components/Header";
+import Sidebar from "@/app/components/Sidebar";
+
+import { getRuangan, deleteRuangan } from "@/services/sarpras.service";
+
 import {
   DoorOpen,
   Plus,
   Search,
-  Filter,
-  Building2,
-  Layers3,
-  School,
-  Boxes,
-  Eye,
-  Pencil,
-  ArrowUpDown,
   RefreshCw,
-  Info,
-  CheckCircle2,
+  Pencil,
+  Trash2,
+  Eye,
+  MapPin,
+  Users,
+  Loader2,
   AlertCircle,
+  ClipboardList,
+  CheckCircle2,
+  X,
 } from "lucide-react";
 
-import Header from "@/app/components/Header";
-import Sidebar from "@/app/components/Sidebar";
-import {
-  getGedung,
-  getLantaiByGedung,
-} from "@/services/infrastruktur.service";
+function extractData(response) {
+  if (Array.isArray(response)) return response;
+  if (Array.isArray(response?.data)) return response.data;
+  if (Array.isArray(response?.data?.data)) return response.data.data;
+  return [];
+}
 
-const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
-const themePrimaryShadow =
-  "shadow-[0_4px_14px_color-mix(in_srgb,var(--color-primary)_20%,transparent)]";
-const themeCardShadow =
-  "shadow-[0_2px_10px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
-const themeSoftSurface =
-  "bg-[color-mix(in_srgb,var(--color-text)_2%,transparent)]";
+function getErrorMessage(error) {
+  return (
+    error?.response?.data?.message ||
+    error?.data?.message ||
+    error?.message ||
+    "Terjadi kesalahan. Silakan coba lagi."
+  );
+}
 
-export default function GlobalRuanganPage() {
+export default function RuanganPage() {
   const router = useRouter();
 
-  // Filter & Search states
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedGedung, setSelectedGedung] = useState("");
-  const [selectedLantai, setSelectedLantai] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
-
-  // Context data from Backend (real data)
-  const [gedungList, setGedungList] = useState([]);
-  const [lantaiList, setLantaiList] = useState([]);
-  const [loadingContext, setLoadingContext] = useState(true);
-
-  // Ruangan list state (Strictly honest: no fake business data)
   const [ruanganList, setRuanganList] = useState([]);
-  const [loadingRuangan, setLoadingRuangan] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
-  // Load real Gedung from Backend
-  const loadGedung = useCallback(async () => {
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+
+  const loadRuangan = useCallback(async (showLoading = true) => {
     try {
-      setLoadingContext(true);
-      const res = await getGedung();
-      if (res?.success && Array.isArray(res.data)) {
-        setGedungList(res.data);
+      if (showLoading) setLoading(true);
+      else setRefreshing(true);
+
+      setErrorMessage("");
+      const response = await getRuangan();
+
+      if (response?.success === false) {
+        throw new Error(response.message || "Gagal mengambil data ruangan.");
       }
-    } catch (err) {
-      console.error(err);
+
+      setRuanganList(extractData(response));
+    } catch (error) {
+      console.error("Gagal mengambil data ruangan:", error);
+      setErrorMessage(getErrorMessage(error));
     } finally {
-      setLoadingContext(false);
+      setLoading(false);
+      setRefreshing(false);
     }
   }, []);
 
-  // Load Lantai when Gedung changes
-  const loadLantai = useCallback(
-    async (gedungId) => {
-      if (!gedungId) {
-        setLantaiList([]);
-        setSelectedLantai("");
-        return;
-      }
+  useEffect(() => {
+    loadRuangan();
+  }, [loadRuangan]);
 
-      // Check if found in gedungList with nested lantai
-      const foundGedung = gedungList.find(
-        (g) => String(g.id) === String(gedungId)
+  useEffect(() => {
+    if (!successMessage) return;
+    const timer = setTimeout(() => setSuccessMessage(""), 4000);
+    return () => clearTimeout(timer);
+  }, [successMessage]);
+
+  const filteredRuangan = useMemo(() => {
+    const keyword = searchTerm.trim().toLowerCase();
+    if (!keyword) return ruanganList;
+
+    return ruanganList.filter((ruangan) => {
+      return [ruangan.nama, ruangan.lokasi, ruangan.keterangan].some((value) =>
+        String(value || "").toLowerCase().includes(keyword)
       );
-      if (
-        foundGedung?.lantai &&
-        Array.isArray(foundGedung.lantai) &&
-        foundGedung.lantai.length > 0
-      ) {
-        setLantaiList(foundGedung.lantai);
-        return;
-      }
+    });
+  }, [ruanganList, searchTerm]);
 
-      try {
-        const res = await getLantaiByGedung(gedungId);
-        if (res?.success && Array.isArray(res.data)) {
-          setLantaiList(res.data);
-        } else {
-          setLantaiList([]);
-        }
-      } catch (err) {
-        console.error(err);
-        setLantaiList([]);
-      }
-    },
-    [gedungList]
+  const totalRuangan = ruanganList.length;
+  const totalKapasitas = ruanganList.reduce(
+    (total, item) => total + (Number(item.kapasitas) || 0),
+    0
   );
+  const ruanganDenganLokasi = ruanganList.filter((item) => item.lokasi).length;
 
-  useEffect(() => {
-    loadGedung();
-  }, [loadGedung]);
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
 
-  useEffect(() => {
-    if (selectedGedung) {
-      loadLantai(selectedGedung);
-    } else {
-      setLantaiList([]);
-      setSelectedLantai("");
+    try {
+      setDeleting(true);
+      setErrorMessage("");
+
+      await deleteRuangan(deleteTarget.id);
+
+      setSuccessMessage(`Ruangan "${deleteTarget.nama}" berhasil dihapus.`);
+      setDeleteTarget(null);
+      await loadRuangan(false);
+    } catch (error) {
+      console.error("Gagal menghapus ruangan:", error);
+      setErrorMessage(getErrorMessage(error));
+    } finally {
+      setDeleting(false);
     }
-  }, [selectedGedung, loadLantai]);
-
-  // Handle reset filters
-  const handleResetFilters = () => {
-    setSearchTerm("");
-    setSelectedGedung("");
-    setSelectedLantai("");
-    setStatusFilter("");
   };
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
-      <Sidebar
-        active="sarpras"
-        setActive={() => {}}
-        collapsed={false}
-        setCollapsed={() => {}}
-      />
+      <Sidebar active="sarpras" setActive={() => {}} collapsed={false} setCollapsed={() => {}} />
 
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
         <div className="shrink-0 border-b theme-border">
           <Header
             toggleSidebar={() => {}}
@@ -149,328 +141,303 @@ export default function GlobalRuanganPage() {
           />
         </div>
 
-        <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto">
-          <div className="w-full p-4 sm:p-6 lg:p-8 space-y-6 min-w-0">
-            {/* Top Header Section */}
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] text-[var(--color-primary)]">
-                    <DoorOpen size={24} />
+        <div className="flex min-h-0 flex-1">
+          <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto">
+            <div className="w-full p-4 sm:p-6 lg:p-8 2xl:px-12 space-y-6">
+              
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--color-primary)] to-[color-mix(in_srgb,var(--color-primary)_70%,var(--color-info))] text-white shadow-lg shadow-[var(--color-primary)]/20">
+                    <DoorOpen size={28} />
                   </div>
                   <div>
-                    <h1 className="theme-text text-2xl font-bold tracking-tight sm:text-3xl">
+                    <h1 className="theme-text text-2xl sm:text-3xl font-bold tracking-tight">
                       Pengelolaan Ruangan
                     </h1>
-                    <p className="theme-text-muted text-xs sm:text-sm mt-0.5">
-                      Kelola data seluruh ruangan sekolah, pantau alokasi kelas, dan keterhubungan aset secara terpusat.
+                    <p className="theme-text-muted mt-1 text-sm">
+                      Manajemen data ruangan, kapasitas, dan lokasi terintegrasi.
                     </p>
                   </div>
                 </div>
-              </div>
 
-              <div className="flex items-center gap-2.5">
-                <button
-                  type="button"
-                  onClick={() => router.push("/admin/sarpras/ruangan/tambah")}
-                  className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-[var(--color-card)] ${themePrimaryGradient} ${themePrimaryShadow} hover:brightness-95 transition-all`}
-                >
-                  <Plus size={16} />
-                  <span>Tambah Ruangan</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Backend Gap / Architecture Status Notice */}
-            <div className="flex items-start gap-3 rounded-2xl border border-[color-mix(in_srgb,var(--color-info)_25%,transparent)] bg-[color-mix(in_srgb,var(--color-info)_6%,transparent)] p-4 sm:p-5 text-sm theme-info">
-              <Info size={20} className="shrink-0 mt-0.5 text-[var(--color-info)]" />
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <span className="font-semibold text-sm">Status Modul Pengelolaan Ruangan</span>
-                  <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[color-mix(in_srgb,var(--color-info)_15%,transparent)]">
-                    UI Ready / Menunggu Endpoint Backend
-                  </span>
-                </div>
-                <p className="text-xs leading-relaxed opacity-95">
-                  Hierarki arsitektur: <strong className="font-semibold">Gedung └── Lantai └── Ruangan ├── Kelas (opsional) └── Asset/Inventaris</strong>.
-                  Tampilan CRUD frontend telah disiapkan dalam bentuk full-page tanpa dummy data palsu. Saat ini endpoint Backend CRUD Ruangan belum tersedia di database.
-                </p>
-              </div>
-            </div>
-
-            {/* Filter & Search Bar */}
-            <div className={`theme-card theme-border rounded-2xl border p-4 sm:p-5 ${themeCardShadow} space-y-4`}>
-              <div className="flex items-center justify-between pb-3 border-b theme-border">
-                <div className="flex items-center gap-2">
-                  <Filter size={16} className="text-[var(--color-primary)]" />
-                  <span className="theme-text text-sm font-semibold">
-                    Filter & Pencarian Ruangan
-                  </span>
-                </div>
-                {(searchTerm || selectedGedung || selectedLantai || statusFilter) && (
+                <div className="flex flex-wrap items-center gap-2.5">
                   <button
                     type="button"
-                    onClick={handleResetFilters}
-                    className="inline-flex items-center gap-1.5 text-xs font-semibold theme-text-muted hover:text-[var(--color-primary)] transition"
+                    onClick={() => loadRuangan(false)}
+                    disabled={refreshing}
+                    className="inline-flex items-center gap-2 rounded-xl border theme-border px-4 py-2.5 text-sm font-medium theme-text-secondary transition hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] disabled:opacity-50"
                   >
-                    <RefreshCw size={13} />
-                    Reset Filter
+                    <RefreshCw size={16} className={refreshing ? "animate-spin" : ""} />
+                    <span className="hidden sm:inline">Refresh</span>
                   </button>
-                )}
-              </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                {/* Search Term */}
-                <div className="relative">
-                  <Search
-                    size={16}
-                    className="theme-text-muted absolute left-3.5 top-1/2 -translate-y-1/2"
-                  />
-                  <input
-                    type="text"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder="Cari nama atau kode ruangan..."
-                    className="theme-input w-full rounded-xl pl-9 pr-4 py-2 text-xs sm:text-sm focus:border-[var(--color-primary)]"
-                  />
-                </div>
-
-                {/* Filter Gedung */}
-                <div className="relative">
-                  <Building2
-                    size={15}
-                    className="theme-text-muted absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"
-                  />
-                  <select
-                    value={selectedGedung}
-                    onChange={(e) => setSelectedGedung(e.target.value)}
-                    className="theme-input w-full rounded-xl pl-9 pr-8 py-2 text-xs sm:text-sm appearance-none focus:border-[var(--color-primary)]"
+                  <button
+                    type="button"
+                    onClick={() => router.push("/admin/sarpras/ruangan/tambah")}
+                    className="inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:brightness-110 active:scale-95"
                   >
-                    <option value="">Semua Gedung</option>
-                    {gedungList.map((g) => (
-                      <option key={g.id} value={g.id}>
-                        {g.nama} {g.kode ? `(${g.kode})` : ""}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Filter Lantai */}
-                <div className="relative">
-                  <Layers3
-                    size={15}
-                    className="theme-text-muted absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"
-                  />
-                  <select
-                    value={selectedLantai}
-                    onChange={(e) => setSelectedLantai(e.target.value)}
-                    disabled={!selectedGedung || lantaiList.length === 0}
-                    className="theme-input w-full rounded-xl pl-9 pr-8 py-2 text-xs sm:text-sm appearance-none focus:border-[var(--color-primary)] disabled:opacity-60 disabled:cursor-not-allowed"
-                  >
-                    <option value="">
-                      {!selectedGedung
-                        ? "Pilih Gedung Dahulu"
-                        : lantaiList.length === 0
-                        ? "Tidak ada lantai"
-                        : "Semua Lantai"}
-                    </option>
-                    {lantaiList.map((l) => (
-                      <option key={l.id} value={l.id}>
-                        {l.nama}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Filter Status */}
-                <div>
-                  <select
-                    value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value)}
-                    className="theme-input w-full rounded-xl px-4 py-2 text-xs sm:text-sm appearance-none focus:border-[var(--color-primary)]"
-                  >
-                    <option value="">Semua Status</option>
-                    <option value="aktif">Aktif</option>
-                    <option value="perbaikan">Dalam Perbaikan</option>
-                    <option value="nonaktif">Nonaktif</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            {/* Table Card */}
-            <div className={`theme-card theme-border rounded-2xl border overflow-hidden ${themeCardShadow}`}>
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between px-5 sm:px-6 py-4 border-b theme-border gap-2">
-                <div className="flex items-center gap-2.5">
-                  <h2 className="theme-text text-base font-bold">
-                    Daftar Ruangan Sekolah
-                  </h2>
-                  <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] text-[var(--color-primary)]">
-                    {ruanganList.length} Ruangan
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-2 text-xs theme-text-muted">
-                  <School size={14} />
-                  <span>
-                    Infrastruktur Terintegrasi Gedung & Lantai
-                  </span>
+                    <Plus size={18} />
+                    Tambah Ruangan
+                  </button>
                 </div>
               </div>
 
-              {/* Responsive Table */}
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[850px] border-collapse text-left">
-                  <thead>
-                    <tr className={`theme-border border-b ${themeSoftSurface}`}>
-                      <th className="theme-text-muted px-5 py-3 text-[10px] font-semibold uppercase tracking-[0.08em] w-12 text-center">
-                        NO
-                      </th>
-                      <th className="theme-text-muted px-5 py-3 text-[10px] font-semibold uppercase tracking-[0.08em]">
-                        NAMA RUANGAN
-                      </th>
-                      <th className="theme-text-muted px-5 py-3 text-[10px] font-semibold uppercase tracking-[0.08em]">
-                        KODE
-                      </th>
-                      <th className="theme-text-muted px-5 py-3 text-[10px] font-semibold uppercase tracking-[0.08em]">
-                        GEDUNG
-                      </th>
-                      <th className="theme-text-muted px-5 py-3 text-[10px] font-semibold uppercase tracking-[0.08em]">
-                        LANTAI
-                      </th>
-                      <th className="theme-text-muted px-5 py-3 text-[10px] font-semibold uppercase tracking-[0.08em]">
-                        KELAS
-                      </th>
-                      <th className="theme-text-muted px-5 py-3 text-[10px] font-semibold uppercase tracking-[0.08em]">
-                        JUMLAH ASSET
-                      </th>
-                      <th className="theme-text-muted px-5 py-3 text-[10px] font-semibold uppercase tracking-[0.08em]">
-                        STATUS
-                      </th>
-                      <th className="theme-text-muted px-5 py-3 text-[10px] font-semibold uppercase tracking-[0.08em] text-right">
-                        AKSI
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {ruanganList.length === 0 ? (
-                      <tr>
-                        <td colSpan={9} className="px-6 py-16 text-center">
-                          <div className={`mx-auto flex h-16 w-16 items-center justify-center rounded-2xl ${themeSoftSurface} text-[var(--color-primary)]`}>
-                            <DoorOpen size={32} />
-                          </div>
-                          <h3 className="theme-text text-base font-semibold mt-4">
-                            Belum Ada Data Ruangan
-                          </h3>
-                          <p className="theme-text-muted text-xs max-w-md mx-auto mt-1.5 leading-relaxed">
-                            Data ruangan sekolah belum terdaftar di database. Sistem saat ini menunggu ketersediaan endpoint Backend CRUD Ruangan (Backend Gap) untuk menyimpan data secara permanen.
-                          </p>
-                          <div className="mt-5 flex items-center justify-center gap-3">
-                            <button
-                              type="button"
-                              onClick={() => router.push("/admin/sarpras/ruangan/tambah")}
-                              className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold text-[var(--color-card)] ${themePrimaryGradient} ${themePrimaryShadow} hover:brightness-95 transition`}
-                            >
-                              <Plus size={14} />
-                              Tambah Ruangan Sekarang
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => router.push("/admin/sarpras/gedung")}
-                              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold theme-text-secondary border theme-border hover:bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)] transition"
-                            >
-                              <Building2 size={14} />
-                              Lihat Data Gedung
-                            </button>
-                          </div>
-                        </td>
+              {errorMessage && (
+                <div className="flex items-start gap-3 rounded-xl border border-red-500/20 bg-red-500/5 p-4 text-sm text-red-600">
+                  <AlertCircle size={18} className="mt-0.5 shrink-0" />
+                  <div className="flex-1 font-medium">{errorMessage}</div>
+                  <button onClick={() => setErrorMessage("")} className="opacity-70 hover:opacity-100">
+                    <X size={16} />
+                  </button>
+                </div>
+              )}
+
+              {successMessage && (
+                <div className="flex items-start gap-3 rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4 text-sm text-emerald-600">
+                  <CheckCircle2 size={18} className="mt-0.5 shrink-0" />
+                  <div className="flex-1 font-medium">{successMessage}</div>
+                  <button onClick={() => setSuccessMessage("")} className="opacity-70 hover:opacity-100">
+                    <X size={16} />
+                  </button>
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
+                <div className="theme-card rounded-2xl border theme-border p-5 shadow-sm transition hover:shadow-md">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="theme-text-muted text-xs font-semibold uppercase tracking-wider">Total Ruangan</p>
+                      <h2 className="theme-text mt-2 text-3xl font-bold">{totalRuangan}</h2>
+                    </div>
+                    <div className="rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] p-3 text-[var(--color-primary)]">
+                      <DoorOpen size={22} />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="theme-card rounded-2xl border theme-border p-5 shadow-sm transition hover:shadow-md">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="theme-text-muted text-xs font-semibold uppercase tracking-wider">Total Kapasitas</p>
+                      <h2 className="theme-text mt-2 text-3xl font-bold">
+                        {totalKapasitas.toLocaleString("id-ID")}
+                      </h2>
+                    </div>
+                    <div className="rounded-xl bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)] p-3 text-[var(--color-success)]">
+                      <Users size={22} />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="theme-card rounded-2xl border theme-border p-5 shadow-sm transition hover:shadow-md">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="theme-text-muted text-xs font-semibold uppercase tracking-wider">Memiliki Lokasi</p>
+                      <h2 className="theme-text mt-2 text-3xl font-bold">{ruanganDenganLokasi}</h2>
+                    </div>
+                    <div className="rounded-xl bg-[color-mix(in_srgb,var(--color-warning)_10%,transparent)] p-3 text-[var(--color-warning)]">
+                      <MapPin size={22} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <section className="theme-card overflow-hidden rounded-2xl border theme-border shadow-sm">
+                <div className="flex flex-col gap-4 border-b theme-border bg-[color-mix(in_srgb,var(--color-text)_1%,transparent)] p-5 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <h2 className="theme-text font-bold text-lg">Data Ruangan Sekolah</h2>
+                    <p className="theme-text-muted mt-0.5 text-xs">
+                      Daftar seluruh ruangan yang terdaftar pada sistem.
+                    </p>
+                  </div>
+
+                  <div className="relative w-full sm:max-w-sm">
+                    <Search size={18} className="theme-text-muted absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      value={searchTerm}
+                      onChange={(event) => setSearchTerm(event.target.value)}
+                      placeholder="Cari nama, lokasi, atau keterangan..."
+                      className="theme-input w-full rounded-xl border theme-border py-2.5 pl-10 pr-4 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[var(--color-primary)]/10"
+                    />
+                  </div>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[900px] text-left">
+                    <thead className="border-b theme-border">
+                      <tr className="bg-[color-mix(in_srgb,var(--color-text)_2%,transparent)]">
+                        <th className="theme-text-muted w-16 px-5 py-4 text-center text-[11px] font-bold uppercase tracking-wider">No</th>
+                        <th className="theme-text-muted px-5 py-4 text-[11px] font-bold uppercase tracking-wider">Nama Ruangan</th>
+                        <th className="theme-text-muted px-5 py-4 text-[11px] font-bold uppercase tracking-wider">Lokasi</th>
+                        <th className="theme-text-muted px-5 py-4 text-[11px] font-bold uppercase tracking-wider">Kapasitas</th>
+                        <th className="theme-text-muted px-5 py-4 text-[11px] font-bold uppercase tracking-wider">Keterangan</th>
+                        <th className="theme-text-muted px-5 py-4 text-right text-[11px] font-bold uppercase tracking-wider">Aksi</th>
                       </tr>
-                    ) : (
-                      ruanganList.map((ruang, index) => (
-                        <tr
-                          key={ruang.id || index}
-                          className="theme-border border-b hover:bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] transition"
-                        >
-                          <td className="px-5 py-3.5 text-xs text-center font-mono theme-text-muted">
-                            {index + 1}
-                          </td>
-                          <td className="px-5 py-3.5 text-xs font-semibold theme-text">
-                            {ruang.nama}
-                          </td>
-                          <td className="px-5 py-3.5 text-xs font-mono theme-text-secondary">
-                            {ruang.kode || "-"}
-                          </td>
-                          <td className="px-5 py-3.5 text-xs theme-text">
-                            {ruang.gedung?.nama || "-"}
-                          </td>
-                          <td className="px-5 py-3.5 text-xs theme-text">
-                            {ruang.lantai?.nama || "-"}
-                          </td>
-                          <td className="px-5 py-3.5 text-xs">
-                            {ruang.kelas?.nama ? (
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] text-[var(--color-primary)]">
-                                <School size={12} />
-                                {ruang.kelas.nama}
-                              </span>
-                            ) : (
-                              <span className="theme-text-muted italic text-[11px]">
-                                Tidak terhubung
-                              </span>
-                            )}
-                          </td>
-                          <td className="px-5 py-3.5 text-xs theme-text-secondary">
-                            <span className="inline-flex items-center gap-1 font-medium">
-                              <Boxes size={13} className="theme-text-muted" />
-                              {ruang.jumlahAsset || 0} Aset
-                            </span>
-                          </td>
-                          <td className="px-5 py-3.5 text-xs">
-                            <span
-                              className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
-                                ruang.status === "aktif"
-                                  ? "bg-[color-mix(in_srgb,var(--color-success)_15%,transparent)] theme-success"
-                                  : ruang.status === "perbaikan"
-                                  ? "bg-[color-mix(in_srgb,var(--color-warning)_15%,transparent)] text-[var(--color-warning)]"
-                                  : "bg-[color-mix(in_srgb,var(--color-text)_10%,transparent)] theme-text-muted"
-                              }`}
-                            >
-                              {ruang.status || "Aktif"}
-                            </span>
-                          </td>
-                          <td className="px-5 py-3.5 text-xs text-right">
-                            <div className="flex items-center justify-end gap-1.5">
-                              <button
-                                type="button"
-                                title="Detail Ruangan"
-                                onClick={() =>
-                                  router.push(`/admin/sarpras/ruangan/${ruang.id}`)
-                                }
-                                className="flex h-8 w-8 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)] text-[var(--color-primary)] hover:bg-[color-mix(in_srgb,var(--color-primary)_18%,transparent)] transition"
-                              >
-                                <Eye size={15} />
-                              </button>
-                              <button
-                                type="button"
-                                title="Edit Ruangan"
-                                onClick={() =>
-                                  router.push(`/admin/sarpras/ruangan/${ruang.id}/edit`)
-                                }
-                                className="flex h-8 w-8 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-warning)_10%,transparent)] text-[var(--color-warning)] hover:bg-[color-mix(in_srgb,var(--color-warning)_20%,transparent)] transition"
-                              >
-                                <Pencil size={15} />
-                              </button>
-                            </div>
+                    </thead>
+
+                    <tbody className="divide-y divide-[var(--color-border-soft)]">
+                      {loading ? (
+                        <tr>
+                          <td colSpan={6} className="px-5 py-20 text-center">
+                            <Loader2 size={32} className="mx-auto animate-spin text-[var(--color-primary)]" />
+                            <p className="theme-text-muted mt-4 text-sm font-medium">Memuat data ruangan...</p>
                           </td>
                         </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
+                      ) : filteredRuangan.length === 0 ? (
+                        <tr>
+                          <td colSpan={6} className="px-5 py-20 text-center">
+                            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)] text-[var(--color-primary)]">
+                              <ClipboardList size={32} />
+                            </div>
+                            <h3 className="theme-text mt-5 text-base font-bold">
+                              {searchTerm ? "Data Tidak Ditemukan" : "Belum Ada Ruangan"}
+                            </h3>
+                            <p className="theme-text-muted mt-1 max-w-xs mx-auto text-sm leading-relaxed">
+                              {searchTerm 
+                                ? "Tidak ada data yang cocok dengan kata kunci pencarian Anda." 
+                                : "Daftar ruangan masih kosong. Silakan tambahkan ruangan baru untuk memulai."}
+                            </p>
+                            {!searchTerm && (
+                              <button
+                                type="button"
+                                onClick={() => router.push("/admin/sarpras/ruangan/tambah")}
+                                className="mt-6 inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-5 py-2.5 text-sm font-semibold text-white transition hover:brightness-110"
+                              >
+                                <Plus size={16} />
+                                Tambah Ruangan Pertama
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      ) : (
+                        filteredRuangan.map((ruangan, index) => (
+                          <tr
+                            key={ruangan.id || index}
+                            className="group transition-colors hover:bg-[color-mix(in_srgb,var(--color-primary)_3%,transparent)]"
+                          >
+                            <td className="theme-text-muted px-5 py-4 text-center text-xs font-mono font-medium">
+                              {String(index + 1).padStart(2, "0")}
+                            </td>
+                            <td className="px-5 py-4">
+                              <div className="flex items-center gap-3">
+                                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)] text-[var(--color-primary)] group-hover:bg-[var(--color-primary)] group-hover:text-white transition-colors">
+                                  <DoorOpen size={16} />
+                                </div>
+                                <span className="theme-text text-sm font-semibold">
+                                  {ruangan.nama || "-"}
+                                </span>
+                              </div>
+                            </td>
+                            <td className="px-5 py-4">
+                              {ruangan.lokasi ? (
+                                <span className="inline-flex items-center gap-1.5 rounded-md border theme-border bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] px-2.5 py-1 text-[11px] font-medium theme-text-secondary">
+                                  <MapPin size={12} className="theme-text-muted" />
+                                  {ruangan.lokasi}
+                                </span>
+                              ) : (
+                                <span className="theme-text-muted text-xs italic">Belum diatur</span>
+                              )}
+                            </td>
+                            <td className="px-5 py-4">
+                              {ruangan.kapasitas !== null && ruangan.kapasitas !== undefined ? (
+                                <div className="flex items-center gap-1.5 theme-text text-sm font-medium">
+                                  <Users size={14} className="theme-text-muted" />
+                                  {ruangan.kapasitas} <span className="theme-text-muted text-xs font-normal">Orang</span>
+                                </div>
+                              ) : (
+                                <span className="theme-text-muted text-xs italic">-</span>
+                              )}
+                            </td>
+                            <td className="px-5 py-4">
+                              <span className="theme-text-secondary block max-w-[250px] truncate text-xs">
+                                {ruangan.keterangan || "-"}
+                              </span>
+                            </td>
+                            <td className="px-5 py-4">
+                              <div className="flex items-center justify-end gap-1.5 opacity-80 group-hover:opacity-100 transition-opacity">
+                                <button
+                                  type="button"
+                                  title="Lihat Detail"
+                                  onClick={() => router.push(`/admin/sarpras/ruangan/${ruangan.id}`)}
+                                  className="flex h-8 w-8 items-center justify-center rounded-lg text-[var(--color-info)] transition hover:bg-[var(--color-info-background)]"
+                                >
+                                  <Eye size={16} />
+                                </button>
+                                <button
+                                  type="button"
+                                  title="Edit Ruangan"
+                                  onClick={() => router.push(`/admin/sarpras/ruangan/${ruangan.id}/edit`)}
+                                  className="flex h-8 w-8 items-center justify-center rounded-lg text-[var(--color-warning)] transition hover:bg-[var(--color-warning-background)]"
+                                >
+                                  <Pencil size={16} />
+                                </button>
+                                <button
+                                  type="button"
+                                  title="Hapus Ruangan"
+                                  onClick={() => setDeleteTarget(ruangan)}
+                                  className="flex h-8 w-8 items-center justify-center rounded-lg text-[var(--color-danger)] transition hover:bg-[var(--color-danger-background)]"
+                                >
+                                  <Trash2 size={16} />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+
+                {!loading && filteredRuangan.length > 0 && (
+                  <div className="flex items-center justify-between border-t theme-border bg-[color-mix(in_srgb,var(--color-text)_1%,transparent)] px-5 py-3">
+                    <p className="theme-text-muted text-xs">
+                      Menampilkan <span className="font-semibold theme-text">{filteredRuangan.length}</span> dari <span className="font-semibold theme-text">{ruanganList.length}</span> ruangan
+                    </p>
+                  </div>
+                )}
+              </section>
+            </div>
+          </main>
+        </div>
+      </div>
+
+      {deleteTarget && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div 
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            onClick={() => !deleting && setDeleteTarget(null)}
+          />
+          <div className="theme-card relative w-full max-w-sm rounded-2xl border theme-border p-6 shadow-2xl animate-in fade-in zoom-in duration-200">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-red-500/10 text-red-500">
+              <AlertCircle size={28} />
+            </div>
+            <h3 className="theme-text text-center text-lg font-bold">Hapus Ruangan?</h3>
+            <p className="theme-text-secondary mt-2 text-center text-sm leading-relaxed">
+              Apakah Anda yakin ingin menghapus ruangan <strong className="theme-text">"{deleteTarget.nama}"</strong>? Tindakan ini tidak dapat dibatalkan.
+            </p>
+            <div className="mt-6 flex gap-3">
+              <button
+                type="button"
+                onClick={() => setDeleteTarget(null)}
+                disabled={deleting}
+                className="flex-1 rounded-xl border theme-border py-2.5 text-sm font-semibold theme-text-secondary transition hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] disabled:opacity-50"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={confirmDelete}
+                disabled={deleting}
+                className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-red-500 py-2.5 text-sm font-semibold text-white transition hover:bg-red-600 disabled:opacity-50"
+              >
+                {deleting ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
+                {deleting ? "Menghapus..." : "Ya, Hapus"}
+              </button>
             </div>
           </div>
-        </main>
-      </div>
+        </div>
+      )}
     </div>
   );
 }

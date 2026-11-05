@@ -25,8 +25,9 @@ import {
   Plus,
   X,
   Info,
+  Lightbulb,
+  ShieldCheck,
 } from "lucide-react";
-
 
 function formatRupiah(value) {
   return new Intl.NumberFormat("id-ID", {
@@ -55,7 +56,6 @@ function getErrorMessage(error) {
     ? error.message
     : "Terjadi kesalahan. Silakan coba kembali.";
 }
-
 
 const inputClass =
   "theme-input w-full rounded-xl border px-3.5 py-2.5 text-sm outline-none transition disabled:cursor-not-allowed disabled:opacity-60";
@@ -100,7 +100,6 @@ function InfoRow({ label, value, icon: Icon }) {
     </div>
   );
 }
-
 
 export default function DetailKategoriJabatanPage() {
   const params = useParams();
@@ -207,70 +206,53 @@ export default function DetailKategoriJabatanPage() {
         onClose={() => setSidebarOpen(false)}
       />
 
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <div className="shrink-0">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+        <div className="shrink-0 border-b theme-border">
           <Header onMenuClick={() => setSidebarOpen(true)} />
         </div>
 
-        <main className="min-w-0 flex-1 overflow-y-auto theme-page theme-text">
-          <div className="w-full px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
-            <div className="mx-auto w-full max-w-5xl space-y-6">
+        <div className="flex min-h-0 flex-1">
+          <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto">
+            <div className="w-full px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 2xl:px-12">
+              
+              <div className="mb-4">
+                <button
+                  type="button"
+                  onClick={() => router.push("/admin/presensi/kategori-jabatan")}
+                  className="inline-flex w-fit items-center gap-2 text-sm font-medium theme-text-muted transition hover:text-[var(--color-primary)]"
+                >
+                  <ArrowLeft size={17} />
+                  Kembali ke Daftar Kategori
+                </button>
+              </div>
+
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div className="flex items-start gap-3">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      router.push("/admin/presensi/kategori-jabatan")
-                    }
-                    className="mt-1 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border theme-border theme-card theme-text-secondary hover:bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] transition"
-                    aria-label="Kembali"
-                  >
-                    <ArrowLeft size={17} />
-                  </button>
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
+                    <BriefcaseBusiness size={23} />
+                  </div>
 
-                  <div className="flex items-start gap-3">
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
-                      <BriefcaseBusiness size={23} />
+                  <div>
+                    <div className="flex items-center gap-2 text-sm theme-text-muted">
+                      <span>Presensi</span>
+                      <span>/</span>
+                      <span>Kategori Jabatan</span>
+                      <span>/</span>
+                      <span>Detail</span>
                     </div>
-
-                    <div>
-                      <div className="flex items-center gap-2 text-sm theme-text-muted">
-                        <span>Presensi</span>
-                        <span>/</span>
-                        <span>Kategori Jabatan</span>
-                        <span>/</span>
-                        <span>Detail</span>
-                      </div>
-                      <h1 className="mt-1 text-2xl font-bold tracking-tight theme-text">
-                        Detail Kategori Jabatan
-                      </h1>
-                      <p className="mt-1 max-w-2xl text-sm leading-6 theme-text-secondary">
-                        Informasi lengkap kategori, tarif aktif, dan riwayat
-                        tarif yang tercatat di sistem.
-                      </p>
-                    </div>
+                    <h1 className="mt-1 text-2xl font-bold tracking-tight theme-text">
+                      Detail Kategori Jabatan
+                    </h1>
+                    <p className="mt-1 max-w-2xl text-sm leading-6 theme-text-secondary">
+                      Informasi lengkap kategori, tarif aktif, dan riwayat tarif yang tercatat di sistem.
+                    </p>
                   </div>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2">
                   <button
                     type="button"
-                    onClick={() =>
-                      router.push("/admin/presensi/kategori-jabatan")
-                    }
-                    className={buttonSecondary}
-                  >
-                    <ArrowLeft size={16} />
-                    Kembali
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() =>
-                      router.push(
-                        `/admin/presensi/kategori-jabatan/${id}/edit`
-                      )
-                    }
+                    onClick={() => router.push(`/admin/presensi/kategori-jabatan/${id}/edit`)}
                     className={buttonPrimary}
                   >
                     <Pencil size={16} />
@@ -282,7 +264,7 @@ export default function DetailKategoriJabatanPage() {
               {notice && (
                 <div
                   role="status"
-                  className="flex items-start gap-3 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700 dark:border-emerald-900/60 dark:bg-emerald-950/30 dark:text-emerald-300"
+                  className="mt-6 flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700 dark:border-emerald-900/60 dark:bg-emerald-950/30 dark:text-emerald-300"
                 >
                   <CheckCircle2 size={18} className="mt-0.5 shrink-0" />
                   <p className="min-w-0 flex-1">{notice}</p>
@@ -300,7 +282,7 @@ export default function DetailKategoriJabatanPage() {
               {error && (
                 <div
                   role="alert"
-                  className="flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-300"
+                  className="mt-6 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-300"
                 >
                   <AlertCircle size={19} className="mt-0.5 shrink-0" />
                   <div className="min-w-0 flex-1">
@@ -319,7 +301,7 @@ export default function DetailKategoriJabatanPage() {
               )}
 
               {loading ? (
-                <div className="flex min-h-[300px] flex-col items-center justify-center gap-3 theme-card rounded-xl border theme-border">
+                <div className="mt-6 flex min-h-[300px] flex-col items-center justify-center gap-3 theme-card rounded-2xl border theme-border">
                   <LoaderCircle
                     size={28}
                     className="animate-spin theme-primary-text"
@@ -332,7 +314,7 @@ export default function DetailKategoriJabatanPage() {
                   </p>
                 </div>
               ) : !item ? (
-                <div className="flex min-h-[300px] flex-col items-center justify-center theme-card rounded-xl border theme-border p-6 text-center">
+                <div className="mt-6 flex min-h-[300px] flex-col items-center justify-center theme-card rounded-2xl border theme-border p-6 text-center">
                   <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-red-50 text-red-600 dark:bg-red-950/50 dark:text-red-400">
                     <AlertCircle size={23} />
                   </div>
@@ -344,9 +326,7 @@ export default function DetailKategoriJabatanPage() {
                   </p>
                   <button
                     type="button"
-                    onClick={() =>
-                      router.push("/admin/presensi/kategori-jabatan")
-                    }
+                    onClick={() => router.push("/admin/presensi/kategori-jabatan")}
                     className={`${buttonPrimary} mt-4`}
                   >
                     <ArrowLeft size={16} />
@@ -354,312 +334,297 @@ export default function DetailKategoriJabatanPage() {
                   </button>
                 </div>
               ) : (
-                <>
-                  <section className="theme-card overflow-hidden rounded-xl border theme-border shadow-sm">
-                    <div className="flex flex-col justify-between gap-3 border-b theme-border p-5 sm:flex-row sm:items-start sm:p-6">
-                      <div className="flex items-start gap-4">
-                        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
-                          <BriefcaseBusiness size={24} />
+                <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+                  
+                  <div className="min-w-0 space-y-6">
+                    <section className="theme-card overflow-hidden rounded-2xl border theme-border shadow-sm">
+                      <div className="flex flex-col justify-between gap-3 border-b theme-border p-5 sm:flex-row sm:items-start sm:p-6">
+                        <div className="flex items-start gap-4">
+                          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
+                            <BriefcaseBusiness size={24} />
+                          </div>
+
+                          <div className="min-w-0">
+                            <h2 className="text-xl font-bold theme-text">
+                              {item.nama}
+                            </h2>
+                            <p className="mt-1 text-sm theme-text-muted">
+                              Kode: {item.kode || "-"}
+                            </p>
+                            {item.keterangan && (
+                              <p className="mt-3 max-w-2xl text-sm leading-6 theme-text-secondary">
+                                {item.keterangan}
+                              </p>
+                            )}
+                          </div>
                         </div>
 
-                        <div className="min-w-0">
-                          <h2 className="text-xl font-bold theme-text">
-                            {item.nama}
-                          </h2>
-                          <p className="mt-1 text-sm theme-text-muted">
-                            Kode: {item.kode || "-"}
-                          </p>
-                          {item.keterangan && (
-                            <p className="mt-3 max-w-2xl text-sm leading-6 theme-text-secondary">
-                              {item.keterangan}
-                            </p>
-                          )}
-                        </div>
+                        <StatusBadge status={item.status} />
                       </div>
 
-                      <StatusBadge status={item.status} />
-                    </div>
+                      <div className="p-5 sm:p-6">
+                        <InfoRow
+                          label="Nama kategori"
+                          value={item.nama || "-"}
+                          icon={BriefcaseBusiness}
+                        />
+                        <InfoRow
+                          label="Kode kategori"
+                          value={item.kode || "-"}
+                        />
+                        <InfoRow
+                          label="Status"
+                          value={item.status === "aktif" ? "Aktif" : "Nonaktif"}
+                        />
+                        <InfoRow
+                          label="Keterangan"
+                          value={item.keterangan || "Tidak ada keterangan."}
+                        />
+                      </div>
+                    </section>
 
-                    <div className="grid grid-cols-1 gap-4 p-5 sm:grid-cols-2 sm:p-6">
-                      <div className="rounded-lg bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] border theme-border p-4">
-                        <div className="flex items-center gap-2">
-                          <Wallet size={16} className="theme-primary-text" />
-                          <p className="text-xs font-medium theme-text-muted">
-                            Tarif aktif
-                          </p>
+                    <section className="theme-card overflow-hidden rounded-2xl border theme-border shadow-sm">
+                      <div className="flex flex-col justify-between gap-3 border-b theme-border p-5 sm:flex-row sm:items-center sm:p-6">
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300">
+                            <History size={19} />
+                          </div>
+                          <div>
+                            <h2 className="font-semibold theme-text">
+                              Riwayat Tarif
+                            </h2>
+                            <p className="mt-1 text-sm theme-text-muted">
+                              Semua perubahan tarif yang pernah tercatat.
+                            </p>
+                          </div>
                         </div>
-                        <p className="mt-2 text-2xl font-bold tabular-nums theme-text">
-                          {currentTarif
-                            ? formatRupiah(currentTarif.tarifPerJam)
-                            : "Belum diatur"}
+
+                        <button
+                          type="button"
+                          onClick={() => setShowTarifForm((v) => !v)}
+                          className={buttonPrimary}
+                        >
+                          <Plus size={16} />
+                          {showTarifForm ? "Tutup Form" : "Tambah Tarif"}
+                        </button>
+                      </div>
+
+                      {showTarifForm && (
+                        <div className="border-b theme-border bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] p-5 sm:p-6">
+                          <form
+                            onSubmit={handleTarifSubmit}
+                            className="space-y-4"
+                          >
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                              <label className="block space-y-1.5">
+                                <span className="text-sm font-medium theme-text">
+                                  Tarif baru per jam (Rp)
+                                  <span className="ml-1 text-red-500">*</span>
+                                </span>
+                                <input
+                                  required
+                                  type="number"
+                                  min="0"
+                                  step="1"
+                                  value={tarifForm.tarifPerJam}
+                                  onChange={(e) =>
+                                    updateTarifForm("tarifPerJam", e.target.value)
+                                  }
+                                  placeholder="Masukkan tarif baru"
+                                  className={inputClass}
+                                  disabled={savingTarif}
+                                />
+                              </label>
+
+                              <label className="block space-y-1.5">
+                                <span className="text-sm font-medium theme-text">
+                                  Berlaku mulai
+                                  <span className="ml-1 text-red-500">*</span>
+                                </span>
+                                <input
+                                  required
+                                  type="date"
+                                  value={tarifForm.berlakuMulai}
+                                  onChange={(e) =>
+                                    updateTarifForm("berlakuMulai", e.target.value)
+                                  }
+                                  className={inputClass}
+                                  disabled={savingTarif}
+                                />
+                              </label>
+                            </div>
+
+                            <label className="block space-y-1.5">
+                              <span className="text-sm font-medium theme-text">
+                                Catatan perubahan
+                              </span>
+                              <textarea
+                                rows={3}
+                                value={tarifForm.catatan}
+                                onChange={(e) =>
+                                  updateTarifForm("catatan", e.target.value)
+                                }
+                                placeholder="Contoh: penyesuaian tarif periode baru"
+                                className={inputClass}
+                                disabled={savingTarif}
+                              />
+                            </label>
+
+                            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                              <button
+                                type="button"
+                                onClick={() => setShowTarifForm(false)}
+                                disabled={savingTarif}
+                                className={buttonSecondary}
+                              >
+                                Batal
+                              </button>
+
+                              <button
+                                type="submit"
+                                disabled={savingTarif}
+                                className={buttonPrimary}
+                              >
+                                {savingTarif ? (
+                                  <LoaderCircle size={16} className="animate-spin" />
+                                ) : (
+                                  <Wallet size={16} />
+                                )}
+                                {savingTarif ? "Menyimpan..." : "Simpan Tarif"}
+                              </button>
+                            </div>
+                          </form>
+                        </div>
+                      )}
+
+                      <div className="p-5 sm:p-6">
+                        {!item.tarifRiwayat?.length ? (
+                          <div className="rounded-xl border border-dashed theme-border p-8 text-center text-sm theme-text-muted">
+                            Belum ada riwayat tarif yang tersedia.
+                          </div>
+                        ) : (
+                          <div className="overflow-x-auto rounded-xl border theme-border">
+                            <table className="w-full min-w-[640px] text-left text-sm">
+                              <thead className="bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] text-xs uppercase tracking-wide theme-text-muted border-b theme-border">
+                                <tr>
+                                  <th className="w-14 px-4 py-3 font-semibold">No</th>
+                                  <th className="px-4 py-3 font-semibold">Tarif per jam</th>
+                                  <th className="px-4 py-3 font-semibold">Mulai berlaku</th>
+                                  <th className="px-4 py-3 font-semibold">Berakhir</th>
+                                  <th className="px-4 py-3 font-semibold">Catatan</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-[color-mix(in_srgb,var(--color-text)_5%,transparent)]">
+                                {item.tarifRiwayat.map((tarif, index) => (
+                                  <tr
+                                    key={tarif.id ?? `${tarif.berlakuMulai}-${index}`}
+                                    className="hover:bg-[color-mix(in_srgb,var(--color-text)_2%,transparent)] transition"
+                                  >
+                                    <td className="px-4 py-3">
+                                      <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)] text-[11px] font-semibold theme-text-secondary">
+                                        {index + 1}
+                                      </span>
+                                    </td>
+                                    <td className="px-4 py-3 font-semibold tabular-nums theme-text">
+                                      {formatRupiah(tarif.tarifPerJam)}
+                                    </td>
+                                    <td className="px-4 py-3 theme-text-secondary">
+                                      {formatTanggal(tarif.berlakuMulai)}
+                                    </td>
+                                    <td className="px-4 py-3 theme-text-secondary">
+                                      {tarif.berakhirPada
+                                        ? formatTanggal(tarif.berakhirPada)
+                                        : "Masih berlaku"}
+                                    </td>
+                                    <td className="px-4 py-3 theme-text-secondary">
+                                      {tarif.catatan || "-"}
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        )}
+                      </div>
+                    </section>
+                  </div>
+
+                  <aside className="flex min-w-0 flex-col gap-6">
+                    <section className="theme-card overflow-hidden rounded-2xl border theme-border shadow-sm p-5 sm:p-6">
+                      <div className="flex items-center gap-2 mb-4">
+                        <Wallet size={18} className="theme-primary-text" />
+                        <h2 className="text-sm font-bold theme-text">Tarif Aktif</h2>
+                      </div>
+                      <div className="rounded-xl bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] border theme-border p-4">
+                        <p className="text-2xl font-bold tabular-nums theme-text">
+                          {currentTarif ? formatRupiah(currentTarif.tarifPerJam) : "Belum diatur"}
                         </p>
                         {currentTarif?.berlakuMulai && (
                           <p className="mt-1 text-xs theme-text-muted">
-                            Berlaku sejak{" "}
-                            {formatTanggal(currentTarif.berlakuMulai)}
+                            Berlaku sejak {formatTanggal(currentTarif.berlakuMulai)}
                           </p>
                         )}
                       </div>
+                    </section>
 
-                      <div className="rounded-lg bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] border theme-border p-4">
-                        <div className="flex items-center gap-2">
-                          <Users size={16} className="text-indigo-600 dark:text-indigo-400" />
-                          <p className="text-xs font-medium theme-text-muted">
-                            Jumlah pegawai
-                          </p>
-                        </div>
-                        <p className="mt-2 text-2xl font-bold tabular-nums theme-text">
+                    <section className="theme-card overflow-hidden rounded-2xl border theme-border shadow-sm p-5 sm:p-6">
+                      <div className="flex items-center gap-2 mb-4">
+                        <Users size={18} className="text-indigo-600 dark:text-indigo-400" />
+                        <h2 className="text-sm font-bold theme-text">Jumlah Pegawai</h2>
+                      </div>
+                      <div className="rounded-xl bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] border theme-border p-4">
+                        <p className="text-2xl font-bold tabular-nums theme-text">
                           {Number(item.jumlahPengguna ?? 0)}
                         </p>
                         <p className="mt-1 text-xs theme-text-muted">
                           Pegawai terhubung dengan kategori ini
                         </p>
                       </div>
-                    </div>
-                  </section>
+                    </section>
 
-                  <section className="theme-card overflow-hidden rounded-xl border theme-border shadow-sm">
-                    <div className="border-b theme-border p-5 sm:p-6">
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
-                          <Info size={19} />
+                    <div className="theme-info theme-border flex items-start gap-3 rounded-2xl border p-4">
+                      <Info size={17} className="mt-0.5 shrink-0 text-[var(--color-info)]" />
+                      <p className="text-xs leading-5">
+                        Perubahan tarif disimpan sebagai riwayat baru. Perhitungan gaji mengikuti aturan sistem dan riwayat tarif yang berlaku pada periode penggajian.
+                      </p>
+                    </div>
+
+                    <div className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
+                      <div className="theme-card-soft theme-border flex items-center gap-3 border-b px-5 py-3">
+                        <div className="theme-warning flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
+                          <Lightbulb size={17} />
                         </div>
-                        <div>
-                          <h2 className="font-semibold theme-text">
-                            Informasi Kategori
-                          </h2>
-                          <p className="mt-1 text-sm theme-text-muted">
-                            Detail identitas kategori jabatan.
-                          </p>
-                        </div>
+                        <h2 className="theme-text text-sm font-bold">Panduan</h2>
                       </div>
-                    </div>
-
-                    <div className="p-5 sm:p-6">
-                      <InfoRow
-                        label="Nama kategori"
-                        value={item.nama || "-"}
-                        icon={BriefcaseBusiness}
-                      />
-                      <InfoRow
-                        label="Kode kategori"
-                        value={item.kode || "-"}
-                      />
-                      <InfoRow
-                        label="Status"
-                        value={
-                          item.status === "aktif" ? "Aktif" : "Nonaktif"
-                        }
-                      />
-                      <InfoRow
-                        label="Keterangan"
-                        value={item.keterangan || "Tidak ada keterangan."}
-                      />
-                    </div>
-                  </section>
-
-                  <section className="theme-card overflow-hidden rounded-xl border theme-border shadow-sm">
-                    <div className="flex flex-col justify-between gap-3 border-b theme-border p-5 sm:flex-row sm:items-center sm:p-6">
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300">
-                          <History size={19} />
-                        </div>
-                        <div>
-                          <h2 className="font-semibold theme-text">
-                            Riwayat Tarif
-                          </h2>
-                          <p className="mt-1 text-sm theme-text-muted">
-                            Semua perubahan tarif yang pernah tercatat.
-                          </p>
-                        </div>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() => setShowTarifForm((v) => !v)}
-                        className={buttonPrimary}
-                      >
-                        <Plus size={16} />
-                        {showTarifForm ? "Tutup Form" : "Tambah Tarif"}
-                      </button>
-                    </div>
-
-                    {showTarifForm && (
-                      <div className="border-b theme-border bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] p-5 sm:p-6">
-                        <form
-                          onSubmit={handleTarifSubmit}
-                          className="space-y-4"
-                        >
-                          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                            <label className="block space-y-1.5">
-                              <span className="text-sm font-medium theme-text">
-                                Tarif baru per jam (Rp)
-                                <span className="ml-1 text-red-500">*</span>
-                              </span>
-                              <input
-                                required
-                                type="number"
-                                min="0"
-                                step="1"
-                                value={tarifForm.tarifPerJam}
-                                onChange={(e) =>
-                                  updateTarifForm(
-                                    "tarifPerJam",
-                                    e.target.value
-                                  )
-                                }
-                                placeholder="Masukkan tarif baru"
-                                className={inputClass}
-                                disabled={savingTarif}
-                              />
-                            </label>
-
-                            <label className="block space-y-1.5">
-                              <span className="text-sm font-medium theme-text">
-                                Berlaku mulai
-                                <span className="ml-1 text-red-500">*</span>
-                              </span>
-                              <input
-                                required
-                                type="date"
-                                value={tarifForm.berlakuMulai}
-                                onChange={(e) =>
-                                  updateTarifForm(
-                                    "berlakuMulai",
-                                    e.target.value
-                                  )
-                                }
-                                className={inputClass}
-                                disabled={savingTarif}
-                              />
-                            </label>
-                          </div>
-
-                          <label className="block space-y-1.5">
-                            <span className="text-sm font-medium theme-text">
-                              Catatan perubahan
+                      <div className="p-5">
+                        <ul className="space-y-3 text-xs leading-5">
+                          <li className="flex items-start gap-2">
+                            <CheckCircle2 size={14} className="mt-0.5 shrink-0 text-[var(--color-success)]" />
+                            <span className="theme-text-secondary">
+                              Tarif baru akan menutup tarif sebelumnya secara otomatis.
                             </span>
-                            <textarea
-                              rows={3}
-                              value={tarifForm.catatan}
-                              onChange={(e) =>
-                                updateTarifForm("catatan", e.target.value)
-                              }
-                              placeholder="Contoh: penyesuaian tarif periode baru"
-                              className={inputClass}
-                              disabled={savingTarif}
-                            />
-                          </label>
-
-                          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-                            <button
-                              type="button"
-                              onClick={() => setShowTarifForm(false)}
-                              disabled={savingTarif}
-                              className={buttonSecondary}
-                            >
-                              Batal
-                            </button>
-
-                            <button
-                              type="submit"
-                              disabled={savingTarif}
-                              className={buttonPrimary}
-                            >
-                              {savingTarif ? (
-                                <LoaderCircle
-                                  size={16}
-                                  className="animate-spin"
-                                />
-                              ) : (
-                                <Wallet size={16} />
-                              )}
-                              {savingTarif
-                                ? "Menyimpan..."
-                                : "Simpan Tarif"}
-                            </button>
-                          </div>
-                        </form>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <CheckCircle2 size={14} className="mt-0.5 shrink-0 text-[var(--color-success)]" />
+                            <span className="theme-text-secondary">
+                              Pastikan tanggal berlaku tidak mundur sebelum tarif lama.
+                            </span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <CheckCircle2 size={14} className="mt-0.5 shrink-0 text-[var(--color-success)]" />
+                            <span className="theme-text-secondary">
+                              Riwayat tarif tersimpan permanen untuk audit penggajian.
+                            </span>
+                          </li>
+                        </ul>
                       </div>
-                    )}
-
-                    <div className="p-5 sm:p-6">
-                      {!item.tarifRiwayat?.length ? (
-                        <div className="rounded-lg border border-dashed theme-border p-8 text-center text-sm theme-text-muted">
-                          Belum ada riwayat tarif yang tersedia.
-                        </div>
-                      ) : (
-                        <div className="overflow-x-auto rounded-lg border theme-border">
-                          <table className="w-full min-w-[640px] text-left text-sm">
-                            <thead className="bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] text-xs uppercase tracking-wide theme-text-muted border-b theme-border">
-                              <tr>
-                                <th className="w-14 px-4 py-3 font-semibold">
-                                  No
-                                </th>
-                                <th className="px-4 py-3 font-semibold">
-                                  Tarif per jam
-                                </th>
-                                <th className="px-4 py-3 font-semibold">
-                                  Mulai berlaku
-                                </th>
-                                <th className="px-4 py-3 font-semibold">
-                                  Berakhir
-                                </th>
-                                <th className="px-4 py-3 font-semibold">
-                                  Catatan
-                                </th>
-                              </tr>
-                            </thead>
-                            <tbody className="divide-y divide-[color-mix(in_srgb,var(--color-text)_5%,transparent)]">
-                              {item.tarifRiwayat.map((tarif, index) => (
-                                <tr
-                                  key={
-                                    tarif.id ??
-                                    `${tarif.berlakuMulai}-${index}`
-                                  }
-                                  className="hover:bg-[color-mix(in_srgb,var(--color-text)_2%,transparent)] transition"
-                                >
-                                  <td className="px-4 py-3">
-                                    <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)] text-[11px] font-semibold theme-text-secondary">
-                                      {index + 1}
-                                    </span>
-                                  </td>
-                                  <td className="px-4 py-3 font-semibold tabular-nums theme-text">
-                                    {formatRupiah(tarif.tarifPerJam)}
-                                  </td>
-                                  <td className="px-4 py-3 theme-text-secondary">
-                                    {formatTanggal(tarif.berlakuMulai)}
-                                  </td>
-                                  <td className="px-4 py-3 theme-text-secondary">
-                                    {tarif.berakhirPada
-                                      ? formatTanggal(tarif.berakhirPada)
-                                      : "Masih berlaku"}
-                                  </td>
-                                  <td className="px-4 py-3 theme-text-secondary">
-                                    {tarif.catatan || "-"}
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      )}
                     </div>
-                  </section>
-
-                  <div className="flex items-start gap-2 rounded-lg border border-blue-200 bg-blue-50/70 p-4 text-sm text-blue-900 dark:border-blue-900/60 dark:bg-blue-950/30 dark:text-blue-200">
-                    <Info size={18} className="mt-0.5 shrink-0" />
-                    <p className="leading-6">
-                      Perubahan tarif disimpan sebagai riwayat baru.
-                      Perhitungan gaji mengikuti aturan sistem dan riwayat
-                      tarif yang berlaku pada periode penggajian.
-                    </p>
-                  </div>
-                </>
+                  </aside>
+                </div>
               )}
             </div>
-          </div>
-        </main>
+          </main>
+        </div>
       </div>
     </div>
   );

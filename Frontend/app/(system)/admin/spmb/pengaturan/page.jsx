@@ -18,6 +18,7 @@ import {
   Settings2,
   Sliders,
   Users,
+  ShieldCheck,
 } from "lucide-react";
 
 import {
@@ -94,7 +95,6 @@ export default function PengaturanSpmbPage() {
   }, []);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadPengaturan();
   }, [loadPengaturan]);
 
@@ -139,7 +139,7 @@ export default function PengaturanSpmbPage() {
     setError("");
     setSuccess("");
 
-    // Validasi koordinat sekolah: jika salah satu diisi, keduanya harus diisi bersamaan
+    // Validasi koordinat sekolah
     const latStr = String(form.lintangSekolah || "").trim();
     const lngStr = String(form.bujurSekolah || "").trim();
 
@@ -214,6 +214,7 @@ export default function PengaturanSpmbPage() {
   }
 
   return (
+    // ✅ Root pakai flex h-screen overflow-hidden
     <div className="theme-page flex h-screen w-full overflow-hidden">
       <Sidebar
         active="spmb"
@@ -224,6 +225,7 @@ export default function PengaturanSpmbPage() {
       />
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        {/* ✅ Header dibungkus shrink-0 */}
         <div className="shrink-0 border-b theme-border">
           <Header
             toggleSidebar={() => setCollapsed((value) => !value)}
@@ -236,308 +238,377 @@ export default function PengaturanSpmbPage() {
           />
         </div>
 
-        <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto">
-          <div className="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6 lg:px-8">
-            <button
-              type="button"
-              onClick={() => router.push("/admin/spmb")}
-              className="mb-4 inline-flex items-center gap-2 text-xs font-semibold theme-text-secondary transition hover:text-[var(--color-primary)]"
-            >
-              <ArrowLeft size={15} />
-              Kembali ke SPMB
-            </button>
-
-            <div className="mb-6 flex items-start gap-3">
-              <div
-                className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${themePrimarySoft} ${themePrimaryText}`}
+        {/* ✅ Body flex min-h-0 flex-1 */}
+        <div className="flex min-h-0 flex-1">
+          
+          {/* ✅ Main min-w-0 flex-1 overflow-y-auto */}
+          <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto">
+            
+            {/* ✅ Konten w-full (max-w dihapus) agar melebar saat zoom out */}
+            <div className="w-full px-4 py-6 sm:px-6 lg:px-8 2xl:px-12">
+              
+              <button
+                type="button"
+                onClick={() => router.push("/admin/spmb")}
+                className="mb-4 inline-flex items-center gap-2 text-xs font-semibold theme-text-secondary transition hover:text-[var(--color-primary)]"
               >
-                <Settings2 size={21} />
+                <ArrowLeft size={15} />
+                Kembali ke SPMB
+              </button>
+
+              <div className="mb-6 flex items-start gap-3">
+                <div
+                  className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${themePrimarySoft} ${themePrimaryText}`}
+                >
+                  <Settings2 size={21} />
+                </div>
+
+                <div>
+                  <h1 className="theme-text text-xl font-bold sm:text-2xl">
+                    Pengaturan SPMB
+                  </h1>
+                  <p className="theme-text-secondary mt-1 text-sm leading-6">
+                    Konfigurasi aturan seleksi, status penerimaan, validasi kuota, koordinat sekolah, dan notifikasi.
+                  </p>
+                </div>
               </div>
 
-              <div>
-                <h1 className="theme-text text-xl font-bold sm:text-2xl">
-                  Pengaturan SPMB
-                </h1>
-                <p className="theme-text-secondary mt-1 text-sm leading-6">
-                  Konfigurasi aturan seleksi, status penerimaan, validasi kuota, koordinat sekolah, dan notifikasi calon peserta didik.
-                </p>
-              </div>
+              {error && (
+                <div className="mb-5 flex items-start gap-3 rounded-xl border border-[color-mix(in_srgb,var(--color-danger)_24%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_9%,transparent)] px-4 py-3">
+                  <AlertCircle
+                    size={18}
+                    className="mt-0.5 shrink-0 text-[var(--color-danger)]"
+                  />
+                  <p className="text-xs text-[var(--color-danger)]">{error}</p>
+                </div>
+              )}
+
+              {success && (
+                <div className="mb-5 flex items-start gap-3 rounded-xl border border-[color-mix(in_srgb,var(--color-success)_24%,transparent)] bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)] px-4 py-3">
+                  <CheckCircle2
+                    size={18}
+                    className="mt-0.5 shrink-0 text-[var(--color-success)]"
+                  />
+                  <p className="text-xs text-[var(--color-success)]">{success}</p>
+                </div>
+              )}
+
+              {loading ? (
+                <div className="flex h-64 items-center justify-center rounded-2xl border theme-border theme-card">
+                  <div className="flex items-center gap-2 text-xs theme-text-muted">
+                    <Loader2 size={16} className="animate-spin text-[var(--color-primary)]" />
+                    <span>Memuat pengaturan dari server...</span>
+                  </div>
+                </div>
+              ) : (
+                <form onSubmit={handleSubmit}>
+                  
+                  {/* ✅ Grid Responsif (Tanpa space kosong di tengah karena minmax(0,...)) */}
+                  <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+                    
+                    {/* === KOLOM KIRI: Kebijakan & Koordinat === */}
+                    <div className="min-w-0 space-y-6">
+                      
+                      {/* Bagian 1: Status dan Aturan SPMB */}
+                      <div className="rounded-2xl border theme-border theme-card p-5 sm:p-6 shadow-sm">
+                        <div className="mb-4 flex items-center gap-2.5 border-b theme-border pb-3">
+                          <Sliders size={18} className="text-[var(--color-primary)]" />
+                          <div>
+                            <h2 className="text-sm font-semibold theme-text">
+                              Status & Kebijakan Seleksi
+                            </h2>
+                            <p className="text-xs theme-text-muted">
+                              Kontrol utama pembukaan pendaftaran dan aturan seleksi penerimaan
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="divide-y theme-border">
+                          {/* pendaftaranDibuka */}
+                          <div className="flex items-center justify-between gap-4 py-4">
+                            <div className="min-w-0 flex-1">
+                              <label
+                                htmlFor="toggle-pendaftaranDibuka"
+                                className="text-xs font-semibold theme-text block cursor-pointer"
+                              >
+                                Pendaftaran PPDB Dibuka
+                              </label>
+                              <p className="mt-0.5 text-xs theme-text-muted leading-relaxed">
+                                Izinkan calon peserta didik mengakses form registrasi online publik untuk sekolah ini.
+                              </p>
+                            </div>
+                            <input
+                              id="toggle-pendaftaranDibuka"
+                              type="checkbox"
+                              checked={form.pendaftaranDibuka}
+                              onChange={() => handleToggle("pendaftaranDibuka")}
+                              className="h-5 w-5 shrink-0 rounded border-gray-300 text-[var(--color-primary)] focus:ring-[var(--color-primary)] cursor-pointer"
+                            />
+                          </div>
+
+                          {/* wajibLokasi */}
+                          <div className="flex items-center justify-between gap-4 py-4">
+                            <div className="min-w-0 flex-1">
+                              <label
+                                htmlFor="toggle-wajibLokasi"
+                                className="text-xs font-semibold theme-text block cursor-pointer"
+                              >
+                                Wajibkan Lokasi / Koordinat Peserta
+                              </label>
+                              <p className="mt-0.5 text-xs theme-text-muted leading-relaxed">
+                                Mengharuskan calon siswa mencantumkan titik koordinat tempat tinggal (lintang dan bujur) untuk seluruh jalur seleksi.
+                              </p>
+                            </div>
+                            <input
+                              id="toggle-wajibLokasi"
+                              type="checkbox"
+                              checked={form.wajibLokasi}
+                              onChange={() => handleToggle("wajibLokasi")}
+                              className="h-5 w-5 shrink-0 rounded border-gray-300 text-[var(--color-primary)] focus:ring-[var(--color-primary)] cursor-pointer"
+                            />
+                          </div>
+
+                          {/* batasiPendaftarSesuaiKuota */}
+                          <div className="flex items-center justify-between gap-4 py-4">
+                            <div className="min-w-0 flex-1">
+                              <label
+                                htmlFor="toggle-batasiPendaftarSesuaiKuota"
+                                className="text-xs font-semibold theme-text block cursor-pointer"
+                              >
+                                Batasi Pendaftar Sesuai Kuota
+                              </label>
+                              <p className="mt-0.5 text-xs theme-text-muted leading-relaxed">
+                                Otomatis menolak pendaftar baru jika total calon siswa yang mendaftar pada jalur terkait telah mencapai kapasitas kuota.
+                              </p>
+                            </div>
+                            <input
+                              id="toggle-batasiPendaftarSesuaiKuota"
+                              type="checkbox"
+                              checked={form.batasiPendaftarSesuaiKuota}
+                              onChange={() => handleToggle("batasiPendaftarSesuaiKuota")}
+                              className="h-5 w-5 shrink-0 rounded border-gray-300 text-[var(--color-primary)] focus:ring-[var(--color-primary)] cursor-pointer"
+                            />
+                          </div>
+
+                          {/* rankingTerbuka */}
+                          <div className="flex items-center justify-between gap-4 py-4">
+                            <div className="min-w-0 flex-1">
+                              <label
+                                htmlFor="toggle-rankingTerbuka"
+                                className="text-xs font-semibold theme-text block cursor-pointer"
+                              >
+                                Publikasi Ranking Terbuka
+                              </label>
+                              <p className="mt-0.5 text-xs theme-text-muted leading-relaxed">
+                                Memungkinkan calon siswa dan masyarakat umum melihat posisi pemeringkatan sementara secara transparan.
+                              </p>
+                            </div>
+                            <input
+                              id="toggle-rankingTerbuka"
+                              type="checkbox"
+                              checked={form.rankingTerbuka}
+                              onChange={() => handleToggle("rankingTerbuka")}
+                              className="h-5 w-5 shrink-0 rounded border-gray-300 text-[var(--color-primary)] focus:ring-[var(--color-primary)] cursor-pointer"
+                            />
+                          </div>
+
+                          {/* kirimEmailKonfirmasi */}
+                          <div className="flex items-center justify-between gap-4 py-4">
+                            <div className="min-w-0 flex-1">
+                              <label
+                                htmlFor="toggle-kirimEmailKonfirmasi"
+                                className="text-xs font-semibold theme-text block cursor-pointer"
+                              >
+                                Kirim Email Konfirmasi Pendaftaran
+                              </label>
+                              <p className="mt-0.5 text-xs theme-text-muted leading-relaxed">
+                                Kirimkan email otomatis berisi tanda bukti nomor registrasi dan instruksi langkah berikutnya ke alamat email pendaftar.
+                              </p>
+                            </div>
+                            <input
+                              id="toggle-kirimEmailKonfirmasi"
+                              type="checkbox"
+                              checked={form.kirimEmailKonfirmasi}
+                              onChange={() => handleToggle("kirimEmailKonfirmasi")}
+                              className="h-5 w-5 shrink-0 rounded border-gray-300 text-[var(--color-primary)] focus:ring-[var(--color-primary)] cursor-pointer"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Bagian 2: Titik Koordinat Lokasi Sekolah */}
+                      <div className="rounded-2xl border theme-border theme-card p-5 sm:p-6 shadow-sm">
+                        <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b theme-border pb-3">
+                          <div className="flex items-center gap-2.5">
+                            <MapPin size={18} className="text-[var(--color-primary)]" />
+                            <div>
+                              <h2 className="text-sm font-semibold theme-text">
+                                Koordinat Lokasi Sekolah
+                              </h2>
+                              <p className="text-xs theme-text-muted">
+                                Titik acuan untuk perhitungan jarak radius pada jalur zonasi
+                              </p>
+                            </div>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={handleLocationDetect}
+                            disabled={detectingLocation}
+                            className="inline-flex items-center gap-1.5 rounded-lg border theme-border px-3 py-1.5 text-xs font-medium theme-text-secondary hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] transition disabled:opacity-50"
+                          >
+                            {detectingLocation ? (
+                              <>
+                                <Loader2 size={13} className="animate-spin text-[var(--color-primary)]" />
+                                <span>Mendeteksi...</span>
+                              </>
+                            ) : (
+                              <>
+                                <Compass size={13} className="text-[var(--color-primary)]" />
+                                <span>Ambil Lokasi Saat Ini</span>
+                              </>
+                            )}
+                          </button>
+                        </div>
+
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                          <div>
+                            <label
+                              htmlFor="input-lintangSekolah"
+                              className="text-xs font-semibold theme-text mb-1 block"
+                            >
+                              Lintang (Latitude) Sekolah
+                            </label>
+                            <input
+                              id="input-lintangSekolah"
+                              type="number"
+                              step="any"
+                              min="-90"
+                              max="90"
+                              value={form.lintangSekolah}
+                              onChange={(e) =>
+                                setForm((prev) => ({
+                                  ...prev,
+                                  lintangSekolah: e.target.value,
+                                }))
+                              }
+                              placeholder="-6.2088"
+                              className={`w-full rounded-xl border ${themeNeutralBorder} ${themeNeutralSurface} px-3.5 py-2.5 text-xs theme-text ${themeFocus} outline-none`}
+                            />
+                            <p className="mt-1 text-[11px] theme-text-muted">
+                              Rentang nilai: -90.0 s/d 90.0
+                            </p>
+                          </div>
+
+                          <div>
+                            <label
+                              htmlFor="input-bujurSekolah"
+                              className="text-xs font-semibold theme-text mb-1 block"
+                            >
+                              Bujur (Longitude) Sekolah
+                            </label>
+                            <input
+                              id="input-bujurSekolah"
+                              type="number"
+                              step="any"
+                              min="-180"
+                              max="180"
+                              value={form.bujurSekolah}
+                              onChange={(e) =>
+                                setForm((prev) => ({
+                                  ...prev,
+                                  bujurSekolah: e.target.value,
+                                }))
+                              }
+                              placeholder="106.8456"
+                              className={`w-full rounded-xl border ${themeNeutralBorder} ${themeNeutralSurface} px-3.5 py-2.5 text-xs theme-text ${themeFocus} outline-none`}
+                            />
+                            <p className="mt-1 text-[11px] theme-text-muted">
+                              Rentang nilai: -180.0 s/d 180.0
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* === KOLOM KANAN: Ringkasan & Tombol === */}
+                    <aside className="flex min-w-0 flex-col gap-6">
+                      
+                      {/* Card: Ringkasan Status */}
+                      <div className="rounded-2xl border theme-border theme-card p-5 shadow-sm">
+                        <div className="flex items-center gap-2.5 border-b theme-border pb-3">
+                          <ShieldCheck size={18} className="text-[var(--color-primary)]" />
+                          <h2 className="text-sm font-semibold theme-text">
+                            Ringkasan Status
+                          </h2>
+                        </div>
+                        
+                        <div className="mt-4 space-y-4">
+                          <div className="flex items-center justify-between gap-3">
+                            <span className="text-xs font-medium theme-text-secondary">Pendaftaran</span>
+                            <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-bold ${form.pendaftaranDibuka ? 'theme-success' : 'theme-card-soft theme-text-muted'}`}>
+                              {form.pendaftaranDibuka ? 'DIBUKA' : 'DITUTUP'}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between gap-3">
+                            <span className="text-xs font-medium theme-text-secondary">Wajib Lokasi</span>
+                            <span className="text-xs font-semibold theme-text">{form.wajibLokasi ? 'Ya' : 'Tidak'}</span>
+                          </div>
+                          <div className="flex items-center justify-between gap-3">
+                            <span className="text-xs font-medium theme-text-secondary">Batasi Kuota</span>
+                            <span className="text-xs font-semibold theme-text">{form.batasiPendaftarSesuaiKuota ? 'Ya' : 'Tidak'}</span>
+                          </div>
+                          <div className="flex items-center justify-between gap-3">
+                            <span className="text-xs font-medium theme-text-secondary">Ranking Publik</span>
+                            <span className="text-xs font-semibold theme-text">{form.rankingTerbuka ? 'Ya' : 'Tidak'}</span>
+                          </div>
+                          <div className="flex items-center justify-between gap-3">
+                            <span className="text-xs font-medium theme-text-secondary">Email Konfirmasi</span>
+                            <span className="text-xs font-semibold theme-text">{form.kirimEmailKonfirmasi ? 'Ya' : 'Tidak'}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Card: Tombol Aksi */}
+                      <div className="rounded-2xl border theme-border theme-card p-5 shadow-sm">
+                        <p className="text-xs theme-text-muted mb-4 leading-relaxed">
+                          Pastikan seluruh konfigurasi sudah sesuai sebelum menyimpan perubahan. Perubahan akan langsung diterapkan pada sistem PPDB.
+                        </p>
+                        
+                        <button
+                          type="submit"
+                          disabled={saving}
+                          className={`${themePrimaryGradient} inline-flex w-full items-center justify-center gap-2 rounded-xl px-5 py-3 text-xs font-semibold text-white shadow-sm transition hover:brightness-95 disabled:opacity-50`}
+                        >
+                          {saving ? (
+                            <>
+                              <Loader2 size={16} className="animate-spin" />
+                              <span>Menyimpan...</span>
+                            </>
+                          ) : (
+                            <>
+                              <Save size={16} />
+                              <span>Simpan Pengaturan</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+
+                      {/* Card: Info Tambahan (Opsional untuk keseimbangan) */}
+                      <div className="theme-info theme-border flex items-start gap-3 rounded-2xl border p-4">
+                        <Globe size={16} className="mt-0.5 shrink-0 text-[var(--color-info)]" />
+                        <p className="text-[11px] leading-5">
+                          Konfigurasi ini memengaruhi seluruh halaman publik PPDB, termasuk form pendaftaran calon siswa.
+                        </p>
+                      </div>
+                    </aside>
+                    
+                  </div>
+                </form>
+              )}
             </div>
-
-            {error && (
-              <div className="mb-5 flex items-start gap-3 rounded-xl border border-[color-mix(in_srgb,var(--color-danger)_24%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_9%,transparent)] px-4 py-3">
-                <AlertCircle
-                  size={18}
-                  className="mt-0.5 shrink-0 text-[var(--color-danger)]"
-                />
-                <p className="text-xs text-[var(--color-danger)]">{error}</p>
-              </div>
-            )}
-
-            {success && (
-              <div className="mb-5 flex items-start gap-3 rounded-xl border border-[color-mix(in_srgb,var(--color-success)_24%,transparent)] bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)] px-4 py-3">
-                <CheckCircle2
-                  size={18}
-                  className="mt-0.5 shrink-0 text-[var(--color-success)]"
-                />
-                <p className="text-xs text-[var(--color-success)]">{success}</p>
-              </div>
-            )}
-
-            {loading ? (
-              <div className="flex h-64 items-center justify-center rounded-2xl border theme-border theme-card">
-                <div className="flex items-center gap-2 text-xs theme-text-muted">
-                  <Loader2 size={16} className="animate-spin text-[var(--color-primary)]" />
-                  <span>Memuat pengaturan dari server...</span>
-                </div>
-              </div>
-            ) : (
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Bagian 1: Status dan Aturan SPMB */}
-                <div className="rounded-2xl border theme-border theme-card p-5 sm:p-6 shadow-sm">
-                  <div className="mb-4 flex items-center gap-2.5 border-b theme-border pb-3">
-                    <Sliders size={18} className="text-[var(--color-primary)]" />
-                    <div>
-                      <h2 className="text-sm font-semibold theme-text">
-                        Status & Kebijakan Seleksi
-                      </h2>
-                      <p className="text-xs theme-text-muted">
-                        Kontrol utama pembukaan pendaftaran dan aturan seleksi penerimaan
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="divide-y theme-border">
-                    {/* pendaftaranDibuka */}
-                    <div className="flex items-center justify-between py-4">
-                      <div className="max-w-[75%]">
-                        <label
-                          htmlFor="toggle-pendaftaranDibuka"
-                          className="text-xs font-semibold theme-text block cursor-pointer"
-                        >
-                          Pendaftaran PPDB Dibuka
-                        </label>
-                        <p className="mt-0.5 text-xs theme-text-muted leading-relaxed">
-                          Izinkan calon peserta didik mengakses form registrasi online publik untuk sekolah ini.
-                        </p>
-                      </div>
-                      <input
-                        id="toggle-pendaftaranDibuka"
-                        type="checkbox"
-                        checked={form.pendaftaranDibuka}
-                        onChange={() => handleToggle("pendaftaranDibuka")}
-                        className="h-5 w-5 rounded border-gray-300 text-[var(--color-primary)] focus:ring-[var(--color-primary)] cursor-pointer"
-                      />
-                    </div>
-
-                    {/* wajibLokasi */}
-                    <div className="flex items-center justify-between py-4">
-                      <div className="max-w-[75%]">
-                        <label
-                          htmlFor="toggle-wajibLokasi"
-                          className="text-xs font-semibold theme-text block cursor-pointer"
-                        >
-                          Wajibkan Lokasi / Koordinat Peserta
-                        </label>
-                        <p className="mt-0.5 text-xs theme-text-muted leading-relaxed">
-                          Mengharuskan calon siswa mencantumkan titik koordinat tempat tinggal (lintang dan bujur) untuk seluruh jalur seleksi.
-                        </p>
-                      </div>
-                      <input
-                        id="toggle-wajibLokasi"
-                        type="checkbox"
-                        checked={form.wajibLokasi}
-                        onChange={() => handleToggle("wajibLokasi")}
-                        className="h-5 w-5 rounded border-gray-300 text-[var(--color-primary)] focus:ring-[var(--color-primary)] cursor-pointer"
-                      />
-                    </div>
-
-                    {/* batasiPendaftarSesuaiKuota */}
-                    <div className="flex items-center justify-between py-4">
-                      <div className="max-w-[75%]">
-                        <label
-                          htmlFor="toggle-batasiPendaftarSesuaiKuota"
-                          className="text-xs font-semibold theme-text block cursor-pointer"
-                        >
-                          Batasi Pendaftar Sesuai Kuota
-                        </label>
-                        <p className="mt-0.5 text-xs theme-text-muted leading-relaxed">
-                          Otomatis menolak pendaftar baru jika total calon siswa yang mendaftar pada jalur terkait telah mencapai kapasitas kuota.
-                        </p>
-                      </div>
-                      <input
-                        id="toggle-batasiPendaftarSesuaiKuota"
-                        type="checkbox"
-                        checked={form.batasiPendaftarSesuaiKuota}
-                        onChange={() => handleToggle("batasiPendaftarSesuaiKuota")}
-                        className="h-5 w-5 rounded border-gray-300 text-[var(--color-primary)] focus:ring-[var(--color-primary)] cursor-pointer"
-                      />
-                    </div>
-
-                    {/* rankingTerbuka */}
-                    <div className="flex items-center justify-between py-4">
-                      <div className="max-w-[75%]">
-                        <label
-                          htmlFor="toggle-rankingTerbuka"
-                          className="text-xs font-semibold theme-text block cursor-pointer"
-                        >
-                          Publikasi Ranking Terbuka
-                        </label>
-                        <p className="mt-0.5 text-xs theme-text-muted leading-relaxed">
-                          Memungkinkan calon siswa dan masyarakat umum melihat posisi pemeringkatan sementara secara transparan.
-                        </p>
-                      </div>
-                      <input
-                        id="toggle-rankingTerbuka"
-                        type="checkbox"
-                        checked={form.rankingTerbuka}
-                        onChange={() => handleToggle("rankingTerbuka")}
-                        className="h-5 w-5 rounded border-gray-300 text-[var(--color-primary)] focus:ring-[var(--color-primary)] cursor-pointer"
-                      />
-                    </div>
-
-                    {/* kirimEmailKonfirmasi */}
-                    <div className="flex items-center justify-between py-4">
-                      <div className="max-w-[75%]">
-                        <label
-                          htmlFor="toggle-kirimEmailKonfirmasi"
-                          className="text-xs font-semibold theme-text block cursor-pointer"
-                        >
-                          Kirim Email Konfirmasi Pendaftaran
-                        </label>
-                        <p className="mt-0.5 text-xs theme-text-muted leading-relaxed">
-                          Kirimkan email otomatis berisi tanda bukti nomor registrasi dan instruksi langkah berikutnya ke alamat email pendaftar.
-                        </p>
-                      </div>
-                      <input
-                        id="toggle-kirimEmailKonfirmasi"
-                        type="checkbox"
-                        checked={form.kirimEmailKonfirmasi}
-                        onChange={() => handleToggle("kirimEmailKonfirmasi")}
-                        className="h-5 w-5 rounded border-gray-300 text-[var(--color-primary)] focus:ring-[var(--color-primary)] cursor-pointer"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Bagian 2: Titik Koordinat Lokasi Sekolah */}
-                <div className="rounded-2xl border theme-border theme-card p-5 sm:p-6 shadow-sm">
-                  <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b theme-border pb-3">
-                    <div className="flex items-center gap-2.5">
-                      <MapPin size={18} className="text-[var(--color-primary)]" />
-                      <div>
-                        <h2 className="text-sm font-semibold theme-text">
-                          Koordinat Lokasi Sekolah
-                        </h2>
-                        <p className="text-xs theme-text-muted">
-                          Titik acuan untuk perhitungan jarak radius pada jalur zonasi
-                        </p>
-                      </div>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={handleLocationDetect}
-                      disabled={detectingLocation}
-                      className="inline-flex items-center gap-1.5 rounded-lg border theme-border px-3 py-1.5 text-xs font-medium theme-text-secondary hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] transition disabled:opacity-50"
-                    >
-                      {detectingLocation ? (
-                        <>
-                          <Loader2 size={13} className="animate-spin text-[var(--color-primary)]" />
-                          <span>Mendeteksi...</span>
-                        </>
-                      ) : (
-                        <>
-                          <Compass size={13} className="text-[var(--color-primary)]" />
-                          <span>Ambil Lokasi Saat Ini</span>
-                        </>
-                      )}
-                    </button>
-                  </div>
-
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <div>
-                      <label
-                        htmlFor="input-lintangSekolah"
-                        className="text-xs font-semibold theme-text mb-1 block"
-                      >
-                        Lintang (Latitude) Sekolah
-                      </label>
-                      <input
-                        id="input-lintangSekolah"
-                        type="number"
-                        step="any"
-                        min="-90"
-                        max="90"
-                        value={form.lintangSekolah}
-                        onChange={(e) =>
-                          setForm((prev) => ({
-                            ...prev,
-                            lintangSekolah: e.target.value,
-                          }))
-                        }
-                        placeholder="-6.2088"
-                        className={`w-full rounded-xl border ${themeNeutralBorder} ${themeNeutralSurface} px-3.5 py-2.5 text-xs theme-text ${themeFocus} outline-none`}
-                      />
-                      <p className="mt-1 text-[11px] theme-text-muted">
-                        Rentang nilai: -90.0 s/d 90.0
-                      </p>
-                    </div>
-
-                    <div>
-                      <label
-                        htmlFor="input-bujurSekolah"
-                        className="text-xs font-semibold theme-text mb-1 block"
-                      >
-                        Bujur (Longitude) Sekolah
-                      </label>
-                      <input
-                        id="input-bujurSekolah"
-                        type="number"
-                        step="any"
-                        min="-180"
-                        max="180"
-                        value={form.bujurSekolah}
-                        onChange={(e) =>
-                          setForm((prev) => ({
-                            ...prev,
-                            bujurSekolah: e.target.value,
-                          }))
-                        }
-                        placeholder="106.8456"
-                        className={`w-full rounded-xl border ${themeNeutralBorder} ${themeNeutralSurface} px-3.5 py-2.5 text-xs theme-text ${themeFocus} outline-none`}
-                      />
-                      <p className="mt-1 text-[11px] theme-text-muted">
-                        Rentang nilai: -180.0 s/d 180.0
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Tombol Simpan */}
-                <div className="flex items-center justify-end gap-3 pt-2">
-                  <button
-                    type="submit"
-                    disabled={saving}
-                    className={`${themePrimaryGradient} inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-xs font-semibold text-[var(--color-card)] shadow-sm transition hover:brightness-95 disabled:opacity-50`}
-                  >
-                    {saving ? (
-                      <>
-                        <Loader2 size={14} className="animate-spin" />
-                        <span>Menyimpan...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Save size={14} />
-                        <span>Simpan Pengaturan</span>
-                      </>
-                    )}
-                  </button>
-                </div>
-              </form>
-            )}
-          </div>
-        </main>
+          </main>
+        </div>
       </div>
     </div>
   );

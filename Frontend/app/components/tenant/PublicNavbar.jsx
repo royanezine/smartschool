@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -73,9 +74,14 @@ function isPageActive(item) {
       "daftar-ppdb",
       "daftarppdb",
     ].includes(slug) ||
-    ["beranda", "home", "tentang", "artikel", "ppdb", "daftar ppdb"].includes(
-      title
-    )
+    [
+      "beranda",
+      "home",
+      "tentang",
+      "artikel",
+      "ppdb",
+      "daftar ppdb",
+    ].includes(title)
   ) {
     return false;
   }
@@ -107,7 +113,13 @@ function getPageList(response) {
 
   if (Array.isArray(result)) return result;
 
-  for (const key of ["daftarCms", "halamanCms", "halaman", "pages", "items"]) {
+  for (const key of [
+    "daftarCms",
+    "halamanCms",
+    "halaman",
+    "pages",
+    "items",
+  ]) {
     if (Array.isArray(result?.[key])) return result[key];
   }
 
@@ -123,35 +135,36 @@ export default function PublicNavbar({ sekolah = {}, halaman = [] }) {
   const pathname = usePathname();
 
   const subdomain = normalizeText(sekolah?.subdomain);
-  const base = subdomain ? `/${subdomain}` : "/";
+  const cleanBase = subdomain ? `/${subdomain}` : "";
+  const base = cleanBase || "/";
   const ppdbBase = getPpdbBasePath(pathname);
   const diHalamanPpdb = ppdbBase !== null;
-  const ppdbHome = `${ppdbBase}/PPDB`;
-  const cleanBase = base === "/" ? "" : base;
   const ppdbHref = `${cleanBase}/PPDB`;
 
-  // Animasi mount pertama kali
+  // Animasi saat pertama kali tampil
   useEffect(() => {
-    const t = setTimeout(() => setMounted(true), 50);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setMounted(true), 50);
+
+    return () => clearTimeout(timer);
   }, []);
 
-  const [prevPathname, setPrevPathname] = useState(pathname);
-  if (prevPathname !== pathname) {
-    setPrevPathname(pathname);
-    setOpen(false);
-  }
-
-  // Lock scroll saat mobile menu terbuka
+  // Tutup menu ketika berpindah halaman
   useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
+
+  // Lock scroll ketika menu mobile terbuka
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+
     if (open) {
       document.body.style.overflow = "hidden";
     } else {
-      document.body.style.overflow = "";
+      document.body.style.overflow = previousOverflow;
     }
 
     return () => {
-      document.body.style.overflow = "";
+      document.body.style.overflow = previousOverflow;
     };
   }, [open]);
 
@@ -160,7 +173,10 @@ export default function PublicNavbar({ sekolah = {}, halaman = [] }) {
     let cancelled = false;
 
     async function loadPages() {
-      if (!subdomain) return;
+      if (!subdomain) {
+        setHalamanApi([]);
+        return;
+      }
 
       try {
         const response = await publikService.getDaftarHalaman(subdomain);
@@ -169,7 +185,10 @@ export default function PublicNavbar({ sekolah = {}, halaman = [] }) {
           setHalamanApi(getPageList(response));
         }
       } catch (error) {
-        console.error("[PublicNavbar] Gagal mengambil halaman CMS:", error);
+        console.error(
+          "[PublicNavbar] Gagal mengambil halaman CMS:",
+          error
+        );
       }
     }
 
@@ -188,7 +207,9 @@ export default function PublicNavbar({ sekolah = {}, halaman = [] }) {
 
     handleScroll();
 
-    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("scroll", handleScroll, {
+      passive: true,
+    });
 
     return () => {
       window.removeEventListener("scroll", handleScroll);
@@ -202,7 +223,6 @@ export default function PublicNavbar({ sekolah = {}, halaman = [] }) {
       ...halamanApi,
     ];
 
-    // PERBAIKAN: Gunakan Set untuk melacak ID dan Slug yang sudah dipakai
     const seenIds = new Set();
     const seenSlugs = new Set();
 
@@ -212,13 +232,11 @@ export default function PublicNavbar({ sekolah = {}, halaman = [] }) {
         const id = String(item.id || "").trim();
         const slug = normalizeSlug(item.slug).toLowerCase();
 
-        // Cek duplikat berdasarkan ID (jika ada)
         if (id) {
           if (seenIds.has(id)) return false;
           seenIds.add(id);
         }
 
-        // Cek duplikat berdasarkan Slug
         if (slug) {
           if (seenSlugs.has(slug)) return false;
           seenSlugs.add(slug);
@@ -241,12 +259,12 @@ export default function PublicNavbar({ sekolah = {}, halaman = [] }) {
       },
       {
         label: "Tentang",
-        href: `${base}/tentang`,
+        href: `${cleanBase}/tentang`,
         key: "about",
       },
       {
         label: "Artikel",
-        href: `${base}/articles`,
+        href: `${cleanBase}/articles`,
         key: "articles",
       },
       {
@@ -259,12 +277,12 @@ export default function PublicNavbar({ sekolah = {}, halaman = [] }) {
     const extraPages = pages
       .map((item, index) => ({
         label: normalizeText(item.judul ?? item.title),
-        href: `${base}/${normalizeSlug(item.slug)}`,
-        // PERBAIKAN: Pastikan key unik dengan fallback ke index/slug
+        href: `${cleanBase}/${normalizeSlug(item.slug)}`,
         key: `page-${item.id || item.slug || index}`,
       }))
       .filter((page) => {
         const normLabel = page.label.toLowerCase();
+
         return (
           page.href !== ppdbHref &&
           normLabel !== "daftar ppdb" &&
@@ -273,7 +291,7 @@ export default function PublicNavbar({ sekolah = {}, halaman = [] }) {
       });
 
     return [...baseMenus, ...extraPages];
-  }, [halaman, halamanApi, base, ppdbHref]);
+  }, [halaman, halamanApi, base, cleanBase, ppdbHref]);
 
   // Deteksi menu aktif
   function isActive(href, isRoot) {
@@ -290,9 +308,33 @@ export default function PublicNavbar({ sekolah = {}, halaman = [] }) {
   const namaSekolah = normalizeText(sekolah?.nama) || "Sekolah";
   const jenjang = normalizeText(sekolah?.jenjang) || "Sekolah";
 
-  const currentReturnPath = pathname || (cleanBase ? `/${cleanBase}` : "/");
-  const ctaHref = `/login?redirect=${encodeURIComponent(currentReturnPath)}`;
-  const ctaLabel = "Login";
+  const currentReturnPath = pathname || base;
+  const ctaHref = `/login?redirect=${encodeURIComponent(
+    currentReturnPath
+  )}`;
+
+  // Seluruh warna mengambil tema dari PublicTheme
+  const theme = {
+    primary: "var(--school-primary, #2563EB)",
+    secondary: "var(--school-secondary, #64748B)",
+    accent: "var(--school-accent, #F59E0B)",
+    background: "var(--school-background, #F8FAFC)",
+    surface: "var(--school-surface, #FFFFFF)",
+    text: "var(--school-text, #0F172A)",
+    border: "var(--school-border, #E2E8F0)",
+  };
+
+  const glassSurface =
+    "color-mix(in srgb, var(--school-surface, #FFFFFF) 88%, transparent)";
+
+  const softBackground =
+    "color-mix(in srgb, var(--school-primary, #2563EB) 7%, var(--school-surface, #FFFFFF))";
+
+  const softBorder =
+    "color-mix(in srgb, var(--school-primary, #2563EB) 25%, var(--school-border, #E2E8F0))";
+
+  const primaryShadow =
+    "0 4px 14px color-mix(in srgb, var(--school-primary, #2563EB) 25%, transparent)";
 
   return (
     <div className="contents">
@@ -303,9 +345,7 @@ export default function PublicNavbar({ sekolah = {}, halaman = [] }) {
             ? "translate-y-0 opacity-100"
             : "-translate-y-6 opacity-0"
         } ${scrolled ? "pt-2 sm:pt-3" : "pt-3 sm:pt-4"}`}
-        style={{
-          color: "var(--warna-netral-teks, #0F172A)",
-        }}
+        style={{ color: theme.text }}
       >
         <header
           className={`mx-auto flex w-full max-w-7xl items-center justify-between gap-3 border px-4 transition-all duration-500 ease-out sm:px-6 ${
@@ -314,12 +354,8 @@ export default function PublicNavbar({ sekolah = {}, halaman = [] }) {
               : "rounded-2xl py-3 shadow-sm"
           }`}
           style={{
-            backgroundColor: scrolled
-              ? "rgba(255, 255, 255, 0.85)"
-              : "var(--warna-netral-putih, #FFFFFF)",
-            borderColor: scrolled
-              ? "rgba(226, 232, 240, 0.8)"
-              : "var(--warna-netral-garis, #E2E8F0)",
+            backgroundColor: scrolled ? glassSurface : theme.surface,
+            borderColor: scrolled ? softBorder : theme.border,
             boxShadow: scrolled
               ? "0 8px 32px rgba(15, 23, 42, 0.10)"
               : "0 2px 10px rgba(15, 23, 42, 0.025)",
@@ -343,8 +379,8 @@ export default function PublicNavbar({ sekolah = {}, halaman = [] }) {
                   scrolled ? "shadow-sm" : ""
                 }`}
                 style={{
-                  backgroundColor: "var(--warna-netral-putih, #FFFFFF)",
-                  borderColor: "var(--warna-netral-garis, #E2E8F0)",
+                  backgroundColor: theme.surface,
+                  borderColor: theme.border,
                 }}
               >
                 <Image
@@ -359,9 +395,7 @@ export default function PublicNavbar({ sekolah = {}, halaman = [] }) {
             ) : (
               <div
                 className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-lg font-bold text-white transition-all duration-500 group-hover:rotate-3 group-hover:scale-105 sm:h-11 sm:w-11"
-                style={{
-                  backgroundColor: "var(--warna-primer-utama, #2563EB)",
-                }}
+                style={{ backgroundColor: theme.primary }}
               >
                 {namaSekolah.charAt(0).toUpperCase()}
               </div>
@@ -374,9 +408,7 @@ export default function PublicNavbar({ sekolah = {}, halaman = [] }) {
 
               <p
                 className="mt-0.5 text-[10px] font-semibold uppercase tracking-[0.15em] transition-all duration-300 sm:text-xs"
-                style={{
-                  color: "var(--warna-primer-utama, #2563EB)",
-                }}
+                style={{ color: theme.primary }}
               >
                 {jenjang}
               </p>
@@ -398,28 +430,19 @@ export default function PublicNavbar({ sekolah = {}, halaman = [] }) {
                   aria-current={active ? "page" : undefined}
                   className="group relative rounded-lg px-3 py-2 text-sm font-medium transition-all duration-300 hover:-translate-y-0.5"
                   style={{
-                    color: active
-                      ? "var(--warna-primer-utama, #2563EB)"
-                      : "var(--warna-netral-teksLembut, #64748B)",
-                    backgroundColor: active
-                      ? "var(--warna-netral-latar, #F8FAFC)"
-                      : "transparent",
+                    color: active ? theme.primary : theme.secondary,
+                    backgroundColor: active ? softBackground : "transparent",
                   }}
-                  onMouseEnter={(e) => {
+                  onMouseEnter={(event) => {
                     if (!active) {
-                      e.currentTarget.style.color =
-                        "var(--warna-primer-utama, #2563EB)";
-
-                      e.currentTarget.style.backgroundColor =
-                        "var(--warna-netral-latar, #F8FAFC)";
+                      event.currentTarget.style.color = theme.primary;
+                      event.currentTarget.style.backgroundColor = softBackground;
                     }
                   }}
-                  onMouseLeave={(e) => {
+                  onMouseLeave={(event) => {
                     if (!active) {
-                      e.currentTarget.style.color =
-                        "var(--warna-netral-teksLembut, #64748B)";
-
-                      e.currentTarget.style.backgroundColor = "transparent";
+                      event.currentTarget.style.color = theme.secondary;
+                      event.currentTarget.style.backgroundColor = "transparent";
                     }
                   }}
                 >
@@ -432,28 +455,25 @@ export default function PublicNavbar({ sekolah = {}, halaman = [] }) {
                           ? "w-full opacity-100"
                           : "w-0 opacity-0 group-hover:w-full group-hover:opacity-100"
                       }`}
-                      style={{
-                        backgroundColor:
-                          "var(--warna-primer-utama, #2563EB)",
-                      }}
+                      style={{ backgroundColor: theme.primary }}
                     />
                   </span>
                 </Link>
               );
             })}
 
-            {/* TOMBOL PPDB */}
+            {/* TOMBOL LOGIN */}
             <Link
               href={ctaHref}
               className="group relative ml-2 inline-flex items-center gap-2 overflow-hidden rounded-xl px-4 py-2.5 text-sm font-semibold text-white transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg active:scale-95"
               style={{
-                backgroundColor: "var(--warna-primer-utama, #2563EB)",
-                boxShadow: "0 4px 14px rgba(37, 99, 235, 0.25)",
+                backgroundColor: theme.primary,
+                boxShadow: primaryShadow,
               }}
             >
               <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
 
-              <span className="relative">{ctaLabel}</span>
+              <span className="relative">Login</span>
 
               <svg
                 width="15"
@@ -478,9 +498,9 @@ export default function PublicNavbar({ sekolah = {}, halaman = [] }) {
             type="button"
             className="group inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border transition-all duration-300 hover:scale-105 active:scale-95 xl:hidden"
             style={{
-              backgroundColor: "var(--warna-netral-latar, #F8FAFC)",
-              borderColor: "var(--warna-netral-garis, #E2E8F0)",
-              color: "var(--warna-netral-teks, #0F172A)",
+              backgroundColor: softBackground,
+              borderColor: theme.border,
+              color: theme.text,
             }}
             onClick={() => setOpen((value) => !value)}
             aria-label={open ? "Tutup menu navigasi" : "Buka menu navigasi"}
@@ -536,8 +556,8 @@ export default function PublicNavbar({ sekolah = {}, halaman = [] }) {
                 : "-translate-y-2 scale-[0.98]"
             }`}
             style={{
-              backgroundColor: "var(--warna-netral-putih, #FFFFFF)",
-              borderColor: "var(--warna-netral-garis, #E2E8F0)",
+              backgroundColor: theme.surface,
+              borderColor: theme.border,
             }}
           >
             <div className="flex max-h-[70vh] flex-col gap-1 overflow-y-auto">
@@ -552,12 +572,8 @@ export default function PublicNavbar({ sekolah = {}, halaman = [] }) {
                     aria-current={active ? "page" : undefined}
                     className="rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200 hover:translate-x-1"
                     style={{
-                      color: active
-                        ? "var(--warna-primer-utama, #2563EB)"
-                        : "var(--warna-netral-teks, #0F172A)",
-                      backgroundColor: active
-                        ? "var(--warna-netral-latar, #F8FAFC)"
-                        : "transparent",
+                      color: active ? theme.primary : theme.text,
+                      backgroundColor: active ? softBackground : "transparent",
                       transitionDelay: open ? `${index * 40}ms` : "0ms",
                     }}
                   >
@@ -568,9 +584,7 @@ export default function PublicNavbar({ sekolah = {}, halaman = [] }) {
 
               <div
                 className="my-2 border-t"
-                style={{
-                  borderColor: "var(--warna-netral-garis, #E2E8F0)",
-                }}
+                style={{ borderColor: theme.border }}
               />
 
               <Link
@@ -578,26 +592,29 @@ export default function PublicNavbar({ sekolah = {}, halaman = [] }) {
                 onClick={() => setOpen(false)}
                 className="group relative flex items-center justify-center overflow-hidden rounded-xl px-4 py-3 text-sm font-semibold text-white transition-all duration-300 hover:opacity-90 active:scale-95"
                 style={{
-                  backgroundColor: "var(--warna-primer-utama, #2563EB)",
+                  backgroundColor: theme.primary,
+                  boxShadow: primaryShadow,
                 }}
               >
                 <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
 
-                <span className="relative">{ctaLabel}</span>
+                <span className="relative">Login</span>
               </Link>
             </div>
           </nav>
         </div>
 
         {/* BACKDROP MOBILE */}
-        <div
+        <button
+          type="button"
+          tabIndex={open ? 0 : -1}
+          aria-label="Tutup menu navigasi"
           className={`fixed inset-0 -z-10 bg-black/20 backdrop-blur-sm transition-opacity duration-300 xl:hidden ${
             open
               ? "pointer-events-auto opacity-100"
               : "pointer-events-none opacity-0"
           }`}
           onClick={() => setOpen(false)}
-          aria-hidden="true"
         />
       </div>
 

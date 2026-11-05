@@ -19,12 +19,13 @@ import {
   Loader2,
   UploadCloud,
   Plus,
+  Info,
+  FileText,
 } from "lucide-react";
 
 import { daftarPpdb, getOpsiPpdbSekolah } from "@/services/ppdb.service";
 import { getJalurPpdb } from "@/services/jalurPpdb.service";
 import { getAuthPayload, getStoredUser } from "@/lib/auth";
-
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -47,7 +48,6 @@ const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
 const EMAIL_REGEX = /^\S+@\S+\.\S+$/;
-
 
 export default function TambahPendaftarPage() {
   const router = useRouter();
@@ -82,7 +82,6 @@ export default function TambahPendaftarPage() {
   const [submitError, setSubmitError] = useState("");
   const [successData, setSuccessData] = useState(null);
 
-
   const loadJalur = useCallback(async () => {
     try {
       setLoadingJalur(true);
@@ -107,10 +106,14 @@ export default function TambahPendaftarPage() {
         try {
           const opsiRes = await getOpsiPpdbSekolah(sId);
           if (opsiRes?.data) {
-            const jenjang = (opsiRes.data.sekolah?.jenjang || "").toUpperCase().trim();
+            const jenjang = (opsiRes.data.sekolah?.jenjang || "")
+              .toUpperCase()
+              .trim();
             const wajib = Boolean(opsiRes.data.wajibJurusan) || jenjang === "SMK";
             setIsSmk(wajib);
-            setJurusanList(Array.isArray(opsiRes.data.jurusan) ? opsiRes.data.jurusan : []);
+            setJurusanList(
+              Array.isArray(opsiRes.data.jurusan) ? opsiRes.data.jurusan : []
+            );
           }
         } catch {
           // Abaikan kegagalan pemuatan opsi jurusan
@@ -135,7 +138,6 @@ export default function TambahPendaftarPage() {
       loadJalur();
     });
   }, [loadJalur]);
-
 
   const handleChange = (field, value) => {
     setForm((prev) => ({
@@ -238,8 +240,7 @@ export default function TambahPendaftarPage() {
     }
 
     const targetSekolahId =
-      sekolahId ||
-      jalurList.find((j) => j.id === form.jalurPpdbId)?.sekolahId;
+      sekolahId || jalurList.find((j) => j.id === form.jalurPpdbId)?.sekolahId;
 
     if (!targetSekolahId) {
       setSubmitError(
@@ -315,10 +316,7 @@ export default function TambahPendaftarPage() {
     setSubmitError("");
   };
 
-
   if (successData) {
-    // PPDB hanya ada di bawah tenant sekolah, jadi tautan unggah berkas wajib
-    // memakai prefix tenant yang terdeteksi dari URL yang sedang dibuka.
     const basePathTenant = basePathTenantSaatIni();
 
     const uploadUrl = basePathTenant
@@ -342,104 +340,119 @@ export default function TambahPendaftarPage() {
         />
 
         <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-          <Header
-            toggleSidebar={() => setCollapsed((v) => !v)}
-            notifications={[]}
-            user={{
-              name: "Admin Sekolah",
-              email: "admin@smartschool.com",
-              avatar: "AD",
-            }}
-          />
+          <div className="shrink-0 border-b theme-border">
+            <Header
+              toggleSidebar={() => setCollapsed((v) => !v)}
+              notifications={[]}
+              user={{
+                name: "Admin Sekolah",
+                email: "admin@smartschool.com",
+                avatar: "AD",
+              }}
+            />
+          </div>
 
-          <main className="min-h-0 min-w-0 flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
-            <div className="mx-auto max-w-2xl">
-              <div
-                className={`theme-card ${themeNeutralBorder} ${themeCardShadow} overflow-hidden rounded-2xl border p-6 sm:p-8`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
-                    <CheckCircle2 size={26} />
+          <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto">
+            <div className="w-full p-4 sm:p-6 lg:p-8 2xl:px-12">
+              <div className="mx-auto max-w-3xl">
+                <div
+                  className={`theme-card ${themeNeutralBorder} ${themeCardShadow} overflow-hidden rounded-2xl border p-6 sm:p-8`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+                      <CheckCircle2 size={26} />
+                    </div>
+                    <div>
+                      <h1 className="theme-text text-lg font-bold sm:text-xl">
+                        Pendaftaran Calon Siswa Berhasil
+                      </h1>
+                      <p className="theme-text-secondary mt-0.5 text-xs">
+                        Data pendaftaran telah disimpan oleh server backend.
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <h1 className="theme-text text-lg font-bold sm:text-xl">
-                      Pendaftaran Calon Siswa Berhasil
-                    </h1>
-                    <p className="theme-text-secondary mt-0.5 text-xs">
-                      Data pendaftaran telah disimpan oleh server backend.
+
+                  <div className="mt-6 space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-4 text-xs">
+                    <div className="flex justify-between border-b border-slate-200 pb-2">
+                      <span className="font-medium text-slate-500">
+                        Nomor Pendaftaran:
+                      </span>
+                      <span className="font-bold text-slate-800">
+                        {successData.nomorPendaftaran || "-"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between border-b border-slate-200 pb-2">
+                      <span className="font-medium text-slate-500">
+                        Nama Lengkap:
+                      </span>
+                      <span className="font-semibold text-slate-800">
+                        {successData.namaLengkap}
+                      </span>
+                    </div>
+                    <div className="flex justify-between border-b border-slate-200 pb-2">
+                      <span className="font-medium text-slate-500">NISN:</span>
+                      <span className="text-slate-800">{successData.nisn}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-medium text-slate-500">
+                        ID Pendaftaran:
+                      </span>
+                      <span className="font-mono text-[11px] text-slate-600">
+                        {successData.id}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-3.5 text-xs text-emerald-800">
+                    <p className="font-semibold">Data Tersimpan di Backend</p>
+                    <p className="mt-1 leading-5 text-emerald-700">
+                      Data calon siswa sudah tersimpan melalui POST
+                      /api/ppdb/daftar. Seluruh daftar pendaftar dapat ditinjau
+                      pada halaman Data Pendaftaran yang membaca GET
+                      /api/ppdb/pendaftar.
                     </p>
                   </div>
-                </div>
 
-                <div className="mt-6 space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-4 text-xs">
-                  <div className="flex justify-between border-b border-slate-200 pb-2">
-                    <span className="font-medium text-slate-500">Nomor Pendaftaran:</span>
-                    <span className="font-bold text-slate-800">
-                      {successData.nomorPendaftaran || "-"}
-                    </span>
+                  <div className="mt-6 flex flex-wrap gap-2.5">
+                    <button
+                      type="button"
+                      onClick={() => uploadUrl && router.push(uploadUrl)}
+                      disabled={!uploadUrl}
+                      className={`${themePrimaryGradient} inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-xs font-semibold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60`}
+                    >
+                      <UploadCloud size={15} />
+                      Unggah Berkas Calon Siswa
+                    </button>
+
+                    {!uploadUrl && (
+                      <p className="w-full text-[11px] leading-5 text-amber-700">
+                        Tautan unggah berkas hanya tersedia dari subdomain
+                        sekolah (mis. smart.localhost:3000). Buka halaman ini
+                        melalui subdomain sekolah untuk melanjutkan unggah
+                        berkas calon siswa.
+                      </p>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={handleResetForm}
+                      className="theme-card theme-neutral-border theme-text inline-flex items-center gap-2 rounded-lg border px-4 py-2.5 text-xs font-semibold transition hover:bg-slate-50"
+                    >
+                      <Plus size={15} />
+                      Daftarkan Siswa Lain
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        router.push("/admin/spmb/data-pendaftaran")
+                      }
+                      className="theme-card theme-neutral-border theme-text-secondary inline-flex items-center gap-2 rounded-lg border px-4 py-2.5 text-xs font-semibold transition hover:bg-slate-50"
+                    >
+                      <ArrowLeft size={15} />
+                      Kembali ke Data Pendaftaran
+                    </button>
                   </div>
-                  <div className="flex justify-between border-b border-slate-200 pb-2">
-                    <span className="font-medium text-slate-500">Nama Lengkap:</span>
-                    <span className="font-semibold text-slate-800">
-                      {successData.namaLengkap}
-                    </span>
-                  </div>
-                  <div className="flex justify-between border-b border-slate-200 pb-2">
-                    <span className="font-medium text-slate-500">NISN:</span>
-                    <span className="text-slate-800">{successData.nisn}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="font-medium text-slate-500">ID Pendaftaran:</span>
-                    <span className="font-mono text-[11px] text-slate-600">
-                      {successData.id}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 p-3.5 text-xs text-emerald-800">
-                  <p className="font-semibold">Data Tersimpan di Backend</p>
-                  <p className="mt-1 leading-5 text-emerald-700">
-                    Data calon siswa sudah tersimpan melalui POST /api/ppdb/daftar. Seluruh daftar pendaftar dapat ditinjau pada halaman Data Pendaftaran yang membaca GET /api/ppdb/pendaftar.
-                  </p>
-                </div>
-
-                <div className="mt-6 flex flex-wrap gap-2.5">
-                  <button
-                    type="button"
-                    onClick={() => uploadUrl && router.push(uploadUrl)}
-                    disabled={!uploadUrl}
-                    className={`${themePrimaryGradient} inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-xs font-semibold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60`}
-                  >
-                    <UploadCloud size={15} />
-                    Unggah Berkas Calon Siswa
-                  </button>
-
-                  {!uploadUrl && (
-                    <p className="w-full text-[11px] leading-5 text-amber-700">
-                      Tautan unggah berkas hanya tersedia dari subdomain
-                      sekolah (mis. smart.localhost:3000). Buka halaman ini
-                      melalui subdomain sekolah untuk melanjutkan unggah
-                      berkas calon siswa.
-                    </p>
-                  )}
-
-                  <button
-                    type="button"
-                    onClick={handleResetForm}
-                    className="theme-card theme-neutral-border theme-text inline-flex items-center gap-2 rounded-lg border px-4 py-2.5 text-xs font-semibold transition hover:bg-slate-50"
-                  >
-                    <Plus size={15} />
-                    Daftarkan Siswa Lain
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => router.push("/admin/spmb/data-pendaftaran")}
-                    className="theme-card theme-neutral-border theme-text-secondary inline-flex items-center gap-2 rounded-lg border px-4 py-2.5 text-xs font-semibold transition hover:bg-slate-50"
-                  >
-                    <ArrowLeft size={15} />
-                    Kembali ke Data Pendaftaran
-                  </button>
                 </div>
               </div>
             </div>
@@ -449,8 +462,8 @@ export default function TambahPendaftarPage() {
     );
   }
 
-
   return (
+    // ✅ ROOT pakai flex h-screen overflow-hidden
     <div className="theme-page flex h-screen w-full overflow-hidden">
       <Sidebar
         active="spmb"
@@ -460,437 +473,473 @@ export default function TambahPendaftarPage() {
         role="admin"
       />
 
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <Header
-          toggleSidebar={() => setCollapsed((value) => !value)}
-          notifications={[]}
-          user={{
-            name: "Admin Sekolah",
-            email: "admin@smartschool.com",
-            avatar: "AD",
-          }}
-        />
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+        {/* ✅ Header dibungkus shrink-0 */}
+        <div className="shrink-0 border-b theme-border">
+          <Header
+            toggleSidebar={() => setCollapsed((value) => !value)}
+            notifications={[]}
+            user={{
+              name: "Admin Sekolah",
+              email: "admin@smartschool.com",
+              avatar: "AD",
+            }}
+          />
+        </div>
 
-        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto">
-          <div className="mx-auto w-full max-w-4xl p-4 sm:p-6 lg:p-8">
-            <button
-              type="button"
-              onClick={() => router.push("/admin/spmb/data-pendaftaran")}
-              className="mb-4 inline-flex items-center gap-2 text-xs font-semibold theme-text-secondary transition hover:text-[var(--color-primary)]"
-            >
-              <ArrowLeft size={15} />
-              Kembali ke Data Pendaftaran
-            </button>
-
-            <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex items-center gap-3">
-                <div
-                  className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${themePrimarySoft} ${themePrimaryText}`}
-                >
-                  <UserRound size={21} />
-                </div>
-                <div>
-                  <h1 className="theme-text text-xl font-bold sm:text-2xl">
-                    Tambah Pendaftar
-                  </h1>
-                  <p className="theme-text-secondary mt-0.5 text-xs">
-                    Input pendaftaran calon peserta didik baru melalui endpoint resmi backend.
-                  </p>
-                </div>
-              </div>
-
-              <span
-                className={`theme-card ${themeNeutralBorder} w-fit rounded-md border px-3 py-1.5 text-[10px] font-semibold theme-text-secondary`}
+        {/* ✅ Body flex min-h-0 flex-1 */}
+        <div className="flex min-h-0 flex-1">
+          
+          {/* ✅ Main min-w-0 flex-1 overflow-y-auto */}
+          <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto">
+            
+            {/* ✅ Konten w-full (max-w dihapus agar melebar penuh saat zoom out) */}
+            <div className="w-full p-4 sm:p-6 lg:p-8 2xl:px-12">
+              
+              <button
+                type="button"
+                onClick={() => router.push("/admin/spmb/data-pendaftaran")}
+                className="mb-4 inline-flex items-center gap-2 text-xs font-semibold theme-text-secondary transition hover:text-[var(--color-primary)]"
               >
-                POST /api/ppdb/daftar
-              </span>
-            </div>
+                <ArrowLeft size={15} />
+                Kembali ke Data Pendaftaran
+              </button>
 
-            {submitError && (
-              <div className="mb-6 flex items-start gap-3 rounded-xl border border-[color-mix(in_srgb,var(--color-danger)_24%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_9%,transparent)] px-4 py-3 text-xs">
-                <AlertCircle size={17} className="mt-0.5 shrink-0 theme-danger" />
-                <div>
-                  <p className="font-semibold theme-danger">Pendaftaran Gagal Disimpan</p>
-                  <p className="mt-0.5 theme-text-secondary">{submitError}</p>
-                </div>
-              </div>
-            )}
-
-            {jalurList.length === 0 && !loadingJalur && (
-              <div className="mb-6 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-800">
-                <AlertCircle size={17} className="mt-0.5 shrink-0 text-amber-600" />
-                <div className="flex-1">
-                  <p className="font-semibold text-amber-900">Belum Ada Jalur PPDB</p>
-                  <p className="mt-0.5 text-amber-700">
-                    Sekolah belum memiliki Jalur PPDB aktif. Buat jalur PPDB terlebih dahulu pada menu Jalur Pendaftaran sebelum mendaftarkan calon siswa.
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => router.push("/admin/spmb/jalur")}
-                    className="mt-2.5 inline-flex items-center gap-1.5 rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-amber-700"
+              <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-center gap-3">
+                  <div
+                    className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${themePrimarySoft} ${themePrimaryText}`}
                   >
-                    <Plus size={13} />
-                    Buat Jalur PPDB Sekarang
-                  </button>
-                </div>
-              </div>
-            )}
-
-            <form
-              onSubmit={handleSubmit}
-              className={`theme-card ${themeNeutralBorder} ${themeCardShadow} space-y-6 overflow-hidden rounded-2xl border p-5 sm:p-7`}
-            >
-              <FormSection
-                icon={GraduationCap}
-                title="Jalur PPDB & Pilihan Jurusan"
-                description="Pilih jalur penerimaan dan jurusan calon siswa."
-              >
-                <div className={`grid gap-4 ${isSmk ? "sm:grid-cols-2" : "grid-cols-1"}`}>
+                    <UserRound size={21} />
+                  </div>
                   <div>
-                    <label className="mb-1.5 block text-xs font-semibold theme-text-secondary">
-                      Jalur PPDB <span className="theme-danger">*</span>
-                    </label>
-                    <select
-                      value={form.jalurPpdbId}
-                      onChange={(e) => handleChange("jalurPpdbId", e.target.value)}
-                      disabled={loadingJalur || saving}
-                      className={`theme-neutral-border theme-neutral-surface theme-text h-10 w-full rounded-lg border px-3 text-xs outline-none transition ${themeFocus}`}
+                    <h1 className="theme-text text-xl font-bold sm:text-2xl">
+                      Tambah Pendaftar
+                    </h1>
+                    <p className="theme-text-secondary mt-0.5 text-xs">
+                      Input pendaftaran calon peserta didik baru melalui endpoint resmi backend.
+                    </p>
+                  </div>
+                </div>
+
+                <span
+                  className={`theme-card ${themeNeutralBorder} w-fit rounded-md border px-3 py-1.5 text-[10px] font-semibold theme-text-secondary`}
+                >
+                  POST /api/ppdb/daftar
+                </span>
+              </div>
+
+              {submitError && (
+                <div className="mb-6 flex items-start gap-3 rounded-xl border border-[color-mix(in_srgb,var(--color-danger)_24%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_9%,transparent)] px-4 py-3 text-xs">
+                  <AlertCircle size={17} className="mt-0.5 shrink-0 theme-danger" />
+                  <div>
+                    <p className="font-semibold theme-danger">Pendaftaran Gagal Disimpan</p>
+                    <p className="mt-0.5 theme-text-secondary">{submitError}</p>
+                  </div>
+                </div>
+              )}
+
+              {jalurList.length === 0 && !loadingJalur && (
+                <div className="mb-6 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-800">
+                  <AlertCircle size={17} className="mt-0.5 shrink-0 text-amber-600" />
+                  <div className="flex-1">
+                    <p className="font-semibold text-amber-900">Belum Ada Jalur PPDB</p>
+                    <p className="mt-0.5 text-amber-700">
+                      Sekolah belum memiliki Jalur PPDB aktif. Buat jalur PPDB terlebih dahulu pada menu Jalur Pendaftaran sebelum mendaftarkan calon siswa.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => router.push("/admin/spmb/jalur")}
+                      className="mt-2.5 inline-flex items-center gap-1.5 rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-amber-700"
                     >
-                      {jalurList.length === 0 && (
-                        <option value="">
-                          {loadingJalur ? "Memuat jalur..." : "Tidak ada jalur tersedia"}
-                        </option>
-                      )}
-                      {jalurList.map((j) => (
-                        <option key={j.id} value={j.id}>
-                          {j.nama} {j.kuota ? `(Kuota: ${j.kuota})` : ""}
-                        </option>
-                      ))}
-                    </select>
-                    {errors.jalurPpdbId && (
-                      <p className="theme-danger mt-1 text-[11px]">{errors.jalurPpdbId}</p>
-                    )}
+                      <Plus size={13} />
+                      Buat Jalur PPDB Sekarang
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* ✅ Grid Layout Responsif (Kiri: Form Utama, Kanan: Data Pendukung) */}
+              <form onSubmit={handleSubmit}>
+                <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+                  
+                  {/* === KOLOM KIRI: Form Utama === */}
+                  <div className={`theme-card ${themeNeutralBorder} ${themeCardShadow} min-w-0 space-y-8 overflow-hidden rounded-2xl border p-5 sm:p-7`}>
+                    
+                    <FormSection
+                      icon={GraduationCap}
+                      title="Jalur PPDB & Pilihan Jurusan"
+                      description="Pilih jalur penerimaan dan jurusan calon siswa."
+                    >
+                      <div className={`grid gap-4 ${isSmk ? "sm:grid-cols-2" : "grid-cols-1"}`}>
+                        <div>
+                          <label className="mb-1.5 block text-xs font-semibold theme-text-secondary">
+                            Jalur PPDB <span className="theme-danger">*</span>
+                          </label>
+                          <select
+                            value={form.jalurPpdbId}
+                            onChange={(e) => handleChange("jalurPpdbId", e.target.value)}
+                            disabled={loadingJalur || saving}
+                            className={`theme-neutral-border theme-neutral-surface theme-text h-10 w-full rounded-lg border px-3 text-xs outline-none transition ${themeFocus}`}
+                          >
+                            {jalurList.length === 0 && (
+                              <option value="">
+                                {loadingJalur ? "Memuat jalur..." : "Tidak ada jalur tersedia"}
+                              </option>
+                            )}
+                            {jalurList.map((j) => (
+                              <option key={j.id} value={j.id}>
+                                {j.nama} {j.kuota ? `(Kuota: ${j.kuota})` : ""}
+                              </option>
+                            ))}
+                          </select>
+                          {errors.jalurPpdbId && (
+                            <p className="theme-danger mt-1 text-[11px]">{errors.jalurPpdbId}</p>
+                          )}
+                        </div>
+
+                        {isSmk && (
+                          <div>
+                            <label className="mb-1.5 block text-xs font-semibold theme-text-secondary">
+                              Pilihan Jurusan (SMK) <span className="theme-danger">*</span>
+                            </label>
+                            <select
+                              value={form.jurusanId}
+                              onChange={(e) => handleChange("jurusanId", e.target.value)}
+                              disabled={loadingJalur || saving}
+                              className={`theme-neutral-border theme-neutral-surface theme-text h-10 w-full rounded-lg border px-3 text-xs outline-none transition ${themeFocus}`}
+                            >
+                              <option value="">-- Pilih Jurusan --</option>
+                              {jurusanList.map((jur) => (
+                                <option key={jur.id} value={jur.id}>
+                                  {jur.nama} {jur.kode ? `(${jur.kode})` : ""}
+                                </option>
+                              ))}
+                            </select>
+                            {errors.jurusanId && (
+                              <p className="theme-danger mt-1 text-[11px]">{errors.jurusanId}</p>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </FormSection>
+
+                    <FormSection
+                      icon={UserRound}
+                      title="Data Calon Siswa"
+                      description="Informasi identitas calon siswa sesuai dokumen resmi."
+                    >
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <div>
+                          <label className="mb-1.5 block text-xs font-semibold theme-text-secondary">
+                            Nama Lengkap <span className="theme-danger">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            value={form.namaLengkap}
+                            onChange={(e) => handleChange("namaLengkap", e.target.value)}
+                            maxLength={100}
+                            disabled={saving}
+                            placeholder="Nama lengkap calon siswa"
+                            className={`theme-neutral-border theme-neutral-surface theme-text h-10 w-full rounded-lg border px-3 text-xs outline-none transition ${themeFocus}`}
+                          />
+                          {errors.namaLengkap && (
+                            <p className="theme-danger mt-1 text-[11px]">{errors.namaLengkap}</p>
+                          )}
+                        </div>
+
+                        <div>
+                          <label className="mb-1.5 block text-xs font-semibold theme-text-secondary">
+                            NIK Calon Siswa <span className="theme-danger">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            value={form.nik}
+                            onChange={(e) =>
+                              handleChange("nik", e.target.value.replace(/\D/g, ""))
+                            }
+                            maxLength={16}
+                            inputMode="numeric"
+                            disabled={saving}
+                            placeholder="16 digit NIK sesuai Kartu Keluarga"
+                            className={`theme-neutral-border theme-neutral-surface theme-text h-10 w-full rounded-lg border px-3 text-xs outline-none transition ${themeFocus}`}
+                          />
+                          {errors.nik && (
+                            <p className="theme-danger mt-1 text-[11px]">{errors.nik}</p>
+                          )}
+                        </div>
+
+                        <div>
+                          <label className="mb-1.5 block text-xs font-semibold theme-text-secondary">
+                            NISN <span className="theme-danger">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            value={form.nisn}
+                            onChange={(e) =>
+                              handleChange("nisn", e.target.value.replace(/\D/g, ""))
+                            }
+                            maxLength={20}
+                            inputMode="numeric"
+                            disabled={saving}
+                            placeholder="10 digit nomor NISN"
+                            className={`theme-neutral-border theme-neutral-surface theme-text h-10 w-full rounded-lg border px-3 text-xs outline-none transition ${themeFocus}`}
+                          />
+                          {errors.nisn && (
+                            <p className="theme-danger mt-1 text-[11px]">{errors.nisn}</p>
+                          )}
+                        </div>
+
+                        <div>
+                          <label className="mb-1.5 block text-xs font-semibold theme-text-secondary">
+                            Tempat Lahir <span className="theme-danger">*</span>
+                          </label>
+                          <input
+                            type="text"
+                            value={form.tempatLahir}
+                            onChange={(e) => handleChange("tempatLahir", e.target.value)}
+                            maxLength={50}
+                            disabled={saving}
+                            placeholder="Kota tempat lahir"
+                            className={`theme-neutral-border theme-neutral-surface theme-text h-10 w-full rounded-lg border px-3 text-xs outline-none transition ${themeFocus}`}
+                          />
+                          {errors.tempatLahir && (
+                            <p className="theme-danger mt-1 text-[11px]">{errors.tempatLahir}</p>
+                          )}
+                        </div>
+
+                        <div>
+                          <label className="mb-1.5 block text-xs font-semibold theme-text-secondary">
+                            Tanggal Lahir <span className="theme-danger">*</span>
+                          </label>
+                          <input
+                            type="date"
+                            value={form.tanggalLahir}
+                            onChange={(e) => handleChange("tanggalLahir", e.target.value)}
+                            disabled={saving}
+                            className={`theme-neutral-border theme-neutral-surface theme-text h-10 w-full rounded-lg border px-3 text-xs outline-none transition ${themeFocus}`}
+                          />
+                          {errors.tanggalLahir && (
+                            <p className="theme-danger mt-1 text-[11px]">{errors.tanggalLahir}</p>
+                          )}
+                        </div>
+
+                        <div>
+                          <label className="mb-1.5 block text-xs font-semibold theme-text-secondary">
+                            Jenis Kelamin <span className="theme-danger">*</span>
+                          </label>
+                          <select
+                            value={form.jenisKelamin}
+                            onChange={(e) => handleChange("jenisKelamin", e.target.value)}
+                            disabled={saving}
+                            className={`theme-neutral-border theme-neutral-surface theme-text h-10 w-full rounded-lg border px-3 text-xs outline-none transition ${themeFocus}`}
+                          >
+                            <option value="L">Laki-laki</option>
+                            <option value="P">Perempuan</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="mb-1.5 block text-xs font-semibold theme-text-secondary">
+                            Nomor Telepon
+                          </label>
+                          <input
+                            type="text"
+                            value={form.telepon}
+                            onChange={(e) =>
+                              handleChange("telepon", e.target.value.replace(/\D/g, ""))
+                            }
+                            maxLength={20}
+                            inputMode="tel"
+                            disabled={saving}
+                            placeholder="08xxxxxxxxxx"
+                            className={`theme-neutral-border theme-neutral-surface theme-text h-10 w-full rounded-lg border px-3 text-xs outline-none transition ${themeFocus}`}
+                          />
+                        </div>
+
+                        <div>
+                          <label className="mb-1.5 block text-xs font-semibold theme-text-secondary">
+                            Email
+                          </label>
+                          <input
+                            type="email"
+                            value={form.email}
+                            onChange={(e) => handleChange("email", e.target.value)}
+                            maxLength={100}
+                            disabled={saving}
+                            placeholder="email@example.com"
+                            className={`theme-neutral-border theme-neutral-surface theme-text h-10 w-full rounded-lg border px-3 text-xs outline-none transition ${themeFocus}`}
+                          />
+                          {errors.email && (
+                            <p className="theme-danger mt-1 text-[11px]">{errors.email}</p>
+                          )}
+                        </div>
+
+                        <div className="sm:col-span-2">
+                          <label className="mb-1.5 block text-xs font-semibold theme-text-secondary">
+                            Alamat Lengkap <span className="theme-danger">*</span>
+                          </label>
+                          <textarea
+                            value={form.alamat}
+                            onChange={(e) => handleChange("alamat", e.target.value)}
+                            rows={3}
+                            disabled={saving}
+                            placeholder="Alamat domisili lengkap calon siswa"
+                            className={`theme-neutral-border theme-neutral-surface theme-text w-full rounded-lg border px-3 py-2.5 text-xs outline-none transition ${themeFocus}`}
+                          />
+                          {errors.alamat && (
+                            <p className="theme-danger mt-1 text-[11px]">{errors.alamat}</p>
+                          )}
+                        </div>
+                      </div>
+                    </FormSection>
                   </div>
 
-                  {isSmk && (
-                    <div>
-                      <label className="mb-1.5 block text-xs font-semibold theme-text-secondary">
-                        Pilihan Jurusan (SMK) <span className="theme-danger">*</span>
-                      </label>
-                      <select
-                        value={form.jurusanId}
-                        onChange={(e) => handleChange("jurusanId", e.target.value)}
-                        disabled={loadingJalur || saving}
-                        className={`theme-neutral-border theme-neutral-surface theme-text h-10 w-full rounded-lg border px-3 text-xs outline-none transition ${themeFocus}`}
+                  {/* === KOLOM KANAN: Data Pendukung & Aksi === */}
+                  <aside className="flex min-w-0 flex-col gap-6">
+                    
+                    {/* Data Pendidikan Sebelumnya */}
+                    <div className={`theme-card ${themeNeutralBorder} ${themeCardShadow} min-w-0 overflow-hidden rounded-2xl border p-5 sm:p-6`}>
+                      <FormSection
+                        icon={School}
+                        title="Pendidikan Sebelumnya"
+                        description="Asal sekolah dan nilai rapor."
                       >
-                        <option value="">-- Pilih Jurusan --</option>
-                        {jurusanList.map((jur) => (
-                          <option key={jur.id} value={jur.id}>
-                            {jur.nama} {jur.kode ? `(${jur.kode})` : ""}
-                          </option>
-                        ))}
-                      </select>
-                      {errors.jurusanId && (
-                        <p className="theme-danger mt-1 text-[11px]">{errors.jurusanId}</p>
-                      )}
+                        <div className="grid gap-4">
+                          <div>
+                            <label className="mb-1.5 block text-xs font-semibold theme-text-secondary">
+                              Asal Sekolah
+                            </label>
+                            <input
+                              type="text"
+                              value={form.asalSekolah}
+                              onChange={(e) => handleChange("asalSekolah", e.target.value)}
+                              maxLength={100}
+                              disabled={saving}
+                              placeholder="Nama sekolah asal"
+                              className={`theme-neutral-border theme-neutral-surface theme-text h-10 w-full rounded-lg border px-3 text-xs outline-none transition ${themeFocus}`}
+                            />
+                          </div>
+
+                          <div>
+                            <label className="mb-1.5 block text-xs font-semibold theme-text-secondary">
+                              Nilai Rapor (Opsional)
+                            </label>
+                            <input
+                              type="number"
+                              value={form.nilaiRapor}
+                              onChange={(e) => handleChange("nilaiRapor", e.target.value)}
+                              min={0}
+                              max={100}
+                              step="0.01"
+                              disabled={saving}
+                              placeholder="0 - 100"
+                              className={`theme-neutral-border theme-neutral-surface theme-text h-10 w-full rounded-lg border px-3 text-xs outline-none transition ${themeFocus}`}
+                            />
+                            {errors.nilaiRapor && (
+                              <p className="theme-danger mt-1 text-[11px]">{errors.nilaiRapor}</p>
+                            )}
+                          </div>
+                        </div>
+                      </FormSection>
                     </div>
-                  )}
+
+                    {/* Data Orang Tua */}
+                    <div className={`theme-card ${themeNeutralBorder} ${themeCardShadow} min-w-0 overflow-hidden rounded-2xl border p-5 sm:p-6`}>
+                      <FormSection
+                        icon={Phone}
+                        title="Data Orang Tua / Wali"
+                        description="Nama ayah dan ibu kandung."
+                      >
+                        <div className="grid gap-4">
+                          <div>
+                            <label className="mb-1.5 block text-xs font-semibold theme-text-secondary">
+                              Nama Ayah
+                            </label>
+                            <input
+                              type="text"
+                              value={form.namaAyah}
+                              onChange={(e) => handleChange("namaAyah", e.target.value)}
+                              maxLength={100}
+                              disabled={saving}
+                              placeholder="Nama lengkap ayah"
+                              className={`theme-neutral-border theme-neutral-surface theme-text h-10 w-full rounded-lg border px-3 text-xs outline-none transition ${themeFocus}`}
+                            />
+                          </div>
+
+                          <div>
+                            <label className="mb-1.5 block text-xs font-semibold theme-text-secondary">
+                              Nama Ibu
+                            </label>
+                            <input
+                              type="text"
+                              value={form.namaIbu}
+                              onChange={(e) => handleChange("namaIbu", e.target.value)}
+                              maxLength={100}
+                              disabled={saving}
+                              placeholder="Nama lengkap ibu"
+                              className={`theme-neutral-border theme-neutral-surface theme-text h-10 w-full rounded-lg border px-3 text-xs outline-none transition ${themeFocus}`}
+                            />
+                          </div>
+                        </div>
+                      </FormSection>
+                    </div>
+
+                    {/* Card: Informasi & Tombol Aksi */}
+                    <div className={`theme-card ${themeNeutralBorder} ${themeCardShadow} min-w-0 overflow-hidden rounded-2xl border p-5 sm:p-6`}>
+                      <div className="theme-info flex items-start gap-3 rounded-xl border p-3 mb-5">
+                        <Info size={16} className="mt-0.5 shrink-0 text-[var(--color-info)]" />
+                        <p className="text-[11px] leading-5">
+                          Pastikan seluruh data yang diinput sudah sesuai dengan dokumen resmi (Kartu Keluarga, Akta Kelahiran, dll) sebelum menyimpan.
+                        </p>
+                      </div>
+
+                      <div className="flex flex-col gap-3">
+                        <button
+                          type="submit"
+                          disabled={saving || jalurList.length === 0}
+                          className={`${themePrimaryGradient} inline-flex w-full items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50`}
+                        >
+                          {saving ? (
+                            <>
+                              <Loader2 size={16} className="animate-spin" />
+                              Menyimpan...
+                            </>
+                          ) : (
+                            <>
+                              <Save size={16} />
+                              Simpan Pendaftaran
+                            </>
+                          )}
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => router.push("/admin/spmb/data-pendaftaran")}
+                          disabled={saving}
+                          className="theme-card theme-neutral-border theme-text-secondary inline-flex w-full items-center justify-center gap-2 rounded-xl border px-5 py-3 text-sm font-semibold transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          <ArrowLeft size={16} />
+                          Batal
+                        </button>
+                      </div>
+                    </div>
+                  </aside>
+
                 </div>
-              </FormSection>
-
-              <FormSection
-                icon={UserRound}
-                title="Data Calon Siswa"
-                description="Informasi identitas calon siswa sesuai dokumen resmi."
-              >
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div>
-                    <label className="mb-1.5 block text-xs font-semibold theme-text-secondary">
-                      Nama Lengkap <span className="theme-danger">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={form.namaLengkap}
-                      onChange={(e) => handleChange("namaLengkap", e.target.value)}
-                      maxLength={100}
-                      disabled={saving}
-                      placeholder="Nama lengkap calon siswa"
-                      className={`theme-neutral-border theme-neutral-surface theme-text h-10 w-full rounded-lg border px-3 text-xs outline-none transition ${themeFocus}`}
-                    />
-                    {errors.namaLengkap && (
-                      <p className="theme-danger mt-1 text-[11px]">{errors.namaLengkap}</p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="mb-1.5 block text-xs font-semibold theme-text-secondary">
-                      NIK Calon Siswa <span className="theme-danger">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={form.nik}
-                      onChange={(e) =>
-                        handleChange("nik", e.target.value.replace(/\D/g, ""))
-                      }
-                      maxLength={16}
-                      inputMode="numeric"
-                      disabled={saving}
-                      placeholder="16 digit NIK sesuai Kartu Keluarga"
-                      className={`theme-neutral-border theme-neutral-surface theme-text h-10 w-full rounded-lg border px-3 text-xs outline-none transition ${themeFocus}`}
-                    />
-                    {errors.nik && (
-                      <p className="theme-danger mt-1 text-[11px]">{errors.nik}</p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="mb-1.5 block text-xs font-semibold theme-text-secondary">
-                      NISN <span className="theme-danger">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={form.nisn}
-                      onChange={(e) =>
-                        handleChange("nisn", e.target.value.replace(/\D/g, ""))
-                      }
-                      maxLength={20}
-                      inputMode="numeric"
-                      disabled={saving}
-                      placeholder="10 digit nomor NISN"
-                      className={`theme-neutral-border theme-neutral-surface theme-text h-10 w-full rounded-lg border px-3 text-xs outline-none transition ${themeFocus}`}
-                    />
-                    {errors.nisn && (
-                      <p className="theme-danger mt-1 text-[11px]">{errors.nisn}</p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="mb-1.5 block text-xs font-semibold theme-text-secondary">
-                      Tempat Lahir <span className="theme-danger">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={form.tempatLahir}
-                      onChange={(e) => handleChange("tempatLahir", e.target.value)}
-                      maxLength={50}
-                      disabled={saving}
-                      placeholder="Kota tempat lahir"
-                      className={`theme-neutral-border theme-neutral-surface theme-text h-10 w-full rounded-lg border px-3 text-xs outline-none transition ${themeFocus}`}
-                    />
-                    {errors.tempatLahir && (
-                      <p className="theme-danger mt-1 text-[11px]">{errors.tempatLahir}</p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="mb-1.5 block text-xs font-semibold theme-text-secondary">
-                      Tanggal Lahir <span className="theme-danger">*</span>
-                    </label>
-                    <input
-                      type="date"
-                      value={form.tanggalLahir}
-                      onChange={(e) => handleChange("tanggalLahir", e.target.value)}
-                      disabled={saving}
-                      className={`theme-neutral-border theme-neutral-surface theme-text h-10 w-full rounded-lg border px-3 text-xs outline-none transition ${themeFocus}`}
-                    />
-                    {errors.tanggalLahir && (
-                      <p className="theme-danger mt-1 text-[11px]">{errors.tanggalLahir}</p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="mb-1.5 block text-xs font-semibold theme-text-secondary">
-                      Jenis Kelamin <span className="theme-danger">*</span>
-                    </label>
-                    <select
-                      value={form.jenisKelamin}
-                      onChange={(e) => handleChange("jenisKelamin", e.target.value)}
-                      disabled={saving}
-                      className={`theme-neutral-border theme-neutral-surface theme-text h-10 w-full rounded-lg border px-3 text-xs outline-none transition ${themeFocus}`}
-                    >
-                      <option value="L">Laki-laki</option>
-                      <option value="P">Perempuan</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="mb-1.5 block text-xs font-semibold theme-text-secondary">
-                      Nomor Telepon
-                    </label>
-                    <input
-                      type="text"
-                      value={form.telepon}
-                      onChange={(e) =>
-                        handleChange("telepon", e.target.value.replace(/\D/g, ""))
-                      }
-                      maxLength={20}
-                      inputMode="tel"
-                      disabled={saving}
-                      placeholder="08xxxxxxxxxx"
-                      className={`theme-neutral-border theme-neutral-surface theme-text h-10 w-full rounded-lg border px-3 text-xs outline-none transition ${themeFocus}`}
-                    />
-                  </div>
-
-                  <div className="sm:col-span-2">
-                    <label className="mb-1.5 block text-xs font-semibold theme-text-secondary">
-                      Email
-                    </label>
-                    <input
-                      type="email"
-                      value={form.email}
-                      onChange={(e) => handleChange("email", e.target.value)}
-                      maxLength={100}
-                      disabled={saving}
-                      placeholder="email@example.com"
-                      className={`theme-neutral-border theme-neutral-surface theme-text h-10 w-full rounded-lg border px-3 text-xs outline-none transition ${themeFocus}`}
-                    />
-                    {errors.email && (
-                      <p className="theme-danger mt-1 text-[11px]">{errors.email}</p>
-                    )}
-                  </div>
-
-                  <div className="sm:col-span-2">
-                    <label className="mb-1.5 block text-xs font-semibold theme-text-secondary">
-                      Alamat Lengkap <span className="theme-danger">*</span>
-                    </label>
-                    <textarea
-                      value={form.alamat}
-                      onChange={(e) => handleChange("alamat", e.target.value)}
-                      rows={3}
-                      disabled={saving}
-                      placeholder="Alamat domisili lengkap calon siswa"
-                      className={`theme-neutral-border theme-neutral-surface theme-text w-full rounded-lg border px-3 py-2.5 text-xs outline-none transition ${themeFocus}`}
-                    />
-                    {errors.alamat && (
-                      <p className="theme-danger mt-1 text-[11px]">{errors.alamat}</p>
-                    )}
-                  </div>
-                </div>
-              </FormSection>
-
-              <FormSection
-                icon={School}
-                title="Data Pendidikan Sebelumnya"
-                description="Informasi asal sekolah dan nilai rapor."
-              >
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div>
-                    <label className="mb-1.5 block text-xs font-semibold theme-text-secondary">
-                      Asal Sekolah
-                    </label>
-                    <input
-                      type="text"
-                      value={form.asalSekolah}
-                      onChange={(e) => handleChange("asalSekolah", e.target.value)}
-                      maxLength={100}
-                      disabled={saving}
-                      placeholder="Nama sekolah asal"
-                      className={`theme-neutral-border theme-neutral-surface theme-text h-10 w-full rounded-lg border px-3 text-xs outline-none transition ${themeFocus}`}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="mb-1.5 block text-xs font-semibold theme-text-secondary">
-                      Nilai Rapor (Opsional)
-                    </label>
-                    <input
-                      type="number"
-                      value={form.nilaiRapor}
-                      onChange={(e) => handleChange("nilaiRapor", e.target.value)}
-                      min={0}
-                      max={100}
-                      step="0.01"
-                      disabled={saving}
-                      placeholder="0 - 100"
-                      className={`theme-neutral-border theme-neutral-surface theme-text h-10 w-full rounded-lg border px-3 text-xs outline-none transition ${themeFocus}`}
-                    />
-                    {errors.nilaiRapor && (
-                      <p className="theme-danger mt-1 text-[11px]">{errors.nilaiRapor}</p>
-                    )}
-                  </div>
-                </div>
-              </FormSection>
-
-              <FormSection
-                icon={Phone}
-                title="Data Orang Tua / Wali"
-                description="Nama ayah dan ibu kandung/wali calon siswa."
-              >
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div>
-                    <label className="mb-1.5 block text-xs font-semibold theme-text-secondary">
-                      Nama Ayah
-                    </label>
-                    <input
-                      type="text"
-                      value={form.namaAyah}
-                      onChange={(e) => handleChange("namaAyah", e.target.value)}
-                      maxLength={100}
-                      disabled={saving}
-                      placeholder="Nama lengkap ayah"
-                      className={`theme-neutral-border theme-neutral-surface theme-text h-10 w-full rounded-lg border px-3 text-xs outline-none transition ${themeFocus}`}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="mb-1.5 block text-xs font-semibold theme-text-secondary">
-                      Nama Ibu
-                    </label>
-                    <input
-                      type="text"
-                      value={form.namaIbu}
-                      onChange={(e) => handleChange("namaIbu", e.target.value)}
-                      maxLength={100}
-                      disabled={saving}
-                      placeholder="Nama lengkap ibu"
-                      className={`theme-neutral-border theme-neutral-surface theme-text h-10 w-full rounded-lg border px-3 text-xs outline-none transition ${themeFocus}`}
-                    />
-                  </div>
-                </div>
-              </FormSection>
-
-              <div className="flex items-center justify-between border-t border-slate-100 pt-5">
-                <button
-                  type="button"
-                  onClick={() => router.push("/admin/spmb/data-pendaftaran")}
-                  disabled={saving}
-                  className="theme-card theme-neutral-border theme-text-secondary inline-flex items-center gap-2 rounded-lg border px-4 py-2.5 text-xs font-semibold transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  <ArrowLeft size={15} />
-                  Batal
-                </button>
-
-                <button
-                  type="submit"
-                  disabled={saving || jalurList.length === 0}
-                  className={`${themePrimaryGradient} inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-xs font-semibold text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50`}
-                >
-                  {saving ? (
-                    <>
-                      <Loader2 size={15} className="animate-spin" />
-                      Menyimpan...
-                    </>
-                  ) : (
-                    <>
-                      <Save size={15} />
-                      Simpan Pendaftaran
-                    </>
-                  )}
-                </button>
-              </div>
-            </form>
-          </div>
-        </main>
+              </form>
+            </div>
+          </main>
+        </div>
       </div>
     </div>
   );
 }
 
-
 function FormSection({ icon: Icon, title, description, children }) {
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-3 border-b border-slate-100 pb-3">
+      <div className="flex items-center gap-3 border-b border-[color-mix(in_srgb,var(--color-text)_8%,transparent)] pb-3">
         <div
           className={`flex h-8 w-8 items-center justify-center rounded-lg ${themePrimarySoft} ${themePrimaryText}`}
         >

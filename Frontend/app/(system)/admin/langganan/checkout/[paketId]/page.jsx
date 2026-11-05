@@ -163,6 +163,7 @@ export default function CheckoutLanggananPage() {
   const toggleSidebar = () => setIsCollapsed((prev) => !prev);
 
   return (
+    // ROOT: viewport-fixed, no page-level scroll
     <div className="flex h-screen w-full theme-page overflow-hidden">
       <Sidebar
         active="paketLangganan"
@@ -172,255 +173,263 @@ export default function CheckoutLanggananPage() {
         role="admin"
       />
 
-      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
-        <Header notifications={[]} />
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        {/* Header stays fixed at top */}
+        <div className="shrink-0">
+          <Header notifications={[]} />
+        </div>
 
-        <main className="flex-1 overflow-y-auto theme-page">
-          <div className="mx-auto w-full max-w-5xl p-4 sm:p-6 lg:p-8 space-y-6">
-            <button
-              type="button"
-              onClick={() => router.push("/admin/langganan/paket")}
-              className="inline-flex items-center gap-2 text-sm font-medium theme-text-secondary hover:text-[var(--color-primary)] transition w-fit"
-            >
-              <ArrowLeft size={16} />
-              Kembali ke Paket
-            </button>
-
-            <div className="flex items-center gap-3">
-              <div
-                className={`p-2.5 rounded-xl ${themePrimarySoft} ${themePrimarySoftBorder} border text-[var(--color-primary)] ${themePrimaryShadow}`}
+        {/* Body: only this area scrolls */}
+        <div className="flex min-h-0 flex-1">
+          <main className="theme-page min-w-0 flex-1 overflow-y-auto">
+            <div className="w-full p-4 sm:p-6 lg:p-8 space-y-6">
+              <button
+                type="button"
+                onClick={() => router.push("/admin/langganan/paket")}
+                className="inline-flex w-fit items-center gap-2 text-sm font-medium theme-text-secondary transition hover:text-[var(--color-primary)]"
               >
-                <CreditCard size={20} />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold theme-text">
-                  Checkout Langganan
-                </h1>
-                <p className="text-sm theme-text-secondary">
-                  Tinjau paket dan siklus penagihan sebelum melanjutkan.
-                </p>
-              </div>
-            </div>
+                <ArrowLeft size={16} />
+                Kembali ke Paket
+              </button>
 
-            {loading && (
-              <div className="theme-card theme-border rounded-xl border p-14 flex flex-col items-center gap-3">
-                <Loader2
-                  size={26}
-                  className="animate-spin text-[var(--color-primary)]"
-                />
-                <p className="text-sm theme-text-secondary">
-                  Memuat data paket...
-                </p>
-              </div>
-            )}
-
-            {!loading && loadError && (
-              <div className="theme-danger rounded-xl border p-5 flex items-start gap-3">
-                <AlertCircle size={18} className="mt-0.5 shrink-0" />
-                <div>
-                  <p className="text-sm font-semibold">Gagal memuat paket</p>
-                  <p className="text-xs mt-1 opacity-90">{loadError}</p>
+              <div className="flex items-center gap-3">
+                <div
+                  className={`shrink-0 rounded-xl p-2.5 ${themePrimarySoft} ${themePrimarySoftBorder} border text-[var(--color-primary)] ${themePrimaryShadow}`}
+                >
+                  <CreditCard size={20} />
+                </div>
+                <div className="min-w-0">
+                  <h1 className="text-2xl font-bold theme-text">
+                    Checkout Langganan
+                  </h1>
+                  <p className="text-sm theme-text-secondary">
+                    Tinjau paket dan siklus penagihan sebelum melanjutkan.
+                  </p>
                 </div>
               </div>
-            )}
 
-            {!loading && !loadError && paket && (
-              <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-5">
-                <section className="theme-card theme-border rounded-xl border p-5 sm:p-6">
-                  <div className="flex items-start gap-4">
-                    <div
-                      className={`w-12 h-12 rounded-xl ${themePrimarySoft} text-[var(--color-primary)] flex items-center justify-center shrink-0`}
-                    >
-                      <Package size={22} />
-                    </div>
+              {loading && (
+                <div className="theme-card theme-border flex flex-col items-center gap-3 rounded-xl border p-14">
+                  <Loader2
+                    size={26}
+                    className="animate-spin text-[var(--color-primary)]"
+                  />
+                  <p className="text-sm theme-text-secondary">
+                    Memuat data paket...
+                  </p>
+                </div>
+              )}
 
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <h2 className="text-xl font-bold theme-text">
-                          {paket.nama}
-                        </h2>
+              {!loading && loadError && (
+                <div className="theme-danger flex items-start gap-3 rounded-xl border p-5">
+                  <AlertCircle size={18} className="mt-0.5 shrink-0" />
+                  <div>
+                    <p className="text-sm font-semibold">Gagal memuat paket</p>
+                    <p className="mt-1 text-xs opacity-90">{loadError}</p>
+                  </div>
+                </div>
+              )}
 
-                        <span
-                          className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${
-                            isPerpanjang
-                              ? "theme-warning"
-                              : "theme-success"
-                          }`}
-                        >
-                          {isPerpanjang ? "PERPANJANGAN" : "PAKET BARU"}
-                        </span>
+              {!loading && !loadError && paket && (
+                // Responsive grid: single col on mobile, 2 col on xl+
+                // No empty middle gap — cards stretch full width
+                <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+                  <section className="theme-card theme-border rounded-xl border p-5 sm:p-6">
+                    <div className="flex items-start gap-4">
+                      <div
+                        className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${themePrimarySoft} text-[var(--color-primary)]`}
+                      >
+                        <Package size={22} />
                       </div>
 
-                      {paket.deskripsi && (
-                        <p className="text-sm theme-text-secondary mt-1.5">
-                          {paket.deskripsi}
-                        </p>
-                      )}
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h2 className="text-xl font-bold theme-text">
+                            {paket.nama}
+                          </h2>
+
+                          <span
+                            className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${
+                              isPerpanjang
+                                ? "theme-warning"
+                                : "theme-success"
+                            }`}
+                          >
+                            {isPerpanjang ? "PERPANJANGAN" : "PAKET BARU"}
+                          </span>
+                        </div>
+
+                        {paket.deskripsi && (
+                          <p className="mt-1.5 text-sm theme-text-secondary">
+                            {paket.deskripsi}
+                          </p>
+                        )}
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="mt-6">
-                    <p className="text-xs font-semibold theme-text-secondary">
-                      Siklus Penagihan
-                    </p>
-
-                    <div className="mt-2 inline-flex items-center gap-1 theme-card-soft theme-border border rounded-xl p-1">
-                      {[
-                        { value: "monthly", label: "Bulanan" },
-                        { value: "annual", label: "Tahunan (12 bulan)" },
-                      ].map((item) => (
-                        <button
-                          key={item.value}
-                          type="button"
-                          onClick={() => setSiklus(item.value)}
-                          className={`px-4 py-2 rounded-lg text-xs font-semibold transition ${
-                            siklus === item.value
-                              ? `${themePrimarySoft} text-[var(--color-primary)] ${themePrimarySoftBorder} border shadow-sm`
-                              : `theme-text-muted ${themeTextHover}`
-                          }`}
-                        >
-                          {item.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {Array.isArray(paket.fitur) && paket.fitur.length > 0 && (
-                    <div className="mt-6 theme-border-soft border-t pt-5">
+                    <div className="mt-6">
                       <p className="text-xs font-semibold theme-text-secondary">
-                        Fitur yang termasuk
+                        Siklus Penagihan
                       </p>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mt-3">
-                        {paket.fitur.map((item) => (
-                          <div
-                            key={item.id || item.kode || item.nama}
-                            className="flex items-center gap-2.5"
+                      <div className="mt-2 inline-flex items-center gap-1 rounded-xl border theme-border theme-card-soft p-1">
+                        {[
+                          { value: "monthly", label: "Bulanan" },
+                          { value: "annual", label: "Tahunan (12 bulan)" },
+                        ].map((item) => (
+                          <button
+                            key={item.value}
+                            type="button"
+                            onClick={() => setSiklus(item.value)}
+                            className={`rounded-lg px-4 py-2 text-xs font-semibold transition ${
+                              siklus === item.value
+                                ? `${themePrimarySoft} text-[var(--color-primary)] ${themePrimarySoftBorder} border shadow-sm`
+                                : `theme-text-muted ${themeTextHover}`
+                            }`}
                           >
-                            <div className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full theme-success">
-                              <CheckCircle2
-                                size={11}
-                                className="text-[var(--color-success)]"
-                              />
-                            </div>
-                            <span className="text-xs theme-text-secondary">
-                              {item.nama}
-                            </span>
-                          </div>
+                            {item.label}
+                          </button>
                         ))}
                       </div>
                     </div>
-                  )}
 
-                  {isPerpanjang && aktif?.tanggalBerakhir && (
-                    <div
-                      className={`mt-6 flex items-start gap-3 rounded-xl border ${themePrimarySoftBorder} ${themePrimarySoft} p-4`}
-                    >
-                      <CalendarDays
-                        size={16}
-                        className="mt-0.5 shrink-0 text-[var(--color-primary)]"
-                      />
-                      <p className="text-xs theme-text-secondary leading-5">
-                        Perpanjangan akan dilanjutkan dari masa aktif
-                        berjalan. Periode paket dihitung setelah pembayaran
-                        terverifikasi.
-                      </p>
-                    </div>
-                  )}
-                </section>
+                    {Array.isArray(paket.fitur) && paket.fitur.length > 0 && (
+                      <div className="mt-6 theme-border-soft border-t pt-5">
+                        <p className="text-xs font-semibold theme-text-secondary">
+                          Fitur yang termasuk
+                        </p>
 
-                <section className="theme-card theme-border rounded-xl border p-5 sm:p-6 h-fit lg:sticky lg:top-6">
-                  <h2 className="text-sm font-bold theme-text">
-                    Ringkasan Pembayaran
-                  </h2>
-
-                  <div className="mt-4 space-y-3">
-                    <div className="flex items-center justify-between gap-3 text-xs">
-                      <span className="theme-text-secondary">Paket</span>
-                      <span className="font-semibold theme-text">
-                        {paket.nama}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center justify-between gap-3 text-xs">
-                      <span className="theme-text-secondary">Siklus</span>
-                      <span className="font-semibold theme-text">
-                        {siklusLabel(siklus)}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center justify-between gap-3 text-xs">
-                      <span className="theme-text-secondary">
-                        Harga / bulan
-                      </span>
-                      <span className="font-semibold theme-text">
-                        {formatRupiah(hargaBulanan)}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="mt-5 theme-border-soft border-t pt-4">
-                    <div className="flex items-center justify-between gap-3">
-                      <span className="text-sm font-bold theme-text">
-                        Total
-                      </span>
-                      <span className="text-xl font-bold text-[var(--color-primary)]">
-                        {formatRupiah(total)}
-                      </span>
-                    </div>
-                  </div>
-
-                  {submitError && (
-                    <div className="mt-4 flex items-start gap-2 rounded-xl theme-danger border p-3">
-                      <AlertCircle size={15} className="mt-0.5 shrink-0" />
-                      <p className="text-xs leading-5">{submitError}</p>
-                    </div>
-                  )}
-
-                  <button
-                    type="button"
-                    onClick={handleSubmit}
-                    disabled={submitting}
-                    className={`mt-5 flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold text-white transition ${
-                      submitting
-                        ? "bg-[var(--color-primary)] opacity-70 cursor-not-allowed"
-                        : "bg-[var(--color-primary)] hover:opacity-90"
-                    }`}
-                  >
-                    {submitting ? (
-                      <>
-                        <Loader2 size={16} className="animate-spin" />
-                        Membuat transaksi...
-                      </>
-                    ) : (
-                      <>
-                        <Wallet size={16} />
-                        Lanjut ke Pembayaran
-                      </>
+                        <div className="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+                          {paket.fitur.map((item) => (
+                            <div
+                              key={item.id || item.kode || item.nama}
+                              className="flex items-center gap-2.5"
+                            >
+                              <div className="flex h-4 w-4 shrink-0 items-center justify-center rounded-full theme-success">
+                                <CheckCircle2
+                                  size={11}
+                                  className="text-[var(--color-success)]"
+                                />
+                              </div>
+                              <span className="text-xs theme-text-secondary">
+                                {item.nama}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
                     )}
-                  </button>
 
-                  <div className="mt-4 flex items-start gap-2 text-[11px] theme-text-placeholder leading-5">
-                    <Lock size={13} className="mt-0.5 shrink-0" />
-                    <span>
-                      Pembayaran diproses melalui Midtrans. Anda akan diarahkan
-                      ke halaman pembayaran resmi untuk memilih metode
-                      pembayaran.
-                    </span>
-                  </div>
+                    {isPerpanjang && aktif?.tanggalBerakhir && (
+                      <div
+                        className={`mt-6 flex items-start gap-3 rounded-xl border ${themePrimarySoftBorder} ${themePrimarySoft} p-4`}
+                      >
+                        <CalendarDays
+                          size={16}
+                          className="mt-0.5 shrink-0 text-[var(--color-primary)]"
+                        />
+                        <p className="text-xs leading-5 theme-text-secondary">
+                          Perpanjangan akan dilanjutkan dari masa aktif
+                          berjalan. Periode paket dihitung setelah pembayaran
+                          terverifikasi.
+                        </p>
+                      </div>
+                    )}
+                  </section>
 
-                  <div className="mt-3 flex items-start gap-2 text-[11px] theme-text-placeholder leading-5">
-                    <ShieldCheck size={13} className="mt-0.5 shrink-0" />
-                    <span>
-                      SmartSchool tidak pernah meminta nomor kartu, CVV, OTP,
-                      maupun PIN pada halaman ini.
-                    </span>
-                  </div>
-                </section>
-              </div>
-            )}
-          </div>
-        </main>
+                  <section className="theme-card theme-border h-fit rounded-xl border p-5 sm:p-6 xl:sticky xl:top-6">
+                    <h2 className="text-sm font-bold theme-text">
+                      Ringkasan Pembayaran
+                    </h2>
+
+                    <div className="mt-4 space-y-3">
+                      <div className="flex items-center justify-between gap-3 text-xs">
+                        <span className="theme-text-secondary">Paket</span>
+                        <span className="font-semibold theme-text">
+                          {paket.nama}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center justify-between gap-3 text-xs">
+                        <span className="theme-text-secondary">Siklus</span>
+                        <span className="font-semibold theme-text">
+                          {siklusLabel(siklus)}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center justify-between gap-3 text-xs">
+                        <span className="theme-text-secondary">
+                          Harga / bulan
+                        </span>
+                        <span className="font-semibold theme-text">
+                          {formatRupiah(hargaBulanan)}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="mt-5 theme-border-soft border-t pt-4">
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="text-sm font-bold theme-text">
+                          Total
+                        </span>
+                        <span className="text-xl font-bold text-[var(--color-primary)]">
+                          {formatRupiah(total)}
+                        </span>
+                      </div>
+                    </div>
+
+                    {submitError && (
+                      <div className="mt-4 flex items-start gap-2 rounded-xl theme-danger border p-3">
+                        <AlertCircle size={15} className="mt-0.5 shrink-0" />
+                        <p className="text-xs leading-5">{submitError}</p>
+                      </div>
+                    )}
+
+                    <button
+                      type="button"
+                      onClick={handleSubmit}
+                      disabled={submitting}
+                      className={`mt-5 flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold text-white transition ${
+                        submitting
+                          ? "cursor-not-allowed bg-[var(--color-primary)] opacity-70"
+                          : "bg-[var(--color-primary)] hover:opacity-90"
+                      }`}
+                    >
+                      {submitting ? (
+                        <>
+                          <Loader2 size={16} className="animate-spin" />
+                          Membuat transaksi...
+                        </>
+                      ) : (
+                        <>
+                          <Wallet size={16} />
+                          Lanjut ke Pembayaran
+                        </>
+                      )}
+                    </button>
+
+                    <div className="mt-4 flex items-start gap-2 text-[11px] leading-5 theme-text-placeholder">
+                      <Lock size={13} className="mt-0.5 shrink-0" />
+                      <span>
+                        Pembayaran diproses melalui Midtrans. Anda akan
+                        diarahkan ke halaman pembayaran resmi untuk memilih
+                        metode pembayaran.
+                      </span>
+                    </div>
+
+                    <div className="mt-3 flex items-start gap-2 text-[11px] leading-5 theme-text-placeholder">
+                      <ShieldCheck size={13} className="mt-0.5 shrink-0" />
+                      <span>
+                        SmartSchool tidak pernah meminta nomor kartu, CVV, OTP,
+                        maupun PIN pada halaman ini.
+                      </span>
+                    </div>
+                  </section>
+                </div>
+              )}
+            </div>
+          </main>
+        </div>
       </div>
     </div>
   );

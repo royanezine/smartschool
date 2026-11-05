@@ -296,7 +296,7 @@ export default function FasilitasDetailPage() {
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
 
                 <div className="min-w-0">
-                  <p className="theme-primary text-xs font-medium uppercase tracking-wide">
+                  <p className="text-[var(--color-primary)] text-xs font-medium uppercase tracking-wide">
                     Detail Fasilitas
                   </p>
 

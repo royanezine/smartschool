@@ -52,9 +52,13 @@ export interface User {
   alamatDomisili?: string | null;
   noTelepon?: string | null;
 
-  status?: string | null;
-  dibuatPada?: string | null;
-  diperbaruiPada?: string | null;
+ status?: string | null;
+dibuatPada?: string | null;
+diperbaruiPada?: string | null;
+terakhirLogin?: string | Date | null;
+lastLogin?: string | Date | null;
+last_login?: string | Date | null;
+loginTerakhir?: string | Date | null;
 
   sekolah?: {
     id?: string;
@@ -114,6 +118,8 @@ export interface CreateUserPayload {
   peranId?: string | null;
   sekolahId?: string | null;
   yayasanId?: string | null;
+
+  kategoriJabatanId?: string | null;
 
   jenisKelamin?: string | null;
   nip?: string | null;

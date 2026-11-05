@@ -217,21 +217,21 @@ export const getDashboardSiswa = async (
         jamMulai: j.jamMulai,
         jamSelesai: j.jamSelesai,
         ruangan: j.ruangan,
-        mataPelajaran: j.kelasMapel.mataPelajaran.nama,
-        guru: j.kelasMapel.guruPengajar.namaLengkap,
+        mataPelajaran: j.kelasMapel.mataPelajaran?.nama ?? "Mata Pelajaran",
+        guru: j.kelasMapel.guruPengajar?.namaLengkap ?? "Guru belum tersedia",
       })),
       tugasMendatang: tugas.map((t) => ({
         id: t.id,
         judul: t.judul,
         batasWaktu: t.batasWaktu,
-        mataPelajaran: t.kelasMapel.mataPelajaran.nama,
+        mataPelajaran: t.kelasMapel.mataPelajaran?.nama ?? "Mata Pelajaran",
       })),
       nilaiTerbaru: nilaiTerbaru.map((n) => ({
         id: n.id,
         nilai: Number(n.nilai),
-        komponen: n.komponenNilai.nama,
-        jenis: n.komponenNilai.jenis,
-        mataPelajaran: n.kelasMapel.mataPelajaran.nama,
+        komponen: n.komponenNilai?.nama ?? "-",
+        jenis: n.komponenNilai?.jenis ?? "-",
+        mataPelajaran: n.kelasMapel.mataPelajaran?.nama ?? "Mata Pelajaran",
         tanggal: n.dibuatPada,
       })),
       rataRataNilai:
@@ -244,7 +244,7 @@ export const getDashboardSiswa = async (
         terdekat: tagihanTerdekat
           ? {
               nomorTagihan: tagihanTerdekat.nomorTagihan,
-              kategori: tagihanTerdekat.kategoriTagihan.nama,
+              kategori: tagihanTerdekat.kategoriTagihan?.nama ?? "-",
               jatuhTempo: tagihanTerdekat.jatuhTempo,
               sisa: Number(tagihanTerdekat.sisa),
             }

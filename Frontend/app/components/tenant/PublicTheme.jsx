@@ -17,49 +17,117 @@ const DEFAULT_THEME = {
   border: "#E2E8F0",
 };
 
-const THEME_KEYS = [
-  "primary",
-  "secondary",
-  "accent",
-  "background",
-  "surface",
-  "text",
-  "border",
-];
-
 function getPublicApiBase() {
-  if (API_URL.endsWith("/api")) {
-    return `${API_URL}/publik`;
+  return API_URL.endsWith("/api")
+    ? `${API_URL}/publik`
+    : `${API_URL}/api/publik`;
+}
+
+function normalizeHex(value, fallback) {
+  const hex =
+    typeof value === "string"
+      ? value
+      : value && typeof value === "object"
+        ? value.hex
+        : "";
+
+  if (typeof hex !== "string") return fallback;
+
+  let normalized = hex.trim().toUpperCase();
+
+  if (/^#[0-9A-F]{3}$/.test(normalized)) {
+    normalized =
+      "#" +
+      normalized
+        .slice(1)
+        .split("")
+        .map((char) => char + char)
+        .join("");
   }
 
-  return `${API_URL}/api/publik`;
+  return /^#[0-9A-F]{6}$/.test(normalized)
+    ? normalized
+    : fallback;
 }
 
-function isValidHex(value) {
-  return (
-    typeof value === "string" &&
-    /^#[0-9a-fA-F]{6}$/.test(value.trim())
-  );
+function normalizeTheme(theme) {
+  const normalized = {};
+
+  for (const key of Object.keys(DEFAULT_THEME)) {
+    normalized[key] = normalizeHex(
+      theme?.[key],
+      DEFAULT_THEME[key]
+    );
+  }
+
+  return normalized;
 }
 
-function applyTheme(theme) {
+function applyTheme(theme = DEFAULT_THEME) {
+  if (typeof document === "undefined") return;
+
   const root = document.documentElement;
+  const colors = normalizeTheme(theme);
 
-  for (const key of THEME_KEYS) {
-    const value = theme?.[key]?.hex;
-    const color = isValidHex(value)
-      ? value.trim()
-      : DEFAULT_THEME[key];
+  // Variabel utama tema sekolah
+  Object.entries(colors).forEach(([key, value]) => {
+    root.style.setProperty(`--school-${key}`, value);
+  });
 
-    root.style.setProperty(`--school-${key}`, color);
-  }
+  // Alias agar kompatibel dengan komponen website lama
+  root.style.setProperty(
+    "--warna-primer-utama",
+    colors.primary
+  );
+
+  root.style.setProperty(
+    "--warna-primer-sekunder",
+    colors.secondary
+  );
+
+  root.style.setProperty(
+    "--warna-aksen",
+    colors.accent
+  );
+
+  root.style.setProperty(
+    "--warna-netral-latar",
+    colors.background
+  );
+
+  root.style.setProperty(
+    "--warna-netral-putih",
+    colors.surface
+  );
+
+  root.style.setProperty(
+    "--warna-netral-teks",
+    colors.text
+  );
+
+  root.style.setProperty(
+    "--warna-netral-teksLembut",
+    colors.secondary
+  );
+
+  root.style.setProperty(
+    "--warna-netral-garis",
+    colors.border
+  );
+
+  // Supaya halaman publik tetap menggunakan tema terang
+  root.style.setProperty("color-scheme", "light");
 }
 
 export default function PublicTheme({ tenant }) {
   useEffect(() => {
+    let cancelled = false;
+
+    // Reset dahulu agar warna tenant sebelumnya tidak terbawa
+    applyTheme(DEFAULT_THEME);
+
     if (!tenant) return;
 
-    let cancelled = false;
     const url = `${getPublicApiBase()}/${encodeURIComponent(
       tenant
     )}/tema`;
@@ -78,7 +146,6 @@ export default function PublicTheme({ tenant }) {
           const detail = await response.text().catch(() => "");
 
           console.warn("Tema sekolah gagal dimuat:", {
-            url,
             status: response.status,
             detail: detail.slice(0, 300),
           });
@@ -90,23 +157,23 @@ export default function PublicTheme({ tenant }) {
 
         if (cancelled) return;
 
-        const tema = result?.data?.tema;
+        const theme =
+          result?.data?.tema ??
+          result?.tema ??
+          result?.data?.data?.tema;
 
-        if (!result?.success || !tema) {
+        if (!theme || typeof theme !== "object") {
           console.warn(
-            "Respons API tema tidak sesuai format yang diharapkan:",
+            "Format respons tema sekolah tidak sesuai:",
             result
           );
           return;
         }
 
-        applyTheme(tema);
+        applyTheme(theme);
       } catch (error) {
         if (!cancelled) {
-          console.warn("Tidak dapat menghubungi API tema sekolah:", {
-            url,
-            message: error?.message,
-          });
+          console.warn("Gagal mengambil tema sekolah:", error);
         }
       }
     }

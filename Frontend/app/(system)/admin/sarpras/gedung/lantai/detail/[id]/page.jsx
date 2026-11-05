@@ -15,7 +15,6 @@ import {
   Users,
   DoorOpen,
   Plus,
-  Boxes,
   ExternalLink,
 } from "lucide-react";
 
@@ -26,7 +25,6 @@ import {
   getGedung,
   getLantaiByGedung,
 } from "@/services/infrastruktur.service";
-
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -55,23 +53,14 @@ const themePrimaryShadow =
 const themeButtonShadow =
   "shadow-[0_4px_12px_color-mix(in_srgb,var(--color-text)_12%,transparent)]";
 
-const themeFocus =
-  "focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]";
-
 const themeSoftSurface =
   "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
 
 const themeInfoSurface =
   "bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)]";
 
-const themeInfoBorder =
-  "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
-
 const themeSuccessSurface =
   "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
-
-const themeSuccessBorder =
-  "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
 
 const themeDangerSurface =
   "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
@@ -173,7 +162,6 @@ export default function DetailLantaiPage() {
     });
   }
 
-
   if (loading) {
     return (
       <div className="theme-page flex h-screen w-full overflow-hidden">
@@ -184,7 +172,7 @@ export default function DetailLantaiPage() {
           setCollapsed={() => {}}
         />
 
-        <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
           <div className="shrink-0 border-b theme-border">
             <Header
               toggleSidebar={() => {}}
@@ -214,7 +202,6 @@ export default function DetailLantaiPage() {
     );
   }
 
-
   if (error || !data) {
     return (
       <div className="theme-page flex h-screen w-full overflow-hidden">
@@ -225,7 +212,7 @@ export default function DetailLantaiPage() {
           setCollapsed={() => {}}
         />
 
-        <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
           <div className="shrink-0 border-b theme-border">
             <Header
               toggleSidebar={() => {}}
@@ -292,7 +279,7 @@ export default function DetailLantaiPage() {
         setCollapsed={() => {}}
       />
 
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
         <div className="shrink-0 border-b theme-border">
           <Header
             toggleSidebar={() => {}}
@@ -305,430 +292,425 @@ export default function DetailLantaiPage() {
           />
         </div>
 
-        <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto">
-          <div className="w-full p-4 sm:p-6 lg:p-8">
-            <div className="mx-auto w-full max-w-6xl space-y-6">
+        <div className="flex min-h-0 flex-1">
+          <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto">
+            <div className="w-full p-4 sm:p-6 lg:p-8 2xl:px-12">
+              <div className="w-full space-y-6">
+                
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                  <div>
+                    <button
+                      onClick={() =>
+                        router.push("/admin/sarpras/gedung/lantai")
+                      }
+                      className={`theme-text-muted mb-3 inline-flex items-center gap-2 text-sm font-medium transition hover:text-[var(--color-primary)]`}
+                    >
+                      <ArrowLeft size={17} />
+                      Kembali ke Data Lantai
+                    </button>
 
+                    <h1 className="theme-text text-2xl font-bold tracking-tight sm:text-3xl">
+                      Detail Lantai
+                    </h1>
 
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                <div>
+                    <p className="theme-text-muted mt-1 text-sm">
+                      Informasi lengkap lantai dan kelas yang menggunakannya.
+                    </p>
+                  </div>
+
                   <button
                     onClick={() =>
-                      router.push("/admin/sarpras/gedung/lantai")
+                      router.push(`/admin/sarpras/lantai/edit/${data.id}`)
                     }
-                    className={`theme-text-muted mb-3 inline-flex items-center gap-2 text-sm font-medium transition hover:text-[var(--color-primary)]`}
+                    className={`inline-flex h-11 items-center justify-center gap-2 rounded-xl px-6 text-sm font-semibold text-[var(--color-card)] transition-all ${themePrimaryGradient} ${themePrimaryShadow} hover:brightness-95 active:scale-[0.98]`}
                   >
-                    <ArrowLeft size={17} />
-                    Kembali ke Data Lantai
+                    <Pencil size={17} />
+                    Edit Lantai
                   </button>
-
-                  <h1 className="theme-text text-2xl font-bold tracking-tight sm:text-3xl">
-                    Detail Lantai
-                  </h1>
-
-                  <p className="theme-text-muted mt-1 text-sm">
-                    Informasi lengkap lantai dan kelas yang menggunakannya.
-                  </p>
                 </div>
 
-                <button
-                  onClick={() =>
-                    router.push(`/admin/sarpras/lantai/edit/${data.id}`)
-                  }
-                  className={`inline-flex h-11 items-center justify-center gap-2 rounded-xl px-6 text-sm font-semibold text-[var(--color-card)] transition-all ${themePrimaryGradient} ${themePrimaryShadow} hover:brightness-95 active:scale-[0.98]`}
-                >
-                  <Pencil size={17} />
-                  Edit Lantai
-                </button>
-              </div>
-
-
-              <div className="grid gap-4 sm:grid-cols-3">
-
-                <div
-                  className={`theme-card theme-border group rounded-2xl border p-5 transition-all hover:-translate-y-0.5 ${themeCardShadow} ${themeCardHoverShadow}`}
-                >
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
                   <div
-                    className={`mb-4 flex h-11 w-11 items-center justify-center rounded-xl ${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow}`}
+                    className={`theme-card theme-border group rounded-2xl border p-5 transition-all hover:-translate-y-0.5 ${themeCardShadow} ${themeCardHoverShadow}`}
                   >
-                    <Layers3 size={20} />
-                  </div>
+                    <div
+                      className={`mb-4 flex h-11 w-11 items-center justify-center rounded-xl ${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow}`}
+                    >
+                      <Layers3 size={20} />
+                    </div>
 
-                  <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-[0.06em]">
-                    Nama Lantai
-                  </p>
-
-                  <h2 className="theme-text mt-2 text-xl font-bold">
-                    {data.nama || "-"}
-                  </h2>
-                </div>
-
-                <div
-                  className={`theme-card theme-border group rounded-2xl border p-5 transition-all hover:-translate-y-0.5 ${themeCardShadow} ${themeCardHoverShadow}`}
-                >
-                  <div
-                    className={`mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-[linear-gradient(135deg,var(--color-info),color-mix(in_srgb,var(--color-info)_72%,var(--color-primary)))] text-[var(--color-card)] ${themeButtonShadow}`}
-                  >
-                    <Building2 size={20} />
-                  </div>
-
-                  <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-[0.06em]">
-                    Gedung
-                  </p>
-
-                  <h2 className="theme-text mt-2 text-xl font-bold">
-                    {gedung?.nama || "-"}
-                  </h2>
-
-                  {gedung?.kode && (
-                    <p className="theme-text-muted mt-1 text-xs">
-                      Kode: {gedung.kode}
+                    <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-[0.06em]">
+                      Nama Lantai
                     </p>
-                  )}
+
+                    <h2 className="theme-text mt-2 text-xl font-bold">
+                      {data.nama || "-"}
+                    </h2>
+                  </div>
+
+                  <div
+                    className={`theme-card theme-border group rounded-2xl border p-5 transition-all hover:-translate-y-0.5 ${themeCardShadow} ${themeCardHoverShadow}`}
+                  >
+                    <div
+                      className={`mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-[linear-gradient(135deg,var(--color-info),color-mix(in_srgb,var(--color-info)_72%,var(--color-primary)))] text-[var(--color-card)] ${themeButtonShadow}`}
+                    >
+                      <Building2 size={20} />
+                    </div>
+
+                    <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-[0.06em]">
+                      Gedung
+                    </p>
+
+                    <h2 className="theme-text mt-2 text-xl font-bold">
+                      {gedung?.nama || "-"}
+                    </h2>
+
+                    {gedung?.kode && (
+                      <p className="theme-text-muted mt-1 text-xs">
+                        Kode: {gedung.kode}
+                      </p>
+                    )}
+                  </div>
+
+                  <div
+                    className={`theme-card theme-border group rounded-2xl border p-5 transition-all hover:-translate-y-0.5 ${themeCardShadow} ${themeCardHoverShadow}`}
+                  >
+                    <div
+                      className={`mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-[linear-gradient(135deg,var(--color-success),color-mix(in_srgb,var(--color-success)_70%,var(--color-info)))] text-[var(--color-card)] ${themeButtonShadow}`}
+                    >
+                      <School size={20} />
+                    </div>
+
+                    <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-[0.06em]">
+                      Jumlah Kelas
+                    </p>
+
+                    <h2 className="theme-text mt-2 text-xl font-bold">
+                      {kelas.length}
+                    </h2>
+
+                    <p className="theme-text-muted mt-1 text-xs">
+                      kelas menggunakan lantai ini
+                    </p>
+                  </div>
                 </div>
 
                 <div
-                  className={`theme-card theme-border group rounded-2xl border p-5 transition-all hover:-translate-y-0.5 ${themeCardShadow} ${themeCardHoverShadow}`}
+                  className={`theme-card theme-border overflow-hidden rounded-2xl border ${themeCardShadow}`}
                 >
                   <div
-                    className={`mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-[linear-gradient(135deg,var(--color-success),color-mix(in_srgb,var(--color-success)_70%,var(--color-info)))] text-[var(--color-card)] ${themeButtonShadow}`}
+                    className={`theme-border border-b px-6 py-5 sm:px-8 ${themeSoftSurface}`}
                   >
-                    <School size={20} />
-                  </div>
-
-                  <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-[0.06em]">
-                    Jumlah Kelas
-                  </p>
-
-                  <h2 className="theme-text mt-2 text-xl font-bold">
-                    {kelas.length}
-                  </h2>
-
-                  <p className="theme-text-muted mt-1 text-xs">
-                    kelas menggunakan lantai ini
-                  </p>
-                </div>
-              </div>
-
-
-              <div
-                className={`theme-card theme-border overflow-hidden rounded-2xl border ${themeCardShadow}`}
-              >
-                <div
-                  className={`theme-border border-b px-6 py-5 sm:px-8 ${themeSoftSurface}`}
-                >
-                  <h2 className="theme-text text-base font-semibold">
-                    Informasi Lantai
-                  </h2>
-
-                  <p className="theme-text-muted mt-1 text-sm">
-                    Detail data yang tersimpan pada sistem.
-                  </p>
-                </div>
-
-                <div className="grid sm:grid-cols-2">
-
-                  <div className="theme-border flex gap-4 border-b p-5 sm:border-r">
-                    <div
-                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${themeSoftSurface} theme-text-secondary`}
-                    >
-                      <Hash size={19} />
-                    </div>
-
-                    <div className="min-w-0">
-                      <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-[0.06em]">
-                        ID Lantai
-                      </p>
-
-                      <p className="theme-text-secondary mt-1 break-all font-mono text-sm font-medium">
-                        {data.id}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="theme-border flex gap-4 border-b p-5">
-                    <div
-                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${themePrimarySoft} text-[var(--color-primary)]`}
-                    >
-                      <Building2 size={19} />
-                    </div>
-
-                    <div className="min-w-0">
-                      <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-[0.06em]">
-                        ID Gedung
-                      </p>
-
-                      <p className="theme-text-secondary mt-1 break-all font-mono text-sm font-medium">
-                        {data.gedungId || gedung?.id || "-"}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="theme-border flex gap-4 border-b p-5 sm:border-r sm:border-b-0">
-                    <div
-                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${themeInfoSurface} theme-info`}
-                    >
-                      <CalendarDays size={19} />
-                    </div>
-
-                    <div>
-                      <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-[0.06em]">
-                        Dibuat Pada
-                      </p>
-
-                      <p className="theme-text-secondary mt-1 text-sm font-medium">
-                        {formatDate(data.dibuatPada)}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-4 p-5">
-                    <div
-                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${themeSuccessSurface} theme-success`}
-                    >
-                      <Users size={19} />
-                    </div>
-
-                    <div>
-                      <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-[0.06em]">
-                        Total Kelas
-                      </p>
-
-                      <p className="theme-text-secondary mt-1 text-sm font-medium">
-                        {kelas.length} kelas
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-
-              {/* Section Daftar Ruangan */}
-              <div
-                className={`theme-card theme-border overflow-hidden rounded-2xl border ${themeCardShadow}`}
-              >
-                <div
-                  className={`theme-border flex flex-col gap-3 border-b px-6 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-8 ${themeSoftSurface}`}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] text-[var(--color-primary)]">
-                      <DoorOpen size={20} />
-                    </div>
-                    <div>
-                      <h2 className="theme-text text-base font-semibold">
-                        Daftar Ruangan
-                      </h2>
-                      <p className="theme-text-muted mt-0.5 text-xs">
-                        Ruangan fisik dan alokasi fasilitas pada lantai ini.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-wrap items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() =>
-                        router.push(
-                          `/admin/sarpras/gedung/lantai/${data.id}/ruangan`
-                        )
-                      }
-                      className="inline-flex items-center gap-1.5 rounded-xl border theme-border px-3.5 py-2 text-xs font-semibold theme-text-secondary hover:text-[var(--color-primary)] hover:bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)] transition"
-                    >
-                      Kelola Ruangan
-                      <ExternalLink size={13} />
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() =>
-                        router.push(
-                          `/admin/sarpras/gedung/lantai/${data.id}/ruangan/tambah`
-                        )
-                      }
-                      className={`inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-semibold text-[var(--color-card)] ${themePrimaryGradient} ${themePrimaryShadow} hover:brightness-95 transition`}
-                    >
-                      <Plus size={14} />
-                      Tambah Ruangan
-                    </button>
-                  </div>
-                </div>
-
-                <div className="overflow-x-auto">
-                  <table className="w-full min-w-[650px] border-collapse text-left">
-                    <thead>
-                      <tr className={`theme-border border-b ${themeSoftSurface}`}>
-                        <th className="theme-text-muted px-6 py-3 text-[10px] font-semibold uppercase tracking-[0.08em]">
-                          No
-                        </th>
-                        <th className="theme-text-muted px-6 py-3 text-[10px] font-semibold uppercase tracking-[0.08em]">
-                          Nama Ruangan
-                        </th>
-                        <th className="theme-text-muted px-6 py-3 text-[10px] font-semibold uppercase tracking-[0.08em]">
-                          Kode
-                        </th>
-                        <th className="theme-text-muted px-6 py-3 text-[10px] font-semibold uppercase tracking-[0.08em]">
-                          Status
-                        </th>
-                        <th className="theme-text-muted px-6 py-3 text-[10px] font-semibold uppercase tracking-[0.08em]">
-                          Kelas Terhubung
-                        </th>
-                        <th className="theme-text-muted px-6 py-3 text-[10px] font-semibold uppercase tracking-[0.08em]">
-                          Jumlah Asset
-                        </th>
-                        <th className="theme-text-muted px-6 py-3 text-[10px] font-semibold uppercase tracking-[0.08em] text-right">
-                          Aksi
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td colSpan={7} className="px-6 py-12 text-center">
-                          <div
-                            className={`theme-text-muted mx-auto flex h-14 w-14 items-center justify-center rounded-2xl ${themeSoftSurface}`}
-                          >
-                            <DoorOpen size={26} className="text-[var(--color-primary)]" />
-                          </div>
-
-                          <h3 className="theme-text-secondary mt-3.5 text-sm font-semibold">
-                            Belum Ada Data Ruangan
-                          </h3>
-
-                          <p className="theme-text-muted mt-1 text-xs max-w-sm mx-auto leading-relaxed">
-                            Data ruangan pada lantai ini belum tersedia. Modul Pengelolaan Ruangan siap digunakan dan sedang menunggu endpoint integrasi Backend.
-                          </p>
-
-                          <div className="mt-4 flex justify-center gap-2.5">
-                            <button
-                              type="button"
-                              onClick={() =>
-                                router.push(
-                                  `/admin/sarpras/gedung/lantai/${data.id}/ruangan/tambah`
-                                )
-                              }
-                              className={`inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-semibold text-[var(--color-card)] ${themePrimaryGradient} ${themePrimaryShadow} hover:brightness-95 transition`}
-                            >
-                              <Plus size={14} />
-                              Tambah Ruangan Pertama
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-
-              <div
-                className={`theme-card theme-border overflow-hidden rounded-2xl border ${themeCardShadow}`}
-              >
-                <div
-                  className={`theme-border flex flex-col gap-3 border-b px-6 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-8 ${themeSoftSurface}`}
-                >
-                  <div>
                     <h2 className="theme-text text-base font-semibold">
-                      Kelas di Lantai Ini
+                      Informasi Lantai
                     </h2>
 
                     <p className="theme-text-muted mt-1 text-sm">
-                      Daftar kelas yang terhubung dengan lantai.
+                      Detail data yang tersimpan pada sistem.
                     </p>
                   </div>
 
-                  <div
-                    className={`theme-text-secondary inline-flex w-fit items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold ${themeSoftSurface}`}
-                  >
-                    <School size={16} />
-                    {kelas.length} Kelas
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+                    <div className="theme-border flex gap-4 border-b p-5 sm:border-r lg:border-b-0">
+                      <div
+                        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${themeSoftSurface} theme-text-secondary`}
+                      >
+                        <Hash size={19} />
+                      </div>
+
+                      <div className="min-w-0">
+                        <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-[0.06em]">
+                          ID Lantai
+                        </p>
+
+                        <p className="theme-text-secondary mt-1 break-all font-mono text-sm font-medium">
+                          {data.id}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="theme-border flex gap-4 border-b p-5 lg:border-b-0 lg:border-r">
+                      <div
+                        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${themePrimarySoft} text-[var(--color-primary)]`}
+                      >
+                        <Building2 size={19} />
+                      </div>
+
+                      <div className="min-w-0">
+                        <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-[0.06em]">
+                          ID Gedung
+                        </p>
+
+                        <p className="theme-text-secondary mt-1 break-all font-mono text-sm font-medium">
+                          {data.gedungId || gedung?.id || "-"}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="theme-border flex gap-4 border-b p-5 sm:border-r sm:border-b-0 lg:border-b-0">
+                      <div
+                        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${themeInfoSurface} theme-info`}
+                      >
+                        <CalendarDays size={19} />
+                      </div>
+
+                      <div>
+                        <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-[0.06em]">
+                          Dibuat Pada
+                        </p>
+
+                        <p className="theme-text-secondary mt-1 text-sm font-medium">
+                          {formatDate(data.dibuatPada)}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-4 p-5">
+                      <div
+                        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${themeSuccessSurface} theme-success`}
+                      >
+                        <Users size={19} />
+                      </div>
+
+                      <div>
+                        <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-[0.06em]">
+                          Total Kelas
+                        </p>
+
+                        <p className="theme-text-secondary mt-1 text-sm font-medium">
+                          {kelas.length} kelas
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
-                {kelas.length === 0 ? (
-                  <div className="px-6 py-16 text-center">
-                    <div
-                      className={`theme-text-muted mx-auto flex h-16 w-16 items-center justify-center rounded-2xl ${themeSoftSurface}`}
-                    >
-                      <School size={28} />
+                <div
+                  className={`theme-card theme-border overflow-hidden rounded-2xl border ${themeCardShadow}`}
+                >
+                  <div
+                    className={`theme-border flex flex-col gap-3 border-b px-6 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-8 ${themeSoftSurface}`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] text-[var(--color-primary)]">
+                        <DoorOpen size={20} />
+                      </div>
+                      <div>
+                        <h2 className="theme-text text-base font-semibold">
+                          Daftar Ruangan
+                        </h2>
+                        <p className="theme-text-muted mt-0.5 text-xs">
+                          Ruangan fisik dan alokasi fasilitas pada lantai ini.
+                        </p>
+                      </div>
                     </div>
 
-                    <h3 className="theme-text-secondary mt-4 text-sm font-semibold">
-                      Belum ada kelas
-                    </h3>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          router.push(
+                            `/admin/sarpras/gedung/lantai/${data.id}/ruangan`
+                          )
+                        }
+                        className="inline-flex items-center gap-1.5 rounded-xl border theme-border px-3.5 py-2 text-xs font-semibold theme-text-secondary hover:text-[var(--color-primary)] hover:bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)] transition"
+                      >
+                        Kelola Ruangan
+                        <ExternalLink size={13} />
+                      </button>
 
-                    <p className="theme-text-muted mt-1 text-xs">
-                      Belum ada kelas yang menggunakan lantai ini.
-                    </p>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          router.push(
+                            `/admin/sarpras/gedung/lantai/${data.id}/ruangan/tambah`
+                          )
+                        }
+                        className={`inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-semibold text-[var(--color-card)] ${themePrimaryGradient} ${themePrimaryShadow} hover:brightness-95 transition`}
+                      >
+                        <Plus size={14} />
+                        Tambah Ruangan
+                      </button>
+                    </div>
                   </div>
-                ) : (
+
                   <div className="overflow-x-auto">
-                    <table className="w-full min-w-[600px] border-collapse">
+                    <table className="w-full min-w-[650px] border-collapse text-left">
                       <thead>
-                        <tr
-                          className={`theme-border border-b ${themeSoftSurface}`}
-                        >
-                          <th className="theme-text-muted px-6 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.08em]">
+                        <tr className={`theme-border border-b ${themeSoftSurface}`}>
+                          <th className="theme-text-muted px-6 py-3 text-[10px] font-semibold uppercase tracking-[0.08em]">
                             No
                           </th>
-
-                          <th className="theme-text-muted px-6 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.08em]">
-                            Nama Kelas
+                          <th className="theme-text-muted px-6 py-3 text-[10px] font-semibold uppercase tracking-[0.08em]">
+                            Nama Ruangan
                           </th>
-
-                          <th className="theme-text-muted px-6 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.08em]">
-                            Tingkat
+                          <th className="theme-text-muted px-6 py-3 text-[10px] font-semibold uppercase tracking-[0.08em]">
+                            Kode
                           </th>
-
-                          <th className="theme-text-muted px-6 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.08em]">
-                            ID Kelas
+                          <th className="theme-text-muted px-6 py-3 text-[10px] font-semibold uppercase tracking-[0.08em]">
+                            Status
+                          </th>
+                          <th className="theme-text-muted px-6 py-3 text-[10px] font-semibold uppercase tracking-[0.08em]">
+                            Kelas Terhubung
+                          </th>
+                          <th className="theme-text-muted px-6 py-3 text-[10px] font-semibold uppercase tracking-[0.08em]">
+                            Jumlah Asset
+                          </th>
+                          <th className="theme-text-muted px-6 py-3 text-[10px] font-semibold uppercase tracking-[0.08em] text-right">
+                            Aksi
                           </th>
                         </tr>
                       </thead>
+                      <tbody>
+                        <tr>
+                          <td colSpan={7} className="px-6 py-12 text-center">
+                            <div
+                              className={`theme-text-muted mx-auto flex h-14 w-14 items-center justify-center rounded-2xl ${themeSoftSurface}`}
+                            >
+                              <DoorOpen size={26} className="text-[var(--color-primary)]" />
+                            </div>
 
-                      <tbody
-                        className={`divide-y ${"divide-[color-mix(in_srgb,var(--color-text)_7%,transparent)]"}`}
-                      >
-                        {kelas.map((item, index) => (
-                          <tr
-                            key={item.id}
-                            className={`transition-colors ${themeNeutralHover}`}
-                          >
-                            <td className="theme-text-muted px-6 py-4 text-sm">
-                              {index + 1}
-                            </td>
+                            <h3 className="theme-text-secondary mt-3.5 text-sm font-semibold">
+                              Belum Ada Data Ruangan
+                            </h3>
 
-                            <td className="px-6 py-4">
-                              <div className="flex items-center gap-3">
-                                <div
-                                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${themePrimarySoft} text-[var(--color-primary)]`}
-                                >
-                                  <School size={17} />
-                                </div>
+                            <p className="theme-text-muted mt-1 text-xs max-w-sm mx-auto leading-relaxed">
+                              Data ruangan pada lantai ini belum tersedia. Modul Pengelolaan Ruangan siap digunakan dan sedang menunggu endpoint integrasi Backend.
+                            </p>
 
-                                <span className="theme-text-secondary text-sm font-semibold">
-                                  {item.nama || "-"}
-                                </span>
-                              </div>
-                            </td>
-
-                            <td className="theme-text-secondary px-6 py-4 text-sm">
-                              {item.tingkat || "-"}
-                            </td>
-
-                            <td className="px-6 py-4">
-                              <span className="theme-text-muted font-mono text-xs">
-                                {item.id}
-                              </span>
-                            </td>
-                          </tr>
-                        ))}
+                            <div className="mt-4 flex justify-center gap-2.5">
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  router.push(
+                                    `/admin/sarpras/gedung/lantai/${data.id}/ruangan/tambah`
+                                  )
+                                }
+                                className={`inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-semibold text-[var(--color-card)] ${themePrimaryGradient} ${themePrimaryShadow} hover:brightness-95 transition`}
+                              >
+                                <Plus size={14} />
+                                Tambah Ruangan Pertama
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
                       </tbody>
                     </table>
                   </div>
-                )}
+                </div>
+
+                <div
+                  className={`theme-card theme-border overflow-hidden rounded-2xl border ${themeCardShadow}`}
+                >
+                  <div
+                    className={`theme-border flex flex-col gap-3 border-b px-6 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-8 ${themeSoftSurface}`}
+                  >
+                    <div>
+                      <h2 className="theme-text text-base font-semibold">
+                        Kelas di Lantai Ini
+                      </h2>
+
+                      <p className="theme-text-muted mt-1 text-sm">
+                        Daftar kelas yang terhubung dengan lantai.
+                      </p>
+                    </div>
+
+                    <div
+                      className={`theme-text-secondary inline-flex w-fit items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold ${themeSoftSurface}`}
+                    >
+                      <School size={16} />
+                      {kelas.length} Kelas
+                    </div>
+                  </div>
+
+                  {kelas.length === 0 ? (
+                    <div className="px-6 py-16 text-center">
+                      <div
+                        className={`theme-text-muted mx-auto flex h-16 w-16 items-center justify-center rounded-2xl ${themeSoftSurface}`}
+                      >
+                        <School size={28} />
+                      </div>
+
+                      <h3 className="theme-text-secondary mt-4 text-sm font-semibold">
+                        Belum ada kelas
+                      </h3>
+
+                      <p className="theme-text-muted mt-1 text-xs">
+                        Belum ada kelas yang menggunakan lantai ini.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full min-w-[600px] border-collapse">
+                        <thead>
+                          <tr
+                            className={`theme-border border-b ${themeSoftSurface}`}
+                          >
+                            <th className="theme-text-muted px-6 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.08em]">
+                              No
+                            </th>
+
+                            <th className="theme-text-muted px-6 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.08em]">
+                              Nama Kelas
+                            </th>
+
+                            <th className="theme-text-muted px-6 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.08em]">
+                              Tingkat
+                            </th>
+
+                            <th className="theme-text-muted px-6 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.08em]">
+                              ID Kelas
+                            </th>
+                          </tr>
+                        </thead>
+
+                        <tbody
+                          className={`divide-y ${"divide-[color-mix(in_srgb,var(--color-text)_7%,transparent)]"}`}
+                        >
+                          {kelas.map((item, index) => (
+                            <tr
+                              key={item.id}
+                              className={`transition-colors ${themeNeutralHover}`}
+                            >
+                              <td className="theme-text-muted px-6 py-4 text-sm">
+                                {index + 1}
+                              </td>
+
+                              <td className="px-6 py-4">
+                                <div className="flex items-center gap-3">
+                                  <div
+                                    className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${themePrimarySoft} text-[var(--color-primary)]`}
+                                  >
+                                    <School size={17} />
+                                  </div>
+
+                                  <span className="theme-text-secondary text-sm font-semibold">
+                                    {item.nama || "-"}
+                                  </span>
+                                </div>
+                              </td>
+
+                              <td className="theme-text-secondary px-6 py-4 text-sm">
+                                {item.tingkat || "-"}
+                              </td>
+
+                              <td className="px-6 py-4">
+                                <span className="theme-text-muted font-mono text-xs">
+                                  {item.id}
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+
               </div>
             </div>
-          </div>
-        </main>
+          </main>
+        </div>
       </div>
     </div>
   );

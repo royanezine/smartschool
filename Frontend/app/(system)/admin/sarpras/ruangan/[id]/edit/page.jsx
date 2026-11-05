@@ -1,140 +1,192 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
-import {
-  ArrowLeft,
-  Building2,
-  Layers3,
-  DoorOpen,
-  School,
-  Save,
-  Info,
-  ChevronRight,
-  CheckCircle2,
-  Users,
-  Hash,
-  Sparkles,
-  Pencil,
-} from "lucide-react";
+import { useRouter, useParams } from "next/navigation";
 
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
+
+import { getRuangan, updateRuangan } from "@/services/sarpras.service";
+import { getGedung, getLantaiByGedung } from "@/services/infrastruktur.service";
+
 import {
-  getGedung,
-  getLantaiByGedung,
-} from "@/services/infrastruktur.service";
+  ArrowLeft,
+  Save,
+  Loader2,
+  AlertCircle,
+  Building2,
+  Info,
+  CheckCircle2,
+  Lightbulb,
+  ShieldCheck,
+  Eye,
+  LayoutGrid,
+} from "lucide-react";
 
-const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
-const themePrimaryShadow =
-  "shadow-[0_4px_14px_color-mix(in_srgb,var(--color-primary)_20%,transparent)]";
-const themeCardShadow =
-  "shadow-[0_2px_10px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
-const themeFocus =
-  "focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]";
+const EMPTY_FORM = {
+  nama: "",
+  lokasi: "",
+  kapasitas: "",
+  keterangan: "",
+};
 
-export default function GlobalEditRuanganPage() {
+function extractData(response) {
+  if (Array.isArray(response)) return response;
+  if (Array.isArray(response?.data)) return response.data;
+  if (Array.isArray(response?.data?.data)) return response.data.data;
+  return [];
+}
+
+function getErrorMessage(error) {
+  return (
+    error?.response?.data?.message ||
+    error?.data?.message ||
+    error?.message ||
+    "Terjadi kesalahan."
+  );
+}
+
+export default function EditRuanganPage() {
   const router = useRouter();
   const params = useParams();
   const id = params?.id;
 
-  // Context lists from Backend
+  const [loading, setLoading] = useState(true);
+  const [loadingMaster, setLoadingMaster] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
   const [gedungList, setGedungList] = useState([]);
-  const [lantaiList, setLantaiList] = useState([]);
-  const [loadingContext, setLoadingContext] = useState(true);
+  const [lokasiOptions, setLokasiOptions] = useState([]);
+  const [form, setForm] = useState(EMPTY_FORM);
+  const [originalData, setOriginalData] = useState(null);
 
-  // Form fields prefilled
-  const [gedungId, setGedungId] = useState("");
-  const [lantaiId, setLantaiId] = useState("");
-  const [nama, setNama] = useState(`Ruangan ${id || ""}`.trim());
-  const [kode, setKode] = useState("R-101");
-  const [kelasId, setKelasId] = useState("");
-  const [kapasitas, setKapasitas] = useState("36");
-  const [status, setStatus] = useState("aktif");
-  const [errors, setErrors] = useState({});
-  const [infoMessage, setInfoMessage] = useState("");
-
-  // Load real Gedung from Backend
-  const loadGedung = useCallback(async () => {
+  const loadMasterData = useCallback(async () => {
     try {
-      setLoadingContext(true);
-      const res = await getGedung();
-      if (res?.success && Array.isArray(res.data)) {
-        setGedungList(res.data);
-        if (res.data.length > 0) {
-          setGedungId(res.data[0].id);
-        }
+      setLoadingMaster(true);
+      const responseGedung = await getGedung();
+      const gedungData = extractData(responseGedung);
+      setGedungList(gedungData);
+
+      if (gedungData.length === 0) {
+        setLokasiOptions([]);
+        return;
       }
-    } catch (err) {
-      console.error(err);
+
+      const hasilLantai = await Promise.allSettled(
+        gedungData.map(async (gedung) => {
+          if (!gedung.id) return [];
+          const responseLantai = await getLantaiByGedung(gedung.id);
+          return extractData(responseLantai).map((lantai) => ({
+            id: lantai.id,
+            gedungId: gedung.id,
+            label: `${gedung.nama} - ${lantai.nama}`,
+          }));
+        })
+      );
+
+      const semuaLokasi = hasilLantai.flatMap((hasil) =>
+        hasil.status === "fulfilled" ? hasil.value : []
+      );
+      setLokasiOptions(semuaLokasi);
+    } catch (error) {
+      console.error(error);
     } finally {
-      setLoadingContext(false);
+      setLoadingMaster(false);
     }
   }, []);
 
-  // Load Lantai when Gedung changes
-  const loadLantai = useCallback(async (selectedGedungId) => {
-    if (!selectedGedungId) {
-      setLantaiList([]);
-      setLantaiId("");
-      return;
-    }
+  const loadRuanganData = useCallback(async () => {
     try {
-      const res = await getLantaiByGedung(selectedGedungId);
-      if (res?.success && Array.isArray(res.data)) {
-        setLantaiList(res.data);
-        if (res.data.length > 0) {
-          setLantaiId(res.data[0].id);
-        }
-      } else {
-        setLantaiList([]);
-      }
-    } catch (err) {
-      console.error(err);
-      setLantaiList([]);
+      setLoading(true);
+      const response = await getRuangan();
+      const data = extractData(response).find(
+        (item) => String(item.id) === String(id)
+      );
+
+      if (!data) throw new Error("Data ruangan tidak ditemukan.");
+
+      setOriginalData(data);
+      setForm({
+        nama: data.nama || "",
+        lokasi: data.lokasi || "",
+        kapasitas:
+          data.kapasitas !== null && data.kapasitas !== undefined
+            ? String(data.kapasitas)
+            : "",
+        keterangan: data.keterangan || "",
+      });
+    } catch (error) {
+      setErrorMessage(getErrorMessage(error));
+    } finally {
+      setLoading(false);
     }
-  }, []);
+  }, [id]);
 
   useEffect(() => {
-    loadGedung();
-  }, [loadGedung]);
+    loadRuanganData();
+    loadMasterData();
+  }, [loadRuanganData, loadMasterData]);
 
-  useEffect(() => {
-    if (gedungId) {
-      loadLantai(gedungId);
-    }
-  }, [gedungId, loadLantai]);
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const newErrors = {};
-
-    if (!nama.trim()) {
-      newErrors.nama = "Nama ruangan wajib diisi.";
-    }
-
-    if (kapasitas && Number(kapasitas) < 1) {
-      newErrors.kapasitas = "Kapasitas minimal 1 orang.";
-    }
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      setInfoMessage("");
-      return;
-    }
-
-    setErrors({});
-    setInfoMessage(
-      "Validasi update berhasil! Catatan: Perubahan belum tersimpan ke database karena endpoint backend `PUT /api/infrastruktur/ruangan/:id` belum diimplementasikan di Backend (Backend Gap)."
-    );
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const selectedGedungObj = gedungList.find((g) => String(g.id) === String(gedungId));
-  const selectedLantaiObj = lantaiList.find((l) => String(l.id) === String(lantaiId));
-  const selectedKelasObj = selectedLantaiObj?.kelas?.find(
-    (k) => String(k.id) === String(kelasId)
-  );
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setErrorMessage("");
+
+    if (!form.nama.trim()) {
+      setErrorMessage("Nama ruangan wajib diisi.");
+      return;
+    }
+
+    const kapasitasValue =
+      form.kapasitas.trim() === "" ? null : Number(form.kapasitas);
+    if (
+      kapasitasValue !== null &&
+      (!Number.isInteger(kapasitasValue) || kapasitasValue < 0)
+    ) {
+      setErrorMessage(
+        "Kapasitas harus berupa angka bulat dan tidak boleh negatif."
+      );
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      const payload = {
+        nama: form.nama.trim(),
+        lokasi: form.lokasi.trim() || null,
+        kapasitas: kapasitasValue,
+        keterangan: form.keterangan.trim() || null,
+      };
+
+      const response = await updateRuangan(id, payload);
+      if (response?.success === false) throw new Error(response.message);
+
+      router.push("/admin/sarpras/ruangan");
+      router.refresh();
+    } catch (error) {
+      setErrorMessage(getErrorMessage(error));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="theme-page flex h-screen w-full items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="animate-spin text-[var(--color-primary)]" size={32} />
+          <p className="theme-text-muted text-sm font-medium">
+            Memuat data ruangan...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
@@ -145,7 +197,7 @@ export default function GlobalEditRuanganPage() {
         setCollapsed={() => {}}
       />
 
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
         <div className="shrink-0 border-b theme-border">
           <Header
             toggleSidebar={() => {}}
@@ -158,345 +210,252 @@ export default function GlobalEditRuanganPage() {
           />
         </div>
 
-        <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto">
-          <div className="w-full p-4 sm:p-6 lg:p-8 space-y-6 min-w-0">
-            {/* Breadcrumb Navigation */}
-            <nav className="flex flex-wrap items-center gap-2 text-xs font-medium theme-text-muted">
-              <button
-                type="button"
-                onClick={() => router.push("/admin/sarpras/ruangan")}
-                className="hover:text-[var(--color-primary)] transition"
-              >
-                Pengelolaan Ruangan
-              </button>
-              <ChevronRight size={14} />
-              <button
-                type="button"
-                onClick={() => router.push(`/admin/sarpras/ruangan/${id}`)}
-                className="hover:text-[var(--color-primary)] transition truncate max-w-[150px]"
-              >
-                {nama}
-              </button>
-              <ChevronRight size={14} />
-              <span className="theme-text font-semibold">Edit Ruangan</span>
-            </nav>
+        <div className="flex min-h-0 flex-1">
+          <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto">
+            <div className="w-full p-4 sm:p-6 lg:p-8 2xl:px-12 space-y-6">
+              
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => router.push("/admin/sarpras/ruangan")}
+                    className="inline-flex w-fit items-center gap-2 text-sm font-medium theme-text-muted transition hover:text-[var(--color-primary)]"
+                  >
+                    <ArrowLeft size={17} />
+                    Kembali ke Daftar Ruangan
+                  </button>
+                  <div className="mt-3 flex items-center gap-3">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-warning)_12%,transparent)] text-[var(--color-warning)]">
+                      <Building2 size={24} />
+                    </div>
+                    <div>
+                      <h1 className="theme-text text-2xl font-bold">Edit Ruangan</h1>
+                      <p className="theme-text-muted mt-1 text-sm">
+                        Perbarui data ruangan yang sudah terdaftar.
+                      </p>
+                    </div>
+                  </div>
+                </div>
 
-            {/* Header Section */}
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-              <div>
                 <button
                   type="button"
                   onClick={() => router.push(`/admin/sarpras/ruangan/${id}`)}
-                  className="mb-2 inline-flex items-center gap-2 text-sm font-medium theme-text-muted hover:text-[var(--color-primary)] transition"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl border theme-border px-5 py-2.5 text-sm font-semibold theme-text-secondary transition hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]"
                 >
-                  <ArrowLeft size={16} />
-                  Kembali ke Detail Ruangan
+                  <Eye size={16} />
+                  Lihat Detail Ruangan
                 </button>
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] text-[var(--color-primary)]">
-                    <Pencil size={20} />
-                  </div>
-                  <div>
-                    <h1 className="theme-text text-2xl font-bold tracking-tight sm:text-3xl">
-                      Edit Data Ruangan
-                    </h1>
-                    <p className="theme-text-muted text-xs sm:text-sm mt-0.5">
-                      Perbarui spesifikasi fisik, penempatan lokasi, atau status operasional ruangan.
-                    </p>
-                  </div>
-                </div>
               </div>
-            </div>
 
-            {/* Informative Status Notification */}
-            {infoMessage && (
-              <div className="flex items-start gap-3 rounded-2xl border border-[color-mix(in_srgb,var(--color-info)_25%,transparent)] bg-[color-mix(in_srgb,var(--color-info)_6%,transparent)] p-4 sm:p-5 text-sm theme-info">
-                <CheckCircle2 size={20} className="shrink-0 mt-0.5 text-[var(--color-info)]" />
-                <div className="space-y-1">
-                  <p className="font-semibold text-sm">Simulasi Update Berhasil</p>
-                  <p className="text-xs leading-relaxed opacity-95">{infoMessage}</p>
-                  <div className="pt-2 flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => router.push(`/admin/sarpras/ruangan/${id}`)}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[var(--color-card)] border theme-border hover:bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)] transition"
-                    >
-                      Buka Detail Ruangan
-                    </button>
-                  </div>
+              {errorMessage && (
+                <div className="flex items-start gap-3 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-600">
+                  <AlertCircle size={18} className="mt-0.5 shrink-0" />
+                  <div className="flex-1">{errorMessage}</div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Main Form Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-              {/* Form Input Column (8 Cols) */}
-              <div className="lg:col-span-8">
-                <form
-                  onSubmit={handleSubmit}
-                  className={`theme-card theme-border rounded-2xl border p-5 sm:p-7 space-y-5 ${themeCardShadow}`}
-                >
-                  <div className="border-b theme-border pb-4">
-                    <h2 className="theme-text text-base font-semibold flex items-center gap-2">
-                      <DoorOpen size={18} className="text-[var(--color-primary)]" />
-                      Ubah Informasi Ruangan
-                    </h2>
-                    <p className="theme-text-muted text-xs mt-0.5">
-                      Sesuaikan parameter ruangan yang ingin diperbarui.
-                    </p>
-                  </div>
+              <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+                
+                <div className="min-w-0">
+                  <form
+                    onSubmit={handleSubmit}
+                    className="space-y-5 theme-card rounded-2xl border theme-border p-6 shadow-sm"
+                  >
+                    <div className="border-b theme-border pb-4 mb-5">
+                      <h2 className="theme-text font-bold text-lg flex items-center gap-2">
+                        <LayoutGrid size={18} className="text-[var(--color-primary)]" />
+                        Informasi Ruangan
+                      </h2>
+                      <p className="theme-text-muted text-xs mt-1">
+                        Ubah data di bawah ini sesuai kebutuhan.
+                      </p>
+                    </div>
 
-                  {/* Gedung & Lantai Selection */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {/* Gedung */}
-                    <div className="space-y-1.5">
-                      <label className="theme-text text-xs font-semibold">
-                        Gedung <span className="theme-danger">*</span>
+                    <div>
+                      <label className="theme-text mb-2 block text-sm font-semibold">
+                        Nama Ruangan <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        name="nama"
+                        value={form.nama}
+                        onChange={handleChange}
+                        required
+                        maxLength={100}
+                        className="theme-input w-full rounded-xl border theme-border px-4 py-3 text-sm outline-none focus:border-[var(--color-primary)]"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="theme-text mb-2 block text-sm font-semibold">
+                        Lokasi
                       </label>
                       <div className="relative">
                         <Building2
-                          size={15}
+                          size={18}
                           className="theme-text-muted absolute left-3.5 top-1/2 -translate-y-1/2"
                         />
                         <select
-                          value={gedungId}
-                          onChange={(e) => setGedungId(e.target.value)}
-                          className={`theme-input w-full rounded-xl pl-9 pr-8 py-2.5 text-sm ${themeFocus}`}
+                          name="lokasi"
+                          value={form.lokasi}
+                          onChange={handleChange}
+                          disabled={loadingMaster}
+                          className="theme-input w-full appearance-none rounded-xl border theme-border bg-transparent py-3 pl-10 pr-9 text-sm outline-none focus:border-[var(--color-primary)] disabled:opacity-60"
                         >
-                          {gedungList.map((g) => (
-                            <option key={g.id} value={g.id}>
-                              {g.nama} {g.kode ? `(${g.kode})` : ""}
+                          <option value="">Pilih gedung dan lantai</option>
+                          {lokasiOptions.map((lokasi) => (
+                            <option
+                              key={`${lokasi.gedungId}-${lokasi.id}`}
+                              value={lokasi.label}
+                            >
+                              {lokasi.label}
                             </option>
                           ))}
                         </select>
                       </div>
                     </div>
 
-                    {/* Lantai */}
-                    <div className="space-y-1.5">
-                      <label className="theme-text text-xs font-semibold">
-                        Lantai <span className="theme-danger">*</span>
+                    <div>
+                      <label className="theme-text mb-2 block text-sm font-semibold">
+                        Kapasitas
                       </label>
-                      <div className="relative">
-                        <Layers3
-                          size={15}
-                          className="theme-text-muted absolute left-3.5 top-1/2 -translate-y-1/2"
-                        />
-                        <select
-                          value={lantaiId}
-                          onChange={(e) => setLantaiId(e.target.value)}
-                          className={`theme-input w-full rounded-xl pl-9 pr-8 py-2.5 text-sm ${themeFocus}`}
-                        >
-                          {lantaiList.map((l) => (
-                            <option key={l.id} value={l.id}>
-                              {l.nama}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Nama Ruangan */}
-                  <div className="space-y-1.5">
-                    <label className="theme-text text-xs font-semibold">
-                      Nama Ruangan <span className="theme-danger">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={nama}
-                      onChange={(e) => setNama(e.target.value)}
-                      placeholder="Contoh: Ruang Teori 101, Lab Komputer"
-                      className={`theme-input w-full rounded-xl px-4 py-2.5 text-sm ${themeFocus} ${
-                        errors.nama ? "border-[var(--color-danger)]" : ""
-                      }`}
-                    />
-                    {errors.nama && (
-                      <p className="text-xs theme-danger mt-1">{errors.nama}</p>
-                    )}
-                  </div>
-
-                  {/* Kode Ruangan */}
-                  <div className="space-y-1.5">
-                    <label className="theme-text text-xs font-semibold">
-                      Kode Ruangan
-                    </label>
-                    <div className="relative">
-                      <Hash
-                        size={15}
-                        className="theme-text-muted absolute left-3.5 top-1/2 -translate-y-1/2"
-                      />
                       <input
-                        type="text"
-                        value={kode}
-                        onChange={(e) => setKode(e.target.value)}
-                        placeholder="Contoh: R-101"
-                        className={`theme-input w-full rounded-xl pl-9 pr-4 py-2.5 text-sm font-mono ${themeFocus}`}
+                        type="number"
+                        name="kapasitas"
+                        value={form.kapasitas}
+                        onChange={handleChange}
+                        min="0"
+                        step="1"
+                        placeholder="Contoh: 40"
+                        className="theme-input w-full rounded-xl border theme-border px-4 py-3 text-sm outline-none focus:border-[var(--color-primary)]"
                       />
                     </div>
-                  </div>
 
-                  {/* Relasi Kelas & Kapasitas */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {/* Kelas Terhubung */}
-                    <div className="space-y-1.5">
-                      <label className="theme-text text-xs font-semibold flex items-center justify-between">
-                        <span>Hubungkan ke Kelas</span>
-                        <span className="text-[11px] theme-text-muted font-normal">
-                          (Opsional)
-                        </span>
+                    <div>
+                      <label className="theme-text mb-2 block text-sm font-semibold">
+                        Keterangan
                       </label>
-                      <div className="relative">
-                        <School
-                          size={15}
-                          className="theme-text-muted absolute left-3.5 top-1/2 -translate-y-1/2"
-                        />
-                        <select
-                          value={kelasId}
-                          onChange={(e) => setKelasId(e.target.value)}
-                          className={`theme-input w-full rounded-xl pl-9 pr-8 py-2.5 text-sm ${themeFocus}`}
-                        >
-                          <option value="">-- Tidak Terhubung ke Kelas --</option>
-                          {selectedLantaiObj?.kelas && selectedLantaiObj.kelas.length > 0 ? (
-                            selectedLantaiObj.kelas.map((k) => (
-                              <option key={k.id} value={k.id}>
-                                {k.nama} (Tingkat {k.tingkat})
-                              </option>
-                            ))
-                          ) : (
-                            <option value="" disabled>
-                              (Tidak ada kelas di lantai ini)
-                            </option>
-                          )}
-                        </select>
-                      </div>
+                      <textarea
+                        name="keterangan"
+                        value={form.keterangan}
+                        onChange={handleChange}
+                        maxLength={255}
+                        rows={4}
+                        placeholder="Keterangan tambahan ruangan..."
+                        className="theme-input w-full resize-none rounded-xl border theme-border px-4 py-3 text-sm outline-none focus:border-[var(--color-primary)]"
+                      />
                     </div>
 
-                    {/* Kapasitas Ruangan */}
-                    <div className="space-y-1.5">
-                      <label className="theme-text text-xs font-semibold">
-                        Kapasitas Ruangan
-                      </label>
-                      <div className="relative">
-                        <Users
-                          size={15}
-                          className="theme-text-muted absolute left-3.5 top-1/2 -translate-y-1/2"
-                        />
-                        <input
-                          type="number"
-                          min="1"
-                          max="200"
-                          value={kapasitas}
-                          onChange={(e) => setKapasitas(e.target.value)}
-                          placeholder="36"
-                          className={`theme-input w-full rounded-xl pl-9 pr-4 py-2.5 text-sm ${themeFocus}`}
-                        />
-                      </div>
-                      {errors.kapasitas && (
-                        <p className="text-xs theme-danger mt-1">
-                          {errors.kapasitas}
-                        </p>
-                      )}
+                    <div className="flex justify-end gap-3 pt-4 border-t theme-border">
+                      <button
+                        type="button"
+                        onClick={() => router.push("/admin/sarpras/ruangan")}
+                        disabled={submitting}
+                        className="rounded-xl border theme-border px-5 py-2.5 text-sm font-semibold theme-text-secondary hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] transition"
+                      >
+                        Batal
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={submitting || loadingMaster}
+                        className="inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:brightness-95 disabled:opacity-60"
+                      >
+                        {submitting ? (
+                          <Loader2 size={17} className="animate-spin" />
+                        ) : (
+                          <Save size={17} />
+                        )}
+                        {submitting ? "Menyimpan..." : "Simpan Perubahan"}
+                      </button>
                     </div>
-                  </div>
-
-                  {/* Status Ruangan */}
-                  <div className="space-y-1.5">
-                    <label className="theme-text text-xs font-semibold">
-                      Status Ruangan
-                    </label>
-                    <select
-                      value={status}
-                      onChange={(e) => setStatus(e.target.value)}
-                      className={`theme-input w-full rounded-xl px-4 py-2.5 text-sm ${themeFocus}`}
-                    >
-                      <option value="aktif">Aktif — Siap digunakan untuk kegiatan</option>
-                      <option value="perbaikan">Dalam Perbaikan / Renovasi</option>
-                      <option value="nonaktif">Nonaktif / Ditutup Sementara</option>
-                    </select>
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div className="pt-4 border-t theme-border flex flex-col-reverse sm:flex-row items-center justify-end gap-3">
-                    <button
-                      type="button"
-                      onClick={() => router.push(`/admin/sarpras/ruangan/${id}`)}
-                      className="w-full sm:w-auto px-5 py-2.5 rounded-xl text-sm font-semibold theme-text-secondary hover:text-[var(--color-primary)] border theme-border hover:bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)] transition"
-                    >
-                      Batal
-                    </button>
-                    <button
-                      type="submit"
-                      className={`w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold text-[var(--color-card)] ${themePrimaryGradient} ${themePrimaryShadow} hover:brightness-95 transition-all`}
-                    >
-                      <Save size={16} />
-                      Simpan Perubahan
-                    </button>
-                  </div>
-                </form>
-              </div>
-
-              {/* Live Preview Column (4 Cols) */}
-              <div className="lg:col-span-4 space-y-4">
-                <div className={`theme-card theme-border rounded-2xl border p-5 ${themeCardShadow}`}>
-                  <div className="flex items-center gap-2 pb-3 border-b theme-border">
-                    <Sparkles size={16} className="text-[var(--color-primary)]" />
-                    <h3 className="theme-text text-sm font-bold">
-                      Pratinjau Hasil Edit
-                    </h3>
-                  </div>
-
-                  <div className="mt-4 space-y-3.5">
-                    <div className="p-4 rounded-xl bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)] border theme-border space-y-2">
-                      <div className="flex items-start justify-between gap-2">
-                        <div>
-                          <p className="theme-text text-base font-bold">
-                            {nama || "Nama Ruangan"}
-                          </p>
-                          <p className="theme-text-muted text-xs font-mono">
-                            Kode: {kode || "Belum ditentukan"}
-                          </p>
-                        </div>
-                        <span
-                          className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
-                            status === "aktif"
-                              ? "bg-[color-mix(in_srgb,var(--color-success)_15%,transparent)] theme-success"
-                              : status === "perbaikan"
-                              ? "bg-[color-mix(in_srgb,var(--color-warning)_15%,transparent)] text-[var(--color-warning)]"
-                              : "bg-[color-mix(in_srgb,var(--color-text)_10%,transparent)] theme-text-muted"
-                          }`}
-                        >
-                          {status}
-                        </span>
-                      </div>
-
-                      <div className="pt-2 border-t theme-border text-xs space-y-1.5 theme-text-secondary">
-                        <div className="flex items-center justify-between">
-                          <span className="theme-text-muted">Gedung:</span>
-                          <span className="font-medium">{selectedGedungObj?.nama || "-"}</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="theme-text-muted">Lantai:</span>
-                          <span className="font-medium">{selectedLantaiObj?.nama || "-"}</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="theme-text-muted">Kapasitas:</span>
-                          <span className="font-medium">{kapasitas || 0} Orang</span>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="theme-text-muted">Kelas:</span>
-                          <span className="font-medium text-[var(--color-primary)]">
-                            {selectedKelasObj ? selectedKelasObj.nama : "Ruang Umum"}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  </form>
                 </div>
+
+                <aside className="flex min-w-0 flex-col gap-5">
+                  <div className="theme-info flex items-start gap-3 rounded-2xl border p-4">
+                    <Info size={17} className="mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-sm font-semibold">Perhatian</p>
+                      <p className="mt-1 text-xs leading-5">
+                        Mengubah lokasi ruangan tidak akan memindahkan aset
+                        secara otomatis. Penyesuaian aset dilakukan secara
+                        manual pada menu Manajemen Aset.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="theme-card rounded-2xl border theme-border p-5 shadow-sm">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Lightbulb size={17} className="text-[var(--color-warning)]" />
+                      <h2 className="text-sm font-bold">Panduan Edit</h2>
+                    </div>
+                    <ul className="space-y-3 text-xs leading-relaxed theme-text-secondary">
+                      <li className="flex items-start gap-2">
+                        <CheckCircle2
+                          size={14}
+                          className="mt-0.5 text-[var(--color-success)] shrink-0"
+                        />
+                        Pastikan nama ruangan tidak sama dengan ruangan lain.
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle2
+                          size={14}
+                          className="mt-0.5 text-[var(--color-success)] shrink-0"
+                        />
+                        Kapasitas diisi dengan angka realistis (jumlah maksimal
+                        orang).
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle2
+                          size={14}
+                          className="mt-0.5 text-[var(--color-success)] shrink-0"
+                        />
+                        Lokasi mengikuti master gedung dan lantai sekolah.
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div className="theme-card rounded-2xl border theme-border p-5 shadow-sm">
+                    <div className="flex items-center gap-2 mb-2">
+                      <ShieldCheck size={17} className="text-[var(--color-primary)]" />
+                      <h2 className="text-sm font-bold">Data Saat Ini</h2>
+                    </div>
+                    <div className="space-y-3 text-xs theme-text-secondary mt-3">
+                      <div>
+                        <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-wider">
+                          Nama Lama
+                        </p>
+                        <p className="theme-text font-semibold mt-0.5">
+                          {originalData?.nama || "-"}
+                        </p>
+                      </div>
+                      <div className="theme-border-soft h-px" />
+                      <div>
+                        <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-wider">
+                          Lokasi Lama
+                        </p>
+                        <p className="theme-text font-semibold mt-0.5">
+                          {originalData?.lokasi || "-"}
+                        </p>
+                      </div>
+                      <div className="theme-border-soft h-px" />
+                      <div>
+                        <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-wider">
+                          Kapasitas Lama
+                        </p>
+                        <p className="theme-text font-semibold mt-0.5">
+                          {originalData?.kapasitas
+                            ? `${originalData.kapasitas} Orang`
+                            : "-"}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </aside>
               </div>
             </div>
-          </div>
-        </main>
+          </main>
+        </div>
       </div>
     </div>
   );

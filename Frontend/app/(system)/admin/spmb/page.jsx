@@ -528,41 +528,7 @@ export default function SpmbOverviewPage() {
               })}
             </div>
 
-            <div
-              className={`${themePrimaryGradient} mt-6 rounded-2xl p-5 text-[var(--color-card)] sm:p-6`}
-            >
-              <p className="text-sm font-bold">
-                Ringkasan integrasi
-              </p>
 
-              <p className="mt-1.5 text-xs leading-5 opacity-90">
-                Endpoint PPDB yang terpasang: POST
-                /api/ppdb/daftar, POST /api/ppdb/:id/berkas,
-                PATCH /api/ppdb/:id/verifikasi, CRUD
-                /api/jalur-ppdb, CRUD /api/ppdb/pengumuman,
-                dan GET/POST /api/pengaturan. Dashboard, Data
-                Pendaftaran, Seleksi, Kuota, dan Laporan
-                membaca GET /api/ppdb/pendaftar beserta
-                GET /api/ppdb/pendaftar/:id; status
-                endpoint daftar diperiksa langsung saat
-                halaman ini dibuka:{" "}
-                {pendaftarTersedia === null
-                  ? "sedang diperiksa"
-                  : pendaftarTersedia
-                    ? "route merespons, modul rekap aktif"
-                    : "route belum aktif pada server berjalan, modul rekap menampilkan status belum tersedia tanpa angka contoh"}
-                . Status /api/gelombang-ppdb juga diperiksa
-                langsung:{" "}
-                {gelombangStatus.status === "ready"
-                  ? "route tersedia dan modul siap dipakai"
-                  : "route belum tersedia sehingga modul ditandai terblokir"}
-                . Pengaturan SPMB dapat disimpan, tetapi
-                belum dibaca oleh alur pendaftaran Backend.
-                Status /api/ppdb/pengumuman juga diperiksa
-                langsung saat halaman dibuka:{" "}
-                {pengumumanStatus.statusText}.
-              </p>
-            </div>
           </div>
         </main>
       </div>
