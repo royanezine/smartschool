@@ -347,7 +347,7 @@ export default function InventarisForm({ mode = "tambah", id = "" }) {
                 Kembali ke Inventaris
               </button>
 
-              <p className="text-xs font-medium uppercase tracking-wide theme-primary">
+              <p className="text-xs font-medium uppercase tracking-wide text-[var(--color-primary)]">
                 Sarana &amp; Prasarana
               </p>
 
