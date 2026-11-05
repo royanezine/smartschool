@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -8,6 +7,7 @@ import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
 
 import { apiFetch } from "@/lib/api";
+
 import {
   ArrowLeft,
   Mail,
@@ -25,13 +25,21 @@ import {
   CheckCircle2,
   UserCheck,
   School,
+  Timer,
+  CalendarClock,
+  BadgeCheck,
 } from "lucide-react";
 
 import { getUserById, getUsers } from "@/services/user.service";
+
 import {
   getKelasMapel,
   getKelasMapelById,
 } from "@/services/kelasMapel.service";
+
+import { getShiftKerja } from "@/services/shiftKerja.service";
+
+
 
 const getInitials = (nama = "") => {
   const parts = String(nama).trim().split(/\s+/).filter(Boolean);
@@ -76,6 +84,67 @@ const formatDate = (value) => {
   }
 };
 
+const formatTime = (value) => {
+  if (!value) return "-";
+
+  return String(value).slice(0, 5);
+};
+
+function extractList(response) {
+  const candidates = [
+    response?.data?.data,
+    response?.data?.users,
+    response?.data?.items,
+    response?.data?.shiftKerja,
+    response?.data,
+    response?.users,
+    response?.items,
+    response?.shiftKerja,
+    response,
+  ];
+
+  return candidates.find(Array.isArray) || [];
+}
+
+function extractObject(response) {
+  const candidates = [
+    response?.data?.data,
+    response?.data?.kelas,
+    response?.data,
+  ];
+
+  return (
+    candidates.find(
+      (item) =>
+        item &&
+        typeof item === "object" &&
+        !Array.isArray(item)
+    ) || null
+  );
+}
+
+
+function extractShiftFromUser(user) {
+  if (!user) return null;
+
+  const candidates = [
+    user.shiftKerjaMaster,
+    user.shiftKerja,
+    user.shiftKerjaPengguna?.shiftKerjaMaster,
+    user.penugasanShift?.shiftKerjaMaster,
+    user.shiftPengguna?.shiftKerjaMaster,
+    user.pengaturanShift?.shiftKerja,
+  ];
+
+  return (
+    candidates.find(
+      (item) =>
+        item &&
+        typeof item === "object" &&
+        !Array.isArray(item)
+    ) || null
+  );
+}
 
 function InfoItem({
   icon: Icon,
@@ -103,7 +172,6 @@ function InfoItem({
     </div>
   );
 }
-
 
 function StatCard({
   icon: Icon,
@@ -143,59 +211,6 @@ function StatCard({
 }
 
 
-function extractList(response) {
-  const candidates = [
-    response?.data?.data,
-    response?.data?.users,
-    response?.data?.items,
-    response?.data,
-    response?.users,
-    response?.items,
-  ];
-
-  return candidates.find(Array.isArray) || [];
-}
-
-function extractObject(response) {
-  const candidates = [
-    response?.data?.data,
-    response?.data?.kelas,
-    response?.data,
-  ];
-
-  return (
-    candidates.find(
-      (item) =>
-        item &&
-        typeof item === "object" &&
-        !Array.isArray(item)
-    ) || null
-  );
-}
-
-function hitungRataKehadiran(dataAbsensi) {
-  if (!Array.isArray(dataAbsensi) || dataAbsensi.length === 0) {
-    return "-";
-  }
-
-  const statusValid = ["hadir", "izin", "sakit", "alpha"];
-
-  const dataValid = dataAbsensi.filter((item) =>
-    statusValid.includes(
-      String(item.status || "").toLowerCase()
-    )
-  );
-
-  if (dataValid.length === 0) return "-";
-
-  const jumlahHadir = dataValid.filter(
-    (item) =>
-      String(item.status || "").toLowerCase() === "hadir"
-  ).length;
-
-  return `${((jumlahHadir / dataValid.length) * 100).toFixed(1)}%`;
-}
-
 
 export default function DetailGuruPage() {
   const router = useRouter();
@@ -204,15 +219,22 @@ export default function DetailGuruPage() {
   const id = params?.id;
 
   const [isCollapsed, setIsCollapsed] = useState(false);
+
   const [guru, setGuru] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+ 
   const [mapelGuru, setMapelGuru] = useState([]);
   const [kelasDiampu, setKelasDiampu] = useState("-");
   const [totalSiswa, setTotalSiswa] = useState("-");
   const [loadingStatistik, setLoadingStatistik] = useState(true);
   const [rataKehadiran, setRataKehadiran] = useState("-");
+
+ 
+  const [shiftGuru, setShiftGuru] = useState(null);
+  const [loadingShift, setLoadingShift] = useState(true);
+
 
 
   useEffect(() => {
@@ -230,18 +252,26 @@ export default function DetailGuruPage() {
         setError("");
 
         let found = null;
+
         try {
           const detailRes = await getUserById(id);
-          found = detailRes?.data || detailRes;
+
+          found =
+            detailRes?.data?.data ||
+            detailRes?.data ||
+            detailRes;
         } catch {
-          // fallback to search in list
           const response = await getUsers({
             page: 1,
             limit: 100,
             role: "guru",
           });
+
           const users = extractList(response);
-          found = users.find((item) => String(item.id) === String(id));
+
+          found = users.find(
+            (item) => String(item.id) === String(id)
+          );
         }
 
         if (!mounted) return;
@@ -274,223 +304,282 @@ export default function DetailGuruPage() {
   }, [id]);
 
 
- 
- 
-useEffect(() => {
-  if (!id) return;
 
-  let mounted = true;
+  useEffect(() => {
+    if (!guru) return;
 
-async function fetchStatistikGuru() {
-  setLoadingStatistik(true);
-  setMapelGuru([]);
-  setKelasDiampu("-");
-  setTotalSiswa("-");
-  setRataKehadiran("-");
+    let mounted = true;
 
-  try {
-    // ============================================
-    // 1. AMBIL PENUGASAN KELAS DAN MATA PELAJARAN
-    // ============================================
-    const responseKelasMapel = await getKelasMapel();
+    async function fetchShiftGuru() {
+      setLoadingShift(true);
+      setShiftGuru(null);
 
-    if (!mounted) return;
+      try {
+       
+        let shift = extractShiftFromUser(guru);
 
-    const semuaKelasMapel = Array.isArray(responseKelasMapel)
-      ? responseKelasMapel
-      : [];
+        const shiftId =
+          guru.shiftKerjaId ??
+          guru.shiftKerjaMasterId ??
+          shift?.id ??
+          null;
 
-    const penugasanGuru = semuaKelasMapel.filter((item) => {
-      const guruId =
-        item.guruPengajarId ??
-        item.guruPengajar?.id;
+        
+        const response = await getShiftKerja();
 
-      return (
-        String(guruId) === String(id) &&
-        !item.dihapusPada
-      );
-    });
+        if (!mounted) return;
 
-    // ============================================
-    // 2. HITUNG MATA PELAJARAN UNIK
-    // ============================================
-    const mapelUnik = new Map();
+        const daftarShift = extractList(response);
 
-    penugasanGuru.forEach((item) => {
-      const mapelId =
-        item.mataPelajaranId ??
-        item.mataPelajaran?.id;
-
-      const namaMapel = item.mataPelajaran?.nama;
-
-      if (mapelId && namaMapel) {
-        mapelUnik.set(String(mapelId), namaMapel);
-      }
-    });
-
-    // ============================================
-    // 3. HITUNG KELAS UNIK
-    // ============================================
-    const kelasUnik = new Map();
-
-    penugasanGuru.forEach((item) => {
-      const kelasId =
-        item.kelasId ??
-        item.kelas?.id;
-
-      if (kelasId) {
-        kelasUnik.set(String(kelasId), {
-          id: String(kelasId),
-          nama: item.kelas?.nama ?? "-",
-          kelasMapelId: item.id,
-        });
-      }
-    });
-
-    // ============================================
-    // 4. HITUNG TOTAL SISWA UNIK
-    //    BERDASARKAN ANGGOTA KELAS
-    // ============================================
-    const siswaUnik = new Set();
-
-    const daftarKelas = [...kelasUnik.values()];
-
-    await Promise.all(
-      daftarKelas.map(async (kelas) => {
-        try {
-          const detail = await getKelasMapelById(
-            kelas.kelasMapelId
+       
+        if (shiftId) {
+          const shiftMaster = daftarShift.find(
+            (item) => String(item.id) === String(shiftId)
           );
 
-          if (!mounted) return;
-
-          const dataDetail = detail?.data ?? detail;
-
-          const daftarSiswa = Array.isArray(dataDetail?.siswa)
-            ? dataDetail.siswa
-            : [];
-
-          daftarSiswa.forEach((siswa) => {
-            if (siswa?.id) {
-              siswaUnik.add(String(siswa.id));
-            }
-          });
-        } catch (error) {
-          console.error(
-            `Gagal mengambil anggota kelas ${kelas.nama}:`,
-            error
-          );
+          if (shiftMaster) {
+            shift = {
+              ...shiftMaster,
+              ...shift,
+            };
+          }
         }
-      })
-    );
 
-    if (!mounted) return;
-
-    setMapelGuru([...mapelUnik.values()]);
-    setKelasDiampu(kelasUnik.size);
-    setTotalSiswa(siswaUnik.size);
-
-    // ============================================
-    // 5. HITUNG KEHADIRAN GURU
-    // ============================================
-    try {
-      const absensiResponse = await apiFetch(
-        `/api/absensi/monitoring-guru?penggunaId=${encodeURIComponent(
-          id
-        )}`,
-        {
-          method: "GET",
+      
+        if (!shift && shiftId) {
+          shift =
+            daftarShift.find(
+              (item) => String(item.id) === String(shiftId)
+            ) || null;
         }
-      );
 
-      if (!mounted) return;
+      
+        if (shift) {
+          setShiftGuru(shift);
+        } else {
+          setShiftGuru(null);
+        }
+      } catch (err) {
+        console.error("Gagal mengambil shift kerja guru:", err);
 
-      // Mendukung beberapa bentuk response API.
-      const dataAbsensi = Array.isArray(absensiResponse)
-        ? absensiResponse
-        : Array.isArray(absensiResponse?.data)
-          ? absensiResponse.data
-          : Array.isArray(absensiResponse?.data?.data)
-            ? absensiResponse.data.data
-            : Array.isArray(absensiResponse?.items)
-              ? absensiResponse.items
-              : [];
-
-      const statusValid = [
-        "hadir",
-        "izin",
-        "sakit",
-        "alpha",
-      ];
-
-      const absensiValid = dataAbsensi.filter((item) => {
-        const penggunaId =
-          item.penggunaId ??
-          item.pengguna?.id ??
-          item.guruId ??
-          item.guru?.id;
-
-        const status = String(
-          item.status ?? ""
-        ).trim().toLowerCase();
-
-        return (
-          String(penggunaId) === String(id) &&
-          statusValid.includes(status)
-        );
-      });
-
-      if (absensiValid.length === 0) {
-        setRataKehadiran("-");
-      } else {
-        const jumlahHadir = absensiValid.filter(
-          (item) =>
-            String(item.status ?? "")
-              .trim()
-              .toLowerCase() === "hadir"
-        ).length;
-
-        const persentase =
-          (jumlahHadir / absensiValid.length) * 100;
-
-        setRataKehadiran(`${persentase.toFixed(1)}%`);
-      }
-    } catch (error) {
-      console.error(
-        "Gagal mengambil statistik kehadiran guru:",
-        error
-      );
-
-      if (mounted) {
-        setRataKehadiran("-");
+        if (mounted) {
+          setShiftGuru(extractShiftFromUser(guru));
+        }
+      } finally {
+        if (mounted) {
+          setLoadingShift(false);
+        }
       }
     }
-  } catch (error) {
-    console.error(
-      "Gagal mengambil statistik guru:",
-      error
-    );
 
-    if (mounted) {
+    fetchShiftGuru();
+
+    return () => {
+      mounted = false;
+    };
+  }, [guru]);
+
+
+
+  useEffect(() => {
+    if (!id) return;
+
+    let mounted = true;
+
+    async function fetchStatistikGuru() {
+      setLoadingStatistik(true);
       setMapelGuru([]);
       setKelasDiampu("-");
       setTotalSiswa("-");
       setRataKehadiran("-");
+
+      try {
+       
+        const responseKelasMapel = await getKelasMapel();
+
+        if (!mounted) return;
+
+        const semuaKelasMapel = Array.isArray(responseKelasMapel)
+          ? responseKelasMapel
+          : [];
+
+        const penugasanGuru = semuaKelasMapel.filter((item) => {
+          const guruId =
+            item.guruPengajarId ??
+            item.guruPengajar?.id;
+
+          return (
+            String(guruId) === String(id) &&
+            !item.dihapusPada
+          );
+        });
+
+       
+        const mapelUnik = new Map();
+
+        penugasanGuru.forEach((item) => {
+          const mapelId =
+            item.mataPelajaranId ??
+            item.mataPelajaran?.id;
+
+          const namaMapel = item.mataPelajaran?.nama;
+
+          if (mapelId && namaMapel) {
+            mapelUnik.set(String(mapelId), namaMapel);
+          }
+        });
+
+     
+        const kelasUnik = new Map();
+
+        penugasanGuru.forEach((item) => {
+          const kelasId =
+            item.kelasId ??
+            item.kelas?.id;
+
+          if (kelasId) {
+            kelasUnik.set(String(kelasId), {
+              id: String(kelasId),
+              nama: item.kelas?.nama ?? "-",
+              kelasMapelId: item.id,
+            });
+          }
+        });
+
+        const siswaUnik = new Set();
+
+        const daftarKelas = [...kelasUnik.values()];
+
+        await Promise.all(
+          daftarKelas.map(async (kelas) => {
+            try {
+              const detail = await getKelasMapelById(
+                kelas.kelasMapelId
+              );
+
+              if (!mounted) return;
+
+              const dataDetail = detail?.data ?? detail;
+
+              const daftarSiswa = Array.isArray(dataDetail?.siswa)
+                ? dataDetail.siswa
+                : [];
+
+              daftarSiswa.forEach((siswa) => {
+                if (siswa?.id) {
+                  siswaUnik.add(String(siswa.id));
+                }
+              });
+            } catch (err) {
+              console.error(
+                `Gagal mengambil anggota kelas ${kelas.nama}:`,
+                err
+              );
+            }
+          })
+        );
+
+        if (!mounted) return;
+
+        setMapelGuru([...mapelUnik.values()]);
+        setKelasDiampu(kelasUnik.size);
+        setTotalSiswa(siswaUnik.size);
+
+        try {
+          const absensiResponse = await apiFetch(
+            `/api/absensi/monitoring-guru?penggunaId=${encodeURIComponent(
+              id
+            )}`,
+            {
+              method: "GET",
+            }
+          );
+
+          if (!mounted) return;
+
+          const dataAbsensi = Array.isArray(absensiResponse)
+            ? absensiResponse
+            : Array.isArray(absensiResponse?.data)
+              ? absensiResponse.data
+              : Array.isArray(absensiResponse?.data?.data)
+                ? absensiResponse.data.data
+                : Array.isArray(absensiResponse?.items)
+                  ? absensiResponse.items
+                  : [];
+
+          const statusValid = [
+            "hadir",
+            "izin",
+            "sakit",
+            "alpha",
+          ];
+
+          const absensiValid = dataAbsensi.filter((item) => {
+            const penggunaId =
+              item.penggunaId ??
+              item.pengguna?.id ??
+              item.guruId ??
+              item.guru?.id;
+
+            const status = String(
+              item.status ?? ""
+            ).trim().toLowerCase();
+
+            return (
+              String(penggunaId) === String(id) &&
+              statusValid.includes(status)
+            );
+          });
+
+          if (absensiValid.length === 0) {
+            setRataKehadiran("-");
+          } else {
+            const jumlahHadir = absensiValid.filter(
+              (item) =>
+                String(item.status ?? "")
+                  .trim()
+                  .toLowerCase() === "hadir"
+            ).length;
+
+            const persentase =
+              (jumlahHadir / absensiValid.length) * 100;
+
+            setRataKehadiran(`${persentase.toFixed(1)}%`);
+          }
+        } catch (err) {
+          console.error(
+            "Gagal mengambil statistik kehadiran guru:",
+            err
+          );
+
+          if (mounted) {
+            setRataKehadiran("-");
+          }
+        }
+      } catch (err) {
+        console.error("Gagal mengambil statistik guru:", err);
+
+        if (mounted) {
+          setMapelGuru([]);
+          setKelasDiampu("-");
+          setTotalSiswa("-");
+          setRataKehadiran("-");
+        }
+      } finally {
+        if (mounted) {
+          setLoadingStatistik(false);
+        }
+      }
     }
-  } finally {
-    if (mounted) {
-      setLoadingStatistik(false);
-    }
-  }
-}
 
-  fetchStatistikGuru();
+    fetchStatistikGuru();
 
-  return () => {
-    mounted = false;
-  };
-}, [id]);
+    return () => {
+      mounted = false;
+    };
+  }, [id]);
 
+ 
 
   if (loading) {
     return (
@@ -529,6 +618,7 @@ async function fetchStatistikGuru() {
     );
   }
 
+ 
 
   if (error || !guru) {
     return (
@@ -568,7 +658,7 @@ async function fetchStatistikGuru() {
               <button
                 type="button"
                 onClick={() => router.push("/admin/guru")}
-                className="mt-5 inline-flex items-center gap-2 rounded-lg theme-primary px-4 py-2.5 text-sm font-semibold transition"
+                className="mt-5 inline-flex items-center gap-2 rounded-lg theme-primary px-4 py-2.5 text-sm font-semibold"
               >
                 <ArrowLeft size={16} />
                 Kembali ke Daftar Guru
@@ -579,6 +669,7 @@ async function fetchStatistikGuru() {
       </div>
     );
   }
+
 
 
   const nama =
@@ -610,6 +701,8 @@ async function fetchStatistikGuru() {
 
   const nip = guru.nip || guru.NIP || "-";
 
+  const nik = guru.nik || "-";
+
   const mapel =
     mapelGuru.length > 0
       ? mapelGuru.join(", ")
@@ -626,13 +719,11 @@ async function fetchStatistikGuru() {
     "-";
 
   const joinDate =
-  guru?.dibuatPada ||
-  guru?.tanggalBergabung ||
-  guru?.tanggalMasuk ||
-  guru?.createdAt ||
-  null;
-
-  
+    guru.dibuatPada ||
+    guru.tanggalBergabung ||
+    guru.tanggalMasuk ||
+    guru.createdAt ||
+    null;
 
   const isActive = String(status).toLowerCase() === "aktif";
 
@@ -640,8 +731,39 @@ async function fetchStatistikGuru() {
     gender === "L"
       ? "Laki-laki"
       : gender === "P"
-      ? "Perempuan"
-      : gender || "-";
+        ? "Perempuan"
+        : gender || "-";
+
+ 
+  const namaShift =
+    shiftGuru?.nama ||
+    shiftGuru?.namaShift ||
+    "-";
+
+  const kodeShift =
+    shiftGuru?.kode ||
+    shiftGuru?.kodeShift ||
+    "-";
+
+  const jamMasuk =
+    formatTime(shiftGuru?.jamMasuk);
+
+  const jamKeluar =
+    formatTime(shiftGuru?.jamKeluar);
+
+  const toleransi =
+    shiftGuru?.toleransiTerlambatMenit;
+
+  const kategoriJabatan =
+    guru.kategoriJabatan?.nama ||
+    guru.kategoriJabatan?.namaKategori ||
+    guru.kategoriJabatanMaster?.nama ||
+    "-";
+
+  const shiftAktif =
+    shiftGuru &&
+    String(shiftGuru.status || "aktif").toLowerCase() === "aktif";
+
 
 
   return (
@@ -670,22 +792,23 @@ async function fetchStatistikGuru() {
           <div className="w-full px-3 py-4 sm:px-5 sm:py-5 md:px-6 lg:px-8 xl:px-10 2xl:px-12">
             <div className="w-full space-y-5">
 
+              {/* HEADER */}
+
               <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0">
                   <button
                     onClick={() => router.back()}
-                    className="inline-flex max-w-full items-center gap-2 text-sm font-medium theme-text-muted transition hover:text-[var(--color-primary)]"
+                    className="inline-flex items-center gap-2 text-sm font-medium theme-text-muted transition hover:text-[var(--color-primary)]"
                   >
-                    <ArrowLeft size={17} className="shrink-0" />
-                    <span className="truncate">
-                      Kembali ke Daftar Guru
-                    </span>
+                    <ArrowLeft size={17} />
+                    Kembali ke Daftar Guru
                   </button>
 
                   <div className="mt-3">
                     <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-primary)]">
                       Data Guru
                     </p>
+
                     <h1 className="mt-1 text-xl font-bold tracking-tight theme-text sm:text-2xl">
                       Detail Profil Guru
                     </h1>
@@ -693,18 +816,22 @@ async function fetchStatistikGuru() {
                 </div>
 
                 <button
-                  onClick={() => router.push(`/admin/guru/edit/${guru.id}`)}
-                  className="inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-lg border theme-card px-4 py-2.5 text-sm font-semibold theme-text-secondary shadow-sm transition theme-sidebar-hover hover:text-[var(--color-primary)] sm:w-auto"
+                  onClick={() =>
+                    router.push(`/admin/guru/edit/${guru.id}`)
+                  }
+                  className="inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-lg border theme-card px-4 py-2.5 text-sm font-semibold theme-text-secondary shadow-sm transition sm:w-auto"
                 >
                   <Edit size={16} />
                   Edit Profil
                 </button>
               </div>
 
+              {/* PROFIL UTAMA */}
+
               <section className="w-full overflow-hidden rounded-xl border theme-card shadow-sm">
                 <div className="h-1 bg-[var(--color-primary)]" />
 
-                <div className="p-4 sm:p-6 lg:p-7 xl:p-8">
+                <div className="p-4 sm:p-6 lg:p-7">
                   <div className="flex min-w-0 flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
                     <div className="flex min-w-0 flex-col gap-5 sm:flex-row sm:items-center">
                       <div
@@ -740,16 +867,16 @@ async function fetchStatistikGuru() {
                         </h2>
 
                         <div className="mt-2 flex min-w-0 flex-wrap items-center gap-x-4 gap-y-2 text-sm theme-text-muted">
-                          <span className="inline-flex min-w-0 max-w-full items-center gap-1.5">
-                            <Hash size={15} className="shrink-0 theme-text-placeholder" />
-                            <span className="break-all">{nip}</span>
+                          <span className="inline-flex items-center gap-1.5">
+                            <Hash size={15} />
+                            {nip}
                           </span>
 
                           <span className="hidden h-4 w-px bg-[var(--color-border)] sm:block" />
 
-                          <span className="inline-flex min-w-0 max-w-full items-center gap-1.5">
-                            <BookOpen size={15} className="shrink-0 theme-text-placeholder" />
-                            <span className="break-words">{mapel}</span>
+                          <span className="inline-flex items-center gap-1.5">
+                            <BookOpen size={15} />
+                            {mapel}
                           </span>
                         </div>
                       </div>
@@ -761,7 +888,11 @@ async function fetchStatistikGuru() {
                       </p>
 
                       <div className="mt-1.5 flex items-center gap-2">
-                        <Calendar size={17} className="shrink-0 text-[var(--color-primary)]" />
+                        <Calendar
+                          size={17}
+                          className="text-[var(--color-primary)]"
+                        />
+
                         <span className="text-sm font-semibold theme-text">
                           {formatDate(joinDate)}
                         </span>
@@ -772,25 +903,56 @@ async function fetchStatistikGuru() {
                   <div className="my-6 border-t theme-border" />
 
                   <div className="grid min-w-0 grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
-                    <InfoItem icon={Mail} label="Email" value={email} iconClass="text-[var(--color-primary)]" />
-                    <InfoItem icon={Phone} label="Nomor Telepon" value={phone} iconClass="text-[var(--color-primary)]" />
-                    <InfoItem icon={UserRound} label="Jenis Kelamin" value={genderLabel} iconClass="text-[var(--color-primary)]" />
-                    <InfoItem icon={Calendar} label="Tanggal Lahir" value={formatDate(tglLahir)} iconClass="text-[var(--color-primary)]" />
+                    <InfoItem
+                      icon={Mail}
+                      label="Email"
+                      value={email}
+                    />
+
+                    <InfoItem
+                      icon={Phone}
+                      label="Nomor Telepon"
+                      value={phone}
+                    />
+
+                    <InfoItem
+                      icon={UserRound}
+                      label="Jenis Kelamin"
+                      value={genderLabel}
+                    />
+
+                    <InfoItem
+                      icon={Calendar}
+                      label="Tanggal Lahir"
+                      value={formatDate(tglLahir)}
+                    />
                   </div>
                 </div>
               </section>
 
-              <div className="grid min-w-0 grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1.75fr)_minmax(280px,0.75fr)] xl:grid-cols-[minmax(0,1.8fr)_minmax(300px,0.72fr)] 2xl:grid-cols-[minmax(0,2fr)_minmax(320px,0.7fr)]">
+              {/* KONTEN UTAMA */}
+
+              <div className="grid min-w-0 grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1.75fr)_minmax(280px,0.75fr)] xl:grid-cols-[minmax(0,1.8fr)_minmax(300px,0.72fr)]">
 
                 <div className="min-w-0 space-y-5">
+
+                  {/* INFORMASI KEPEGAWAIAN */}
+
                   <section className="w-full rounded-xl border theme-card shadow-sm">
                     <div className="border-b theme-border px-4 py-4 sm:px-6">
-                      <div className="flex min-w-0 items-center gap-3">
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg theme-info">
-                          <BriefcaseBusiness size={18} className="text-[var(--color-info)]" />
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-lg theme-info">
+                          <BriefcaseBusiness
+                            size={18}
+                            className="text-[var(--color-info)]"
+                          />
                         </div>
-                        <div className="min-w-0">
-                          <h3 className="text-sm font-bold theme-text">Informasi Kepegawaian</h3>
+
+                        <div>
+                          <h3 className="text-sm font-bold theme-text">
+                            Informasi Kepegawaian
+                          </h3>
+
                           <p className="mt-0.5 text-xs theme-text-muted">
                             Informasi penugasan dan status guru
                           </p>
@@ -799,21 +961,198 @@ async function fetchStatistikGuru() {
                     </div>
 
                     <div className="grid min-w-0 grid-cols-1 gap-x-8 gap-y-5 p-4 sm:grid-cols-2 sm:p-6">
-                      <InfoItem icon={Hash} label="NIP" value={nip} />
-                      <InfoItem icon={BookOpen} label="Mata Pelajaran" value={mapel} />
-                      <InfoItem icon={UserCheck} label="Status Kepegawaian" value={status} />
-                      <InfoItem icon={Clock} label="Tanggal Bergabung" value={formatDate(joinDate)} />
+                      <InfoItem
+                        icon={Hash}
+                        label="NIP"
+                        value={nip}
+                      />
+
+                      <InfoItem
+                        icon={Hash}
+                        label="NIK"
+                        value={nik}
+                      />
+
+                      <InfoItem
+                        icon={BookOpen}
+                        label="Mata Pelajaran"
+                        value={mapel}
+                      />
+
+                      <InfoItem
+                        icon={UserCheck}
+                        label="Status Kepegawaian"
+                        value={status}
+                      />
+
+                      <InfoItem
+                        icon={BadgeCheck}
+                        label="Kategori Jabatan"
+                        value={kategoriJabatan}
+                      />
+
+                      <InfoItem
+                        icon={Clock}
+                        label="Tanggal Bergabung"
+                        value={formatDate(joinDate)}
+                      />
                     </div>
                   </section>
 
+                  {/* INFORMASI SHIFT KERJA */}
+
+                  <section className="w-full overflow-hidden rounded-xl border theme-card shadow-sm">
+                    <div className="border-b theme-border px-4 py-4 sm:px-6">
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex min-w-0 items-center gap-3">
+                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg theme-info">
+                            <CalendarClock
+                              size={18}
+                              className="text-[var(--color-info)]"
+                            />
+                          </div>
+
+                          <div className="min-w-0">
+                            <h3 className="text-sm font-bold theme-text">
+                              Informasi Shift Kerja
+                            </h3>
+
+                            <p className="mt-0.5 text-xs theme-text-muted">
+                              Jadwal kerja yang ditetapkan untuk guru
+                            </p>
+                          </div>
+                        </div>
+
+                        {!loadingShift && shiftGuru && (
+                          <span
+                            className={`shrink-0 rounded-md border px-2.5 py-1 text-xs font-semibold ${
+                              shiftAktif
+                                ? "theme-success"
+                                : "theme-danger"
+                            }`}
+                          >
+                            {shiftAktif ? "Aktif" : "Nonaktif"}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="p-4 sm:p-6">
+                      {loadingShift ? (
+                        <div className="flex items-center gap-3 py-5">
+                          <div className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--color-primary)] border-t-transparent" />
+
+                          <p className="text-sm theme-text-muted">
+                            Memuat informasi shift kerja...
+                          </p>
+                        </div>
+                      ) : shiftGuru ? (
+                        <>
+                          <div className="mb-5 rounded-lg border theme-info p-4">
+                            <div className="flex items-center gap-3">
+                              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border theme-card">
+                                <Clock
+                                  size={21}
+                                  className="text-[var(--color-primary)]"
+                                />
+                              </div>
+
+                              <div className="min-w-0">
+                                <p className="text-xs font-medium theme-text-muted">
+                                  Shift yang Ditugaskan
+                                </p>
+
+                                <h4 className="mt-1 break-words text-lg font-bold theme-text">
+                                  {namaShift}
+                                </h4>
+
+                                <p className="mt-0.5 text-xs theme-text-muted">
+                                  Kode Shift: {kodeShift}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            <InfoItem
+                              icon={Clock}
+                              label="Jam Masuk"
+                              value={
+                                jamMasuk !== "-"
+                                  ? `${jamMasuk} WIB`
+                                  : "-"
+                              }
+                              iconClass="text-[var(--color-success)]"
+                            />
+
+                            <InfoItem
+                              icon={Clock}
+                              label="Jam Pulang"
+                              value={
+                                jamKeluar !== "-"
+                                  ? `${jamKeluar} WIB`
+                                  : "-"
+                              }
+                              iconClass="text-[var(--color-info)]"
+                            />
+
+                            <InfoItem
+                              icon={Timer}
+                              label="Toleransi Keterlambatan"
+                              value={
+                                toleransi !== undefined &&
+                                toleransi !== null
+                                  ? `${toleransi} menit`
+                                  : "-"
+                              }
+                            />
+
+                            <InfoItem
+                              icon={BadgeCheck}
+                              label="Kategori Jabatan"
+                              value={kategoriJabatan}
+                            />
+                          </div>
+                        </>
+                      ) : (
+                        <div className="rounded-lg border theme-card-soft p-5 text-center">
+                          <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-lg theme-info">
+                            <CalendarClock
+                              size={21}
+                              className="text-[var(--color-info)]"
+                            />
+                          </div>
+
+                          <p className="mt-3 text-sm font-semibold theme-text">
+                            Shift Kerja Belum Diatur
+                          </p>
+
+                          <p className="mt-1 text-xs leading-5 theme-text-muted">
+                            Guru ini belum memiliki informasi penugasan
+                            shift kerja yang dapat ditampilkan.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </section>
+
+                  {/* ALAMAT */}
+
                   <section className="w-full rounded-xl border theme-card shadow-sm">
                     <div className="border-b theme-border px-4 py-4 sm:px-6">
-                      <div className="flex min-w-0 items-center gap-3">
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg theme-info">
-                          <MapPin size={18} className="text-[var(--color-info)]" />
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-lg theme-info">
+                          <MapPin
+                            size={18}
+                            className="text-[var(--color-info)]"
+                          />
                         </div>
+
                         <div>
-                          <h3 className="text-sm font-bold theme-text">Alamat</h3>
+                          <h3 className="text-sm font-bold theme-text">
+                            Alamat
+                          </h3>
+
                           <p className="mt-0.5 text-xs theme-text-muted">
                             Informasi alamat tempat tinggal guru
                           </p>
@@ -826,6 +1165,7 @@ async function fetchStatistikGuru() {
                         <p className="text-xs font-medium theme-text-muted">
                           Alamat Lengkap
                         </p>
+
                         <p className="mt-2 break-words text-sm font-semibold leading-6 theme-text sm:text-[15px]">
                           {alamat}
                         </p>
@@ -833,14 +1173,23 @@ async function fetchStatistikGuru() {
                     </div>
                   </section>
 
+                  {/* INFORMASI PRIBADI */}
+
                   <section className="w-full rounded-xl border theme-card shadow-sm">
                     <div className="border-b theme-border px-4 py-4 sm:px-6">
-                      <div className="flex min-w-0 items-center gap-3">
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg theme-info">
-                          <Users size={18} className="text-[var(--color-info)]" />
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-lg theme-info">
+                          <Users
+                            size={18}
+                            className="text-[var(--color-info)]"
+                          />
                         </div>
+
                         <div>
-                          <h3 className="text-sm font-bold theme-text">Informasi Pribadi</h3>
+                          <h3 className="text-sm font-bold theme-text">
+                            Informasi Pribadi
+                          </h3>
+
                           <p className="mt-0.5 text-xs theme-text-muted">
                             Informasi dasar profil guru
                           </p>
@@ -849,23 +1198,66 @@ async function fetchStatistikGuru() {
                     </div>
 
                     <div className="grid min-w-0 grid-cols-1 gap-5 p-4 sm:grid-cols-2 sm:p-6">
-                      <InfoItem icon={UserRound} label="Nama Lengkap" value={nama} />
-                      <InfoItem icon={UserRound} label="Jenis Kelamin" value={genderLabel} />
-                      <InfoItem icon={Calendar} label="Tanggal Lahir" value={formatDate(tglLahir)} />
-                      <InfoItem icon={Phone} label="Nomor Telepon" value={phone} />
+                      <InfoItem
+                        icon={UserRound}
+                        label="Nama Lengkap"
+                        value={nama}
+                      />
+
+                      <InfoItem
+                        icon={UserRound}
+                        label="Jenis Kelamin"
+                        value={genderLabel}
+                      />
+
+                      <InfoItem
+                        icon={Calendar}
+                        label="Tanggal Lahir"
+                        value={formatDate(tglLahir)}
+                      />
+
+                      <InfoItem
+                        icon={Phone}
+                        label="Nomor Telepon"
+                        value={phone}
+                      />
+
+                      <InfoItem
+                        icon={Mail}
+                        label="Email"
+                        value={email}
+                      />
+
+                      <InfoItem
+                        icon={Hash}
+                        label="NIK"
+                        value={nik}
+                      />
                     </div>
                   </section>
                 </div>
 
+                {/* SIDEBAR STATISTIK */}
+
                 <aside className="min-w-0 space-y-5">
+
+                  {/* STATISTIK MENGAJAR */}
+
                   <section className="w-full rounded-xl border theme-card shadow-sm">
                     <div className="border-b theme-border px-4 py-4 sm:px-5">
-                      <div className="flex min-w-0 items-center gap-3">
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg theme-info">
-                          <GraduationCap size={18} className="text-[var(--color-info)]" />
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-lg theme-info">
+                          <GraduationCap
+                            size={18}
+                            className="text-[var(--color-info)]"
+                          />
                         </div>
+
                         <div>
-                          <h3 className="text-sm font-bold theme-text">Statistik Mengajar</h3>
+                          <h3 className="text-sm font-bold theme-text">
+                            Statistik Mengajar
+                          </h3>
+
                           <p className="mt-0.5 text-xs theme-text-muted">
                             Ringkasan aktivitas mengajar
                           </p>
@@ -879,7 +1271,6 @@ async function fetchStatistikGuru() {
                         value={loadingStatistik ? "..." : kelasDiampu}
                         label="Kelas Diampu"
                         description="Jumlah kelas unik yang ditugaskan"
-                        iconClass="text-[var(--color-primary)]"
                       />
 
                       <StatCard
@@ -891,35 +1282,67 @@ async function fetchStatistikGuru() {
                       />
 
                       <StatCard
-  icon={CheckCircle2}
-  value={loadingStatistik ? "..." : rataKehadiran}
-  label="Rata-rata Kehadiran"
-  description="Persentase catatan absensi berstatus hadir"
-  iconClass="text-[var(--color-success)]"
-  valueClass="text-[var(--color-success)]"
-/>
+                        icon={CheckCircle2}
+                        value={loadingStatistik ? "..." : rataKehadiran}
+                        label="Rata-rata Kehadiran"
+                        description="Persentase catatan absensi berstatus hadir"
+                        iconClass="text-[var(--color-success)]"
+                        valueClass="text-[var(--color-success)]"
+                      />
                     </div>
                   </section>
 
+                  {/* STATUS PROFIL */}
+
                   <section className="w-full rounded-xl border theme-card shadow-sm">
                     <div className="border-b theme-border px-4 py-4 sm:px-5">
-                      <h3 className="text-sm font-bold theme-text">Status Profil</h3>
+                      <h3 className="text-sm font-bold theme-text">
+                        Status Profil
+                      </h3>
+
                       <p className="mt-0.5 text-xs theme-text-muted">
                         Status data guru saat ini
                       </p>
                     </div>
 
                     <div className="p-4 sm:p-5">
-                      <div className={`flex min-w-0 items-start gap-3 rounded-lg border p-4 ${isActive ? "theme-success" : "theme-danger"}`}>
-                        <div className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg theme-card ${isActive ? "text-[var(--color-success)]" : "text-[var(--color-danger)]"}`}>
-                          {isActive ? <CheckCircle2 size={17} /> : <Clock size={17} />}
+                      <div
+                        className={`flex min-w-0 items-start gap-3 rounded-lg border p-4 ${
+                          isActive ? "theme-success" : "theme-danger"
+                        }`}
+                      >
+                        <div
+                          className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg theme-card ${
+                            isActive
+                              ? "text-[var(--color-success)]"
+                              : "text-[var(--color-danger)]"
+                          }`}
+                        >
+                          {isActive ? (
+                            <CheckCircle2 size={17} />
+                          ) : (
+                            <Clock size={17} />
+                          )}
                         </div>
 
                         <div className="min-w-0">
-                          <p className={`text-sm font-bold ${isActive ? "text-[var(--color-success)]" : "text-[var(--color-danger)]"}`}>
+                          <p
+                            className={`text-sm font-bold ${
+                              isActive
+                                ? "text-[var(--color-success)]"
+                                : "text-[var(--color-danger)]"
+                            }`}
+                          >
                             {isActive ? "Profil Aktif" : "Profil Nonaktif"}
                           </p>
-                          <p className={`mt-1 break-words text-xs leading-5 ${isActive ? "text-[var(--color-success)]" : "text-[var(--color-danger)]"}`}>
+
+                          <p
+                            className={`mt-1 break-words text-xs leading-5 ${
+                              isActive
+                                ? "text-[var(--color-success)]"
+                                : "text-[var(--color-danger)]"
+                            }`}
+                          >
                             {isActive
                               ? "Guru terdaftar sebagai tenaga pendidik aktif."
                               : "Guru saat ini berstatus nonaktif."}
@@ -929,9 +1352,84 @@ async function fetchStatistikGuru() {
                     </div>
                   </section>
 
+                  {/* RINGKASAN SHIFT */}
+
                   <section className="w-full rounded-xl border theme-card shadow-sm">
                     <div className="border-b theme-border px-4 py-4 sm:px-5">
-                      <h3 className="text-sm font-bold theme-text">Mata Pelajaran</h3>
+                      <h3 className="text-sm font-bold theme-text">
+                        Jadwal Kerja
+                      </h3>
+
+                      <p className="mt-0.5 text-xs theme-text-muted">
+                        Ringkasan waktu kerja guru
+                      </p>
+                    </div>
+
+                    <div className="space-y-4 p-4 sm:p-5">
+                      {loadingShift ? (
+                        <p className="text-sm theme-text-muted">
+                          Memuat jadwal...
+                        </p>
+                      ) : shiftGuru ? (
+                        <>
+                          <div>
+                            <p className="text-xs theme-text-muted">
+                              Nama Shift
+                            </p>
+
+                            <p className="mt-1 text-base font-bold theme-text">
+                              {namaShift}
+                            </p>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-3">
+                            <div className="rounded-lg border theme-card-soft p-3">
+                              <p className="text-xs theme-text-muted">
+                                Masuk
+                              </p>
+
+                              <p className="mt-1 text-lg font-bold theme-text">
+                                {jamMasuk}
+                              </p>
+                            </div>
+
+                            <div className="rounded-lg border theme-card-soft p-3">
+                              <p className="text-xs theme-text-muted">
+                                Pulang
+                              </p>
+
+                              <p className="mt-1 text-lg font-bold theme-text">
+                                {jamKeluar}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center justify-between gap-2 border-t theme-border pt-3">
+                            <span className="text-xs theme-text-muted">
+                              Toleransi keterlambatan
+                            </span>
+
+                            <span className="text-sm font-semibold theme-text">
+                              {toleransi ?? "-"} menit
+                            </span>
+                          </div>
+                        </>
+                      ) : (
+                        <p className="text-sm theme-text-muted">
+                          Belum ada shift kerja yang ditugaskan.
+                        </p>
+                      )}
+                    </div>
+                  </section>
+
+                  {/* MATA PELAJARAN */}
+
+                  <section className="w-full rounded-xl border theme-card shadow-sm">
+                    <div className="border-b theme-border px-4 py-4 sm:px-5">
+                      <h3 className="text-sm font-bold theme-text">
+                        Mata Pelajaran
+                      </h3>
+
                       <p className="mt-0.5 text-xs theme-text-muted">
                         Bidang pengajaran utama
                       </p>
@@ -943,18 +1441,23 @@ async function fetchStatistikGuru() {
                           Memuat mata pelajaran...
                         </p>
                       ) : mapelGuru.length > 0 ? (
-                        mapelGuru.map((namaMapel) => (
+                        mapelGuru.map((namaMapel, index) => (
                           <div
-                            key={namaMapel}
+                            key={`${namaMapel}-${index}`}
                             className="flex min-w-0 items-center gap-3 rounded-lg border theme-info p-4"
                           >
                             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border theme-card">
-                              <BookOpen size={18} className="text-[var(--color-info)]" />
+                              <BookOpen
+                                size={18}
+                                className="text-[var(--color-info)]"
+                              />
                             </div>
+
                             <div className="min-w-0">
                               <p className="text-xs font-medium theme-text-muted">
                                 Mengajar
                               </p>
+
                               <p className="mt-0.5 break-words text-sm font-bold theme-text">
                                 {namaMapel}
                               </p>
@@ -971,11 +1474,14 @@ async function fetchStatistikGuru() {
                 </aside>
               </div>
 
+              {/* FOOTER */}
+
               <div className="flex min-w-0 flex-col gap-3 border-t theme-border pb-4 pt-5 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0">
                   <p className="text-sm font-semibold theme-text-secondary">
                     Perlu mengubah data guru?
                   </p>
+
                   <p className="mt-0.5 text-xs theme-text-muted">
                     Pastikan data yang diperbarui sudah sesuai.
                   </p>
@@ -984,14 +1490,16 @@ async function fetchStatistikGuru() {
                 <div className="flex w-full gap-2 sm:w-auto">
                   <button
                     onClick={() => router.back()}
-                    className="flex-1 rounded-lg border theme-card px-4 py-2.5 text-sm font-semibold theme-text-secondary transition theme-sidebar-hover sm:flex-none"
+                    className="flex-1 rounded-lg border theme-card px-4 py-2.5 text-sm font-semibold theme-text-secondary sm:flex-none"
                   >
                     Kembali
                   </button>
 
                   <button
-                    onClick={() => router.push(`/admin/guru/edit/${guru.id}`)}
-                    className="flex flex-1 items-center justify-center gap-2 rounded-lg theme-primary px-4 py-2.5 text-sm font-semibold shadow-sm transition sm:flex-none"
+                    onClick={() =>
+                      router.push(`/admin/guru/edit/${guru.id}`)
+                    }
+                    className="flex flex-1 items-center justify-center gap-2 rounded-lg theme-primary px-4 py-2.5 text-sm font-semibold shadow-sm sm:flex-none"
                   >
                     <Edit size={16} />
                     Edit Profil

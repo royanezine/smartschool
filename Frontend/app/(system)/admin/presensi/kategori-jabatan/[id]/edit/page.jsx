@@ -20,8 +20,10 @@ import {
   LoaderCircle,
   Save,
   Info,
+  Lightbulb,
+  ShieldCheck,
+  Eye,
 } from "lucide-react";
-
 
 function getErrorMessage(error) {
   return error instanceof Error
@@ -62,7 +64,6 @@ function Field({ label, required, hint, number, children }) {
   );
 }
 
-
 export default function EditKategoriJabatanPage() {
   const params = useParams();
   const router = useRouter();
@@ -81,7 +82,6 @@ export default function EditKategoriJabatanPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
-
 
   const loadDetail = useCallback(async () => {
     if (!id) return;
@@ -114,7 +114,6 @@ export default function EditKategoriJabatanPage() {
     const timeout = setTimeout(() => setNotice(""), 4000);
     return () => clearTimeout(timeout);
   }, [notice]);
-
 
   function updateForm(field, value) {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -158,7 +157,6 @@ export default function EditKategoriJabatanPage() {
     router.push(`/admin/presensi/kategori-jabatan/${id}`);
   }
 
-
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
       <Sidebar
@@ -167,14 +165,27 @@ export default function EditKategoriJabatanPage() {
         onClose={() => setSidebarOpen(false)}
       />
 
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <div className="shrink-0">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+        <div className="shrink-0 border-b theme-border">
           <Header onMenuClick={() => setSidebarOpen(true)} />
         </div>
 
-        <main className="min-w-0 flex-1 overflow-y-auto theme-page theme-text">
-          <div className="w-full px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
-            <div className="mx-auto w-full max-w-5xl space-y-6">
+        <div className="flex min-h-0 flex-1">
+          <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto">
+            <div className="w-full px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 2xl:px-12">
+              
+              <div className="mb-4">
+                <button
+                  type="button"
+                  onClick={handleBack}
+                  disabled={saving}
+                  className="inline-flex w-fit items-center gap-2 text-sm font-medium theme-text-muted transition hover:text-[var(--color-primary)] disabled:opacity-50"
+                >
+                  <ArrowLeft size={17} />
+                  Kembali ke Detail Kategori
+                </button>
+              </div>
+
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div className="flex items-start gap-3">
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
@@ -199,22 +210,12 @@ export default function EditKategoriJabatanPage() {
                     </p>
                   </div>
                 </div>
-
-                <button
-                  type="button"
-                  onClick={handleBack}
-                  disabled={saving}
-                  className={buttonSecondary}
-                >
-                  <ArrowLeft size={17} />
-                  Kembali
-                </button>
               </div>
 
               {notice && (
                 <div
                   role="status"
-                  className="flex items-start gap-3 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700 dark:border-emerald-900/60 dark:bg-emerald-950/30 dark:text-emerald-300"
+                  className="mt-6 flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700 dark:border-emerald-900/60 dark:bg-emerald-950/30 dark:text-emerald-300"
                 >
                   <CheckCircle2 size={18} className="mt-0.5 shrink-0" />
                   <p className="min-w-0 flex-1">{notice}</p>
@@ -224,7 +225,7 @@ export default function EditKategoriJabatanPage() {
               {error && (
                 <div
                   role="alert"
-                  className="flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-300"
+                  className="mt-6 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-300"
                 >
                   <AlertCircle size={19} className="mt-0.5 shrink-0" />
                   <div className="min-w-0 flex-1">
@@ -235,7 +236,7 @@ export default function EditKategoriJabatanPage() {
               )}
 
               {loading ? (
-                <div className="flex min-h-[300px] flex-col items-center justify-center gap-3 theme-card rounded-xl border theme-border">
+                <div className="mt-6 flex min-h-[300px] flex-col items-center justify-center gap-3 theme-card rounded-2xl border theme-border">
                   <LoaderCircle
                     size={28}
                     className="animate-spin theme-primary-text"
@@ -248,128 +249,243 @@ export default function EditKategoriJabatanPage() {
                   </p>
                 </div>
               ) : (
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <section className="theme-card overflow-hidden rounded-xl border theme-border shadow-sm">
-                    <div className="flex items-start gap-3 border-b theme-border p-5 sm:p-6">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
-                        <BriefcaseBusiness size={19} />
-                      </div>
+                <form onSubmit={handleSubmit} className="mt-6">
+                  <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+                    
+                    <div className="min-w-0 space-y-6">
+                      <section className="theme-card overflow-hidden rounded-2xl border theme-border shadow-sm">
+                        <div className="flex items-start gap-3 border-b theme-border p-5 sm:p-6">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
+                            <BriefcaseBusiness size={19} />
+                          </div>
 
-                      <div>
-                        <h2 className="font-semibold theme-text">
-                          Identitas Kategori
-                        </h2>
-                        <p className="mt-1 text-sm theme-text-muted">
-                          Perbarui informasi dasar kategori jabatan.
+                          <div>
+                            <h2 className="font-semibold theme-text">
+                              Identitas Kategori
+                            </h2>
+                            <p className="mt-1 text-sm theme-text-muted">
+                              Perbarui informasi dasar kategori jabatan.
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 gap-5 p-5 sm:grid-cols-2 sm:p-6">
+                          <Field label="Nama kategori" required number={1}>
+                            <input
+                              required
+                              maxLength={100}
+                              value={form.nama}
+                              onChange={(e) =>
+                                updateForm("nama", e.target.value)
+                              }
+                              placeholder="Contoh: Guru"
+                              className={inputClass}
+                              disabled={saving}
+                            />
+                          </Field>
+
+                          <Field
+                            label="Kode kategori"
+                            hint="Opsional, maksimal 50 karakter."
+                            number={2}
+                          >
+                            <input
+                              maxLength={50}
+                              value={form.kode}
+                              onChange={(e) =>
+                                updateForm("kode", e.target.value)
+                              }
+                              placeholder="Contoh: GR"
+                              className={inputClass}
+                              disabled={saving}
+                            />
+                          </Field>
+
+                          <div className="sm:col-span-2">
+                            <Field label="Keterangan" number={3}>
+                              <textarea
+                                rows={4}
+                                value={form.keterangan}
+                                onChange={(e) =>
+                                  updateForm("keterangan", e.target.value)
+                                }
+                                placeholder="Masukkan keterangan kategori jabatan..."
+                                className={inputClass}
+                                disabled={saving}
+                              />
+                            </Field>
+                          </div>
+
+                          <Field label="Status kategori" required number={4}>
+                            <select
+                              required
+                              value={form.status}
+                              onChange={(e) =>
+                                updateForm("status", e.target.value)
+                              }
+                              className={inputClass}
+                              disabled={saving}
+                            >
+                              <option value="aktif">Aktif</option>
+                              <option value="nonaktif">Nonaktif</option>
+                            </select>
+                          </Field>
+                        </div>
+                      </section>
+
+                      <div className="theme-info theme-border flex items-start gap-3 rounded-2xl border p-4">
+                        <Info size={17} className="mt-0.5 shrink-0 text-[var(--color-info)]" />
+                        <p className="text-xs leading-5">
+                          Tarif tidak diubah dari halaman ini. Untuk menambah
+                          atau mengubah tarif, gunakan tombol{" "}
+                          <strong className="font-semibold">Tambah Tarif</strong>{" "}
+                          pada halaman detail agar riwayat tarif lama tetap
+                          tersimpan.
                         </p>
                       </div>
+
+                      <div className="flex flex-col-reverse gap-3 border-t theme-border pt-5 sm:flex-row sm:justify-end">
+                        <button
+                          type="button"
+                          onClick={handleBack}
+                          disabled={saving}
+                          className={buttonSecondary}
+                        >
+                          Batal
+                        </button>
+
+                        <button
+                          type="submit"
+                          disabled={saving}
+                          className={buttonPrimary}
+                        >
+                          {saving ? (
+                            <LoaderCircle size={17} className="animate-spin" />
+                          ) : (
+                            <Save size={17} />
+                          )}
+                          {saving ? "Menyimpan..." : "Simpan Perubahan"}
+                        </button>
+                      </div>
                     </div>
 
-                    <div className="grid grid-cols-1 gap-5 p-5 sm:grid-cols-2 sm:p-6">
-                      <Field label="Nama kategori" required number={1}>
-                        <input
-                          required
-                          maxLength={100}
-                          value={form.nama}
-                          onChange={(e) =>
-                            updateForm("nama", e.target.value)
-                          }
-                          placeholder="Contoh: Guru"
-                          className={inputClass}
-                          disabled={saving}
-                        />
-                      </Field>
-
-                      <Field
-                        label="Kode kategori"
-                        hint="Opsional, maksimal 50 karakter."
-                        number={2}
-                      >
-                        <input
-                          maxLength={50}
-                          value={form.kode}
-                          onChange={(e) =>
-                            updateForm("kode", e.target.value)
-                          }
-                          placeholder="Contoh: GR"
-                          className={inputClass}
-                          disabled={saving}
-                        />
-                      </Field>
-
-                      <div className="sm:col-span-2">
-                        <Field label="Keterangan" number={3}>
-                          <textarea
-                            rows={4}
-                            value={form.keterangan}
-                            onChange={(e) =>
-                              updateForm("keterangan", e.target.value)
-                            }
-                            placeholder="Masukkan keterangan kategori jabatan..."
-                            className={inputClass}
-                            disabled={saving}
-                          />
-                        </Field>
+                    <aside className="flex min-w-0 flex-col gap-6">
+                      <div className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
+                        <div className="theme-card-soft theme-border flex items-center gap-3 border-b px-5 py-3">
+                          <div className="theme-info flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
+                            <Eye className="h-4 w-4" />
+                          </div>
+                          <h2 className="theme-text text-sm font-bold">
+                            Preview Data
+                          </h2>
+                        </div>
+                        <div className="p-5">
+                          <div className="space-y-4 text-xs">
+                            <div>
+                              <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-wider">
+                                Nama Kategori
+                              </p>
+                              <p className="theme-text mt-1 break-words text-sm font-semibold">
+                                {form.nama || "Belum diisi"}
+                              </p>
+                            </div>
+                            <div className="theme-border-soft h-px" />
+                            <div>
+                              <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-wider">
+                                Kode
+                              </p>
+                              <p className="theme-text mt-1 text-sm font-semibold">
+                                {form.kode || "-"}
+                              </p>
+                            </div>
+                            <div className="theme-border-soft h-px" />
+                            <div>
+                              <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-wider">
+                                Status
+                              </p>
+                              <div className="flex items-center gap-2 mt-1">
+                                <span
+                                  className={`h-2 w-2 rounded-full ${
+                                    form.status === "aktif"
+                                      ? "bg-[var(--color-success)]"
+                                      : "bg-[var(--color-text-muted)]"
+                                  }`}
+                                />
+                                <span className="theme-text text-sm font-semibold capitalize">
+                                  {form.status}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       </div>
 
-                      <Field label="Status kategori" required number={4}>
-                        <select
-                          required
-                          value={form.status}
-                          onChange={(e) =>
-                            updateForm("status", e.target.value)
-                          }
-                          className={inputClass}
-                          disabled={saving}
-                        >
-                          <option value="aktif">Aktif</option>
-                          <option value="nonaktif">Nonaktif</option>
-                        </select>
-                      </Field>
-                    </div>
-                  </section>
+                      <div className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
+                        <div className="theme-card-soft theme-border flex items-center gap-3 border-b px-5 py-3">
+                          <div className="theme-warning flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
+                            <Lightbulb size={17} />
+                          </div>
+                          <h2 className="theme-text text-sm font-bold">
+                            Panduan
+                          </h2>
+                        </div>
+                        <div className="p-5">
+                          <ul className="space-y-3 text-xs leading-5">
+                            <li className="flex items-start gap-2">
+                              <CheckCircle2
+                                size={14}
+                                className="mt-0.5 shrink-0 text-[var(--color-success)]"
+                              />
+                              <span className="theme-text-secondary">
+                                Periksa ejaan nama kategori sebelum menyimpan.
+                              </span>
+                            </li>
+                            <li className="flex items-start gap-2">
+                              <CheckCircle2
+                                size={14}
+                                className="mt-0.5 shrink-0 text-[var(--color-success)]"
+                              />
+                              <span className="theme-text-secondary">
+                                Kode kategori membantu membedakan kategori serupa.
+                              </span>
+                            </li>
+                            <li className="flex items-start gap-2">
+                              <CheckCircle2
+                                size={14}
+                                className="mt-0.5 shrink-0 text-[var(--color-success)]"
+                              />
+                              <span className="theme-text-secondary">
+                                Status nonaktif akan menyembunyikan kategori dari form.
+                              </span>
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
 
-                  <div className="flex items-start gap-2 rounded-lg border border-blue-200 bg-blue-50/70 p-4 text-sm text-blue-900 dark:border-blue-900/60 dark:bg-blue-950/30 dark:text-blue-200">
-                    <Info size={18} className="mt-0.5 shrink-0" />
-                    <p className="leading-6">
-                      Tarif tidak diubah dari halaman ini. Untuk menambah
-                      atau mengubah tarif, gunakan tombol{" "}
-                      <strong className="font-semibold">
-                        Tambah Tarif
-                      </strong>{" "}
-                      pada halaman detail agar riwayat tarif lama tetap
-                      tersimpan.
-                    </p>
-                  </div>
-
-                  <div className="flex flex-col-reverse gap-3 border-t theme-border pt-5 sm:flex-row sm:justify-end">
-                    <button
-                      type="button"
-                      onClick={handleBack}
-                      disabled={saving}
-                      className={buttonSecondary}
-                    >
-                      Batal
-                    </button>
-
-                    <button
-                      type="submit"
-                      disabled={saving}
-                      className={buttonPrimary}
-                    >
-                      {saving ? (
-                        <LoaderCircle size={17} className="animate-spin" />
-                      ) : (
-                        <Save size={17} />
-                      )}
-                      {saving ? "Menyimpan..." : "Simpan Perubahan"}
-                    </button>
+                      <div className="theme-card theme-border rounded-2xl border p-4 shadow-sm">
+                        <div className="flex items-start gap-3">
+                          <div className="theme-card-soft theme-text-secondary flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
+                            <ShieldCheck className="h-4 w-4" />
+                          </div>
+                          <div className="min-w-0">
+                            <h3 className="theme-text text-sm font-bold">
+                              Informasi Sistem
+                            </h3>
+                            <div className="theme-text-secondary mt-1.5 space-y-1.5 text-xs leading-5">
+                              <p>• ID Kategori: {String(id).slice(0, 8)}</p>
+                              <p>• Perubahan langsung tersimpan ke server.</p>
+                              <p>• Tarif tidak diubah dari halaman ini.</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </aside>
                   </div>
                 </form>
               )}
             </div>
-          </div>
-        </main>
+          </main>
+        </div>
       </div>
     </div>
   );

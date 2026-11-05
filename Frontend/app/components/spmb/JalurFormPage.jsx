@@ -24,6 +24,9 @@ import {
   Sliders,
   Sparkles,
   Users,
+  Info,
+  ShieldCheck,
+  Eye,
 } from "lucide-react";
 
 import {
@@ -177,7 +180,6 @@ export default function JalurFormPage({ jalurId }) {
   }, [jalurId, modeEdit]);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadDetail();
   }, [loadDetail]);
 
@@ -188,7 +190,6 @@ export default function JalurFormPage({ jalurId }) {
         [field]: value,
       };
 
-      // Kriteria zonasi & jalur lainnya tersedia otomatis saat kategori dipilih
       if (field === "kategori" && !modeEdit) {
         if (value === "zonasi") {
           next.metodeRanking = "jarak";
@@ -349,6 +350,7 @@ export default function JalurFormPage({ jalurId }) {
   }
 
   return (
+    // ✅ ROOT pakai flex h-screen overflow-hidden
     <div className="theme-page flex h-screen w-full overflow-hidden">
       <Sidebar
         active="spmb"
@@ -359,6 +361,7 @@ export default function JalurFormPage({ jalurId }) {
       />
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+        {/* ✅ Header dibungkus shrink-0 */}
         <div className="shrink-0 border-b theme-border">
           <Header
             toggleSidebar={() => setCollapsed((v) => !v)}
@@ -371,390 +374,362 @@ export default function JalurFormPage({ jalurId }) {
           />
         </div>
 
-        <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto">
-          <div className="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6 lg:px-8">
-            <Link
-              href="/admin/spmb/jalur"
-              className="theme-text-muted mb-4 inline-flex items-center gap-2 text-xs font-semibold transition hover:opacity-70"
-            >
-              <ArrowLeft size={14} />
-              Kembali ke Daftar Jalur
-            </Link>
+        {/* ✅ Body flex min-h-0 flex-1 */}
+        <div className="flex min-h-0 flex-1">
+          
+          {/* ✅ Main min-w-0 flex-1 overflow-y-auto */}
+          <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto">
+            
+            {/* ✅ Konten w-full (max-w dihapus agar melebar penuh saat zoom out) */}
+            <div className="w-full px-4 py-6 sm:px-6 lg:px-8 2xl:px-12">
+              
+              <div className="mb-6 flex flex-col gap-4">
+                <Link
+                  href="/admin/spmb/jalur"
+                  className="theme-text-muted inline-flex w-fit items-center gap-2 text-sm font-medium transition hover:opacity-70"
+                >
+                  <ArrowLeft size={16} />
+                  Kembali ke Daftar Jalur
+                </Link>
 
-            <div className="mb-6 flex items-start gap-3">
-              <div
-                className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] text-[var(--color-primary)]`}
-              >
-                <Route size={22} />
-              </div>
-              <div>
-                <h1 className="theme-text text-xl font-bold sm:text-2xl">
-                  {modeEdit ? "Edit Jalur Pendaftaran" : "Tambah Jalur Pendaftaran"}
-                </h1>
-                <p className="theme-text-muted mt-1 text-xs sm:text-sm">
-                  {modeEdit
-                    ? "Perbarui konfigurasi kategori, kuota, metode seleksi, dan berkas wajib jalur PPDB."
-                    : "Konfigurasikan jalur seleksi penerimaan peserta didik baru terintegrasi backend."}
-                </p>
-              </div>
-            </div>
-
-            {error && (
-              <div className="mb-5 flex items-start gap-3 rounded-xl border border-[color-mix(in_srgb,var(--color-danger)_24%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_9%,transparent)] px-4 py-3">
-                <AlertCircle
-                  size={18}
-                  className="mt-0.5 shrink-0 text-[var(--color-danger)]"
-                />
-                <p className="text-xs text-[var(--color-danger)]">{error}</p>
-              </div>
-            )}
-
-            {loading ? (
-              <div className="theme-card theme-border flex min-h-[350px] items-center justify-center rounded-2xl border">
-                <div className="flex items-center gap-2 text-xs theme-text-muted">
-                  <Loader2 size={16} className="animate-spin text-[var(--color-primary)]" />
-                  <span>Memuat data jalur dari server...</span>
-                </div>
-              </div>
-            ) : (
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Informasi Pokok Jalur */}
-                <div className="theme-card theme-border rounded-2xl border p-5 sm:p-6 shadow-sm">
-                  <div className="mb-4 flex items-center gap-2 border-b theme-border pb-3">
-                    <Sliders size={18} className="text-[var(--color-primary)]" />
-                    <div>
-                      <h2 className="text-sm font-semibold theme-text">
-                        Informasi Utama Jalur
-                      </h2>
-                      <p className="text-xs theme-text-muted">
-                        Nama, kategori penerimaan, daya tampung kuota, dan status
-                      </p>
-                    </div>
+                <div className="flex min-w-0 items-center gap-3">
+                  <div className="theme-info flex h-12 w-12 shrink-0 items-center justify-center rounded-xl">
+                    <Route className="h-6 w-6" />
                   </div>
-
-                  <div className="space-y-4">
-                    {/* Nama Jalur */}
-                    <div>
-                      <label
-                        htmlFor="nama"
-                        className="text-xs font-semibold theme-text mb-1 block"
-                      >
-                        Nama Jalur <span className="text-[var(--color-danger)]">*</span>
-                      </label>
-                      <input
-                        id="nama"
-                        type="text"
-                        value={form.nama}
-                        onChange={(e) => ubah("nama", e.target.value)}
-                        placeholder="Contoh: Jalur Zonasi Domisili"
-                        maxLength={NAMA_MAX}
-                        required
-                        className={`w-full rounded-xl border ${themeNeutralBorder} ${themeNeutralSurface} px-3.5 py-2.5 text-xs theme-text ${themeFocus} outline-none`}
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                      {/* Kategori Jalur */}
-                      <div>
-                        <label
-                          htmlFor="kategori"
-                          className="text-xs font-semibold theme-text mb-1 block"
-                        >
-                          Kategori Seleksi <span className="text-[var(--color-danger)]">*</span>
-                        </label>
-                        <select
-                          id="kategori"
-                          value={form.kategori}
-                          onChange={(e) => ubah("kategori", e.target.value)}
-                          className={`w-full rounded-xl border ${themeNeutralBorder} ${themeNeutralSurface} px-3.5 py-2.5 text-xs theme-text ${themeFocus} outline-none cursor-pointer`}
-                        >
-                          {KATEGORI_JALUR_OPTIONS.map((opt) => (
-                            <option key={opt.value} value={opt.value}>
-                              {opt.label}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-
-                      {/* Kuota Penerimaan */}
-                      <div>
-                        <label
-                          htmlFor="kuota"
-                          className="text-xs font-semibold theme-text mb-1 block"
-                        >
-                          Kuota Siswa <span className="text-[var(--color-danger)]">*</span>
-                        </label>
-                        <input
-                          id="kuota"
-                          type="number"
-                          min="1"
-                          value={form.kuota}
-                          onChange={(e) => ubah("kuota", e.target.value)}
-                          placeholder="Contoh: 100"
-                          required
-                          className={`w-full rounded-xl border ${themeNeutralBorder} ${themeNeutralSurface} px-3.5 py-2.5 text-xs theme-text ${themeFocus} outline-none`}
-                        />
-                      </div>
-
-                      {/* Status */}
-                      <div>
-                        <label
-                          htmlFor="status"
-                          className="text-xs font-semibold theme-text mb-1 block"
-                        >
-                          Status Operasional <span className="text-[var(--color-danger)]">*</span>
-                        </label>
-                        <select
-                          id="status"
-                          value={form.status}
-                          onChange={(e) => ubah("status", e.target.value)}
-                          className={`w-full rounded-xl border ${themeNeutralBorder} ${themeNeutralSurface} px-3.5 py-2.5 text-xs theme-text ${themeFocus} outline-none cursor-pointer`}
-                        >
-                          <option value="aktif">Aktif</option>
-                          <option value="nonaktif">Nonaktif</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    {/* Deskripsi */}
-                    <div>
-                      <label
-                        htmlFor="deskripsi"
-                        className="text-xs font-semibold theme-text mb-1 block"
-                      >
-                        Deskripsi / Keterangan Jalur
-                      </label>
-                      <textarea
-                        id="deskripsi"
-                        rows={3}
-                        value={form.deskripsi}
-                        onChange={(e) => ubah("deskripsi", e.target.value)}
-                        placeholder="Uraian kriteria, petunjuk singkat pendaftaran, atau keterangan lainnya..."
-                        maxLength={DESKRIPSI_MAX}
-                        className={`w-full rounded-xl border ${themeNeutralBorder} ${themeNeutralSurface} px-3.5 py-2.5 text-xs theme-text ${themeFocus} outline-none`}
-                      />
-                    </div>
+                  <div className="min-w-0">
+                    <h1 className="theme-text text-2xl font-bold">
+                      {modeEdit ? "Edit Jalur Pendaftaran" : "Tambah Jalur Pendaftaran"}
+                    </h1>
+                    <p className="theme-text-muted mt-1 text-sm">
+                      {modeEdit
+                        ? "Perbarui konfigurasi kategori, kuota, metode seleksi, dan berkas wajib jalur PPDB."
+                        : "Konfigurasikan jalur seleksi penerimaan peserta didik baru terintegrasi backend."}
+                    </p>
                   </div>
                 </div>
+              </div>
 
-                {/* Metode Seleksi & Parameter Ranking */}
-                <div className="theme-card theme-border rounded-2xl border p-5 sm:p-6 shadow-sm">
-                  <div className="mb-4 flex items-center gap-2 border-b theme-border pb-3">
-                    <Sparkles size={18} className="text-[var(--color-primary)]" />
-                    <div>
-                      <h2 className="text-sm font-semibold theme-text">
-                        Metode Seleksi & Ranking
-                      </h2>
-                      <p className="text-xs theme-text-muted">
-                        Aturan penentuan urutan kelulusan seleksi dan ambang batas
-                      </p>
-                    </div>
-                  </div>
+              {error && (
+                <div className="theme-danger mb-6 flex items-start gap-3 rounded-xl border p-4">
+                  <AlertCircle size={18} className="mt-0.5 shrink-0" />
+                  <p className="text-sm">{error}</p>
+                </div>
+              )}
 
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                    {/* Metode Ranking */}
-                    <div>
-                      <label
-                        htmlFor="metodeRanking"
-                        className="text-xs font-semibold theme-text mb-1 block"
-                      >
-                        Metode Pemeringkatan
-                      </label>
-                      <select
-                        id="metodeRanking"
-                        value={form.metodeRanking}
-                        onChange={(e) => ubah("metodeRanking", e.target.value)}
-                        className={`w-full rounded-xl border ${themeNeutralBorder} ${themeNeutralSurface} px-3.5 py-2.5 text-xs theme-text ${themeFocus} outline-none cursor-pointer`}
-                      >
-                        {METODE_RANKING_OPTIONS.map((opt) => (
-                          <option key={opt.value} value={opt.value}>
-                            {opt.label}
-                          </option>
-                        ))}
-                      </select>
-                      <p className="mt-1 text-[11px] theme-text-muted">
-                        Dasar pengurutan calon siswa
-                      </p>
-                    </div>
-
-                    {/* Jarak Maksimal (Km) */}
-                    <div>
-                      <label
-                        htmlFor="jarakMaksimalKm"
-                        className="text-xs font-semibold theme-text mb-1 block"
-                      >
-                        Radius Maksimal (Km)
-                      </label>
-                      <input
-                        id="jarakMaksimalKm"
-                        type="number"
-                        step="0.1"
-                        min="0"
-                        max="1000"
-                        value={form.jarakMaksimalKm}
-                        onChange={(e) => ubah("jarakMaksimalKm", e.target.value)}
-                        placeholder="Contoh: 5 (opsional)"
-                        className={`w-full rounded-xl border ${themeNeutralBorder} ${themeNeutralSurface} px-3.5 py-2.5 text-xs theme-text ${themeFocus} outline-none`}
-                      />
-                      <p className="mt-1 text-[11px] theme-text-muted">
-                        Kosongkan jika tidak dibatasi radius
-                      </p>
-                    </div>
-
-                    {/* Nilai Minimal */}
-                    <div>
-                      <label
-                        htmlFor="nilaiMinimal"
-                        className="text-xs font-semibold theme-text mb-1 block"
-                      >
-                        Ambang Nilai Minimal
-                      </label>
-                      <input
-                        id="nilaiMinimal"
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        max="100"
-                        value={form.nilaiMinimal}
-                        onChange={(e) => ubah("nilaiMinimal", e.target.value)}
-                        placeholder="Contoh: 75.0 (opsional)"
-                        className={`w-full rounded-xl border ${themeNeutralBorder} ${themeNeutralSurface} px-3.5 py-2.5 text-xs theme-text ${themeFocus} outline-none`}
-                      />
-                      <p className="mt-1 text-[11px] theme-text-muted">
-                        Syarat nilai minimal rapor / prestasi
-                      </p>
-                    </div>
+              {loading ? (
+                <div className="theme-card theme-border flex min-h-[350px] items-center justify-center rounded-2xl border">
+                  <div className="flex items-center gap-2 text-xs theme-text-muted">
+                    <Loader2 size={16} className="animate-spin text-[var(--color-primary)]" />
+                    <span>Memuat data jalur dari server...</span>
                   </div>
                 </div>
-
-                {/* Berkas Wajib */}
-                <div className="theme-card theme-border rounded-2xl border p-5 sm:p-6 shadow-sm">
-                  <div className="mb-4 flex items-center gap-2 border-b theme-border pb-3">
-                    <FileCheck2 size={18} className="text-[var(--color-primary)]" />
-                    <div>
-                      <h2 className="text-sm font-semibold theme-text">
-                        Persyaratan Berkas Wajib <span className="text-[var(--color-danger)]">*</span>
-                      </h2>
-                      <p className="text-xs theme-text-muted">
-                        Dokumen yang harus diunggah pendaftar untuk verifikasi kelulusan
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
-                    {BERKAS_PPDB_OPTIONS.map((item) => {
-                      const isChecked = form.berkasWajib.includes(item.value);
-                      return (
-                        <button
-                          key={item.value}
-                          type="button"
-                          onClick={() => toggleBerkas(item.value)}
-                          className={`flex items-center gap-2.5 rounded-xl border p-3 text-left transition ${
-                            isChecked
-                              ? "border-[var(--color-primary)] bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)]"
-                              : "theme-border hover:bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]"
-                          }`}
-                        >
-                          <input
-                            type="checkbox"
-                            checked={isChecked}
-                            onChange={() => {}} // dikontrol oleh onClick button
-                            className="h-4 w-4 rounded border-gray-300 text-[var(--color-primary)] focus:ring-[var(--color-primary)] cursor-pointer pointer-events-none"
-                          />
-                          <div className="min-w-0 flex-1">
-                            <span className="text-xs font-semibold theme-text block truncate">
-                              {item.label}
-                            </span>
-                            <span className="text-[11px] theme-text-muted block font-mono">
-                              Kode: {item.value}
-                            </span>
+              ) : (
+                <form onSubmit={handleSubmit}>
+                  
+                  {/* ✅ Grid 2 Kolom Responsif (Kiri: Info & Metode, Kanan: Berkas, Jadwal & Tombol) */}
+                  <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+                    
+                    {/* === KOLOM KIRI === */}
+                    <div className="min-w-0 space-y-6">
+                      
+                      {/* Informasi Pokok Jalur */}
+                      <div className="theme-card theme-border rounded-2xl border p-5 sm:p-6 shadow-sm">
+                        <div className="mb-4 flex items-center gap-2 border-b theme-border pb-3">
+                          <Sliders size={18} className="text-[var(--color-primary)]" />
+                          <div>
+                            <h2 className="text-sm font-semibold theme-text">
+                              Informasi Utama Jalur
+                            </h2>
+                            <p className="text-xs theme-text-muted">
+                              Nama, kategori penerimaan, daya tampung kuota, dan status
+                            </p>
                           </div>
+                        </div>
+
+                        <div className="space-y-4">
+                          <div>
+                            <label htmlFor="nama" className="text-xs font-semibold theme-text mb-1 block">
+                              Nama Jalur <span className="text-[var(--color-danger)]">*</span>
+                            </label>
+                            <input
+                              id="nama"
+                              type="text"
+                              value={form.nama}
+                              onChange={(e) => ubah("nama", e.target.value)}
+                              placeholder="Contoh: Jalur Zonasi Domisili"
+                              maxLength={NAMA_MAX}
+                              required
+                              className={`w-full rounded-xl border ${themeNeutralBorder} ${themeNeutralSurface} px-3.5 py-2.5 text-xs theme-text ${themeFocus} outline-none`}
+                            />
+                          </div>
+
+                          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                            <div>
+                              <label htmlFor="kategori" className="text-xs font-semibold theme-text mb-1 block">
+                                Kategori Seleksi <span className="text-[var(--color-danger)]">*</span>
+                              </label>
+                              <select
+                                id="kategori"
+                                value={form.kategori}
+                                onChange={(e) => ubah("kategori", e.target.value)}
+                                className={`w-full rounded-xl border ${themeNeutralBorder} ${themeNeutralSurface} px-3.5 py-2.5 text-xs theme-text ${themeFocus} outline-none cursor-pointer`}
+                              >
+                                {KATEGORI_JALUR_OPTIONS.map((opt) => (
+                                  <option key={opt.value} value={opt.value}>
+                                    {opt.label}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+
+                            <div>
+                              <label htmlFor="kuota" className="text-xs font-semibold theme-text mb-1 block">
+                                Kuota Siswa <span className="text-[var(--color-danger)]">*</span>
+                              </label>
+                              <input
+                                id="kuota"
+                                type="number"
+                                min="1"
+                                value={form.kuota}
+                                onChange={(e) => ubah("kuota", e.target.value)}
+                                placeholder="Contoh: 100"
+                                required
+                                className={`w-full rounded-xl border ${themeNeutralBorder} ${themeNeutralSurface} px-3.5 py-2.5 text-xs theme-text ${themeFocus} outline-none`}
+                              />
+                            </div>
+
+                            <div>
+                              <label htmlFor="status" className="text-xs font-semibold theme-text mb-1 block">
+                                Status Operasional <span className="text-[var(--color-danger)]">*</span>
+                              </label>
+                              <select
+                                id="status"
+                                value={form.status}
+                                onChange={(e) => ubah("status", e.target.value)}
+                                className={`w-full rounded-xl border ${themeNeutralBorder} ${themeNeutralSurface} px-3.5 py-2.5 text-xs theme-text ${themeFocus} outline-none cursor-pointer`}
+                              >
+                                <option value="aktif">Aktif</option>
+                                <option value="nonaktif">Nonaktif</option>
+                              </select>
+                            </div>
+                          </div>
+
+                          <div>
+                            <label htmlFor="deskripsi" className="text-xs font-semibold theme-text mb-1 block">
+                              Deskripsi / Keterangan Jalur
+                            </label>
+                            <textarea
+                              id="deskripsi"
+                              rows={3}
+                              value={form.deskripsi}
+                              onChange={(e) => ubah("deskripsi", e.target.value)}
+                              placeholder="Uraian kriteria, petunjuk singkat pendaftaran, atau keterangan lainnya..."
+                              maxLength={DESKRIPSI_MAX}
+                              className={`w-full rounded-xl border ${themeNeutralBorder} ${themeNeutralSurface} px-3.5 py-2.5 text-xs theme-text ${themeFocus} outline-none`}
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Metode Seleksi & Parameter Ranking */}
+                      <div className="theme-card theme-border rounded-2xl border p-5 sm:p-6 shadow-sm">
+                        <div className="mb-4 flex items-center gap-2 border-b theme-border pb-3">
+                          <Sparkles size={18} className="text-[var(--color-primary)]" />
+                          <div>
+                            <h2 className="text-sm font-semibold theme-text">
+                              Metode Seleksi & Ranking
+                            </h2>
+                            <p className="text-xs theme-text-muted">
+                              Aturan penentuan urutan kelulusan seleksi dan ambang batas
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                          <div>
+                            <label htmlFor="metodeRanking" className="text-xs font-semibold theme-text mb-1 block">
+                              Metode Pemeringkatan
+                            </label>
+                            <select
+                              id="metodeRanking"
+                              value={form.metodeRanking}
+                              onChange={(e) => ubah("metodeRanking", e.target.value)}
+                              className={`w-full rounded-xl border ${themeNeutralBorder} ${themeNeutralSurface} px-3.5 py-2.5 text-xs theme-text ${themeFocus} outline-none cursor-pointer`}
+                            >
+                              {METODE_RANKING_OPTIONS.map((opt) => (
+                                <option key={opt.value} value={opt.value}>
+                                  {opt.label}
+                                </option>
+                              ))}
+                            </select>
+                            <p className="mt-1 text-[11px] theme-text-muted">Dasar pengurutan calon siswa</p>
+                          </div>
+
+                          <div>
+                            <label htmlFor="jarakMaksimalKm" className="text-xs font-semibold theme-text mb-1 block">
+                              Radius Maksimal (Km)
+                            </label>
+                            <input
+                              id="jarakMaksimalKm"
+                              type="number"
+                              step="0.1"
+                              min="0"
+                              max="1000"
+                              value={form.jarakMaksimalKm}
+                              onChange={(e) => ubah("jarakMaksimalKm", e.target.value)}
+                              placeholder="Contoh: 5 (opsional)"
+                              className={`w-full rounded-xl border ${themeNeutralBorder} ${themeNeutralSurface} px-3.5 py-2.5 text-xs theme-text ${themeFocus} outline-none`}
+                            />
+                            <p className="mt-1 text-[11px] theme-text-muted">Kosongkan jika tidak dibatasi radius</p>
+                          </div>
+
+                          <div>
+                            <label htmlFor="nilaiMinimal" className="text-xs font-semibold theme-text mb-1 block">
+                              Ambang Nilai Minimal
+                            </label>
+                            <input
+                              id="nilaiMinimal"
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              max="100"
+                              value={form.nilaiMinimal}
+                              onChange={(e) => ubah("nilaiMinimal", e.target.value)}
+                              placeholder="Contoh: 75.0 (opsional)"
+                              className={`w-full rounded-xl border ${themeNeutralBorder} ${themeNeutralSurface} px-3.5 py-2.5 text-xs theme-text ${themeFocus} outline-none`}
+                            />
+                            <p className="mt-1 text-[11px] theme-text-muted">Syarat nilai minimal rapor / prestasi</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* === KOLOM KANAN === */}
+                    <aside className="flex min-w-0 flex-col gap-6">
+                      
+                      {/* Berkas Wajib */}
+                      <div className="theme-card theme-border rounded-2xl border p-5 sm:p-6 shadow-sm">
+                        <div className="mb-4 flex items-center gap-2 border-b theme-border pb-3">
+                          <FileCheck2 size={18} className="text-[var(--color-primary)]" />
+                          <div>
+                            <h2 className="text-sm font-semibold theme-text">
+                              Persyaratan Berkas <span className="text-[var(--color-danger)]">*</span>
+                            </h2>
+                            <p className="text-xs theme-text-muted">
+                              Berkas wajib unggah
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 gap-2.5">
+                          {BERKAS_PPDB_OPTIONS.map((item) => {
+                            const isChecked = form.berkasWajib.includes(item.value);
+                            return (
+                              <button
+                                key={item.value}
+                                type="button"
+                                onClick={() => toggleBerkas(item.value)}
+                                className={`flex items-center gap-2.5 rounded-xl border p-3 text-left transition ${
+                                  isChecked
+                                    ? "border-[var(--color-primary)] bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)]"
+                                    : "theme-border hover:bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]"
+                                }`}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={isChecked}
+                                  readOnly
+                                  className="h-4 w-4 rounded border-gray-300 text-[var(--color-primary)] focus:ring-[var(--color-primary)] pointer-events-none"
+                                />
+                                <div className="min-w-0 flex-1">
+                                  <span className="text-xs font-semibold theme-text block truncate">
+                                    {item.label}
+                                  </span>
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Jadwal Pendaftaran */}
+                      <div className="theme-card theme-border rounded-2xl border p-5 sm:p-6 shadow-sm">
+                        <div className="mb-4 flex items-center gap-2 border-b theme-border pb-3">
+                          <CalendarDays size={18} className="text-[var(--color-primary)]" />
+                          <div>
+                            <h2 className="text-sm font-semibold theme-text">
+                              Jadwal Pendaftaran
+                            </h2>
+                            <p className="text-xs theme-text-muted">
+                              Periode buka & tutup
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                          <div>
+                            <label htmlFor="tanggalMulai" className="text-xs font-semibold theme-text mb-1 block">
+                              Mulai
+                            </label>
+                            <input
+                              id="tanggalMulai"
+                              type="date"
+                              value={form.tanggalMulai}
+                              onChange={(e) => ubah("tanggalMulai", e.target.value)}
+                              className={`w-full rounded-xl border ${themeNeutralBorder} ${themeNeutralSurface} px-3.5 py-2.5 text-xs theme-text ${themeFocus} outline-none cursor-pointer`}
+                            />
+                          </div>
+
+                          <div>
+                            <label htmlFor="tanggalSelesai" className="text-xs font-semibold theme-text mb-1 block">
+                              Selesai
+                            </label>
+                            <input
+                              id="tanggalSelesai"
+                              type="date"
+                              value={form.tanggalSelesai}
+                              onChange={(e) => ubah("tanggalSelesai", e.target.value)}
+                              className={`w-full rounded-xl border ${themeNeutralBorder} ${themeNeutralSurface} px-3.5 py-2.5 text-xs theme-text ${themeFocus} outline-none cursor-pointer`}
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Tombol Aksi */}
+                      <div className="flex flex-col gap-3 pt-2">
+                        <button
+                          type="submit"
+                          disabled={saving}
+                          className={`${themePrimaryGradient} inline-flex w-full items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:brightness-95 disabled:opacity-50`}
+                        >
+                          {saving ? (
+                            <>
+                              <Loader2 size={16} className="animate-spin" />
+                              <span>Menyimpan...</span>
+                            </>
+                          ) : (
+                            <>
+                              <Save size={16} />
+                              <span>{modeEdit ? "Perbarui Jalur" : "Buat Jalur PPDB"}</span>
+                            </>
+                          )}
                         </button>
-                      );
-                    })}
+
+                        <Link
+                          href="/admin/spmb/jalur"
+                          className="theme-card theme-border theme-text-secondary inline-flex w-full items-center justify-center rounded-xl border px-5 py-3 text-sm font-semibold transition hover:opacity-80"
+                        >
+                          Batal
+                        </Link>
+                      </div>
+                    </aside>
+
                   </div>
-                </div>
-
-                {/* Periode Pendaftaran */}
-                <div className="theme-card theme-border rounded-2xl border p-5 sm:p-6 shadow-sm">
-                  <div className="mb-4 flex items-center gap-2 border-b theme-border pb-3">
-                    <CalendarDays size={18} className="text-[var(--color-primary)]" />
-                    <div>
-                      <h2 className="text-sm font-semibold theme-text">
-                        Jadwal & Periode Pendaftaran
-                      </h2>
-                      <p className="text-xs theme-text-muted">
-                        Rentang tanggal buka dan penutupan pendaftaran jalur ini (opsional)
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <div>
-                      <label
-                        htmlFor="tanggalMulai"
-                        className="text-xs font-semibold theme-text mb-1 block"
-                      >
-                        Tanggal Mulai
-                      </label>
-                      <input
-                        id="tanggalMulai"
-                        type="date"
-                        value={form.tanggalMulai}
-                        onChange={(e) => ubah("tanggalMulai", e.target.value)}
-                        className={`w-full rounded-xl border ${themeNeutralBorder} ${themeNeutralSurface} px-3.5 py-2.5 text-xs theme-text ${themeFocus} outline-none cursor-pointer`}
-                      />
-                    </div>
-
-                    <div>
-                      <label
-                        htmlFor="tanggalSelesai"
-                        className="text-xs font-semibold theme-text mb-1 block"
-                      >
-                        Tanggal Selesai
-                      </label>
-                      <input
-                        id="tanggalSelesai"
-                        type="date"
-                        value={form.tanggalSelesai}
-                        onChange={(e) => ubah("tanggalSelesai", e.target.value)}
-                        className={`w-full rounded-xl border ${themeNeutralBorder} ${themeNeutralSurface} px-3.5 py-2.5 text-xs theme-text ${themeFocus} outline-none cursor-pointer`}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Tombol Simpan */}
-                <div className="flex items-center justify-end gap-3 pt-2">
-                  <Link
-                    href="/admin/spmb/jalur"
-                    className="rounded-xl border theme-border px-4 py-2.5 text-xs font-semibold theme-text-secondary hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] transition"
-                  >
-                    Batal
-                  </Link>
-
-                  <button
-                    type="submit"
-                    disabled={saving}
-                    className={`${themePrimaryGradient} inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-xs font-semibold text-[var(--color-card)] shadow-sm transition hover:brightness-95 disabled:opacity-50`}
-                  >
-                    {saving ? (
-                      <>
-                        <Loader2 size={14} className="animate-spin" />
-                        <span>Menyimpan...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Save size={14} />
-                        <span>{modeEdit ? "Perbarui Jalur" : "Buat Jalur PPDB"}</span>
-                      </>
-                    )}
-                  </button>
-                </div>
-              </form>
-            )}
-          </div>
-        </main>
+                </form>
+              )}
+            </div>
+          </main>
+        </div>
       </div>
     </div>
   );

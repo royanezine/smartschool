@@ -39,50 +39,26 @@ import {
   Database,
   Activity,
   MoreHorizontal,
+  Clock,
+  BadgeCheck,
 } from "lucide-react";
-
 
 const API_URL = (
   process.env.NEXT_PUBLIC_API_URL ||
   "http://localhost:5000"
 ).replace(/\/$/, "");
 
-
-
-
-
-
-
 const extractUsers = (response) => {
-  if (Array.isArray(response)) {
-    return response;
-  }
-
-  if (Array.isArray(response?.data)) {
-    return response.data;
-  }
-
-  if (Array.isArray(response?.data?.data)) {
-    return response.data.data;
-  }
-
-  if (Array.isArray(response?.data?.items)) {
-    return response.data.items;
-  }
-
-  if (Array.isArray(response?.items)) {
-    return response.items;
-  }
+  if (Array.isArray(response)) return response;
+  if (Array.isArray(response?.data)) return response.data;
+  if (Array.isArray(response?.data?.data)) return response.data.data;
+  if (Array.isArray(response?.data?.items)) return response.data.items;
+  if (Array.isArray(response?.items)) return response.items;
 
   return [];
 };
 
-
-const extractPagination = (
-  response,
-  fallbackPage,
-  fallbackLimit,
-) => {
+const extractPagination = (response, fallbackPage, fallbackLimit) => {
   const pagination =
     response?.pagination ||
     response?.meta ||
@@ -96,7 +72,7 @@ const extractPagination = (
         pagination.currentPage ??
           pagination.current_page ??
           pagination.page ??
-          fallbackPage,
+          fallbackPage
       ) || fallbackPage,
 
     totalPages:
@@ -104,7 +80,7 @@ const extractPagination = (
         pagination.totalPages ??
           pagination.total_pages ??
           pagination.pages ??
-          1,
+          1
       ) || 1,
 
     totalData:
@@ -112,7 +88,7 @@ const extractPagination = (
         pagination.totalData ??
           pagination.total_data ??
           pagination.total ??
-          0,
+          0
       ) || 0,
 
     limit:
@@ -120,44 +96,28 @@ const extractPagination = (
         pagination.limit ??
           pagination.perPage ??
           pagination.per_page ??
-          fallbackLimit,
+          fallbackLimit
       ) || fallbackLimit,
   };
 };
 
-
 const normalizeRole = (role) => {
-  const value = String(role || "")
-    .trim()
-    .toLowerCase();
+  const value = String(role || "").trim().toLowerCase();
 
-  if (value.includes("guru")) {
-    return "Guru";
-  }
+  if (value.includes("guru")) return "Guru";
+  if (value.includes("siswa")) return "Siswa";
 
-  if (value.includes("siswa")) {
-    return "Siswa";
-  }
-
-  if (
-    value.includes("staff") ||
-    value.includes("staf")
-  ) {
+  if (value.includes("staff") || value.includes("staf")) {
     return "Staff";
   }
 
-  if (value.includes("admin")) {
-    return "Admin";
-  }
+  if (value.includes("admin")) return "Admin";
 
   return role || "-";
 };
 
-
 const normalizeStatus = (status) => {
-  const value = String(status || "")
-    .trim()
-    .toLowerCase();
+  const value = String(status || "").trim().toLowerCase();
 
   if (
     value === "aktif" ||
@@ -171,11 +131,8 @@ const normalizeStatus = (status) => {
   return "Nonaktif";
 };
 
-
 const getInitials = (name) => {
-  if (!name) {
-    return "U";
-  }
+  if (!name) return "U";
 
   const words = String(name)
     .trim()
@@ -183,9 +140,7 @@ const getInitials = (name) => {
     .filter(Boolean);
 
   if (words.length === 1) {
-    return words[0]
-      .substring(0, 2)
-      .toUpperCase();
+    return words[0].substring(0, 2).toUpperCase();
   }
 
   return (
@@ -194,22 +149,92 @@ const getInitials = (name) => {
   ).toUpperCase();
 };
 
+const normalizeJabatan = (user) => {
+  const jabatan =
+    user?.kategoriJabatan?.nama ||
+    user?.kategoriJabatan?.namaJabatan ||
+    user?.kategori_jabatan?.nama ||
+    user?.kategori_jabatan?.nama_jabatan ||
 
-const normalizeUser = (
-  user,
-  index,
-) => {
+    user?.jabatan?.namaTampilan ||
+    user?.jabatan?.nama ||
+    user?.jabatan?.namaJabatan ||
+    user?.jabatan?.label ||
+
+    (typeof user?.jabatan === "string"
+      ? user.jabatan
+      : null) ||
+
+    user?.pegawai?.kategoriJabatan?.nama ||
+    user?.pegawai?.jabatan?.nama ||
+    user?.pegawai?.jabatan ||
+
+    user?.namaJabatan ||
+    user?.posisi ||
+    user?.keterangan;
+
+  return jabatan || "-";
+};
+
+const normalizeShift = (user) => {
+  const shiftMaster =
+    user?.shiftKerjaMaster ||
+    user?.shift_kerja_master ||
+    null;
+
+  const shiftValue =
+    user?.shiftKerja ||
+    user?.shift_kerja ||
+    null;
+
+  const nama =
+    shiftMaster?.nama ||
+    shiftMaster?.kode ||
+    shiftValue ||
+    null;
+
+  const jamMasuk =
+    shiftMaster?.jamMasuk ||
+    shiftMaster?.jam_masuk ||
+    null;
+
+  const jamKeluar =
+    shiftMaster?.jamKeluar ||
+    shiftMaster?.jam_keluar ||
+    null;
+
+  if (!nama) {
+    return {
+      nama: "-",
+      jamMasuk: null,
+      jamKeluar: null,
+      label: "Shift belum diatur",
+    };
+  }
+
+  return {
+    nama,
+    jamMasuk,
+    jamKeluar,
+    label:
+      jamMasuk && jamKeluar
+        ? `${nama} (${jamMasuk} - ${jamKeluar})`
+        : nama,
+  };
+};
+
+const normalizeUser = (user, index) => {
   const role =
     user?.peran?.namaTampilan ||
     user?.peran?.nama ||
     user?.role ||
-    user?.peran ||
+    (typeof user?.peran === "string"
+      ? user.peran
+      : null) ||
     "-";
 
   return {
-    id:
-      user?.id ||
-      `user-${index}`,
+    id: user?.id || `user-${index}`,
 
     nama:
       user?.namaLengkap ||
@@ -227,27 +252,23 @@ const normalizeUser = (
 
     noTelepon:
       user?.noTelepon ||
+      user?.nomorTelepon ||
+      user?.telepon ||
       "-",
 
     peran: normalizeRole(role),
-
-    peranRaw:
-      user?.peran?.nama ||
-      role,
+    peranRaw: role,
 
     peranId:
       user?.peran?.id ||
       user?.peranId ||
       null,
 
-    jabatan:
-      user?.jabatan ||
-      "-",
+    jabatan: normalizeJabatan(user),
 
-    status:
-      normalizeStatus(
-        user?.status,
-      ),
+    shift: normalizeShift(user),
+
+    status: normalizeStatus(user?.status),
 
     statusRaw:
       user?.status ||
@@ -255,19 +276,12 @@ const normalizeUser = (
 
     avatar:
       user?.avatar ||
+      user?.fotoProfil ||
       null,
 
-    nip:
-      user?.nip ||
-      null,
-
-    nipd:
-      user?.nipd ||
-      null,
-
-    nisn:
-      user?.nisn ||
-      null,
+    nip: user?.nip || null,
+    nipd: user?.nipd || null,
+    nisn: user?.nisn || null,
 
     golongan:
       user?.golongan ||
@@ -283,10 +297,10 @@ const normalizeUser = (
 
     dibuatPada:
       user?.dibuatPada ||
+      user?.createdAt ||
       null,
   };
 };
-
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]";
@@ -297,42 +311,33 @@ const themePrimarySoftBorder =
 const themePrimaryHover =
   "hover:bg-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]";
 
-const themeTextHover =
-  "hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
-
 const themeCardShadow =
   "shadow-[0_6px_24px_color-mix(in_srgb,var(--color-text)_6%,transparent)]";
 
 const themePrimaryShadow =
   "shadow-[0_10px_25px_color-mix(in_srgb,var(--color-primary)_20%,transparent)]";
 
-
 const roleConfig = {
   Guru: {
     icon: GraduationCap,
-    className:
-      "theme-primary",
+    className: "theme-primary",
   },
 
   Siswa: {
     icon: UserRound,
-    className:
-      "theme-info",
+    className: "theme-info",
   },
 
   Staff: {
     icon: BriefcaseBusiness,
-    className:
-      "theme-warning",
+    className: "theme-warning",
   },
 
   Admin: {
     icon: ShieldCheck,
-    className:
-      "theme-primary",
+    className: "theme-primary",
   },
 };
-
 
 function RoleBadge({ role }) {
   const config = roleConfig[role] || {
@@ -345,18 +350,10 @@ function RoleBadge({ role }) {
   return (
     <span
       className={`
-        inline-flex
-        items-center
-        gap-1.5
-        px-2.5
-        py-1
-        rounded-full
-        border
-        theme-border
+        inline-flex items-center gap-1.5
+        px-2.5 py-1 rounded-full border theme-border
         ${config.className}
-        text-[11px]
-        font-semibold
-        whitespace-nowrap
+        text-[11px] font-semibold whitespace-nowrap
       `}
     >
       <Icon size={12} />
@@ -365,29 +362,16 @@ function RoleBadge({ role }) {
   );
 }
 
-
 function StatusBadge({ status }) {
   const active = status === "Aktif";
 
   return (
     <span
       className={`
-        inline-flex
-        items-center
-        gap-1.5
-        px-2.5
-        py-1
-        rounded-full
-        border
-        theme-border
-        ${
-          active
-            ? "theme-success"
-            : "theme-danger"
-        }
-        text-[11px]
-        font-semibold
-        whitespace-nowrap
+        inline-flex items-center gap-1.5
+        px-2.5 py-1 rounded-full border theme-border
+        ${active ? "theme-success" : "theme-danger"}
+        text-[11px] font-semibold whitespace-nowrap
       `}
     >
       {active ? (
@@ -401,6 +385,34 @@ function StatusBadge({ status }) {
   );
 }
 
+function ShiftDisplay({ shift }) {
+  if (!shift || shift.nama === "-") {
+    return (
+      <span className="text-xs theme-text-muted">
+        Shift belum diatur
+      </span>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-1">
+      <span className="text-xs font-semibold theme-text">
+        {shift.nama}
+      </span>
+
+      {shift.jamMasuk && shift.jamKeluar ? (
+        <span className="inline-flex items-center gap-1 text-[11px] theme-text-muted">
+          <Clock size={11} />
+          {shift.jamMasuk} - {shift.jamKeluar}
+        </span>
+      ) : (
+        <span className="text-[11px] theme-text-muted">
+          Jam kerja belum tersedia
+        </span>
+      )}
+    </div>
+  );
+}
 
 function StatCard({
   title,
@@ -413,16 +425,10 @@ function StatCard({
   return (
     <div
       className={`
-        theme-card
-        rounded-2xl
-        border
-        theme-border
-        p-4
-        sm:p-5
-        ${themeCardShadow}
+        theme-card rounded-2xl border theme-border
+        p-4 sm:p-5 ${themeCardShadow}
         hover:shadow-[0_10px_30px_color-mix(in_srgb,var(--color-text)_10%,transparent)]
-        transition-all
-        duration-200
+        transition-all duration-200
       `}
     >
       <div className="flex items-start justify-between gap-3">
@@ -432,16 +438,7 @@ function StatCard({
           </p>
 
           {loading ? (
-            <div
-              className="
-                mt-2
-                h-8
-                w-16
-                animate-pulse
-                rounded-lg
-                bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]
-              "
-            />
+            <div className="mt-2 h-8 w-16 animate-pulse rounded-lg bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]" />
           ) : (
             <p className="mt-1.5 text-2xl sm:text-3xl font-bold theme-text">
               {value}
@@ -455,79 +452,44 @@ function StatCard({
 
         <div
           className={`
-            w-10
-            h-10
-            rounded-xl
-            ${themePrimarySoft}
-            border
-            ${themePrimarySoftBorder}
-            flex
-            items-center
-            justify-center
-            shrink-0
+            w-10 h-10 rounded-xl ${themePrimarySoft}
+            border ${themePrimarySoftBorder}
+            flex items-center justify-center shrink-0
           `}
         >
-          <Icon
-            size={18}
-            className={iconClass}
-          />
+          <Icon size={18} className={iconClass} />
         </div>
       </div>
     </div>
   );
 }
 
-
 export default function PenggunaPage() {
   const router = useRouter();
 
-  const [sidebarOpen, setSidebarOpen] =
-    useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [users, setUsers] = useState([]);
 
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState("");
 
-  const [users, setUsers] =
-    useState([]);
+  const [search, setSearch] = useState("");
+  const [roleFilter, setRoleFilter] = useState("Semua");
+  const [statusFilter, setStatusFilter] = useState("Semua");
 
-  const [loading, setLoading] =
-    useState(true);
-
-  const [refreshing, setRefreshing] =
-    useState(false);
-
-  const [error, setError] =
-    useState("");
-
-
-  const [search, setSearch] =
-    useState("");
-
-  const [roleFilter, setRoleFilter] =
-    useState("Semua");
-
-  const [statusFilter, setStatusFilter] =
-    useState("Semua");
-
-
-  const [page, setPage] =
-    useState(1);
-
+  const [page, setPage] = useState(1);
   const LIMIT = 7;
 
-  const [pagination, setPagination] =
-    useState({
-      currentPage: 1,
-      totalPages: 1,
-      totalData: 0,
-      limit: LIMIT,
-    });
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    totalData: 0,
+    limit: LIMIT,
+  });
 
-
-  const [selectedUser, setSelectedUser] =
-    useState(null);
-
-  const [updatingStatus, setUpdatingStatus] =
-    useState(false);
-
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [updatingStatus, setUpdatingStatus] = useState(false);
 
   const fetchUsers = useCallback(
     async ({
@@ -553,8 +515,6 @@ export default function PenggunaPage() {
           Admin: "admin",
         };
 
-        // Memakai service resmi pengguna (services/user.service.ts) agar
-        // kontrak endpoint /api/users konsisten dengan backend.
         const result = await getUsers({
           page: pageNumber,
           limit: LIMIT,
@@ -574,48 +534,36 @@ export default function PenggunaPage() {
               : undefined,
         });
 
-        const rawUsers =
-          extractUsers(result);
+        const rawUsers = extractUsers(result);
 
-        const normalizedUsers =
-          rawUsers.map(
-            normalizeUser,
-          );
-
-        const paginationData =
-          extractPagination(
-            result,
-            pageNumber,
-            LIMIT,
-          );
-
-        setUsers(
-          normalizedUsers,
+        const normalizedUsers = rawUsers.map(
+          normalizeUser
         );
 
-        setPagination(
-          paginationData,
+        const paginationData = extractPagination(
+          result,
+          pageNumber,
+          LIMIT
         );
+
+        setUsers(normalizedUsers);
+        setPagination(paginationData);
       } catch (err) {
-        console.error(
-          "GET USERS ERROR:",
-          err,
-        );
+        console.error("GET USERS ERROR:", err);
 
         setUsers([]);
 
         setError(
           err?.message ||
-            "Gagal mengambil data pengguna.",
+            "Gagal mengambil data pengguna."
         );
       } finally {
         setLoading(false);
         setRefreshing(false);
       }
     },
-    [],
+    []
   );
-
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -626,6 +574,7 @@ export default function PenggunaPage() {
         statusValue: statusFilter,
       });
     }, 0);
+
     return () => clearTimeout(timer);
   }, [
     page,
@@ -635,90 +584,52 @@ export default function PenggunaPage() {
     fetchUsers,
   ]);
 
+  const statistics = useMemo(() => {
+    return {
+      total:
+        pagination.totalData ||
+        users.length,
 
-  const statistics =
-    useMemo(() => {
-      return {
-        total:
-          pagination.totalData ||
-          users.length,
+      guru: users.filter(
+        (item) => item.peran === "Guru"
+      ).length,
 
-        guru:
-          users.filter(
-            (item) =>
-              item.peran === "Guru",
-          ).length,
+      siswa: users.filter(
+        (item) => item.peran === "Siswa"
+      ).length,
 
-        siswa:
-          users.filter(
-            (item) =>
-              item.peran === "Siswa",
-          ).length,
+      staff: users.filter(
+        (item) => item.peran === "Staff"
+      ).length,
 
-        staff:
-          users.filter(
-            (item) =>
-              item.peran === "Staff",
-          ).length,
+      admin: users.filter(
+        (item) => item.peran === "Admin"
+      ).length,
 
-        admin:
-          users.filter(
-            (item) =>
-              item.peran === "Admin",
-          ).length,
+      aktif: users.filter(
+        (item) => item.status === "Aktif"
+      ).length,
 
-        aktif:
-          users.filter(
-            (item) =>
-              item.status ===
-              "Aktif",
-          ).length,
+      nonaktif: users.filter(
+        (item) => item.status === "Nonaktif"
+      ).length,
+    };
+  }, [users, pagination.totalData]);
 
-        nonaktif:
-          users.filter(
-            (item) =>
-              item.status ===
-              "Nonaktif",
-          ).length,
-      };
-    }, [
-      users,
-      pagination.totalData,
-    ]);
-
-
-  const handleSearchChange = (
-    event,
-  ) => {
-    setSearch(
-      event.target.value,
-    );
-
+  const handleSearchChange = (event) => {
+    setSearch(event.target.value);
     setPage(1);
   };
 
-
-  const handleRoleChange = (
-    event,
-  ) => {
-    setRoleFilter(
-      event.target.value,
-    );
-
+  const handleRoleChange = (event) => {
+    setRoleFilter(event.target.value);
     setPage(1);
   };
 
-
-  const handleStatusChange = (
-    event,
-  ) => {
-    setStatusFilter(
-      event.target.value,
-    );
-
+  const handleStatusChange = (event) => {
+    setStatusFilter(event.target.value);
     setPage(1);
   };
-
 
   const handleResetFilter = () => {
     setSearch("");
@@ -727,12 +638,10 @@ export default function PenggunaPage() {
     setPage(1);
   };
 
-
   const handleRoleFilter = (role) => {
     setRoleFilter(role);
     setPage(1);
   };
-
 
   const handleRefresh = () => {
     fetchUsers({
@@ -744,108 +653,70 @@ export default function PenggunaPage() {
     });
   };
 
+  const handleDetail = (user) => {
+    if (!user?.id) return;
 
-  const handleDetail = (
-    user,
-  ) => {
-    if (!user?.id) {
-      return;
-    }
-
-    router.push(
-      `/admin/pengguna/${user.id}`,
-    );
+    router.push(`/admin/pengguna/${user.id}`);
   };
 
+  const handleEdit = (user) => {
+    if (!user?.id) return;
 
-  const handleEdit = (
-    user,
-  ) => {
-    if (!user?.id) {
-      return;
-    }
-
-    router.push(
-      `/admin/pengguna/${user.id}/edit`,
-    );
+    router.push(`/admin/pengguna/${user.id}/edit`);
   };
 
-
-  const handleOpenStatusModal = (
-    user,
-  ) => {
+  const handleOpenStatusModal = (user) => {
     setSelectedUser(user);
   };
 
-
   const handleCloseStatusModal = () => {
-    if (updatingStatus) {
-      return;
-    }
+    if (updatingStatus) return;
 
     setSelectedUser(null);
   };
 
+  const handleUpdateStatus = async () => {
+    if (!selectedUser?.id || updatingStatus) return;
 
-  const handleUpdateStatus =
-    async () => {
-      if (
-        !selectedUser?.id ||
-        updatingStatus
-      ) {
-        return;
-      }
+    try {
+      setUpdatingStatus(true);
+      setError("");
 
-      try {
-        setUpdatingStatus(true);
-        setError("");
+      const newStatus =
+        selectedUser.status === "Aktif"
+          ? "nonaktif"
+          : "aktif";
 
-        const newStatus =
-          selectedUser.status ===
-          "Aktif"
-            ? "nonaktif"
-            : "aktif";
+      await updateUserStatus(
+        selectedUser.id,
+        newStatus
+      );
 
-        await updateUserStatus(selectedUser.id, newStatus);
+      setSelectedUser(null);
 
-        setSelectedUser(null);
+      await fetchUsers({
+        pageNumber: page,
+        searchValue: search,
+        roleValue: roleFilter,
+        statusValue: statusFilter,
+      });
+    } catch (err) {
+      console.error("UPDATE STATUS ERROR:", err);
 
-        await fetchUsers({
-          pageNumber: page,
-          searchValue: search,
-          roleValue: roleFilter,
-          statusValue: statusFilter,
-        });
-      } catch (err) {
-        console.error(
-          "UPDATE STATUS ERROR:",
-          err,
-        );
-
-        setError(
-          err?.message ||
-            "Gagal mengubah status pengguna.",
-        );
-      } finally {
-        setUpdatingStatus(false);
-      }
-    };
-
+      setError(
+        err?.message ||
+          "Gagal mengubah status pengguna."
+      );
+    } finally {
+      setUpdatingStatus(false);
+    }
+  };
 
   const handleExport = () => {
-    if (!users.length) {
-      return;
-    }
+    if (!users.length) return;
 
-    const escapeCsv = (
-      value,
-    ) =>
-      `"${String(
-        value ?? "",
-      ).replaceAll(
-        '"',
-        '""',
-      )}"`;
+    const escapeCsv = (value) =>
+      `"${String(value ?? "").replaceAll('"', '""')}"`;
 
     const headers = [
       "Nama Lengkap",
@@ -854,47 +725,41 @@ export default function PenggunaPage() {
       "No. Telepon",
       "Peran",
       "Jabatan",
+      "Shift Kerja",
+      "Jam Masuk",
+      "Jam Keluar",
       "Status",
     ];
 
-    const rows = users.map(
-      (user) => [
-        user.nama,
-        user.username,
-        user.email,
-        user.noTelepon,
-        user.peran,
-        user.jabatan,
-        user.status,
-      ],
-    );
+    const rows = users.map((user) => [
+      user.nama,
+      user.username,
+      user.email,
+      user.noTelepon,
+      user.peran,
+      user.jabatan,
+      user.shift.nama,
+      user.shift.jamMasuk || "-",
+      user.shift.jamKeluar || "-",
+      user.status,
+    ]);
 
     const csv = [
-      headers
-        .map(escapeCsv)
-        .join(","),
+      headers.map(escapeCsv).join(","),
       ...rows.map((row) =>
-        row
-          .map(escapeCsv)
-          .join(","),
+        row.map(escapeCsv).join(",")
       ),
     ].join("\n");
 
-    const blob =
-      new Blob(
-        ["\ufeff" + csv],
-        {
-          type: "text/csv;charset=utf-8;",
-        },
-      );
+    const blob = new Blob(
+      ["\ufeff" + csv],
+      {
+        type: "text/csv;charset=utf-8;",
+      }
+    );
 
-    const url =
-      URL.createObjectURL(blob);
-
-    const link =
-      document.createElement(
-        "a",
-      );
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
 
     link.href = url;
 
@@ -903,127 +768,76 @@ export default function PenggunaPage() {
         .toISOString()
         .slice(0, 10)}.csv`;
 
-    document.body.appendChild(
-      link,
-    );
-
+    document.body.appendChild(link);
     link.click();
-
-    document.body.removeChild(
-      link,
-    );
+    document.body.removeChild(link);
 
     URL.revokeObjectURL(url);
   };
 
+  const pageNumbers = useMemo(() => {
+    const totalPages =
+      pagination.totalPages || 1;
 
-  const pageNumbers =
-    useMemo(() => {
-      const totalPages =
-        pagination.totalPages ||
-        1;
+    const currentPage =
+      pagination.currentPage || page;
 
-      const currentPage =
-        pagination.currentPage ||
-        page;
+    const result = [];
 
-      const result = [];
+    const start = Math.max(
+      1,
+      currentPage - 2
+    );
 
-      const start = Math.max(
-        1,
-        currentPage - 2,
-      );
+    const end = Math.min(
+      totalPages,
+      currentPage + 2
+    );
 
-      const end = Math.min(
-        totalPages,
-        currentPage + 2,
-      );
+    for (let i = start; i <= end; i++) {
+      result.push(i);
+    }
 
-      for (
-        let i = start;
-        i <= end;
-        i++
-      ) {
-        result.push(i);
-      }
-
-      return result;
-    }, [
-      pagination.totalPages,
-      pagination.currentPage,
-      page,
-    ]);
-
+    return result;
+  }, [
+    pagination.totalPages,
+    pagination.currentPage,
+    page,
+  ]);
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
-
       <Sidebar
         role="admin"
         activeMenu="pengguna"
         isOpen={sidebarOpen}
-        onToggle={() =>
-          setSidebarOpen(
-            !sidebarOpen,
-          )
-        }
+        onToggle={() => setSidebarOpen(!sidebarOpen)}
       />
 
-
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
-
         <Header
           title="Pengguna"
-          onMenuClick={() =>
-            setSidebarOpen(
-              !sidebarOpen,
-            )
-          }
+          onMenuClick={() => setSidebarOpen(!sidebarOpen)}
         />
-
 
         <main className="flex-1 overflow-y-auto">
           <div className="p-4 sm:p-6 lg:p-8 space-y-5 sm:space-y-6">
 
-            <div
-              className="
-                flex
-                flex-col
-                lg:flex-row
-                lg:items-center
-                lg:justify-between
-                gap-4
-              "
-            >
-
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
               <div className="flex items-center gap-3">
                 <div
                   className={`
-                    w-11
-                    h-11
-                    rounded-xl
+                    w-11 h-11 rounded-xl
                     bg-[var(--color-primary)]
-                    text-white
-                    flex
-                    items-center
-                    justify-center
-                    ${themePrimaryShadow}
-                    shrink-0
+                    text-white flex items-center justify-center
+                    ${themePrimaryShadow} shrink-0
                   `}
                 >
                   <Users size={20} />
                 </div>
 
                 <div className="min-w-0">
-                  <h1
-                    className="
-                      text-xl
-                      sm:text-2xl
-                      font-bold
-                      theme-text
-                      truncate
-                    "
-                  >
+                  <h1 className="text-xl sm:text-2xl font-bold theme-text truncate">
                     Pengguna
                   </h1>
 
@@ -1033,98 +847,50 @@ export default function PenggunaPage() {
                 </div>
               </div>
 
-
               <div className="flex flex-col sm:flex-row gap-2">
-
                 <button
                   type="button"
                   onClick={handleRefresh}
                   disabled={refreshing}
                   className="
-                    inline-flex
-                    items-center
-                    justify-center
-                    gap-2
-                    px-4
-                    py-2.5
-                    rounded-xl
-                    border
-                    theme-border
-                    theme-card
-                    theme-text-secondary
-                    text-sm
-                    font-semibold
+                    inline-flex items-center justify-center gap-2
+                    px-4 py-2.5 rounded-xl border theme-border
+                    theme-card theme-text-secondary text-sm font-semibold
                     hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]
-                    transition
-                    disabled:cursor-not-allowed
-                    disabled:opacity-60
+                    transition disabled:cursor-not-allowed disabled:opacity-60
                   "
                 >
                   <RefreshCw
                     size={15}
-                    className={
-                      refreshing
-                        ? "animate-spin"
-                        : ""
-                    }
+                    className={refreshing ? "animate-spin" : ""}
                   />
-
                   Refresh
                 </button>
-
 
                 <button
                   type="button"
                   onClick={handleExport}
-                  disabled={
-                    loading || !users.length
-                  }
+                  disabled={loading || !users.length}
                   className="
-                    inline-flex
-                    items-center
-                    justify-center
-                    gap-2
-                    px-4
-                    py-2.5
-                    rounded-xl
-                    border
-                    theme-border
-                    theme-card
-                    theme-text-secondary
-                    text-sm
-                    font-semibold
+                    inline-flex items-center justify-center gap-2
+                    px-4 py-2.5 rounded-xl border theme-border
+                    theme-card theme-text-secondary text-sm font-semibold
                     hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]
-                    transition
-                    disabled:cursor-not-allowed
-                    disabled:opacity-60
+                    transition disabled:cursor-not-allowed disabled:opacity-60
                   "
                 >
                   <Download size={15} />
                   Export
                 </button>
 
-
                 <button
                   type="button"
-                  onClick={() =>
-                    router.push(
-                      "/admin/pengguna/tambah",
-                    )
-                  }
+                  onClick={() => router.push("/admin/pengguna/tambah")}
                   className="
-                    inline-flex
-                    items-center
-                    justify-center
-                    gap-2
-                    px-4
-                    py-2.5
-                    rounded-xl
-                    bg-[var(--color-primary)]
-                    text-white
-                    text-sm
-                    font-semibold
-                    hover:brightness-110
-                    transition
+                    inline-flex items-center justify-center gap-2
+                    px-4 py-2.5 rounded-xl
+                    bg-[var(--color-primary)] text-white
+                    text-sm font-semibold hover:brightness-110 transition
                   "
                 >
                   <Plus size={16} />
@@ -1133,23 +899,9 @@ export default function PenggunaPage() {
               </div>
             </div>
 
-
             {error && (
-              <div
-                className="
-                  flex
-                  items-start
-                  gap-3
-                  rounded-xl
-                  border
-                  theme-danger
-                  p-4
-                "
-              >
-                <AlertCircle
-                  size={19}
-                  className="mt-0.5 shrink-0"
-                />
+              <div className="flex items-start gap-3 rounded-xl border theme-danger p-4">
+                <AlertCircle size={19} className="mt-0.5 shrink-0" />
 
                 <div className="flex-1">
                   <p className="text-sm font-semibold">
@@ -1163,30 +915,15 @@ export default function PenggunaPage() {
 
                 <button
                   type="button"
-                  onClick={() =>
-                    setError("")
-                  }
-                  className="
-                    opacity-70
-                    hover:opacity-100
-                    transition
-                  "
+                  onClick={() => setError("")}
+                  className="opacity-70 hover:opacity-100 transition"
                 >
                   <X size={18} />
                 </button>
               </div>
             )}
 
-
-            <div
-              className="
-                grid
-                grid-cols-2
-                lg:grid-cols-4
-                gap-3
-                sm:gap-4
-              "
-            >
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
               <StatCard
                 title="Total Pengguna"
                 value={statistics.total}
@@ -1224,42 +961,21 @@ export default function PenggunaPage() {
               />
             </div>
 
-
             <section
               className={`
-                theme-card
-                rounded-2xl
-                border
-                theme-border
-                ${themeCardShadow}
-                overflow-hidden
+                theme-card rounded-2xl border theme-border
+                ${themeCardShadow} overflow-hidden
               `}
             >
               <div className="p-4 sm:p-5 lg:p-6">
-                <div
-                  className="
-                    flex
-                    flex-col
-                    xl:flex-row
-                    xl:items-center
-                    xl:justify-between
-                    gap-5
-                  "
-                >
-
+                <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-5">
                   <div>
                     <div className="flex items-center gap-2">
                       <div
                         className={`
-                          w-8
-                          h-8
-                          rounded-lg
-                          ${themePrimarySoft}
-                          border
-                          ${themePrimarySoftBorder}
-                          flex
-                          items-center
-                          justify-center
+                          w-8 h-8 rounded-lg ${themePrimarySoft}
+                          border ${themePrimarySoftBorder}
+                          flex items-center justify-center
                         `}
                       >
                         <Activity
@@ -1278,200 +994,83 @@ export default function PenggunaPage() {
                     </p>
                   </div>
 
-
-                  <div
-                    className="
-                      grid
-                      grid-cols-2
-                      sm:grid-cols-4
-                      gap-2
-                      w-full
-                      xl:w-auto
-                    "
-                  >
-
-                    <button
-                      type="button"
-                      onClick={() =>
-                        handleRoleFilter("Semua")
-                      }
-                      className={`
-                        px-4
-                        py-3
-                        rounded-xl
-                        border
-                        text-left
-                        transition
-                        ${
-                          roleFilter === "Semua"
-                            ? `${themePrimarySoft} ${themePrimarySoftBorder}`
-                            : "theme-card theme-border"
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 w-full xl:w-auto">
+                    {[
+                      {
+                        label: "Semua",
+                        value: statistics.total,
+                      },
+                      {
+                        label: "Guru",
+                        value: statistics.guru,
+                      },
+                      {
+                        label: "Siswa",
+                        value: statistics.siswa,
+                      },
+                      {
+                        label: "Staff",
+                        value: statistics.staff,
+                      },
+                    ].map((item) => (
+                      <button
+                        key={item.label}
+                        type="button"
+                        onClick={() =>
+                          handleRoleFilter(item.label)
                         }
-                      `}
-                    >
-                      <p className="text-[10px] theme-text-muted">
-                        Semua
-                      </p>
+                        className={`
+                          px-4 py-3 rounded-xl border text-left transition
+                          ${
+                            roleFilter === item.label
+                              ? `${themePrimarySoft} ${themePrimarySoftBorder}`
+                              : "theme-card theme-border"
+                          }
+                        `}
+                      >
+                        <p className="text-[10px] theme-text-muted">
+                          {item.label}
+                        </p>
 
-                      <p className="text-lg font-bold theme-text mt-1">
-                        {statistics.total}
-                      </p>
-                    </button>
-
-
-                    <button
-                      type="button"
-                      onClick={() =>
-                        handleRoleFilter("Guru")
-                      }
-                      className={`
-                        px-4
-                        py-3
-                        rounded-xl
-                        border
-                        text-left
-                        transition
-                        ${
-                          roleFilter === "Guru"
-                            ? `${themePrimarySoft} ${themePrimarySoftBorder}`
-                            : "theme-card theme-border"
-                        }
-                      `}
-                    >
-                      <p className="text-[10px] theme-text-muted">
-                        Guru
-                      </p>
-
-                      <p className="text-lg font-bold theme-text mt-1">
-                        {statistics.guru}
-                      </p>
-                    </button>
-
-
-                    <button
-                      type="button"
-                      onClick={() =>
-                        handleRoleFilter("Siswa")
-                      }
-                      className={`
-                        px-4
-                        py-3
-                        rounded-xl
-                        border
-                        text-left
-                        transition
-                        ${
-                          roleFilter === "Siswa"
-                            ? `${themePrimarySoft} ${themePrimarySoftBorder}`
-                            : "theme-card theme-border"
-                        }
-                      `}
-                    >
-                      <p className="text-[10px] theme-text-muted">
-                        Siswa
-                      </p>
-
-                      <p className="text-lg font-bold theme-text mt-1">
-                        {statistics.siswa}
-                      </p>
-                    </button>
-
-
-                    <button
-                      type="button"
-                      onClick={() =>
-                        handleRoleFilter("Staff")
-                      }
-                      className={`
-                        px-4
-                        py-3
-                        rounded-xl
-                        border
-                        text-left
-                        transition
-                        ${
-                          roleFilter === "Staff"
-                            ? `${themePrimarySoft} ${themePrimarySoftBorder}`
-                            : "theme-card theme-border"
-                        }
-                      `}
-                    >
-                      <p className="text-[10px] theme-text-muted">
-                        Staff
-                      </p>
-
-                      <p className="text-lg font-bold theme-text mt-1">
-                        {statistics.staff}
-                      </p>
-                    </button>
+                        <p className="text-lg font-bold theme-text mt-1">
+                          {item.value}
+                        </p>
+                      </button>
+                    ))}
                   </div>
                 </div>
 
-
                 <div
                   className="
-                    mt-5
-                    pt-4
-                    border-t
-                    theme-border-soft
-                    flex
-                    flex-wrap
-                    gap-x-6
-                    gap-y-2
+                    mt-5 pt-4 border-t theme-border-soft
+                    flex flex-wrap gap-x-6 gap-y-2
                   "
                 >
                   <div className="flex items-center gap-2">
-                    <span
-                      className="
-                        w-2
-                        h-2
-                        rounded-full
-                        bg-[var(--color-success)]
-                      "
-                    />
-
+                    <span className="w-2 h-2 rounded-full bg-[var(--color-success)]" />
                     <span className="text-xs theme-text-secondary">
                       Aktif:
                     </span>
-
                     <span className="text-xs font-semibold theme-text">
                       {statistics.aktif}
                     </span>
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <span
-                      className="
-                        w-2
-                        h-2
-                        rounded-full
-                        theme-danger
-                      "
-                    />
-
+                    <span className="w-2 h-2 rounded-full theme-danger" />
                     <span className="text-xs theme-text-secondary">
                       Nonaktif:
                     </span>
-
                     <span className="text-xs font-semibold theme-text">
                       {statistics.nonaktif}
                     </span>
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <span
-                      className="
-                        w-2
-                        h-2
-                        rounded-full
-                        bg-[var(--color-primary)]
-                      "
-                    />
-
+                    <span className="w-2 h-2 rounded-full bg-[var(--color-primary)]" />
                     <span className="text-xs theme-text-secondary">
                       Admin:
                     </span>
-
                     <span className="text-xs font-semibold theme-text">
                       {statistics.admin}
                     </span>
@@ -1480,34 +1079,18 @@ export default function PenggunaPage() {
               </div>
             </section>
 
-
             <section
               className={`
-                theme-card
-                rounded-2xl
-                border
-                theme-border
-                ${themeCardShadow}
-                p-4
+                theme-card rounded-2xl border theme-border
+                ${themeCardShadow} p-4
               `}
             >
-              <div
-                className="
-                  flex
-                  flex-col
-                  lg:flex-row
-                  gap-3
-                "
-              >
-
+              <div className="flex flex-col lg:flex-row gap-3">
                 <div className="relative flex-1">
                   <Search
                     size={16}
                     className="
-                      absolute
-                      left-3
-                      top-1/2
-                      -translate-y-1/2
+                      absolute left-3 top-1/2 -translate-y-1/2
                       theme-text-muted
                     "
                   />
@@ -1518,16 +1101,8 @@ export default function PenggunaPage() {
                     onChange={handleSearchChange}
                     placeholder="Cari nama, username, email, ID, jabatan..."
                     className="
-                      theme-input
-                      theme-border
-                      theme-text
-                      w-full
-                      pl-9
-                      pr-10
-                      py-2.5
-                      text-sm
-                      rounded-xl
-                      border
+                      theme-input theme-border theme-text w-full
+                      pl-9 pr-10 py-2.5 text-sm rounded-xl border
                       outline-none
                       placeholder:text-[var(--color-text-placeholder)]
                       focus:ring-2
@@ -1545,12 +1120,8 @@ export default function PenggunaPage() {
                         setPage(1);
                       }}
                       className="
-                        absolute
-                        right-3
-                        top-1/2
-                        -translate-y-1/2
-                        theme-text-muted
-                        hover:theme-text
+                        absolute right-3 top-1/2 -translate-y-1/2
+                        theme-text-muted hover:theme-text
                       "
                     >
                       <X size={15} />
@@ -1558,102 +1129,48 @@ export default function PenggunaPage() {
                   )}
                 </div>
 
-
-                <div
-                  className="
-                    flex
-                    flex-col
-                    sm:flex-row
-                    gap-2
-                  "
-                >
+                <div className="flex flex-col sm:flex-row gap-2">
                   <select
                     value={roleFilter}
                     onChange={handleRoleChange}
                     className="
-                      theme-input
-                      theme-border
-                      theme-text
-                      text-sm
-                      rounded-xl
-                      border
-                      px-3
-                      py-2.5
-                      focus:outline-none
-                      focus:ring-2
+                      theme-input theme-border theme-text text-sm
+                      rounded-xl border px-3 py-2.5
+                      focus:outline-none focus:ring-2
                       focus:ring-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]
                       focus:border-[color-mix(in_srgb,var(--color-primary)_50%,transparent)]
                     "
                   >
-                    <option value="Semua">
-                      Semua Role
-                    </option>
-
-                    <option value="Guru">
-                      Guru
-                    </option>
-
-                    <option value="Siswa">
-                      Siswa
-                    </option>
-
-                    <option value="Staff">
-                      Staff
-                    </option>
-
-                    <option value="Admin">
-                      Admin
-                    </option>
+                    <option value="Semua">Semua Role</option>
+                    <option value="Guru">Guru</option>
+                    <option value="Siswa">Siswa</option>
+                    <option value="Staff">Staff</option>
+                    <option value="Admin">Admin</option>
                   </select>
 
                   <select
                     value={statusFilter}
                     onChange={handleStatusChange}
                     className="
-                      theme-input
-                      theme-border
-                      theme-text
-                      text-sm
-                      rounded-xl
-                      border
-                      px-3
-                      py-2.5
-                      focus:outline-none
-                      focus:ring-2
+                      theme-input theme-border theme-text text-sm
+                      rounded-xl border px-3 py-2.5
+                      focus:outline-none focus:ring-2
                       focus:ring-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]
                       focus:border-[color-mix(in_srgb,var(--color-primary)_50%,transparent)]
                     "
                   >
-                    <option value="Semua">
-                      Semua Status
-                    </option>
-
-                    <option value="Aktif">
-                      Aktif
-                    </option>
-
-                    <option value="Nonaktif">
-                      Nonaktif
-                    </option>
+                    <option value="Semua">Semua Status</option>
+                    <option value="Aktif">Aktif</option>
+                    <option value="Nonaktif">Nonaktif</option>
                   </select>
 
                   <button
                     type="button"
                     onClick={handleResetFilter}
                     className="
-                      inline-flex
-                      items-center
-                      justify-center
-                      gap-2
-                      px-3
-                      py-2.5
-                      rounded-xl
-                      border
-                      theme-border
-                      theme-card
-                      theme-text-secondary
-                      text-sm
-                      font-medium
+                      inline-flex items-center justify-center gap-2
+                      px-3 py-2.5 rounded-xl border theme-border
+                      theme-card theme-text-secondary text-sm font-medium
                       hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]
                       transition
                     "
@@ -1665,32 +1182,18 @@ export default function PenggunaPage() {
               </div>
             </section>
 
-
             <section
               className={`
-                theme-card
-                rounded-2xl
-                border
-                theme-border
-                ${themeCardShadow}
-                overflow-hidden
+                theme-card rounded-2xl border theme-border
+                ${themeCardShadow} overflow-hidden
               `}
             >
-
               <div
                 className="
-                  px-4
-                  sm:px-5
-                  lg:px-6
-                  py-4
-                  border-b
-                  theme-border-soft
-                  flex
-                  flex-col
-                  sm:flex-row
-                  sm:items-center
-                  sm:justify-between
-                  gap-3
+                  px-4 sm:px-5 lg:px-6 py-4
+                  border-b theme-border-soft
+                  flex flex-col sm:flex-row sm:items-center
+                  sm:justify-between gap-3
                 "
               >
                 <div>
@@ -1713,27 +1216,13 @@ export default function PenggunaPage() {
                 <button
                   type="button"
                   onClick={handleExport}
-                  disabled={
-                    loading || !users.length
-                  }
+                  disabled={loading || !users.length}
                   className="
-                    inline-flex
-                    items-center
-                    justify-center
-                    gap-2
-                    px-3
-                    py-2
-                    rounded-lg
-                    border
-                    theme-border
-                    theme-card
-                    theme-text-secondary
-                    text-xs
-                    font-semibold
+                    inline-flex items-center justify-center gap-2
+                    px-3 py-2 rounded-lg border theme-border
+                    theme-card theme-text-secondary text-xs font-semibold
                     hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]
-                    transition
-                    w-fit
-                    disabled:cursor-not-allowed
+                    transition w-fit disabled:cursor-not-allowed
                     disabled:opacity-60
                   "
                 >
@@ -1742,9 +1231,8 @@ export default function PenggunaPage() {
                 </button>
               </div>
 
-
               <div className="overflow-x-auto">
-                <table className="w-full min-w-[1100px] text-sm border-collapse">
+                <table className="w-full min-w-[1250px] text-sm border-collapse">
                   <thead>
                     <tr className="bg-[var(--color-primary)] text-white">
                       <th className="px-4 py-3 text-center font-semibold w-[65px]">
@@ -1767,6 +1255,10 @@ export default function PenggunaPage() {
                         Jabatan / Keterangan
                       </th>
 
+                      <th className="px-4 py-3 text-left font-semibold">
+                        Shift Kerja
+                      </th>
+
                       <th className="px-4 py-3 text-center font-semibold">
                         Status
                       </th>
@@ -1778,84 +1270,79 @@ export default function PenggunaPage() {
                   </thead>
 
                   <tbody>
-
                     {loading ? (
-                      Array.from({
-                        length: LIMIT,
-                      }).map((_, index) => (
-                        <tr
-                          key={index}
-                          className="border-b theme-border-soft last:border-0"
-                        >
-                          <td className="px-4 py-3 text-center">
-                            <div className="mx-auto h-7 w-7 animate-pulse rounded-lg bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]" />
-                          </td>
+                      Array.from({ length: LIMIT }).map(
+                        (_, index) => (
+                          <tr
+                            key={index}
+                            className="border-b theme-border-soft last:border-0"
+                          >
+                            <td className="px-4 py-3 text-center">
+                              <div className="mx-auto h-7 w-7 animate-pulse rounded-lg bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]" />
+                            </td>
 
-                          <td className="px-4 py-3">
-                            <div className="flex items-center gap-3">
-                              <div className="h-10 w-10 animate-pulse rounded-full bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]" />
+                            <td className="px-4 py-3">
+                              <div className="flex items-center gap-3">
+                                <div className="h-10 w-10 animate-pulse rounded-full bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]" />
 
-                              <div className="space-y-2">
-                                <div className="h-4 w-36 animate-pulse rounded bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]" />
-
-                                <div className="h-3 w-20 animate-pulse rounded bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]" />
+                                <div className="space-y-2">
+                                  <div className="h-4 w-36 animate-pulse rounded bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]" />
+                                  <div className="h-3 w-20 animate-pulse rounded bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]" />
+                                </div>
                               </div>
-                            </div>
-                          </td>
+                            </td>
 
-                          <td className="px-4 py-3">
-                            <div className="space-y-2">
-                              <div className="h-3 w-40 animate-pulse rounded bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]" />
+                            <td className="px-4 py-3">
+                              <div className="space-y-2">
+                                <div className="h-3 w-40 animate-pulse rounded bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]" />
+                                <div className="h-3 w-24 animate-pulse rounded bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]" />
+                              </div>
+                            </td>
 
-                              <div className="h-3 w-24 animate-pulse rounded bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]" />
-                            </div>
-                          </td>
+                            <td className="px-4 py-3">
+                              <div className="h-6 w-20 animate-pulse rounded-full bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]" />
+                            </td>
 
-                          <td className="px-4 py-3">
-                            <div className="h-6 w-20 animate-pulse rounded-full bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]" />
-                          </td>
+                            <td className="px-4 py-3">
+                              <div className="space-y-2">
+                                <div className="h-3 w-32 animate-pulse rounded bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]" />
+                                <div className="h-3 w-24 animate-pulse rounded bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]" />
+                              </div>
+                            </td>
 
-                          <td className="px-4 py-3">
-                            <div className="space-y-2">
-                              <div className="h-3 w-32 animate-pulse rounded bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]" />
+                            <td className="px-4 py-3">
+                              <div className="space-y-2">
+                                <div className="h-3 w-24 animate-pulse rounded bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]" />
+                                <div className="h-3 w-28 animate-pulse rounded bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]" />
+                              </div>
+                            </td>
 
-                              <div className="h-3 w-24 animate-pulse rounded bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]" />
-                            </div>
-                          </td>
+                            <td className="px-4 py-3 text-center">
+                              <div className="mx-auto h-6 w-20 animate-pulse rounded-full bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]" />
+                            </td>
 
-                          <td className="px-4 py-3 text-center">
-                            <div className="mx-auto h-6 w-20 animate-pulse rounded-full bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]" />
-                          </td>
-
-                          <td className="px-4 py-3">
-                            <div className="mx-auto flex justify-center gap-1.5">
-                              <div className="h-8 w-8 animate-pulse rounded-lg bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]" />
-
-                              <div className="h-8 w-8 animate-pulse rounded-lg bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]" />
-
-                              <div className="h-8 w-8 animate-pulse rounded-lg bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]" />
-                            </div>
-                          </td>
-                        </tr>
-                      ))
+                            <td className="px-4 py-3">
+                              <div className="mx-auto flex justify-center gap-1.5">
+                                <div className="h-8 w-8 animate-pulse rounded-lg bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]" />
+                                <div className="h-8 w-8 animate-pulse rounded-lg bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]" />
+                                <div className="h-8 w-8 animate-pulse rounded-lg bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]" />
+                              </div>
+                            </td>
+                          </tr>
+                        )
+                      )
                     ) : users.length === 0 ? (
                       <tr>
                         <td
-                          colSpan={7}
+                          colSpan={8}
                           className="px-4 py-16 text-center"
                         >
                           <div className="flex flex-col items-center">
                             <div
                               className={`
-                                w-12
-                                h-12
-                                rounded-full
-                                ${themePrimarySoft}
-                                border
-                                ${themePrimarySoftBorder}
-                                flex
-                                items-center
-                                justify-center
+                                w-12 h-12 rounded-full ${themePrimarySoft}
+                                border ${themePrimarySoftBorder}
+                                flex items-center justify-center
                               `}
                             >
                               <Search
@@ -1876,11 +1363,8 @@ export default function PenggunaPage() {
                               type="button"
                               onClick={handleResetFilter}
                               className="
-                                mt-4
-                                text-xs
-                                font-semibold
-                                text-[var(--color-primary)]
-                                hover:underline
+                                mt-4 text-xs font-semibold
+                                text-[var(--color-primary)] hover:underline
                               "
                             >
                               Reset Filter
@@ -1893,70 +1377,45 @@ export default function PenggunaPage() {
                         <tr
                           key={user.id}
                           className={`
-                            border-b
-                            theme-border-soft
-                            last:border-0
-                            ${themePrimaryHover}
-                            transition-colors
+                            border-b theme-border-soft last:border-0
+                            ${themePrimaryHover} transition-colors
                           `}
                         >
-
                           <td className="px-4 py-3 text-center">
                             <span
                               className={`
-                                inline-flex
-                                items-center
-                                justify-center
-                                w-7
-                                h-7
-                                rounded-lg
-                                ${themePrimarySoft}
-                                border
-                                ${themePrimarySoftBorder}
+                                inline-flex items-center justify-center
+                                w-7 h-7 rounded-lg ${themePrimarySoft}
+                                border ${themePrimarySoftBorder}
                                 text-[var(--color-primary)]
-                                text-xs
-                                font-bold
+                                text-xs font-bold
                               `}
                             >
-                              {(page - 1) * LIMIT +
-                                index +
-                                1}
+                              {(page - 1) * LIMIT + index + 1}
                             </span>
                           </td>
-
 
                           <td className="px-4 py-3">
                             <div className="flex items-center gap-3">
                               <div
                                 className="
-                                  w-10
-                                  h-10
-                                  rounded-full
-                                  bg-[var(--color-primary)]
-                                  text-white
-                                  flex
-                                  items-center
-                                  justify-center
-                                  text-xs
-                                  font-bold
-                                  shrink-0
-                                  overflow-hidden
+                                  w-10 h-10 rounded-full
+                                  bg-[var(--color-primary)] text-white
+                                  flex items-center justify-center
+                                  text-xs font-bold shrink-0 overflow-hidden
                                 "
                               >
                                 {user.avatar ? (
                                   <img
                                     src={
-                                      user.avatar.startsWith(
-                                        "http",
-                                      )
+                                      user.avatar.startsWith("http")
                                         ? user.avatar
                                         : `${API_URL}${user.avatar}`
                                     }
                                     alt={user.nama}
                                     className="h-full w-full object-cover"
                                     onError={(event) => {
-                                      event.currentTarget.style.display =
-                                        "none";
+                                      event.currentTarget.style.display = "none";
                                     }}
                                   />
                                 ) : (
@@ -1965,14 +1424,7 @@ export default function PenggunaPage() {
                               </div>
 
                               <div className="min-w-0">
-                                <p
-                                  className="
-                                    font-semibold
-                                    theme-text
-                                    truncate
-                                    max-w-[220px]
-                                  "
-                                >
+                                <p className="font-semibold theme-text truncate max-w-[220px]">
                                   {user.nama}
                                 </p>
 
@@ -1982,7 +1434,6 @@ export default function PenggunaPage() {
                               </div>
                             </div>
                           </td>
-
 
                           <td className="px-4 py-3">
                             <div className="space-y-1">
@@ -2012,82 +1463,77 @@ export default function PenggunaPage() {
                             </div>
                           </td>
 
-
                           <td className="px-4 py-3">
                             <RoleBadge role={user.peran} />
                           </td>
 
-
                           <td className="px-4 py-3">
-                            <p className="text-xs font-medium theme-text-secondary">
-                              {user.jabatan}
-                            </p>
+                            <div className="flex flex-col gap-2 max-w-[220px]">
+                              <span
+                                className={`
+                                  inline-flex w-fit items-center gap-1.5
+                                  px-2.5 py-1 rounded-md border theme-border
+                                  theme-card-soft theme-text
+                                  text-xs font-semibold truncate
+                                `}
+                              >
+                                <BadgeCheck size={13} className="text-[var(--color-primary)] shrink-0" />
+                                <span className="truncate">{user.jabatan !== "-" ? user.jabatan : "Belum diatur"}</span>
+                              </span>
 
-                            <p className="text-[11px] theme-text-muted mt-1">
-                              @{user.username}
-                            </p>
+                              <div className="flex flex-wrap gap-2 text-[11px] theme-text-muted">
+                                <span className="inline-flex items-center gap-1">
+                                  @{user.username}
+                                </span>
+                                {user.nip && (
+                                  <span>• NIP: {user.nip}</span>
+                                )}
+                                {user.nisn && (
+                                  <span>• NISN: {user.nisn}</span>
+                                )}
+                              </div>
+                            </div>
                           </td>
 
+                          <td className="px-4 py-3">
+                            <ShiftDisplay shift={user.shift} />
+                          </td>
 
                           <td className="px-4 py-3 text-center">
                             <StatusBadge status={user.status} />
                           </td>
 
-
                           <td className="px-4 py-3">
                             <div className="flex items-center justify-center gap-1.5">
-
                               <button
                                 type="button"
-                                onClick={() =>
-                                  handleDetail(user)
-                                }
+                                onClick={() => handleDetail(user)}
                                 className="
-                                  w-8
-                                  h-8
-                                  rounded-lg
-                                  border
-                                  theme-border
-                                  theme-card
-                                  theme-text-muted
+                                  w-8 h-8 rounded-lg border theme-border
+                                  theme-card theme-text-muted
                                   hover:text-[var(--color-primary)]
                                   hover:bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]
-                                  transition
-                                  flex
-                                  items-center
-                                  justify-center
+                                  transition flex items-center justify-center
                                 "
                                 title="Detail"
                               >
                                 <Eye size={14} />
                               </button>
 
-
                               <button
                                 type="button"
-                                onClick={() =>
-                                  handleEdit(user)
-                                }
+                                onClick={() => handleEdit(user)}
                                 className="
-                                  w-8
-                                  h-8
-                                  rounded-lg
-                                  border
-                                  theme-border
-                                  theme-card
-                                  theme-text-muted
+                                  w-8 h-8 rounded-lg border theme-border
+                                  theme-card theme-text-muted
                                   hover:text-[var(--color-primary)]
                                   hover:bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]
-                                  transition
-                                  flex
-                                  items-center
-                                  justify-center
+                                  transition flex items-center justify-center
                                 "
                                 title="Edit"
                               >
                                 <Pencil size={14} />
                               </button>
-
 
                               <button
                                 type="button"
@@ -2095,15 +1541,8 @@ export default function PenggunaPage() {
                                   handleOpenStatusModal(user)
                                 }
                                 className={`
-                                  w-8
-                                  h-8
-                                  rounded-lg
-                                  border
-                                  theme-card
-                                  flex
-                                  items-center
-                                  justify-center
-                                  transition
+                                  w-8 h-8 rounded-lg border theme-card
+                                  flex items-center justify-center transition
                                   ${
                                     user.status === "Aktif"
                                       ? "theme-danger"
@@ -2123,22 +1562,13 @@ export default function PenggunaPage() {
                                 )}
                               </button>
 
-
                               <button
                                 type="button"
                                 className="
-                                  w-8
-                                  h-8
-                                  rounded-lg
-                                  border
-                                  theme-border
-                                  theme-card
-                                  theme-text-muted
+                                  w-8 h-8 rounded-lg border theme-border
+                                  theme-card theme-text-muted
                                   hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]
-                                  transition
-                                  flex
-                                  items-center
-                                  justify-center
+                                  transition flex items-center justify-center
                                 "
                                 title="Lainnya"
                               >
@@ -2153,22 +1583,12 @@ export default function PenggunaPage() {
                 </table>
               </div>
 
-
               {!loading && users.length > 0 && (
                 <div
                   className="
-                    px-4
-                    sm:px-5
-                    py-3
-                    border-t
-                    theme-border-soft
-                    theme-card-soft
-                    flex
-                    flex-col
-                    sm:flex-row
-                    sm:items-center
-                    sm:justify-between
-                    gap-3
+                    px-4 sm:px-5 py-3 border-t theme-border-soft
+                    theme-card-soft flex flex-col sm:flex-row
+                    sm:items-center sm:justify-between gap-3
                   "
                 >
                   <p className="text-xs theme-text-secondary">
@@ -2184,27 +1604,16 @@ export default function PenggunaPage() {
                   </p>
 
                   <div className="flex items-center gap-1">
-
                     <button
                       type="button"
                       disabled={page === 1}
                       onClick={() =>
-                        setPage(
-                          Math.max(1, page - 1),
-                        )
+                        setPage(Math.max(1, page - 1))
                       }
                       className="
-                        w-8
-                        h-8
-                        rounded-lg
-                        border
-                        theme-border
-                        theme-card
-                        theme-text-muted
-                        flex
-                        items-center
-                        justify-center
-                        disabled:opacity-40
+                        w-8 h-8 rounded-lg border theme-border
+                        theme-card theme-text-muted flex items-center
+                        justify-center disabled:opacity-40
                         disabled:cursor-not-allowed
                         hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]
                       "
@@ -2212,21 +1621,13 @@ export default function PenggunaPage() {
                       <ChevronLeft size={15} />
                     </button>
 
-
                     {pageNumbers.map((pageNumber) => (
                       <button
                         key={pageNumber}
                         type="button"
-                        onClick={() =>
-                          setPage(pageNumber)
-                        }
+                        onClick={() => setPage(pageNumber)}
                         className={`
-                          w-8
-                          h-8
-                          rounded-lg
-                          text-xs
-                          font-semibold
-                          transition
+                          w-8 h-8 rounded-lg text-xs font-semibold transition
                           ${
                             page === pageNumber
                               ? "bg-[var(--color-primary)] text-white"
@@ -2238,32 +1639,21 @@ export default function PenggunaPage() {
                       </button>
                     ))}
 
-
                     <button
                       type="button"
-                      disabled={
-                        page >= pagination.totalPages
-                      }
+                      disabled={page >= pagination.totalPages}
                       onClick={() =>
                         setPage(
                           Math.min(
                             pagination.totalPages,
-                            page + 1,
-                          ),
+                            page + 1
+                          )
                         )
                       }
                       className="
-                        w-8
-                        h-8
-                        rounded-lg
-                        border
-                        theme-border
-                        theme-card
-                        theme-text-muted
-                        flex
-                        items-center
-                        justify-center
-                        disabled:opacity-40
+                        w-8 h-8 rounded-lg border theme-border
+                        theme-card theme-text-muted flex items-center
+                        justify-center disabled:opacity-40
                         disabled:cursor-not-allowed
                         hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]
                       "
@@ -2278,55 +1668,29 @@ export default function PenggunaPage() {
         </main>
       </div>
 
-
       {selectedUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-
           <div
-            className="
-              absolute
-              inset-0
-              bg-black/40
-              backdrop-blur-sm
-            "
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
             onClick={handleCloseStatusModal}
           />
 
-
           <div
             className={`
-              relative
-              w-full
-              max-w-md
-              theme-card
-              rounded-2xl
-              ${themeCardShadow}
-              border
-              theme-border
-              overflow-hidden
+              relative w-full max-w-md theme-card rounded-2xl
+              ${themeCardShadow} border theme-border overflow-hidden
             `}
           >
-
             <div
               className="
-                px-5
-                py-4
-                border-b
-                theme-border-soft
-                flex
-                items-center
-                justify-between
+                px-5 py-4 border-b theme-border-soft
+                flex items-center justify-between
               "
             >
               <div className="flex items-center gap-3">
                 <div
                   className={`
-                    w-9
-                    h-9
-                    rounded-lg
-                    flex
-                    items-center
-                    justify-center
+                    w-9 h-9 rounded-lg flex items-center justify-center
                     ${
                       selectedUser.status === "Aktif"
                         ? "theme-danger"
@@ -2335,13 +1699,9 @@ export default function PenggunaPage() {
                   `}
                 >
                   {selectedUser.status === "Aktif" ? (
-                    <UserX
-                      size={17}
-                    />
+                    <UserX size={17} />
                   ) : (
-                    <UserCheck
-                      size={17}
-                    />
+                    <UserCheck size={17} />
                   )}
                 </div>
 
@@ -2363,48 +1723,28 @@ export default function PenggunaPage() {
                 onClick={handleCloseStatusModal}
                 disabled={updatingStatus}
                 className="
-                  w-8
-                  h-8
-                  rounded-lg
+                  w-8 h-8 rounded-lg
                   hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]
-                  flex
-                  items-center
-                  justify-center
-                  theme-text-muted
-                  transition
-                  disabled:opacity-50
+                  flex items-center justify-center
+                  theme-text-muted transition disabled:opacity-50
                 "
               >
                 <X size={16} />
               </button>
             </div>
 
-
             <div className="p-5">
               <div
-                className={`
-                  flex
-                  items-center
-                  gap-3
-                  p-4
-                  rounded-xl
-                  theme-card-soft
-                  border
-                  theme-border
-                `}
+                className="
+                  flex items-center gap-3 p-4 rounded-xl
+                  theme-card-soft border theme-border
+                "
               >
                 <div
                   className="
-                    w-10
-                    h-10
-                    rounded-full
-                    bg-[var(--color-primary)]
-                    text-white
-                    flex
-                    items-center
-                    justify-center
-                    text-xs
-                    font-bold
+                    w-10 h-10 rounded-full bg-[var(--color-primary)]
+                    text-white flex items-center justify-center
+                    text-xs font-bold
                   "
                 >
                   {getInitials(selectedUser.nama)}
@@ -2432,17 +1772,10 @@ export default function PenggunaPage() {
               </p>
             </div>
 
-
             <div
               className="
-                px-5
-                py-4
-                border-t
-                theme-border-soft
-                theme-card-soft
-                flex
-                justify-end
-                gap-2
+                px-5 py-4 border-t theme-border-soft theme-card-soft
+                flex justify-end gap-2
               "
             >
               <button
@@ -2450,18 +1783,10 @@ export default function PenggunaPage() {
                 onClick={handleCloseStatusModal}
                 disabled={updatingStatus}
                 className="
-                  px-4
-                  py-2.5
-                  rounded-lg
-                  border
-                  theme-border
-                  theme-card
-                  theme-text-secondary
-                  text-sm
-                  font-semibold
+                  px-4 py-2.5 rounded-lg border theme-border
+                  theme-card theme-text-secondary text-sm font-semibold
                   hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]
-                  transition
-                  disabled:opacity-50
+                  transition disabled:opacity-50
                 "
               >
                 Batal
@@ -2472,18 +1797,9 @@ export default function PenggunaPage() {
                 onClick={handleUpdateStatus}
                 disabled={updatingStatus}
                 className={`
-                  inline-flex
-                  items-center
-                  gap-2
-                  px-4
-                  py-2.5
-                  rounded-lg
-                  text-white
-                  text-sm
-                  font-semibold
-                  transition
-                  disabled:cursor-not-allowed
-                  disabled:opacity-60
+                  inline-flex items-center gap-2 px-4 py-2.5
+                  rounded-lg text-white text-sm font-semibold
+                  transition disabled:cursor-not-allowed disabled:opacity-60
                   ${
                     selectedUser.status === "Aktif"
                       ? "theme-danger"

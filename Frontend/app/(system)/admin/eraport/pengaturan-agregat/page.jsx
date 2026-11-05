@@ -25,6 +25,7 @@ import {
   Edit3,
   Trash2,
   X,
+  ShieldCheck,
 } from "lucide-react";
 
 
@@ -86,7 +87,7 @@ function StatCard({
           <Icon size={19} strokeWidth={2} />
         </div>
 
-        <div>
+        <div className="min-w-0">
           <p className="theme-text-muted text-[11px] font-medium uppercase tracking-wide">
             {label}
           </p>
@@ -399,581 +400,603 @@ export default function PengaturanAgregatPage() {
 
 
   return (
-    <div className="theme-page flex min-h-screen w-full">
+    // ROOT: fixed viewport height, no page-level scroll
+    <div className="theme-page flex h-screen w-full overflow-hidden">
       <Sidebar />
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <Header />
+        {/* Header stays fixed at top */}
+        <div className="shrink-0">
+          <Header />
+        </div>
 
-        <main className="min-w-0 flex-1 px-4 py-5 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-[1280px]">
-
-
-            <div className="mb-5 rounded-xl border theme-border theme-card-soft px-4 py-3.5 text-xs leading-5 theme-text-secondary">
-              <strong className="theme-text">
-                Info Integrasi:
-              </strong>{" "}
-              Konfigurasi bobot nilai dan KKM terhubung langsung ke backend melalui{" "}
-              <code className="rounded bg-black/5 px-1.5 py-0.5 font-mono text-[11px] font-semibold text-[var(--color-primary)]">
-                GET &amp; PUT /api/pengaturan/agregat-rapor
-              </code>
-              . Perubahan bobot akan digunakan untuk proses kalkulasi nilai akhir e-Rapor pada tahun ajaran yang aktif.
-            </div>
+        {/* Body: sidebar + main are side by side, only main scrolls */}
+        <div className="flex min-h-0 flex-1">
+          {/* Main scrollable area */}
+          <main className="min-w-0 flex-1 overflow-y-auto px-4 py-5 sm:px-6 lg:px-8">
+            <div className="w-full">
 
 
-            <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-              <div className="flex min-w-0 items-center gap-3">
-                <div className="theme-primary flex h-12 w-12 shrink-0 items-center justify-center rounded-xl shadow-sm">
-                  <Settings2
-                    size={23}
-                    strokeWidth={2}
+              {/* ====== INFO INTEGRASI (user friendly) ====== */}
+              <div className="mb-5 flex items-start gap-3 rounded-xl border theme-border theme-card-soft px-4 py-4 text-sm">
+                <div className="theme-card flex h-10 w-10 shrink-0 items-center justify-center rounded-lg shadow-sm">
+                  <ShieldCheck
+                    size={19}
+                    className="text-[var(--color-success)]"
                   />
                 </div>
 
                 <div className="min-w-0">
-                  <h1 className="theme-text text-[24px] font-bold tracking-tight sm:text-[27px]">
-                    Pengaturan Agregat
-                  </h1>
-
-                  <p className="theme-text-muted text-sm">
-                    Atur bobot penilaian dan KKM untuk e-Rapor
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-2">
-                <button
-                  type="button"
-                  disabled={saving || loading || (!hasChanged && search === "" && kategori === "Semua")}
-                  onClick={resetFilter}
-                  className="theme-card theme-border theme-text-secondary theme-sidebar-hover flex h-10 items-center gap-2 rounded-lg border px-3.5 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-40"
-                >
-                  <RefreshCw size={16} />
-
-                  <span className="hidden sm:inline">
-                    Reset
-                  </span>
-                </button>
-
-                <button
-                  type="button"
-                  disabled={saving || loading || !selectedTahunAjaranId || subjects.length === 0}
-                  onClick={handleSave}
-                  className="theme-primary flex h-10 items-center gap-2 rounded-lg px-4 text-sm font-semibold shadow-sm transition disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {saving ? <Loader2 size={17} className="animate-spin" /> : <Save size={17} />}
-                  {saving ? "Menyimpan..." : "Simpan Pengaturan"}
-                </button>
-              </div>
-            </div>
-
-
-            {errorMsg && (
-              <div className="mb-5 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
-                <CircleAlert size={18} className="mt-0.5 shrink-0 text-red-600" />
-                <div className="flex-1">
-                  <p className="font-semibold">Gagal Memproses Agregat Rapor</p>
-                  <p className="mt-0.5 text-xs leading-relaxed text-red-700">
-                    {errorMsg}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setErrorMsg("")}
-                  className="text-red-500 hover:text-red-700"
-                >
-                  <X size={16} />
-                </button>
-              </div>
-            )}
-
-            {saved && (
-              <div className="theme-success mb-5 flex items-center gap-3 rounded-xl border px-4 py-3 text-sm">
-                <CircleCheck size={18} />
-
-                <div>
-                  <p className="font-semibold">
-                    Pengaturan berhasil disimpan
-                  </p>
-
-                  <p className="text-xs opacity-80">
-                    Konfigurasi bobot nilai telah diperbarui ke backend.
-                  </p>
-                </div>
-              </div>
-            )}
-
-
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-              <StatCard
-                icon={BookOpen}
-                label="Total Mata Pelajaran"
-                value={totalSubjects}
-                type="blue"
-              />
-
-              <StatCard
-                icon={CircleCheck}
-                label="Mapel Aktif"
-                value={activeSubjects}
-                type="green"
-              />
-
-              <StatCard
-                icon={Calculator}
-                label="Konfigurasi Valid"
-                value={validSubjects}
-                type="purple"
-              />
-
-              <StatCard
-                icon={CircleAlert}
-                label="Bobot Tidak Valid"
-                value={invalidSubjects}
-                type="orange"
-              />
-            </div>
-
-
-            <div className="theme-card theme-border mt-5 rounded-xl border p-4 shadow-sm sm:p-5">
-              <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-
-
-                <div>
-                  <label className="theme-text-secondary mb-2 block text-xs font-semibold">
-                    Tahun Ajaran
-                  </label>
-
-                  <div className="relative">
-                    <select
-                      value={selectedTahunAjaranId}
-                      onChange={(e) =>
-                        handleSelectTahunAjaran(e.target.value)
-                      }
-                      disabled={loading || saving || tahunAjaranList.length === 0}
-                      className="theme-input h-10 w-full appearance-none rounded-lg px-3.5 pr-9 text-sm outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 disabled:opacity-50"
-                    >
-                      {tahunAjaranList.length === 0 ? (
-                        <option value="">Tidak ada tahun ajaran</option>
-                      ) : (
-                        tahunAjaranList.map((ta) => (
-                          <option key={ta.id} value={ta.id}>
-                            {ta.nama} - Semester {ta.semester}{" "}
-                            {ta.status === "aktif" ? "(Aktif)" : ""}
-                          </option>
-                        ))
-                      )}
-                    </select>
-
-                    <ChevronDown
-                      size={15}
-                      className="theme-text-muted pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
-                    />
-                  </div>
-                </div>
-
-
-                <div>
-                  <label className="theme-text-secondary mb-2 block text-xs font-semibold">
-                    Semester
-                  </label>
-
-                  <div className="relative">
-                    <input
-                      type="text"
-                      readOnly
-                      value={
-                        currentTahunAjaran
-                          ? `Semester ${currentTahunAjaran.semester}`
-                          : "-"
-                      }
-                      className="theme-input h-10 w-full cursor-not-allowed rounded-lg px-3.5 text-sm bg-black/[0.03] outline-none"
-                    />
-                  </div>
-                </div>
-
-
-                <div>
-                  <label className="theme-text-secondary mb-2 block text-xs font-semibold">
-                    Kategori Mata Pelajaran
-                  </label>
-
-                  <div className="relative">
-                    <select
-                      value={kategori}
-                      onChange={(e) =>
-                        setKategori(
-                          e.target.value
-                        )
-                      }
-                      className="theme-input h-10 w-full appearance-none rounded-lg px-3.5 pr-9 text-sm outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
-                    >
-                      <option value="Semua">
-                        Semua Kategori
-                      </option>
-
-                      <option value="Produktif">
-                        Produktif
-                      </option>
-
-                      <option value="Umum">
-                        Umum
-                      </option>
-                    </select>
-
-                    <ChevronDown
-                      size={15}
-                      className="theme-text-muted pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
-                    />
-                  </div>
-                </div>
-              </div>
-
-
-              <div className="mt-4">
-                <div className="relative">
-                  <BookOpen
-                    size={18}
-                    className="theme-text-muted pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2"
-                  />
-
-                  <input
-                    value={search}
-                    onChange={(e) =>
-                      setSearch(e.target.value)
-                    }
-                    placeholder="Cari mata pelajaran..."
-                    className="theme-input h-11 w-full rounded-lg pl-10 pr-4 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
-                  />
-                </div>
-              </div>
-            </div>
-
-
-            <div className="theme-info theme-border mt-5 rounded-xl border px-5 py-4">
-              <div className="flex gap-3">
-                <div className="theme-card flex h-10 w-10 shrink-0 items-center justify-center rounded-lg shadow-sm">
-                  <Calculator
-                    size={19}
-                    className="text-[var(--color-info)]"
-                  />
-                </div>
-
-                <div>
                   <p className="theme-text text-sm font-semibold">
-                    Konfigurasi Agregat Nilai
+                    Data Anda Aman
                   </p>
-
-                  <p className="theme-text-secondary mt-1 text-xs leading-5">
-                    Total bobot setiap mata pelajaran harus
-                    berjumlah tepat <strong>100%</strong>.
-                    Bobot ini digunakan untuk menghitung
-                    nilai akhir pada proses Entry Nilai.
+                  <p className="theme-text-muted mt-1 text-xs leading-5">
+                    Semua pengaturan bobot nilai dan KKM yang Anda ubah
+                    disimpan secara aman di server sekolah. Jangan pernah
+                    membagikan akun, kata sandi, atau data pribadi Anda
+                    kepada siapa pun — termasuk yang mengaku sebagai
+                    pihak sekolah. Jika ada yang meminta data Anda,
+                    segera laporkan ke admin.
                   </p>
                 </div>
               </div>
-            </div>
 
 
-            <div className="theme-card theme-border mt-5 overflow-hidden rounded-xl border shadow-sm">
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[1050px] border-collapse text-left">
-                  <thead>
-                    <tr className="theme-primary text-xs font-semibold uppercase tracking-wide">
-                      <th className="w-16 px-4 py-3.5 text-center">
-                        No
-                      </th>
+              <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                <div className="flex min-w-0 items-center gap-3">
+                  <div className="theme-primary flex h-12 w-12 shrink-0 items-center justify-center rounded-xl shadow-sm">
+                    <Settings2
+                      size={23}
+                      strokeWidth={2}
+                    />
+                  </div>
 
-                      <th className="px-4 py-3.5">
-                        Mata Pelajaran
-                      </th>
+                  <div className="min-w-0">
+                    <h1 className="theme-text text-[24px] font-bold tracking-tight sm:text-[27px]">
+                      Pengaturan Agregat
+                    </h1>
 
-                      <th className="px-4 py-3.5">
-                        Kategori
-                      </th>
+                    <p className="theme-text-muted text-sm">
+                      Atur bobot penilaian dan KKM untuk e-Rapor
+                    </p>
+                  </div>
+                </div>
 
-                      <th className="px-3 py-3.5 text-center">
-                        Tugas
-                      </th>
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    disabled={saving || loading || (!hasChanged && search === "" && kategori === "Semua")}
+                    onClick={resetFilter}
+                    className="theme-card theme-border theme-text-secondary theme-sidebar-hover flex h-10 items-center gap-2 rounded-lg border px-3.5 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    <RefreshCw size={16} />
 
-                      <th className="px-3 py-3.5 text-center">
-                        UTS
-                      </th>
+                    <span className="hidden sm:inline">
+                      Reset
+                    </span>
+                  </button>
 
-                      <th className="px-3 py-3.5 text-center">
-                        UAS
-                      </th>
+                  <button
+                    type="button"
+                    disabled={saving || loading || !selectedTahunAjaranId || subjects.length === 0}
+                    onClick={handleSave}
+                    className="theme-primary flex h-10 items-center gap-2 rounded-lg px-4 text-sm font-semibold shadow-sm transition disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {saving ? <Loader2 size={17} className="animate-spin" /> : <Save size={17} />}
+                    {saving ? "Menyimpan..." : "Simpan Pengaturan"}
+                  </button>
+                </div>
+              </div>
 
-                      <th className="px-3 py-3.5 text-center">
-                        Praktik
-                      </th>
 
-                      <th className="px-3 py-3.5 text-center">
-                        Total
-                      </th>
+              {errorMsg && (
+                <div className="mb-5 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+                  <CircleAlert size={18} className="mt-0.5 shrink-0 text-red-600" />
+                  <div className="flex-1">
+                    <p className="font-semibold">Gagal Memproses Agregat Rapor</p>
+                    <p className="mt-0.5 text-xs leading-relaxed text-red-700">
+                      {errorMsg}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setErrorMsg("")}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+              )}
 
-                      <th className="px-3 py-3.5 text-center">
-                        KKM
-                      </th>
+              {saved && (
+                <div className="theme-success mb-5 flex items-center gap-3 rounded-xl border px-4 py-3 text-sm">
+                  <CircleCheck size={18} />
 
-                      <th className="px-4 py-3.5 text-center">
-                        Status
-                      </th>
+                  <div>
+                    <p className="font-semibold">
+                      Pengaturan berhasil disimpan
+                    </p>
 
-                      <th className="px-4 py-3.5 text-right">
-                        Aksi
-                      </th>
-                    </tr>
-                  </thead>
+                    <p className="text-xs opacity-80">
+                      Konfigurasi bobot nilai telah diperbarui ke backend.
+                    </p>
+                  </div>
+                </div>
+              )}
 
-                  <tbody>
-                    {loading ? (
-                      <tr>
-                        <td colSpan={11} className="py-12 text-center text-sm text-[var(--color-text-muted)]">
-                          <div className="flex items-center justify-center gap-2">
-                            <Loader2 className="animate-spin" size={18} />
-                            <span>Memuat konfigurasi agregat rapor dari server...</span>
-                          </div>
-                        </td>
+
+              {/* ====== STAT CARDS: responsive grid, no empty gaps ====== */}
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+                <StatCard
+                  icon={BookOpen}
+                  label="Total Mata Pelajaran"
+                  value={totalSubjects}
+                  type="blue"
+                />
+
+                <StatCard
+                  icon={CircleCheck}
+                  label="Mapel Aktif"
+                  value={activeSubjects}
+                  type="green"
+                />
+
+                <StatCard
+                  icon={Calculator}
+                  label="Konfigurasi Valid"
+                  value={validSubjects}
+                  type="purple"
+                />
+
+                <StatCard
+                  icon={CircleAlert}
+                  label="Bobot Tidak Valid"
+                  value={invalidSubjects}
+                  type="orange"
+                />
+              </div>
+
+
+              <div className="theme-card theme-border mt-5 rounded-xl border p-4 shadow-sm sm:p-5">
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+
+
+                  <div>
+                    <label className="theme-text-secondary mb-2 block text-xs font-semibold">
+                      Tahun Ajaran
+                    </label>
+
+                    <div className="relative">
+                      <select
+                        value={selectedTahunAjaranId}
+                        onChange={(e) =>
+                          handleSelectTahunAjaran(e.target.value)
+                        }
+                        disabled={loading || saving || tahunAjaranList.length === 0}
+                        className="theme-input h-10 w-full appearance-none rounded-lg px-3.5 pr-9 text-sm outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 disabled:opacity-50"
+                      >
+                        {tahunAjaranList.length === 0 ? (
+                          <option value="">Tidak ada tahun ajaran</option>
+                        ) : (
+                          tahunAjaranList.map((ta) => (
+                            <option key={ta.id} value={ta.id}>
+                              {ta.nama} - Semester {ta.semester}{" "}
+                              {ta.status === "aktif" ? "(Aktif)" : ""}
+                            </option>
+                          ))
+                        )}
+                      </select>
+
+                      <ChevronDown
+                        size={15}
+                        className="theme-text-muted pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
+                      />
+                    </div>
+                  </div>
+
+
+                  <div>
+                    <label className="theme-text-secondary mb-2 block text-xs font-semibold">
+                      Semester
+                    </label>
+
+                    <div className="relative">
+                      <input
+                        type="text"
+                        readOnly
+                        value={
+                          currentTahunAjaran
+                            ? `Semester ${currentTahunAjaran.semester}`
+                            : "-"
+                        }
+                        className="theme-input h-10 w-full cursor-not-allowed rounded-lg px-3.5 text-sm bg-black/[0.03] outline-none"
+                      />
+                    </div>
+                  </div>
+
+
+                  <div>
+                    <label className="theme-text-secondary mb-2 block text-xs font-semibold">
+                      Kategori Mata Pelajaran
+                    </label>
+
+                    <div className="relative">
+                      <select
+                        value={kategori}
+                        onChange={(e) =>
+                          setKategori(
+                            e.target.value
+                          )
+                        }
+                        className="theme-input h-10 w-full appearance-none rounded-lg px-3.5 pr-9 text-sm outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
+                      >
+                        <option value="Semua">
+                          Semua Kategori
+                        </option>
+
+                        <option value="Produktif">
+                          Produktif
+                        </option>
+
+                        <option value="Umum">
+                          Umum
+                        </option>
+                      </select>
+
+                      <ChevronDown
+                        size={15}
+                        className="theme-text-muted pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+
+                <div className="mt-4">
+                  <div className="relative">
+                    <BookOpen
+                      size={18}
+                      className="theme-text-muted pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2"
+                    />
+
+                    <input
+                      value={search}
+                      onChange={(e) =>
+                        setSearch(e.target.value)
+                      }
+                      placeholder="Cari mata pelajaran..."
+                      className="theme-input h-11 w-full rounded-lg pl-10 pr-4 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
+                    />
+                  </div>
+                </div>
+              </div>
+
+
+              <div className="theme-info theme-border mt-5 rounded-xl border px-5 py-4">
+                <div className="flex gap-3">
+                  <div className="theme-card flex h-10 w-10 shrink-0 items-center justify-center rounded-lg shadow-sm">
+                    <Calculator
+                      size={19}
+                      className="text-[var(--color-info)]"
+                    />
+                  </div>
+
+                  <div>
+                    <p className="theme-text text-sm font-semibold">
+                      Konfigurasi Agregat Nilai
+                    </p>
+
+                    <p className="theme-text-secondary mt-1 text-xs leading-5">
+                      Total bobot setiap mata pelajaran harus
+                      berjumlah tepat <strong>100%</strong>.
+                      Bobot ini digunakan untuk menghitung
+                      nilai akhir pada proses Entry Nilai.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+
+              <div className="theme-card theme-border mt-5 overflow-hidden rounded-xl border shadow-sm">
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[1050px] border-collapse text-left">
+                    <thead>
+                      <tr className="theme-primary text-xs font-semibold uppercase tracking-wide">
+                        <th className="w-16 px-4 py-3.5 text-center">
+                          No
+                        </th>
+
+                        <th className="px-4 py-3.5">
+                          Mata Pelajaran
+                        </th>
+
+                        <th className="px-4 py-3.5">
+                          Kategori
+                        </th>
+
+                        <th className="px-3 py-3.5 text-center">
+                          Tugas
+                        </th>
+
+                        <th className="px-3 py-3.5 text-center">
+                          UTS
+                        </th>
+
+                        <th className="px-3 py-3.5 text-center">
+                          UAS
+                        </th>
+
+                        <th className="px-3 py-3.5 text-center">
+                          Praktik
+                        </th>
+
+                        <th className="px-3 py-3.5 text-center">
+                          Total
+                        </th>
+
+                        <th className="px-3 py-3.5 text-center">
+                          KKM
+                        </th>
+
+                        <th className="px-4 py-3.5 text-center">
+                          Status
+                        </th>
+
+                        <th className="px-4 py-3.5 text-right">
+                          Aksi
+                        </th>
                       </tr>
-                    ) : filteredSubjects.length === 0 ? (
-                      <tr>
-                        <td colSpan={11} className="py-12 text-center text-sm text-[var(--color-text-muted)]">
-                          Tidak ada mata pelajaran yang ditemukan.
-                        </td>
-                      </tr>
-                    ) : (
-                      filteredSubjects.map((subject, index) => {
-                        const total =
-                          getTotalWeight(
-                            subject
+                    </thead>
+
+                    <tbody>
+                      {loading ? (
+                        <tr>
+                          <td colSpan={11} className="py-12 text-center text-sm text-[var(--color-text-muted)]">
+                            <div className="flex items-center justify-center gap-2">
+                              <Loader2 className="animate-spin" size={18} />
+                              <span>Memuat konfigurasi agregat rapor dari server...</span>
+                            </div>
+                          </td>
+                        </tr>
+                      ) : filteredSubjects.length === 0 ? (
+                        <tr>
+                          <td colSpan={11} className="py-12 text-center text-sm text-[var(--color-text-muted)]">
+                            Tidak ada mata pelajaran yang ditemukan.
+                          </td>
+                        </tr>
+                      ) : (
+                        filteredSubjects.map((subject, index) => {
+                          const total =
+                            getTotalWeight(
+                              subject
+                            );
+
+                          const valid =
+                            total === 100;
+
+                          return (
+                            <tr
+                              key={subject.id}
+                              className="theme-table-hover border-b border-[var(--color-border-soft)] transition last:border-0"
+                            >
+                              <td className="theme-text-muted px-4 py-4 text-center text-sm font-medium">
+                                {index + 1}
+                              </td>
+
+                              <td className="px-4 py-4">
+                                <div className="flex items-center gap-3">
+                                  <div className="theme-info flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
+                                    <BookOpen size={17} />
+                                  </div>
+
+                                  <div>
+                                    <p className="theme-text text-sm font-semibold">
+                                      {subject.mapel}
+                                    </p>
+
+                                    <p className="theme-text-muted mt-0.5 text-xs">
+                                      {currentTahunAjaran
+                                        ? `${currentTahunAjaran.nama} (${currentTahunAjaran.semester})`
+                                        : "Tahun Ajaran"}
+                                    </p>
+                                  </div>
+                                </div>
+                              </td>
+
+                              <td className="px-4 py-4">
+                                <span className="theme-text-secondary text-sm">
+                                  {subject.kategori}
+                                </span>
+                              </td>
+
+                              <td className="px-3 py-4 text-center">
+                                <span className="theme-text-secondary text-sm font-medium">
+                                  {subject.tugas}%
+                                </span>
+                              </td>
+
+                              <td className="px-3 py-4 text-center">
+                                <span className="theme-text-secondary text-sm font-medium">
+                                  {subject.uts}%
+                                </span>
+                              </td>
+
+                              <td className="px-3 py-4 text-center">
+                                <span className="theme-text-secondary text-sm font-medium">
+                                  {subject.uas}%
+                                </span>
+                              </td>
+
+                              <td className="px-3 py-4 text-center">
+                                <span className="theme-text-secondary text-sm font-medium">
+                                  {subject.praktik}%
+                                </span>
+                              </td>
+
+                              <td className="px-3 py-4 text-center">
+                                <span
+                                  className={`text-sm font-bold ${
+                                    valid
+                                      ? "text-[var(--color-success)]"
+                                      : "text-[var(--color-danger)]"
+                                  }`}
+                                >
+                                  {total}%
+                                </span>
+                              </td>
+
+                              <td className="px-3 py-4 text-center">
+                                <span className="theme-card-soft theme-text-secondary inline-flex min-w-[40px] items-center justify-center rounded-md px-2 py-1 text-sm font-semibold">
+                                  {subject.kkm}
+                                </span>
+                              </td>
+
+                              <td className="px-4 py-4 text-center">
+                                <span
+                                  className={`inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-semibold ${getStatusStyle(
+                                    subject.status
+                                  )}`}
+                                >
+                                  {valid ? (
+                                    <CircleCheck size={13} />
+                                  ) : (
+                                    <CircleAlert size={13} />
+                                  )}
+
+                                  {valid
+                                    ? "Valid"
+                                    : "Periksa Bobot"}
+                                </span>
+                              </td>
+
+                              <td className="px-4 py-4">
+                                <div className="flex items-center justify-end gap-1">
+                                  <button
+                                    type="button"
+                                    title="Edit konfigurasi"
+                                    onClick={() =>
+                                      setEditingSubject(
+                                        subject
+                                      )
+                                    }
+                                    className="theme-text-muted theme-sidebar-hover flex h-8 w-8 items-center justify-center rounded-md transition hover:text-[var(--color-primary)]"
+                                  >
+                                    <Edit3 size={16} />
+                                  </button>
+
+                                  <button
+                                    type="button"
+                                    title="Hapus konfigurasi"
+                                    onClick={() =>
+                                      deleteSubject(
+                                        subject.id
+                                      )
+                                    }
+                                    className="theme-text-muted flex h-8 w-8 items-center justify-center rounded-md transition hover:bg-[var(--color-danger-background)] hover:text-[var(--color-danger)]"
+                                  >
+                                    <Trash2 size={16} />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
                           );
-
-                        const valid =
-                          total === 100;
-
-                        return (
-                          <tr
-                            key={subject.id}
-                            className="theme-table-hover border-b border-[var(--color-border-soft)] transition last:border-0"
-                          >
-                            <td className="theme-text-muted px-4 py-4 text-center text-sm font-medium">
-                              {index + 1}
-                            </td>
-
-                            <td className="px-4 py-4">
-                              <div className="flex items-center gap-3">
-                                <div className="theme-info flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
-                                  <BookOpen size={17} />
-                                </div>
-
-                                <div>
-                                  <p className="theme-text text-sm font-semibold">
-                                    {subject.mapel}
-                                  </p>
-
-                                  <p className="theme-text-muted mt-0.5 text-xs">
-                                    {currentTahunAjaran
-                                      ? `${currentTahunAjaran.nama} (${currentTahunAjaran.semester})`
-                                      : "Tahun Ajaran"}
-                                  </p>
-                                </div>
-                              </div>
-                            </td>
-
-                            <td className="px-4 py-4">
-                              <span className="theme-text-secondary text-sm">
-                                {subject.kategori}
-                              </span>
-                            </td>
-
-                            <td className="px-3 py-4 text-center">
-                              <span className="theme-text-secondary text-sm font-medium">
-                                {subject.tugas}%
-                              </span>
-                            </td>
-
-                            <td className="px-3 py-4 text-center">
-                              <span className="theme-text-secondary text-sm font-medium">
-                                {subject.uts}%
-                              </span>
-                            </td>
-
-                            <td className="px-3 py-4 text-center">
-                              <span className="theme-text-secondary text-sm font-medium">
-                                {subject.uas}%
-                              </span>
-                            </td>
-
-                            <td className="px-3 py-4 text-center">
-                              <span className="theme-text-secondary text-sm font-medium">
-                                {subject.praktik}%
-                              </span>
-                            </td>
-
-                            <td className="px-3 py-4 text-center">
-                              <span
-                                className={`text-sm font-bold ${
-                                  valid
-                                    ? "text-[var(--color-success)]"
-                                    : "text-[var(--color-danger)]"
-                                }`}
-                              >
-                                {total}%
-                              </span>
-                            </td>
-
-                            <td className="px-3 py-4 text-center">
-                              <span className="theme-card-soft theme-text-secondary inline-flex min-w-[40px] items-center justify-center rounded-md px-2 py-1 text-sm font-semibold">
-                                {subject.kkm}
-                              </span>
-                            </td>
-
-                            <td className="px-4 py-4 text-center">
-                              <span
-                                className={`inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-semibold ${getStatusStyle(
-                                  subject.status
-                                )}`}
-                              >
-                                {valid ? (
-                                  <CircleCheck size={13} />
-                                ) : (
-                                  <CircleAlert size={13} />
-                                )}
-
-                                {valid
-                                  ? "Valid"
-                                  : "Periksa Bobot"}
-                              </span>
-                            </td>
-
-                            <td className="px-4 py-4">
-                              <div className="flex items-center justify-end gap-1">
-                                <button
-                                  type="button"
-                                  title="Edit konfigurasi"
-                                  onClick={() =>
-                                    setEditingSubject(
-                                      subject
-                                    )
-                                  }
-                                  className="theme-text-muted theme-sidebar-hover flex h-8 w-8 items-center justify-center rounded-md transition hover:text-[var(--color-primary)]"
-                                >
-                                  <Edit3 size={16} />
-                                </button>
-
-                                <button
-                                  type="button"
-                                  title="Hapus konfigurasi"
-                                  onClick={() =>
-                                    deleteSubject(
-                                      subject.id
-                                    )
-                                  }
-                                  className="theme-text-muted flex h-8 w-8 items-center justify-center rounded-md transition hover:bg-[var(--color-danger-background)] hover:text-[var(--color-danger)]"
-                                >
-                                  <Trash2 size={16} />
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })
-                    )}
-                  </tbody>
-                </table>
-              </div>
-
-
-              <div className="theme-border-soft flex flex-col gap-2 border-t px-5 py-3 sm:flex-row sm:items-center sm:justify-between">
-                <p className="theme-text-muted text-xs">
-                  Menampilkan{" "}
-                  <span className="theme-text-secondary font-medium">
-                    {filteredSubjects.length}
-                  </span>{" "}
-                  dari{" "}
-                  <span className="theme-text-secondary font-medium">
-                    {totalSubjects}
-                  </span>{" "}
-                  mata pelajaran
-                </p>
-
-                <p className="theme-text-muted text-xs">
-                  Bobot wajib berjumlah 100%
-                </p>
-              </div>
-            </div>
-
-
-            <div className="mt-5 grid grid-cols-1 gap-4 lg:grid-cols-2">
-              <div className="theme-card theme-border rounded-xl border p-5">
-                <div className="flex items-center gap-3">
-                  <div className="theme-info flex h-9 w-9 items-center justify-center rounded-lg">
-                    <Calculator size={18} />
-                  </div>
-
-                  <div>
-                    <h3 className="theme-text text-sm font-bold">
-                      Rumus Nilai Akhir
-                    </h3>
-
-                    <p className="theme-text-muted text-xs">
-                      Perhitungan otomatis e-Rapor
-                    </p>
-                  </div>
+                        })
+                      )}
+                    </tbody>
+                  </table>
                 </div>
 
-                <div className="theme-card-soft mt-4 rounded-lg px-4 py-3">
-                  <p className="theme-text-secondary text-sm font-semibold">
-                    Nilai Akhir =
+
+                <div className="theme-border-soft flex flex-col gap-2 border-t px-5 py-3 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="theme-text-muted text-xs">
+                    Menampilkan{" "}
+                    <span className="theme-text-secondary font-medium">
+                      {filteredSubjects.length}
+                    </span>{" "}
+                    dari{" "}
+                    <span className="theme-text-secondary font-medium">
+                      {totalSubjects}
+                    </span>{" "}
+                    mata pelajaran
                   </p>
 
-                  <p className="theme-text-muted mt-2 text-xs leading-5">
-                    (Nilai Tugas × Bobot Tugas) +
-                    (Nilai UTS × Bobot UTS) +
-                    (Nilai UAS × Bobot UAS) +
-                    (Nilai Praktik × Bobot Praktik)
+                  <p className="theme-text-muted text-xs">
+                    Bobot wajib berjumlah 100%
                   </p>
                 </div>
               </div>
 
-              <div className="theme-card theme-border rounded-xl border p-5">
-                <div className="flex items-center gap-3">
-                  <div className="theme-warning flex h-9 w-9 items-center justify-center rounded-lg">
-                    <Info size={18} />
+
+              <div className="mt-5 grid grid-cols-1 gap-4 lg:grid-cols-2">
+                <div className="theme-card theme-border rounded-xl border p-5">
+                  <div className="flex items-center gap-3">
+                    <div className="theme-info flex h-9 w-9 items-center justify-center rounded-lg">
+                      <Calculator size={18} />
+                    </div>
+
+                    <div>
+                      <h3 className="theme-text text-sm font-bold">
+                        Rumus Nilai Akhir
+                      </h3>
+
+                      <p className="theme-text-muted text-xs">
+                        Perhitungan otomatis e-Rapor
+                      </p>
+                    </div>
                   </div>
 
-                  <div>
-                    <h3 className="theme-text text-sm font-bold">
-                      Catatan Pengaturan
-                    </h3>
+                  <div className="theme-card-soft mt-4 rounded-lg px-4 py-3">
+                    <p className="theme-text-secondary text-sm font-semibold">
+                      Nilai Akhir =
+                    </p>
 
-                    <p className="theme-text-muted text-xs">
-                      Perhatikan konfigurasi sebelum disimpan
+                    <p className="theme-text-muted mt-2 text-xs leading-5">
+                      (Nilai Tugas × Bobot Tugas) +
+                      (Nilai UTS × Bobot UTS) +
+                      (Nilai UAS × Bobot UAS) +
+                      (Nilai Praktik × Bobot Praktik)
                     </p>
                   </div>
                 </div>
 
-                <ul className="theme-text-muted mt-4 space-y-2 text-xs leading-5">
-                  <li className="flex gap-2">
-                    <span className="theme-primary mt-1 h-1.5 w-1.5 shrink-0 rounded-full" />
-                    Total bobot setiap mata pelajaran harus 100%.
-                  </li>
+                <div className="theme-card theme-border rounded-xl border p-5">
+                  <div className="flex items-center gap-3">
+                    <div className="theme-warning flex h-9 w-9 items-center justify-center rounded-lg">
+                      <Info size={18} />
+                    </div>
 
-                  <li className="flex gap-2">
-                    <span className="theme-primary mt-1 h-1.5 w-1.5 shrink-0 rounded-full" />
-                    KKM menjadi batas minimal ketuntasan siswa.
-                  </li>
+                    <div>
+                      <h3 className="theme-text text-sm font-bold">
+                        Catatan Pengaturan
+                      </h3>
 
-                  <li className="flex gap-2">
-                    <span className="theme-primary mt-1 h-1.5 w-1.5 shrink-0 rounded-full" />
-                    Perubahan bobot akan memengaruhi nilai akhir.
-                  </li>
-                </ul>
+                      <p className="theme-text-muted text-xs">
+                        Perhatikan konfigurasi sebelum disimpan
+                      </p>
+                    </div>
+                  </div>
+
+                  <ul className="theme-text-muted mt-4 space-y-2 text-xs leading-5">
+                    <li className="flex gap-2">
+                      <span className="theme-primary mt-1 h-1.5 w-1.5 shrink-0 rounded-full" />
+                      Total bobot setiap mata pelajaran harus 100%.
+                    </li>
+
+                    <li className="flex gap-2">
+                      <span className="theme-primary mt-1 h-1.5 w-1.5 shrink-0 rounded-full" />
+                      KKM menjadi batas minimal ketuntasan siswa.
+                    </li>
+
+                    <li className="flex gap-2">
+                      <span className="theme-primary mt-1 h-1.5 w-1.5 shrink-0 rounded-full" />
+                      Perubahan bobot akan memengaruhi nilai akhir.
+                    </li>
+                  </ul>
+                </div>
               </div>
             </div>
-          </div>
-        </main>
+          </main>
+        </div>
       </div>
 
 
@@ -985,7 +1008,7 @@ export default function PengaturanAgregatPage() {
               "color-mix(in srgb, var(--color-text) 40%, transparent)",
           }}
         >
-          <div className="theme-card w-full max-w-lg overflow-hidden rounded-2xl shadow-2xl">
+          <div className="theme-card w-full max-w-lg overflow-hidden rounded-2xl shadow-2xl max-h-[90vh] overflow-y-auto">
 
 
             <div className="theme-border flex items-center justify-between border-b px-5 py-4 sm:px-6">

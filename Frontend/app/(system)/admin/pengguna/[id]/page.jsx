@@ -249,7 +249,10 @@ function getCategoryLabel(user, matchedCategory) {
     user?.kategoriJabatan?.namaKategoriJabatan,
     user?.kategoriJabatan?.namaJabatan,
     user?.kategoriJabatanMaster?.nama,
-    user?.kategoriJabatanNama
+    user?.kategoriJabatanNama,
+    user?.jabatan?.nama,
+    user?.jabatan,
+    user?.namaJabatan
   );
 
   if (category && typeof category !== "object") {
@@ -547,6 +550,14 @@ export default function DetailPenggunaPage() {
   const shiftTime = getShiftTime(user, matchedShift);
   const shiftCode = getShiftCode(user, matchedShift);
   const categoryLabel = getCategoryLabel(user, matchedCategory);
+  const jabatanLabel = categoryLabel !== "-"
+  ? categoryLabel
+  : firstValue(
+      user.jabatan?.nama,
+      user.jabatan,
+      user.namaJabatan,
+      "-"
+    );
 
   const hasShiftAssignment =
     Boolean(assignedShiftId) ||
@@ -649,12 +660,12 @@ export default function DetailPenggunaPage() {
                     {getRoleLabel(user)}
                   </span>
 
-                  {user.jabatan && (
-                    <span className="inline-flex items-center gap-1.5 rounded-lg border theme-border theme-card-soft px-2.5 py-1.5 text-xs font-semibold theme-text-secondary">
-                      <Briefcase size={13} />
-                      {user.jabatan}
-                    </span>
-                  )}
+                 {jabatanLabel !== "-" && (
+  <span className="inline-flex items-center gap-1.5 rounded-lg border theme-border theme-card-soft px-2.5 py-1.5 text-xs font-semibold theme-text-secondary">
+    <Briefcase size={13} />
+    {jabatanLabel}
+  </span>
+)}
                 </div>
               </div>
             </div>
@@ -681,10 +692,10 @@ export default function DetailPenggunaPage() {
               value={getRoleLabel(user)}
             />
             <InfoItem
-              icon={Briefcase}
-              label="Jabatan"
-              value={user.jabatan}
-            />
+  icon={Briefcase}
+  label="Jabatan"
+  value={jabatanLabel}
+/>
             <InfoItem icon={CreditCard} label="NIP" value={user.nip} />
             <InfoItem
               icon={CreditCard}
@@ -718,11 +729,11 @@ export default function DetailPenggunaPage() {
               value={shiftTime}
             />
 
-            <InfoItem
-              icon={Tags}
-              label="Kategori Jabatan"
-              value={categoryLabel}
-            />
+          <InfoItem
+  icon={Tags}
+  label="Kategori Jabatan"
+  value={categoryLabel}
+/>
 
             <InfoItem
               icon={Briefcase}

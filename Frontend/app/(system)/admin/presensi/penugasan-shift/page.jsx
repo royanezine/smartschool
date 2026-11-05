@@ -115,25 +115,18 @@ function formatJam(value) {
 
   const text = String(value).trim();
 
-  // Format waktu dari database: HH:mm atau HH:mm:ss
   const timeMatch = text.match(/^(\d{1,2}):(\d{2})(?::\d{2}(?:\.\d+)?)?$/);
-
   if (timeMatch) {
     return `${timeMatch[1].padStart(2, "0")}:${timeMatch[2]}`;
   }
 
-  // Timestamp ISO: ambil jam yang tertulis pada timestamp,
-  // jangan konversi menggunakan timezone browser.
   const isoMatch = text.match(/[T ](\d{2}):(\d{2})(?::\d{2})?/);
-
   if (isoMatch) {
     return `${isoMatch[1]}:${isoMatch[2]}`;
   }
 
   return text;
 }
-
-
 
 function getRole(user) {
   if (!isObject(user)) return "";
@@ -380,17 +373,11 @@ function getShiftKelasValue(value) {
   if (value == null || value === "") return "";
 
   const candidates = isObject(value)
-    ? [
-        value.kode,
-        value.shift,
-        value.nama,
-        value.jenisShift,
-      ]
+    ? [value.kode, value.shift, value.nama, value.jenisShift]
     : [value];
 
   for (const candidate of candidates) {
     const normalized = normalizeText(candidate);
-
     if (normalized === "pagi") return "pagi";
     if (normalized === "siang") return "siang";
   }
@@ -399,32 +386,64 @@ function getShiftKelasValue(value) {
 }
 
 /**
- * Service getShiftSiswa() yang dikirim mengembalikan response.data.
- * Fungsi ini tetap mendukung respons array langsung maupun respons
- * API yang masih dibungkus dengan { data: [...] }.
+ * Service getShiftSiswa() mengembalikan `response.data` yang berupa
+ * `ShiftSiswa[]` langsung. Fungsi ini tetap mendukung respons
+ * berbentuk array langsung maupun yang dibungkus { data: [...] }.
  */
 function normalizeShiftSiswaResponse(response) {
-  const rows = getArray(response, [
-    "shiftSiswa",
-    "shift_siswa",
-    "shifts",
-  ]);
+  // getArray sudah menangani array langsung, { data: [...] }, dll.
+  const rows = getArray(response, ["shiftSiswa", "shift_siswa", "shifts"]);
+
+  if (!Array.isArray(rows)) return [];
 
   return rows
     .filter(
       (item) =>
         isObject(item) &&
         typeof item.kode === "string" &&
-        typeof item.jamMasuk === "string" &&
-        typeof item.jamKeluar === "string"
+        item.kode.trim() !== ""
     )
     .map((item) => ({
       ...item,
       kode: normalizeText(item.kode),
-      jamMasuk: item.jamMasuk,
-      jamKeluar: item.jamKeluar,
+      nama:
+        item.nama ??
+        (normalizeText(item.kode) === "pagi"
+          ? "Pagi"
+          : normalizeText(item.kode) === "siang"
+            ? "Siang"
+            : normalizeText(item.kode)),
+      jamMasuk: item.jamMasuk ?? item.jam_masuk ?? null,
+      jamKeluar: item.jamKeluar ?? item.jam_keluar ?? null,
+      toleransiTerlambatMenit:
+        item.toleransiTerlambatMenit ?? item.toleransi_terlambat_menit ?? 15,
     }))
     .filter((item) => ["pagi", "siang"].includes(item.kode));
+}
+
+/**
+ * Fallback master shift siswa jika API gagal / kosong.
+ * Nilai default ini hanya untuk tampilan; update tetap butuh API.
+ */
+function buildFallbackShiftSiswa() {
+  return [
+    {
+      kode: "pagi",
+      nama: "Pagi",
+      jamMasuk: "07:00",
+      jamKeluar: "14:00",
+      toleransiTerlambatMenit: 15,
+      __fallback: true,
+    },
+    {
+      kode: "siang",
+      nama: "Siang",
+      jamMasuk: "12:00",
+      jamKeluar: "18:00",
+      toleransiTerlambatMenit: 15,
+      __fallback: true,
+    },
+  ];
 }
 
 function getMasterShiftSiswa(shiftSiswaList = [], shift) {
@@ -432,15 +451,13 @@ function getMasterShiftSiswa(shiftSiswaList = [], shift) {
   if (!normalized) return null;
 
   return (
-    shiftSiswaList.find(
-      (item) => normalizeText(item.kode) === normalized
-    ) ?? null
+    shiftSiswaList.find((item) => normalizeText(item.kode) === normalized) ??
+    null
   );
 }
 
 function getJamBelajar(shift, shiftSiswaList = []) {
   const kode = getShiftKelasValue(shift);
-
   if (!kode) return null;
 
   const master = shiftSiswaList.find(
@@ -755,31 +772,33 @@ export default function PenugasanShiftPage() {
         );
       }
 
-     
-    if (shiftSiswaResult.status === "fulfilled") {
-      shiftSiswa = normalizeShiftSiswaResponse(
-        shiftSiswaResult.value
-      );
+      // ===== SHIFT SISWA (diperbaiki) =====
+      if (shiftSiswaResult.status === "fulfilled") {
+        shiftSiswa = normalizeShiftSiswaResponse(shiftSiswaResult.value);
 
-      if (shiftSiswa.length === 0) {
+        if (shiftSiswa.length === 0) {
+          // Fallback: tetap render agar UI tidak kosong
+          shiftSiswa = buildFallbackShiftSiswa();
+          nextWarnings.push(
+            "Konfigurasi jam shift siswa tidak tersedia dari server. Menampilkan jam default (Pagi 07:00–14:00, Siang 12:00–18:00). Silakan periksa menu konfigurasi shift siswa di backend."
+          );
+        }
+      } else {
+        console.error(
+          "[SHIFT SISWA] Gagal mengambil konfigurasi:",
+          shiftSiswaResult.reason
+        );
+
+        // Fallback: tetap render dengan nilai default
+        shiftSiswa = buildFallbackShiftSiswa();
+
         nextWarnings.push(
-          "Data konfigurasi shift siswa kosong atau format respons API belum sesuai."
+          `Konfigurasi jam shift siswa gagal dimuat: ${getErrorMessage(
+            shiftSiswaResult.reason,
+            "Permintaan konfigurasi shift siswa gagal."
+          )}. Jam ditampilkan menggunakan nilai default (Pagi 07:00–14:00, Siang 12:00–18:00).`
         );
       }
-    } else {
-      console.error(
-        "[SHIFT SISWA] Gagal mengambil konfigurasi:",
-        shiftSiswaResult.reason
-      );
-
-      nextWarnings.push(
-        `Konfigurasi jam shift siswa gagal dimuat: ${getErrorMessage(
-          shiftSiswaResult.reason,
-          "Permintaan konfigurasi shift siswa gagal."
-        )}. Jam tidak ditampilkan menggunakan nilai default.`
-      );
-    }
-
 
       const normalizedUsers = users
         .filter((user) => isObject(user))
@@ -797,11 +816,6 @@ export default function PenugasanShiftPage() {
         );
       }
 
-      /*
-       * Shift kelas:
-       * - Jika data kelas sudah memiliki shift, gunakan data tersebut.
-       * - Jika shift null atau belum disertakan, ambil detail dari API kelas.
-       */
       const kelasWithShift = await Promise.all(
         kelas.map(async (item) => {
           const rawShift = item.shift ?? item.shiftKelas ?? null;
@@ -1001,7 +1015,6 @@ export default function PenugasanShiftPage() {
     setNotice("");
 
     try {
-      // Mengikuti kontrak service Backend yang sudah tersedia.
       await updateShiftKelas(kelasId, shift);
 
       setKelasList((previous) =>
@@ -1132,9 +1145,9 @@ export default function PenugasanShiftPage() {
         matchSearch =
           normalizeText(item.nama).includes(keyword) ||
           normalizeText(item.tingkat).includes(keyword) ||
-          normalizeText(
-            getTahunAjaranLabel(item, tahunAjaranList)
-          ).includes(keyword);
+          normalizeText(getTahunAjaranLabel(item, tahunAjaranList)).includes(
+            keyword
+          );
       }
 
       if (!matchSearch) return false;
@@ -1386,7 +1399,7 @@ export default function PenugasanShiftPage() {
                             <div className="flex items-center justify-between theme-text-muted">
                               <span>Jam Belajar:</span>
                               <span className="font-semibold theme-text font-mono">
-                                {shiftItem.jamMasuk} &ndash; {shiftItem.jamKeluar}
+                                {formatJam(shiftItem.jamMasuk)} – {formatJam(shiftItem.jamKeluar)}
                               </span>
                             </div>
                             <div className="flex items-center justify-between theme-text-muted">
@@ -1973,7 +1986,7 @@ export default function PenugasanShiftPage() {
                   placeholder="Contoh: 15"
                 />
                 <p className="mt-1 text-[11px] theme-text-muted">
-                  Batas waktu toleransi sebelum siswa dinyatakan terlambat (0 &ndash; 240 menit).
+                  Batas waktu toleransi sebelum siswa dinyatakan terlambat (0 – 240 menit).
                 </p>
               </div>
 
@@ -1998,7 +2011,7 @@ export default function PenugasanShiftPage() {
                     </>
                   ) : (
                     "Simpan Perubahan"
-                  )}
+                  )}3
                 </button>
               </div>
             </form>
