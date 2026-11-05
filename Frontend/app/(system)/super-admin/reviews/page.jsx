@@ -161,6 +161,7 @@ export default function ModerasiReviewPage() {
 
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const [confirmDialog, setConfirmDialog] = useState(null);
 
   const loadReviews = useCallback(async () => {
     setLoading(true);
@@ -183,7 +184,10 @@ export default function ModerasiReviewPage() {
   }, [statusFilter]);
 
   useEffect(() => {
-    loadReviews();
+    const timer = setTimeout(() => {
+      loadReviews();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadReviews]);
 
   // LOGIKA FILTER & SORTING (Client-Side)
@@ -241,14 +245,6 @@ export default function ModerasiReviewPage() {
   }, [reviews]);
 
   async function handleStatusChange(review, status) {
-    const actionLabels = {
-      tampil: "menampilkan",
-      disembunyikan: "menyembunyikan",
-      menunggu: "mengembalikan ke antrean",
-    };
-
-    if (!window.confirm(`Apakah kamu yakin ingin ${actionLabels[status]} review dari ${getUserName(review)}?`)) return;
-
     setProcessingId(review.id);
     setError("");
     setNotice("");
@@ -270,9 +266,23 @@ export default function ModerasiReviewPage() {
     }
   }
 
-  async function handleDelete(review) {
-    if (!window.confirm(`Hapus review dari ${getUserName(review)} secara permanen?`)) return;
+  function requestStatusChange(review, status) {
+    const actionLabels = {
+      tampil: "menampilkan",
+      disembunyikan: "menyembunyikan",
+      menunggu: "mengembalikan ke antrean",
+    };
 
+    setConfirmDialog({
+      title: `${status === "tampil" ? "Tampilkan" : status === "disembunyikan" ? "Sembunyikan" : "Kembalikan"} Review`,
+      message: `Apakah kamu yakin ingin ${actionLabels[status]} review dari ${getUserName(review)}?`,
+      confirmLabel: status === "tampil" ? "Tampilkan" : status === "disembunyikan" ? "Sembunyikan" : "Kembalikan",
+      isDanger: status === "disembunyikan",
+      onConfirm: () => handleStatusChange(review, status),
+    });
+  }
+
+  async function handleDelete(review) {
     setProcessingId(review.id);
     setError("");
     setNotice("");
@@ -286,6 +296,16 @@ export default function ModerasiReviewPage() {
     } finally {
       setProcessingId(null);
     }
+  }
+
+  function requestDelete(review) {
+    setConfirmDialog({
+      title: "Hapus Review",
+      message: `Hapus review dari ${getUserName(review)} secara permanen? Tindakan ini tidak dapat dibatalkan.`,
+      confirmLabel: "Hapus Permanen",
+      isDanger: true,
+      onConfirm: () => handleDelete(review),
+    });
   }
 
   const toggleSortOrder = () => {
@@ -495,7 +515,8 @@ export default function ModerasiReviewPage() {
                       <div className="flex shrink-0 flex-col gap-2 border-t border-slate-100 pt-4 lg:w-48 lg:border-l lg:border-t-0 lg:pl-6 lg:pt-0">
                         {review.status !== "tampil" && (
                           <button
-                            onClick={() => handleStatusChange(review, "tampil")}
+                            type="button"
+                            onClick={() => requestStatusChange(review, "tampil")}
                             disabled={isProcessing}
                             className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-50"
                           >
@@ -504,7 +525,8 @@ export default function ModerasiReviewPage() {
                         )}
                         {review.status !== "disembunyikan" && (
                           <button
-                            onClick={() => handleStatusChange(review, "disembunyikan")}
+                            type="button"
+                            onClick={() => requestStatusChange(review, "disembunyikan")}
                             disabled={isProcessing}
                             className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-50"
                           >
@@ -513,7 +535,8 @@ export default function ModerasiReviewPage() {
                         )}
                         {review.status !== "menunggu" && (
                           <button
-                            onClick={() => handleStatusChange(review, "menunggu")}
+                            type="button"
+                            onClick={() => requestStatusChange(review, "menunggu")}
                             disabled={isProcessing}
                             className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800 transition hover:bg-amber-100 disabled:opacity-50"
                           >
@@ -521,7 +544,8 @@ export default function ModerasiReviewPage() {
                           </button>
                         )}
                         <button
-                          onClick={() => handleDelete(review)}
+                          type="button"
+                          onClick={() => requestDelete(review)}
                           disabled={isProcessing}
                           className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-red-200 bg-white px-3 py-2 text-xs font-semibold text-red-600 transition hover:bg-red-50 disabled:opacity-50"
                         >
@@ -546,6 +570,44 @@ export default function ModerasiReviewPage() {
           Hak akses moderasi dilindungi oleh middleware Super Admin.
         </p>
       </div>
+
+      {confirmDialog && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl border border-slate-200">
+            <div className="flex items-center gap-3 mb-4">
+              <div className={`p-2.5 rounded-xl ${confirmDialog.isDanger ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600'}`}>
+                {confirmDialog.isDanger ? <AlertCircle size={22} /> : <ShieldCheck size={22} />}
+              </div>
+              <h3 className="text-lg font-bold text-slate-900">{confirmDialog.title}</h3>
+            </div>
+            <p className="text-sm text-slate-600 mb-6 leading-relaxed">{confirmDialog.message}</p>
+            <div className="flex items-center justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setConfirmDialog(null)}
+                className="px-4 py-2 text-sm font-semibold text-slate-600 hover:text-slate-900 rounded-xl hover:bg-slate-100 transition"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  const action = confirmDialog.onConfirm;
+                  setConfirmDialog(null);
+                  if (action) await action();
+                }}
+                className={`px-4 py-2 text-sm font-semibold rounded-xl text-white shadow-sm transition ${
+                  confirmDialog.isDanger
+                    ? "bg-red-600 hover:bg-red-700"
+                    : "bg-blue-600 hover:bg-blue-700"
+                }`}
+              >
+                {confirmDialog.confirmLabel}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

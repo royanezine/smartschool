@@ -132,6 +132,13 @@ export default function SuperAdminYayasanPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const [toast, setToast] = useState(null);
+
+  useEffect(() => {
+    if (!toast) return;
+    const timer = setTimeout(() => setToast(null), 4000);
+    return () => clearTimeout(timer);
+  }, [toast]);
 
   const [summary, setSummary] = useState({
     totalYayasan: 0,
@@ -303,6 +310,10 @@ export default function SuperAdminYayasanPage() {
       setSuccessMessage(
         res?.message || `Yayasan "${deleteTarget.nama}" berhasil dinonaktifkan.`
       );
+      setToast({
+        type: "success",
+        message: res?.message || `Yayasan "${deleteTarget.nama}" berhasil dinonaktifkan.`,
+      });
       setDeleteTarget(null);
 
       // Refresh list from backend
@@ -318,6 +329,10 @@ export default function SuperAdminYayasanPage() {
         err?.message ||
         "Gagal menonaktifkan yayasan.";
       setDeleteError(msg);
+      setToast({
+        type: "error",
+        message: msg,
+      });
     } finally {
       setDeleting(false);
     }
@@ -326,7 +341,10 @@ export default function SuperAdminYayasanPage() {
   // Export to CSV
   const handleExportCSV = () => {
     if (yayasanList.length === 0) {
-      alert("Tidak ada data yayasan untuk diekspor.");
+      setToast({
+        type: "warning",
+        message: "Tidak ada data yayasan untuk diekspor.",
+      });
       return;
     }
 
@@ -905,6 +923,30 @@ export default function SuperAdminYayasanPage() {
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {toast && (
+        <div
+          role="status"
+          className="fixed bottom-5 right-5 z-50 flex items-center gap-3 rounded-xl border theme-border theme-card p-4 shadow-xl max-w-md animate-in fade-in slide-in-from-bottom-2"
+        >
+          {toast.type === "warning" ? (
+            <AlertTriangle size={18} className="text-[var(--color-warning)] shrink-0" />
+          ) : toast.type === "error" ? (
+            <XCircle size={18} className="text-red-500 shrink-0" />
+          ) : (
+            <CheckCircle2 size={18} className="text-emerald-500 shrink-0" />
+          )}
+          <p className="text-xs sm:text-sm theme-text flex-1">{toast.message}</p>
+          <button
+            type="button"
+            onClick={() => setToast(null)}
+            className="theme-text-muted hover:theme-text transition-colors p-1"
+            aria-label="Tutup"
+          >
+            <XCircle size={16} />
+          </button>
         </div>
       )}
     </div>

@@ -144,6 +144,7 @@ export interface CreateUserPayload {
   kota?: string | null;
 
   shiftKerja?: "pagi" | "siang";
+  kelasId?: string | null;
 }
 
 export interface UpdateUserPayload {
@@ -413,6 +414,7 @@ export async function createUser(
     jabatan: payload.jabatan?.trim() || null,
     golongan: payload.golongan?.trim() || null,
     shiftKerja: payload.shiftKerja || null,
+    ...(payload.kelasId ? { kelasId: payload.kelasId } : {}),
   };
 
   return request<UserMutationResponse>("/users", {

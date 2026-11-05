@@ -221,6 +221,14 @@ export default function ManajemenAksesPage() {
 
   const [openMenuId, setOpenMenuId] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
+  const [roleToDelete, setRoleToDelete] = useState(null);
+  const [toast, setToast] = useState(null);
+
+  useEffect(() => {
+    if (!toast) return;
+    const timer = setTimeout(() => setToast(null), 4000);
+    return () => clearTimeout(timer);
+  }, [toast]);
 
 
   const loadRoles = useCallback(async () => {
@@ -491,13 +499,14 @@ export default function ManajemenAksesPage() {
   };
 
 
-  const handleDelete = async (role) => {
-    const confirmed =
-      window.confirm(
-        `Apakah kamu yakin ingin menghapus role "${role.nama}"?`
-      );
+  const handleDelete = (role) => {
+    setOpenMenuId(null);
+    setRoleToDelete(role);
+  };
 
-    if (!confirmed) return;
+  const confirmDeleteRole = async () => {
+    if (!roleToDelete) return;
+    const role = roleToDelete;
 
     try {
       setDeletingId(role.id);
@@ -511,17 +520,21 @@ export default function ManajemenAksesPage() {
         )
       );
 
-      setOpenMenuId(null);
+      setToast({
+        type: "success",
+        message: `Role "${role.nama}" berhasil dihapus.`,
+      });
+      setRoleToDelete(null);
     } catch (error) {
       console.error(
         "Gagal menghapus role:",
         error
       );
 
-      window.alert(
-        error?.message ||
-          "Role gagal dihapus."
-      );
+      setToast({
+        type: "error",
+        message: error?.message || "Role gagal dihapus.",
+      });
     } finally {
       setDeletingId(null);
     }
@@ -2145,6 +2158,74 @@ export default function ManajemenAksesPage() {
         </div>
 
       </div>
+
+      {roleToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in">
+          <div className="w-full max-w-md rounded-2xl border theme-border theme-card p-6 shadow-2xl">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2.5 rounded-xl bg-red-500/10 text-red-500">
+                <Trash2 size={22} />
+              </div>
+              <h3 className="text-lg font-bold theme-text">Hapus Role?</h3>
+            </div>
+            <p className="text-sm theme-text-secondary mb-6 leading-relaxed">
+              Apakah kamu yakin ingin menghapus role <strong className="theme-text">&ldquo;{roleToDelete.nama}&rdquo;</strong>? Tindakan ini tidak dapat dibatalkan.
+            </p>
+            <div className="flex items-center justify-end gap-3">
+              <button
+                type="button"
+                disabled={Boolean(deletingId)}
+                onClick={() => setRoleToDelete(null)}
+                className={`rounded-xl border theme-border px-4 py-2 text-xs font-semibold theme-text-secondary ${themeNeutralHover} transition disabled:opacity-50`}
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                disabled={Boolean(deletingId)}
+                onClick={confirmDeleteRole}
+                className="inline-flex items-center gap-2 rounded-xl bg-red-600 px-4 py-2 text-xs font-semibold text-white shadow transition hover:bg-red-700 disabled:opacity-50"
+              >
+                {deletingId ? (
+                  <>
+                    <Loader2 size={14} className="animate-spin" />
+                    Menghapus...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 size={14} />
+                    Ya, Hapus
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {toast && (
+        <div
+          role="status"
+          className="fixed bottom-5 right-5 z-50 flex items-center gap-3 rounded-xl border theme-border theme-card p-4 shadow-xl max-w-md animate-in fade-in slide-in-from-bottom-2"
+        >
+          {toast.type === "warning" ? (
+            <AlertCircle size={18} className="text-[var(--color-warning)] shrink-0" />
+          ) : toast.type === "error" ? (
+            <XCircle size={18} className="text-red-500 shrink-0" />
+          ) : (
+            <CheckCircle2 size={18} className="text-emerald-500 shrink-0" />
+          )}
+          <p className="text-xs sm:text-sm theme-text flex-1">{toast.message}</p>
+          <button
+            type="button"
+            onClick={() => setToast(null)}
+            className="theme-text-muted hover:theme-text transition-colors p-1"
+            aria-label="Tutup"
+          >
+            <XCircle size={16} />
+          </button>
+        </div>
+      )}
     </div>
   );
 }

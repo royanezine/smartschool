@@ -2,11 +2,14 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { getAllLangganan } from "@/services/langganan.service";
-import { Loader2 } from "lucide-react";
 import {
+  Loader2,
   Search,
   ArrowUpRight,
   ArrowDownRight,
+  AlertCircle,
+  CheckCircle2,
+  XCircle,
 } from "lucide-react";
 
 
@@ -92,6 +95,13 @@ export default function LaporanAnalitikPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [rawSubscriptions, setRawSubscriptions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [toast, setToast] = useState(null);
+
+  useEffect(() => {
+    if (!toast) return;
+    const timer = setTimeout(() => setToast(null), 4000);
+    return () => clearTimeout(timer);
+  }, [toast]);
 
   useEffect(() => {
     let active = true;
@@ -242,7 +252,10 @@ export default function LaporanAnalitikPage() {
 
   const handleExportCSV = () => {
     if (filteredReport.length === 0) {
-      alert("Tidak ada data untuk diekspor.");
+      setToast({
+        type: "warning",
+        message: "Tidak ada data untuk diekspor.",
+      });
       return;
     }
     const headers = ["Sekolah", "Yayasan", "Paket", "Status", "Pendapatan"];
@@ -519,6 +532,30 @@ export default function LaporanAnalitikPage() {
         </div>
 
       </div>
+
+      {toast && (
+        <div
+          role="status"
+          className="fixed bottom-5 right-5 z-50 flex items-center gap-3 rounded-xl border theme-border theme-card p-4 shadow-xl max-w-md animate-in fade-in slide-in-from-bottom-2"
+        >
+          {toast.type === "warning" ? (
+            <AlertCircle size={18} className="text-[var(--color-warning)] shrink-0" />
+          ) : toast.type === "error" ? (
+            <XCircle size={18} className="text-red-500 shrink-0" />
+          ) : (
+            <CheckCircle2 size={18} className="text-emerald-500 shrink-0" />
+          )}
+          <p className="text-xs sm:text-sm theme-text flex-1">{toast.message}</p>
+          <button
+            type="button"
+            onClick={() => setToast(null)}
+            className="theme-text-muted hover:theme-text transition-colors p-1"
+            aria-label="Tutup"
+          >
+            <XCircle size={16} />
+          </button>
+        </div>
+      )}
     </div>
   );
 }

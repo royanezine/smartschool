@@ -260,6 +260,7 @@ function TambahPaketPageContent() {
   const [harga, setHarga] = useState(0);
   const [siklus, setSiklus] = useState("bulan");
   const [status, setStatus] = useState("aktif");
+  const [tipe, setTipe] = useState("SEKOLAH");
 
   const [fiturTerpilih, setFiturTerpilih] =
     useState([]);
@@ -338,6 +339,9 @@ function TambahPaketPageContent() {
         }
 
         setStatus(paket.status || "aktif");
+        if (paket.tipe) {
+          setTipe(paket.tipe);
+        }
 
         const modulIds = Array.isArray(paket.fitur)
           ? paket.fitur.map((f) => f.id)
@@ -422,6 +426,7 @@ function TambahPaketPageContent() {
         harga: Number(harga) || 0,
         durasi,
         modulIds,
+        tipe,
       };
 
       console.log(
@@ -617,7 +622,92 @@ function TambahPaketPageContent() {
 
 
               <div className="space-y-6 p-5 sm:p-7">
+                <div>
+                  <label className="block text-sm font-semibold theme-text">
+                    Kategori Paket{" "}
+                    <span className="ml-1 text-[var(--color-warning)]">*</span>
+                  </label>
 
+                  <p className="mt-1 text-xs sm:text-sm theme-text-muted">
+                    Tentukan target pengguna paket berlangganan ini.
+                  </p>
+
+                  <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setTipe("SEKOLAH")}
+                      className={`flex items-center gap-3 rounded-xl border p-3.5 text-left transition-all ${
+                        tipe === "SEKOLAH"
+                          ? `${themePrimarySoftBorder} ${themePrimarySoft} ring-2 ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)] ${themeSmallShadow}`
+                          : `${themeNeutralBorder} theme-card ${themeNeutralHover}`
+                      }`}
+                    >
+                      <span
+                        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
+                          tipe === "SEKOLAH"
+                            ? "bg-[var(--color-primary)] text-[var(--color-card)]"
+                            : `${themeNeutralSurface} theme-text-muted`
+                        }`}
+                      >
+                        <Layers size={18} />
+                      </span>
+
+                      <span className="min-w-0">
+                        <span className="block text-sm font-semibold theme-text">
+                          Paket Sekolah
+                        </span>
+
+                        <span className="block text-xs theme-text-muted">
+                          Untuk unit/cabang sekolah mandiri
+                        </span>
+                      </span>
+
+                      {tipe === "SEKOLAH" && (
+                        <Check
+                          size={16}
+                          className="ml-auto shrink-0 text-[var(--color-primary)]"
+                        />
+                      )}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setTipe("YAYASAN")}
+                      className={`flex items-center gap-3 rounded-xl border p-3.5 text-left transition-all ${
+                        tipe === "YAYASAN"
+                          ? `${themePrimarySoftBorder} ${themePrimarySoft} ring-2 ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)] ${themeSmallShadow}`
+                          : `${themeNeutralBorder} theme-card ${themeNeutralHover}`
+                      }`}
+                    >
+                      <span
+                        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
+                          tipe === "YAYASAN"
+                            ? "bg-[var(--color-primary)] text-[var(--color-card)]"
+                            : `${themeNeutralSurface} theme-text-muted`
+                        }`}
+                      >
+                        <Package size={18} />
+                      </span>
+
+                      <span className="min-w-0">
+                        <span className="block text-sm font-semibold theme-text">
+                          Paket Yayasan
+                        </span>
+
+                        <span className="block text-xs theme-text-muted">
+                          Untuk yayasan pengelola banyak sekolah
+                        </span>
+                      </span>
+
+                      {tipe === "YAYASAN" && (
+                        <Check
+                          size={16}
+                          className="ml-auto shrink-0 text-[var(--color-primary)]"
+                        />
+                      )}
+                    </button>
+                  </div>
+                </div>
 
                 <div>
                   <label className="block text-sm font-semibold theme-text">
@@ -1070,12 +1160,12 @@ function TambahPaketPageContent() {
                     </p>
 
                     <h2 className="mt-1 text-lg font-bold">
-                      Paket Sekolah
+                      {tipe === "YAYASAN" ? "Paket Yayasan" : "Paket Sekolah"}
                     </h2>
                   </div>
 
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-card)_14%,transparent)] backdrop-blur-sm">
-                    <Package size={19} />
+                    {tipe === "YAYASAN" ? <Package size={19} /> : <Layers size={19} />}
                   </div>
 
                 </div>
@@ -1106,17 +1196,29 @@ function TambahPaketPageContent() {
 
                     </div>
 
-                    <span
-                      className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold ${
-                        status === "aktif"
-                          ? `${themeSuccessSurface} text-[var(--color-success)] ${themeSuccessBorder} border`
-                          : `${themeNeutralSurface} theme-text-secondary ${themeNeutralBorder} border`
-                      }`}
-                    >
-                      {status === "aktif"
-                        ? "AKTIF"
-                        : "NONAKTIF"}
-                    </span>
+                    <div className="flex items-center gap-1.5 shrink-0 flex-wrap justify-end">
+                      <span
+                        className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${
+                          tipe === "YAYASAN"
+                            ? "bg-purple-100 text-purple-800 border border-purple-300"
+                            : "bg-blue-100 text-blue-800 border border-blue-300"
+                        }`}
+                      >
+                        {tipe === "YAYASAN" ? "YAYASAN" : "SEKOLAH"}
+                      </span>
+
+                      <span
+                        className={`rounded-full px-2.5 py-1 text-[10px] font-bold ${
+                          status === "aktif"
+                            ? `${themeSuccessSurface} text-[var(--color-success)] ${themeSuccessBorder} border`
+                            : `${themeNeutralSurface} theme-text-secondary ${themeNeutralBorder} border`
+                        }`}
+                      >
+                        {status === "aktif"
+                          ? "AKTIF"
+                          : "NONAKTIF"}
+                      </span>
+                    </div>
 
                   </div>
 

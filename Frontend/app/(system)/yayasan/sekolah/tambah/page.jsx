@@ -19,7 +19,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { createSekolahBinaan } from "@/services/yayasan.service";
-import { getPaket } from "@/services/paket.service";
+import { filterPaketSekolah, getPaket } from "@/services/paket.service";
 
 const JENJANG_OPTIONS = ["SD", "SMP", "SMA", "SMK"];
 
@@ -51,10 +51,9 @@ export default function TambahSekolahCabangPage() {
         setLoadingPaket(true);
         const res = await getPaket();
         const list = Array.isArray(res?.data) ? res.data : [];
-        // Saring paket bertipe SEKOLAH
-        const filtered = list.filter(
-          (p) => !p.tipe || String(p.tipe).toUpperCase() === "SEKOLAH"
-        );
+        // Hanya paket bertipe SEKOLAH yang boleh dipilih untuk sekolah cabang.
+        // Paket tipe YAYASAN tidak boleh bocor ke flow ini.
+        const filtered = filterPaketSekolah(list);
         setPaketList(filtered);
         if (filtered.length > 0) {
           setFormData((prev) => ({ ...prev, paketId: filtered[0].id }));

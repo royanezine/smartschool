@@ -4,6 +4,7 @@
 import { useEffect, useState } from "react";
 import { getProfile, getUsers } from "@/services/user.service";
 import { getShiftKerja } from "@/services/shiftKerja.service";
+import { getKelas } from "@/services/kelas.service";
 import { getToken } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 
@@ -187,12 +188,14 @@ export default function TambahPenggunaPage() {
   const [loadingData, setLoadingData] = useState(true);
   const [loadingJabatan, setLoadingJabatan] = useState(false);
   const [loadingShift, setLoadingShift] = useState(false);
+  const [loadingKelas, setLoadingKelas] = useState(false);
 
   const [error, setError] = useState("");
 
   const [roles, setRoles] = useState([]);
   const [kategoriJabatan, setKategoriJabatan] = useState([]);
   const [shiftKerja, setShiftKerja] = useState([]);
+  const [kelasList, setKelasList] = useState([]);
 
   const [sekolahId, setSekolahId] = useState("");
 
@@ -210,6 +213,7 @@ export default function TambahPenggunaPage() {
     jenisKelamin: "",
     golongan: "",
     peran: "",
+    kelasId: "",
   });
 
   // ============================================================
@@ -304,6 +308,24 @@ export default function TambahPenggunaPage() {
     }
   };
 
+  const loadKelasData = async () => {
+    try {
+      setLoadingKelas(true);
+      const res = await getKelas({ limit: 100 });
+      const list = Array.isArray(res?.data)
+        ? res.data
+        : Array.isArray(res)
+        ? res
+        : [];
+      setKelasList(list);
+    } catch (err) {
+      console.error("LOAD KELAS ERROR:", err);
+      setKelasList([]);
+    } finally {
+      setLoadingKelas(false);
+    }
+  };
+
   // ============================================================
   // AMBIL DATA AWAL
   // ============================================================
@@ -332,6 +354,7 @@ export default function TambahPenggunaPage() {
         await Promise.all([
           loadKategoriJabatan(),
           loadShiftKerja(currentSekolahId),
+          loadKelasData(),
         ]);
 
         const usersResult = await getUsers({
@@ -451,6 +474,7 @@ export default function TambahPenggunaPage() {
     .toLowerCase();
 
   const isGuru = normalizedRole === "guru";
+  const isSiswa = normalizedRole === "siswa";
 
   // ============================================================
   // SHIFT TERPILIH
@@ -475,7 +499,7 @@ export default function TambahPenggunaPage() {
       [name]: value,
 
       ...(name === "peran"
-        ? { shiftKerjaId: "" }
+        ? { shiftKerjaId: "", kelasId: "" }
         : {}),
     }));
 
@@ -533,6 +557,15 @@ export default function TambahPenggunaPage() {
   const shiftOptions = shiftKerja.map((item) => ({
     value: item.id,
     label: `${item.nama} (${item.jamMasuk} - ${item.jamKeluar})`,
+  }));
+
+  // ============================================================
+  // OPTIONS KELAS
+  // ============================================================
+
+  const kelasOptions = kelasList.map((item) => ({
+    value: item.id,
+    label: `${item.nama}${item.tingkat ? ` — Tingkat ${item.tingkat}` : ""}`,
   }));
 
   // ============================================================
@@ -635,6 +668,12 @@ export default function TambahPenggunaPage() {
           ? {
               shiftKerja: shiftKerjaValue,
               shiftKerjaId: form.shiftKerjaId,
+            }
+          : {}),
+
+        ...(isSiswa && form.kelasId
+          ? {
+              kelasId: form.kelasId,
             }
           : {}),
 
@@ -929,6 +968,29 @@ export default function TambahPenggunaPage() {
                             : shiftKerja.length === 0
                               ? "Master shift kerja belum tersedia"
                               : "Pilih Shift Kerja"
+                        }
+                      />
+                    )}
+
+                    {/* KELAS KHUSUS SISWA */}
+
+                    {isSiswa && (
+                      <FormSelect
+                        label="Kelas"
+                        name="kelasId"
+                        value={form.kelasId}
+                        onChange={handleChange}
+                        disabled={
+                          loadingKelas ||
+                          kelasList.length === 0
+                        }
+                        options={kelasOptions}
+                        placeholder={
+                          loadingKelas
+                            ? "Memuat kelas..."
+                            : kelasList.length === 0
+                              ? "Master kelas belum tersedia"
+                              : "Pilih Kelas"
                         }
                       />
                     )}

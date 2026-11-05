@@ -122,6 +122,8 @@ export async function apiFetch(endpoint, options = {}) {
     error.status = response.status;
     error.data = data?.data ?? data;
     error.raw = data;
+    error.errorCode = data?.errorCode || null;
+    error.response = { status: response.status, data };
 
     throw error;
   }

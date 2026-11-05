@@ -1,6 +1,7 @@
 
 "use client";
 
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
@@ -17,6 +18,10 @@ import {
   Calendar,
   ChevronRight,
 } from "lucide-react";
+
+import { getPlatformYayasan } from "@/services/platform.service";
+import { getAllPaket } from "@/services/paket.service";
+import { getProvinsi, getKotaByProvinsi } from "@/services/wilayah.service";
 
 
 const themeCardShadow =
@@ -132,6 +137,113 @@ const fileInputClass = `
 
 export default function TambahSekolahPage() {
   const router = useRouter();
+
+  const [yayasanList, setYayasanList] = useState([]);
+  const [loadingYayasan, setLoadingYayasan] = useState(true);
+  const [selectedYayasan, setSelectedYayasan] = useState("-");
+
+  const [paketList, setPaketList] = useState([]);
+  const [loadingPaket, setLoadingPaket] = useState(true);
+  const [selectedPaket, setSelectedPaket] = useState("");
+
+  const [provinsiList, setProvinsiList] = useState([]);
+  const [loadingProvinsi, setLoadingProvinsi] = useState(true);
+  const [selectedProvinsi, setSelectedProvinsi] = useState("");
+  const [selectedProvinsiId, setSelectedProvinsiId] = useState("");
+
+  const [kotaList, setKotaList] = useState([]);
+  const [loadingKota, setLoadingKota] = useState(false);
+  const [selectedKota, setSelectedKota] = useState("");
+
+  useEffect(() => {
+    let active = true;
+    async function loadYayasan() {
+      try {
+        setLoadingYayasan(true);
+        const res = await getPlatformYayasan({ limit: 100 });
+        if (active) {
+          setYayasanList(Array.isArray(res?.data) ? res.data : []);
+        }
+      } catch (err) {
+        console.error("Gagal mengambil data yayasan:", err);
+        if (active) setYayasanList([]);
+      } finally {
+        if (active) setLoadingYayasan(false);
+      }
+    }
+    loadYayasan();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    async function loadPaket() {
+      try {
+        setLoadingPaket(true);
+        const res = await getAllPaket();
+        if (active) {
+          setPaketList(Array.isArray(res?.data) ? res.data : []);
+        }
+      } catch (err) {
+        console.error("Gagal mengambil data paket:", err);
+        if (active) setPaketList([]);
+      } finally {
+        if (active) setLoadingPaket(false);
+      }
+    }
+    loadPaket();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    async function loadProvinsi() {
+      try {
+        setLoadingProvinsi(true);
+        const list = await getProvinsi();
+        if (active) {
+          setProvinsiList(list || []);
+        }
+      } catch (err) {
+        console.error("Gagal mengambil data provinsi:", err);
+        if (active) setProvinsiList([]);
+      } finally {
+        if (active) setLoadingProvinsi(false);
+      }
+    }
+    loadProvinsi();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!selectedProvinsiId) return;
+
+    let active = true;
+    async function loadKota() {
+      try {
+        setLoadingKota(true);
+        const list = await getKotaByProvinsi(selectedProvinsiId);
+        if (active) {
+          setKotaList(list || []);
+        }
+      } catch (err) {
+        console.error("Gagal mengambil data kota:", err);
+        if (active) setKotaList([]);
+      } finally {
+        if (active) setLoadingKota(false);
+      }
+    }
+    loadKota();
+    return () => {
+      active = false;
+    };
+  }, [selectedProvinsiId]);
 
   const goBack = () => {
     router.push("/super-admin/sekolah");
@@ -349,36 +461,57 @@ export default function TambahSekolahPage() {
             <div className="p-4 sm:p-6">
               <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
                 <FormField label="Provinsi" required>
-                  <select name="provinsi" required defaultValue="" className={selectClass}>
+                  <select
+                    name="provinsi"
+                    required
+                    value={selectedProvinsi}
+                    onChange={(e) => {
+                      const provName = e.target.value;
+                      setSelectedProvinsi(provName);
+                      const found = provinsiList.find(
+                        (p) => p.name === provName || p.id === provName
+                      );
+                      setSelectedProvinsiId(found?.id || "");
+                      setSelectedKota("");
+                      setKotaList([]);
+                    }}
+                    className={selectClass}
+                    disabled={loadingProvinsi}
+                  >
                     <option value="" disabled>
-                      Pilih provinsi
+                      {loadingProvinsi
+                        ? "Memuat provinsi..."
+                        : "Pilih provinsi"}
                     </option>
-                    <option value="DKI Jakarta">DKI Jakarta</option>
-                    <option value="Banten">Banten</option>
-                    <option value="Jawa Barat">Jawa Barat</option>
-                    <option value="Jawa Tengah">Jawa Tengah</option>
-                    <option value="Jawa Timur">Jawa Timur</option>
-                    <option value="Bali">Bali</option>
-                    <option value="Sumatera Utara">Sumatera Utara</option>
-                    <option value="Sumatera Selatan">Sumatera Selatan</option>
+                    {provinsiList.map((prov) => (
+                      <option key={prov.id} value={prov.name}>
+                        {prov.name}
+                      </option>
+                    ))}
                   </select>
                 </FormField>
 
                 <FormField label="Kabupaten / Kota" required>
-                  <select name="kabupatenKota" required defaultValue="" className={selectClass}>
+                  <select
+                    name="kabupatenKota"
+                    required
+                    value={selectedKota}
+                    onChange={(e) => setSelectedKota(e.target.value)}
+                    className={selectClass}
+                    disabled={!selectedProvinsiId || loadingKota}
+                  >
                     <option value="" disabled>
-                      Pilih kabupaten / kota
+                      {!selectedProvinsiId
+                        ? "Pilih provinsi terlebih dahulu"
+                        : loadingKota
+                        ? "Memuat kabupaten / kota..."
+                        : "Pilih kabupaten / kota"}
                     </option>
-                    <option value="Depok">Depok</option>
-                    <option value="Bogor">Bogor</option>
-                    <option value="Bekasi">Bekasi</option>
-                    <option value="Bandung">Bandung</option>
-                    <option value="Tangerang">Tangerang</option>
-                    <option value="Tangerang Selatan">Tangerang Selatan</option>
-                    <option value="Jakarta Selatan">Jakarta Selatan</option>
-                    <option value="Jakarta Pusat">Jakarta Pusat</option>
-                    <option value="Denpasar">Denpasar</option>
-                    <option value="Surabaya">Surabaya</option>
+                    {kotaList.map((kota) => (
+                      <option key={kota.id} value={kota.name}>
+                        {kota.name}
+                      </option>
+                    ))}
                   </select>
                 </FormField>
 
@@ -454,26 +587,47 @@ export default function TambahSekolahPage() {
             <div className="p-4 sm:p-6">
               <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
                 <FormField label="Yayasan">
-                  <select name="yayasan" defaultValue="-" className={selectClass}>
+                  <select
+                    name="yayasan"
+                    value={selectedYayasan}
+                    onChange={(e) => setSelectedYayasan(e.target.value)}
+                    className={selectClass}
+                    disabled={loadingYayasan}
+                  >
                     <option value="-">- Tanpa Yayasan -</option>
-                    <option value="Yayasan Al-Azhar">Yayasan Al-Azhar</option>
-                    <option value="Yayasan BPK Penabur">Yayasan BPK Penabur</option>
-                    <option value="Yayasan Pengembangan Pendidikan">
-                      Yayasan Pengembangan Pendidikan
-                    </option>
-                    <option value="Yayasan Bina Insani">Yayasan Bina Insani</option>
-                    <option value="Yayasan Al-Falah">Yayasan Al-Falah</option>
+                    {loadingYayasan ? (
+                      <option value="" disabled>
+                        Memuat daftar yayasan...
+                      </option>
+                    ) : (
+                      yayasanList.map((y) => (
+                        <option key={y.id} value={y.id}>
+                          {y.nama}
+                        </option>
+                      ))
+                    )}
                   </select>
                 </FormField>
 
                 <FormField label="Paket Langganan" required>
-                  <select name="paketLangganan" required defaultValue="" className={selectClass}>
+                  <select
+                    name="paketLangganan"
+                    required
+                    value={selectedPaket}
+                    onChange={(e) => setSelectedPaket(e.target.value)}
+                    className={selectClass}
+                    disabled={loadingPaket}
+                  >
                     <option value="" disabled>
-                      Pilih paket langganan
+                      {loadingPaket
+                        ? "Memuat paket langganan..."
+                        : "Pilih paket langganan"}
                     </option>
-                    <option value="Starter">Starter</option>
-                    <option value="Professional">Professional</option>
-                    <option value="Enterprise">Enterprise</option>
+                    {paketList.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.nama} {p.tipe ? `(${p.tipe})` : ""}
+                      </option>
+                    ))}
                   </select>
                 </FormField>
 

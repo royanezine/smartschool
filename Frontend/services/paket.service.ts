@@ -26,6 +26,7 @@ export interface Paket {
   durasi: number;
   status?: string | null;
   fitur: PaketFitur[];
+  tipe?: string | null;
 }
 
 export interface PaketResponse {
@@ -52,6 +53,56 @@ export interface CreatePaketPayload {
   harga: number;
   durasi: number;
   modulIds: string[];
+  tipe?: TipePaket;
+}
+
+export const TIPE_PAKET_SEKOLAH = "SEKOLAH";
+export const TIPE_PAKET_YAYASAN = "YAYASAN";
+
+export type TipePaket = typeof TIPE_PAKET_SEKOLAH | typeof TIPE_PAKET_YAYASAN;
+
+/**
+ * Menentukan tipe paket (SEKOLAH / YAYASAN).
+ *
+ * Sumber utama adalah field `tipe` yang dikembalikan Backend.
+ * Jika Backend belum mengirim field tersebut, klasifikasi diturunkan dari
+ * nama/deskripsi paket. Ini mencerminkan nilai default kolom `paket.tipe`
+ * di database yang bernilai 'SEKOLAH'.
+ */
+export function resolveTipePaket(paket: Partial<Paket> | null | undefined): TipePaket {
+  const tipe = String(paket?.tipe ?? "").trim().toUpperCase();
+
+  if (tipe === TIPE_PAKET_YAYASAN) {
+    return TIPE_PAKET_YAYASAN;
+  }
+
+  if (tipe === TIPE_PAKET_SEKOLAH) {
+    return TIPE_PAKET_SEKOLAH;
+  }
+
+  const teks = `${paket?.nama ?? ""} ${paket?.deskripsi ?? ""}`.toLowerCase();
+
+  if (teks.includes("yayasan")) {
+    return TIPE_PAKET_YAYASAN;
+  }
+
+  return TIPE_PAKET_SEKOLAH;
+}
+
+export function isPaketYayasan(paket: Partial<Paket> | null | undefined): boolean {
+  return resolveTipePaket(paket) === TIPE_PAKET_YAYASAN;
+}
+
+export function isPaketSekolah(paket: Partial<Paket> | null | undefined): boolean {
+  return resolveTipePaket(paket) === TIPE_PAKET_SEKOLAH;
+}
+
+export function filterPaketYayasan<T extends Partial<Paket>>(paketList: T[]): T[] {
+  return (paketList ?? []).filter((paket) => isPaketYayasan(paket));
+}
+
+export function filterPaketSekolah<T extends Partial<Paket>>(paketList: T[]): T[] {
+  return (paketList ?? []).filter((paket) => isPaketSekolah(paket));
 }
 
 export interface UpdatePaketPayload {
@@ -61,6 +112,7 @@ export interface UpdatePaketPayload {
   durasi: number;
   modulIds?: string[];
   status?: string;
+  tipe?: TipePaket;
 }
 
 
@@ -138,6 +190,8 @@ export async function getPaket(): Promise<PaketResponse> {
     data,
   };
 }
+
+export const getAllPaket = getPaket;
 
 
 export async function getPaketById(
@@ -253,6 +307,7 @@ export async function createPaket(
         harga,
         durasi,
         modulIds,
+        ...(data.tipe && { tipe: data.tipe }),
       }),
     }
   );
@@ -320,6 +375,10 @@ export async function updatePaket(
 
   if (data.status !== undefined) {
     body.status = data.status;
+  }
+
+  if (data.tipe !== undefined) {
+    body.tipe = data.tipe;
   }
 
   const response = await apiFetch(
@@ -437,6 +496,10 @@ function normalizePaket(
     status:
       paket?.status ??
       "aktif",
+
+    tipe:
+      paket?.tipe ??
+      null,
 
     fitur,
   };

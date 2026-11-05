@@ -122,6 +122,14 @@ export default function KelolaUserPage() {
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const [statusUserToToggle, setStatusUserToToggle] = useState(null);
+  const [toast, setToast] = useState(null);
+
+  useEffect(() => {
+    if (!toast) return;
+    const timer = setTimeout(() => setToast(null), 4000);
+    return () => clearTimeout(timer);
+  }, [toast]);
 
   const [actionLoading, setActionLoading] = useState(false);
 
@@ -248,6 +256,10 @@ export default function KelolaUserPage() {
 
       setShowDeleteModal(false);
       setSelectedUser(null);
+      setToast({
+        type: "success",
+        message: "Pengguna berhasil dihapus.",
+      });
 
       await fetchUsers(true);
     } catch (err) {
@@ -256,10 +268,14 @@ export default function KelolaUserPage() {
         err
       );
 
-      setError(
+      const msg =
         err?.message ||
-          "Gagal menghapus pengguna."
-      );
+        "Gagal menghapus pengguna.";
+      setError(msg);
+      setToast({
+        type: "error",
+        message: msg,
+      });
 
       setShowDeleteModal(false);
     } finally {
@@ -268,8 +284,14 @@ export default function KelolaUserPage() {
   };
 
 
-  const handleToggleStatus = async (user) => {
+  const handleToggleStatus = (user) => {
     if (!user?.id) return;
+    setStatusUserToToggle(user);
+  };
+
+  const confirmToggleStatus = async () => {
+    if (!statusUserToToggle?.id) return;
+    const user = statusUserToToggle;
 
     const currentlyActive =
       isActiveStatus(user.status);
@@ -287,6 +309,12 @@ export default function KelolaUserPage() {
         newStatus
       );
 
+      setToast({
+        type: "success",
+        message: `Status pengguna "${getUserName(user)}" berhasil diubah menjadi ${newStatus}.`,
+      });
+      setStatusUserToToggle(null);
+
       await fetchUsers(true);
     } catch (err) {
       console.error(
@@ -294,10 +322,14 @@ export default function KelolaUserPage() {
         err
       );
 
-      setError(
+      const msg =
         err?.message ||
-          "Gagal mengubah status pengguna."
-      );
+        "Gagal mengubah status pengguna.";
+      setError(msg);
+      setToast({
+        type: "error",
+        message: msg,
+      });
     } finally {
       setActionLoading(false);
     }
@@ -1306,6 +1338,121 @@ export default function KelolaUserPage() {
             </div>
           </ModalOverlay>
         )}
+
+      {statusUserToToggle && (
+        <ModalOverlay
+          onClose={() => {
+            if (!actionLoading) {
+              setStatusUserToToggle(null);
+            }
+          }}
+        >
+          <div
+            className={`w-full max-w-md overflow-hidden rounded-3xl theme-card ${themeCardShadow}`}
+          >
+            <div
+              className={`flex items-start justify-between border-b ${themeDivider} ${themeNeutralSurface} p-5`}
+            >
+              <div className="flex items-center gap-3">
+                <div
+                  className={`flex h-11 w-11 items-center justify-center rounded-xl border theme-border ${
+                    isActiveStatus(statusUserToToggle.status)
+                      ? `${themeWarningSurface} text-[var(--color-warning)]`
+                      : `${themeSuccessSurface} text-[var(--color-success)]`
+                  }`}
+                >
+                  {isActiveStatus(statusUserToToggle.status) ? (
+                    <UserX className="h-5 w-5" />
+                  ) : (
+                    <UserCheck className="h-5 w-5" />
+                  )}
+                </div>
+
+                <div>
+                  <h3 className="text-base font-bold theme-text">
+                    {isActiveStatus(statusUserToToggle.status)
+                      ? "Nonaktifkan Pengguna?"
+                      : "Aktifkan Pengguna?"}
+                  </h3>
+                  <p className="mt-0.5 text-xs theme-text-muted">
+                    Konfirmasi perubahan status akun
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setStatusUserToToggle(null)}
+                className={`rounded-lg p-1.5 theme-text-muted transition ${themeNeutralHover}`}
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="p-5">
+              <p className="text-sm leading-6 theme-text-secondary">
+                Apakah kamu yakin ingin{" "}
+                {isActiveStatus(statusUserToToggle.status)
+                  ? "menonaktifkan"
+                  : "mengaktifkan"}{" "}
+                pengguna{" "}
+                <span className="font-bold theme-text">
+                  {getUserName(statusUserToToggle)}
+                </span>
+                ?
+              </p>
+
+              <div className="mt-6 flex items-center justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setStatusUserToToggle(null)}
+                  disabled={actionLoading}
+                  className={`rounded-xl border theme-border theme-card px-5 py-2.5 text-sm font-bold theme-text transition ${themeNeutralHover} disabled:cursor-not-allowed disabled:opacity-50`}
+                >
+                  Batal
+                </button>
+
+                <button
+                  type="button"
+                  onClick={confirmToggleStatus}
+                  disabled={actionLoading}
+                  className={`inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold text-white transition ${
+                    isActiveStatus(statusUserToToggle.status)
+                      ? "bg-amber-600 hover:bg-amber-700"
+                      : "bg-emerald-600 hover:bg-emerald-700"
+                  } disabled:cursor-not-allowed disabled:opacity-60`}
+                >
+                  {actionLoading ? "Memproses..." : "Ya, Lanjutkan"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </ModalOverlay>
+      )}
+
+      {toast && (
+        <div
+          role="status"
+          className="fixed bottom-5 right-5 z-[110] flex items-center gap-3 rounded-xl border theme-border theme-card p-4 shadow-xl max-w-md animate-in fade-in slide-in-from-bottom-2"
+        >
+          {toast.type === "warning" ? (
+            <AlertCircle size={18} className="text-[var(--color-warning)] shrink-0" />
+          ) : toast.type === "error" ? (
+            <XCircle size={18} className="text-red-500 shrink-0" />
+          ) : (
+            <CheckCircle2 size={18} className="text-emerald-500 shrink-0" />
+          )}
+          <p className="text-xs sm:text-sm theme-text flex-1">{toast.message}</p>
+          <button
+            type="button"
+            onClick={() => setToast(null)}
+            className="theme-text-muted hover:theme-text transition-colors p-1"
+            aria-label="Tutup"
+          >
+            <X size={16} />
+          </button>
+        </div>
+      )}
     </div>
   );
 }

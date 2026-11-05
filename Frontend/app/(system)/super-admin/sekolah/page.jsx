@@ -507,6 +507,15 @@ export default function DataSekolahPage() {
   const [sortOrder, setSortOrder] =
     useState("asc");
 
+  const [toast, setToast] = useState(null);
+  const [schoolToDelete, setSchoolToDelete] = useState(null);
+
+  useEffect(() => {
+    if (!toast) return;
+    const timer = setTimeout(() => setToast(null), 4500);
+    return () => clearTimeout(timer);
+  }, [toast]);
+
   const itemsPerPage = 5;
 
 
@@ -860,9 +869,17 @@ export default function DataSekolahPage() {
   const handleDelete = (
     item
   ) => {
-    window.alert(
-      `Fitur hapus sekolah untuk "${item.nama}" belum dihubungkan ke endpoint DELETE backend.`
-    );
+    setSchoolToDelete(item);
+  };
+
+  const confirmDeleteSchool = () => {
+    if (!schoolToDelete) return;
+    const name = schoolToDelete.nama;
+    setSchoolToDelete(null);
+    setToast({
+      type: "info",
+      message: `Fitur hapus sekolah untuk "${name}" belum dihubungkan ke endpoint DELETE backend.`,
+    });
   };
 
 
@@ -1932,6 +1949,57 @@ export default function DataSekolahPage() {
           </div>
         </div>
       </main>
+
+      {schoolToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in">
+          <div className="w-full max-w-md rounded-2xl border theme-border theme-card p-6 shadow-2xl">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2.5 rounded-xl bg-red-500/10 text-red-500">
+                <Trash2 size={22} />
+              </div>
+              <h3 className="text-lg font-bold theme-text">Hapus Sekolah?</h3>
+            </div>
+            <p className="text-sm theme-text-secondary mb-6 leading-relaxed">
+              Apakah kamu yakin ingin menghapus sekolah <strong className="theme-text">&ldquo;{schoolToDelete.nama}&rdquo;</strong>? Tindakan ini akan menghapus data sekolah dari daftar aktif.
+            </p>
+            <div className="flex items-center justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setSchoolToDelete(null)}
+                className={`rounded-xl border theme-border px-4 py-2 text-xs font-semibold theme-text-secondary ${themeNeutralHover} transition`}
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={confirmDeleteSchool}
+                className="inline-flex items-center gap-2 rounded-xl bg-red-600 px-4 py-2 text-xs font-semibold text-white shadow transition hover:bg-red-700"
+              >
+                <Trash2 size={14} />
+                Ya, Hapus
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {toast && (
+        <div
+          role="status"
+          className="fixed bottom-5 right-5 z-50 flex items-center gap-3 rounded-xl border theme-border theme-card p-4 shadow-xl max-w-md animate-in fade-in slide-in-from-bottom-2"
+        >
+          <Clock3 size={18} className="text-[var(--color-primary)] shrink-0" />
+          <p className="text-xs sm:text-sm theme-text flex-1">{toast.message}</p>
+          <button
+            type="button"
+            onClick={() => setToast(null)}
+            className="theme-text-muted hover:theme-text transition-colors p-1"
+            aria-label="Tutup"
+          >
+            <XCircle size={16} />
+          </button>
+        </div>
+      )}
     </div>
   );
 }

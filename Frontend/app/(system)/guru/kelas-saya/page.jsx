@@ -641,25 +641,23 @@ async function loadKelasSaya() {
   ];
 
   return (
-    <div className="flex min-h-screen w-full theme-page">
+    <div className="theme-page flex h-screen w-full overflow-hidden">
       <Sidebar role="guru" />
 
-      <div className="flex min-h-screen min-w-0 flex-1 flex-col">
+      <div className="flex h-full min-w-0 flex-1 flex-col overflow-hidden">
         <Header user={teacher} />
 
-        <div className="min-w-0 flex-1">
-    <main className="theme-page min-h-full w-full">
-      <div
-        className={`
-          mx-auto
-          w-full
-          max-w-[1600px]
-          space-y-6
-          p-4
-          transition-all
-          duration-500
-          sm:p-6
-          lg:p-8
+        <main className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
+          <div
+            className={`
+              w-full
+              min-w-0
+              space-y-6
+              p-4
+              transition-all
+              duration-500
+              sm:p-6
+              lg:p-8
           ${
             mounted
               ? "translate-y-0 opacity-100"
@@ -1438,9 +1436,8 @@ async function loadKelasSaya() {
             <ArrowUpRight size={14} />
           </button>
         </div>
-      </div>
-    </main>
-        </div>
+          </div>
+        </main>
       </div>
     </div>
   );

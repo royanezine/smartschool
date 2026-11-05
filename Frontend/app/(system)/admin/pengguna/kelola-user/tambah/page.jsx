@@ -7,6 +7,7 @@ import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
 import { createUser } from "@/services/user.service";
 import { getRoles } from "@/services/role.service";
+import { getKelas } from "@/services/kelas.service";
 
 import {
   ArrowLeft,
@@ -28,6 +29,7 @@ import {
   Clock,
   Eye,
   CheckCircle2,
+  GraduationCap,
   Lightbulb,
   ShieldCheck,
 } from "lucide-react";
@@ -94,6 +96,8 @@ export default function TambahUserPage() {
 
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isLoadingRoles, setIsLoadingRoles] = useState(true);
+  const [kelasList, setKelasList] = useState([]);
+  const [isLoadingKelas, setIsLoadingKelas] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [errors, setErrors] = useState({});
@@ -112,10 +116,12 @@ export default function TambahUserPage() {
     namaPengguna: "",
     kataSandi: "",
     shiftKerja: "",
+    kelasId: "",
   });
 
   useEffect(() => {
     loadRoles();
+    loadKelasList();
   }, []);
 
   async function loadRoles() {
@@ -142,17 +148,35 @@ export default function TambahUserPage() {
     }
   }
 
+  async function loadKelasList() {
+    try {
+      setIsLoadingKelas(true);
+      const response = await getKelas({ limit: 100 });
+      const list = Array.isArray(response?.data)
+        ? response.data
+        : Array.isArray(response)
+        ? response
+        : [];
+      setKelasList(list);
+    } catch (error) {
+      console.error("LOAD KELAS ERROR:", error);
+      setKelasList([]);
+    } finally {
+      setIsLoadingKelas(false);
+    }
+  }
+
   function handleChange(field, value) {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
-      ...(field === "peranId" ? { shiftKerja: "" } : {}),
+      ...(field === "peranId" ? { shiftKerja: "", kelasId: "" } : {}),
     }));
 
     setErrors((prev) => ({
       ...prev,
       [field]: "",
-      ...(field === "peranId" ? { shiftKerja: "" } : {}),
+      ...(field === "peranId" ? { shiftKerja: "", kelasId: "" } : {}),
     }));
 
     setServerError("");
@@ -164,6 +188,7 @@ export default function TambahUserPage() {
 
   const selectedRoleName = normalizeRole(selectedRole?.nama);
   const isGuru = selectedRoleName === "guru";
+  const isSiswa = selectedRoleName === "siswa";
 
   function generateUsername() {
     if (!formData.email.trim()) {
@@ -257,6 +282,9 @@ export default function TambahUserPage() {
         alamat: formData.alamat.trim() || null,
         ...(isGuru
           ? { shiftKerja: formData.shiftKerja }
+          : {}),
+        ...(isSiswa && formData.kelasId
+          ? { kelasId: formData.kelasId }
           : {}),
       };
 
@@ -584,6 +612,45 @@ export default function TambahUserPage() {
                           </div>
                           {errors.shiftKerja && (
                             <ErrorText>{errors.shiftKerja}</ErrorText>
+                          )}
+                        </div>
+                      )}
+
+                      {isSiswa && (
+                        <div className="min-w-0">
+                          <label className="theme-text-secondary mb-1.5 block text-sm font-semibold">
+                            Kelas
+                          </label>
+                          <div className="relative">
+                            <GraduationCap
+                              size={17}
+                              className="theme-text-placeholder pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2"
+                            />
+                            <select
+                              value={formData.kelasId}
+                              onChange={(e) =>
+                                handleChange("kelasId", e.target.value)
+                              }
+                              disabled={isLoadingKelas}
+                              className={`${inputClass(errors.kelasId)} appearance-none`}
+                            >
+                              <option value="">
+                                {isLoadingKelas
+                                  ? "Memuat kelas..."
+                                  : kelasList.length === 0
+                                    ? "Belum ada kelas tersedia"
+                                    : "Pilih Kelas"}
+                              </option>
+                              {kelasList.map((kelas) => (
+                                <option key={kelas.id} value={kelas.id}>
+                                  {kelas.nama}
+                                  {kelas.tingkat ? ` — Tingkat ${kelas.tingkat}` : ""}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                          {errors.kelasId && (
+                            <ErrorText>{errors.kelasId}</ErrorText>
                           )}
                         </div>
                       )}

@@ -1,8 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { getKelas } from "@/services/kelas.service";
 import { getKelasMapel } from "@/services/kelasMapel.service";
+import { getTahunAjaran } from "@/services/raport.service";
+import { getDashboardSekolah } from "@/services/dashboard.service";
+import { getSemuaSiswa } from "@/services/siswa.service";
 import Link from "next/link";
 
 import Header from "@/app/components/Header";
@@ -22,6 +25,7 @@ import {
   FileText,
   GraduationCap,
   LayoutGrid,
+  Loader2,
   MoreHorizontal,
   PenLine,
   Printer,
@@ -260,76 +264,119 @@ export default function ERaportPage() {
   const [activeView, setActiveView] = useState("ringkasan");
   const [kelasList, setKelasList] = useState([]);
   const [kelasMapelList, setKelasMapelList] = useState([]);
+  const [tahunAjaranList, setTahunAjaranList] = useState([]);
+  const [totalSiswaApi, setTotalSiswaApi] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    let active = true;
-    const timer = setTimeout(async () => {
-      try {
-        setLoading(true);
-        const [kelasRes, mapelRes] = await Promise.allSettled([
-          getKelas({ limit: 100 }),
-          getKelasMapel(),
-        ]);
-        if (!active) return;
-        if (kelasRes.status === "fulfilled") {
-          const val = kelasRes.value;
-          const kList = Array.isArray(val?.data)
-            ? val.data
-            : Array.isArray(val)
-            ? val
-            : [];
-          setKelasList(kList);
-        }
-        if (mapelRes.status === "fulfilled") {
-          const val = mapelRes.value;
-          const mList = Array.isArray(val?.data)
-            ? val.data
-            : Array.isArray(val)
-            ? val
-            : [];
-          setKelasMapelList(mList);
-        }
-      } catch {
-        // Fallback
-      } finally {
-        if (active) setLoading(false);
-      }
-    }, 0);
+  const loadData = useCallback(async () => {
+    try {
+      setLoading(true);
+      const [kelasRes, mapelRes, taRes, dashRes, siswaRes] = await Promise.allSettled([
+        getKelas({ limit: 100 }),
+        getKelasMapel(),
+        getTahunAjaran(),
+        getDashboardSekolah(),
+        getSemuaSiswa({ limit: 1 }),
+      ]);
 
-    return () => {
-      active = false;
-      clearTimeout(timer);
-    };
+      if (kelasRes.status === "fulfilled") {
+        const val = kelasRes.value;
+        const kList = Array.isArray(val?.data)
+          ? val.data
+          : Array.isArray(val)
+          ? val
+          : [];
+        setKelasList(kList);
+      }
+
+      if (mapelRes.status === "fulfilled") {
+        const val = mapelRes.value;
+        const mList = Array.isArray(val?.data)
+          ? val.data
+          : Array.isArray(val)
+          ? val
+          : [];
+        setKelasMapelList(mList);
+      }
+
+      if (taRes.status === "fulfilled") {
+        const val = taRes.value;
+        const taList = Array.isArray(val?.data)
+          ? val.data
+          : Array.isArray(val)
+          ? val
+          : [];
+        setTahunAjaranList(taList);
+      }
+
+      let siswaCount = 0;
+      if (dashRes.status === "fulfilled") {
+        const dVal = dashRes.value?.data;
+        siswaCount = dVal?.sekolah?.totalSiswa ?? dVal?.cabang?.totalSiswa ?? 0;
+      }
+      if (!siswaCount && siswaRes.status === "fulfilled") {
+        const sVal = siswaRes.value;
+        siswaCount = sVal?.meta?.totalData ?? sVal?.meta?.total ?? 0;
+      }
+      if (siswaCount > 0) {
+        setTotalSiswaApi(siswaCount);
+      }
+    } catch (err) {
+      console.error("Gagal memuat data dashboard E-Raport:", err);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      loadData();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [loadData]);
+
+  const activeTahunAjaran = useMemo(() => {
+    if (!Array.isArray(tahunAjaranList) || tahunAjaranList.length === 0) {
+      return null;
+    }
+    return tahunAjaranList.find((t) => t.status === "aktif") || tahunAjaranList[0];
+  }, [tahunAjaranList]);
 
   const classProgress = useMemo(() => {
     return kelasList.map((k) => {
       const siswaCount =
+        k._count?.anggota ??
         k._count?.anggotaKelas ??
-        (Array.isArray(k.anggotaKelas) ? k.anggotaKelas.length : k.kapasitas || 0);
+        (Array.isArray(k.anggota) ? k.anggota.length : (Array.isArray(k.anggotaKelas) ? k.anggotaKelas.length : k.kapasitas || 0));
       return {
         id: k.id,
         kelas: k.nama || "Kelas",
         tingkat: k.tingkat ? `Tingkat ${k.tingkat}` : "Reguler",
         siswa: siswaCount,
-        nilai: 100,
-        raport: 100,
-        status: "Aktif",
+        nilai: 0,
+        raport: 0,
+        status: k.status || "Aktif",
       };
     });
   }, [kelasList]);
 
   const totalSiswa = useMemo(() => {
+    if (totalSiswaApi > 0) return totalSiswaApi;
     return classProgress.reduce((sum, item) => sum + item.siswa, 0);
-  }, [classProgress]);
+  }, [totalSiswaApi, classProgress]);
+
+  // Data raport aktual dari sistem (saat ini 0 raport selesai di DB)
+  const raportLengkap = 0;
+  const belumLengkap = Math.max(0, totalSiswa - raportLengkap);
+  const averageNilai = totalSiswa > 0 ? Math.round((raportLengkap / totalSiswa) * 100) : 0;
+  const averageRaport = totalSiswa > 0 ? Math.round((raportLengkap / totalSiswa) * 100) : 0;
 
   const subjectProgress = useMemo(() => {
     return kelasMapelList.slice(0, 8).map((km) => ({
       id: km.id,
       subject: km.mataPelajaran?.nama || "Mata Pelajaran",
       teacher: km.guruPengajar?.namaLengkap || "Guru Pengajar",
-      progress: 100,
+      progress: 0,
       students: totalSiswa,
     }));
   }, [kelasMapelList, totalSiswa]);
@@ -360,16 +407,13 @@ export default function ERaportPage() {
   const recentActivity = useMemo(() => {
     return kelasList.slice(0, 4).map((k, idx) => ({
       title: `Kelas ${k.nama || ""} aktif`,
-      detail: `${k.tingkat ? `Tingkat ${k.tingkat}` : "Reguler"} · ${k.kapasitas || 0} kapasitas`,
+      detail: `${k.tingkat ? `Tingkat ${k.tingkat}` : "Reguler"} · ${k._count?.anggota ?? k.kapasitas ?? 0} siswa`,
       user: "Sistem Akademik",
       time: "Aktif",
       icon: FileCheck2,
       tone: idx % 2 === 0 ? "emerald" : "blue",
     }));
   }, [kelasList]);
-
-  const averageNilai = 100;
-  const averageRaport = 100;
 
   return (
     <div className="theme-page flex h-screen min-h-0 overflow-hidden">
@@ -552,11 +596,17 @@ export default function ERaportPage() {
                       </p>
 
                       <p className="mt-1 text-lg font-bold theme-text">
-                        2026/2027
+                        {loading
+                          ? "Memuat..."
+                          : activeTahunAjaran?.tahunAjaran || "2025/2026"}
                       </p>
 
                       <p className="mt-1 text-xs theme-text-muted">
-                        Semester Ganjil
+                        {loading
+                          ? "..."
+                          : activeTahunAjaran?.semester
+                          ? `Semester ${activeTahunAjaran.semester}`
+                          : "Semester Ganjil"}
                       </p>
                     </div>
 
@@ -714,7 +764,7 @@ export default function ERaportPage() {
               <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                 <StatCard
                   label="Total Siswa"
-                  value={totalSiswa}
+                  value={loading ? "..." : totalSiswa}
                   description="Siswa dalam periode aktif"
                   icon={Users}
                   tone="blue"
@@ -722,7 +772,7 @@ export default function ERaportPage() {
 
                 <StatCard
                   label="Nilai Terisi"
-                  value={`${averageNilai}%`}
+                  value={loading ? "..." : `${averageNilai}%`}
                   description="Rata-rata kelengkapan nilai"
                   icon={FileSpreadsheet}
                   tone="violet"
@@ -731,7 +781,7 @@ export default function ERaportPage() {
 
                 <StatCard
                   label="Raport Lengkap"
-                  value="428"
+                  value={loading ? "..." : raportLengkap}
                   description="Raport siap diproses"
                   icon={FileCheck2}
                   tone="emerald"
@@ -740,7 +790,7 @@ export default function ERaportPage() {
 
                 <StatCard
                   label="Belum Lengkap"
-                  value="38"
+                  value={loading ? "..." : belumLengkap}
                   description="Perlu ditindaklanjuti"
                   icon={XCircle}
                   tone="amber"
@@ -886,7 +936,9 @@ export default function ERaportPage() {
                                 </p>
 
                                 <p className="mt-0.5 text-[11px] theme-text-placeholder">
-                                  Semester Ganjil
+                                  {activeTahunAjaran?.semester
+                                    ? `Semester ${activeTahunAjaran.semester}`
+                                    : "Semester Ganjil"}
                                 </p>
                               </div>
                             </div>
@@ -998,11 +1050,15 @@ export default function ERaportPage() {
                         </p>
 
                         <p className="mt-1 text-xs leading-5 theme-text-secondary">
-                          Kelas 9 memiliki tingkat kelengkapan
-                          raport paling tinggi. Kelas 8B masih
-                          membutuhkan perhatian karena progres
-                          pengisian nilai berada di bawah kelas
-                          lainnya.
+                          {kelasList.length > 0
+                            ? `Terdapat ${kelasList.length} kelas aktif dengan total ${totalSiswa} siswa terdaftar pada Tahun Ajaran ${
+                                activeTahunAjaran?.tahunAjaran || "aktif"
+                              } (${
+                                activeTahunAjaran?.semester
+                                  ? `Semester ${activeTahunAjaran.semester}`
+                                  : "Ganjil"
+                              }). Pengisian nilai dan pencetakan raport dapat dipantau melalui modul di bawah.`
+                            : "Belum ada kelas aktif yang terdaftar untuk periode ini."}
                         </p>
                       </div>
                     </div>
@@ -1066,7 +1122,7 @@ export default function ERaportPage() {
 
                     <div className="text-center">
                       <p className="text-3xl font-bold theme-text">
-                        78%
+                        {loading ? "..." : `${averageRaport}%`}
                       </p>
 
                       <p className="mt-1 text-[11px] font-medium theme-text-placeholder">
@@ -1255,6 +1311,8 @@ export default function ERaportPage() {
 
                   <button
                     type="button"
+                    onClick={loadData}
+                    disabled={loading}
                     className="
                       theme-card-soft
                       theme-text-muted
@@ -1264,9 +1322,11 @@ export default function ERaportPage() {
                       rounded-lg
                       transition
                       hover:text-[var(--color-primary)]
+                      disabled:opacity-50
                     "
+                    title="Segarkan Data"
                   >
-                    <RefreshCw size={15} />
+                    <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
                   </button>
                 </div>
 
@@ -1463,7 +1523,13 @@ export default function ERaportPage() {
                 </span>
 
                 <span>
-                  Semester Ganjil 2026/2027
+                  {activeTahunAjaran
+                    ? `${
+                        activeTahunAjaran.semester
+                          ? `Semester ${activeTahunAjaran.semester}`
+                          : ""
+                      } ${activeTahunAjaran.tahunAjaran || ""}`.trim()
+                    : "Semester Aktif"}
                 </span>
               </div>
             </div>

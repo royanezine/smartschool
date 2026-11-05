@@ -15,6 +15,51 @@ export async function getPengaturan(params?: { sekolahId?: string }): Promise<an
   return apiFetch(`/api/pengaturan${qs}`);
 }
 
+export interface PengaturanGlobalIdentitas {
+  namaAplikasi: string;
+  emailDukungan: string | null;
+  teleponDukungan: string | null;
+  logoUrl: string | null;
+}
+
+export interface PengaturanGlobalPendaftaran {
+  pendaftaranDibuka: boolean;
+  durasiUjiCobaHari: number;
+}
+
+export interface PengaturanGlobalPemeliharaan {
+  aktif: boolean;
+  pesan: string | null;
+}
+
+export interface PengaturanGlobalSemua {
+  identitas: PengaturanGlobalIdentitas;
+  pendaftaran: PengaturanGlobalPendaftaran;
+  pemeliharaan: PengaturanGlobalPemeliharaan;
+}
+
+export async function getPengaturanGlobalSemua(): Promise<{
+  success: boolean;
+  message: string;
+  data: PengaturanGlobalSemua;
+}> {
+  return apiFetch("/api/pengaturan/global/semua");
+}
+
+export async function updatePengaturanGlobal(
+  kelompok: "identitas" | "pendaftaran" | "pemeliharaan",
+  payload: Record<string, unknown>
+): Promise<{
+  success: boolean;
+  message: string;
+  data: any;
+}> {
+  return apiFetch(`/api/pengaturan/global/${kelompok}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+}
+
 export async function upsertPengaturan(payload: {
   kunci: string;
   nilai: string;
@@ -105,6 +150,44 @@ export async function updateAgregatRapor(
   payload: UpdateAgregatRaporPayload
 ): Promise<AgregatRaporResponse> {
   return apiFetch("/api/pengaturan/agregat-rapor", {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+}
+
+export interface PengaturanPresensiSekolah {
+  lintang: number | null;
+  bujur: number | null;
+  radiusAbsensi: number | null;
+  metodeAbsensiAktif: ("barcode" | "lokasi" | "face")[];
+}
+
+export interface PengaturanPresensiResponse {
+  success: boolean;
+  message: string;
+  data: PengaturanPresensiSekolah;
+}
+
+export interface UpdatePengaturanPresensiPayload {
+  lintang?: number;
+  bujur?: number;
+  radiusAbsensi?: number;
+  metodeAbsensiAktif?: ("barcode" | "lokasi" | "face")[];
+}
+
+export async function getPengaturanPresensiSekolah(
+  sekolahId?: string
+): Promise<PengaturanPresensiResponse> {
+  const qs = sekolahId ? `?sekolahId=${encodeURIComponent(sekolahId)}` : "";
+  return apiFetch(`/api/sekolah/pengaturan-presensi${qs}`);
+}
+
+export async function updatePengaturanPresensiSekolah(
+  payload: UpdatePengaturanPresensiPayload,
+  sekolahId?: string
+): Promise<PengaturanPresensiResponse> {
+  const qs = sekolahId ? `?sekolahId=${encodeURIComponent(sekolahId)}` : "";
+  return apiFetch(`/api/sekolah/pengaturan-presensi${qs}`, {
     method: "PUT",
     body: JSON.stringify(payload),
   });

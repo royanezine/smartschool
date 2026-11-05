@@ -497,8 +497,8 @@ function KelasSearchDropdown({
 export default function GuruMateriPage() {
   const router = useRouter();
 
-  const [sidebarOpen, setSidebarOpen] =
-    useState(true);
+  const [isCollapsed, setIsCollapsed] =
+    useState(false);
 
   const [materiList, setMateriList] =
     useState([]);
@@ -810,39 +810,27 @@ export default function GuruMateriPage() {
     search.trim() !== "";
 
 
-  function toggleSidebar() {
-    setSidebarOpen(
-      (prev) => !prev
-    );
-  }
-
-
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
-
       <Sidebar
         active="materi"
         setActive={() => {}}
-        collapsed={!sidebarOpen}
-        setCollapsed={() =>
-          setSidebarOpen(
-            (prev) => !prev
-          )
-        }
+        collapsed={isCollapsed}
+        setCollapsed={setIsCollapsed}
         role="guru"
       />
 
+      <div className="flex h-full min-w-0 flex-1 flex-col overflow-hidden">
+        <div className="shrink-0">
+          <Header
+            role="guru"
+            toggleSidebar={() => setIsCollapsed((prev) => !prev)}
+            notifications={[]}
+          />
+        </div>
 
-      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
-        <Header
-          toggleSidebar={
-            toggleSidebar
-          }
-        />
-
-        <main className="flex-1 overflow-y-auto overflow-x-hidden">
-          <div className="w-full p-4 sm:p-6 lg:p-8">
-            <div className="max-w-7xl mx-auto space-y-6">
+        <main className="theme-page min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
+          <div className="w-full space-y-6 p-4 sm:p-6 lg:p-8">
 
 
               <section
@@ -935,7 +923,7 @@ export default function GuruMateriPage() {
                 </div>
 
 
-                <div className="relative mt-5 grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div className="relative mt-5 grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-4 gap-3">
                   {[
                     {
                       label: "Total Materi",
@@ -1223,7 +1211,7 @@ export default function GuruMateriPage() {
 
 
               {loading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 xl:gap-5">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4 xl:gap-5">
                   {[1, 2, 3, 4, 5, 6].map(
                     (i) => (
                       <SkeletonCard key={i} />
@@ -1284,7 +1272,7 @@ export default function GuruMateriPage() {
                 </section>
               ) : (
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 xl:gap-5">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4 xl:gap-5">
                   {filteredMateri.map(
                     (materi) => {
                       const kelasName =
@@ -1523,7 +1511,6 @@ export default function GuruMateriPage() {
                     </p>
                   </div>
                 )}
-            </div>
           </div>
         </main>
       </div>

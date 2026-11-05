@@ -10,7 +10,9 @@ import {
   Pencil,
   Trash2,
   X,
+  XCircle,
   Check,
+  CheckCircle,
   Search,
   Sparkles,
   Crown,
@@ -28,6 +30,7 @@ import {
   MessageSquare,
   Boxes,
   MoreHorizontal,
+  MoreVertical,
   Copy,
   ShieldCheck,
   Loader2,
@@ -431,6 +434,13 @@ export default function PaketModulPage() {
   const [error, setError] = useState("");
   const [confirmDelete, setConfirmDelete] =
     useState(null);
+  const [toast, setToast] = useState(null);
+
+  useEffect(() => {
+    if (!toast) return;
+    const timer = setTimeout(() => setToast(null), 4000);
+    return () => clearTimeout(timer);
+  }, [toast]);
   const [search, setSearch] = useState("");
 
 
@@ -689,16 +699,25 @@ export default function PaketModulPage() {
       );
 
       setConfirmDelete(null);
+      setToast({
+        type: "success",
+        message: "Paket berhasil dihapus/dinonaktifkan.",
+      });
+      await loadData();
     } catch (err) {
       console.error(
         "Gagal menghapus paket:",
         err
       );
 
-      setError(
+      const msg =
         err?.message ||
-          "Gagal menghapus paket."
-      );
+        "Gagal menghapus paket.";
+      setError(msg);
+      setToast({
+        type: "error",
+        message: msg,
+      });
     }
   }
 
@@ -769,16 +788,25 @@ export default function PaketModulPage() {
             }
           )
       );
+
+      setToast({
+        type: "success",
+        message: `Paket berhasil ${nextStatus === "aktif" ? "diaktifkan" : "dinonaktifkan"}.`,
+      });
     } catch (err) {
       console.error(
         "Gagal mengubah status:",
         err
       );
 
-      setError(
+      const msg =
         err?.message ||
-          "Gagal mengubah status paket."
-      );
+        "Gagal mengubah status paket.";
+      setError(msg);
+      setToast({
+        type: "error",
+        message: msg,
+      });
     }
   }
 
@@ -1123,6 +1151,30 @@ export default function PaketModulPage() {
           }
         />
       )}
+
+      {toast && (
+        <div
+          role="status"
+          className="fixed bottom-5 right-5 z-[110] flex items-center gap-3 rounded-xl border theme-border theme-card p-4 shadow-xl max-w-md animate-in fade-in slide-in-from-bottom-2"
+        >
+          {toast.type === "warning" ? (
+            <AlertCircle size={18} className="text-[var(--color-warning)] shrink-0" />
+          ) : toast.type === "error" ? (
+            <XCircle size={18} className="text-red-500 shrink-0" />
+          ) : (
+            <CheckCircle size={18} className="text-emerald-500 shrink-0" />
+          )}
+          <p className="text-xs sm:text-sm theme-text flex-1">{toast.message}</p>
+          <button
+            type="button"
+            onClick={() => setToast(null)}
+            className="theme-text-muted hover:theme-text transition-colors p-1"
+            aria-label="Tutup"
+          >
+            <X size={16} />
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -1216,17 +1268,19 @@ function PaketCard({
 
   return (
     <div
-      className={`relative overflow-hidden rounded-2xl border theme-border theme-card ${themeCardShadow} hover:shadow-[0_10px_30px_color-mix(in_srgb,var(--color-text)_9%,transparent)] transition flex flex-col`}
+      className={`relative rounded-2xl border theme-border theme-card ${themeCardShadow} hover:shadow-[0_10px_30px_color-mix(in_srgb,var(--color-text)_9%,transparent)] transition flex flex-col ${
+        menuOpen ? "z-30" : "z-0"
+      }`}
     >
 
-      <div
-        className={`relative h-24 ${theme.card} overflow-hidden`}
-      >
-        <div
-          className={`absolute -right-8 -top-12 w-32 h-32 rounded-full ${themeHeroSoft}`}
-        />
+      <div className={`relative h-24 ${theme.card} rounded-t-2xl`}>
+        <div className="absolute inset-0 overflow-hidden rounded-t-2xl pointer-events-none">
+          <div
+            className={`absolute -right-8 -top-12 w-32 h-32 rounded-full ${themeHeroSoft}`}
+          />
 
-        <div className="absolute right-8 bottom-[-35px] w-24 h-24 rounded-full bg-[color-mix(in_srgb,var(--color-card)_7%,transparent)]" />
+          <div className="absolute right-8 bottom-[-35px] w-24 h-24 rounded-full bg-[color-mix(in_srgb,var(--color-card)_7%,transparent)]" />
+        </div>
 
         <div className="relative flex items-center justify-between p-5">
           <div
@@ -1240,74 +1294,72 @@ function PaketCard({
 
           <div className="relative">
             <button
+              type="button"
               onClick={() =>
                 setMenuOpen(
                   (value) =>
                     !value
                 )
               }
+              aria-label="Menu Opsi Paket"
               className={`w-9 h-9 rounded-lg flex items-center justify-center ${themeHeroSecondary} hover:text-[var(--color-card)] hover:bg-[color-mix(in_srgb,var(--color-card)_10%,transparent)] transition`}
             >
-              <MoreHorizontal size={18} />
+              <MoreVertical size={18} />
             </button>
 
             {menuOpen && (
-              <div
-                onMouseLeave={() =>
-                  setMenuOpen(false)
-                }
-                className={`absolute right-0 top-10 w-44 rounded-xl border theme-border theme-card ${themeCardShadow} py-1.5 z-30`}
-              >
-                <MenuButton
-                  icon={Pencil}
-                  label="Edit Paket"
-                  onClick={() => {
-                    onEdit();
-                    setMenuOpen(
-                      false
-                    );
-                  }}
+              <>
+                <div
+                  className="fixed inset-0 z-40"
+                  onClick={() => setMenuOpen(false)}
                 />
+                <div
+                  className={`absolute left-0 top-11 w-44 rounded-xl border theme-border theme-card ${themeCardShadow} py-1.5 z-50`}
+                >
+                  <MenuButton
+                    icon={Pencil}
+                    label="Edit Paket"
+                    onClick={() => {
+                      onEdit();
+                      setMenuOpen(false);
+                    }}
+                  />
 
-                <MenuButton
-                  icon={Copy}
-                  label="Duplikat"
-                  onClick={() => {
-                    onDuplicate();
-                    setMenuOpen(
-                      false
-                    );
-                  }}
-                />
+                  <MenuButton
+                    icon={Copy}
+                    label="Duplikat"
+                    onClick={() => {
+                      onDuplicate();
+                      setMenuOpen(false);
+                    }}
+                  />
 
-                <MenuButton
-                  icon={ShieldCheck}
-                  label={
-                    paket.status ===
-                    "aktif"
-                      ? "Nonaktifkan"
-                      : "Aktifkan"
-                  }
-                  onClick={() => {
-                    onToggleStatus();
-                    setMenuOpen(
-                      false
-                    );
-                  }}
-                />
+                  <MenuButton
+                    icon={ShieldCheck}
+                    label={
+                      paket.status === "aktif"
+                        ? "Nonaktifkan"
+                        : "Aktifkan"
+                    }
+                    onClick={() => {
+                      onToggleStatus();
+                      setMenuOpen(false);
+                    }}
+                  />
 
-                <MenuButton
-                  icon={Trash2}
-                  label="Hapus"
-                  danger
-                  onClick={() => {
-                    onDelete();
-                    setMenuOpen(
-                      false
-                    );
-                  }}
-                />
-              </div>
+                  <div className="my-1 border-t theme-border-soft" />
+
+                  <MenuButton
+                    icon={Trash2}
+                    label="Hapus"
+                    danger
+                    onClick={() => {
+                      onDelete();
+                      setMenuOpen(false);
+                    }}
+                  />
+                </div>
+              </>
             )}
           </div>
         </div>
@@ -1358,28 +1410,40 @@ function PaketCard({
         <div
           className={`flex flex-wrap items-center justify-between gap-2 mt-4 pb-4 border-b ${themeDivider}`}
         >
-          <span
-            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold ${
-              paket.status ===
-              "aktif"
-                ? `${themeSuccessSurface} text-[var(--color-success)] border ${themeSuccessBorder}`
-                : `${themeNeutralSurface} theme-text-muted border ${themeNeutralBorder}`
-            }`}
-          >
+          <div className="flex items-center gap-1.5 flex-wrap">
             <span
-              className={`w-1.5 h-1.5 rounded-full ${
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold ${
                 paket.status ===
                 "aktif"
-                  ? "bg-[var(--color-success)]"
-                  : "bg-[var(--color-text-muted)]"
+                  ? `${themeSuccessSurface} text-[var(--color-success)] border ${themeSuccessBorder}`
+                  : `${themeNeutralSurface} theme-text-muted border ${themeNeutralBorder}`
               }`}
-            />
+            >
+              <span
+                className={`w-1.5 h-1.5 rounded-full ${
+                  paket.status ===
+                  "aktif"
+                    ? "bg-[var(--color-success)]"
+                    : "bg-[var(--color-text-muted)]"
+                }`}
+              />
 
-            {paket.status ===
-            "aktif"
-              ? "Aktif"
-              : "Nonaktif"}
-          </span>
+              {paket.status ===
+              "aktif"
+                ? "Aktif"
+                : "Nonaktif"}
+            </span>
+
+            <span
+              className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold ${
+                paket.tipe === "YAYASAN"
+                  ? "bg-purple-100 text-purple-800 border border-purple-300"
+                  : "bg-blue-100 text-blue-800 border border-blue-300"
+              }`}
+            >
+              {paket.tipe === "YAYASAN" ? "Paket Yayasan" : "Paket Sekolah"}
+            </span>
+          </div>
 
           <span className="flex items-center gap-1.5 text-xs theme-text-muted">
             <Users size={13} />
@@ -1541,10 +1605,11 @@ function MenuButton({
 }) {
   return (
     <button
+      type="button"
       onClick={onClick}
       className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 text-xs transition ${
         danger
-          ? "text-[var(--color-warning)] hover:bg-[color-mix(in_srgb,var(--color-warning)_8%,transparent)]"
+          ? "text-[var(--color-danger,#ef4444)] hover:bg-[color-mix(in_srgb,var(--color-danger,#ef4444)_10%,transparent)] font-semibold"
           : "theme-text-secondary hover:bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)]"
       }`}
     >
@@ -1801,10 +1866,14 @@ function ConfirmDeleteModal({
   onCancel,
   onConfirm,
 }) {
-  const [
-    deleting,
-    setDeleting,
-  ] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const packageName = getPaketName(paket);
+  const subscriberCount = Number(
+    paket?.langganan ||
+      paket?.jumlahSekolah ||
+      paket?.tenantCount ||
+      0
+  );
 
   async function handleDelete() {
     try {
@@ -1816,90 +1885,67 @@ function ConfirmDeleteModal({
   }
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-
-      <div
-        className="absolute inset-0 bg-[color-mix(in_srgb,var(--color-text)_48%,transparent)] backdrop-blur-sm"
-        onClick={
-          deleting
-            ? undefined
-            : onCancel
-        }
-      />
-
-
-      <div
-        className={`relative w-full max-w-md overflow-hidden rounded-2xl theme-card ${themeCardShadow}`}
-      >
-
-        <div
-          className="bg-[var(--color-warning)] p-6 text-center"
-        >
-          <div
-            className={`w-14 h-14 mx-auto rounded-2xl bg-[color-mix(in_srgb,var(--color-card)_15%,transparent)] border ${themeHeroSoftBorder} flex items-center justify-center`}
-          >
-            <Trash2
-              size={24}
-              className="text-[var(--color-card)]"
-            />
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-delete-title"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in"
+    >
+      <div className="w-full max-w-md rounded-2xl border theme-border theme-card p-6 shadow-2xl animate-in zoom-in-95 duration-150">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="p-2.5 rounded-xl bg-red-500/10 text-red-500 shrink-0">
+            <Trash2 size={22} />
+          </div>
+          <div>
+            <h3 id="modal-delete-title" className="text-lg font-bold theme-text">
+              Hapus Paket?
+            </h3>
+            <p className="text-xs theme-text-muted mt-0.5">
+              Konfirmasi penghapusan paket modul
+            </p>
           </div>
         </div>
 
+        <p className="text-sm theme-text-secondary mb-4 leading-relaxed">
+          Apakah Anda yakin ingin menghapus paket{" "}
+          <strong className="theme-text font-semibold">
+            &ldquo;{packageName}&rdquo;
+          </strong>
+          ? Tindakan ini akan menghapus paket dari daftar aktif.
+        </p>
 
-        <div className="p-6">
-          <h3 className="text-center text-lg font-bold theme-text">
-            Hapus paket?
-          </h3>
-
-          <p className="text-center text-sm theme-text-secondary mt-2 leading-relaxed">
-            Kamu akan menghapus
-            paket{" "}
-            <span className="font-semibold theme-text">
-              &ldquo;{paket.nama}&rdquo;
-            </span>
-            . Tindakan ini akan
-            menghapus paket dari
-            daftar aktif.
-          </p>
-
-          {paket.langganan > 0 && (
-            <div
-              className={`mt-4 p-3 rounded-xl ${themeWarningSurface} border ${themeWarningBorder} text-xs text-[var(--color-warning)]`}
-            >
-              Paket ini masih memiliki{" "}
-              <strong>
-                {paket.langganan} sekolah
-              </strong>{" "}
-              yang berlangganan.
-            </div>
-          )}
-
-          <div className="flex items-center gap-3 mt-6">
-            <button
-              onClick={onCancel}
-              disabled={deleting}
-              className={`flex-1 py-2.5 rounded-xl border theme-border theme-text-secondary ${themeNeutralHover} text-sm font-semibold transition disabled:opacity-50`}
-            >
-              Batal
-            </button>
-
-            <button
-              onClick={handleDelete}
-              disabled={deleting}
-              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[var(--color-warning)] hover:bg-[color-mix(in_srgb,var(--color-warning)_88%,var(--color-text))] text-[var(--color-card)] text-sm font-semibold shadow-sm transition disabled:opacity-60"
-            >
-              {deleting && (
-                <Loader2
-                  size={15}
-                  className="animate-spin"
-                />
-              )}
-
-              {deleting
-                ? "Menghapus..."
-                : "Ya, Hapus"}
-            </button>
+        {subscriberCount > 0 && (
+          <div
+            className={`mb-4 p-3 rounded-xl ${themeWarningSurface} border ${themeWarningBorder} text-xs text-[var(--color-warning)]`}
+          >
+            Paket ini masih memiliki{" "}
+            <strong>{subscriberCount} sekolah</strong> yang berlangganan.
           </div>
+        )}
+
+        <div className="flex items-center justify-end gap-3 mt-6">
+          <button
+            type="button"
+            onClick={onCancel}
+            disabled={deleting}
+            className={`rounded-xl border theme-border px-4 py-2 text-xs font-semibold theme-text-secondary ${themeNeutralHover} transition disabled:opacity-50`}
+          >
+            Batal
+          </button>
+
+          <button
+            type="button"
+            onClick={handleDelete}
+            disabled={deleting}
+            className="inline-flex items-center gap-2 rounded-xl bg-red-600 px-4 py-2 text-xs font-semibold text-white shadow transition hover:bg-red-700 disabled:opacity-60"
+          >
+            {deleting ? (
+              <Loader2 size={14} className="animate-spin" />
+            ) : (
+              <Trash2 size={14} />
+            )}
+            {deleting ? "Menghapus..." : "Ya, Hapus"}
+          </button>
         </div>
       </div>
     </div>

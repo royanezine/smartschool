@@ -484,7 +484,7 @@ function pickLatestTodayRecord(records) {
 export default function GuruDashboardPage() {
   const router = useRouter();
 
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [animate, setAnimate] = useState(false);
@@ -1170,14 +1170,16 @@ export default function GuruDashboardPage() {
       <Sidebar
         active="dashboard"
         setActive={() => {}}
-        collapsed={!sidebarOpen}
-        setCollapsed={() => setSidebarOpen((value) => !value)}
+        collapsed={isCollapsed}
+        setCollapsed={setIsCollapsed}
+        role="guru"
       />
 
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+      <div className="flex h-full min-w-0 flex-1 flex-col overflow-hidden">
         <div className="shrink-0">
           <Header
-            toggleSidebar={() => setSidebarOpen((value) => !value)}
+            role="guru"
+            toggleSidebar={() => setIsCollapsed((prev) => !prev)}
             notifications={headerNotifications}
             user={{
               name: displayName,
@@ -1187,9 +1189,9 @@ export default function GuruDashboardPage() {
           />
         </div>
 
-        <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
-          <div className="mx-auto w-full max-w-[1600px] p-3 sm:p-4 md:p-5 lg:p-6">
-            <div className="space-y-6 lg:space-y-7">
+        <main className="theme-page min-w-0 flex-1 overflow-x-hidden overflow-y-auto">
+          <div className="w-full space-y-6 p-4 sm:p-6 lg:p-8">
+            <div className="w-full space-y-6 lg:space-y-7">
               {/* ================= ERROR ================= */}
               {error && (
                 <div className="flex items-start gap-3 rounded-xl border border-red-500/20 bg-red-500/5 p-4">
@@ -1212,34 +1214,34 @@ export default function GuruDashboardPage() {
 
               {/* ================= HERO ================= */}
               <section
-                className="relative overflow-hidden rounded-3xl p-5 text-white sm:p-7"
+                className="relative overflow-hidden rounded-2xl p-5 text-white sm:p-7 shadow-lg"
                 style={{
                   background:
-                    "linear-gradient(120deg, var(--color-primary) 0%, color-mix(in srgb, var(--color-primary) 62%, #0b1f4f) 100%)",
+                    "linear-gradient(135deg, var(--color-primary) 0%, color-mix(in srgb, var(--color-primary) 65%, #071530) 100%)",
                 }}
               >
                 <div className="pointer-events-none absolute -right-16 -top-20 h-64 w-64 rounded-full bg-white/10 blur-2xl" />
                 <div className="pointer-events-none absolute -bottom-24 left-1/3 h-56 w-56 rounded-full bg-white/10 blur-2xl" />
 
-                <div className="relative grid grid-cols-1 gap-6 lg:grid-cols-[1.4fr_1fr] lg:items-center">
-                  <div className="min-w-0">
+                <div className="relative grid grid-cols-1 gap-6 lg:grid-cols-12 lg:items-center">
+                  <div className="min-w-0 lg:col-span-7 xl:col-span-8">
                     <span className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1.5 text-xs font-medium ring-1 ring-white/25">
                       <CalendarDays size={13} />
                       {formatDate(today)}
                     </span>
 
-                    <h1 className="mt-4 break-words text-2xl font-bold tracking-tight sm:text-4xl">
+                    <h1 className="mt-4 break-words text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">
                       {getGreeting()}, {displayName}
                     </h1>
-                    <p className="mt-2 max-w-xl text-sm leading-relaxed text-white/85 sm:text-base">
+                    <p className="mt-2 max-w-2xl text-sm leading-relaxed text-white/85 sm:text-base">
                       {heroSummary}
                     </p>
 
-                    <div className="mt-5 flex flex-wrap items-center gap-2.5">
+                    <div className="mt-5 flex flex-wrap items-center gap-2.5 sm:gap-3">
                       <button
                         type="button"
                         onClick={() => router.push("/guru/jadwal")}
-                        className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-[var(--color-primary)] transition hover:bg-white/90"
+                        className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-[var(--color-primary)] transition hover:bg-white/90 shadow-sm"
                       >
                         <CalendarDays size={15} />
                         Lihat jadwal
@@ -1257,7 +1259,7 @@ export default function GuruDashboardPage() {
                         title="Muat ulang data"
                         onClick={() => loadDashboard(true)}
                         disabled={refreshing}
-                        className="inline-flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium text-white/85 transition hover:bg-white/10 disabled:opacity-50"
+                        className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-3.5 py-2.5 text-sm font-medium text-white/90 ring-1 ring-white/20 transition hover:bg-white/20 disabled:opacity-50"
                       >
                         <RefreshCw size={15} className={refreshing ? "animate-spin" : ""} />
                         Refresh
@@ -1266,7 +1268,7 @@ export default function GuruDashboardPage() {
                   </div>
 
                   {/* Kartu fokus */}
-                  <div className="rounded-2xl bg-white/15 p-5 ring-1 ring-white/25 backdrop-blur">
+                  <div className="min-w-0 lg:col-span-5 xl:col-span-4 rounded-2xl bg-white/15 p-5 ring-1 ring-white/25 backdrop-blur">
                     <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider text-white/80">
                       <Sparkles size={13} />
                       {focusSchedule
@@ -1334,7 +1336,7 @@ export default function GuruDashboardPage() {
               </section>
 
               {/* ================= KPI ================= */}
-              <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-4 sm:gap-5">
                 <KpiCard
                   label="Kelas Diampu"
                   value={loading ? "…" : formatNumber(uniqueClassCount)}
@@ -1389,9 +1391,9 @@ export default function GuruDashboardPage() {
               </section>
 
               {/* ================= JADWAL & PERLU PERHATIAN ================= */}
-              <section className="grid min-w-0 grid-cols-1 gap-4 xl:grid-cols-3">
+              <section className="grid min-w-0 grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-3 2xl:grid-cols-3">
                 {/* Jadwal hari ini */}
-                <div className={`${themeCard} min-w-0 overflow-hidden xl:col-span-2`}>
+                <div className={`${themeCard} min-w-0 overflow-hidden lg:col-span-2`}>
                   <CardHeader
                     Icon={Clock3}
                     title="Jadwal Hari Ini"
@@ -1504,7 +1506,7 @@ export default function GuruDashboardPage() {
                 </div>
 
                 {/* Perlu perhatian */}
-                <div className={`${themeCard} min-w-0 overflow-hidden`}>
+                <div className={`${themeCard} min-w-0 overflow-hidden lg:col-span-1`}>
                   <CardHeader
                     Icon={AlertCircle}
                     title="Perlu Perhatian"
@@ -1578,23 +1580,23 @@ export default function GuruDashboardPage() {
                   subtitle="Langsung ke menu yang paling sering dipakai."
                 />
 
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6 2xl:grid-cols-6 gap-3 sm:gap-4">
                   {quickMenu.map((item) => (
                     <button
                       key={item.id}
                       type="button"
                       onClick={() => router.push(item.path)}
-                      className={`${themeCard} group flex min-w-0 items-center gap-4 p-4 text-left transition duration-200 hover:-translate-y-0.5`}
+                      className={`${themeCard} group flex min-w-0 items-center gap-3.5 p-4 text-left transition duration-200 hover:-translate-y-0.5`}
                     >
-                      <IconChip Icon={item.icon} tone={item.tone} size={46} />
+                      <IconChip Icon={item.icon} tone={item.tone} size={42} />
                       <div className="min-w-0 flex-1">
                         <h3 className="truncate text-sm font-semibold theme-text">
                           {item.title}
                         </h3>
-                        <p className="mt-0.5 text-xs theme-text-secondary">{item.desc}</p>
+                        <p className="mt-0.5 line-clamp-1 text-xs theme-text-secondary">{item.desc}</p>
                       </div>
                       <ChevronRight
-                        size={16}
+                        size={15}
                         className={`shrink-0 transition group-hover:translate-x-0.5 ${themeMuted}`}
                       />
                     </button>
@@ -1618,34 +1620,36 @@ export default function GuruDashboardPage() {
                   }
                 />
 
-                <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-                  <ChartCard title="Ringkasan Semua Kelas" subtitle="Status kehadiran seluruh siswa">
-                    {loading ? (
-                      <ChartLoading />
-                    ) : attendanceSummary.totalRecorded === 0 ? (
-                      <EmptyChart message="Belum ada catatan absensi hari ini." />
-                    ) : (
-                      <div className="flex flex-col items-center gap-6">
-                        <DonutChart
-                          data={attendanceDonutData}
-                          total={attendanceSummary.totalRecorded}
-                          animate={animate}
-                          centerValue={
-                            attendanceSummary.percentage === null
-                              ? "—"
-                              : `${attendanceSummary.percentage}%`
-                          }
-                          centerLabel="Hadir"
-                        />
-                        <LegendList
-                          data={attendanceDonutData}
-                          total={attendanceSummary.totalRecorded}
-                        />
-                      </div>
-                    )}
-                  </ChartCard>
+                <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-3 2xl:grid-cols-3">
+                  <div className="min-w-0 lg:col-span-1">
+                    <ChartCard title="Ringkasan Semua Kelas" subtitle="Status kehadiran seluruh siswa">
+                      {loading ? (
+                        <ChartLoading />
+                      ) : attendanceSummary.totalRecorded === 0 ? (
+                        <EmptyChart message="Belum ada catatan absensi hari ini." />
+                      ) : (
+                        <div className="flex flex-col items-center gap-6">
+                          <DonutChart
+                            data={attendanceDonutData}
+                            total={attendanceSummary.totalRecorded}
+                            animate={animate}
+                            centerValue={
+                              attendanceSummary.percentage === null
+                                ? "—"
+                                : `${attendanceSummary.percentage}%`
+                            }
+                            centerLabel="Hadir"
+                          />
+                          <LegendList
+                            data={attendanceDonutData}
+                            total={attendanceSummary.totalRecorded}
+                          />
+                        </div>
+                      )}
+                    </ChartCard>
+                  </div>
 
-                  <div className="lg:col-span-2">
+                  <div className="min-w-0 lg:col-span-2">
                     <ChartCard
                       title="Per Kelas"
                       subtitle="Semakin hijau berarti semakin banyak siswa yang hadir"
@@ -1711,8 +1715,8 @@ export default function GuruDashboardPage() {
                   subtitle="Sebaran siswa, status penilaian tugas, dan beban mengajar."
                 />
 
-                <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-                  <div className="lg:col-span-2">
+                <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-3 2xl:grid-cols-3">
+                  <div className="min-w-0 lg:col-span-2">
                     <ChartCard title="Jumlah Siswa per Kelas" subtitle="Kelas yang Anda ampu">
                       {loading ? (
                         <ChartLoading />
@@ -1724,31 +1728,33 @@ export default function GuruDashboardPage() {
                     </ChartCard>
                   </div>
 
-                  <ChartCard title="Status Penilaian Tugas" subtitle="Dari seluruh pengumpulan siswa">
-                    {loading ? (
-                      <ChartLoading />
-                    ) : !taskCountAvailable ? (
-                      <EmptyChart message="Data pengumpulan belum berhasil diambil." />
-                    ) : submissionTotal === 0 ? (
-                      <EmptyChart message="Belum ada pengumpulan tugas." />
-                    ) : (
-                      <div className="flex flex-col items-center gap-6">
-                        <DonutChart
-                          data={submissionDonutData}
-                          total={submissionTotal}
-                          animate={animate}
-                          centerValue={formatNumber(submissionTotal)}
-                          centerLabel="Pengumpulan"
-                        />
-                        <LegendList
-                          data={submissionDonutData}
-                          total={submissionTotal}
-                        />
-                      </div>
-                    )}
-                  </ChartCard>
+                  <div className="min-w-0 lg:col-span-1">
+                    <ChartCard title="Status Penilaian Tugas" subtitle="Dari seluruh pengumpulan siswa">
+                      {loading ? (
+                        <ChartLoading />
+                      ) : !taskCountAvailable ? (
+                        <EmptyChart message="Data pengumpulan belum berhasil diambil." />
+                      ) : submissionTotal === 0 ? (
+                        <EmptyChart message="Belum ada pengumpulan tugas." />
+                      ) : (
+                        <div className="flex flex-col items-center gap-6">
+                          <DonutChart
+                            data={submissionDonutData}
+                            total={submissionTotal}
+                            animate={animate}
+                            centerValue={formatNumber(submissionTotal)}
+                            centerLabel="Pengumpulan"
+                          />
+                          <LegendList
+                            data={submissionDonutData}
+                            total={submissionTotal}
+                          />
+                        </div>
+                      )}
+                    </ChartCard>
+                  </div>
 
-                  <div className="lg:col-span-2">
+                  <div className="min-w-0 lg:col-span-2">
                     <ChartCard
                       title="Beban Jadwal Mingguan"
                       subtitle={`Sesi mengajar per hari · total ${weeklyTotal} sesi · hari ini ditandai warna penuh`}
@@ -1763,7 +1769,8 @@ export default function GuruDashboardPage() {
                     </ChartCard>
                   </div>
 
-                  <ChartCard title="Kehadiran Saya Hari Ini" subtitle="Dicatat oleh sistem absensi">
+                  <div className="min-w-0 lg:col-span-1">
+                    <ChartCard title="Kehadiran Saya Hari Ini" subtitle="Dicatat oleh sistem absensi">
                     <div className="grid grid-cols-2 gap-3">
                       <TimeBox
                         label="Jam masuk"
@@ -1804,7 +1811,8 @@ export default function GuruDashboardPage() {
                     )}
                   </ChartCard>
                 </div>
-              </section>
+              </div>
+            </section>
 
               {/* ================= NOTIFIKASI ================= */}
               <section className={`${themeCard} min-w-0 overflow-hidden`}>

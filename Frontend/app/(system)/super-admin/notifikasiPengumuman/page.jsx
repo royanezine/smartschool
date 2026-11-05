@@ -90,6 +90,83 @@ const themeDangerBorder =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
+const formatTanggal = (dateString) => {
+  if (!dateString) return "-";
+  try {
+    const d = new Date(dateString);
+    if (isNaN(d.getTime())) return String(dateString);
+    return d.toLocaleDateString("id-ID", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  } catch {
+    return String(dateString);
+  }
+};
+
+const getTipeColor = (tipe) => {
+  const map = {
+    info: `${themeInfoSurface} text-[var(--color-info)] ${themeInfoBorder}`,
+    success: `${themeSuccessSurface} text-[var(--color-success)] ${themeSuccessBorder}`,
+    warning: `${themeWarningSurface} text-[var(--color-warning)] ${themeWarningBorder}`,
+    error: `${themeDangerSurface} text-[var(--color-danger,_#ef4444)] ${themeDangerBorder}`,
+  };
+
+  return map[tipe] || map.info;
+};
+
+const getTipeIcon = (tipe) => {
+  const map = {
+    info: Info,
+    success: CheckCircle,
+    warning: AlertTriangle,
+    error: XCircle,
+  };
+
+  return map[tipe] || Info;
+};
+
+const getPrioritasColor = (prioritas) => {
+  const map = {
+    high: `${themeDangerSurface} text-[var(--color-danger,_#ef4444)] ${themeDangerBorder}`,
+    medium: `${themeWarningSurface} text-[var(--color-warning)] ${themeWarningBorder}`,
+    low: `${themeInfoSurface} text-[var(--color-info)] ${themeInfoBorder}`,
+  };
+
+  return map[prioritas] || map.low;
+};
+
+const getPrioritasLabel = (prioritas) => {
+  const map = {
+    high: "Penting",
+    medium: "Sedang",
+    low: "Rendah",
+  };
+
+  return map[prioritas] || prioritas || "Rendah";
+};
+
+const getStatusBadge = (status) => {
+  const map = {
+    published: {
+      bg: `${themeSuccessSurface} text-[var(--color-success)] ${themeSuccessBorder}`,
+      label: "Dipublikasikan",
+    },
+    draft: {
+      bg: `${themeNeutralSurface} theme-text-secondary ${themeNeutralBorder}`,
+      label: "Draf",
+    },
+    archived: {
+      bg: `${themeNeutralSurface} theme-text-muted ${themeNeutralBorder}`,
+      label: "Diarsipkan",
+    },
+  };
+
+  return map[status] || map.draft;
+};
 
 export default function NotifikasiPengumumanPage() {
   const router = useRouter();
@@ -104,6 +181,14 @@ export default function NotifikasiPengumumanPage() {
   const [notifications, setNotifications] = useState([]);
   const [announcements, setAnnouncements] = useState([]);
   const [, setLoading] = useState(true);
+  const [toast, setToast] = useState(null);
+  const [itemToDelete, setItemToDelete] = useState(null);
+
+  useEffect(() => {
+    if (!toast) return;
+    const timer = setTimeout(() => setToast(null), 4000);
+    return () => clearTimeout(timer);
+  }, [toast]);
 
   const loadData = useCallback(async () => {
     try {
@@ -151,17 +236,17 @@ export default function NotifikasiPengumumanPage() {
 
   const filteredNotifs = notifications.filter((n) => {
     const matchSearch =
-      n.judul.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      n.isi.toLowerCase().includes(searchQuery.toLowerCase());
+      String(n?.judul || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      String(n?.isi || "").toLowerCase().includes(searchQuery.toLowerCase());
 
     const matchKategori =
       filterKategori === "Semua" ||
-      n.kategori === filterKategori;
+      n?.kategori === filterKategori;
 
     const matchDibaca =
       filterDibaca === "Semua" ||
-      (filterDibaca === "Belum Dibaca" && !n.dibaca) ||
-      (filterDibaca === "Sudah Dibaca" && n.dibaca);
+      (filterDibaca === "Belum Dibaca" && !n?.dibaca) ||
+      (filterDibaca === "Sudah Dibaca" && n?.dibaca);
 
     return matchSearch && matchKategori && matchDibaca;
   });
@@ -169,12 +254,12 @@ export default function NotifikasiPengumumanPage() {
 
   const filteredAnnounces = announcements.filter((a) => {
     const matchSearch =
-      a.judul.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      a.isi.toLowerCase().includes(searchQuery.toLowerCase());
+      String(a?.judul || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      String(a?.isi || "").toLowerCase().includes(searchQuery.toLowerCase());
 
     const matchKategori =
       filterKategori === "Semua" ||
-      a.kategori === filterKategori;
+      a?.kategori === filterKategori;
 
     return matchSearch && matchKategori;
   });
@@ -213,16 +298,42 @@ export default function NotifikasiPengumumanPage() {
     }
   };
 
-  const handleDeleteNotif = (id) => {
-    setNotifications((prev) =>
-      prev.filter((n) => n.id !== id)
-    );
+  const handleDeleteNotif = (notif) => {
+    setItemToDelete({
+      type: "notif",
+      id: notif.id,
+      title: notif.judul || "Notifikasi",
+    });
   };
 
-  const handleDeleteAnnounce = (id) => {
-    setAnnouncements((prev) =>
-      prev.filter((a) => a.id !== id)
-    );
+  const handleDeleteAnnounce = (announce) => {
+    setItemToDelete({
+      type: "announce",
+      id: announce.id,
+      title: announce.judul || "Pengumuman",
+    });
+  };
+
+  const confirmDeleteItem = () => {
+    if (!itemToDelete) return;
+    if (itemToDelete.type === "notif") {
+      setNotifications((prev) =>
+        prev.filter((n) => n.id !== itemToDelete.id)
+      );
+      setToast({
+        type: "success",
+        message: "Notifikasi berhasil dihapus.",
+      });
+    } else {
+      setAnnouncements((prev) =>
+        prev.filter((a) => a.id !== itemToDelete.id)
+      );
+      setToast({
+        type: "success",
+        message: "Pengumuman berhasil dihapus.",
+      });
+    }
+    setItemToDelete(null);
   };
 
   const handleToggleStatus = (id) => {
@@ -269,7 +380,10 @@ export default function NotifikasiPengumumanPage() {
       await loadData();
     } catch (err) {
       console.error("Gagal mengirim broadcast pengumuman:", err);
-      alert(err?.message || "Gagal mengirim pengumuman.");
+      setToast({
+        type: "error",
+        message: err?.message || "Gagal mengirim pengumuman.",
+      });
     }
   };
 
@@ -346,17 +460,15 @@ export default function NotifikasiPengumumanPage() {
                   </button>
                 )}
 
-              {activeTab === "pengumuman" && (
-                <button
-                  onClick={() =>
-                    router.push("/super-admin/notifikasiPengumuman/tambah")
-                  }
-                  className={`flex items-center gap-2 px-4 py-2 text-sm font-medium text-[var(--color-card)] ${themePrimaryGradient} rounded-lg transition-all ${themePrimaryShadow}`}
-                >
-                  <Plus size={16} />
-                  Buat Pengumuman
-                </button>
-              )}
+              <button
+                onClick={() =>
+                  router.push("/super-admin/notifikasiPengumuman/tambah")
+                }
+                className={`flex items-center gap-2 px-4 py-2 text-sm font-medium text-[var(--color-card)] ${themePrimaryGradient} rounded-lg transition-all ${themePrimaryShadow}`}
+              >
+                <Plus size={16} />
+                Buat Pengumuman
+              </button>
             </div>
           </div>
 
@@ -566,10 +678,6 @@ export default function NotifikasiPengumumanPage() {
                             if (!notif.dibaca) {
                               handleMarkRead(notif.id);
                             }
-
-                            if (notif.targetUrl) {
-                              router.push(notif.targetUrl);
-                            }
                           }}
                         >
                           <div className="flex items-start gap-3">
@@ -626,11 +734,19 @@ export default function NotifikasiPengumumanPage() {
                                 </span>
 
                                 {notif.targetUrl && (
-                                  <span
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      if (!notif.dibaca) handleMarkRead(notif.id);
+                                      if (typeof notif.targetUrl === "string" && notif.targetUrl.startsWith("/")) {
+                                        router.push(notif.targetUrl);
+                                      }
+                                    }}
                                     className={`text-xs ${themePrimaryText} hover:underline font-medium`}
                                   >
                                     Lihat Detail →
-                                  </span>
+                                  </button>
                                 )}
 
                                 <div className="flex items-center gap-0.5 ml-auto">
@@ -651,10 +767,11 @@ export default function NotifikasiPengumumanPage() {
                                   )}
 
                                   <button
+                                    type="button"
                                     onClick={(e) => {
                                       e.stopPropagation();
                                       handleDeleteNotif(
-                                        notif.id
+                                        notif
                                       );
                                     }}
                                     className={`p-1.5 rounded-lg theme-text-muted hover:text-[var(--color-warning)] ${themeWarningSurface} transition-colors`}
@@ -926,9 +1043,10 @@ export default function NotifikasiPengumumanPage() {
                                     </button>
 
                                     <button
+                                      type="button"
                                       onClick={() =>
                                         handleDeleteAnnounce(
-                                          announce.id
+                                          announce
                                         )
                                       }
                                       className={`p-1.5 rounded-lg theme-text-muted hover:text-[var(--color-warning)] ${themeWarningSurface} transition-colors`}
@@ -963,7 +1081,65 @@ export default function NotifikasiPengumumanPage() {
         </div>
       </div>
 
+      {itemToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in">
+          <div className="w-full max-w-md rounded-2xl border theme-border theme-card p-6 shadow-2xl">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2.5 rounded-xl bg-red-500/10 text-red-500">
+                <Trash2 size={22} />
+              </div>
+              <h3 className="text-lg font-bold theme-text">
+                {itemToDelete.type === "notif" ? "Hapus Notifikasi?" : "Hapus Pengumuman?"}
+              </h3>
+            </div>
+            <p className="text-sm theme-text-secondary mb-6 leading-relaxed">
+              Apakah kamu yakin ingin menghapus {itemToDelete.type === "notif" ? "notifikasi" : "pengumuman"}{" "}
+              <strong className="theme-text">&ldquo;{itemToDelete.title}&rdquo;</strong>?
+            </p>
+            <div className="flex items-center justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setItemToDelete(null)}
+                className={`rounded-xl border theme-border px-4 py-2 text-xs font-semibold theme-text-secondary ${themeNeutralHover} transition`}
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={confirmDeleteItem}
+                className="inline-flex items-center gap-2 rounded-xl bg-red-600 px-4 py-2 text-xs font-semibold text-white shadow transition hover:bg-red-700"
+              >
+                <Trash2 size={14} />
+                Ya, Hapus
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
+      {toast && (
+        <div
+          role="status"
+          className="fixed bottom-5 right-5 z-50 flex items-center gap-3 rounded-xl border theme-border theme-card p-4 shadow-xl max-w-md animate-in fade-in slide-in-from-bottom-2"
+        >
+          {toast.type === "warning" ? (
+            <AlertTriangle size={18} className="text-[var(--color-warning)] shrink-0" />
+          ) : toast.type === "error" ? (
+            <XCircle size={18} className="text-red-500 shrink-0" />
+          ) : (
+            <CheckCircle size={18} className="text-emerald-500 shrink-0" />
+          )}
+          <p className="text-xs sm:text-sm theme-text flex-1">{toast.message}</p>
+          <button
+            type="button"
+            onClick={() => setToast(null)}
+            className="theme-text-muted hover:theme-text transition-colors p-1"
+            aria-label="Tutup"
+          >
+            <X size={16} />
+          </button>
+        </div>
+      )}
     </div>
   );
 }

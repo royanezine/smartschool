@@ -1,7 +1,7 @@
 
 "use client";
 
-import { Suspense, useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -33,18 +33,8 @@ import {
 } from "lucide-react";
 
 import { registerTenant } from "@/services/tenant.service";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
-
-function getApiBaseUrl() {
-  if (!API_URL) {
-    throw new Error(
-      "NEXT_PUBLIC_API_URL belum dikonfigurasi di file .env."
-    );
-  }
-
-  return API_URL.trim().replace(/\/+$/, "").replace(/\/api$/i, "");
-}
+import { getPaket, isPaketYayasan, isPaketSekolah } from "@/services/paket.service";
+import { getProvinsi, getKotaByProvinsi } from "@/services/wilayah.service";
 
 const initialForm = {
   // Mode Sekolah
@@ -98,25 +88,6 @@ function formatHarga(value) {
   return `Rp ${number.toLocaleString("id-ID")}`;
 }
 
-function getPaketArray(result) {
-  if (Array.isArray(result)) return result;
-  if (Array.isArray(result?.data)) return result.data;
-  if (Array.isArray(result?.data?.paket)) return result.data.paket;
-  if (Array.isArray(result?.data?.pakets)) return result.data.pakets;
-  if (Array.isArray(result?.paket)) return result.paket;
-
-  return [];
-}
-
-function isPaketYayasan(paket) {
-  if (!paket) return false;
-  if (paket.tipe) {
-    return String(paket.tipe).toUpperCase() === "YAYASAN";
-  }
-  const text = `${paket.nama || ""} ${paket.deskripsi || ""}`.toLowerCase();
-  return text.includes("yayasan");
-}
-
 function DaftarSekolahContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -135,16 +106,30 @@ function DaftarSekolahContent() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+  // Wilayah: formData.provinsi / formData.kota menyimpan NAMA (payload tetap),
+  // sedangkan ID dipakai hanya untuk query dropdown berjenjang.
+  const [provinsiList, setProvinsiList] = useState([]);
+  const [provinsiId, setProvinsiId] = useState("");
+  const [loadingProvinsi, setLoadingProvinsi] = useState(true);
+  const [errorProvinsi, setErrorProvinsi] = useState("");
+  const [kotaList, setKotaList] = useState([]);
+  const [kotaId, setKotaId] = useState("");
+  const [loadingKota, setLoadingKota] = useState(false);
+  const [errorKota, setErrorKota] = useState("");
+  const kotaRequestRef = useRef(0);
+
   const subdomain = useMemo(
     () => generateSubdomain(formData.namaSekolah),
     [formData.namaSekolah]
   );
 
   const availablePaketList = useMemo(() => {
-    const filtered = paketList.filter((p) =>
-      jenisPendaftaran === "yayasan" ? isPaketYayasan(p) : !isPaketYayasan(p)
-    );
-    return filtered.length > 0 ? filtered : paketList;
+    // Tidak ada fallback ke paketList: paket yang ditampilkan harus benar-benar
+    // sesuai jenis pendaftaran. Jika paket untuk jenis tersebut belum tersedia
+    // dari Backend, halaman menampilkan state "Paket belum tersedia".
+    return jenisPendaftaran === "yayasan"
+      ? paketList.filter((p) => isPaketYayasan(p))
+      : paketList.filter((p) => isPaketSekolah(p));
   }, [paketList, jenisPendaftaran]);
 
   useEffect(() => {
@@ -154,36 +139,10 @@ function DaftarSekolahContent() {
       try {
         setLoadingPaket(true);
 
-        const endpoint = `${getApiBaseUrl()}/api/paket`;
-
-        const response = await fetch(endpoint, {
-          method: "GET",
-          headers: {
-            Accept: "application/json",
-          },
-          cache: "no-store",
-        });
-
-        const responseText = await response.text();
-
-        let result;
-
-        try {
-          result = responseText ? JSON.parse(responseText) : {};
-        } catch {
-          throw new Error(
-            `Respons API paket bukan JSON. Periksa endpoint ${endpoint}.`
-          );
-        }
-
-        if (!response.ok || result?.success === false) {
-          throw new Error(
-            result?.message ||
-              `Gagal mengambil daftar paket. HTTP ${response.status}.`
-          );
-        }
-
-        const data = getPaketArray(result);
+        // Gunakan service resmi Frontend agar normalisasi data (termasuk
+        // field `tipe`) konsisten dengan halaman lain.
+        const result = await getPaket();
+        const data = Array.isArray(result?.data) ? result.data : [];
 
         if (!cancelled) {
           setPaketList(data);
@@ -241,7 +200,7 @@ function DaftarSekolahContent() {
     setError("");
 
     const targetPakets = paketList.filter((p) =>
-      nextJenis === "yayasan" ? isPaketYayasan(p) : !isPaketYayasan(p)
+      nextJenis === "yayasan" ? isPaketYayasan(p) : isPaketSekolah(p)
     );
     const isCurrentValid = targetPakets.some((p) => p.id === formData.paket);
     if (!isCurrentValid && targetPakets.length > 0) {
@@ -250,6 +209,109 @@ function DaftarSekolahContent() {
         paket: targetPakets[0].id,
       }));
     }
+  }
+
+  useEffect(() => {
+    // loadingProvinsi sudah true sejak state awal; semua setState di bawah
+    // terjadi setelah await (async), bukan sinkron di body effect.
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const list = await getProvinsi();
+        if (cancelled) return;
+        setProvinsiList(list);
+        if (list.length === 0) {
+          setErrorProvinsi("Daftar provinsi kosong dari server.");
+        }
+      } catch (err) {
+        if (cancelled) return;
+        setProvinsiList([]);
+        setErrorProvinsi(err?.message || "Gagal memuat daftar provinsi.");
+      } finally {
+        if (!cancelled) setLoadingProvinsi(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Dipakai tombol "Coba lagi" (handler event, bukan effect).
+  async function retryProvinsi() {
+    setLoadingProvinsi(true);
+    setErrorProvinsi("");
+
+    try {
+      const list = await getProvinsi();
+      setProvinsiList(list);
+      if (list.length === 0) {
+        setErrorProvinsi("Daftar provinsi kosong dari server.");
+      }
+    } catch (err) {
+      setProvinsiList([]);
+      setErrorProvinsi(err?.message || "Gagal memuat daftar provinsi.");
+    } finally {
+      setLoadingProvinsi(false);
+    }
+  }
+
+  async function loadKota(idProvinsi) {
+    const requestId = ++kotaRequestRef.current;
+
+    setLoadingKota(true);
+    setErrorKota("");
+
+    try {
+      const list = await getKotaByProvinsi(idProvinsi);
+      if (requestId !== kotaRequestRef.current) return;
+      setKotaList(list);
+      if (list.length === 0) {
+        setErrorKota("Data kota/kabupaten untuk provinsi ini kosong.");
+      }
+    } catch (err) {
+      if (requestId !== kotaRequestRef.current) return;
+      setKotaList([]);
+      setErrorKota(err?.message || "Gagal memuat daftar kota/kabupaten.");
+    } finally {
+      if (requestId === kotaRequestRef.current) setLoadingKota(false);
+    }
+  }
+
+  function handleProvinsiChange(event) {
+    const id = event.target.value;
+    const selected = provinsiList.find((item) => item.id === id);
+
+    // Ganti provinsi: reset kota lama, batalkan request kota yang masih berjalan.
+    kotaRequestRef.current += 1;
+    setProvinsiId(id);
+    setKotaId("");
+    setKotaList([]);
+    setErrorKota("");
+    setLoadingKota(false);
+    setFormData((prev) => ({
+      ...prev,
+      provinsi: selected ? selected.name : "",
+      kota: "",
+    }));
+    setError("");
+    setSuccess("");
+
+    if (id) loadKota(id);
+  }
+
+  function handleKotaChange(event) {
+    const id = event.target.value;
+    const selected = kotaList.find((item) => item.id === id);
+
+    setKotaId(id);
+    setFormData((prev) => ({
+      ...prev,
+      kota: selected ? selected.name : "",
+    }));
+    setError("");
+    setSuccess("");
   }
 
   function handleChange(event) {
@@ -325,6 +387,20 @@ function DaftarSekolahContent() {
 
     if (!selectedPaket) {
       setError("Paket tidak ditemukan. Silakan muat ulang halaman.");
+      return;
+    }
+
+    // Pastikan paket yang dipilih sesuai jenis pendaftaran yang aktif.
+    const tipePaketDipilih = isPaketYayasan(selectedPaket)
+      ? "yayasan"
+      : "sekolah";
+
+    if (tipePaketDipilih !== jenisPendaftaran) {
+      setError(
+        jenisPendaftaran === "yayasan"
+          ? "Paket yang dipilih bukan paket yayasan. Silakan pilih ulang paket."
+          : "Paket yang dipilih bukan paket sekolah. Silakan pilih ulang paket."
+      );
       return;
     }
 
@@ -816,33 +892,84 @@ function DaftarSekolahContent() {
 
                     <div>
                       <label className={labelClass}>
-                        Kota <span className="text-rose-500">*</span>
+                        Provinsi <span className="text-rose-500">*</span>
                       </label>
                       <div className="relative">
-                        <MapPin size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                        <input
+                        <MapPin size={16} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                        <select
                           required
-                          name="kota"
-                          value={formData.kota}
-                          onChange={handleChange}
-                          placeholder="Contoh: Depok"
-                          className={`${inputClass} pl-10`}
-                        />
+                          name="provinsi"
+                          value={provinsiId}
+                          onChange={handleProvinsiChange}
+                          disabled={loadingProvinsi || provinsiList.length === 0}
+                          className={`${inputClass} pl-10 disabled:cursor-not-allowed disabled:opacity-60`}
+                        >
+                          <option value="">
+                            {loadingProvinsi ? "Memuat provinsi..." : "Pilih provinsi"}
+                          </option>
+                          {provinsiList.map((item) => (
+                            <option key={item.id} value={item.id}>
+                              {item.name}
+                            </option>
+                          ))}
+                        </select>
                       </div>
+                      {errorProvinsi && (
+                        <p className="mt-1.5 text-xs text-rose-600">
+                          {errorProvinsi}{" "}
+                          <button
+                            type="button"
+                            onClick={retryProvinsi}
+                            className="font-semibold underline underline-offset-2"
+                          >
+                            Coba lagi
+                          </button>
+                        </p>
+                      )}
                     </div>
 
                     <div>
                       <label className={labelClass}>
-                        Provinsi <span className="text-rose-500">*</span>
+                        Kota/Kabupaten <span className="text-rose-500">*</span>
                       </label>
-                      <input
-                        required
-                        name="provinsi"
-                        value={formData.provinsi}
-                        onChange={handleChange}
-                        placeholder="Contoh: Jawa Barat"
-                        className={inputClass}
-                      />
+                      <div className="relative">
+                        <MapPin size={16} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                        <select
+                          required
+                          name="kota"
+                          value={kotaId}
+                          onChange={handleKotaChange}
+                          disabled={!provinsiId || loadingKota || kotaList.length === 0}
+                          className={`${inputClass} pl-10 disabled:cursor-not-allowed disabled:opacity-60`}
+                        >
+                          <option value="">
+                            {!provinsiId
+                              ? "Pilih provinsi terlebih dahulu"
+                              : loadingKota
+                                ? "Memuat kota/kabupaten..."
+                                : "Pilih kota/kabupaten"}
+                          </option>
+                          {kotaList.map((item) => (
+                            <option key={item.id} value={item.id}>
+                              {item.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      {errorKota && (
+                        <p className="mt-1.5 text-xs text-rose-600">
+                          {errorKota}{" "}
+                          {provinsiId && (
+                            <button
+                              type="button"
+                              onClick={() => loadKota(provinsiId)}
+                              className="font-semibold underline underline-offset-2"
+                            >
+                              Coba lagi
+                            </button>
+                          )}
+                        </p>
+                      )}
                     </div>
 
                     <div className="md:col-span-2">

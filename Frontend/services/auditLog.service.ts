@@ -39,6 +39,7 @@ export interface GetAuditLogsParams {
   page?: number;
   limit?: number;
   search?: string;
+  sekolahId?: string;
 }
 
 export async function getAuditLogs(
@@ -48,6 +49,7 @@ export async function getAuditLogs(
     page = 1,
     limit = 10,
     search = "",
+    sekolahId = "",
   } = params;
 
   const query = new URLSearchParams({
@@ -57,6 +59,10 @@ export async function getAuditLogs(
 
   if (search.trim()) {
     query.set("search", search.trim());
+  }
+
+  if (sekolahId.trim()) {
+    query.set("sekolahId", sekolahId.trim());
   }
 
   return apiFetch(

@@ -300,7 +300,39 @@ export default function LoginForm() {
     } catch (err) {
       console.error("LOGIN ERROR:", err);
 
-      setError(err?.message || "Terjadi kesalahan saat login.");
+      const status = err?.status ?? err?.response?.status;
+      const errorCode = String(
+        err?.errorCode ||
+          err?.raw?.errorCode ||
+          err?.response?.data?.errorCode ||
+          ""
+      ).toUpperCase();
+
+      const backendMessage = String(
+        err?.raw?.message ||
+          err?.response?.data?.message ||
+          err?.message ||
+          ""
+      ).trim();
+
+      // 403 + errorCode berawalan SUBSCRIPTION_ (mis. SUBSCRIPTION_REQUIRED,
+      // SUBSCRIPTION_EXPIRED, SUBSCRIPTION_INACTIVE) atau mengandung SUBSCRIPTION
+      // = masalah langganan tenant, bukan kredensial salah.
+      if (
+        status === 403 &&
+        (errorCode.startsWith("SUBSCRIPTION_") ||
+          errorCode.includes("SUBSCRIPTION"))
+      ) {
+        setError(
+          backendMessage ||
+            "Langganan sekolah Anda telah berakhir atau tidak aktif. Silakan hubungi administrator untuk memperpanjang langganan."
+        );
+        return;
+      }
+
+      // 403 lain (mis. peran tidak aktif): tampilkan pesan Backend apa adanya.
+      // 401 dan error lain: perilaku semula (pesan dari Backend).
+      setError(backendMessage || "Terjadi kesalahan saat login.");
     } finally {
       setLoading(false);
     }
