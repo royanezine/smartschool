@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient, TipePaket } from "@prisma/client";
 import bcrypt from "bcryptjs";
@@ -306,7 +307,7 @@ async function main() {
   const createdPaket = [];
   for (const p of paketData) {
     let paket = await prisma.paket.findFirst({
-      where: { nama: p.nama },
+      where: { nama: p.nama, tipe: p.tipe, dihapusPada: null },
     });
     if (!paket) {
       paket = await prisma.paket.create({
@@ -325,7 +326,7 @@ async function main() {
   const paketMap = Object.fromEntries(createdPaket.map((p) => [p.nama, p.id]));
 
 
-  console.log("Data PaketModul lama dihapus");
+  console.log("Melengkapi relasi PaketModul tanpa menghapus data lama");
 
   const paketModulMapping: Record<string, string[]> = {
     Basic: ["akademik", "tugas", "ujian", "lms", "laporan"],
@@ -375,59 +376,49 @@ async function main() {
 
   console.log("Membuat data sekolah dummy...");
 
-  const yayasan = await prisma.yayasan.upsert({
-    where: { npyp: "1234567890" },
-    update: {},
-    create: {
-      nama: "Yayasan Pendidikan Smart",
-      alamat: "Jl. Pendidikan No. 1, Jakarta",
-      telepon: "021-1234567",
-      email: "yayasan@smartschool.com",
-      npyp: "1234567890",
-      status: "aktif",
-      dibuatOleh: superAdmin.id,
-      diperbaruiOleh: superAdmin.id,
-    },
-  });
-  console.log("Yayasan dummy dibuat");
+  // TipePaket.YAYASAN is the existing package category; no schema change is needed.
+  const paketYayasan = createdPaket.find(p => p.tipe === TipePaket.YAYASAN);
+  const paketEnterprise = createdPaket.find(p => p.nama === "Enterprise" && p.tipe === TipePaket.SEKOLAH);
+  if (!paketYayasan || !paketEnterprise) throw new Error("Paket tenant dummy belum tersedia");
+  const mulaiYayasan = new Date();
+  const berakhirYayasan = new Date(mulaiYayasan.getTime() + paketYayasan.durasi * 86400000);
+  const adminYayasanPassword = await bcrypt.hash("Yayasan123!", 10);
 
-  const paketYayasan = await prisma.paket.findFirst({
-    where: { nama: "Paket Yayasan Standar" },
-  });
-
-  if (paketYayasan) {
-    const mulaiYayasan = new Date();
-    const berakhirYayasan = new Date(mulaiYayasan);
-    berakhirYayasan.setDate(berakhirYayasan.getDate() + paketYayasan.durasi);
-
-    await prisma.yayasan.update({
-      where: { id: yayasan.id },
-      data: {
-        paketId: paketYayasan.id,
-        statusLangganan: "active",
-        tanggalMulaiLangganan: mulaiYayasan,
-        tanggalBerakhirLangganan: berakhirYayasan,
+  const yayasan = await prisma.$transaction(async tx => {
+    const yayasan = await tx.yayasan.upsert({
+      where: { npyp: "1234567890" }, update: {},
+      create: {
+        nama: "Yayasan Pendidikan Smart", alamat: "Jl. Pendidikan No. 1, Jakarta",
+        telepon: "021-1234567", email: "yayasan@smartschool.com", npyp: "1234567890",
+        status: "aktif", dibuatOleh: superAdmin.id, diperbaruiOleh: superAdmin.id,
+        paketId: paketYayasan.id, statusLangganan: "active",
+        tanggalMulaiLangganan: mulaiYayasan, tanggalBerakhirLangganan: berakhirYayasan,
       },
     });
-    console.log("Langganan Paket Yayasan Standar untuk yayasan dummy diaktifkan");
-  }
-
-  await prisma.pengguna.upsert({
-    where: { email: "admin@yayasan.smartschool.com" },
-    update: {},
-    create: {
-      namaPengguna: "adminyayasan",
-      email: "admin@yayasan.smartschool.com",
-      kataSandi: await bcrypt.hash("Yayasan123!", 10),
-      namaLengkap: "Admin Yayasan",
-      peranId: peranAdminYayasan.id,
-      yayasanId: yayasan.id,
-      status: "aktif",
-      dibuatOleh: superAdmin.id,
-      diperbaruiOleh: superAdmin.id,
-    },
+    // Attach a missing subscription once; never renew/reactivate it on each seed.
+    if (!yayasan.paketId && !yayasan.statusLangganan) {
+      await tx.yayasan.update({where: {id: yayasan.id}, data: {
+        paketId: paketYayasan.id, statusLangganan: "active",
+        tanggalMulaiLangganan: mulaiYayasan, tanggalBerakhirLangganan: berakhirYayasan,
+      }});
+    }
+    const existingAdmin = await tx.pengguna.findUnique({where: {email: "admin@yayasan.smartschool.com"}});
+    if (existingAdmin && (existingAdmin.yayasanId !== yayasan.id || existingAdmin.sekolahId)) {
+      throw new Error("Email admin yayasan dummy sudah digunakan tenant lain; akun tidak diubah");
+    }
+    await tx.pengguna.upsert({
+      where: {email: "admin@yayasan.smartschool.com"},
+      update: {peranId: peranAdminYayasan.id},
+      create: {
+        namaPengguna: "adminyayasan", email: "admin@yayasan.smartschool.com",
+        kataSandi: adminYayasanPassword, namaLengkap: "Admin Yayasan",
+        peranId: peranAdminYayasan.id, yayasanId: yayasan.id, sekolahId: null,
+        status: "aktif", dibuatOleh: superAdmin.id, diperbaruiOleh: superAdmin.id,
+      },
+    });
+    return yayasan;
   });
-  console.log("Admin Yayasan dummy dibuat");
+  console.log("Yayasan, paket langganan, dan admin dummy selesai diproses");
 
   const sekolah = await prisma.$transaction(async (tx) => {
     const sekolah = await tx.sekolah.upsert({
@@ -452,34 +443,26 @@ async function main() {
   });
   console.log("Sekolah dummy dibuat");
 
-  const paketEnterprise = await prisma.paket.findFirst({
-    where: { nama: "Enterprise" },
-  });
-
-  if (paketEnterprise && !sekolah.langgananAktifId) {
-    const endDate = new Date();
-    endDate.setFullYear(endDate.getFullYear() + 1);
-
-    const langganan = await prisma.langgananSekolah.create({
-      data: {
-        sekolahId: sekolah.id,
-        paketId: paketEnterprise.id,
-        statusPembayaran: "success",
-        statusLangganan: "active",
-        tanggalMulai: new Date(),
-        tanggalBerakhir: endDate,
-        hargaSaatBerlangganan: paketEnterprise.harga,
-        siklusPenagihan: "annual",
-        dibuatOleh: superAdmin.id,
-      },
+  if (!sekolah.langgananAktifId) {
+    await prisma.$transaction(async tx => {
+      // Reuse existing history instead of inserting a duplicate subscription.
+      let langganan = await tx.langgananSekolah.findFirst({
+        where: {sekolahId: sekolah.id},
+        orderBy: [{dibuatPada: "desc"}, {id: "desc"}],
+      });
+      if (!langganan) {
+        const mulai = new Date();
+        langganan = await tx.langgananSekolah.create({data: {
+          sekolahId: sekolah.id, paketId: paketEnterprise.id,
+          statusPembayaran: "success", statusLangganan: "active",
+          tanggalMulai: mulai, tanggalBerakhir: new Date(mulai.getTime() + paketEnterprise.durasi * 86400000),
+          hargaSaatBerlangganan: paketEnterprise.harga, siklusPenagihan: "annual",
+          dibuatOleh: superAdmin.id,
+        }});
+      }
+      await tx.sekolah.update({where: {id: sekolah.id}, data: {langgananAktifId: langganan.id}});
     });
-
-    await prisma.sekolah.update({
-      where: { id: sekolah.id },
-      data: { langgananAktifId: langganan.id },
-    });
-
-    console.log("Langganan Enterprise untuk sekolah dummy diaktifkan");
+    console.log("Relasi paket langganan sekolah dummy selesai diproses");
   }
 
   const schoolSubscription = await prisma.langgananSekolah.findFirst({ where: { sekolahId: sekolah.id }, orderBy: { dibuatPada: "desc" } });

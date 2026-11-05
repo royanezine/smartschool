@@ -23,6 +23,7 @@ import {
 import { ambilIzinDanModul } from "../services/auth.services";
 import { isSuperAdmin, normalizeRole } from "../utils/rbac";
 import { AuthRequest } from "../middlewares/auth.middleware";
+import { assertLoginSubscription } from "../services/loginSubscription.service";
 
 export const register = async (req: Request, res: Response) => {
   const data = registerSchema.parse(req.body);
@@ -157,6 +158,8 @@ export const verifyRegister = async (req: Request, res: Response) => {
     throw new AppError("Data pengguna tidak ditemukan", 404);
   }
 
+  await assertLoginSubscription(userWithRole);
+
   if (
     userWithRole.peran?.nama?.trim().toLowerCase() === "siswa" &&
     !userWithRole.pinHash
@@ -228,6 +231,8 @@ export const login = async (req: Request, res: Response) => {
   if (!user.peran || user.peran.status !== "aktif" || user.peran.dihapusPada) {
     throw new AppError("Peran akun tidak aktif. Hubungi administrator.", 403);
   }
+
+  await assertLoginSubscription(user);
 
   // 2. KHUSUS ROLE SISWA: Terapkan alur autentikasi PIN
   if (roleName === "siswa") {
@@ -421,6 +426,8 @@ export const setupPin = async (req: Request, res: Response) => {
     throw new AppError("Setup PIN hanya berlaku untuk peran siswa", 403);
   }
 
+  await assertLoginSubscription(user);
+
   const hashedPin = await bcrypt.hash(data.pin, 10);
 
   // Atomic update untuk mencegah race condition (hanya update jika pinHash saat ini null)
@@ -511,6 +518,8 @@ export const verifyPin = async (req: Request, res: Response) => {
   if (user.peran?.nama?.trim().toLowerCase() !== "siswa") {
     throw new AppError("Verifikasi PIN hanya untuk peran siswa", 403);
   }
+
+  await assertLoginSubscription(user);
 
   if (!user.pinHash) {
     throw new AppError("PIN belum dibuat. Silakan lakukan setup PIN terlebih dahulu.", 400);

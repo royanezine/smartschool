@@ -44,6 +44,7 @@ import raportRoutes from "./routes/raport.routes";
 import keuanganRoutes from "./routes/keuangan.routes";
 import { jurusanRoutes, pengumumanRoutes } from "./routes/qaResources.routes";
 import platformRoutes from "./routes/platform.routes";
+import wilayahRoutes from "./routes/wilayah.routes";
 
 // IMPORT ROUTES BARU (YANG SEBELUMNYA HILANG)
 import auditLogRoutes from "./routes/auditLog.routes";
@@ -116,6 +117,7 @@ app.use("/api/paket", paketRoutes);
 app.use("/api/sarpras", sarprasRoutes);
 app.use("/api/cms", cmsRoutes);
 app.use("/api/publik", publikRoutes);
+app.use("/api/wilayah", wilayahRoutes);
 app.use("/api/siswa", siswaRoutes);
 app.use("/api/tahun-ajaran", tahunAjaranRoutes);
 app.use("/api/kelas", kelasRoutes);
