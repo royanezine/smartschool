@@ -182,7 +182,13 @@ export const getUsers = async (req: AuthRequest, res: Response) => {
           shiftKerjaId: true,
           shiftKerjaMaster: true,
           kategoriJabatanId: true,
-          kategoriJabatan: true,
+          kategoriJabatan: {
+            select: {
+              id: true,
+              nama: true,
+              kode: true,
+            },
+          },
           terakhirLogin: true,
           pinHash: true,
           sekolahId: true,
@@ -212,10 +218,21 @@ export const getUsers = async (req: AuthRequest, res: Response) => {
       }),
     ]);
 
+    const formattedUsers = users.map((user) => {
+      const baseUser = publicUser(user);
+      return {
+        ...baseUser,
+        jabatan: user.jabatan,
+        golongan: user.golongan,
+        kategoriJabatanId: user.kategoriJabatanId,
+        kategoriJabatan: user.kategoriJabatan,
+      };
+    });
+
     return paginatedResponse(
       res,
       "Berhasil mengambil data pengguna",
-      users.map(publicUser),
+      formattedUsers,
       page,
       limit,
       totalData,
@@ -249,7 +266,6 @@ export const createUser = async (req: AuthRequest, res: Response) => {
       alamat,
       noTelepon,
       avatar,
-      // Tambahan data
       jabatan,
       golongan,
       nik,
@@ -328,7 +344,6 @@ export const createUser = async (req: AuthRequest, res: Response) => {
     const assignedSekolahId =
       actorRole === "super_admin" ? sekolahId || null : req.user?.sekolahId || null;
 
-    // Shift kerja hanya berlaku untuk Guru dan wajib diisi (pagi / siang)
     let shiftValue: string | null = null;
     if (isGuru(role.nama)) {
       shiftValue = normalizeShiftKerja(shiftKerja);
@@ -431,7 +446,6 @@ export const updateUser = async (req: AuthRequest, res: Response) => {
       noTelepon,
       avatar,
       status,
-      // Tambahan data
       jabatan,
       golongan,
       nik,
@@ -487,7 +501,6 @@ export const updateUser = async (req: AuthRequest, res: Response) => {
       }
     }
 
-    // Tentukan role akhir (role lama atau role baru kalau peranId diubah)
     const wasGuru = isGuru(target.peran?.nama);
     let finalRoleName: string | null | undefined = target.peran?.nama;
 
@@ -518,7 +531,6 @@ export const updateUser = async (req: AuthRequest, res: Response) => {
       finalRoleName = newRole.nama;
     }
 
-    // Self-demotion protection
     if (
       target.id === req.user?.userId &&
       (status === "nonaktif" ||
@@ -531,7 +543,6 @@ export const updateUser = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Last superadmin protection
     if (
       targetRole === "super_admin" &&
       (status === "nonaktif" ||
@@ -588,11 +599,9 @@ export const updateUser = async (req: AuthRequest, res: Response) => {
       ...(alamatDomisili !== undefined && { alamatDomisili }),
       ...(kecamatan !== undefined && { kecamatan }),
       ...(kelurahan !== undefined && { kelurahan }),
-      // FIX: field di schema bernama kotaKabupaten, bukan kota
       ...(kota !== undefined && { kotaKabupaten: kota }),
     };
 
-    // Aturan shift kerja: hanya untuk Guru
     if (willBeGuru) {
       const roleBaruJadiGuru = !wasGuru;
 
@@ -607,7 +616,6 @@ export const updateUser = async (req: AuthRequest, res: Response) => {
         data.shiftKerja = shiftValue;
       }
     } else if (target.shiftKerja) {
-      // Bukan guru lagi -> bersihkan shift lama
       data.shiftKerja = null;
     }
 
@@ -701,7 +709,6 @@ export const deleteUser = async (req: AuthRequest, res: Response) => {
       }
     }
 
-    // Self-deletion protection
     if (user.id === req.user?.userId) {
       return res.status(400).json({
         success: false,
@@ -710,7 +717,6 @@ export const deleteUser = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Last superadmin protection
     if (targetRole === "super_admin") {
       const activeSuperAdminCount = await prisma.pengguna.count({
         where: {
@@ -877,8 +883,6 @@ export const updateProfile = async (req: AuthRequest, res: Response) => {
       tanggalLahir,
     } = req.body;
 
-    // shiftKerja sengaja tidak bisa diubah sendiri lewat profil;
-    // hanya admin lewat updateUser.
     const user = await prisma.pengguna.update({
       where: {
         id: req.user.userId,
