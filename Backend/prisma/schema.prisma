@@ -1930,3 +1930,50 @@ enum KategoriBuku {
   FIKSI
   NON_FIKSI
 }
+
+// ─── Enum & Model untuk Pengaturan Super Admin Platform ───────────────────────
+
+enum KategoriKonfigurasi {
+  INTEGRASI
+  KEAMANAN
+  NOTIFIKASI
+}
+
+/// Konfigurasi tingkat platform (hanya bisa diakses super_admin).
+/// Berbeda dari PengaturanSistem yang bersifat per-sekolah.
+model KonfigurasiSistem {
+  id             String               @id @default(uuid())
+  kategori       KategoriKonfigurasi
+  kunci          String               @unique @db.VarChar(100)
+  nilaiText      String?              @map("nilai_text")
+  nilaiBoolean   Boolean?             @map("nilai_boolean")
+  nilaiAngka     Decimal?             @map("nilai_angka") @db.Decimal(20, 6)
+  isRahasia      Boolean              @default(false) @map("is_rahasia")
+  keterangan     String?
+  dibuatPada     DateTime             @default(now()) @map("dibuat_pada") @db.Timestamp(6)
+  diperbaruiPada DateTime             @updatedAt @map("diperbarui_pada") @db.Timestamp(6)
+  diperbaruiOleh String?              @map("diperbarui_oleh")
+
+  @@index([kategori])
+  @@map("konfigurasi_sistem")
+}
+
+/// Template pesan untuk notifikasi/email otomatis platform.
+model TemplateNotifikasi {
+  id             String   @id @default(uuid())
+  eventTarget    String   @map("event_target") @db.VarChar(100)
+  kanal          String   @db.VarChar(50)
+  subjek         String?  @db.VarChar(255)
+  isiTemplate    String   @map("isi_template")
+  variabel       Json?
+  isActive       Boolean  @default(true) @map("is_active")
+  dibuatPada     DateTime @default(now()) @map("dibuat_pada") @db.Timestamp(6)
+  diperbaruiPada DateTime @updatedAt @map("diperbarui_pada") @db.Timestamp(6)
+  dibuatOleh     String?  @map("dibuat_oleh")
+  diperbaruiOleh String?  @map("diperbarui_oleh")
+
+  @@unique([eventTarget, kanal])
+  @@index([kanal])
+  @@index([isActive])
+  @@map("template_notifikasi")
+}
