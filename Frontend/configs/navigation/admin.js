@@ -273,6 +273,12 @@ export const adminSidebarConfig = {
           path: "/admin/akademik/kelas",
         },
         {
+  key: "jurusan",
+  icon: BookOpen,
+  label: "Jurusan",
+  path: "/admin/akademik/jurusan",
+},
+        {
           key: "guruWaliKelas",
           icon: UserCheck,
           label: "Wali Kelas",
