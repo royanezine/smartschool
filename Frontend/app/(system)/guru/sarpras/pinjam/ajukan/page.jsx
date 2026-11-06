@@ -253,10 +253,10 @@ function AjukanPeminjamanContent() {
         setCollapsed={() => setSidebarOpen((v) => !v)}
       />
 
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
         <Header toggleSidebar={() => setSidebarOpen((v) => !v)} />
 
-        <main className="theme-page relative flex-1 overflow-y-auto">
+        <main className="theme-page relative min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
           <div
             aria-hidden="true"
             className="pointer-events-none absolute inset-0 overflow-hidden"
@@ -278,7 +278,7 @@ function AjukanPeminjamanContent() {
             />
           </div>
 
-          <div className="relative mx-auto w-full max-w-[1100px] space-y-6 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+          <div className="relative w-full space-y-6 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
 
 
             <button
@@ -492,7 +492,7 @@ function AjukanPeminjamanContent() {
 
                 <form
                   onSubmit={kirimPengajuan}
-                  className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
+                  className={`min-w-0 theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
                 >
                   <div
                     className={`flex items-center gap-3 border-b px-5 py-4 sm:px-6 ${themeDivider}`}
@@ -665,7 +665,7 @@ function AjukanPeminjamanContent() {
                       type="button"
                       onClick={handleBack}
                       disabled={submitting}
-                      className={`theme-card theme-text-secondary h-11 rounded-xl border px-5 text-sm font-semibold transition-colors ${themeNeutralBorder} ${themeNeutralHover} disabled:opacity-50`}
+                      className={`theme-card theme-text-secondary h-11 w-full rounded-xl border px-5 text-sm font-semibold transition-colors sm:w-auto ${themeNeutralBorder} ${themeNeutralHover} disabled:opacity-50`}
                     >
                       Batal
                     </button>
@@ -673,7 +673,7 @@ function AjukanPeminjamanContent() {
                     <button
                       type="submit"
                       disabled={submitting}
-                      className={`${themePrimaryGradient} ${themePrimaryShadow} inline-flex h-11 items-center justify-center gap-2 rounded-xl px-5 text-sm font-semibold text-[var(--color-card)] transition-all hover:-translate-y-0.5 disabled:translate-y-0 disabled:opacity-60`}
+                      className={`${themePrimaryGradient} ${themePrimaryShadow} inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl px-5 text-sm font-semibold text-[var(--color-card)] transition-all hover:-translate-y-0.5 disabled:translate-y-0 disabled:opacity-60 sm:w-auto`}
                     >
                       {submitting ? (
                         <>
@@ -694,7 +694,7 @@ function AjukanPeminjamanContent() {
                 </form>
 
 
-                <aside className="space-y-4 lg:sticky lg:top-6">
+                <aside className="min-w-0 space-y-4 lg:sticky lg:top-6">
 
 
                   <div

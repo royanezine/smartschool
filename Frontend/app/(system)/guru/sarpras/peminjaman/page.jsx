@@ -479,7 +479,7 @@ export default function GuruSarprasPeminjamanPage() {
         }
       />
 
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
 
         <Header toggleSidebar={() =>
             setSidebarOpen(
@@ -487,7 +487,7 @@ export default function GuruSarprasPeminjamanPage() {
             )
           } />
 
-        <main className="theme-page relative flex-1 overflow-y-auto">
+        <main className="theme-page relative min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
 
           <div
             aria-hidden="true"
@@ -498,7 +498,7 @@ export default function GuruSarprasPeminjamanPage() {
             <div className="absolute -left-40 top-1/3 h-[280px] w-[280px] rounded-full bg-[color-mix(in_srgb,var(--color-info)_6%,transparent)] blur-3xl" />
           </div>
 
-          <div className="relative mx-auto w-full max-w-[1700px] space-y-6 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+          <div className="relative w-full space-y-6 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
 
 
             <button

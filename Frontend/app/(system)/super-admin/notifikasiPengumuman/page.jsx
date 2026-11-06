@@ -411,8 +411,9 @@ export default function NotifikasiPengumumanPage() {
 
 
   return (
-    <div className="theme-page theme-text min-h-full">
-      <div className="mx-auto w-full max-w-[1600px] px-4 py-5 sm:px-6 sm:py-7 lg:px-8 lg:py-8">
+    <div className="theme-page theme-text min-h-full w-full">
+      {/* Tanpa max-w & mx-auto agar konten selalu menempel ke sidebar saat zoom out */}
+      <div className="w-full px-4 py-5 sm:px-6 sm:py-7 lg:px-8 lg:py-8">
         <div className="space-y-5 lg:space-y-6">
 
 

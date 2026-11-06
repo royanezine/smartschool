@@ -211,7 +211,7 @@ export default function GuruNilaiIndexPage() {
       />
 
 
-      <div className="flex min-w-0 flex-1 flex-col theme-page">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden theme-page">
 
         <Header
           toggleSidebar={() =>
@@ -224,9 +224,9 @@ export default function GuruNilaiIndexPage() {
           }}
         />
 
-        <main className="flex-1 overflow-y-auto theme-page">
+        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden theme-page">
 
-          <div className="mx-auto w-full max-w-[1600px] px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
+          <div className="w-full px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
 
             <div className="space-y-6">
 

@@ -248,7 +248,7 @@ export default function AjukanIzinPage() {
       />
 
 
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
 
         <Header
           sidebarOpen={sidebarOpen}
@@ -256,8 +256,8 @@ export default function AjukanIzinPage() {
         />
 
 
-        <main className="flex-1 overflow-y-auto bg-[var(--color-background)]">
-          <div className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
+        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden bg-[var(--color-background)]">
+          <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
 
 
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -651,7 +651,7 @@ export default function AjukanIzinPage() {
                     type="button"
                     onClick={() => router.push("/guru/jadwal/izin")}
                     disabled={submitting}
-                    className={`inline-flex h-11 items-center justify-center gap-2 rounded-xl border px-5 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-50 ${themeCard} ${themeTextSecondary} hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]`}
+                    className={`inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border px-5 text-sm font-medium transition sm:w-auto disabled:cursor-not-allowed disabled:opacity-50 ${themeCard} ${themeTextSecondary} hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]`}
                   >
                     <ArrowLeft size={17} />
                     Batal
@@ -660,7 +660,7 @@ export default function AjukanIzinPage() {
                   <button
                     type="submit"
                     disabled={submitting || success}
-                    className={`inline-flex h-11 items-center justify-center gap-2 rounded-xl px-5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-50 ${themePrimary}`}
+                    className={`inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl px-5 text-sm font-semibold transition sm:w-auto disabled:cursor-not-allowed disabled:opacity-50 ${themePrimary}`}
                   >
                     {submitting ? (
                       <>

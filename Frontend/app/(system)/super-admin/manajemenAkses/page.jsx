@@ -640,8 +640,9 @@ export default function ManajemenAksesPage() {
 
 
   return (
-    <div className="theme-page theme-text min-h-full">
-      <div className="w-full max-w-[1600px] mx-auto px-4 py-5 sm:px-6 sm:py-7 lg:px-8 lg:py-8">
+    <div className="theme-page theme-text min-h-full w-full min-w-0">
+      {/* Perubahan: max-w-[1600px] dan mx-auto dihapus agar konten selalu menempel ke sidebar */}
+      <div className="w-full min-w-0 px-4 py-5 sm:px-6 sm:py-7 lg:px-8 lg:py-8">
 
 
         <section

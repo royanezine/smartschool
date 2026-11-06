@@ -21,7 +21,6 @@ import {
 import { getPublicReviews } from "@/services/review.service";
 
 const HEADER_SPACE = "px-6 sm:px-10 lg:px-16 xl:px-20";
-const MARQUEE_SPACE = "px-4 sm:px-8 lg:px-14";
 
 function normalizeReview(review) {
   if (!review || !review.id) return null;
@@ -259,18 +258,16 @@ function ReviewMarquee({
     direction === "right" ? "review-marquee-right" : "review-marquee-left";
 
   return (
-    <div className={`mx-auto w-full max-w-[1520px] ${MARQUEE_SPACE}`}>
-      <div className="review-marquee-wrapper relative w-full overflow-hidden py-6">
-        <div
-          className={`review-marquee-track ${animationClass}`}
-          style={{ "--marquee-duration": `${duration}s` }}
-        >
-          {repeatedItems.map((item, index) => (
-            <div key={`${item.id}-${index}`} className="shrink-0 px-3">
-              <ReviewCard item={item} featured={featured} />
-            </div>
-          ))}
-        </div>
+    <div className="review-marquee-wrapper relative w-full overflow-hidden py-6">
+      <div
+        className={`review-marquee-track ${animationClass}`}
+        style={{ "--marquee-duration": `${duration}s` }}
+      >
+        {repeatedItems.map((item, index) => (
+          <div key={`${item.id}-${index}`} className="shrink-0 px-3">
+            <ReviewCard item={item} featured={featured} />
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -447,22 +444,22 @@ export default function Testimonial() {
       : 0;
 
   return (
-    <section className="relative isolate overflow-hidden bg-white py-20 sm:py-24">
+    <section className="relative isolate w-full overflow-hidden bg-white py-20 sm:py-24">
       <style>{`
         .review-marquee-wrapper {
           -webkit-mask-image: linear-gradient(
             to right,
-            transparent,
-            black 6%,
-            black 94%,
-            transparent
+            transparent 0%,
+            black 8%,
+            black 92%,
+            transparent 100%
           );
           mask-image: linear-gradient(
             to right,
-            transparent,
-            black 6%,
-            black 94%,
-            transparent
+            transparent 0%,
+            black 8%,
+            black 92%,
+            transparent 100%
           );
         }
 
@@ -672,7 +669,7 @@ export default function Testimonial() {
           </div>
         </div>
       ) : testimonials.length > 0 ? (
-        <div className="relative flex flex-col gap-2">
+        <div className="relative flex w-full flex-col gap-2">
           <ReviewMarquee
             items={firstRow}
             direction="left"

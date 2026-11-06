@@ -337,7 +337,7 @@ export default function TambahTugasPage() {
           />
         </div>
 
-        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto">
+        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
 
           {/* Konten w-full (bukan max-w) → melebar saat zoom out */}
           <div className="w-full p-4 sm:p-5 lg:p-6 xl:p-8">
@@ -411,7 +411,7 @@ export default function TambahTugasPage() {
             <form onSubmit={handleSubmit}>
               <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 2xl:grid-cols-[minmax(0,1fr)_400px]">
 
-                <div className="lg:col-span-2 2xl:col-span-1">
+                <div className="min-w-0 lg:col-span-2 2xl:col-span-1">
                   <div
                     className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
                   >
@@ -636,7 +636,7 @@ export default function TambahTugasPage() {
                   </div>
                 </div>
 
-                <div className="lg:col-span-1">
+                <div className="min-w-0 lg:col-span-1">
                   <div className="space-y-5 lg:sticky lg:top-6">
                     <div
                       className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}

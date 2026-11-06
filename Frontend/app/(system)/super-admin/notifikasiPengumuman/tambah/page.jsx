@@ -60,8 +60,9 @@ export default function TambahPengumumanPage() {
   };
 
   return (
-    <div className="theme-page theme-text min-h-full">
-      <div className="mx-auto w-full max-w-[1200px] px-4 py-5 sm:px-6 sm:py-7 lg:px-8 lg:py-8">
+    <div className="theme-page theme-text min-h-full w-full min-w-0">
+      {/* Perubahan: mx-auto dan max-w-[1200px] dihapus agar konten selalu menempel ke sidebar */}
+      <div className="w-full min-w-0 px-4 py-5 sm:px-6 sm:py-7 lg:px-8 lg:py-8">
         <div className="space-y-6">
           <div>
             <Link

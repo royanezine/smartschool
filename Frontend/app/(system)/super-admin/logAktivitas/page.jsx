@@ -1,4 +1,4 @@
- "use client";
+"use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -62,13 +62,13 @@ function getModuleIcon(module) {
 
 function StatCard({ label, value, icon: Icon }) {
   return (
-    <div className={`${theme.card} p-4`}>
+    <div className={`${theme.card} min-w-0 p-4`}>
       <div className="flex items-center gap-3">
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)] text-[var(--color-primary)]">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)] text-[var(--color-primary)]">
           <Icon size={17} />
         </div>
         <div className="min-w-0">
-          <p className={`text-[10px] font-semibold uppercase tracking-wider ${theme.muted}`}>{label}</p>
+          <p className={`truncate text-[10px] font-semibold uppercase tracking-wider ${theme.muted}`}>{label}</p>
           <p className="text-lg font-semibold theme-text">{Number(value || 0).toLocaleString("id-ID")}</p>
         </div>
       </div>
@@ -86,7 +86,7 @@ function StatusBadge({ status }) {
       ? "border-red-500/20 bg-red-500/5 text-red-600"
       : "border theme-border bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)] theme-text-secondary";
   const Icon = isSuccess ? CheckCircle : isFailed ? XCircle : AlertCircle;
-  return <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium ${classes}`}><Icon size={12} />{statusLabel(normalized)}</span>;
+  return <span className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium ${classes}`}><Icon size={12} />{statusLabel(normalized)}</span>;
 }
 
 export default function LogAktivitasPage() {
@@ -252,30 +252,37 @@ export default function LogAktivitasPage() {
     URL.revokeObjectURL(url);
   };
 
-  const resetButton = <button type="button" onClick={resetFilters} className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm theme-text-secondary hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]"><RotateCcw size={14} />Reset filter</button>;
+  const resetButton = <button type="button" onClick={resetFilters} className="inline-flex shrink-0 items-center gap-2 rounded-xl px-3 py-2 text-sm theme-text-secondary hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]"><RotateCcw size={14} />Reset filter</button>;
 
   return (
-    <main className="theme-page theme-text min-h-full">
-      <div className="mx-auto max-w-[1600px] space-y-5 px-4 py-5 sm:px-6 lg:px-8 lg:py-8">
-        <section className={`${theme.card} flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6`}>
-          <div className="flex items-start gap-3">
+    // FIX: w-full + min-w-0 agar konten selalu mengisi sisa ruang di sebelah sidebar
+    <main className="theme-page theme-text min-h-full w-full min-w-0">
+      {/*
+        FIX: sebelumnya `mx-auto max-w-[1600px]` -> saat browser di-zoom out, viewport (dalam CSS px)
+        melebar melewati 1600px, lalu konten di-center sehingga muncul celah kosong antara sidebar
+        dan konten. Sekarang tanpa max-width & tanpa mx-auto, jadi konten tetap menempel ke sidebar
+        dan melebar mengisi ruang yang tersedia.
+      */}
+      <div className="w-full min-w-0 space-y-5 px-4 py-5 sm:px-6 lg:px-8 lg:py-8">
+        <section className={`${theme.card} flex w-full flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6`}>
+          <div className="flex min-w-0 items-start gap-3">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[var(--color-primary)] text-white"><Activity size={23} /></div>
-            <div>
+            <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2"><h1 className="text-xl font-semibold sm:text-2xl">Log Aktivitas</h1><span className="rounded-full border border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)] px-2.5 py-1 text-[10px] font-semibold text-[var(--color-primary)]">Monitoring</span></div>
-              <p className={`mt-1 flex items-center gap-2 text-sm ${theme.muted}`}><Clock size={14} />Pantau aktivitas pengguna yang dicatat oleh sistem SmartSchool.</p>
+              <p className={`mt-1 flex items-center gap-2 text-sm ${theme.muted}`}><Clock size={14} className="shrink-0" />Pantau aktivitas pengguna yang dicatat oleh sistem SmartSchool.</p>
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex shrink-0 gap-2">
             <button type="button" onClick={loadAuditLogs} disabled={isLoading} className="inline-flex h-10 flex-1 items-center justify-center gap-2 rounded-xl border theme-border px-4 text-sm disabled:opacity-50 sm:flex-none"><RefreshCw size={15} className={isLoading ? "animate-spin" : ""}/>{isLoading ? "Memuat..." : "Refresh"}</button>
             <button type="button" onClick={exportCsv} disabled={!sortedLogs.length} className="inline-flex h-10 flex-1 items-center justify-center gap-2 rounded-xl border theme-border px-4 text-sm disabled:opacity-40 sm:flex-none"><Download size={15}/>Export CSV</button>
           </div>
         </section>
 
-        {errorMessage && <section role="alert" className="rounded-xl border border-red-500/25 bg-red-500/5 p-4">
-          <div className="flex items-start gap-3"><AlertCircle className="mt-0.5 shrink-0 text-red-600" size={18}/><div className="min-w-0 flex-1"><p className="font-semibold text-red-600">Gagal memuat audit log</p><p className="mt-1 break-words text-sm theme-text-secondary">{errorMessage}</p><p className="mt-2 text-xs theme-text-muted">Periksa token login, role yang diizinkan BE, URL endpoint, dan log server.</p></div><button onClick={loadAuditLogs} type="button" className="rounded-lg border theme-border px-3 py-1.5 text-sm">Coba lagi</button></div>
+        {errorMessage && <section role="alert" className="w-full rounded-xl border border-red-500/25 bg-red-500/5 p-4">
+          <div className="flex items-start gap-3"><AlertCircle className="mt-0.5 shrink-0 text-red-600" size={18}/><div className="min-w-0 flex-1"><p className="font-semibold text-red-600">Gagal memuat audit log</p><p className="mt-1 break-words text-sm theme-text-secondary">{errorMessage}</p><p className="mt-2 text-xs theme-text-muted">Periksa token login, role yang diizinkan BE, URL endpoint, dan log server.</p></div><button onClick={loadAuditLogs} type="button" className="shrink-0 rounded-lg border theme-border px-3 py-1.5 text-sm">Coba lagi</button></div>
         </section>}
 
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+        <div className="grid w-full grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           <StatCard label="Total aktivitas dimuat" value={stats.total} icon={Activity}/>
           <StatCard label="Berhasil" value={stats.success} icon={CheckCircle}/>
           <StatCard label="Gagal" value={stats.failed} icon={XCircle}/>
@@ -283,22 +290,23 @@ export default function LogAktivitasPage() {
           <StatCard label="Modul tercatat" value={stats.modules} icon={Database}/>
         </div>
 
-        <section className={`${theme.card} p-4 sm:p-5`}>
-          <div className="mb-4 flex items-center justify-between gap-3"><div><h2 className="flex items-center gap-2 text-sm font-semibold"><Filter size={16}/>Filter & pencarian</h2><p className={`mt-1 text-xs ${theme.muted}`}>Pencarian lokal pada data yang berhasil dimuat dari BE.</p></div>{resetButton}</div>
+        <section className={`${theme.card} w-full p-4 sm:p-5`}>
+          <div className="mb-4 flex items-center justify-between gap-3"><div className="min-w-0"><h2 className="flex items-center gap-2 text-sm font-semibold"><Filter size={16}/>Filter & pencarian</h2><p className={`mt-1 text-xs ${theme.muted}`}>Pencarian lokal pada data yang berhasil dimuat dari BE.</p></div>{resetButton}</div>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-            <div className="relative"><Search size={15} className={`absolute left-3 top-1/2 -translate-y-1/2 ${theme.muted}`}/><input aria-label="Cari aktivitas" placeholder="Cari aktivitas..." value={searchQuery} onChange={e => {setSearchQuery(e.target.value);setCurrentPage(1);}} className={`${theme.input} pl-9`}/></div>
+            <div className="relative min-w-0"><Search size={15} className={`absolute left-3 top-1/2 -translate-y-1/2 ${theme.muted}`}/><input aria-label="Cari aktivitas" placeholder="Cari aktivitas..." value={searchQuery} onChange={e => {setSearchQuery(e.target.value);setCurrentPage(1);}} className={`${theme.input} pl-9`}/></div>
             <select aria-label="Filter role" value={selectedRole} onChange={e => {setSelectedRole(e.target.value);setCurrentPage(1);}} className={theme.input}><option value="all">Semua role</option>{roleOptions.map(x => <option key={x} value={x}>{x}</option>)}</select>
             <select aria-label="Filter modul" value={selectedModule} onChange={e => {setSelectedModule(e.target.value);setCurrentPage(1);}} className={theme.input}><option value="all">Semua modul</option>{moduleOptions.map(x => <option key={x} value={x}>{x}</option>)}</select>
             <select aria-label="Filter status" value={selectedStatus} onChange={e => {setSelectedStatus(e.target.value);setCurrentPage(1);}} className={theme.input}><option value="all">Semua status</option><option value="success">Berhasil</option><option value="failed">Gagal</option><option value="unknown">Tidak diketahui</option></select>
             <select aria-label="Filter waktu" value={selectedTime} onChange={e => {setSelectedTime(e.target.value);setCurrentPage(1);}} className={theme.input}><option value="all">Semua waktu</option><option value="today">Hari ini</option><option value="week">7 hari terakhir</option><option value="month">30 hari terakhir</option><option value="custom">Rentang tanggal</option></select>
-            {selectedTime === "custom" && <div className="flex gap-2"><input aria-label="Tanggal mulai" type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className={`${theme.input} min-w-0 px-2`}/><input aria-label="Tanggal akhir" type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className={`${theme.input} min-w-0 px-2`}/></div>}
+            {selectedTime === "custom" && <div className="flex min-w-0 gap-2"><input aria-label="Tanggal mulai" type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className={`${theme.input} min-w-0 px-2`}/><input aria-label="Tanggal akhir" type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className={`${theme.input} min-w-0 px-2`}/></div>}
           </div>
           <p className={`mt-3 text-xs ${theme.muted}`}>Menampilkan {filteredLogs.length} dari {logs.length} data yang dimuat.</p>
         </section>
 
-        <section className={`${theme.card} overflow-hidden`}>
-          <div className="hidden overflow-x-auto lg:block">
-            <table className="w-full min-w-[1000px] border-collapse text-left">
+        <section className={`${theme.card} w-full min-w-0 overflow-hidden`}>
+          <div className="hidden w-full overflow-x-auto lg:block">
+            {/* FIX: min-w dikurangi & tabel w-full agar mengisi lebar penuh saat zoom out */}
+            <table className="w-full min-w-[860px] table-auto border-collapse text-left">
               <thead className="bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]"><tr className="border-b theme-border text-[10px] uppercase tracking-wider theme-text-muted">
                 {[["user","Pengguna"],["role","Role"],["module","Modul"],["action","Aktivitas"],["status","Status"],["timestamp","Waktu"]].map(([field,label]) => <th key={field} className="px-4 py-3"><button type="button" onClick={() => changeSort(field)} className="inline-flex items-center gap-1 font-semibold">{label}{sortIcon(field)}</button></th>)}<th className="px-4 py-3">IP Address</th>
               </tr></thead>
@@ -308,7 +316,7 @@ export default function LogAktivitasPage() {
                 : pageLogs.map(log => {const Icon = getModuleIcon(log.module);return <tr key={log.id} className="hover:bg-[color-mix(in_srgb,var(--color-primary)_4%,transparent)]">
                   <td className="px-4 py-3.5"><p className="text-sm font-medium">{log.user}</p><p className={`mt-1 text-[11px] ${theme.muted}`}>ID: {log.id}</p></td>
                   <td className="px-4 py-3.5 text-sm">{log.role}</td><td className="px-4 py-3.5"><span className="inline-flex items-center gap-2 text-sm"><Icon size={14} className={theme.muted}/>{log.module}</span></td>
-                  <td className="px-4 py-3.5 text-sm">{log.action}</td><td className="px-4 py-3.5"><StatusBadge status={log.status}/></td><td className={`px-4 py-3.5 text-sm ${theme.muted}`}>{formatDateTime(log.timestamp)}</td><td className={`px-4 py-3.5 font-mono text-xs ${theme.muted}`}><span className="inline-flex items-center gap-1.5"><Globe size={13}/>{log.ip}</span></td>
+                  <td className="px-4 py-3.5 text-sm">{log.action}</td><td className="px-4 py-3.5"><StatusBadge status={log.status}/></td><td className={`whitespace-nowrap px-4 py-3.5 text-sm ${theme.muted}`}>{formatDateTime(log.timestamp)}</td><td className={`px-4 py-3.5 font-mono text-xs ${theme.muted}`}><span className="inline-flex items-center gap-1.5"><Globe size={13}/>{log.ip}</span></td>
                 </tr>;})}
               </tbody>
             </table>
@@ -318,7 +326,7 @@ export default function LogAktivitasPage() {
             {isLoading ? <div className="p-8 text-center"><RefreshCw className="mx-auto animate-spin" size={22}/><p className={`mt-2 text-sm ${theme.muted}`}>Mengambil audit log...</p></div>
             : pageLogs.length === 0 ? <div className="p-8 text-center"><Activity className={`mx-auto ${theme.muted}`} size={24}/><p className="mt-2 text-sm font-semibold">{errorMessage ? "Data tidak dapat dimuat" : "Tidak ada aktivitas"}</p></div>
             : pageLogs.map(log => {const Icon = getModuleIcon(log.module);return <article key={log.id} className="p-4">
-              <div className="flex items-start justify-between gap-3"><div className="min-w-0"><p className="truncate text-sm font-semibold">{log.user}</p><p className={`mt-1 text-xs ${theme.muted}`}>{log.role}</p><p className="mt-2 text-sm">{log.action}</p></div><StatusBadge status={log.status}/></div>
+              <div className="flex items-start justify-between gap-3"><div className="min-w-0"><p className="truncate text-sm font-semibold">{log.user}</p><p className={`mt-1 text-xs ${theme.muted}`}>{log.role}</p><p className="mt-2 break-words text-sm">{log.action}</p></div><StatusBadge status={log.status}/></div>
               <div className={`mt-3 flex flex-wrap gap-x-3 gap-y-2 text-xs ${theme.muted}`}><span className="inline-flex items-center gap-1"><Icon size={12}/>{log.module}</span><span>{formatDateTime(log.timestamp, true)}</span><span className="font-mono">{log.ip}</span></div>
             </article>;})}
           </div>

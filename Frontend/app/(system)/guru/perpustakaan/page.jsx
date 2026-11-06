@@ -182,6 +182,7 @@ export default function PerpustakaanGuruPage() {
   );
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadData();
   }, [loadData]);
 
@@ -231,7 +232,9 @@ export default function PerpustakaanGuruPage() {
   const paginatedBooks = useMemo(() => filteredBooks.slice((pageBuku - 1) * PAGE_SIZE, pageBuku * PAGE_SIZE), [filteredBooks, pageBuku]);
   const paginatedBorrowings = useMemo(() => filteredBorrowings.slice((pagePinjam - 1) * PAGE_SIZE, pagePinjam * PAGE_SIZE), [filteredBorrowings, pagePinjam]);
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setPageBuku(1); }, [search, filterKategori, filterTipe]);
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setPagePinjam(1); }, [search, filterStatusPinjam]);
 
   const openBorrowModal = (book) => {
@@ -297,13 +300,13 @@ export default function PerpustakaanGuruPage() {
     <div className="flex h-screen w-full overflow-hidden bg-slate-50 dark:bg-slate-950">
       <Sidebar active="perpustakaan" />
 
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
         <div className="shrink-0 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
           <Header user={{ name: "Guru", email: "", avatar: "GU" }} />
         </div>
 
-        <main className="min-w-0 flex-1 overflow-y-auto">
-          <div className="w-full space-y-6 p-4 sm:p-6 lg:p-8 max-w-[1600px] mx-auto">
+        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
+          <div className="w-full space-y-6 p-4 sm:p-6 lg:p-8">
             
             {/* HEADER */}
             <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
@@ -401,12 +404,12 @@ export default function PerpustakaanGuruPage() {
                       <Filter size={14} className="text-slate-400" />
                       <span className="text-xs font-semibold text-slate-500">Filter:</span>
                     </div>
-                    <select value={filterTipe} onChange={(e) => setFilterTipe(e.target.value)} className="h-9 rounded-md border border-slate-200 bg-white px-2 text-xs font-medium dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300">
+                    <select value={filterTipe} onChange={(e) => setFilterTipe(e.target.value)} className="h-9 w-full rounded-md border border-slate-200 bg-white px-2 text-xs font-medium sm:w-auto dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300">
                       <option value="SEMUA">Semua Jenis</option>
                       <option value="FISIK">Fisik</option>
                       <option value="EBOOK">E-Book</option>
                     </select>
-                    <select value={filterKategori} onChange={(e) => setFilterKategori(e.target.value)} className="h-9 rounded-md border border-slate-200 bg-white px-2 text-xs font-medium dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300">
+                    <select value={filterKategori} onChange={(e) => setFilterKategori(e.target.value)} className="h-9 w-full rounded-md border border-slate-200 bg-white px-2 text-xs font-medium sm:w-auto dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300">
                       <option value="">Semua Kategori</option>
                       {kategoriOptions.map(k => <option key={k} value={k}>{k}</option>)}
                     </select>
@@ -489,7 +492,7 @@ export default function PerpustakaanGuruPage() {
                   ) : (
                     <>
                       <div className="hidden overflow-x-auto md:block">
-                        <table className="w-full text-left text-sm">
+                        <table className="w-full min-w-[760px] text-left text-sm">
                           <thead className="bg-slate-50 text-[11px] uppercase tracking-wider text-slate-500 dark:bg-slate-800/50 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">
                             <tr>
                               <th className="px-6 py-4 font-semibold">Informasi Buku</th>
@@ -565,7 +568,7 @@ export default function PerpustakaanGuruPage() {
       {/* MODAL PINJAM */}
       {selectedBook && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-sm" onMouseDown={(e) => { if (e.target === e.currentTarget) closeBorrowModal(); }}>
-          <div className="w-full max-w-md overflow-hidden rounded-xl bg-white shadow-2xl dark:bg-slate-900">
+          <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-xl bg-white shadow-2xl dark:bg-slate-900">
             <div className="flex items-center justify-between border-b border-slate-100 p-5 dark:border-slate-800">
               <h2 className="text-lg font-bold text-slate-900 dark:text-white">Form Peminjaman</h2>
               <button onClick={closeBorrowModal} disabled={submitting} className="rounded p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"><X size={18} /></button>
@@ -585,9 +588,9 @@ export default function PerpustakaanGuruPage() {
                   <textarea value={catatan} onChange={(e) => setCatatan(e.target.value)} rows={2} className="w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200" />
                 </div>
               </div>
-              <div className="flex gap-2 border-t border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/50 justify-end">
-                <button type="button" onClick={closeBorrowModal} disabled={submitting} className="h-9 rounded-lg px-4 text-xs font-semibold text-slate-600 hover:bg-slate-200 dark:text-slate-400 dark:hover:bg-slate-800">Batal</button>
-                <button type="submit" disabled={submitting || !tanggalJatuhTempo} className="inline-flex h-9 items-center gap-2 rounded-lg bg-slate-900 px-4 text-xs font-semibold text-white hover:bg-slate-800 disabled:opacity-50 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200">
+              <div className="flex flex-col-reverse gap-2 border-t border-slate-100 bg-slate-50 p-4 sm:flex-row sm:justify-end dark:border-slate-800 dark:bg-slate-950/50">
+                <button type="button" onClick={closeBorrowModal} disabled={submitting} className="h-9 w-full rounded-lg px-4 text-xs font-semibold text-slate-600 hover:bg-slate-200 sm:w-auto dark:text-slate-400 dark:hover:bg-slate-800">Batal</button>
+                <button type="submit" disabled={submitting || !tanggalJatuhTempo} className="inline-flex h-9 w-full items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 text-xs font-semibold text-white hover:bg-slate-800 disabled:opacity-50 sm:w-auto dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200">
                   {submitting && <Loader2 className="animate-spin" size={14} />} Konfirmasi Pinjam
                 </button>
               </div>
@@ -603,7 +606,7 @@ export default function PerpustakaanGuruPage() {
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400"><RotateCcw size={24} /></div>
             <h2 className="mt-4 text-lg font-bold text-slate-900 dark:text-white">Pengembalian Buku</h2>
             <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-              Apakah Anda yakin ingin mengembalikan buku <br/><strong className="text-slate-800 dark:text-slate-200">"{getBorrowingBookTitle(selectedReturn)}"</strong>?
+              Apakah Anda yakin ingin mengembalikan buku <br/><strong className="text-slate-800 dark:text-slate-200">&quot;{getBorrowingBookTitle(selectedReturn)}&quot;</strong>?
             </p>
             <div className="mt-6 flex flex-col gap-2">
               <button onClick={handleReturn} disabled={submitting} className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-slate-900 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-50 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200">
@@ -621,7 +624,7 @@ export default function PerpustakaanGuruPage() {
 function Pagination({ page, totalPages, totalItems, pageSize, onPageChange }) {
   if (totalItems === 0) return null;
   return (
-    <div className="flex items-center justify-between border-t border-slate-200 px-6 py-4 dark:border-slate-800">
+    <div className="flex flex-col gap-3 border-t border-slate-200 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 dark:border-slate-800">
       <p className="text-xs text-slate-500 dark:text-slate-400">
         Menampilkan <span className="font-bold text-slate-700 dark:text-slate-300">{(page - 1) * pageSize + 1}-{Math.min(page * pageSize, totalItems)}</span> dari <span className="font-bold text-slate-700 dark:text-slate-300">{totalItems}</span> data
       </p>

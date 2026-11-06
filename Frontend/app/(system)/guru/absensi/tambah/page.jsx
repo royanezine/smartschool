@@ -232,14 +232,16 @@ function TambahAbsensiPageContent() {
 
 
   return (
-    <div className="theme-page min-h-screen">
-      <Header />
+    <div className="theme-page flex h-screen w-full overflow-hidden">
+      <Sidebar />
 
-      <div className="flex">
-        <Sidebar />
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+        <div className="shrink-0">
+          <Header />
+        </div>
 
-        <main className="min-w-0 flex-1 p-4 sm:p-6 lg:p-8">
-          <div className="mx-auto max-w-4xl">
+        <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6 lg:p-8">
+          <div className="w-full">
 
 
             <div className="mb-6 flex items-center gap-4">
@@ -371,9 +373,8 @@ function TambahAbsensiPageContent() {
 
 
                 <div className="space-y-6 p-5 sm:p-6">
-
-
-                  <div>
+                  <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                  <div className="min-w-0">
                     <label className="theme-text mb-2 block text-sm font-semibold">
                       ID Kelas
                     </label>
@@ -411,7 +412,7 @@ function TambahAbsensiPageContent() {
                   </div>
 
 
-                  <div>
+                  <div className="min-w-0">
                     <label className="theme-text mb-2 block text-sm font-semibold">
                       Status Absensi
                     </label>
@@ -446,6 +447,7 @@ function TambahAbsensiPageContent() {
                         Alpha
                       </option>
                     </select>
+                  </div>
                   </div>
 
 
@@ -661,9 +663,9 @@ function TambahAbsensiPageContent() {
                       ${themeNeutralBorder}
                       theme-text-secondary
                       ${themeNeutralHover}
-                      rounded-xl border
+                      w-full rounded-xl border
                       px-5 py-3 text-sm font-semibold
-                      transition
+                      transition sm:w-auto
                       disabled:cursor-not-allowed
                       disabled:opacity-50
                     `}
@@ -678,12 +680,12 @@ function TambahAbsensiPageContent() {
                     className={`
                       ${themePrimaryGradient}
                       ${themePrimaryShadow}
-                      flex items-center
+                      flex w-full items-center
                       justify-center gap-2
                       rounded-xl px-5 py-3
                       text-sm font-semibold
                       text-[var(--color-card)]
-                      transition
+                      transition sm:w-auto
                       hover:brightness-95
                       disabled:cursor-not-allowed
                       disabled:opacity-60

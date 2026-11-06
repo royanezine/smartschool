@@ -506,8 +506,9 @@ function TambahPaketPageContent() {
 
 
   return (
-    <div className="theme-page theme-text min-h-full">
-      <div className="w-full max-w-[1600px] mx-auto px-4 py-5 sm:px-6 sm:py-7 lg:px-8 lg:py-8">
+    <div className="theme-page theme-text min-h-full w-full min-w-0">
+      {/* Perubahan: max-w-[1600px] dan mx-auto dihapus agar konten selalu menempel ke sidebar */}
+      <div className="w-full min-w-0 px-4 py-5 sm:px-6 sm:py-7 lg:px-8 lg:py-8">
 
 
         <div className="flex flex-col xl:flex-row xl:items-end xl:justify-between gap-5 mb-7">
@@ -558,7 +559,7 @@ function TambahPaketPageContent() {
             className={`mb-6 flex items-start gap-3 rounded-xl border ${themeWarningBorder} ${themeWarningSurface} p-4 ${themeSmallShadow}`}
           >
             <div
-              className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${theme-card} ${themeWarningSurface} text-[var(--color-warning)] ${themeSmallShadow}`}
+              className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg theme-card ${themeWarningSurface} text-[var(--color-warning)] ${themeSmallShadow}`}
             >
               <AlertCircle size={17} />
             </div>
@@ -1039,7 +1040,7 @@ function TambahPaketPageContent() {
                             <span
                               className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
                                 checked
-                                  ? `${theme-card} ${themePrimaryText} ${themeSmallShadow}`
+                                  ? `theme-card ${themePrimaryText} ${themeSmallShadow}`
                                   : `${themeNeutralSurface} theme-text-muted`
                               }`}
                             >

@@ -612,7 +612,7 @@ export default function EditTugasPage() {
 
 
         <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
-          <div className="mx-auto w-full max-w-7xl px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
+          <div className="w-full px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
 
             <button
               type="button"
@@ -698,7 +698,7 @@ export default function EditTugasPage() {
                         className={`flex items-start gap-3 rounded-xl border p-4 ${themeDangerSurface} ${themeDangerBorder}`}
                       >
                         <div
-                          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border ${theme-card} ${themeDangerBorder}`}
+                          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border theme-card ${themeDangerBorder}`}
                         >
                           <AlertCircle
                             size={17}
@@ -724,7 +724,7 @@ export default function EditTugasPage() {
                         className={`flex items-start gap-3 rounded-xl border p-4 ${themeSuccessSurface} ${themeSuccessBorder}`}
                       >
                         <div
-                          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border ${themeSuccessBorder} ${theme-card}`}
+                          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border ${themeSuccessBorder} theme-card`}
                         >
                           <CheckCircle2
                             size={17}
@@ -862,7 +862,7 @@ export default function EditTugasPage() {
                           className={`flex items-start gap-3 border-b p-4 sm:border-r ${themeDivider}`}
                         >
                           <div
-                            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border ${theme-card} ${themePrimarySoftBorder}`}
+                            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border theme-card ${themePrimarySoftBorder}`}
                           >
                             <Users
                               size={16}
@@ -886,7 +886,7 @@ export default function EditTugasPage() {
                           className={`flex items-start gap-3 border-b p-4 sm:border-b-0 ${themeDivider}`}
                         >
                           <div
-                            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border ${theme-card} ${themePrimarySoftBorder}`}
+                            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border theme-card ${themePrimarySoftBorder}`}
                           >
                             <BookOpen
                               size={16}
@@ -910,7 +910,7 @@ export default function EditTugasPage() {
                           className={`flex items-start gap-3 p-4 sm:border-r ${themeDivider}`}
                         >
                           <div
-                            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border ${theme-card} ${themePrimarySoftBorder}`}
+                            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border theme-card ${themePrimarySoftBorder}`}
                           >
                             <GraduationCap
                               size={16}
@@ -934,7 +934,7 @@ export default function EditTugasPage() {
                           className={`flex items-start gap-3 border-t p-4 ${themeDivider}`}
                         >
                           <div
-                            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border ${theme-card} ${themePrimarySoftBorder}`}
+                            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border theme-card ${themePrimarySoftBorder}`}
                           >
                             <CalendarDays
                               size={16}
@@ -1003,7 +1003,7 @@ export default function EditTugasPage() {
               </section>
 
 
-              <aside className="space-y-5">
+              <aside className="min-w-0 space-y-5">
 
                 <section
                   className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}

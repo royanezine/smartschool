@@ -581,8 +581,9 @@ export default function PengaturanSistemPage() {
   ];
 
   return (
-    <div className="theme-page theme-text min-h-full">
-      <div className="w-full max-w-[1500px] mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 space-y-5 sm:space-y-6">
+    <div className="theme-page theme-text min-h-full w-full min-w-0">
+      {/* Perubahan: max-w-[1500px] dan mx-auto dihapus agar konten selalu menempel ke sidebar */}
+      <div className="w-full min-w-0 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 space-y-5 sm:space-y-6">
 
         {/* ── Page Header ─────────────────────────────────────────────────── */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">

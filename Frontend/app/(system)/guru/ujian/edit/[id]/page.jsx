@@ -634,7 +634,7 @@ export default function EditUjianPage() {
           />
         </div>
 
-        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto">
+        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
           {/* Konten w-full (bukan max-w) → melebar saat zoom out */}
           <div className="w-full p-4 sm:p-5 lg:p-6 xl:p-8">
 

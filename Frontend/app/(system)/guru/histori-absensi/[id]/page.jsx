@@ -324,6 +324,7 @@ export default function DetailSiswaPage() {
     );
 
     if (found) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSiswa(found);
       setAttendanceData(
         generateAttendanceForStudent(id),
@@ -535,8 +536,8 @@ export default function DetailSiswaPage() {
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <Header />
 
-        <main className="flex-1 overflow-y-auto theme-page p-4 sm:p-6 lg:p-8">
-          <div className="w-full max-w-6xl mx-auto space-y-6">
+        <main className="flex-1 min-h-0 min-w-0 overflow-y-auto overflow-x-hidden theme-page p-4 sm:p-6 lg:p-8">
+          <div className="w-full space-y-6">
 
             <button
               type="button"
@@ -888,7 +889,7 @@ export default function DetailSiswaPage() {
                   </span>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex w-full items-center gap-2 sm:w-auto">
                   <select
                     value={selectedMapel}
                     onChange={(e) =>
@@ -896,7 +897,7 @@ export default function DetailSiswaPage() {
                         e.target.value,
                       )
                     }
-                    className={`px-3 py-1.5 text-sm theme-input rounded-lg focus:outline-none ${themeFocus} transition`}
+                    className={`w-full px-3 py-1.5 text-sm theme-input rounded-lg focus:outline-none ${themeFocus} transition sm:w-auto`}
                   >
                     {uniqueMapel.map(
                       (mapel) => (
@@ -913,8 +914,8 @@ export default function DetailSiswaPage() {
               </div>
 
 
-              <div className="overflow-x-auto">
-                <table className="w-full table-auto">
+              <div className="w-full overflow-x-auto">
+                <table className="w-full min-w-[640px] table-auto">
                   <thead>
                     <tr
                       className={`${themeNeutralSurface} border-b ${themeDivider}`}

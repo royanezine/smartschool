@@ -464,11 +464,11 @@ export default function DetailNilaiSiswaPage() {
         setIsCollapsed={setIsCollapsed}
       />
 
-      <div className="flex h-screen flex-1 flex-col overflow-hidden">
+      <div className="flex h-screen min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
         <Header />
 
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
-          <div className="mx-auto w-full max-w-[1200px]">
+        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-6 lg:p-8">
+          <div className="w-full">
 
             <nav className="mb-5 flex items-center gap-2 text-xs">
               <button

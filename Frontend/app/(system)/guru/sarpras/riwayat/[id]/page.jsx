@@ -325,11 +325,11 @@ export default function DetailRiwayatPage() {
         setCollapsed={() => setSidebarOpen(!sidebarOpen)}
       />
 
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
         <Header toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
 
-        <main className="theme-page flex-1 overflow-y-auto">
-          <div className="mx-auto w-full max-w-[1400px] space-y-5 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+        <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
+          <div className="w-full space-y-5 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
 
 
             <button
@@ -510,7 +510,7 @@ export default function DetailRiwayatPage() {
                 <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
 
 
-                  <div className="space-y-5">
+                  <div className="min-w-0 space-y-5">
 
 
                     <div
@@ -705,7 +705,7 @@ export default function DetailRiwayatPage() {
                   </div>
 
 
-                  <aside className="space-y-5 lg:sticky lg:top-6">
+                  <aside className="min-w-0 space-y-5 lg:sticky lg:top-6">
 
 
                     <div

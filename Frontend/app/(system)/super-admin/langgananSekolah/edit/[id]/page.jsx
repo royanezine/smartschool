@@ -33,7 +33,7 @@ export default function EditLanggananPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-[60vh] items-center justify-center">
+      <div className="flex min-h-[60vh] w-full min-w-0 items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-[var(--color-primary)]" />
       </div>
     );
@@ -41,7 +41,7 @@ export default function EditLanggananPage() {
 
   if (!initialData) {
     return (
-      <div className="theme-page theme-text min-h-full">
+      <div className="theme-page theme-text min-h-full w-full min-w-0">
         <div className="flex min-h-[60vh] items-center justify-center px-4">
           <div className="theme-card theme-border w-full max-w-md rounded-2xl border p-8 text-center shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]">
             <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]">
@@ -62,9 +62,9 @@ export default function EditLanggananPage() {
   }
 
   return (
-    <div className="theme-page theme-text min-h-full">
-      <div className="w-full px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
-        <div className="mx-auto w-full max-w-[1400px]">
+    <div className="theme-page theme-text min-h-full w-full min-w-0">
+      <div className="w-full min-w-0 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
+        <div className="w-full min-w-0">
           <LanggananForm
             initialData={initialData}
             isEdit={true}

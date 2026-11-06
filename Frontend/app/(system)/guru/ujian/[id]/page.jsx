@@ -270,8 +270,8 @@ export default function KelolaSoalUjianPage() {
           }}
         />
 
-        <main className="flex-1 overflow-y-auto bg-[var(--color-page)]">
-          <div className="mx-auto w-full max-w-[1500px] space-y-6 p-4 sm:p-6 lg:p-8">
+        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden bg-[var(--color-page)]">
+          <div className="w-full space-y-6 p-4 sm:p-6 lg:p-8">
 
 
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -312,7 +312,7 @@ export default function KelolaSoalUjianPage() {
               <button
                 type="button"
                 onClick={handleOpenCreate}
-                className="inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:opacity-90"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 sm:w-auto"
                 style={{
                   backgroundColor:
                     "var(--school-primary)",

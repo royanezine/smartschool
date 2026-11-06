@@ -568,8 +568,10 @@ export default function DashboardPage() {
   );
 
   return (
-    <div className="theme-page theme-text min-h-full">
-      <div className="mx-auto w-full max-w-[1700px] px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
+    <div className="theme-page theme-text min-h-full w-full min-w-0">
+      {/* Tidak ada max-w + mx-auto: konten selalu menempel ke sidebar
+          dan mengisi sisa lebar layar, berapa pun level zoom-nya. */}
+      <div className="w-full min-w-0 px-4 py-5 sm:px-6 lg:px-8 lg:py-7 2xl:px-10">
         <div className="space-y-5 lg:space-y-6">
 
 
@@ -691,7 +693,7 @@ export default function DashboardPage() {
 
 
             <div
-              className={`rounded-xl border theme-border theme-card p-5 ${themeCardShadow} xl:col-span-2`}
+              className={`min-w-0 rounded-xl border theme-border theme-card p-5 ${themeCardShadow} xl:col-span-2`}
             >
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-center gap-3">
@@ -826,7 +828,7 @@ export default function DashboardPage() {
 
 
             <div
-              className={`rounded-xl border theme-border theme-card p-5 ${themeCardShadow}`}
+              className={`min-w-0 rounded-xl border theme-border theme-card p-5 ${themeCardShadow}`}
             >
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
@@ -953,7 +955,7 @@ export default function DashboardPage() {
 
 
             <div
-              className={`rounded-xl border theme-border theme-card p-5 ${themeCardShadow} lg:col-span-2`}
+              className={`min-w-0 rounded-xl border theme-border theme-card p-5 ${themeCardShadow} lg:col-span-2`}
             >
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
@@ -1077,7 +1079,7 @@ export default function DashboardPage() {
 
 
             <div
-              className={`overflow-hidden rounded-xl border theme-border theme-card p-5 ${themeCardShadow}`}
+              className={`min-w-0 overflow-hidden rounded-xl border theme-border theme-card p-5 ${themeCardShadow}`}
             >
               <div className="flex items-center gap-3">
                 <div
@@ -1174,7 +1176,7 @@ export default function DashboardPage() {
 
 
             <div
-              className={`rounded-xl border theme-border theme-card p-5 ${themeCardShadow}`}
+              className={`min-w-0 rounded-xl border theme-border theme-card p-5 ${themeCardShadow}`}
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -1273,7 +1275,7 @@ export default function DashboardPage() {
             </div>
 
 
-            <div className="space-y-4">
+            <div className="min-w-0 space-y-4">
 
 
               <div

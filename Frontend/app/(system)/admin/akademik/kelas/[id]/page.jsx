@@ -265,7 +265,13 @@ export default function DetailKelasPage() {
 
           guru: getGuruName(item),
 
+          ruanganId:
+            item?.ruanganId ||
+            item?.ruanganRef?.id ||
+            "",
+
           ruangan:
+            item?.ruanganRef?.nama ||
             item?.ruangan ||
             item?.namaRuangan ||
             item?.room ||

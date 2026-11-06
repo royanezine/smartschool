@@ -312,6 +312,7 @@ export default function GuruAbsensiPage() {
 
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchKelas();
   }, [fetchKelas]);
 
@@ -326,6 +327,7 @@ export default function GuruAbsensiPage() {
     const idFromUrl = params.get("kelasId");
 
     if (idFromUrl) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setKelasId(idFromUrl);
     }
   }, []);
@@ -389,6 +391,7 @@ export default function GuruAbsensiPage() {
 
   useEffect(() => {
     if (kelasId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       fetchAbsensi();
     }
   }, [kelasId, fetchAbsensi]);
@@ -567,7 +570,7 @@ export default function GuruAbsensiPage() {
         }
       />
 
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-h-0 min-w-0 overflow-hidden">
 
         <Header
           toggleSidebar={() =>
@@ -581,7 +584,7 @@ export default function GuruAbsensiPage() {
           }}
         />
 
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+        <main className="flex-1 min-h-0 min-w-0 overflow-y-auto overflow-x-hidden p-4 sm:p-6 lg:p-8">
           <div className="w-full space-y-6">
 
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
@@ -598,7 +601,7 @@ export default function GuruAbsensiPage() {
                   </h1>
                 </div>
 
-                <p className="text-sm theme-text-secondary mt-1 ml-[42px]">
+                <p className="text-sm theme-text-secondary mt-1 sm:ml-[42px]">
                   Kelola dan lihat data absensi
                   siswa berdasarkan kelas.
                 </p>
@@ -900,7 +903,7 @@ export default function GuruAbsensiPage() {
               !errorAbsensi && (
                 <>
 
-                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
 
                     <div
                       className={`theme-card rounded-xl border ${themeNeutralBorder} p-3.5 ${themeCardShadow} flex items-center gap-3`}

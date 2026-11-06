@@ -768,7 +768,7 @@ export default function UploadMateriPage() {
 
         <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
 
-          <div className="mx-auto w-full max-w-[1600px] p-4 sm:p-6 lg:p-8">
+          <div className="w-full p-4 sm:p-6 lg:p-8">
 
 
             <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -1744,7 +1744,7 @@ export default function UploadMateriPage() {
                     disabled={
                       saving
                     }
-                    className={`theme-card theme-text-secondary inline-flex h-11 items-center justify-center gap-2 rounded-xl border px-5 text-sm font-semibold transition ${themeNeutralBorder} ${themeNeutralHover} disabled:cursor-not-allowed disabled:opacity-60`}
+                    className={`theme-card theme-text-secondary inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border px-5 text-sm font-semibold transition sm:w-auto ${themeNeutralBorder} ${themeNeutralHover} disabled:cursor-not-allowed disabled:opacity-60`}
                   >
                     <X
                       size={17}
@@ -1762,7 +1762,7 @@ export default function UploadMateriPage() {
                       kelasMapelList.length ===
                         0
                     }
-                    className={`inline-flex h-11 items-center justify-center gap-2 rounded-xl px-6 text-sm font-semibold transition ${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow} hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60`}
+                    className={`inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl px-6 text-sm font-semibold transition sm:w-auto ${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow} hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60`}
                   >
                     {saving ? (
                       <>

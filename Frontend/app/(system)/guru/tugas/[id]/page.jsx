@@ -291,6 +291,7 @@ export default function DetailTugasPage() {
 
   useEffect(() => {
     if (!tugasId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLoading(false);
       setError("ID tugas tidak ditemukan pada URL.");
       return;
@@ -466,7 +467,7 @@ export default function DetailTugasPage() {
           }
         />
 
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
           <div className="shrink-0">
             <Header
               toggleSidebar={() =>
@@ -567,7 +568,7 @@ export default function DetailTugasPage() {
   }
 
   return renderLayout(
-    <main className="min-h-0 min-w-0 flex-1 overflow-y-auto">
+    <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
       <div className="w-full p-4 sm:p-5 lg:p-6 xl:p-8">
         <button
           type="button"
@@ -684,7 +685,7 @@ export default function DetailTugasPage() {
 
         <div className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1fr)_300px] 2xl:grid-cols-[minmax(0,1fr)_340px]">
           <section
-            className={`theme-card rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
+            className={`min-w-0 theme-card rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
           >
             <div
               className={`border-b ${themeDivider} px-5 py-4 sm:px-6`}
@@ -712,7 +713,7 @@ export default function DetailTugasPage() {
           </section>
 
           <section
-            className={`theme-card rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
+            className={`min-w-0 theme-card rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
           >
             <div
               className={`border-b ${themeDivider} px-5 py-4`}

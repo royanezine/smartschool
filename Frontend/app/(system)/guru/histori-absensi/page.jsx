@@ -285,6 +285,7 @@ export default function HistoriAbsensiPage() {
 
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setAttendanceData(
       generateAttendanceData(),
     );
@@ -406,6 +407,7 @@ export default function HistoriAbsensiPage() {
   ]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCurrentPage(1);
   }, [
     selectedMapel,
@@ -530,21 +532,15 @@ export default function HistoriAbsensiPage() {
 
 
   return (
-    <div className="min-h-screen w-full theme-page flex">
+    <div className="theme-page flex h-screen w-full overflow-hidden">
+      <Sidebar />
 
-      <div className="flex-shrink-0">
-        <Sidebar />
-      </div>
-
-
-      <div className="flex-1 min-w-0 min-h-screen flex flex-col">
-
-        <div className="flex-shrink-0">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+        <div className="shrink-0">
           <Header />
         </div>
 
-
-        <main className="flex-1 min-w-0 theme-page overflow-x-hidden">
+        <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
           <div className="w-full min-w-0 px-3 py-4 sm:px-5 sm:py-5 md:px-6 lg:px-8 xl:px-10">
             <div className="w-full max-w-none mx-auto space-y-5 sm:space-y-6">
 
@@ -732,7 +728,7 @@ export default function HistoriAbsensiPage() {
                     </div>
 
 
-                    <div className="grid grid-cols-2 gap-2 min-w-0">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 min-w-0">
 
                       <div className="min-w-0">
                         <label className="block text-xs font-semibold theme-text-secondary mb-1.5">
@@ -1299,7 +1295,7 @@ export default function HistoriAbsensiPage() {
                       </span>
                     </span>
 
-                    <div className="flex items-center gap-1">
+                    <div className="flex flex-wrap items-center justify-center gap-1">
 
                       <button
                         type="button"

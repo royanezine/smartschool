@@ -531,8 +531,10 @@ export default function DetailYayasanSuperAdminPage() {
   }
 
   return (
-    <div className="theme-page theme-text min-h-full">
-      <div className="mx-auto w-full max-w-[1600px] space-y-6 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
+    <div className="theme-page theme-text min-h-full w-full min-w-0">
+      {/* Tidak ada max-w + mx-auto: konten menempel ke sidebar dan
+          mengisi sisa lebar layar, berapa pun level zoom-nya. */}
+      <div className="w-full min-w-0 space-y-6 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 2xl:px-10">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-xs">
           <Link

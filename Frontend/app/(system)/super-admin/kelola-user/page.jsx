@@ -30,7 +30,7 @@ import {
   getUsers,
   deleteUser,
   updateUserStatus,
-    resetUserPassword,
+  resetUserPassword,
 } from "@/services/user.service";
 
 
@@ -51,9 +51,6 @@ const themePrimaryShadow =
 
 const themeCardShadow =
   "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
-
-const themeSmallShadow =
-  "shadow-[0_2px_8px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
 
 const themeNeutralSurface =
   "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
@@ -121,7 +118,6 @@ export default function KelolaUserPage() {
   const [selectedUser, setSelectedUser] = useState(null);
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [showDetailModal, setShowDetailModal] = useState(false);
   const [statusUserToToggle, setStatusUserToToggle] = useState(null);
   const [toast, setToast] = useState(null);
 
@@ -341,11 +337,12 @@ export default function KelolaUserPage() {
     setShowDeleteModal(true);
   };
 
-  const openDetailModal = (user) => {
-    setSelectedUser(user);
-    setShowDetailModal(true);
+  const handleDetail = (user) => {
+    if (!user?.id) return;
+    router.push(
+      `/super-admin/kelola-user/detail-user?id=${encodeURIComponent(user.id)}`
+    );
   };
-
 
   const handleEdit = (user) => {
     router.push(
@@ -379,12 +376,13 @@ export default function KelolaUserPage() {
 
 
   return (
-    <div className="theme-page theme-text min-h-full">
-      <div className="mx-auto w-full max-w-[1500px] px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
+    <div className="theme-page theme-text min-h-full w-full min-w-0">
+      {/* Full width: tidak ada max-width / mx-auto, sehingga selalu menempel ke sidebar saat zoom out */}
+      <div className="w-full min-w-0 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
 
 
         <section
-          className={`relative mb-6 overflow-hidden rounded-3xl ${themePrimaryGradient} ${themePrimaryShadow}`}
+          className={`relative mb-6 w-full overflow-hidden rounded-3xl ${themePrimaryGradient} ${themePrimaryShadow}`}
         >
           <div className="absolute inset-0 overflow-hidden">
 
@@ -487,7 +485,7 @@ export default function KelolaUserPage() {
         )}
 
 
-        <section className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <section className="mb-6 grid w-full grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
 
           <StatCard
             label="Total User"
@@ -529,7 +527,7 @@ export default function KelolaUserPage() {
 
 
         <section
-          className={`mb-6 rounded-2xl border theme-border theme-card p-5 ${themeCardShadow}`}
+          className={`mb-6 w-full rounded-2xl border theme-border theme-card p-5 ${themeCardShadow}`}
         >
           <div className="flex flex-col gap-4 xl:flex-row xl:items-center">
 
@@ -698,7 +696,7 @@ export default function KelolaUserPage() {
 
 
         <section
-          className={`overflow-hidden rounded-2xl border theme-border theme-card ${themeCardShadow}`}
+          className={`w-full overflow-hidden rounded-2xl border theme-border theme-card ${themeCardShadow}`}
         >
 
 
@@ -755,8 +753,8 @@ export default function KelolaUserPage() {
             />
           ) : (
             <>
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[1100px]">
+              <div className="w-full overflow-x-auto">
+                <table className="w-full min-w-[1100px] table-auto">
 
                   <thead>
                     <tr
@@ -869,7 +867,7 @@ export default function KelolaUserPage() {
                                 type="button"
                                 title="Lihat detail"
                                 onClick={() =>
-                                  openDetailModal(
+                                  handleDetail(
                                     user
                                   )
                                 }
@@ -1106,239 +1104,6 @@ export default function KelolaUserPage() {
         </ModalOverlay>
       )}
 
-
-      {showDetailModal &&
-        selectedUser && (
-          <ModalOverlay
-            onClose={() =>
-              setShowDetailModal(false)
-            }
-          >
-            <div
-              className={`max-h-[92vh] w-full max-w-2xl overflow-hidden rounded-3xl theme-card ${themeCardShadow}`}
-            >
-
-
-              <div
-                className={`flex items-start justify-between border-b ${themeDivider} ${themeNeutralSurface} p-5 md:p-6`}
-              >
-
-                <div className="flex min-w-0 items-center gap-3">
-
-                  <div
-                    className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${themePrimarySoft} ${themePrimaryText}`}
-                  >
-                    <ShieldCheck className="h-5 w-5" />
-                  </div>
-
-                  <div className="min-w-0">
-
-                    <h2 className="text-lg font-bold theme-text">
-                      Detail Pengguna
-                    </h2>
-
-                    <p className="mt-0.5 text-xs theme-text-muted">
-                      Informasi lengkap
-                      akun pengguna
-                    </p>
-
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    setShowDetailModal(
-                      false
-                    )
-                  }
-                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl theme-text-muted transition ${themeNeutralHover} hover:text-[var(--color-primary)]`}
-                >
-                  <X className="h-5 w-5" />
-                </button>
-
-              </div>
-
-
-              <div className="max-h-[calc(92vh-140px)] overflow-y-auto p-5 md:p-6">
-
-
-                <div
-                  className={`flex flex-col gap-4 rounded-2xl border ${themeInfoBorder} ${themeInfoSurface} p-5 sm:flex-row sm:items-center`}
-                >
-
-                  <Avatar
-                    user={selectedUser}
-                    large
-                  />
-
-                  <div className="min-w-0 flex-1 text-center sm:text-left">
-
-                    <h3 className="truncate text-lg font-bold theme-text">
-                      {getUserName(
-                        selectedUser
-                      )}
-                    </h3>
-
-                    <p className="mt-1 truncate text-sm theme-text-secondary">
-                      {selectedUser.email ||
-                        "-"}
-                    </p>
-
-                    <div className="mt-3 flex flex-wrap justify-center gap-2 sm:justify-start">
-
-                      <RoleBadge
-                        role={getRoleName(
-                          selectedUser
-                        )}
-                      />
-
-                      <StatusBadge
-                        active={isActiveStatus(
-                          selectedUser.status
-                        )}
-                        status={
-                          selectedUser.status
-                        }
-                      />
-
-                    </div>
-                  </div>
-
-                </div>
-
-
-                <div
-                  className={`mt-4 rounded-2xl border theme-border theme-card p-5 ${themeSmallShadow}`}
-                >
-
-                  <div className="mb-4 flex items-center gap-2">
-
-                    <div
-                      className={`h-5 w-1 rounded-full bg-[var(--color-primary)]`}
-                    />
-
-                    <h4 className="text-sm font-bold theme-text">
-                      Informasi Akun
-                    </h4>
-
-                  </div>
-
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-
-                    <DetailItem
-                      label="Nama Lengkap"
-                      value={getUserName(
-                        selectedUser
-                      )}
-                    />
-
-                    <DetailItem
-                      label="Username"
-                      value={getUsername(
-                        selectedUser
-                      )}
-                    />
-
-                    <DetailItem
-                      label="Email"
-                      value={
-                        selectedUser.email
-                      }
-                    />
-
-                    <DetailItem
-                      label="Role"
-                      value={getRoleName(
-                        selectedUser
-                      )}
-                    />
-
-                    <DetailItem
-                      label="NIP"
-                      value={
-                        selectedUser.nip
-                      }
-                    />
-
-                    <DetailItem
-                      label="NISN"
-                      value={
-                        selectedUser.nisn
-                      }
-                    />
-
-                    <DetailItem
-                      label="NIPD"
-                      value={
-                        selectedUser.nipd
-                      }
-                    />
-
-                    <DetailItem
-                      label="Jenis Kelamin"
-                      value={
-                        selectedUser.jenisKelamin
-                      }
-                    />
-
-                    <DetailItem
-                      label="Jabatan"
-                      value={
-                        selectedUser.jabatan
-                      }
-                    />
-
-                    <DetailItem
-                      label="Golongan"
-                      value={
-                        selectedUser.golongan
-                      }
-                    />
-
-                    <DetailItem
-                      label="Sekolah"
-                      value={
-                        selectedUser.sekolah
-                          ?.nama ||
-                        selectedUser.sekolahId
-                      }
-                    />
-
-                    <DetailItem
-                      label="Yayasan"
-                      value={
-                        selectedUser.yayasan
-                          ?.nama ||
-                        selectedUser.yayasanId
-                      }
-                    />
-
-                  </div>
-                </div>
-              </div>
-
-
-              <div
-                className={`flex justify-end border-t ${themeDivider} ${themeNeutralSurface} p-4 md:p-5`}
-              >
-                <button
-                  type="button"
-                  onClick={() =>
-                    setShowDetailModal(
-                      false
-                    )
-                  }
-                  className={`rounded-xl border ${themePrimarySoftBorder} ${themePrimarySoft} px-5 py-2.5 text-sm font-bold ${themePrimaryText} transition hover:opacity-80`}
-                >
-                  Tutup
-                </button>
-              </div>
-
-            </div>
-          </ModalOverlay>
-        )}
-
       {statusUserToToggle && (
         <ModalOverlay
           onClose={() => {
@@ -1489,7 +1254,7 @@ function StatCard({
 }) {
   return (
     <div
-      className={`group rounded-2xl border theme-border theme-card p-5 ${themeCardShadow} transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_color-mix(in_srgb,var(--color-text)_8%,transparent)]`}
+      className={`group min-w-0 rounded-2xl border theme-border theme-card p-5 ${themeCardShadow} transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_color-mix(in_srgb,var(--color-text)_8%,transparent)]`}
     >
       <div className="flex items-start justify-between gap-4">
 
@@ -1639,26 +1404,6 @@ function StatusBadge({
 
       {formatStatus(status)}
     </span>
-  );
-}
-
-
-function DetailItem({
-  label,
-  value,
-}) {
-  return (
-    <div
-      className={`rounded-xl border theme-border theme-card p-4 transition hover:border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] hover:bg-[color-mix(in_srgb,var(--color-primary)_3%,transparent)]`}
-    >
-      <p className="text-[11px] font-medium uppercase tracking-wide theme-text-muted">
-        {label}
-      </p>
-
-      <p className="mt-1.5 break-words text-sm font-semibold theme-text">
-        {value || "-"}
-      </p>
-    </div>
   );
 }
 

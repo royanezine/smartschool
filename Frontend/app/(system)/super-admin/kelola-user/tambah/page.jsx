@@ -55,23 +55,11 @@ const themeNeutralBorder =
 const themeDivider =
   "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
 
-const themeInfoSurface =
-  "bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)]";
-
-const themeInfoBorder =
-  "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
-
 const themeSuccessSurface =
   "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
 
 const themeSuccessBorder =
   "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
-
-const themeWarningSurface =
-  "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]";
-
-const themeWarningBorder =
-  "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
 
 const themeDangerSurface =
   "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
@@ -212,18 +200,19 @@ export default function TambahUserPage() {
 
 
   return (
-    <div className="theme-page theme-text min-h-full">
-      <div className="mx-auto w-full max-w-[1400px] px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
+    <div className="theme-page theme-text min-h-full w-full min-w-0">
+      {/* Full width: tanpa max-width / mx-auto agar selalu menempel ke sidebar saat zoom out */}
+      <div className="w-full min-w-0 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
 
 
         <section
-          className={`relative mb-6 overflow-hidden rounded-3xl ${themePrimaryGradient} p-6 ${themePrimaryShadow} md:p-8`}
+          className={`relative mb-6 w-full overflow-hidden rounded-3xl ${themePrimaryGradient} p-6 ${themePrimaryShadow} md:p-8`}
         >
           <div
             className="absolute -right-20 -top-28 h-72 w-72 rounded-full blur-2xl"
             style={{
               background:
-                "color-mix(in_srgb,var(--color-card)_12%,transparent)",
+                "color-mix(in srgb, var(--color-card) 12%, transparent)",
             }}
           />
 
@@ -231,7 +220,7 @@ export default function TambahUserPage() {
             className="absolute -bottom-32 left-1/3 h-80 w-80 rounded-full blur-3xl"
             style={{
               background:
-                "color-mix(in_srgb,var(--color-info)_20%,transparent)",
+                "color-mix(in srgb, var(--color-info) 20%, transparent)",
             }}
           />
 
@@ -239,7 +228,7 @@ export default function TambahUserPage() {
             className="absolute inset-0 opacity-[0.07]"
             style={{
               backgroundImage:
-                "linear-gradient(color-mix(in_srgb,var(--color-card)_80%,transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in_srgb,var(--color-card)_80%,transparent) 1px, transparent 1px)",
+                "linear-gradient(color-mix(in srgb, var(--color-card) 80%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, var(--color-card) 80%, transparent) 1px, transparent 1px)",
               backgroundSize: "32px 32px",
             }}
           />
@@ -338,10 +327,10 @@ export default function TambahUserPage() {
 
 
         <form onSubmit={handleSubmit}>
-          <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_360px]">
+          <div className="grid w-full grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
 
 
-            <div className="space-y-6">
+            <div className="min-w-0 space-y-6">
 
 
               <section
@@ -351,12 +340,9 @@ export default function TambahUserPage() {
                   icon={User}
                   title="Informasi Dasar"
                   description="Informasi utama pengguna."
-                  tone="primary"
                 />
 
-                <div
-                  className={`${themePrimarySoft} grid grid-cols-1 gap-5 p-5 sm:grid-cols-2 lg:p-6`}
-                >
+                <div className="grid grid-cols-1 gap-5 p-5 sm:grid-cols-2 lg:p-6">
                   <InputField
                     label="Nama Lengkap"
                     name="namaLengkap"
@@ -416,12 +402,9 @@ export default function TambahUserPage() {
                   icon={ShieldCheck}
                   title="Akses Akun"
                   description="Role, kata sandi, dan status akun."
-                  tone="info"
                 />
 
-                <div
-                  className={`${themeInfoSurface} grid grid-cols-1 gap-5 p-5 sm:grid-cols-2 lg:p-6`}
-                >
+                <div className="grid grid-cols-1 gap-5 p-5 sm:grid-cols-2 lg:p-6">
                   <SelectField
                     label="Role"
                     name="peranId"
@@ -509,12 +492,9 @@ export default function TambahUserPage() {
                   icon={Building2}
                   title="Organisasi & Tenant"
                   description="Hubungkan pengguna dengan sekolah atau yayasan."
-                  tone="info"
                 />
 
-                <div
-                  className={`${themeNeutralSurface} grid grid-cols-1 gap-5 p-5 sm:grid-cols-2 lg:p-6`}
-                >
+                <div className="grid grid-cols-1 gap-5 p-5 sm:grid-cols-2 lg:p-6">
                   <InputField
                     label="Sekolah ID"
                     name="sekolahId"
@@ -543,12 +523,9 @@ export default function TambahUserPage() {
                   icon={GraduationCap}
                   title="Data Akademik & Kepegawaian"
                   description="Data tambahan pengguna."
-                  tone="success"
                 />
 
-                <div
-                  className={`${themeSuccessSurface} grid grid-cols-1 gap-5 p-5 sm:grid-cols-2 lg:p-6`}
-                >
+                <div className="grid grid-cols-1 gap-5 p-5 sm:grid-cols-2 lg:p-6">
                   <InputField
                     label="NIP"
                     name="nip"
@@ -598,7 +575,7 @@ export default function TambahUserPage() {
             </div>
 
 
-            <aside className="xl:sticky xl:top-0 xl:self-start">
+            <aside className="min-w-0 xl:sticky xl:top-0 xl:self-start">
               <div className="space-y-4">
 
                 <PreviewCard form={form} />
@@ -669,53 +646,18 @@ function SectionHeader({
   icon: Icon,
   title,
   description,
-  tone = "primary",
 }) {
-  const toneMap = {
-    primary: {
-      wrap: `${themePrimarySoft}`,
-      border: themePrimarySoftBorder,
-      icon: `bg-[var(--color-primary)] text-[var(--color-card)]`,
-    },
-
-    info: {
-      wrap: themeInfoSurface,
-      border: themeInfoBorder,
-      icon: `bg-[var(--color-info)] text-[var(--color-card)]`,
-    },
-
-    success: {
-      wrap: themeSuccessSurface,
-      border: themeSuccessBorder,
-      icon: `bg-[var(--color-success)] text-[var(--color-card)]`,
-    },
-
-    warning: {
-      wrap: themeWarningSurface,
-      border: themeWarningBorder,
-      icon: `bg-[var(--color-warning)] text-[var(--color-card)]`,
-    },
-
-    neutral: {
-      wrap: themeNeutralSurface,
-      border: themeNeutralBorder,
-      icon: `${themePrimarySoft} ${themePrimaryText}`,
-    },
-  };
-
-  const current = toneMap[tone] || toneMap.primary;
-
   return (
     <div
-      className={`flex items-start gap-3 border-b ${current.border} ${current.wrap} px-5 py-5 lg:px-6`}
+      className={`flex items-start gap-3 border-b ${themeDivider} ${themeNeutralSurface} px-5 py-5 lg:px-6`}
     >
       <div
-        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${current.icon} shadow-sm`}
+        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${themePrimarySoft} ${themePrimaryText}`}
       >
         <Icon size={19} />
       </div>
 
-      <div>
+      <div className="min-w-0">
         <h2 className="text-base font-bold theme-text">
           {title}
         </h2>
@@ -741,7 +683,7 @@ function InputField({
   required = false,
 }) {
   return (
-    <div>
+    <div className="min-w-0">
       <label
         htmlFor={name}
         className="mb-2 block text-sm font-semibold theme-text-secondary"
@@ -749,7 +691,7 @@ function InputField({
         {label}
 
         {required && (
-          <span className="ml-1 theme-text-primary">
+          <span className={`ml-1 ${themePrimaryText}`}>
             *
           </span>
         )}
@@ -763,7 +705,7 @@ function InputField({
         onChange={onChange}
         placeholder={placeholder}
         required={required}
-        className={`theme-input h-11 w-full rounded-xl px-4 text-sm shadow-sm outline-none transition ${themeFocus} hover:border-[color-mix(in_srgb,var(--color-text)_18%,transparent)] placeholder:theme-text-placeholder`}
+        className={`theme-input h-11 w-full rounded-xl px-4 text-sm shadow-sm outline-none transition ${themeFocus} hover:border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]`}
       />
 
       {helper && (
@@ -786,7 +728,7 @@ function SelectField({
   helper,
 }) {
   return (
-    <div>
+    <div className="min-w-0">
       <label
         htmlFor={name}
         className="mb-2 block text-sm font-semibold theme-text-secondary"
@@ -833,7 +775,7 @@ function PasswordField({
   required = false,
 }) {
   return (
-    <div>
+    <div className="min-w-0">
       <label
         htmlFor={name}
         className="mb-2 block text-sm font-semibold theme-text-secondary"
@@ -841,7 +783,7 @@ function PasswordField({
         {label}
 
         {required && (
-          <span className="ml-1 theme-text-primary">
+          <span className={`ml-1 ${themePrimaryText}`}>
             *
           </span>
         )}
@@ -861,7 +803,7 @@ function PasswordField({
           onChange={onChange}
           placeholder={placeholder}
           required={required}
-          className={`theme-input h-11 w-full rounded-xl pl-10 pr-11 text-sm shadow-sm outline-none transition ${themeFocus} placeholder:theme-text-placeholder`}
+          className={`theme-input h-11 w-full rounded-xl pl-10 pr-11 text-sm shadow-sm outline-none transition ${themeFocus}`}
         />
 
         <button
@@ -903,10 +845,10 @@ function PreviewCard({ form }) {
       className={`overflow-hidden rounded-2xl border theme-border theme-card ${themeCardShadow}`}
     >
       <div
-        className={`flex items-center gap-2 border-b ${themePrimarySoftBorder} ${themePrimarySoft} px-5 py-4`}
+        className={`flex items-center gap-2 border-b ${themeDivider} ${themeNeutralSurface} px-5 py-4`}
       >
         <div
-          className={`flex h-9 w-9 items-center justify-center rounded-lg ${themePrimaryGradient} text-[var(--color-card)] shadow-sm`}
+          className={`flex h-9 w-9 items-center justify-center rounded-lg ${themePrimarySoft} ${themePrimaryText}`}
         >
           <Sparkles className="h-4 w-4" />
         </div>
@@ -916,7 +858,7 @@ function PreviewCard({ form }) {
         </h3>
       </div>
 
-      <div className={`${themeNeutralSurface} p-5`}>
+      <div className="p-5">
         <div className="flex items-center gap-4">
           <div
             className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl ${themePrimaryGradient} text-lg font-bold text-[var(--color-card)] ${themePrimaryShadow}`}
@@ -937,7 +879,7 @@ function PreviewCard({ form }) {
         </div>
 
         <div
-          className={`mt-4 space-y-2.5 rounded-xl border ${themeDivider} theme-card p-4`}
+          className={`mt-4 space-y-2.5 rounded-xl border ${themeDivider} ${themeNeutralSurface} p-4`}
         >
           <PreviewRow
             label="Username"
@@ -1011,18 +953,18 @@ function TipsCard() {
 
   return (
     <div
-      className={`overflow-hidden rounded-2xl border ${themeWarningBorder} ${themeWarningSurface} ${themeCardShadow}`}
+      className={`overflow-hidden rounded-2xl border theme-border theme-card ${themeCardShadow}`}
     >
       <div
-        className={`flex items-center gap-2 border-b ${themeWarningBorder} px-5 py-4`}
+        className={`flex items-center gap-2 border-b ${themeDivider} ${themeNeutralSurface} px-5 py-4`}
       >
         <div
-          className={`flex h-9 w-9 items-center justify-center rounded-lg bg-[var(--color-warning)] text-[var(--color-card)] shadow-sm`}
+          className={`flex h-9 w-9 items-center justify-center rounded-lg ${themePrimarySoft} ${themePrimaryText}`}
         >
           <Info className="h-4 w-4" />
         </div>
 
-        <h3 className="text-sm font-bold text-[var(--color-warning)]">
+        <h3 className="text-sm font-bold theme-text">
           Panduan Cepat
         </h3>
       </div>
@@ -1033,7 +975,7 @@ function TipsCard() {
             key={i}
             className="flex items-start gap-2.5"
           >
-            <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-warning)]" />
+            <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-primary)]" />
 
             <span className="text-xs leading-5 theme-text-secondary">
               {item}

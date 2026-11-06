@@ -260,7 +260,7 @@ function UbahKataSandiGuruSection() {
           <button
             type="submit"
             disabled={saving || !form.kataSandiLama || !form.kataSandiBaru}
-            className="flex items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-sm font-semibold theme-primary shadow-sm transition-all hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+            className="flex w-full items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-sm font-semibold theme-primary shadow-sm transition-all hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto"
           >
             {saving ? (
               <>
@@ -401,14 +401,14 @@ export default function GuruPengaturanPage() {
         role="guru"
       />
 
-      <div className="flex min-w-0 flex-1 flex-col theme-page">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden theme-page">
         <Header
           toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
           user={headerUser}
         />
 
-        <main className="flex-1 overflow-y-auto theme-page">
-          <div className="mx-auto w-full max-w-3xl px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
+        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden theme-page">
+          <div className="w-full px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
             <div className="flex flex-col gap-5 mb-7">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-start gap-3 min-w-0">
@@ -654,7 +654,7 @@ export default function GuruPengaturanPage() {
                       <button
                         type="submit"
                         disabled={saving}
-                        className="flex items-center gap-1.5 rounded-xl px-4 py-2.5 text-sm font-semibold theme-primary shadow-sm transition-all hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+                        className="flex w-full items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-sm font-semibold theme-primary shadow-sm transition-all hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto"
                       >
                         {saving ? (
                           <Loader2 size={14} className="animate-spin" />

@@ -639,7 +639,7 @@ export default function GuruNilaiTugasPage() {
         }
       />
 
-      <div className="flex flex-1 flex-col min-w-0">
+      <div className="flex flex-1 flex-col min-h-0 min-w-0 overflow-hidden">
         <Header
           toggleSidebar={() =>
             setSidebarOpen(
@@ -648,7 +648,7 @@ export default function GuruNilaiTugasPage() {
           }
         />
 
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+        <main className="flex-1 min-h-0 min-w-0 overflow-y-auto overflow-x-hidden p-4 sm:p-6 lg:p-8">
           <div className="w-full space-y-6">
 
 
@@ -668,7 +668,7 @@ export default function GuruNilaiTugasPage() {
                   </h1>
                 </div>
 
-                <p className="theme-text-secondary mt-1 ml-[42px] flex items-center gap-1.5 text-sm">
+                <p className="theme-text-secondary mt-1 flex items-center gap-1.5 text-sm sm:ml-[42px]">
                   <Sparkles
                     size={14}
                     className="theme-text-muted"
@@ -930,7 +930,7 @@ export default function GuruNilaiTugasPage() {
             )}
 
 
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
 
 
               <div
@@ -1054,7 +1054,7 @@ export default function GuruNilaiTugasPage() {
 
 
               <div
-                className={`theme-card lg:col-span-2 overflow-hidden rounded-xl border ${themeNeutralBorder} ${themeCardShadow}`}
+                className={`min-w-0 theme-card lg:col-span-2 overflow-hidden rounded-xl border ${themeNeutralBorder} ${themeCardShadow}`}
               >
                 <div
                   className={`border-b p-4 sm:p-5 ${themeDivider}`}
@@ -1347,7 +1347,7 @@ export default function GuruNilaiTugasPage() {
               </div>
 
 
-              <div className="space-y-6">
+              <div className="min-w-0 space-y-6">
 
 
                 <div

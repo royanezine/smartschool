@@ -486,13 +486,13 @@ export default function GuruSarprasRiwayatPage() {
         }
       />
 
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
         <Header toggleSidebar={() =>
             setSidebarOpen(!sidebarOpen)
           } />
 
-        <main className="theme-page flex-1 overflow-y-auto">
-          <div className="mx-auto w-full max-w-[1700px] space-y-6 px-4 py-6 sm:px-6 lg:px-8 lg:py-8 2xl:max-w-[1900px]">
+        <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
+          <div className="w-full space-y-6 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
 
 
             <button

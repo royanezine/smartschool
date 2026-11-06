@@ -857,7 +857,7 @@ export default function EditPaketPage() {
 
   if (loading) {
     return (
-      <div className="theme-page theme-text min-h-full">
+      <div className="theme-page theme-text min-h-full w-full">
         <div className="flex min-h-[70vh] w-full items-center justify-center px-4">
           <div className="flex flex-col items-center gap-3">
             <div
@@ -880,8 +880,9 @@ export default function EditPaketPage() {
 
 
   return (
-    <div className="theme-page theme-text min-h-full">
-      <div className="w-full max-w-[1600px] mx-auto px-4 py-5 sm:px-6 sm:py-7 lg:px-8">
+    <div className="theme-page theme-text min-h-full w-full">
+      {/* Tanpa max-w & mx-auto agar konten selalu menempel ke sidebar saat zoom out */}
+      <div className="w-full px-4 py-5 sm:px-6 sm:py-7 lg:px-8">
 
 
         <div className="mb-6">

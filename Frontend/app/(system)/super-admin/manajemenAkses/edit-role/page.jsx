@@ -475,10 +475,12 @@ function EditRolePageContent() {
   }
 
   return (
-    <div className="theme-page theme-text flex min-h-screen">
+    <div className="theme-page theme-text flex min-h-screen w-full min-w-0">
       
-      <main className="flex-1 w-full px-3 py-4 sm:px-5 sm:py-5 lg:px-7 lg:py-7 xl:px-8">
-        <div className="mx-auto w-full max-w-[1500px] space-y-5 lg:space-y-6">
+      {/* Perubahan: min-w-0 ditambahkan pada main */}
+      <main className="flex-1 w-full min-w-0 px-3 py-4 sm:px-5 sm:py-5 lg:px-7 lg:py-7 xl:px-8">
+        {/* Perubahan: mx-auto dan max-w-[1500px] dihapus agar konten selalu menempel ke sidebar */}
+        <div className="w-full min-w-0 space-y-5 lg:space-y-6">
           
           <button
             onClick={() => router.push("/super-admin/manajemenAkses")}
@@ -819,7 +821,7 @@ function EditRolePageContent() {
                                       <span className={`flex h-8 w-8 items-center justify-center rounded-lg border transition-all ${
                                         checked
                                           ? `${style.bg} ${style.text} ${style.border}`
-                                          : `${themeNeutralBorder} theme-card theme-text-muted hover:${themePrimaryText}`
+                                          : `${themeNeutralBorder} theme-card theme-text-muted hover:text-[var(--color-primary)]`
                                       }`}>
                                         {checked ? <CheckCircle size={16} strokeWidth={2.2} /> : <span className="h-1.5 w-1.5 rounded-full bg-current" />}
                                       </span>

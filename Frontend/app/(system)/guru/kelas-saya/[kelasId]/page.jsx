@@ -360,12 +360,12 @@ const year =
   "Tahun ajaran aktif";
 
   return (
-    <div className="flex min-h-screen w-full theme-page">
+    <div className="theme-page flex h-screen w-full overflow-hidden">
       <Sidebar role="guru" />
-      <div className="flex min-h-screen min-w-0 flex-1 flex-col">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
         <Header user={teacher} />
-        <main className="theme-page min-w-0 flex-1">
-          <div className="mx-auto w-full max-w-[1400px] space-y-6 p-4 sm:p-6 lg:p-8">
+        <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
+          <div className="w-full space-y-6 p-4 sm:p-6 lg:p-8">
             <button type="button" onClick={() => router.push("/guru/kelas-saya")} className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--color-primary)] hover:opacity-75">
               <ArrowLeft size={17} /> Kembali ke Kelas Saya
             </button>

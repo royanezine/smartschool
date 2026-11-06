@@ -398,7 +398,7 @@ export default function NilaiTugasPage() {
         />
 
         {/* Body: sidebar + main sejajar */}
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
           <div className="shrink-0">
             <Header
               toggleSidebar={() =>
@@ -465,7 +465,7 @@ export default function NilaiTugasPage() {
 
 
   return renderLayout(
-    <main className="min-h-0 min-w-0 flex-1 overflow-y-auto">
+    <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
       {/* Konten w-full (bukan max-w) → melebar saat zoom out */}
       <div className="w-full p-4 sm:p-5 lg:p-6 xl:p-8">
 
@@ -624,8 +624,8 @@ export default function NilaiTugasPage() {
                 </p>
               </div>
 
-              <div className="flex flex-col gap-2 sm:flex-row">
-                <div className="relative">
+              <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+                <div className="relative w-full sm:w-64">
                   <Search
                     size={16}
                     className="theme-text-muted absolute left-3 top-1/2 -translate-y-1/2"
@@ -645,7 +645,7 @@ export default function NilaiTugasPage() {
                   onChange={(event) =>
                     setFilter(event.target.value)
                   }
-                  className={`theme-input rounded-lg border ${neutralBorder} bg-[var(--color-card)] px-3 py-2.5 text-sm outline-none ${focusRing}`}
+                  className={`theme-input w-full rounded-lg border ${neutralBorder} bg-[var(--color-card)] px-3 py-2.5 text-sm outline-none sm:w-auto ${focusRing}`}
                 >
                   <option value="semua">Semua Status</option>
                   <option value="menunggu">Menunggu Penilaian</option>
@@ -869,7 +869,7 @@ export default function NilaiTugasPage() {
                             type="button"
                             disabled={saving}
                             onClick={() => handleSave(item)}
-                            className={`inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-[var(--color-card)] ${primaryGradient} ${primaryShadow} transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60`}
+                            className={`inline-flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium text-[var(--color-card)] sm:w-auto ${primaryGradient} ${primaryShadow} transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60`}
                           >
                             {saving ? (
                               <Loader2

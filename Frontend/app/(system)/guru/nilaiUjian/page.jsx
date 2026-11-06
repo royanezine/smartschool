@@ -422,7 +422,7 @@ export default function NilaiUjianGuruPage() {
         </div>
 
         {/* Main Content Scroll Area */}
-        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto">
+        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
           <div className="w-full p-4 sm:p-5 lg:p-6 xl:p-8">
 
             {/* Tombol Kembali & Header Halaman */}
@@ -448,7 +448,7 @@ export default function NilaiUjianGuruPage() {
 
                 {/* Tombol Aksi Excel (Import & Export) */}
                 {selectedKelasId && (
-                  <div className="flex flex-wrap items-center gap-2.5">
+                  <div className="flex w-full flex-wrap items-center gap-2.5 sm:w-auto">
                     <button
                       type="button"
                       onClick={() => {
@@ -462,7 +462,7 @@ export default function NilaiUjianGuruPage() {
                         }
                       }}
                       disabled={loadingNilai || komponen.length === 0}
-                      className={`theme-card ${themeNeutralBorder} ${themeSmallShadow} theme-text inline-flex items-center justify-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold transition hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] disabled:cursor-not-allowed disabled:opacity-60`}
+                      className={`theme-card ${themeNeutralBorder} ${themeSmallShadow} theme-text inline-flex flex-1 items-center justify-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold transition hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] disabled:cursor-not-allowed disabled:opacity-60 sm:flex-initial`}
                     >
                       <Upload size={16} className="text-[var(--color-primary)]" />
                       Import Excel
@@ -472,7 +472,7 @@ export default function NilaiUjianGuruPage() {
                       type="button"
                       onClick={handleExport}
                       disabled={exporting || loadingNilai}
-                      className={`${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow} inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60`}
+                      className={`${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow} inline-flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60 sm:flex-initial`}
                     >
                       {exporting ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
                       {exporting ? "Mengunduh..." : "Export Excel"}
@@ -694,7 +694,7 @@ export default function NilaiUjianGuruPage() {
       {/* Modal Dialog Import Excel */}
       {isImportModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-          <div className={`theme-card ${themeNeutralBorder} ${themeCardShadow} w-full max-w-lg rounded-2xl border p-6 shadow-2xl`}>
+          <div className={`theme-card ${themeNeutralBorder} ${themeCardShadow} max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border p-5 sm:p-6 shadow-2xl`}>
             <div className={`flex items-center justify-between border-b ${themeDivider} pb-4`}>
               <div className="flex items-center gap-2.5">
                 <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${themePrimarySoft} ${themePrimaryText}`}>
@@ -794,19 +794,19 @@ export default function NilaiUjianGuruPage() {
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-2.5 pt-3">
+              <div className="flex flex-col-reverse gap-2.5 pt-3 sm:flex-row sm:items-center sm:justify-end">
                 <button
                   type="button"
                   onClick={() => setIsImportModalOpen(false)}
                   disabled={isUploading}
-                  className="rounded-xl px-4 py-2.5 text-xs font-semibold theme-text-secondary hover:bg-black/5 disabled:opacity-50"
+                  className="w-full rounded-xl px-4 py-2.5 text-xs font-semibold theme-text-secondary hover:bg-black/5 disabled:opacity-50 sm:w-auto"
                 >
                   Batal
                 </button>
                 <button
                   type="submit"
                   disabled={isUploading || !importFile || !activeKomponenId}
-                  className={`${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow} inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-xs font-bold transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60`}
+                  className={`${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow} inline-flex w-full items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-xs font-bold transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto`}
                 >
                   {isUploading ? (
                     <>

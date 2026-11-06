@@ -312,9 +312,9 @@ export default function LanggananSekolahPage() {
   const goNext = () => setPage((p) => Math.min(totalPages, p + 1));
 
   return (
-    <div className="theme-page theme-text min-h-full">
-      <main className="w-full overflow-x-hidden px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 xl:px-10">
-        <div className="mx-auto w-full max-w-[1600px]">
+    <div className="theme-page theme-text min-h-full w-full min-w-0">
+      <main className="w-full min-w-0 overflow-x-hidden px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 xl:px-10">
+        <div className="w-full min-w-0">
 
           <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex min-w-0 items-center gap-4">

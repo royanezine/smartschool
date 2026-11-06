@@ -944,11 +944,11 @@ function Modal({
 
         <div className="space-y-4 p-6">{children}</div>
 
-        <div className="flex justify-end gap-3 border-t theme-border px-6 py-4">
+        <div className="flex flex-col-reverse gap-2.5 border-t theme-border px-6 py-4 sm:flex-row sm:justify-end">
           <button
             type="button"
             onClick={onClose}
-            className="theme-card-soft theme-text-secondary rounded-xl border theme-border px-5 py-2.5 text-sm font-semibold transition hover:brightness-95"
+            className="theme-card-soft theme-text-secondary w-full rounded-xl border theme-border px-5 py-2.5 text-sm font-semibold transition hover:brightness-95 sm:w-auto"
           >
             Batal
           </button>
@@ -957,7 +957,7 @@ function Modal({
             type="button"
             onClick={onSave}
             disabled={disabled}
-            className="theme-primary inline-flex items-center gap-2 rounded-xl px-6 py-2.5 text-sm font-semibold transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60"
+            className="theme-primary inline-flex w-full items-center justify-center gap-2 rounded-xl px-6 py-2.5 text-sm font-semibold transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
           >
             {disabled && <Loader2 size={16} className="animate-spin" />}
             {saveLabel}

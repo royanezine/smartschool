@@ -851,7 +851,7 @@ export default function PaketModulPage() {
 
   if (loading) {
     return (
-      <div className="theme-page theme-text min-h-full">
+      <div className="theme-page theme-text min-h-full w-full">
         <div className="min-h-[60vh] flex items-center justify-center px-6">
           <div className="flex flex-col items-center gap-4">
             <div
@@ -880,8 +880,9 @@ export default function PaketModulPage() {
 
 
   return (
-    <div className="theme-page theme-text min-h-full">
-      <div className="w-full max-w-[1500px] mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 space-y-6">
+    <div className="theme-page theme-text min-h-full w-full">
+      {/* Tanpa max-w & mx-auto agar konten selalu menempel ke sidebar saat zoom out */}
+      <div className="w-full px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 space-y-6">
 
 
         <section

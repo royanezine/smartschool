@@ -421,8 +421,8 @@ export default function DetailSekolahPage() {
 
     if (loading) {
         return (
-            <div className="theme-page theme-text min-h-full">
-                <div className="w-full max-w-[1280px] mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
+            <div className="theme-page theme-text min-h-full w-full min-w-0">
+                <div className="w-full min-w-0 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 2xl:px-10">
                     <div className="max-w-4xl mx-auto min-h-[70vh] flex items-center justify-center">
                         <div className="text-center">
                             <div
@@ -452,8 +452,8 @@ export default function DetailSekolahPage() {
 
     if (!school) {
         return (
-            <div className="theme-page theme-text min-h-full">
-                <div className="w-full max-w-[1280px] mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
+            <div className="theme-page theme-text min-h-full w-full min-w-0">
+                <div className="w-full min-w-0 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 2xl:px-10">
                     <div className="max-w-md w-full mx-auto min-h-[70vh] flex items-center justify-center">
                         <div className="text-center w-full">
                             <div
@@ -531,9 +531,11 @@ export default function DetailSekolahPage() {
 
 
     return (
-        <div className="theme-page theme-text min-h-full">
-            <div className="w-full max-w-[1280px] mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
-                <div className="max-w-4xl mx-auto space-y-4 sm:space-y-5 md:space-y-6">
+        <div className="theme-page theme-text min-h-full w-full min-w-0">
+            {/* Tidak ada max-w + mx-auto: konten menempel ke sidebar dan
+                mengisi sisa lebar layar, berapa pun level zoom-nya. */}
+            <div className="w-full min-w-0 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 2xl:px-10">
+                <div className="w-full min-w-0 space-y-4 sm:space-y-5 md:space-y-6">
 
                     <button
                         onClick={() => router.back()}

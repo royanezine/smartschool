@@ -149,7 +149,13 @@ function normalizeSchedule(schedule) {
     day: normalizeText(schedule?.hari),
     startTime: String(schedule?.jamMulai ?? ""),
     endTime: String(schedule?.jamSelesai ?? ""),
-    roomName: String(schedule?.ruangan ?? schedule?.namaRuangan ?? ""),
+    roomId: String(schedule?.ruanganId ?? schedule?.ruanganRef?.id ?? ""),
+    roomName: String(
+      schedule?.ruanganRef?.nama ??
+        schedule?.ruangan ??
+        schedule?.namaRuangan ??
+        ""
+    ),
     subjectId: String(subjectId),
     subjectName,
     subjectCode: String(mataPelajaran?.kode ?? ""),
@@ -234,8 +240,11 @@ export default function KalenderGuruPage() {
   const [filterSubject, setFilterSubject] = useState("all");
 
   useEffect(() => {
-    const user = getCurrentUserFromToken();
-    setCurrentUser(user);
+    const timer = setTimeout(() => {
+      const user = getCurrentUserFromToken();
+      setCurrentUser(user);
+    }, 0);
+    return () => clearTimeout(timer);
   }, []);
 
   const loadSchedules = useCallback(async () => {
@@ -317,7 +326,10 @@ export default function KalenderGuruPage() {
   }, [router]);
 
   useEffect(() => {
-    loadSchedules();
+    const timer = setTimeout(() => {
+      loadSchedules();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadSchedules]);
 
   const today = new Date();

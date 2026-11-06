@@ -607,6 +607,7 @@ export default function PresensiGuruPage() {
 
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadData();
   }, [loadData]);
 
@@ -1222,7 +1223,7 @@ export default function PresensiGuruPage() {
         />
 
 
-        <main className="theme-page flex-1 overflow-y-auto">
+        <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
           <div className="w-full min-w-0 p-3 sm:p-4 lg:p-6 xl:p-8">
             <div className="mx-auto w-full max-w-none space-y-4 sm:space-y-5 lg:space-y-6">
 
@@ -2017,7 +2018,7 @@ export default function PresensiGuruPage() {
           <div
             className={`
               theme-card
-              w-full max-w-2xl
+              flex max-h-[90vh] w-full max-w-2xl flex-col
               overflow-hidden
               rounded-2xl
               border ${themeNeutralBorder}
@@ -2027,7 +2028,7 @@ export default function PresensiGuruPage() {
 
             <div
               className={`
-                flex items-center justify-between
+                flex shrink-0 items-center justify-between
                 border-b ${themeDivider}
                 px-5 py-4
               `}
@@ -2080,6 +2081,7 @@ export default function PresensiGuruPage() {
             <div
               className="
                 theme-card-soft
+                flex-1 overflow-y-auto
                 p-4
                 sm:p-6
               "
@@ -2203,7 +2205,7 @@ export default function PresensiGuruPage() {
 
             <div
               className={`
-                flex flex-col gap-3
+                flex shrink-0 flex-col-reverse gap-3
                 border-t ${themeDivider}
                 ${themeNeutralSurface}
                 p-5
@@ -2223,11 +2225,11 @@ export default function PresensiGuruPage() {
                     className={`
                       theme-card
                       theme-text-secondary
-                      rounded-xl
+                      w-full rounded-xl
                       border ${themeNeutralBorder}
                       px-5 py-3
                       text-sm font-semibold
-                      transition
+                      transition sm:w-auto
                       ${themeNeutralHover}
                       disabled:opacity-50
                     `}
@@ -2246,12 +2248,12 @@ export default function PresensiGuruPage() {
                     }
                     className={`
                       ${themePrimaryGradient}
-                      rounded-xl
+                      w-full rounded-xl
                       px-6 py-3
                       text-sm font-bold
                       text-[var(--color-card)]
                       ${themePrimaryShadow}
-                      transition
+                      transition sm:w-auto
                       hover:brightness-95
                       disabled:cursor-not-allowed
                       disabled:opacity-60
@@ -2273,11 +2275,11 @@ export default function PresensiGuruPage() {
                     className={`
                       theme-card
                       theme-text-secondary
-                      rounded-xl
+                      w-full rounded-xl
                       border ${themeNeutralBorder}
                       px-5 py-3
                       text-sm font-semibold
-                      transition
+                      transition sm:w-auto
                       ${themeNeutralHover}
                       disabled:opacity-50
                     `}
@@ -2295,7 +2297,7 @@ export default function PresensiGuruPage() {
                       !location
                     }
                     className={`
-                      inline-flex
+                      inline-flex w-full
                       items-center
                       justify-center
                       gap-2
@@ -2305,7 +2307,7 @@ export default function PresensiGuruPage() {
                       text-sm font-bold
                       text-[var(--color-card)]
                       ${themePrimaryShadow}
-                      transition
+                      transition sm:w-auto
                       hover:brightness-95
                       disabled:cursor-not-allowed
                       disabled:opacity-60

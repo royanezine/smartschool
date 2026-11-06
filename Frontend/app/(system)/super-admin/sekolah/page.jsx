@@ -884,9 +884,10 @@ export default function DataSekolahPage() {
 
 
   return (
-    <div className="theme-page theme-text min-h-full">
+    <div className="theme-page theme-text min-h-full w-full">
       <main className="w-full p-3 sm:p-5 lg:p-7 xl:p-8">
-        <div className="mx-auto w-full max-w-[1600px] space-y-5 sm:space-y-6">
+        {/* Tanpa max-w & mx-auto agar konten selalu menempel ke sidebar saat zoom out */}
+        <div className="w-full space-y-5 sm:space-y-6">
 
 
           <section
@@ -976,7 +977,7 @@ export default function DataSekolahPage() {
           </section>
 
 
-          <section className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+          <section className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
             <StatCard
               label="Total Sekolah"
               value={stats.total}
@@ -1316,7 +1317,8 @@ export default function DataSekolahPage() {
                 <table className="w-full min-w-[1080px] border-collapse">
                   <colgroup>
                     <col className="w-[60px]" />
-                    <col className="w-[280px]" />
+                    {/* Kolom nama dibuat fleksibel agar tabel mengisi penuh lebar layar */}
+                    <col />
                     <col className="w-[120px]" />
                     <col className="w-[100px]" />
                     <col className="w-[180px]" />

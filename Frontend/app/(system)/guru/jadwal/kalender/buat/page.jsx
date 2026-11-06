@@ -26,6 +26,8 @@ import {
 
 import { getKelasMapel } from "@/services/kelasMapel.service";
 import { createJadwalMengajar } from "@/services/jadwalMengajar.service";
+import { getRuangan } from "@/services/sarpras.service";
+import { X } from "lucide-react";
 
 
 const themePrimaryGradient =
@@ -116,36 +118,22 @@ function getErrorMessage(error) {
 }
 
 
-const HEADER_HEIGHT = 88;
-const SIDEBAR_WIDTH = 280;
-
 function AppShell({ children }) {
   return (
-    <div className="min-h-screen theme-page">
-      <aside
-        className="fixed inset-y-0 left-0 z-50 hidden lg:block"
-        style={{ width: SIDEBAR_WIDTH }}
-      >
-        <Sidebar role="guru" />
-      </aside>
+    <div className="theme-page flex h-screen w-full overflow-hidden">
+      <Sidebar role="guru" />
 
-      <div className="lg:hidden">
-        <Sidebar role="guru" />
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+        <header
+          className={`shrink-0 border-b ${themeDivider} theme-header`}
+        >
+          <Header />
+        </header>
+
+        <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
+          {children}
+        </main>
       </div>
-
-      <header
-        className={`fixed left-0 right-0 top-0 z-40 border-b ${themeDivider} theme-header lg:left-[280px]`}
-        style={{ height: HEADER_HEIGHT }}
-      >
-        <Header />
-      </header>
-
-      <main
-        className="lg:ml-[280px] theme-page"
-        style={{ paddingTop: HEADER_HEIGHT }}
-      >
-        {children}
-      </main>
     </div>
   );
 }
@@ -405,10 +393,238 @@ function SearchableKelasMapelSelect({
 }
 
 
+function SearchableRuanganSelect({
+  value,
+  onChange,
+  options,
+  loading,
+  disabled,
+}) {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const wrapperRef = useRef(null);
+
+  const selected = useMemo(
+    () =>
+      options.find(
+        (item) => String(item.id) === String(value)
+      ),
+    [options, value]
+  );
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+
+    if (!q) return options;
+
+    return options.filter((item) => {
+      const nama = String(item?.nama || "").toLowerCase();
+      const lokasi = String(item?.lokasi || "").toLowerCase();
+      const keterangan = String(item?.keterangan || "").toLowerCase();
+
+      return (
+        nama.includes(q) ||
+        lokasi.includes(q) ||
+        keterangan.includes(q)
+      );
+    });
+  }, [options, query]);
+
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (
+        wrapperRef.current &&
+        !wrapperRef.current.contains(e.target)
+      ) {
+        setOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () =>
+      document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  function handleSelect(itemId) {
+    onChange(itemId);
+    setOpen(false);
+    setQuery("");
+  }
+
+  const placeholder = loading
+    ? "Memuat daftar ruangan..."
+    : options.length === 0
+    ? "Belum ada data ruangan"
+    : "Pilih ruangan (opsional)";
+
+  return (
+    <div className="relative" ref={wrapperRef}>
+      <button
+        type="button"
+        disabled={disabled || loading}
+        onClick={() => setOpen((prev) => !prev)}
+        className={`flex w-full items-center justify-between gap-3 rounded-xl border ${themeNeutralBorder} theme-input px-4 py-3 text-left text-sm outline-none transition ${themeFocus} disabled:cursor-not-allowed`}
+      >
+        <span className="flex min-w-0 items-center gap-3">
+          <span
+            className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${themePrimarySoft} ${themePrimaryText}`}
+          >
+            <MapPin size={16} />
+          </span>
+
+          <span className="min-w-0">
+            {selected ? (
+              <>
+                <span className="block truncate font-semibold theme-text">
+                  {selected.nama || "Ruangan"}
+                </span>
+
+                {(selected.lokasi || selected.kapasitas != null) && (
+                  <span className="block truncate text-xs theme-text-secondary">
+                    {[
+                      selected.lokasi,
+                      selected.kapasitas != null
+                        ? `Kapasitas: ${selected.kapasitas}`
+                        : null,
+                    ]
+                      .filter(Boolean)
+                      .join(" • ")}
+                  </span>
+                )}
+              </>
+            ) : (
+              <span className="theme-text-placeholder">
+                {placeholder}
+              </span>
+            )}
+          </span>
+        </span>
+
+        <ChevronDown
+          size={18}
+          className={`shrink-0 theme-text-muted transition ${
+            open ? "rotate-180" : ""
+          }`}
+        />
+      </button>
+
+      {open && !loading && (
+        <div
+          className={`absolute left-0 right-0 z-30 mt-2 overflow-hidden rounded-xl border ${themeNeutralBorder} theme-card ${themeCardShadow}`}
+        >
+          <div className={`border-b ${themeDivider} p-3`}>
+            <div className="relative">
+              <Search
+                size={16}
+                className="absolute left-3 top-1/2 -translate-y-1/2 theme-text-muted"
+              />
+
+              <input
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Cari ruangan atau lokasi..."
+                autoFocus
+                className={`h-11 w-full rounded-lg border ${themeNeutralBorder} theme-input pl-9 pr-3 text-sm outline-none transition ${themeFocus} placeholder:text-[var(--color-text-placeholder)]`}
+              />
+            </div>
+          </div>
+
+          <div className="max-h-72 overflow-y-auto p-2">
+            {value && (
+              <button
+                type="button"
+                onClick={() => handleSelect("")}
+                className={`mb-1 flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-xs font-medium theme-text-secondary transition ${themeNeutralHover}`}
+              >
+                <X size={14} />
+                <span>Kosongkan pilihan ruangan</span>
+              </button>
+            )}
+
+            {filtered.length === 0 ? (
+              <div
+                className={`px-4 py-8 text-center ${themeNeutralSurface} rounded-lg`}
+              >
+                <MapPin className="mx-auto mb-2 h-7 w-7 theme-text-muted" />
+
+                <p className="text-sm font-medium theme-text-secondary">
+                  Data ruangan tidak ditemukan
+                </p>
+              </div>
+            ) : (
+              filtered.map((item) => {
+                const isSelected =
+                  String(item.id) === String(value);
+
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => handleSelect(item.id)}
+                    className={`flex w-full items-start gap-3 rounded-lg px-3 py-3 text-left transition ${
+                      isSelected
+                        ? `${themePrimarySoft} ${themePrimaryText}`
+                        : `${themeNeutralHover}`
+                    }`}
+                  >
+                    <span
+                      className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
+                        isSelected
+                          ? themePrimarySoft
+                          : themeNeutralSurface
+                      } ${
+                        isSelected
+                          ? themePrimaryText
+                          : "theme-text-secondary"
+                      }`}
+                    >
+                      <MapPin size={15} />
+                    </span>
+
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate text-sm font-semibold theme-text">
+                        {item.nama || "Ruangan"}
+                      </span>
+
+                      {(item.lokasi || item.kapasitas != null) && (
+                        <span className="block truncate text-xs theme-text-secondary">
+                          {[
+                            item.lokasi,
+                            item.kapasitas != null
+                              ? `Kapasitas: ${item.kapasitas}`
+                              : null,
+                          ]
+                            .filter(Boolean)
+                            .join(" • ")}
+                        </span>
+                      )}
+                    </span>
+
+                    {isSelected && (
+                      <CheckCircle2
+                        size={18}
+                        className={`mt-1 shrink-0 ${themePrimaryText}`}
+                      />
+                    )}
+                  </button>
+                );
+              })
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
 export default function BuatJadwalGuruPage() {
   const router = useRouter();
 
   const [kelasMapel, setKelasMapel] =
+    useState([]);
+  const [ruanganList, setRuanganList] =
     useState([]);
 
   const [loadingData, setLoadingData] =
@@ -428,6 +644,7 @@ export default function BuatJadwalGuruPage() {
     hari: "senin",
     jamMulai: "07:00",
     jamSelesai: "08:30",
+    ruanganId: "",
     ruangan: "",
   });
 
@@ -436,7 +653,16 @@ export default function BuatJadwalGuruPage() {
       setLoadingData(true);
       setError("");
 
-      const data = await getKelasMapel();
+      const [kmResult, ruanganResult] = await Promise.allSettled([
+        getKelasMapel(),
+        getRuangan(),
+      ]);
+
+      if (kmResult.status === "rejected") {
+        throw kmResult.reason;
+      }
+
+      const data = kmResult.value;
 
       if (!Array.isArray(data)) {
         throw new Error(
@@ -445,6 +671,18 @@ export default function BuatJadwalGuruPage() {
       }
 
       setKelasMapel(data);
+
+      if (ruanganResult.status === "fulfilled") {
+        const rawRuangan = ruanganResult.value;
+        const rList = Array.isArray(rawRuangan)
+          ? rawRuangan
+          : Array.isArray(rawRuangan?.data)
+          ? rawRuangan.data
+          : Array.isArray(rawRuangan?.data?.data)
+          ? rawRuangan.data.data
+          : [];
+        setRuanganList(rList);
+      }
 
       if (data.length === 0) {
         setError(
@@ -484,6 +722,16 @@ export default function BuatJadwalGuruPage() {
       ) || null
     );
   }, [kelasMapel, form.kelasMapelId]);
+
+  const selectedRuangan = useMemo(() => {
+    if (!form.ruanganId) return null;
+
+    return (
+      ruanganList.find(
+        (item) => String(item.id) === String(form.ruanganId)
+      ) || null
+    );
+  }, [ruanganList, form.ruanganId]);
 
   function handleChange(event) {
     const { name, value } = event.target;
@@ -540,8 +788,11 @@ export default function BuatJadwalGuruPage() {
         hari: form.hari,
         jamMulai: form.jamMulai,
         jamSelesai: form.jamSelesai,
+        ruanganId: form.ruanganId || null,
         ruangan:
-          form.ruangan.trim() || null,
+          selectedRuangan?.nama ||
+          form.ruangan.trim() ||
+          null,
       };
 
       await createJadwalMengajar(
@@ -577,7 +828,7 @@ export default function BuatJadwalGuruPage() {
   return (
     <AppShell>
       <div className="w-full px-4 py-6 sm:px-6 lg:px-8 lg:py-8 theme-page">
-        <div className="mx-auto w-full max-w-6xl">
+        <div className="w-full">
 
 
           <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -942,23 +1193,24 @@ export default function BuatJadwalGuruPage() {
                       </span>
                     </label>
 
-                    <div className="relative">
-                      <MapPin
-                        size={18}
-                        className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 theme-text-muted"
-                      />
-
-                      <input
-                        id="ruangan"
-                        name="ruangan"
-                        type="text"
-                        value={form.ruangan}
-                        onChange={handleChange}
-                        disabled={saving}
-                        placeholder="Contoh: Ruang 12, Lab Fisika"
-                        className={`w-full rounded-xl border ${themeNeutralBorder} theme-input py-3 pl-11 pr-4 text-sm outline-none transition ${themeFocus} placeholder:text-[var(--color-text-placeholder)] disabled:cursor-not-allowed`}
-                      />
-                    </div>
+                    <SearchableRuanganSelect
+                      value={form.ruanganId}
+                      onChange={(val) => {
+                        const found = ruanganList.find(
+                          (r) => String(r.id) === String(val)
+                        );
+                        setForm((prev) => ({
+                          ...prev,
+                          ruanganId: val,
+                          ruangan: found ? found.nama : "",
+                        }));
+                        setError("");
+                        setSuccess("");
+                      }}
+                      options={ruanganList}
+                      loading={loadingData}
+                      disabled={saving}
+                    />
                   </div>
                 </div>
 
@@ -968,7 +1220,7 @@ export default function BuatJadwalGuruPage() {
                 >
                   <Link
                     href="/guru/jadwal/kalender"
-                    className={`inline-flex items-center justify-center gap-2 rounded-xl border ${themeNeutralBorder} theme-card px-5 py-3 text-sm font-semibold theme-text-secondary ${themeNeutralHover} transition-colors`}
+                    className={`inline-flex w-full items-center justify-center gap-2 rounded-xl border ${themeNeutralBorder} theme-card px-5 py-3 text-sm font-semibold theme-text-secondary ${themeNeutralHover} transition-colors sm:w-auto`}
                   >
                     Batal
                   </Link>
@@ -980,7 +1232,7 @@ export default function BuatJadwalGuruPage() {
                       loadingData ||
                       kelasMapel.length === 0
                     }
-                    className={`inline-flex items-center justify-center gap-2 rounded-xl ${themePrimaryGradient} px-5 py-3 text-sm font-semibold text-[var(--color-card)] ${themePrimaryShadow} transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60`}
+                    className={`inline-flex w-full items-center justify-center gap-2 rounded-xl ${themePrimaryGradient} px-5 py-3 text-sm font-semibold text-[var(--color-card)] ${themePrimaryShadow} transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto`}
                   >
                     {saving ? (
                       <>
@@ -1167,7 +1419,8 @@ export default function BuatJadwalGuruPage() {
                           </p>
 
                           <p className="mt-0.5 font-semibold theme-text">
-                            {form.ruangan ||
+                            {selectedRuangan?.nama ||
+                              form.ruangan ||
                               "Belum ditentukan"}
                           </p>
                         </div>

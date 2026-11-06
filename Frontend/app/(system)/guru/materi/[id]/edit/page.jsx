@@ -188,6 +188,7 @@ export default function EditMateriPage() {
 
   useEffect(() => {
     if (!id) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLoading(false);
       setError("ID materi tidak ditemukan.");
       return;
@@ -476,9 +477,9 @@ export default function EditMateriPage() {
           }}
         />
 
-        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto">
+        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
           <div className="w-full p-4 sm:p-6 lg:p-8">
-            <div className="mx-auto max-w-7xl space-y-6">
+            <div className="w-full space-y-6">
               {/* PAGE HEADER */}
 
               <section
@@ -616,7 +617,7 @@ export default function EditMateriPage() {
 
               <form onSubmit={handleSubmit}>
                 <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
-                  <div className="space-y-6">
+                  <div className="min-w-0 space-y-6">
                     {/* INFORMASI MATERI */}
 
                     <section
@@ -912,7 +913,7 @@ export default function EditMateriPage() {
 
                   {/* SIDEBAR RINGKASAN */}
 
-                  <div className="space-y-6">
+                  <div className="min-w-0 space-y-6">
                     <section
                       className={`theme-card rounded-2xl border ${themeNeutralBorder} p-5 ${themeCardShadow}`}
                     >
@@ -1017,13 +1018,13 @@ export default function EditMateriPage() {
                 {/* ACTION BUTTONS */}
 
                 <div
-                  className={`theme-card mt-6 flex flex-col gap-3 rounded-2xl border ${themeNeutralBorder} p-5 sm:flex-row sm:items-center sm:justify-between ${themeCardShadow}`}
+                  className={`theme-card mt-6 flex flex-col-reverse gap-3 rounded-2xl border ${themeNeutralBorder} p-5 sm:flex-row sm:items-center sm:justify-between ${themeCardShadow}`}
                 >
                   <button
                     type="button"
                     onClick={() => router.push(`/guru/materi/${id}`)}
                     disabled={saving}
-                    className={`theme-card theme-text-secondary inline-flex items-center justify-center gap-2 rounded-xl border ${themeNeutralBorder} px-5 py-2.5 text-sm font-medium transition-all ${themeNeutralHover} hover:text-[var(--color-primary)] disabled:cursor-not-allowed disabled:opacity-60`}
+                    className={`theme-card theme-text-secondary inline-flex w-full items-center justify-center gap-2 rounded-xl border ${themeNeutralBorder} px-5 py-2.5 text-sm font-medium transition-all sm:w-auto ${themeNeutralHover} hover:text-[var(--color-primary)] disabled:cursor-not-allowed disabled:opacity-60`}
                   >
                     <X size={16} />
                     Batal
@@ -1032,7 +1033,7 @@ export default function EditMateriPage() {
                   <button
                     type="submit"
                     disabled={saving || loading}
-                    className={`inline-flex items-center justify-center gap-2 rounded-xl ${themePrimaryGradient} px-8 py-2.5 text-sm font-semibold text-[var(--color-card)] ${themePrimaryShadow} transition-all hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-60`}
+                    className={`inline-flex w-full items-center justify-center gap-2 rounded-xl ${themePrimaryGradient} px-8 py-2.5 text-sm font-semibold text-[var(--color-card)] ${themePrimaryShadow} transition-all hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto`}
                   >
                     {saving ? (
                       <>

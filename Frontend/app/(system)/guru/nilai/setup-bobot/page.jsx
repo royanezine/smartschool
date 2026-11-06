@@ -153,14 +153,14 @@ export default function SetupBobotPage() {
   const showLoading = loadingClasses || loadingKomponen;
 
   return (
-    <div className="flex min-h-screen w-full theme-page">
+    <div className="theme-page flex h-screen w-full overflow-hidden">
       <Sidebar role="guru" />
 
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
         <Header user={{ name: "Guru" }} />
 
-        <main className="theme-page flex-1">
-          <div className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 lg:px-9 lg:py-8">
+        <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
+          <div className="w-full px-4 py-6 sm:px-6 lg:px-9 lg:py-8">
             <div className="mb-8 flex flex-col gap-5 border-b border-[color-mix(in_srgb,var(--color-text)_10%,transparent)] pb-6 lg:flex-row lg:items-end lg:justify-between">
               <div>
                 <button
@@ -610,7 +610,7 @@ export default function SetupBobotPage() {
                 </div>
               </section>
 
-              <aside className="space-y-5">
+              <aside className="min-w-0 space-y-5">
                 <section className="theme-card rounded-xl border border-[color-mix(in_srgb,var(--color-text)_10%,transparent)] p-5">
                   <div className="flex items-center gap-2">
                     <Calculator

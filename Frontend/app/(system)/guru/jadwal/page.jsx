@@ -722,7 +722,7 @@ export default function PresensiGuruPage() {
           user={user}
         />
 
-        <main className="flex-1 overflow-y-auto">
+        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
           <div className="space-y-5 p-4 sm:space-y-6 sm:p-6 lg:p-8">
 
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -1241,11 +1241,11 @@ export default function PresensiGuruPage() {
       {cameraOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[color-mix(in_srgb,var(--color-background)_78%,transparent)] p-4 backdrop-blur-sm">
           <div
-            className={`theme-card w-full max-w-2xl overflow-hidden rounded-2xl ${themeCardShadow}`}
+            className={`theme-card flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl ${themeCardShadow}`}
           >
 
             <div
-              className={`flex items-center justify-between border-b ${themeDivider} px-5 py-4`}
+              className={`flex shrink-0 items-center justify-between border-b ${themeDivider} px-5 py-4`}
             >
               <div className="flex items-center gap-3">
                 <div
@@ -1275,7 +1275,7 @@ export default function PresensiGuruPage() {
             </div>
 
 
-            <div className="theme-card-soft p-4 sm:p-6">
+            <div className="theme-card-soft flex-1 overflow-y-auto p-4 sm:p-6">
               <div className="relative mx-auto w-full max-w-[620px] overflow-hidden rounded-2xl bg-[var(--color-card)]">
                 {!capturedPhoto ? (
                   <>
@@ -1339,7 +1339,7 @@ export default function PresensiGuruPage() {
 
 
             <div
-              className={`flex flex-col gap-3 border-t ${themeDivider} theme-card p-5 sm:flex-row sm:justify-end`}
+              className={`flex shrink-0 flex-col-reverse gap-3 border-t ${themeDivider} theme-card p-5 sm:flex-row sm:justify-end`}
             >
               {!capturedPhoto ? (
                 <>
@@ -1347,7 +1347,7 @@ export default function PresensiGuruPage() {
                     type="button"
                     onClick={stopCamera}
                     disabled={submitting}
-                    className={`theme-card theme-text-secondary rounded-xl border ${themeNeutralBorder} px-5 py-3 text-sm font-semibold transition ${themeNeutralHover} disabled:opacity-50`}
+                    className={`theme-card theme-text-secondary w-full rounded-xl border ${themeNeutralBorder} px-5 py-3 text-sm font-semibold transition sm:w-auto ${themeNeutralHover} disabled:opacity-50`}
                   >
                     Batal
                   </button>
@@ -1355,7 +1355,7 @@ export default function PresensiGuruPage() {
                     type="button"
                     onClick={capturePhoto}
                     disabled={submitting || cameraLoading}
-                    className={`rounded-xl ${themePrimaryGradient} px-6 py-3 text-sm font-bold text-[var(--color-card)] ${themePrimaryShadow} transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-60`}
+                    className={`w-full rounded-xl ${themePrimaryGradient} px-6 py-3 text-sm font-bold text-[var(--color-card)] ${themePrimaryShadow} transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto`}
                   >
                     Ambil Foto
                   </button>
@@ -1366,7 +1366,7 @@ export default function PresensiGuruPage() {
                     type="button"
                     onClick={retakePhoto}
                     disabled={submitting}
-                    className={`theme-card theme-text-secondary rounded-xl border ${themeNeutralBorder} px-5 py-3 text-sm font-semibold transition ${themeNeutralHover} disabled:opacity-50`}
+                    className={`theme-card theme-text-secondary w-full rounded-xl border ${themeNeutralBorder} px-5 py-3 text-sm font-semibold transition sm:w-auto ${themeNeutralHover} disabled:opacity-50`}
                   >
                     Ambil Ulang
                   </button>
@@ -1374,7 +1374,7 @@ export default function PresensiGuruPage() {
                     type="button"
                     onClick={handleCheckin}
                     disabled={submitting || !location}
-                    className={`inline-flex items-center justify-center gap-2 rounded-xl ${themePrimaryGradient} px-6 py-3 text-sm font-bold text-[var(--color-card)] ${themePrimaryShadow} transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-60`}
+                    className={`inline-flex w-full items-center justify-center gap-2 rounded-xl ${themePrimaryGradient} px-6 py-3 text-sm font-bold text-[var(--color-card)] ${themePrimaryShadow} transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto`}
                   >
                     {submitting ? (
                       <>

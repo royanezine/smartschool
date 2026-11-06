@@ -146,7 +146,7 @@ export default function DetailLanggananPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-[60vh] items-center justify-center">
+      <div className="flex min-h-[60vh] w-full items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-[var(--color-primary)]" />
       </div>
     );
@@ -155,8 +155,8 @@ export default function DetailLanggananPage() {
 
   if (!langganan) {
     return (
-      <div className="theme-page theme-text min-h-full">
-        <div className="flex min-h-[70vh] items-center justify-center px-4 py-8">
+      <div className="theme-page theme-text min-h-full w-full min-w-0">
+        <div className="flex min-h-[70vh] w-full items-center justify-center px-4 py-8">
           <div className="w-full max-w-md text-center">
             <div
               className={`mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full ${themeNeutralSurface} ${themeTextMuted}`}
@@ -302,8 +302,14 @@ export default function DetailLanggananPage() {
 
 
   return (
-    <div className="theme-page theme-text min-h-full">
-      <div className="mx-auto w-full max-w-[1400px] space-y-5 px-4 py-5 sm:space-y-6 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
+    // FIX: w-full + min-w-0 agar halaman selalu mengisi ruang di sebelah sidebar
+    <div className="theme-page theme-text min-h-full w-full min-w-0">
+      {/*
+        FIX: sebelumnya `mx-auto max-w-[1400px]` -> saat zoom out, viewport melebar melewati 1400px
+        lalu konten di-center sehingga muncul celah kosong antara sidebar dan konten.
+        Sekarang tanpa max-width & mx-auto, konten tetap menempel ke sidebar dan ikut melebar.
+      */}
+      <div className="w-full min-w-0 space-y-5 px-4 py-5 sm:space-y-6 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
 
         <button
           type="button"
@@ -320,7 +326,7 @@ export default function DetailLanggananPage() {
 
 
         <section
-          className={`overflow-hidden rounded-2xl border ${themeBorder} ${themeCard} ${themeCardShadow}`}
+          className={`w-full overflow-hidden rounded-2xl border ${themeBorder} ${themeCard} ${themeCardShadow}`}
         >
           <div className="p-4 sm:p-6">
             <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
@@ -346,7 +352,7 @@ export default function DetailLanggananPage() {
                 </div>
               </div>
 
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="flex shrink-0 flex-wrap items-center gap-2">
                 <span
                   className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium ${statusStyle.surface} ${statusStyle.text} ${statusStyle.border}`}
                 >
@@ -411,10 +417,10 @@ export default function DetailLanggananPage() {
         </section>
 
 
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
 
           <section
-            className={`rounded-2xl border ${themeBorder} ${themeCard} p-4 ${themeCardShadow}`}
+            className={`min-w-0 rounded-2xl border ${themeBorder} ${themeCard} p-4 ${themeCardShadow}`}
           >
             <SectionTitle
               icon={Building2}
@@ -458,7 +464,7 @@ export default function DetailLanggananPage() {
 
 
           <section
-            className={`rounded-2xl border ${themeBorder} ${themeCard} p-4 ${themeCardShadow}`}
+            className={`min-w-0 rounded-2xl border ${themeBorder} ${themeCard} p-4 ${themeCardShadow}`}
           >
             <SectionTitle
               icon={Package}
@@ -469,7 +475,7 @@ export default function DetailLanggananPage() {
             <div className="mt-4 space-y-4">
               <div className="flex items-center gap-3">
                 <div
-                  className={`flex h-11 w-11 items-center justify-center rounded-xl ${themeInfoSurface} text-[var(--color-info)]`}
+                  className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${themeInfoSurface} text-[var(--color-info)]`}
                 >
                   <PaketIcon size={20} />
                 </div>
@@ -563,7 +569,7 @@ export default function DetailLanggananPage() {
 
 
         <section
-          className={`rounded-2xl border ${themeBorder} ${themeCard} p-4 ${themeCardShadow}`}
+          className={`w-full rounded-2xl border ${themeBorder} ${themeCard} p-4 ${themeCardShadow}`}
         >
           <SectionTitle
             icon={Layers}
@@ -596,7 +602,7 @@ export default function DetailLanggananPage() {
 
 
         <section
-          className={`rounded-2xl border ${themeBorder} ${themeCard} p-4 ${themeCardShadow}`}
+          className={`w-full min-w-0 rounded-2xl border ${themeBorder} ${themeCard} p-4 ${themeCardShadow}`}
         >
           <SectionTitle
             icon={CreditCard}
@@ -606,8 +612,8 @@ export default function DetailLanggananPage() {
 
           {langganan.riwayatPembayaran &&
           langganan.riwayatPembayaran.length > 0 ? (
-            <div className="mt-4 overflow-x-auto">
-              <table className="w-full min-w-[720px] text-xs sm:text-sm">
+            <div className="mt-4 w-full overflow-x-auto">
+              <table className="w-full min-w-[640px] text-xs sm:text-sm">
                 <thead>
                   <tr
                     className={`border-b ${themeDivider}`}
@@ -705,7 +711,7 @@ export default function DetailLanggananPage() {
 
 
         <div
-          className={`flex flex-col items-center justify-end gap-3 border-t ${themeDivider} pt-5 sm:flex-row`}
+          className={`flex w-full flex-col items-center justify-end gap-3 border-t ${themeDivider} pt-5 sm:flex-row`}
         >
           <button
             type="button"
@@ -787,7 +793,7 @@ function SectionTitle({
       className={`flex items-center gap-2.5 text-sm font-semibold ${themeText}`}
     >
       <span
-        className={`flex h-8 w-8 items-center justify-center rounded-lg border ${selected.wrapper}`}
+        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border ${selected.wrapper}`}
       >
         <span
           className={`flex h-6 w-6 items-center justify-center rounded-md ${selected.icon}`}
@@ -813,7 +819,7 @@ function InfoRow({
         className={`mt-0.5 shrink-0 ${themeTextMuted}`}
       />
 
-      <span className={themeTextSecondary}>
+      <span className={`min-w-0 break-words ${themeTextSecondary}`}>
         {value}
       </span>
     </div>

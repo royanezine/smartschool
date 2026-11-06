@@ -1,17 +1,17 @@
-
 "use client";
 
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
+import { Plus_Jakarta_Sans } from "next/font/google";
+import { motion, useReducedMotion } from "framer-motion";
 import {
+  ArrowLeft,
   ArrowRight,
-  Building,
   Building2,
   Check,
   CheckCircle2,
-  ChevronRight,
   CircleHelp,
   Eye,
   EyeOff,
@@ -20,13 +20,11 @@ import {
   LockKeyhole,
   Mail,
   MapPin,
-  MessageCircle,
   Package,
   Phone,
   RefreshCw,
   School,
   ShieldCheck,
-  Sparkles,
   UserRound,
   Users,
   XCircle,
@@ -35,6 +33,12 @@ import {
 import { registerTenant } from "@/services/tenant.service";
 import { getPaket, isPaketYayasan, isPaketSekolah } from "@/services/paket.service";
 import { getProvinsi, getKotaByProvinsi } from "@/services/wilayah.service";
+
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  display: "swap",
+});
 
 const initialForm = {
   // Mode Sekolah
@@ -88,8 +92,54 @@ function formatHarga(value) {
   return `Rp ${number.toLocaleString("id-ID")}`;
 }
 
+const HERO_FADE =
+  "linear-gradient(90deg, rgba(255,255,255,0.97) 0%, rgba(255,255,255,0.93) 32%, rgba(243,247,255,0.78) 50%, rgba(238,244,255,0.35) 70%, rgba(238,244,255,0.1) 100%)";
+
+/* ---------- Komponen presentasi kecil ---------- */
+
+function SectionHeader({ number, title, description }) {
+  return (
+    <div className="mb-6 flex items-start gap-4">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#2F6FFF] to-[#0D47C9] text-sm font-extrabold text-white shadow-md shadow-[#155DFC]/25 ring-4 ring-[#EEF4FF]">
+        {number}
+      </div>
+      <div className="pt-0.5">
+        <h3 className="text-base font-extrabold text-[#0F172A]">{title}</h3>
+        <p className="mt-0.5 text-sm font-medium text-[#475569]/80">{description}</p>
+      </div>
+    </div>
+  );
+}
+
+function Field({ label, required, optional, className = "", children }) {
+  return (
+    <div className={className}>
+      <label className="mb-2 block text-[13px] font-bold text-[#0F172A]">
+        {label}
+        {required && <span className="ml-0.5 text-rose-500">*</span>}
+        {optional && (
+          <span className="ml-1.5 font-medium text-[#94A3B8]">(opsional)</span>
+        )}
+      </label>
+      {children}
+    </div>
+  );
+}
+
+function SummaryRow({ label, value }) {
+  return (
+    <div className="flex items-start justify-between gap-4 py-3 text-sm">
+      <span className="font-medium text-[#475569]/80">{label}</span>
+      <span className="max-w-[58%] break-words text-right font-bold text-[#0F172A]">
+        {value || <span className="font-normal text-[#CBD5E1]">—</span>}
+      </span>
+    </div>
+  );
+}
+
 function DaftarSekolahContent() {
   const router = useRouter();
+  const reduce = useReducedMotion();
   const searchParams = useSearchParams();
   const queryPaketId = searchParams.get("paketId") || searchParams.get("paket") || "";
   const queryJenis = searchParams.get("jenis") || "";
@@ -131,6 +181,11 @@ function DaftarSekolahContent() {
       ? paketList.filter((p) => isPaketYayasan(p))
       : paketList.filter((p) => isPaketSekolah(p));
   }, [paketList, jenisPendaftaran]);
+
+  const selectedPaketInfo = useMemo(
+    () => paketList.find((p) => p.id === formData.paket) || null,
+    [paketList, formData.paket]
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -510,327 +565,303 @@ function DaftarSekolahContent() {
       return;
     }
 
-  try {
-    setLoadingSubmit(true);
+    try {
+      setLoadingSubmit(true);
 
-    const result = await registerTenant(payload);
+      const result = await registerTenant(payload);
 
-    // Service tenant sudah memeriksa HTTP error dan success: false.
-    // Jangan menganggap gagal hanya karena backend tidak mengirim properti success.
-    if (result?.success === false) {
-      throw new Error(
-        result?.message || "Pendaftaran belum berhasil diproses."
+      // Service tenant sudah memeriksa HTTP error dan success: false.
+      // Jangan menganggap gagal hanya karena backend tidak mengirim properti success.
+      if (result?.success === false) {
+        throw new Error(
+          result?.message || "Pendaftaran belum berhasil diproses."
+        );
+      }
+
+      // Email diteruskan ke halaman verifikasi melalui query URL.
+      // Tidak perlu menyimpan data pendaftaran ke localStorage.
+
+      setSuccess(
+        result.message || "Pendaftaran berhasil. Silakan verifikasi email."
       );
+
+      router.push(
+        `/daftar-sekolah/menunggu?email=${encodeURIComponent(email)}`
+      );
+    } catch (err) {
+      // Ambil pesan error dari Error biasa, TenantApiError, atau object respons
+      // yang mungkin dilempar oleh service/backend.
+      const errorObject = err && typeof err === "object" ? err : null;
+
+      const isConflict =
+        errorObject?.status === 409 ||
+        err?.status === 409 ||
+        /409/.test(String(err));
+
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : typeof errorObject?.message === "string"
+            ? errorObject.message
+            : typeof errorObject?.error === "string"
+              ? errorObject.error
+              : typeof errorObject?.payload?.message === "string"
+                ? errorObject.payload.message
+                : "Pendaftaran gagal. Silakan coba kembali.";
+
+      console.error("REGISTER TENANT ERROR:", {
+        message: errorMessage,
+        name: err instanceof Error ? err.name : errorObject?.name,
+        status: errorObject?.status,
+        errorCode: errorObject?.errorCode,
+        payload: errorObject?.payload,
+        isConflict,
+        error: err,
+      });
+
+      // Tangani HTTP 409 secara khusus: tampilkan pesan spesifik dari Backend tanpa masking
+      setError(errorMessage);
+    } finally {
+      setLoadingSubmit(false);
     }
-
-    // Email diteruskan ke halaman verifikasi melalui query URL.
-    // Tidak perlu menyimpan data pendaftaran ke localStorage.
-
-    setSuccess(
-      result.message || "Pendaftaran berhasil. Silakan verifikasi email."
-    );
-
-    router.push(
-      `/daftar-sekolah/menunggu?email=${encodeURIComponent(email)}`
-    );
-  } catch (err) {
-    // Ambil pesan error dari Error biasa, TenantApiError, atau object respons
-    // yang mungkin dilempar oleh service/backend.
-    const errorObject =
-      err && typeof err === "object"
-        ? err
-        : null;
-
-    const isConflict =
-      errorObject?.status === 409 ||
-      err?.status === 409 ||
-      /409/.test(String(err));
-
-    const errorMessage =
-      err instanceof Error
-        ? err.message
-        : typeof errorObject?.message === "string"
-          ? errorObject.message
-          : typeof errorObject?.error === "string"
-            ? errorObject.error
-            : typeof errorObject?.payload?.message === "string"
-              ? errorObject.payload.message
-              : "Pendaftaran gagal. Silakan coba kembali.";
-
-    console.error("REGISTER TENANT ERROR:", {
-      message: errorMessage,
-      name: err instanceof Error ? err.name : errorObject?.name,
-      status: errorObject?.status,
-      errorCode: errorObject?.errorCode,
-      payload: errorObject?.payload,
-      isConflict,
-      error: err,
-    });
-
-    // Tangani HTTP 409 secara khusus: tampilkan pesan spesifik dari Backend tanpa masking
-    setError(errorMessage);
-  } finally {
-    setLoadingSubmit(false);
   }
-}
-
 
   const inputClass =
-    "w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10";
+    "w-full rounded-xl border border-[#DBE5F5] bg-white px-4 py-3 text-sm font-medium text-[#0F172A] outline-none transition placeholder:font-normal placeholder:text-[#94A3B8] hover:border-[#155DFC]/50 focus:border-[#155DFC] focus:ring-4 focus:ring-[#155DFC]/15 disabled:cursor-not-allowed disabled:bg-[#F5F8FE] disabled:text-[#94A3B8]";
 
-  const labelClass = "mb-2 block text-sm font-semibold text-slate-700";
+  const iconClass =
+    "pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[#94A3B8]";
+
+  const isYayasan = jenisPendaftaran === "yayasan";
 
   const fitur = [
     { icon: Building2, text: "Manajemen sekolah terintegrasi" },
-    { icon: Users, text: "Pengelolaan pengguna berbasis role" },
-    { icon: ShieldCheck, text: "Akses data lebih terkontrol" },
+    { icon: Users, text: "Pengelolaan pengguna berbasis peran" },
+    { icon: ShieldCheck, text: "Akses data yang terkontrol" },
     { icon: Globe2, text: "Platform berbasis cloud" },
   ];
 
+  const fadeUp = {
+    hidden: { opacity: 0, y: reduce ? 0 : 16 },
+    show: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: reduce ? 0 : 0.55, ease: "easeOut" },
+    },
+  };
+
   return (
-    <main className="min-h-screen bg-[#f5f8fc] text-slate-900">
-      <nav className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl">
-        <div className="mx-auto flex h-[72px] max-w-7xl items-center justify-between px-5 sm:px-6 lg:px-8">
-          <Link href="/" className="flex items-center gap-3">
-            <div className="relative h-10 w-10">
-              <Image
-                src="/logo/logoSS.png"
-                alt="SmartSchool Logo"
-                fill
-                priority
-                sizes="40px"
-                className="object-contain"
-              />
+    <main className={`${jakarta.className} min-h-screen bg-[#EEF4FF] text-[#0F172A]`}>
+      {/* ===== Hero ===== */}
+      <header className="relative isolate overflow-hidden">
+        <div className="absolute inset-0 -z-30">
+          <Image
+            src="/hero/hero.png"
+            alt="Gedung Smart School"
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover object-center"
+          />
+        </div>
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 -z-20"
+          style={{ background: HERO_FADE }}
+        />
+        <div className="absolute inset-0 -z-20 bg-white/45 lg:hidden" />
+        <div
+          aria-hidden="true"
+          className="absolute inset-x-0 bottom-0 -z-10 h-24 bg-gradient-to-b from-transparent to-[#EEF4FF]"
+        />
+
+        <div className="mx-auto max-w-7xl px-5 pb-28 pt-5 sm:px-6 lg:px-8 lg:pb-32">
+          {/* Bar atas */}
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <button
+                type="button"
+                onClick={() => router.push("/")}
+                aria-label="Kembali"
+                className="flex h-11 w-11 items-center justify-center rounded-full bg-white text-[#0F172A] shadow-sm ring-1 ring-[#0F172A]/10 transition-all hover:bg-[#0F172A] hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#155DFC]"
+              >
+                <ArrowLeft size={20} strokeWidth={2.5} />
+              </button>
+
+              <Link
+                href="/"
+                aria-label="Smart School Beranda"
+                className="flex items-center gap-3 transition-opacity hover:opacity-80"
+              >
+                <Image
+                  src="/logo/logoSS.png"
+                  alt="Logo Smart School"
+                  width={44}
+                  height={44}
+                  priority
+                  className="h-11 w-11 object-contain"
+                />
+                <span className="text-xl font-extrabold leading-none tracking-tight text-[#0F172A]">
+                  SMART <span className="text-[#155DFC]">SCHOOL</span>
+                </span>
+              </Link>
             </div>
 
-            <span className="text-xl font-bold tracking-tight text-blue-600">
-              SmartSchool
-            </span>
-          </Link>
-
-          <div className="hidden items-center gap-8 md:flex">
-            <Link href="/#fitur" className="text-sm text-slate-500 hover:text-blue-600">Fitur</Link>
-            <Link href="/#harga" className="text-sm text-slate-500 hover:text-blue-600">Harga</Link>
-            <Link href="/#cara-kerja" className="text-sm text-slate-500 hover:text-blue-600">Cara Kerja</Link>
-            <Link href="/#kontak" className="text-sm text-slate-500 hover:text-blue-600">Kontak</Link>
-            <Link href="/login" className="rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-semibold hover:border-blue-300 hover:text-blue-600">
+            <Link
+              href="/login"
+              className="rounded-full bg-white px-5 py-2.5 text-sm font-bold text-[#0F172A] shadow-sm ring-1 ring-[#0F172A]/10 transition hover:bg-[#0F172A] hover:text-white"
+            >
               Masuk
             </Link>
           </div>
 
-          <Link href="/login" className="inline-flex items-center gap-1.5 text-sm font-semibold text-blue-600 md:hidden">
-            Masuk <ChevronRight size={16} />
-          </Link>
-        </div>
-      </nav>
-
-      <section className="relative overflow-hidden bg-[#0f172a]">
-        <div className="pointer-events-none absolute inset-0">
-          <div className="absolute -right-32 -top-40 h-[420px] w-[420px] rounded-full bg-blue-600/20 blur-3xl" />
-          <div className="absolute -bottom-48 left-[-100px] h-[420px] w-[420px] rounded-full bg-indigo-600/10 blur-3xl" />
-          <div
-            className="absolute inset-0 opacity-[0.055]"
-            style={{
-              backgroundImage:
-                "linear-gradient(rgba(255,255,255,.8) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.8) 1px, transparent 1px)",
-              backgroundSize: "42px 42px",
-            }}
-          />
-        </div>
-
-        <div className="relative mx-auto max-w-7xl px-5 py-12 sm:px-6 sm:py-14 lg:px-8 lg:py-16">
-          <div className="max-w-3xl">
-            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.07] px-3.5 py-2 text-xs font-semibold text-blue-200">
-              <Sparkles size={14} />
-              {jenisPendaftaran === "yayasan" ? "Pendaftaran Yayasan" : "Pendaftaran Sekolah"}
+          {/* Judul */}
+          <motion.div
+            key={jenisPendaftaran}
+            variants={fadeUp}
+            initial="hidden"
+            animate="show"
+            className="mt-12 max-w-2xl lg:mt-16"
+          >
+            <div className="flex items-center gap-3.5">
+              <span aria-hidden="true" className="block h-[3px] w-11 rounded-full bg-[#155DFC]" />
+              <span className="text-sm font-bold text-[#155DFC] sm:text-base">
+                {isYayasan ? "Pendaftaran Yayasan" : "Pendaftaran Sekolah"}
+              </span>
             </div>
 
-            <h1 className="text-3xl font-bold leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl">
-              {jenisPendaftaran === "yayasan" ? (
-                <>
-                  Kelola multi-unit yayasan
-                  <br />
-                  bersama <span className="text-blue-400">SmartSchool</span>
-                </>
-              ) : (
-                <>
-                  Mulai kelola sekolah
-                  <br />
-                  bersama <span className="text-blue-400">SmartSchool</span>
-                </>
-              )}
+            <h1 className="mt-5 text-4xl font-extrabold leading-[1.15] tracking-tight text-[#0F172A] sm:text-5xl">
+              {isYayasan ? "Kelola Seluruh Unit" : "Mulai Kelola"}
+              <br />
+              <span className="bg-gradient-to-r from-[#155DFC] to-[#0D47C9] bg-clip-text text-transparent">
+                {isYayasan ? "Yayasan Anda" : "Sekolah Anda"}
+              </span>
             </h1>
 
-            <p className="mt-5 max-w-2xl text-sm leading-7 text-slate-300 sm:text-base">
-              {jenisPendaftaran === "yayasan"
+            <p className="mt-5 max-w-xl text-base font-medium leading-7 text-[#475569]">
+              {isYayasan
                 ? "Lengkapi informasi yayasan dan administrator untuk mengelola seluruh unit sekolah binaan dalam satu sistem terpusat."
-                : "Lengkapi informasi sekolah dan administrator untuk memulai penggunaan platform manajemen sekolah terintegrasi SmartSchool."}
+                : "Lengkapi informasi satuan pendidikan dan administrator untuk mulai menggunakan platform manajemen sekolah SmartSchool."}
             </p>
-
-            <div className="mt-7 flex flex-wrap gap-3">
-              {[
-                [ShieldCheck, "Sistem terintegrasi"],
-                [LockKeyhole, "Akses aman"],
-                [Globe2, "Berbasis cloud"],
-              ].map(([Icon, text]) => (
-                <div key={text} className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.06] px-3.5 py-2.5 text-xs font-medium text-slate-300">
-                  <Icon size={15} className="text-blue-400" />
-                  {text}
-                </div>
-              ))}
-            </div>
-          </div>
+          </motion.div>
         </div>
-      </section>
+      </header>
 
-      <section className="pb-16 pt-7 sm:pb-20 sm:pt-9">
-        <div className="mx-auto grid max-w-7xl gap-6 px-5 sm:px-6 lg:grid-cols-[minmax(0,1fr)_350px] lg:gap-7 lg:px-8">
-          <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_12px_40px_rgba(15,23,42,0.06)]">
-            <div className="border-b border-slate-100 px-5 py-5 sm:px-7 sm:py-6">
-              <div className="flex items-start gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-                  {jenisPendaftaran === "yayasan" ? <Landmark size={19} /> : <Building2 size={19} />}
-                </div>
-                <div>
-                  <h2 className="text-base font-bold sm:text-lg">
-                    {jenisPendaftaran === "yayasan" ? "Pendaftaran Akun Yayasan" : "Pendaftaran Akun Sekolah"}
-                  </h2>
-                  <p className="mt-1 text-xs leading-5 text-slate-500 sm:text-sm">
-                    {jenisPendaftaran === "yayasan"
-                      ? "Pilih jenis pendaftaran dan lengkapi data legalitas yayasan pengelola."
-                      : "Pilih jenis pendaftaran dan lengkapi data satuan pendidikan."}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <form onSubmit={handleSubmit} className="p-5 sm:p-7">
+      {/* ===== Konten ===== */}
+      <section className="relative z-10 -mt-16 pb-16 sm:-mt-20 sm:pb-20">
+        <div className="mx-auto grid max-w-7xl gap-8 px-5 sm:px-6 lg:grid-cols-[minmax(0,1fr)_340px] lg:px-8">
+          {/* Form */}
+          <div className="rounded-3xl border border-white bg-white shadow-[0_20px_60px_rgba(15,23,42,0.10)]">
+            <form onSubmit={handleSubmit} className="p-6 sm:p-9">
               {error && (
-                <div className="mb-6 flex items-start gap-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3.5 text-sm text-rose-700">
-                  <XCircle size={18} className="mt-0.5 shrink-0" />
+                <div
+                  role="alert"
+                  className="mb-8 flex items-start gap-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3.5 text-sm text-rose-800"
+                >
+                  <XCircle size={18} className="mt-0.5 shrink-0 text-rose-600" />
                   <div>
-                    <p className="font-semibold">Pendaftaran belum dapat diproses</p>
-                    <p className="mt-0.5 text-xs leading-5">{error}</p>
+                    <p className="font-bold">Pendaftaran belum dapat diproses</p>
+                    <p className="mt-0.5 text-[13px] leading-5">{error}</p>
                   </div>
                 </div>
               )}
 
               {success && (
-                <div className="mb-6 flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3.5 text-sm text-emerald-700">
-                  <CheckCircle2 size={18} className="mt-0.5 shrink-0" />
+                <div
+                  role="status"
+                  className="mb-8 flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3.5 text-sm text-emerald-800"
+                >
+                  <CheckCircle2 size={18} className="mt-0.5 shrink-0 text-emerald-600" />
                   <div>
-                    <p className="font-semibold">Pendaftaran berhasil</p>
-                    <p className="mt-0.5 text-xs leading-5">{success}</p>
+                    <p className="font-bold">Pendaftaran berhasil</p>
+                    <p className="mt-0.5 text-[13px] leading-5">{success}</p>
                   </div>
                 </div>
               )}
 
-              {/* Pilihan Jenis Pendaftaran */}
-              <div className="mb-8">
-                <div className="mb-3 flex items-center justify-between">
-                  <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                    Pilih Jenis Pendaftaran
-                  </span>
-                  <span className="text-[11px] font-medium text-slate-400">
-                    Pilih sesuai entitas yang didaftarkan
-                  </span>
-                </div>
+              {/* 1. Jenis pendaftaran */}
+              <section>
+                <SectionHeader
+                  number="1"
+                  title="Jenis Pendaftaran"
+                  description="Pilih sesuai entitas yang akan didaftarkan."
+                />
 
                 <div className="grid gap-3.5 sm:grid-cols-2">
-                  <button
-                    type="button"
-                    onClick={() => handleSelectJenis("sekolah")}
-                    className={`relative flex items-start gap-3.5 rounded-2xl border p-4 text-left transition ${
-                      jenisPendaftaran === "sekolah"
-                        ? "border-blue-600 bg-blue-50/70 ring-2 ring-blue-600/15 shadow-sm"
-                        : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50"
-                    }`}
-                  >
-                    <div
-                      className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition ${
-                        jenisPendaftaran === "sekolah"
-                          ? "bg-blue-600 text-white shadow-md shadow-blue-500/25"
-                          : "bg-slate-100 text-slate-600"
-                      }`}
-                    >
-                      <School size={20} />
-                    </div>
+                  {[
+                    {
+                      key: "sekolah",
+                      icon: School,
+                      title: "Sekolah",
+                      desc: "Satuan pendidikan mandiri atau cabang (SD, SMP, SMA, SMK, SLB).",
+                    },
+                    {
+                      key: "yayasan",
+                      icon: Landmark,
+                      title: "Yayasan",
+                      desc: "Badan pengelola yang menaungi beberapa unit sekolah binaan.",
+                    },
+                  ].map(({ key, icon: Icon, title, desc }) => {
+                    const active = jenisPendaftaran === key;
 
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
-                        <h4 className="text-sm font-bold text-slate-900">
-                          Daftar sebagai Sekolah
-                        </h4>
-                        {jenisPendaftaran === "sekolah" && (
-                          <div className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-white">
-                            <Check size={12} strokeWidth={3} />
+                    return (
+                      <button
+                        key={key}
+                        type="button"
+                        role="radio"
+                        aria-checked={active}
+                        onClick={() => handleSelectJenis(key)}
+                        className={`flex items-start gap-4 rounded-2xl border p-4 text-left transition ${
+                          active
+                            ? "border-[#155DFC] bg-[#EEF4FF]/70 ring-2 ring-[#155DFC]/20"
+                            : "border-[#DBE5F5] bg-white hover:border-[#155DFC]/50"
+                        }`}
+                      >
+                        <div
+                          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition ${
+                            active
+                              ? "bg-gradient-to-br from-[#2F6FFF] to-[#0D47C9] text-white shadow-md shadow-[#155DFC]/30"
+                              : "bg-[#EEF4FF] text-[#155DFC]"
+                          }`}
+                        >
+                          <Icon size={20} />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center justify-between gap-2">
+                            <h4 className="text-sm font-extrabold text-[#0F172A]">{title}</h4>
+                            <span
+                              className={`flex h-5 w-5 items-center justify-center rounded-full border transition ${
+                                active
+                                  ? "border-[#155DFC] bg-[#155DFC] text-white"
+                                  : "border-[#CBD5E1] text-transparent"
+                              }`}
+                            >
+                              <Check size={12} strokeWidth={3} />
+                            </span>
                           </div>
-                        )}
-                      </div>
-                      <p className="mt-1 text-xs leading-relaxed text-slate-500">
-                        Untuk satuan pendidikan mandiri atau cabang (SD, SMP, SMA, SMK, SLB).
-                      </p>
-                    </div>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleSelectJenis("yayasan")}
-                    className={`relative flex items-start gap-3.5 rounded-2xl border p-4 text-left transition ${
-                      jenisPendaftaran === "yayasan"
-                        ? "border-blue-600 bg-blue-50/70 ring-2 ring-blue-600/15 shadow-sm"
-                        : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/50"
-                    }`}
-                  >
-                    <div
-                      className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition ${
-                        jenisPendaftaran === "yayasan"
-                          ? "bg-blue-600 text-white shadow-md shadow-blue-500/25"
-                          : "bg-slate-100 text-slate-600"
-                      }`}
-                    >
-                      <Landmark size={20} />
-                    </div>
-
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
-                        <h4 className="text-sm font-bold text-slate-900">
-                          Daftar sebagai Yayasan
-                        </h4>
-                        {jenisPendaftaran === "yayasan" && (
-                          <div className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-white">
-                            <Check size={12} strokeWidth={3} />
-                          </div>
-                        )}
-                      </div>
-                      <p className="mt-1 text-xs leading-relaxed text-slate-500">
-                        Untuk badan pengelola yayasan yang menaungi banyak unit sekolah binaan.
-                      </p>
-                    </div>
-                  </button>
+                          <p className="mt-1 text-[13px] font-medium leading-5 text-[#475569]/80">
+                            {desc}
+                          </p>
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
-              </div>
+              </section>
 
-              <div className="my-6 h-px bg-slate-100" />
+              <div className="my-9 h-px bg-[#E5ECF8]" />
 
-              {/* Data Instansi (Berdasarkan Mode) */}
-              {jenisPendaftaran === "sekolah" ? (
+              {/* 2. Data instansi */}
+              {!isYayasan ? (
                 <section>
-                  <div className="mb-5 flex items-center gap-3">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
-                      <Building2 size={16} />
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-bold">Data Sekolah</h3>
-                      <p className="text-xs text-slate-400">Informasi dasar satuan pendidikan</p>
-                    </div>
-                  </div>
+                  <SectionHeader
+                    number="2"
+                    title="Data Sekolah"
+                    description="Informasi dasar satuan pendidikan."
+                  />
 
                   <div className="grid gap-5 md:grid-cols-2">
-                    <div className="md:col-span-2">
-                      <label className={labelClass}>
-                        Nama Sekolah <span className="text-rose-500">*</span>
-                      </label>
+                    <Field label="Nama Sekolah" required className="md:col-span-2">
                       <input
                         required
                         minLength={3}
@@ -841,22 +872,19 @@ function DaftarSekolahContent() {
                         className={inputClass}
                       />
                       {subdomain && (
-                        <div className="mt-2.5 flex items-center gap-2 rounded-lg bg-blue-50 px-3 py-2">
-                          <Globe2 size={14} className="shrink-0 text-blue-600" />
-                          <p className="text-xs text-slate-500">
-                            Subdomain:
-                            <span className="ml-1 font-semibold text-blue-600">
+                        <div className="mt-2.5 inline-flex items-center gap-2 rounded-full bg-[#EEF4FF] px-3.5 py-1.5">
+                          <Globe2 size={14} className="shrink-0 text-[#155DFC]" />
+                          <p className="text-xs font-medium text-[#475569]">
+                            Alamat akses:
+                            <span className="ml-1 font-bold text-[#155DFC]">
                               {subdomain}.smartschool.id
                             </span>
                           </p>
                         </div>
                       )}
-                    </div>
+                    </Field>
 
-                    <div>
-                      <label className={labelClass}>
-                        Jenjang <span className="text-rose-500">*</span>
-                      </label>
+                    <Field label="Jenjang" required>
                       <select
                         required
                         name="jenjang"
@@ -872,12 +900,11 @@ function DaftarSekolahContent() {
                         <option value="SLB">SLB</option>
                         <option value="Lainnya">Lainnya</option>
                       </select>
-                    </div>
+                    </Field>
 
-                    <div>
-                      <label className={labelClass}>Jumlah Siswa (opsional)</label>
+                    <Field label="Jumlah Siswa" optional>
                       <div className="relative">
-                        <Users size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                        <Users size={16} className={iconClass} />
                         <input
                           type="number"
                           min="1"
@@ -888,21 +915,18 @@ function DaftarSekolahContent() {
                           className={`${inputClass} pl-10`}
                         />
                       </div>
-                    </div>
+                    </Field>
 
-                    <div>
-                      <label className={labelClass}>
-                        Provinsi <span className="text-rose-500">*</span>
-                      </label>
+                    <Field label="Provinsi" required>
                       <div className="relative">
-                        <MapPin size={16} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                        <MapPin size={16} className={iconClass} />
                         <select
                           required
                           name="provinsi"
                           value={provinsiId}
                           onChange={handleProvinsiChange}
                           disabled={loadingProvinsi || provinsiList.length === 0}
-                          className={`${inputClass} pl-10 disabled:cursor-not-allowed disabled:opacity-60`}
+                          className={`${inputClass} pl-10`}
                         >
                           <option value="">
                             {loadingProvinsi ? "Memuat provinsi..." : "Pilih provinsi"}
@@ -920,27 +944,24 @@ function DaftarSekolahContent() {
                           <button
                             type="button"
                             onClick={retryProvinsi}
-                            className="font-semibold underline underline-offset-2"
+                            className="font-bold underline underline-offset-2"
                           >
                             Coba lagi
                           </button>
                         </p>
                       )}
-                    </div>
+                    </Field>
 
-                    <div>
-                      <label className={labelClass}>
-                        Kota/Kabupaten <span className="text-rose-500">*</span>
-                      </label>
+                    <Field label="Kota/Kabupaten" required>
                       <div className="relative">
-                        <MapPin size={16} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                        <MapPin size={16} className={iconClass} />
                         <select
                           required
                           name="kota"
                           value={kotaId}
                           onChange={handleKotaChange}
                           disabled={!provinsiId || loadingKota || kotaList.length === 0}
-                          className={`${inputClass} pl-10 disabled:cursor-not-allowed disabled:opacity-60`}
+                          className={`${inputClass} pl-10`}
                         >
                           <option value="">
                             {!provinsiId
@@ -963,21 +984,18 @@ function DaftarSekolahContent() {
                             <button
                               type="button"
                               onClick={() => loadKota(provinsiId)}
-                              className="font-semibold underline underline-offset-2"
+                              className="font-bold underline underline-offset-2"
                             >
                               Coba lagi
                             </button>
                           )}
                         </p>
                       )}
-                    </div>
+                    </Field>
 
-                    <div className="md:col-span-2">
-                      <label className={labelClass}>
-                        Telepon / WhatsApp Sekolah <span className="text-rose-500">*</span>
-                      </label>
+                    <Field label="Telepon / WhatsApp Sekolah" required>
                       <div className="relative">
-                        <Phone size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                        <Phone size={16} className={iconClass} />
                         <input
                           required
                           type="tel"
@@ -988,52 +1006,53 @@ function DaftarSekolahContent() {
                           className={`${inputClass} pl-10`}
                         />
                       </div>
-                    </div>
+                    </Field>
 
-                    <div>
-                      <label className={labelClass}>
-                        Nama Yayasan Naungan <span className="font-normal text-slate-400">(opsional)</span>
-                      </label>
-                      <input
-                        name="namaYayasanNaungan"
-                        value={formData.namaYayasanNaungan}
-                        onChange={handleChange}
-                        placeholder="Contoh: Yayasan Pendidikan Al-Hikmah"
-                        className={inputClass}
-                      />
-                    </div>
+                    <div className="md:col-span-2">
+                      <div className="rounded-2xl border border-[#DBE5F5] bg-[#F5F8FE] p-5">
+                        <p className="text-[13px] font-bold text-[#0F172A]">
+                          Yayasan Naungan
+                          <span className="ml-1.5 font-medium text-[#94A3B8]">(opsional)</span>
+                        </p>
+                        <p className="mt-0.5 text-xs font-medium text-[#475569]/80">
+                          Isi jika sekolah berada di bawah naungan sebuah yayasan.
+                        </p>
 
-                    <div>
-                      <label className={labelClass}>
-                        NPYP Yayasan Naungan <span className="font-normal text-slate-400">(opsional)</span>
-                      </label>
-                      <input
-                        name="npypYayasanNaungan"
-                        value={formData.npypYayasanNaungan}
-                        onChange={handleChange}
-                        placeholder="Contoh: P-12345678"
-                        className={inputClass}
-                      />
+                        <div className="mt-4 grid gap-5 md:grid-cols-2">
+                          <Field label="Nama Yayasan">
+                            <input
+                              name="namaYayasanNaungan"
+                              value={formData.namaYayasanNaungan}
+                              onChange={handleChange}
+                              placeholder="Contoh: Yayasan Pendidikan Al-Hikmah"
+                              className={inputClass}
+                            />
+                          </Field>
+
+                          <Field label="NPYP Yayasan">
+                            <input
+                              name="npypYayasanNaungan"
+                              value={formData.npypYayasanNaungan}
+                              onChange={handleChange}
+                              placeholder="Contoh: P-12345678"
+                              className={inputClass}
+                            />
+                          </Field>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </section>
               ) : (
                 <section>
-                  <div className="mb-5 flex items-center gap-3">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
-                      <Landmark size={16} />
-                    </div>
-                    <div>
-                      <h3 className="text-sm font-bold">Data Lembaga Yayasan</h3>
-                      <p className="text-xs text-slate-400">Informasi identitas dan legalitas yayasan</p>
-                    </div>
-                  </div>
+                  <SectionHeader
+                    number="2"
+                    title="Data Lembaga Yayasan"
+                    description="Informasi identitas dan legalitas yayasan."
+                  />
 
                   <div className="grid gap-5 md:grid-cols-2">
-                    <div className="md:col-span-2">
-                      <label className={labelClass}>
-                        Nama Yayasan <span className="text-rose-500">*</span>
-                      </label>
+                    <Field label="Nama Yayasan" required className="md:col-span-2">
                       <input
                         required
                         minLength={3}
@@ -1043,47 +1062,38 @@ function DaftarSekolahContent() {
                         placeholder="Contoh: Yayasan Pendidikan Al-Hikmah"
                         className={inputClass}
                       />
-                    </div>
+                    </Field>
 
-                    <div>
-                      <label className={labelClass}>
-                        NPYP Yayasan <span className="text-rose-500">*</span>
-                      </label>
+                    <Field label="NPYP Yayasan" required>
                       <input
                         required
                         minLength={3}
                         name="npypYayasan"
                         value={formData.npypYayasan}
                         onChange={handleChange}
-                        placeholder="Nomor Pokok Yayasan (min. 3 karakter)"
+                        placeholder="Nomor Pokok Yayasan"
                         className={inputClass}
                       />
-                    </div>
+                    </Field>
 
-                    <div>
-                      <label className={labelClass}>
-                        Nomor Telepon Yayasan <span className="text-rose-500">*</span>
-                      </label>
+                    <Field label="Nomor Telepon Yayasan" required>
                       <div className="relative">
-                        <Phone size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                        <Phone size={16} className={iconClass} />
                         <input
                           required
                           type="tel"
                           name="teleponYayasan"
                           value={formData.teleponYayasan}
                           onChange={handleChange}
-                          placeholder="Contoh: 022-1234567 atau 08123456789"
+                          placeholder="022-1234567 atau 08123456789"
                           className={`${inputClass} pl-10`}
                         />
                       </div>
-                    </div>
+                    </Field>
 
-                    <div className="md:col-span-2">
-                      <label className={labelClass}>
-                        Email Resmi Yayasan <span className="text-rose-500">*</span>
-                      </label>
+                    <Field label="Email Resmi Yayasan" required className="md:col-span-2">
                       <div className="relative">
-                        <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                        <Mail size={16} className={iconClass} />
                         <input
                           required
                           type="email"
@@ -1094,97 +1104,77 @@ function DaftarSekolahContent() {
                           className={`${inputClass} pl-10`}
                         />
                       </div>
-                    </div>
+                    </Field>
 
-                    <div className="md:col-span-2">
-                      <label className={labelClass}>
-                        Alamat Lengkap Yayasan <span className="text-rose-500">*</span>
-                      </label>
-                      <div className="relative">
-                        <MapPin size={16} className="absolute left-3.5 top-3.5 text-slate-400" />
-                        <textarea
-                          required
-                          minLength={5}
-                          rows={3}
-                          name="alamatYayasan"
-                          value={formData.alamatYayasan}
-                          onChange={handleChange}
-                          placeholder="Contoh: Jl. Pendidikan No. 10, Kel. Dago, Kec. Coblong, Kota Bandung, Jawa Barat"
-                          className={`${inputClass} pl-10 resize-none`}
-                        />
-                      </div>
-                    </div>
+                    <Field label="Alamat Lengkap Yayasan" required className="md:col-span-2">
+                      <textarea
+                        required
+                        minLength={5}
+                        rows={3}
+                        name="alamatYayasan"
+                        value={formData.alamatYayasan}
+                        onChange={handleChange}
+                        placeholder="Jl. Pendidikan No. 10, Kel. Dago, Kec. Coblong, Kota Bandung, Jawa Barat"
+                        className={`${inputClass} resize-none`}
+                      />
+                    </Field>
                   </div>
                 </section>
               )}
 
-              <div className="my-8 h-px bg-slate-100" />
+              <div className="my-9 h-px bg-[#E5ECF8]" />
 
+              {/* 3. Administrator */}
               <section>
-                <div className="mb-5 flex items-center gap-3">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
-                    <UserRound size={16} />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-bold">
-                      {jenisPendaftaran === "yayasan" ? "Data Administrator Yayasan" : "Data Administrator Sekolah"}
-                    </h3>
-                    <p className="text-xs text-slate-400">
-                      Akun pengelola yang akan menerima kode verifikasi OTP
-                    </p>
-                  </div>
-                </div>
+                <SectionHeader
+                  number="3"
+                  title={isYayasan ? "Administrator Yayasan" : "Administrator Sekolah"}
+                  description="Akun pengelola yang akan menerima kode verifikasi (OTP) melalui email."
+                />
 
                 <div className="grid gap-5 md:grid-cols-2">
-                  <div>
-                    <label className={labelClass}>
-                      Nama Lengkap <span className="text-rose-500">*</span>
-                    </label>
-                    <input
-                      required
-                      name="namaLengkap"
-                      value={formData.namaLengkap}
-                      onChange={handleChange}
-                      placeholder={jenisPendaftaran === "yayasan" ? "Contoh: Ahmad Fauzi" : "Nama lengkap administrator"}
-                      className={inputClass}
-                    />
-                  </div>
+                  <Field label="Nama Lengkap" required>
+                    <div className="relative">
+                      <UserRound size={16} className={iconClass} />
+                      <input
+                        required
+                        name="namaLengkap"
+                        value={formData.namaLengkap}
+                        onChange={handleChange}
+                        placeholder={isYayasan ? "Contoh: Ahmad Fauzi" : "Nama lengkap administrator"}
+                        className={`${inputClass} pl-10`}
+                      />
+                    </div>
+                  </Field>
 
-                  <div>
-                    <label className={labelClass}>Jabatan (opsional)</label>
+                  <Field label="Jabatan" optional>
                     <input
                       name="jabatan"
                       value={formData.jabatan}
                       onChange={handleChange}
-                      placeholder={jenisPendaftaran === "yayasan" ? "Contoh: Ketua Yayasan" : "Contoh: Kepala Sekolah"}
+                      placeholder={isYayasan ? "Contoh: Ketua Yayasan" : "Contoh: Kepala Sekolah"}
                       className={inputClass}
                     />
-                  </div>
+                  </Field>
 
-                  <div className="md:col-span-2">
-                    <label className={labelClass}>
-                      Email Administrator (Penerima OTP) <span className="text-rose-500">*</span>
-                    </label>
+                  <Field label="Email Administrator (Penerima OTP)" required className="md:col-span-2">
                     <div className="relative">
-                      <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                      <Mail size={16} className={iconClass} />
                       <input
                         required
                         type="email"
                         name="email"
                         value={formData.email}
                         onChange={handleChange}
-                        placeholder={jenisPendaftaran === "yayasan" ? "ahmad@yayasan-alhikmah.sch.id" : "admin@sekolah.sch.id"}
+                        placeholder={isYayasan ? "ahmad@yayasan-alhikmah.sch.id" : "admin@sekolah.sch.id"}
                         className={`${inputClass} pl-10`}
                       />
                     </div>
-                  </div>
+                  </Field>
 
-                  <div>
-                    <label className={labelClass}>
-                      Kata Sandi <span className="text-rose-500">*</span>
-                    </label>
+                  <Field label="Kata Sandi" required>
                     <div className="relative">
-                      <LockKeyhole size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                      <LockKeyhole size={16} className={iconClass} />
                       <input
                         required
                         type={showPassword ? "text" : "password"}
@@ -1193,26 +1183,26 @@ function DaftarSekolahContent() {
                         onChange={handleChange}
                         minLength={8}
                         autoComplete="new-password"
-                        placeholder="Min. 8 karakter, 1 huruf besar & 1 angka"
+                        placeholder="Min. 8 karakter"
                         className={`${inputClass} pl-10 pr-11`}
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword((prev) => !prev)}
                         aria-label={showPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-[#94A3B8] transition hover:text-[#155DFC]"
                       >
                         {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
                       </button>
                     </div>
-                  </div>
+                    <p className="mt-1.5 text-xs font-medium text-[#475569]/70">
+                      Minimal 8 karakter, mengandung 1 huruf besar dan 1 angka.
+                    </p>
+                  </Field>
 
-                  <div>
-                    <label className={labelClass}>
-                      Konfirmasi Kata Sandi <span className="text-rose-500">*</span>
-                    </label>
+                  <Field label="Konfirmasi Kata Sandi" required>
                     <div className="relative">
-                      <LockKeyhole size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                      <LockKeyhole size={16} className={iconClass} />
                       <input
                         required
                         type={showConfirmPassword ? "text" : "password"}
@@ -1227,43 +1217,40 @@ function DaftarSekolahContent() {
                         type="button"
                         onClick={() => setShowConfirmPassword((prev) => !prev)}
                         aria-label={showConfirmPassword ? "Sembunyikan konfirmasi kata sandi" : "Tampilkan konfirmasi kata sandi"}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-[#94A3B8] transition hover:text-[#155DFC]"
                       >
                         {showConfirmPassword ? <EyeOff size={17} /> : <Eye size={17} />}
                       </button>
                     </div>
-                  </div>
+                  </Field>
                 </div>
               </section>
 
-              <div className="my-8 h-px bg-slate-100" />
+              <div className="my-9 h-px bg-[#E5ECF8]" />
 
+              {/* 4. Paket */}
               <section>
-                <div className="mb-5 flex items-center gap-3">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
-                    <Package size={16} />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-bold">Pilih Paket SmartSchool</h3>
-                    <p className="text-xs text-slate-400">
-                      {jenisPendaftaran === "yayasan"
-                        ? "Pilih paket khusus pengelolaan multi-sekolah yayasan"
-                        : "Sesuaikan dengan skala dan kebutuhan satuan pendidikan"}
-                    </p>
-                  </div>
-                </div>
+                <SectionHeader
+                  number="4"
+                  title="Paket SmartSchool"
+                  description={
+                    isYayasan
+                      ? "Pilih paket untuk pengelolaan multi-sekolah."
+                      : "Sesuaikan dengan skala dan kebutuhan satuan pendidikan."
+                  }
+                />
 
                 {loadingPaket ? (
-                  <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-5 text-sm text-slate-500">
-                    <RefreshCw size={17} className="animate-spin text-blue-600" />
+                  <div className="flex items-center gap-3 rounded-2xl border border-[#DBE5F5] bg-[#F5F8FE] px-4 py-5 text-sm font-medium text-[#475569]">
+                    <RefreshCw size={16} className="animate-spin text-[#155DFC]" />
                     Memuat daftar paket...
                   </div>
                 ) : availablePaketList.length === 0 ? (
-                  <div className="flex items-start gap-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-4 text-sm text-rose-700">
-                    <XCircle size={18} className="mt-0.5 shrink-0" />
+                  <div className="flex items-start gap-3 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-4 text-sm text-rose-800">
+                    <XCircle size={18} className="mt-0.5 shrink-0 text-rose-600" />
                     <div>
-                      <p className="font-semibold">Paket belum tersedia</p>
-                      <p className="mt-1 text-xs leading-5">
+                      <p className="font-bold">Paket belum tersedia</p>
+                      <p className="mt-1 text-[13px] leading-5">
                         Belum ada paket aktif untuk pendaftaran {jenisPendaftaran}.
                       </p>
                     </div>
@@ -1278,60 +1265,60 @@ function DaftarSekolahContent() {
                         <button
                           key={paket.id}
                           type="button"
+                          role="radio"
+                          aria-checked={selected}
                           onClick={() => selectPaket(paket.id)}
-                          className={`group relative overflow-hidden rounded-2xl border p-5 text-left transition ${
+                          className={`flex flex-col rounded-2xl border p-5 text-left transition ${
                             selected
-                              ? "border-blue-500 bg-blue-50/70 ring-2 ring-blue-500/10"
-                              : "border-slate-200 bg-white hover:border-blue-300 hover:shadow-md"
+                              ? "border-[#155DFC] bg-[#EEF4FF]/70 ring-2 ring-[#155DFC]/20"
+                              : "border-[#DBE5F5] bg-white hover:border-[#155DFC]/50 hover:shadow-md hover:shadow-[#155DFC]/10"
                           }`}
                         >
-                          {selected && (
-                            <div className="absolute right-0 top-0 rounded-bl-xl bg-blue-600 px-3 py-1.5 text-[10px] font-bold uppercase text-white">
-                              Pilihan
-                            </div>
-                          )}
-
-                          <div className="flex items-start gap-3">
-                            <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
-                              selected ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-500"
-                            }`}>
-                              <Package size={18} />
-                            </div>
-
-                            <div className="min-w-0">
-                              <h4 className="font-bold text-slate-900">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex items-center gap-3">
+                              <div
+                                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${
+                                  selected
+                                    ? "bg-gradient-to-br from-[#2F6FFF] to-[#0D47C9] text-white shadow-md shadow-[#155DFC]/30"
+                                    : "bg-[#EEF4FF] text-[#155DFC]"
+                                }`}
+                              >
+                                <Package size={18} />
+                              </div>
+                              <h4 className="font-extrabold text-[#0F172A]">
                                 {paket.nama || paket.namaPaket || "Paket SmartSchool"}
                               </h4>
-                              {paket.deskripsi && (
-                                <p className="mt-1.5 text-xs leading-5 text-slate-500">
-                                  {paket.deskripsi}
-                                </p>
-                              )}
                             </div>
+
+                            <span
+                              className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border ${
+                                selected
+                                  ? "border-[#155DFC] bg-[#155DFC] text-white"
+                                  : "border-[#CBD5E1] text-transparent"
+                              }`}
+                            >
+                              <Check size={12} strokeWidth={3} />
+                            </span>
                           </div>
 
-                          <div className="mt-5 flex items-end justify-between gap-3 border-t border-slate-200/70 pt-4">
-                            <div>
+                          {paket.deskripsi && (
+                            <p className="mt-3 text-[13px] font-medium leading-5 text-[#475569]/80">
+                              {paket.deskripsi}
+                            </p>
+                          )}
+
+                          {(harga || paket.durasi) && (
+                            <div className="mt-4 border-t border-[#E5ECF8] pt-4">
                               {harga && (
-                                <p className="text-lg font-bold text-blue-700">
-                                  {harga}
-                                </p>
+                                <p className="text-xl font-extrabold text-[#155DFC]">{harga}</p>
                               )}
                               {paket.durasi && (
-                                <p className="mt-0.5 text-[11px] text-slate-400">
+                                <p className="mt-0.5 text-xs font-medium text-[#475569]/70">
                                   Durasi {paket.durasi}
                                 </p>
                               )}
                             </div>
-
-                            <div className={`flex h-7 w-7 items-center justify-center rounded-full border ${
-                              selected
-                                ? "border-blue-600 bg-blue-600 text-white"
-                                : "border-slate-300 text-transparent"
-                            }`}>
-                              <Check size={14} />
-                            </div>
-                          </div>
+                          )}
                         </button>
                       );
                     })}
@@ -1339,136 +1326,138 @@ function DaftarSekolahContent() {
                 )}
               </section>
 
-              <div className="my-8 h-px bg-slate-100" />
+              <div className="my-9 h-px bg-[#E5ECF8]" />
 
-              <div>
-                <label className={labelClass}>
-                  Pesan / Kebutuhan Tambahan{" "}
-                  <span className="font-normal text-slate-400">(opsional)</span>
-                </label>
-                <textarea
-                  name="pesan"
-                  value={formData.pesan}
-                  onChange={handleChange}
-                  rows={4}
-                  placeholder="Tulis kebutuhan atau pertanyaan mengenai SmartSchool..."
-                  className={`${inputClass} resize-none`}
+              {/* 5. Catatan */}
+              <section>
+                <SectionHeader
+                  number="5"
+                  title="Catatan Tambahan"
+                  description="Sampaikan kebutuhan khusus atau pertanyaan Anda."
                 />
-                <p className="mt-1 text-xs text-slate-400">
-                  Pesan ini belum dikirim ke backend karena tidak ada pada payload registrasi yang diberikan.
-                </p>
-              </div>
 
-              <div className="mt-8 border-t border-slate-100 pt-6">
+                <Field label="Pesan / Kebutuhan Tambahan" optional>
+                  <textarea
+                    name="pesan"
+                    value={formData.pesan}
+                    onChange={handleChange}
+                    rows={4}
+                    placeholder="Tulis kebutuhan atau pertanyaan mengenai SmartSchool..."
+                    className={`${inputClass} resize-none`}
+                  />
+                </Field>
+              </section>
+
+              {/* Submit */}
+              <div className="mt-9 flex flex-col gap-4 border-t border-[#E5ECF8] pt-7 sm:flex-row sm:items-center sm:justify-between">
+                <p className="flex items-start gap-2 text-xs font-medium leading-5 text-[#475569]/80 sm:max-w-sm">
+                  <ShieldCheck size={15} className="mt-0.5 shrink-0 text-[#155DFC]" />
+                  Setelah pendaftaran tersimpan, kode OTP akan dikirim ke email administrator.
+                </p>
+
                 <button
                   type="submit"
                   disabled={loadingSubmit || loadingPaket || availablePaketList.length === 0}
-                  className="group flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#155DFC] px-6 text-sm font-bold text-white shadow-lg transition hover:bg-[#0D47C9] disabled:cursor-not-allowed disabled:opacity-60"
+                  className="group inline-flex h-12 items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#155DFC] to-[#0D47C9] px-8 text-sm font-bold text-white shadow-lg shadow-[#155DFC]/30 transition hover:shadow-xl hover:shadow-[#155DFC]/40 hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60 disabled:shadow-none"
                 >
                   {loadingSubmit ? (
                     <>
-                      <RefreshCw size={17} className="animate-spin" />
+                      <RefreshCw size={16} className="animate-spin" />
                       Mengirim pendaftaran...
                     </>
                   ) : (
                     <>
-                      {jenisPendaftaran === "yayasan" ? "Daftar Yayasan" : "Daftar Sekolah"}
-                      <ArrowRight size={17} className="transition-transform group-hover:translate-x-0.5" />
+                      {isYayasan ? "Daftarkan Yayasan" : "Daftarkan Sekolah"}
+                      <ArrowRight size={16} className="transition-transform group-hover:translate-x-0.5" />
                     </>
                   )}
                 </button>
-
-                <div className="mt-4 flex items-start justify-center gap-2 text-center">
-                  <ShieldCheck size={14} className="mt-0.5 shrink-0 text-blue-500" />
-                  <p className="text-[11px] leading-5 text-slate-400">
-                    Setelah pendaftaran tersimpan, kode OTP dikirim ke email administrator.
-                  </p>
-                </div>
               </div>
             </form>
           </div>
 
-          <aside className="h-fit space-y-5 lg:sticky lg:top-24">
-            <div className="relative overflow-hidden rounded-2xl bg-[#0f172a] p-6 text-white shadow-xl">
-              <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-blue-600/20 blur-2xl" />
-
-              <div className="relative">
-                <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-xl bg-blue-600">
-                  <ShieldCheck size={21} />
-                </div>
-
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-blue-300">
-                  SmartSchool
+          {/* Sidebar */}
+          <aside className="h-fit space-y-5 lg:sticky lg:top-6">
+            <div className="overflow-hidden rounded-3xl bg-white shadow-[0_20px_60px_rgba(15,23,42,0.10)]">
+              <div className="bg-gradient-to-br from-[#155DFC] to-[#0D47C9] px-6 py-5">
+                <p className="text-xs font-bold uppercase tracking-[0.14em] text-white/70">
+                  Ringkasan
                 </p>
-                <h3 className="mt-2 text-xl font-bold">
-                  Satu platform untuk pengelolaan sekolah.
+                <h3 className="mt-1 text-lg font-extrabold text-white">
+                  Data Pendaftaran
                 </h3>
-                <p className="mt-3 text-sm leading-6 text-slate-400">
-                  Kelola aktivitas sekolah secara lebih terstruktur melalui satu sistem terintegrasi.
-                </p>
-
-                <div className="mt-6 space-y-3">
-                  {fitur.map((item) => {
-                    const Icon = item.icon;
-
-                    return (
-                      <div key={item.text} className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.04] px-3.5 py-3">
-                        <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-blue-600/15 text-blue-300">
-                          <Icon size={14} />
-                        </div>
-                        <p className="text-xs font-medium text-slate-300">{item.text}</p>
-                      </div>
-                    );
-                  })}
-                </div>
+              </div>
+              <div className="divide-y divide-[#E5ECF8] px-6 py-2">
+                <SummaryRow label="Jenis" value={isYayasan ? "Yayasan" : "Sekolah"} />
+                <SummaryRow
+                  label={isYayasan ? "Nama yayasan" : "Nama sekolah"}
+                  value={isYayasan ? formData.namaYayasan : formData.namaSekolah}
+                />
+                {!isYayasan && (
+                  <SummaryRow
+                    label="Alamat akses"
+                    value={subdomain ? `${subdomain}.smartschool.id` : ""}
+                  />
+                )}
+                <SummaryRow
+                  label="Paket"
+                  value={selectedPaketInfo?.nama || selectedPaketInfo?.namaPaket}
+                />
+                <SummaryRow
+                  label="Harga"
+                  value={selectedPaketInfo ? formatHarga(selectedPaketInfo.harga) : ""}
+                />
               </div>
             </div>
 
-            <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
-              <div className="border-b border-slate-100 px-5 py-4">
-                <div className="flex items-center gap-2.5">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
-                    <CircleHelp size={16} />
-                  </div>
-                  <h3 className="text-sm font-bold">Butuh bantuan?</h3>
-                </div>
-              </div>
-              <div className="p-5">
-                <p className="text-xs leading-6 text-slate-500">
-                  Hubungi tim SmartSchool untuk informasi paket atau proses pendaftaran.
-                </p>
-                <a href="mailto:info@smartschool.com" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-blue-600">
-                  <Mail size={15} /> info@smartschool.com
-                </a>
-              </div>
+            <div className="rounded-3xl bg-white p-6 shadow-[0_12px_40px_rgba(15,23,42,0.07)]">
+              <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#155DFC]">
+                Mengapa SmartSchool
+              </p>
+              <ul className="mt-5 space-y-4">
+                {fitur.map(({ icon: Icon, text }) => (
+                  <li key={text} className="flex items-center gap-3">
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#2F6FFF] to-[#0D47C9] text-white shadow-md shadow-[#155DFC]/25">
+                      <Icon size={16} />
+                    </span>
+                    <span className="text-sm font-bold text-[#0F172A]">{text}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
 
-            <div className="rounded-2xl border border-blue-100 bg-blue-50/60 p-5">
-              <div className="flex items-start gap-3">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-blue-600 shadow-sm">
-                  <LockKeyhole size={15} />
-                </div>
-                <div>
-                  <p className="text-xs font-bold text-slate-800">Data pendaftaran</p>
-                  <p className="mt-1 text-[11px] leading-5 text-slate-500">
-                    Informasi digunakan untuk proses pendaftaran dan verifikasi administrator.
-                  </p>
-                </div>
+            <div className="rounded-3xl bg-white p-6 shadow-[0_12px_40px_rgba(15,23,42,0.07)]">
+              <div className="flex items-center gap-2.5">
+                <CircleHelp size={18} className="text-[#155DFC]" />
+                <h3 className="text-sm font-extrabold text-[#0F172A]">Butuh bantuan?</h3>
               </div>
+              <p className="mt-2.5 text-[13px] font-medium leading-5 text-[#475569]/80">
+                Hubungi tim kami untuk informasi paket atau proses pendaftaran.
+              </p>
+              <a
+                href="mailto:info@smartschool.com"
+                className="mt-3 inline-flex items-center gap-2 text-sm font-bold text-[#155DFC] transition hover:text-[#0D47C9]"
+              >
+                <Mail size={15} /> info@smartschool.com
+              </a>
             </div>
+
+            <p className="flex items-start gap-2 px-2 text-xs font-medium leading-5 text-[#475569]/70">
+              <LockKeyhole size={14} className="mt-0.5 shrink-0 text-[#155DFC]" />
+              Data pendaftaran hanya digunakan untuk proses pendaftaran dan verifikasi administrator.
+            </p>
           </aside>
         </div>
       </section>
 
-      <footer className="border-t border-slate-200 bg-white">
+      <footer className="border-t border-[#DBE5F5] bg-white/70">
         <div className="mx-auto flex max-w-7xl flex-col gap-2 px-5 py-6 text-center sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:text-left lg:px-8">
-          <p className="text-xs text-slate-400">
+          <p className="text-xs font-medium text-[#475569]/80">
             © {new Date().getFullYear()} SmartSchool. Semua hak dilindungi.
           </p>
-          <div className="flex items-center justify-center gap-1.5 text-xs text-slate-400">
-            <ShieldCheck size={13} className="text-blue-500" />
+          <p className="text-xs font-medium text-[#94A3B8]">
             Platform Manajemen Sekolah Terintegrasi
-          </div>
+          </p>
         </div>
       </footer>
     </main>
@@ -1479,8 +1468,8 @@ export default function DaftarSekolahPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-screen items-center justify-center bg-[#f5f8fc]">
-          <RefreshCw className="animate-spin text-blue-600" size={28} />
+        <div className="flex min-h-screen items-center justify-center bg-[#EEF4FF]">
+          <RefreshCw className="animate-spin text-[#155DFC]" size={26} />
         </div>
       }
     >

@@ -361,8 +361,9 @@ export default function TambahRolePage() {
 
 
   return (
-    <div className="theme-page theme-text min-h-full">
-      <main className="w-full max-w-[1600px] mx-auto px-4 py-5 sm:px-6 sm:py-7 lg:px-8">
+    <div className="theme-page theme-text min-h-full w-full min-w-0">
+      {/* Perubahan: max-w-[1600px] dan mx-auto dihapus agar konten selalu menempel ke sidebar */}
+      <main className="w-full min-w-0 px-4 py-5 sm:px-6 sm:py-7 lg:px-8">
         <div className="space-y-4 sm:space-y-5 lg:space-y-6">
 
 
@@ -666,7 +667,7 @@ export default function TambahRolePage() {
 
                   <button
                     onClick={pilihSemua}
-                    className={`rounded-lg px-2 py-0.5 text-xs font-medium ${themePrimaryText} transition-colors hover:${themePrimaryText} ${themePrimarySoft} sm:px-3 sm:py-1`}
+                    className={`rounded-lg px-2 py-0.5 text-xs font-medium ${themePrimaryText} transition-colors ${themePrimarySoft} sm:px-3 sm:py-1`}
                   >
                     Pilih Semua
                   </button>

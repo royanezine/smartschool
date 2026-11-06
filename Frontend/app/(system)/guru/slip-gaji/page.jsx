@@ -307,8 +307,8 @@ export default function SlipGajiPage() {
           />
         </div>
 
-        <main className="flex-1 overflow-y-auto print:overflow-visible">
-          <div className="mx-auto max-w-[1500px] space-y-5 p-4 sm:p-6 lg:p-8 print:p-0">
+        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden print:overflow-visible">
+          <div className="w-full space-y-5 p-4 sm:p-6 lg:p-8 print:p-0">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between print:hidden">
               <div className="flex items-center gap-3">
                 <div className="theme-primary flex h-11 w-11 shrink-0 items-center justify-center rounded-xl">
@@ -330,7 +330,7 @@ export default function SlipGajiPage() {
                 type="button"
                 onClick={handlePrint}
                 disabled={!selectedSlip || loading}
-                className="theme-primary inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold shadow-sm transition hover:opacity-90 disabled:opacity-50"
+                className="theme-primary inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold shadow-sm transition hover:opacity-90 disabled:opacity-50 sm:w-auto"
               >
                 <Printer size={16} />
                 Cetak Slip
@@ -377,11 +377,11 @@ export default function SlipGajiPage() {
                   </p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2 sm:flex">
+                <div className="grid grid-cols-1 gap-2 sm:flex">
                   <select
                     value={bulan}
                     onChange={(event) => setBulan(event.target.value)}
-                    className="theme-input h-11 min-w-[150px] rounded-xl border px-3 text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20"
+                    className="theme-input h-11 w-full rounded-xl border px-3 text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20 sm:min-w-[150px]"
                   >
                     {BULAN.map((nama, index) => (
                       <option key={nama} value={String(index + 1)}>
@@ -393,7 +393,7 @@ export default function SlipGajiPage() {
                   <select
                     value={tahun}
                     onChange={(event) => setTahun(event.target.value)}
-                    className="theme-input h-11 min-w-[100px] rounded-xl border px-3 text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20"
+                    className="theme-input h-11 w-full rounded-xl border px-3 text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20 sm:min-w-[100px]"
                   >
                     {Array.from(
                       { length: 6 },

@@ -256,7 +256,7 @@ export default function ProfilGuruPage() {
         role="guru"
       />
 
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
         <Header
           toggleSidebar={toggleSidebar}
           notifications={[]}
@@ -267,9 +267,9 @@ export default function ProfilGuruPage() {
           }}
         />
 
-        <main className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
+        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
           <div className="w-full min-w-0 p-3 sm:p-4 md:p-6 lg:p-7 xl:p-8">
-            <div className="mx-auto w-full max-w-[1500px] space-y-6">
+            <div className="w-full space-y-6">
 
 
               <section

@@ -321,9 +321,9 @@ export default function MateriDetailPage() {
           }}
         />
 
-        <main className="flex-1 overflow-y-auto">
+        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
           <div className="w-full p-4 sm:p-6 lg:p-8">
-            <div className="mx-auto max-w-6xl space-y-6">
+            <div className="w-full space-y-6">
 
 
               <button
@@ -448,7 +448,7 @@ export default function MateriDetailPage() {
                         </div>
 
 
-                        <div className="flex shrink-0 items-center gap-2">
+                        <div className="flex shrink-0 flex-wrap items-center gap-2">
 
                           <button
                             type="button"
@@ -457,7 +457,7 @@ export default function MateriDetailPage() {
                                 `/guru/materi/${materi.id}/edit`
                               )
                             }
-                            className={`inline-flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${themePrimarySoft} ${themePrimarySoftBorder} ${themePrimaryText} hover:bg-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]`}
+                            className={`inline-flex flex-1 items-center justify-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-colors sm:flex-initial ${themePrimarySoft} ${themePrimarySoftBorder} ${themePrimaryText} hover:bg-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]`}
                           >
                             <Pencil size={15} />
                             Edit
@@ -468,7 +468,7 @@ export default function MateriDetailPage() {
                             type="button"
                             onClick={handleDelete}
                             disabled={deleting}
-                            className={`theme-danger inline-flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${themeDangerSurface} ${themeDangerBorder} hover:bg-[color-mix(in_srgb,var(--color-text)_8%,transparent)] disabled:cursor-not-allowed disabled:opacity-60`}
+                            className={`theme-danger inline-flex flex-1 items-center justify-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-colors sm:flex-initial ${themeDangerSurface} ${themeDangerBorder} hover:bg-[color-mix(in_srgb,var(--color-text)_8%,transparent)] disabled:cursor-not-allowed disabled:opacity-60`}
                           >
                             {deleting ? (
                               <Loader2

@@ -367,7 +367,7 @@ export default function DetailRolePage() {
 
   if (loading) {
     return (
-      <div className={`${themeCard} ${themeText} min-h-full`}>
+      <div className={`${themeCard} ${themeText} min-h-full w-full min-w-0`}>
         <div className="relative min-h-[70vh] flex items-center justify-center px-5 py-10">
 
           <div className="text-center">
@@ -419,7 +419,7 @@ export default function DetailRolePage() {
 
   if (error || !role) {
     return (
-      <div className="theme-page theme-text min-h-full flex items-center justify-center p-5">
+      <div className="theme-page theme-text min-h-full w-full min-w-0 flex items-center justify-center p-5">
 
         <div
           className={`relative w-full max-w-md overflow-hidden rounded-2xl ${themeCard} ${themeNeutralBorder} ${themeCardShadow}`}
@@ -489,11 +489,12 @@ export default function DetailRolePage() {
 
 
   return (
-    <div className="theme-page theme-text min-h-full">
+    <div className="theme-page theme-text min-h-full w-full min-w-0">
 
-      <main className="w-full px-4 py-5 sm:px-6 sm:py-7 lg:px-8">
+      {/* FIX: tanpa mx-auto & max-w, konten selalu menempel ke sidebar saat zoom out */}
+      <main className="w-full min-w-0 px-4 py-5 sm:px-6 sm:py-7 lg:px-8">
 
-        <div className="mx-auto w-full max-w-[1600px]">
+        <div className="w-full min-w-0">
 
 
           <div

@@ -541,8 +541,8 @@ export default function FormSoalUjianPage() {
           }}
         />
 
-        <main className="theme-page flex-1 overflow-y-auto">
-          <div className="mx-auto w-full max-w-[1600px] space-y-5 p-4 sm:p-6 lg:p-8">
+        <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
+          <div className="w-full space-y-5 p-4 sm:p-6 lg:p-8">
             <section
               className={`theme-card relative overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
             >
@@ -674,7 +674,7 @@ export default function FormSoalUjianPage() {
             <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(0,360px)] 2xl:grid-cols-[minmax(0,1fr)_400px]">
               <form
                 onSubmit={handleSubmit}
-                className={`theme-card space-y-5 rounded-2xl border ${themeNeutralBorder} p-5 ${themeCardShadow} sm:p-6`}
+                className={`min-w-0 theme-card space-y-5 rounded-2xl border ${themeNeutralBorder} p-5 ${themeCardShadow} sm:p-6`}
               >
                 <div>
                   <div className="mb-2 flex items-center justify-between gap-3">
@@ -1023,7 +1023,7 @@ export default function FormSoalUjianPage() {
                 </div>
               </form>
 
-              <aside className="space-y-5">
+              <aside className="min-w-0 space-y-5">
                 <div
                   className={`theme-card rounded-2xl border ${themeNeutralBorder} p-5 ${themeCardShadow}`}
                 >

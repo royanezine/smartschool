@@ -275,7 +275,7 @@ function JadwalCard({ item, index, hariAktif }) {
   const namaMapel = getNamaMapel(item);
   const namaGuru = getNamaGuru(item);
   const namaKelas = getNamaKelas(item?.kelasMapel?.kelas);
-  const namaRuangan = getNamaRuangan(item?.ruangan);
+  const namaRuangan = getNamaRuangan(item?.ruanganRef || item?.ruangan);
 
   return (
     <article
@@ -402,7 +402,10 @@ export default function JadwalSiswaPage() {
   }, []);
 
   useEffect(() => {
-    loadJadwal();
+    const timer = setTimeout(() => {
+      loadJadwal();
+    }, 0);
+    return () => clearTimeout(timer);
   }, [loadJadwal]);
 
   const jadwalHariIni = useMemo(() => {
@@ -438,7 +441,7 @@ export default function JadwalSiswaPage() {
     jadwalData.forEach((item) => {
       const mapel = getNamaMapel(item);
       const guru = getNamaGuru(item);
-      const ruangan = getNamaRuangan(item?.ruangan);
+      const ruangan = getNamaRuangan(item?.ruanganRef || item?.ruangan);
 
       if (mapel && mapel !== "Mata Pelajaran belum tersedia") {
         mapelUnik.add(mapel);
