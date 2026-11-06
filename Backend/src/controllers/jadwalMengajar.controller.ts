@@ -6,7 +6,20 @@ interface AuthRequest extends Request {
   user?: TokenPayLoad;
 }
 
+type HasilRuangan = {
+  valid: boolean;
+  ruanganId: string | null;
+  ruangan: string | null;
+};
+
 const jadwalInclude = {
+  ruanganRef: {
+    select: {
+      id: true,
+      nama: true,
+      lokasi: true,
+    },
+  },
   kelasMapel: {
     include: {
       kelas: true,
@@ -27,6 +40,37 @@ const hitungDurasiMenit = (jamMulai: string, jamSelesai: string) => {
   const [h1 = 0, m1 = 0] = jamMulai.split(":").map(Number);
   const [h2 = 0, m2 = 0] = jamSelesai.split(":").map(Number);
   return h2 * 60 + m2 - (h1 * 60 + m1);
+};
+
+const resolveRuangan = async (
+  sekolahId: string,
+  ruanganId: unknown,
+  ruanganTeks: unknown,
+): Promise<HasilRuangan> => {
+  if (typeof ruanganId === "string" && ruanganId !== "") {
+    const data = await prisma.ruangan.findFirst({
+      where: { id: ruanganId, sekolahId, dihapusPada: null },
+      select: { id: true, nama: true },
+    });
+    if (!data) {
+      return { valid: false, ruanganId: null, ruangan: null };
+    }
+    return { valid: true, ruanganId: data.id, ruangan: data.nama };
+  }
+
+  const teks = typeof ruanganTeks === "string" ? ruanganTeks.trim() : "";
+  return { valid: true, ruanganId: null, ruangan: teks === "" ? null : teks };
+};
+
+const buatKondisiRuangan = (hasil: HasilRuangan) => {
+  const kondisi: any[] = [];
+  if (hasil.ruanganId) {
+    kondisi.push({ ruanganId: hasil.ruanganId });
+  }
+  if (hasil.ruangan) {
+    kondisi.push({ ruangan: hasil.ruangan });
+  }
+  return kondisi;
 };
 
 export const getJadwalMengajar = async (req: AuthRequest, res: Response) => {
@@ -107,7 +151,8 @@ export const getJadwalMengajarById = async (
 
 export const createJadwalMengajar = async (req: AuthRequest, res: Response) => {
   try {
-    const { kelasMapelId, hari, jamMulai, jamSelesai, ruangan } = req.body;
+    const { kelasMapelId, hari, jamMulai, jamSelesai, ruangan, ruanganId } =
+      req.body;
     const sekolahId = req.user?.sekolahId;
     const userId = req.user?.userId;
 
@@ -132,18 +177,24 @@ export const createJadwalMengajar = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    const orConditions: any[] = [
-      { kelasMapel: { guruPengajarId: kelasMapel.guruPengajarId } },
-    ];
-    if (ruangan && ruangan.trim() !== "") {
-      orConditions.push({ ruangan });
+    const hasilRuangan = await resolveRuangan(sekolahId, ruanganId, ruangan);
+    if (!hasilRuangan.valid) {
+      return res.status(404).json({
+        success: false,
+        message: "Ruangan tidak ditemukan",
+      });
     }
 
-    // 1. CEK BENTROK JADWAL GURU & RUANGAN
+    const orConditions: any[] = [
+      { kelasMapel: { guruPengajarId: kelasMapel.guruPengajarId } },
+      ...buatKondisiRuangan(hasilRuangan),
+    ];
+
     const bentrok = await prisma.jadwalMengajar.findFirst({
       where: {
         hari,
         dihapusPada: null,
+        kelasMapel: { kelas: { sekolahId } },
         OR: orConditions,
         jamMulai: { lt: jamSelesai },
         jamSelesai: { gt: jamMulai },
@@ -163,8 +214,7 @@ export const createJadwalMengajar = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // 2. VALIDASI BEBAN KERJA GURU (DINAMIS DARI DATABASE)
-    let maxJamMengajar = 40; // Fallback default
+    let maxJamMengajar = 40;
     const pengaturan = await prisma.pengaturanSistem.findFirst({
       where: { sekolahId, kunci: "MAX_JAM_MENGAJAR_MINGGUAN" },
     });
@@ -203,7 +253,8 @@ export const createJadwalMengajar = async (req: AuthRequest, res: Response) => {
         hari,
         jamMulai,
         jamSelesai,
-        ruangan: ruangan || null,
+        ruangan: hasilRuangan.ruangan,
+        ruanganId: hasilRuangan.ruanganId,
         dibuatOleh: userId,
       },
       include: jadwalInclude,
@@ -226,9 +277,17 @@ export const createJadwalMengajar = async (req: AuthRequest, res: Response) => {
 export const updateJadwalMengajar = async (req: AuthRequest, res: Response) => {
   try {
     const id = req.params.id as string;
-    const { kelasMapelId, hari, jamMulai, jamSelesai, ruangan } = req.body;
+    const { kelasMapelId, hari, jamMulai, jamSelesai, ruangan, ruanganId } =
+      req.body;
     const sekolahId = req.user?.sekolahId;
     const userId = req.user?.userId;
+
+    if (!sekolahId) {
+      return res.status(403).json({
+        success: false,
+        message: "Anda tidak terhubung dengan sekolah",
+      });
+    }
 
     const existing = await prisma.jadwalMengajar.findFirst({
       where: {
@@ -256,19 +315,25 @@ export const updateJadwalMengajar = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    const orConditions: any[] = [
-      { kelasMapel: { guruPengajarId: kelasMapel.guruPengajarId } },
-    ];
-    if (ruangan && ruangan.trim() !== "") {
-      orConditions.push({ ruangan });
+    const hasilRuangan = await resolveRuangan(sekolahId, ruanganId, ruangan);
+    if (!hasilRuangan.valid) {
+      return res.status(404).json({
+        success: false,
+        message: "Ruangan tidak ditemukan",
+      });
     }
 
-    // 1. CEK BENTROK JADWAL GURU & RUANGAN
+    const orConditions: any[] = [
+      { kelasMapel: { guruPengajarId: kelasMapel.guruPengajarId } },
+      ...buatKondisiRuangan(hasilRuangan),
+    ];
+
     const bentrok = await prisma.jadwalMengajar.findFirst({
       where: {
         id: { not: id },
         hari,
         dihapusPada: null,
+        kelasMapel: { kelas: { sekolahId } },
         OR: orConditions,
         jamMulai: { lt: jamSelesai },
         jamSelesai: { gt: jamMulai },
@@ -288,8 +353,7 @@ export const updateJadwalMengajar = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // 2. VALIDASI BEBAN KERJA GURU (DINAMIS DARI DATABASE)
-    let maxJamMengajar = 40; // Fallback default
+    let maxJamMengajar = 40;
     const pengaturan = await prisma.pengaturanSistem.findFirst({
       where: { sekolahId, kunci: "MAX_JAM_MENGAJAR_MINGGUAN" },
     });
@@ -330,7 +394,8 @@ export const updateJadwalMengajar = async (req: AuthRequest, res: Response) => {
         hari,
         jamMulai,
         jamSelesai,
-        ruangan: ruangan || null,
+        ruangan: hasilRuangan.ruangan,
+        ruanganId: hasilRuangan.ruanganId,
         diperbaruiOleh: userId,
       },
       include: jadwalInclude,

@@ -40,6 +40,12 @@ export const createJadwalMengajarSchema = z
       .max(100, "Ruangan maksimal 100 karakter")
       .optional()
       .nullable(),
+
+    ruanganId: z
+      .string()
+      .uuid("ruanganId harus berupa UUID")
+      .optional()
+      .nullable(),
   })
   .refine(
     (data) => data.jamMulai < data.jamSelesai,

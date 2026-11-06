@@ -2,13 +2,16 @@ import { Response } from "express";
 import { AuthRequest } from "../middlewares/auth.middleware";
 import { prisma } from "../config/db";
 import { AppError } from "../utils/appError";
-import { successResponse, paginatedResponse } from "../utils/responseFormatter";
+import { successResponse } from "../utils/responseFormatter";
 import {
   kalkulasiPenggajianSchema,
   updateStatusPenggajianSchema,
 } from "../validations/penggajian.validation";
 import { normalizeRole } from "../utils/rbac";
 import { z } from "zod";
+
+const STATUS_HADIR = ["hadir", "Hadir", "HADIR", "h", "H", "terlambat", "Terlambat", "TERLAMBAT"];
+const UKURAN_BATCH = 5;
 
 const getTenantSekolahId = (req: AuthRequest, targetSekolahId?: string): string => {
   const actorRole = normalizeRole(req.user?.role);
@@ -35,7 +38,6 @@ export const kalkulasiPenggajian = async (req: AuthRequest, res: Response) => {
   const tanggalMulai = new Date(Date.UTC(tahun, bulan - 1, 1, 0, 0, 0, 0));
   const tanggalSelesai = new Date(Date.UTC(tahun, bulan, 0, 23, 59, 59, 999));
 
-  // Ambil pegawai target (bukan siswa)
   const userWhere: any = {
     sekolahId,
     dihapusPada: null,
@@ -68,77 +70,87 @@ export const kalkulasiPenggajian = async (req: AuthRequest, res: Response) => {
     throw new AppError("Tidak ada data pegawai yang memenuhi kriteria kalkulasi", 404);
   }
 
-  const hasilKalkulasi: any[] = [];
+  const pegawaiIds = pegawaiList.map((p) => p.id);
+
+  const [gajiLamaList, absensiAll] = await Promise.all([
+    prisma.penggajian.findMany({
+      where: {
+        sekolahId,
+        bulan,
+        tahun,
+        penggunaId: { in: pegawaiIds },
+      },
+      select: { penggunaId: true, status: true },
+    }),
+    prisma.absensi.findMany({
+      where: {
+        sekolahId,
+        penggunaId: { in: pegawaiIds },
+        tanggal: {
+          gte: tanggalMulai,
+          lte: tanggalSelesai,
+        },
+        status: { in: STATUS_HADIR },
+        shiftKerjaId: { not: null },
+        waktuKeluar: { not: null },
+        durasiJamKerja: { not: null },
+      },
+      select: {
+        penggunaId: true,
+        durasiJamKerja: true,
+      },
+    }),
+  ]);
+
+  const statusLamaMap = new Map<string, string>();
+  for (const g of gajiLamaList) {
+    statusLamaMap.set(g.penggunaId, g.status);
+  }
+
+  const absensiMap = new Map<string, { hari: number; jam: number }>();
+  for (const a of absensiAll) {
+    const cur = absensiMap.get(a.penggunaId) ?? { hari: 0, jam: 0 };
+    cur.hari += 1;
+    cur.jam += Number(a.durasiJamKerja || 0);
+    absensiMap.set(a.penggunaId, cur);
+  }
+
   const dilewati: any[] = [];
+  const antrian: { pegawai: (typeof pegawaiList)[number]; args: any }[] = [];
 
-  await prisma.$transaction(async (tx) => {
-    for (const pegawai of pegawaiList) {
-      // 1. Cek status penggajian saat ini jika sudah ada
-      const gajiLama = await tx.penggajian.findUnique({
-        where: {
-          sekolahId_penggunaId_bulan_tahun: {
-            sekolahId,
-            penggunaId: pegawai.id,
-            bulan,
-            tahun,
-          },
-        },
+  for (const pegawai of pegawaiList) {
+    const statusLama = statusLamaMap.get(pegawai.id);
+
+    if (statusLama === "dibekukan" || statusLama === "disetujui" || statusLama === "dibayar") {
+      dilewati.push({
+        nama: pegawai.namaLengkap,
+        alasan: `Data penggajian sudah berstatus '${statusLama}' (terkunci).`,
       });
+      continue;
+    }
 
-      if (gajiLama && (gajiLama.status === "dibekukan" || gajiLama.status === "disetujui")) {
-        dilewati.push({
-          nama: pegawai.namaLengkap,
-          alasan: `Data penggajian sudah berstatus '${gajiLama.status}' (terkunci).`,
-        });
-        continue;
-      }
-
-      // 2. Ambil tarif per jam historis yang berlaku pada periode ini
-      let tarifPerJam = 0;
-      if (pegawai.kategoriJabatan?.tarifRiwayat) {
-        const tarifCocok = pegawai.kategoriJabatan.tarifRiwayat.find((t) => {
-          const tMulai = new Date(t.berlakuMulai);
-          const tAkhir = t.berakhirPada ? new Date(t.berakhirPada) : null;
-          return tMulai <= tanggalSelesai && (!tAkhir || tAkhir >= tanggalMulai);
-        });
-
-        if (tarifCocok) {
-          tarifPerJam = Number(tarifCocok.tarifPerJam);
-        } else if (pegawai.kategoriJabatan.tarifRiwayat.length > 0) {
-          const defaultTarif = pegawai.kategoriJabatan.tarifRiwayat[0];
-          if (defaultTarif) {
-            tarifPerJam = Number(defaultTarif.tarifPerJam);
-          }
-        }
-      }
-
-      // 3. Ambil absensi valid dalam rentang periode
-      const absensiList = await tx.absensi.findMany({
-        where: {
-          sekolahId,
-          penggunaId: pegawai.id,
-          tanggal: {
-            gte: tanggalMulai,
-            lte: tanggalSelesai,
-          },
-          status: "hadir",
-          waktuKeluar: { not: null },
-          durasiJamKerja: { not: null },
-        },
+    let tarifPerJam = 0;
+    const riwayat = pegawai.kategoriJabatan?.tarifRiwayat ?? [];
+    if (riwayat.length > 0) {
+      const tarifCocok = riwayat.find((t) => {
+        const tMulai = new Date(t.berlakuMulai);
+        const tAkhir = t.berakhirPada ? new Date(t.berakhirPada) : null;
+        return tMulai <= tanggalSelesai && (!tAkhir || tAkhir >= tanggalMulai);
       });
+      const dipakai = tarifCocok ?? riwayat[0];
+      if (dipakai) {
+        tarifPerJam = Number(dipakai.tarifPerJam);
+      }
+    }
 
-      const totalHariKerja = absensiList.length;
-      const totalJamKerjaNumber = absensiList.reduce(
-        (sum, a) => sum + Number(a.durasiJamKerja || 0),
-        0,
-      );
-      const totalJamKerja = parseFloat(totalJamKerjaNumber.toFixed(2));
+    const rekap = absensiMap.get(pegawai.id) ?? { hari: 0, jam: 0 };
+    const totalHariKerja = rekap.hari;
+    const totalJamKerja = parseFloat(rekap.jam.toFixed(2));
+    const totalGaji = Math.round(totalJamKerja * tarifPerJam);
 
-      // 4. Kalkulasi Gaji sepenuhnya di Backend: Total Gaji = Total Jam Kerja Valid x Tarif Per Jam
-      const totalGajiNumber = Math.round(totalJamKerja * tarifPerJam);
-      const totalGaji = totalGajiNumber;
-
-      const recordGaji = await tx.penggajian.upsert({
+    antrian.push({
+      pegawai,
+      args: {
         where: {
           sekolahId_penggunaId_bulan_tahun: {
             sekolahId,
@@ -170,21 +182,30 @@ export const kalkulasiPenggajian = async (req: AuthRequest, res: Response) => {
           totalGaji,
           diperbaruiOleh: operatorId,
         },
-        include: {
-          pengguna: {
-            select: {
-              id: true,
-              namaLengkap: true,
-              email: true,
-              jabatan: true,
-            },
-          },
-        },
-      });
+      },
+    });
+  }
 
-      hasilKalkulasi.push(recordGaji);
-    }
-  });
+  const hasilKalkulasi: any[] = [];
+
+  for (let i = 0; i < antrian.length; i += UKURAN_BATCH) {
+    const potongan = antrian.slice(i, i + UKURAN_BATCH);
+    const hasilPotongan = await Promise.all(
+      potongan.map(async ({ pegawai, args }) => {
+        const record = await prisma.penggajian.upsert(args);
+        return {
+          ...record,
+          pengguna: {
+            id: pegawai.id,
+            namaLengkap: pegawai.namaLengkap,
+            email: pegawai.email,
+            jabatan: pegawai.jabatan,
+          },
+        };
+      }),
+    );
+    hasilKalkulasi.push(...hasilPotongan);
+  }
 
   return successResponse(
     res,
@@ -305,7 +326,6 @@ export const getPenggajianById = async (req: AuthRequest, res: Response) => {
     throw new AppError("Data penggajian tidak ditemukan", 404);
   }
 
-  // Ambil rincian absensi yang menyusun total jam kerja
   const rincianAbsensi = await prisma.absensi.findMany({
     where: {
       sekolahId,
@@ -314,7 +334,9 @@ export const getPenggajianById = async (req: AuthRequest, res: Response) => {
         gte: gaji.tanggalMulai,
         lte: gaji.tanggalSelesai,
       },
-      status: "hadir",
+      status: { in: STATUS_HADIR },
+      shiftKerjaId: { not: null },
+      waktuKeluar: { not: null },
       durasiJamKerja: { not: null },
     },
     select: {
