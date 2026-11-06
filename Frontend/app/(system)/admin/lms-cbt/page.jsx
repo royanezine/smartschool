@@ -19,14 +19,10 @@ import {
   GraduationCap,
   MonitorPlay,
   RefreshCw,
-  Server,
-  Settings2,
   Sparkles,
   Target,
   Users,
-  Wifi,
   Loader2,
-  AlertCircle,
   ExternalLink,
 } from "lucide-react";
 
@@ -460,14 +456,16 @@ export default function LMSCBTDashboardPage() {
   }, [materiList, tugasList, ujianList]);
 
   return (
-    <div className="theme-page min-h-screen flex">
+    <div className="flex h-screen overflow-hidden theme-page theme-text">
       <Sidebar />
 
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <Header />
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+        <div className="shrink-0">
+          <Header />
+        </div>
 
-        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto">
-          <div className="mx-auto w-full max-w-[1600px] px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
+        <main className="min-w-0 flex-1 overflow-y-auto">
+          <div className="w-full px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
             <section
               className="
                 relative mb-6 overflow-hidden rounded-[28px]
@@ -624,7 +622,7 @@ export default function LMSCBTDashboardPage() {
                 description="Akses cepat untuk pengelolaan seluruh komponen pembelajaran digital sekolah."
               />
 
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6">
                 {LMS_MENU.map((item) => {
                   const Icon = item.icon;
                   const theme = toneMap[item.tone] || toneMap.primary;
@@ -695,7 +693,7 @@ export default function LMSCBTDashboardPage() {
             </section>
 
             <section className="mb-7">
-              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-6">
                 <StatCard
                   label="Materi & Modul Ajar"
                   value={totalMateri}

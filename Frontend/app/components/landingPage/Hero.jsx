@@ -39,7 +39,7 @@ const highlights = [
   { icon: BookOpen, title: "Akademik", desc: "Nilai, jadwal & rapor" },
   { icon: ClipboardCheck, title: "Absensi", desc: "Guru & siswa real-time" },
   { icon: CreditCard, title: "Keuangan", desc: "SPP & tagihan digital" },
-  { icon: BellRing, title: "Notifikasi", desc: "Langsung ke orang tua" },
+  { icon: BellRing, title: "Notifikasi" },
 ];
 
 const sideNav = [
@@ -245,7 +245,7 @@ function DashboardPreview() {
           <p className="text-xs font-semibold text-slate-900">
             Notifikasi Terkirim
           </p>
-          <p className="text-[11px] text-slate-500">Ke guru &amp; orang tua</p>
+          <p className="text-[11px] text-slate-500"></p>
         </div>
       </motion.div>
     </motion.div>

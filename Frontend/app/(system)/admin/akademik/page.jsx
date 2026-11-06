@@ -16,7 +16,6 @@ import {
   Users,
   TrendingUp,
   AlertCircle,
-  CheckCircle2,
   ArrowUpRight,
   CalendarDays,
   School,
@@ -49,9 +48,6 @@ const getAvatarColor = (nama = "") => {
 
   return colors[nama.length % colors.length];
 };
-
-
-
 
 
 export default function AkademikPage() {
@@ -257,8 +253,7 @@ export default function AkademikPage() {
 
 
   return (
-    <div className="theme-page flex h-screen w-full overflow-hidden">
-
+    <div className="flex h-screen overflow-hidden theme-page theme-text">
       <Sidebar
         active="akademik"
         setActive={() => {}}
@@ -267,23 +262,22 @@ export default function AkademikPage() {
         role="admin"
       />
 
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+        <div className="shrink-0">
+          <Header
+            toggleSidebar={toggleSidebar}
+            notifications={[]}
+            user={{
+              name: "Admin Sekolah",
+              email: "admin@smartschool.com",
+              avatar: "AD",
+            }}
+          />
+        </div>
 
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <Header
-          toggleSidebar={toggleSidebar}
-          notifications={[]}
-          user={{
-            name: "Admin Sekolah",
-            email: "admin@smartschool.com",
-            avatar: "AD",
-          }}
-        />
-
-
-        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
-          <div className="mx-auto w-full max-w-[1500px] px-4 py-5 sm:px-6 sm:py-6 lg:px-8 xl:px-10">
-            <div className="space-y-6">
-
+        <main className="min-w-0 flex-1 overflow-y-auto">
+          <div className="w-full px-4 py-5 sm:px-6 sm:py-6 lg:px-8 xl:px-10">
+            <div className="w-full space-y-6">
 
               <section>
                 <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
@@ -347,7 +341,7 @@ export default function AkademikPage() {
 
 
               <section className="theme-card overflow-hidden rounded-xl border shadow-sm">
-                <div className="grid grid-cols-2 divide-x divide-[var(--color-border)] sm:grid-cols-3 lg:grid-cols-5">
+                <div className="grid grid-cols-2 divide-x divide-[var(--color-border)] sm:grid-cols-3 lg:grid-cols-5 2xl:grid-cols-6">
 
 
                   <div className="min-w-0 p-4 sm:p-5">
@@ -450,7 +444,7 @@ export default function AkademikPage() {
                   </div>
 
 
-                  <div className="col-span-2 min-w-0 p-4 sm:col-span-1 sm:p-5">
+                  <div className="col-span-2 min-w-0 p-4 sm:col-span-1 sm:p-5 2xl:col-span-2">
                     <div className="flex items-start gap-3">
 
                       <div className="theme-success flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">

@@ -543,7 +543,7 @@ export default function TambahFaceIdPage() {
   }, [previewUrl]);
 
   return (
-    <div className="flex h-screen w-full theme-page overflow-hidden">
+    <div className="flex h-screen overflow-hidden theme-page theme-text">
       <Sidebar
         active="pengguna"
         setActive={() => {}}
@@ -552,20 +552,22 @@ export default function TambahFaceIdPage() {
         role="admin"
       />
 
-      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
-        <Header
-          toggleSidebar={toggleSidebar}
-          notifications={[]}
-          user={{
-            name: "Admin Sekolah",
-            email: "admin@smartschool.com",
-            avatar: "AD",
-          }}
-        />
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+        <div className="shrink-0">
+          <Header
+            toggleSidebar={toggleSidebar}
+            notifications={[]}
+            user={{
+              name: "Admin Sekolah",
+              email: "admin@smartschool.com",
+              avatar: "AD",
+            }}
+          />
+        </div>
 
-        <main className="flex-1 overflow-y-auto">
-          <div className="p-4 sm:p-6 lg:p-8">
-            <div className="max-w-[1400px] mx-auto space-y-6">
+        <main className="min-w-0 flex-1 overflow-y-auto">
+          <div className="w-full p-4 sm:p-6 lg:p-8">
+            <div className="w-full space-y-6">
               <div className="flex items-center justify-between gap-3">
                 <button
                   type="button"
@@ -684,7 +686,7 @@ export default function TambahFaceIdPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1.25fr)_minmax(340px,0.75fr)] gap-6">
+              <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1.25fr)_minmax(340px,0.75fr)] 2xl:grid-cols-[minmax(0,1.5fr)_minmax(380px,0.8fr)] gap-6">
                 <section className={`theme-card rounded-2xl border theme-border ${themeCardShadow} overflow-hidden`}>
                   <div className="px-5 sm:px-6 py-4 border-b theme-border">
                     <div className="flex items-center justify-between gap-3">

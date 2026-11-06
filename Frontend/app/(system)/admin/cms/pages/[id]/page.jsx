@@ -12,10 +12,10 @@ import {
   ArrowLeft,
   Pencil,
   Trash2,
-    ChevronRight,
+  ChevronRight,
   Eye,
   ExternalLink,
-   Menu,
+  Menu,
   Globe2,
   FileText,
   LayoutTemplate,
@@ -46,63 +46,64 @@ export default function PageDetail() {
   const [deleting, setDeleting] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
 
-  const fetchPage = useCallback(async (showRefresh = false) => {
-    if (!id) {
-      setLoading(false);
-      return;
-    }
-
-    try {
-      setError("");
-
-      if (showRefresh) {
-        setRefreshing(true);
-      } else {
-        setLoading(true);
+  const fetchPage = useCallback(
+    async (showRefresh = false) => {
+      if (!id) {
+        setLoading(false);
+        return;
       }
 
-      const result = await apiFetch("/api/cms/halaman");
-      const responseData = result?.data;
+      try {
+        setError("");
 
-      let pages = [];
+        if (showRefresh) {
+          setRefreshing(true);
+        } else {
+          setLoading(true);
+        }
 
-      if (Array.isArray(responseData)) {
-        pages = responseData;
-      } else if (Array.isArray(responseData?.data)) {
-        pages = responseData.data;
-      } else if (Array.isArray(result)) {
-        pages = result;
+        const result = await apiFetch("/api/cms/halaman");
+        const responseData = result?.data;
+
+        let pages = [];
+
+        if (Array.isArray(responseData)) {
+          pages = responseData;
+        } else if (Array.isArray(responseData?.data)) {
+          pages = responseData.data;
+        } else if (Array.isArray(result)) {
+          pages = result;
+        }
+
+        const foundPage = pages.find(
+          (item) => String(item?.id) === String(id)
+        );
+
+        if (!foundPage) {
+          setPage(null);
+          setMenuKonfigurasi([]);
+          setError("Halaman yang kamu cari tidak ditemukan.");
+          return;
+        }
+
+        setPage(foundPage);
+
+        const menus = Array.isArray(foundPage?.menuKonfigurasi)
+          ? foundPage.menuKonfigurasi
+          : [];
+
+        setMenuKonfigurasi(menus);
+      } catch (err) {
+        console.error("Gagal mengambil detail halaman:", err);
+        setError(err?.message || "Gagal mengambil detail halaman dari server.");
+        setPage(null);
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
       }
-
-      const foundPage = pages.find(
-        (item) => String(item?.id) === String(id)
-      );
-
-      if (!foundPage) {
-  setPage(null);
-  setMenuKonfigurasi([]);
-  setError("Halaman yang kamu cari tidak ditemukan.");
-  return;
-}
-
-setPage(foundPage);
-
-const menus = Array.isArray(foundPage?.menuKonfigurasi)
-  ? foundPage.menuKonfigurasi
-  : [];
-
-setMenuKonfigurasi(menus);
-    } catch (err) {
-      console.error("Gagal mengambil detail halaman:", err);
-      setError(
-        err?.message || "Gagal mengambil detail halaman dari server."
-      );
-      setPage(null);
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, [id]);
+    },
+    [id]
+  );
 
   useEffect(() => {
     fetchPage();
@@ -131,43 +132,37 @@ setMenuKonfigurasi(menus);
     return value ? value.trim() : "";
   };
 
-const getWebsiteUrl = () => {
-  const slug = String(page?.slug || "").trim();
-  const tenant = getTenantSubdomain();
+  const getWebsiteUrl = () => {
+    const slug = String(page?.slug || "").trim();
+    const tenant = getTenantSubdomain();
 
-  if (!slug || !tenant) return "";
+    if (!slug || !tenant) return "";
 
-  return `/${encodeURIComponent(tenant)}/${encodeURIComponent(slug)}`;
-};
+    return `/${encodeURIComponent(tenant)}/${encodeURIComponent(slug)}`;
+  };
 
-const handleOpenWebsite = () => {
-  const slug = String(page?.slug || "").trim();
-  const tenant = getTenantSubdomain();
+  const handleOpenWebsite = () => {
+    const slug = String(page?.slug || "").trim();
+    const tenant = getTenantSubdomain();
 
-  console.log("CMS PAGE:", page);
-  console.log("TENANT:", tenant);
-  console.log("SLUG:", slug);
+    if (!tenant) {
+      setError(
+        "Subdomain tenant tidak ditemukan dari data halaman CMS. Periksa respons GET /api/cms/halaman."
+      );
+      return;
+    }
 
-  if (!tenant) {
-    setError(
-      "Subdomain tenant tidak ditemukan dari data halaman CMS. Periksa respons GET /api/cms/halaman."
-    );
-    return;
-  }
+    if (!slug) {
+      setError("Slug halaman belum tersedia.");
+      return;
+    }
 
-  if (!slug) {
-    setError("Slug halaman belum tersedia.");
-    return;
-  }
+    const url = `${window.location.origin}/${encodeURIComponent(
+      tenant
+    )}/${encodeURIComponent(slug)}`;
 
-  const url = `${window.location.origin}/${encodeURIComponent(
-    tenant
-  )}/${encodeURIComponent(slug)}`;
-
-  console.log("TARGET WEBSITE:", url);
-
-  window.open(url, "_blank", "noopener,noreferrer");
-};
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
 
   const handleCopyUrl = async () => {
     const url = getWebsiteUrl();
@@ -292,25 +287,33 @@ const handleOpenWebsite = () => {
 
   if (loading) {
     return (
-      <div className="theme-page flex min-h-screen w-full">
-        <Sidebar
-          active={active}
-          setActive={setActive}
-          collapsed={collapsed}
-          setCollapsed={setCollapsed}
-        />
-
-        <div className="flex min-w-0 flex-1 flex-col">
-          <Header
-            title="Detail Halaman"
-            user={{
-              name: "CMS Admin",
-              email: "cms@smartschool.com",
-              avatar: "CA",
-            }}
+      <div className="theme-page flex h-screen w-full overflow-hidden">
+        <div className="fixed inset-y-0 left-0 z-50">
+          <Sidebar
+            active={active}
+            setActive={setActive}
+            collapsed={collapsed}
+            setCollapsed={setCollapsed}
           />
+        </div>
 
-          <main className="flex flex-1 items-center justify-center p-6">
+        <div
+          className={`flex h-screen min-w-0 flex-1 flex-col overflow-hidden transition-[margin] duration-300 ${
+            collapsed ? "lg:ml-[88px]" : "lg:ml-[260px]"
+          }`}
+        >
+          <div className="shrink-0">
+            <Header
+              title="Detail Halaman"
+              user={{
+                name: "CMS Admin",
+                email: "cms@smartschool.com",
+                avatar: "CA",
+              }}
+            />
+          </div>
+
+          <main className="flex min-h-0 min-w-0 flex-1 items-center justify-center overflow-y-auto p-6">
             <div className="flex flex-col items-center text-center">
               <div className="theme-info mb-4 flex h-14 w-14 items-center justify-center rounded-2xl">
                 <Loader2 className="h-6 w-6 animate-spin" />
@@ -330,25 +333,33 @@ const handleOpenWebsite = () => {
 
   if (!page) {
     return (
-      <div className="theme-page flex min-h-screen w-full">
-        <Sidebar
-          active={active}
-          setActive={setActive}
-          collapsed={collapsed}
-          setCollapsed={setCollapsed}
-        />
-
-        <div className="flex min-w-0 flex-1 flex-col">
-          <Header
-            title="Detail Halaman"
-            user={{
-              name: "CMS Admin",
-              email: "cms@smartschool.com",
-              avatar: "CA",
-            }}
+      <div className="theme-page flex h-screen w-full overflow-hidden">
+        <div className="fixed inset-y-0 left-0 z-50">
+          <Sidebar
+            active={active}
+            setActive={setActive}
+            collapsed={collapsed}
+            setCollapsed={setCollapsed}
           />
+        </div>
 
-          <main className="flex flex-1 items-center justify-center p-6">
+        <div
+          className={`flex h-screen min-w-0 flex-1 flex-col overflow-hidden transition-[margin] duration-300 ${
+            collapsed ? "lg:ml-[88px]" : "lg:ml-[260px]"
+          }`}
+        >
+          <div className="shrink-0">
+            <Header
+              title="Detail Halaman"
+              user={{
+                name: "CMS Admin",
+                email: "cms@smartschool.com",
+                avatar: "CA",
+              }}
+            />
+          </div>
+
+          <main className="flex min-h-0 min-w-0 flex-1 items-center justify-center overflow-y-auto p-6">
             <div className="theme-card theme-border w-full max-w-md rounded-3xl border p-8 text-center shadow-sm">
               <div className="theme-danger mx-auto flex h-14 w-14 items-center justify-center rounded-2xl">
                 <AlertCircle className="h-6 w-6" />
@@ -388,27 +399,35 @@ const handleOpenWebsite = () => {
   }
 
   return (
-    <div className="theme-page flex min-h-screen w-full">
-      <Sidebar
-        active={active}
-        setActive={setActive}
-        collapsed={collapsed}
-        setCollapsed={setCollapsed}
-      />
-
-      <div className="flex min-w-0 flex-1 flex-col">
-        <Header
-          title="Detail Halaman"
-          user={{
-            name: "CMS Admin",
-            email: "cms@smartschool.com",
-            avatar: "CA",
-          }}
+    <div className="theme-page flex h-screen w-full overflow-hidden">
+      <div className="fixed inset-y-0 left-0 z-50">
+        <Sidebar
+          active={active}
+          setActive={setActive}
+          collapsed={collapsed}
+          setCollapsed={setCollapsed}
         />
+      </div>
 
-        <main className="min-w-0 flex-1 overflow-y-auto">
+      <div
+        className={`flex h-screen min-w-0 flex-1 flex-col overflow-hidden transition-[margin] duration-300 ${
+          collapsed ? "lg:ml-[88px]" : "lg:ml-[260px]"
+        }`}
+      >
+        <div className="shrink-0">
+          <Header
+            title="Detail Halaman"
+            user={{
+              name: "CMS Admin",
+              email: "cms@smartschool.com",
+              avatar: "CA",
+            }}
+          />
+        </div>
+
+        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
           <div className="w-full px-3 py-4 sm:px-5 sm:py-6 md:px-7 lg:px-9 xl:px-10">
-            <div className="mx-auto w-full max-w-[1500px]">
+            <div className="w-full">
               <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <Link
                   href="/admin/cms/pages"
@@ -425,7 +444,9 @@ const handleOpenWebsite = () => {
                   className="theme-card theme-border theme-text-secondary inline-flex w-fit items-center gap-2 rounded-xl border px-3.5 py-2 text-xs font-semibold shadow-sm transition theme-sidebar-hover disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   <RefreshCw
-                    className={`h-3.5 w-3.5 ${refreshing ? "animate-spin" : ""}`}
+                    className={`h-3.5 w-3.5 ${
+                      refreshing ? "animate-spin" : ""
+                    }`}
                   />
                   Refresh
                 </button>
@@ -438,9 +459,7 @@ const handleOpenWebsite = () => {
                   </div>
 
                   <div className="min-w-0 flex-1">
-                    <h3 className="text-sm font-bold">
-                      Terjadi kesalahan
-                    </h3>
+                    <h3 className="text-sm font-bold">Terjadi kesalahan</h3>
                     <p className="mt-1 text-xs leading-5">{error}</p>
                   </div>
 
@@ -482,7 +501,9 @@ const handleOpenWebsite = () => {
                       <span
                         className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-semibold ${statusStyle.wrapper}`}
                       >
-                        <span className={`h-1.5 w-1.5 rounded-full ${statusStyle.dot}`} />
+                        <span
+                          className={`h-1.5 w-1.5 rounded-full ${statusStyle.dot}`}
+                        />
                         {getStatusLabel()}
                       </span>
                     </div>
@@ -495,8 +516,7 @@ const handleOpenWebsite = () => {
 
                         <div className="theme-text-secondary mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs">
                           <span className="inline-flex items-center gap-1.5">
-                            <Globe2 className="h-3.5 w-3.5" />
-                            /{getSlug()}
+                            <Globe2 className="h-3.5 w-3.5" />/{getSlug()}
                           </span>
 
                           {tenantSubdomain && (
@@ -516,8 +536,6 @@ const handleOpenWebsite = () => {
                       </div>
 
                       <div className="flex flex-col gap-2 sm:flex-row lg:shrink-0">
-                      
-
                         <Link
                           href={`/admin/cms/pages/${page.id}/edit`}
                           className="theme-primary inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold shadow-lg transition"
@@ -575,7 +593,7 @@ const handleOpenWebsite = () => {
                 </div>
               </section>
 
-              <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_330px]">
+              <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(300px,0.34fr)] 2xl:grid-cols-[minmax(0,1fr)_minmax(340px,0.3fr)]">
                 <section className="theme-card theme-border min-w-0 overflow-hidden rounded-2xl border shadow-sm">
                   <div className="theme-border flex items-center justify-between border-b px-5 py-4 sm:px-6">
                     <div className="flex items-center gap-3">
@@ -599,22 +617,7 @@ const handleOpenWebsite = () => {
                   <div className="p-5 sm:p-7 lg:p-8">
                     {page?.konten ? (
                       <article
-                        className="cms-content theme-text-secondary max-w-none text-[15px] leading-8
-                          [&_p]:mb-5
-                          [&_h1]:mb-5 [&_h1]:mt-8 [&_h1]:text-3xl [&_h1]:font-bold [&_h1]:leading-tight [&_h1]:text-[var(--color-text)]
-                          [&_h2]:mb-4 [&_h2]:mt-8 [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:leading-tight [&_h2]:text-[var(--color-text)]
-                          [&_h3]:mb-3 [&_h3]:mt-6 [&_h3]:text-xl [&_h3]:font-bold [&_h3]:text-[var(--color-text)]
-                          [&_h4]:mb-2 [&_h4]:mt-5 [&_h4]:text-lg [&_h4]:font-bold [&_h4]:text-[var(--color-text)]
-                          [&_ul]:mb-5 [&_ul]:list-disc [&_ul]:space-y-2 [&_ul]:pl-6
-                          [&_ol]:mb-5 [&_ol]:list-decimal [&_ol]:space-y-2 [&_ol]:pl-6
-                          [&_li]:pl-1
-                          [&_a]:font-semibold [&_a]:text-[var(--color-primary)] [&_a]:underline [&_a]:underline-offset-2 [&_a]:hover:text-[var(--color-primary-hover)]
-                          [&_strong]:font-bold [&_strong]:text-[var(--color-text)]
-                          [&_blockquote]:my-6 [&_blockquote]:border-l-4 [&_blockquote]:border-[var(--color-primary)] [&_blockquote]:bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)] [&_blockquote]:px-5 [&_blockquote]:py-4 [&_blockquote]:text-[var(--color-text-secondary)]
-                          [&_img]:my-6 [&_img]:h-auto [&_img]:max-w-full [&_img]:rounded-2xl [&_img]:border [&_img]:border-[var(--color-border)]
-                          [&_table]:my-6 [&_table]:w-full [&_table]:border-collapse
-                          [&_th]:border [&_th]:border-[var(--color-border)] [&_th]:bg-[var(--color-table-header)] [&_th]:px-4 [&_th]:py-3 [&_th]:text-left [&_th]:font-semibold
-                          [&_td]:border [&_td]:border-[var(--color-border)] [&_td]:px-4 [&_td]:py-3"
+                        className="cms-content theme-text-secondary max-w-none text-[15px] leading-8 [&_p]:mb-5 [&_h1]:mb-5 [&_h1]:mt-8 [&_h1]:text-3xl [&_h1]:font-bold [&_h1]:leading-tight [&_h1]:text-[var(--color-text)] [&_h2]:mb-4 [&_h2]:mt-8 [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:leading-tight [&_h2]:text-[var(--color-text)] [&_h3]:mb-3 [&_h3]:mt-6 [&_h3]:text-xl [&_h3]:font-bold [&_h3]:text-[var(--color-text)] [&_h4]:mb-2 [&_h4]:mt-5 [&_h4]:text-lg [&_h4]:font-bold [&_h4]:text-[var(--color-text)] [&_ul]:mb-5 [&_ul]:list-disc [&_ul]:space-y-2 [&_ul]:pl-6 [&_ol]:mb-5 [&_ol]:list-decimal [&_ol]:space-y-2 [&_ol]:pl-6 [&_li]:pl-1 [&_a]:font-semibold [&_a]:text-[var(--color-primary)] [&_a]:underline [&_a]:underline-offset-2 [&_a]:hover:text-[var(--color-primary-hover)] [&_strong]:font-bold [&_strong]:text-[var(--color-text)] [&_blockquote]:my-6 [&_blockquote]:border-l-4 [&_blockquote]:border-[var(--color-primary)] [&_blockquote]:bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)] [&_blockquote]:px-5 [&_blockquote]:py-4 [&_blockquote]:text-[var(--color-text-secondary)] [&_img]:my-6 [&_img]:h-auto [&_img]:max-w-full [&_img]:rounded-2xl [&_img]:border [&_img]:border-[var(--color-border)] [&_table]:my-6 [&_table]:w-full [&_table]:border-collapse [&_th]:border [&_th]:border-[var(--color-border)] [&_th]:bg-[var(--color-table-header)] [&_th]:px-4 [&_th]:py-3 [&_th]:text-left [&_th]:font-semibold [&_td]:border [&_td]:border-[var(--color-border)] [&_td]:px-4 [&_td]:py-3"
                         dangerouslySetInnerHTML={{ __html: page.konten }}
                       />
                     ) : (
@@ -641,7 +644,7 @@ const handleOpenWebsite = () => {
                   </div>
                 </section>
 
-                <aside className="space-y-5">
+                <aside className="min-w-0 space-y-5">
                   <section className="theme-card theme-border rounded-2xl border p-5 shadow-sm">
                     <div className="flex items-center gap-3">
                       <div className="theme-info flex h-9 w-9 items-center justify-center rounded-xl">
@@ -658,8 +661,12 @@ const handleOpenWebsite = () => {
                     </div>
 
                     <div className="mt-5">
-                      <span className={`inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-semibold ${statusStyle.wrapper}`}>
-                        <span className={`h-1.5 w-1.5 rounded-full ${statusStyle.dot}`} />
+                      <span
+                        className={`inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-semibold ${statusStyle.wrapper}`}
+                      >
+                        <span
+                          className={`h-1.5 w-1.5 rounded-full ${statusStyle.dot}`}
+                        />
                         {getStatusLabel()}
                       </span>
                     </div>
@@ -673,140 +680,135 @@ const handleOpenWebsite = () => {
                     </div>
                   </section>
 
-                  
-<section className="theme-card theme-border rounded-2xl border p-5 shadow-sm">
-  <div className="flex items-center gap-3">
-    <div className="theme-info flex h-9 w-9 items-center justify-center rounded-xl">
-      <Menu className="h-4 w-4" />
-    </div>
+                  <section className="theme-card theme-border rounded-2xl border p-5 shadow-sm">
+                    <div className="flex items-center gap-3">
+                      <div className="theme-info flex h-9 w-9 items-center justify-center rounded-xl">
+                        <Menu className="h-4 w-4" />
+                      </div>
 
-    <div className="min-w-0">
-      <h3 className="theme-text text-sm font-bold">
-        Menu Konfigurasi
-      </h3>
-      <p className="theme-text-muted text-[11px]">
-        Menu navigasi yang menggunakan halaman ini
-      </p>
-    </div>
+                      <div className="min-w-0">
+                        <h3 className="theme-text text-sm font-bold">
+                          Menu Konfigurasi
+                        </h3>
+                        <p className="theme-text-muted text-[11px]">
+                          Menu navigasi yang menggunakan halaman ini
+                        </p>
+                      </div>
 
-    <span className="theme-card-soft theme-text-secondary ml-auto rounded-lg px-2.5 py-1 text-xs font-bold">
-      {menuKonfigurasi.length}
-    </span>
-  </div>
+                      <span className="theme-card-soft theme-text-secondary ml-auto rounded-lg px-2.5 py-1 text-xs font-bold">
+                        {menuKonfigurasi.length}
+                      </span>
+                    </div>
 
-  {menuKonfigurasi.length > 0 ? (
-    <div className="mt-4 space-y-3">
-      {menuKonfigurasi.map((menu, index) => {
-        const namaMenu =
-          menu?.nama ||
-          menu?.judul ||
-          menu?.label ||
-          menu?.namaMenu ||
-          menu?.title ||
-          "Menu tanpa nama";
+                    {menuKonfigurasi.length > 0 ? (
+                      <div className="mt-4 space-y-3">
+                        {menuKonfigurasi.map((menu, index) => {
+                          const namaMenu =
+                            menu?.nama ||
+                            menu?.judul ||
+                            menu?.label ||
+                            menu?.namaMenu ||
+                            menu?.title ||
+                            "Menu tanpa nama";
 
-        const urlMenu =
-          menu?.url ||
-          menu?.link ||
-          menu?.path ||
-          menu?.href ||
-          "";
+                          const urlMenu =
+                            menu?.url ||
+                            menu?.link ||
+                            menu?.path ||
+                            menu?.href ||
+                            "";
 
-        const statusMenu = String(
-          menu?.status || menu?.aktif || ""
-        ).toLowerCase();
+                          const aktif =
+                            menu?.aktif === true ||
+                            menu?.isActive === true ||
+                            menu?.status === "aktif" ||
+                            menu?.status === "active";
 
-        const aktif =
-          menu?.aktif === true ||
-          menu?.isActive === true ||
-          menu?.status === "aktif" ||
-          menu?.status === "active";
+                          return (
+                            <div
+                              key={menu?.id || `${namaMenu}-${index}`}
+                              className="theme-card-soft theme-border rounded-xl border p-3"
+                            >
+                              <div className="flex items-start gap-3">
+                                <div className="theme-card theme-border flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border">
+                                  <Menu className="theme-text-secondary h-4 w-4" />
+                                </div>
 
-        return (
-          <div
-            key={menu?.id || `${namaMenu}-${index}`}
-            className="theme-card-soft theme-border rounded-xl border p-3"
-          >
-            <div className="flex items-start gap-3">
-              <div className="theme-card theme-border flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border">
-                <Menu className="theme-text-secondary h-4 w-4" />
-              </div>
+                                <div className="min-w-0 flex-1">
+                                  <p className="theme-text break-words text-sm font-semibold">
+                                    {namaMenu}
+                                  </p>
 
-              <div className="min-w-0 flex-1">
-                <p className="theme-text break-words text-sm font-semibold">
-                  {namaMenu}
-                </p>
+                                  {urlMenu ? (
+                                    <p className="theme-text-muted mt-1 break-all text-xs">
+                                      {urlMenu}
+                                    </p>
+                                  ) : (
+                                    <p className="theme-text-muted mt-1 text-xs">
+                                      URL menu tidak tersedia
+                                    </p>
+                                  )}
 
-                {urlMenu ? (
-                  <p className="theme-text-muted mt-1 break-all text-xs">
-                    {urlMenu}
-                  </p>
-                ) : (
-                  <p className="theme-text-muted mt-1 text-xs">
-                    URL menu tidak tersedia
-                  </p>
-                )}
+                                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                                    {menu?.urutan !== undefined && (
+                                      <span className="theme-text-muted text-[10px]">
+                                        Urutan: {menu.urutan}
+                                      </span>
+                                    )}
 
-                <div className="mt-2 flex flex-wrap items-center gap-2">
-                  {menu?.urutan !== undefined && (
-                    <span className="theme-text-muted text-[10px]">
-                      Urutan: {menu.urutan}
-                    </span>
-                  )}
+                                    {menu?.posisi && (
+                                      <span className="theme-card theme-border theme-text-secondary rounded-md border px-2 py-1 text-[10px]">
+                                        {menu.posisi}
+                                      </span>
+                                    )}
 
-                  {menu?.posisi && (
-                    <span className="theme-card theme-border theme-text-secondary rounded-md border px-2 py-1 text-[10px]">
-                      {menu.posisi}
-                    </span>
-                  )}
+                                    {(menu?.aktif !== undefined ||
+                                      menu?.isActive !== undefined ||
+                                      menu?.status !== undefined) && (
+                                      <span
+                                        className={`rounded-md px-2 py-1 text-[10px] font-semibold ${
+                                          aktif
+                                            ? "theme-success"
+                                            : "theme-card theme-text-muted"
+                                        }`}
+                                      >
+                                        {aktif ? "Aktif" : "Nonaktif"}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
 
-                  {(menu?.aktif !== undefined ||
-                    menu?.isActive !== undefined ||
-                    menu?.status !== undefined) && (
-                    <span
-                      className={`rounded-md px-2 py-1 text-[10px] font-semibold ${
-                        aktif
-                          ? "theme-success"
-                          : "theme-card theme-text-muted"
-                      }`}
-                    >
-                      {aktif ? "Aktif" : "Nonaktif"}
-                    </span>
-                  )}
-                </div>
-              </div>
+                                <ChevronRight className="theme-text-muted mt-1 h-4 w-4 shrink-0" />
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <div className="theme-card-soft mt-4 rounded-xl p-4 text-center">
+                        <Menu className="theme-text-muted mx-auto h-6 w-6" />
 
-              <ChevronRight className="theme-text-muted mt-1 h-4 w-4 shrink-0" />
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  ) : (
-    <div className="theme-card-soft mt-4 rounded-xl p-4 text-center">
-      <Menu className="theme-text-muted mx-auto h-6 w-6" />
+                        <p className="theme-text-secondary mt-2 text-xs font-semibold">
+                          Belum ada menu konfigurasi
+                        </p>
 
-      <p className="theme-text-secondary mt-2 text-xs font-semibold">
-        Belum ada menu konfigurasi
-      </p>
+                        <p className="theme-text-muted mt-1 text-[11px] leading-5">
+                          Belum ada menu navigasi yang terhubung dengan halaman
+                          ini.
+                        </p>
+                      </div>
+                    )}
 
-      <p className="theme-text-muted mt-1 text-[11px] leading-5">
-        Belum ada menu navigasi yang terhubung dengan halaman ini.
-      </p>
-    </div>
-  )}
-
-  <div className="theme-border mt-4 border-t pt-3">
-    <Link
-      href="/admin/cms/menu"
-      className="theme-text-secondary inline-flex items-center gap-2 text-xs font-semibold transition hover:text-[var(--color-primary)]"
-    >
-      Kelola Menu Konfigurasi
-      <ChevronRight className="h-3.5 w-3.5" />
-    </Link>
-  </div>
-</section>
-
+                    <div className="theme-border mt-4 border-t pt-3">
+                      <Link
+                        href="/admin/cms/menu"
+                        className="theme-text-secondary inline-flex items-center gap-2 text-xs font-semibold transition hover:text-[var(--color-primary)]"
+                      >
+                        Kelola Menu Konfigurasi
+                        <ChevronRight className="h-3.5 w-3.5" />
+                      </Link>
+                    </div>
+                  </section>
 
                   <section className="theme-card theme-border rounded-2xl border p-5 shadow-sm">
                     <div className="flex items-center gap-3">
@@ -843,7 +845,12 @@ const handleOpenWebsite = () => {
                       </p>
                       <p className="theme-text-secondary mt-1 break-all text-xs leading-5">
                         {websiteUrl
-                          ? new URL(websiteUrl, typeof window !== "undefined" ? window.location.origin : "http://localhost").toString()
+                          ? new URL(
+                              websiteUrl,
+                              typeof window !== "undefined"
+                                ? window.location.origin
+                                : "http://localhost"
+                            ).toString()
                           : "URL belum dapat dibuat karena subdomain tidak tersedia"}
                       </p>
                     </div>
@@ -970,7 +977,7 @@ const handleOpenWebsite = () => {
               <p className="theme-text-secondary mt-2 text-sm leading-6">
                 Kamu akan menghapus halaman{" "}
                 <span className="theme-text font-semibold">
-                  "{getTitle()}"
+                  &quot;{getTitle()}&quot;
                 </span>
                 .
               </p>

@@ -12,6 +12,10 @@ import {
   Info,
   CalendarDays,
   Clock3,
+  BookOpen,
+  UserRound,
+  FileText,
+  Sparkles,
 } from "lucide-react";
 
 import Sidebar from "@/app/components/Sidebar";
@@ -140,257 +144,323 @@ export default function EditUjianAdminPage() {
   };
 
   return (
-    <div className="min-h-screen theme-page flex">
+    <div className="flex h-screen overflow-hidden theme-page theme-text">
       <Sidebar />
 
-      <div className="flex-1 min-w-0 flex flex-col">
-        <Header />
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+        <div className="shrink-0">
+          <Header />
+        </div>
 
-        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto px-4 py-6 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-2 text-sm theme-text-secondary mb-4">
-            <Link
-              href="/admin/lms-cbt/ujian"
-              className="hover:text-[var(--color-primary)] transition"
-            >
-              Ujian CBT Online
-            </Link>
-            <span>/</span>
-            <Link
-              href={`/admin/lms-cbt/ujian/${id}`}
-              className="hover:text-[var(--color-primary)] transition truncate max-w-xs"
-            >
-              {ujianData?.judul || "Detail Ujian"}
-            </Link>
-            <span>/</span>
-            <span className="theme-text font-medium">Edit Ujian</span>
-          </div>
-
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-            <div className="flex items-center gap-3">
+        <main className="min-w-0 flex-1 overflow-y-auto">
+          <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
+            
+            <div className="flex items-center gap-2 text-sm theme-text-secondary mb-4">
+              <Link
+                href="/admin/lms-cbt/ujian"
+                className="hover:text-[var(--color-primary)] transition"
+              >
+                Ujian CBT Online
+              </Link>
+              <span>/</span>
               <Link
                 href={`/admin/lms-cbt/ujian/${id}`}
-                className="
-                  p-2 border theme-border rounded-lg theme-text-secondary
-                  hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]
-                  hover:theme-text transition
-                "
-                title="Kembali ke rincian ujian"
+                className="hover:text-[var(--color-primary)] transition truncate max-w-xs"
               >
-                <ArrowLeft size={18} />
+                {ujianData?.judul || "Detail Ujian"}
               </Link>
-              <div>
-                <h1 className="text-2xl font-bold theme-text tracking-tight">
-                  Edit Ujian CBT
-                </h1>
-                <p className="text-sm theme-text-secondary mt-0.5">
-                  Perbarui judul, jenis, durasi, jadwal, nilai kelulusan, dan status publikasi.
+              <span>/</span>
+              <span className="theme-text font-medium">Edit Ujian</span>
+            </div>
+
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+              <div className="flex items-center gap-3">
+                <Link
+                  href={`/admin/lms-cbt/ujian/${id}`}
+                  className="
+                    p-2 border theme-border rounded-lg theme-text-secondary
+                    hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]
+                    hover:theme-text transition
+                  "
+                  title="Kembali ke rincian ujian"
+                >
+                  <ArrowLeft size={18} />
+                </Link>
+                <div>
+                  <h1 className="text-2xl font-bold theme-text tracking-tight">
+                    Edit Ujian CBT
+                  </h1>
+                  <p className="text-sm theme-text-secondary mt-0.5">
+                    Perbarui judul, jenis, durasi, jadwal, nilai kelulusan, dan status publikasi.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {success && (
+              <div className="mb-6 p-4 rounded-xl border border-[color-mix(in_srgb,var(--color-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)] flex items-center gap-2.5 text-sm text-[var(--color-success)]">
+                <CheckCircle2 size={18} />
+                <span className="font-medium">{success}</span>
+              </div>
+            )}
+
+            {loading ? (
+              <div className="w-full p-12 text-center theme-card border theme-border rounded-xl">
+                <Loader2
+                  size={32}
+                  className="animate-spin text-[var(--color-primary)] mx-auto mb-3"
+                />
+                <p className="text-sm theme-text-secondary">
+                  Memuat data ujian dari server...
                 </p>
               </div>
-            </div>
-          </div>
-
-          {success && (
-            <div className="max-w-3xl mb-6 p-4 rounded-xl border border-[color-mix(in_srgb,var(--color-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)] flex items-center gap-2.5 text-sm text-[var(--color-success)]">
-              <CheckCircle2 size={18} />
-              <span className="font-medium">{success}</span>
-            </div>
-          )}
-
-          {loading ? (
-            <div className="max-w-3xl p-12 text-center theme-card border theme-border rounded-xl">
-              <Loader2
-                size={32}
-                className="animate-spin text-[var(--color-primary)] mx-auto mb-3"
-              />
-              <p className="text-sm theme-text-secondary">
-                Memuat data ujian dari server...
-              </p>
-            </div>
-          ) : error && !ujianData ? (
-            <div className="max-w-3xl p-6 rounded-xl border border-[color-mix(in_srgb,var(--color-danger)_30%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_10%,transparent)] flex items-start gap-3 text-sm text-[var(--color-danger)]">
-              <AlertCircle size={20} className="mt-0.5 shrink-0" />
-              <div>
-                <p className="font-semibold">Gagal Memuat Data Ujian</p>
-                <p className="mt-1">{error}</p>
-                <Link
-                  href="/admin/lms-cbt/ujian"
-                  className="inline-block mt-3 px-3.5 py-1.5 bg-[var(--color-danger)] text-white rounded-md text-xs font-medium hover:opacity-90 transition"
-                >
-                  Kembali ke Daftar Ujian
-                </Link>
-              </div>
-            </div>
-          ) : (
-            <div className="max-w-3xl theme-card border theme-border rounded-xl p-6 shadow-sm">
-              <div className="mb-6 p-4 rounded-xl theme-card-soft border theme-border flex flex-wrap items-center justify-between gap-3 text-xs">
+            ) : error && !ujianData ? (
+              <div className="w-full p-6 rounded-xl border border-[color-mix(in_srgb,var(--color-danger)_30%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_10%,transparent)] flex items-start gap-3 text-sm text-[var(--color-danger)]">
+                <AlertCircle size={20} className="mt-0.5 shrink-0" />
                 <div>
-                  <span className="theme-text-muted block text-[11px]">Kelas & Mata Pelajaran:</span>
-                  <span className="font-semibold theme-text text-sm">
-                    {ujianData?.kelasMapel?.kelas?.nama || "-"} • {ujianData?.kelasMapel?.mataPelajaran?.nama || "-"}
-                  </span>
-                </div>
-                <div>
-                  <span className="theme-text-muted block text-[11px]">Guru Pengajar:</span>
-                  <span className="font-medium theme-text">
-                    {ujianData?.kelasMapel?.guruPengajar?.namaLengkap || "-"}
-                  </span>
-                </div>
-                <div>
-                  <span className="theme-text-muted block text-[11px]">Total Soal:</span>
-                  <span className="font-semibold theme-text text-[var(--color-primary)]">
-                    {ujianData?.soalAsesmen?.length || 0} Soal
-                  </span>
+                  <p className="font-semibold">Gagal Memuat Data Ujian</p>
+                  <p className="mt-1">{error}</p>
+                  <Link
+                    href="/admin/lms-cbt/ujian"
+                    className="inline-block mt-3 px-3.5 py-1.5 bg-[var(--color-danger)] text-white rounded-md text-xs font-medium hover:opacity-90 transition"
+                  >
+                    Kembali ke Daftar Ujian
+                  </Link>
                 </div>
               </div>
-
-              <form onSubmit={handleSubmit} className="space-y-5">
-                {error && (
-                  <div className="p-4 rounded-lg border border-[color-mix(in_srgb,var(--color-danger)_30%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_10%,transparent)] text-xs text-[var(--color-danger)] flex items-start gap-2.5">
-                    <AlertCircle size={18} className="shrink-0 mt-0.5" />
-                    <div>
-                      <p className="font-semibold">Gagal Menyimpan Perubahan</p>
-                      <p className="mt-0.5 leading-relaxed">{error}</p>
+            ) : (
+              <div className="w-full grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_350px] 2xl:grid-cols-[minmax(0,1fr)_400px] gap-6 items-start">
+                
+                <div className="theme-card border theme-border rounded-xl p-6 shadow-sm">
+                  <div className="mb-6 p-4 rounded-xl theme-card-soft border theme-border flex flex-wrap items-center justify-between gap-4 text-xs">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg theme-info flex items-center justify-center">
+                        <BookOpen size={16} className="text-[var(--color-primary)]" />
+                      </div>
+                      <div>
+                        <span className="theme-text-muted block text-[11px]">Kelas & Mata Pelajaran:</span>
+                        <span className="font-semibold theme-text text-sm">
+                          {ujianData?.kelasMapel?.kelas?.nama || "-"} • {ujianData?.kelasMapel?.mataPelajaran?.nama || "-"}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg theme-info flex items-center justify-center">
+                        <UserRound size={16} className="text-[var(--color-primary)]" />
+                      </div>
+                      <div>
+                        <span className="theme-text-muted block text-[11px]">Guru Pengajar:</span>
+                        <span className="font-medium theme-text">
+                          {ujianData?.kelasMapel?.guruPengajar?.namaLengkap || "-"}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg theme-info flex items-center justify-center">
+                        <FileText size={16} className="text-[var(--color-primary)]" />
+                      </div>
+                      <div>
+                        <span className="theme-text-muted block text-[11px]">Total Soal:</span>
+                        <span className="font-semibold theme-text text-[var(--color-primary)]">
+                          {ujianData?.soalAsesmen?.length || 0} Soal
+                        </span>
+                      </div>
                     </div>
                   </div>
-                )}
 
-                <div>
-                  <label className="block text-xs font-semibold theme-text uppercase tracking-wider mb-2">
-                    Judul / Nama Ujian *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={form.judul}
-                    onChange={(e) => update("judul", e.target.value)}
-                    placeholder="Contoh: Penilaian Harian Bab 2 Fisika Terapan"
-                    className="theme-input w-full px-3.5 py-2.5 border theme-border rounded-lg text-sm theme-text outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_15%,transparent)] focus:border-[var(--color-primary)]"
-                  />
-                </div>
+                  <form onSubmit={handleSubmit} className="space-y-5">
+                    {error && (
+                      <div className="p-4 rounded-lg border border-[color-mix(in_srgb,var(--color-danger)_30%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_10%,transparent)] text-xs text-[var(--color-danger)] flex items-start gap-2.5">
+                        <AlertCircle size={18} className="shrink-0 mt-0.5" />
+                        <div>
+                          <p className="font-semibold">Gagal Menyimpan Perubahan</p>
+                          <p className="mt-0.5 leading-relaxed">{error}</p>
+                        </div>
+                      </div>
+                    )}
 
-                <div>
-                  <label className="block text-xs font-semibold theme-text uppercase tracking-wider mb-2">
-                    Deskripsi / Petunjuk Ujian
-                  </label>
-                  <textarea
-                    rows={3}
-                    value={form.deskripsi}
-                    onChange={(e) => update("deskripsi", e.target.value)}
-                    placeholder="Petunjuk atau catatan bagi siswa..."
-                    className="theme-input w-full px-3.5 py-2.5 border theme-border rounded-lg text-sm theme-text outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_15%,transparent)] focus:border-[var(--color-primary)]"
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-semibold theme-text uppercase tracking-wider mb-2">
-                      Tipe / Jenis Ujian *
-                    </label>
-                    <select
-                      value={form.jenis}
-                      onChange={(e) => update("jenis", e.target.value)}
-                      className="theme-input w-full px-3.5 py-2.5 border theme-border rounded-lg text-sm theme-text-secondary outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_15%,transparent)] focus:border-[var(--color-primary)]"
-                    >
-                      <option value="Harian">Ulangan Harian</option>
-                      <option value="UTS">UTS (Tengah Semester)</option>
-                      <option value="UAS">UAS (Akhir Semester)</option>
-                      <option value="Kuis">Kuis</option>
-                      <option value="Lainnya">Lainnya</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold theme-text uppercase tracking-wider mb-2">
-                      Durasi Pengerjaan (Menit) *
-                    </label>
-                    <input
-                      type="number"
-                      min={5}
-                      required
-                      value={form.durasi}
-                      onChange={(e) => update("durasi", e.target.value)}
-                      className="theme-input w-full px-3.5 py-2.5 border theme-border rounded-lg text-sm theme-text outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_15%,transparent)] focus:border-[var(--color-primary)]"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-semibold theme-text uppercase tracking-wider mb-2">
-                      Waktu Mulai
-                    </label>
-                    <input
-                      type="datetime-local"
-                      value={form.waktuMulai}
-                      onChange={(e) => update("waktuMulai", e.target.value)}
-                      className="theme-input w-full px-3.5 py-2.5 border theme-border rounded-lg text-sm theme-text-secondary outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_15%,transparent)] focus:border-[var(--color-primary)]"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold theme-text uppercase tracking-wider mb-2">
-                      Waktu Selesai
-                    </label>
-                    <input
-                      type="datetime-local"
-                      value={form.waktuSelesai}
-                      onChange={(e) => update("waktuSelesai", e.target.value)}
-                      className="theme-input w-full px-3.5 py-2.5 border theme-border rounded-lg text-sm theme-text-secondary outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_15%,transparent)] focus:border-[var(--color-primary)]"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center pt-2">
-                  <div>
-                    <label className="block text-xs font-semibold theme-text uppercase tracking-wider mb-2">
-                      Nilai Kelulusan (KKM)
-                    </label>
-                    <input
-                      type="number"
-                      min={0}
-                      max={100}
-                      value={form.nilaiKelulusan}
-                      onChange={(e) => update("nilaiKelulusan", e.target.value)}
-                      placeholder="Contoh: 75"
-                      className="theme-input w-full px-3.5 py-2.5 border theme-border rounded-lg text-sm theme-text outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_15%,transparent)] focus:border-[var(--color-primary)]"
-                    />
-                  </div>
-
-                  <div className="pt-4 sm:pt-6">
-                    <label className="flex items-center gap-2.5 cursor-pointer select-none">
+                    <div>
+                      <label className="block text-xs font-semibold theme-text uppercase tracking-wider mb-2">
+                        Judul / Nama Ujian *
+                      </label>
                       <input
-                        type="checkbox"
-                        checked={form.dipublikasikan}
-                        onChange={(e) => update("dipublikasikan", e.target.checked)}
-                        className="rounded border-gray-300 text-[var(--color-primary)] focus:ring-[var(--color-primary)] h-4 w-4"
+                        type="text"
+                        required
+                        value={form.judul}
+                        onChange={(e) => update("judul", e.target.value)}
+                        placeholder="Contoh: Penilaian Harian Bab 2 Fisika Terapan"
+                        className="theme-input w-full px-3.5 py-2.5 border theme-border rounded-lg text-sm theme-text outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_15%,transparent)] focus:border-[var(--color-primary)]"
                       />
-                      <span className="text-xs font-medium theme-text">
-                        Publikasikan Ujian (Dapat Diakses Siswa)
-                      </span>
-                    </label>
-                  </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold theme-text uppercase tracking-wider mb-2">
+                        Deskripsi / Petunjuk Ujian
+                      </label>
+                      <textarea
+                        rows={3}
+                        value={form.deskripsi}
+                        onChange={(e) => update("deskripsi", e.target.value)}
+                        placeholder="Petunjuk atau catatan bagi siswa..."
+                        className="theme-input w-full px-3.5 py-2.5 border theme-border rounded-lg text-sm theme-text outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_15%,transparent)] focus:border-[var(--color-primary)]"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-semibold theme-text uppercase tracking-wider mb-2">
+                          Tipe / Jenis Ujian *
+                        </label>
+                        <select
+                          value={form.jenis}
+                          onChange={(e) => update("jenis", e.target.value)}
+                          className="theme-input w-full px-3.5 py-2.5 border theme-border rounded-lg text-sm theme-text-secondary outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_15%,transparent)] focus:border-[var(--color-primary)]"
+                        >
+                          <option value="Harian">Ulangan Harian</option>
+                          <option value="UTS">UTS (Tengah Semester)</option>
+                          <option value="UAS">UAS (Akhir Semester)</option>
+                          <option value="Kuis">Kuis</option>
+                          <option value="Lainnya">Lainnya</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-semibold theme-text uppercase tracking-wider mb-2">
+                          Durasi Pengerjaan (Menit) *
+                        </label>
+                        <input
+                          type="number"
+                          min={5}
+                          required
+                          value={form.durasi}
+                          onChange={(e) => update("durasi", e.target.value)}
+                          className="theme-input w-full px-3.5 py-2.5 border theme-border rounded-lg text-sm theme-text outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_15%,transparent)] focus:border-[var(--color-primary)]"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-semibold theme-text uppercase tracking-wider mb-2">
+                          Waktu Mulai
+                        </label>
+                        <input
+                          type="datetime-local"
+                          value={form.waktuMulai}
+                          onChange={(e) => update("waktuMulai", e.target.value)}
+                          className="theme-input w-full px-3.5 py-2.5 border theme-border rounded-lg text-sm theme-text-secondary outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_15%,transparent)] focus:border-[var(--color-primary)]"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-semibold theme-text uppercase tracking-wider mb-2">
+                          Waktu Selesai
+                        </label>
+                        <input
+                          type="datetime-local"
+                          value={form.waktuSelesai}
+                          onChange={(e) => update("waktuSelesai", e.target.value)}
+                          className="theme-input w-full px-3.5 py-2.5 border theme-border rounded-lg text-sm theme-text-secondary outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_15%,transparent)] focus:border-[var(--color-primary)]"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center pt-2">
+                      <div>
+                        <label className="block text-xs font-semibold theme-text uppercase tracking-wider mb-2">
+                          Nilai Kelulusan (KKM)
+                        </label>
+                        <input
+                          type="number"
+                          min={0}
+                          max={100}
+                          value={form.nilaiKelulusan}
+                          onChange={(e) => update("nilaiKelulusan", e.target.value)}
+                          placeholder="Contoh: 75"
+                          className="theme-input w-full px-3.5 py-2.5 border theme-border rounded-lg text-sm theme-text outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_15%,transparent)] focus:border-[var(--color-primary)]"
+                        />
+                      </div>
+
+                      <div className="pt-4 sm:pt-6">
+                        <label className="flex items-center gap-2.5 cursor-pointer select-none">
+                          <input
+                            type="checkbox"
+                            checked={form.dipublikasikan}
+                            onChange={(e) => update("dipublikasikan", e.target.checked)}
+                            className="rounded border-gray-300 text-[var(--color-primary)] focus:ring-[var(--color-primary)] h-4 w-4"
+                          />
+                          <span className="text-xs font-medium theme-text">
+                            Publikasikan Ujian (Dapat Diakses Siswa)
+                          </span>
+                        </label>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-end gap-3 pt-6 border-t theme-border">
+                      <Link
+                        href={`/admin/lms-cbt/ujian/${id}`}
+                        className="px-4 py-2.5 border theme-border rounded-lg text-sm font-medium theme-text-secondary hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] transition"
+                      >
+                        Batal
+                      </Link>
+
+                      <button
+                        type="submit"
+                        disabled={submitting}
+                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-[var(--color-primary)] text-white rounded-lg text-sm font-medium hover:opacity-90 transition disabled:opacity-50 shadow-sm"
+                      >
+                        {submitting && <Loader2 size={16} className="animate-spin" />}
+                        <span>{submitting ? "Menyimpan..." : "Simpan Perubahan"}</span>
+                      </button>
+                    </div>
+                  </form>
                 </div>
 
-                <div className="flex items-center justify-end gap-3 pt-6 border-t theme-border">
-                  <Link
-                    href={`/admin/lms-cbt/ujian/${id}`}
-                    className="px-4 py-2.5 border theme-border rounded-lg text-sm font-medium theme-text-secondary hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] transition"
-                  >
-                    Batal
-                  </Link>
+                <aside className="space-y-5">
+                  <section className="theme-card border theme-border rounded-xl p-5 shadow-sm">
+                    <div className="flex items-center gap-2 mb-4">
+                      <div className="w-8 h-8 rounded-lg theme-info flex items-center justify-center">
+                        <Info size={16} className="text-[var(--color-primary)]" />
+                      </div>
+                      <h2 className="text-sm font-bold theme-text">Panduan Edit</h2>
+                    </div>
+                    <div className="space-y-4">
+                      <div className="flex items-start gap-3">
+                        <div className="w-6 h-6 rounded-md bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] text-[var(--color-primary)] flex items-center justify-center text-[10px] font-bold shrink-0">1</div>
+                        <p className="text-xs leading-relaxed theme-text-secondary">
+                          Perubahan pada judul dan deskripsi akan langsung terlihat oleh siswa jika ujian sudah dipublikasikan.
+                        </p>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <div className="w-6 h-6 rounded-md bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] text-[var(--color-primary)] flex items-center justify-center text-[10px] font-bold shrink-0">2</div>
+                        <p className="text-xs leading-relaxed theme-text-secondary">
+                          Pastikan durasi ujian sesuai dengan alokasi waktu yang ditentukan (dalam menit).
+                        </p>
+                      </div>
+                      <div className="flex items-start gap-3">
+                        <div className="w-6 h-6 rounded-md bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] text-[var(--color-primary)] flex items-center justify-center text-[10px] font-bold shrink-0">3</div>
+                        <p className="text-xs leading-relaxed theme-text-secondary">
+                          Mengubah jadwal (waktu mulai/selesai) akan mempengaruhi akses siswa ke ujian.
+                        </p>
+                      </div>
+                    </div>
+                  </section>
 
-                  <button
-                    type="submit"
-                    disabled={submitting}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-[var(--color-primary)] text-white rounded-lg text-sm font-medium hover:opacity-90 transition disabled:opacity-50 shadow-sm"
-                  >
-                    {submitting && <Loader2 size={16} className="animate-spin" />}
-                    <span>{submitting ? "Menyimpan..." : "Simpan Perubahan"}</span>
-                  </button>
-                </div>
-              </form>
-            </div>
-          )}
+                  <section className="rounded-xl border border-[color-mix(in_srgb,var(--color-warning)_30%,transparent)] bg-[color-mix(in_srgb,var(--color-warning)_10%,transparent)] p-5">
+                    <div className="flex items-start gap-3">
+                      <AlertCircle size={18} className="mt-0.5 shrink-0 text-[var(--color-warning)]" />
+                      <div>
+                        <h3 className="text-xs font-bold text-[var(--color-warning)]">Perhatian</h3>
+                        <p className="mt-1 text-[11px] leading-relaxed text-[var(--color-warning)] opacity-90">
+                          Jika ujian sudah pernah dikerjakan oleh siswa, mengubah KKM atau durasi mungkin dapat mempengaruhi hasil evaluasi. Harap berhati-hati.
+                        </p>
+                      </div>
+                    </div>
+                  </section>
+                </aside>
+              </div>
+            )}
+          </div>
         </main>
       </div>
     </div>

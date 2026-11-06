@@ -2,13 +2,13 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
 import {
   getAkunKas,
   getJurnalKas,
   getLaporanKas,
-  createJurnalKas,
 } from "@/services/jurnalKas.service";
 import {
   getRingkasanTagihan,
@@ -24,7 +24,6 @@ import {
   Download,
   Plus,
   Eye,
-  X,
   ChevronLeft,
   ChevronRight,
   Filter,
@@ -37,10 +36,8 @@ import {
   CheckCircle2,
   Clock,
   Building2,
-  Printer,
   Loader2,
 } from "lucide-react";
-
 
 const themeCardShadow =
   "shadow-[0_1px_3px_color-mix(in_srgb,var(--color-text)_6%,transparent)]";
@@ -65,7 +62,6 @@ const themePrimarySurface =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]";
 
-
 function formatRupiah(value) {
   const amount = Number(value ?? 0);
   return new Intl.NumberFormat("id-ID", {
@@ -85,7 +81,6 @@ function formatTanggal(value) {
     year: "numeric",
   }).format(date);
 }
-
 
 function formatKategori(value) {
   return String(value || "-")
@@ -136,8 +131,8 @@ function formatNumberOrUnavailable(value) {
     : Number(value).toLocaleString("id-ID");
 }
 
-
 export default function KeuanganPage() {
+  const router = useRouter();
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const [search, setSearch] = useState("");
@@ -147,21 +142,6 @@ export default function KeuanganPage() {
 
   const [page, setPage] = useState(1);
   const limit = 5;
-
-  const [detailOpen, setDetailOpen] = useState(false);
-  const [selectedTransaksi, setSelectedTransaksi] = useState(null);
-
-  const [formOpen, setFormOpen] = useState(false);
-  const [formType, setFormType] = useState("pemasukan");
-  const [form, setForm] = useState({
-    tanggal: todayISO(),
-    kategori: "",
-    jumlah: "",
-    keterangan: "",
-    akunKasId: "",
-  });
-  const [formError, setFormError] = useState("");
-  const [saving, setSaving] = useState(false);
 
   const [refreshKey, setRefreshKey] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -208,7 +188,7 @@ export default function KeuanganPage() {
           akunRes.value.ringkasan?.totalSaldo === undefined ||
             akunRes.value.ringkasan?.totalSaldo === null
             ? null
-            : Number(akunRes.value.ringkasan.totalSaldo)
+            : Number(akunRes.value.ringkasan.totalSaldo),
         );
       } else {
         setAkunKas([]);
@@ -222,7 +202,7 @@ export default function KeuanganPage() {
         setJurnalTotal(
           typeof jurnalRes.value.meta?.total === "number"
             ? jurnalRes.value.meta.total
-            : null
+            : null,
         );
       } else {
         setJurnal([]);
@@ -278,7 +258,7 @@ export default function KeuanganPage() {
         akun: item.akunKas?.nama || "-",
         sumber: item.sumber || "-",
       })),
-    [jurnal]
+    [jurnal],
   );
 
   const kategoriOptions = useMemo(() => {
@@ -322,15 +302,7 @@ export default function KeuanganPage() {
   const currentPage = Math.min(page, totalPages);
   const paginatedData = filteredData.slice(
     (currentPage - 1) * limit,
-    currentPage * limit
-  );
-
-  const activeAkun = useMemo(
-    () =>
-      akunKas.filter(
-        (akun) => (akun.status || "aktif") === "aktif"
-      ),
-    [akunKas]
+    currentPage * limit,
   );
 
   const saldoAkhir = akunTotalSaldo;
@@ -353,72 +325,8 @@ export default function KeuanganPage() {
     }
   };
 
-  const closeDetail = () => {
-    setDetailOpen(false);
-    setSelectedTransaksi(null);
-  };
-
   const openForm = (type) => {
     router.push(`/admin/keuangan/jurnalKas/tambah?tipe=${type}`);
-  };
-
-  const closeForm = () => {
-    setFormOpen(false);
-    setFormError("");
-  };
-
-  const updateForm = (field, value) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
-    setFormError("");
-  };
-
-  const handleSubmitForm = async (event) => {
-    event.preventDefault();
-    setFormError("");
-
-    if (!form.akunKasId) {
-      setFormError("Pilih akun kas terlebih dahulu.");
-      return;
-    }
-
-    if (!form.tanggal) {
-      setFormError("Tanggal transaksi wajib diisi.");
-      return;
-    }
-
-    if (!form.kategori.trim()) {
-      setFormError("Kategori transaksi wajib diisi.");
-      return;
-    }
-
-    if (!form.jumlah || Number(form.jumlah) <= 0) {
-      setFormError("Jumlah transaksi harus lebih dari 0.");
-      return;
-    }
-
-    setSaving(true);
-
-    try {
-      const response = await createJurnalKas({
-        akunKasId: form.akunKasId,
-        tanggal: form.tanggal,
-        jenis: formType === "pemasukan" ? "masuk" : "keluar",
-        kategori: form.kategori.trim(),
-        jumlah: Number(form.jumlah),
-        keterangan: form.keterangan.trim() || undefined,
-      });
-
-      if (response?.success === false) {
-        throw new Error(response.message || "Transaksi gagal disimpan.");
-      }
-
-      closeForm();
-      setRefreshKey((value) => value + 1);
-    } catch (err) {
-      setFormError(getErrorMessage(err, "transaksi"));
-    } finally {
-      setSaving(false);
-    }
   };
 
   const handleExport = () => {
@@ -495,8 +403,6 @@ export default function KeuanganPage() {
 
         <main className="min-h-0 min-w-0 flex-1 overflow-y-auto">
           <div className="w-full space-y-5 p-4 sm:p-6 lg:p-8">
-
-
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-3">
                 <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_70%,var(--color-info)))] text-[var(--color-card)] shadow-[0_4px_14px_color-mix(in_srgb,var(--color-primary)_25%,transparent)]">
@@ -548,7 +454,6 @@ export default function KeuanganPage() {
                 </button>
               </div>
             </div>
-
 
             {error && (
               <div className="flex items-start gap-3 rounded-xl border border-[color-mix(in_srgb,var(--color-danger)_28%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_6%,transparent)] p-4 text-sm">
@@ -631,7 +536,6 @@ export default function KeuanganPage() {
                 accent="warning"
               />
             </section>
-
 
             <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {akunKas.map((akun) => {
@@ -747,28 +651,28 @@ export default function KeuanganPage() {
                       <ReportRow
                         label="Jumlah Tagihan"
                         value={Number(
-                          tagihanRingkasan.jumlahTagihan || 0
+                          tagihanRingkasan.jumlahTagihan || 0,
                         ).toLocaleString("id-ID")}
                         variant="neutral"
                       />
                       <ReportRow
                         label="Total Tagihan"
                         value={formatRupiah(
-                          tagihanRingkasan.totalTagihan
+                          tagihanRingkasan.totalTagihan,
                         )}
                         variant="neutral"
                       />
                       <ReportRow
                         label="Total Dibayar"
                         value={formatRupiah(
-                          tagihanRingkasan.totalDibayar
+                          tagihanRingkasan.totalDibayar,
                         )}
                         variant="success"
                       />
                       <ReportRow
                         label="Sisa Tagihan"
                         value={formatRupiah(
-                          tagihanRingkasan.totalSisa
+                          tagihanRingkasan.totalSisa,
                         )}
                         variant="danger"
                       />
@@ -805,14 +709,14 @@ export default function KeuanganPage() {
                       <ReportRow
                         label="Jumlah Tagihan Menunggak"
                         value={Number(
-                          tunggakanRingkasan.jumlahTagihan || 0
+                          tunggakanRingkasan.jumlahTagihan || 0,
                         ).toLocaleString("id-ID")}
                         variant="neutral"
                       />
                       <ReportRow
                         label="Total Tunggakan"
                         value={formatRupiah(
-                          tunggakanRingkasan.totalTunggakan
+                          tunggakanRingkasan.totalTunggakan,
                         )}
                         variant="danger"
                         bold
@@ -826,7 +730,6 @@ export default function KeuanganPage() {
                 </div>
               </div>
             </section>
-
 
             <section
               className={`overflow-hidden rounded-2xl border ${themeNeutralBorder} theme-card ${themeCardShadow}`}
@@ -1025,7 +928,7 @@ export default function KeuanganPage() {
                             <td className="px-4 py-3">
                               <span
                                 className={`inline-flex rounded-md px-2 py-0.5 text-[11px] font-medium ${getKategoriStyle(
-                                  item.kategori
+                                  item.kategori,
                                 )}`}
                               >
                                 {item.kategori}
@@ -1106,7 +1009,7 @@ export default function KeuanganPage() {
                     disabled={currentPage >= totalPages}
                     onClick={() =>
                       setPage((p) =>
-                        Math.min(totalPages, p + 1)
+                        Math.min(totalPages, p + 1),
                       )
                     }
                     className={`inline-flex h-8 items-center gap-1 rounded-lg border ${themeNeutralBorder} theme-card px-2.5 text-xs font-semibold theme-text-secondary transition ${themeNeutralHover} disabled:cursor-not-allowed disabled:opacity-40`}
@@ -1117,7 +1020,6 @@ export default function KeuanganPage() {
                 </div>
               </div>
             </section>
-
 
             <section className="grid grid-cols-1 gap-4 lg:grid-cols-2">
               <div
@@ -1166,7 +1068,7 @@ export default function KeuanganPage() {
                         pengeluaranBulanIni === null
                           ? "Tidak tersedia"
                           : formatRupiah(
-                              pemasukanBulanIni - pengeluaranBulanIni
+                              pemasukanBulanIni - pengeluaranBulanIni,
                             )
                       }
                       variant="primary"
@@ -1237,12 +1139,9 @@ export default function KeuanganPage() {
           </div>
         </main>
       </div>
-
-
     </div>
   );
 }
-
 
 function StatCard({ icon: Icon, label, value, description, accent = "primary" }) {
   const accentConfig = {
@@ -1372,26 +1271,6 @@ function StatusBadge({ status }) {
       <Icon size={11} />
       {item.label}
     </span>
-  );
-}
-
-function DetailItem({ icon: Icon, label, value }) {
-  return (
-    <div
-      className={`rounded-xl border ${themeNeutralBorder} ${themeNeutralSurface} p-3`}
-    >
-      <div className="flex items-center gap-2">
-        <Icon size={14} className="theme-text-muted" />
-
-        <p className="text-[10px] font-semibold uppercase tracking-wider theme-text-muted">
-          {label}
-        </p>
-      </div>
-
-      <p className="mt-1.5 text-sm font-semibold capitalize theme-text">
-        {value || "-"}
-      </p>
-    </div>
   );
 }
 

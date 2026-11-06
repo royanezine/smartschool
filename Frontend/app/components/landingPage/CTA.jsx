@@ -13,7 +13,7 @@ export default function CTA() {
           <div className="relative z-10 max-w-3xl">
 
             <span className="inline-flex rounded-full bg-white/20 px-4 py-2 text-sm font-medium text-white">
-              🚀 Mulai Digitalisasi Sekolah
+               Mulai Digitalisasi Sekolah
             </span>
 
             <h2 className="mt-6 text-4xl font-bold leading-tight text-white md:text-5xl">

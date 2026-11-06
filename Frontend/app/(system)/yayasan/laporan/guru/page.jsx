@@ -17,7 +17,6 @@ import {
 } from "lucide-react";
 import { getLaporanGuru, getSekolahBinaan } from "@/services/yayasan.service";
 
-
 const themeCardShadow =
   "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
 
@@ -60,7 +59,6 @@ const themeInfoSurface =
 const themeInfoBorder =
   "border-[color-mix(in_srgb,var(--color-info)_24%,transparent)]";
 
-
 const statusTheme = {
   aktif: {
     surface: themeSuccessSurface,
@@ -75,7 +73,6 @@ const statusTheme = {
     label: "Nonaktif",
   },
 };
-
 
 export default function LaporanGuruPage() {
   const router = useRouter();
@@ -96,18 +93,14 @@ export default function LaporanGuruPage() {
         getSekolahBinaan(),
       ]);
 
-      // getLaporanGuru -> getMonitoringUsers({ peran: 'guru' })
-      // Response: { data: [...users], meta: { ... } }
-      const rawList = Array.isArray(guruRes?.data)
-        ? guruRes.data
-        : [];
+      const rawList = Array.isArray(guruRes?.data) ? guruRes.data : [];
       setDataGuru(rawList);
 
       const sekolahList = Array.isArray(sekolahRes?.data?.items)
         ? sekolahRes.data.items
         : Array.isArray(sekolahRes?.data)
-        ? sekolahRes.data
-        : [];
+          ? sekolahRes.data
+          : [];
       if (sekolahList.length > 0) {
         setUnitOptions(["Semua Unit", ...sekolahList.map((s) => s.nama)]);
       }
@@ -132,19 +125,22 @@ export default function LaporanGuruPage() {
         const sekolahList = Array.isArray(sekolahRes?.data?.items)
           ? sekolahRes.data.items
           : Array.isArray(sekolahRes?.data)
-          ? sekolahRes.data
-          : [];
+            ? sekolahRes.data
+            : [];
         if (sekolahList.length > 0) {
           setUnitOptions(["Semua Unit", ...sekolahList.map((s) => s.nama)]);
         }
       } catch (err) {
-        if (!cancelled) setError(err?.message || "Gagal memuat laporan data guru yayasan.");
+        if (!cancelled)
+          setError(err?.message || "Gagal memuat laporan data guru yayasan.");
       } finally {
         if (!cancelled) setLoading(false);
       }
     }
     load();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const filteredGuru = useMemo(() => {
@@ -154,7 +150,10 @@ export default function LaporanGuruPage() {
       const matchUnit = unit === "Semua Unit" || guruUnit === unit;
       const nama = g.namaLengkap || g.namaPengguna || "";
       const email = g.email || "";
-      const matchSearch = !keyword || nama.toLowerCase().includes(keyword) || email.toLowerCase().includes(keyword);
+      const matchSearch =
+        !keyword ||
+        nama.toLowerCase().includes(keyword) ||
+        email.toLowerCase().includes(keyword);
       return matchUnit && matchSearch;
     });
   }, [dataGuru, unit, search]);
@@ -162,7 +161,9 @@ export default function LaporanGuruPage() {
   const summary = useMemo(() => {
     const totalGuru = filteredGuru.length;
     const guruAktif = filteredGuru.filter((g) => g.status === "aktif").length;
-    const totalUnit = new Set(filteredGuru.map((g) => g.sekolah?.nama).filter(Boolean)).size;
+    const totalUnit = new Set(
+      filteredGuru.map((g) => g.sekolah?.nama).filter(Boolean)
+    ).size;
     return { totalGuru, guruAktif, totalUnit };
   }, [filteredGuru]);
 
@@ -175,8 +176,15 @@ export default function LaporanGuruPage() {
       g.peran?.namaTampilan || g.peran?.nama || "Guru",
       g.status === "aktif" ? "Aktif" : "Nonaktif",
     ]);
-    const csv = [headers.join(","), ...rows.map((row) => row.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(","))].join("\n");
-    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+    const csv = [
+      headers.join(","),
+      ...rows.map((row) =>
+        row.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(",")
+      ),
+    ].join("\n");
+    const blob = new Blob(["\uFEFF" + csv], {
+      type: "text/csv;charset=utf-8;",
+    });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
@@ -187,126 +195,285 @@ export default function LaporanGuruPage() {
     URL.revokeObjectURL(url);
   };
 
-
   return (
     <div className="theme-page theme-text min-h-full">
-      <div className="w-full max-w-[1800px] mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 space-y-6">
-
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="w-full space-y-6 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
+        {/* Header */}
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
-            <button onClick={() => router.push("/yayasan/laporan")} className="inline-flex items-center gap-1 text-xs font-medium text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors mb-1">
+            <button
+              onClick={() => router.push("/yayasan/laporan")}
+              className="mb-1 inline-flex items-center gap-1 text-xs font-medium text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-primary)]"
+            >
               <ChevronLeft size={13} /> Laporan & Analitik
             </button>
+
             <div className="flex items-center gap-2.5">
-              <div className={`p-2 rounded-lg ${themePrimarySoft} text-[var(--color-primary)] ${themePrimarySoftBorder} border ${themeSmallShadow} flex-shrink-0`}>
+              <div
+                className={`shrink-0 rounded-lg border ${themePrimarySoft} p-2 text-[var(--color-primary)] ${themePrimarySoftBorder} ${themeSmallShadow}`}
+              >
                 <GraduationCap size={18} />
               </div>
-              <h1 className="text-xl sm:text-2xl font-semibold theme-text truncate">Laporan Guru</h1>
+              <h1 className="theme-text truncate text-xl font-semibold sm:text-2xl">
+                Laporan Guru
+              </h1>
             </div>
-            <p className="text-sm theme-text-secondary mt-1 ml-[42px] flex items-center gap-1.5">
-              <Sparkles size={14} className="text-[var(--color-primary)] flex-shrink-0" />
-              <span className="truncate">Rekap data guru dan unit sekolah tempat mengajar.</span>
+
+            <p className="theme-text-secondary ml-[42px] mt-1 flex items-center gap-1.5 text-sm">
+              <Sparkles
+                size={14}
+                className="shrink-0 text-[var(--color-primary)]"
+              />
+              <span className="truncate">
+                Rekap data guru dan unit sekolah tempat mengajar.
+              </span>
             </p>
           </div>
-          <button type="button" onClick={handleDownload} disabled={loading || filteredGuru.length === 0} className={`inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg transition-all shadow-sm whitespace-nowrap flex-shrink-0 ${themePrimaryButton} disabled:opacity-50`}>
+
+          <button
+            type="button"
+            onClick={handleDownload}
+            disabled={loading || filteredGuru.length === 0}
+            className={`inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-lg px-4 py-2.5 text-sm font-medium shadow-sm transition-all ${themePrimaryButton} disabled:opacity-50`}
+          >
             <Download size={16} /> Unduh Laporan
           </button>
         </div>
 
-        <div className={`theme-card rounded-xl ${themeNeutralBorder} border p-4 ${themeCardShadow}`}>
-          <div className="flex flex-col sm:flex-row flex-wrap gap-3">
-            <div className="relative flex-1 min-w-[180px]">
-              <select value={unit} onChange={(e) => setUnit(e.target.value)} className={`w-full appearance-none pl-3 pr-9 py-2.5 text-sm font-medium theme-text-secondary ${themeNeutralSurface} ${themeNeutralBorder} border rounded-lg hover:border-[color-mix(in_srgb,var(--color-text)_18%,transparent)] focus:outline-none ${themeFocus} transition-colors cursor-pointer`}>
-                {unitOptions.map((u) => (<option key={u} value={u}>{u}</option>))}
+        {/* Filter */}
+        <div
+          className={`theme-card rounded-xl border ${themeNeutralBorder} p-4 ${themeCardShadow}`}
+        >
+          <div className="flex flex-col flex-wrap gap-3 sm:flex-row">
+            <div className="relative min-w-[180px] flex-1">
+              <select
+                value={unit}
+                onChange={(e) => setUnit(e.target.value)}
+                className={`theme-text-secondary w-full cursor-pointer appearance-none rounded-lg border py-2.5 pl-3 pr-9 text-sm font-medium transition-colors hover:border-[color-mix(in_srgb,var(--color-text)_18%,transparent)] focus:outline-none ${themeNeutralSurface} ${themeNeutralBorder} ${themeFocus}`}
+              >
+                {unitOptions.map((u) => (
+                  <option key={u} value={u}>
+                    {u}
+                  </option>
+                ))}
               </select>
-              <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] pointer-events-none" />
+              <ChevronDown
+                size={14}
+                className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]"
+              />
             </div>
-            <div className="relative flex-1 min-w-[200px]">
-              <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]" />
-              <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Cari nama guru atau email..." className={`w-full pl-9 pr-3 py-2.5 text-sm theme-text-secondary placeholder:text-[var(--color-text-placeholder)] ${themeNeutralSurface} ${themeNeutralBorder} border rounded-lg focus:outline-none ${themeFocus} transition-colors`} />
+
+            <div className="relative min-w-[200px] flex-1">
+              <Search
+                size={15}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]"
+              />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Cari nama guru atau email..."
+                className={`theme-text-secondary w-full rounded-lg border py-2.5 pl-9 pr-3 text-sm transition-colors placeholder:text-[var(--color-text-placeholder)] focus:outline-none ${themeNeutralSurface} ${themeNeutralBorder} ${themeFocus}`}
+              />
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-          <div className={`theme-card rounded-xl ${themeNeutralBorder} border p-3.5 ${themeCardShadow} flex items-center gap-3 min-w-0`}>
-            <div className={`p-2 rounded-lg ${themePrimarySoft} text-[var(--color-primary)] ${themePrimarySoftBorder} border flex-shrink-0`}><Users size={16} /></div>
+        {/* Summary Cards */}
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
+          <div
+            className={`theme-card flex min-w-0 items-center gap-3 rounded-xl border ${themeNeutralBorder} p-3.5 ${themeCardShadow}`}
+          >
+            <div
+              className={`shrink-0 rounded-lg border ${themePrimarySoft} p-2 text-[var(--color-primary)] ${themePrimarySoftBorder}`}
+            >
+              <Users size={16} />
+            </div>
             <div className="min-w-0">
-              <p className="text-[11px] font-medium theme-text-muted uppercase tracking-wider truncate">Total Guru</p>
-              <p className="text-lg font-bold theme-text">{loading ? "..." : summary.totalGuru}</p>
+              <p className="theme-text-muted truncate text-[11px] font-medium uppercase tracking-wider">
+                Total Guru
+              </p>
+              <p className="theme-text text-lg font-bold">
+                {loading ? "..." : summary.totalGuru}
+              </p>
             </div>
           </div>
-          <div className={`theme-card rounded-xl ${themeNeutralBorder} border p-3.5 ${themeCardShadow} flex items-center gap-3 min-w-0`}>
-            <div className={`p-2 rounded-lg ${themeSuccessSurface} text-[var(--color-success)] ${themeSuccessBorder} border flex-shrink-0`}><UserCheck size={16} /></div>
+
+          <div
+            className={`theme-card flex min-w-0 items-center gap-3 rounded-xl border ${themeNeutralBorder} p-3.5 ${themeCardShadow}`}
+          >
+            <div
+              className={`shrink-0 rounded-lg border ${themeSuccessSurface} p-2 text-[var(--color-success)] ${themeSuccessBorder}`}
+            >
+              <UserCheck size={16} />
+            </div>
             <div className="min-w-0">
-              <p className="text-[11px] font-medium theme-text-muted uppercase tracking-wider truncate">Guru Aktif</p>
-              <p className="text-lg font-bold theme-text">{loading ? "..." : summary.guruAktif}</p>
+              <p className="theme-text-muted truncate text-[11px] font-medium uppercase tracking-wider">
+                Guru Aktif
+              </p>
+              <p className="theme-text text-lg font-bold">
+                {loading ? "..." : summary.guruAktif}
+              </p>
             </div>
           </div>
-          <div className={`theme-card rounded-xl ${themeNeutralBorder} border p-3.5 ${themeCardShadow} flex items-center gap-3 min-w-0`}>
-            <div className={`p-2 rounded-lg ${themeInfoSurface} text-[var(--color-info)] ${themeInfoBorder} border flex-shrink-0`}><Building2 size={16} /></div>
+
+          <div
+            className={`theme-card flex min-w-0 items-center gap-3 rounded-xl border ${themeNeutralBorder} p-3.5 ${themeCardShadow}`}
+          >
+            <div
+              className={`shrink-0 rounded-lg border ${themeInfoSurface} p-2 text-[var(--color-info)] ${themeInfoBorder}`}
+            >
+              <Building2 size={16} />
+            </div>
             <div className="min-w-0">
-              <p className="text-[11px] font-medium theme-text-muted uppercase tracking-wider truncate">Unit Sekolah</p>
-              <p className="text-lg font-bold theme-text">{loading ? "..." : summary.totalUnit}</p>
+              <p className="theme-text-muted truncate text-[11px] font-medium uppercase tracking-wider">
+                Unit Sekolah
+              </p>
+              <p className="theme-text text-lg font-bold">
+                {loading ? "..." : summary.totalUnit}
+              </p>
             </div>
           </div>
         </div>
 
-        <div className={`theme-card rounded-xl ${themeNeutralBorder} border ${themeCardShadow} overflow-hidden`}>
-          <div className={`p-4 sm:p-5 ${themeDivider} border-b flex items-center justify-between gap-2`}>
-            <h3 className="text-sm font-semibold theme-text-secondary truncate">Daftar Guru</h3>
-            <span className="text-xs theme-text-muted flex-shrink-0">{filteredGuru.length} guru</span>
+        {/* Table */}
+        <div
+          className={`theme-card overflow-hidden rounded-xl border ${themeNeutralBorder} ${themeCardShadow}`}
+        >
+          <div
+            className={`flex items-center justify-between gap-2 border-b p-4 sm:p-5 ${themeDivider}`}
+          >
+            <h3 className="theme-text-secondary truncate text-sm font-semibold">
+              Daftar Guru
+            </h3>
+            <span className="theme-text-muted shrink-0 text-xs">
+              {filteredGuru.length} guru
+            </span>
           </div>
-          <div className="overflow-x-auto w-full">
-            <table className="w-full min-w-[640px] text-sm border-collapse">
+
+          <div className="w-full overflow-x-auto">
+            <table className="w-full min-w-[640px] border-collapse text-sm">
               <thead>
                 <tr className={themeNeutralSurface}>
-                  <th className={`border ${themeNeutralBorder} text-left font-medium theme-text-muted text-xs uppercase tracking-wider px-4 sm:px-5 py-3 whitespace-nowrap`}>Nama Guru</th>
-                  <th className={`border ${themeNeutralBorder} text-left font-medium theme-text-muted text-xs uppercase tracking-wider px-3 py-3 whitespace-nowrap`}>Email</th>
-                  <th className={`border ${themeNeutralBorder} text-left font-medium theme-text-muted text-xs uppercase tracking-wider px-3 py-3 whitespace-nowrap`}>Unit Sekolah</th>
-                  <th className={`border ${themeNeutralBorder} text-center font-medium theme-text-muted text-xs uppercase tracking-wider px-3 py-3 whitespace-nowrap`}>Peran</th>
-                  <th className={`border ${themeNeutralBorder} text-center font-medium theme-text-muted text-xs uppercase tracking-wider px-3 py-3 whitespace-nowrap`}>Status</th>
+                  <th
+                    className={`theme-text-muted border ${themeNeutralBorder} whitespace-nowrap px-4 py-3 text-left text-xs font-medium uppercase tracking-wider sm:px-5`}
+                  >
+                    Nama Guru
+                  </th>
+                  <th
+                    className={`theme-text-muted border ${themeNeutralBorder} whitespace-nowrap px-3 py-3 text-left text-xs font-medium uppercase tracking-wider`}
+                  >
+                    Email
+                  </th>
+                  <th
+                    className={`theme-text-muted border ${themeNeutralBorder} whitespace-nowrap px-3 py-3 text-left text-xs font-medium uppercase tracking-wider`}
+                  >
+                    Unit Sekolah
+                  </th>
+                  <th
+                    className={`theme-text-muted border ${themeNeutralBorder} whitespace-nowrap px-3 py-3 text-center text-xs font-medium uppercase tracking-wider`}
+                  >
+                    Peran
+                  </th>
+                  <th
+                    className={`theme-text-muted border ${themeNeutralBorder} whitespace-nowrap px-3 py-3 text-center text-xs font-medium uppercase tracking-wider`}
+                  >
+                    Status
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {loading ? (
-                  <tr><td colSpan={5} className={`border ${themeNeutralBorder} p-10 text-center`}>
-                    <Loader2 size={28} className="mx-auto text-[var(--color-primary)] animate-spin mb-2" />
-                    <p className="text-sm theme-text-muted">Memuat data guru yayasan...</p>
-                  </td></tr>
+                  <tr>
+                    <td
+                      colSpan={5}
+                      className={`border ${themeNeutralBorder} p-10 text-center`}
+                    >
+                      <Loader2
+                        size={28}
+                        className="mx-auto mb-2 animate-spin text-[var(--color-primary)]"
+                      />
+                      <p className="theme-text-muted text-sm">
+                        Memuat data guru yayasan...
+                      </p>
+                    </td>
+                  </tr>
                 ) : error ? (
-                  <tr><td colSpan={5} className={`border ${themeNeutralBorder} p-8 text-center text-[var(--color-danger)]`}>
-                    <AlertCircle size={28} className="mx-auto mb-2" />
-                    <p className="text-sm">{error}</p>
-                    <button type="button" onClick={fetchGuru} className="mt-2 text-xs font-semibold underline">Coba Lagi</button>
-                  </td></tr>
+                  <tr>
+                    <td
+                      colSpan={5}
+                      className={`border ${themeNeutralBorder} p-8 text-center text-[var(--color-danger)]`}
+                    >
+                      <AlertCircle size={28} className="mx-auto mb-2" />
+                      <p className="text-sm">{error}</p>
+                      <button
+                        type="button"
+                        onClick={fetchGuru}
+                        className="mt-2 text-xs font-semibold underline"
+                      >
+                        Coba Lagi
+                      </button>
+                    </td>
+                  </tr>
                 ) : filteredGuru.length === 0 ? (
-                  <tr><td colSpan={5} className={`border ${themeNeutralBorder} p-10 text-center`}>
-                    <Users size={28} className="mx-auto text-[var(--color-text-placeholder)] mb-2" />
-                    <p className="text-sm theme-text-muted">Tidak ada guru yang cocok.</p>
-                  </td></tr>
+                  <tr>
+                    <td
+                      colSpan={5}
+                      className={`border ${themeNeutralBorder} p-10 text-center`}
+                    >
+                      <Users
+                        size={28}
+                        className="mx-auto mb-2 text-[var(--color-text-placeholder)]"
+                      />
+                      <p className="theme-text-muted text-sm">
+                        Tidak ada guru yang cocok.
+                      </p>
+                    </td>
+                  </tr>
                 ) : (
                   filteredGuru.map((g) => {
                     const st = statusTheme[g.status] || statusTheme.nonaktif;
                     return (
-                      <tr key={g.id} className={`border-b ${themeDivider} hover:bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] transition-colors`}>
-                        <td className={`border-r ${themeNeutralBorder} px-4 sm:px-5 py-3 whitespace-nowrap`}>
-                          <span className="text-sm font-medium theme-text">{g.namaLengkap || g.namaPengguna || "-"}</span>
+                      <tr
+                        key={g.id}
+                        className={`border-b ${themeDivider} transition-colors hover:bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)]`}
+                      >
+                        <td
+                          className={`border-r ${themeNeutralBorder} whitespace-nowrap px-4 py-3 sm:px-5`}
+                        >
+                          <span className="theme-text text-sm font-medium">
+                            {g.namaLengkap || g.namaPengguna || "-"}
+                          </span>
                         </td>
-                        <td className={`border-r ${themeNeutralBorder} px-3 py-3 theme-text-secondary whitespace-nowrap`}>{g.email || "-"}</td>
-                        <td className={`border-r ${themeNeutralBorder} px-3 py-3 theme-text-secondary whitespace-nowrap`}>
+                        <td
+                          className={`border-r ${themeNeutralBorder} theme-text-secondary whitespace-nowrap px-3 py-3`}
+                        >
+                          {g.email || "-"}
+                        </td>
+                        <td
+                          className={`border-r ${themeNeutralBorder} theme-text-secondary whitespace-nowrap px-3 py-3`}
+                        >
                           <div className="flex items-center gap-1.5">
-                            <Building2 size={13} className="text-[var(--color-text-muted)] flex-shrink-0" />
+                            <Building2
+                              size={13}
+                              className="shrink-0 text-[var(--color-text-muted)]"
+                            />
                             {g.sekolah?.nama || "-"}
                           </div>
                         </td>
-                        <td className={`border-r ${themeNeutralBorder} px-3 py-3 text-center whitespace-nowrap`}>
-                          <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full border ${themeNeutralSurface} theme-text-secondary ${themeNeutralBorder}`}>
+                        <td
+                          className={`border-r ${themeNeutralBorder} whitespace-nowrap px-3 py-3 text-center`}
+                        >
+                          <span
+                            className={`rounded-full border px-2 py-0.5 text-[11px] font-medium ${themeNeutralSurface} theme-text-secondary ${themeNeutralBorder}`}
+                          >
                             {g.peran?.namaTampilan || g.peran?.nama || "Guru"}
                           </span>
                         </td>
-                        <td className="px-3 py-3 text-center whitespace-nowrap">
-                          <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full border ${st.surface} ${st.text} ${st.border}`}>
+                        <td className="whitespace-nowrap px-3 py-3 text-center">
+                          <span
+                            className={`rounded-full border px-2 py-0.5 text-[11px] font-medium ${st.surface} ${st.text} ${st.border}`}
+                          >
                             {st.label}
                           </span>
                         </td>
@@ -318,7 +485,6 @@ export default function LaporanGuruPage() {
             </table>
           </div>
         </div>
-
       </div>
     </div>
   );

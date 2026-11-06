@@ -47,28 +47,109 @@ export default function CreateKategoriPage() {
   }
 
   return (
-    <div className="theme-page flex h-screen overflow-hidden">
+    <div className="flex h-screen overflow-hidden theme-page theme-text">
       <Sidebar role="admin" active="bk" />
 
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <Header />
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+        <div className="shrink-0">
+          <Header />
+        </div>
 
-        <main className="flex-1 overflow-y-auto p-5 md:p-6 lg:p-8">
-          <div className="mx-auto w-full max-w-[1200px]">
-            <div className="mb-7 flex items-start gap-4">
+        <main className="min-w-0 flex-1 overflow-y-auto">
+          <div className="w-full p-5 md:p-6 lg:p-8">
+
+            <div className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <div className="flex items-start gap-4">
+                <button
+                  type="button"
+                  onClick={() => router.back()}
+                  className="
+                    theme-card
+                    theme-border
+                    theme-text-secondary
+                    theme-sidebar-hover
+                    mt-1 flex h-10 w-10 shrink-0
+                    items-center justify-center rounded-xl
+                    border shadow-sm transition
+                  "
+                  title="Kembali"
+                >
+                  <svg
+                    className="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M15 19l-7-7 7-7"
+                    />
+                  </svg>
+                </button>
+
+                <div className="flex items-start gap-4">
+                  <div className="theme-primary relative flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl shadow-lg">
+                    <svg
+                      className="h-6 w-6"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M12 4v16m8-8H4"
+                      />
+                    </svg>
+
+                    <span className="absolute -right-1 -top-1 flex h-3 w-3">
+                      <span
+                        className="
+                          absolute inline-flex h-full w-full
+                          animate-ping rounded-full
+                          bg-[var(--color-primary)]
+                          opacity-50
+                        "
+                      />
+
+                      <span
+                        className="
+                          relative inline-flex h-3 w-3
+                          rounded-full
+                          bg-[var(--color-primary)]
+                        "
+                      />
+                    </span>
+                  </div>
+
+                  <div>
+                    <h1 className="theme-text text-[26px] font-bold leading-tight tracking-tight">
+                      Tambah Kategori
+                    </h1>
+
+                    <p className="theme-text-muted mt-1 text-sm font-medium">
+                      Buat kategori pelanggaran baru
+                    </p>
+                  </div>
+                </div>
+              </div>
+
               <button
                 type="button"
-                onClick={() => router.back()}
+                onClick={() => router.push("/admin/bk/kategori-point")}
                 className="
                   theme-card
                   theme-border
                   theme-text-secondary
                   theme-sidebar-hover
-                  mt-1 flex h-10 w-10 shrink-0
-                  items-center justify-center rounded-xl
-                  border shadow-sm transition
+                  inline-flex items-center justify-center gap-2
+                  rounded-xl border px-4 py-2.5
+                  text-sm font-bold shadow-sm transition
+                  self-start
                 "
-                title="Kembali"
               >
                 <svg
                   className="h-4 w-4"
@@ -80,57 +161,12 @@ export default function CreateKategoriPage() {
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    d="M15 19l-7-7 7-7"
+                    d="M4 6h16M4 10h16M4 14h16M4 18h16"
                   />
                 </svg>
+
+                Lihat Daftar
               </button>
-
-              <div className="flex items-start gap-4">
-                <div className="theme-primary relative flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl shadow-lg">
-                  <svg
-                    className="h-6 w-6"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M12 4v16m8-8H4"
-                    />
-                  </svg>
-
-                  <span className="absolute -right-1 -top-1 flex h-3 w-3">
-                    <span
-                      className="
-                        absolute inline-flex h-full w-full
-                        animate-ping rounded-full
-                        bg-[var(--color-primary)]
-                        opacity-50
-                      "
-                    />
-
-                    <span
-                      className="
-                        relative inline-flex h-3 w-3
-                        rounded-full
-                        bg-[var(--color-primary)]
-                      "
-                    />
-                  </span>
-                </div>
-
-                <div>
-                  <h1 className="theme-text text-[26px] font-bold leading-tight tracking-tight">
-                    Tambah Kategori
-                  </h1>
-
-                  <p className="theme-text-muted mt-1 text-sm font-medium">
-                    Buat kategori pelanggaran baru
-                  </p>
-                </div>
-              </div>
             </div>
 
             {error && (
@@ -153,7 +189,7 @@ export default function CreateKategoriPage() {
               </div>
             )}
 
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_340px]">
+            <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_340px] 2xl:grid-cols-[minmax(0,1fr)_400px]">
               <form
                 onSubmit={handleSubmit}
                 className="theme-card theme-border overflow-hidden rounded-2xl border shadow-xl"

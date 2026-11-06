@@ -224,14 +224,16 @@ export default function TambahMasterShiftPage() {
   }
 
   return (
-    <div className="theme-page theme-text flex min-h-screen w-full">
+    <div className="flex h-screen overflow-hidden theme-page theme-text">
       <Sidebar />
 
-      <div className="flex min-h-screen min-w-0 flex-1 flex-col">
-        <Header />
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+        <div className="shrink-0">
+          <Header />
+        </div>
 
-        <main className="theme-page min-h-0 flex-1">
-          <div className="mx-auto w-full max-w-[1500px] px-5 py-6 md:px-8 md:py-8">
+        <main className="min-w-0 flex-1 overflow-y-auto">
+          <div className="w-full px-5 py-6 md:px-8 md:py-8">
             <button
               type="button"
               onClick={handleBack}
@@ -318,7 +320,7 @@ export default function TambahMasterShiftPage() {
             )}
 
             <form onSubmit={handleSubmit}>
-              <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_350px]">
+              <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_350px] 2xl:grid-cols-[minmax(0,1fr)_400px]">
                 <section className="theme-card theme-border overflow-hidden rounded-xl border shadow-sm">
                   <div className="theme-card-soft theme-border flex items-center gap-3 border-b px-5 py-4 md:px-6">
                     <div className="theme-info flex h-9 w-9 items-center justify-center rounded-lg border">

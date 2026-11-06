@@ -1,378 +1,284 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
   ArrowLeft,
   Save,
   User,
-  UserRound,
   MapPin,
   Users,
   Loader2,
   AlertCircle,
   CheckCircle2,
+  Search,
+  ChevronDown,
+  X,
+  GraduationCap,
+  Sparkles,
 } from "lucide-react";
 
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
 import { getUserById, updateUser } from "@/services/user.service";
+import { getKelas } from "@/services/kelas.service";
 
-const DEFAULT_FORM = {
-  nama: "",
-  nis: "",
+const INITIAL_FORM = {
+  namaLengkap: "",
+  nipd: "",
   nisn: "",
   status: "aktif",
-  gender: "L",
-  tglLahir: "",
-  joinDate: "",
+  jenisKelamin: "",
   tempatLahir: "",
-  kecamatan: "",
-  kota: "",
-  kelurahan: "",
+  tanggalLahir: "",
   email: "",
-  phone: "",
+  noTelepon: "",
   alamat: "",
-  nikOrtu: "",
-  namaAyah: "",
-  pekerjaanAyah: "",
-  namaIbu: "",
-  pekerjaanIbu: "",
-  alamatKtpOrtu: "",
-  alamatDomisiliOrtu: "",
-  domisiliSama: true,
+  provinsi: "",
+  kota: "",
+  kecamatan: "",
+  kelurahan: "",
+  namaOrangTua: "",
+  noTeleponOrangTua: "",
 };
 
-const themeBorder =
-  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+function getResponseData(response) {
+  const result = response?.data ?? response;
 
-const themeDivider =
-  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+  if (Array.isArray(result)) return result;
+  if (Array.isArray(result?.data)) return result.data;
+  if (Array.isArray(result?.items)) return result.items;
+  if (Array.isArray(result?.kelas)) return result.kelas;
 
-const themeSoft =
-  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+  return [];
+}
 
-const themeSoftBorder =
-  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+function getErrorMessage(error, fallback) {
+  return (
+    error?.response?.data?.message ||
+    error?.data?.message ||
+    error?.message ||
+    fallback
+  );
+}
 
-const themeText = "text-[var(--color-primary)]";
-
-const themeShadow =
-  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
-
-const themeFocus =
-  "focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
-
-function formatDateForInput(value) {
+function formatTanggal(value) {
   if (!value) return "";
 
   const date = new Date(value);
-
   if (Number.isNaN(date.getTime())) return "";
 
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-
-  return `${year}-${month}-${day}`;
+  return date.toISOString().slice(0, 10);
 }
 
-function normalizeGender(value) {
-  const gender = String(value || "").toLowerCase();
-
-  if (["p", "perempuan", "female", "wanita"].includes(gender)) {
-    return "P";
-  }
-
-  return "L";
-}
-
-function normalizeStatus(value) {
-  const status = String(value || "").toLowerCase();
-
-  if (["nonaktif", "inactive", "tidak aktif"].includes(status)) {
-    return "nonaktif";
-  }
-
-  return "aktif";
-}
-
-function getErrorMessage(error) {
+function getNamaKelas(kelas) {
   return (
-    error?.message ||
-    error?.response?.data?.message ||
-    "Terjadi kesalahan saat memproses data."
+    kelas?.namaKelas ||
+    kelas?.nama ||
+    kelas?.tingkat ||
+    "Kelas tanpa nama"
   );
 }
 
 export default function EditSiswaPage() {
-  const router = useRouter();
   const params = useParams();
+  const router = useRouter();
+  const id = params?.id;
 
-  const id = params?.id ? String(params.id) : "";
+  const [form, setForm] = useState(INITIAL_FORM);
 
-  const [form, setForm] = useState({ ...DEFAULT_FORM });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
+  const [success, setSuccess] = useState("");
 
-  const loadData = useCallback(async () => {
-    if (!id) {
-      setError("ID siswa tidak ditemukan.");
-      setLoading(false);
-      return;
+  const [kelasList, setKelasList] = useState([]);
+  const [kelasId, setKelasId] = useState("");
+  const [kelasSearch, setKelasSearch] = useState("");
+  const [kelasDropdownOpen, setKelasDropdownOpen] = useState(false);
+  const [loadingKelas, setLoadingKelas] = useState(false);
+  const [kelasError, setKelasError] = useState("");
+
+  const loadKelas = useCallback(async () => {
+    try {
+      setLoadingKelas(true);
+      setKelasError("");
+
+      const response = await getKelas({
+        page: 1,
+        limit: 100,
+        sortBy: "nama",
+        sortOrder: "asc",
+      });
+
+      setKelasList(getResponseData(response));
+    } catch (err) {
+      console.error("Gagal mengambil daftar kelas:", err);
+      setKelasError(
+        getErrorMessage(err, "Gagal mengambil daftar kelas.")
+      );
+    } finally {
+      setLoadingKelas(false);
     }
+  }, []);
+
+  const loadSiswa = useCallback(async () => {
+    if (!id) return;
 
     try {
       setLoading(true);
       setError("");
-      setSuccessMessage("");
 
       const response = await getUserById(id);
-
-      const result = response?.data?.data ?? response?.data ?? response;
+      const result = response?.data ?? response;
       const user = result?.data ?? result;
 
-      if (
-        !user ||
-        typeof user !== "object" ||
-        !user.id
-      ) {
-        throw new Error(
-          response?.message ||
-            "Data siswa tidak ditemukan atau format respons tidak sesuai."
-        );
+      if (!user) {
+        throw new Error("Data siswa tidak ditemukan.");
       }
 
       setForm({
-        nama: user.namaLengkap || "",
-        nis: user.nipd || "",
+        namaLengkap: user.namaLengkap || user.name || "",
+        nipd: user.nipd || user.nis || "",
         nisn: user.nisn || "",
-        status: normalizeStatus(user.status),
-        gender: normalizeGender(user.jenisKelamin),
-        tglLahir: formatDateForInput(user.tanggalLahir),
-        joinDate: formatDateForInput(user.dibuatPada),
+        status: user.status || "aktif",
+        jenisKelamin: user.jenisKelamin || "",
         tempatLahir: user.tempatLahir || "",
-        kecamatan: user.kecamatan || "",
-        kota: user.kotaKabupaten || "",
-        kelurahan: user.kelurahan || "",
+        tanggalLahir: formatTanggal(user.tanggalLahir),
         email: user.email || "",
-        phone: user.noTelepon || "",
+        noTelepon: user.noTelepon || user.telepon || "",
         alamat: user.alamat || "",
-        nikOrtu: user.nik || "",
-        namaAyah: user.namaAyah || "",
-        pekerjaanAyah: user.pekerjaanAyah || "",
-        namaIbu: user.namaIbu || "",
-        pekerjaanIbu: user.pekerjaanIbu || "",
-        alamatKtpOrtu: user.alamatKtp || "",
-        alamatDomisiliOrtu: user.alamatDomisili || "",
-        domisiliSama:
-          !user.alamatDomisili ||
-          user.alamatDomisili === user.alamatKtp,
+        provinsi: user.provinsi || "",
+        kota: user.kota || "",
+        kecamatan: user.kecamatan || "",
+        kelurahan: user.kelurahan || "",
+        namaOrangTua: user.namaOrangTua || "",
+        noTeleponOrangTua:
+          user.noTeleponOrangTua || user.teleponOrangTua || "",
       });
+
+      const kelasAwal =
+        user.kelasId ||
+        user.anggotaKelas?.[0]?.kelasId ||
+        user.anggotaKelas?.[0]?.kelas?.id ||
+        user.kelas?.id ||
+        "";
+
+      if (kelasAwal) {
+        setKelasId(String(kelasAwal));
+      }
     } catch (err) {
-      console.error("Error load siswa:", err);
-      setError(getErrorMessage(err));
+      console.error("Gagal mengambil data siswa:", err);
+      setError(getErrorMessage(err, "Gagal mengambil data siswa."));
     } finally {
       setLoading(false);
     }
   }, [id]);
 
   useEffect(() => {
-    let cancelled = false;
+    loadSiswa();
+    loadKelas();
+  }, [loadSiswa, loadKelas]);
 
-    async function run() {
-      if (!id) {
-        setError("ID siswa tidak ditemukan.");
-        setLoading(false);
-        return;
-      }
+  const filteredKelas = useMemo(() => {
+    const keyword = kelasSearch.trim().toLowerCase();
 
-      try {
-        setLoading(true);
-        setError("");
+    if (!keyword) return kelasList;
 
-        const response = await getUserById(id);
+    return kelasList.filter((kelas) => {
+      const nama = getNamaKelas(kelas).toLowerCase();
+      const tingkat = String(kelas?.tingkat || "").toLowerCase();
+      const tahunAjaran = String(
+        kelas?.tahunAjaran?.nama ||
+          kelas?.tahunAjaran?.tahun ||
+          kelas?.tahunAjaran?.namaTahunAjaran ||
+          ""
+      ).toLowerCase();
+      const jurusan = String(
+        kelas?.jurusan?.namaJurusan ||
+          kelas?.jurusan?.nama ||
+          ""
+      ).toLowerCase();
 
-        if (cancelled) return;
-
-        const result = response?.data?.data ?? response?.data ?? response;
-        const user = result?.data ?? result;
-
-        if (!user || typeof user !== "object" || !user.id) {
-          throw new Error(
-            response?.message || "Data siswa tidak ditemukan."
-          );
-        }
-
-        setForm({
-          nama: user.namaLengkap || "",
-          nis: user.nipd || "",
-          nisn: user.nisn || "",
-          status: normalizeStatus(user.status),
-          gender: normalizeGender(user.jenisKelamin),
-          tglLahir: formatDateForInput(user.tanggalLahir),
-          joinDate: formatDateForInput(user.dibuatPada),
-          tempatLahir: user.tempatLahir || "",
-          kecamatan: user.kecamatan || "",
-          kota: user.kotaKabupaten || "",
-          kelurahan: user.kelurahan || "",
-          email: user.email || "",
-          phone: user.noTelepon || "",
-          alamat: user.alamat || "",
-          nikOrtu: user.nik || "",
-          namaAyah: user.namaAyah || "",
-          pekerjaanAyah: user.pekerjaanAyah || "",
-          namaIbu: user.namaIbu || "",
-          pekerjaanIbu: user.pekerjaanIbu || "",
-          alamatKtpOrtu: user.alamatKtp || "",
-          alamatDomisiliOrtu: user.alamatDomisili || "",
-          domisiliSama:
-            !user.alamatDomisili ||
-            user.alamatDomisili === user.alamatKtp,
-        });
-      } catch (err) {
-        if (!cancelled) {
-          console.error("Error load siswa:", err);
-          setError(getErrorMessage(err));
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    }
-
-    run();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [id]);
-
-  function handleChange(event) {
-    const { name, value, type, checked } = event.target;
-
-    setForm((prev) => {
-      const next = {
-        ...prev,
-        [name]: type === "checkbox" ? checked : value,
-      };
-
-      if (name === "alamatKtpOrtu" && prev.domisiliSama) {
-        next.alamatDomisiliOrtu = value;
-      }
-
-      return next;
+      return (
+        nama.includes(keyword) ||
+        tingkat.includes(keyword) ||
+        tahunAjaran.includes(keyword) ||
+        jurusan.includes(keyword)
+      );
     });
+  }, [kelasList, kelasSearch]);
 
-    setError("");
-    setSuccessMessage("");
-  }
+  const selectedKelas = useMemo(
+    () => kelasList.find((kelas) => String(kelas.id) === String(kelasId)),
+    [kelasList, kelasId]
+  );
 
-  function handleDomisiliChange(event) {
-    const checked = event.target.checked;
+  const handleChange = (event) => {
+    const { name, value } = event.target;
 
-    setForm((prev) => ({
-      ...prev,
-      domisiliSama: checked,
-      alamatDomisiliOrtu: checked
-        ? prev.alamatKtpOrtu
-        : prev.alamatDomisiliOrtu,
+    setForm((previous) => ({
+      ...previous,
+      [name]: value,
     }));
+  };
 
-    setError("");
-  }
+  const handleSelectKelas = (kelas) => {
+    setKelasId(String(kelas.id));
+    setKelasSearch("");
+    setKelasDropdownOpen(false);
+  };
 
-  function validateForm() {
-    if (!form.nama.trim()) return "Nama siswa wajib diisi.";
-    if (!form.nis.trim()) return "NIS wajib diisi.";
-    if (!form.nisn.trim()) return "NISN wajib diisi.";
-    if (!form.email.trim()) return "Email wajib diisi.";
-
-    return "";
-  }
-
-  async function handleSubmit(event) {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-
-    const validationError = validateForm();
-
-    if (validationError) {
-      setError(validationError);
-      window.scrollTo({ top: 0, behavior: "smooth" });
-      return;
-    }
-
-    if (!id) {
-      setError("ID siswa tidak ditemukan.");
-      return;
-    }
-
-    const payload = {
-      namaLengkap: form.nama.trim(),
-      nipd: form.nis.trim(),
-      nisn: form.nisn.trim(),
-      email: form.email.trim(),
-      jenisKelamin: form.gender,
-      tempatLahir: form.tempatLahir.trim() || null,
-      tanggalLahir: form.tglLahir || null,
-      alamat: form.alamat.trim() || null,
-      noTelepon: form.phone.trim() || null,
-      status: form.status,
-      nik: form.nikOrtu.trim() || null,
-      namaAyah: form.namaAyah.trim() || null,
-      pekerjaanAyah: form.pekerjaanAyah.trim() || null,
-      namaIbu: form.namaIbu.trim() || null,
-      pekerjaanIbu: form.pekerjaanIbu.trim() || null,
-      alamatKtp: form.alamatKtpOrtu.trim() || null,
-      alamatDomisili: form.domisiliSama
-        ? form.alamatKtpOrtu.trim() || null
-        : form.alamatDomisiliOrtu.trim() || null,
-      kecamatan: form.kecamatan.trim() || null,
-      kelurahan: form.kelurahan.trim() || null,
-      kota: form.kota.trim() || null,
-    };
 
     try {
       setSaving(true);
       setError("");
-      setSuccessMessage("");
+      setSuccess("");
 
-      console.log("Update siswa:", { id, payload });
+      const payload = {
+        namaLengkap: form.namaLengkap,
+        nipd: form.nipd,
+        nisn: form.nisn,
+        status: form.status,
+        jenisKelamin: form.jenisKelamin,
+        tempatLahir: form.tempatLahir,
+        tanggalLahir: form.tanggalLahir || null,
+        email: form.email,
+        noTelepon: form.noTelepon,
+        alamat: form.alamat,
+        provinsi: form.provinsi,
+        kota: form.kota,
+        kecamatan: form.kecamatan,
+        kelurahan: form.kelurahan,
+        namaOrangTua: form.namaOrangTua,
+        noTeleponOrangTua: form.noTeleponOrangTua,
+      };
 
-      const response = await updateUser(id, payload);
+      await updateUser(id, payload);
 
-      const result = response?.data ?? response;
-
-      if (result?.success === false) {
-        throw new Error(result.message || "Gagal memperbarui data siswa.");
-      }
-
-      setSuccessMessage(
-        result?.message || "Data siswa berhasil diperbarui."
+      setSuccess(
+        "Data siswa berhasil diperbarui. Pilihan kelas belum disimpan karena endpoint perubahan anggota kelas belum tersedia."
       );
-
-      window.setTimeout(() => {
-        router.push("/admin/siswa");
-        router.refresh();
-      }, 1000);
     } catch (err) {
-      console.error("Error update siswa:", err);
-      setError(getErrorMessage(err));
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      console.error("Gagal memperbarui data siswa:", err);
+      setError(getErrorMessage(err, "Gagal memperbarui data siswa."));
     } finally {
       setSaving(false);
     }
-  }
+  };
 
   if (loading) {
     return (
       <PageLayout>
-        <div className="flex min-h-[60vh] flex-col items-center justify-center gap-3">
-          <Loader2 className={`h-8 w-8 animate-spin ${themeText}`} />
-          <p className="theme-text-secondary text-sm">
-            Mengambil data siswa...
-          </p>
+        <div className="flex min-h-[60vh] items-center justify-center">
+          <div className="flex flex-col items-center gap-3">
+            <Loader2 className="h-8 w-8 animate-spin text-[var(--color-primary)]" />
+            <span className="text-sm font-medium text-[var(--color-text-muted)]">
+              Memuat data siswa...
+            </span>
+          </div>
         </div>
       </PageLayout>
     );
@@ -380,356 +286,526 @@ export default function EditSiswaPage() {
 
   return (
     <PageLayout>
-      <main className="min-h-0 min-w-0 flex-1 overflow-y-auto">
-        <div className="w-full p-4 sm:p-6 lg:p-8 space-y-6 min-w-0">
-          <button
-            type="button"
-            onClick={() => router.push("/admin/siswa")}
-            className="theme-text-muted mb-4 inline-flex items-center gap-2 text-sm font-medium hover:text-[var(--color-primary)]"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Kembali ke Data Siswa
-          </button>
+      <div className="w-full space-y-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <button
+              type="button"
+              onClick={() => router.back()}
+              className="mb-3 inline-flex items-center gap-2 text-sm font-medium text-[var(--color-text-muted)] transition hover:text-[var(--color-primary)]"
+            >
+              <ArrowLeft size={17} />
+              Kembali
+            </button>
 
-          <div className="mb-6">
-            <h1 className="theme-text text-2xl font-bold">
+            <h1 className="text-2xl font-bold text-[var(--color-text)] sm:text-3xl">
               Edit Data Siswa
             </h1>
-            <p className="theme-text-muted mt-1 text-sm">
-              Perbarui informasi siswa melalui sistem.
+            <p className="mt-1 max-w-2xl text-sm text-[var(--color-text-muted)]">
+              Perbarui informasi identitas, kontak, dan penempatan kelas siswa.
             </p>
           </div>
+        </div>
 
-          {error && (
-            <AlertBox type="error" message={error} />
-          )}
+        {error && (
+          <AlertBox type="error">
+            <AlertCircle size={18} />
+            <span>{error}</span>
+          </AlertBox>
+        )}
 
-          {successMessage && (
-            <AlertBox type="success" message={successMessage} />
-          )}
+        {success && (
+          <AlertBox type="success">
+            <CheckCircle2 size={18} />
+            <span>{success}</span>
+          </AlertBox>
+        )}
 
-          <form onSubmit={handleSubmit}>
-            <FormSection
-              icon={<User className="h-5 w-5" />}
-              title="Data Utama Siswa"
-              description="Informasi dasar siswa."
-            >
-              <div className="grid gap-5 p-6 md:grid-cols-2">
-                <Field label="Nama Lengkap" required className="md:col-span-2">
-                  <Input
-                    name="nama"
-                    value={form.nama}
-                    onChange={handleChange}
-                    placeholder="Masukkan nama lengkap siswa"
-                    required
-                  />
-                </Field>
-
-                <Field label="NIS" required>
-                  <Input
-                    name="nis"
-                    value={form.nis}
-                    onChange={handleChange}
-                    placeholder="Masukkan NIS"
-                    required
-                  />
-                </Field>
-
-                <Field label="NISN" required>
-                  <Input
-                    name="nisn"
-                    value={form.nisn}
-                    onChange={handleChange}
-                    placeholder="Masukkan NISN"
-                    required
-                  />
-                </Field>
-
-                <Field label="Kelas">
-                  <Input
-                    value="Informasi kelas belum tersedia dari endpoint ini"
-                    disabled
-                    readOnly
-                  />
-                  <Hint>
-                    Controller getUserById belum mengembalikan relasi kelas.
-                  </Hint>
-                </Field>
-
-                <Field label="Status">
-                  <Select name="status" value={form.status} onChange={handleChange}>
-                    <option value="aktif">Aktif</option>
-                    <option value="nonaktif">Nonaktif</option>
-                  </Select>
-                </Field>
-
-                <Field label="Jenis Kelamin">
-                  <Select name="gender" value={form.gender} onChange={handleChange}>
-                    <option value="L">Laki-laki</option>
-                    <option value="P">Perempuan</option>
-                  </Select>
-                </Field>
-
-                <Field label="Tempat Lahir">
-                  <Input
-                    name="tempatLahir"
-                    value={form.tempatLahir}
-                    onChange={handleChange}
-                    placeholder="Masukkan tempat lahir"
-                  />
-                </Field>
-
-                <Field label="Tanggal Lahir">
-                  <Input
-                    type="date"
-                    name="tglLahir"
-                    value={form.tglLahir}
-                    onChange={handleChange}
-                  />
-                </Field>
-
-                <Field label="Tanggal Bergabung">
-                  <Input type="date" value={form.joinDate} disabled readOnly />
-                  <Hint>Diambil dari tanggal data dibuat di backend.</Hint>
-                </Field>
-              </div>
-            </FormSection>
-
-            <FormSection
-              icon={<MapPin className="h-5 w-5" />}
-              title="Alamat Siswa"
-              description="Informasi alamat tempat tinggal siswa."
-            >
-              <div className="grid gap-5 p-6 md:grid-cols-2">
-                <Field label="Alamat Lengkap" className="md:col-span-2">
-                  <Textarea
-                    name="alamat"
-                    value={form.alamat}
-                    onChange={handleChange}
-                    placeholder="Masukkan alamat lengkap siswa"
-                  />
-                </Field>
-
-                <Field label="Kota / Kabupaten">
-                  <Input
-                    name="kota"
-                    value={form.kota}
-                    onChange={handleChange}
-                    placeholder="Masukkan kota/kabupaten"
-                  />
-                </Field>
-
-                <Field label="Kecamatan">
-                  <Input
-                    name="kecamatan"
-                    value={form.kecamatan}
-                    onChange={handleChange}
-                    placeholder="Masukkan kecamatan"
-                  />
-                </Field>
-
-                <Field label="Kelurahan">
-                  <Input
-                    name="kelurahan"
-                    value={form.kelurahan}
-                    onChange={handleChange}
-                    placeholder="Masukkan kelurahan"
-                  />
-                </Field>
-              </div>
-            </FormSection>
-
-            <FormSection
-              icon={<UserRound className="h-5 w-5" />}
-              title="Informasi Kontak"
-              description="Email dan nomor telepon siswa."
-            >
-              <div className="grid gap-5 p-6 md:grid-cols-2">
-                <Field label="Email" required>
-                  <Input
-                    type="email"
-                    name="email"
-                    value={form.email}
-                    onChange={handleChange}
-                    placeholder="contoh@email.com"
-                    required
-                  />
-                </Field>
-
-                <Field label="Nomor Telepon">
-                  <Input
-                    type="tel"
-                    name="phone"
-                    value={form.phone}
-                    onChange={handleChange}
-                    placeholder="08xxxxxxxxxx"
-                  />
-                </Field>
-              </div>
-            </FormSection>
-
-            <FormSection
-              icon={<Users className="h-5 w-5" />}
-              title="Data Orang Tua / Wali"
-              description="Informasi ayah, ibu, dan alamat orang tua."
-            >
-              <div className="grid gap-5 p-6 md:grid-cols-2">
-                <Field label="NIK Orang Tua / Wali">
-                  <Input
-                    name="nikOrtu"
-                    value={form.nikOrtu}
-                    onChange={handleChange}
-                    placeholder="Masukkan NIK"
-                  />
-                </Field>
-
-                <div />
-
-                <Field label="Nama Ayah">
-                  <Input
-                    name="namaAyah"
-                    value={form.namaAyah}
-                    onChange={handleChange}
-                    placeholder="Masukkan nama ayah"
-                  />
-                </Field>
-
-                <Field label="Pekerjaan Ayah">
-                  <Input
-                    name="pekerjaanAyah"
-                    value={form.pekerjaanAyah}
-                    onChange={handleChange}
-                    placeholder="Masukkan pekerjaan ayah"
-                  />
-                </Field>
-
-                <Field label="Nama Ibu">
-                  <Input
-                    name="namaIbu"
-                    value={form.namaIbu}
-                    onChange={handleChange}
-                    placeholder="Masukkan nama ibu"
-                  />
-                </Field>
-
-                <Field label="Pekerjaan Ibu">
-                  <Input
-                    name="pekerjaanIbu"
-                    value={form.pekerjaanIbu}
-                    onChange={handleChange}
-                    placeholder="Masukkan pekerjaan ibu"
-                  />
-                </Field>
-
-                <Field label="Alamat KTP Orang Tua / Wali" className="md:col-span-2">
-                  <Textarea
-                    name="alamatKtpOrtu"
-                    value={form.alamatKtpOrtu}
-                    onChange={handleChange}
-                    placeholder="Masukkan alamat sesuai KTP"
-                  />
-                </Field>
-
-                <div className="md:col-span-2">
-                  <label className="theme-text-secondary flex cursor-pointer items-center gap-3 text-sm">
-                    <input
-                      type="checkbox"
-                      checked={form.domisiliSama}
-                      onChange={handleDomisiliChange}
-                      className="h-4 w-4 accent-[var(--color-primary)]"
-                    />
-                    Alamat domisili sama dengan alamat KTP
-                  </label>
-                </div>
-
-                {!form.domisiliSama && (
-                  <Field
-                    label="Alamat Domisili Orang Tua / Wali"
-                    className="md:col-span-2"
-                  >
-                    <Textarea
-                      name="alamatDomisiliOrtu"
-                      value={form.alamatDomisiliOrtu}
+        <form onSubmit={handleSubmit}>
+          <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_350px] 2xl:grid-cols-[minmax(0,1fr)_400px]">
+            
+            <div className="space-y-6">
+              <FormSection
+                title="Informasi Akademik"
+                description="Informasi nomor induk dan penempatan kelas siswa."
+                icon={<GraduationCap size={19} />}
+              >
+                <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                  <Field label="NIS" required>
+                    <Input
+                      name="nipd"
+                      value={form.nipd}
                       onChange={handleChange}
-                      placeholder="Masukkan alamat domisili"
+                      placeholder="Masukkan NIS"
+                      required
                     />
                   </Field>
-                )}
+
+                  <Field label="NISN">
+                    <Input
+                      name="nisn"
+                      value={form.nisn}
+                      onChange={handleChange}
+                      placeholder="Masukkan NISN"
+                    />
+                  </Field>
+
+                  <Field label="Kelas">
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setKelasDropdownOpen((previous) => !previous)
+                        }
+                        className="flex min-h-11 w-full items-center justify-between rounded-lg border border-[var(--color-border)] bg-[var(--color-card)] px-3 py-2 text-left text-sm outline-none transition hover:border-[var(--color-primary)] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
+                      >
+                        <span
+                          className={
+                            selectedKelas
+                              ? "font-medium text-[var(--color-text)]"
+                              : "text-[var(--color-text-placeholder)]"
+                          }
+                        >
+                          {selectedKelas
+                            ? getNamaKelas(selectedKelas)
+                            : "Pilih kelas"}
+                        </span>
+
+                        <ChevronDown
+                          size={18}
+                          className={`shrink-0 text-[var(--color-text-muted)] transition ${
+                            kelasDropdownOpen ? "rotate-180" : ""
+                          }`}
+                        />
+                      </button>
+
+                      {kelasDropdownOpen && (
+                        <div className="absolute left-0 right-0 z-30 mt-2 overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-card)] shadow-xl">
+                          <div className="border-b border-[var(--color-border)] p-3">
+                            <div className="relative">
+                              <Search
+                                size={17}
+                                className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]"
+                              />
+
+                              <input
+                                type="text"
+                                value={kelasSearch}
+                                onChange={(event) =>
+                                  setKelasSearch(event.target.value)
+                                }
+                                placeholder="Cari nama kelas..."
+                                autoFocus
+                                className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-background)] py-2.5 pl-9 pr-9 text-sm text-[var(--color-text)] outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
+                              />
+
+                              {kelasSearch && (
+                                <button
+                                  type="button"
+                                  onClick={() => setKelasSearch("")}
+                                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+                                >
+                                  <X size={15} />
+                                </button>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="max-h-60 overflow-y-auto p-1.5">
+                            {loadingKelas ? (
+                              <div className="flex items-center justify-center gap-2 px-3 py-6 text-sm text-[var(--color-text-muted)]">
+                                <Loader2
+                                  size={17}
+                                  className="animate-spin"
+                                />
+                                Memuat daftar kelas...
+                              </div>
+                            ) : kelasError ? (
+                              <div className="px-3 py-4 text-sm text-red-600">
+                                <p>{kelasError}</p>
+                                <button
+                                  type="button"
+                                  onClick={loadKelas}
+                                  className="mt-2 font-semibold text-[var(--color-primary)] hover:underline"
+                                >
+                                  Coba lagi
+                                </button>
+                              </div>
+                            ) : filteredKelas.length === 0 ? (
+                              <div className="px-3 py-6 text-center text-sm text-[var(--color-text-muted)]">
+                                {kelasList.length === 0
+                                  ? "Belum ada data kelas."
+                                  : "Kelas tidak ditemukan."}
+                              </div>
+                            ) : (
+                              filteredKelas.map((kelas) => {
+                                const isSelected =
+                                  String(kelas.id) === String(kelasId);
+
+                                return (
+                                  <button
+                                    key={kelas.id}
+                                    type="button"
+                                    onClick={() => handleSelectKelas(kelas)}
+                                    className={`flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-left transition ${
+                                      isSelected
+                                        ? "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] text-[var(--color-primary)]"
+                                        : "text-[var(--color-text-secondary)] hover:bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]"
+                                    }`}
+                                  >
+                                    <div className="min-w-0">
+                                      <p className="truncate text-sm font-semibold">
+                                        {getNamaKelas(kelas)}
+                                      </p>
+                                      <p className="mt-0.5 text-xs text-[var(--color-text-muted)]">
+                                        {[
+                                          kelas.tingkat,
+                                          kelas.jurusan?.namaJurusan ||
+                                            kelas.jurusan?.nama,
+                                          kelas.tahunAjaran?.nama ||
+                                            kelas.tahunAjaran?.tahun,
+                                        ]
+                                          .filter(Boolean)
+                                          .join(" • ") || "Informasi kelas"}
+                                      </p>
+                                    </div>
+
+                                    {isSelected && (
+                                      <CheckCircle2
+                                        size={18}
+                                        className="ml-3 shrink-0 text-[var(--color-primary)]"
+                                      />
+                                    )}
+                                  </button>
+                                );
+                              })
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {selectedKelas && (
+                      <div className="mt-2 flex items-center justify-between rounded-lg border border-[color-mix(in_srgb,var(--color-primary)_30%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)] px-3 py-2">
+                        <div className="flex min-w-0 items-center gap-2 text-sm text-[var(--color-primary)]">
+                          <GraduationCap size={16} />
+                          <span className="truncate font-medium">
+                            {getNamaKelas(selectedKelas)}
+                          </span>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => setKelasId("")}
+                          className="ml-2 text-[var(--color-primary)] hover:text-red-600"
+                          title="Hapus pilihan kelas"
+                        >
+                          <X size={16} />
+                        </button>
+                      </div>
+                    )}
+
+                    <Hint>
+                      Pilihan kelas saat ini belum tersimpan ke database karena
+                      endpoint perubahan keanggotaan kelas belum tersedia.
+                    </Hint>
+                  </Field>
+
+                  <Field label="Status Siswa">
+                    <Select
+                      name="status"
+                      value={form.status}
+                      onChange={handleChange}
+                    >
+                      <option value="aktif">Aktif</option>
+                      <option value="nonaktif">Nonaktif</option>
+                      <option value="lulus">Lulus</option>
+                      <option value="keluar">Keluar</option>
+                    </Select>
+                  </Field>
+                </div>
+              </FormSection>
+
+              <FormSection
+                title="Identitas Siswa"
+                description="Informasi pribadi dan identitas siswa."
+                icon={<User size={19} />}
+              >
+                <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                  <Field label="Nama Lengkap" required>
+                    <Input
+                      name="namaLengkap"
+                      value={form.namaLengkap}
+                      onChange={handleChange}
+                      placeholder="Masukkan nama lengkap"
+                      required
+                    />
+                  </Field>
+
+                  <Field label="Jenis Kelamin">
+                    <Select
+                      name="jenisKelamin"
+                      value={form.jenisKelamin}
+                      onChange={handleChange}
+                    >
+                      <option value="">Pilih jenis kelamin</option>
+                      <option value="L">Laki-laki</option>
+                      <option value="P">Perempuan</option>
+                    </Select>
+                  </Field>
+
+                  <Field label="Tempat Lahir">
+                    <Input
+                      name="tempatLahir"
+                      value={form.tempatLahir}
+                      onChange={handleChange}
+                      placeholder="Masukkan tempat lahir"
+                    />
+                  </Field>
+
+                  <Field label="Tanggal Lahir">
+                    <Input
+                      type="date"
+                      name="tanggalLahir"
+                      value={form.tanggalLahir}
+                      onChange={handleChange}
+                    />
+                  </Field>
+                </div>
+              </FormSection>
+
+              <FormSection
+                title="Informasi Kontak"
+                description="Informasi email, nomor telepon, dan alamat siswa."
+                icon={<MapPin size={19} />}
+              >
+                <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                  <Field label="Email">
+                    <Input
+                      type="email"
+                      name="email"
+                      value={form.email}
+                      onChange={handleChange}
+                      placeholder="nama@email.com"
+                    />
+                  </Field>
+
+                  <Field label="Nomor Telepon">
+                    <Input
+                      name="noTelepon"
+                      value={form.noTelepon}
+                      onChange={handleChange}
+                      placeholder="Masukkan nomor telepon"
+                    />
+                  </Field>
+
+                  <Field label="Provinsi">
+                    <Input
+                      name="provinsi"
+                      value={form.provinsi}
+                      onChange={handleChange}
+                      placeholder="Masukkan provinsi"
+                    />
+                  </Field>
+
+                  <Field label="Kota/Kabupaten">
+                    <Input
+                      name="kota"
+                      value={form.kota}
+                      onChange={handleChange}
+                      placeholder="Masukkan kota/kabupaten"
+                    />
+                  </Field>
+
+                  <Field label="Kecamatan">
+                    <Input
+                      name="kecamatan"
+                      value={form.kecamatan}
+                      onChange={handleChange}
+                      placeholder="Masukkan kecamatan"
+                    />
+                  </Field>
+
+                  <Field label="Kelurahan/Desa">
+                    <Input
+                      name="kelurahan"
+                      value={form.kelurahan}
+                      onChange={handleChange}
+                      placeholder="Masukkan kelurahan/desa"
+                    />
+                  </Field>
+
+                  <div className="md:col-span-2">
+                    <Field label="Alamat Lengkap">
+                      <Textarea
+                        name="alamat"
+                        value={form.alamat}
+                        onChange={handleChange}
+                        placeholder="Masukkan alamat lengkap"
+                        rows={3}
+                      />
+                    </Field>
+                  </div>
+                </div>
+              </FormSection>
+
+              <FormSection
+                title="Informasi Orang Tua/Wali"
+                description="Informasi kontak orang tua atau wali siswa."
+                icon={<Users size={19} />}
+              >
+                <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                  <Field label="Nama Orang Tua/Wali">
+                    <Input
+                      name="namaOrangTua"
+                      value={form.namaOrangTua}
+                      onChange={handleChange}
+                      placeholder="Masukkan nama orang tua/wali"
+                    />
+                  </Field>
+
+                  <Field label="Nomor Telepon Orang Tua/Wali">
+                    <Input
+                      name="noTeleponOrangTua"
+                      value={form.noTeleponOrangTua}
+                      onChange={handleChange}
+                      placeholder="Masukkan nomor telepon"
+                    />
+                  </Field>
+                </div>
+              </FormSection>
+
+              <div className="flex flex-wrap items-center justify-end gap-3 border-t border-[var(--color-border)] pt-5">
+                <button
+                  type="button"
+                  onClick={() => router.back()}
+                  disabled={saving}
+                  className="rounded-lg border border-[var(--color-border)] px-5 py-2.5 text-sm font-semibold text-[var(--color-text-secondary)] transition hover:bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)] disabled:opacity-50"
+                >
+                  Batal
+                </button>
+
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="inline-flex items-center gap-2 rounded-lg bg-[var(--color-primary)] px-5 py-2.5 text-sm font-semibold text-[var(--color-card)] transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {saving ? (
+                    <Loader2 size={17} className="animate-spin" />
+                  ) : (
+                    <Save size={17} />
+                  )}
+                  {saving ? "Menyimpan..." : "Simpan Perubahan"}
+                </button>
               </div>
-            </FormSection>
-
-            <div className={`flex flex-col-reverse gap-3 border-t ${themeDivider} pt-6 sm:flex-row sm:justify-end`}>
-              <button
-                type="button"
-                onClick={() => router.push("/admin/siswa")}
-                disabled={saving}
-                className={`theme-card theme-text-secondary ${themeBorder} rounded-xl border px-5 py-3 text-sm font-semibold transition hover:opacity-80 disabled:opacity-60`}
-              >
-                Batal
-              </button>
-
-              <button
-                type="submit"
-                disabled={saving}
-                className="theme-primary inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold text-[var(--color-card)] shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_16%,transparent)] transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {saving ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Menyimpan...
-                  </>
-                ) : (
-                  <>
-                    <Save className="h-4 w-4" />
-                    Perbarui Data
-                  </>
-                )}
-              </button>
             </div>
-          </form>
-        </div>
-      </main>
+
+            <aside className="space-y-5">
+              <section className="overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-card)] shadow-sm">
+                <div className="flex items-center gap-2 border-b border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text)_2%,transparent)] px-5 py-4">
+                  <Sparkles size={16} className="text-[var(--color-primary)]" />
+                  <h2 className="text-sm font-bold text-[var(--color-text)]">Panduan Pengisian</h2>
+                </div>
+                <div className="space-y-4 p-5">
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] text-[var(--color-primary)]">
+                      <User size={15} />
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-[var(--color-text)]">Nama & Identitas</p>
+                      <p className="mt-0.5 text-[11px] leading-relaxed text-[var(--color-text-muted)]">
+                        Pastikan nama lengkap dan NIS diisi dengan benar sesuai data resmi sekolah.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-info)_10%,transparent)] text-[var(--color-info)]">
+                      <GraduationCap size={15} />
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-[var(--color-text)]">Penempatan Kelas</p>
+                      <p className="mt-0.5 text-[11px] leading-relaxed text-[var(--color-text-muted)]">
+                        Pilih kelas yang sesuai. Saat ini perubahan kelas belum dapat disimpan ke database.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-warning)_10%,transparent)] text-[var(--color-warning)]">
+                      <MapPin size={15} />
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-[var(--color-text)]">Alamat & Kontak</p>
+                      <p className="mt-0.5 text-[11px] leading-relaxed text-[var(--color-text-muted)]">
+                        Lengkapi alamat domisili dan nomor telepon yang aktif untuk memudahkan komunikasi.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <div className="rounded-xl border border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_5%,transparent)] p-5 text-sm text-[var(--color-text)]">
+                <div className="flex items-start gap-3">
+                  <AlertCircle size={18} className="mt-0.5 shrink-0 text-[var(--color-primary)]" />
+                  <div>
+                    <h3 className="text-xs font-bold text-[var(--color-primary)]">Perhatian</h3>
+                    <p className="mt-1 text-[11px] leading-relaxed text-[var(--color-text-secondary)]">
+                      Perubahan data akan langsung mempengaruhi profil siswa di seluruh sistem. Harap periksa kembali sebelum menyimpan.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </form>
+      </div>
     </PageLayout>
   );
 }
 
 function PageLayout({ children }) {
   return (
-    <div className="theme-page flex h-screen overflow-hidden">
-      <Sidebar role="admin" active="siswa" />
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <Header />
-        {children}
+    <div className="flex h-screen overflow-hidden theme-page theme-text">
+      <div className="shrink-0">
+        <Sidebar />
+      </div>
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+        <div className="shrink-0">
+          <Header />
+        </div>
+        <main className="min-w-0 flex-1 overflow-y-auto">
+          <div className="w-full px-4 py-5 sm:px-6 md:px-7 lg:px-8 xl:px-10">
+            {children}
+          </div>
+        </main>
       </div>
     </div>
   );
 }
 
-function FormSection({ icon, title, description, children }) {
+function FormSection({ title, description, icon, children }) {
   return (
-    <section className={`theme-card ${themeBorder} ${themeShadow} mb-6 overflow-hidden rounded-2xl border`}>
-      <div className={`border-b ${themeDivider} px-6 py-5`}>
-        <div className="flex items-center gap-3">
-          <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${themeSoftBorder} ${themeSoft} ${themeText}`}>
-            {icon}
-          </div>
-          <div>
-            <h2 className="theme-text text-base font-semibold">{title}</h2>
-            <p className="theme-text-muted mt-0.5 text-sm">{description}</p>
-          </div>
+    <section className="overflow-visible rounded-xl border border-[var(--color-border)] bg-[var(--color-card)] shadow-sm">
+      <div className="flex items-start gap-3 border-b border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text)_2%,transparent)] px-5 py-4">
+        <div className="rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] p-2 text-[var(--color-primary)]">
+          {icon}
+        </div>
+        <div>
+          <h2 className="font-semibold text-[var(--color-text)]">{title}</h2>
+          <p className="mt-0.5 text-sm text-[var(--color-text-muted)]">{description}</p>
         </div>
       </div>
-      {children}
+
+      <div className="p-5">{children}</div>
     </section>
   );
 }
 
-function Field({ label, required = false, className = "", children }) {
+function Field({ label, required, children }) {
   return (
-    <div className={className}>
-      <label className="theme-text-secondary mb-2 block text-sm font-medium">
+    <div className="min-w-0 space-y-1.5">
+      <label className="block text-sm font-medium text-[var(--color-text-secondary)]">
         {label}
-        {required && <span className="theme-danger ml-1">*</span>}
+        {required && <span className="ml-1 text-[var(--color-danger)]">*</span>}
       </label>
       {children}
     </div>
@@ -740,17 +816,19 @@ function Input({ className = "", ...props }) {
   return (
     <input
       {...props}
-      className={`theme-input w-full rounded-xl border px-4 py-3 text-sm outline-none transition ${themeBorder} ${themeFocus} disabled:cursor-not-allowed disabled:opacity-70 ${className}`}
+      className={`min-h-11 w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-background)] px-3 py-2 text-sm text-[var(--color-text)] outline-none transition placeholder:text-[var(--color-text-placeholder)] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 disabled:bg-[var(--color-border)] ${className}`}
     />
   );
 }
 
-function Select({ className = "", ...props }) {
+function Select({ className = "", children, ...props }) {
   return (
     <select
       {...props}
-      className={`theme-input w-full rounded-xl border px-4 py-3 text-sm outline-none transition ${themeBorder} ${themeFocus} ${className}`}
-    />
+      className={`min-h-11 w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-background)] px-3 py-2 text-sm text-[var(--color-text)] outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 ${className}`}
+    >
+      {children}
+    </select>
   );
 }
 
@@ -758,40 +836,25 @@ function Textarea({ className = "", ...props }) {
   return (
     <textarea
       {...props}
-      rows={3}
-      className={`theme-input w-full resize-y rounded-xl border px-4 py-3 text-sm outline-none transition ${themeBorder} ${themeFocus} ${className}`}
+      className={`w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-background)] px-3 py-2 text-sm text-[var(--color-text)] outline-none transition placeholder:text-[var(--color-text-placeholder)] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 ${className}`}
     />
   );
 }
 
 function Hint({ children }) {
-  return (
-    <p className="theme-text-muted mt-1.5 text-xs leading-5">
-      {children}
-    </p>
-  );
+  return <p className="mt-1.5 text-xs leading-relaxed text-[var(--color-text-muted)]">{children}</p>;
 }
 
-function AlertBox({ type, message }) {
-  const success = type === "success";
-  const Icon = success ? CheckCircle2 : AlertCircle;
+function AlertBox({ type = "error", children }) {
+  const styles =
+    type === "success"
+      ? "border-[color-mix(in_srgb,var(--color-success)_30%,transparent)] bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)] text-[var(--color-success)]"
+      : "border-[color-mix(in_srgb,var(--color-danger)_30%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_10%,transparent)] text-[var(--color-danger)]";
 
   return (
-    <div
-      role="alert"
-      className={`mb-5 flex items-start gap-3 rounded-xl border px-4 py-3 ${
-        success
-          ? "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)] bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)] theme-success"
-          : "border-[color-mix(in_srgb,var(--color-danger)_24%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_8%,transparent)] theme-danger"
-      }`}
-    >
-      <Icon className="mt-0.5 h-5 w-5 shrink-0" />
-      <div>
-        <p className="text-sm font-semibold">
-          {success ? "Berhasil" : "Gagal"}
-        </p>
-        <p className="mt-0.5 text-sm">{message}</p>
-      </div>
+    <div className={`flex items-start gap-2 rounded-lg border px-4 py-3 text-sm ${styles}`}>
+      <span className="mt-0.5 shrink-0">{children?.props?.children?.[0]}</span>
+      <div className="min-w-0">{children}</div>
     </div>
   );
 }

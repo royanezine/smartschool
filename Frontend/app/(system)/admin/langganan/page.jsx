@@ -46,7 +46,6 @@ import {
   statusPembayaranInfo,
 } from "@/lib/langganan";
 
-
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]";
 
@@ -61,7 +60,6 @@ const themeCardShadow =
 
 const themeCardHoverShadow =
   "hover:shadow-[0_15px_40px_color-mix(in_srgb,var(--color-primary)_10%,transparent)]";
-
 
 function StatusBadge({ status }) {
   const info = statusLanggananInfo(status);
@@ -89,10 +87,10 @@ function RiwayatStatusBadge({ status }) {
   );
 }
 
-
 export default function LanggananPage() {
   const router = useRouter();
 
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -154,16 +152,33 @@ export default function LanggananPage() {
   const riwayatTerbaru = riwayat.slice(0, 3);
 
   return (
-    <div className="flex h-screen min-h-0 overflow-hidden theme-page">
-      <Sidebar role="admin" active="langganan" setActive={() => {}} />
+    <div className="theme-page flex h-screen w-full overflow-hidden">
+      <div className="fixed inset-y-0 left-0 z-50">
+        <Sidebar
+          role="admin"
+          active="langganan"
+          setActive={() => {}}
+          collapsed={isCollapsed}
+          setCollapsed={setIsCollapsed}
+        />
+      </div>
 
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <Header notifications={[]} />
+      <div
+        className={`flex h-screen min-w-0 flex-1 flex-col overflow-hidden transition-[margin] duration-300 ${
+          isCollapsed ? "lg:ml-[88px]" : "lg:ml-[260px]"
+        }`}
+      >
+        <div className="shrink-0">
+          <Header
+            toggleSidebar={() => setIsCollapsed((v) => !v)}
+            notifications={[]}
+          />
+        </div>
 
-        <main className="min-h-0 flex-1 overflow-y-auto theme-page">
-          <div className="mx-auto w-full max-w-[1600px] px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
+        <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
+          <div className="w-full px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
             {loading && (
-              <div className="theme-card theme-border rounded-2xl border p-16 flex flex-col items-center gap-3">
+              <div className="theme-card theme-border flex flex-col items-center gap-3 rounded-2xl border p-16">
                 <Loader2
                   size={28}
                   className="animate-spin text-[var(--color-primary)]"
@@ -175,13 +190,11 @@ export default function LanggananPage() {
             )}
 
             {!loading && error && (
-              <div className="theme-danger rounded-2xl border p-5 flex items-start gap-3">
+              <div className="theme-danger flex items-start gap-3 rounded-2xl border p-5">
                 <AlertCircle size={18} className="mt-0.5 shrink-0" />
                 <div>
-                  <p className="text-sm font-semibold">
-                    Gagal memuat langganan
-                  </p>
-                  <p className="text-xs mt-1 opacity-90">{error}</p>
+                  <p className="text-sm font-semibold">Gagal memuat langganan</p>
+                  <p className="mt-1 text-xs opacity-90">{error}</p>
                 </div>
               </div>
             )}
@@ -192,7 +205,7 @@ export default function LanggananPage() {
                   <div className="absolute -right-20 -top-28 h-80 w-80 rounded-full bg-white/10 blur-3xl" />
                   <div className="absolute -bottom-40 left-1/3 h-96 w-96 rounded-full bg-white/5 blur-3xl" />
 
-                  <div className="relative grid gap-8 px-6 py-7 sm:px-8 sm:py-8 lg:grid-cols-[1fr_400px] lg:px-10 lg:py-9">
+                  <div className="relative grid gap-8 px-6 py-7 sm:px-8 sm:py-8 lg:grid-cols-[1fr_400px] lg:px-10 lg:py-9 2xl:grid-cols-[minmax(0,1fr)_minmax(380px,0.5fr)]">
                     <div className="flex flex-col justify-center">
                       <div className="mb-4 inline-flex w-fit items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur-md">
                         <Crown size={13} />
@@ -292,9 +305,7 @@ export default function LanggananPage() {
                             Sisa masa aktif
                           </p>
                           <p className="mt-1 text-xs font-semibold text-white">
-                            {hariTersisa !== null
-                              ? `${hariTersisa} hari`
-                              : "-"}
+                            {hariTersisa !== null ? `${hariTersisa} hari` : "-"}
                           </p>
                         </div>
                       </div>
@@ -302,7 +313,7 @@ export default function LanggananPage() {
                   </div>
                 </section>
 
-                <section className="mb-7 grid gap-4 sm:grid-cols-3">
+                <section className="mb-7 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
                   <Link
                     href="/admin/langganan/paket"
                     className={`group theme-card theme-border rounded-2xl border p-5 ${themeCardShadow} transition ${themeCardHoverShadow} hover:-translate-y-0.5`}
@@ -375,7 +386,7 @@ export default function LanggananPage() {
 
                 <section className="mb-7">
                   <div
-                    className={`overflow-hidden theme-card theme-border rounded-2xl border ${themeCardShadow}`}
+                    className={`theme-card theme-border overflow-hidden rounded-2xl border ${themeCardShadow}`}
                   >
                     <div className="theme-border-soft border-b px-5 py-5 sm:px-6">
                       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -402,7 +413,7 @@ export default function LanggananPage() {
                         {aktif ? (
                           <StatusBadge status={aktif.statusLangganan} />
                         ) : (
-                          <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold border theme-text-muted theme-border">
+                          <span className="inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-bold theme-text-muted theme-border">
                             <AlertCircle size={12} />
                             Belum Berlangganan
                           </span>
@@ -410,7 +421,7 @@ export default function LanggananPage() {
                       </div>
                     </div>
 
-                    <div className="grid gap-5 p-5 sm:grid-cols-2 sm:p-6">
+                    <div className="grid grid-cols-1 gap-5 p-5 sm:grid-cols-2 sm:p-6 2xl:grid-cols-4">
                       <div className="theme-card-soft rounded-xl p-4">
                         <div className="flex items-center gap-2">
                           <CalendarDays
@@ -427,7 +438,8 @@ export default function LanggananPage() {
                         </p>
 
                         <p className="mt-1 text-xs theme-text-placeholder">
-                          sampai {aktif ? formatTanggal(aktif.tanggalBerakhir) : "-"}
+                          sampai{" "}
+                          {aktif ? formatTanggal(aktif.tanggalBerakhir) : "-"}
                         </p>
                       </div>
 
@@ -461,37 +473,35 @@ export default function LanggananPage() {
                       </div>
                     </div>
 
-                    {aktif &&
-                      hariTersisa !== null &&
-                      hariTersisa <= 30 && (
-                        <div
-                          className={`mx-5 mb-5 rounded-xl border ${themePrimarySoftBorder} ${themePrimarySoft} p-4 sm:mx-6 sm:mb-6`}
-                        >
-                          <div className="flex items-start gap-3">
-                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg theme-card text-[var(--color-primary)]">
-                              <BellRing size={15} />
-                            </div>
-                            <div>
-                              <p className="text-xs font-bold theme-text">
-                                Langganan akan segera berakhir
-                              </p>
-                              <p className="mt-1 text-[11px] leading-5 theme-text-secondary">
-                                Masa aktif berakhir dalam{" "}
-                                <strong className="text-[var(--color-primary)]">
-                                  {hariTersisa} hari
-                                </strong>
-                                . Perpanjang agar seluruh fitur tetap dapat
-                                digunakan.
-                              </p>
-                            </div>
+                    {aktif && hariTersisa !== null && hariTersisa <= 30 && (
+                      <div
+                        className={`mx-5 mb-5 rounded-xl border ${themePrimarySoftBorder} ${themePrimarySoft} p-4 sm:mx-6 sm:mb-6`}
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="theme-card flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[var(--color-primary)]">
+                            <BellRing size={15} />
+                          </div>
+                          <div>
+                            <p className="text-xs font-bold theme-text">
+                              Langganan akan segera berakhir
+                            </p>
+                            <p className="mt-1 text-[11px] leading-5 theme-text-secondary">
+                              Masa aktif berakhir dalam{" "}
+                              <strong className="text-[var(--color-primary)]">
+                                {hariTersisa} hari
+                              </strong>
+                              . Perpanjang agar seluruh fitur tetap dapat
+                              digunakan.
+                            </p>
                           </div>
                         </div>
-                      )}
+                      </div>
+                    )}
 
                     <div className="theme-border-soft flex flex-col gap-2 border-t p-5 sm:flex-row sm:justify-end sm:px-6">
                       <Link
                         href="/admin/langganan/paket"
-                        className={`inline-flex items-center justify-center gap-2 rounded-xl border theme-border theme-card px-4 py-2.5 text-xs font-semibold theme-text-secondary transition ${themeTextHover} hover:text-[var(--color-primary)]`}
+                        className={`inline-flex items-center justify-center gap-2 rounded-xl border px-4 py-2.5 text-xs font-semibold theme-text-secondary theme-border theme-card transition ${themeTextHover} hover:text-[var(--color-primary)]`}
                       >
                         Lihat Paket
                       </Link>
@@ -511,7 +521,7 @@ export default function LanggananPage() {
                   </div>
                 </section>
 
-                <section className="mb-7 grid gap-5 lg:grid-cols-[.8fr_1.2fr]">
+                <section className="mb-7 grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] 2xl:grid-cols-[minmax(0,0.7fr)_minmax(0,1.3fr)]">
                   <div className="relative overflow-hidden rounded-2xl bg-[var(--color-primary)] p-6 text-white shadow-[0_16px_45px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]">
                     <div className="absolute -right-16 -top-16 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
 
@@ -576,13 +586,13 @@ export default function LanggananPage() {
                     </div>
 
                     {fitur.length > 0 ? (
-                      <div className="mt-6 grid gap-x-8 gap-y-3 sm:grid-cols-2">
+                      <div className="mt-6 grid grid-cols-1 gap-x-8 gap-y-3 sm:grid-cols-2 2xl:grid-cols-3">
                         {fitur.map((feature) => (
                           <div
                             key={feature.id || feature.kode || feature.nama}
                             className="flex items-center gap-2.5"
                           >
-                            <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full theme-success">
+                            <div className="theme-success flex h-5 w-5 shrink-0 items-center justify-center rounded-full">
                               <Check size={12} strokeWidth={3} />
                             </div>
                             <span className="text-xs font-medium theme-text-secondary">
@@ -612,7 +622,7 @@ export default function LanggananPage() {
                 </section>
 
                 <section
-                  className={`mb-7 theme-card theme-border rounded-2xl border ${themeCardShadow}`}
+                  className={`theme-card theme-border mb-7 rounded-2xl border ${themeCardShadow}`}
                 >
                   <div className="theme-border-soft flex flex-col gap-4 border-b px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
                     <div>
@@ -639,17 +649,17 @@ export default function LanggananPage() {
                   {riwayatTerbaru.length === 0 ? (
                     <div className="px-6 py-12 text-center">
                       <div
-                        className={`mx-auto w-12 h-12 rounded-full ${themePrimarySoft} flex items-center justify-center`}
+                        className={`mx-auto flex h-12 w-12 items-center justify-center rounded-full ${themePrimarySoft}`}
                       >
                         <Receipt
                           size={20}
                           className="text-[var(--color-primary)]"
                         />
                       </div>
-                      <p className="text-sm font-semibold theme-text-secondary mt-3">
+                      <p className="theme-text-secondary mt-3 text-sm font-semibold">
                         Belum ada transaksi
                       </p>
-                      <p className="text-xs theme-text-placeholder mt-1">
+                      <p className="theme-text-placeholder mt-1 text-xs">
                         Riwayat pembayaran akan muncul setelah Anda
                         berlangganan.
                       </p>
@@ -660,22 +670,22 @@ export default function LanggananPage() {
                         <table className="w-full min-w-[700px]">
                           <thead>
                             <tr className="theme-card-soft theme-border-soft border-b">
-                              <th className="px-6 py-3 text-left text-[10px] font-bold uppercase tracking-wider theme-text-muted">
+                              <th className="theme-text-muted px-6 py-3 text-left text-[10px] font-bold uppercase tracking-wider">
                                 Invoice
                               </th>
-                              <th className="px-6 py-3 text-left text-[10px] font-bold uppercase tracking-wider theme-text-muted">
+                              <th className="theme-text-muted px-6 py-3 text-left text-[10px] font-bold uppercase tracking-wider">
                                 Tanggal
                               </th>
-                              <th className="px-6 py-3 text-left text-[10px] font-bold uppercase tracking-wider theme-text-muted">
+                              <th className="theme-text-muted px-6 py-3 text-left text-[10px] font-bold uppercase tracking-wider">
                                 Paket
                               </th>
-                              <th className="px-6 py-3 text-right text-[10px] font-bold uppercase tracking-wider theme-text-muted">
+                              <th className="theme-text-muted px-6 py-3 text-right text-[10px] font-bold uppercase tracking-wider">
                                 Jumlah
                               </th>
-                              <th className="px-6 py-3 text-center text-[10px] font-bold uppercase tracking-wider theme-text-muted">
+                              <th className="theme-text-muted px-6 py-3 text-center text-[10px] font-bold uppercase tracking-wider">
                                 Status
                               </th>
-                              <th className="px-6 py-3 text-center text-[10px] font-bold uppercase tracking-wider theme-text-muted">
+                              <th className="theme-text-muted px-6 py-3 text-center text-[10px] font-bold uppercase tracking-wider">
                                 Aksi
                               </th>
                             </tr>
@@ -685,25 +695,25 @@ export default function LanggananPage() {
                             {riwayatTerbaru.map((item) => (
                               <tr
                                 key={item.id}
-                                className={`theme-border-soft border-b last:border-0 transition ${themeTextHover}`}
+                                className={`theme-border-soft border-b transition last:border-0 ${themeTextHover}`}
                               >
                                 <td className="px-6 py-4">
-                                  <span className="text-xs font-bold text-[var(--color-primary)] break-all">
+                                  <span className="break-all text-xs font-bold text-[var(--color-primary)]">
                                     {item.midtransInvoiceId ?? "-"}
                                   </span>
                                 </td>
 
-                                <td className="px-6 py-4 text-xs theme-text-secondary">
+                                <td className="theme-text-secondary px-6 py-4 text-xs">
                                   {formatTanggal(item.dibuatPada)}
                                 </td>
 
                                 <td className="px-6 py-4">
-                                  <span className="text-xs font-semibold theme-text-secondary">
+                                  <span className="theme-text-secondary text-xs font-semibold">
                                     {item.langgananSekolah?.paket?.nama ?? "-"}
                                   </span>
                                 </td>
 
-                                <td className="px-6 py-4 text-right text-xs font-bold theme-text">
+                                <td className="theme-text px-6 py-4 text-right text-xs font-bold">
                                   {formatRupiah(item.jumlah)}
                                 </td>
 
@@ -719,7 +729,7 @@ export default function LanggananPage() {
                                         `/admin/langganan/riwayat-pembayaran/${item.id}`
                                       )
                                     }
-                                    className={`inline-flex h-8 w-8 items-center justify-center rounded-lg theme-text-placeholder transition ${themePrimarySoft} hover:text-[var(--color-primary)]`}
+                                    className={`theme-text-placeholder inline-flex h-8 w-8 items-center justify-center rounded-lg transition ${themePrimarySoft} hover:text-[var(--color-primary)]`}
                                     title="Lihat detail"
                                   >
                                     <FileText size={15} />
@@ -736,10 +746,10 @@ export default function LanggananPage() {
                           <div key={item.id} className="p-5">
                             <div className="flex items-start justify-between gap-3">
                               <div className="min-w-0">
-                                <p className="text-xs font-bold text-[var(--color-primary)] break-all">
+                                <p className="break-all text-xs font-bold text-[var(--color-primary)]">
                                   {item.midtransInvoiceId ?? "-"}
                                 </p>
-                                <p className="mt-1 text-[11px] theme-text-placeholder">
+                                <p className="theme-text-placeholder mt-1 text-[11px]">
                                   {formatTanggal(item.dibuatPada)}
                                 </p>
                               </div>
@@ -749,19 +759,19 @@ export default function LanggananPage() {
 
                             <div className="mt-4 flex items-center justify-between">
                               <div>
-                                <p className="text-[10px] theme-text-placeholder">
+                                <p className="theme-text-placeholder text-[10px]">
                                   Paket
                                 </p>
-                                <p className="mt-1 text-xs font-semibold theme-text-secondary">
+                                <p className="theme-text-secondary mt-1 text-xs font-semibold">
                                   {item.langgananSekolah?.paket?.nama ?? "-"}
                                 </p>
                               </div>
 
                               <div className="text-right">
-                                <p className="text-[10px] theme-text-placeholder">
+                                <p className="theme-text-placeholder text-[10px]">
                                   Jumlah
                                 </p>
-                                <p className="mt-1 text-xs font-bold theme-text">
+                                <p className="theme-text mt-1 text-xs font-bold">
                                   {formatRupiah(item.jumlah)}
                                 </p>
                               </div>
@@ -774,7 +784,7 @@ export default function LanggananPage() {
                                   `/admin/langganan/riwayat-pembayaran/${item.id}`
                                 )
                               }
-                              className={`mt-4 flex w-full items-center justify-center gap-2 rounded-xl border theme-border theme-card px-3 py-2.5 text-xs font-semibold theme-text-secondary transition ${themeTextHover} hover:text-[var(--color-primary)]`}
+                              className={`theme-card mt-4 flex w-full items-center justify-center gap-2 rounded-xl border px-3 py-2.5 text-xs font-semibold theme-text-secondary theme-border transition ${themeTextHover} hover:text-[var(--color-primary)]`}
                             >
                               <FileText size={14} />
                               Lihat Detail
@@ -806,14 +816,14 @@ export default function LanggananPage() {
                       </p>
                     </div>
                   ) : (
-                    <div className="grid gap-5 lg:grid-cols-3">
+                    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
                       {paketTersedia.map((plan) => {
                         const isCurrent = aktif?.paketId === plan.id;
 
                         return (
                           <div
                             key={plan.id}
-                            className={`relative overflow-hidden rounded-2xl border theme-card p-6 ${themeCardShadow} transition-all duration-300 hover:-translate-y-1 ${themeCardHoverShadow} ${
+                            className={`theme-card relative overflow-hidden rounded-2xl border p-6 ${themeCardShadow} transition-all duration-300 hover:-translate-y-1 ${themeCardHoverShadow} ${
                               isCurrent
                                 ? "border-[var(--color-primary)] ring-1 ring-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]"
                                 : "theme-border"
@@ -840,7 +850,7 @@ export default function LanggananPage() {
                               </h3>
 
                               {plan.deskripsi && (
-                                <p className="mt-2 min-h-[40px] text-xs leading-5 theme-text-secondary">
+                                <p className="theme-text-secondary mt-2 min-h-[40px] text-xs leading-5">
                                   {plan.deskripsi}
                                 </p>
                               )}
@@ -849,7 +859,7 @@ export default function LanggananPage() {
                                 <span className="text-2xl font-bold theme-text">
                                   {formatRupiah(plan.harga)}
                                 </span>
-                                <span className="ml-1 text-xs theme-text-placeholder">
+                                <span className="theme-text-placeholder ml-1 text-xs">
                                   / bulan
                                 </span>
                               </div>
@@ -858,22 +868,28 @@ export default function LanggananPage() {
                             <div className="theme-border-soft my-6 border-t" />
 
                             <div className="space-y-3">
-                              {(plan.fitur ?? []).slice(0, 6).map((feature) => (
-                                <div
-                                  key={feature.id || feature.kode || feature.nama}
-                                  className="flex items-start gap-2.5"
-                                >
-                                  <div className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full theme-success">
-                                    <Check size={10} strokeWidth={3} />
+                              {(plan.fitur ?? [])
+                                .slice(0, 6)
+                                .map((feature) => (
+                                  <div
+                                    key={
+                                      feature.id ||
+                                      feature.kode ||
+                                      feature.nama
+                                    }
+                                    className="flex items-start gap-2.5"
+                                  >
+                                    <div className="theme-success mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full">
+                                      <Check size={10} strokeWidth={3} />
+                                    </div>
+                                    <span className="theme-text-secondary text-xs">
+                                      {feature.nama}
+                                    </span>
                                   </div>
-                                  <span className="text-xs theme-text-secondary">
-                                    {feature.nama}
-                                  </span>
-                                </div>
-                              ))}
+                                ))}
 
                               {(plan.fitur?.length ?? 0) > 6 && (
-                                <p className="text-[11px] theme-text-placeholder">
+                                <p className="theme-text-placeholder text-[11px]">
                                   +{(plan.fitur?.length ?? 0) - 6} fitur lainnya
                                 </p>
                               )}
@@ -882,14 +898,12 @@ export default function LanggananPage() {
                             <button
                               type="button"
                               onClick={() =>
-                                router.push(
-                                  `/admin/langganan/checkout/${plan.id}`
-                                )
+                                router.push(`/admin/langganan/checkout/${plan.id}`)
                               }
                               className={`mt-7 flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-xs font-semibold transition ${
                                 isCurrent
                                   ? "bg-[var(--color-primary)] text-white hover:brightness-95"
-                                  : "border theme-border theme-card theme-text-secondary hover:text-[var(--color-primary)]"
+                                  : "theme-card theme-text-secondary border theme-border hover:text-[var(--color-primary)]"
                               }`}
                             >
                               {isCurrent ? "Perpanjang Paket" : "Pilih Paket"}
@@ -902,7 +916,7 @@ export default function LanggananPage() {
                   )}
                 </section>
 
-                <section className="mb-7 grid gap-5 md:grid-cols-3">
+                <section className="mb-7 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
                   <div
                     className={`theme-card theme-border rounded-2xl border p-5 ${themeCardShadow}`}
                   >
@@ -914,7 +928,7 @@ export default function LanggananPage() {
                     <h3 className="mt-4 text-sm font-bold theme-text">
                       Data tetap aman
                     </h3>
-                    <p className="mt-1.5 text-xs leading-5 theme-text-secondary">
+                    <p className="theme-text-secondary mt-1.5 text-xs leading-5">
                       Data sekolah dan aktivitas pengguna dikelola dalam sistem
                       yang terintegrasi.
                     </p>
@@ -931,7 +945,7 @@ export default function LanggananPage() {
                     <h3 className="mt-4 text-sm font-bold theme-text">
                       Perpanjangan mudah
                     </h3>
-                    <p className="mt-1.5 text-xs leading-5 theme-text-secondary">
+                    <p className="theme-text-secondary mt-1.5 text-xs leading-5">
                       Perpanjang paket kapan saja tanpa perlu mengatur ulang
                       data sekolah.
                     </p>
@@ -948,14 +962,14 @@ export default function LanggananPage() {
                     <h3 className="mt-4 text-sm font-bold theme-text">
                       Butuh bantuan?
                     </h3>
-                    <p className="mt-1.5 text-xs leading-5 theme-text-secondary">
+                    <p className="theme-text-secondary mt-1.5 text-xs leading-5">
                       Hubungi administrator SmartSchool jika ada masalah terkait
                       paket atau pembayaran.
                     </p>
                   </div>
                 </section>
 
-                <div className="theme-border-soft flex flex-col gap-3 border-t py-5 text-xs theme-text-muted sm:flex-row sm:items-center sm:justify-between">
+                <div className="theme-border-soft theme-text-muted flex flex-col gap-3 border-t py-5 text-xs sm:flex-row sm:items-center sm:justify-between">
                   <div className="flex items-center gap-2">
                     <WalletCards size={15} />
                     <span>SmartSchool · Manajemen Langganan</span>

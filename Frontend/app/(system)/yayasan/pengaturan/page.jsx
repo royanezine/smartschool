@@ -33,7 +33,6 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
 
@@ -61,18 +60,6 @@ const themeNeutralBorder =
 const themeDivider =
   "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
 
-const themeInfoSurface =
-  "bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)]";
-
-const themeInfoBorder =
-  "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
-
-const themeSuccessSurface =
-  "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
-
-const themeSuccessBorder =
-  "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
-
 const themeWarningSurface =
   "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]";
 
@@ -88,33 +75,12 @@ const themeDangerBorder =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-
 const TABS = [
-  {
-    id: "profil",
-    label: "Profil",
-    icon: User,
-  },
-  {
-    id: "yayasan",
-    label: "Info Yayasan",
-    icon: Building2,
-  },
-  {
-    id: "keamanan",
-    label: "Keamanan",
-    icon: Lock,
-  },
-  {
-    id: "notifikasi",
-    label: "Notifikasi",
-    icon: Bell,
-  },
-  {
-    id: "tampilan",
-    label: "Tampilan",
-    icon: Palette,
-  },
+  { id: "profil", label: "Profil", icon: User },
+  { id: "yayasan", label: "Info Yayasan", icon: Building2 },
+  { id: "keamanan", label: "Keamanan", icon: Lock },
+  { id: "notifikasi", label: "Notifikasi", icon: Bell },
+  { id: "tampilan", label: "Tampilan", icon: Palette },
 ];
 
 const initialProfil = {
@@ -160,96 +126,46 @@ const initialNotifikasi = [
   },
 ];
 
-
 function Toggle({ checked, onChange }) {
   return (
     <button
       type="button"
       onClick={onChange}
       aria-pressed={checked}
-      className={`
-        relative
-        inline-flex
-        h-6
-        w-11
-        flex-shrink-0
-        items-center
-        rounded-full
-        transition-colors
-        ${
-          checked
-            ? "bg-[var(--color-primary)]"
-            : themeNeutralSurface
-        }
-        border
-        ${
-          checked
-            ? "border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]"
-            : themeNeutralBorder
-        }
-      `}
+      className={`relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full border transition-colors ${
+        checked
+          ? "border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] bg-[var(--color-primary)]"
+          : `${themeNeutralSurface} ${themeNeutralBorder}`
+      }`}
     >
       <span
-        className={`
-          inline-block
-          h-[18px]
-          w-[18px]
-          transform
-          rounded-full
-          bg-[var(--color-card)]
-          shadow-[0_1px_4px_color-mix(in_srgb,var(--color-text)_15%,transparent)]
-          transition-transform
-          ${
-            checked
-              ? "translate-x-[22px]"
-              : "translate-x-1"
-          }
-        `}
+        className={`inline-block h-[18px] w-[18px] transform rounded-full bg-[var(--color-card)] shadow-[0_1px_4px_color-mix(in_srgb,var(--color-text)_15%,transparent)] transition-transform ${
+          checked ? "translate-x-[22px]" : "translate-x-1"
+        }`}
       />
     </button>
   );
 }
 
-
 function SectionCard({ children }) {
   return (
     <div
-      className={`
-        theme-card
-        rounded-xl
-        border theme-border
-        ${themeCardShadow}
-        p-5
-        sm:p-6
-      `}
+      className={`theme-card theme-border rounded-xl border p-5 sm:p-6 ${themeCardShadow}`}
     >
       {children}
     </div>
   );
 }
 
-
 function FieldLabel({ children }) {
   return (
-    <label className="block text-xs font-medium theme-text-secondary mb-1.5">
+    <label className="theme-text-secondary mb-1.5 block text-xs font-medium">
       {children}
     </label>
   );
 }
 
-
-const inputClass = `
-  theme-input
-  w-full
-  px-3.5
-  py-2.5
-  text-sm
-  rounded-lg
-  transition-colors
-  ${themeFocus}
-  placeholder:text-[var(--color-text-placeholder)]
-`;
-
+const inputClass = `theme-input w-full rounded-lg px-3.5 py-2.5 text-sm transition-colors placeholder:text-[var(--color-text-placeholder)] ${themeFocus}`;
 
 export default function PengaturanPage() {
   const router = useRouter();
@@ -262,18 +178,13 @@ export default function PengaturanPage() {
 
   const [profil, setProfil] = useState(initialProfil);
   const [yayasan, setYayasan] = useState(initialYayasan);
-  const [notifikasi, setNotifikasi] = useState(
-    initialNotifikasi
-  );
+  const [notifikasi, setNotifikasi] = useState(initialNotifikasi);
 
   const [tema, setTema] = useState("terang");
   const [bahasa, setBahasa] = useState("id");
 
-  const [showPassword, setShowPassword] =
-    useState(false);
-
-  const [showPasswordBaru, setShowPasswordBaru] =
-    useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showPasswordBaru, setShowPasswordBaru] = useState(false);
 
   const [passwordForm, setPasswordForm] = useState({
     lama: "",
@@ -288,7 +199,6 @@ export default function PengaturanPage() {
         setLoading(true);
         setErrorMsg("");
 
-        // Muat profil lengkap (user + yayasan) dari satu endpoint
         const profilRes = await getProfilLengkapYayasan();
         const profilData = profilRes?.data || profilRes;
 
@@ -332,14 +242,7 @@ export default function PengaturanPage() {
 
   const toggleNotifikasi = (id) => {
     setNotifikasi((prev) =>
-      prev.map((n) =>
-        n.id === id
-          ? {
-              ...n,
-              aktif: !n.aktif,
-            }
-          : n
-      )
+      prev.map((n) => (n.id === id ? { ...n, aktif: !n.aktif } : n))
     );
   };
 
@@ -349,7 +252,6 @@ export default function PengaturanPage() {
       setErrorMsg("");
 
       if (activeTab === "profil") {
-        // Simpan profil user via profil-lengkap
         await updateProfilLengkapYayasan({
           user: {
             namaLengkap: profil.nama,
@@ -364,7 +266,6 @@ export default function PengaturanPage() {
           throw new Error("NPYP yayasan minimal 3 karakter.");
         }
 
-        // Endpoint: PUT /api/yayasan/profil
         await updateProfilYayasan({
           nama: yayasan.nama.trim(),
           npyp: yayasan.npyp.trim(),
@@ -383,7 +284,9 @@ export default function PengaturanPage() {
           throw new Error("Password baru minimal 8 karakter.");
         }
         if (passwordForm.baru === passwordForm.lama) {
-          throw new Error("Password baru harus berbeda dari password saat ini.");
+          throw new Error(
+            "Password baru harus berbeda dari password saat ini."
+          );
         }
         if (passwordForm.baru !== passwordForm.konfirmasi) {
           throw new Error("Konfirmasi password baru tidak cocok.");
@@ -394,16 +297,11 @@ export default function PengaturanPage() {
           kataSandiBaru: passwordForm.baru,
         });
 
-        setPasswordForm({
-          lama: "",
-          baru: "",
-          konfirmasi: "",
-        });
+        setPasswordForm({ lama: "", baru: "", konfirmasi: "" });
       } else {
-        // Tab notifikasi/tampilan
         setErrorMsg(
-          "Pengaturan pada tab ini belum memiliki endpoint Backend. "
-            + "Hanya data profil, informasi yayasan, dan keamanan akun yang dapat disimpan saat ini."
+          "Pengaturan pada tab ini belum memiliki endpoint Backend. " +
+            "Hanya data profil, informasi yayasan, dan keamanan akun yang dapat disimpan saat ini."
         );
         return;
       }
@@ -414,12 +312,20 @@ export default function PengaturanPage() {
       }, 2500);
     } catch (err) {
       console.error("Gagal menyimpan:", err);
-      // Tangani HTTP 409 atau duplicate error
-      const is409 = err?.status === 409 || err?.statusCode === 409 || /409/.test(String(err));
+      const is409 =
+        err?.status === 409 ||
+        err?.statusCode === 409 ||
+        /409/.test(String(err));
       if (is409) {
-        setErrorMsg(err?.message || "Konflik Data (HTTP 409): NPYP Yayasan sudah terdaftar pada lembaga lain.");
+        setErrorMsg(
+          err?.message ||
+            "Konflik Data (HTTP 409): NPYP Yayasan sudah terdaftar pada lembaga lain."
+        );
       } else {
-        setErrorMsg(err?.message || "Gagal menyimpan perubahan. Periksa kembali isian form.");
+        setErrorMsg(
+          err?.message ||
+            "Gagal menyimpan perubahan. Periksa kembali isian form."
+        );
       }
     } finally {
       setSaving(false);
@@ -428,26 +334,14 @@ export default function PengaturanPage() {
 
   return (
     <div className="theme-page theme-text min-h-full">
-      <div className="w-full max-w-[1500px] mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 space-y-6">
-
-
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div className="w-full space-y-6 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
+        {/* Header */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
-
             <button
               type="button"
               onClick={() => router.push("/yayasan")}
-              className="
-                inline-flex
-                items-center
-                gap-1
-                text-xs
-                font-medium
-                theme-text-muted
-                hover:text-[var(--color-primary)]
-                transition-colors
-                mb-1
-              "
+              className="mb-1 inline-flex items-center gap-1 text-xs font-medium text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-primary)]"
             >
               <ChevronLeft size={13} />
               Dashboard
@@ -455,32 +349,22 @@ export default function PengaturanPage() {
 
             <div className="flex items-center gap-2.5">
               <div
-                className={`
-                  p-2
-                  rounded-lg
-                  ${themePrimaryGradient}
-                  text-[var(--color-card)]
-                  ${themePrimaryShadow}
-                  flex-shrink-0
-                `}
+                className={`shrink-0 rounded-lg p-2 ${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow}`}
               >
                 <Settings size={18} />
               </div>
-
-              <h1 className="text-xl sm:text-2xl font-semibold theme-text truncate">
+              <h1 className="theme-text truncate text-xl font-semibold sm:text-2xl">
                 Pengaturan
               </h1>
             </div>
 
-            <p className="text-sm theme-text-secondary mt-1 ml-[42px] flex items-center gap-1.5">
+            <p className="theme-text-secondary ml-[42px] mt-1 flex items-center gap-1.5 text-sm">
               <Sparkles
                 size={14}
-                className="theme-text-muted flex-shrink-0"
+                className="shrink-0 text-[var(--color-text-muted)]"
               />
-
               <span className="truncate">
-                Kelola profil, keamanan, notifikasi,
-                dan preferensi akun Anda.
+                Kelola profil, keamanan, notifikasi, dan preferensi akun Anda.
               </span>
             </p>
           </div>
@@ -489,26 +373,7 @@ export default function PengaturanPage() {
             type="button"
             onClick={handleSimpan}
             disabled={saving || loading}
-            className={`
-              flex
-              items-center
-              justify-center
-              gap-2
-              px-4
-              py-2.5
-              text-sm
-              font-medium
-              text-[var(--color-card)]
-              bg-[var(--color-primary)]
-              rounded-lg
-              hover:opacity-90
-              transition-colors
-              ${themePrimaryShadow}
-              whitespace-nowrap
-              flex-shrink-0
-              disabled:opacity-50
-              disabled:cursor-not-allowed
-            `}
+            className={`flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-lg bg-[var(--color-primary)] px-4 py-2.5 text-sm font-medium text-[var(--color-card)] transition-colors hover:opacity-90 ${themePrimaryShadow} disabled:cursor-not-allowed disabled:opacity-50`}
           >
             {saving ? (
               <Loader2 size={16} className="animate-spin" />
@@ -517,70 +382,32 @@ export default function PengaturanPage() {
             ) : (
               <Save size={16} />
             )}
-
-            {saving
-              ? "Menyimpan..."
-              : saved
-              ? "Tersimpan"
-              : "Simpan Perubahan"}
+            {saving ? "Menyimpan..." : saved ? "Tersimpan" : "Simpan Perubahan"}
           </button>
         </div>
 
-
-        <div className="flex flex-col lg:flex-row gap-6">
-
-
-          <div className="lg:w-56 flex-shrink-0">
+        <div className="flex flex-col gap-6 lg:flex-row">
+          {/* Sidebar Tabs */}
+          <div className="w-full shrink-0 lg:w-56">
             <div
-              className={`
-                theme-card
-                rounded-xl
-                border theme-border
-                ${themeCardShadow}
-                p-2
-                flex
-                flex-row
-                lg:flex-col
-                gap-1
-                overflow-x-auto
-                lg:overflow-visible
-              `}
+              className={`theme-card theme-border flex flex-row gap-1 overflow-x-auto rounded-xl border p-2 lg:flex-col lg:overflow-visible ${themeCardShadow}`}
             >
               {TABS.map((tab) => {
                 const Icon = tab.icon;
-                const isActive =
-                  activeTab === tab.id;
+                const isActive = activeTab === tab.id;
 
                 return (
                   <button
                     type="button"
                     key={tab.id}
-                    onClick={() =>
-                      setActiveTab(tab.id)
-                    }
-                    className={`
-                      flex
-                      items-center
-                      gap-2.5
-                      px-3.5
-                      py-2.5
-                      rounded-lg
-                      text-sm
-                      font-medium
-                      transition-colors
-                      whitespace-nowrap
-                      ${
-                        isActive
-                          ? `${themePrimarySoft} text-[var(--color-primary)] ${themePrimarySoftBorder} border`
-                          : `theme-text-secondary ${themeNeutralHover}`
-                      }
-                    `}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`flex items-center gap-2.5 whitespace-nowrap rounded-lg px-3.5 py-2.5 text-sm font-medium transition-colors ${
+                      isActive
+                        ? `${themePrimarySoft} border text-[var(--color-primary)] ${themePrimarySoftBorder}`
+                        : `theme-text-secondary ${themeNeutralHover}`
+                    }`}
                   >
-                    <Icon
-                      size={16}
-                      className="flex-shrink-0"
-                    />
-
+                    <Icon size={16} className="shrink-0" />
                     {tab.label}
                   </button>
                 );
@@ -588,148 +415,93 @@ export default function PengaturanPage() {
             </div>
           </div>
 
-
-          <div className="flex-1 min-w-0 space-y-4">
-
-
+          {/* Content Area */}
+          <div className="min-w-0 flex-1 space-y-4">
             {errorMsg && (
-              <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-xs flex items-center gap-2">
-                <AlertCircle size={14} className="flex-shrink-0" />
+              <div className="flex items-center gap-2 rounded-lg border border-red-500/20 bg-red-500/10 p-3 text-xs text-red-600 dark:text-red-400">
+                <AlertCircle size={14} className="shrink-0" />
                 <span>{errorMsg}</span>
               </div>
             )}
 
             {activeTab === "profil" && loading && (
               <SectionCard>
-                <div className="flex flex-col items-center justify-center py-12 gap-3">
-                  <Loader2 className="w-7 h-7 animate-spin text-[var(--color-primary)]" />
-                  <span className="text-xs theme-text-muted">Memuat profil pengguna...</span>
+                <div className="flex flex-col items-center justify-center gap-3 py-12">
+                  <Loader2 className="h-7 w-7 animate-spin text-[var(--color-primary)]" />
+                  <span className="theme-text-muted text-xs">
+                    Memuat profil pengguna...
+                  </span>
                 </div>
               </SectionCard>
             )}
 
             {activeTab === "profil" && !loading && (
               <SectionCard>
-                <h3 className="text-sm font-semibold theme-text-secondary mb-4">
+                <h3 className="theme-text-secondary mb-4 text-sm font-semibold">
                   Informasi Profil
                 </h3>
 
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="relative flex-shrink-0">
-
+                <div className="mb-6 flex items-center gap-4">
+                  <div className="relative shrink-0">
                     <div
-                      className={`
-                        w-16
-                        h-16
-                        rounded-full
-                        ${themePrimaryGradient}
-                        text-[var(--color-card)]
-                        flex
-                        items-center
-                        justify-center
-                        text-xl
-                        font-semibold
-                        ${themePrimaryShadow}
-                      `}
+                      className={`flex h-16 w-16 items-center justify-center rounded-full ${themePrimaryGradient} text-xl font-semibold text-[var(--color-card)] ${themePrimaryShadow}`}
                     >
                       Y
                     </div>
 
                     <button
                       type="button"
-                      className={`
-                        absolute
-                        -bottom-1
-                        -right-1
-                        p-1.5
-                        rounded-full
-                        theme-card
-                        border theme-border
-                        theme-text-muted
-                        hover:text-[var(--color-primary)]
-                        hover:border-[color-mix(in_srgb,var(--color-primary)_28%,transparent)]
-                        transition-colors
-                        ${themeCardShadow}
-                      `}
+                      className={`theme-card theme-border theme-text-muted absolute -bottom-1 -right-1 rounded-full border p-1.5 transition-colors hover:border-[color-mix(in_srgb,var(--color-primary)_28%,transparent)] hover:text-[var(--color-primary)] ${themeCardShadow}`}
                     >
                       <Camera size={12} />
                     </button>
                   </div>
 
                   <div>
-                    <p className="text-sm font-semibold theme-text">
+                    <p className="theme-text text-sm font-semibold">
                       {profil.nama}
                     </p>
-
-                    <p className="text-xs theme-text-muted">
-                      {profil.jabatan}
-                    </p>
+                    <p className="theme-text-muted text-xs">{profil.jabatan}</p>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 2xl:grid-cols-4">
                   <div>
-                    <FieldLabel>
-                      Nama Lengkap
-                    </FieldLabel>
-
+                    <FieldLabel>Nama Lengkap</FieldLabel>
                     <input
                       type="text"
                       value={profil.nama}
                       onChange={(e) =>
-                        setProfil({
-                          ...profil,
-                          nama: e.target.value,
-                        })
+                        setProfil({ ...profil, nama: e.target.value })
                       }
                       className={inputClass}
                     />
                   </div>
 
                   <div>
-                    <FieldLabel>
-                      Jabatan
-                    </FieldLabel>
-
+                    <FieldLabel>Jabatan</FieldLabel>
                     <input
                       type="text"
                       value={profil.jabatan}
                       onChange={(e) =>
-                        setProfil({
-                          ...profil,
-                          jabatan: e.target.value,
-                        })
+                        setProfil({ ...profil, jabatan: e.target.value })
                       }
                       className={inputClass}
                     />
                   </div>
 
                   <div>
-                    <FieldLabel>
-                      Email
-                    </FieldLabel>
-
+                    <FieldLabel>Email</FieldLabel>
                     <div className="relative">
                       <Mail
                         size={14}
-                        className="
-                          absolute
-                          left-3
-                          top-1/2
-                          -translate-y-1/2
-                          theme-text-muted
-                        "
+                        className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]"
                       />
-
                       <input
                         type="email"
                         value={profil.email}
                         onChange={(e) =>
-                          setProfil({
-                            ...profil,
-                            email: e.target.value,
-                          })
+                          setProfil({ ...profil, email: e.target.value })
                         }
                         className={`${inputClass} pl-9`}
                       />
@@ -737,30 +509,17 @@ export default function PengaturanPage() {
                   </div>
 
                   <div>
-                    <FieldLabel>
-                      Nomor Telepon
-                    </FieldLabel>
-
+                    <FieldLabel>Nomor Telepon</FieldLabel>
                     <div className="relative">
                       <Phone
                         size={14}
-                        className="
-                          absolute
-                          left-3
-                          top-1/2
-                          -translate-y-1/2
-                          theme-text-muted
-                        "
+                        className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]"
                       />
-
                       <input
                         type="text"
                         value={profil.telepon}
                         onChange={(e) =>
-                          setProfil({
-                            ...profil,
-                            telepon: e.target.value,
-                          })
+                          setProfil({ ...profil, telepon: e.target.value })
                         }
                         className={`${inputClass} pl-9`}
                       />
@@ -770,34 +529,31 @@ export default function PengaturanPage() {
               </SectionCard>
             )}
 
-
             {activeTab === "yayasan" && (
               <SectionCard>
-                <div className="mb-4 rounded-xl border border-[color-mix(in_srgb,var(--color-primary)_30%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)] p-3.5 flex items-start gap-2.5">
-                  <Building2 className="text-[var(--color-primary)] shrink-0 mt-0.5" size={16} />
-                  <p className="text-xs text-[var(--color-text-secondary)] leading-relaxed">
-                    Pengaturan identitas resmi yayasan naungan. Data tersinkronisasi langsung dengan sistem backend yayasan.
+                <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-[color-mix(in_srgb,var(--color-primary)_30%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)] p-3.5">
+                  <Building2
+                    className="mt-0.5 shrink-0 text-[var(--color-primary)]"
+                    size={16}
+                  />
+                  <p className="text-xs leading-relaxed text-[var(--color-text-secondary)]">
+                    Pengaturan identitas resmi yayasan naungan. Data
+                    tersinkronisasi langsung dengan sistem backend yayasan.
                   </p>
                 </div>
-                <h3 className="text-sm font-semibold theme-text-secondary mb-4">
+
+                <h3 className="theme-text-secondary mb-4 text-sm font-semibold">
                   Informasi Lembaga Yayasan
                 </h3>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
-                  <div className="sm:col-span-2">
-                    <FieldLabel>
-                      Nama Yayasan *
-                    </FieldLabel>
-
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 2xl:grid-cols-4">
+                  <div className="sm:col-span-2 2xl:col-span-4">
+                    <FieldLabel>Nama Yayasan *</FieldLabel>
                     <input
                       type="text"
                       value={yayasan.nama}
                       onChange={(e) =>
-                        setYayasan({
-                          ...yayasan,
-                          nama: e.target.value,
-                        })
+                        setYayasan({ ...yayasan, nama: e.target.value })
                       }
                       className={inputClass}
                       placeholder="Masukkan nama resmi yayasan"
@@ -805,40 +561,28 @@ export default function PengaturanPage() {
                   </div>
 
                   <div>
-                    <FieldLabel>
-                      NPYP (Nomor Pokok Yayasan Pendidikan) *
-                    </FieldLabel>
-
+                    <FieldLabel>NPYP *</FieldLabel>
                     <input
                       type="text"
                       value={yayasan.npyp}
                       onChange={(e) =>
-                        setYayasan({
-                          ...yayasan,
-                          npyp: e.target.value,
-                        })
+                        setYayasan({ ...yayasan, npyp: e.target.value })
                       }
                       className={inputClass}
                       placeholder="Contoh: NPYP-998877"
                     />
-                    <p className="text-[11px] theme-text-muted mt-1">
+                    <p className="theme-text-muted mt-1 text-[11px]">
                       NPYP unik terdaftar pada kementerian / dinas terkait.
                     </p>
                   </div>
 
                   <div>
-                    <FieldLabel>
-                      Telepon Kantor
-                    </FieldLabel>
-
+                    <FieldLabel>Telepon Kantor</FieldLabel>
                     <input
                       type="text"
                       value={yayasan.telepon}
                       onChange={(e) =>
-                        setYayasan({
-                          ...yayasan,
-                          telepon: e.target.value,
-                        })
+                        setYayasan({ ...yayasan, telepon: e.target.value })
                       }
                       className={inputClass}
                       placeholder="Nomor telepon kantor yayasan"
@@ -846,37 +590,25 @@ export default function PengaturanPage() {
                   </div>
 
                   <div>
-                    <FieldLabel>
-                      Email Lembaga
-                    </FieldLabel>
-
+                    <FieldLabel>Email Lembaga</FieldLabel>
                     <input
                       type="email"
                       value={yayasan.email}
                       onChange={(e) =>
-                        setYayasan({
-                          ...yayasan,
-                          email: e.target.value,
-                        })
+                        setYayasan({ ...yayasan, email: e.target.value })
                       }
                       className={inputClass}
                       placeholder="email@yayasan.org"
                     />
                   </div>
 
-                  <div className="sm:col-span-2">
-                    <FieldLabel>
-                      Alamat Kantor Yayasan
-                    </FieldLabel>
-
+                  <div className="sm:col-span-2 2xl:col-span-4">
+                    <FieldLabel>Alamat Kantor Yayasan</FieldLabel>
                     <input
                       type="text"
                       value={yayasan.alamat}
                       onChange={(e) =>
-                        setYayasan({
-                          ...yayasan,
-                          alamat: e.target.value,
-                        })
+                        setYayasan({ ...yayasan, alamat: e.target.value })
                       }
                       className={inputClass}
                       placeholder="Alamat lengkap domisili kantor yayasan"
@@ -889,24 +621,16 @@ export default function PengaturanPage() {
             {activeTab === "keamanan" && (
               <>
                 <SectionCard>
-                  <h3 className="text-sm font-semibold theme-text-secondary mb-4">
+                  <h3 className="theme-text-secondary mb-4 text-sm font-semibold">
                     Ubah Password
                   </h3>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div className="sm:col-span-2 sm:max-w-sm">
-                      <FieldLabel>
-                        Password Saat Ini
-                      </FieldLabel>
-
+                      <FieldLabel>Password Saat Ini</FieldLabel>
                       <div className="relative">
                         <input
-                          type={
-                            showPassword
-                              ? "text"
-                              : "password"
-                          }
+                          type={showPassword ? "text" : "password"}
                           value={passwordForm.lama}
                           onChange={(e) =>
                             setPasswordForm({
@@ -917,23 +641,10 @@ export default function PengaturanPage() {
                           placeholder="••••••••"
                           className={`${inputClass} pr-10`}
                         />
-
                         <button
                           type="button"
-                          onClick={() =>
-                            setShowPassword(
-                              !showPassword
-                            )
-                          }
-                          className="
-                            absolute
-                            right-3
-                            top-1/2
-                            -translate-y-1/2
-                            theme-text-muted
-                            hover:text-[var(--color-primary)]
-                            transition-colors
-                          "
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-primary)]"
                         >
                           {showPassword ? (
                             <EyeOff size={15} />
@@ -945,17 +656,10 @@ export default function PengaturanPage() {
                     </div>
 
                     <div>
-                      <FieldLabel>
-                        Password Baru
-                      </FieldLabel>
-
+                      <FieldLabel>Password Baru</FieldLabel>
                       <div className="relative">
                         <input
-                          type={
-                            showPasswordBaru
-                              ? "text"
-                              : "password"
-                          }
+                          type={showPasswordBaru ? "text" : "password"}
                           value={passwordForm.baru}
                           onChange={(e) =>
                             setPasswordForm({
@@ -966,23 +670,12 @@ export default function PengaturanPage() {
                           placeholder="••••••••"
                           className={`${inputClass} pr-10`}
                         />
-
                         <button
                           type="button"
                           onClick={() =>
-                            setShowPasswordBaru(
-                              !showPasswordBaru
-                            )
+                            setShowPasswordBaru(!showPasswordBaru)
                           }
-                          className="
-                            absolute
-                            right-3
-                            top-1/2
-                            -translate-y-1/2
-                            theme-text-muted
-                            hover:text-[var(--color-primary)]
-                            transition-colors
-                          "
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-primary)]"
                         >
                           {showPasswordBaru ? (
                             <EyeOff size={15} />
@@ -994,18 +687,14 @@ export default function PengaturanPage() {
                     </div>
 
                     <div>
-                      <FieldLabel>
-                        Konfirmasi Password Baru
-                      </FieldLabel>
-
+                      <FieldLabel>Konfirmasi Password Baru</FieldLabel>
                       <input
                         type="password"
                         value={passwordForm.konfirmasi}
                         onChange={(e) =>
                           setPasswordForm({
                             ...passwordForm,
-                            konfirmasi:
-                              e.target.value,
+                            konfirmasi: e.target.value,
                           })
                         }
                         placeholder="••••••••"
@@ -1014,16 +703,21 @@ export default function PengaturanPage() {
                     </div>
                   </div>
 
-                  <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-3 border-t theme-border-soft">
-                    <p className="text-xs theme-text-muted">
-                      Minimal 8 karakter, kombinasi huruf besar, huruf kecil, dan angka.
+                  <div className="theme-border-soft mt-4 flex flex-col gap-3 border-t pt-3 sm:flex-row sm:items-center sm:justify-between">
+                    <p className="theme-text-muted text-xs">
+                      Minimal 8 karakter, kombinasi huruf besar, huruf kecil,
+                      dan angka.
                     </p>
-
                     <button
                       type="button"
                       onClick={handleSimpan}
-                      disabled={saving || loading || !passwordForm.lama || !passwordForm.baru}
-                      className="inline-flex items-center justify-center gap-2 px-4 py-2 text-xs font-semibold rounded-xl bg-[var(--color-primary)] text-white hover:opacity-90 disabled:opacity-50 transition-opacity"
+                      disabled={
+                        saving ||
+                        loading ||
+                        !passwordForm.lama ||
+                        !passwordForm.baru
+                      }
+                      className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-4 py-2 text-xs font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
                     >
                       {saving ? (
                         <>
@@ -1042,84 +736,83 @@ export default function PengaturanPage() {
 
                 <SectionCard>
                   <div className="flex items-start gap-3">
-
                     <div
-                      className={`
-                        p-2
-                        rounded-lg
-                        ${themeWarningSurface}
-                        ${themeWarningBorder}
-                        text-[var(--color-warning)]
-                        border
-                        flex-shrink-0
-                      `}
+                      className={`shrink-0 rounded-lg border p-2 ${themeWarningSurface} ${themeWarningBorder} text-[var(--color-warning)]`}
                     >
                       <Shield size={16} />
                     </div>
 
-                    <div className="flex-1 min-w-0">
+                    <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between gap-3">
                         <div>
-                          <p className="text-sm font-semibold theme-text">
+                          <p className="theme-text text-sm font-semibold">
                             Verifikasi Dua Langkah
                           </p>
-
-                          <p className="text-xs theme-text-muted mt-0.5">
-                            Tambahkan lapisan keamanan ekstra
-                            saat masuk ke akun.
+                          <p className="theme-text-muted mt-0.5 text-xs">
+                            Tambahkan lapisan keamanan ekstra saat masuk ke
+                            akun.
                           </p>
                         </div>
-
-                        <Toggle
-                          checked={false}
-                          onChange={() => {}}
-                        />
+                        <Toggle checked={false} onChange={() => {}} />
                       </div>
+                    </div>
+                  </div>
+                </SectionCard>
+
+                <SectionCard>
+                  <div className="flex items-start gap-3">
+                    <div
+                      className={`shrink-0 rounded-lg border p-2 ${themeDangerSurface} ${themeDangerBorder} text-[var(--color-text)]`}
+                    >
+                      <AlertTriangle size={16} />
+                    </div>
+
+                    <div>
+                      <p className="theme-text text-sm font-semibold">
+                        Keluar dari Semua Perangkat
+                      </p>
+                      <p className="theme-text-muted mb-3 mt-0.5 text-xs">
+                        Akhiri semua sesi aktif di perangkat lain selain
+                        perangkat ini.
+                      </p>
+                      <button
+                        type="button"
+                        className={`rounded-lg border px-3.5 py-2 text-xs font-medium text-[var(--color-text)] transition-colors hover:opacity-80 ${themeDangerSurface} ${themeDangerBorder}`}
+                      >
+                        Keluar dari Semua Perangkat
+                      </button>
                     </div>
                   </div>
                 </SectionCard>
               </>
             )}
 
-
             {activeTab === "notifikasi" && (
               <SectionCard>
-                <h3 className="text-sm font-semibold theme-text-secondary mb-1">
+                <h3 className="theme-text-secondary mb-1 text-sm font-semibold">
                   Preferensi Notifikasi
                 </h3>
-
-                <p className="text-xs theme-text-muted mb-4">
-                  Pilih jenis notifikasi yang ingin Anda
-                  terima.
+                <p className="theme-text-muted mb-4 text-xs">
+                  Pilih jenis notifikasi yang ingin Anda terima.
                 </p>
 
                 <div className={`divide-y ${themeDivider}`}>
                   {notifikasi.map((n) => (
                     <div
                       key={n.id}
-                      className="
-                        flex
-                        items-center
-                        justify-between
-                        gap-3
-                        py-3.5
-                      "
+                      className="flex items-center justify-between gap-3 py-3.5"
                     >
                       <div className="min-w-0">
-                        <p className="text-sm font-medium theme-text-secondary truncate">
+                        <p className="theme-text-secondary truncate text-sm font-medium">
                           {n.label}
                         </p>
-
-                        <p className="text-xs theme-text-muted mt-0.5">
+                        <p className="theme-text-muted mt-0.5 text-xs">
                           {n.desc}
                         </p>
                       </div>
-
                       <Toggle
                         checked={n.aktif}
-                        onChange={() =>
-                          toggleNotifikasi(n.id)
-                        }
+                        onChange={() => toggleNotifikasi(n.id)}
                       />
                     </div>
                   ))}
@@ -1127,38 +820,22 @@ export default function PengaturanPage() {
               </SectionCard>
             )}
 
-
             {activeTab === "tampilan" && (
               <>
                 <SectionCard>
-                  <h3 className="text-sm font-semibold theme-text-secondary mb-4">
+                  <h3 className="theme-text-secondary mb-4 text-sm font-semibold">
                     Tema
                   </h3>
 
-                  <div className="grid grid-cols-2 gap-3 max-w-sm">
-
+                  <div className="grid max-w-sm grid-cols-1 gap-3 sm:grid-cols-2">
                     <button
                       type="button"
-                      onClick={() =>
-                        setTema("terang")
-                      }
-                      className={`
-                        flex
-                        items-center
-                        gap-2.5
-                        px-4
-                        py-3
-                        rounded-lg
-                        border
-                        text-sm
-                        font-medium
-                        transition-colors
-                        ${
-                          tema === "terang"
-                            ? `${themePrimarySoftBorder} ${themePrimarySoft} text-[var(--color-primary)]`
-                            : `theme-border theme-text-secondary ${themeNeutralHover}`
-                        }
-                      `}
+                      onClick={() => setTema("terang")}
+                      className={`flex items-center gap-2.5 rounded-lg border px-4 py-3 text-sm font-medium transition-colors ${
+                        tema === "terang"
+                          ? `${themePrimarySoftBorder} ${themePrimarySoft} text-[var(--color-primary)]`
+                          : `theme-border theme-text-secondary ${themeNeutralHover}`
+                      }`}
                     >
                       <Sun size={16} />
                       Terang
@@ -1166,26 +843,12 @@ export default function PengaturanPage() {
 
                     <button
                       type="button"
-                      onClick={() =>
-                        setTema("gelap")
-                      }
-                      className={`
-                        flex
-                        items-center
-                        gap-2.5
-                        px-4
-                        py-3
-                        rounded-lg
-                        border
-                        text-sm
-                        font-medium
-                        transition-colors
-                        ${
-                          tema === "gelap"
-                            ? `${themePrimarySoftBorder} ${themePrimarySoft} text-[var(--color-primary)]`
-                            : `theme-border theme-text-secondary ${themeNeutralHover}`
-                        }
-                      `}
+                      onClick={() => setTema("gelap")}
+                      className={`flex items-center gap-2.5 rounded-lg border px-4 py-3 text-sm font-medium transition-colors ${
+                        tema === "gelap"
+                          ? `${themePrimarySoftBorder} ${themePrimarySoft} text-[var(--color-primary)]`
+                          : `theme-border theme-text-secondary ${themeNeutralHover}`
+                      }`}
                     >
                       <Moon size={16} />
                       Gelap
@@ -1194,106 +857,26 @@ export default function PengaturanPage() {
                 </SectionCard>
 
                 <SectionCard>
-                  <h3 className="text-sm font-semibold theme-text-secondary mb-4">
+                  <h3 className="theme-text-secondary mb-4 text-sm font-semibold">
                     Bahasa
                   </h3>
 
                   <div className="relative max-w-sm">
                     <Globe
                       size={15}
-                      className="
-                        absolute
-                        left-3
-                        top-1/2
-                        -translate-y-1/2
-                        theme-text-muted
-                        pointer-events-none
-                      "
+                      className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]"
                     />
-
                     <select
                       value={bahasa}
-                      onChange={(e) =>
-                        setBahasa(e.target.value)
-                      }
-                      className={`
-                        theme-input
-                        w-full
-                        appearance-none
-                        pl-9
-                        pr-3
-                        py-2.5
-                        text-sm
-                        font-medium
-                        rounded-lg
-                        transition-colors
-                        cursor-pointer
-                        ${themeFocus}
-                      `}
+                      onChange={(e) => setBahasa(e.target.value)}
+                      className={`theme-input w-full cursor-pointer appearance-none rounded-lg py-2.5 pl-9 pr-3 text-sm font-medium transition-colors ${themeFocus}`}
                     >
-                      <option value="id">
-                        Bahasa Indonesia
-                      </option>
-
-                      <option value="en">
-                        English
-                      </option>
+                      <option value="id">Bahasa Indonesia</option>
+                      <option value="en">English</option>
                     </select>
                   </div>
                 </SectionCard>
               </>
-            )}
-
-
-            {activeTab === "keamanan" && (
-              <SectionCard>
-                <div className="flex items-start gap-3">
-
-                  <div
-                    className={`
-                      p-2
-                      rounded-lg
-                      ${themeDangerSurface}
-                      ${themeDangerBorder}
-                      text-[var(--color-text)]
-                      border
-                      flex-shrink-0
-                    `}
-                  >
-                    <AlertTriangle size={16} />
-                  </div>
-
-                  <div>
-                    <p className="text-sm font-semibold theme-text">
-                      Keluar dari Semua Perangkat
-                    </p>
-
-                    <p className="text-xs theme-text-muted mt-0.5 mb-3">
-                      Akhiri semua sesi aktif di perangkat
-                      lain selain perangkat ini.
-                    </p>
-
-                    <button
-                      type="button"
-                      className={`
-                        px-3.5
-                        py-2
-                        text-xs
-                        font-medium
-                        text-[var(--color-text)]
-                        ${themeDangerSurface}
-                        ${themeDangerBorder}
-                        border
-                        rounded-lg
-                        hover:opacity-80
-                        transition-colors
-                      `}
-                    >
-                      Keluar dari Semua Perangkat
-                    </button>
-                  </div>
-                </div>
-              </SectionCard>
             )}
           </div>
         </div>

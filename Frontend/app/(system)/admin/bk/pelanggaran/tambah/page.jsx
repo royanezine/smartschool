@@ -397,30 +397,102 @@ export default function CreatePelanggaranPage() {
     : form.status || "tercatat";
 
   return (
-    <div className="theme-page flex h-screen overflow-hidden">
+    <div className="flex h-screen overflow-hidden theme-page theme-text">
       <Sidebar role="admin" active="bk" />
 
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <Header />
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+        <div className="shrink-0">
+          <Header />
+        </div>
 
-        <main className="theme-page flex-1 overflow-y-auto p-5 md:p-6 lg:p-8">
-          <div className="mx-auto w-full max-w-[1200px]">
+        <main className="min-w-0 flex-1 overflow-y-auto">
+          <div className="w-full p-5 md:p-6 lg:p-8">
 
-            <div className="mb-7 flex items-start gap-4">
+            <div className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <div className="flex items-start gap-4">
+                <button
+                  type="button"
+                  onClick={() => router.back()}
+                  className="
+                    theme-card
+                    theme-text-muted
+                    mt-1 flex h-10 w-10 shrink-0
+                    items-center justify-center
+                    rounded-xl border
+                    shadow-sm
+                    transition
+                    hover:opacity-80
+                  "
+                  title="Kembali"
+                >
+                  <svg
+                    className="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M15 19l-7-7 7-7"
+                    />
+                  </svg>
+                </button>
+
+                <div className="flex items-start gap-4">
+                  <div
+                    className="
+                      flex h-12 w-12 shrink-0
+                      items-center justify-center
+                      rounded-2xl
+                      bg-[var(--color-primary)]
+                      text-white
+                      shadow-lg
+                    "
+                  >
+                    <svg
+                      className="h-6 w-6"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M12 4v16m8-8H4"
+                      />
+                    </svg>
+                  </div>
+
+                  <div>
+                    <h1 className="theme-text text-[26px] font-bold leading-tight tracking-tight">
+                      Catat Pelanggaran
+                    </h1>
+
+                    <p className="theme-text-muted mt-1 text-sm font-medium">
+                      Isi data pelanggaran siswa dengan lengkap
+                    </p>
+                  </div>
+                </div>
+              </div>
+
               <button
                 type="button"
-                onClick={() => router.back()}
+                onClick={() => router.push("/admin/bk/pelanggaran")}
                 className="
                   theme-card
-                  theme-text-muted
-                  mt-1 flex h-10 w-10 shrink-0
-                  items-center justify-center
+                  theme-border
+                  theme-text-secondary
+                  inline-flex items-center justify-center gap-2
                   rounded-xl border
+                  px-4 py-2.5
+                  text-sm font-bold
                   shadow-sm
                   transition
-                  hover:opacity-80
+                  theme-sidebar-hover
                 "
-                title="Kembali"
               >
                 <svg
                   className="h-4 w-4"
@@ -432,47 +504,12 @@ export default function CreatePelanggaranPage() {
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    d="M15 19l-7-7 7-7"
+                    d="M4 6h16M4 10h16M4 14h16M4 18h16"
                   />
                 </svg>
+
+                Lihat Daftar
               </button>
-
-              <div className="flex items-start gap-4">
-                <div
-                  className="
-                    flex h-12 w-12 shrink-0
-                    items-center justify-center
-                    rounded-2xl
-                    bg-[var(--color-primary)]
-                    text-white
-                    shadow-lg
-                  "
-                >
-                  <svg
-                    className="h-6 w-6"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M12 4v16m8-8H4"
-                    />
-                  </svg>
-                </div>
-
-                <div>
-                  <h1 className="theme-text text-[26px] font-bold leading-tight tracking-tight">
-                    Catat Pelanggaran
-                  </h1>
-
-                  <p className="theme-text-muted mt-1 text-sm font-medium">
-                    Isi data pelanggaran siswa dengan lengkap
-                  </p>
-                </div>
-              </div>
             </div>
 
             {error && (
@@ -495,7 +532,7 @@ export default function CreatePelanggaranPage() {
               </div>
             )}
 
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_340px]">
+            <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_340px] 2xl:grid-cols-[minmax(0,1fr)_400px]">
 
               <form
                 onSubmit={handleSubmit}
@@ -568,49 +605,29 @@ export default function CreatePelanggaranPage() {
                     </p>
                   </Field>
 
-                  <Field
-                    label="Kategori Pelanggaran"
-                    required
-                  >
+                  <Field label="Kategori Pelanggaran" required>
                     <select
                       required
                       value={form.kategoriPelanggaranId}
-                      onChange={(e) =>
-                        handleKategoriChange(
-                          e.target.value
-                        )
-                      }
+                      onChange={(e) => handleKategoriChange(e.target.value)}
                       className={inputClass}
                     >
-                      <option value="">
-                        Pilih kategori
-                      </option>
+                      <option value="">Pilih kategori</option>
 
                       {kategori.map((item) => (
-                        <option
-                          key={item.id}
-                          value={item.id}
-                        >
+                        <option key={item.id} value={item.id}>
                           {item.nama} - {item.poin} poin
                         </option>
                       ))}
                     </select>
                   </Field>
 
-                  <Field
-                    label="Tanggal"
-                    required
-                  >
+                  <Field label="Tanggal" required>
                     <input
                       required
                       type="date"
                       value={form.tanggal}
-                      onChange={(e) =>
-                        handleChange(
-                          "tanggal",
-                          e.target.value
-                        )
-                      }
+                      onChange={(e) => handleChange("tanggal", e.target.value)}
                       className={inputClass}
                     />
                   </Field>
@@ -620,12 +637,7 @@ export default function CreatePelanggaranPage() {
                       type="number"
                       min="0"
                       value={form.poin}
-                      onChange={(e) =>
-                        handleChange(
-                          "poin",
-                          e.target.value
-                        )
-                      }
+                      onChange={(e) => handleChange("poin", e.target.value)}
                       placeholder="Otomatis dari kategori"
                       className={inputClass}
                     />
@@ -635,34 +647,17 @@ export default function CreatePelanggaranPage() {
                     <Field label="Status">
                       <select
                         value={previewStatus}
-                        onChange={(e) =>
-                          handleChange(
-                            "status",
-                            e.target.value
-                          )
-                        }
+                        onChange={(e) => handleChange("status", e.target.value)}
                         className={inputClass}
                       >
-                        <option value="tercatat">
-                          Tercatat
-                        </option>
-
-                        <option value="proses">
-                          Proses
-                        </option>
-
-                        <option value="ditindaklanjuti">
-                          Ditindaklanjuti
-                        </option>
-
-                        <option value="selesai">
-                          Selesai
-                        </option>
+                        <option value="tercatat">Tercatat</option>
+                        <option value="proses">Proses</option>
+                        <option value="ditindaklanjuti">Ditindaklanjuti</option>
+                        <option value="selesai">Selesai</option>
                       </select>
 
                       <p className="theme-text-muted mt-1.5 text-xs">
-                        Jika Tindak Lanjut diisi, status
-                        otomatis menjadi &quot;Ditindaklanjuti&quot;.
+                        Jika Tindak Lanjut diisi, status otomatis menjadi &quot;Ditindaklanjuti&quot;.
                       </p>
                     </Field>
                   </div>
@@ -672,12 +667,7 @@ export default function CreatePelanggaranPage() {
                       <textarea
                         rows="4"
                         value={form.kronologi}
-                        onChange={(e) =>
-                          handleChange(
-                            "kronologi",
-                            e.target.value
-                          )
-                        }
+                        onChange={(e) => handleChange("kronologi", e.target.value)}
                         placeholder="Jelaskan kronologi kejadian..."
                         className={`${inputClass} resize-none`}
                       />
@@ -689,18 +679,13 @@ export default function CreatePelanggaranPage() {
                       <textarea
                         rows="3"
                         value={form.tindakLanjut}
-                        onChange={(e) =>
-                          handleTindakLanjutChange(
-                            e.target.value
-                          )
-                        }
+                        onChange={(e) => handleTindakLanjutChange(e.target.value)}
                         placeholder="Contoh: Siswa diberikan teguran dan diarahkan untuk mengikuti konseling dengan guru BK."
                         className={`${inputClass} resize-none`}
                       />
 
                       <p className="theme-text-muted mt-1.5 text-xs">
-                        Mengisi tindak lanjut akan mengubah
-                        status menjadi{" "}
+                        Mengisi tindak lanjut akan mengubah status menjadi{" "}
                         <span className="font-bold text-[var(--color-success)]">
                           Ditindaklanjuti
                         </span>
@@ -714,12 +699,7 @@ export default function CreatePelanggaranPage() {
                       <textarea
                         rows="3"
                         value={form.catatan}
-                        onChange={(e) =>
-                          handleChange(
-                            "catatan",
-                            e.target.value
-                          )
-                        }
+                        onChange={(e) => handleChange("catatan", e.target.value)}
                         placeholder="Catatan tambahan..."
                         className={`${inputClass} resize-none`}
                       />

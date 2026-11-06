@@ -22,7 +22,6 @@ import {
   RefreshCw,
 } from "lucide-react";
 
-// Mengambil array dari beberapa kemungkinan bentuk response API.
 function extractList(response) {
   let result = response;
 
@@ -193,7 +192,6 @@ export default function CmsDashboardPage() {
     })
     .slice(0, 5);
 
-  // Views hanya dihitung jika data jumlah views memang tersedia di response API.
   const viewCounts = [
     ...articles.map(getViewCount),
     ...pages.map(getViewCount),
@@ -226,16 +224,7 @@ export default function CmsDashboardPage() {
       icon: File,
       color: "primary",
     },
-    {
-      title: "Total Dilihat",
-      value: totalViews === null ? "—" : formatNumber(totalViews),
-      subtitle:
-        totalViews === null
-          ? "Data views belum tersedia dari API"
-          : "Total views dari data yang tersedia",
-      icon: Eye,
-      color: "warning",
-    },
+  
   ];
 
   const tips = [
@@ -290,7 +279,7 @@ export default function CmsDashboardPage() {
       : 0;
 
   return (
-    <div className="theme-page flex min-h-screen w-full">
+    <div className="theme-page flex h-screen w-full overflow-hidden">
       <Sidebar
         active={active}
         setActive={setActive}
@@ -298,19 +287,22 @@ export default function CmsDashboardPage() {
         setCollapsed={setCollapsed}
       />
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        <Header
-          user={{
-            name: "CMS Admin",
-            email: "admin@smartschool.com",
-            avatar: "CA",
-          }}
-          notifications={[]}
-        />
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+        <div className="shrink-0">
+          <Header
+            toggleSidebar={() => setCollapsed(!collapsed)}
+            user={{
+              name: "CMS Admin",
+              email: "admin@smartschool.com",
+              avatar: "CA",
+            }}
+            notifications={[]}
+          />
+        </div>
 
-        <main className="theme-page min-w-0 flex-1 p-4 sm:p-6 lg:p-8">
-          <div className="mx-auto w-full max-w-[1600px]">
-            <section className="mb-7">
+        <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto">
+          <div className="flex w-full min-w-0 flex-col gap-6 p-4 sm:p-6 lg:p-8">
+            <section>
               <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
                 <div className="flex min-w-0 items-center gap-3">
                   <div className="theme-card theme-border flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border text-[var(--color-primary)] shadow-sm">
@@ -348,15 +340,7 @@ export default function CmsDashboardPage() {
                     <span>{refreshing ? "Memuat..." : "Refresh Data"}</span>
                   </button>
 
-                  <a
-                    href="/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="theme-card theme-border theme-text-secondary inline-flex items-center justify-center gap-2 rounded-lg border px-3.5 py-2.5 text-sm font-medium shadow-sm transition-all hover:opacity-80"
-                  >
-                    <ExternalLink size={16} />
-                    <span>Preview Website</span>
-                  </a>
+                  
 
                   <Link
                     href="/admin/cms/articles/tambah"
@@ -372,7 +356,7 @@ export default function CmsDashboardPage() {
             </section>
 
             {error && (
-              <div className="theme-warning mb-6 flex flex-col gap-3 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="theme-warning flex flex-col gap-3 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between">
                 <p className="text-sm">{error}</p>
                 <button
                   type="button"
@@ -384,7 +368,7 @@ export default function CmsDashboardPage() {
               </div>
             )}
 
-            <section className="mb-6 grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
+            <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 2xl:grid-cols-6">
               {statCards.map((stat) => {
                 const Icon = stat.icon;
                 const color = colorClasses[stat.color];
@@ -424,7 +408,7 @@ export default function CmsDashboardPage() {
               })}
             </section>
 
-            <div className="mb-6 grid grid-cols-1 gap-5 xl:grid-cols-3">
+            <div className="grid grid-cols-1 gap-5 xl:grid-cols-3">
               <section className="theme-card theme-border overflow-hidden rounded-xl border shadow-sm xl:col-span-2">
                 <div className="theme-border-soft border-b px-5 py-5 sm:px-6">
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -595,28 +579,7 @@ export default function CmsDashboardPage() {
                     </span>
                   </div>
 
-                  <div className="theme-card-soft theme-border-soft flex items-center justify-between rounded-lg border p-3.5">
-                    <div className="flex items-center gap-3">
-                      <div className="theme-card theme-border flex h-8 w-8 items-center justify-center rounded-lg border text-[var(--color-warning)]">
-                        <Eye size={15} />
-                      </div>
-                      <div>
-                        <p className="theme-text-secondary text-xs font-medium">
-                          Total Views
-                        </p>
-                        <p className="theme-text-muted text-[11px]">
-                          Jika disediakan oleh API
-                        </p>
-                      </div>
-                    </div>
-                    <span className="theme-text text-lg font-semibold">
-                      {loading
-                        ? "..."
-                        : totalViews === null
-                          ? "—"
-                          : formatNumber(totalViews)}
-                    </span>
-                  </div>
+              
 
                   <Link
                     href="/admin/cms/articles/tambah"
@@ -629,7 +592,7 @@ export default function CmsDashboardPage() {
               </section>
             </div>
 
-            <section className="mb-6 grid grid-cols-1 gap-5 lg:grid-cols-3">
+            <section className="grid grid-cols-1 gap-5 lg:grid-cols-3">
               <div className="theme-card theme-border overflow-hidden rounded-xl border shadow-sm lg:col-span-2">
                 <div className="theme-border-soft border-b px-5 py-5 sm:px-6">
                   <div className="flex items-center gap-3">

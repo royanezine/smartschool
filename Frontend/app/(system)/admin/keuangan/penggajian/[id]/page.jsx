@@ -224,14 +224,14 @@ export default function DetailPenggajianPage() {
         onClose={() => setSidebarOpen(false)}
       />
 
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+      <div className="flex h-screen min-w-0 flex-1 flex-col overflow-hidden">
         <div className="shrink-0">
           <Header onMenuClick={() => setSidebarOpen(true)} />
         </div>
 
-        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto theme-page theme-text">
+        <main className="theme-page theme-text min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
           <div className="w-full px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
-            <div className="mx-auto w-full max-w-[1500px]">
+            <div className="w-full">
               <div className="mb-6">
                 <button
                   type="button"
@@ -244,13 +244,11 @@ export default function DetailPenggajianPage() {
 
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                   <div>
-                    
-
-                    <h1 className="text-2xl font-bold tracking-tight theme-text sm:text-3xl">
+                    <h1 className="theme-text text-2xl font-bold tracking-tight sm:text-3xl">
                       Detail Penggajian
                     </h1>
 
-                    <p className="mt-2 max-w-2xl text-sm leading-6 theme-text-secondary">
+                    <p className="theme-text-secondary mt-2 max-w-2xl text-sm leading-6">
                       Informasi hasil perhitungan gaji dan rincian absensi
                       berdasarkan data dari sistem.
                     </p>
@@ -275,7 +273,7 @@ export default function DetailPenggajianPage() {
                         type="button"
                         onClick={handleFreeze}
                         disabled={freezing || loading || !data}
-                        className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-amber-600 px-4 text-sm font-semibold text-white hover:bg-amber-700 disabled:cursor-not-allowed disabled:opacity-60 transition"
+                        className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-amber-600 px-4 text-sm font-semibold text-white transition hover:bg-amber-700 disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         {freezing ? (
                           <LoaderCircle size={16} className="animate-spin" />
@@ -306,27 +304,27 @@ export default function DetailPenggajianPage() {
               )}
 
               {loading ? (
-                <div className="flex min-h-80 flex-col items-center justify-center gap-3 theme-card rounded-xl border theme-border">
+                <div className="theme-card theme-border flex min-h-80 flex-col items-center justify-center gap-3 rounded-xl border">
                   <LoaderCircle
                     size={30}
-                    className="animate-spin theme-primary-text"
+                    className="theme-primary-text animate-spin"
                   />
-                  <p className="text-sm font-medium theme-text">
+                  <p className="theme-text text-sm font-medium">
                     Memuat detail penggajian...
                   </p>
-                  <p className="text-xs theme-text-muted">
+                  <p className="theme-text-muted text-xs">
                     Mengambil data dari sistem
                   </p>
                 </div>
               ) : !data ? (
-                <div className="flex min-h-80 flex-col items-center justify-center theme-card rounded-xl border theme-border px-5 text-center">
+                <div className="theme-card theme-border flex min-h-80 flex-col items-center justify-center rounded-xl border px-5 text-center">
                   <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-red-50 text-red-600 dark:bg-red-950/50 dark:text-red-400">
                     <AlertCircle size={23} />
                   </div>
-                  <h2 className="mt-4 font-semibold theme-text">
+                  <h2 className="theme-text mt-4 font-semibold">
                     Detail penggajian tidak tersedia
                   </h2>
-                  <p className="mt-2 max-w-md text-sm theme-text-muted">
+                  <p className="theme-text-muted mt-2 max-w-md text-sm">
                     Data tidak ditemukan atau akun tidak memiliki akses untuk
                     melihat penggajian ini.
                   </p>
@@ -341,25 +339,23 @@ export default function DetailPenggajianPage() {
                 </div>
               ) : (
                 <>
-                  <section className="mb-6 theme-card rounded-xl border theme-border p-5 shadow-sm sm:p-6">
+                  <section className="theme-card theme-border mb-6 rounded-xl border p-5 shadow-sm sm:p-6">
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                       <div className="flex items-start gap-4">
-                        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
+                        <div className="theme-primary-text flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]">
                           <UserRound size={26} />
                         </div>
 
                         <div className="min-w-0">
-                          <h2 className="text-xl font-bold theme-text">
+                          <h2 className="theme-text text-xl font-bold">
                             {data.pengguna?.namaLengkap ?? "-"}
                           </h2>
-                          <p className="mt-1 text-sm theme-text-muted">
+                          <p className="theme-text-muted mt-1 text-sm">
                             {data.pengguna?.kategoriJabatan?.nama ?? "-"}
                           </p>
-                          <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm theme-text-muted">
+                          <div className="theme-text-muted mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm">
                             <span>NIP: {data.pengguna?.nip ?? "-"}</span>
-                            <span>
-                              Email: {data.pengguna?.email ?? "-"}
-                            </span>
+                            <span>Email: {data.pengguna?.email ?? "-"}</span>
                           </div>
                         </div>
                       </div>
@@ -371,7 +367,7 @@ export default function DetailPenggajianPage() {
                       </span>
                     </div>
 
-                    <div className="mt-6 grid grid-cols-1 gap-3 border-t theme-border pt-5 sm:grid-cols-2 lg:grid-cols-4">
+                    <div className="theme-border mt-6 grid grid-cols-1 gap-3 border-t pt-5 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6">
                       <InfoItem
                         icon={CalendarDays}
                         label="Periode"
@@ -397,15 +393,15 @@ export default function DetailPenggajianPage() {
 
                   <section className="mb-6">
                     <div className="mb-4">
-                      <h2 className="text-lg font-bold theme-text">
+                      <h2 className="theme-text text-lg font-bold">
                         Ringkasan Penggajian
                       </h2>
-                      <p className="mt-1 text-sm theme-text-muted">
+                      <p className="theme-text-muted mt-1 text-sm">
                         Nilai mengikuti hasil kalkulasi yang disimpan sistem.
                       </p>
                     </div>
 
-                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6">
                       <SummaryCard
                         icon={CalendarDays}
                         label="Total Hari Kerja"
@@ -433,19 +429,19 @@ export default function DetailPenggajianPage() {
                     </div>
                   </section>
 
-                  <section className="mb-6 theme-card overflow-hidden rounded-xl border theme-border shadow-sm">
-                    <div className="border-b theme-border p-5">
+                  <section className="theme-card theme-border mb-6 overflow-hidden rounded-xl border shadow-sm">
+                    <div className="theme-border border-b p-5">
                       <div className="flex items-start gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
+                        <div className="theme-primary-text flex h-10 w-10 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]">
                           <Clock3 size={20} />
                         </div>
                         <div>
-                          <h2 className="font-semibold theme-text">
+                          <h2 className="theme-text font-semibold">
                             Rincian Absensi
                           </h2>
-                          <p className="mt-1 text-sm theme-text-muted">
-                            {attendance.length} catatan absensi yang
-                            dikembalikan sistem.
+                          <p className="theme-text-muted mt-1 text-sm">
+                            {attendance.length} catatan absensi yang dikembalikan
+                            sistem.
                           </p>
                         </div>
                       </div>
@@ -453,13 +449,13 @@ export default function DetailPenggajianPage() {
 
                     {attendance.length === 0 ? (
                       <div className="flex flex-col items-center px-5 py-12 text-center">
-                        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] theme-text-muted">
+                        <div className="theme-text-muted flex h-12 w-12 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]">
                           <CalendarDays size={23} />
                         </div>
-                        <p className="mt-4 font-semibold theme-text">
+                        <p className="theme-text mt-4 font-semibold">
                           Belum ada rincian absensi
                         </p>
-                        <p className="mt-1 max-w-lg text-sm theme-text-muted">
+                        <p className="theme-text-muted mt-1 max-w-lg text-sm">
                           Sistem tidak mengembalikan catatan absensi hadir
                           dengan durasi jam kerja untuk periode ini.
                         </p>
@@ -467,14 +463,12 @@ export default function DetailPenggajianPage() {
                     ) : (
                       <div className="overflow-x-auto">
                         <table className="w-full min-w-[850px] text-left text-sm">
-                          <thead className="bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] text-xs uppercase tracking-wide theme-text-muted border-b theme-border">
+                          <thead className="theme-text-muted theme-border border-b bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] text-xs uppercase tracking-wide">
                             <tr>
                               <th className="px-5 py-4 font-semibold">
                                 Tanggal
                               </th>
-                              <th className="px-5 py-4 font-semibold">
-                                Masuk
-                              </th>
+                              <th className="px-5 py-4 font-semibold">Masuk</th>
                               <th className="px-5 py-4 font-semibold">
                                 Keluar
                               </th>
@@ -494,18 +488,18 @@ export default function DetailPenggajianPage() {
                             {attendance.map((item) => (
                               <tr
                                 key={item.id}
-                                className="hover:bg-[color-mix(in_srgb,var(--color-text)_2%,transparent)] transition"
+                                className="transition hover:bg-[color-mix(in_srgb,var(--color-text)_2%,transparent)]"
                               >
-                                <td className="px-5 py-4 font-medium theme-text">
+                                <td className="theme-text px-5 py-4 font-medium">
                                   {formatDate(item.tanggal)}
                                 </td>
-                                <td className="px-5 py-4 theme-text-secondary">
+                                <td className="theme-text-secondary px-5 py-4">
                                   {formatTime(item.waktuMasuk)}
                                 </td>
-                                <td className="px-5 py-4 theme-text-secondary">
+                                <td className="theme-text-secondary px-5 py-4">
                                   {formatTime(item.waktuKeluar)}
                                 </td>
-                                <td className="px-5 py-4 tabular-nums theme-text-secondary">
+                                <td className="theme-text-secondary px-5 py-4 tabular-nums">
                                   {item.durasiJamKerja != null
                                     ? `${formatNumber(item.durasiJamKerja)} jam`
                                     : item.durasiKerjaMenit != null
@@ -513,11 +507,11 @@ export default function DetailPenggajianPage() {
                                       : "-"}
                                 </td>
                                 <td className="px-5 py-4">
-                                  <span className="inline-flex rounded-md bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)] px-2.5 py-1 text-xs font-medium theme-text-secondary">
+                                  <span className="theme-text-secondary inline-flex rounded-md bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)] px-2.5 py-1 text-xs font-medium">
                                     {item.statusShift ?? "-"}
                                   </span>
                                 </td>
-                                <td className="px-5 py-4 tabular-nums theme-text-secondary">
+                                <td className="theme-text-secondary px-5 py-4 tabular-nums">
                                   {item.terlambatMenit != null
                                     ? `${formatNumber(item.terlambatMenit, 0)} menit`
                                     : "-"}
@@ -530,22 +524,22 @@ export default function DetailPenggajianPage() {
                     )}
                   </section>
 
-                  <section className="mb-6 theme-card rounded-xl border theme-border p-5 shadow-sm sm:p-6">
+                  <section className="theme-card theme-border mb-6 rounded-xl border p-5 shadow-sm sm:p-6">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)] theme-text-secondary">
+                      <div className="theme-text-secondary flex h-10 w-10 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)]">
                         <FileText size={20} />
                       </div>
                       <div>
-                        <h2 className="font-semibold theme-text">
+                        <h2 className="theme-text font-semibold">
                           Informasi Tambahan
                         </h2>
-                        <p className="mt-1 text-sm theme-text-muted">
+                        <p className="theme-text-muted mt-1 text-sm">
                           Catatan dan waktu pembaruan data.
                         </p>
                       </div>
                     </div>
 
-                    <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 2xl:grid-cols-4">
                       <InfoItem
                         icon={FileText}
                         label="Catatan"
@@ -582,7 +576,6 @@ export default function DetailPenggajianPage() {
   );
 }
 
-
 function SummaryCard({ icon: Icon, label, value, tone = "blue" }) {
   const toneClasses = {
     blue: {
@@ -609,7 +602,7 @@ function SummaryCard({ icon: Icon, label, value, tone = "blue" }) {
   return (
     <div className={`rounded-xl p-5 ${classes.wrapper}`}>
       <div className="flex items-center justify-between gap-3">
-        <p className="text-sm font-medium theme-text-muted">{label}</p>
+        <p className="theme-text-muted text-sm font-medium">{label}</p>
         <div
           className={`flex h-9 w-9 items-center justify-center rounded-lg ${classes.icon}`}
         >
@@ -629,25 +622,23 @@ function SummaryCard({ icon: Icon, label, value, tone = "blue" }) {
   );
 }
 
-
 function InfoItem({ icon: Icon, label, value }) {
   return (
     <div className="flex min-w-0 items-start gap-3">
-      <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)] theme-text-secondary">
+      <div className="theme-text-secondary mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)]">
         <Icon size={17} />
       </div>
       <div className="min-w-0">
-        <p className="text-xs font-medium uppercase tracking-wide theme-text-muted">
+        <p className="theme-text-muted text-xs font-medium uppercase tracking-wide">
           {label}
         </p>
-        <p className="mt-1 break-words text-sm font-medium theme-text">
+        <p className="theme-text mt-1 break-words text-sm font-medium">
           {value ?? "-"}
         </p>
       </div>
     </div>
   );
 }
-
 
 function AlertBox({ type, message, onClose }) {
   const success = type === "success";

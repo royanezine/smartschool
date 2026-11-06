@@ -182,37 +182,15 @@ export default function MonitoringAkademikPage() {
 
   return (
     <div className="theme-page theme-text min-h-full">
-      <div className="w-full max-w-[1500px] mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 space-y-6">
+      <div className="w-full space-y-6 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
         {/* Hero Header */}
         <section
-          className={`
-            relative overflow-hidden rounded-2xl
-            border ${themePrimarySoftBorder}
-            ${themePrimaryGradient}
-            ${themePrimaryShadow}
-          `}
+          className={`relative overflow-hidden rounded-2xl border ${themePrimarySoftBorder} ${themePrimaryGradient} ${themePrimaryShadow}`}
         >
-          <div
-            className="
-              pointer-events-none absolute -right-20 -top-24
-              h-64 w-64 rounded-full
-              bg-[color-mix(in_srgb,var(--color-card)_12%,transparent)]
-              blur-3xl
-            "
-          />
+          <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-[color-mix(in_srgb,var(--color-card)_12%,transparent)] blur-3xl" />
           <div className="relative p-5 sm:p-6 md:p-8">
             <div className="flex items-start gap-4">
-              <div
-                className="
-                  flex h-12 w-12 shrink-0 items-center justify-center
-                  rounded-2xl border
-                  border-[color-mix(in_srgb,var(--color-card)_22%,transparent)]
-                  bg-[color-mix(in_srgb,var(--color-card)_12%,transparent)]
-                  text-[var(--color-card)]
-                  shadow-[0_4px_16px_color-mix(in_srgb,var(--color-text)_12%,transparent)]
-                  backdrop-blur-md sm:h-14 sm:w-14
-                "
-              >
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-[color-mix(in_srgb,var(--color-card)_22%,transparent)] bg-[color-mix(in_srgb,var(--color-card)_12%,transparent)] text-[var(--color-card)] shadow-[0_4px_16px_color-mix(in_srgb,var(--color-text)_12%,transparent)] backdrop-blur-md sm:h-14 sm:w-14">
                 <ClipboardCheck className="h-6 w-6 sm:h-7 sm:w-7" />
               </div>
               <div className="min-w-0">
@@ -232,13 +210,13 @@ export default function MonitoringAkademikPage() {
 
         {/* Ringkasan Cards */}
         {loading ? (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6">
             {[0, 1, 2, 3].map((i) => (
               <div
                 key={i}
-                className={`theme-card rounded-xl border theme-border p-4 ${themeSmallShadow}`}
+                className={`theme-card theme-border rounded-xl border p-4 ${themeSmallShadow}`}
               >
-                <div className="animate-pulse flex items-center gap-3">
+                <div className="flex animate-pulse items-center gap-3">
                   <div className="h-10 w-10 rounded-lg bg-[color-mix(in_srgb,var(--color-text)_8%,transparent)]" />
                   <div className="flex-1 space-y-2">
                     <div className="h-3 w-20 rounded bg-[color-mix(in_srgb,var(--color-text)_8%,transparent)]" />
@@ -270,14 +248,14 @@ export default function MonitoringAkademikPage() {
             </div>
           </div>
         ) : ringkasan ? (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6">
             {summaryCards.map((card) => {
               const Icon = card.icon;
               const colors = colorMap[card.color] || colorMap.primary;
               return (
                 <div
                   key={card.label}
-                  className={`theme-card rounded-xl border theme-border p-4 ${themeSmallShadow}`}
+                  className={`theme-card theme-border rounded-xl border p-4 ${themeSmallShadow}`}
                 >
                   <div className="flex items-center gap-3">
                     <div
@@ -286,8 +264,8 @@ export default function MonitoringAkademikPage() {
                       <Icon size={18} />
                     </div>
                     <div>
-                      <p className="text-sm theme-text-secondary">{card.label}</p>
-                      <p className="mt-1 text-2xl font-semibold theme-text">{card.value}</p>
+                      <p className="theme-text-secondary text-sm">{card.label}</p>
+                      <p className="theme-text mt-1 text-2xl font-semibold">{card.value}</p>
                     </div>
                   </div>
                 </div>
@@ -299,7 +277,7 @@ export default function MonitoringAkademikPage() {
         {/* Per-Sekolah Table */}
         {!loading && !error && perSekolah.length > 0 && (
           <div
-            className={`overflow-hidden rounded-xl border theme-border theme-card ${themeCardShadow}`}
+            className={`theme-border theme-card overflow-hidden rounded-xl border ${themeCardShadow}`}
           >
             <div className="overflow-x-auto">
               <table className="w-full min-w-[700px] text-left text-sm">
@@ -309,10 +287,10 @@ export default function MonitoringAkademikPage() {
                   <tr>
                     <th className="px-4 py-3 font-semibold">Sekolah</th>
                     <th className="px-4 py-3 font-semibold">Jenjang</th>
-                    <th className="px-4 py-3 font-semibold text-right">Siswa</th>
-                    <th className="px-4 py-3 font-semibold text-right">Rata Nilai</th>
-                    <th className="px-4 py-3 font-semibold text-right">Kehadiran</th>
-                    <th className="px-4 py-3 font-semibold text-right">Tuntas KKM</th>
+                    <th className="px-4 py-3 text-right font-semibold">Siswa</th>
+                    <th className="px-4 py-3 text-right font-semibold">Rata Nilai</th>
+                    <th className="px-4 py-3 text-right font-semibold">Kehadiran</th>
+                    <th className="px-4 py-3 text-right font-semibold">Tuntas KKM</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -320,19 +298,17 @@ export default function MonitoringAkademikPage() {
                     <tr
                       key={s.sekolahId}
                       className={`${themeNeutralHover} transition-colors ${
-                        index !== perSekolah.length - 1
-                          ? `border-b ${themeDivider}`
-                          : ""
+                        index !== perSekolah.length - 1 ? `border-b ${themeDivider}` : ""
                       }`}
                     >
-                      <td className="px-4 py-3 font-medium theme-text">{s.namaSekolah}</td>
-                      <td className="px-4 py-3 theme-text-secondary capitalize">{s.jenjang || "-"}</td>
-                      <td className="px-4 py-3 theme-text-secondary text-right">{s.siswa ?? "-"}</td>
-                      <td className="px-4 py-3 theme-text-secondary text-right">{s.rataNilai ?? "-"}</td>
-                      <td className="px-4 py-3 theme-text-secondary text-right">
+                      <td className="theme-text px-4 py-3 font-medium">{s.namaSekolah}</td>
+                      <td className="theme-text-secondary px-4 py-3 capitalize">{s.jenjang || "-"}</td>
+                      <td className="theme-text-secondary px-4 py-3 text-right">{s.siswa ?? "-"}</td>
+                      <td className="theme-text-secondary px-4 py-3 text-right">{s.rataNilai ?? "-"}</td>
+                      <td className="theme-text-secondary px-4 py-3 text-right">
                         {s.kehadiran != null ? `${s.kehadiran}%` : "-"}
                       </td>
-                      <td className="px-4 py-3 theme-text-secondary text-right">
+                      <td className="theme-text-secondary px-4 py-3 text-right">
                         {s.tuntasKKM != null ? `${s.tuntasKKM}%` : "-"}
                       </td>
                     </tr>
@@ -345,52 +321,35 @@ export default function MonitoringAkademikPage() {
 
         {/* Sub-module Navigation */}
         <div>
-          <h2 className="text-base sm:text-lg font-bold theme-text mb-4">
+          <h2 className="theme-text mb-4 text-base font-bold sm:text-lg">
             Pilih Modul Monitoring
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
             {subModules.map((mod) => {
               const Icon = mod.icon;
               return (
                 <Link
                   key={mod.path}
                   href={mod.path}
-                  className={`
-                    group theme-card flex flex-col justify-between
-                    rounded-2xl border theme-border p-5
-                    ${themeCardShadow}
-                    transition-all hover:-translate-y-1
-                    hover:border-[color-mix(in_srgb,var(--color-primary)_35%,transparent)]
-                    ${themeNeutralHover}
-                  `}
+                  className={`group theme-card theme-border flex flex-col justify-between rounded-2xl border p-5 ${themeCardShadow} transition-all hover:-translate-y-1 hover:border-[color-mix(in_srgb,var(--color-primary)_35%,transparent)] ${themeNeutralHover}`}
                 >
                   <div>
-                    <div className="flex items-center justify-between mb-3">
+                    <div className="mb-3 flex items-center justify-between">
                       <div
-                        className={`
-                          flex h-11 w-11 items-center justify-center
-                          rounded-xl border
-                          ${themePrimarySoftBorder}
-                          ${themePrimarySoft}
-                          text-[var(--color-primary)]
-                        `}
+                        className={`flex h-11 w-11 items-center justify-center rounded-xl border ${themePrimarySoftBorder} ${themePrimarySoft} text-[var(--color-primary)]`}
                       >
                         <Icon className="h-5 w-5" />
                       </div>
                       <span
-                        className={`
-                          inline-flex items-center rounded-full border
-                          px-2.5 py-0.5 text-[11px] font-semibold
-                          ${mod.badgeColor}
-                        `}
+                        className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${mod.badgeColor}`}
                       >
                         {mod.status}
                       </span>
                     </div>
-                    <h3 className="text-base font-bold theme-text group-hover:text-[var(--color-primary)] transition-colors">
+                    <h3 className="theme-text text-base font-bold transition-colors group-hover:text-[var(--color-primary)]">
                       {mod.title}
                     </h3>
-                    <p className="mt-1 text-xs sm:text-sm leading-relaxed theme-text-secondary">
+                    <p className="theme-text-secondary mt-1 text-xs leading-relaxed sm:text-sm">
                       {mod.desc}
                     </p>
                   </div>

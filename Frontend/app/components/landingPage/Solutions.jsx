@@ -49,7 +49,7 @@ const solutions = [
     number: "06",
     icon: MessagesSquare,
     title: "Komunikasi Terintegrasi",
-    desc: "Guru, siswa, orang tua, dan pihak sekolah terhubung dalam satu platform komunikasi yang efektif.",
+    desc: "Guru, siswa dan pihak sekolah terhubung dalam satu platform komunikasi yang efektif.",
     span: "lg:col-span-2",
   },
 ];

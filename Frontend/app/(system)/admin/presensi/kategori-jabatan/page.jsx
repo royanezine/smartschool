@@ -7,9 +7,6 @@ import Sidebar from "@/app/components/Sidebar";
 
 import {
   getKategoriJabatan,
-  createKategoriJabatan,
-  updateKategoriJabatan,
-  tambahTarifKategoriJabatan,
   deleteKategoriJabatan,
 } from "@/services/kategoriJabatan.service";
 
@@ -25,34 +22,16 @@ import {
   Users,
   CheckCircle2,
   XCircle,
-  Clock3,
   AlertCircle,
   X,
   ChevronLeft,
   ChevronRight,
   LoaderCircle,
-  History,
   Info,
   ArrowUpDown,
   ArrowUp,
   ArrowDown,
 } from "lucide-react";
-
-const initialForm = {
-  nama: "",
-  kode: "",
-  keterangan: "",
-  status: "aktif",
-  tarifPerJam: "",
-  berlakuMulai: new Date().toISOString().slice(0, 10),
-  catatanTarif: "",
-};
-
-const initialTarifForm = {
-  tarifPerJam: "",
-  berlakuMulai: new Date().toISOString().slice(0, 10),
-  catatan: "",
-};
 
 function formatRupiah(value) {
   return new Intl.NumberFormat("id-ID", {
@@ -64,11 +43,8 @@ function formatRupiah(value) {
 
 function formatTanggal(value) {
   if (!value) return "-";
-
   const date = new Date(value);
-
   if (Number.isNaN(date.getTime())) return String(value);
-
   return new Intl.DateTimeFormat("id-ID", {
     day: "2-digit",
     month: "short",
@@ -96,60 +72,6 @@ function StatusBadge({ status }) {
       {aktif ? <CheckCircle2 size={13} /> : <XCircle size={13} />}
       {aktif ? "Aktif" : "Nonaktif"}
     </span>
-  );
-}
-
-function Modal({ title, description, onClose, children, wide = false }) {
-  return (
-    <div
-      className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-slate-950/50 p-4 backdrop-blur-[2px]"
-      onMouseDown={(event) => {
-        if (event.target === event.currentTarget) onClose();
-      }}
-    >
-      <section
-        className={`theme-card my-auto w-full ${
-          wide ? "max-w-2xl" : "max-w-xl"
-        } overflow-hidden rounded-2xl border theme-border shadow-2xl`}
-      >
-        <div className="flex items-start justify-between gap-4 border-b theme-border px-5 py-4 sm:px-6">
-          <div>
-            <h2 className="text-lg font-semibold theme-text">{title}</h2>
-            {description && (
-              <p className="mt-1 text-sm theme-text-muted">{description}</p>
-            )}
-          </div>
-
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Tutup dialog"
-            className="rounded-lg p-2 theme-text-muted transition hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] hover:theme-text"
-          >
-            <X size={19} />
-          </button>
-        </div>
-
-        <div className="max-h-[75vh] overflow-y-auto p-5 sm:p-6">
-          {children}
-        </div>
-      </section>
-    </div>
-  );
-}
-
-function Field({ label, required, hint, children }) {
-  return (
-    <label className="block space-y-1.5">
-      <span className="text-sm font-medium theme-text">
-        {label}
-        {required && <span className="ml-1 text-red-500">*</span>}
-      </span>
-      {children}
-      {hint && (
-        <span className="block text-xs theme-text-muted">{hint}</span>
-      )}
-    </label>
   );
 }
 
@@ -204,12 +126,11 @@ const buttonPrimary =
   "inline-flex items-center justify-center gap-2 rounded-xl theme-primary px-4 py-2.5 text-sm font-semibold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 transition";
 
 export default function KategoriJabatanPage() {
-  const [items, setItems] = useState([]);
   const router = useRouter();
+  const [items, setItems] = useState([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [saving, setSaving] = useState(false);
 
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
@@ -224,6 +145,9 @@ export default function KategoriJabatanPage() {
   const [sortBy, setSortBy] = useState("nama");
   const [sortOrder, setSortOrder] = useState("asc");
 
+  const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
+
   function handleSort(column) {
     if (sortBy === column) {
       setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
@@ -232,13 +156,6 @@ export default function KategoriJabatanPage() {
       setSortOrder("asc");
     }
   }
-
-  const [modal, setModal] = useState(null);
-  const [selected, setSelected] = useState(null);
-  const [form, setForm] = useState(initialForm);
-  const [tarifForm, setTarifForm] = useState(initialTarifForm);
-  const [error, setError] = useState("");
-  const [notice, setNotice] = useState("");
 
   const loadData = useCallback(
     async ({ quiet = false } = {}) => {
@@ -279,7 +196,6 @@ export default function KategoriJabatanPage() {
 
   useEffect(() => {
     if (!notice) return;
-
     const timeout = setTimeout(() => setNotice(""), 4000);
     return () => clearTimeout(timeout);
   }, [notice]);
@@ -337,13 +253,6 @@ export default function KategoriJabatanPage() {
     };
   }, [items]);
 
-  function closeModal() {
-    if (saving) return;
-    setModal(null);
-    setSelected(null);
-    setError("");
-  }
-
   function openCreate() {
     router.push("/admin/presensi/kategori-jabatan/tambah");
   }
@@ -357,124 +266,7 @@ export default function KategoriJabatanPage() {
   }
 
   function openTarif(item) {
-    setError("");
-    setSelected(item);
-    setTarifForm({
-      ...initialTarifForm,
-      berlakuMulai: new Date().toISOString().slice(0, 10),
-    });
-    setModal("tarif");
-  }
-
-  function updateForm(field, value) {
-    setForm((previous) => ({ ...previous, [field]: value }));
-  }
-
-  function updateTarifForm(field, value) {
-    setTarifForm((previous) => ({ ...previous, [field]: value }));
-  }
-
-  async function handleSubmit(event) {
-    event.preventDefault();
-    setError("");
-
-    const nama = form.nama.trim();
-
-    if (!nama) {
-      setError("Nama kategori jabatan wajib diisi.");
-      return;
-    }
-
-    if (modal === "create") {
-      if (
-        form.tarifPerJam === "" ||
-        !Number.isFinite(Number(form.tarifPerJam)) ||
-        Number(form.tarifPerJam) < 0
-      ) {
-        setError("Tarif per jam wajib berupa angka minimal 0.");
-        return;
-      }
-
-      if (!form.berlakuMulai) {
-        setError("Tanggal mulai berlaku tarif wajib diisi.");
-        return;
-      }
-    }
-
-    setSaving(true);
-
-    try {
-      if (modal === "create") {
-        await createKategoriJabatan({
-          nama,
-          kode: form.kode.trim() || undefined,
-          keterangan: form.keterangan.trim() || undefined,
-          status: form.status,
-          tarifPerJam: Number(form.tarifPerJam),
-          berlakuMulai: form.berlakuMulai,
-          catatanTarif: form.catatanTarif.trim() || undefined,
-        });
-
-        setNotice("Kategori jabatan berhasil ditambahkan.");
-      } else {
-        await updateKategoriJabatan(selected.id, {
-          nama,
-          kode: form.kode.trim(),
-          keterangan: form.keterangan.trim(),
-          status: form.status,
-        });
-
-        setNotice("Kategori jabatan berhasil diperbarui.");
-      }
-
-      setModal(null);
-      setSelected(null);
-      await loadData({ quiet: true });
-    } catch (err) {
-      setError(getErrorMessage(err));
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  async function handleTarifSubmit(event) {
-    event.preventDefault();
-    setError("");
-
-    const tarif = Number(tarifForm.tarifPerJam);
-
-    if (
-      tarifForm.tarifPerJam === "" ||
-      !Number.isFinite(tarif) ||
-      tarif < 0
-    ) {
-      setError("Tarif per jam wajib berupa angka minimal 0.");
-      return;
-    }
-
-    if (!tarifForm.berlakuMulai) {
-      setError("Tanggal mulai berlaku wajib diisi.");
-      return;
-    }
-
-    setSaving(true);
-
-    try {
-      await tambahTarifKategoriJabatan(selected.id, {
-        tarifPerJam: tarif,
-        berlakuMulai: tarifForm.berlakuMulai,
-        catatan: tarifForm.catatan.trim() || undefined,
-      });
-
-      setNotice("Tarif baru berhasil disimpan.");
-      setModal(null);
-      setSelected(null);
-      await loadData({ quiet: true });
-    } catch (err) {
-      setError(getErrorMessage(err));
-    } finally {
-      setSaving(false);
-    }
+    router.push(`/admin/presensi/kategori-jabatan/${item.id}/tarif`);
   }
 
   async function handleDelete(item) {
@@ -500,8 +292,6 @@ export default function KategoriJabatanPage() {
     setPage(1);
     setSearch(searchInput.trim());
   }
-
-  const currentTarif = selected?.tarifAktif;
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
@@ -595,7 +385,7 @@ export default function KategoriJabatanPage() {
                   </div>
                 )}
 
-                {error && !modal && (
+                {error && (
                   <div
                     role="alert"
                     className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-300"
@@ -920,398 +710,6 @@ export default function KategoriJabatanPage() {
           </main>
         </div>
       </div>
-
-      {(modal === "create" || modal === "edit") && (
-        <Modal
-          title={
-            modal === "create"
-              ? "Tambah Kategori Jabatan"
-              : "Edit Kategori Jabatan"
-          }
-          description={
-            modal === "create"
-              ? "Lengkapi identitas kategori dan tarif awal."
-              : "Perbarui informasi kategori jabatan."
-          }
-          onClose={closeModal}
-        >
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {error && (
-              <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-300">
-                <AlertCircle size={17} className="mt-0.5 shrink-0" />
-                <span>{error}</span>
-              </div>
-            )}
-
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <Field label="Nama kategori" required>
-                <input
-                  required
-                  maxLength={100}
-                  value={form.nama}
-                  onChange={(event) =>
-                    updateForm("nama", event.target.value)
-                  }
-                  placeholder="Contoh: Guru"
-                  className={inputClass}
-                />
-              </Field>
-
-              <Field
-                label="Kode kategori"
-                hint="Opsional, maksimal 50 karakter."
-              >
-                <input
-                  maxLength={50}
-                  value={form.kode}
-                  onChange={(event) =>
-                    updateForm("kode", event.target.value)
-                  }
-                  placeholder="Contoh: GR"
-                  className={inputClass}
-                />
-              </Field>
-            </div>
-
-            <Field label="Keterangan">
-              <textarea
-                rows={3}
-                value={form.keterangan}
-                onChange={(event) =>
-                  updateForm("keterangan", event.target.value)
-                }
-                placeholder="Keterangan tambahan kategori..."
-                className={inputClass}
-              />
-            </Field>
-
-            <Field label="Status">
-              <select
-                value={form.status}
-                onChange={(event) =>
-                  updateForm("status", event.target.value)
-                }
-                className={inputClass}
-              >
-                <option value="aktif">Aktif</option>
-                <option value="nonaktif">Nonaktif</option>
-              </select>
-            </Field>
-
-            {modal === "create" && (
-              <div className="space-y-4 rounded-xl border theme-border bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] p-4">
-                <div className="flex items-center gap-2">
-                  <Wallet size={18} className="theme-primary-text" />
-                  <h3 className="font-semibold theme-text">Tarif awal</h3>
-                </div>
-
-                <Field label="Tarif per jam (Rp)" required>
-                  <input
-                    required
-                    type="number"
-                    min="0"
-                    step="1"
-                    value={form.tarifPerJam}
-                    onChange={(event) =>
-                      updateForm("tarifPerJam", event.target.value)
-                    }
-                    placeholder="Contoh: 25000"
-                    className={inputClass}
-                  />
-                </Field>
-
-                <Field label="Berlaku mulai" required>
-                  <input
-                    required
-                    type="date"
-                    value={form.berlakuMulai}
-                    onChange={(event) =>
-                      updateForm("berlakuMulai", event.target.value)
-                    }
-                    className={inputClass}
-                  />
-                </Field>
-
-                <Field label="Catatan tarif">
-                  <textarea
-                    rows={2}
-                    value={form.catatanTarif}
-                    onChange={(event) =>
-                      updateForm("catatanTarif", event.target.value)
-                    }
-                    placeholder="Opsional"
-                    className={inputClass}
-                  />
-                </Field>
-              </div>
-            )}
-
-            {modal === "edit" && (
-              <p className="rounded-xl border border-blue-200 bg-blue-50 p-3 text-xs leading-5 text-blue-800 dark:border-blue-900/60 dark:bg-blue-950/30 dark:text-blue-200">
-                Tarif tidak diubah dari formulir ini. Gunakan tindakan Atur
-                Tarif agar riwayat tarif lama tetap tersimpan.
-              </p>
-            )}
-
-            <div className="flex flex-col-reverse gap-2 border-t theme-border pt-4 sm:flex-row sm:justify-end">
-              <button
-                type="button"
-                onClick={closeModal}
-                disabled={saving}
-                className={buttonSecondary}
-              >
-                Batal
-              </button>
-
-              <button
-                type="submit"
-                disabled={saving}
-                className={buttonPrimary}
-              >
-                {saving ? (
-                  <LoaderCircle size={16} className="animate-spin" />
-                ) : (
-                  <CheckCircle2 size={16} />
-                )}
-                {saving
-                  ? "Menyimpan..."
-                  : modal === "create"
-                    ? "Simpan Kategori"
-                    : "Simpan Perubahan"}
-              </button>
-            </div>
-          </form>
-        </Modal>
-      )}
-
-      {modal === "tarif" && selected && (
-        <Modal
-          title="Atur Tarif Jabatan"
-          description={`Tambahkan tarif baru untuk kategori ${selected.nama}.`}
-          onClose={closeModal}
-        >
-          <form onSubmit={handleTarifSubmit} className="space-y-5">
-            {error && (
-              <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-300">
-                <AlertCircle size={17} className="mt-0.5 shrink-0" />
-                <span>{error}</span>
-              </div>
-            )}
-
-            <div className="rounded-xl bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] border theme-border p-4">
-              <p className="text-xs theme-text-muted">Tarif saat ini</p>
-              <p className="mt-1 text-xl font-bold tabular-nums theme-text">
-                {selected.tarifAktif
-                  ? formatRupiah(selected.tarifAktif.tarifPerJam)
-                  : "Belum diatur"}
-              </p>
-            </div>
-
-            <Field label="Tarif baru per jam (Rp)" required>
-              <input
-                required
-                type="number"
-                min="0"
-                step="1"
-                value={tarifForm.tarifPerJam}
-                onChange={(event) =>
-                  updateTarifForm("tarifPerJam", event.target.value)
-                }
-                placeholder="Masukkan tarif baru"
-                className={inputClass}
-              />
-            </Field>
-
-            <Field label="Berlaku mulai" required>
-              <input
-                required
-                type="date"
-                value={tarifForm.berlakuMulai}
-                onChange={(event) =>
-                  updateTarifForm("berlakuMulai", event.target.value)
-                }
-                className={inputClass}
-              />
-            </Field>
-
-            <Field label="Catatan perubahan">
-              <textarea
-                rows={3}
-                value={tarifForm.catatan}
-                onChange={(event) =>
-                  updateTarifForm("catatan", event.target.value)
-                }
-                placeholder="Contoh: penyesuaian tarif periode baru"
-                className={inputClass}
-              />
-            </Field>
-
-            <p className="text-xs leading-5 theme-text-muted">
-              Sistem yang mengatur penutupan tarif sebelumnya dan pembuatan
-              riwayat tarif baru.
-            </p>
-
-            <div className="flex flex-col-reverse gap-2 border-t theme-border pt-4 sm:flex-row sm:justify-end">
-              <button
-                type="button"
-                onClick={closeModal}
-                disabled={saving}
-                className={buttonSecondary}
-              >
-                Batal
-              </button>
-              <button
-                type="submit"
-                disabled={saving}
-                className={buttonPrimary}
-              >
-                {saving ? (
-                  <LoaderCircle size={16} className="animate-spin" />
-                ) : (
-                  <Wallet size={16} />
-                )}
-                {saving ? "Menyimpan..." : "Simpan Tarif"}
-              </button>
-            </div>
-          </form>
-        </Modal>
-      )}
-
-      {modal === "detail" && selected && (
-        <Modal
-          title="Detail Kategori Jabatan"
-          description="Informasi kategori dan riwayat tarif dari sistem."
-          onClose={closeModal}
-          wide
-        >
-          {error && (
-            <div className="mb-4 flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-300">
-              <AlertCircle size={17} className="mt-0.5 shrink-0" />
-              <span>{error}</span>
-            </div>
-          )}
-
-          <div className="space-y-5">
-            <div className="flex flex-col justify-between gap-3 rounded-xl border theme-border p-4 sm:flex-row sm:items-start">
-              <div className="flex items-start gap-3">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
-                  <BriefcaseBusiness size={21} />
-                </div>
-                <div>
-                  <h3 className="font-semibold theme-text">
-                    {selected.nama}
-                  </h3>
-                  <p className="mt-1 text-sm theme-text-muted">
-                    Kode: {selected.kode || "-"}
-                  </p>
-                  <p className="mt-2 text-sm theme-text-secondary">
-                    {selected.keterangan || "Tidak ada keterangan."}
-                  </p>
-                </div>
-              </div>
-              <StatusBadge status={selected.status} />
-            </div>
-
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <div className="rounded-xl bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] border theme-border p-4">
-                <p className="text-sm theme-text-muted">Tarif aktif</p>
-                <p className="mt-2 text-xl font-bold tabular-nums theme-text">
-                  {currentTarif
-                    ? formatRupiah(currentTarif.tarifPerJam)
-                    : "Belum diatur"}
-                </p>
-                {currentTarif?.berlakuMulai && (
-                  <p className="mt-1 text-xs theme-text-muted">
-                    Sejak {formatTanggal(currentTarif.berlakuMulai)}
-                  </p>
-                )}
-              </div>
-
-              <div className="rounded-xl bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] border theme-border p-4">
-                <p className="text-sm theme-text-muted">Jumlah pegawai</p>
-                <p className="mt-2 text-xl font-bold tabular-nums theme-text">
-                  {Number(selected.jumlahPengguna ?? 0)}
-                </p>
-              </div>
-            </div>
-
-            <div>
-              <div className="mb-3 flex items-center gap-2">
-                <History size={18} className="theme-text-muted" />
-                <h3 className="font-semibold theme-text">Riwayat Tarif</h3>
-              </div>
-
-              {!selected.tarifRiwayat?.length ? (
-                <div className="rounded-xl border border-dashed theme-border p-6 text-center text-sm theme-text-muted">
-                  Belum ada riwayat tarif yang tersedia.
-                </div>
-              ) : (
-                <div className="overflow-x-auto rounded-xl border theme-border">
-                  <table className="w-full min-w-[600px] text-left text-sm">
-                    <thead className="bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] text-xs theme-text-muted border-b theme-border">
-                      <tr>
-                        <th className="px-4 py-3 font-medium w-12">No</th>
-                        <th className="px-4 py-3 font-medium">Tarif per jam</th>
-                        <th className="px-4 py-3 font-medium">
-                          Mulai berlaku
-                        </th>
-                        <th className="px-4 py-3 font-medium">Berakhir</th>
-                        <th className="px-4 py-3 font-medium">Catatan</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-[color-mix(in_srgb,var(--color-text)_5%,transparent)]">
-                      {selected.tarifRiwayat.map((tarif, index) => (
-                        <tr
-                          key={tarif.id ?? `${tarif.berlakuMulai}-${index}`}
-                          className="hover:bg-[color-mix(in_srgb,var(--color-text)_2%,transparent)] transition"
-                        >
-                          <td className="px-4 py-3">
-                            <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)] text-[11px] font-semibold theme-text-secondary">
-                              {index + 1}
-                            </span>
-                          </td>
-                          <td className="px-4 py-3 font-semibold tabular-nums theme-text">
-                            {formatRupiah(tarif.tarifPerJam)}
-                          </td>
-                          <td className="px-4 py-3 theme-text-secondary">
-                            {formatTanggal(tarif.berlakuMulai)}
-                          </td>
-                          <td className="px-4 py-3 theme-text-secondary">
-                            {tarif.berakhirPada
-                              ? formatTanggal(tarif.berakhirPada)
-                              : "Masih berlaku"}
-                          </td>
-                          <td className="px-4 py-3 theme-text-secondary">
-                            {tarif.catatan || "-"}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-
-            <div className="flex flex-col-reverse gap-2 border-t theme-border pt-4 sm:flex-row sm:justify-end">
-              <button
-                type="button"
-                onClick={closeModal}
-                className={buttonSecondary}
-              >
-                Tutup
-              </button>
-              <button
-                type="button"
-                onClick={() => openTarif(selected)}
-                className={buttonPrimary}
-              >
-                <Wallet size={16} />
-                Tambah Tarif
-              </button>
-            </div>
-          </div>
-        </Modal>
-      )}
     </div>
   );
 }

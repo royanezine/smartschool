@@ -54,7 +54,7 @@ const inputClass =
   "theme-input h-11 w-full rounded-lg border px-3 text-sm outline-none transition disabled:cursor-not-allowed disabled:opacity-60";
 
 const buttonSecondary =
-  "inline-flex items-center justify-center gap-2 rounded-lg border theme-border theme-card px-4 text-sm font-medium theme-text-secondary hover:bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] disabled:cursor-not-allowed disabled:opacity-60 transition";
+  "inline-flex h-11 items-center justify-center gap-2 rounded-lg border theme-border theme-card px-4 text-sm font-medium theme-text-secondary hover:bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] disabled:cursor-not-allowed disabled:opacity-60 transition";
 
 const buttonPrimary =
   "inline-flex h-11 items-center justify-center gap-2 rounded-lg theme-primary px-4 text-sm font-semibold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60 transition";
@@ -262,15 +262,15 @@ export default function EditPenggajianPage() {
         onClose={() => setSidebarOpen(false)}
       />
 
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
         <div className="shrink-0">
           <Header onMenuClick={() => setSidebarOpen(true)} />
         </div>
 
-        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto theme-page theme-text">
-          <div className="w-full px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
-            <div className="mb-6">
-              <div className="mb-2 flex flex-wrap items-center gap-2 text-sm theme-text-muted">
+        <main className="theme-page theme-text min-h-0 min-w-0 flex-1 overflow-y-auto">
+          <div className="flex w-full min-w-0 flex-col gap-5 p-4 sm:p-6 lg:p-8">
+            <div>
+              <div className="theme-text-muted mb-2 flex flex-wrap items-center gap-2 text-sm">
                 <button
                   type="button"
                   onClick={() => router.push("/admin/keuangan/penggajian")}
@@ -291,11 +291,11 @@ export default function EditPenggajianPage() {
               </div>
 
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                <div>
-                  <h1 className="text-2xl font-bold tracking-tight theme-text sm:text-3xl">
+                <div className="min-w-0">
+                  <h1 className="theme-text text-2xl font-bold tracking-tight sm:text-3xl">
                     Edit Penggajian
                   </h1>
-                  <p className="mt-2 max-w-2xl text-sm leading-6 theme-text-secondary">
+                  <p className="theme-text-secondary mt-2 max-w-2xl text-sm leading-6">
                     Periksa data penggajian dan sesuaikan status serta catatan
                     sesuai kebutuhan.
                   </p>
@@ -329,27 +329,27 @@ export default function EditPenggajianPage() {
             )}
 
             {loading ? (
-              <div className="flex min-h-72 flex-col items-center justify-center gap-3 theme-card rounded-xl border theme-border">
+              <div className="theme-card theme-border flex min-h-72 flex-col items-center justify-center gap-3 rounded-xl border">
                 <LoaderCircle
                   size={28}
-                  className="animate-spin theme-primary-text"
+                  className="theme-primary-text animate-spin"
                 />
-                <p className="text-sm font-medium theme-text">
+                <p className="theme-text text-sm font-medium">
                   Memuat detail penggajian...
                 </p>
-                <p className="text-xs theme-text-muted">
+                <p className="theme-text-muted text-xs">
                   Mengambil data dari sistem
                 </p>
               </div>
             ) : !item ? (
-              <div className="flex min-h-72 flex-col items-center justify-center theme-card rounded-xl border theme-border px-5 text-center">
+              <div className="theme-card theme-border flex min-h-72 flex-col items-center justify-center rounded-xl border px-5 text-center">
                 <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-red-50 text-red-600 dark:bg-red-950/50 dark:text-red-400">
                   <AlertCircle size={23} />
                 </div>
-                <h2 className="mt-4 font-semibold theme-text">
+                <h2 className="theme-text mt-4 font-semibold">
                   Data penggajian tidak ditemukan
                 </h2>
-                <p className="mt-1 max-w-md text-sm theme-text-muted">
+                <p className="theme-text-muted mt-1 max-w-md text-sm">
                   Periksa kembali data yang dipilih atau muat ulang halaman.
                 </p>
                 <button
@@ -363,19 +363,19 @@ export default function EditPenggajianPage() {
               </div>
             ) : (
               <form onSubmit={handleSubmit}>
-                <div className="grid grid-cols-1 gap-5 xl:grid-cols-3">
-                  <div className="space-y-5 xl:col-span-2">
-                    <section className="theme-card overflow-hidden rounded-xl border theme-border shadow-sm">
-                      <div className="border-b theme-border p-4 sm:p-5">
+                <div className="grid min-w-0 grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_320px] xl:grid-cols-[minmax(0,1fr)_360px] 2xl:grid-cols-[minmax(0,1fr)_400px]">
+                  <div className="min-w-0 space-y-5">
+                    <section className="theme-card theme-border overflow-hidden rounded-xl border shadow-sm">
+                      <div className="theme-border border-b p-4 sm:p-5">
                         <div className="flex items-center gap-3">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
+                          <div className="theme-primary-text flex h-10 w-10 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]">
                             <UserRound size={20} />
                           </div>
-                          <div>
-                            <h2 className="font-semibold theme-text">
+                          <div className="min-w-0">
+                            <h2 className="theme-text font-semibold">
                               Informasi Pegawai
                             </h2>
-                            <p className="mt-1 text-sm theme-text-muted">
+                            <p className="theme-text-muted mt-1 text-sm">
                               Identitas pegawai dan periode penggajian.
                             </p>
                           </div>
@@ -419,17 +419,17 @@ export default function EditPenggajianPage() {
                       </div>
                     </section>
 
-                    <section className="theme-card overflow-hidden rounded-xl border theme-border shadow-sm">
-                      <div className="border-b theme-border p-4 sm:p-5">
+                    <section className="theme-card theme-border overflow-hidden rounded-xl border shadow-sm">
+                      <div className="theme-border border-b p-4 sm:p-5">
                         <div className="flex items-center gap-3">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
+                          <div className="theme-primary-text flex h-10 w-10 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]">
                             <Wallet size={20} />
                           </div>
-                          <div>
-                            <h2 className="font-semibold theme-text">
+                          <div className="min-w-0">
+                            <h2 className="theme-text font-semibold">
                               Rincian Penggajian
                             </h2>
-                            <p className="mt-1 text-sm theme-text-muted">
+                            <p className="theme-text-muted mt-1 text-sm">
                               Nilai hasil kalkulasi yang tercatat dalam
                               sistem.
                             </p>
@@ -464,10 +464,10 @@ export default function EditPenggajianPage() {
                         </div>
                       </div>
 
-                      <div className="mx-4 mb-4 flex items-start gap-2 rounded-lg border theme-border bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] p-3 text-xs leading-5 theme-text-secondary sm:mx-5 sm:mb-5">
+                      <div className="theme-border theme-text-secondary mx-4 mb-4 flex items-start gap-2 rounded-lg border bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] p-3 text-xs leading-5 sm:mx-5 sm:mb-5">
                         <Info
                           size={16}
-                          className="mt-0.5 shrink-0 theme-primary-text"
+                          className="theme-primary-text mt-0.5 shrink-0"
                         />
                         <p>
                           Rincian jam kerja, tarif, dan total gaji ditampilkan
@@ -478,13 +478,13 @@ export default function EditPenggajianPage() {
                     </section>
                   </div>
 
-                  <div className="space-y-5">
-                    <section className="theme-card overflow-hidden rounded-xl border theme-border shadow-sm">
-                      <div className="border-b theme-border p-4 sm:p-5">
-                        <h2 className="font-semibold theme-text">
+                  <div className="min-w-0 space-y-5">
+                    <section className="theme-card theme-border overflow-hidden rounded-xl border shadow-sm">
+                      <div className="theme-border border-b p-4 sm:p-5">
+                        <h2 className="theme-text font-semibold">
                           Pengaturan Penggajian
                         </h2>
-                        <p className="mt-1 text-sm theme-text-muted">
+                        <p className="theme-text-muted mt-1 text-sm">
                           Ubah status dan catatan data penggajian.
                         </p>
                       </div>
@@ -493,7 +493,7 @@ export default function EditPenggajianPage() {
                         <div>
                           <label
                             htmlFor="status"
-                            className="mb-2 block text-sm font-medium theme-text"
+                            className="theme-text mb-2 block text-sm font-medium"
                           >
                             Status Penggajian
                           </label>
@@ -530,7 +530,7 @@ export default function EditPenggajianPage() {
                         <div>
                           <label
                             htmlFor="catatan"
-                            className="mb-2 block text-sm font-medium theme-text"
+                            className="theme-text mb-2 block text-sm font-medium"
                           >
                             Catatan
                           </label>
@@ -545,7 +545,7 @@ export default function EditPenggajianPage() {
                             placeholder="Tambahkan catatan penggajian jika diperlukan..."
                             className="theme-input w-full resize-y rounded-lg border px-3 py-2.5 text-sm outline-none transition disabled:cursor-not-allowed disabled:opacity-60"
                           />
-                          <p className="mt-1 text-right text-xs theme-text-muted">
+                          <p className="theme-text-muted mt-1 text-right text-xs">
                             {catatan.length}/1000 karakter
                           </p>
                         </div>
@@ -588,20 +588,20 @@ export default function EditPenggajianPage() {
                       </div>
                     </section>
 
-                    <section className="theme-card rounded-xl border theme-border p-4 shadow-sm sm:p-5">
+                    <section className="theme-card theme-border rounded-xl border p-4 shadow-sm sm:p-5">
                       <div className="flex items-start gap-3">
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)] theme-text-secondary">
+                        <div className="theme-text-secondary flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)]">
                           <FileText size={18} />
                         </div>
 
-                        <div>
-                          <h3 className="text-sm font-semibold theme-text">
+                        <div className="min-w-0">
+                          <h3 className="theme-text text-sm font-semibold">
                             Informasi Data
                           </h3>
-                          <p className="mt-1 break-all text-xs leading-5 theme-text-muted">
+                          <p className="theme-text-muted mt-1 break-all text-xs leading-5">
                             ID Penggajian: {item.id}
                           </p>
-                          <p className="mt-1 text-xs leading-5 theme-text-muted">
+                          <p className="theme-text-muted mt-1 text-xs leading-5">
                             Perubahan status dan catatan dikirim ke sistem
                             melalui fitur pembaruan status penggajian.
                           </p>
@@ -613,7 +613,7 @@ export default function EditPenggajianPage() {
               </form>
             )}
 
-            <p className="mt-5 text-xs leading-5 theme-text-muted">
+            <p className="theme-text-muted text-xs leading-5">
               Data penggajian mengikuti data yang tercatat dalam sistem.
             </p>
           </div>
@@ -623,22 +623,20 @@ export default function EditPenggajianPage() {
   );
 }
 
-
 function ReadOnlyField({ label, value, icon: Icon }) {
   return (
-    <div>
-      <p className="mb-2 text-sm font-medium theme-text-secondary">{label}</p>
+    <div className="min-w-0">
+      <p className="theme-text-secondary mb-2 text-sm font-medium">{label}</p>
 
-      <div className="flex min-h-11 items-center gap-3 rounded-lg border theme-border bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] px-3 py-2">
-        <Icon size={16} className="shrink-0 theme-text-muted" />
-        <span className="break-words text-sm font-medium theme-text">
+      <div className="theme-border flex min-h-11 items-center gap-3 rounded-lg border bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] px-3 py-2">
+        <Icon size={16} className="theme-text-muted shrink-0" />
+        <span className="theme-text break-words text-sm font-medium">
           {value === null || value === undefined || value === "" ? "-" : value}
         </span>
       </div>
     </div>
   );
 }
-
 
 function AlertBox({ type, message, onClose }) {
   const success = type === "success";

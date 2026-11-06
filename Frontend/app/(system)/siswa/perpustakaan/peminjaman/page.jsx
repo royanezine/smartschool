@@ -884,722 +884,726 @@ export default function PeminjamanSiswaPage() {
   };
 
   return (
-    <div className="theme-page min-h-full w-full">
-      <div
-        className={`mx-auto w-full max-w-[1500px] space-y-6 p-4 transition-all duration-700 sm:p-6 lg:p-8 ${
-          mounted
-            ? "translate-y-0 opacity-100"
-            : "translate-y-4 opacity-0"
-        }`}
-      >
+    <div className="flex h-screen overflow-hidden theme-page theme-text">
+      <div className="flex min-h-0 flex-1 flex-col">
+        <main className="min-w-0 flex-1 overflow-y-auto">
+          <div
+            className={`w-full space-y-6 p-4 transition-all duration-700 sm:p-6 lg:p-8 ${
+              mounted
+                ? "translate-y-0 opacity-100"
+                : "translate-y-4 opacity-0"
+            }`}
+          >
 
-        <section
-          className={`relative overflow-hidden rounded-[28px] border ${themePrimaryBorder} ${themeCardShadow} bg-[color-mix(in_srgb,var(--color-primary)_10%,var(--color-card))]`}
-        >
-          <div className="absolute -right-24 -top-24 h-80 w-80 rounded-full bg-[color-mix(in_srgb,var(--color-primary)_18%,transparent)] blur-3xl" />
-
-          <div className="absolute -bottom-36 left-[35%] h-80 w-80 rounded-full bg-[color-mix(in_srgb,var(--color-info)_10%,transparent)] blur-3xl" />
-
-          <div className="relative px-5 py-7 sm:px-7 sm:py-8 lg:px-10 lg:py-9">
-            <Link
-              href="/siswa/perpustakaan"
-              className={`inline-flex items-center gap-2 rounded-lg border ${themePrimaryBorder} ${themePrimarySoft} px-3 py-2 text-xs font-semibold text-[var(--color-primary)] transition ${themePrimarySoftHover}`}
+            <section
+              className={`relative overflow-hidden rounded-[28px] border ${themePrimaryBorder} ${themeCardShadow} bg-[color-mix(in_srgb,var(--color-primary)_10%,var(--color-card))]`}
             >
-              <ArrowLeft size={14} />
-              Kembali ke Perpustakaan
-            </Link>
+              <div className="absolute -right-24 -top-24 h-80 w-80 rounded-full bg-[color-mix(in_srgb,var(--color-primary)_18%,transparent)] blur-3xl" />
 
-            <div className="mt-6 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-              <div>
-                <div
-                  className={`mb-3 inline-flex items-center gap-2 rounded-full border ${themePrimaryBorder} ${themePrimarySoft} px-3 py-1.5 text-xs font-semibold text-[var(--color-primary)]`}
-                >
-                  <BookOpenCheck size={13} />
-                  Peminjaman Siswa
-                </div>
+              <div className="absolute -bottom-36 left-[35%] h-80 w-80 rounded-full bg-[color-mix(in_srgb,var(--color-info)_10%,transparent)] blur-3xl" />
 
-                <h1 className="theme-text text-2xl font-bold tracking-tight sm:text-3xl lg:text-[36px]">
-                  Peminjaman Saya
-                </h1>
-
-                <p className="theme-text-secondary mt-2 max-w-2xl text-sm leading-6">
-                  Hai, {username}. Di halaman ini kamu
-                  dapat melihat seluruh transaksi peminjaman
-                  buku milik akunmu yang diambil langsung dari
-                  backend perpustakaan.
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={() =>
-                  loadData(true)
-                }
-                disabled={
-                  loading || refreshing
-                }
-                className={`theme-card theme-border theme-text-secondary inline-flex h-10 items-center justify-center gap-2 rounded-lg border px-4 text-sm font-semibold transition ${themePrimarySoftHover} disabled:cursor-not-allowed disabled:opacity-60`}
-              >
-                <RefreshCw
-                  size={15}
-                  className={
-                    refreshing
-                      ? "animate-spin"
-                      : ""
-                  }
-                />
-                Refresh Data
-              </button>
-            </div>
-          </div>
-        </section>
-
-
-        {error && (
-          <div
-            className={`flex items-start gap-3 rounded-xl border ${themeDangerSoft} border-[color-mix(in_srgb,var(--color-danger)_20%,transparent)] p-4`}
-          >
-            <div
-              className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${themeDangerSoft} text-[var(--color-danger)]`}
-            >
-              <XCircle size={17} />
-            </div>
-
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold text-[var(--color-danger)]">
-                Terjadi masalah
-              </p>
-
-              <p className="mt-1 text-xs leading-5 text-[var(--color-danger)]">
-                {error}
-              </p>
-            </div>
-
-            <button
-              type="button"
-              onClick={() =>
-                loadData(true)
-              }
-              disabled={
-                loading || refreshing
-              }
-              className={`shrink-0 rounded-lg border border-[color-mix(in_srgb,var(--color-danger)_20%,transparent)] ${themeDangerSoft} px-3 py-2 text-xs font-semibold text-[var(--color-danger)] transition hover:brightness-95 disabled:opacity-60`}
-            >
-              Coba lagi
-            </button>
-          </div>
-        )}
-
-
-        <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <div
-            className={`theme-card relative overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow} ${themeCardHoverShadow} p-5`}
-          >
-            <div
-              className={`absolute -right-8 -top-8 h-24 w-24 rounded-full ${themePrimarySoft}`}
-            />
-
-            <div className="relative flex items-start justify-between">
-              <div>
-                <p className="theme-text-secondary text-sm font-medium">
-                  Total Transaksi
-                </p>
-
-                <p className="mt-2 text-3xl font-bold text-[var(--color-primary)]">
-                  {loans.length}
-                </p>
-
-                <p className="theme-text-muted mt-1.5 text-xs">
-                  Seluruh riwayat peminjaman
-                </p>
-              </div>
-
-              <div
-                className={`flex h-11 w-11 items-center justify-center rounded-xl ${themePrimarySoft} text-[var(--color-primary)]`}
-              >
-                <Library size={20} />
-              </div>
-            </div>
-          </div>
-
-          <div
-            className={`theme-card relative overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow} ${themeCardHoverShadow} p-5`}
-          >
-            <div
-              className={`absolute -right-8 -top-8 h-24 w-24 rounded-full ${themePrimarySoft}`}
-            />
-
-            <div className="relative flex items-start justify-between">
-              <div>
-                <p className="theme-text-secondary text-sm font-medium">
-                  Sedang Dipinjam
-                </p>
-
-                <p className="mt-2 text-3xl font-bold text-[var(--color-primary)]">
-                  {activeLoans.length}
-                </p>
-
-                <p className="theme-text-muted mt-1.5 text-xs">
-                  Buku yang belum dikembalikan
-                </p>
-              </div>
-
-              <div
-                className={`flex h-11 w-11 items-center justify-center rounded-xl ${themePrimarySoft} text-[var(--color-primary)]`}
-              >
-                <BookOpenCheck size={20} />
-              </div>
-            </div>
-          </div>
-
-          <div
-            className={`theme-card relative overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow} ${themeCardHoverShadow} p-5`}
-          >
-            <div
-              className={`absolute -right-8 -top-8 h-24 w-24 rounded-full ${themeWarningSoft}`}
-            />
-
-            <div className="relative flex items-start justify-between">
-              <div>
-                <p className="theme-text-secondary text-sm font-medium">
-                  Terlambat
-                </p>
-
-                <p className="mt-2 text-3xl font-bold text-[var(--color-warning)]">
-                  {overdueLoans.length}
-                </p>
-
-                <p className="theme-text-muted mt-1.5 text-xs">
-                  Melewati tanggal jatuh tempo
-                </p>
-              </div>
-
-              <div
-                className={`flex h-11 w-11 items-center justify-center rounded-xl ${themeWarningSoft} text-[var(--color-warning)]`}
-              >
-                <CalendarClock size={20} />
-              </div>
-            </div>
-          </div>
-
-          <div
-            className={`theme-card relative overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow} ${themeCardHoverShadow} p-5`}
-          >
-            <div
-              className={`absolute -right-8 -top-8 h-24 w-24 rounded-full ${themeSuccessSoft}`}
-            />
-
-            <div className="relative flex items-start justify-between">
-              <div>
-                <p className="theme-text-secondary text-sm font-medium">
-                  Dikembalikan
-                </p>
-
-                <p className="mt-2 text-3xl font-bold text-[var(--color-success)]">
-                  {returnedLoans.length}
-                </p>
-
-                <p className="theme-text-muted mt-1.5 text-xs">
-                  Transaksi yang sudah selesai
-                </p>
-              </div>
-
-              <div
-                className={`flex h-11 w-11 items-center justify-center rounded-xl ${themeSuccessSoft} text-[var(--color-success)]`}
-              >
-                <CheckCircle2 size={20} />
-              </div>
-            </div>
-          </div>
-        </section>
-
-
-        <section
-          className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
-        >
-          <div
-            className={`border-b ${themeDivider} px-5 py-5 sm:px-6`}
-          >
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-              <div>
-                <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--color-primary)]">
-                  Data dari backend
-                </p>
-
-                <h2 className="theme-text mt-1 text-lg font-bold">
-                  Riwayat Peminjaman
-                </h2>
-
-                <p className="theme-text-muted mt-1 text-sm">
-                  Menampilkan transaksi yang terkait dengan akun
-                  siswa yang sedang login.
-                </p>
-              </div>
-
-              <div
-                className={`inline-flex items-center gap-2 rounded-xl ${themePrimarySoft} px-3 py-2 text-xs font-semibold text-[var(--color-primary)]`}
-              >
-                <UserRound size={14} />
-                {username}
-              </div>
-            </div>
-
-            <div className="mt-5 grid gap-3 lg:grid-cols-[1fr_auto]">
-              <div className="relative">
-                <Search
-                  size={17}
-                  className="theme-text-muted pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2"
-                />
-
-                <input
-                  value={search}
-                  onChange={(event) =>
-                    setSearch(
-                      event.target.value,
-                    )
-                  }
-                  placeholder="Cari judul buku, kode, atau nomor peminjaman..."
-                  className="theme-input theme-border theme-text h-11 w-full rounded-lg border pl-10 pr-4 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_15%,transparent)] placeholder:text-[var(--color-text-placeholder)]"
-                />
-              </div>
-
-              <select
-                value={filterStatus}
-                onChange={(event) =>
-                  setFilterStatus(
-                    event.target.value,
-                  )
-                }
-                className="theme-input theme-border theme-text h-11 rounded-lg border px-3.5 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]"
-              >
-                <option value="Semua">
-                  Semua Status
-                </option>
-
-                <option value="Dipinjam">
-                  Dipinjam
-                </option>
-
-                <option value="Terlambat">
-                  Terlambat
-                </option>
-
-                <option value="Dikembalikan">
-                  Dikembalikan
-                </option>
-              </select>
-            </div>
-
-            <div className="mt-3 flex items-center justify-between gap-3">
-              <p className="theme-text-muted text-xs">
-                {filteredLoans.length} transaksi ditemukan
-              </p>
-
-              {(search ||
-                filterStatus !== "Semua") && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSearch("");
-                    setFilterStatus("Semua");
-                  }}
-                  className="text-xs font-semibold text-[var(--color-primary)] transition hover:opacity-80"
-                >
-                  Reset filter
-                </button>
-              )}
-            </div>
-          </div>
-
-          <div className="p-5 sm:p-6">
-            {loading ? (
-              <div className="flex min-h-[300px] flex-col items-center justify-center">
-                <div
-                  className={`flex h-12 w-12 items-center justify-center rounded-full ${themePrimarySoft} text-[var(--color-primary)]`}
-                >
-                  <Loader2
-                    size={22}
-                    className="animate-spin"
-                  />
-                </div>
-
-                <p className="theme-text mt-4 text-sm font-semibold">
-                  Memuat peminjaman...
-                </p>
-
-                <p className="theme-text-muted mt-1 text-xs">
-                  Mengambil data transaksi dari server.
-                </p>
-              </div>
-            ) : filteredLoans.length === 0 ? (
-              <div
-                className={`flex min-h-[300px] flex-col items-center justify-center rounded-xl border border-dashed ${themeNeutralBorder} ${themeNeutralSurface} px-5 text-center`}
-              >
-                <div
-                  className={`flex h-12 w-12 items-center justify-center rounded-full ${themePrimarySoft} text-[var(--color-primary)]`}
-                >
-                  <BookOpen size={21} />
-                </div>
-
-                <p className="theme-text mt-4 text-sm font-semibold">
-                  Tidak ada transaksi
-                </p>
-
-                <p className="theme-text-muted mt-1 max-w-md text-xs leading-5">
-                  Belum ada data peminjaman yang sesuai dengan
-                  pencarian atau filter yang dipilih.
-                </p>
-
+              <div className="relative px-5 py-7 sm:px-7 sm:py-8 lg:px-10 lg:py-9">
                 <Link
                   href="/siswa/perpustakaan"
-                  className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-[var(--color-primary)]"
+                  className={`inline-flex items-center gap-2 rounded-lg border ${themePrimaryBorder} ${themePrimarySoft} px-3 py-2 text-xs font-semibold text-[var(--color-primary)] transition ${themePrimarySoftHover}`}
                 >
-                  Lihat katalog buku
-                  <ChevronRight size={14} />
+                  <ArrowLeft size={14} />
+                  Kembali ke Perpustakaan
                 </Link>
+
+                <div className="mt-6 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+                  <div>
+                    <div
+                      className={`mb-3 inline-flex items-center gap-2 rounded-full border ${themePrimaryBorder} ${themePrimarySoft} px-3 py-1.5 text-xs font-semibold text-[var(--color-primary)]`}
+                    >
+                      <BookOpenCheck size={13} />
+                      Peminjaman Siswa
+                    </div>
+
+                    <h1 className="theme-text text-2xl font-bold tracking-tight sm:text-3xl lg:text-[36px]">
+                      Peminjaman Saya
+                    </h1>
+
+                    <p className="theme-text-secondary mt-2 max-w-2xl text-sm leading-6">
+                      Hai, {username}. Di halaman ini kamu
+                      dapat melihat seluruh transaksi peminjaman
+                      buku milik akunmu yang diambil langsung dari
+                      backend perpustakaan.
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      loadData(true)
+                    }
+                    disabled={
+                      loading || refreshing
+                    }
+                    className={`theme-card theme-border theme-text-secondary inline-flex h-10 items-center justify-center gap-2 rounded-lg border px-4 text-sm font-semibold transition ${themePrimarySoftHover} disabled:cursor-not-allowed disabled:opacity-60`}
+                  >
+                    <RefreshCw
+                      size={15}
+                      className={
+                        refreshing
+                          ? "animate-spin"
+                          : ""
+                      }
+                    />
+                    Refresh Data
+                  </button>
+                </div>
               </div>
-            ) : (
-              <div className="space-y-3">
-                {filteredLoans.map(
-                  (loan) => {
-                    const overdue =
-                      isOverdue(loan);
+            </section>
 
-                    const isReturned =
-                      loan.status ===
-                        "Dikembalikan" ||
-                      Boolean(
-                        loan.tanggalKembali,
-                      );
 
-                    return (
-                      <div
-                        key={String(
-                          loan.id,
-                        )}
-                        className={`group rounded-2xl border p-4 transition-all duration-300 ${
-                          overdue
-                            ? "border-[color-mix(in_srgb,var(--color-danger)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_4%,transparent)]"
-                            : themeNeutralBorder
-                        } ${themeCardHoverShadow}`}
-                      >
-                        <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
-                          <div
-                            className={`flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl ${
-                              overdue
-                                ? themeDangerSoft
-                                : isReturned
-                                  ? themeSuccessSoft
-                                  : themePrimarySoft
-                            }`}
-                          >
-                            {loan.buku
-                              .coverUrl ? (
-                              <img
-                                src={
-                                  loan.buku
-                                    .coverUrl
-                                }
-                                alt={`Cover ${loan.buku.judul}`}
-                                className="h-full w-full object-cover"
-                              />
-                            ) : (
-                              <BookOpen
-                                size={23}
-                                className={
-                                  overdue
-                                    ? "text-[var(--color-danger)]"
-                                    : isReturned
-                                      ? "text-[var(--color-success)]"
-                                      : "text-[var(--color-primary)]"
-                                }
-                              />
-                            )}
-                          </div>
+            {error && (
+              <div
+                className={`flex items-start gap-3 rounded-xl border ${themeDangerSoft} border-[color-mix(in_srgb,var(--color-danger)_20%,transparent)] p-4`}
+              >
+                <div
+                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${themeDangerSoft} text-[var(--color-danger)]`}
+                >
+                  <XCircle size={17} />
+                </div>
 
-                          <div className="min-w-0 flex-1">
-                            <div className="flex flex-wrap items-center gap-2">
-                              <h3 className="theme-text text-sm font-bold">
-                                {loan.buku.judul}
-                              </h3>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold text-[var(--color-danger)]">
+                    Terjadi masalah
+                  </p>
 
-                              <StatusBadge
-                                loan={
-                                  loan
-                                }
-                              />
-                            </div>
+                  <p className="mt-1 text-xs leading-5 text-[var(--color-danger)]">
+                    {error}
+                  </p>
+                </div>
 
-                            <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
-                              <p className="theme-text-muted text-xs">
-                                {loan.buku.kodeBuku}
-                              </p>
-
-                              <span className="theme-text-muted text-[10px]">
-                                •
-                              </span>
-
-                              <p className="theme-text-muted text-xs">
-                                {loan.nomorPeminjaman}
-                              </p>
-                            </div>
-
-                            <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
-                              <div>
-                                <p className="theme-text-muted text-[10px]">
-                                  Dipinjam
-                                </p>
-
-                                <p className="theme-text mt-1 text-xs font-semibold">
-                                  {formatDate(
-                                    loan.tanggalPinjam,
-                                  )}
-                                </p>
-                              </div>
-
-                              <div>
-                                <p className="theme-text-muted text-[10px]">
-                                  Jatuh Tempo
-                                </p>
-
-                                <p
-                                  className={`mt-1 text-xs font-semibold ${
-                                    overdue
-                                      ? "text-[var(--color-danger)]"
-                                      : "theme-text"
-                                  }`}
-                                >
-                                  {formatDate(
-                                    loan.tanggalJatuhTempo,
-                                  )}
-                                </p>
-                              </div>
-
-                              <div>
-                                <p className="theme-text-muted text-[10px]">
-                                  Dikembalikan
-                                </p>
-
-                                <p className="theme-text mt-1 text-xs font-semibold">
-                                  {loan.tanggalKembali
-                                    ? formatDate(
-                                        loan.tanggalKembali,
-                                      )
-                                    : "-"}
-                                </p>
-                              </div>
-
-                              <div>
-                                <p className="theme-text-muted text-[10px]">
-                                  Tipe
-                                </p>
-
-                                <p className="theme-text mt-1 text-xs font-semibold">
-                                  {loan.buku.tipe ===
-                                  "EBOOK"
-                                    ? "E-Book"
-                                    : "Fisik"}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="flex shrink-0 flex-row items-center gap-2 lg:flex-col lg:items-stretch">
-                            <button
-                              type="button"
-                              onClick={() =>
-                                setSelectedLoan(
-                                  loan,
-                                )
-                              }
-                              className={`theme-card theme-border theme-text-secondary inline-flex h-10 items-center justify-center gap-2 rounded-lg border px-4 text-xs font-semibold transition ${themePrimarySoftHover} hover:text-[var(--color-primary)]`}
-                            >
-                              Detail
-                            </button>
-
-                            {!isReturned && (
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  handleReturn(
-                                    loan,
-                                  )
-                                }
-                                disabled={
-                                  returningId ===
-                                  String(
-                                    loan.id,
-                                  )
-                                }
-                                className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-[var(--color-primary)] px-4 text-xs font-semibold text-[var(--color-card)] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
-                              >
-                                {returningId ===
-                                String(
-                                  loan.id,
-                                ) ? (
-                                  <Loader2
-                                    size={14}
-                                    className="animate-spin"
-                                  />
-                                ) : (
-                                  <RotateCcw
-                                    size={14}
-                                  />
-                                )}
-
-                                {returningId ===
-                                String(
-                                  loan.id,
-                                )
-                                  ? "Memproses..."
-                                  : "Kembalikan"}
-                              </button>
-                            )}
-                          </div>
-                        </div>
-
-                        {overdue && (
-                          <div
-                            className={`mt-4 flex items-center gap-2 rounded-xl border border-[color-mix(in_srgb,var(--color-warning)_20%,transparent)] ${themeWarningSoft} px-3 py-2.5`}
-                          >
-                            <CalendarClock
-                              size={15}
-                              className="shrink-0 text-[var(--color-warning)]"
-                            />
-
-                            <p className="text-[11px] font-medium text-[var(--color-warning)]">
-                              Buku ini sudah melewati tanggal
-                              jatuh tempo.
-                            </p>
-                          </div>
-                        )}
-
-                        {loan.tanggalKembali && (
-                          <div
-                            className={`mt-4 flex items-center gap-2 rounded-xl border border-[color-mix(in_srgb,var(--color-success)_20%,transparent)] ${themeSuccessSoft} px-3 py-2.5`}
-                          >
-                            <CheckCircle2
-                              size={15}
-                              className="shrink-0 text-[var(--color-success)]"
-                            />
-
-                            <p className="text-[11px] font-medium text-[var(--color-success)]">
-                              Buku telah dikembalikan pada{" "}
-                              {formatDateTime(
-                                loan.tanggalKembali,
-                              )}
-                              .
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  },
-                )}
+                <button
+                  type="button"
+                  onClick={() =>
+                    loadData(true)
+                  }
+                  disabled={
+                    loading || refreshing
+                  }
+                  className={`shrink-0 rounded-lg border border-[color-mix(in_srgb,var(--color-danger)_20%,transparent)] ${themeDangerSoft} px-3 py-2 text-xs font-semibold text-[var(--color-danger)] transition hover:brightness-95 disabled:opacity-60`}
+                >
+                  Coba lagi
+                </button>
               </div>
             )}
-          </div>
-        </section>
 
 
-        <section className="grid gap-5 lg:grid-cols-3">
-          <div
-            className={`theme-card rounded-2xl border ${themeNeutralBorder} ${themeCardShadow} p-5`}
-          >
-            <div className="flex items-start gap-3">
+            <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
               <div
-                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${themePrimarySoft} text-[var(--color-primary)]`}
+                className={`theme-card relative overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow} ${themeCardHoverShadow} p-5`}
               >
-                <BookOpenCheck size={18} />
+                <div
+                  className={`absolute -right-8 -top-8 h-24 w-24 rounded-full ${themePrimarySoft}`}
+                />
+
+                <div className="relative flex items-start justify-between">
+                  <div>
+                    <p className="theme-text-secondary text-sm font-medium">
+                      Total Transaksi
+                    </p>
+
+                    <p className="mt-2 text-3xl font-bold text-[var(--color-primary)]">
+                      {loans.length}
+                    </p>
+
+                    <p className="theme-text-muted mt-1.5 text-xs">
+                      Seluruh riwayat peminjaman
+                    </p>
+                  </div>
+
+                  <div
+                    className={`flex h-11 w-11 items-center justify-center rounded-xl ${themePrimarySoft} text-[var(--color-primary)]`}
+                  >
+                    <Library size={20} />
+                  </div>
+                </div>
               </div>
 
-              <div>
-                <p className="theme-text text-sm font-bold">
-                  Sedang dipinjam
-                </p>
+              <div
+                className={`theme-card relative overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow} ${themeCardHoverShadow} p-5`}
+              >
+                <div
+                  className={`absolute -right-8 -top-8 h-24 w-24 rounded-full ${themePrimarySoft}`}
+                />
 
-                <p className="theme-text-muted mt-1 text-xs leading-5">
-                  Data diambil berdasarkan pengguna yang sedang
-                  login sehingga transaksi siswa lain tidak
-                  ditampilkan.
-                </p>
+                <div className="relative flex items-start justify-between">
+                  <div>
+                    <p className="theme-text-secondary text-sm font-medium">
+                      Sedang Dipinjam
+                    </p>
+
+                    <p className="mt-2 text-3xl font-bold text-[var(--color-primary)]">
+                      {activeLoans.length}
+                    </p>
+
+                    <p className="theme-text-muted mt-1.5 text-xs">
+                      Buku yang belum dikembalikan
+                    </p>
+                  </div>
+
+                  <div
+                    className={`flex h-11 w-11 items-center justify-center rounded-xl ${themePrimarySoft} text-[var(--color-primary)]`}
+                  >
+                    <BookOpenCheck size={20} />
+                  </div>
+                </div>
+              </div>
+
+              <div
+                className={`theme-card relative overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow} ${themeCardHoverShadow} p-5`}
+              >
+                <div
+                  className={`absolute -right-8 -top-8 h-24 w-24 rounded-full ${themeWarningSoft}`}
+                />
+
+                <div className="relative flex items-start justify-between">
+                  <div>
+                    <p className="theme-text-secondary text-sm font-medium">
+                      Terlambat
+                    </p>
+
+                    <p className="mt-2 text-3xl font-bold text-[var(--color-warning)]">
+                      {overdueLoans.length}
+                    </p>
+
+                    <p className="theme-text-muted mt-1.5 text-xs">
+                      Melewati tanggal jatuh tempo
+                    </p>
+                  </div>
+
+                  <div
+                    className={`flex h-11 w-11 items-center justify-center rounded-xl ${themeWarningSoft} text-[var(--color-warning)]`}
+                  >
+                    <CalendarClock size={20} />
+                  </div>
+                </div>
+              </div>
+
+              <div
+                className={`theme-card relative overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow} ${themeCardHoverShadow} p-5`}
+              >
+                <div
+                  className={`absolute -right-8 -top-8 h-24 w-24 rounded-full ${themeSuccessSoft}`}
+                />
+
+                <div className="relative flex items-start justify-between">
+                  <div>
+                    <p className="theme-text-secondary text-sm font-medium">
+                      Dikembalikan
+                    </p>
+
+                    <p className="mt-2 text-3xl font-bold text-[var(--color-success)]">
+                      {returnedLoans.length}
+                    </p>
+
+                    <p className="theme-text-muted mt-1.5 text-xs">
+                      Transaksi yang sudah selesai
+                    </p>
+                  </div>
+
+                  <div
+                    className={`flex h-11 w-11 items-center justify-center rounded-xl ${themeSuccessSoft} text-[var(--color-success)]`}
+                  >
+                    <CheckCircle2 size={20} />
+                  </div>
+                </div>
+              </div>
+            </section>
+
+
+            <section
+              className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
+            >
+              <div
+                className={`border-b ${themeDivider} px-5 py-5 sm:px-6`}
+              >
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                  <div>
+                    <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--color-primary)]">
+                      Data dari backend
+                    </p>
+
+                    <h2 className="theme-text mt-1 text-lg font-bold">
+                      Riwayat Peminjaman
+                    </h2>
+
+                    <p className="theme-text-muted mt-1 text-sm">
+                      Menampilkan transaksi yang terkait dengan akun
+                      siswa yang sedang login.
+                    </p>
+                  </div>
+
+                  <div
+                    className={`inline-flex items-center gap-2 rounded-xl ${themePrimarySoft} px-3 py-2 text-xs font-semibold text-[var(--color-primary)]`}
+                  >
+                    <UserRound size={14} />
+                    {username}
+                  </div>
+                </div>
+
+                <div className="mt-5 grid gap-3 lg:grid-cols-[1fr_auto]">
+                  <div className="relative">
+                    <Search
+                      size={17}
+                      className="theme-text-muted pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2"
+                    />
+
+                    <input
+                      value={search}
+                      onChange={(event) =>
+                        setSearch(
+                          event.target.value,
+                        )
+                      }
+                      placeholder="Cari judul buku, kode, atau nomor peminjaman..."
+                      className="theme-input theme-border theme-text h-11 w-full rounded-lg border pl-10 pr-4 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_15%,transparent)] placeholder:text-[var(--color-text-placeholder)]"
+                    />
+                  </div>
+
+                  <select
+                    value={filterStatus}
+                    onChange={(event) =>
+                      setFilterStatus(
+                        event.target.value,
+                      )
+                    }
+                    className="theme-input theme-border theme-text h-11 rounded-lg border px-3.5 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]"
+                  >
+                    <option value="Semua">
+                      Semua Status
+                    </option>
+
+                    <option value="Dipinjam">
+                      Dipinjam
+                    </option>
+
+                    <option value="Terlambat">
+                      Terlambat
+                    </option>
+
+                    <option value="Dikembalikan">
+                      Dikembalikan
+                    </option>
+                  </select>
+                </div>
+
+                <div className="mt-3 flex items-center justify-between gap-3">
+                  <p className="theme-text-muted text-xs">
+                    {filteredLoans.length} transaksi ditemukan
+                  </p>
+
+                  {(search ||
+                    filterStatus !== "Semua") && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSearch("");
+                        setFilterStatus("Semua");
+                      }}
+                      className="text-xs font-semibold text-[var(--color-primary)] transition hover:opacity-80"
+                    >
+                      Reset filter
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              <div className="p-5 sm:p-6">
+                {loading ? (
+                  <div className="flex min-h-[300px] flex-col items-center justify-center">
+                    <div
+                      className={`flex h-12 w-12 items-center justify-center rounded-full ${themePrimarySoft} text-[var(--color-primary)]`}
+                    >
+                      <Loader2
+                        size={22}
+                        className="animate-spin"
+                      />
+                    </div>
+
+                    <p className="theme-text mt-4 text-sm font-semibold">
+                      Memuat peminjaman...
+                    </p>
+
+                    <p className="theme-text-muted mt-1 text-xs">
+                      Mengambil data transaksi dari server.
+                    </p>
+                  </div>
+                ) : filteredLoans.length === 0 ? (
+                  <div
+                    className={`flex min-h-[300px] flex-col items-center justify-center rounded-xl border border-dashed ${themeNeutralBorder} ${themeNeutralSurface} px-5 text-center`}
+                  >
+                    <div
+                      className={`flex h-12 w-12 items-center justify-center rounded-full ${themePrimarySoft} text-[var(--color-primary)]`}
+                    >
+                      <BookOpen size={21} />
+                    </div>
+
+                    <p className="theme-text mt-4 text-sm font-semibold">
+                      Tidak ada transaksi
+                    </p>
+
+                    <p className="theme-text-muted mt-1 max-w-md text-xs leading-5">
+                      Belum ada data peminjaman yang sesuai dengan
+                      pencarian atau filter yang dipilih.
+                    </p>
+
+                    <Link
+                      href="/siswa/perpustakaan"
+                      className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-[var(--color-primary)]"
+                    >
+                      Lihat katalog buku
+                      <ChevronRight size={14} />
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {filteredLoans.map(
+                      (loan) => {
+                        const overdue =
+                          isOverdue(loan);
+
+                        const isReturned =
+                          loan.status ===
+                            "Dikembalikan" ||
+                          Boolean(
+                            loan.tanggalKembali,
+                          );
+
+                        return (
+                          <div
+                            key={String(
+                              loan.id,
+                            )}
+                            className={`group rounded-2xl border p-4 transition-all duration-300 ${
+                              overdue
+                                ? "border-[color-mix(in_srgb,var(--color-danger)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_4%,transparent)]"
+                                : themeNeutralBorder
+                            } ${themeCardHoverShadow}`}
+                          >
+                            <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
+                              <div
+                                className={`flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl ${
+                                  overdue
+                                    ? themeDangerSoft
+                                    : isReturned
+                                      ? themeSuccessSoft
+                                      : themePrimarySoft
+                                }`}
+                              >
+                                {loan.buku
+                                  .coverUrl ? (
+                                  <img
+                                    src={
+                                      loan.buku
+                                        .coverUrl
+                                    }
+                                    alt={`Cover ${loan.buku.judul}`}
+                                    className="h-full w-full object-cover"
+                                  />
+                                ) : (
+                                  <BookOpen
+                                    size={23}
+                                    className={
+                                      overdue
+                                        ? "text-[var(--color-danger)]"
+                                        : isReturned
+                                          ? "text-[var(--color-success)]"
+                                          : "text-[var(--color-primary)]"
+                                    }
+                                  />
+                                )}
+                              </div>
+
+                              <div className="min-w-0 flex-1">
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <h3 className="theme-text text-sm font-bold">
+                                    {loan.buku.judul}
+                                  </h3>
+
+                                  <StatusBadge
+                                    loan={
+                                      loan
+                                    }
+                                  />
+                                </div>
+
+                                <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
+                                  <p className="theme-text-muted text-xs">
+                                    {loan.buku.kodeBuku}
+                                  </p>
+
+                                  <span className="theme-text-muted text-[10px]">
+                                    •
+                                  </span>
+
+                                  <p className="theme-text-muted text-xs">
+                                    {loan.nomorPeminjaman}
+                                  </p>
+                                </div>
+
+                                <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
+                                  <div>
+                                    <p className="theme-text-muted text-[10px]">
+                                      Dipinjam
+                                    </p>
+
+                                    <p className="theme-text mt-1 text-xs font-semibold">
+                                      {formatDate(
+                                        loan.tanggalPinjam,
+                                      )}
+                                    </p>
+                                  </div>
+
+                                  <div>
+                                    <p className="theme-text-muted text-[10px]">
+                                      Jatuh Tempo
+                                    </p>
+
+                                    <p
+                                      className={`mt-1 text-xs font-semibold ${
+                                        overdue
+                                          ? "text-[var(--color-danger)]"
+                                          : "theme-text"
+                                      }`}
+                                    >
+                                      {formatDate(
+                                        loan.tanggalJatuhTempo,
+                                      )}
+                                    </p>
+                                  </div>
+
+                                  <div>
+                                    <p className="theme-text-muted text-[10px]">
+                                      Dikembalikan
+                                    </p>
+
+                                    <p className="theme-text mt-1 text-xs font-semibold">
+                                      {loan.tanggalKembali
+                                        ? formatDate(
+                                            loan.tanggalKembali,
+                                          )
+                                        : "-"}
+                                    </p>
+                                  </div>
+
+                                  <div>
+                                    <p className="theme-text-muted text-[10px]">
+                                      Tipe
+                                    </p>
+
+                                    <p className="theme-text mt-1 text-xs font-semibold">
+                                      {loan.buku.tipe ===
+                                      "EBOOK"
+                                        ? "E-Book"
+                                        : "Fisik"}
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="flex shrink-0 flex-row items-center gap-2 lg:flex-col lg:items-stretch">
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    setSelectedLoan(
+                                      loan,
+                                    )
+                                  }
+                                  className={`theme-card theme-border theme-text-secondary inline-flex h-10 items-center justify-center gap-2 rounded-lg border px-4 text-xs font-semibold transition ${themePrimarySoftHover} hover:text-[var(--color-primary)]`}
+                                >
+                                  Detail
+                                </button>
+
+                                {!isReturned && (
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      handleReturn(
+                                        loan,
+                                      )
+                                    }
+                                    disabled={
+                                      returningId ===
+                                      String(
+                                        loan.id,
+                                      )
+                                    }
+                                    className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-[var(--color-primary)] px-4 text-xs font-semibold text-[var(--color-card)] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+                                  >
+                                    {returningId ===
+                                    String(
+                                      loan.id,
+                                    ) ? (
+                                      <Loader2
+                                        size={14}
+                                        className="animate-spin"
+                                      />
+                                    ) : (
+                                      <RotateCcw
+                                        size={14}
+                                      />
+                                    )}
+
+                                    {returningId ===
+                                    String(
+                                      loan.id,
+                                    )
+                                      ? "Memproses..."
+                                      : "Kembalikan"}
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+
+                            {overdue && (
+                              <div
+                                className={`mt-4 flex items-center gap-2 rounded-xl border border-[color-mix(in_srgb,var(--color-warning)_20%,transparent)] ${themeWarningSoft} px-3 py-2.5`}
+                              >
+                                <CalendarClock
+                                  size={15}
+                                  className="shrink-0 text-[var(--color-warning)]"
+                                />
+
+                                <p className="text-[11px] font-medium text-[var(--color-warning)]">
+                                  Buku ini sudah melewati tanggal
+                                  jatuh tempo.
+                                </p>
+                              </div>
+                            )}
+
+                            {loan.tanggalKembali && (
+                              <div
+                                className={`mt-4 flex items-center gap-2 rounded-xl border border-[color-mix(in_srgb,var(--color-success)_20%,transparent)] ${themeSuccessSoft} px-3 py-2.5`}
+                              >
+                                <CheckCircle2
+                                  size={15}
+                                  className="shrink-0 text-[var(--color-success)]"
+                                />
+
+                                <p className="text-[11px] font-medium text-[var(--color-success)]">
+                                  Buku telah dikembalikan pada{" "}
+                                  {formatDateTime(
+                                    loan.tanggalKembali,
+                                  )}
+                                  .
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      },
+                    )}
+                  </div>
+                )}
+              </div>
+            </section>
+
+
+            <section className="grid gap-5 lg:grid-cols-3">
+              <div
+                className={`theme-card rounded-2xl border ${themeNeutralBorder} ${themeCardShadow} p-5`}
+              >
+                <div className="flex items-start gap-3">
+                  <div
+                    className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${themePrimarySoft} text-[var(--color-primary)]`}
+                  >
+                    <BookOpenCheck size={18} />
+                  </div>
+
+                  <div>
+                    <p className="theme-text text-sm font-bold">
+                      Sedang dipinjam
+                    </p>
+
+                    <p className="theme-text-muted mt-1 text-xs leading-5">
+                      Data diambil berdasarkan pengguna yang sedang
+                      login sehingga transaksi siswa lain tidak
+                      ditampilkan.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                className={`theme-card rounded-2xl border ${themeNeutralBorder} ${themeCardShadow} p-5`}
+              >
+                <div className="flex items-start gap-3">
+                  <div
+                    className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${themeWarningSoft} text-[var(--color-warning)]`}
+                  >
+                    <CalendarClock size={18} />
+                  </div>
+
+                  <div>
+                    <p className="theme-text text-sm font-bold">
+                      Jatuh tempo
+                    </p>
+
+                    <p className="theme-text-muted mt-1 text-xs leading-5">
+                      Perhatikan tanggal jatuh tempo pada setiap
+                      transaksi peminjaman.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                className={`theme-card rounded-2xl border ${themeNeutralBorder} ${themeCardShadow} p-5`}
+              >
+                <div className="flex items-start gap-3">
+                  <div
+                    className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${themeSuccessSoft} text-[var(--color-success)]`}
+                  >
+                    <CheckCircle2 size={18} />
+                  </div>
+
+                  <div>
+                    <p className="theme-text text-sm font-bold">
+                      Pengembalian
+                    </p>
+
+                    <p className="theme-text-muted mt-1 text-xs leading-5">
+                      Tombol Kembalikan memanggil endpoint pengembalian
+                      pada backend perpustakaan.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+
+            <div
+              className={`flex flex-col gap-3 border-t ${themeDivider} py-5 text-xs theme-text-muted sm:flex-row sm:items-center sm:justify-between`}
+            >
+              <div className="flex items-center gap-2">
+                <Library size={15} />
+
+                <span>
+                  SmartSchool · Peminjaman Siswa
+                </span>
+              </div>
+
+              <div className="flex items-center gap-4">
+                <span className="inline-flex items-center gap-1.5">
+                  <CheckCircle2
+                    size={13}
+                    className="text-[var(--color-success)]"
+                  />
+                  Terhubung dengan server
+                </span>
+
+                <span>
+                  {loans.length} transaksi
+                </span>
               </div>
             </div>
           </div>
-
-          <div
-            className={`theme-card rounded-2xl border ${themeNeutralBorder} ${themeCardShadow} p-5`}
-          >
-            <div className="flex items-start gap-3">
-              <div
-                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${themeWarningSoft} text-[var(--color-warning)]`}
-              >
-                <CalendarClock size={18} />
-              </div>
-
-              <div>
-                <p className="theme-text text-sm font-bold">
-                  Jatuh tempo
-                </p>
-
-                <p className="theme-text-muted mt-1 text-xs leading-5">
-                  Perhatikan tanggal jatuh tempo pada setiap
-                  transaksi peminjaman.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div
-            className={`theme-card rounded-2xl border ${themeNeutralBorder} ${themeCardShadow} p-5`}
-          >
-            <div className="flex items-start gap-3">
-              <div
-                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${themeSuccessSoft} text-[var(--color-success)]`}
-              >
-                <CheckCircle2 size={18} />
-              </div>
-
-              <div>
-                <p className="theme-text text-sm font-bold">
-                  Pengembalian
-                </p>
-
-                <p className="theme-text-muted mt-1 text-xs leading-5">
-                  Tombol Kembalikan memanggil endpoint pengembalian
-                  pada backend perpustakaan.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-
-        <div
-          className={`flex flex-col gap-3 border-t ${themeDivider} py-5 text-xs theme-text-muted sm:flex-row sm:items-center sm:justify-between`}
-        >
-          <div className="flex items-center gap-2">
-            <Library size={15} />
-
-            <span>
-              SmartSchool · Peminjaman Siswa
-            </span>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <span className="inline-flex items-center gap-1.5">
-              <CheckCircle2
-                size={13}
-                className="text-[var(--color-success)]"
-              />
-              Terhubung dengan server
-            </span>
-
-            <span>
-              {loans.length} transaksi
-            </span>
-          </div>
-        </div>
+        </main>
       </div>
 
       <DetailModal

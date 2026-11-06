@@ -693,12 +693,12 @@ export default function DetailSiswaPage() {
       isCollapsed={isCollapsed}
       setIsCollapsed={setIsCollapsed}
     >
-      <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
+      <main className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
         <div className="w-full px-4 py-5 sm:px-6 md:px-7 lg:px-8 xl:px-10">
-          <div className="mx-auto w-full max-w-[1500px]">
+          <div className="w-full space-y-6">
 
 
-            <div className="mb-5 flex flex-col gap-3 sm:mb-6 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <button
                 type="button"
                 onClick={() => router.push("/admin/siswa")}
@@ -801,7 +801,7 @@ export default function DetailSiswaPage() {
                 </div>
 
                 <div
-                  className={`mt-7 grid grid-cols-1 gap-x-8 gap-y-5 border-t ${themeDivider} pt-6 sm:grid-cols-2 lg:grid-cols-4`}
+                  className={`mt-7 grid grid-cols-1 gap-x-8 gap-y-5 border-t ${themeDivider} pt-6 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6`}
                 >
                   <InfoItem
                     icon={<User size={17} />}
@@ -838,7 +838,7 @@ export default function DetailSiswaPage() {
             </section>
 
 
-            <div className="mt-5 grid grid-cols-1 gap-5 xl:grid-cols-3">
+            <div className="grid grid-cols-1 gap-5 xl:grid-cols-3">
               <div className="min-w-0 space-y-5 xl:col-span-2">
 
 
@@ -1166,7 +1166,7 @@ export default function DetailSiswaPage() {
 
 function PageShell({ children, isCollapsed, setIsCollapsed }) {
   return (
-    <div className="theme-page flex min-h-screen w-full min-w-0">
+    <div className="flex h-screen overflow-hidden theme-page theme-text">
       <div className="shrink-0">
         <Sidebar
           active="siswa"
@@ -1176,16 +1176,18 @@ function PageShell({ children, isCollapsed, setIsCollapsed }) {
         />
       </div>
 
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <Header
-          toggleSidebar={() => setIsCollapsed((prev) => !prev)}
-          notifications={[]}
-          user={{
-            name: "Admin Sekolah",
-            email: "admin@smartschool.com",
-            avatar: "AD",
-          }}
-        />
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+        <div className="shrink-0">
+          <Header
+            toggleSidebar={() => setIsCollapsed((prev) => !prev)}
+            notifications={[]}
+            user={{
+              name: "Admin Sekolah",
+              email: "admin@smartschool.com",
+              avatar: "AD",
+            }}
+          />
+        </div>
 
         {children}
       </div>

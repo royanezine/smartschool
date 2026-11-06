@@ -1,12 +1,16 @@
+
 import { getToken as getAuthToken } from "../lib/auth";
 
 const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ||
-  "http://localhost:5000";
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
-const BASE_ENDPOINT =
-  "/api/jadwal-mengajar";
+const BASE_ENDPOINT = "/api/jadwal-mengajar";
 
+export interface RuanganRef {
+  id: string;
+  nama: string;
+  lokasi?: string | null;
+}
 
 export interface JadwalMengajar {
   id: string;
@@ -14,7 +18,15 @@ export interface JadwalMengajar {
   hari: string;
   jamMulai: string;
   jamSelesai: string;
+
+  // Foreign key relasi master ruangan
+  ruanganId?: string | null;
+
+  // Nama ruangan untuk kompatibilitas data lama
   ruangan?: string | null;
+
+  // Hasil include relasi Backend
+  ruanganRef?: RuanganRef | null;
 
   dibuatOleh?: string | null;
   diperbaruiOleh?: string | null;
@@ -54,7 +66,6 @@ export interface JadwalMengajar {
   };
 }
 
-
 export interface JadwalMengajarResponse {
   success: boolean;
   message?: string;
@@ -67,13 +78,12 @@ export interface JadwalMengajarDetailResponse {
   data?: JadwalMengajar;
 }
 
-
 export interface CreateJadwalMengajarPayload {
   kelasMapelId: string;
   hari: string;
   jamMulai: string;
   jamSelesai: string;
-  ruangan?: string | null;
+  ruanganId?: string | null;
 }
 
 export interface UpdateJadwalMengajarPayload {
@@ -81,9 +91,14 @@ export interface UpdateJadwalMengajarPayload {
   hari: string;
   jamMulai: string;
   jamSelesai: string;
-  ruangan?: string | null;
+  ruanganId?: string | null;
 }
 
+interface ApiResponse<T> {
+  success: boolean;
+  message?: string;
+  data?: T;
+}
 
 async function request<T>(
   endpoint: string,
@@ -95,54 +110,22 @@ async function request<T>(
     ? rawToken.replace(/^Bearer\s+/i, "").trim()
     : null;
 
-  console.log(
-    "[JADWAL API] Token:",
-    token ? "TERSEDIA" : "TIDAK ADA"
-  );
-
   if (!token) {
     throw new Error(
-      "Token login tidak ditemukan di browser. Silakan login kembali."
+      "Token login tidak ditemukan. Silakan login kembali."
     );
   }
 
-  const headers = new Headers(
-    options.headers
-  );
+  const headers = new Headers(options.headers);
 
-  headers.set(
-    "Accept",
-    "application/json"
-  );
+  headers.set("Accept", "application/json");
+  headers.set("Authorization", `Bearer ${token}`);
 
-  headers.set(
-    "Authorization",
-    `Bearer ${token}`
-  );
-
-  if (
-    options.body &&
-    !headers.has("Content-Type")
-  ) {
-    headers.set(
-      "Content-Type",
-      "application/json"
-    );
+  if (options.body && !headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
   }
 
-  const url =
-    `${API_URL}${endpoint}`;
-
-  console.log(
-    "[JADWAL API] Request:",
-    {
-      method:
-        options.method || "GET",
-      url,
-      authorization:
-        "Bearer ********",
-    }
-  );
+  const url = `${API_URL}${endpoint}`;
 
   let response: Response;
 
@@ -153,70 +136,31 @@ async function request<T>(
       cache: "no-store",
     });
   } catch (error) {
-    console.error(
-      "[JADWAL API] Network Error:",
-      error
-    );
+    console.error("[JADWAL API] Network error:", error);
 
     throw new Error(
-      "Tidak dapat terhubung ke backend. Pastikan server berjalan di http://localhost:5000."
+      "Tidak dapat terhubung ke backend. Periksa koneksi server."
     );
   }
 
-  const rawText =
-    await response.text();
-
-  console.log(
-    "[JADWAL API] Response:",
-    {
-      status:
-        response.status,
-
-      statusText:
-        response.statusText,
-
-      url,
-
-      body:
-        rawText.substring(
-          0,
-          500
-        ),
-    }
-  );
+  const rawText = await response.text();
 
   let result: any = null;
 
   if (rawText.trim()) {
     try {
-      result =
-        JSON.parse(rawText);
-    } catch (error) {
-      console.error(
-        "[JADWAL API] Response bukan JSON:",
-        {
-          status:
-            response.status,
-          url,
-          body:
-            rawText.substring(
-              0,
-              500
-            ),
-        }
-      );
-
+      result = JSON.parse(rawText);
+    } catch {
       throw new Error(
         `Server mengembalikan response bukan JSON (${response.status}).`
       );
     }
   }
 
-
   if (response.status === 401) {
     throw new Error(
       result?.message ||
-        "Token tidak valid atau sudah expired. Silakan login kembali."
+        "Token tidak valid atau sudah kedaluwarsa. Silakan login kembali."
     );
   }
 
@@ -230,14 +174,14 @@ async function request<T>(
   if (response.status === 404) {
     throw new Error(
       result?.message ||
-        "Data jadwal mengajar tidak ditemukan."
+        "Data jadwal atau ruangan tidak ditemukan."
     );
   }
 
   if (response.status === 409) {
     throw new Error(
       result?.message ||
-        "Jadwal guru bentrok dengan jadwal lain."
+        "Jadwal guru atau ruangan bentrok dengan jadwal lain."
     );
   }
 
@@ -258,7 +202,7 @@ async function request<T>(
   return result as T;
 }
 
-
+// GET seluruh jadwal mengajar
 export async function getJadwalMengajar(): Promise<JadwalMengajarResponse> {
   return request<JadwalMengajarResponse>(
     BASE_ENDPOINT,
@@ -268,14 +212,12 @@ export async function getJadwalMengajar(): Promise<JadwalMengajarResponse> {
   );
 }
 
-
+// GET detail jadwal berdasarkan ID
 export async function getJadwalMengajarById(
   id: string
 ): Promise<JadwalMengajarDetailResponse> {
   if (!id) {
-    throw new Error(
-      "ID jadwal mengajar tidak ditemukan."
-    );
+    throw new Error("ID jadwal mengajar tidak ditemukan.");
   }
 
   return request<JadwalMengajarDetailResponse>(
@@ -286,10 +228,10 @@ export async function getJadwalMengajarById(
   );
 }
 
-
+// POST tambah jadwal mengajar
 export async function createJadwalMengajar(
   payload: CreateJadwalMengajarPayload
-) {
+): Promise<ApiResponse<JadwalMengajar>> {
   if (!payload.kelasMapelId) {
     throw new Error(
       "Kelas dan mata pelajaran wajib dipilih."
@@ -297,57 +239,35 @@ export async function createJadwalMengajar(
   }
 
   if (!payload.hari) {
+    throw new Error("Hari jadwal wajib dipilih.");
+  }
+
+  if (!payload.jamMulai || !payload.jamSelesai) {
     throw new Error(
-      "Hari jadwal wajib dipilih."
+      "Jam mulai dan jam selesai wajib diisi."
     );
   }
 
-  if (!payload.jamMulai) {
-    throw new Error(
-      "Jam mulai wajib diisi."
-    );
-  }
-
-  if (!payload.jamSelesai) {
-    throw new Error(
-      "Jam selesai wajib diisi."
-    );
-  }
-
-  return request<{
-    success: boolean;
-    message?: string;
-    data?: JadwalMengajar;
-  }>(
+  return request<ApiResponse<JadwalMengajar>>(
     BASE_ENDPOINT,
     {
       method: "POST",
-
       body: JSON.stringify({
-        kelasMapelId:
-          payload.kelasMapelId,
-
-        hari:
-          payload.hari,
-
-        jamMulai:
-          payload.jamMulai,
-
-        jamSelesai:
-          payload.jamSelesai,
-
-        ruangan:
-          payload.ruangan || null,
+        kelasMapelId: payload.kelasMapelId,
+        hari: payload.hari,
+        jamMulai: payload.jamMulai,
+        jamSelesai: payload.jamSelesai,
+        ruanganId: payload.ruanganId || null,
       }),
     }
   );
 }
 
-
+// PUT ubah jadwal mengajar
 export async function updateJadwalMengajar(
   id: string,
   payload: UpdateJadwalMengajarPayload
-) {
+): Promise<ApiResponse<JadwalMengajar>> {
   if (!id) {
     throw new Error(
       "ID jadwal mengajar tidak ditemukan."
@@ -361,66 +281,41 @@ export async function updateJadwalMengajar(
   }
 
   if (!payload.hari) {
+    throw new Error("Hari jadwal wajib dipilih.");
+  }
+
+  if (!payload.jamMulai || !payload.jamSelesai) {
     throw new Error(
-      "Hari jadwal wajib dipilih."
+      "Jam mulai dan jam selesai wajib diisi."
     );
   }
 
-  if (!payload.jamMulai) {
-    throw new Error(
-      "Jam mulai wajib diisi."
-    );
-  }
-
-  if (!payload.jamSelesai) {
-    throw new Error(
-      "Jam selesai wajib diisi."
-    );
-  }
-
-  return request<{
-    success: boolean;
-    message?: string;
-    data?: JadwalMengajar;
-  }>(
+  return request<ApiResponse<JadwalMengajar>>(
     `${BASE_ENDPOINT}/${id}`,
     {
       method: "PUT",
-
       body: JSON.stringify({
-        kelasMapelId:
-          payload.kelasMapelId,
-
-        hari:
-          payload.hari,
-
-        jamMulai:
-          payload.jamMulai,
-
-        jamSelesai:
-          payload.jamSelesai,
-
-        ruangan:
-          payload.ruangan || null,
+        kelasMapelId: payload.kelasMapelId,
+        hari: payload.hari,
+        jamMulai: payload.jamMulai,
+        jamSelesai: payload.jamSelesai,
+        ruanganId: payload.ruanganId || null,
       }),
     }
   );
 }
 
-
+// DELETE jadwal mengajar
 export async function deleteJadwalMengajar(
   id: string
-) {
+): Promise<ApiResponse<null>> {
   if (!id) {
     throw new Error(
       "ID jadwal mengajar tidak ditemukan."
     );
   }
 
-  return request<{
-    success: boolean;
-    message?: string;
-  }>(
+  return request<ApiResponse<null>>(
     `${BASE_ENDPOINT}/${id}`,
     {
       method: "DELETE",

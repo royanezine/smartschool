@@ -127,21 +127,22 @@ export default function DetailTabunganPage() {
   }
 
   return (
-    <div className="theme-page flex h-screen w-full overflow-hidden">
+    <div className="flex h-screen overflow-hidden theme-page theme-text">
       <Sidebar
         role="admin"
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
       />
 
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         <div className="shrink-0">
           <Header onMenuClick={() => setSidebarOpen(true)} />
         </div>
 
-        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto theme-page theme-text">
+        <main className="min-w-0 flex-1 overflow-y-auto">
           <div className="w-full px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
-            <div className="mx-auto w-full max-w-5xl space-y-6">
+            <div className="w-full space-y-6">
+              
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div className="flex items-start gap-3">
                   <button
@@ -154,18 +155,16 @@ export default function DetailTabunganPage() {
                   </button>
 
                   <div>
-                   
                     <h1 className="mt-1 text-2xl font-bold theme-text">
                       Detail Tabungan Siswa
                     </h1>
                     <p className="mt-1 max-w-2xl text-sm leading-6 theme-text-secondary">
-                      Informasi saldo dan riwayat mutasi tabungan.
+                      Informasi saldo dan riwayat mutasi tabungan siswa.
                     </p>
                   </div>
                 </div>
 
                 <div className="flex flex-wrap gap-2">
-                  
                   <button
                     type="button"
                     onClick={openSetor}
@@ -210,42 +209,39 @@ export default function DetailTabunganPage() {
                 </div>
               ) : (
                 <>
-                  <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-                    <div className="theme-card rounded-xl border theme-border p-4">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
+                    <div className="theme-card rounded-xl border theme-border p-5 shadow-sm">
                       <div className="flex items-center gap-2">
-                        <User size={15} className="theme-primary-text" />
-                        <p className="text-[10px] font-semibold uppercase tracking-wide theme-text-muted">
+                        <User size={16} className="theme-primary-text" />
+                        <p className="text-[10px] font-bold uppercase tracking-wider theme-text-muted">
                           Nama siswa
                         </p>
                       </div>
-                      <p className="mt-2 text-sm font-semibold theme-text">
+                      <p className="mt-2 text-sm font-bold theme-text truncate">
                         {detail?.siswa?.namaLengkap || "-"}
                       </p>
                     </div>
 
-                    <div className="theme-card rounded-xl border theme-border p-4">
+                    <div className="theme-card rounded-xl border theme-border p-5 shadow-sm">
                       <div className="flex items-center gap-2">
-                        <CreditCard
-                          size={15}
-                          className="theme-primary-text"
-                        />
-                        <p className="text-[10px] font-semibold uppercase tracking-wide theme-text-muted">
+                        <CreditCard size={16} className="theme-primary-text" />
+                        <p className="text-[10px] font-bold uppercase tracking-wider theme-text-muted">
                           NIS
                         </p>
                       </div>
-                      <p className="mt-2 text-sm font-semibold theme-text">
+                      <p className="mt-2 text-sm font-bold theme-text truncate">
                         {detail?.siswa?.nis || "-"}
                       </p>
                     </div>
 
-                    <div className="theme-card rounded-xl border theme-border p-4">
+                    <div className="theme-card rounded-xl border theme-border p-5 shadow-sm sm:col-span-2 lg:col-span-1 2xl:col-span-4">
                       <div className="flex items-center gap-2">
-                        <Wallet size={15} className="theme-primary-text" />
-                        <p className="text-[10px] font-semibold uppercase tracking-wide theme-text-muted">
-                          Saldo tabungan
+                        <Wallet size={16} className="theme-primary-text" />
+                        <p className="text-[10px] font-bold uppercase tracking-wider theme-text-muted">
+                          Saldo tabungan saat ini
                         </p>
                       </div>
-                      <p className="mt-2 whitespace-nowrap text-lg font-bold tabular-nums theme-text">
+                      <p className="mt-2 text-xl font-bold tabular-nums theme-text">
                         {formatRupiah(detail?.saldo ?? 0)}
                       </p>
                     </div>
@@ -288,7 +284,7 @@ export default function DetailTabunganPage() {
                             <tr>
                               <td
                                 colSpan={5}
-                                className="px-4 py-10 text-center"
+                                className="px-4 py-14 text-center"
                               >
                                 <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] theme-text-muted">
                                   <History size={22} />
@@ -310,13 +306,13 @@ export default function DetailTabunganPage() {
                                   key={item.id}
                                   className="hover:bg-[color-mix(in_srgb,var(--color-text)_2%,transparent)] transition"
                                 >
-                                  <td className="px-4 py-3 text-xs theme-text-secondary">
+                                  <td className="px-4 py-4 text-xs theme-text-secondary">
                                     {formatTanggal(item.tanggal)}
                                   </td>
-                                  <td className="px-4 py-3 text-xs font-semibold theme-text">
+                                  <td className="px-4 py-4 text-xs font-semibold theme-text">
                                     {item.nomorTransaksi || "-"}
                                   </td>
-                                  <td className="px-4 py-3">
+                                  <td className="px-4 py-4">
                                     <span
                                       className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold ${
                                         isSetor
@@ -333,7 +329,7 @@ export default function DetailTabunganPage() {
                                     </span>
                                   </td>
                                   <td
-                                    className={`px-4 py-3 text-right text-xs font-bold tabular-nums whitespace-nowrap ${
+                                    className={`px-4 py-4 text-right text-xs font-bold tabular-nums whitespace-nowrap ${
                                       isSetor
                                         ? "text-emerald-700 dark:text-emerald-400"
                                         : "text-amber-700 dark:text-amber-400"
@@ -342,7 +338,7 @@ export default function DetailTabunganPage() {
                                     {isSetor ? "+" : "-"}
                                     {formatRupiah(item.jumlah)}
                                   </td>
-                                  <td className="px-4 py-3 text-right text-xs font-semibold tabular-nums whitespace-nowrap theme-text">
+                                  <td className="px-4 py-4 text-right text-xs font-semibold tabular-nums whitespace-nowrap theme-text">
                                     {formatRupiah(item.saldoSesudah)}
                                   </td>
                                 </tr>
@@ -353,7 +349,7 @@ export default function DetailTabunganPage() {
                       </table>
                     </div>
 
-                    <div className="flex justify-between border-t theme-border px-5 py-3 text-[11px] theme-text-muted">
+                    <div className="flex justify-between border-t theme-border px-5 py-4 text-[11px] theme-text-muted">
                       <span>
                         Total {mutasiMeta?.total || mutasi.length} mutasi
                       </span>

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -25,44 +26,21 @@ import {
   CircleCheck,
   DoorOpen,
   Users,
+  MapPin,
 } from "lucide-react";
 
-import {
-  getKelasMapel,
-} from "@/services/kelasMapel.service";
-
-import {
-  createJadwalMengajar,
-} from "@/services/jadwalMengajar.service";
-
+import { getKelasMapel } from "@/services/kelasMapel.service";
+import { getRuangan } from "@/services/sarpras.service";
+import { createJadwalMengajar } from "@/services/jadwalMengajar.service";
 
 const HARI = [
-  {
-    key: "senin",
-    label: "Senin",
-  },
-  {
-    key: "selasa",
-    label: "Selasa",
-  },
-  {
-    key: "rabu",
-    label: "Rabu",
-  },
-  {
-    key: "kamis",
-    label: "Kamis",
-  },
-  {
-    key: "jumat",
-    label: "Jumat",
-  },
-  {
-    key: "sabtu",
-    label: "Sabtu",
-  },
+  { key: "senin", label: "Senin" },
+  { key: "selasa", label: "Selasa" },
+  { key: "rabu", label: "Rabu" },
+  { key: "kamis", label: "Kamis" },
+  { key: "jumat", label: "Jumat" },
+  { key: "sabtu", label: "Sabtu" },
 ];
-
 
 const emptyJadwal = () =>
   HARI.reduce((acc, hari) => {
@@ -74,25 +52,25 @@ const emptyJadwal = () =>
     return acc;
   }, {});
 
-
-const getInitials = (name = "") => {
-  const parts = name
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean);
-
-  if (parts.length >= 2) {
-    return (
-      parts[0][0] +
-      parts[1][0]
-    ).toUpperCase();
+const unwrapData = (response) => {
+  if (Array.isArray(response)) return response;
+  if (Array.isArray(response?.data)) return response.data;
+  if (Array.isArray(response?.data?.data)) {
+    return response.data.data;
   }
 
-  return name
-    .slice(0, 2)
-    .toUpperCase();
+  return [];
 };
 
+const getInitials = (name = "") => {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  }
+
+  return name.slice(0, 2).toUpperCase();
+};
 
 function SearchableSelect({
   label,
@@ -103,45 +81,33 @@ function SearchableSelect({
   placeholder,
   disabled = false,
   renderOption,
+  optional = false,
 }) {
-  const [open, setOpen] =
-    useState(false);
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
 
-  const [query, setQuery] =
-    useState("");
+  const selectedOption = options.find(
+    (item) => item.value === value
+  ) || null;
 
-  const selectedOption =
-    options.find(
-      (item) =>
-        item.value === value
-    ) || null;
+  const filteredOptions = useMemo(() => {
+    const keyword = query.trim().toLowerCase();
 
-  const filteredOptions =
-    useMemo(() => {
-      const keyword =
-        query
-          .trim()
-          .toLowerCase();
+    if (!keyword) return options;
 
-      if (!keyword) {
-        return options;
-      }
+    return options.filter((item) => {
+      const text = [
+        item.label,
+        item.value,
+        item.searchText,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
 
-      return options.filter(
-        (item) => {
-          const text =
-            `${item.label || ""} ${
-              item.value || ""
-            } ${
-              item.searchText || ""
-            }`.toLowerCase();
-
-          return text.includes(
-            keyword
-          );
-        }
-      );
-    }, [options, query]);
+      return text.includes(keyword);
+    });
+  }, [options, query]);
 
   const handleSelect = (item) => {
     onChange(item.value);
@@ -157,35 +123,27 @@ function SearchableSelect({
   return (
     <div className="relative">
       <label className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold theme-text-secondary">
-        <Icon
-          size={14}
-          className="theme-text-muted"
-        />
-
+        <Icon size={14} className="theme-text-muted" />
         {label}
 
-        <span className="text-[var(--color-danger)]">
-          *
-        </span>
+        {optional ? (
+          <span className="text-[10px] font-normal theme-text-placeholder">
+            (opsional)
+          </span>
+        ) : (
+          <span className="text-[var(--color-danger)]">*</span>
+        )}
       </label>
 
       <button
         type="button"
         disabled={disabled}
-        onClick={() =>
-          setOpen(
-            (prev) => !prev
-          )
-        }
+        onClick={() => setOpen((prev) => !prev)}
         className={`flex h-11 w-full items-center justify-between gap-3 rounded-lg border px-3.5 text-left text-sm transition theme-input ${
           open
             ? "border-[var(--color-primary)] ring-4 ring-[var(--color-primary)]/10"
             : "hover:border-[var(--color-primary)]"
-        } ${
-          disabled
-            ? "cursor-not-allowed opacity-70"
-            : ""
-        }`}
+        } ${disabled ? "cursor-not-allowed opacity-70" : ""}`}
       >
         <span className="min-w-0 truncate">
           {selectedOption
@@ -196,9 +154,7 @@ function SearchableSelect({
         <ChevronDown
           size={16}
           className={`shrink-0 theme-text-muted transition-transform ${
-            open
-              ? "rotate-180"
-              : ""
+            open ? "rotate-180" : ""
           }`}
         />
       </button>
@@ -213,8 +169,6 @@ function SearchableSelect({
           />
 
           <div className="absolute left-0 right-0 top-full z-40 mt-2 overflow-hidden rounded-xl border theme-card theme-border shadow-xl">
-
-
             <div className="border-b theme-border-soft p-3">
               <div className="relative">
                 <Search
@@ -226,72 +180,49 @@ function SearchableSelect({
                   autoFocus
                   type="text"
                   value={query}
-                  onChange={(e) =>
-                    setQuery(
-                      e.target.value
-                    )
-                  }
-                  onClick={(e) =>
-                    e.stopPropagation()
-                  }
+                  onChange={(e) => setQuery(e.target.value)}
+                  onClick={(e) => e.stopPropagation()}
                   placeholder={`Cari ${label.toLowerCase()}...`}
-                  className="h-10 w-full rounded-lg border px-9 pr-3 text-xs outline-none transition theme-input focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[var(--color-primary)]/10"
+                  className="h-10 w-full rounded-lg border px-9 pr-3 text-xs outline-none theme-input focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[var(--color-primary)]/10"
                 />
               </div>
             </div>
 
-
             <div className="max-h-72 overflow-y-auto p-1.5">
-              {filteredOptions.length >
-              0 ? (
-                filteredOptions.map(
-                  (item) => {
-                    const selected =
-                      item.value ===
-                      value;
+              {filteredOptions.length > 0 ? (
+                filteredOptions.map((item) => {
+                  const selected = item.value === value;
 
-                    return (
-                      <button
-                        type="button"
-                        key={
-                          item.value
-                        }
-                        onClick={() =>
-                          handleSelect(
-                            item
-                          )
-                        }
-                        className={`flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left transition ${
-                          selected
-                            ? "theme-sidebar-active"
-                            : "theme-text-secondary theme-table-hover"
-                        }`}
-                      >
-                        {renderOption
-                          ? renderOption(
-                              item,
-                              selected
-                            )
-                          : (
-                            <div className="min-w-0 flex-1">
-                              <p className="truncate text-xs font-semibold">
-                                {
-                                  item.label
-                                }
-                              </p>
-                            </div>
-                          )}
+                  return (
+                    <button
+                      type="button"
+                      key={item.value}
+                      onClick={() => handleSelect(item)}
+                      className={`flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left transition ${
+                        selected
+                          ? "theme-sidebar-active"
+                          : "theme-text-secondary theme-table-hover"
+                      }`}
+                    >
+                      {renderOption ? (
+                        renderOption(item, selected)
+                      ) : (
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-xs font-semibold">
+                            {item.label}
+                          </p>
+                        </div>
+                      )}
 
-                        {selected && (
-                          <CircleCheck
-                            size={15}
-                            className="ml-auto shrink-0 text-[var(--color-primary)]"
-                          />
-                        )}
-                      </button>
-                    );
-                  }
-                )
+                      {selected && (
+                        <CircleCheck
+                          size={15}
+                          className="ml-auto shrink-0 text-[var(--color-primary)]"
+                        />
+                      )}
+                    </button>
+                  );
+                })
               ) : (
                 <div className="px-4 py-8 text-center">
                   <Search
@@ -317,9 +248,7 @@ function SearchableSelect({
         <p className="mt-1 text-[10px] theme-text-placeholder">
           Pilihan saat ini:{" "}
           <span className="font-medium theme-text-muted">
-            {
-              selectedOption.label
-            }
+            {selectedOption.label}
           </span>
         </p>
       )}
@@ -327,47 +256,37 @@ function SearchableSelect({
   );
 }
 
-
 export default function TambahJadwalMengajarPage() {
   const router = useRouter();
 
-  const [isCollapsed, setIsCollapsed] =
-    useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
-
-  const [kelasMapelList, setKelasMapelList] =
-    useState([]);
-
-  const [loadingData, setLoadingData] =
-    useState(true);
-
+  // Data kelas mapel
+  const [kelasMapelList, setKelasMapelList] = useState([]);
+  const [loadingData, setLoadingData] = useState(true);
   const [selectedKelasMapelId, setSelectedKelasMapelId] =
     useState("");
 
-
-  const [jadwal, setJadwal] =
-    useState(emptyJadwal());
-
-  const [ruangan, setRuangan] =
+  // Data master ruangan
+  const [ruanganList, setRuanganList] = useState([]);
+  const [loadingRuangan, setLoadingRuangan] = useState(true);
+  const [selectedRuanganId, setSelectedRuanganId] =
     useState("");
 
+  // Form jadwal
+  const [jadwal, setJadwal] = useState(emptyJadwal());
 
-  const [saving, setSaving] =
-    useState(false);
-
-  const [error, setError] =
-    useState("");
-
-  const [success, setSuccess] =
-    useState(false);
-
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
 
   const toggleSidebar = () => {
-    setIsCollapsed(
-      (prev) => !prev
-    );
+    setIsCollapsed((prev) => !prev);
   };
 
+  // ==========================================
+  // LOAD KELAS MAPEL
+  // ==========================================
 
   useEffect(() => {
     let mounted = true;
@@ -375,52 +294,38 @@ export default function TambahJadwalMengajarPage() {
     const fetchKelasMapel = async () => {
       try {
         setLoadingData(true);
-        setError("");
 
-        const response =
-          await getKelasMapel();
+        const response = await getKelasMapel();
 
-        if (!mounted) {
-          return;
-        }
+        if (!mounted) return;
 
-        const data =
-          Array.isArray(response)
-            ? response
-            : [];
+        const data = unwrapData(response);
 
         setKelasMapelList(data);
 
+        // Dukungan redirect dari halaman kelas
         if (typeof window !== "undefined") {
-          const searchParams = new URLSearchParams(window.location.search);
-          const targetKelasId = searchParams.get("kelasId");
+          const params = new URLSearchParams(
+            window.location.search
+          );
+
+          const targetKelasId = params.get("kelasId");
+
           if (targetKelasId) {
             const found = data.find(
-              (km) => String(km.kelasId || km.kelas?.id) === String(targetKelasId)
+              (item) =>
+                String(
+                  item.kelasId || item.kelas?.id
+                ) === String(targetKelasId)
             );
+
             if (found) {
               setSelectedKelasMapelId(found.id);
             }
           }
         }
-
-        console.log(
-          "========== KELAS MAPEL =========="
-        );
-
-        console.log(
-          "DATA:",
-          data
-        );
-
-        console.log(
-          "================================="
-        );
       } catch (err) {
-        console.error(
-          "Error mengambil kelas mapel:",
-          err
-        );
+        console.error("Error mengambil kelas mapel:", err);
 
         if (mounted) {
           setError(
@@ -431,9 +336,7 @@ export default function TambahJadwalMengajarPage() {
         }
       } finally {
         if (mounted) {
-          setLoadingData(
-            false
-          );
+          setLoadingData(false);
         }
       }
     };
@@ -445,139 +348,162 @@ export default function TambahJadwalMengajarPage() {
     };
   }, []);
 
+  // ==========================================
+  // LOAD MASTER RUANGAN SARPRAS
+  // ==========================================
 
-  const kelasMapelOptions =
-    useMemo(() => {
-      return kelasMapelList
-        .filter(
-          (item) =>
-            item &&
-            item.id &&
-            item.kelasMapel !== null
-        )
-        .map((item) => {
-          const kelas =
-            item.kelas || {};
+  useEffect(() => {
+    let mounted = true;
 
-          const mapel =
-            item.mataPelajaran ||
-            {};
+    const fetchRuangan = async () => {
+      try {
+        setLoadingRuangan(true);
 
-          const guru =
-            item.guruPengajar ||
-            {};
+        const response = await getRuangan();
 
-          const kelasNama =
-            kelas.nama ||
-            "-";
+        if (!mounted) return;
 
-          const mapelNama =
-            mapel.nama ||
-            "-";
+        const data = unwrapData(response);
 
-          const mapelKode =
-            mapel.kode ||
-            "";
-
-          const guruNama =
-            guru.namaLengkap ||
-            "-";
-
-          const guruNip =
-            guru.nip ||
-            "";
-
-          return {
+        const normalized = data
+          .filter(
+            (item) =>
+              item &&
+              item.id &&
+              item.nama &&
+              !item.dihapusPada
+          )
+          .map((item) => ({
             value: item.id,
+            label: item.nama,
+            lokasi: item.lokasi || "",
+            kapasitas: item.kapasitas ?? null,
+            searchText: [
+              item.nama,
+              item.lokasi,
+              item.keterangan,
+            ]
+              .filter(Boolean)
+              .join(" "),
+          }));
 
-            label:
-              `${mapelNama} • ${kelasNama}`,
+        setRuanganList(normalized);
+      } catch (err) {
+        console.error("Error mengambil ruangan:", err);
 
-            searchText:
-              `${mapelNama} ${mapelKode} ${kelasNama} ${guruNama} ${guruNip}`,
-
-            kelasNama,
-
-            mapelNama,
-
-            mapelKode,
-
-            guruNama,
-
-            guruNip,
-          };
-        });
-    }, [kelasMapelList]);
-
-
-  const kelasMapelTerpilih =
-    useMemo(() => {
-      return (
-        kelasMapelOptions.find(
-          (item) =>
-            item.value ===
-            selectedKelasMapelId
-        ) || null
-      );
-    }, [
-      kelasMapelOptions,
-      selectedKelasMapelId,
-    ]);
-
-
-  const handleSlotChange =
-    (hariKey, field) =>
-    (event) => {
-      const value =
-        event.target.value;
-
-      setJadwal((prev) => ({
-        ...prev,
-
-        [hariKey]: {
-          ...prev[hariKey],
-          [field]: value,
-        },
-      }));
+        if (mounted) {
+          setRuanganList([]);
+          setError(
+            err instanceof Error
+              ? err.message
+              : "Gagal mengambil data ruangan."
+          );
+        }
+      } finally {
+        if (mounted) {
+          setLoadingRuangan(false);
+        }
+      }
     };
 
+    fetchRuangan();
 
-  const jumlahHariDiisi =
-    HARI.filter((hari) => {
-      const slot =
-        jadwal[hari.key];
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
-      return (
-        slot.jamMulai &&
-        slot.jamSelesai
-      );
-    }).length;
+  // ==========================================
+  // OPTIONS KELAS MAPEL
+  // ==========================================
 
+  const kelasMapelOptions = useMemo(() => {
+    return kelasMapelList
+      .filter((item) => item?.id && item.kelasMapel !== null)
+      .map((item) => {
+        const kelas = item.kelas || {};
+        const mapel = item.mataPelajaran || {};
+        const guru = item.guruPengajar || {};
+
+        const kelasNama = kelas.nama || "-";
+        const mapelNama = mapel.nama || "-";
+        const mapelKode = mapel.kode || "";
+        const guruNama = guru.namaLengkap || "-";
+        const guruNip = guru.nip || "";
+
+        return {
+          value: item.id,
+          label: `${mapelNama} • ${kelasNama}`,
+          searchText: [
+            mapelNama,
+            mapelKode,
+            kelasNama,
+            guruNama,
+            guruNip,
+          ]
+            .filter(Boolean)
+            .join(" "),
+          kelasNama,
+          mapelNama,
+          mapelKode,
+          guruNama,
+          guruNip,
+        };
+      });
+  }, [kelasMapelList]);
+
+  const kelasMapelTerpilih = useMemo(() => {
+    return (
+      kelasMapelOptions.find(
+        (item) => item.value === selectedKelasMapelId
+      ) || null
+    );
+  }, [kelasMapelOptions, selectedKelasMapelId]);
+
+  const ruanganTerpilih = useMemo(() => {
+    return (
+      ruanganList.find(
+        (item) => item.value === selectedRuanganId
+      ) || null
+    );
+  }, [ruanganList, selectedRuanganId]);
+
+  // ==========================================
+  // JADWAL
+  // ==========================================
+
+  const handleSlotChange = (hariKey, field) => (event) => {
+    const value = event.target.value;
+
+    setJadwal((prev) => ({
+      ...prev,
+      [hariKey]: {
+        ...prev[hariKey],
+        [field]: value,
+      },
+    }));
+  };
+
+  const jumlahHariDiisi = HARI.filter((hari) => {
+    const slot = jadwal[hari.key];
+
+    return slot.jamMulai && slot.jamSelesai;
+  }).length;
 
   const validateJadwal = () => {
     for (const hari of HARI) {
-      const slot =
-        jadwal[hari.key];
+      const slot = jadwal[hari.key];
 
       const adaInput =
-        slot.jamMulai ||
-        slot.jamSelesai;
+        slot.jamMulai || slot.jamSelesai;
 
-      if (!adaInput) {
-        continue;
-      }
+      if (!adaInput) continue;
 
-      if (
-        !slot.jamMulai ||
-        !slot.jamSelesai
-      ) {
+      if (!slot.jamMulai || !slot.jamSelesai) {
         return `Lengkapi jam jadwal hari ${hari.label}.`;
       }
 
-      if (
-        slot.jamSelesai <=
-        slot.jamMulai
-      ) {
+      if (slot.jamSelesai <= slot.jamMulai) {
         return `Jam selesai hari ${hari.label} harus lebih besar dari jam mulai.`;
       }
     }
@@ -585,151 +511,81 @@ export default function TambahJadwalMengajarPage() {
     return "";
   };
 
+  // ==========================================
+  // SUBMIT
+  // ==========================================
 
-  const handleSubmit = async (
-    event
-  ) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
     setError("");
-
 
     if (!selectedKelasMapelId) {
       setError(
         "Kelas, mata pelajaran, dan guru wajib dipilih."
       );
-
       return;
     }
-
 
     if (jumlahHariDiisi === 0) {
-      setError(
-        "Isi jadwal untuk minimal satu hari."
-      );
-
+      setError("Isi jadwal untuk minimal satu hari.");
       return;
     }
 
-
-    const validationError =
-      validateJadwal();
+    const validationError = validateJadwal();
 
     if (validationError) {
-      setError(
-        validationError
-      );
-
+      setError(validationError);
       return;
     }
+
+    const hariTerisi = HARI.filter((hari) => {
+      const slot = jadwal[hari.key];
+
+      return slot.jamMulai && slot.jamSelesai;
+    });
 
     try {
       setSaving(true);
 
-      console.log(
-        "========== CREATE JADWAL =========="
-      );
+      console.log("========== CREATE JADWAL ==========");
+      console.log("Kelas Mapel ID:", selectedKelasMapelId);
+      console.log("Guru:", kelasMapelTerpilih?.guruNama);
+      console.log("Mapel:", kelasMapelTerpilih?.mapelNama);
+      console.log("Kelas:", kelasMapelTerpilih?.kelasNama);
+      console.log("Ruangan ID:", selectedRuanganId);
+      console.log("Ruangan:", ruanganTerpilih);
+      console.log("Jadwal:", jadwal);
+      console.log("===================================");
 
-      console.log(
-        "Kelas Mapel ID:",
-        selectedKelasMapelId
-      );
+      // Setiap hari membuat satu record di Backend.
+      // Kirim ruanganId, bukan nama ruangan.
+      for (const hari of hariTerisi) {
+        const slot = jadwal[hari.key];
 
-      console.log(
-        "Guru:",
-        kelasMapelTerpilih?.guruNama
-      );
+        const payload = {
+          kelasMapelId: selectedKelasMapelId,
+          hari: hari.key,
+          jamMulai: slot.jamMulai,
+          jamSelesai: slot.jamSelesai,
+          ruanganId: selectedRuanganId || null,
+        };
 
-      console.log(
-        "Mapel:",
-        kelasMapelTerpilih?.mapelNama
-      );
-
-      console.log(
-        "Kelas:",
-        kelasMapelTerpilih?.kelasNama
-      );
-
-      console.log(
-        "Ruangan:",
-        ruangan
-      );
-
-      console.log(
-        "Jadwal:",
-        jadwal
-      );
-
-      console.log(
-        "==================================="
-      );
-
-
-      const hariTerisi =
-        HARI.filter((hari) => {
-          const slot =
-            jadwal[hari.key];
-
-          return (
-            slot.jamMulai &&
-            slot.jamSelesai
-          );
-        });
-
-      const hasil =
-        await Promise.all(
-          hariTerisi.map(
-            async (hari) => {
-              const slot =
-                jadwal[hari.key];
-
-              const payload = {
-                kelasMapelId:
-                  selectedKelasMapelId,
-
-                hari:
-                  hari.key,
-
-                jamMulai:
-                  slot.jamMulai,
-
-                jamSelesai:
-                  slot.jamSelesai,
-
-                ruangan:
-                  ruangan.trim() ||
-                  null,
-              };
-
-              console.log(
-                `CREATE ${hari.label}:`,
-                payload
-              );
-
-              return createJadwalMengajar(
-                payload
-              );
-            }
-          )
+        console.log(
+          `CREATE ${hari.label}:`,
+          payload
         );
 
-      console.log(
-        "HASIL CREATE:",
-        hasil
-      );
+        await createJadwalMengajar(payload);
+      }
 
       setSuccess(true);
 
       setTimeout(() => {
-        router.push(
-          "/admin/guru/jadwal-mengajar"
-        );
+        router.push("/admin/guru/jadwal-mengajar");
       }, 900);
     } catch (err) {
-      console.error(
-        "Error create jadwal:",
-        err
-      );
+      console.error("Error create jadwal:", err);
 
       setError(
         err instanceof Error
@@ -741,65 +597,52 @@ export default function TambahJadwalMengajarPage() {
     }
   };
 
+  // ==========================================
+  // RESET
+  // ==========================================
 
   const handleReset = () => {
     setSelectedKelasMapelId("");
-
-    setJadwal(
-      emptyJadwal()
-    );
-
-    setRuangan("");
-
+    setSelectedRuanganId("");
+    setJadwal(emptyJadwal());
     setError("");
-
     setSuccess(false);
   };
 
+  // ==========================================
+  // RENDER
+  // ==========================================
 
   return (
-    <div className="flex h-screen w-full overflow-hidden theme-page">
-
-
+    <div className="flex h-screen overflow-hidden theme-page theme-text">
       <Sidebar
         active="guruJadwalMengajar"
         setActive={() => {}}
-        collapsed={
-          isCollapsed
-        }
-        setCollapsed={
-          setIsCollapsed
-        }
+        collapsed={isCollapsed}
+        setCollapsed={setIsCollapsed}
         role="admin"
       />
 
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+        <div className="shrink-0">
+          <Header
+            toggleSidebar={toggleSidebar}
+            notifications={[]}
+            user={{
+              name: "Admin Sekolah",
+              email: "admin@smartschool.com",
+              avatar: "AD",
+            }}
+          />
+        </div>
 
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        <main className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
+          <div className="w-full px-4 py-5 sm:px-6 sm:py-6 lg:px-8 xl:px-10">
+            <div className="w-full space-y-6">
 
-
-        <Header
-          toggleSidebar={
-            toggleSidebar
-          }
-          notifications={[]}
-          user={{
-            name: "Admin Sekolah",
-            email:
-              "admin@smartschool.com",
-            avatar: "AD",
-          }}
-        />
-
-
-        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
-
-          <div className="mx-auto w-full max-w-[1600px] px-4 py-5 sm:px-6 sm:py-6 lg:px-8 xl:px-10">
-
-            <div className="space-y-6">
-
+              {/* HEADER HALAMAN */}
 
               <section>
-
                 <button
                   type="button"
                   onClick={() =>
@@ -809,27 +652,18 @@ export default function TambahJadwalMengajarPage() {
                   }
                   className="mb-4 inline-flex items-center gap-2 text-xs font-semibold theme-text-muted transition hover:text-[var(--color-primary)]"
                 >
-                  <ArrowLeft
-                    size={15}
-                  />
-
+                  <ArrowLeft size={15} />
                   Kembali ke Jadwal Mengajar
                 </button>
 
                 <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-
                   <div className="flex min-w-0 items-start gap-3">
-
                     <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl theme-primary shadow-sm">
-                      <CalendarClock
-                        size={22}
-                      />
+                      <CalendarClock size={22} />
                     </div>
 
                     <div className="min-w-0">
-
                       <div className="flex flex-wrap items-center gap-2">
-
                         <h1 className="text-xl font-bold tracking-tight theme-text sm:text-2xl">
                           Tambah Jadwal Mengajar
                         </h1>
@@ -837,38 +671,30 @@ export default function TambahJadwalMengajarPage() {
                         <span className="rounded-full border px-2.5 py-1 text-[10px] font-semibold theme-sidebar-active theme-border">
                           Akademik
                         </span>
-
                       </div>
 
                       <p className="mt-1 max-w-2xl text-xs leading-5 theme-text-muted sm:text-sm">
-                        Tentukan guru, mata pelajaran, kelas, ruangan, dan waktu mengajar.
+                        Tentukan guru, mata pelajaran, kelas,
+                        ruangan, dan waktu mengajar.
                       </p>
-
                     </div>
-
                   </div>
 
-
                   <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center">
-
                     <div className="rounded-lg border px-4 py-2.5 shadow-sm theme-card theme-border">
-
                       <p className="text-[10px] uppercase tracking-wide theme-text-placeholder">
                         Hari Terisi
                       </p>
 
                       <p className="mt-0.5 text-sm font-bold theme-text">
                         {jumlahHariDiisi}
-
                         <span className="ml-1 text-xs font-normal theme-text-placeholder">
                           / {HARI.length}
                         </span>
                       </p>
-
                     </div>
 
                     <div className="rounded-lg border px-4 py-2.5 shadow-sm theme-card theme-border">
-
                       <p className="text-[10px] uppercase tracking-wide theme-text-placeholder">
                         Kelas
                       </p>
@@ -877,19 +703,15 @@ export default function TambahJadwalMengajarPage() {
                         {kelasMapelTerpilih?.kelasNama ||
                           "Belum dipilih"}
                       </p>
-
                     </div>
-
                   </div>
-
                 </div>
-
               </section>
 
+              {/* LOADING */}
 
-              {loadingData && (
+              {(loadingData || loadingRuangan) && (
                 <div className="flex items-center gap-3 rounded-xl border p-4 theme-info theme-border">
-
                   <Loader2
                     size={18}
                     className="animate-spin text-[var(--color-info)]"
@@ -897,21 +719,23 @@ export default function TambahJadwalMengajarPage() {
 
                   <div>
                     <p className="text-sm font-semibold text-[var(--color-info)]">
-                      Mengambil data kelas mapel...
+                      Mengambil data...
                     </p>
 
                     <p className="mt-1 text-xs text-[var(--color-info)]">
-                      Data guru, mata pelajaran, dan kelas sedang dimuat dari backend.
+                      {loadingData &&
+                        "Memuat kelas, mata pelajaran, dan guru. "}
+                      {loadingRuangan &&
+                        "Memuat master ruangan dari Sarpras."}
                     </p>
                   </div>
-
                 </div>
               )}
 
+              {/* SUCCESS */}
 
               {success && (
                 <div className="flex items-start gap-3 rounded-xl border p-4 theme-success theme-border">
-
                   <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg theme-card">
                     <CheckCircle2
                       size={18}
@@ -928,14 +752,13 @@ export default function TambahJadwalMengajarPage() {
                       Mengalihkan ke daftar jadwal mengajar...
                     </p>
                   </div>
-
                 </div>
               )}
 
+              {/* ERROR */}
 
               {error && (
                 <div className="flex items-start gap-3 rounded-xl border p-4 theme-danger theme-border">
-
                   <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg theme-card">
                     <AlertCircle
                       size={18}
@@ -944,7 +767,6 @@ export default function TambahJadwalMengajarPage() {
                   </div>
 
                   <div className="min-w-0 flex-1">
-
                     <p className="text-sm font-semibold text-[var(--color-danger)]">
                       Data belum dapat diproses
                     </p>
@@ -952,40 +774,30 @@ export default function TambahJadwalMengajarPage() {
                     <p className="mt-1 text-xs leading-5 text-[var(--color-danger)]">
                       {error}
                     </p>
-
                   </div>
 
                   <button
                     type="button"
-                    onClick={() =>
-                      setError("")
-                    }
-                    className="rounded-lg p-1 text-[var(--color-danger)] transition hover:bg-[var(--color-danger-background)]"
+                    onClick={() => setError("")}
+                    className="rounded-lg p-1 text-[var(--color-danger)] transition"
                   >
-                    <X
-                      size={16}
-                    />
+                    <X size={16} />
                   </button>
-
                 </div>
               )}
 
+              {/* FORM DAN PREVIEW */}
 
               <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_360px] 2xl:grid-cols-[minmax(0,1fr)_390px]">
 
-
                 <form
-                  onSubmit={
-                    handleSubmit
-                  }
+                  onSubmit={handleSubmit}
                   className="min-w-0 overflow-hidden rounded-xl border shadow-sm theme-card theme-border"
                 >
-
+                  {/* INFORMASI JADWAL */}
 
                   <div className="border-b px-5 py-5 sm:px-6 theme-border-soft">
-
                     <div className="flex items-start gap-3">
-
                       <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg theme-info">
                         <School
                           size={17}
@@ -994,50 +806,36 @@ export default function TambahJadwalMengajarPage() {
                       </div>
 
                       <div>
-
                         <h2 className="text-sm font-bold theme-text">
                           Informasi Jadwal
                         </h2>
 
                         <p className="mt-1 text-xs theme-text-muted">
-                          Pilih relasi kelas, mata pelajaran, dan guru yang sudah terdaftar.
+                          Pilih relasi kelas, mata pelajaran,
+                          guru, dan ruangan.
                         </p>
-
                       </div>
-
                     </div>
-
                   </div>
 
+                  <div className="space-y-5 p-5 sm:p-6">
 
-                  <div className="p-5 sm:p-6">
+                    {/* KELAS MAPEL */}
 
                     <SearchableSelect
                       label="Kelas / Mata Pelajaran / Guru"
                       icon={Users}
-                      value={
-                        selectedKelasMapelId
-                      }
-                      onChange={
-                        setSelectedKelasMapelId
-                      }
-                      options={
-                        kelasMapelOptions
-                      }
+                      value={selectedKelasMapelId}
+                      onChange={setSelectedKelasMapelId}
+                      options={kelasMapelOptions}
                       placeholder={
                         loadingData
                           ? "Memuat data..."
                           : "Pilih kelas, mata pelajaran, dan guru..."
                       }
-                      disabled={
-                        saving ||
-                        loadingData
-                      }
-                      renderOption={(
-                        item
-                      ) => (
+                      disabled={saving || loadingData}
+                      renderOption={(item) => (
                         <div className="flex min-w-0 flex-1 items-center gap-3">
-
                           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg theme-info">
                             <BookMarked
                               size={15}
@@ -1046,20 +844,13 @@ export default function TambahJadwalMengajarPage() {
                           </div>
 
                           <div className="min-w-0 flex-1">
-
                             <p className="truncate text-xs font-bold theme-text">
-                              {
-                                item.mapelNama
-                              }
+                              {item.mapelNama}
                             </p>
 
                             <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
-
                               <span className="text-[10px] font-medium theme-text-muted">
-                                Kelas:{" "}
-                                {
-                                  item.kelasNama
-                                }
+                                Kelas: {item.kelasNama}
                               </span>
 
                               <span className="theme-text-placeholder">
@@ -1067,175 +858,192 @@ export default function TambahJadwalMengajarPage() {
                               </span>
 
                               <span className="text-[10px] theme-text-muted">
-                                Guru:{" "}
-                                {
-                                  item.guruNama
-                                }
+                                Guru: {item.guruNama}
                               </span>
-
                             </div>
 
                             {item.mapelKode && (
                               <p className="mt-1 text-[9px] theme-text-placeholder">
-                                Kode Mapel:{" "}
-                                {
-                                  item.mapelKode
-                                }
+                                Kode Mapel: {item.mapelKode}
                               </p>
                             )}
-
                           </div>
-
                         </div>
                       )}
                     />
 
+                    {/* DETAIL KELAS MAPEL */}
 
                     {kelasMapelTerpilih && (
-                      <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
-
+                      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                         <div className="rounded-lg border p-3 theme-card-soft theme-border">
-
                           <div className="flex items-center gap-2">
-
                             <User
                               size={14}
                               className="text-[var(--color-primary)]"
                             />
-
                             <p className="text-[10px] font-semibold uppercase tracking-wide theme-text-placeholder">
                               Guru
                             </p>
-
                           </div>
 
                           <p className="mt-1.5 truncate text-xs font-bold theme-text">
-                            {
-                              kelasMapelTerpilih.guruNama
-                            }
+                            {kelasMapelTerpilih.guruNama}
                           </p>
 
                           {kelasMapelTerpilih.guruNip && (
                             <p className="mt-0.5 text-[9px] theme-text-placeholder">
-                              NIP:{" "}
-                              {
-                                kelasMapelTerpilih.guruNip
-                              }
+                              NIP: {kelasMapelTerpilih.guruNip}
                             </p>
                           )}
-
                         </div>
 
                         <div className="rounded-lg border p-3 theme-card-soft theme-border">
-
                           <div className="flex items-center gap-2">
-
                             <BookMarked
                               size={14}
                               className="text-[var(--color-primary)]"
                             />
-
                             <p className="text-[10px] font-semibold uppercase tracking-wide theme-text-placeholder">
                               Mata Pelajaran
                             </p>
-
                           </div>
 
                           <p className="mt-1.5 truncate text-xs font-bold theme-text">
-                            {
-                              kelasMapelTerpilih.mapelNama
-                            }
+                            {kelasMapelTerpilih.mapelNama}
                           </p>
 
                           {kelasMapelTerpilih.mapelKode && (
                             <p className="mt-0.5 text-[9px] theme-text-placeholder">
-                              Kode:{" "}
-                              {
-                                kelasMapelTerpilih.mapelKode
-                              }
+                              Kode: {kelasMapelTerpilih.mapelKode}
                             </p>
                           )}
-
                         </div>
 
                         <div className="rounded-lg border p-3 theme-card-soft theme-border">
-
                           <div className="flex items-center gap-2">
-
                             <School
                               size={14}
                               className="text-[var(--color-primary)]"
                             />
-
                             <p className="text-[10px] font-semibold uppercase tracking-wide theme-text-placeholder">
                               Kelas
                             </p>
-
                           </div>
 
                           <p className="mt-1.5 truncate text-xs font-bold theme-text">
-                            {
-                              kelasMapelTerpilih.kelasNama
-                            }
+                            {kelasMapelTerpilih.kelasNama}
                           </p>
-
                         </div>
-
                       </div>
                     )}
 
-                  </div>
+                    {/* RELASI RUANGAN */}
 
+                    <div className="rounded-xl border p-4 theme-card-soft theme-border">
+                      <div className="mb-3">
+                        <h3 className="text-xs font-bold theme-text">
+                          Lokasi Mengajar
+                        </h3>
 
-                  <div className="border-y px-5 py-4 sm:px-6 theme-card-soft theme-border">
+                        <p className="mt-1 text-[10px] theme-text-muted">
+                          Pilih ruangan dari data master Sarpras.
+                        </p>
+                      </div>
 
-                    <div className="max-w-xl">
-
-                      <label className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold theme-text-secondary">
-
-                        <DoorOpen
-                          size={14}
-                          className="theme-text-muted"
-                        />
-
-                        Ruangan
-
-                        <span className="text-[10px] font-normal theme-text-placeholder">
-                          (opsional)
-                        </span>
-
-                      </label>
-
-                      <input
-                        type="text"
-                        value={ruangan}
-                        onChange={(e) =>
-                          setRuangan(
-                            e.target.value
-                          )
+                      <SearchableSelect
+                        label="Ruangan"
+                        icon={DoorOpen}
+                        value={selectedRuanganId}
+                        onChange={setSelectedRuanganId}
+                        options={ruanganList}
+                        placeholder={
+                          loadingRuangan
+                            ? "Memuat data ruangan..."
+                            : ruanganList.length > 0
+                            ? "Pilih ruangan..."
+                            : "Belum ada data ruangan"
                         }
-                        disabled={
-                          saving
-                        }
-                        placeholder="Contoh: Lab Komputer 1 / Ruang 201"
-                        className="h-11 w-full rounded-lg border px-3.5 text-sm outline-none transition theme-input focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[var(--color-primary)]/10 disabled:opacity-70"
+                        disabled={saving || loadingRuangan}
+                        optional
+                        renderOption={(item) => (
+                          <div className="flex min-w-0 flex-1 items-center gap-3">
+                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg theme-info">
+                              <DoorOpen
+                                size={16}
+                                className="text-[var(--color-primary)]"
+                              />
+                            </div>
+
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate text-xs font-bold theme-text">
+                                {item.label}
+                              </p>
+
+                              <div className="mt-1 flex flex-wrap items-center gap-2">
+                                <span className="text-[10px] theme-text-muted">
+                                  {item.lokasi ||
+                                    "Lokasi tidak tersedia"}
+                                </span>
+
+                                {item.kapasitas !== null && (
+                                  <span className="text-[10px] theme-text-placeholder">
+                                    • Kapasitas: {item.kapasitas} orang
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        )}
                       />
 
-                      <p className="mt-1.5 text-[10px] theme-text-placeholder">
-                        Ruangan ini akan digunakan untuk semua hari yang kamu isi.
+                      {ruanganTerpilih && (
+                        <div className="mt-3 rounded-lg border p-3 theme-sidebar-active theme-border">
+                          <div className="flex items-center gap-2">
+                            <CheckCircle2
+                              size={15}
+                              className="text-[var(--color-success)]"
+                            />
+                            <p className="text-xs font-semibold theme-text">
+                              Ruangan dipilih
+                            </p>
+                          </div>
+
+                          <p className="mt-2 text-xs font-bold theme-text">
+                            {ruanganTerpilih.label}
+                          </p>
+
+                          <div className="mt-1 flex items-center gap-1.5">
+                            <MapPin
+                              size={11}
+                              className="theme-text-muted"
+                            />
+                            <p className="text-[10px] theme-text-muted">
+                              {ruanganTerpilih.lokasi ||
+                                "Lokasi tidak tersedia"}
+                            </p>
+                          </div>
+
+                          {ruanganTerpilih.kapasitas !== null && (
+                            <p className="mt-1 text-[10px] theme-text-muted">
+                              Kapasitas: {ruanganTerpilih.kapasitas} orang
+                            </p>
+                          )}
+                        </div>
+                      )}
+
+                      <p className="mt-2 text-[10px] theme-text-placeholder">
+                        Ruangan opsional. Jika tidak dipilih,
+                        jadwal disimpan tanpa relasi ruangan.
                       </p>
-
                     </div>
-
                   </div>
 
+                  {/* JADWAL MINGGUAN */}
 
-                  <div className="border-b px-5 py-4 sm:px-6 theme-border-soft theme-card">
-
+                  <div className="border-y px-5 py-4 sm:px-6 theme-border-soft theme-card">
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-
                       <div>
-
                         <h2 className="text-sm font-bold theme-text">
                           Jadwal Mingguan
                         </h2>
@@ -1243,186 +1051,129 @@ export default function TambahJadwalMengajarPage() {
                         <p className="mt-1 text-xs theme-text-muted">
                           Isi waktu pada hari yang memiliki jadwal.
                         </p>
-
                       </div>
 
                       <div className="inline-flex w-fit items-center gap-2 rounded-lg border px-3 py-2 text-[10px] font-semibold theme-card-soft theme-border theme-text-secondary">
-
                         <Clock3
                           size={13}
                           className="text-[var(--color-primary)]"
                         />
-
                         {jumlahHariDiisi} hari terisi
-
                       </div>
-
                     </div>
-
                   </div>
 
+                  <div className="space-y-3 p-5 sm:p-6">
+                    {HARI.map((hari) => {
+                      const slot = jadwal[hari.key];
 
-                  <div className="p-5 sm:p-6">
+                      const terisi = Boolean(
+                        slot.jamMulai && slot.jamSelesai
+                      );
 
-                    <div className="space-y-3">
+                      const sebagianDiisi = Boolean(
+                        slot.jamMulai || slot.jamSelesai
+                      );
 
-                      {HARI.map(
-                        (hari) => {
-                          const slot =
-                            jadwal[
-                              hari.key
-                            ];
-
-                          const terisi =
-                            Boolean(
-                              slot.jamMulai &&
-                              slot.jamSelesai
-                            );
-
-                          const sebagianDiisi =
-                            Boolean(
-                              slot.jamMulai ||
-                              slot.jamSelesai
-                            );
-
-                          return (
-                            <div
-                              key={
-                                hari.key
-                              }
-                              className={`rounded-xl border p-3.5 transition sm:p-4 ${
-                                terisi
-                                  ? "theme-sidebar-active theme-border"
-                                  : sebagianDiisi
-                                  ? "theme-warning theme-border"
-                                  : "theme-card theme-border"
-                              }`}
-                            >
-
-                              <div className="grid grid-cols-1 gap-3 xl:grid-cols-[160px_minmax(0,1fr)_minmax(0,1fr)] xl:items-center">
-
-
-                                <div className="flex items-center gap-3">
-
-                                  <div
-                                    className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
-                                      terisi
-                                        ? "theme-primary"
-                                        : "theme-card-soft theme-text-muted"
-                                    }`}
-                                  >
-                                    <CalendarDays
-                                      size={16}
-                                    />
-                                  </div>
-
-                                  <div>
-
-                                    <p className="text-xs font-bold theme-text">
-                                      {
-                                        hari.label
-                                      }
-                                    </p>
-
-                                    <p
-                                      className={`mt-0.5 text-[10px] ${
-                                        terisi
-                                          ? "text-[var(--color-primary)]"
-                                          : sebagianDiisi
-                                          ? "text-[var(--color-warning)]"
-                                          : "theme-text-placeholder"
-                                      }`}
-                                    >
-                                      {terisi
-                                        ? "Jadwal terisi"
-                                        : sebagianDiisi
-                                        ? "Belum lengkap"
-                                        : "Tidak ada jadwal"}
-                                    </p>
-
-                                  </div>
-
-                                </div>
-
-
-                                <div>
-
-                                  <label className="mb-1.5 block text-[10px] font-semibold uppercase tracking-wide theme-text-placeholder">
-                                    Jam Mulai
-                                  </label>
-
-                                  <input
-                                    type="time"
-                                    value={
-                                      slot.jamMulai
-                                    }
-                                    onChange={handleSlotChange(
-                                      hari.key,
-                                      "jamMulai"
-                                    )}
-                                    disabled={
-                                      saving
-                                    }
-                                    className="h-10 w-full rounded-lg border px-3 text-xs outline-none transition theme-input focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[var(--color-primary)]/10 disabled:opacity-70"
-                                  />
-
-                                </div>
-
-
-                                <div>
-
-                                  <label className="mb-1.5 block text-[10px] font-semibold uppercase tracking-wide theme-text-placeholder">
-                                    Jam Selesai
-                                  </label>
-
-                                  <input
-                                    type="time"
-                                    value={
-                                      slot.jamSelesai
-                                    }
-                                    onChange={handleSlotChange(
-                                      hari.key,
-                                      "jamSelesai"
-                                    )}
-                                    disabled={
-                                      saving
-                                    }
-                                    className="h-10 w-full rounded-lg border px-3 text-xs outline-none transition theme-input focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[var(--color-primary)]/10 disabled:opacity-70"
-                                  />
-
-                                </div>
-
+                      return (
+                        <div
+                          key={hari.key}
+                          className={`rounded-xl border p-3.5 transition sm:p-4 ${
+                            terisi
+                              ? "theme-sidebar-active theme-border"
+                              : sebagianDiisi
+                              ? "theme-warning theme-border"
+                              : "theme-card theme-border"
+                          }`}
+                        >
+                          <div className="grid grid-cols-1 gap-3 xl:grid-cols-[160px_minmax(0,1fr)_minmax(0,1fr)] xl:items-center">
+                            <div className="flex items-center gap-3">
+                              <div
+                                className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
+                                  terisi
+                                    ? "theme-primary"
+                                    : "theme-card-soft theme-text-muted"
+                                }`}
+                              >
+                                <CalendarDays size={16} />
                               </div>
 
+                              <div>
+                                <p className="text-xs font-bold theme-text">
+                                  {hari.label}
+                                </p>
+
+                                <p
+                                  className={`mt-0.5 text-[10px] ${
+                                    terisi
+                                      ? "text-[var(--color-primary)]"
+                                      : sebagianDiisi
+                                      ? "text-[var(--color-warning)]"
+                                      : "theme-text-placeholder"
+                                  }`}
+                                >
+                                  {terisi
+                                    ? "Jadwal terisi"
+                                    : sebagianDiisi
+                                    ? "Belum lengkap"
+                                    : "Tidak ada jadwal"}
+                                </p>
+                              </div>
                             </div>
-                          );
-                        }
-                      )}
 
-                    </div>
+                            <div>
+                              <label className="mb-1.5 block text-[10px] font-semibold uppercase tracking-wide theme-text-placeholder">
+                                Jam Mulai
+                              </label>
 
+                              <input
+                                type="time"
+                                value={slot.jamMulai}
+                                onChange={handleSlotChange(
+                                  hari.key,
+                                  "jamMulai"
+                                )}
+                                disabled={saving}
+                                className="h-10 w-full rounded-lg border px-3 text-xs outline-none theme-input focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[var(--color-primary)]/10"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="mb-1.5 block text-[10px] font-semibold uppercase tracking-wide theme-text-placeholder">
+                                Jam Selesai
+                              </label>
+
+                              <input
+                                type="time"
+                                value={slot.jamSelesai}
+                                onChange={handleSlotChange(
+                                  hari.key,
+                                  "jamSelesai"
+                                )}
+                                disabled={saving}
+                                className="h-10 w-full rounded-lg border px-3 text-xs outline-none theme-input focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[var(--color-primary)]/10"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
 
+                  {/* TOMBOL FORM */}
 
                   <div className="border-t px-5 py-4 sm:px-6 theme-border theme-card-soft">
-
                     <div className="flex flex-col gap-2 sm:flex-row sm:justify-between">
-
                       <button
                         type="button"
-                        onClick={
-                          handleReset
-                        }
-                        disabled={
-                          saving
-                        }
-                        className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border px-4 py-2 text-xs font-semibold transition theme-card theme-border theme-text-secondary theme-sidebar-hover disabled:cursor-not-allowed disabled:opacity-50"
+                        onClick={handleReset}
+                        disabled={saving}
+                        className="inline-flex min-h-10 items-center justify-center rounded-lg border px-4 py-2 text-xs font-semibold theme-card theme-border theme-text-secondary disabled:opacity-50"
                       >
                         Reset Form
                       </button>
 
                       <div className="flex flex-col-reverse gap-2 sm:flex-row">
-
                         <button
                           type="button"
                           onClick={() =>
@@ -1430,10 +1181,8 @@ export default function TambahJadwalMengajarPage() {
                               "/admin/guru/jadwal-mengajar"
                             )
                           }
-                          disabled={
-                            saving
-                          }
-                          className="inline-flex min-h-10 items-center justify-center rounded-lg border px-5 py-2 text-xs font-semibold transition theme-card theme-border theme-text-secondary theme-sidebar-hover disabled:cursor-not-allowed disabled:opacity-50"
+                          disabled={saving}
+                          className="inline-flex min-h-10 items-center justify-center rounded-lg border px-5 py-2 text-xs font-semibold theme-card theme-border theme-text-secondary disabled:opacity-50"
                         >
                           Batal
                         </button>
@@ -1446,50 +1195,35 @@ export default function TambahJadwalMengajarPage() {
                             loadingData ||
                             !selectedKelasMapelId
                           }
-                          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg px-5 py-2 text-xs font-semibold shadow-sm transition theme-primary disabled:cursor-not-allowed disabled:opacity-60"
+                          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg px-5 py-2 text-xs font-semibold shadow-sm theme-primary disabled:cursor-not-allowed disabled:opacity-60"
                         >
-
                           {saving ? (
                             <>
                               <Loader2
                                 size={15}
                                 className="animate-spin"
                               />
-
                               Menyimpan...
                             </>
                           ) : (
                             <>
-                              <Save
-                                size={15}
-                              />
-
+                              <Save size={15} />
                               Simpan Jadwal
                             </>
                           )}
-
                         </button>
-
                       </div>
-
                     </div>
-
                   </div>
-
                 </form>
 
+                {/* SIDEBAR PREVIEW */}
 
                 <aside className="min-w-0 space-y-5">
-
-
                   <section className="overflow-hidden rounded-xl border shadow-sm theme-card theme-border">
-
                     <div className="border-b px-5 py-4 theme-border-soft">
-
                       <div className="flex items-center justify-between gap-3">
-
                         <div>
-
                           <h2 className="text-sm font-bold theme-text">
                             Pratinjau Jadwal
                           </h2>
@@ -1497,7 +1231,6 @@ export default function TambahJadwalMengajarPage() {
                           <p className="mt-1 text-[11px] theme-text-muted">
                             Ringkasan data yang akan disimpan.
                           </p>
-
                         </div>
 
                         <div className="flex h-9 w-9 items-center justify-center rounded-lg theme-info">
@@ -1506,16 +1239,14 @@ export default function TambahJadwalMengajarPage() {
                             className="text-[var(--color-primary)]"
                           />
                         </div>
-
                       </div>
-
                     </div>
 
                     <div className="p-5">
 
+                      {/* GURU */}
 
                       <div className="flex items-center gap-3 pb-4">
-
                         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full theme-primary text-xs font-bold">
                           {kelasMapelTerpilih
                             ? getInitials(
@@ -1525,211 +1256,164 @@ export default function TambahJadwalMengajarPage() {
                         </div>
 
                         <div className="min-w-0">
-
                           <p className="text-[10px] font-bold uppercase tracking-wide theme-text-placeholder">
                             Guru
                           </p>
 
                           <p className="mt-0.5 truncate text-sm font-bold theme-text">
-                            {kelasMapelTerpilih
-                              ?.guruNama ||
+                            {kelasMapelTerpilih?.guruNama ||
                               "Belum dipilih"}
                           </p>
 
                           {kelasMapelTerpilih?.guruNip && (
                             <p className="mt-0.5 text-[10px] theme-text-placeholder">
-                              NIP:{" "}
-                              {
-                                kelasMapelTerpilih.guruNip
-                              }
+                              NIP: {kelasMapelTerpilih.guruNip}
                             </p>
                           )}
-
                         </div>
-
                       </div>
 
+                      {/* MAPEL */}
 
                       <div className="rounded-lg border p-3.5 theme-card-soft theme-border">
-
                         <div className="flex items-start gap-2.5">
-
                           <BookMarked
                             size={15}
                             className="mt-0.5 shrink-0 text-[var(--color-primary)]"
                           />
 
                           <div className="min-w-0">
-
                             <p className="text-[10px] font-semibold uppercase tracking-wide theme-text-placeholder">
                               Mata Pelajaran
                             </p>
 
                             <p className="mt-1 text-xs font-bold theme-text">
-                              {kelasMapelTerpilih
-                                ?.mapelNama ||
+                              {kelasMapelTerpilih?.mapelNama ||
                                 "Belum dipilih"}
                             </p>
 
                             {kelasMapelTerpilih?.mapelKode && (
                               <p className="mt-0.5 text-[10px] theme-text-placeholder">
-                                Kode:{" "}
-                                {
-                                  kelasMapelTerpilih.mapelKode
-                                }
+                                Kode: {kelasMapelTerpilih.mapelKode}
                               </p>
                             )}
-
                           </div>
-
                         </div>
-
                       </div>
 
+                      {/* KELAS */}
 
                       <div className="mt-3 rounded-lg border p-3.5 theme-card-soft theme-border">
-
                         <div className="flex items-start gap-2.5">
-
                           <School
                             size={15}
                             className="mt-0.5 shrink-0 text-[var(--color-primary)]"
                           />
 
                           <div className="min-w-0">
-
                             <p className="text-[10px] font-semibold uppercase tracking-wide theme-text-placeholder">
                               Kelas
                             </p>
 
                             <p className="mt-1 text-xs font-bold theme-text">
-                              {kelasMapelTerpilih
-                                ?.kelasNama ||
+                              {kelasMapelTerpilih?.kelasNama ||
                                 "Belum dipilih"}
                             </p>
-
                           </div>
-
                         </div>
-
                       </div>
 
+                      {/* RUANGAN RELASI */}
 
                       <div className="mt-3 rounded-lg border p-3.5 theme-card-soft theme-border">
-
                         <div className="flex items-start gap-2.5">
-
                           <DoorOpen
                             size={15}
                             className="mt-0.5 shrink-0 text-[var(--color-primary)]"
                           />
 
                           <div className="min-w-0">
-
                             <p className="text-[10px] font-semibold uppercase tracking-wide theme-text-placeholder">
                               Ruangan
                             </p>
 
-                            <p className="mt-1 truncate text-xs font-bold theme-text">
-                              {ruangan.trim() ||
-                                "Belum diisi"}
+                            <p className="mt-1 text-xs font-bold theme-text">
+                              {ruanganTerpilih?.label ||
+                                "Belum dipilih"}
                             </p>
 
+                            {ruanganTerpilih?.lokasi && (
+                              <p className="mt-1 text-[10px] theme-text-muted">
+                                {ruanganTerpilih.lokasi}
+                              </p>
+                            )}
+
+                            {ruanganTerpilih?.kapasitas !== null &&
+                              ruanganTerpilih?.kapasitas !==
+                                undefined && (
+                                <p className="mt-1 text-[10px] theme-text-placeholder">
+                                  Kapasitas:{" "}
+                                  {ruanganTerpilih.kapasitas} orang
+                                </p>
+                              )}
                           </div>
-
                         </div>
-
                       </div>
 
+                      {/* RINGKASAN HARI */}
 
                       <div className="mt-4 space-y-2">
+                        {HARI.map((hari) => {
+                          const slot = jadwal[hari.key];
 
-                        {HARI.map(
-                          (hari) => {
-                            const slot =
-                              jadwal[
-                                hari.key
-                              ];
+                          const terisi = Boolean(
+                            slot.jamMulai &&
+                              slot.jamSelesai
+                          );
 
-                            const terisi =
-                              Boolean(
-                                slot.jamMulai &&
-                                slot.jamSelesai
-                              );
+                          return (
+                            <div
+                              key={hari.key}
+                              className={`flex items-center justify-between gap-3 rounded-lg border px-3 py-2.5 ${
+                                terisi
+                                  ? "theme-sidebar-active theme-border"
+                                  : "theme-card theme-border-soft"
+                              }`}
+                            >
+                              <div className="flex items-center gap-2">
+                                <div
+                                  className={`h-1.5 w-1.5 rounded-full ${
+                                    terisi
+                                      ? "bg-[var(--color-primary)]"
+                                      : "bg-[var(--color-text-placeholder)]"
+                                  }`}
+                                />
 
-                            return (
-                              <div
-                                key={
-                                  hari.key
-                                }
-                                className={`flex items-center justify-between gap-3 rounded-lg border px-3 py-2.5 ${
-                                  terisi
-                                    ? "theme-sidebar-active theme-border"
-                                    : "theme-card theme-border-soft"
-                                }`}
-                              >
-
-                                <div className="flex items-center gap-2">
-
-                                  <div
-                                    className={`h-1.5 w-1.5 rounded-full ${
-                                      terisi
-                                        ? "bg-[var(--color-primary)]"
-                                        : "bg-[var(--color-text-placeholder)]"
-                                    }`}
-                                  />
-
-                                  <span className="text-[11px] font-semibold theme-text-secondary">
-                                    {
-                                      hari.label
-                                    }
-                                  </span>
-
-                                </div>
-
-                                {terisi ? (
-                                  <span className="max-w-[190px] truncate text-right text-[10px] font-semibold theme-text">
-
-                                    {
-                                      slot.jamMulai
-                                    }
-
-                                    {" – "}
-
-                                    {
-                                      slot.jamSelesai
-                                    }
-
-                                    {" · "}
-
-                                    {
-                                      kelasMapelTerpilih?.kelasNama ||
-                                      "-"
-                                    }
-
-                                  </span>
-                                ) : (
-                                  <span className="text-[10px] theme-text-placeholder">
-                                    —
-                                  </span>
-                                )}
-
+                                <span className="text-[11px] font-semibold theme-text-secondary">
+                                  {hari.label}
+                                </span>
                               </div>
-                            );
-                          }
-                        )}
 
+                              {terisi ? (
+                                <span className="max-w-[190px] truncate text-right text-[10px] font-semibold theme-text">
+                                  {slot.jamMulai} – {slot.jamSelesai}
+                                </span>
+                              ) : (
+                                <span className="text-[10px] theme-text-placeholder">
+                                  —
+                                </span>
+                              )}
+                            </div>
+                          );
+                        })}
                       </div>
-
                     </div>
-
                   </section>
 
+                  {/* INFORMASI */}
 
                   <section className="rounded-xl border p-5 theme-info theme-border">
-
                     <div className="flex items-start gap-3">
-
                       <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg theme-card shadow-sm">
                         <Info
                           size={17}
@@ -1738,141 +1422,90 @@ export default function TambahJadwalMengajarPage() {
                       </div>
 
                       <div className="min-w-0">
-
                         <h2 className="text-xs font-bold theme-text">
                           Informasi Pengisian
                         </h2>
 
                         <div className="mt-3 space-y-2.5">
+                          {[
+                            "Data guru, mata pelajaran, dan kelas diambil dari relasi Kelas Mapel.",
+                            "Ruangan diambil dari master data Sarpras berdasarkan ID.",
+                            "Satu hari yang diisi akan membuat satu record jadwal di Backend.",
+                            "Jam selesai harus lebih besar dari jam mulai.",
+                            "Backend memvalidasi bentrok jadwal guru dan ruangan.",
+                          ].map((item, index) => (
+                            <div
+                              key={index}
+                              className="flex items-start gap-2"
+                            >
+                              <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-primary)]" />
 
-                          <div className="flex items-start gap-2">
-
-                            <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-primary)]" />
-
-                            <p className="text-[11px] leading-5 theme-text-secondary">
-                              Data guru, mata pelajaran, dan kelas diambil dari relasi Kelas Mapel.
-                            </p>
-
-                          </div>
-
-                          <div className="flex items-start gap-2">
-
-                            <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-primary)]" />
-
-                            <p className="text-[11px] leading-5 theme-text-secondary">
-                              Satu hari yang diisi akan membuat satu record jadwal di backend.
-                            </p>
-
-                          </div>
-
-                          <div className="flex items-start gap-2">
-
-                            <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-primary)]" />
-
-                            <p className="text-[11px] leading-5 theme-text-secondary">
-                              Jam selesai harus lebih besar dari jam mulai.
-                            </p>
-
-                          </div>
-
-                          <div className="flex items-start gap-2">
-
-                            <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-primary)]" />
-
-                            <p className="text-[11px] leading-5 theme-text-secondary">
-                              Backend otomatis menolak jadwal guru yang bentrok.
-                            </p>
-
-                          </div>
-
+                              <p className="text-[11px] leading-5 theme-text-secondary">
+                                {item}
+                              </p>
+                            </div>
+                          ))}
                         </div>
-
                       </div>
-
                     </div>
-
                   </section>
 
+                  {/* KELENGKAPAN */}
 
                   <section className="rounded-xl border p-5 shadow-sm theme-card theme-border">
-
                     <div className="flex items-center justify-between gap-3">
-
                       <div>
-
                         <p className="text-[10px] font-bold uppercase tracking-wide theme-text-placeholder">
                           Kelengkapan
                         </p>
 
                         <p className="mt-1 text-sm font-bold theme-text">
-                          {jumlahHariDiisi} /{" "}
-                          {HARI.length} hari
+                          {jumlahHariDiisi} / {HARI.length} hari
                         </p>
-
                       </div>
 
                       <CheckCircle2
                         size={21}
                         className={
-                          jumlahHariDiisi >
-                          0
+                          jumlahHariDiisi > 0
                             ? "text-[var(--color-primary)]"
                             : "theme-text-placeholder"
                         }
                       />
-
                     </div>
 
                     <div className="mt-3 h-2 overflow-hidden rounded-full bg-[var(--color-border)]">
-
                       <div
                         className="h-full rounded-full bg-[var(--color-primary)] transition-all"
                         style={{
                           width: `${
-                            (jumlahHariDiisi /
-                              HARI.length) *
+                            (jumlahHariDiisi / HARI.length) *
                             100
                           }%`,
                         }}
                       />
-
                     </div>
 
                     <p className="mt-2 text-[10px] theme-text-placeholder">
-
-                      {jumlahHariDiisi ===
-                      0
+                      {jumlahHariDiisi === 0
                         ? "Belum ada jadwal yang diisi."
-                        : jumlahHariDiisi ===
-                          HARI.length
+                        : jumlahHariDiisi === HARI.length
                         ? "Semua hari telah memiliki jadwal."
                         : "Beberapa hari masih dapat diisi."}
-
                     </p>
-
                   </section>
-
                 </aside>
-
               </div>
 
-
               <footer className="pb-3 pt-1 text-center">
-
                 <p className="text-[10px] theme-text-placeholder">
                   © 2026 SmartSchool • Tambah Jadwal Mengajar
                 </p>
-
               </footer>
-
             </div>
-
           </div>
-
         </main>
-
       </div>
-
     </div>
   );
 }

@@ -24,7 +24,7 @@ const items = [
     number: "03",
     icon: Users,
     title: "Kolaborasi Efektif",
-    desc: "Mempermudah komunikasi dan kolaborasi antara guru, siswa, orang tua, dan pihak sekolah.",
+    desc: "Mempermudah komunikasi dan kolaborasi antara guru, siswa dan pihak sekolah.",
   },
   {
     number: "04",

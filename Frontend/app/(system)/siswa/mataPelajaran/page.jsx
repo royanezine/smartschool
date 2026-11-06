@@ -962,51 +962,55 @@ export default function MataPelajaranPage() {
 
   if (loading) {
     return (
-      <div className="theme-page theme-text min-h-full">
-        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
-          <div className="animate-pulse">
-            <div
-              className={`h-4 w-28 rounded mb-3 ${themeNeutralSurface}`}
-            />
+      <div className="flex h-screen overflow-hidden theme-page theme-text">
+        <div className="flex min-h-0 flex-1 flex-col">
+          <main className="min-w-0 flex-1 overflow-y-auto">
+            <div className="w-full px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
+              <div className="animate-pulse">
+                <div
+                  className={`h-4 w-28 rounded mb-3 ${themeNeutralSurface}`}
+                />
 
-            <div
-              className={`h-8 w-64 rounded mb-2 ${themeNeutralSurface}`}
-            />
+                <div
+                  className={`h-8 w-64 rounded mb-2 ${themeNeutralSurface}`}
+                />
 
-            <div
-              className={`h-4 w-80 max-w-full rounded mb-8 ${themeNeutralSurface}`}
-            />
+                <div
+                  className={`h-4 w-80 max-w-full rounded mb-8 ${themeNeutralSurface}`}
+                />
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-              {[1, 2, 3].map(
-                (item) => (
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                  {[1, 2, 3].map(
+                    (item) => (
+                      <div
+                        key={item}
+                        className={`h-24 rounded-2xl ${themeCardSurface} ${themeNeutralBorder}`}
+                      />
+                    )
+                  )}
+                </div>
+
+                <div
+                  className={`${themeCardSurface} ${themeNeutralBorder} rounded-2xl p-5`}
+                >
                   <div
-                    key={item}
-                    className={`h-24 rounded-2xl ${themeCardSurface} ${themeNeutralBorder}`}
+                    className={`h-5 w-40 rounded mb-5 ${themeNeutralSurface}`}
                   />
-                )
-              )}
-            </div>
 
-            <div
-              className={`${themeCardSurface} ${themeNeutralBorder} rounded-2xl p-5`}
-            >
-              <div
-                className={`h-5 w-40 rounded mb-5 ${themeNeutralSurface}`}
-              />
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {[1, 2, 3, 4, 5, 6].map(
-                  (item) => (
-                    <div
-                      key={item}
-                      className={`h-48 rounded-2xl ${themeNeutralSurface}`}
-                    />
-                  )
-                )}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {[1, 2, 3, 4, 5, 6].map(
+                      (item) => (
+                        <div
+                          key={item}
+                          className={`h-48 rounded-2xl ${themeNeutralSurface}`}
+                        />
+                      )
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
+          </main>
         </div>
       </div>
     );
@@ -1014,738 +1018,431 @@ export default function MataPelajaranPage() {
 
 
   return (
-    <div className="theme-page theme-text min-h-full">
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
+    <div className="flex h-screen overflow-hidden theme-page theme-text">
+      <div className="flex min-h-0 flex-1 flex-col">
+        <main className="min-w-0 flex-1 overflow-y-auto">
+          <div className="w-full px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
 
 
-        <div className="flex items-start gap-3 mb-7">
-          {selected && (
-            <button
-              type="button"
-              onClick={backToList}
-              className={`
-                mt-1
-                w-10 h-10
-                flex items-center justify-center
-                rounded-xl
-                ${themeCardSurface}
-                ${themeNeutralBorder}
-                ${themeTextSecondary}
-                ${themePrimaryHoverText}
-                ${themePrimaryHoverBorder}
-                ${themePrimaryHoverSurface}
-                transition
-              `}
-            >
-              <ArrowLeft size={17} />
-            </button>
-          )}
-
-          <div className="min-w-0">
-            <div className="flex items-center gap-2 mb-1.5">
-              <span
-                className={`w-1.5 h-1.5 rounded-full ${themePrimaryBg}`}
-              />
-
-              <p
-                className={`text-xs sm:text-sm font-semibold ${themePrimaryText}`}
-              >
-                {selected?.kelas ||
-                  kelasSiswa?.nama ||
-                  currentUser?.kelas?.nama ||
-                  "Kelas Siswa"}
-              </p>
-            </div>
-
-            <h1
-              className={`text-2xl sm:text-3xl font-bold tracking-tight ${themeText}`}
-            >
-              {selected
-                ? selected.nama
-                : "Mata Pelajaran"}
-            </h1>
-
-            <p
-              className={`text-sm ${themeTextMuted} mt-1.5 max-w-2xl`}
-            >
-              {selected
-                ? `Diampu oleh ${selected.guru}`
-                : "Kelola aktivitas pembelajaran berdasarkan mata pelajaran yang kamu ikuti."}
-            </p>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => {
-              fetchMataPelajaran();
-              fetchNotifications();
-            }}
-            disabled={loading}
-            className={`
-              ml-auto
-              flex-shrink-0
-              w-10 h-10
-              flex items-center justify-center
-              rounded-xl
-              ${themeCardSurface}
-              ${themeNeutralBorder}
-              ${themeTextSecondary}
-              ${themePrimaryHoverText}
-              ${themePrimaryHoverBorder}
-              ${themePrimaryHoverSurface}
-              transition
-              disabled:opacity-50
-            `}
-            title="Refresh"
-          >
-            <RefreshCw
-              size={17}
-              className={
-                loading
-                  ? "animate-spin"
-                  : ""
-              }
-            />
-          </button>
-        </div>
-
-
-        {error && (
-          <div
-            className={`
-              mb-6
-              rounded-2xl
-              border
-              ${themeNeutralBorder}
-              ${themeCardSurface}
-              p-4
-              ${themeCardShadow}
-            `}
-          >
-            <div className="flex items-start gap-3">
-              <div
-                className={`
-                  w-9 h-9
-                  rounded-xl
-                  ${themeNeutralSurface}
-                  flex items-center justify-center
-                  flex-shrink-0
-                `}
-              >
-                <AlertCircle
-                  size={18}
-                  className={themeTextSecondary}
-                />
-              </div>
-
-              <div className="min-w-0 flex-1">
-                <p
-                  className={`text-sm font-semibold ${themeText}`}
-                >
-                  Gagal memuat data
-                </p>
-
-                <p
-                  className={`text-xs ${themeTextMuted} mt-1 break-words`}
-                >
-                  {error}
-                </p>
-
-                <div className="mt-3 flex flex-wrap items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={
-                      fetchMataPelajaran
-                    }
-                    className={`
-                      inline-flex items-center gap-2
-                      px-3 py-2
-                      rounded-lg
-                      ${themePrimaryGradient}
-                      text-[var(--color-card)]
-                      text-xs font-semibold
-                      hover:opacity-90
-                      transition
-                    `}
-                  >
-                    <RefreshCw size={13} />
-                    Coba lagi
-                  </button>
-
-                  {userLoaded && !currentUser ? (
-                    <button
-                      type="button"
-                      onClick={() =>
-                        router.push("/login")
-                      }
-                      className={`
-                        inline-flex items-center gap-2
-                        px-3 py-2
-                        rounded-lg
-                        border
-                        ${themeNeutralBorder}
-                        ${themeTextSecondary}
-                        ${themePrimaryHoverText}
-                        ${themePrimaryHoverBorder}
-                        ${themePrimaryHoverSurface}
-                        text-xs font-semibold
-                        transition
-                      `}
-                    >
-                      <LogIn size={13} />
-                      Masuk kembali
-                    </button>
-                  ) : null}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-
-        {selected ? (
-          <div className="space-y-6">
-
-
-            <div
-              className={`
-                relative
-                overflow-hidden
-                rounded-2xl
-                ${themeCardSurface}
-                border
-                ${themeNeutralBorder}
-                ${themeCardShadow}
-              `}
-            >
-              <div
-                className={`
-                  absolute
-                  right-0
-                  top-0
-                  w-56
-                  h-56
-                  rounded-full
-                  ${themePrimarySurface}
-                  blur-3xl
-                  pointer-events-none
-                `}
-              />
-
-              <div className="relative p-5 sm:p-6">
-                <div className="flex flex-col sm:flex-row sm:items-center gap-5">
-                  <div
-                    className={`
-                      w-16 h-16
-                      rounded-2xl
-                      ${themePrimaryGradient}
-                      text-[var(--color-card)]
-                      flex items-center justify-center
-                      ${themePrimaryShadow}
-                      flex-shrink-0
-                    `}
-                  >
-                    <selected.icon
-                      size={27}
-                      strokeWidth={1.8}
-                    />
-                  </div>
-
-                  <div className="min-w-0 flex-1">
-                    <p
-                      className={`text-xs font-medium ${themeTextMuted} uppercase tracking-wider`}
-                    >
-                      Mata Pelajaran
-                    </p>
-
-                    <h2
-                      className={`text-xl sm:text-2xl font-bold ${themeText} mt-1`}
-                    >
-                      {selected.nama}
-                    </h2>
-
-                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5">
-                      <span
-                        className={`text-sm ${themeTextSecondary}`}
-                      >
-                        {selected.guru}
-                      </span>
-
-                      <span
-                        className={`hidden sm:block w-1 h-1 rounded-full ${themeNeutralSurface}`}
-                      />
-
-                      <span
-                        className={`text-sm ${themeTextMuted}`}
-                      >
-                        {selected.kelas}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div
-                    className={`
-                      hidden sm:flex
-                      items-center gap-2
-                      px-3 py-2
-                      rounded-xl
-                      ${themePrimarySurface}
-                      ${themePrimaryText}
-                    `}
-                  >
-                    <BookOpen size={16} />
-
-                    <span className="text-xs font-semibold">
-                      Pembelajaran
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <MiniStat
-                label="Materi"
-                value={selected.materi}
-                description="Materi tersedia"
-                icon={FileText}
-              />
-
-              <MiniStat
-                label="Tugas"
-                value={selected.tugas}
-                description="Tugas pembelajaran"
-                icon={ClipboardList}
-              />
-
-              <MiniStat
-                label="Ujian"
-                value={selected.ujian}
-                description="Jadwal ujian"
-                icon={GraduationCap}
-              />
-            </div>
-
-
-            <div>
-              <div className="mb-4">
-                <h2
-                  className={`text-base font-bold ${themeText}`}
-                >
-                  Aktivitas Pembelajaran
-                </h2>
-
-                <p
-                  className={`text-xs ${themeTextMuted} mt-1`}
-                >
-                  Akses materi, tugas, dan ujian untuk
-                  mata pelajaran ini.
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <SectionCard
-                  icon={FileText}
-                  title="Materi"
-                  description="Pelajari materi pembelajaran"
-                  count={selected.materi}
-                  countLabel="materi"
-                  variant="primary"
-                  onClick={() =>
-                    goTo("materi")
-                  }
-                />
-
-                <SectionCard
-                  icon={ClipboardList}
-                  title="Tugas"
-                  description="Lihat dan kerjakan tugas"
-                  count={selected.tugas}
-                  countLabel="tugas"
-                  variant="info"
-                  onClick={() =>
-                    goTo("tugas")
-                  }
-                />
-
-                <SectionCard
-                  icon={GraduationCap}
-                  title="Ujian"
-                  description="Jadwal dan hasil ujian"
-                  count={selected.ujian}
-                  countLabel="ujian"
-                  variant="neutral"
-                  onClick={() =>
-                    goTo("ujian")
-                  }
-                />
-              </div>
-            </div>
-
-
-            <div
-              className={`
-                rounded-2xl
-                border
-                ${themeInfoBorder}
-                ${themeInfoSurface}
-                p-4
-              `}
-            >
-              <div className="flex items-start gap-3">
-                <div
+            <div className="flex items-start gap-3 mb-7">
+              {selected && (
+                <button
+                  type="button"
+                  onClick={backToList}
                   className={`
-                    w-9 h-9
+                    mt-1
+                    w-10 h-10
+                    flex items-center justify-center
                     rounded-xl
                     ${themeCardSurface}
-                    border
-                    ${themeInfoBorder}
-                    flex items-center justify-center
-                    flex-shrink-0
+                    ${themeNeutralBorder}
+                    ${themeTextSecondary}
+                    ${themePrimaryHoverText}
+                    ${themePrimaryHoverBorder}
+                    ${themePrimaryHoverSurface}
+                    transition
                   `}
                 >
-                  <BookOpen
-                    size={17}
-                    className={themeInfoText}
+                  <ArrowLeft size={17} />
+                </button>
+              )}
+
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span
+                    className={`w-1.5 h-1.5 rounded-full ${themePrimaryBg}`}
                   />
-                </div>
-
-                <div className="min-w-0">
-                  <p
-                    className={`text-sm font-semibold ${themeInfoText}`}
-                  >
-                    Informasi pembelajaran
-                  </p>
 
                   <p
-                    className={`text-xs ${themeInfoText} mt-1`}
+                    className={`text-xs sm:text-sm font-semibold ${themePrimaryText}`}
                   >
-                    {selected.kelas}
-                    {" · "}
-                    {selected.nama}
-                    {" · "}
-                    {selected.guru}
-                  </p>
-
-                  <p
-                    className={`text-[11px] ${themeTextMuted} mt-2 break-all`}
-                  >
-                    ID Kelas Mapel:{" "}
-                    {selected.kelasMapelId}
+                    {selected?.kelas ||
+                      kelasSiswa?.nama ||
+                      currentUser?.kelas?.nama ||
+                      "Kelas Siswa"}
                   </p>
                 </div>
+
+                <h1
+                  className={`text-2xl sm:text-3xl font-bold tracking-tight ${themeText}`}
+                >
+                  {selected
+                    ? selected.nama
+                    : "Mata Pelajaran"}
+                </h1>
+
+                <p
+                  className={`text-sm ${themeTextMuted} mt-1.5 max-w-2xl`}
+                >
+                  {selected
+                    ? `Diampu oleh ${selected.guru}`
+                    : "Kelola aktivitas pembelajaran berdasarkan mata pelajaran yang kamu ikuti."}
+                </p>
               </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  fetchMataPelajaran();
+                  fetchNotifications();
+                }}
+                disabled={loading}
+                className={`
+                  ml-auto
+                  flex-shrink-0
+                  w-10 h-10
+                  flex items-center justify-center
+                  rounded-xl
+                  ${themeCardSurface}
+                  ${themeNeutralBorder}
+                  ${themeTextSecondary}
+                  ${themePrimaryHoverText}
+                  ${themePrimaryHoverBorder}
+                  ${themePrimaryHoverSurface}
+                  transition
+                  disabled:opacity-50
+                `}
+                title="Refresh"
+              >
+                <RefreshCw
+                  size={17}
+                  className={
+                    loading
+                      ? "animate-spin"
+                      : ""
+                  }
+                />
+              </button>
             </div>
 
 
-            <div
-              className={`
-                ${themeCardSurface}
-                rounded-2xl
-                border
-                ${themeNeutralBorder}
-                ${themeCardShadow}
-                overflow-hidden
-              `}
-            >
+            {error && (
               <div
-                className={`px-5 py-4 border-b ${themeDivider}`}
+                className={`
+                  mb-6
+                  rounded-2xl
+                  border
+                  ${themeNeutralBorder}
+                  ${themeCardSurface}
+                  p-4
+                  ${themeCardShadow}
+                `}
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-start gap-3">
                   <div
                     className={`
                       w-9 h-9
                       rounded-xl
                       ${themeNeutralSurface}
-                      ${themeTextSecondary}
                       flex items-center justify-center
+                      flex-shrink-0
                     `}
                   >
-                    <Bell size={17} />
+                    <AlertCircle
+                      size={18}
+                      className={themeTextSecondary}
+                    />
                   </div>
 
-                  <div>
-                    <h3
+                  <div className="min-w-0 flex-1">
+                    <p
                       className={`text-sm font-semibold ${themeText}`}
                     >
-                      Aktivitas Terbaru
-                    </h3>
+                      Gagal memuat data
+                    </p>
 
                     <p
-                      className={`text-xs ${themeTextMuted} mt-0.5`}
+                      className={`text-xs ${themeTextMuted} mt-1 break-words`}
                     >
-                      Pembaruan pembelajaran{" "}
-                      {selected.nama}
+                      {error}
                     </p>
+
+                    <div className="mt-3 flex flex-wrap items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={
+                          fetchMataPelajaran
+                        }
+                        className={`
+                          inline-flex items-center gap-2
+                          px-3 py-2
+                          rounded-lg
+                          ${themePrimaryGradient}
+                          text-[var(--color-card)]
+                          text-xs font-semibold
+                          hover:opacity-90
+                          transition
+                        `}
+                      >
+                        <RefreshCw size={13} />
+                        Coba lagi
+                      </button>
+
+                      {userLoaded && !currentUser ? (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            router.push("/login")
+                          }
+                          className={`
+                            inline-flex items-center gap-2
+                            px-3 py-2
+                            rounded-lg
+                            border
+                            ${themeNeutralBorder}
+                            ${themeTextSecondary}
+                            ${themePrimaryHoverText}
+                            ${themePrimaryHoverBorder}
+                            ${themePrimaryHoverSurface}
+                            text-xs font-semibold
+                            transition
+                          `}
+                        >
+                          <LogIn size={13} />
+                          Masuk kembali
+                        </button>
+                      ) : null}
+                    </div>
                   </div>
                 </div>
               </div>
-
-              <EmptyActivity />
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-6">
+            )}
 
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <OverviewCard
-                icon={BookOpen}
-                label="Mata Pelajaran"
-                value={
-                  mataPelajaranList.length
-                }
-                description="Pelajaran aktif"
-                primary
-              />
-
-              <OverviewCard
-                icon={FileText}
-                label="Total Materi"
-                value={totalMateri}
-                description="Materi tersedia"
-              />
-
-              <OverviewCard
-                icon={ClipboardList}
-                label="Total Tugas"
-                value={totalTugas}
-                description="Tugas pembelajaran"
-              />
-            </div>
+            {selected ? (
+              <div className="space-y-6">
 
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-
-              <section
-                className={`
-                  lg:col-span-2
-                  ${themeCardSurface}
-                  rounded-2xl
-                  border
-                  ${themeNeutralBorder}
-                  ${themeCardShadow}
-                  overflow-hidden
-                `}
-              >
                 <div
-                  className={`px-5 py-5 border-b ${themeDivider}`}
+                  className={`
+                    relative
+                    overflow-hidden
+                    rounded-2xl
+                    ${themeCardSurface}
+                    border
+                    ${themeNeutralBorder}
+                    ${themeCardShadow}
+                  `}
                 >
-                  <div className="flex items-center justify-between gap-4">
-                    <div>
-                      <h2
-                        className={`text-base font-bold ${themeText}`}
+                  <div
+                    className={`
+                      absolute
+                      right-0
+                      top-0
+                      w-56
+                      h-56
+                      rounded-full
+                      ${themePrimarySurface}
+                      blur-3xl
+                      pointer-events-none
+                    `}
+                  />
+
+                  <div className="relative p-5 sm:p-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-5">
+                      <div
+                        className={`
+                          w-16 h-16
+                          rounded-2xl
+                          ${themePrimaryGradient}
+                          text-[var(--color-card)]
+                          flex items-center justify-center
+                          ${themePrimaryShadow}
+                          flex-shrink-0
+                        `}
                       >
-                        Mata Pelajaran
-                      </h2>
+                        <selected.icon
+                          size={27}
+                          strokeWidth={1.8}
+                        />
+                      </div>
 
-                      <p
-                        className={`text-xs ${themeTextMuted} mt-1`}
+                      <div className="min-w-0 flex-1">
+                        <p
+                          className={`text-xs font-medium ${themeTextMuted} uppercase tracking-wider`}
+                        >
+                          Mata Pelajaran
+                        </p>
+
+                        <h2
+                          className={`text-xl sm:text-2xl font-bold ${themeText} mt-1`}
+                        >
+                          {selected.nama}
+                        </h2>
+
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5">
+                          <span
+                            className={`text-sm ${themeTextSecondary}`}
+                          >
+                            {selected.guru}
+                          </span>
+
+                          <span
+                            className={`hidden sm:block w-1 h-1 rounded-full ${themeNeutralSurface}`}
+                          />
+
+                          <span
+                            className={`text-sm ${themeTextMuted}`}
+                          >
+                            {selected.kelas}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div
+                        className={`
+                          hidden sm:flex
+                          items-center gap-2
+                          px-3 py-2
+                          rounded-xl
+                          ${themePrimarySurface}
+                          ${themePrimaryText}
+                        `}
                       >
-                        Pilih mata pelajaran untuk melihat
-                        detail pembelajaran.
-                      </p>
-                    </div>
+                        <BookOpen size={16} />
 
-                    <div
-                      className={`
-                        hidden sm:flex
-                        items-center gap-2
-                        px-3 py-2
-                        rounded-xl
-                        ${themePrimarySurface}
-                        ${themePrimaryText}
-                      `}
-                    >
-                      <BookOpen size={16} />
-
-                      <span className="text-xs font-semibold">
-                        {mataPelajaranList.length}{" "}
-                        pelajaran
-                      </span>
+                        <span className="text-xs font-semibold">
+                          Pembelajaran
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                {mataPelajaranList.length ===
-                0 ? (
-                  <EmptySubjects
-                    onRefresh={
-                      fetchMataPelajaran
-                    }
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <MiniStat
+                    label="Materi"
+                    value={selected.materi}
+                    description="Materi tersedia"
+                    icon={FileText}
                   />
-                ) : (
-                  <div className="p-5">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {mataPelajaranList.map(
-                        (mapel) => {
-                          const Icon =
-                            mapel.icon;
 
-                          return (
-                            <button
-                              key={
-                                mapel.kelasMapelId
-                              }
-                              type="button"
-                              onClick={() =>
-                                setSelectedId(
-                                  mapel.kelasMapelId
-                                )
-                              }
-                              className={`
-                                group
-                                text-left
-                                w-full
-                                ${themeCardSurface}
-                                border
-                                ${themeNeutralBorder}
-                                ${themePrimaryHoverBorder}
-                                rounded-2xl
-                                p-4
-                                ${themeSmallShadow}
-                                ${themeHoverShadow}
-                                hover:-translate-y-0.5
-                                transition-all
-                                duration-200
-                              `}
-                            >
-                              <div className="flex items-start justify-between">
-                                <div
-                                  className={`
-                                    w-11 h-11
-                                    rounded-xl
-                                    ${themePrimaryGradient}
-                                    text-[var(--color-card)]
-                                    flex items-center justify-center
-                                    ${themeSmallShadow}
-                                  `}
-                                >
-                                  <Icon
-                                    size={20}
-                                    strokeWidth={1.9}
-                                  />
-                                </div>
+                  <MiniStat
+                    label="Tugas"
+                    value={selected.tugas}
+                    description="Tugas pembelajaran"
+                    icon={ClipboardList}
+                  />
 
-                                <div
-                                  className={`
-                                    w-8 h-8
-                                    rounded-lg
-                                    ${themeNeutralSurface}
-                                    flex items-center justify-center
-                                    ${themePrimaryHoverSurface}
-                                    transition
-                                  `}
-                                >
-                                  <ChevronRight
-                                    size={16}
-                                    className={`
-                                      ${themeTextMuted}
-                                      ${themePrimaryHoverText}
-                                      transition
-                                    `}
-                                  />
-                                </div>
-                              </div>
+                  <MiniStat
+                    label="Ujian"
+                    value={selected.ujian}
+                    description="Jadwal ujian"
+                    icon={GraduationCap}
+                  />
+                </div>
 
-                              <div className="mt-4">
-                                <h3
-                                  className={`
-                                    text-sm
-                                    font-bold
-                                    ${themeText}
-                                    truncate
-                                  `}
-                                >
-                                  {mapel.nama}
-                                </h3>
 
-                                <p
-                                  className={`
-                                    text-xs
-                                    ${themeTextSecondary}
-                                    mt-1
-                                    truncate
-                                  `}
-                                >
-                                  {mapel.guru}
-                                </p>
+                <div>
+                  <div className="mb-4">
+                    <h2
+                      className={`text-base font-bold ${themeText}`}
+                    >
+                      Aktivitas Pembelajaran
+                    </h2>
 
-                                <div className="flex items-center gap-2 mt-1">
-                                  <span
-                                    className={`
-                                      w-1 h-1
-                                      rounded-full
-                                      ${themeNeutralSurface}
-                                    `}
-                                  />
+                    <p
+                      className={`text-xs ${themeTextMuted} mt-1`}
+                    >
+                      Akses materi, tugas, dan ujian untuk
+                      mata pelajaran ini.
+                    </p>
+                  </div>
 
-                                  <span
-                                    className={`
-                                      text-[11px]
-                                      ${themeTextMuted}
-                                      truncate
-                                    `}
-                                  >
-                                    {mapel.kelas}
-                                  </span>
-                                </div>
-                              </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <SectionCard
+                      icon={FileText}
+                      title="Materi"
+                      description="Pelajari materi pembelajaran"
+                      count={selected.materi}
+                      countLabel="materi"
+                      variant="primary"
+                      onClick={() =>
+                        goTo("materi")
+                      }
+                    />
 
-                              <div
-                                className={`
-                                  mt-4
-                                  pt-3
-                                  border-t
-                                  ${themeDivider}
-                                  flex items-center
-                                  justify-between gap-2
-                                `}
-                              >
-                                <div className="flex items-center gap-2">
-                                  <ContentBadge
-                                    icon={FileText}
-                                    value={
-                                      mapel.materi
-                                    }
-                                    label="materi"
-                                  />
+                    <SectionCard
+                      icon={ClipboardList}
+                      title="Tugas"
+                      description="Lihat dan kerjakan tugas"
+                      count={selected.tugas}
+                      countLabel="tugas"
+                      variant="info"
+                      onClick={() =>
+                        goTo("tugas")
+                      }
+                    />
 
-                                  <ContentBadge
-                                    icon={
-                                      ClipboardList
-                                    }
-                                    value={
-                                      mapel.tugas
-                                    }
-                                    label="tugas"
-                                    primary
-                                  />
-                                </div>
+                    <SectionCard
+                      icon={GraduationCap}
+                      title="Ujian"
+                      description="Jadwal dan hasil ujian"
+                      count={selected.ujian}
+                      countLabel="ujian"
+                      variant="neutral"
+                      onClick={() =>
+                        goTo("ujian")
+                      }
+                    />
+                  </div>
+                </div>
 
-                                <span
-                                  className={`
-                                    text-[11px]
-                                    font-semibold
-                                    ${themePrimaryText}
-                                  `}
-                                >
-                                  Buka
-                                </span>
-                              </div>
-                            </button>
-                          );
-                        }
-                      )}
+
+                <div
+                  className={`
+                    rounded-2xl
+                    border
+                    ${themeInfoBorder}
+                    ${themeInfoSurface}
+                    p-4
+                  `}
+                >
+                  <div className="flex items-start gap-3">
+                    <div
+                      className={`
+                        w-9 h-9
+                        rounded-xl
+                        ${themeCardSurface}
+                        border
+                        ${themeInfoBorder}
+                        flex items-center justify-center
+                        flex-shrink-0
+                      `}
+                    >
+                      <BookOpen
+                        size={17}
+                        className={themeInfoText}
+                      />
+                    </div>
+
+                    <div className="min-w-0">
+                      <p
+                        className={`text-sm font-semibold ${themeInfoText}`}
+                      >
+                        Informasi pembelajaran
+                      </p>
+
+                      <p
+                        className={`text-xs ${themeInfoText} mt-1`}
+                      >
+                        {selected.kelas}
+                        {" · "}
+                        {selected.nama}
+                        {" · "}
+                        {selected.guru}
+                      </p>
+
+                      <p
+                        className={`text-[11px] ${themeTextMuted} mt-2 break-all`}
+                      >
+                        ID Kelas Mapel:{" "}
+                        {selected.kelasMapelId}
+                      </p>
                     </div>
                   </div>
-                )}
-              </section>
-
-
-              <aside className="space-y-4">
+                </div>
 
 
                 <div
@@ -1766,440 +1463,751 @@ export default function MataPelajaranPage() {
                         className={`
                           w-9 h-9
                           rounded-xl
-                          ${themePrimarySurface}
-                          ${themePrimaryText}
+                          ${themeNeutralSurface}
+                          ${themeTextSecondary}
                           flex items-center justify-center
                         `}
                       >
-                        <BookOpen size={17} />
+                        <Bell size={17} />
                       </div>
 
                       <div>
                         <h3
                           className={`text-sm font-semibold ${themeText}`}
                         >
-                          Pembelajaran
+                          Aktivitas Terbaru
                         </h3>
 
                         <p
                           className={`text-xs ${themeTextMuted} mt-0.5`}
                         >
-                          {kelasSiswa?.nama
-                            ? `Ringkasan ${kelasSiswa.nama}`
-                            : "Ringkasan kelas kamu"}
+                          Pembaruan pembelajaran{" "}
+                          {selected.nama}
                         </p>
                       </div>
                     </div>
                   </div>
 
-                  <div className="p-5">
-                    <div className="space-y-4">
-                      <InfoRow
-                        label="Kelas"
-                        value={
-                          kelasSiswa?.nama ||
-                          "-"
-                        }
-                      />
-
-                      <InfoRow
-                        label="Mata Pelajaran"
-                        value={
-                          mataPelajaranList.length
-                        }
-                      />
-
-                      <InfoRow
-                        label="Total Materi"
-                        value={totalMateri}
-                      />
-
-                      <InfoRow
-                        label="Total Tugas"
-                        value={totalTugas}
-                      />
-                    </div>
-                  </div>
+                  <EmptyActivity />
                 </div>
+              </div>
+            ) : (
+              <div className="space-y-6">
 
 
-                <div
-                  className={`
-                    relative
-                    overflow-hidden
-                    rounded-2xl
-                    ${themePrimaryGradient}
-                    p-5
-                    text-[var(--color-card)]
-                    ${themePrimaryShadow}
-                  `}
-                >
-                  <div
-                    className="
-                      absolute
-                      -right-8
-                      -top-8
-                      w-28
-                      h-28
-                      rounded-full
-                      bg-white/10
-                    "
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <OverviewCard
+                    icon={BookOpen}
+                    label="Mata Pelajaran"
+                    value={
+                      mataPelajaranList.length
+                    }
+                    description="Pelajaran aktif"
+                    primary
                   />
 
-                  <div className="relative">
-                    <div
-                      className="
-                        w-9 h-9
-                        rounded-xl
-                        bg-white/10
-                        border border-white/10
-                        flex items-center justify-center
-                        mb-4
-                      "
-                    >
-                      <GraduationCap size={18} />
-                    </div>
+                  <OverviewCard
+                    icon={FileText}
+                    label="Total Materi"
+                    value={totalMateri}
+                    description="Materi tersedia"
+                  />
 
-                    <h3 className="text-sm font-semibold">
-                      Fokus belajar
-                    </h3>
-
-                    <p className="text-xs opacity-80 leading-relaxed mt-1.5">
-                      Pilih mata pelajaran dan lanjutkan
-                      aktivitas pembelajaranmu.
-                    </p>
-                  </div>
+                  <OverviewCard
+                    icon={ClipboardList}
+                    label="Total Tugas"
+                    value={totalTugas}
+                    description="Tugas pembelajaran"
+                  />
                 </div>
 
 
-                <div
-                  className={`
-                    ${themeCardSurface}
-                    rounded-2xl
-                    border
-                    ${themeNeutralBorder}
-                    ${themeCardShadow}
-                    overflow-hidden
-                  `}
-                >
-                  <div
-                    className={`px-5 py-4 border-b ${themeDivider}`}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+
+                  <section
+                    className={`
+                      lg:col-span-2
+                      ${themeCardSurface}
+                      rounded-2xl
+                      border
+                      ${themeNeutralBorder}
+                      ${themeCardShadow}
+                      overflow-hidden
+                    `}
                   >
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-3">
+                    <div
+                      className={`px-5 py-5 border-b ${themeDivider}`}
+                    >
+                      <div className="flex items-center justify-between gap-4">
+                        <div>
+                          <h2
+                            className={`text-base font-bold ${themeText}`}
+                          >
+                            Mata Pelajaran
+                          </h2>
+
+                          <p
+                            className={`text-xs ${themeTextMuted} mt-1`}
+                          >
+                            Pilih mata pelajaran untuk melihat
+                            detail pembelajaran.
+                          </p>
+                        </div>
+
                         <div
                           className={`
-                            relative
-                            w-9 h-9
+                            hidden sm:flex
+                            items-center gap-2
+                            px-3 py-2
                             rounded-xl
                             ${themePrimarySurface}
                             ${themePrimaryText}
-                            flex items-center justify-center
                           `}
                         >
-                          <Bell size={17} />
+                          <BookOpen size={16} />
 
-                          {notifications.some(
-                            (notification) =>
-                              !notification.dibaca
-                          ) && (
-                            <span
-                              className={`
-                                absolute
-                                -top-1
-                                -right-1
-                                w-2.5
-                                h-2.5
-                                rounded-full
-                                ${themePrimaryBg}
-                                border-2
-                                border-[var(--color-card)]
-                              `}
-                            />
+                          <span className="text-xs font-semibold">
+                            {mataPelajaranList.length}{" "}
+                            pelajaran
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {mataPelajaranList.length ===
+                    0 ? (
+                      <EmptySubjects
+                        onRefresh={
+                          fetchMataPelajaran
+                        }
+                      />
+                    ) : (
+                      <div className="p-5">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          {mataPelajaranList.map(
+                            (mapel) => {
+                              const Icon =
+                                mapel.icon;
+
+                              return (
+                                <button
+                                  key={
+                                    mapel.kelasMapelId
+                                  }
+                                  type="button"
+                                  onClick={() =>
+                                    setSelectedId(
+                                      mapel.kelasMapelId
+                                    )
+                                  }
+                                  className={`
+                                    group
+                                    text-left
+                                    w-full
+                                    ${themeCardSurface}
+                                    border
+                                    ${themeNeutralBorder}
+                                    ${themePrimaryHoverBorder}
+                                    rounded-2xl
+                                    p-4
+                                    ${themeSmallShadow}
+                                    ${themeHoverShadow}
+                                    hover:-translate-y-0.5
+                                    transition-all
+                                    duration-200
+                                  `}
+                                >
+                                  <div className="flex items-start justify-between">
+                                    <div
+                                      className={`
+                                        w-11 h-11
+                                        rounded-xl
+                                        ${themePrimaryGradient}
+                                        text-[var(--color-card)]
+                                        flex items-center justify-center
+                                        ${themeSmallShadow}
+                                      `}
+                                    >
+                                      <Icon
+                                        size={20}
+                                        strokeWidth={1.9}
+                                      />
+                                    </div>
+
+                                    <div
+                                      className={`
+                                        w-8 h-8
+                                        rounded-lg
+                                        ${themeNeutralSurface}
+                                        flex items-center justify-center
+                                        ${themePrimaryHoverSurface}
+                                        transition
+                                      `}
+                                    >
+                                      <ChevronRight
+                                        size={16}
+                                        className={`
+                                          ${themeTextMuted}
+                                          ${themePrimaryHoverText}
+                                          transition
+                                        `}
+                                      />
+                                    </div>
+                                  </div>
+
+                                  <div className="mt-4">
+                                    <h3
+                                      className={`
+                                        text-sm
+                                        font-bold
+                                        ${themeText}
+                                        truncate
+                                      `}
+                                    >
+                                      {mapel.nama}
+                                    </h3>
+
+                                    <p
+                                      className={`
+                                        text-xs
+                                        ${themeTextSecondary}
+                                        mt-1
+                                        truncate
+                                      `}
+                                    >
+                                      {mapel.guru}
+                                    </p>
+
+                                    <div className="flex items-center gap-2 mt-1">
+                                      <span
+                                        className={`
+                                          w-1 h-1
+                                          rounded-full
+                                          ${themeNeutralSurface}
+                                        `}
+                                      />
+
+                                      <span
+                                        className={`
+                                          text-[11px]
+                                          ${themeTextMuted}
+                                          truncate
+                                        `}
+                                      >
+                                        {mapel.kelas}
+                                      </span>
+                                    </div>
+                                  </div>
+
+                                  <div
+                                    className={`
+                                      mt-4
+                                      pt-3
+                                      border-t
+                                      ${themeDivider}
+                                      flex items-center
+                                      justify-between gap-2
+                                    `}
+                                  >
+                                    <div className="flex items-center gap-2">
+                                      <ContentBadge
+                                        icon={FileText}
+                                        value={
+                                          mapel.materi
+                                        }
+                                        label="materi"
+                                      />
+
+                                      <ContentBadge
+                                        icon={
+                                          ClipboardList
+                                        }
+                                        value={
+                                          mapel.tugas
+                                        }
+                                        label="tugas"
+                                        primary
+                                      />
+                                    </div>
+
+                                    <span
+                                      className={`
+                                        text-[11px]
+                                        font-semibold
+                                        ${themePrimaryText}
+                                      `}
+                                    >
+                                      Buka
+                                    </span>
+                                  </div>
+                                </button>
+                              );
+                            }
                           )}
                         </div>
+                      </div>
+                    )}
+                  </section>
 
-                        <div>
-                          <h3
-                            className={`text-sm font-semibold ${themeText}`}
-                          >
-                            Info Terbaru
-                          </h3>
 
-                          <p
-                            className={`text-xs ${themeTextMuted} mt-0.5`}
+                  <aside className="space-y-4">
+
+
+                    <div
+                      className={`
+                        ${themeCardSurface}
+                        rounded-2xl
+                        border
+                        ${themeNeutralBorder}
+                        ${themeCardShadow}
+                        overflow-hidden
+                      `}
+                    >
+                      <div
+                        className={`px-5 py-4 border-b ${themeDivider}`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div
+                            className={`
+                              w-9 h-9
+                              rounded-xl
+                              ${themePrimarySurface}
+                              ${themePrimaryText}
+                              flex items-center justify-center
+                            `}
                           >
-                            Notifikasi pembelajaran kamu
-                          </p>
+                            <BookOpen size={17} />
+                          </div>
+
+                          <div>
+                            <h3
+                              className={`text-sm font-semibold ${themeText}`}
+                            >
+                              Pembelajaran
+                            </h3>
+
+                            <p
+                              className={`text-xs ${themeTextMuted} mt-0.5`}
+                            >
+                              {kelasSiswa?.nama
+                                ? `Ringkasan ${kelasSiswa.nama}`
+                                : "Ringkasan kelas kamu"}
+                            </p>
+                          </div>
                         </div>
                       </div>
 
-                      {notifications.length >
-                        0 && (
-                        <span
-                          className={`
-                            text-[10px]
-                            font-semibold
-                            ${themePrimaryText}
-                            ${themePrimarySurface}
-                            px-2
-                            py-1
-                            rounded-lg
-                          `}
-                        >
-                          {notifications.length}{" "}
-                          terbaru
-                        </span>
-                      )}
-                    </div>
-                  </div>
+                      <div className="p-5">
+                        <div className="space-y-4">
+                          <InfoRow
+                            label="Kelas"
+                            value={
+                              kelasSiswa?.nama ||
+                              "-"
+                            }
+                          />
 
-                  {notificationLoading ? (
-                    <div className="p-5 space-y-3">
-                      {[1, 2, 3].map(
-                        (item) => (
-                          <div
-                            key={item}
-                            className="flex items-start gap-3 animate-pulse"
-                          >
+                          <InfoRow
+                            label="Mata Pelajaran"
+                            value={
+                              mataPelajaranList.length
+                            }
+                          />
+
+                          <InfoRow
+                            label="Total Materi"
+                            value={totalMateri}
+                          />
+
+                          <InfoRow
+                            label="Total Tugas"
+                            value={totalTugas}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+
+                    <div
+                      className={`
+                        relative
+                        overflow-hidden
+                        rounded-2xl
+                        ${themePrimaryGradient}
+                        p-5
+                        text-[var(--color-card)]
+                        ${themePrimaryShadow}
+                      `}
+                    >
+                      <div
+                        className="
+                          absolute
+                          -right-8
+                          -top-8
+                          w-28
+                          h-28
+                          rounded-full
+                          bg-white/10
+                        "
+                      />
+
+                      <div className="relative">
+                        <div
+                          className="
+                            w-9 h-9
+                            rounded-xl
+                            bg-white/10
+                            border border-white/10
+                            flex items-center justify-center
+                            mb-4
+                          "
+                        >
+                          <GraduationCap size={18} />
+                        </div>
+
+                        <h3 className="text-sm font-semibold">
+                          Fokus belajar
+                        </h3>
+
+                        <p className="text-xs opacity-80 leading-relaxed mt-1.5">
+                          Pilih mata pelajaran dan lanjutkan
+                          aktivitas pembelajaranmu.
+                        </p>
+                      </div>
+                    </div>
+
+
+                    <div
+                      className={`
+                        ${themeCardSurface}
+                        rounded-2xl
+                        border
+                        ${themeNeutralBorder}
+                        ${themeCardShadow}
+                        overflow-hidden
+                      `}
+                    >
+                      <div
+                        className={`px-5 py-4 border-b ${themeDivider}`}
+                      >
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="flex items-center gap-3">
                             <div
                               className={`
+                                relative
                                 w-9 h-9
                                 rounded-xl
-                                ${themeNeutralSurface}
-                                flex-shrink-0
-                              `}
-                            />
-
-                            <div className="flex-1 min-w-0">
-                              <div
-                                className={`
-                                  h-3
-                                  w-3/4
-                                  rounded
-                                  ${themeNeutralSurface}
-                                `}
-                              />
-
-                              <div
-                                className={`
-                                  h-2.5
-                                  w-full
-                                  rounded
-                                  mt-2
-                                  ${themeNeutralSurface}
-                                `}
-                              />
-
-                              <div
-                                className={`
-                                  h-2.5
-                                  w-1/3
-                                  rounded
-                                  mt-2
-                                  ${themeNeutralSurface}
-                                `}
-                              />
-                            </div>
-                          </div>
-                        )
-                      )}
-                    </div>
-                  ) : notifications.length ===
-                    0 ? (
-                    <div className="p-6 text-center">
-                      <div
-                        className={`
-                          w-11 h-11
-                          mx-auto
-                          rounded-xl
-                          ${themeNeutralSurface}
-                          flex items-center justify-center
-                        `}
-                      >
-                        <Bell
-                          size={19}
-                          className={themeTextMuted}
-                        />
-                      </div>
-
-                      <p
-                        className={`text-xs ${themeTextMuted} mt-3`}
-                      >
-                        Belum ada notifikasi terbaru.
-                      </p>
-
-                      <p
-                        className={`text-[11px] ${themeTextPlaceholder} mt-1`}
-                      >
-                        Notifikasi tugas dan pembelajaran
-                        akan muncul di sini.
-                      </p>
-                    </div>
-                  ) : (
-                    <div
-                      className={`divide-y ${themeDivide}`}
-                    >
-                      {notifications.map(
-                        (notification) => {
-                          const isUnread =
-                            !notification.dibaca;
-
-                          const title =
-                            notification.judul ||
-                            "Notifikasi";
-
-                          const description =
-                            notification.isi ||
-                            "Ada informasi baru untuk kamu.";
-
-                          let timeText = "";
-
-                          if (
-                            notification.dibuatPada
-                          ) {
-                            const date =
-                              new Date(
-                                notification.dibuatPada
-                              );
-
-                            if (
-                              !Number.isNaN(
-                                date.getTime()
-                              )
-                            ) {
-                              timeText =
-                                date.toLocaleString(
-                                  "id-ID",
-                                  {
-                                    day: "2-digit",
-                                    month:
-                                      "short",
-                                    hour: "2-digit",
-                                    minute:
-                                      "2-digit",
-                                  }
-                                );
-                            }
-                          }
-
-                          return (
-                            <button
-                              key={
-                                notification.id
-                              }
-                              type="button"
-                              onClick={() => {
-                                if (
-                                  notification.targetUrl
-                                ) {
-                                  router.push(
-                                    notification.targetUrl
-                                  );
-                                }
-                              }}
-                              className={`
-                                w-full
-                                text-left
-                                p-4
-                                flex items-start gap-3
-                                transition
-                                ${themeNeutralHover}
-                                ${
-                                  isUnread
-                                    ? themePrimarySurface
-                                    : themeCardSurface
-                                }
+                                ${themePrimarySurface}
+                                ${themePrimaryText}
+                                flex items-center justify-center
                               `}
                             >
-                              <div
-                                className={`
-                                  w-9 h-9
-                                  rounded-xl
-                                  flex items-center justify-center
-                                  flex-shrink-0
-                                  ${
-                                    isUnread
-                                      ? `${themePrimarySurface} ${themePrimaryText}`
-                                      : `${themeNeutralSurface} ${themeTextSecondary}`
-                                  }
-                                `}
-                              >
-                                {notification.kategori ===
-                                "deadline_tugas" ? (
-                                  <ClipboardList
-                                    size={16}
-                                  />
-                                ) : (
-                                  <Bell size={16} />
-                                )}
-                              </div>
+                              <Bell size={17} />
 
-                              <div className="min-w-0 flex-1">
-                                <div className="flex items-start gap-2">
-                                  <p
+                              {notifications.some(
+                                (notification) =>
+                                  !notification.dibaca
+                              ) && (
+                                <span
+                                  className={`
+                                    absolute
+                                    -top-1
+                                    -right-1
+                                    w-2.5
+                                    h-2.5
+                                    rounded-full
+                                    ${themePrimaryBg}
+                                    border-2
+                                    border-[var(--color-card)]
+                                  `}
+                                />
+                              )}
+                            </div>
+
+                            <div>
+                              <h3
+                                className={`text-sm font-semibold ${themeText}`}
+                              >
+                                Info Terbaru
+                              </h3>
+
+                              <p
+                                className={`text-xs ${themeTextMuted} mt-0.5`}
+                              >
+                                Notifikasi pembelajaran kamu
+                              </p>
+                            </div>
+                          </div>
+
+                          {notifications.length >
+                            0 && (
+                            <span
+                              className={`
+                                text-[10px]
+                                font-semibold
+                                ${themePrimaryText}
+                                ${themePrimarySurface}
+                                px-2
+                                py-1
+                                rounded-lg
+                              `}
+                            >
+                              {notifications.length}{" "}
+                              terbaru
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {notificationLoading ? (
+                        <div className="p-5 space-y-3">
+                          {[1, 2, 3].map(
+                            (item) => (
+                              <div
+                                key={item}
+                                className="flex items-start gap-3 animate-pulse"
+                              >
+                                <div
+                                  className={`
+                                    w-9 h-9
+                                    rounded-xl
+                                    ${themeNeutralSurface}
+                                    flex-shrink-0
+                                  `}
+                                />
+
+                                <div className="flex-1 min-w-0">
+                                  <div
                                     className={`
-                                      text-xs
-                                      leading-relaxed
-                                      flex-1
+                                      h-3
+                                      w-3/4
+                                      rounded
+                                      ${themeNeutralSurface}
+                                    `}
+                                  />
+
+                                  <div
+                                    className={`
+                                      h-2.5
+                                      w-full
+                                      rounded
+                                      mt-2
+                                      ${themeNeutralSurface}
+                                    `}
+                                  />
+
+                                  <div
+                                    className={`
+                                      h-2.5
+                                      w-1/3
+                                      rounded
+                                      mt-2
+                                      ${themeNeutralSurface}
+                                    `}
+                                  />
+                                </div>
+                              </div>
+                            )
+                          )}
+                        </div>
+                      ) : notifications.length ===
+                        0 ? (
+                        <div className="p-6 text-center">
+                          <div
+                            className={`
+                              w-11 h-11
+                              mx-auto
+                              rounded-xl
+                              ${themeNeutralSurface}
+                              flex items-center justify-center
+                            `}
+                          >
+                            <Bell
+                              size={19}
+                              className={themeTextMuted}
+                            />
+                          </div>
+
+                          <p
+                            className={`text-xs ${themeTextMuted} mt-3`}
+                          >
+                            Belum ada notifikasi terbaru.
+                          </p>
+
+                          <p
+                            className={`text-[11px] ${themeTextPlaceholder} mt-1`}
+                          >
+                            Notifikasi tugas dan pembelajaran
+                            akan muncul di sini.
+                          </p>
+                        </div>
+                      ) : (
+                        <div
+                          className={`divide-y ${themeDivide}`}
+                        >
+                          {notifications.map(
+                            (notification) => {
+                              const isUnread =
+                                !notification.dibaca;
+
+                              const title =
+                                notification.judul ||
+                                "Notifikasi";
+
+                              const description =
+                                notification.isi ||
+                                "Ada informasi baru untuk kamu.";
+
+                              let timeText = "";
+
+                              if (
+                                notification.dibuatPada
+                              ) {
+                                const date =
+                                  new Date(
+                                    notification.dibuatPada
+                                  );
+
+                                if (
+                                  !Number.isNaN(
+                                    date.getTime()
+                                  )
+                                ) {
+                                  timeText =
+                                    date.toLocaleString(
+                                      "id-ID",
+                                      {
+                                        day: "2-digit",
+                                        month:
+                                          "short",
+                                        hour: "2-digit",
+                                        minute:
+                                          "2-digit",
+                                      }
+                                    );
+                                }
+                              }
+
+                              return (
+                                <button
+                                  key={
+                                    notification.id
+                                  }
+                                  type="button"
+                                  onClick={() => {
+                                    if (
+                                      notification.targetUrl
+                                    ) {
+                                      router.push(
+                                        notification.targetUrl
+                                      );
+                                    }
+                                  }}
+                                  className={`
+                                    w-full
+                                    text-left
+                                    p-4
+                                    flex items-start gap-3
+                                    transition
+                                    ${themeNeutralHover}
+                                    ${
+                                      isUnread
+                                        ? themePrimarySurface
+                                        : themeCardSurface
+                                    }
+                                  `}
+                                >
+                                  <div
+                                    className={`
+                                      w-9 h-9
+                                      rounded-xl
+                                      flex items-center justify-center
+                                      flex-shrink-0
                                       ${
                                         isUnread
-                                          ? `font-semibold ${themeText}`
-                                          : `font-medium ${themeTextSecondary}`
+                                          ? `${themePrimarySurface} ${themePrimaryText}`
+                                          : `${themeNeutralSurface} ${themeTextSecondary}`
                                       }
                                     `}
                                   >
-                                    {title}
-                                  </p>
+                                    {notification.kategori ===
+                                    "deadline_tugas" ? (
+                                      <ClipboardList
+                                        size={16}
+                                      />
+                                    ) : (
+                                      <Bell size={16} />
+                                    )}
+                                  </div>
 
-                                  {isUnread && (
-                                    <span
+                                  <div className="min-w-0 flex-1">
+                                    <div className="flex items-start gap-2">
+                                      <p
+                                        className={`
+                                          text-xs
+                                          leading-relaxed
+                                          flex-1
+                                          ${
+                                            isUnread
+                                              ? `font-semibold ${themeText}`
+                                              : `font-medium ${themeTextSecondary}`
+                                          }
+                                        `}
+                                      >
+                                        {title}
+                                      </p>
+
+                                      {isUnread && (
+                                        <span
+                                          className={`
+                                            w-2 h-2
+                                            rounded-full
+                                            ${themePrimaryBg}
+                                            flex-shrink-0
+                                            mt-1
+                                          `}
+                                        />
+                                      )}
+                                    </div>
+
+                                    <p
                                       className={`
-                                        w-2 h-2
-                                        rounded-full
-                                        ${themePrimaryBg}
-                                        flex-shrink-0
+                                        text-[11px]
+                                        ${themeTextSecondary}
+                                        leading-relaxed
                                         mt-1
+                                        line-clamp-2
                                       `}
-                                    />
-                                  )}
-                                </div>
+                                    >
+                                      {description}
+                                    </p>
 
-                                <p
-                                  className={`
-                                    text-[11px]
-                                    ${themeTextSecondary}
-                                    leading-relaxed
-                                    mt-1
-                                    line-clamp-2
-                                  `}
-                                >
-                                  {description}
-                                </p>
-
-                                {timeText && (
-                                  <p
-                                    className={`
-                                      text-[10px]
-                                      ${themeTextMuted}
-                                      mt-1.5
-                                    `}
-                                  >
-                                    {timeText}
-                                  </p>
-                                )}
-                              </div>
-                            </button>
-                          );
-                        }
+                                    {timeText && (
+                                      <p
+                                        className={`
+                                          text-[10px]
+                                          ${themeTextMuted}
+                                          mt-1.5
+                                        `}
+                                      >
+                                        {timeText}
+                                      </p>
+                                    )}
+                                  </div>
+                                </button>
+                              );
+                            }
+                          )}
+                        </div>
                       )}
                     </div>
-                  )}
+                  </aside>
                 </div>
-              </aside>
-            </div>
+              </div>
+            )}
           </div>
-        )}
+        </main>
       </div>
     </div>
   );

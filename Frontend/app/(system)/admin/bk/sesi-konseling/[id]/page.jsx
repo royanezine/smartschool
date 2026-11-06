@@ -90,15 +90,17 @@ export default function DetailSesiKonselingPage() {
   }
 
   return (
-    <div className="theme-page flex h-screen overflow-hidden">
+    <div className="flex h-screen overflow-hidden theme-page theme-text">
       <Sidebar role="admin" active="bk" />
 
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <Header />
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+        <div className="shrink-0">
+          <Header />
+        </div>
 
-        <main className="flex-1 overflow-y-auto p-5 md:p-6 lg:p-7">
-          <div className="mx-auto w-full max-w-[1200px]">
-
+        <main className="min-w-0 flex-1 overflow-y-auto">
+          <div className="w-full p-5 md:p-6 lg:p-7">
+            
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div className="flex items-start gap-3">
                 <button
@@ -207,7 +209,7 @@ export default function DetailSesiKonselingPage() {
                 </div>
               </div>
             ) : data ? (
-              <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_320px]">
+              <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_320px] 2xl:grid-cols-[minmax(0,1fr)_360px]">
 
                 <div className="space-y-5">
 

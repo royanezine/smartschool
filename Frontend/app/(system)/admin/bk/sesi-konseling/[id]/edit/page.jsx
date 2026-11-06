@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 
 import Header from "@/app/components/Header";
@@ -11,8 +11,248 @@ import {
   updateSesiKonseling,
 } from "@/services/bk.service";
 
+import { getSemuaSiswa } from "@/services/siswa.service";
+import { getUsers } from "@/services/user.service";
+
 const inputClass =
   "theme-input w-full rounded-xl border px-4 py-2.5 text-sm font-medium shadow-sm outline-none transition focus:border-[var(--color-primary)]";
+
+const initialForm = {
+  siswaId: "",
+  konselorId: "",
+  tanggal: "",
+  waktuMulai: "",
+  waktuSelesai: "",
+  topik: "",
+  masalah: "",
+  hasil: "",
+  tindakLanjut: "",
+  status: "dijadwalkan",
+  catatan: "",
+};
+
+function extractArray(result) {
+  if (Array.isArray(result)) return result;
+  if (Array.isArray(result?.data)) return result.data;
+  if (Array.isArray(result?.data?.data)) return result.data.data;
+  if (Array.isArray(result?.result)) return result.result;
+  if (Array.isArray(result?.result?.data)) return result.result.data;
+  return [];
+}
+
+function getPersonName(person) {
+  return (
+    person?.namaLengkap ||
+    person?.nama ||
+    person?.user?.namaLengkap ||
+    person?.user?.nama ||
+    person?.name ||
+    ""
+  );
+}
+
+function getPersonId(person) {
+  return person?.id || person?.userId || "";
+}
+
+function getRelatedName(value) {
+  if (!value) return "";
+  if (typeof value === "string") return "";
+  return getPersonName(value);
+}
+
+// ==========================================
+// KOMPONEN SEARCHABLE SELECT
+// ==========================================
+function SearchableSelect({
+  label,
+  value,
+  onChange,
+  options,
+  placeholder,
+  disabled = false,
+  displayKey = "namaLengkap",
+  subLabelKey = "nis",
+  emptyMessage = "Tidak ada data",
+  required = false,
+}) {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+
+  const selectedOption = options.find(
+    (item) => String(getPersonId(item)) === String(value)
+  );
+
+  // Filter opsi berdasarkan ketikan
+  const filteredOptions = useMemo(() => {
+    const keyword = query.trim().toLowerCase();
+    if (!keyword) return options;
+
+    return options.filter((item) => {
+      const mainText = String(getPersonName(item)).toLowerCase();
+      const subText = String(item?.[subLabelKey] || "").toLowerCase();
+      return mainText.includes(keyword) || subText.includes(keyword);
+    });
+  }, [options, query, subLabelKey]);
+
+  const handleSelect = (item) => {
+    onChange(String(getPersonId(item)));
+    setQuery("");
+    setOpen(false);
+  };
+
+  const handleOpen = () => {
+    if (disabled) return;
+    setOpen(true);
+    setQuery("");
+  };
+
+  return (
+    <div className="relative">
+      <label className="theme-text mb-2 block text-sm font-semibold">
+        {label}
+        {required && (
+          <span className="ml-1 text-[var(--color-danger)]">*</span>
+        )}
+      </label>
+
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={handleOpen}
+        className={`
+          theme-input
+          w-full rounded-xl border
+          px-4 py-2.5 text-sm font-medium text-left
+          shadow-sm outline-none transition
+          hover:border-[var(--color-primary)]
+          focus:border-[var(--color-primary)]
+          flex items-center justify-between gap-2
+          ${disabled ? "cursor-not-allowed opacity-60" : ""}
+        `}
+      >
+        <span className={`truncate ${selectedOption ? "theme-text" : "theme-text-muted"}`}>
+          {selectedOption
+            ? `${getPersonName(selectedOption)}${
+                selectedOption[subLabelKey] ? ` — ${selectedOption[subLabelKey]}` : ""
+              }`
+            : placeholder}
+        </span>
+        <svg
+          className={`h-4 w-4 shrink-0 theme-text-muted transition-transform ${open ? "rotate-180" : ""}`}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          viewBox="0 0 24 24"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      {open && (
+        <>
+          {/* Overlay untuk menutup dropdown */}
+          <div
+            className="fixed inset-0 z-30"
+            onClick={() => setOpen(false)}
+          />
+
+          <div className="absolute left-0 right-0 top-full z-40 mt-2 overflow-hidden rounded-xl border theme-card shadow-xl">
+            {/* Search Input */}
+            <div className="border-b theme-border-soft p-3">
+              <div className="relative">
+                <svg
+                  className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 theme-text-muted"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z" />
+                </svg>
+                <input
+                  autoFocus
+                  type="text"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  onClick={(e) => e.stopPropagation()}
+                  placeholder="Ketik untuk mencari..."
+                  className="theme-input h-10 w-full rounded-lg border pl-9 pr-3 text-xs outline-none focus:border-[var(--color-primary)]"
+                />
+              </div>
+            </div>
+
+            {/* Daftar Opsi */}
+            <div className="max-h-64 overflow-y-auto p-1.5">
+              {filteredOptions.length === 0 ? (
+                <div className="px-4 py-8 text-center">
+                  <svg
+                    className="mx-auto h-6 w-6 theme-text-muted"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <p className="theme-text-muted mt-2 text-xs font-medium">
+                    {emptyMessage}
+                  </p>
+                </div>
+              ) : (
+                filteredOptions.map((item) => {
+                  const isSelected = String(getPersonId(item)) === String(value);
+                  return (
+                    <button
+                      type="button"
+                      key={getPersonId(item)}
+                      onClick={() => handleSelect(item)}
+                      className={`
+                        flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition
+                        ${isSelected ? "theme-info" : "hover:bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]"}
+                      `}
+                    >
+                      <div className="theme-info flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold">
+                        {String(getPersonName(item) || "?")
+                          .split(" ")
+                          .map((n) => n[0])
+                          .slice(0, 2)
+                          .join("")
+                          .toUpperCase()}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-semibold theme-text">
+                          {getPersonName(item)}
+                        </p>
+                        {item[subLabelKey] && (
+                          <p className="truncate text-xs theme-text-muted">
+                            {item[subLabelKey]}
+                          </p>
+                        )}
+                      </div>
+                      {isSelected && (
+                        <svg
+                          className="h-4 w-4 shrink-0 text-[var(--color-primary)]"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.5"
+                          viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                      )}
+                    </button>
+                  );
+                })
+              )}
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+// ==========================================
 
 export default function EditSesiKonselingPage() {
   const router = useRouter();
@@ -23,29 +263,33 @@ export default function EditSesiKonselingPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
-  const [form, setForm] = useState({
-    siswaId: "",
-    konselorId: "",
-    tanggal: "",
-    waktuMulai: "",
-    waktuSelesai: "",
-    topik: "",
-    masalah: "",
-    hasil: "",
-    tindakLanjut: "",
-    status: "dijadwalkan",
-    catatan: "",
-  });
+  const [siswaList, setSiswaList] = useState([]);
+  const [konselorList, setKonselorList] = useState([]);
+
+  const [form, setForm] = useState(initialForm);
+
+  const [selectedItem, setSelectedItem] = useState(null);
 
   useEffect(() => {
+    if (!id) return;
+
     async function load() {
       try {
         setLoading(true);
+        setError("");
 
-        const result = await getSesiKonseling();
-        const list = Array.isArray(result) ? result : [];
+        const [sesiResult, siswaResult, guruResult] =
+          await Promise.all([
+            getSesiKonseling(),
+            getSemuaSiswa({ page: 1, limit: 1000 }),
+            getUsers({ page: 1, limit: 100, role: "guru" }),
+          ]);
 
-        const item = list.find(
+        const sesiList = extractArray(sesiResult);
+        const siswaData = extractArray(siswaResult);
+        const guruData = extractArray(guruResult);
+
+        const item = sesiList.find(
           (x) => String(x.id) === String(id)
         );
 
@@ -53,11 +297,32 @@ export default function EditSesiKonselingPage() {
           throw new Error("Data sesi konseling tidak ditemukan.");
         }
 
+        setSelectedItem(item);
+
+        setSiswaList(
+          siswaData.filter((siswa) => getPersonId(siswa))
+        );
+
+        setKonselorList(
+          guruData.filter((guru) => {
+            const status = String(
+              guru?.status || guru?.user?.status || ""
+            ).toLowerCase();
+
+            return (
+              getPersonId(guru) &&
+              (!status ||
+                ["aktif", "active", "1"].includes(status))
+            );
+          })
+        );
+
         setForm({
-          siswaId: item.siswaId || "",
-          konselorId: item.konselorId || "",
+          siswaId: item.siswaId || item.siswa?.id || "",
+          konselorId:
+            item.konselorId || item.konselor?.id || "",
           tanggal: item.tanggal
-            ? item.tanggal.slice(0, 10)
+            ? String(item.tanggal).slice(0, 10)
             : "",
           waktuMulai: item.waktuMulai || "",
           waktuSelesai: item.waktuSelesai || "",
@@ -75,11 +340,42 @@ export default function EditSesiKonselingPage() {
       }
     }
 
-    if (id) load();
+    load();
   }, [id]);
+
+  function handleChange(field, value) {
+    setForm((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  }
+
+  const selectedSiswa = siswaList.find(
+    (item) => String(getPersonId(item)) === String(form.siswaId)
+  );
+
+  const selectedKonselor = konselorList.find(
+    (item) =>
+      String(getPersonId(item)) === String(form.konselorId)
+  );
+
+  const siswaName =
+    getPersonName(selectedSiswa) ||
+    getRelatedName(selectedItem?.siswa) ||
+    (form.siswaId ? "Siswa terpilih" : "-");
+
+  const konselorName =
+    getPersonName(selectedKonselor) ||
+    getRelatedName(selectedItem?.konselor) ||
+    (form.konselorId ? "Konselor terpilih" : "-");
 
   async function handleSubmit(e) {
     e.preventDefault();
+
+    if (!form.siswaId) {
+      setError("Silakan pilih siswa terlebih dahulu.");
+      return;
+    }
 
     try {
       setSaving(true);
@@ -110,48 +406,25 @@ export default function EditSesiKonselingPage() {
   }
 
   return (
-    <div className="theme-page flex h-screen overflow-hidden">
+    <div className="flex h-screen overflow-hidden theme-page theme-text">
       <Sidebar role="admin" active="bk" />
 
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <Header />
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+        <div className="shrink-0">
+          <Header />
+        </div>
 
-        <main className="flex-1 overflow-y-auto p-5 md:p-6 lg:p-8">
-          <div className="mx-auto w-full max-w-[1200px]">
-
-            <div className="mb-7 flex items-start gap-4">
-              <button
-                type="button"
-                onClick={() => router.back()}
-                className="
-                  theme-card theme-border theme-text-muted
-                  mt-1 flex h-10 w-10 shrink-0
-                  items-center justify-center
-                  rounded-xl border
-                  shadow-sm
-                  transition
-                  hover:opacity-80
-                "
-              >
-                <svg
-                  className="h-4 w-4"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M15 19l-7-7 7-7"
-                  />
-                </svg>
-              </button>
-
+        <main className="min-w-0 flex-1 overflow-y-auto">
+          <div className="w-full p-5 md:p-6 lg:p-8">
+            <div className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div className="flex items-start gap-4">
-                <div className="theme-primary flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl shadow-lg">
+                <button
+                  type="button"
+                  onClick={() => router.back()}
+                  className="theme-card theme-border theme-text-muted mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border shadow-sm transition hover:opacity-80"
+                >
                   <svg
-                    className="h-6 w-6"
+                    className="h-4 w-4"
                     fill="none"
                     stroke="currentColor"
                     strokeWidth="2"
@@ -160,19 +433,36 @@ export default function EditSesiKonselingPage() {
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"
+                      d="M15 19l-7-7 7-7"
                     />
                   </svg>
-                </div>
+                </button>
 
-                <div>
-                  <h1 className="theme-text text-[26px] font-bold leading-tight tracking-tight">
-                    Edit Sesi Konseling
-                  </h1>
+                <div className="flex items-start gap-4">
+                  <div className="theme-primary flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl shadow-lg">
+                    <svg
+                      className="h-6 w-6"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"
+                      />
+                    </svg>
+                  </div>
 
-                  <p className="theme-text-muted mt-1 text-sm font-medium">
-                    Perbarui data sesi konseling
-                  </p>
+                  <div>
+                    <h1 className="theme-text text-[26px] font-bold leading-tight tracking-tight">
+                      Edit Sesi Konseling
+                    </h1>
+                    <p className="theme-text-muted mt-1 text-sm font-medium">
+                      Perbarui data sesi konseling
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -192,7 +482,6 @@ export default function EditSesiKonselingPage() {
                     d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                   />
                 </svg>
-
                 {error}
               </div>
             )}
@@ -205,8 +494,7 @@ export default function EditSesiKonselingPage() {
                 </div>
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_340px]">
-
+              <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_340px] 2xl:grid-cols-[minmax(0,1fr)_400px]">
                 <form
                   onSubmit={handleSubmit}
                   className="theme-card theme-border overflow-hidden rounded-2xl border shadow-xl"
@@ -232,7 +520,6 @@ export default function EditSesiKonselingPage() {
                       <h2 className="theme-text text-sm font-bold">
                         Informasi Sesi
                       </h2>
-
                       <p className="theme-text-muted text-xs font-medium">
                         Perbarui data berikut dengan benar
                       </p>
@@ -240,33 +527,39 @@ export default function EditSesiKonselingPage() {
                   </div>
 
                   <div className="grid gap-5 p-6 md:grid-cols-2">
-
-                    <Field label="Siswa ID" required>
-                      <input
+                    {/* SEARCHABLE SISWA */}
+                    <div className="md:col-span-2">
+                      <SearchableSelect
+                        label="Siswa"
                         required
                         value={form.siswaId}
-                        onChange={(e) =>
-                          setForm({
-                            ...form,
-                            siswaId: e.target.value,
-                          })
-                        }
-                        className={inputClass}
+                        onChange={(val) => handleChange("siswaId", val)}
+                        options={siswaList}
+                        placeholder="Pilih atau ketik nama siswa"
+                        disabled={loading}
+                        displayKey="namaLengkap"
+                        subLabelKey="nis"
+                        emptyMessage="Siswa tidak ditemukan"
                       />
-                    </Field>
+                    </div>
 
-                    <Field label="Konselor ID">
-                      <input
+                    {/* SEARCHABLE KONSELOR */}
+                    <div className="md:col-span-2">
+                      <SearchableSelect
+                        label="Konselor"
                         value={form.konselorId}
-                        onChange={(e) =>
-                          setForm({
-                            ...form,
-                            konselorId: e.target.value,
-                          })
-                        }
-                        className={inputClass}
+                        onChange={(val) => handleChange("konselorId", val)}
+                        options={konselorList}
+                        placeholder="Pilih atau ketik nama guru"
+                        disabled={loading}
+                        displayKey="namaLengkap"
+                        subLabelKey="nip"
+                        emptyMessage="Guru tidak ditemukan"
                       />
-                    </Field>
+                      <p className="theme-text-muted mt-2 text-xs">
+                        Konselor dapat dipilih sesuai guru yang tersedia.
+                      </p>
+                    </div>
 
                     <Field label="Tanggal" required>
                       <input
@@ -274,10 +567,7 @@ export default function EditSesiKonselingPage() {
                         type="date"
                         value={form.tanggal}
                         onChange={(e) =>
-                          setForm({
-                            ...form,
-                            tanggal: e.target.value,
-                          })
+                          handleChange("tanggal", e.target.value)
                         }
                         className={inputClass}
                       />
@@ -287,25 +577,14 @@ export default function EditSesiKonselingPage() {
                       <select
                         value={form.status}
                         onChange={(e) =>
-                          setForm({
-                            ...form,
-                            status: e.target.value,
-                          })
+                          handleChange("status", e.target.value)
                         }
                         className={inputClass}
                       >
-                        <option value="dijadwalkan">
-                          Dijadwalkan
-                        </option>
-                        <option value="berlangsung">
-                          Berlangsung
-                        </option>
-                        <option value="selesai">
-                          Selesai
-                        </option>
-                        <option value="dibatalkan">
-                          Dibatalkan
-                        </option>
+                        <option value="dijadwalkan">Dijadwalkan</option>
+                        <option value="berlangsung">Berlangsung</option>
+                        <option value="selesai">Selesai</option>
+                        <option value="dibatalkan">Dibatalkan</option>
                       </select>
                     </Field>
 
@@ -314,10 +593,7 @@ export default function EditSesiKonselingPage() {
                         type="time"
                         value={form.waktuMulai}
                         onChange={(e) =>
-                          setForm({
-                            ...form,
-                            waktuMulai: e.target.value,
-                          })
+                          handleChange("waktuMulai", e.target.value)
                         }
                         className={inputClass}
                       />
@@ -328,10 +604,7 @@ export default function EditSesiKonselingPage() {
                         type="time"
                         value={form.waktuSelesai}
                         onChange={(e) =>
-                          setForm({
-                            ...form,
-                            waktuSelesai: e.target.value,
-                          })
+                          handleChange("waktuSelesai", e.target.value)
                         }
                         className={inputClass}
                       />
@@ -343,10 +616,7 @@ export default function EditSesiKonselingPage() {
                           required
                           value={form.topik}
                           onChange={(e) =>
-                            setForm({
-                              ...form,
-                              topik: e.target.value,
-                            })
+                            handleChange("topik", e.target.value)
                           }
                           className={inputClass}
                         />
@@ -359,10 +629,7 @@ export default function EditSesiKonselingPage() {
                           rows="3"
                           value={form.masalah}
                           onChange={(e) =>
-                            setForm({
-                              ...form,
-                              masalah: e.target.value,
-                            })
+                            handleChange("masalah", e.target.value)
                           }
                           className={`${inputClass} resize-none`}
                         />
@@ -375,10 +642,7 @@ export default function EditSesiKonselingPage() {
                           rows="3"
                           value={form.hasil}
                           onChange={(e) =>
-                            setForm({
-                              ...form,
-                              hasil: e.target.value,
-                            })
+                            handleChange("hasil", e.target.value)
                           }
                           className={`${inputClass} resize-none`}
                         />
@@ -391,10 +655,7 @@ export default function EditSesiKonselingPage() {
                           rows="3"
                           value={form.tindakLanjut}
                           onChange={(e) =>
-                            setForm({
-                              ...form,
-                              tindakLanjut: e.target.value,
-                            })
+                            handleChange("tindakLanjut", e.target.value)
                           }
                           className={`${inputClass} resize-none`}
                         />
@@ -407,10 +668,7 @@ export default function EditSesiKonselingPage() {
                           rows="3"
                           value={form.catatan}
                           onChange={(e) =>
-                            setForm({
-                              ...form,
-                              catatan: e.target.value,
-                            })
+                            handleChange("catatan", e.target.value)
                           }
                           className={`${inputClass} resize-none`}
                         />
@@ -422,15 +680,7 @@ export default function EditSesiKonselingPage() {
                     <button
                       type="button"
                       onClick={() => router.back()}
-                      className="
-                        theme-card theme-border theme-text-secondary
-                        rounded-xl border
-                        px-5 py-2.5
-                        text-sm font-bold
-                        shadow-sm
-                        transition
-                        hover:opacity-80
-                      "
+                      className="theme-card theme-border theme-text-secondary rounded-xl border px-5 py-2.5 text-sm font-bold shadow-sm transition hover:opacity-80"
                     >
                       Batal
                     </button>
@@ -438,17 +688,7 @@ export default function EditSesiKonselingPage() {
                     <button
                       type="submit"
                       disabled={saving}
-                      className="
-                        theme-primary
-                        inline-flex items-center gap-2
-                        rounded-xl
-                        px-5 py-2.5
-                        text-sm font-bold
-                        shadow-lg
-                        transition
-                        disabled:cursor-not-allowed
-                        disabled:opacity-50
-                      "
+                      className="theme-primary inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold shadow-lg transition disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {saving ? (
                         <>
@@ -470,7 +710,6 @@ export default function EditSesiKonselingPage() {
                               d="M5 13l4 4L19 7"
                             />
                           </svg>
-
                           Simpan Perubahan
                         </>
                       )}
@@ -479,7 +718,6 @@ export default function EditSesiKonselingPage() {
                 </form>
 
                 <aside className="space-y-5">
-
                   <div className="theme-card theme-border relative overflow-hidden rounded-2xl border p-6 shadow-xl">
                     <div className="theme-info absolute -right-8 -top-8 h-24 w-24 rounded-full opacity-30" />
 
@@ -513,19 +751,19 @@ export default function EditSesiKonselingPage() {
 
                       <div className="theme-border-soft flex items-center gap-3 border-b pb-4">
                         <div className="theme-primary flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-base font-bold shadow-md">
-                          {form.siswaId?.slice(0, 2).toUpperCase() ||
-                            "?"}
+                          {siswaName !== "-"
+                            ? siswaName.slice(0, 2).toUpperCase()
+                            : "?"}
                         </div>
 
                         <div className="min-w-0">
                           <p className="theme-text truncate text-sm font-bold">
-                            {form.siswaId || "-"}
+                            {siswaName}
                           </p>
-
                           <p className="theme-text-muted truncate text-xs font-medium">
-                            {form.konselorId
-                              ? `Konselor: ${form.konselorId}`
-                              : "-"}
+                            {konselorName !== "-"
+                              ? `Konselor: ${konselorName}`
+                              : "Belum ada konselor"}
                           </p>
                         </div>
                       </div>
@@ -535,12 +773,10 @@ export default function EditSesiKonselingPage() {
                           label="Topik"
                           value={form.topik || "-"}
                         />
-
                         <PreviewRow
                           label="Tanggal"
                           value={form.tanggal || "-"}
                         />
-
                         <PreviewRow
                           label="Waktu"
                           value={
@@ -553,7 +789,6 @@ export default function EditSesiKonselingPage() {
                               : "-"
                           }
                         />
-
                         <PreviewRow
                           label="Status"
                           value={
@@ -585,10 +820,7 @@ export default function EditSesiKonselingPage() {
                       </div>
 
                       <div>
-                        <h4 className="text-sm font-bold">
-                          Perhatian
-                        </h4>
-
+                        <h4 className="text-sm font-bold">Perhatian</h4>
                         <p className="mt-1 text-xs leading-5 opacity-80">
                           Perubahan data akan langsung tersimpan dan
                           memengaruhi riwayat sesi konseling siswa.
@@ -606,32 +838,24 @@ export default function EditSesiKonselingPage() {
   );
 }
 
-
 function Field({ label, children, required }) {
   return (
     <div>
       <label className="theme-text mb-2 block text-sm font-semibold">
         {label}
-
         {required && (
-          <span className="theme-text-danger ml-1 text-[var(--color-danger)]">
-            *
-          </span>
+          <span className="ml-1 text-[var(--color-danger)]">*</span>
         )}
       </label>
-
       {children}
     </div>
   );
 }
 
-
 function PreviewRow({ label, value, badge }) {
   return (
     <div className="flex items-start justify-between gap-3 text-sm">
-      <span className="theme-text-muted font-medium">
-        {label}
-      </span>
+      <span className="theme-text-muted font-medium">{label}</span>
 
       {badge ? (
         <span className="theme-info inline-flex rounded-full px-2.5 py-0.5 text-xs font-bold">

@@ -14,7 +14,6 @@ import {
   ArrowUpCircle,
   Receipt,
   AlertCircle,
-  CheckCircle2,
   TrendingUp,
   TrendingDown,
   Users,
@@ -244,21 +243,21 @@ export default function TabunganSiswaPage() {
   );
 
   return (
-    <div className="theme-page flex h-screen w-full overflow-hidden">
+    <div className="flex h-screen overflow-hidden theme-page theme-text">
       <Sidebar
         role="admin"
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
       />
 
-      <div className="flex h-full min-w-0 flex-1 flex-col overflow-hidden">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         <div className="shrink-0">
           <Header onMenuClick={() => setSidebarOpen(true)} />
         </div>
 
-        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto theme-page theme-text">
+        <main className="min-w-0 flex-1 overflow-y-auto">
           <div className="w-full px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
-            <div className="mx-auto w-full max-w-[1500px] space-y-5">
+            <div className="w-full space-y-5">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div className="flex items-center gap-3">
                   <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
@@ -312,7 +311,7 @@ export default function TabunganSiswaPage() {
                 </div>
               )}
 
-              <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6">
                 <StatCard
                   title="Total Saldo"
                   value={formatRupiah(ringkasan.totalSaldo)}

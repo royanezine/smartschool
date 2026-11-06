@@ -132,22 +132,13 @@ export default function MonitoringLmsPage() {
 
   return (
     <div className="theme-page theme-text min-h-full">
-      <div className="w-full max-w-[1500px] mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
+      <div className="w-full px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
         {/* Back Button */}
         <div className="mb-5 flex items-center">
           <button
             type="button"
             onClick={handleBack}
-            className={`
-              inline-flex items-center gap-2 rounded-xl
-              border theme-border theme-card
-              px-3.5 py-2.5 text-sm font-semibold theme-text-secondary
-              ${themeCardShadow} transition-all
-              hover:-translate-x-0.5
-              hover:border-[color-mix(in_srgb,var(--color-primary)_28%,transparent)]
-              hover:text-[var(--color-primary)]
-              ${themeNeutralHover}
-            `}
+            className={`theme-border theme-card theme-text-secondary inline-flex items-center gap-2 rounded-xl border px-3.5 py-2.5 text-sm font-semibold ${themeCardShadow} transition-all hover:-translate-x-0.5 hover:border-[color-mix(in_srgb,var(--color-primary)_28%,transparent)] hover:text-[var(--color-primary)] ${themeNeutralHover}`}
           >
             <ArrowLeft className="h-4 w-4" />
             <span>Kembali</span>
@@ -156,12 +147,7 @@ export default function MonitoringLmsPage() {
 
         {/* Hero Header */}
         <section
-          className={`
-            relative mb-6 overflow-hidden rounded-2xl
-            border ${themePrimarySoftBorder}
-            ${themePrimaryGradient}
-            ${themePrimaryShadow}
-          `}
+          className={`relative mb-6 overflow-hidden rounded-2xl border ${themePrimarySoftBorder} ${themePrimaryGradient} ${themePrimaryShadow}`}
         >
           <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-[color-mix(in_srgb,var(--color-card)_12%,transparent)] blur-3xl" />
           <div className="relative p-5 sm:p-6 md:p-8">
@@ -188,10 +174,13 @@ export default function MonitoringLmsPage() {
           {/* Loading Skeleton */}
           {loading && (
             <div className="space-y-4">
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
                 {[0, 1, 2].map((i) => (
-                  <div key={i} className={`theme-card rounded-xl border theme-border p-4 ${themeSmallShadow}`}>
-                    <div className="animate-pulse flex items-center gap-3">
+                  <div
+                    key={i}
+                    className={`theme-card theme-border rounded-xl border p-4 ${themeSmallShadow}`}
+                  >
+                    <div className="flex animate-pulse items-center gap-3">
                       <div className="h-10 w-10 rounded-lg bg-[color-mix(in_srgb,var(--color-text)_8%,transparent)]" />
                       <div className="flex-1 space-y-2">
                         <div className="h-3 w-24 rounded bg-[color-mix(in_srgb,var(--color-text)_8%,transparent)]" />
@@ -206,11 +195,15 @@ export default function MonitoringLmsPage() {
 
           {/* Error State */}
           {!loading && error && (
-            <div className={`theme-card rounded-xl border border-[color-mix(in_srgb,var(--color-warning)_30%,transparent)] p-5 ${themeSmallShadow}`}>
+            <div
+              className={`theme-card rounded-xl border border-[color-mix(in_srgb,var(--color-warning)_30%,transparent)] p-5 ${themeSmallShadow}`}
+            >
               <div className="flex items-start gap-3">
                 <AlertCircle className="h-5 w-5 shrink-0 text-[var(--color-warning)]" />
                 <div>
-                  <p className="text-sm font-medium text-[var(--color-warning)]">{error}</p>
+                  <p className="text-sm font-medium text-[var(--color-warning)]">
+                    {error}
+                  </p>
                   <button
                     type="button"
                     onClick={fetchData}
@@ -226,19 +219,24 @@ export default function MonitoringLmsPage() {
 
           {/* Summary Cards */}
           {!loading && !error && ringkasan && (
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
               {summaryCards.map((card) => {
                 const Icon = card.icon;
                 const colors = colorMap[card.color] || colorMap.primary;
                 return (
-                  <div key={card.label} className={`theme-card rounded-xl border theme-border p-4 ${themeSmallShadow}`}>
+                  <div
+                    key={card.label}
+                    className={`theme-card theme-border rounded-xl border p-4 ${themeSmallShadow}`}
+                  >
                     <div className="flex items-center gap-3">
-                      <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${colors.bg} ${colors.text}`}>
+                      <div
+                        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${colors.bg} ${colors.text}`}
+                      >
                         <Icon size={18} />
                       </div>
                       <div>
-                        <p className="text-sm theme-text-secondary">{card.label}</p>
-                        <p className="mt-1 text-2xl font-semibold theme-text">{card.value}</p>
+                        <p className="theme-text-secondary text-sm">{card.label}</p>
+                        <p className="theme-text mt-1 text-2xl font-semibold">{card.value}</p>
                       </div>
                     </div>
                   </div>
@@ -249,16 +247,28 @@ export default function MonitoringLmsPage() {
 
           {/* Per-Sekolah Table */}
           {!loading && !error && perSekolah.length > 0 && (
-            <div className={`overflow-hidden rounded-xl border theme-border theme-card ${themeCardShadow}`}>
-              <div className="overflow-x-auto">
+            <div
+              className={`theme-border theme-card overflow-hidden rounded-xl border ${themeCardShadow}`}
+            >
+              <div className="w-full overflow-x-auto">
                 <table className="w-full min-w-[700px] text-left text-sm">
-                  <thead className={`${themeNeutralSurface} theme-text-secondary text-xs uppercase`}>
+                  <thead
+                    className={`${themeNeutralSurface} theme-text-secondary text-xs uppercase`}
+                  >
                     <tr>
                       <th className="px-4 py-3 font-semibold">Sekolah</th>
-                      <th className="px-4 py-3 font-semibold text-right">Jumlah Materi</th>
-                      <th className="px-4 py-3 font-semibold text-right">Jumlah Tugas</th>
-                      <th className="px-4 py-3 font-semibold text-right">Tugas Dikumpulkan</th>
-                      <th className="px-4 py-3 font-semibold text-right">Total Siswa</th>
+                      <th className="px-4 py-3 text-right font-semibold">
+                        Jumlah Materi
+                      </th>
+                      <th className="px-4 py-3 text-right font-semibold">
+                        Jumlah Tugas
+                      </th>
+                      <th className="px-4 py-3 text-right font-semibold">
+                        Tugas Dikumpulkan
+                      </th>
+                      <th className="px-4 py-3 text-right font-semibold">
+                        Total Siswa
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -266,14 +276,26 @@ export default function MonitoringLmsPage() {
                       <tr
                         key={s.sekolahId}
                         className={`${themeNeutralHover} transition-colors ${
-                          index !== perSekolah.length - 1 ? `border-b ${themeDivider}` : ""
+                          index !== perSekolah.length - 1
+                            ? `border-b ${themeDivider}`
+                            : ""
                         }`}
                       >
-                        <td className="px-4 py-3 font-medium theme-text">{s.namaSekolah}</td>
-                        <td className="px-4 py-3 theme-text-secondary text-right">{s.jumlahMateri ?? "-"}</td>
-                        <td className="px-4 py-3 theme-text-secondary text-right">{s.jumlahTugas ?? "-"}</td>
-                        <td className="px-4 py-3 theme-text-secondary text-right">{s.tugasDikumpulkan ?? "-"}</td>
-                        <td className="px-4 py-3 theme-text-secondary text-right">{s.totalSiswa ?? "-"}</td>
+                        <td className="theme-text px-4 py-3 font-medium">
+                          {s.namaSekolah}
+                        </td>
+                        <td className="theme-text-secondary px-4 py-3 text-right">
+                          {s.jumlahMateri ?? "-"}
+                        </td>
+                        <td className="theme-text-secondary px-4 py-3 text-right">
+                          {s.jumlahTugas ?? "-"}
+                        </td>
+                        <td className="theme-text-secondary px-4 py-3 text-right">
+                          {s.tugasDikumpulkan ?? "-"}
+                        </td>
+                        <td className="theme-text-secondary px-4 py-3 text-right">
+                          {s.totalSiswa ?? "-"}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -284,12 +306,18 @@ export default function MonitoringLmsPage() {
 
           {/* Empty State */}
           {!loading && !error && !ringkasan && perSekolah.length === 0 && (
-            <div className={`theme-card flex flex-col items-center justify-center rounded-2xl border theme-border px-6 py-16 text-center ${themeCardShadow}`}>
-              <div className={`flex h-14 w-14 items-center justify-center rounded-2xl border ${themePrimarySoftBorder} ${themePrimarySoft} text-[var(--color-primary)]`}>
+            <div
+              className={`theme-card theme-border flex flex-col items-center justify-center rounded-2xl border px-6 py-16 text-center ${themeCardShadow}`}
+            >
+              <div
+                className={`flex h-14 w-14 items-center justify-center rounded-2xl border ${themePrimarySoftBorder} ${themePrimarySoft} text-[var(--color-primary)]`}
+              >
                 <Search className="h-6 w-6" />
               </div>
-              <h3 className="mt-4 text-sm font-bold theme-text">Belum Ada Data LMS</h3>
-              <p className="mt-1 max-w-sm text-sm leading-relaxed theme-text-muted">
+              <h3 className="theme-text mt-4 text-sm font-bold">
+                Belum Ada Data LMS
+              </h3>
+              <p className="theme-text-muted mt-1 max-w-sm text-sm leading-relaxed">
                 Data aktivitas LMS dan tugas lintas sekolah belum tersedia saat ini.
               </p>
             </div>

@@ -35,7 +35,7 @@ const modules = [
   {
     title: "Notifikasi",
     icon: BellRing,
-    desc: "Informasi penting langsung dikirim ke guru, siswa, maupun orang tua.",
+    desc: "Informasi penting langsung dikirim ke guru, siswa.",
   },
   {
     title: "Dashboard Analitik",

@@ -45,7 +45,6 @@ export default function PagesPage() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
 
-
   const fetchPages = async (showRefresh = false) => {
     try {
       setError("");
@@ -57,7 +56,6 @@ export default function PagesPage() {
       }
 
       const result = await apiFetch("/api/cms/halaman");
-      
 
       const responseData = result?.data;
 
@@ -71,9 +69,7 @@ export default function PagesPage() {
     } catch (err) {
       console.error("Gagal mengambil halaman CMS:", err);
 
-      setError(
-        err?.message || "Gagal mengambil data halaman dari server."
-      );
+      setError(err?.message || "Gagal mengambil data halaman dari server.");
 
       setPages([]);
     } finally {
@@ -85,7 +81,6 @@ export default function PagesPage() {
   useEffect(() => {
     fetchPages();
   }, []);
-
 
   const filteredPages = useMemo(() => {
     const keyword = searchQuery.trim().toLowerCase();
@@ -107,7 +102,6 @@ export default function PagesPage() {
     });
   }, [pages, searchQuery]);
 
-
   const totalPages = pages.length;
 
   const publishedCount = pages.filter((page) => {
@@ -125,7 +119,6 @@ export default function PagesPage() {
 
     return status === "draft";
   }).length;
-
 
   const getPageTitle = (page) => {
     return page?.judul || "Tanpa Judul";
@@ -180,26 +173,26 @@ export default function PagesPage() {
     };
   };
 
+  const getPageUrl = (page) => {
+    const slug = String(page?.slug || "").trim();
 
- const getPageUrl = (page) => {
-  const slug = String(page?.slug || "").trim();
+    const tenant =
+      page?.subdomain ||
+      page?.tenantSubdomain ||
+      page?.tenantSlug ||
+      page?.sekolahSubdomain ||
+      page?.sekolah?.subdomain ||
+      page?.tenant?.subdomain ||
+      page?.yayasan?.subdomain;
 
-  const tenant =
-    page?.subdomain ||
-    page?.tenantSubdomain ||
-    page?.tenantSlug ||
-    page?.sekolahSubdomain ||
-    page?.sekolah?.subdomain ||
-    page?.tenant?.subdomain ||
-    page?.yayasan?.subdomain;
+    if (!slug || !tenant) {
+      return "#";
+    }
 
-  if (!slug || !tenant) {
-    return "#";
-  }
-
-  return `/${encodeURIComponent(String(tenant).trim())}/${encodeURIComponent(slug)}`;
-};
-
+    return `/${encodeURIComponent(
+      String(tenant).trim()
+    )}/${encodeURIComponent(slug)}`;
+  };
 
   const handleDelete = async () => {
     if (!deleteTarget?.id) {
@@ -211,22 +204,15 @@ export default function PagesPage() {
       setError("");
       setSuccess("");
 
-      await apiFetch(
-        `/api/cms/halaman/${deleteTarget.id}`,
-        {
-          method: "DELETE",
-        }
-      );
+      await apiFetch(`/api/cms/halaman/${deleteTarget.id}`, {
+        method: "DELETE",
+      });
 
       setPages((currentPages) =>
-        currentPages.filter(
-          (page) => page.id !== deleteTarget.id
-        )
+        currentPages.filter((page) => page.id !== deleteTarget.id)
       );
 
-      setSuccess(
-        `Halaman "${getPageTitle(deleteTarget)}" berhasil dihapus.`
-      );
+      setSuccess(`Halaman "${getPageTitle(deleteTarget)}" berhasil dihapus.`);
 
       setDeleteTarget(null);
 
@@ -236,44 +222,47 @@ export default function PagesPage() {
     } catch (err) {
       console.error("Gagal menghapus halaman:", err);
 
-      setError(
-        err?.message || "Gagal menghapus halaman."
-      );
+      setError(err?.message || "Gagal menghapus halaman.");
     } finally {
       setDeleting(false);
     }
   };
 
-
   if (loading) {
     return (
-      <div className="theme-page flex min-h-screen w-full">
-        <Sidebar
-          active={active}
-          setActive={setActive}
-          collapsed={collapsed}
-          setCollapsed={setCollapsed}
-        />
-
-        <div className="flex min-w-0 flex-1 flex-col">
-          <Header
-            title="Halaman Statis"
-            user={{
-              name: "CMS Admin",
-              email: "cms@smartschool.com",
-              avatar: "CA",
-            }}
+      <div className="theme-page flex h-screen w-full overflow-hidden">
+        <div className="fixed inset-y-0 left-0 z-50">
+          <Sidebar
+            active={active}
+            setActive={setActive}
+            collapsed={collapsed}
+            setCollapsed={setCollapsed}
           />
+        </div>
 
-          <main className="theme-page flex flex-1 items-center justify-center p-6">
+        <div
+          className={`flex h-screen min-w-0 flex-1 flex-col overflow-hidden transition-[margin] duration-300 ${
+            collapsed ? "lg:ml-[88px]" : "lg:ml-[260px]"
+          }`}
+        >
+          <div className="shrink-0">
+            <Header
+              title="Halaman Statis"
+              user={{
+                name: "CMS Admin",
+                email: "cms@smartschool.com",
+                avatar: "CA",
+              }}
+            />
+          </div>
+
+          <main className="theme-page flex min-h-0 min-w-0 flex-1 items-center justify-center overflow-y-auto p-6">
             <div className="flex flex-col items-center text-center">
               <div className="theme-info mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border">
                 <Loader2 className="h-6 w-6 animate-spin" />
               </div>
 
-              <h2 className="theme-text text-sm font-bold">
-                Memuat halaman...
-              </h2>
+              <h2 className="theme-text text-sm font-bold">Memuat halaman...</h2>
 
               <p className="theme-text-muted mt-1 text-xs">
                 Mengambil data halaman dari server.
@@ -285,35 +274,36 @@ export default function PagesPage() {
     );
   }
 
-
   return (
-    <div className="theme-page flex min-h-screen w-full">
-
-      <Sidebar
-        active={active}
-        setActive={setActive}
-        collapsed={collapsed}
-        setCollapsed={setCollapsed}
-      />
-
-
-      <div className="flex min-w-0 flex-1 flex-col">
-
-        <Header
-          title="Halaman Statis"
-          user={{
-            name: "CMS Admin",
-            email: "cms@smartschool.com",
-            avatar: "CA",
-          }}
+    <div className="theme-page flex h-screen w-full overflow-hidden">
+      <div className="fixed inset-y-0 left-0 z-50">
+        <Sidebar
+          active={active}
+          setActive={setActive}
+          collapsed={collapsed}
+          setCollapsed={setCollapsed}
         />
+      </div>
 
+      <div
+        className={`flex h-screen min-w-0 flex-1 flex-col overflow-hidden transition-[margin] duration-300 ${
+          collapsed ? "lg:ml-[88px]" : "lg:ml-[260px]"
+        }`}
+      >
+        <div className="shrink-0">
+          <Header
+            title="Halaman Statis"
+            user={{
+              name: "CMS Admin",
+              email: "cms@smartschool.com",
+              avatar: "CA",
+            }}
+          />
+        </div>
 
-        <main className="theme-page min-w-0 flex-1 overflow-y-auto">
+        <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
           <div className="w-full min-w-0 px-3 py-4 sm:px-5 sm:py-6 md:px-7 lg:px-9 xl:px-10">
-            <div className="mx-auto w-full max-w-[1700px]">
-
-
+            <div className="w-full min-w-0">
               <div className="mb-6 flex flex-col gap-4 lg:mb-7 lg:flex-row lg:items-center lg:justify-between">
                 <div className="min-w-0">
                   <div className="flex items-center gap-3">
@@ -338,25 +328,13 @@ export default function PagesPage() {
                     type="button"
                     onClick={() => fetchPages(true)}
                     disabled={refreshing}
-                    className="
-                      theme-card theme-border theme-text-secondary
-                      inline-flex h-11 items-center justify-center gap-2
-                      rounded-xl border px-4 text-sm font-semibold shadow-sm
-                      transition
-                      hover:bg-[var(--color-header-hover)]
-                      hover:text-[var(--color-primary)]
-                      disabled:cursor-not-allowed disabled:opacity-60
-                    "
+                    className="theme-card theme-border theme-text-secondary inline-flex h-11 items-center justify-center gap-2 rounded-xl border px-4 text-sm font-semibold shadow-sm transition hover:bg-[var(--color-header-hover)] hover:text-[var(--color-primary)] disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     <RefreshCw
-                      className={`h-4 w-4 ${
-                        refreshing ? "animate-spin" : ""
-                      }`}
+                      className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`}
                     />
 
-                    <span className="hidden sm:inline">
-                      Refresh
-                    </span>
+                    <span className="hidden sm:inline">Refresh</span>
                   </button>
 
                   <Link
@@ -369,7 +347,6 @@ export default function PagesPage() {
                 </div>
               </div>
 
-
               {success && (
                 <div className="theme-success mb-5 flex items-start gap-3 rounded-2xl border p-4">
                   <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-success)_15%,transparent)]">
@@ -377,9 +354,7 @@ export default function PagesPage() {
                   </div>
 
                   <div className="min-w-0 flex-1">
-                    <h3 className="text-sm font-bold">
-                      Berhasil
-                    </h3>
+                    <h3 className="text-sm font-bold">Berhasil</h3>
 
                     <p className="mt-1 text-xs leading-5 opacity-90">
                       {success}
@@ -396,7 +371,6 @@ export default function PagesPage() {
                 </div>
               )}
 
-
               {error && (
                 <div className="theme-danger mb-5 flex items-start gap-3 rounded-2xl border p-4">
                   <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-danger)_15%,transparent)]">
@@ -404,13 +378,9 @@ export default function PagesPage() {
                   </div>
 
                   <div className="min-w-0 flex-1">
-                    <h3 className="text-sm font-bold">
-                      Terjadi kesalahan
-                    </h3>
+                    <h3 className="text-sm font-bold">Terjadi kesalahan</h3>
 
-                    <p className="mt-1 text-xs leading-5 opacity-90">
-                      {error}
-                    </p>
+                    <p className="mt-1 text-xs leading-5 opacity-90">{error}</p>
                   </div>
 
                   <button
@@ -423,12 +393,8 @@ export default function PagesPage() {
                 </div>
               )}
 
-
               <section
-                className="
-                  relative mb-6 overflow-hidden rounded-3xl p-5
-                  shadow-xl sm:p-6 lg:p-7
-                "
+                className="relative mb-6 overflow-hidden rounded-3xl p-5 shadow-xl sm:p-6 lg:p-7"
                 style={{
                   background:
                     "linear-gradient(135deg, var(--color-card-soft), var(--color-sidebar-active))",
@@ -454,7 +420,6 @@ export default function PagesPage() {
                   <div className="min-w-0 max-w-2xl">
                     <div className="theme-info mb-3 inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-medium">
                       <Globe2 className="h-3.5 w-3.5" />
-
                       Website Content
                     </div>
 
@@ -463,16 +428,12 @@ export default function PagesPage() {
                     </h2>
 
                     <p className="theme-text-secondary mt-2 max-w-xl text-xs leading-6 sm:text-sm">
-                      Buat dan kelola halaman seperti Tentang
-                      Sekolah, Akademik, Kontak, Profil Sekolah,
-                      dan halaman informasi lainnya.
+                      Buat dan kelola halaman seperti Tentang Sekolah, Akademik,
+                      Kontak, Profil Sekolah, dan halaman informasi lainnya.
                     </p>
                   </div>
 
-
-                  <div className="grid w-full grid-cols-3 gap-2 sm:max-w-lg sm:gap-3">
-
-
+                  <div className="grid w-full grid-cols-1 gap-2 sm:grid-cols-3 sm:gap-3 lg:w-auto lg:min-w-[420px] 2xl:grid-cols-3">
                     <div className="theme-card rounded-2xl border p-3 shadow-sm sm:p-4">
                       <div className="mb-2 flex items-center justify-between">
                         <span className="theme-text-muted text-[9px] font-medium uppercase tracking-wider sm:text-[10px]">
@@ -491,7 +452,6 @@ export default function PagesPage() {
                       </p>
                     </div>
 
-
                     <div className="theme-card rounded-2xl border p-3 shadow-sm sm:p-4">
                       <div className="mb-2 flex items-center justify-between">
                         <span className="theme-text-muted text-[9px] font-medium uppercase tracking-wider sm:text-[10px]">
@@ -509,7 +469,6 @@ export default function PagesPage() {
                         aktif
                       </p>
                     </div>
-
 
                     <div className="theme-card rounded-2xl border p-3 shadow-sm sm:p-4">
                       <div className="mb-2 flex items-center justify-between">
@@ -532,7 +491,6 @@ export default function PagesPage() {
                 </div>
               </section>
 
-
               <div className="mb-4 flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
                 <div>
                   <h2 className="theme-text text-base font-bold">
@@ -544,7 +502,6 @@ export default function PagesPage() {
                   </p>
                 </div>
 
-
                 <div className="relative w-full xl:w-[360px]">
                   <Search className="theme-text-muted absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2" />
 
@@ -552,9 +509,7 @@ export default function PagesPage() {
                     type="text"
                     placeholder="Cari judul, slug, status..."
                     value={searchQuery}
-                    onChange={(e) =>
-                      setSearchQuery(e.target.value)
-                    }
+                    onChange={(e) => setSearchQuery(e.target.value)}
                     className="theme-input w-full rounded-xl border py-3 pl-10 pr-10 text-sm outline-none shadow-sm transition focus:border-[var(--color-primary)]"
                   />
 
@@ -569,7 +524,6 @@ export default function PagesPage() {
                   )}
                 </div>
               </div>
-
 
               <section className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
                 <div className="theme-card-soft theme-border flex flex-col gap-3 border-b px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
@@ -591,14 +545,12 @@ export default function PagesPage() {
 
                   <div className="theme-success inline-flex w-fit items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-semibold">
                     <CheckCircle2 className="h-3.5 w-3.5" />
-
                     Terhubung Backend
                   </div>
                 </div>
 
                 {filteredPages.length > 0 ? (
                   <>
-
                     <div className="hidden w-full overflow-x-auto md:block">
                       <table className="w-full min-w-[900px] border-collapse">
                         <thead>
@@ -627,15 +579,13 @@ export default function PagesPage() {
 
                         <tbody>
                           {filteredPages.map((page) => {
-                            const statusStyle =
-                              getStatusStyle(page?.status);
+                            const statusStyle = getStatusStyle(page?.status);
 
                             return (
                               <tr
                                 key={page.id}
                                 className="theme-table-hover theme-border-soft border-b transition-colors"
                               >
-
                                 <td className="px-6 py-4">
                                   <div className="flex items-center gap-3">
                                     <div className="theme-info flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border">
@@ -654,7 +604,6 @@ export default function PagesPage() {
                                   </div>
                                 </td>
 
-
                                 <td className="px-6 py-4">
                                   <div className="theme-card-soft inline-flex max-w-[300px] items-center gap-1.5 rounded-lg border px-2.5 py-1.5">
                                     <Globe2 className="theme-text-muted h-3.5 w-3.5 shrink-0" />
@@ -665,7 +614,6 @@ export default function PagesPage() {
                                   </div>
                                 </td>
 
-
                                 <td className="px-6 py-4">
                                   <span
                                     className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-[11px] font-semibold ${statusStyle.wrapper}`}
@@ -674,12 +622,9 @@ export default function PagesPage() {
                                       className={`h-1.5 w-1.5 rounded-full ${statusStyle.dot}`}
                                     />
 
-                                    {getStatusLabel(
-                                      page?.status
-                                    )}
+                                    {getStatusLabel(page?.status)}
                                   </span>
                                 </td>
-
 
                                 <td className="px-6 py-4">
                                   <span className="theme-text-secondary text-xs font-medium">
@@ -687,19 +632,15 @@ export default function PagesPage() {
                                   </span>
                                 </td>
 
-
                                 <td className="px-6 py-4">
                                   <div className="flex items-center justify-end gap-1">
-
-
                                     <Link
-  href={`/admin/cms/pages/${page.id}`}
-  title="Detail halaman"
-  className="theme-text-muted flex h-9 w-9 items-center justify-center rounded-lg transition hover:bg-[var(--color-sidebar-active)] hover:text-[var(--color-primary)]"
->
-  <Eye className="h-4 w-4" />
-</Link>
-
+                                      href={`/admin/cms/pages/${page.id}`}
+                                      title="Detail halaman"
+                                      className="theme-text-muted flex h-9 w-9 items-center justify-center rounded-lg transition hover:bg-[var(--color-sidebar-active)] hover:text-[var(--color-primary)]"
+                                    >
+                                      <Eye className="h-4 w-4" />
+                                    </Link>
 
                                     <Link
                                       href={`/admin/cms/pages/${page.id}/edit`}
@@ -709,20 +650,14 @@ export default function PagesPage() {
                                       <Pencil className="h-4 w-4" />
                                     </Link>
 
-
                                     <button
                                       type="button"
                                       title="Hapus"
-                                      onClick={() =>
-                                        setDeleteTarget(page)
-                                      }
+                                      onClick={() => setDeleteTarget(page)}
                                       className="theme-text-muted flex h-9 w-9 items-center justify-center rounded-lg transition hover:bg-[var(--color-danger-background)] hover:text-[var(--color-danger)]"
                                     >
                                       <Trash2 className="h-4 w-4" />
                                     </button>
-
-
-                                
                                   </div>
                                 </td>
                               </tr>
@@ -732,17 +667,12 @@ export default function PagesPage() {
                       </table>
                     </div>
 
-
                     <div className="theme-border-soft divide-y md:hidden">
                       {filteredPages.map((page) => {
-                        const statusStyle =
-                          getStatusStyle(page?.status);
+                        const statusStyle = getStatusStyle(page?.status);
 
                         return (
-                          <div
-                            key={page.id}
-                            className="p-4"
-                          >
+                          <div key={page.id} className="p-4">
                             <div className="flex items-start gap-3">
                               <div className="theme-info flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border">
                                 <File className="h-4 w-4" />
@@ -767,9 +697,7 @@ export default function PagesPage() {
                                       className={`h-1.5 w-1.5 rounded-full ${statusStyle.dot}`}
                                     />
 
-                                    {getStatusLabel(
-                                      page?.status
-                                    )}
+                                    {getStatusLabel(page?.status)}
                                   </span>
                                 </div>
 
@@ -779,18 +707,13 @@ export default function PagesPage() {
                                   </span>
 
                                   <div className="flex items-center gap-1">
-
-
-                                    
-<Link
-  href={`/admin/cms/pages/${page.id}`}
-  title="Detail Halaman"
-  className="theme-text-muted flex h-8 w-8 items-center justify-center rounded-lg transition hover:bg-[var(--color-sidebar-active)] hover:text-[var(--color-primary)]"
->
-  <Eye className="h-4 w-4" />
-</Link>
-
-
+                                    <Link
+                                      href={`/admin/cms/pages/${page.id}`}
+                                      title="Detail Halaman"
+                                      className="theme-text-muted flex h-8 w-8 items-center justify-center rounded-lg transition hover:bg-[var(--color-sidebar-active)] hover:text-[var(--color-primary)]"
+                                    >
+                                      <Eye className="h-4 w-4" />
+                                    </Link>
 
                                     <Link
                                       href={`/admin/pages/${page.id}/edit`}
@@ -799,12 +722,9 @@ export default function PagesPage() {
                                       <Pencil className="h-4 w-4" />
                                     </Link>
 
-
                                     <button
                                       type="button"
-                                      onClick={() =>
-                                        setDeleteTarget(page)
-                                      }
+                                      onClick={() => setDeleteTarget(page)}
                                       className="theme-text-muted flex h-8 w-8 items-center justify-center rounded-lg transition hover:bg-[var(--color-danger-background)] hover:text-[var(--color-danger)]"
                                     >
                                       <Trash2 className="h-4 w-4" />
@@ -819,7 +739,6 @@ export default function PagesPage() {
                     </div>
                   </>
                 ) : (
-
                   <div className="px-6 py-16 text-center">
                     <div className="mx-auto flex max-w-sm flex-col items-center">
                       <div className="theme-card-soft theme-text-muted mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border">
@@ -844,14 +763,12 @@ export default function PagesPage() {
                           className="theme-primary mt-5 inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-semibold transition"
                         >
                           <Plus className="h-3.5 w-3.5" />
-
                           Buat Halaman
                         </Link>
                       )}
                     </div>
                   </div>
                 )}
-
 
                 <div className="theme-card-soft theme-border flex flex-col gap-3 border-t px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
                   <p className="theme-text-muted text-xs">
@@ -871,50 +788,38 @@ export default function PagesPage() {
                     className="inline-flex w-fit items-center gap-2 text-xs font-semibold text-[var(--color-primary)] transition hover:text-[var(--color-primary-hover)]"
                   >
                     <Plus className="h-3.5 w-3.5" />
-
                     Tambah halaman baru
-
                     <ArrowRight className="h-3.5 w-3.5" />
                   </Link>
                 </div>
               </section>
 
-
-              <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-3">
-
-
+              <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
                 <div className="theme-card theme-border rounded-2xl border p-5">
                   <div className="theme-info mb-3 flex h-9 w-9 items-center justify-center rounded-xl border">
                     <LayoutTemplate className="h-4 w-4" />
                   </div>
 
-                  <h3 className="theme-text text-sm font-bold">
-                    Halaman Statis
-                  </h3>
+                  <h3 className="theme-text text-sm font-bold">Halaman Statis</h3>
 
                   <p className="theme-text-secondary mt-1 text-xs leading-5">
-                    Cocok digunakan untuk Tentang Sekolah,
-                    Akademik, Kontak, Profil, dan informasi
-                    lainnya.
+                    Cocok digunakan untuk Tentang Sekolah, Akademik, Kontak,
+                    Profil, dan informasi lainnya.
                   </p>
                 </div>
-
 
                 <div className="theme-card theme-border rounded-2xl border p-5">
                   <div className="theme-info mb-3 flex h-9 w-9 items-center justify-center rounded-xl border">
                     <Globe2 className="h-4 w-4" />
                   </div>
 
-                  <h3 className="theme-text text-sm font-bold">
-                    Slug Otomatis
-                  </h3>
+                  <h3 className="theme-text text-sm font-bold">Slug Otomatis</h3>
 
                   <p className="theme-text-secondary mt-1 text-xs leading-5">
-                    Slug halaman berasal dari sistem CMS sehingga
-                    frontend tidak perlu membuat slug sendiri.
+                    Slug halaman berasal dari sistem CMS sehingga frontend tidak
+                    perlu membuat slug sendiri.
                   </p>
                 </div>
-
 
                 <div className="theme-card theme-border rounded-2xl border p-5">
                   <div className="theme-success mb-3 flex h-9 w-9 items-center justify-center rounded-xl border">
@@ -926,12 +831,11 @@ export default function PagesPage() {
                   </h3>
 
                   <p className="theme-text-secondary mt-1 text-xs leading-5">
-                    Data halaman diambil langsung dari API CMS
-                    sekolah yang sedang login.
+                    Data halaman diambil langsung dari API CMS sekolah yang
+                    sedang login.
                   </p>
                 </div>
               </div>
-
 
               <footer className="py-7 text-center">
                 <p className="theme-text-muted text-[11px]">
@@ -943,12 +847,9 @@ export default function PagesPage() {
         </main>
       </div>
 
-
       {selectedPage && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm">
           <div className="theme-card theme-border max-h-[90vh] w-full max-w-3xl overflow-hidden rounded-3xl border shadow-2xl">
-
-
             <div className="theme-border flex items-center justify-between border-b px-5 py-4">
               <div className="flex min-w-0 items-center gap-3">
                 <div className="theme-info flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border">
@@ -975,10 +876,7 @@ export default function PagesPage() {
               </button>
             </div>
 
-
             <div className="max-h-[65vh] overflow-y-auto p-5 sm:p-6">
-
-
               <div className="mb-5">
                 <p className="theme-text-muted text-[10px] font-bold uppercase tracking-wider">
                   Judul
@@ -988,7 +886,6 @@ export default function PagesPage() {
                   {getPageTitle(selectedPage)}
                 </h4>
               </div>
-
 
               <div className="mb-5">
                 <p className="theme-text-muted text-[10px] font-bold uppercase tracking-wider">
@@ -1004,7 +901,6 @@ export default function PagesPage() {
                 </div>
               </div>
 
-
               <div className="mb-5">
                 <p className="theme-text-muted mb-2 text-[10px] font-bold uppercase tracking-wider">
                   Status
@@ -1012,25 +908,18 @@ export default function PagesPage() {
 
                 <span
                   className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold ${
-                    getStatusStyle(
-                      selectedPage?.status
-                    ).wrapper
+                    getStatusStyle(selectedPage?.status).wrapper
                   }`}
                 >
                   <span
                     className={`h-1.5 w-1.5 rounded-full ${
-                      getStatusStyle(
-                        selectedPage?.status
-                      ).dot
+                      getStatusStyle(selectedPage?.status).dot
                     }`}
                   />
 
-                  {getStatusLabel(
-                    selectedPage?.status
-                  )}
+                  {getStatusLabel(selectedPage?.status)}
                 </span>
               </div>
-
 
               <div>
                 <p className="theme-text-muted mb-2 text-[10px] font-bold uppercase tracking-wider">
@@ -1040,49 +929,7 @@ export default function PagesPage() {
                 <div className="theme-card-soft theme-border rounded-2xl border p-5">
                   {selectedPage?.konten ? (
                     <div
-                      className="
-                        theme-text-secondary
-                        text-sm leading-7
-
-                        [&_p]:mb-4
-
-                        [&_h1]:mb-4
-                        [&_h1]:text-2xl
-                        [&_h1]:font-bold
-                        [&_h1]:text-[var(--color-text)]
-
-                        [&_h2]:mb-3
-                        [&_h2]:text-xl
-                        [&_h2]:font-bold
-                        [&_h2]:text-[var(--color-text)]
-
-                        [&_h3]:mb-2
-                        [&_h3]:text-lg
-                        [&_h3]:font-bold
-                        [&_h3]:text-[var(--color-text)]
-
-                        [&_ul]:mb-4
-                        [&_ul]:list-disc
-                        [&_ul]:pl-6
-
-                        [&_ol]:mb-4
-                        [&_ol]:list-decimal
-                        [&_ol]:pl-6
-
-                        [&_li]:mb-1
-
-                        [&_strong]:font-bold
-                        [&_strong]:text-[var(--color-text)]
-
-                        [&_a]:text-[var(--color-primary)]
-                        [&_a]:underline
-
-                        [&_img]:my-4
-                        [&_img]:max-w-full
-                        [&_img]:rounded-xl
-                        [&_img]:border
-                        [&_img]:border-[var(--color-border)]
-                      "
+                      className="theme-text-secondary text-sm leading-7 [&_p]:mb-4 [&_h1]:mb-4 [&_h1]:text-2xl [&_h1]:font-bold [&_h1]:text-[var(--color-text)] [&_h2]:mb-3 [&_h2]:text-xl [&_h2]:font-bold [&_h2]:text-[var(--color-text)] [&_h3]:mb-2 [&_h3]:text-lg [&_h3]:font-bold [&_h3]:text-[var(--color-text)] [&_ul]:mb-4 [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:mb-4 [&_ol]:list-decimal [&_ol]:pl-6 [&_li]:mb-1 [&_strong]:font-bold [&_strong]:text-[var(--color-text)] [&_a]:text-[var(--color-primary)] [&_a]:underline [&_img]:my-4 [&_img]:max-w-full [&_img]:rounded-xl [&_img]:border [&_img]:border-[var(--color-border)]"
                       dangerouslySetInnerHTML={{
                         __html: selectedPage.konten,
                       }}
@@ -1090,7 +937,6 @@ export default function PagesPage() {
                   ) : (
                     <div className="theme-text-muted flex items-center gap-2 text-sm">
                       <FileText className="h-4 w-4" />
-
                       Belum ada konten.
                     </div>
                   )}
@@ -1098,9 +944,7 @@ export default function PagesPage() {
               </div>
             </div>
 
-
             <div className="theme-card-soft theme-border flex flex-col gap-2 border-t p-4 sm:flex-row sm:justify-end">
-
               <button
                 type="button"
                 onClick={() => setSelectedPage(null)}
@@ -1116,7 +960,6 @@ export default function PagesPage() {
                   className="theme-card theme-border theme-text-secondary inline-flex items-center justify-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold transition hover:border-[var(--color-primary)] hover:bg-[var(--color-sidebar-active)] hover:text-[var(--color-primary)]"
                 >
                   <ExternalLink className="h-4 w-4" />
-
                   Buka Website
                 </Link>
               )}
@@ -1126,7 +969,6 @@ export default function PagesPage() {
                 className="theme-primary inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold shadow-sm transition"
               >
                 <Pencil className="h-4 w-4" />
-
                 Edit Halaman
               </Link>
             </div>
@@ -1134,11 +976,9 @@ export default function PagesPage() {
         </div>
       )}
 
-
       {deleteTarget && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm">
           <div className="theme-card theme-border w-full max-w-md overflow-hidden rounded-3xl border shadow-2xl">
-
             <div className="p-6">
               <div className="theme-danger flex h-12 w-12 items-center justify-center rounded-2xl">
                 <Trash2 className="h-5 w-5" />
@@ -1151,7 +991,7 @@ export default function PagesPage() {
               <p className="theme-text-secondary mt-2 text-sm leading-6">
                 Kamu akan menghapus halaman{" "}
                 <span className="theme-text font-semibold">
-                  "{getPageTitle(deleteTarget)}"
+                  &quot;{getPageTitle(deleteTarget)}&quot;
                 </span>
                 .
               </p>

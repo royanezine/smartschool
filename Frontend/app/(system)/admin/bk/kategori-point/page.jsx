@@ -165,14 +165,17 @@ export default function KategoriPelanggaranPage() {
   }
 
   return (
-    <div className="theme-page flex h-screen overflow-hidden">
+    <div className="flex h-screen overflow-hidden theme-page theme-text">
       <Sidebar role="admin" active="bk" />
 
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <Header />
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+        <div className="shrink-0">
+          <Header />
+        </div>
 
-        <main className="flex-1 overflow-y-auto p-5 md:p-6 lg:p-8">
-          <div className="mx-auto w-full max-w-[1600px]">
+        <main className="min-w-0 flex-1 overflow-y-auto">
+          <div className="w-full p-5 md:p-6 lg:p-8">
+
             <div className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div className="flex items-start gap-4">
                 <div className="theme-primary flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl shadow-lg">
@@ -221,9 +224,7 @@ export default function KategoriPelanggaranPage() {
                   "
                 >
                   <svg
-                    className={`h-4 w-4 ${
-                      refreshing ? "animate-spin" : ""
-                    }`}
+                    className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`}
                     fill="none"
                     stroke="currentColor"
                     strokeWidth="2"
@@ -242,9 +243,7 @@ export default function KategoriPelanggaranPage() {
                 <button
                   type="button"
                   onClick={() =>
-                    router.push(
-                      "/admin/bk/kategori-point/tambah"
-                    )
+                    router.push("/admin/bk/kategori-point/tambah")
                   }
                   className="
                     theme-primary
@@ -278,7 +277,7 @@ export default function KategoriPelanggaranPage() {
               </div>
             )}
 
-            <div className="mb-7 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="mb-7 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6">
               <Stat
                 label="Total Kategori"
                 value={stats.total}
@@ -369,21 +368,10 @@ export default function KategoriPelanggaranPage() {
                       shadow-sm outline-none transition
                     "
                   >
-                    <option value="nama_asc">
-                      Nama A → Z
-                    </option>
-
-                    <option value="nama_desc">
-                      Nama Z → A
-                    </option>
-
-                    <option value="poin_desc">
-                      Poin Tertinggi
-                    </option>
-
-                    <option value="poin_asc">
-                      Poin Terendah
-                    </option>
+                    <option value="nama_asc">Nama A → Z</option>
+                    <option value="nama_desc">Nama Z → A</option>
+                    <option value="poin_desc">Poin Tertinggi</option>
+                    <option value="poin_asc">Poin Terendah</option>
                   </select>
                 </div>
 
@@ -482,15 +470,7 @@ export default function KategoriPelanggaranPage() {
                           className="theme-text-muted px-5 py-12 text-center"
                         >
                           <div className="flex items-center justify-center gap-2 text-sm font-medium">
-                            <span
-                              className="
-                                h-4 w-4 animate-spin
-                                rounded-full border-2
-                                border-[var(--color-border)]
-                                border-t-[var(--color-primary)]
-                              "
-                            />
-
+                            <span className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--color-border)] border-t-[var(--color-primary)]" />
                             Memuat data...
                           </div>
                         </td>
@@ -575,7 +555,6 @@ export default function KategoriPelanggaranPage() {
                                     strokeLinejoin="round"
                                     d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
                                   />
-
                                   <path
                                     strokeLinecap="round"
                                     strokeLinejoin="round"
@@ -617,9 +596,7 @@ export default function KategoriPelanggaranPage() {
 
                               <button
                                 type="button"
-                                onClick={() =>
-                                  handleDelete(item.id)
-                                }
+                                onClick={() => handleDelete(item.id)}
                                 title="Hapus"
                                 className="
                                   theme-text-muted
@@ -673,9 +650,7 @@ export default function KategoriPelanggaranPage() {
                   <div className="flex items-center gap-1.5">
                     <button
                       type="button"
-                      onClick={() =>
-                        setPage((p) => Math.max(1, p - 1))
-                      }
+                      onClick={() => setPage((p) => Math.max(1, p - 1))}
                       disabled={page === 1}
                       className="
                         theme-card
@@ -704,35 +679,29 @@ export default function KategoriPelanggaranPage() {
                       </svg>
                     </button>
 
-                    {Array.from({ length: totalPage }).map(
-                      (_, i) => {
-                        const p = i + 1;
-                        const active = p === page;
+                    {Array.from({ length: totalPage }).map((_, i) => {
+                      const p = i + 1;
+                      const active = p === page;
 
-                        return (
-                          <button
-                            type="button"
-                            key={p}
-                            onClick={() => setPage(p)}
-                            className={
-                              active
-                                ? "theme-primary flex h-9 min-w-9 items-center justify-center rounded-xl px-3 text-sm font-bold shadow-lg transition"
-                                : "theme-card theme-border theme-text-secondary theme-sidebar-hover flex h-9 min-w-9 items-center justify-center rounded-xl border px-3 text-sm font-bold transition"
-                            }
-                          >
-                            {p}
-                          </button>
-                        );
-                      }
-                    )}
+                      return (
+                        <button
+                          type="button"
+                          key={p}
+                          onClick={() => setPage(p)}
+                          className={
+                            active
+                              ? "theme-primary flex h-9 min-w-9 items-center justify-center rounded-xl px-3 text-sm font-bold shadow-lg transition"
+                              : "theme-card theme-border theme-text-secondary theme-sidebar-hover flex h-9 min-w-9 items-center justify-center rounded-xl border px-3 text-sm font-bold transition"
+                          }
+                        >
+                          {p}
+                        </button>
+                      );
+                    })}
 
                     <button
                       type="button"
-                      onClick={() =>
-                        setPage((p) =>
-                          Math.min(totalPage, p + 1)
-                        )
-                      }
+                      onClick={() => setPage((p) => Math.min(totalPage, p + 1))}
                       disabled={page === totalPage}
                       className="
                         theme-card
@@ -796,7 +765,6 @@ function Stat({
         d="M7 7h.01M7 3h5a1.99 1.99 0 011.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.99 1.99 0 013 12V7a4 4 0 014-4z"
       />
     ),
-
     check: (
       <path
         strokeLinecap="round"
@@ -804,7 +772,6 @@ function Stat({
         d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
       />
     ),
-
     x: (
       <path
         strokeLinecap="round"
@@ -812,7 +779,6 @@ function Stat({
         d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
       />
     ),
-
     star: (
       <path
         strokeLinecap="round"
@@ -829,7 +795,6 @@ function Stat({
           <p className="theme-text-muted text-xs font-bold uppercase tracking-wider">
             {label}
           </p>
-
           <p className="theme-text mt-2 text-3xl font-bold tracking-tight">
             {value}
           </p>

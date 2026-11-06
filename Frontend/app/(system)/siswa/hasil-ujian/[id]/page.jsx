@@ -80,7 +80,6 @@ const themeDangerBorder =
 
 
 
-
 function normalizeObjectResponse(response) {
   if (!response) {
     return null;
@@ -514,7 +513,6 @@ export default function HasilUjianPage() {
   const params = useParams();
   const searchParams = useSearchParams();
 
-  // Hasil ujian dibaca dari query navigasi (bukan sessionStorage).
   const idDariRoute = params?.id;
 
   const hasilDariUrl = useMemo(() => {
@@ -907,7 +905,7 @@ export default function HasilUjianPage() {
 
   if (loading) {
     return (
-      <div className="theme-page flex min-h-full min-w-0 flex-1 items-center justify-center p-6">
+      <div className="flex h-screen items-center justify-center theme-page theme-text p-6">
         <div
           className={`w-full max-w-sm rounded-3xl border theme-border theme-card p-8 text-center ${themeCardShadow}`}
         >
@@ -936,7 +934,7 @@ export default function HasilUjianPage() {
 
   if (error) {
     return (
-      <div className="theme-page flex min-h-full min-w-0 flex-1 items-center justify-center p-6">
+      <div className="flex h-screen items-center justify-center theme-page theme-text p-6">
         <div
           className={`w-full max-w-md rounded-3xl border theme-border theme-card p-7 text-center ${themeCardShadow}`}
         >
@@ -982,512 +980,515 @@ export default function HasilUjianPage() {
 
 
   return (
-    <div className="theme-page min-h-full min-w-0 flex-1 overflow-y-auto">
-      <div className="mx-auto w-full max-w-6xl px-4 py-5 sm:px-6 sm:py-7 lg:px-8 lg:py-8">
+    <div className="flex h-screen overflow-hidden theme-page theme-text">
+      <div className="flex min-h-0 flex-1 flex-col">
+        <main className="min-w-0 flex-1 overflow-y-auto">
+          <div className="w-full px-4 py-5 sm:px-6 sm:py-7 lg:px-8 lg:py-8">
+
+            <button
+              type="button"
+              onClick={() =>
+                router.push(
+                  "/siswa/ujian"
+                )
+              }
+              className="mb-5 inline-flex items-center gap-2 text-sm font-semibold theme-text-muted transition hover:text-[var(--color-primary)]"
+            >
+              <ArrowLeft size={17} />
+              Kembali ke Daftar Ujian
+            </button>
 
 
-        <button
-          type="button"
-          onClick={() =>
-            router.push(
-              "/siswa/ujian"
-            )
-          }
-          className="mb-5 inline-flex items-center gap-2 text-sm font-semibold theme-text-muted transition hover:text-[var(--color-primary)]"
-        >
-          <ArrowLeft size={17} />
-          Kembali ke Daftar Ujian
-        </button>
+            <section
+              className={`relative overflow-hidden rounded-3xl border theme-border theme-card ${themeCardShadow}`}
+            >
+              <div
+                className={`h-1.5 ${themePrimaryGradient}`}
+              />
+
+              <div className="relative overflow-hidden px-5 py-8 sm:px-8 sm:py-10 lg:px-10">
+
+                <div
+                  className={`pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full ${themePrimarySoft} blur-2xl`}
+                />
+
+                <div
+                  className={`pointer-events-none absolute -bottom-28 -left-20 h-56 w-56 rounded-full ${themeInfoSurface} blur-2xl`}
+                />
+
+                <div className="relative">
+                  <div className="flex flex-col gap-7 lg:flex-row lg:items-center lg:justify-between">
 
 
-        <section
-          className={`relative overflow-hidden rounded-3xl border theme-border theme-card ${themeCardShadow}`}
-        >
-          <div
-            className={`h-1.5 ${themePrimaryGradient}`}
-          />
+                    <div className="min-w-0">
+                      <div
+                        className={`mb-4 inline-flex items-center gap-2 rounded-full border ${themePrimarySoftBorder} ${themePrimarySoft} px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.14em] ${themePrimaryText}`}
+                      >
+                        <CheckCircle2 size={14} />
+                        Ujian Selesai
+                      </div>
 
-          <div className="relative overflow-hidden px-5 py-8 sm:px-8 sm:py-10 lg:px-10">
+                      <h1 className="max-w-2xl text-2xl font-black tracking-tight theme-text sm:text-3xl lg:text-[34px]">
+                        {ujian?.judul ||
+                          "Hasil Ujian"}
+                      </h1>
 
-            <div
-              className={`pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full ${themePrimarySoft} blur-2xl`}
-            />
+                      <p className="mt-2 max-w-xl text-sm leading-6 theme-text-secondary">
+                        Pengerjaan ujian kamu
+                        telah selesai. Berikut
+                        adalah ringkasan hasil yang
+                        berhasil diperoleh.
+                      </p>
 
-            <div
-              className={`pointer-events-none absolute -bottom-28 -left-20 h-56 w-56 rounded-full ${themeInfoSurface} blur-2xl`}
-            />
+                      <div className="mt-5 flex flex-wrap items-center gap-2">
+                        <span
+                          className="inline-flex items-center gap-2 rounded-xl border theme-border theme-card px-3 py-2 text-xs font-semibold theme-text-secondary"
+                        >
+                          <BookOpen
+                            size={14}
+                            className={themePrimaryText}
+                          />
 
-            <div className="relative">
-              <div className="flex flex-col gap-7 lg:flex-row lg:items-center lg:justify-between">
+                          {ujian
+                            ?.kelasMapel
+                            ?.mataPelajaran
+                            ?.nama ||
+                            "Mata Pelajaran"}
+                        </span>
 
+                        <span
+                          className="inline-flex items-center gap-2 rounded-xl border theme-border theme-card px-3 py-2 text-xs font-semibold theme-text-secondary"
+                        >
+                          <FileText
+                            size={14}
+                            className="theme-text-muted"
+                          />
 
-                <div className="min-w-0">
-                  <div
-                    className={`mb-4 inline-flex items-center gap-2 rounded-full border ${themePrimarySoftBorder} ${themePrimarySoft} px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.14em] ${themePrimaryText}`}
-                  >
-                    <CheckCircle2 size={14} />
-                    Ujian Selesai
-                  </div>
-
-                  <h1 className="max-w-2xl text-2xl font-black tracking-tight theme-text sm:text-3xl lg:text-[34px]">
-                    {ujian?.judul ||
-                      "Hasil Ujian"}
-                  </h1>
-
-                  <p className="mt-2 max-w-xl text-sm leading-6 theme-text-secondary">
-                    Pengerjaan ujian kamu
-                    telah selesai. Berikut
-                    adalah ringkasan hasil yang
-                    berhasil diperoleh.
-                  </p>
-
-                  <div className="mt-5 flex flex-wrap items-center gap-2">
-                    <span
-                      className="inline-flex items-center gap-2 rounded-xl border theme-border theme-card px-3 py-2 text-xs font-semibold theme-text-secondary"
-                    >
-                      <BookOpen
-                        size={14}
-                        className={themePrimaryText}
-                      />
-
-                      {ujian
-                        ?.kelasMapel
-                        ?.mataPelajaran
-                        ?.nama ||
-                        "Mata Pelajaran"}
-                    </span>
-
-                    <span
-                      className="inline-flex items-center gap-2 rounded-xl border theme-border theme-card px-3 py-2 text-xs font-semibold theme-text-secondary"
-                    >
-                      <FileText
-                        size={14}
-                        className="theme-text-muted"
-                      />
-
-                      {ujian
-                        ?.kelasMapel
-                        ?.kelas
-                        ?.nama ||
-                        "Kelas"}
-                    </span>
-                  </div>
-                </div>
-
-
-                <div className="shrink-0 lg:w-[250px]">
-                  <div
-                    className={`rounded-3xl border ${themePrimarySoftBorder} ${themePrimarySoft} p-5 text-center`}
-                  >
-                    <div
-                      className={`mx-auto flex h-12 w-12 items-center justify-center rounded-2xl theme-card ${themePrimaryText} ${themeSmallShadow}`}
-                    >
-                      {lulus ? (
-                        <Trophy size={23} />
-                      ) : (
-                        <Award size={23} />
-                      )}
+                          {ujian
+                            ?.kelasMapel
+                            ?.kelas
+                            ?.nama ||
+                            "Kelas"}
+                        </span>
+                      </div>
                     </div>
 
-                    <p className="mt-4 text-[11px] font-bold uppercase tracking-[0.16em] theme-text-muted">
-                      Nilai Akhir
-                    </p>
 
-                    <div className="mt-1 flex items-baseline justify-center gap-1">
+                    <div className="shrink-0 lg:w-[250px]">
+                      <div
+                        className={`rounded-3xl border ${themePrimarySoftBorder} ${themePrimarySoft} p-5 text-center`}
+                      >
+                        <div
+                          className={`mx-auto flex h-12 w-12 items-center justify-center rounded-2xl theme-card ${themePrimaryText} ${themeSmallShadow}`}
+                        >
+                          {lulus ? (
+                            <Trophy size={23} />
+                          ) : (
+                            <Award size={23} />
+                          )}
+                        </div>
+
+                        <p className="mt-4 text-[11px] font-bold uppercase tracking-[0.16em] theme-text-muted">
+                          Nilai Akhir
+                        </p>
+
+                        <div className="mt-1 flex items-baseline justify-center gap-1">
+                          <span
+                            className={`text-5xl font-black tracking-tight ${themePrimaryText}`}
+                          >
+                            {formatNumber(
+                              nilaiNumber
+                            )}
+                          </span>
+
+                          <span className="text-sm font-bold theme-text-muted">
+                            /100
+                          </span>
+                        </div>
+
+                        <div
+                          className={`mx-auto mt-4 h-2 max-w-[180px] overflow-hidden rounded-full ${themeNeutralSurface}`}
+                        >
+                          <div
+                            className={`h-full rounded-full ${themePrimaryGradient} transition-all duration-700`}
+                            style={{
+                              width: `${progressNilai}%`,
+                            }}
+                          />
+                        </div>
+
+                        <div className="mt-4">
+                          {lulus ? (
+                            <span
+                              className={`inline-flex items-center gap-2 rounded-full ${themeSuccessSurface} px-3.5 py-1.5 text-xs font-bold text-[var(--color-success)]`}
+                            >
+                              <CheckCircle2 size={14} />
+                              Lulus
+                            </span>
+                          ) : (
+                            <span
+                              className={`inline-flex items-center gap-2 rounded-full ${themeDangerSurface} px-3.5 py-1.5 text-xs font-bold theme-danger`}
+                            >
+                              <XCircle size={14} />
+                              Belum Lulus
+                            </span>
+                          )}
+                        </div>
+
+                        {nilaiKelulusan > 0 && (
+                          <p className="mt-3 text-[11px] theme-text-muted">
+                            Minimal kelulusan{" "}
+                            <span className="font-bold theme-text-secondary">
+                              {formatNumber(
+                                nilaiKelulusan
+                              )}
+                            </span>
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+
+            <section className="mt-5 grid gap-4 sm:grid-cols-3">
+              <ResultStat
+                icon={
+                  <CheckCircle2 size={19} />
+                }
+                label="Jawaban Benar"
+                value={jumlahBenar}
+                description={
+                  totalSoal > 0
+                    ? `${Math.round(
+                        (jumlahBenar /
+                          totalSoal) *
+                          100
+                      )}% dari total soal`
+                    : "Tidak tersedia"
+                }
+                tone="success"
+              />
+
+              <ResultStat
+                icon={
+                  <XCircle size={19} />
+                }
+                label="Jawaban Salah"
+                value={jumlahSalah}
+                description={
+                  totalSoal > 0
+                    ? `${Math.round(
+                        (jumlahSalah /
+                          totalSoal) *
+                          100
+                      )}% dari total soal`
+                    : "Tidak tersedia"
+                }
+                tone="danger"
+              />
+
+              <ResultStat
+                icon={
+                  <MinusCircle size={19} />
+                }
+                label="Tidak Dijawab"
+                value={jumlahLewati}
+                description={
+                  totalSoal > 0
+                    ? `${Math.round(
+                        (jumlahLewati /
+                          totalSoal) *
+                          100
+                      )}% dari total soal`
+                    : "Tidak tersedia"
+                }
+                tone="warning"
+              />
+            </section>
+
+
+            <div className="mt-5 grid gap-5 lg:grid-cols-[1.35fr_0.65fr]">
+
+
+              <section
+                className={`rounded-3xl border theme-border theme-card ${themeCardShadow}`}
+              >
+                <SectionHeader
+                  icon={<BookOpen size={19} />}
+                  title="Detail Ujian"
+                  description="Informasi mengenai ujian yang kamu kerjakan"
+                />
+
+                <div className="grid gap-3 p-5 sm:grid-cols-2 sm:p-6">
+                  <InfoCard
+                    icon={<BookOpen size={17} />}
+                    label="Mata Pelajaran"
+                    value={
+                      ujian
+                        ?.kelasMapel
+                        ?.mataPelajaran
+                        ?.nama || "-"
+                    }
+                    tone="primary"
+                  />
+
+                  <InfoCard
+                    icon={<FileText size={17} />}
+                    label="Kelas"
+                    value={
+                      ujian
+                        ?.kelasMapel
+                        ?.kelas
+                        ?.nama || "-"
+                    }
+                    tone="info"
+                  />
+
+                  <InfoCard
+                    icon={<FileText size={17} />}
+                    label="Jumlah Soal"
+                    value={`${totalSoal} soal`}
+                    tone="success"
+                  />
+
+                  <InfoCard
+                    icon={<Clock3 size={17} />}
+                    label="Durasi"
+                    value={`${ujian?.durasi || 0} menit`}
+                    tone="warning"
+                  />
+                </div>
+              </section>
+
+
+              <section
+                className={`rounded-3xl border theme-border theme-card ${themeCardShadow}`}
+              >
+                <SectionHeader
+                  icon={<Award size={19} />}
+                  title="Ringkasan Nilai"
+                  description="Performa pengerjaan kamu"
+                />
+
+                <div className="p-5 sm:p-6">
+                  <div
+                    className={`rounded-2xl ${themeNeutralSurface} p-4`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-medium theme-text-secondary">
+                        Nilai diperoleh
+                      </span>
+
                       <span
-                        className={`text-5xl font-black tracking-tight ${themePrimaryText}`}
+                        className={`text-sm font-black ${themePrimaryText}`}
                       >
                         {formatNumber(
                           nilaiNumber
                         )}
                       </span>
-
-                      <span className="text-sm font-bold theme-text-muted">
-                        /100
-                      </span>
                     </div>
 
                     <div
-                      className={`mx-auto mt-4 h-2 max-w-[180px] overflow-hidden rounded-full ${themeNeutralSurface}`}
+                      className={`mt-3 h-2 overflow-hidden rounded-full ${themeNeutralSurface}`}
                     >
                       <div
-                        className={`h-full rounded-full ${themePrimaryGradient} transition-all duration-700`}
+                        className={`h-full rounded-full ${themePrimaryGradient}`}
                         style={{
                           width: `${progressNilai}%`,
                         }}
                       />
                     </div>
 
-                    <div className="mt-4">
-                      {lulus ? (
-                        <span
-                          className={`inline-flex items-center gap-2 rounded-full ${themeSuccessSurface} px-3.5 py-1.5 text-xs font-bold text-[var(--color-success)]`}
-                        >
-                          <CheckCircle2 size={14} />
-                          Lulus
-                        </span>
-                      ) : (
-                        <span
-                          className={`inline-flex items-center gap-2 rounded-full ${themeDangerSurface} px-3.5 py-1.5 text-xs font-bold theme-danger`}
-                        >
-                          <XCircle size={14} />
-                          Belum Lulus
-                        </span>
-                      )}
-                    </div>
-
                     {nilaiKelulusan > 0 && (
-                      <p className="mt-3 text-[11px] theme-text-muted">
-                        Minimal kelulusan{" "}
+                      <div className="mt-3 flex items-center justify-between text-[11px]">
+                        <span className="theme-text-muted">
+                          Nilai kelulusan
+                        </span>
+
                         <span className="font-bold theme-text-secondary">
                           {formatNumber(
                             nilaiKelulusan
                           )}
                         </span>
-                      </p>
+                      </div>
                     )}
                   </div>
+
+                  <div className="mt-4 space-y-3">
+                    <MiniResultRow
+                      icon={
+                        <CheckCircle2 size={15} />
+                      }
+                      label="Benar"
+                      value={jumlahBenar}
+                      tone="success"
+                    />
+
+                    <MiniResultRow
+                      icon={
+                        <XCircle size={15} />
+                      }
+                      label="Salah"
+                      value={jumlahSalah}
+                      tone="danger"
+                    />
+
+                    <MiniResultRow
+                      icon={
+                        <MinusCircle size={15} />
+                      }
+                      label="Tidak dijawab"
+                      value={jumlahLewati}
+                      tone="warning"
+                    />
+                  </div>
                 </div>
-              </div>
+              </section>
             </div>
-          </div>
-        </section>
 
 
-        <section className="mt-5 grid gap-4 sm:grid-cols-3">
-          <ResultStat
-            icon={
-              <CheckCircle2 size={19} />
-            }
-            label="Jawaban Benar"
-            value={jumlahBenar}
-            description={
-              totalSoal > 0
-                ? `${Math.round(
-                    (jumlahBenar /
-                      totalSoal) *
-                      100
-                  )}% dari total soal`
-                : "Tidak tersedia"
-            }
-            tone="success"
-          />
-
-          <ResultStat
-            icon={
-              <XCircle size={19} />
-            }
-            label="Jawaban Salah"
-            value={jumlahSalah}
-            description={
-              totalSoal > 0
-                ? `${Math.round(
-                    (jumlahSalah /
-                      totalSoal) *
-                      100
-                  )}% dari total soal`
-                : "Tidak tersedia"
-            }
-            tone="danger"
-          />
-
-          <ResultStat
-            icon={
-              <MinusCircle size={19} />
-            }
-            label="Tidak Dijawab"
-            value={jumlahLewati}
-            description={
-              totalSoal > 0
-                ? `${Math.round(
-                    (jumlahLewati /
-                      totalSoal) *
-                      100
-                  )}% dari total soal`
-                : "Tidak tersedia"
-            }
-            tone="warning"
-          />
-        </section>
-
-
-        <div className="mt-5 grid gap-5 lg:grid-cols-[1.35fr_0.65fr]">
-
-
-          <section
-            className={`rounded-3xl border theme-border theme-card ${themeCardShadow}`}
-          >
-            <SectionHeader
-              icon={<BookOpen size={19} />}
-              title="Detail Ujian"
-              description="Informasi mengenai ujian yang kamu kerjakan"
-            />
-
-            <div className="grid gap-3 p-5 sm:grid-cols-2 sm:p-6">
-              <InfoCard
-                icon={<BookOpen size={17} />}
-                label="Mata Pelajaran"
-                value={
-                  ujian
-                    ?.kelasMapel
-                    ?.mataPelajaran
-                    ?.nama || "-"
-                }
-                tone="primary"
-              />
-
-              <InfoCard
-                icon={<FileText size={17} />}
-                label="Kelas"
-                value={
-                  ujian
-                    ?.kelasMapel
-                    ?.kelas
-                    ?.nama || "-"
-                }
-                tone="info"
-              />
-
-              <InfoCard
-                icon={<FileText size={17} />}
-                label="Jumlah Soal"
-                value={`${totalSoal} soal`}
-                tone="success"
-              />
-
-              <InfoCard
-                icon={<Clock3 size={17} />}
-                label="Durasi"
-                value={`${ujian?.durasi || 0} menit`}
-                tone="warning"
-              />
-            </div>
-          </section>
-
-
-          <section
-            className={`rounded-3xl border theme-border theme-card ${themeCardShadow}`}
-          >
-            <SectionHeader
-              icon={<Award size={19} />}
-              title="Ringkasan Nilai"
-              description="Performa pengerjaan kamu"
-            />
-
-            <div className="p-5 sm:p-6">
-              <div
-                className={`rounded-2xl ${themeNeutralSurface} p-4`}
+            {percobaanSaya && (
+              <section
+                className={`mt-5 rounded-3xl border theme-border theme-card ${themeCardShadow}`}
               >
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium theme-text-secondary">
-                    Nilai diperoleh
-                  </span>
-
-                  <span
-                    className={`text-sm font-black ${themePrimaryText}`}
-                  >
-                    {formatNumber(
-                      nilaiNumber
-                    )}
-                  </span>
-                </div>
+                <SectionHeader
+                  icon={<CalendarDays size={19} />}
+                  title="Waktu Pengerjaan"
+                  description="Informasi sesi pengerjaan ujian"
+                />
 
                 <div
-                  className={`mt-3 h-2 overflow-hidden rounded-full ${themeNeutralSurface}`}
+                  className={`grid gap-0 divide-y ${themeDivider} sm:grid-cols-3 sm:divide-x sm:divide-y-0`}
                 >
-                  <div
-                    className={`h-full rounded-full ${themePrimaryGradient}`}
-                    style={{
-                      width: `${progressNilai}%`,
-                    }}
+                  <TimeInfo
+                    label="Mulai"
+                    value={formatDateTime(
+                      percobaanSaya?.dimulaiPada
+                    )}
                   />
-                </div>
 
-                {nilaiKelulusan > 0 && (
-                  <div className="mt-3 flex items-center justify-between text-[11px]">
-                    <span className="theme-text-muted">
-                      Nilai kelulusan
-                    </span>
+                  <TimeInfo
+                    label="Selesai"
+                    value={formatDateTime(
+                      percobaanSaya?.selesaiPada ||
+                        tanggalSelesai
+                    )}
+                  />
 
-                    <span className="font-bold theme-text-secondary">
-                      {formatNumber(
-                        nilaiKelulusan
-                      )}
+                  <div className="p-5 sm:p-6">
+                    <p className="text-[11px] font-semibold uppercase tracking-wider theme-text-muted">
+                      Status
+                    </p>
+
+                    <span
+                      className={`mt-2 inline-flex items-center gap-2 rounded-full ${themeSuccessSurface} px-3 py-1.5 text-xs font-bold text-[var(--color-success)]`}
+                    >
+                      <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-success)]" />
+                      {status}
                     </span>
                   </div>
-                )}
-              </div>
-
-              <div className="mt-4 space-y-3">
-                <MiniResultRow
-                  icon={
-                    <CheckCircle2 size={15} />
-                  }
-                  label="Benar"
-                  value={jumlahBenar}
-                  tone="success"
-                />
-
-                <MiniResultRow
-                  icon={
-                    <XCircle size={15} />
-                  }
-                  label="Salah"
-                  value={jumlahSalah}
-                  tone="danger"
-                />
-
-                <MiniResultRow
-                  icon={
-                    <MinusCircle size={15} />
-                  }
-                  label="Tidak dijawab"
-                  value={jumlahLewati}
-                  tone="warning"
-                />
-              </div>
-            </div>
-          </section>
-        </div>
+                </div>
+              </section>
+            )}
 
 
-        {percobaanSaya && (
-          <section
-            className={`mt-5 rounded-3xl border theme-border theme-card ${themeCardShadow}`}
-          >
-            <SectionHeader
-              icon={<CalendarDays size={19} />}
-              title="Waktu Pengerjaan"
-              description="Informasi sesi pengerjaan ujian"
-            />
-
-            <div
-              className={`grid gap-0 divide-y ${themeDivider} sm:grid-cols-3 sm:divide-x sm:divide-y-0`}
-            >
-              <TimeInfo
-                label="Mulai"
-                value={formatDateTime(
-                  percobaanSaya?.dimulaiPada
-                )}
-              />
-
-              <TimeInfo
-                label="Selesai"
-                value={formatDateTime(
-                  percobaanSaya?.selesaiPada ||
-                    tanggalSelesai
-                )}
-              />
-
-              <div className="p-5 sm:p-6">
-                <p className="text-[11px] font-semibold uppercase tracking-wider theme-text-muted">
-                  Status
-                </p>
-
-                <span
-                  className={`mt-2 inline-flex items-center gap-2 rounded-full ${themeSuccessSurface} px-3 py-1.5 text-xs font-bold text-[var(--color-success)]`}
+            {!percobaanSaya &&
+              !hasilUjian && (
+                <section
+                  className={`mt-5 rounded-3xl border ${themeWarningBorder} ${themeWarningSurface} p-5`}
                 >
-                  <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-success)]" />
-                  {status}
-                </span>
-              </div>
-            </div>
-          </section>
-        )}
+                  <div className="flex gap-3">
+                    <div
+                      className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl theme-card text-[var(--color-warning)] ${themeSmallShadow}`}
+                    >
+                      <AlertCircle size={18} />
+                    </div>
+
+                    <div>
+                      <h3 className="text-sm font-bold text-[var(--color-warning)]">
+                        Data hasil belum ditemukan
+                      </h3>
+
+                      <p className="mt-1 text-xs leading-5 theme-text-secondary">
+                        Backend belum mengirim data
+                        percobaan atau hasil ujian
+                        untuk sesi ini.
+                      </p>
+                    </div>
+                  </div>
+                </section>
+              )}
 
 
-        {!percobaanSaya &&
-          !hasilUjian && (
-            <section
-              className={`mt-5 rounded-3xl border ${themeWarningBorder} ${themeWarningSurface} p-5`}
-            >
-              <div className="flex gap-3">
-                <div
-                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl theme-card text-[var(--color-warning)] ${themeSmallShadow}`}
-                >
-                  <AlertCircle size={18} />
-                </div>
-
-                <div>
-                  <h3 className="text-sm font-bold text-[var(--color-warning)]">
-                    Data hasil belum ditemukan
-                  </h3>
-
-                  <p className="mt-1 text-xs leading-5 theme-text-secondary">
-                    Backend belum mengirim data
-                    percobaan atau hasil ujian
-                    untuk sesi ini.
-                  </p>
-                </div>
-              </div>
-            </section>
-          )}
-
-
-        {percobaanSaya && (
-          <section
-            className={`mt-5 rounded-3xl border ${themeInfoBorder} ${themeInfoSurface} p-4 sm:p-5`}
-          >
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex items-center gap-3">
-                <div
-                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl theme-card ${themePrimaryText} ${themeSmallShadow}`}
-                >
-                  <CheckCircle2 size={17} />
-                </div>
-
-                <div>
-                  <p
-                    className={`text-xs font-bold ${themePrimaryText}`}
-                  >
-                    Hasil berhasil ditemukan
-                  </p>
-
-                  <p className="mt-0.5 text-[11px] theme-text-secondary">
-                    Data hasil pengerjaan tersedia
-                    untuk sesi ujian ini.
-                  </p>
-                </div>
-              </div>
-
-              <div
-                className={`rounded-xl theme-card px-3 py-2 sm:text-right ${themeSmallShadow}`}
+            {percobaanSaya && (
+              <section
+                className={`mt-5 rounded-3xl border ${themeInfoBorder} ${themeInfoSurface} p-4 sm:p-5`}
               >
-                <p className="text-[9px] font-bold uppercase tracking-wider theme-text-muted">
-                  Percobaan ID
-                </p>
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl theme-card ${themePrimaryText} ${themeSmallShadow}`}
+                    >
+                      <CheckCircle2 size={17} />
+                    </div>
 
-                <p className="mt-0.5 max-w-[230px] truncate text-[11px] font-bold theme-text-secondary">
-                  {percobaanSaya?.id ||
-                    percobaanSaya?.percobaanUjianId ||
-                    "-"}
-                </p>
-              </div>
+                    <div>
+                      <p
+                        className={`text-xs font-bold ${themePrimaryText}`}
+                      >
+                        Hasil berhasil ditemukan
+                      </p>
+
+                      <p className="mt-0.5 text-[11px] theme-text-secondary">
+                        Data hasil pengerjaan tersedia
+                        untuk sesi ujian ini.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div
+                    className={`rounded-xl theme-card px-3 py-2 sm:text-right ${themeSmallShadow}`}
+                  >
+                    <p className="text-[9px] font-bold uppercase tracking-wider theme-text-muted">
+                      Percobaan ID
+                    </p>
+
+                    <p className="mt-0.5 max-w-[230px] truncate text-[11px] font-bold theme-text-secondary">
+                      {percobaanSaya?.id ||
+                        percobaanSaya?.percobaanUjianId ||
+                        "-"}
+                    </p>
+                  </div>
+                </div>
+              </section>
+            )}
+
+
+            <div className="mt-6 flex justify-center">
+              <button
+                type="button"
+                onClick={() =>
+                  router.push(
+                    "/siswa/ujian"
+                  )
+                }
+                className={`inline-flex w-full items-center justify-center gap-2 rounded-2xl ${themePrimaryGradient} px-6 py-3.5 text-sm font-bold text-[var(--color-card)] ${themePrimaryShadow} transition hover:brightness-95 sm:w-auto`}
+              >
+                <ArrowLeft size={17} />
+                Kembali ke Daftar Ujian
+              </button>
             </div>
-          </section>
-        )}
 
-
-        <div className="mt-6 flex justify-center">
-          <button
-            type="button"
-            onClick={() =>
-              router.push(
-                "/siswa/ujian"
-              )
-            }
-            className={`inline-flex w-full items-center justify-center gap-2 rounded-2xl ${themePrimaryGradient} px-6 py-3.5 text-sm font-bold text-[var(--color-card)] ${themePrimaryShadow} transition hover:brightness-95 sm:w-auto`}
-          >
-            <ArrowLeft size={17} />
-            Kembali ke Daftar Ujian
-          </button>
-        </div>
-
-        <footer className="py-7 text-center text-[11px] theme-text-muted">
-          © 2026 SmartSchool
-          <span className="mx-1.5">•</span>
-          Hasil Ujian
-        </footer>
+            <footer className="py-7 text-center text-[11px] theme-text-muted">
+              © 2026 SmartSchool
+              <span className="mx-1.5">•</span>
+              Hasil Ujian
+            </footer>
+          </div>
+        </main>
       </div>
     </div>
   );

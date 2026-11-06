@@ -158,7 +158,6 @@ function formatDecimal(value) {
 
 
 
-
 function saveHasilUjian(
   ujianId,
   submitResponse,
@@ -245,8 +244,6 @@ function saveHasilUjian(
 }
 
 
-// Hasil ujian diteruskan lewat query navigasi (bukan storage bisnis) supaya
-// halaman hasil tetap dapat dibaca ulang setelah refresh.
 function buildHasilUrl(ujianId, hasilPayload) {
   if (!ujianId || !hasilPayload) {
     return `/siswa/hasil-ujian/${ujianId}`;
@@ -769,7 +766,7 @@ export default function UjianPage() {
 
   if (loading) {
     return (
-      <div className="theme-page theme-text flex min-h-full items-center justify-center p-6">
+      <div className="flex h-screen items-center justify-center theme-page theme-text p-6">
         <div className="text-center">
           <div
             className={`mx-auto flex h-14 w-14 items-center justify-center rounded-2xl ${themePrimarySoft} ${themePrimarySoftBorder} border`}
@@ -795,7 +792,7 @@ export default function UjianPage() {
 
   if (error && !ujian) {
     return (
-      <div className="theme-page theme-text flex min-h-full items-center justify-center p-6">
+      <div className="flex h-screen items-center justify-center theme-page theme-text p-6">
         <div
           className={`theme-card ${themeCardShadow} w-full max-w-md rounded-2xl border ${themeNeutralBorder} p-6 text-center`}
         >
@@ -827,729 +824,732 @@ export default function UjianPage() {
 
 
   return (
-    <div className="theme-page theme-text min-h-full">
-      <div className="mx-auto w-full max-w-[1500px] p-3 sm:p-4 md:p-6 lg:p-8">
-        <div className="space-y-4">
-          {error && (
-            <div
-              className={`flex items-start gap-3 rounded-xl border ${themeDangerBorder} ${themeDangerSurface} p-3 text-sm`}
-            >
-              <AlertCircle
-                size={18}
-                className="theme-text mt-0.5 shrink-0"
-              />
-
-              <p className="theme-text min-w-0 flex-1 font-medium">
-                {error}
-              </p>
-
-              <button
-                type="button"
-                onClick={() => setError("")}
-                className="theme-text-muted shrink-0 transition hover:text-[var(--color-primary)]"
-              >
-                <X size={16} />
-              </button>
-            </div>
-          )}
-
-          <section
-            className={`theme-card ${themeCardShadow} rounded-2xl border ${themeNeutralBorder}`}
-          >
-            <div className="flex flex-col gap-4 p-4 sm:p-5 lg:flex-row lg:items-center lg:justify-between">
-              <div className="flex min-w-0 items-start gap-3">
+    <div className="flex h-screen overflow-hidden theme-page theme-text">
+      <div className="flex min-h-0 flex-1 flex-col">
+        <main className="min-w-0 flex-1 overflow-y-auto">
+          <div className="w-full p-3 sm:p-4 md:p-6 lg:p-8">
+            <div className="space-y-4">
+              {error && (
                 <div
-                  className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow}`}
+                  className={`flex items-start gap-3 rounded-xl border ${themeDangerBorder} ${themeDangerSurface} p-3 text-sm`}
                 >
-                  <BookOpen size={20} />
+                  <AlertCircle
+                    size={18}
+                    className="theme-text mt-0.5 shrink-0"
+                  />
+
+                  <p className="theme-text min-w-0 flex-1 font-medium">
+                    {error}
+                  </p>
+
+                  <button
+                    type="button"
+                    onClick={() => setError("")}
+                    className="theme-text-muted shrink-0 transition hover:text-[var(--color-primary)]"
+                  >
+                    <X size={16} />
+                  </button>
                 </div>
+              )}
 
-                <div className="min-w-0">
-                  <h1 className="theme-text text-base font-bold sm:text-lg">
-                    {ujian?.judul || "Ujian"}
-                  </h1>
+              <section
+                className={`theme-card ${themeCardShadow} rounded-2xl border ${themeNeutralBorder}`}
+              >
+                <div className="flex flex-col gap-4 p-4 sm:p-5 lg:flex-row lg:items-center lg:justify-between">
+                  <div className="flex min-w-0 items-start gap-3">
+                    <div
+                      className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow}`}
+                    >
+                      <BookOpen size={20} />
+                    </div>
 
-                  <div className="theme-text-muted mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs sm:text-sm">
-                    <span>
-                      {ujian?.kelasMapel
-                        ?.mataPelajaran?.nama ||
-                        "-"}
-                    </span>
+                    <div className="min-w-0">
+                      <h1 className="theme-text text-base font-bold sm:text-lg">
+                        {ujian?.judul || "Ujian"}
+                      </h1>
 
-                    <span className="theme-text-placeholder">
-                      •
-                    </span>
+                      <div className="theme-text-muted mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs sm:text-sm">
+                        <span>
+                          {ujian?.kelasMapel
+                            ?.mataPelajaran?.nama ||
+                            "-"}
+                        </span>
 
-                    <span>
-                      {ujian?.kelasMapel?.kelas
-                        ?.nama || "-"}
-                    </span>
-
-                    {ujian?.kelasMapel
-                      ?.guruPengajar
-                      ?.namaLengkap && (
-                      <>
                         <span className="theme-text-placeholder">
                           •
                         </span>
 
                         <span>
-                          {
-                            ujian.kelasMapel
-                              .guruPengajar
-                              .namaLengkap
-                          }
+                          {ujian?.kelasMapel?.kelas
+                            ?.nama || "-"}
                         </span>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </div>
 
-              <div className="flex flex-wrap items-center gap-2">
-                <StatChip
-                  icon={FileText}
-                  tone="primary"
-                  label="Soal"
-                  value={soal.length}
-                />
+                        {ujian?.kelasMapel
+                          ?.guruPengajar
+                          ?.namaLengkap && (
+                          <>
+                            <span className="theme-text-placeholder">
+                              •
+                            </span>
 
-                <StatChip
-                  icon={Clock}
-                  tone="info"
-                  label="Durasi"
-                  value={`${ujian?.durasi || 0} menit`}
-                />
-
-                <StatChip
-  icon={Info}
-  tone="success"
-  label="Jenis"
-  value={jenisUjian}
-/>
-              </div>
-            </div>
-          </section>
-
-          {!sesi && (
-            <section
-              className={`theme-card ${themeCardShadow} overflow-hidden rounded-2xl border ${themeNeutralBorder}`}
-            >
-              <div
-                className={`${themePrimaryGradient} p-6 text-[var(--color-card)] sm:p-8`}
-              >
-                <div className="mx-auto max-w-2xl text-center">
-                  <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[color-mix(in_srgb,var(--color-card)_12%,transparent)] ring-1 ring-[color-mix(in_srgb,var(--color-card)_20%,transparent)] backdrop-blur">
-                    <LockKeyhole size={28} />
-                  </div>
-
-                  <h2 className="mt-4 text-xl font-bold sm:text-2xl">
-                    Siap Mengerjakan Ujian?
-                  </h2>
-
-                  <p className="mt-2 text-sm text-[color-mix(in_srgb,var(--color-card)_78%,transparent)]">
-                    Pastikan kamu sudah siap sebelum
-                    memulai. Setelah ujian dimulai,
-                    waktu akan berjalan sesuai durasi
-                    yang ditentukan.
-                  </p>
-                </div>
-              </div>
-
-              <div className="grid gap-3 p-4 sm:grid-cols-3 sm:p-6">
-                <InfoTile
-                  icon={Timer}
-                  tone="primary"
-                  label="Durasi"
-                  value={`${ujian?.durasi || 0} menit`}
-                />
-
-                <InfoTile
-                  icon={FileText}
-                  tone="info"
-                  label="Jumlah Soal"
-                  value={`${soal.length} soal`}
-                />
-
-                <InfoTile
-                  icon={Clock}
-                  tone="warning"
-                  label="Jadwal"
-                  value={formatDate(
-                    ujian?.waktuMulai
-                  )}
-                />
-              </div>
-
-              <div
-                className={`border-t ${themeDivider} p-4 sm:p-6`}
-              >
-                <button
-                  type="button"
-                  onClick={handleOpenStart}
-                  disabled={soal.length === 0}
-                  className={`mx-auto flex w-full max-w-md items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-5 py-3 text-sm font-semibold text-[var(--color-card)] transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50 ${themePrimaryShadow}`}
-                >
-                  <BookOpen size={18} />
-                  Mulai Ujian
-                </button>
-              </div>
-            </section>
-          )}
-
-          {sesi && !isFinished && (
-            <>
-              <section
-                className={`theme-card sticky top-0 z-30 rounded-2xl border ${themeNeutralBorder} bg-[color-mix(in_srgb,var(--color-card)_95%,transparent)] ${themeSmallShadow} backdrop-blur`}
-              >
-                <div className="flex flex-wrap items-center justify-between gap-3 p-3 sm:p-4">
-                  <div className="flex min-w-0 items-center gap-3">
-                    <div
-                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${themePrimarySoft} ${themePrimaryText} ${themePrimarySoftBorder} ring-1`}
-                    >
-                      <BookOpen size={18} />
-                    </div>
-
-                    <div className="min-w-0">
-                      <h2 className="theme-text truncate text-sm font-bold">
-                        {ujian?.judul}
-                      </h2>
-
-                      <p className="theme-text-muted text-xs">
-                        {answeredCount} dari{" "}
-                        {soal.length} soal terjawab
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <div
-                      className={`flex items-center gap-2 rounded-xl border px-3 py-2 ${timerTheme}`}
-                    >
-                      <Clock size={16} />
-
-                      <div>
-                        <p className="text-[9px] font-medium opacity-70">
-                          Waktu
-                        </p>
-
-                        <p className="font-mono text-sm font-bold">
-                          {formatTime(waktu)}
-                        </p>
+                            <span>
+                              {
+                                ujian.kelasMapel
+                                  .guruPengajar
+                                  .namaLengkap
+                              }
+                            </span>
+                          </>
+                        )}
                       </div>
                     </div>
-
-                    <button
-                      type="button"
-                      onClick={handleSubmit}
-                      disabled={submitting}
-                      className={`flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-3 py-2 text-xs font-semibold text-[var(--color-card)] transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50 sm:px-4 sm:text-sm ${themePrimaryShadow}`}
-                    >
-                      {submitting ? (
-                        <Loader2
-                          size={16}
-                          className="animate-spin"
-                        />
-                      ) : (
-                        <Send size={16} />
-                      )}
-
-                      <span className="hidden sm:inline">
-                        Kirim
-                      </span>
-                    </button>
-                  </div>
-                </div>
-
-                <div className="px-3 pb-3 sm:px-4 sm:pb-4">
-                  <div className="theme-text-muted mb-1.5 flex items-center justify-between text-[10px]">
-                    <span>
-                      Progress pengerjaan
-                    </span>
-
-                    <span
-                      className={`${themePrimaryText} font-semibold`}
-                    >
-                      {Math.round(progress)}%
-                    </span>
                   </div>
 
-                  <div
-                    className={`h-2 overflow-hidden rounded-full ${themeNeutralSurface}`}
-                  >
-                    <div
-                      className={`h-full rounded-full ${themePrimaryGradient} transition-all duration-300`}
-                      style={{
-                        width: `${progress}%`,
-                      }}
+                  <div className="flex flex-wrap items-center gap-2">
+                    <StatChip
+                      icon={FileText}
+                      tone="primary"
+                      label="Soal"
+                      value={soal.length}
+                    />
+
+                    <StatChip
+                      icon={Clock}
+                      tone="info"
+                      label="Durasi"
+                      value={`${ujian?.durasi || 0} menit`}
+                    />
+
+                    <StatChip
+                      icon={Info}
+                      tone="success"
+                      label="Jenis"
+                      value={jenisUjian}
                     />
                   </div>
                 </div>
               </section>
 
-              {showTimeWarning && (
-                <div
-                  className={`flex items-center gap-3 rounded-xl border ${themeWarningBorder} ${themeWarningSurface} p-3 text-[var(--color-warning)]`}
+              {!sesi && (
+                <section
+                  className={`theme-card ${themeCardShadow} overflow-hidden rounded-2xl border ${themeNeutralBorder}`}
                 >
-                  <AlertTriangle
-                    size={18}
-                    className="shrink-0"
-                  />
+                  <div
+                    className={`${themePrimaryGradient} p-6 text-[var(--color-card)] sm:p-8`}
+                  >
+                    <div className="mx-auto max-w-2xl text-center">
+                      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[color-mix(in_srgb,var(--color-card)_12%,transparent)] ring-1 ring-[color-mix(in_srgb,var(--color-card)_20%,transparent)] backdrop-blur">
+                        <LockKeyhole size={28} />
+                      </div>
 
-                  <p className="text-xs font-medium sm:text-sm">
-                    Waktu ujian tersisa kurang dari 5
-                    menit. Pastikan semua jawaban sudah
-                    diperiksa.
-                  </p>
-                </div>
+                      <h2 className="mt-4 text-xl font-bold sm:text-2xl">
+                        Siap Mengerjakan Ujian?
+                      </h2>
+
+                      <p className="mt-2 text-sm text-[color-mix(in_srgb,var(--color-card)_78%,transparent)]">
+                        Pastikan kamu sudah siap sebelum
+                        memulai. Setelah ujian dimulai,
+                        waktu akan berjalan sesuai durasi
+                        yang ditentukan.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid gap-3 p-4 sm:grid-cols-3 sm:p-6">
+                    <InfoTile
+                      icon={Timer}
+                      tone="primary"
+                      label="Durasi"
+                      value={`${ujian?.durasi || 0} menit`}
+                    />
+
+                    <InfoTile
+                      icon={FileText}
+                      tone="info"
+                      label="Jumlah Soal"
+                      value={`${soal.length} soal`}
+                    />
+
+                    <InfoTile
+                      icon={Clock}
+                      tone="warning"
+                      label="Jadwal"
+                      value={formatDate(
+                        ujian?.waktuMulai
+                      )}
+                    />
+                  </div>
+
+                  <div
+                    className={`border-t ${themeDivider} p-4 sm:p-6`}
+                  >
+                    <button
+                      type="button"
+                      onClick={handleOpenStart}
+                      disabled={soal.length === 0}
+                      className={`mx-auto flex w-full max-w-md items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-5 py-3 text-sm font-semibold text-[var(--color-card)] transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50 ${themePrimaryShadow}`}
+                    >
+                      <BookOpen size={18} />
+                      Mulai Ujian
+                    </button>
+                  </div>
+                </section>
               )}
 
-              <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
-                <div className="min-w-0 lg:col-span-4">
-                  {currentSoal && (
-                    <section
-                      className={`soal-container theme-card ${themeCardShadow} rounded-2xl border ${themeNeutralBorder} p-4 sm:p-5 md:p-6`}
-                    >
-                      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-                        <div className="flex items-center gap-2">
-                          <div
-                            className={`flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--color-primary)] text-sm font-bold text-[var(--color-card)] ${themePrimaryShadow}`}
-                          >
-                            {currentIndex + 1}
-                          </div>
+              {sesi && !isFinished && (
+                <>
+                  <section
+                    className={`theme-card sticky top-0 z-30 rounded-2xl border ${themeNeutralBorder} bg-[color-mix(in_srgb,var(--color-card)_95%,transparent)] ${themeSmallShadow} backdrop-blur`}
+                  >
+                    <div className="flex flex-wrap items-center justify-between gap-3 p-3 sm:p-4">
+                      <div className="flex min-w-0 items-center gap-3">
+                        <div
+                          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${themePrimarySoft} ${themePrimaryText} ${themePrimarySoftBorder} ring-1`}
+                        >
+                          <BookOpen size={18} />
+                        </div>
+
+                        <div className="min-w-0">
+                          <h2 className="theme-text truncate text-sm font-bold">
+                            {ujian?.judul}
+                          </h2>
+
+                          <p className="theme-text-muted text-xs">
+                            {answeredCount} dari{" "}
+                            {soal.length} soal terjawab
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <div
+                          className={`flex items-center gap-2 rounded-xl border px-3 py-2 ${timerTheme}`}
+                        >
+                          <Clock size={16} />
 
                           <div>
-                            <p className="theme-text text-sm font-bold">
-                              Soal {currentIndex + 1}
+                            <p className="text-[9px] font-medium opacity-70">
+                              Waktu
                             </p>
 
-                            <p className="theme-text-muted text-[10px]">
-                              dari {soal.length} soal
+                            <p className="font-mono text-sm font-bold">
+                              {formatTime(waktu)}
                             </p>
                           </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={handleSubmit}
+                          disabled={submitting}
+                          className={`flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-3 py-2 text-xs font-semibold text-[var(--color-card)] transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50 sm:px-4 sm:text-sm ${themePrimaryShadow}`}
+                        >
+                          {submitting ? (
+                            <Loader2
+                              size={16}
+                              className="animate-spin"
+                            />
+                          ) : (
+                            <Send size={16} />
+                          )}
+
+                          <span className="hidden sm:inline">
+                            Kirim
+                          </span>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="px-3 pb-3 sm:px-4 sm:pb-4">
+                      <div className="theme-text-muted mb-1.5 flex items-center justify-between text-[10px]">
+                        <span>
+                          Progress pengerjaan
+                        </span>
+
+                        <span
+                          className={`${themePrimaryText} font-semibold`}
+                        >
+                          {Math.round(progress)}%
+                        </span>
+                      </div>
+
+                      <div
+                        className={`h-2 overflow-hidden rounded-full ${themeNeutralSurface}`}
+                      >
+                        <div
+                          className={`h-full rounded-full ${themePrimaryGradient} transition-all duration-300`}
+                          style={{
+                            width: `${progress}%`,
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </section>
+
+                  {showTimeWarning && (
+                    <div
+                      className={`flex items-center gap-3 rounded-xl border ${themeWarningBorder} ${themeWarningSurface} p-3 text-[var(--color-warning)]`}
+                    >
+                      <AlertTriangle
+                        size={18}
+                        className="shrink-0"
+                      />
+
+                      <p className="text-xs font-medium sm:text-sm">
+                        Waktu ujian tersisa kurang dari 5
+                        menit. Pastikan semua jawaban sudah
+                        diperiksa.
+                      </p>
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
+                    <div className="min-w-0 lg:col-span-4">
+                      {currentSoal && (
+                        <section
+                          className={`soal-container theme-card ${themeCardShadow} rounded-2xl border ${themeNeutralBorder} p-4 sm:p-5 md:p-6`}
+                        >
+                          <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+                            <div className="flex items-center gap-2">
+                              <div
+                                className={`flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--color-primary)] text-sm font-bold text-[var(--color-card)] ${themePrimaryShadow}`}
+                              >
+                                {currentIndex + 1}
+                              </div>
+
+                              <div>
+                                <p className="theme-text text-sm font-bold">
+                                  Soal {currentIndex + 1}
+                                </p>
+
+                                <p className="theme-text-muted text-[10px]">
+                                  dari {soal.length} soal
+                                </p>
+                              </div>
+                            </div>
+
+                            <div
+                              className={`flex items-center gap-1 rounded-lg border ${themeNeutralBorder} p-1`}
+                            >
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setViewMode("list")
+                                }
+                                className={`rounded-md p-1.5 transition ${
+                                  viewMode === "list"
+                                    ? `${themePrimarySoft} ${themePrimaryText}`
+                                    : `theme-text-muted ${themeNeutralHover}`
+                                }`}
+                              >
+                                <List size={16} />
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setViewMode("grid")
+                                }
+                                className={`rounded-md p-1.5 transition ${
+                                  viewMode === "grid"
+                                    ? `${themePrimarySoft} ${themePrimaryText}`
+                                    : `theme-text-muted ${themeNeutralHover}`
+                                }`}
+                              >
+                                <Grid3X3 size={16} />
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="mb-6">
+                            <div className="mb-2 flex flex-wrap items-center gap-2">
+                              <span className="theme-text-muted text-[10px] font-semibold uppercase tracking-wider">
+                                Pertanyaan
+                              </span>
+
+                              <span
+                                className={`rounded-full ${themeNeutralSurface} px-2 py-0.5 text-[10px] font-medium theme-text-secondary`}
+                              >
+                                {currentSoal?.jenisSoal ===
+                                "pilihan_ganda"
+                                  ? "Pilihan Ganda"
+                                  : currentSoal?.jenisSoal ===
+                                      "benar_salah"
+                                    ? "Benar / Salah"
+                                    : "Esai"}
+                              </span>
+
+                              <span
+                                className={`rounded-full ${themePrimarySoft} ${themePrimaryText} px-2 py-0.5 text-[10px] font-medium ring-1 ${themePrimarySoftBorder}`}
+                              >
+                                {formatDecimal(
+                                  currentSoal?.poin
+                                )}{" "}
+                                poin
+                              </span>
+                            </div>
+
+                            <p className="theme-text text-sm font-medium leading-7 sm:text-base">
+                              {currentSoal?.teksSoal ||
+                                "-"}
+                            </p>
+                          </div>
+
+                          {currentSoal?.jenisSoal ===
+                            "pilihan_ganda" && (
+                            <div className="space-y-2.5">
+                              {Array.isArray(
+                                currentSoal?.pilihan
+                              ) &&
+                                currentSoal.pilihan.map(
+                                  (option, i) => {
+                                    const value =
+                                      getOptionValue(
+                                        option
+                                      );
+
+                                    const label =
+                                      String.fromCharCode(
+                                        65 + i
+                                      );
+
+                                    const selectedValue =
+                                      jawaban[
+                                        currentSoal.id
+                                      ];
+
+                                    const isSelected =
+                                      String(
+                                        selectedValue ?? ""
+                                      ) ===
+                                      String(value);
+
+                                    return (
+                                      <button
+                                        key={`${currentSoal.id}-${i}`}
+                                        type="button"
+                                        onClick={() =>
+                                          pilihJawaban(
+                                            currentSoal.id,
+                                            value
+                                          )
+                                        }
+                                        disabled={
+                                          submitting
+                                        }
+                                        className={`w-full rounded-xl border p-3 text-left transition-all sm:p-4 ${
+                                          isSelected
+                                            ? `${themePrimarySoftBorder} ${themePrimarySoft} ring-2 ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]`
+                                            : `${themeNeutralBorder} theme-card hover:border-[color-mix(in_srgb,var(--color-primary)_28%,transparent)] hover:bg-[color-mix(in_srgb,var(--color-primary)_4%,transparent)]`
+                                        }`}
+                                      >
+                                        <div className="flex items-center gap-3">
+                                          <span
+                                            className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
+                                              isSelected
+                                                ? `bg-[var(--color-primary)] text-[var(--color-card)]`
+                                                : `${themeNeutralSurface} theme-text-secondary`
+                                            }`}
+                                          >
+                                            {label}
+                                          </span>
+
+                                          <span
+                                            className={`min-w-0 flex-1 text-sm ${
+                                              isSelected
+                                                ? `${themePrimaryText} font-semibold`
+                                                : "theme-text-secondary"
+                                            }`}
+                                          >
+                                            {value}
+                                          </span>
+
+                                          {isSelected && (
+                                            <CheckCircle2
+                                              size={18}
+                                              className={`${themePrimaryText} shrink-0`}
+                                            />
+                                          )}
+                                        </div>
+                                      </button>
+                                    );
+                                  }
+                                )}
+                            </div>
+                          )}
+
+                          {currentSoal?.jenisSoal ===
+                            "benar_salah" && (
+                            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                              {["Benar", "Salah"].map(
+                                (value) => {
+                                  const isSelected =
+                                    String(
+                                      jawaban[
+                                        currentSoal.id
+                                      ] ?? ""
+                                    ).toLowerCase() ===
+                                    value.toLowerCase();
+
+                                  return (
+                                    <button
+                                      key={value}
+                                      type="button"
+                                      onClick={() =>
+                                        pilihJawaban(
+                                          currentSoal.id,
+                                          value
+                                        )
+                                      }
+                                      disabled={
+                                        submitting
+                                      }
+                                      className={`rounded-xl border p-4 text-left transition ${
+                                        isSelected
+                                          ? `${themePrimarySoftBorder} ${themePrimarySoft} ring-2 ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]`
+                                          : `${themeNeutralBorder} theme-card hover:border-[color-mix(in_srgb,var(--color-primary)_28%,transparent)] hover:bg-[color-mix(in_srgb,var(--color-primary)_4%,transparent)]`
+                                      }`}
+                                    >
+                                      <div className="flex items-center justify-between gap-3">
+                                        <span
+                                          className={`text-sm font-semibold ${
+                                            isSelected
+                                              ? themePrimaryText
+                                              : "theme-text-secondary"
+                                          }`}
+                                        >
+                                          {value}
+                                        </span>
+
+                                        {isSelected && (
+                                          <CheckCircle2
+                                            size={18}
+                                            className={
+                                              themePrimaryText
+                                            }
+                                          />
+                                        )}
+                                      </div>
+                                    </button>
+                                  );
+                                }
+                              )}
+                            </div>
+                          )}
+
+                          {currentSoal?.jenisSoal ===
+                            "esai" && (
+                            <div>
+                              <textarea
+                                value={
+                                  jawaban[
+                                    currentSoal.id
+                                  ] || ""
+                                }
+                                onChange={(e) =>
+                                  pilihJawaban(
+                                    currentSoal.id,
+                                    e.target.value
+                                  )
+                                }
+                                disabled={submitting}
+                                rows={8}
+                                placeholder="Tuliskan jawaban kamu di sini..."
+                                className={`theme-input theme-text w-full resize-y rounded-xl border p-4 text-sm leading-6 outline-none transition placeholder:theme-text-placeholder ${themeFocus}`}
+                              />
+
+                              <div className="theme-text-muted mt-2 flex items-center justify-between text-[10px]">
+                                <span>
+                                  Jawaban akan dinilai oleh
+                                  guru.
+                                </span>
+
+                                <span>
+                                  {
+                                    String(
+                                      jawaban[
+                                        currentSoal.id
+                                      ] || ""
+                                    ).length
+                                  }{" "}
+                                  karakter
+                                </span>
+                              </div>
+                            </div>
+                          )}
+
+                          <div
+                            className={`mt-6 flex items-center justify-between gap-2 border-t ${themeDivider} pt-4`}
+                          >
+                            <button
+                              type="button"
+                              onClick={() =>
+                                goToSoal(
+                                  currentIndex - 1
+                                )
+                              }
+                              disabled={currentIndex === 0}
+                              className={`theme-text-secondary flex items-center gap-1.5 rounded-xl border ${themeNeutralBorder} px-3 py-2 text-xs font-medium transition hover:border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)] hover:text-[var(--color-primary)] disabled:cursor-not-allowed disabled:opacity-40 sm:px-4 sm:text-sm`}
+                            >
+                              <ChevronLeft size={16} />
+                              <span>Sebelumnya</span>
+                            </button>
+
+                            <span
+                              className={`rounded-full ${themeNeutralSurface} theme-text-muted px-3 py-1.5 text-[10px] font-semibold`}
+                            >
+                              {currentIndex + 1} /{" "}
+                              {soal.length}
+                            </span>
+
+                            <button
+                              type="button"
+                              onClick={() =>
+                                goToSoal(
+                                  currentIndex + 1
+                                )
+                              }
+                              disabled={
+                                currentIndex ===
+                                soal.length - 1
+                              }
+                              className="flex items-center gap-1.5 rounded-xl bg-[var(--color-primary)] px-3 py-2 text-xs font-medium text-[var(--color-card)] transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-40 sm:px-4 sm:text-sm"
+                            >
+                              <span>Selanjutnya</span>
+                              <ChevronRight size={16} />
+                            </button>
+                          </div>
+                        </section>
+                      )}
+                    </div>
+
+                    <aside className="min-w-0 lg:col-span-1">
+                      <div
+                        className={`theme-card ${themeSmallShadow} sticky top-24 rounded-2xl border ${themeNeutralBorder} p-3 sm:p-4`}
+                      >
+                        <div className="mb-3 flex items-center justify-between">
+                          <div>
+                            <h3 className="theme-text text-sm font-bold">
+                              Daftar Soal
+                            </h3>
+
+                            <p className="theme-text-muted text-[10px]">
+                              Pilih nomor soal
+                            </p>
+                          </div>
+
+                          <span
+                            className={`rounded-full ${themePrimarySoft} ${themePrimaryText} px-2 py-1 text-[10px] font-bold ring-1 ${themePrimarySoftBorder}`}
+                          >
+                            {answeredCount}/
+                            {soal.length}
+                          </span>
                         </div>
 
                         <div
-                          className={`flex items-center gap-1 rounded-lg border ${themeNeutralBorder} p-1`}
+                          className={`grid gap-1.5 ${
+                            viewMode === "grid"
+                              ? "grid-cols-5"
+                              : "grid-cols-4"
+                          }`}
                         >
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setViewMode("list")
-                            }
-                            className={`rounded-md p-1.5 transition ${
-                              viewMode === "list"
-                                ? `${themePrimarySoft} ${themePrimaryText}`
-                                : `theme-text-muted ${themeNeutralHover}`
-                            }`}
-                          >
-                            <List size={16} />
-                          </button>
+                          {soal.map(
+                            (item, index) => {
+                              const value =
+                                jawaban[item.id];
 
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setViewMode("grid")
-                            }
-                            className={`rounded-md p-1.5 transition ${
-                              viewMode === "grid"
-                                ? `${themePrimarySoft} ${themePrimaryText}`
-                                : `theme-text-muted ${themeNeutralHover}`
-                            }`}
-                          >
-                            <Grid3X3 size={16} />
-                          </button>
-                        </div>
-                      </div>
+                              const isAnswered =
+                                value !== null &&
+                                value !== undefined &&
+                                String(value).trim() !==
+                                  "";
 
-                      <div className="mb-6">
-                        <div className="mb-2 flex flex-wrap items-center gap-2">
-                          <span className="theme-text-muted text-[10px] font-semibold uppercase tracking-wider">
-                            Pertanyaan
-                          </span>
-
-                          <span
-                            className={`rounded-full ${themeNeutralSurface} px-2 py-0.5 text-[10px] font-medium theme-text-secondary`}
-                          >
-                            {currentSoal?.jenisSoal ===
-                            "pilihan_ganda"
-                              ? "Pilihan Ganda"
-                              : currentSoal?.jenisSoal ===
-                                  "benar_salah"
-                                ? "Benar / Salah"
-                                : "Esai"}
-                          </span>
-
-                          <span
-                            className={`rounded-full ${themePrimarySoft} ${themePrimaryText} px-2 py-0.5 text-[10px] font-medium ring-1 ${themePrimarySoftBorder}`}
-                          >
-                            {formatDecimal(
-                              currentSoal?.poin
-                            )}{" "}
-                            poin
-                          </span>
-                        </div>
-
-                        <p className="theme-text text-sm font-medium leading-7 sm:text-base">
-                          {currentSoal?.teksSoal ||
-                            "-"}
-                        </p>
-                      </div>
-
-                      {currentSoal?.jenisSoal ===
-                        "pilihan_ganda" && (
-                        <div className="space-y-2.5">
-                          {Array.isArray(
-                            currentSoal?.pilihan
-                          ) &&
-                            currentSoal.pilihan.map(
-                              (option, i) => {
-                                const value =
-                                  getOptionValue(
-                                    option
-                                  );
-
-                                const label =
-                                  String.fromCharCode(
-                                    65 + i
-                                  );
-
-                                const selectedValue =
-                                  jawaban[
-                                    currentSoal.id
-                                  ];
-
-                                const isSelected =
-                                  String(
-                                    selectedValue ?? ""
-                                  ) ===
-                                  String(value);
-
-                                return (
-                                  <button
-                                    key={`${currentSoal.id}-${i}`}
-                                    type="button"
-                                    onClick={() =>
-                                      pilihJawaban(
-                                        currentSoal.id,
-                                        value
-                                      )
-                                    }
-                                    disabled={
-                                      submitting
-                                    }
-                                    className={`w-full rounded-xl border p-3 text-left transition-all sm:p-4 ${
-                                      isSelected
-                                        ? `${themePrimarySoftBorder} ${themePrimarySoft} ring-2 ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]`
-                                        : `${themeNeutralBorder} theme-card hover:border-[color-mix(in_srgb,var(--color-primary)_28%,transparent)] hover:bg-[color-mix(in_srgb,var(--color-primary)_4%,transparent)]`
-                                    }`}
-                                  >
-                                    <div className="flex items-center gap-3">
-                                      <span
-                                        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
-                                          isSelected
-                                            ? `bg-[var(--color-primary)] text-[var(--color-card)]`
-                                            : `${themeNeutralSurface} theme-text-secondary`
-                                        }`}
-                                      >
-                                        {label}
-                                      </span>
-
-                                      <span
-                                        className={`min-w-0 flex-1 text-sm ${
-                                          isSelected
-                                            ? `${themePrimaryText} font-semibold`
-                                            : "theme-text-secondary"
-                                        }`}
-                                      >
-                                        {value}
-                                      </span>
-
-                                      {isSelected && (
-                                        <CheckCircle2
-                                          size={18}
-                                          className={`${themePrimaryText} shrink-0`}
-                                        />
-                                      )}
-                                    </div>
-                                  </button>
-                                );
-                              }
-                            )}
-                        </div>
-                      )}
-
-                      {currentSoal?.jenisSoal ===
-                        "benar_salah" && (
-                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                          {["Benar", "Salah"].map(
-                            (value) => {
-                              const isSelected =
-                                String(
-                                  jawaban[
-                                    currentSoal.id
-                                  ] ?? ""
-                                ).toLowerCase() ===
-                                value.toLowerCase();
+                              const isActive =
+                                index === currentIndex;
 
                               return (
                                 <button
-                                  key={value}
+                                  key={item.id}
                                   type="button"
                                   onClick={() =>
-                                    pilihJawaban(
-                                      currentSoal.id,
-                                      value
-                                    )
+                                    goToSoal(index)
                                   }
-                                  disabled={
-                                    submitting
-                                  }
-                                  className={`rounded-xl border p-4 text-left transition ${
-                                    isSelected
-                                      ? `${themePrimarySoftBorder} ${themePrimarySoft} ring-2 ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]`
-                                      : `${themeNeutralBorder} theme-card hover:border-[color-mix(in_srgb,var(--color-primary)_28%,transparent)] hover:bg-[color-mix(in_srgb,var(--color-primary)_4%,transparent)]`
+                                  className={`relative flex aspect-square items-center justify-center rounded-lg text-xs font-semibold transition ${
+                                    isActive
+                                      ? `bg-[var(--color-primary)] text-[var(--color-card)] ${themePrimaryShadow} ring-2 ring-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]`
+                                      : isAnswered
+                                        ? `${themeSuccessSurface} text-[var(--color-success)] ring-1 ${themeSuccessBorder} hover:brightness-95`
+                                        : `border ${themeNeutralBorder} ${themeNeutralSurface} theme-text-secondary ${themeNeutralHover}`
                                   }`}
                                 >
-                                  <div className="flex items-center justify-between gap-3">
-                                    <span
-                                      className={`text-sm font-semibold ${
-                                        isSelected
-                                          ? themePrimaryText
-                                          : "theme-text-secondary"
-                                      }`}
-                                    >
-                                      {value}
-                                    </span>
+                                  {index + 1}
 
-                                    {isSelected && (
-                                      <CheckCircle2
-                                        size={18}
-                                        className={
-                                          themePrimaryText
-                                        }
-                                      />
+                                  {isAnswered &&
+                                    !isActive && (
+                                      <span
+                                        className={`absolute -right-1 -top-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-[var(--color-success)] ring-2 ring-[var(--color-card)]`}
+                                      >
+                                        <CheckCircle2
+                                          size={8}
+                                          className="text-[var(--color-card)]"
+                                        />
+                                      </span>
                                     )}
-                                  </div>
                                 </button>
                               );
                             }
                           )}
                         </div>
-                      )}
 
-                      {currentSoal?.jenisSoal ===
-                        "esai" && (
-                        <div>
-                          <textarea
-                            value={
-                              jawaban[
-                                currentSoal.id
-                              ] || ""
-                            }
-                            onChange={(e) =>
-                              pilihJawaban(
-                                currentSoal.id,
-                                e.target.value
-                              )
-                            }
-                            disabled={submitting}
-                            rows={8}
-                            placeholder="Tuliskan jawaban kamu di sini..."
-                            className={`theme-input theme-text w-full resize-y rounded-xl border p-4 text-sm leading-6 outline-none transition placeholder:theme-text-placeholder ${themeFocus}`}
+                        <div
+                          className={`mt-4 space-y-2 border-t ${themeDivider} pt-3`}
+                        >
+                          <LegendRow
+                            text="Terjawab"
+                            value={answeredCount}
+                            tone="success"
                           />
 
-                          <div className="theme-text-muted mt-2 flex items-center justify-between text-[10px]">
-                            <span>
-                              Jawaban akan dinilai oleh
-                              guru.
-                            </span>
-
-                            <span>
-                              {
-                                String(
-                                  jawaban[
-                                    currentSoal.id
-                                  ] || ""
-                                ).length
-                              }{" "}
-                              karakter
-                            </span>
-                          </div>
+                          <LegendRow
+                            text="Belum"
+                            value={unansweredCount}
+                            tone="warning"
+                          />
                         </div>
-                      )}
-
-                      <div
-                        className={`mt-6 flex items-center justify-between gap-2 border-t ${themeDivider} pt-4`}
-                      >
-                        <button
-                          type="button"
-                          onClick={() =>
-                            goToSoal(
-                              currentIndex - 1
-                            )
-                          }
-                          disabled={currentIndex === 0}
-                          className={`theme-text-secondary flex items-center gap-1.5 rounded-xl border ${themeNeutralBorder} px-3 py-2 text-xs font-medium transition hover:border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)] hover:text-[var(--color-primary)] disabled:cursor-not-allowed disabled:opacity-40 sm:px-4 sm:text-sm`}
-                        >
-                          <ChevronLeft size={16} />
-                          <span>Sebelumnya</span>
-                        </button>
-
-                        <span
-                          className={`rounded-full ${themeNeutralSurface} theme-text-muted px-3 py-1.5 text-[10px] font-semibold`}
-                        >
-                          {currentIndex + 1} /{" "}
-                          {soal.length}
-                        </span>
 
                         <button
                           type="button"
-                          onClick={() =>
-                            goToSoal(
-                              currentIndex + 1
-                            )
-                          }
-                          disabled={
-                            currentIndex ===
-                            soal.length - 1
-                          }
-                          className="flex items-center gap-1.5 rounded-xl bg-[var(--color-primary)] px-3 py-2 text-xs font-medium text-[var(--color-card)] transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-40 sm:px-4 sm:text-sm"
+                          onClick={handleSubmit}
+                          disabled={submitting}
+                          className={`mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-3 py-2.5 text-xs font-semibold text-[var(--color-card)] transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50 ${themePrimaryShadow}`}
                         >
-                          <span>Selanjutnya</span>
-                          <ChevronRight size={16} />
+                          {submitting ? (
+                            <Loader2
+                              size={15}
+                              className="animate-spin"
+                            />
+                          ) : (
+                            <Send size={15} />
+                          )}
+
+                          Kirim Ujian
                         </button>
                       </div>
-                    </section>
-                  )}
-                </div>
-
-                <aside className="min-w-0 lg:col-span-1">
-                  <div
-                    className={`theme-card ${themeSmallShadow} sticky top-24 rounded-2xl border ${themeNeutralBorder} p-3 sm:p-4`}
-                  >
-                    <div className="mb-3 flex items-center justify-between">
-                      <div>
-                        <h3 className="theme-text text-sm font-bold">
-                          Daftar Soal
-                        </h3>
-
-                        <p className="theme-text-muted text-[10px]">
-                          Pilih nomor soal
-                        </p>
-                      </div>
-
-                      <span
-                        className={`rounded-full ${themePrimarySoft} ${themePrimaryText} px-2 py-1 text-[10px] font-bold ring-1 ${themePrimarySoftBorder}`}
-                      >
-                        {answeredCount}/
-                        {soal.length}
-                      </span>
-                    </div>
-
-                    <div
-                      className={`grid gap-1.5 ${
-                        viewMode === "grid"
-                          ? "grid-cols-5"
-                          : "grid-cols-4"
-                      }`}
-                    >
-                      {soal.map(
-                        (item, index) => {
-                          const value =
-                            jawaban[item.id];
-
-                          const isAnswered =
-                            value !== null &&
-                            value !== undefined &&
-                            String(value).trim() !==
-                              "";
-
-                          const isActive =
-                            index === currentIndex;
-
-                          return (
-                            <button
-                              key={item.id}
-                              type="button"
-                              onClick={() =>
-                                goToSoal(index)
-                              }
-                              className={`relative flex aspect-square items-center justify-center rounded-lg text-xs font-semibold transition ${
-                                isActive
-                                  ? `bg-[var(--color-primary)] text-[var(--color-card)] ${themePrimaryShadow} ring-2 ring-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]`
-                                  : isAnswered
-                                    ? `${themeSuccessSurface} text-[var(--color-success)] ring-1 ${themeSuccessBorder} hover:brightness-95`
-                                    : `border ${themeNeutralBorder} ${themeNeutralSurface} theme-text-secondary ${themeNeutralHover}`
-                              }`}
-                            >
-                              {index + 1}
-
-                              {isAnswered &&
-                                !isActive && (
-                                  <span
-                                    className={`absolute -right-1 -top-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-[var(--color-success)] ring-2 ring-[var(--color-card)]`}
-                                  >
-                                    <CheckCircle2
-                                      size={8}
-                                      className="text-[var(--color-card)]"
-                                    />
-                                  </span>
-                                )}
-                            </button>
-                          );
-                        }
-                      )}
-                    </div>
-
-                    <div
-                      className={`mt-4 space-y-2 border-t ${themeDivider} pt-3`}
-                    >
-                      <LegendRow
-                        text="Terjawab"
-                        value={answeredCount}
-                        tone="success"
-                      />
-
-                      <LegendRow
-                        text="Belum"
-                        value={unansweredCount}
-                        tone="warning"
-                      />
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={handleSubmit}
-                      disabled={submitting}
-                      className={`mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-[var(--color-primary)] px-3 py-2.5 text-xs font-semibold text-[var(--color-card)] transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50 ${themePrimaryShadow}`}
-                    >
-                      {submitting ? (
-                        <Loader2
-                          size={15}
-                          className="animate-spin"
-                        />
-                      ) : (
-                        <Send size={15} />
-                      )}
-
-                      Kirim Ujian
-                    </button>
+                    </aside>
                   </div>
-                </aside>
-              </div>
-            </>
-          )}
+                </>
+              )}
 
-          <footer
-            className={`border-t ${themeDivider} py-4 text-center text-[10px] theme-text-muted sm:text-xs`}
-          >
-            © 2026 SmartSchool •{" "}
-            {ujian?.judul || "Ujian Siswa"}
-          </footer>
-        </div>
+              <footer
+                className={`border-t ${themeDivider} py-4 text-center text-[10px] theme-text-muted sm:text-xs`}
+              >
+                © 2026 SmartSchool •{" "}
+                {ujian?.judul || "Ujian Siswa"}
+              </footer>
+            </div>
+          </div>
+        </main>
       </div>
-
 
       {showTokenModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[color-mix(in_srgb,var(--color-text)_55%,transparent)] p-4 backdrop-blur-sm">
@@ -1692,7 +1692,6 @@ export default function UjianPage() {
           </div>
         </div>
       )}
-
 
       {showConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-[color-mix(in_srgb,var(--color-text)_55%,transparent)] p-4 backdrop-blur-sm">

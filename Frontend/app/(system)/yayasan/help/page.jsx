@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useMemo, useState } from "react";
@@ -15,13 +14,9 @@ import {
   ChevronDown,
   ChevronRight,
   MessageCircle,
-  Mail,
-  Phone,
   FileText,
-  CreditCard,
   GraduationCap,
   ClipboardList,
-  ExternalLink,
   Lightbulb,
   CircleHelp,
   LifeBuoy,
@@ -169,15 +164,15 @@ function normalizeText(value) {
 
 function HelpCard({ icon: Icon, title, description, children }) {
   return (
-    <div className="rounded-xl border theme-border theme-card p-5 transition-colors">
+    <div className="theme-border theme-card rounded-xl border p-5 transition-colors">
       <div className="flex items-start gap-3">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-500/10 text-blue-500">
           <Icon size={20} />
         </div>
 
         <div className="min-w-0 flex-1">
-          <h3 className="text-sm font-bold theme-text">{title}</h3>
-          <p className="mt-1 text-sm leading-6 theme-text-muted">
+          <h3 className="theme-text text-sm font-bold">{title}</h3>
+          <p className="theme-text-muted mt-1 text-sm leading-6">
             {description}
           </p>
           {children}
@@ -189,7 +184,7 @@ function HelpCard({ icon: Icon, title, description, children }) {
 
 function FAQItem({ item, open, onToggle }) {
   return (
-    <article className="overflow-hidden rounded-xl border theme-border theme-card">
+    <article className="theme-border theme-card overflow-hidden rounded-xl border">
       <button
         type="button"
         onClick={onToggle}
@@ -201,22 +196,22 @@ function FAQItem({ item, open, onToggle }) {
             <CircleHelp size={19} />
           </span>
 
-          <span className="text-sm font-semibold leading-6 theme-text">
+          <span className="theme-text text-sm font-semibold leading-6">
             {item.question}
           </span>
         </span>
 
         <ChevronDown
           size={18}
-          className={`shrink-0 theme-text-muted transition-transform duration-200 ${
+          className={`theme-text-muted shrink-0 transition-transform duration-200 ${
             open ? "rotate-180" : ""
           }`}
         />
       </button>
 
       {open && (
-        <div className="border-t theme-border px-4 pb-5 pt-4 sm:px-5">
-          <p className="pl-8 text-sm leading-7 theme-text-muted">
+        <div className="theme-border border-t px-4 pb-5 pt-4 sm:px-5">
+          <p className="theme-text-muted pl-8 text-sm leading-7">
             {item.answer}
           </p>
         </div>
@@ -247,16 +242,13 @@ export default function BantuanYayasanPage() {
         ].join(" ")
       );
 
-      const matchesSearch =
-        !keyword || searchableText.includes(keyword);
+      const matchesSearch = !keyword || searchableText.includes(keyword);
 
       return matchesCategory && matchesSearch;
     });
   }, [search, activeCategory]);
 
-  const displayedFAQs = showAll
-    ? filteredFAQs
-    : filteredFAQs.slice(0, 6);
+  const displayedFAQs = showAll ? filteredFAQs : filteredFAQs.slice(0, 6);
 
   const handleCategoryChange = (categoryId) => {
     setActiveCategory(categoryId);
@@ -278,7 +270,7 @@ export default function BantuanYayasanPage() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-7xl space-y-6 px-4 py-6 sm:px-6 lg:px-8">
+    <div className="w-full space-y-6 px-4 py-6 sm:px-6 lg:px-8">
       {/* HEADER */}
       <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-start gap-3">
@@ -287,12 +279,12 @@ export default function BantuanYayasanPage() {
           </div>
 
           <div>
-            <h1 className="text-2xl font-bold tracking-tight theme-text">
+            <h1 className="theme-text text-2xl font-bold tracking-tight">
               Pusat Bantuan
             </h1>
-            <p className="mt-1 max-w-2xl text-sm leading-6 theme-text-muted">
-              Temukan panduan dan jawaban untuk membantu Anda mengelola
-              yayasan dan sekolah binaan melalui SmartSchool.
+            <p className="theme-text-muted mt-1 max-w-2xl text-sm leading-6">
+              Temukan panduan dan jawaban untuk membantu Anda mengelola yayasan
+              dan sekolah binaan melalui SmartSchool.
             </p>
           </div>
         </div>
@@ -304,7 +296,7 @@ export default function BantuanYayasanPage() {
       </header>
 
       {/* SEARCH HERO */}
-      <section className="relative overflow-hidden rounded-2xl border theme-border theme-card p-5 sm:p-8">
+      <section className="theme-border theme-card relative overflow-hidden rounded-2xl border p-5 sm:p-8">
         <div className="pointer-events-none absolute -right-12 -top-16 h-48 w-48 rounded-full bg-blue-500/10 blur-3xl" />
 
         <div className="relative mx-auto max-w-3xl text-center">
@@ -312,11 +304,11 @@ export default function BantuanYayasanPage() {
             <HelpCircle size={26} />
           </div>
 
-          <h2 className="mt-4 text-xl font-bold theme-text sm:text-2xl">
+          <h2 className="theme-text mt-4 text-xl font-bold sm:text-2xl">
             Ada yang bisa kami bantu?
           </h2>
 
-          <p className="mt-2 text-sm leading-6 theme-text-muted">
+          <p className="theme-text-muted mt-2 text-sm leading-6">
             Cari panduan berdasarkan pertanyaan atau kendala yang sedang Anda
             alami.
           </p>
@@ -324,7 +316,7 @@ export default function BantuanYayasanPage() {
           <div className="relative mt-6">
             <Search
               size={19}
-              className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 theme-text-muted"
+              className="theme-text-muted pointer-events-none absolute left-4 top-1/2 -translate-y-1/2"
             />
 
             <input
@@ -333,7 +325,7 @@ export default function BantuanYayasanPage() {
               onChange={handleSearchChange}
               placeholder="Cari bantuan, misalnya profil, sekolah, laporan..."
               aria-label="Cari bantuan"
-              className="w-full rounded-xl border theme-border bg-[var(--color-card)] py-3.5 pl-12 pr-12 text-sm theme-text outline-none transition placeholder:text-[var(--color-text-muted)] focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+              className="theme-border theme-text w-full rounded-xl border bg-[var(--color-card)] py-3.5 pl-12 pr-12 text-sm outline-none transition placeholder:text-[var(--color-text-muted)] focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
             />
 
             {search && (
@@ -341,14 +333,14 @@ export default function BantuanYayasanPage() {
                 type="button"
                 onClick={() => setSearch("")}
                 aria-label="Hapus pencarian"
-                className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg theme-text-muted transition hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]"
+                className="theme-text-muted absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg transition hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]"
               >
                 <X size={17} />
               </button>
             )}
           </div>
 
-          <p className="mt-3 text-xs theme-text-muted">
+          <p className="theme-text-muted mt-3 text-xs">
             Contoh pencarian: sekolah binaan, ubah profil, monitoring akademik.
           </p>
         </div>
@@ -357,13 +349,13 @@ export default function BantuanYayasanPage() {
       {/* QUICK ACCESS */}
       <section>
         <div className="mb-4">
-          <h2 className="text-lg font-bold theme-text">Akses Cepat</h2>
-          <p className="mt-1 text-sm theme-text-muted">
+          <h2 className="theme-text text-lg font-bold">Akses Cepat</h2>
+          <p className="theme-text-muted mt-1 text-sm">
             Langsung menuju menu yang sering digunakan.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
           {QUICK_LINKS.map((item) => {
             const Icon = item.icon;
 
@@ -371,17 +363,17 @@ export default function BantuanYayasanPage() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="group flex min-w-0 items-start gap-3 rounded-xl border theme-border theme-card p-4 transition hover:border-blue-500/50 hover:bg-[color-mix(in_srgb,var(--color-text)_2%,transparent)]"
+                className="group theme-border theme-card flex min-w-0 items-start gap-3 rounded-xl border p-4 transition hover:border-blue-500/50 hover:bg-[color-mix(in_srgb,var(--color-text)_2%,transparent)]"
               >
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-500/10 text-blue-500 transition group-hover:bg-blue-500/15">
                   <Icon size={20} />
                 </div>
 
                 <div className="min-w-0 flex-1">
-                  <h3 className="text-sm font-semibold theme-text">
+                  <h3 className="theme-text text-sm font-semibold">
                     {item.title}
                   </h3>
-                  <p className="mt-1 text-xs leading-5 theme-text-muted">
+                  <p className="theme-text-muted mt-1 text-xs leading-5">
                     {item.description}
                   </p>
                   <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-blue-500">
@@ -399,24 +391,24 @@ export default function BantuanYayasanPage() {
       </section>
 
       {/* FAQ SECTION */}
-      <section className="rounded-xl border theme-border theme-card p-4 sm:p-6">
-        <div className="flex flex-col gap-3 border-b theme-border pb-5 sm:flex-row sm:items-start sm:justify-between">
+      <section className="theme-border theme-card rounded-xl border p-4 sm:p-6">
+        <div className="theme-border flex flex-col gap-3 border-b pb-5 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex items-start gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-500/10 text-blue-500">
               <BookOpen size={20} />
             </div>
 
             <div>
-              <h2 className="text-lg font-bold theme-text">
+              <h2 className="theme-text text-lg font-bold">
                 Pertanyaan yang Sering Diajukan
               </h2>
-              <p className="mt-1 text-sm theme-text-muted">
+              <p className="theme-text-muted mt-1 text-sm">
                 Temukan jawaban untuk kendala umum penggunaan SmartSchool.
               </p>
             </div>
           </div>
 
-          <span className="w-fit rounded-full border theme-border px-3 py-1 text-xs theme-text-muted">
+          <span className="theme-border theme-text-muted w-fit rounded-full border px-3 py-1 text-xs">
             {filteredFAQs.length} panduan
           </span>
         </div>
@@ -464,16 +456,16 @@ export default function BantuanYayasanPage() {
               />
             ))
           ) : (
-            <div className="rounded-xl border border-dashed theme-border px-5 py-12 text-center">
+            <div className="theme-border rounded-xl border border-dashed px-5 py-12 text-center">
               <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-blue-500/10 text-blue-500">
                 <Search size={22} />
               </div>
 
-              <h3 className="mt-4 text-sm font-bold theme-text">
+              <h3 className="theme-text mt-4 text-sm font-bold">
                 Bantuan tidak ditemukan
               </h3>
 
-              <p className="mx-auto mt-2 max-w-md text-sm leading-6 theme-text-muted">
+              <p className="theme-text-muted mx-auto mt-2 max-w-md text-sm leading-6">
                 Kami belum menemukan panduan yang sesuai dengan pencarian
                 Anda. Coba gunakan kata kunci yang lebih sederhana atau pilih
                 kategori lainnya.
@@ -495,7 +487,7 @@ export default function BantuanYayasanPage() {
             <button
               type="button"
               onClick={() => setShowAll((previous) => !previous)}
-              className="inline-flex items-center gap-2 rounded-lg border theme-border px-4 py-2.5 text-sm font-semibold theme-text transition hover:bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]"
+              className="theme-border theme-text inline-flex items-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-semibold transition hover:bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]"
             >
               {showAll ? "Tampilkan lebih sedikit" : "Lihat semua panduan"}
               <ChevronDown
@@ -510,15 +502,15 @@ export default function BantuanYayasanPage() {
       {/* HOW TO GET HELP */}
       <section>
         <div className="mb-4">
-          <h2 className="text-lg font-bold theme-text">
+          <h2 className="theme-text text-lg font-bold">
             Masih Membutuhkan Bantuan?
           </h2>
-          <p className="mt-1 text-sm theme-text-muted">
+          <p className="theme-text-muted mt-1 text-sm">
             Ikuti langkah berikut jika jawaban yang dicari belum tersedia.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
           <HelpCard
             icon={Lightbulb}
             title="1. Periksa kembali data"
@@ -526,7 +518,7 @@ export default function BantuanYayasanPage() {
           />
 
           <HelpCard
-            icon={RefreshCwIcon}
+            icon={Settings}
             title="2. Muat ulang halaman"
             description="Jika informasi belum berubah, coba muat ulang halaman dan periksa koneksi internet."
           />
@@ -548,13 +540,13 @@ export default function BantuanYayasanPage() {
             </div>
 
             <div>
-              <h2 className="text-base font-bold theme-text">
+              <h2 className="theme-text text-base font-bold">
                 Butuh bantuan lebih lanjut?
               </h2>
-              <p className="mt-1 max-w-2xl text-sm leading-6 theme-text-muted">
-                Siapkan nama menu, waktu kejadian, pesan kesalahan, dan
-                langkah yang sudah dilakukan agar administrator dapat
-                membantu memeriksa kendala Anda.
+              <p className="theme-text-muted mt-1 max-w-2xl text-sm leading-6">
+                Siapkan nama menu, waktu kejadian, pesan kesalahan, dan langkah
+                yang sudah dilakukan agar administrator dapat membantu
+                memeriksa kendala Anda.
               </p>
             </div>
           </div>
@@ -572,7 +564,10 @@ export default function BantuanYayasanPage() {
                 "Pesan kesalahan: ",
               ].join("\n");
 
-              if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
+              if (
+                typeof navigator !== "undefined" &&
+                navigator.clipboard?.writeText
+              ) {
                 navigator.clipboard
                   .writeText(message)
                   .then(() => {
@@ -596,18 +591,12 @@ export default function BantuanYayasanPage() {
       </section>
 
       {/* FOOTER */}
-      <footer className="border-t theme-border py-4">
-        <div className="flex flex-col gap-2 text-xs theme-text-muted sm:flex-row sm:items-center sm:justify-between">
+      <footer className="theme-border border-t py-4">
+        <div className="theme-text-muted flex flex-col gap-2 text-xs sm:flex-row sm:items-center sm:justify-between">
           <p>SmartSchool · Pusat Bantuan Yayasan</p>
-          <p>
-            Tidak menemukan jawaban? Hubungi administrator sistem Anda.
-          </p>
+          <p>Tidak menemukan jawaban? Hubungi administrator sistem Anda.</p>
         </div>
       </footer>
     </div>
   );
-}
-
-function RefreshCwIcon({ size = 20, ...props }) {
-  return <Settings size={size} {...props} />;
 }

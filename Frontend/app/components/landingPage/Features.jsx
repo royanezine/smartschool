@@ -36,7 +36,7 @@ const features = [
   {
     tag: "Komunikasi",
     title: "Notifikasi",
-    desc: "Pemberitahuan otomatis ke guru dan orang tua.",
+    desc: "Pemberitahuan otomatis ke guru dan.",
   },
   {
     tag: "Komunikasi",

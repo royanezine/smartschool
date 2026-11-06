@@ -1518,19 +1518,18 @@ export default function CetakRaportPage() {
 
 
   return (
-    <div className="theme-page flex min-h-screen w-full print:block print:min-h-0 print:overflow-visible print:bg-white">
+    <div className="flex h-screen overflow-hidden theme-page theme-text print:block print:min-h-0 print:overflow-visible print:bg-white">
       <div className="print:hidden shrink-0">
         <Sidebar />
       </div>
 
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden print:block print:overflow-visible">
-        <div className="print:hidden">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col print:block print:overflow-visible">
+        <div className="print:hidden shrink-0">
           <Header />
         </div>
 
-        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto print:overflow-visible">
-          <div className="mx-auto w-full max-w-[1400px] space-y-6 p-4 sm:p-6 lg:p-8 print:max-w-full print:p-0">
-
+        <main className="min-w-0 flex-1 overflow-y-auto print:overflow-visible">
+          <div className="w-full space-y-6 p-4 sm:p-6 lg:p-8 print:max-w-full print:p-0">
 
             <div className="print:hidden flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex items-start gap-3">
@@ -1671,7 +1670,7 @@ export default function CetakRaportPage() {
             </div>
 
 
-            <div className="print:hidden grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="print:hidden grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-6">
               <StatCard
                 icon={Users}
                 label="Total Siswa"

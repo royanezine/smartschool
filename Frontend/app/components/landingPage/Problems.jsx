@@ -49,7 +49,7 @@ const problems = [
     number: "06",
     icon: MessageSquareOff,
     title: "Komunikasi Belum Terintegrasi",
-    desc: "Komunikasi antar guru, siswa, orang tua, dan pihak sekolah belum terintegrasi.",
+    desc: "Komunikasi antar guru, siswa dan pihak sekolah belum terintegrasi.",
     span: "lg:col-span-3",
     wide: true,
   },

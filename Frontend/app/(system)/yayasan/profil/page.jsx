@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
@@ -79,15 +78,12 @@ function getErrorMessage(error, fallback) {
   if (typeof error?.message === "string" && error.message.trim()) {
     return error.message;
   }
-
   return fallback;
 }
 
 function getDateLabel(value) {
   if (!value) return "Tanggal tidak tersedia";
-
   const date = new Date(value);
-
   if (Number.isNaN(date.getTime())) return "Tanggal tidak tersedia";
 
   return date.toLocaleDateString("id-ID", {
@@ -122,10 +118,6 @@ function getReviewStatusClass(status) {
       return "border-[var(--color-border)] bg-[var(--color-card)] theme-text-muted";
   }
 }
-
-/* =========================================================
-   FORM FIELD
-========================================================= */
 
 function FormField({
   label,
@@ -192,16 +184,10 @@ function FormField({
         )}
       </div>
 
-      {helper && (
-        <p className="mt-1.5 text-xs theme-text-muted">{helper}</p>
-      )}
+      {helper && <p className="mt-1.5 text-xs theme-text-muted">{helper}</p>}
     </div>
   );
 }
-
-/* =========================================================
-   SECTION HEADER
-========================================================= */
 
 function SectionHeader({ icon: Icon, title, description, right }) {
   return (
@@ -222,13 +208,12 @@ function SectionHeader({ icon: Icon, title, description, right }) {
   );
 }
 
-/* =========================================================
-   STAR RATING
-========================================================= */
-
 function StarRating({ rating = 0, interactive = false, onChange, size = 18 }) {
   return (
-    <div className="flex items-center gap-1" aria-label={`Rating ${rating} dari 5`}>
+    <div
+      className="flex items-center gap-1"
+      aria-label={`Rating ${rating} dari 5`}
+    >
       {[1, 2, 3, 4, 5].map((star) => (
         <button
           key={star}
@@ -254,10 +239,6 @@ function StarRating({ rating = 0, interactive = false, onChange, size = 18 }) {
   );
 }
 
-/* =========================================================
-   REVIEW CARD
-========================================================= */
-
 function ReviewCard({ review }) {
   const nama =
     review?.pengguna?.namaLengkap?.trim() || "Pengguna SmartSchool";
@@ -269,7 +250,7 @@ function ReviewCard({ review }) {
     "Pengguna";
 
   return (
-    <article className="flex h-full flex-col rounded-xl border theme-border theme-card p-4 transition hover:border-blue-500/40 sm:p-5">
+    <article className="theme-border theme-card flex h-full flex-col rounded-xl border p-4 transition hover:border-blue-500/40 sm:p-5">
       <div className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-500/10 font-bold text-blue-500">
@@ -277,36 +258,29 @@ function ReviewCard({ review }) {
           </div>
 
           <div className="min-w-0">
-            <p className="truncate text-sm font-bold theme-text">{nama}</p>
-            <p className="mt-0.5 truncate text-xs theme-text-muted">{jabatan}</p>
+            <p className="theme-text truncate text-sm font-bold">{nama}</p>
+            <p className="theme-text-muted mt-0.5 truncate text-xs">{jabatan}</p>
           </div>
         </div>
 
-        <MessageSquareQuote
-          size={20}
-          className="shrink-0 text-blue-500/60"
-        />
+        <MessageSquareQuote size={20} className="shrink-0 text-blue-500/60" />
       </div>
 
       <div className="mt-4">
         <StarRating rating={review?.rating || 0} />
       </div>
 
-      <p className="mt-3 flex-1 whitespace-pre-line break-words text-sm leading-6 theme-text-muted">
+      <p className="theme-text-muted mt-3 flex-1 whitespace-pre-line break-words text-sm leading-6">
         {review?.komentar || "Tidak ada komentar."}
       </p>
 
-      <div className="mt-4 flex items-center gap-2 border-t theme-border pt-3 text-xs theme-text-muted">
+      <div className="theme-border theme-text-muted mt-4 flex items-center gap-2 border-t pt-3 text-xs">
         <CalendarDays size={14} />
         <span>{getDateLabel(review?.dibuatPada)}</span>
       </div>
     </article>
   );
 }
-
-/* =========================================================
-   MAIN PAGE
-========================================================= */
 
 export default function ProfilYayasanPage() {
   const [form, setForm] = useState(INITIAL_FORM);
@@ -331,10 +305,6 @@ export default function ProfilYayasanPage() {
   const isDirty = JSON.stringify(form) !== JSON.stringify(initialForm);
   const hasOwnReview = Boolean(review?.id);
 
-  /* -----------------------------------------
-     LOAD PROFIL YAYASAN
-  ----------------------------------------- */
-
   const loadProfile = useCallback(async () => {
     setLoading(true);
     setError("");
@@ -350,17 +320,11 @@ export default function ProfilYayasanPage() {
       setForm(normalized);
       setInitialForm(normalized);
     } catch (err) {
-      setError(
-        getErrorMessage(err, "Gagal mengambil data profil yayasan.")
-      );
+      setError(getErrorMessage(err, "Gagal mengambil data profil yayasan."));
     } finally {
       setLoading(false);
     }
   }, []);
-
-  /* -----------------------------------------
-     LOAD REVIEW SAYA
-  ----------------------------------------- */
 
   const loadMyReview = useCallback(async () => {
     setReviewLoading(true);
@@ -381,17 +345,11 @@ export default function ProfilYayasanPage() {
         setReviewForm(INITIAL_REVIEW);
       }
     } catch (err) {
-      setReviewError(
-        getErrorMessage(err, "Gagal memuat review Anda.")
-      );
+      setReviewError(getErrorMessage(err, "Gagal memuat review Anda."));
     } finally {
       setReviewLoading(false);
     }
   }, []);
-
-  /* -----------------------------------------
-     LOAD REVIEW PUBLIK
-  ----------------------------------------- */
 
   const loadPublicReviews = useCallback(async () => {
     setPublicReviewLoading(true);
@@ -425,36 +383,22 @@ export default function ProfilYayasanPage() {
     loadPublicReviews();
   }, [loadProfile, loadMyReview, loadPublicReviews]);
 
-  /* -----------------------------------------
-     FORM PROFILE HANDLERS
-  ----------------------------------------- */
-
   const handleUserChange = (event) => {
     const { name, value } = event.target;
-
     setForm((previous) => ({
       ...previous,
-      user: {
-        ...previous.user,
-        [name]: value,
-      },
+      user: { ...previous.user, [name]: value },
     }));
-
     setError("");
     setSuccess("");
   };
 
   const handleYayasanChange = (event) => {
     const { name, value } = event.target;
-
     setForm((previous) => ({
       ...previous,
-      yayasan: {
-        ...previous.yayasan,
-        [name]: value,
-      },
+      yayasan: { ...previous.yayasan, [name]: value },
     }));
-
     setError("");
     setSuccess("");
   };
@@ -466,13 +410,8 @@ export default function ProfilYayasanPage() {
     setSuccess("");
   };
 
-  /* -----------------------------------------
-     SAVE PROFILE
-  ----------------------------------------- */
-
   const handleSave = async (event) => {
     event.preventDefault();
-
     if (saving) return;
 
     const namaLengkap = form.user.namaLengkap.trim();
@@ -501,7 +440,6 @@ export default function ProfilYayasanPage() {
 
     for (const item of emailFields) {
       const email = item.value.trim();
-
       if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
         setError(`${item.label} tidak memiliki format yang valid.`);
         return;
@@ -536,21 +474,14 @@ export default function ProfilYayasanPage() {
       setEditMode(false);
       setSuccess("Profil yayasan berhasil diperbarui.");
     } catch (err) {
-      setError(
-        getErrorMessage(err, "Gagal menyimpan profil yayasan.")
-      );
+      setError(getErrorMessage(err, "Gagal menyimpan profil yayasan."));
     } finally {
       setSaving(false);
     }
   };
 
-  /* -----------------------------------------
-     SAVE REVIEW
-  ----------------------------------------- */
-
   const handleReviewSubmit = async (event) => {
     event.preventDefault();
-
     if (reviewSaving) return;
 
     const komentar = reviewForm.komentar.trim();
@@ -588,20 +519,14 @@ export default function ProfilYayasanPage() {
           : "Review berhasil dikirim. Review mungkin perlu dimoderasi sebelum tampil secara publik."
       );
     } catch (err) {
-      setReviewError(
-        getErrorMessage(err, "Gagal menyimpan review Anda.")
-      );
+      setReviewError(getErrorMessage(err, "Gagal menyimpan review Anda."));
     } finally {
       setReviewSaving(false);
     }
   };
 
-  /* -----------------------------------------
-     PAGE
-  ----------------------------------------- */
-
   return (
-    <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+    <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
       {/* PAGE HEADER */}
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-start gap-3">
@@ -610,10 +535,10 @@ export default function ProfilYayasanPage() {
           </div>
 
           <div>
-            <h1 className="text-2xl font-bold tracking-tight theme-text">
+            <h1 className="theme-text text-2xl font-bold tracking-tight">
               Profil Yayasan
             </h1>
-            <p className="mt-1 text-sm theme-text-muted">
+            <p className="theme-text-muted mt-1 text-sm">
               Kelola informasi akun, identitas yayasan, dan ulasan Anda.
             </p>
           </div>
@@ -677,18 +602,18 @@ export default function ProfilYayasanPage() {
 
       {/* PROFILE FORM */}
       {loading ? (
-        <div className="flex min-h-[320px] flex-col items-center justify-center rounded-xl border theme-border theme-card">
+        <div className="theme-border theme-card flex min-h-[320px] flex-col items-center justify-center rounded-xl border">
           <LoaderCircle size={32} className="animate-spin text-blue-500" />
-          <p className="mt-3 text-sm font-medium theme-text-muted">
+          <p className="theme-text-muted mt-3 text-sm font-medium">
             Memuat profil yayasan...
           </p>
         </div>
       ) : (
         <form onSubmit={handleSave} className="space-y-6">
-          <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-            <div className="space-y-6 xl:col-span-2">
+          <div className="grid grid-cols-1 gap-6 xl:grid-cols-3 2xl:grid-cols-4">
+            <div className="space-y-6 xl:col-span-2 2xl:col-span-3">
               {/* ADMIN INFORMATION */}
-              <section className="rounded-xl border theme-border theme-card p-5 shadow-sm sm:p-6">
+              <section className="theme-border theme-card rounded-xl border p-5 shadow-sm sm:p-6">
                 <SectionHeader
                   icon={UserRound}
                   title="Informasi Admin"
@@ -737,7 +662,7 @@ export default function ProfilYayasanPage() {
               </section>
 
               {/* FOUNDATION INFORMATION */}
-              <section className="rounded-xl border theme-border theme-card p-5 shadow-sm sm:p-6">
+              <section className="theme-border theme-card rounded-xl border p-5 shadow-sm sm:p-6">
                 <SectionHeader
                   icon={Landmark}
                   title="Identitas Yayasan"
@@ -816,65 +741,77 @@ export default function ProfilYayasanPage() {
 
             {/* RIGHT SUMMARY */}
             <div className="space-y-6">
-              <section className="overflow-hidden rounded-xl border theme-border theme-card shadow-sm">
-                <div className="border-b theme-border bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] px-5 py-6">
+              <section className="theme-border theme-card overflow-hidden rounded-xl border shadow-sm">
+                <div className="theme-border border-b bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] px-5 py-6">
                   <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500">
                     <Building2 size={24} />
                   </div>
 
-                  <h2 className="mt-4 break-words text-lg font-bold theme-text">
+                  <h2 className="theme-text mt-4 break-words text-lg font-bold">
                     {form.yayasan.nama || "Nama Yayasan"}
                   </h2>
 
-                  <p className="mt-1 text-sm theme-text-muted">
+                  <p className="theme-text-muted mt-1 text-sm">
                     Profil Organisasi
                   </p>
                 </div>
 
                 <div className="space-y-5 p-5">
                   <div className="flex items-start gap-3">
-                    <Hash size={17} className="mt-0.5 shrink-0 theme-text-muted" />
+                    <Hash
+                      size={17}
+                      className="theme-text-muted mt-0.5 shrink-0"
+                    />
                     <div className="min-w-0">
-                      <p className="text-[11px] font-bold uppercase tracking-wider theme-text-muted">
+                      <p className="theme-text-muted text-[11px] font-bold uppercase tracking-wider">
                         NPYP
                       </p>
-                      <p className="mt-1 break-words text-sm font-semibold theme-text">
+                      <p className="theme-text mt-1 break-words text-sm font-semibold">
                         {form.yayasan.npyp || "-"}
                       </p>
                     </div>
                   </div>
 
                   <div className="flex items-start gap-3">
-                    <Mail size={17} className="mt-0.5 shrink-0 theme-text-muted" />
+                    <Mail
+                      size={17}
+                      className="theme-text-muted mt-0.5 shrink-0"
+                    />
                     <div className="min-w-0">
-                      <p className="text-[11px] font-bold uppercase tracking-wider theme-text-muted">
+                      <p className="theme-text-muted text-[11px] font-bold uppercase tracking-wider">
                         Email Yayasan
                       </p>
-                      <p className="mt-1 break-all text-sm font-semibold theme-text">
+                      <p className="theme-text mt-1 break-all text-sm font-semibold">
                         {form.yayasan.email || "-"}
                       </p>
                     </div>
                   </div>
 
                   <div className="flex items-start gap-3">
-                    <Phone size={17} className="mt-0.5 shrink-0 theme-text-muted" />
+                    <Phone
+                      size={17}
+                      className="theme-text-muted mt-0.5 shrink-0"
+                    />
                     <div className="min-w-0">
-                      <p className="text-[11px] font-bold uppercase tracking-wider theme-text-muted">
+                      <p className="theme-text-muted text-[11px] font-bold uppercase tracking-wider">
                         Telepon
                       </p>
-                      <p className="mt-1 break-words text-sm font-semibold theme-text">
+                      <p className="theme-text mt-1 break-words text-sm font-semibold">
                         {form.yayasan.telepon || "-"}
                       </p>
                     </div>
                   </div>
 
                   <div className="flex items-start gap-3">
-                    <MapPin size={17} className="mt-0.5 shrink-0 theme-text-muted" />
+                    <MapPin
+                      size={17}
+                      className="theme-text-muted mt-0.5 shrink-0"
+                    />
                     <div className="min-w-0">
-                      <p className="text-[11px] font-bold uppercase tracking-wider theme-text-muted">
+                      <p className="theme-text-muted text-[11px] font-bold uppercase tracking-wider">
                         Alamat
                       </p>
-                      <p className="mt-1 whitespace-pre-line break-words text-sm font-semibold theme-text">
+                      <p className="theme-text mt-1 whitespace-pre-line break-words text-sm font-semibold">
                         {form.yayasan.alamat || "-"}
                       </p>
                     </div>
@@ -904,9 +841,9 @@ export default function ProfilYayasanPage() {
 
           {/* EDIT ACTIONS */}
           {editMode && (
-            <div className="sticky bottom-0 z-10 -mx-4 border-t theme-border bg-[var(--color-card)]/95 px-4 py-4 backdrop-blur-md sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
-              <div className="mx-auto flex max-w-7xl flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-sm font-medium theme-text-muted">
+            <div className="theme-border sticky bottom-0 z-10 -mx-4 border-t bg-[var(--color-card)]/95 px-4 py-4 backdrop-blur-md sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
+              <div className="mx-auto flex max-w-full flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <p className="theme-text-muted text-sm font-medium">
                   {isDirty
                     ? "Ada perubahan yang belum disimpan."
                     : "Belum ada perubahan."}
@@ -917,7 +854,7 @@ export default function ProfilYayasanPage() {
                     type="button"
                     onClick={handleCancel}
                     disabled={saving}
-                    className="inline-flex items-center justify-center gap-2 rounded-lg border theme-border bg-[var(--color-card)] px-4 py-2.5 text-sm font-semibold theme-text transition hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] disabled:opacity-50"
+                    className="theme-border theme-text inline-flex items-center justify-center gap-2 rounded-lg border bg-[var(--color-card)] px-4 py-2.5 text-sm font-semibold transition hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] disabled:opacity-50"
                   >
                     <RotateCcw size={16} />
                     Batal
@@ -927,7 +864,7 @@ export default function ProfilYayasanPage() {
                     type="button"
                     onClick={loadProfile}
                     disabled={saving || loading}
-                    className="inline-flex items-center justify-center gap-2 rounded-lg border theme-border bg-[var(--color-card)] px-4 py-2.5 text-sm font-semibold theme-text transition hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] disabled:opacity-50"
+                    className="theme-border theme-text inline-flex items-center justify-center gap-2 rounded-lg border bg-[var(--color-card)] px-4 py-2.5 text-sm font-semibold transition hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] disabled:opacity-50"
                   >
                     <RefreshCw size={16} />
                     Muat Ulang
@@ -961,7 +898,7 @@ export default function ProfilYayasanPage() {
           REVIEW & TESTIMONI
       ===================================================== */}
 
-      <section className="mt-8 rounded-xl border theme-border theme-card p-5 shadow-sm sm:p-6">
+      <section className="theme-border theme-card mt-8 rounded-xl border p-5 shadow-sm sm:p-6">
         <SectionHeader
           icon={MessageSquareQuote}
           title="Review & Testimoni"
@@ -974,7 +911,7 @@ export default function ProfilYayasanPage() {
                 loadPublicReviews();
               }}
               disabled={reviewLoading || publicReviewLoading}
-              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border theme-border px-3 py-2 text-xs font-semibold theme-text transition hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] disabled:opacity-50"
+              className="theme-border theme-text inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border px-3 py-2 text-xs font-semibold transition hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] disabled:opacity-50"
             >
               <RefreshCw
                 size={14}
@@ -988,13 +925,13 @@ export default function ProfilYayasanPage() {
         />
 
         {/* MY REVIEW */}
-        <div className="mt-5 rounded-xl border theme-border bg-[color-mix(in_srgb,var(--color-text)_2%,transparent)] p-4 sm:p-5">
+        <div className="theme-border mt-5 rounded-xl border bg-[color-mix(in_srgb,var(--color-text)_2%,transparent)] p-4 sm:p-5">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <h3 className="font-semibold theme-text">
+              <h3 className="theme-text font-semibold">
                 {hasOwnReview ? "Review Saya" : "Bagaimana pengalaman Anda?"}
               </h3>
-              <p className="mt-1 text-sm theme-text-muted">
+              <p className="theme-text-muted mt-1 text-sm">
                 Berikan penilaian dan masukan untuk SmartSchool.
               </p>
             </div>
@@ -1030,14 +967,14 @@ export default function ProfilYayasanPage() {
           )}
 
           {reviewLoading ? (
-            <div className="flex min-h-32 items-center justify-center gap-2 theme-text-muted">
+            <div className="theme-text-muted flex min-h-32 items-center justify-center gap-2">
               <LoaderCircle size={20} className="animate-spin text-blue-500" />
               <span className="text-sm">Memuat review Anda...</span>
             </div>
           ) : (
             <form onSubmit={handleReviewSubmit} className="mt-5 space-y-4">
               <div>
-                <label className="mb-2 block text-sm font-semibold theme-text">
+                <label className="theme-text mb-2 block text-sm font-semibold">
                   Rating Anda
                 </label>
 
@@ -1046,10 +983,7 @@ export default function ProfilYayasanPage() {
                     rating={reviewForm.rating}
                     interactive
                     onChange={(rating) => {
-                      setReviewForm((previous) => ({
-                        ...previous,
-                        rating,
-                      }));
+                      setReviewForm((previous) => ({ ...previous, rating }));
                       setReviewError("");
                       setReviewSuccess("");
                     }}
@@ -1065,7 +999,7 @@ export default function ProfilYayasanPage() {
               <div>
                 <label
                   htmlFor="reviewKomentar"
-                  className="mb-1.5 block text-sm font-semibold theme-text"
+                  className="theme-text mb-1.5 block text-sm font-semibold"
                 >
                   Komentar
                   <span className="ml-1 text-red-500">*</span>
@@ -1086,16 +1020,16 @@ export default function ProfilYayasanPage() {
                   rows={4}
                   maxLength={5000}
                   disabled={reviewSaving}
-                  className="w-full resize-y rounded-lg border theme-border bg-[var(--color-card)] px-3 py-3 text-sm theme-text outline-none transition placeholder:text-[var(--color-text-muted)] focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 disabled:opacity-60"
+                  className="theme-border theme-text w-full resize-y rounded-lg border bg-[var(--color-card)] px-3 py-3 text-sm outline-none transition placeholder:text-[var(--color-text-muted)] focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 disabled:opacity-60"
                 />
 
-                <p className="mt-1 text-right text-xs theme-text-muted">
+                <p className="theme-text-muted mt-1 text-right text-xs">
                   {reviewForm.komentar.length}/5000 karakter
                 </p>
               </div>
 
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-xs leading-5 theme-text-muted">
+                <p className="theme-text-muted text-xs leading-5">
                   Review yang baru dikirim mungkin perlu dimoderasi sebelum
                   ditampilkan ke pengguna lain.
                 </p>
@@ -1126,16 +1060,16 @@ export default function ProfilYayasanPage() {
         <div className="mt-7">
           <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <h3 className="text-lg font-bold theme-text">
+              <h3 className="theme-text text-lg font-bold">
                 Testimoni Pengguna
               </h3>
-              <p className="mt-1 text-sm theme-text-muted">
+              <p className="theme-text-muted mt-1 text-sm">
                 Ulasan yang telah ditampilkan secara publik.
               </p>
             </div>
 
             {!publicReviewLoading && publicReviews.length > 0 && (
-              <span className="text-xs theme-text-muted">
+              <span className="theme-text-muted text-xs">
                 {publicReviews.length} testimoni ditampilkan
               </span>
             )}
@@ -1149,27 +1083,27 @@ export default function ProfilYayasanPage() {
           )}
 
           {publicReviewLoading ? (
-            <div className="flex min-h-36 items-center justify-center gap-2 theme-text-muted">
+            <div className="theme-text-muted flex min-h-36 items-center justify-center gap-2">
               <LoaderCircle size={22} className="animate-spin text-blue-500" />
               <span className="text-sm">Memuat testimoni...</span>
             </div>
           ) : publicReviews.length > 0 ? (
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
               {publicReviews.map((item) => (
                 <ReviewCard key={item.id} review={item} />
               ))}
             </div>
           ) : (
-            <div className="rounded-xl border border-dashed theme-border px-5 py-10 text-center">
+            <div className="theme-border rounded-xl border border-dashed px-5 py-10 text-center">
               <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-blue-500/10 text-blue-500">
                 <MessageSquareQuote size={23} />
               </div>
 
-              <h4 className="mt-3 text-sm font-semibold theme-text">
+              <h4 className="theme-text mt-3 text-sm font-semibold">
                 Belum ada testimoni
               </h4>
 
-              <p className="mx-auto mt-1 max-w-md text-sm leading-6 theme-text-muted">
+              <p className="theme-text-muted mx-auto mt-1 max-w-md text-sm leading-6">
                 Belum ada review yang ditampilkan secara publik. Jadilah salah
                 satu pengguna yang memberikan masukan untuk SmartSchool.
               </p>

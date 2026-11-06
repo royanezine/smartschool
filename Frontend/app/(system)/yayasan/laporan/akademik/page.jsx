@@ -16,10 +16,8 @@ import {
   CheckCircle2,
   Loader2,
   AlertCircle,
-  RefreshCw,
 } from "lucide-react";
 import { getLaporanAkademik } from "@/services/yayasan.service";
-
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -71,7 +69,6 @@ const themeWarningSurface =
 const themeWarningBorder =
   "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
 
-
 const JENJANG_OPTIONS = ["Semua Jenjang", "SD", "SMP", "SMA"];
 
 const KKM = 75;
@@ -113,20 +110,25 @@ export default function LaporanAkademikPage() {
         setRingkasan(d.ringkasan || null);
         setPerSekolah(Array.isArray(d.perSekolah) ? d.perSekolah : []);
       } catch (err) {
-        if (!cancelled) setError(err?.message || "Gagal memuat laporan akademik yayasan.");
+        if (!cancelled)
+          setError(err?.message || "Gagal memuat laporan akademik yayasan.");
       } finally {
         if (!cancelled) setLoading(false);
       }
     }
     load();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const filteredUnits = useMemo(() => {
     const keyword = search.trim().toLowerCase();
     return perSekolah.filter((unit) => {
-      const matchJenjang = jenjang === "Semua Jenjang" || unit.jenjang === jenjang;
-      const matchSearch = !keyword || unit.namaSekolah?.toLowerCase().includes(keyword);
+      const matchJenjang =
+        jenjang === "Semua Jenjang" || unit.jenjang === jenjang;
+      const matchSearch =
+        !keyword || unit.namaSekolah?.toLowerCase().includes(keyword);
       return matchJenjang && matchSearch;
     });
   }, [perSekolah, jenjang, search]);
@@ -134,8 +136,14 @@ export default function LaporanAkademikPage() {
   const summary = useMemo(() => {
     if (jenjang === "Semua Jenjang" && !search.trim() && ringkasan) {
       return {
-        rataNilai: ringkasan.rataNilaiGlobal != null ? round1(ringkasan.rataNilaiGlobal) : null,
-        rataKehadiran: ringkasan.rataKehadiranGlobal != null ? round1(ringkasan.rataKehadiranGlobal) : null,
+        rataNilai:
+          ringkasan.rataNilaiGlobal != null
+            ? round1(ringkasan.rataNilaiGlobal)
+            : null,
+        rataKehadiran:
+          ringkasan.rataKehadiranGlobal != null
+            ? round1(ringkasan.rataKehadiranGlobal)
+            : null,
         totalSiswa: Number(ringkasan.totalSiswa) || 0,
         totalTuntas: Number(ringkasan.tuntasKKM) || 0,
       };
@@ -143,24 +151,60 @@ export default function LaporanAkademikPage() {
     if (filteredUnits.length === 0) {
       return { rataNilai: null, rataKehadiran: null, totalSiswa: 0, totalTuntas: 0 };
     }
-    const totalSiswa = filteredUnits.reduce((t, u) => t + (Number(u.siswa) || 0), 0);
-    const totalTuntas = filteredUnits.reduce((t, u) => t + (Number(u.tuntasKKM) || 0), 0);
-    const rataNilai = round1(filteredUnits.reduce((t, u) => t + (Number(u.rataNilai) || 0), 0) / filteredUnits.length);
-    const rataKehadiran = round1(filteredUnits.reduce((t, u) => t + (Number(u.kehadiran) || 0), 0) / filteredUnits.length);
+    const totalSiswa = filteredUnits.reduce(
+      (t, u) => t + (Number(u.siswa) || 0),
+      0
+    );
+    const totalTuntas = filteredUnits.reduce(
+      (t, u) => t + (Number(u.tuntasKKM) || 0),
+      0
+    );
+    const rataNilai = round1(
+      filteredUnits.reduce((t, u) => t + (Number(u.rataNilai) || 0), 0) /
+        filteredUnits.length
+    );
+    const rataKehadiran = round1(
+      filteredUnits.reduce((t, u) => t + (Number(u.kehadiran) || 0), 0) /
+        filteredUnits.length
+    );
     return { rataNilai, rataKehadiran, totalSiswa, totalTuntas };
   }, [filteredUnits, ringkasan, jenjang, search]);
 
-
   const handleDownload = () => {
-    const header = ["Unit Sekolah", "Jenjang", "Siswa", "Rata Nilai", "Kehadiran", "Tuntas KKM", "Persentase Tuntas"];
+    const header = [
+      "Unit Sekolah",
+      "Jenjang",
+      "Siswa",
+      "Rata Nilai",
+      "Kehadiran",
+      "Tuntas KKM",
+      "Persentase Tuntas",
+    ];
     const rows = filteredUnits.map((unit) => {
-      const persenTuntas = (Number(unit.siswa) || 0) > 0
-        ? round1(((Number(unit.tuntasKKM) || 0) / (Number(unit.siswa) || 1)) * 100)
-        : 0;
-      return [unit.namaSekolah, unit.jenjang, unit.siswa, unit.rataNilai, `${unit.kehadiran}%`, unit.tuntasKKM, `${persenTuntas}%`];
+      const persenTuntas =
+        (Number(unit.siswa) || 0) > 0
+          ? round1(
+              ((Number(unit.tuntasKKM) || 0) / (Number(unit.siswa) || 1)) * 100
+            )
+          : 0;
+      return [
+        unit.namaSekolah,
+        unit.jenjang,
+        unit.siswa,
+        unit.rataNilai,
+        `${unit.kehadiran}%`,
+        unit.tuntasKKM,
+        `${persenTuntas}%`,
+      ];
     });
-    const csv = [header, ...rows].map((row) => row.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(",")).join("\n");
-    const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8;" });
+    const csv = [header, ...rows]
+      .map((row) =>
+        row.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(",")
+      )
+      .join("\n");
+    const blob = new Blob(["\ufeff" + csv], {
+      type: "text/csv;charset=utf-8;",
+    });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
@@ -171,136 +215,304 @@ export default function LaporanAkademikPage() {
     URL.revokeObjectURL(url);
   };
 
-
   return (
     <div className="theme-page theme-text min-h-full">
-      <div className="w-full max-w-[1800px] mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
+      <div className="w-full px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
         <div className="space-y-6">
-
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          {/* Header */}
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0">
-              <button type="button" onClick={() => router.push("/yayasan/laporan")} className="inline-flex items-center gap-1 text-xs font-medium text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors mb-1">
+              <button
+                type="button"
+                onClick={() => router.push("/yayasan/laporan")}
+                className="mb-1 inline-flex items-center gap-1 text-xs font-medium text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-primary)]"
+              >
                 <ChevronLeft size={13} /> Laporan & Analitik
               </button>
+
               <div className="flex items-center gap-2.5">
-                <div className={`p-2 rounded-lg ${themePrimaryGradient} text-[var(--color-card)] ${themeSmallShadow} flex-shrink-0`}>
+                <div
+                  className={`shrink-0 rounded-lg p-2 ${themePrimaryGradient} text-[var(--color-card)] ${themeSmallShadow}`}
+                >
                   <BookOpen size={18} />
                 </div>
-                <h1 className="text-xl sm:text-2xl font-semibold theme-text truncate">Laporan Akademik</h1>
+                <h1 className="theme-text truncate text-xl font-semibold sm:text-2xl">
+                  Laporan Akademik
+                </h1>
               </div>
-              <p className="theme-text-secondary text-sm mt-1 ml-[42px] flex items-center gap-1.5">
-                <Sparkles size={14} className="text-[var(--color-text-muted)] flex-shrink-0" />
-                <span className="truncate">Rekap nilai dan kehadiran akademik per unit sekolah.</span>
+
+              <p className="theme-text-secondary ml-[42px] mt-1 flex items-center gap-1.5 text-sm">
+                <Sparkles
+                  size={14}
+                  className="shrink-0 text-[var(--color-text-muted)]"
+                />
+                <span className="truncate">
+                  Rekap nilai dan kehadiran akademik per unit sekolah.
+                </span>
               </p>
             </div>
-            <button type="button" onClick={handleDownload} disabled={loading || filteredUnits.length === 0} className={`flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-[var(--color-card)] bg-[var(--color-primary)] ${themePrimaryHover} rounded-lg transition-colors ${themeSmallShadow} whitespace-nowrap flex-shrink-0 disabled:opacity-50`}>
+
+            <button
+              type="button"
+              onClick={handleDownload}
+              disabled={loading || filteredUnits.length === 0}
+              className={`flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-lg bg-[var(--color-primary)] px-4 py-2.5 text-sm font-medium text-[var(--color-card)] transition-colors ${themePrimaryHover} ${themeSmallShadow} disabled:opacity-50`}
+            >
               <Download size={16} /> Unduh Laporan
             </button>
           </div>
 
-          <div className={`theme-card rounded-xl border theme-border p-4 ${themeCardShadow}`}>
-            <div className="flex flex-col sm:flex-row flex-wrap gap-3">
-              <div className="relative flex-1 min-w-[140px]">
-                <select value={jenjang} onChange={(e) => setJenjang(e.target.value)} className={`w-full appearance-none pl-3 pr-9 py-2.5 text-sm font-medium theme-text-secondary ${themeNeutralSurface} border theme-border rounded-lg ${themeNeutralHover} focus:outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)] transition-colors cursor-pointer`}>
-                  {JENJANG_OPTIONS.map((opt) => (<option key={opt} value={opt}>{opt}</option>))}
+          {/* Filter */}
+          <div
+            className={`theme-card theme-border rounded-xl border p-4 ${themeCardShadow}`}
+          >
+            <div className="flex flex-col flex-wrap gap-3 sm:flex-row">
+              <div className="relative min-w-[140px] flex-1">
+                <select
+                  value={jenjang}
+                  onChange={(e) => setJenjang(e.target.value)}
+                  className={`theme-text-secondary w-full cursor-pointer appearance-none rounded-lg border py-2.5 pl-3 pr-9 text-sm font-medium transition-colors focus:border-[var(--color-primary)] focus:outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)] ${themeNeutralSurface} theme-border ${themeNeutralHover}`}
+                >
+                  {JENJANG_OPTIONS.map((opt) => (
+                    <option key={opt} value={opt}>
+                      {opt}
+                    </option>
+                  ))}
                 </select>
-                <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] pointer-events-none" />
+                <ChevronDown
+                  size={14}
+                  className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]"
+                />
               </div>
-              <div className="relative flex-1 min-w-[200px]">
-                <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]" />
-                <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Cari nama unit sekolah..." className={`w-full pl-9 pr-3 py-2.5 text-sm theme-text-secondary ${themeNeutralSurface} border theme-border rounded-lg focus:outline-none focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)] transition-colors placeholder:text-[var(--color-text-placeholder)]`} />
+
+              <div className="relative min-w-[200px] flex-1">
+                <Search
+                  size={15}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]"
+                />
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Cari nama unit sekolah..."
+                  className={`theme-text-secondary w-full rounded-lg border py-2.5 pl-9 pr-3 text-sm transition-colors placeholder:text-[var(--color-text-placeholder)] focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)] ${themeNeutralSurface} theme-border`}
+                />
               </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div className={`theme-card rounded-xl border theme-border p-3.5 ${themeSmallShadow} flex items-center gap-3 min-w-0`}>
-              <div className={`p-2 rounded-lg border ${themePrimarySoft} ${themePrimaryText} ${themePrimarySoftBorder} flex-shrink-0`}><BarChart3 size={16} /></div>
+          {/* Summary Cards */}
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6">
+            <div
+              className={`theme-card theme-border flex min-w-0 items-center gap-3 rounded-xl border p-3.5 ${themeSmallShadow}`}
+            >
+              <div
+                className={`shrink-0 rounded-lg border p-2 ${themePrimarySoft} ${themePrimaryText} ${themePrimarySoftBorder}`}
+              >
+                <BarChart3 size={16} />
+              </div>
               <div className="min-w-0">
-                <p className="text-[11px] font-medium text-[var(--color-text-muted)] uppercase tracking-wider truncate">Rata Nilai</p>
-                <p className="text-lg font-bold theme-text">{loading ? "..." : (summary.rataNilai ?? "—")}</p>
+                <p className="truncate text-[11px] font-medium uppercase tracking-wider text-[var(--color-text-muted)]">
+                  Rata Nilai
+                </p>
+                <p className="theme-text text-lg font-bold">
+                  {loading ? "..." : summary.rataNilai ?? "—"}
+                </p>
               </div>
             </div>
-            <div className={`theme-card rounded-xl border theme-border p-3.5 ${themeSmallShadow} flex items-center gap-3 min-w-0`}>
-              <div className={`p-2 rounded-lg border ${themeSuccessSurface} text-[var(--color-success)] ${themeSuccessBorder} flex-shrink-0`}><TrendingUp size={16} /></div>
+
+            <div
+              className={`theme-card theme-border flex min-w-0 items-center gap-3 rounded-xl border p-3.5 ${themeSmallShadow}`}
+            >
+              <div
+                className={`shrink-0 rounded-lg border p-2 ${themeSuccessSurface} text-[var(--color-success)] ${themeSuccessBorder}`}
+              >
+                <TrendingUp size={16} />
+              </div>
               <div className="min-w-0">
-                <p className="text-[11px] font-medium text-[var(--color-text-muted)] uppercase tracking-wider truncate">Rata Kehadiran</p>
-                <p className="text-lg font-bold theme-text">{loading ? "..." : (summary.rataKehadiran != null ? `${summary.rataKehadiran}%` : "—")}</p>
+                <p className="truncate text-[11px] font-medium uppercase tracking-wider text-[var(--color-text-muted)]">
+                  Rata Kehadiran
+                </p>
+                <p className="theme-text text-lg font-bold">
+                  {loading
+                    ? "..."
+                    : summary.rataKehadiran != null
+                      ? `${summary.rataKehadiran}%`
+                      : "—"}
+                </p>
               </div>
             </div>
-            <div className={`theme-card rounded-xl border theme-border p-3.5 ${themeSmallShadow} flex items-center gap-3 min-w-0`}>
-              <div className={`p-2 rounded-lg border ${themeInfoSurface} text-[var(--color-info)] ${themeInfoBorder} flex-shrink-0`}><Users size={16} /></div>
+
+            <div
+              className={`theme-card theme-border flex min-w-0 items-center gap-3 rounded-xl border p-3.5 ${themeSmallShadow}`}
+            >
+              <div
+                className={`shrink-0 rounded-lg border p-2 ${themeInfoSurface} text-[var(--color-info)] ${themeInfoBorder}`}
+              >
+                <Users size={16} />
+              </div>
               <div className="min-w-0">
-                <p className="text-[11px] font-medium text-[var(--color-text-muted)] uppercase tracking-wider truncate">Total Siswa</p>
-                <p className="text-lg font-bold theme-text">{loading ? "..." : summary.totalSiswa.toLocaleString("id-ID")}</p>
+                <p className="truncate text-[11px] font-medium uppercase tracking-wider text-[var(--color-text-muted)]">
+                  Total Siswa
+                </p>
+                <p className="theme-text text-lg font-bold">
+                  {loading ? "..." : summary.totalSiswa.toLocaleString("id-ID")}
+                </p>
               </div>
             </div>
-            <div className={`theme-card rounded-xl border theme-border p-3.5 ${themeSmallShadow} flex items-center gap-3 min-w-0`}>
-              <div className={`p-2 rounded-lg border ${themeWarningSurface} text-[var(--color-warning)] ${themeWarningBorder} flex-shrink-0`}><CheckCircle2 size={16} /></div>
+
+            <div
+              className={`theme-card theme-border flex min-w-0 items-center gap-3 rounded-xl border p-3.5 ${themeSmallShadow}`}
+            >
+              <div
+                className={`shrink-0 rounded-lg border p-2 ${themeWarningSurface} text-[var(--color-warning)] ${themeWarningBorder}`}
+              >
+                <CheckCircle2 size={16} />
+              </div>
               <div className="min-w-0">
-                <p className="text-[11px] font-medium text-[var(--color-text-muted)] uppercase tracking-wider truncate">Tuntas (KKM {KKM})</p>
-                <p className="text-lg font-bold theme-text">{loading ? "..." : summary.totalTuntas.toLocaleString("id-ID")}</p>
+                <p className="truncate text-[11px] font-medium uppercase tracking-wider text-[var(--color-text-muted)]">
+                  Tuntas (KKM {KKM})
+                </p>
+                <p className="theme-text text-lg font-bold">
+                  {loading
+                    ? "..."
+                    : summary.totalTuntas.toLocaleString("id-ID")}
+                </p>
               </div>
             </div>
           </div>
 
-          <div className={`theme-card rounded-xl border theme-border ${themeCardShadow} overflow-hidden`}>
-            <div className={`p-4 sm:p-5 border-b ${themeDivider} flex items-center justify-between gap-2`}>
-              <h3 className="text-sm font-semibold theme-text truncate">Rekap per Unit Sekolah</h3>
-              <span className="text-xs text-[var(--color-text-muted)] flex-shrink-0">{filteredUnits.length} unit</span>
+          {/* Table */}
+          <div
+            className={`theme-card theme-border overflow-hidden rounded-xl border ${themeCardShadow}`}
+          >
+            <div
+              className={`theme-divider flex items-center justify-between gap-2 border-b p-4 sm:p-5 ${themeDivider}`}
+            >
+              <h3 className="theme-text truncate text-sm font-semibold">
+                Rekap per Unit Sekolah
+              </h3>
+              <span className="shrink-0 text-xs text-[var(--color-text-muted)]">
+                {filteredUnits.length} unit
+              </span>
             </div>
-            <div className="overflow-x-auto w-full">
-              <table className="w-full min-w-[720px] text-sm border-collapse">
+
+            <div className="w-full overflow-x-auto">
+              <table className="w-full min-w-[720px] border-collapse text-sm">
                 <thead>
                   <tr className={themeNeutralSurface}>
-                    <th className="border theme-border text-left font-medium text-[var(--color-text-muted)] text-xs uppercase tracking-wider px-4 sm:px-5 py-3 whitespace-nowrap">Unit Sekolah</th>
-                    <th className="border theme-border text-center font-medium text-[var(--color-text-muted)] text-xs uppercase tracking-wider px-3 py-3 whitespace-nowrap">Jenjang</th>
-                    <th className="border theme-border text-center font-medium text-[var(--color-text-muted)] text-xs uppercase tracking-wider px-3 py-3 whitespace-nowrap">Siswa</th>
-                    <th className="border theme-border text-center font-medium text-[var(--color-text-muted)] text-xs uppercase tracking-wider px-3 py-3 whitespace-nowrap">Rata Nilai</th>
-                    <th className="border theme-border text-center font-medium text-[var(--color-text-muted)] text-xs uppercase tracking-wider px-3 py-3 whitespace-nowrap">Kehadiran</th>
-                    <th className="border theme-border text-center font-medium text-[var(--color-text-muted)] text-xs uppercase tracking-wider px-3 py-3 whitespace-nowrap">Tuntas KKM</th>
+                    <th className="theme-border whitespace-nowrap border px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)] sm:px-5">
+                      Unit Sekolah
+                    </th>
+                    <th className="theme-border whitespace-nowrap border px-3 py-3 text-center text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)]">
+                      Jenjang
+                    </th>
+                    <th className="theme-border whitespace-nowrap border px-3 py-3 text-center text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)]">
+                      Siswa
+                    </th>
+                    <th className="theme-border whitespace-nowrap border px-3 py-3 text-center text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)]">
+                      Rata Nilai
+                    </th>
+                    <th className="theme-border whitespace-nowrap border px-3 py-3 text-center text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)]">
+                      Kehadiran
+                    </th>
+                    <th className="theme-border whitespace-nowrap border px-3 py-3 text-center text-xs font-medium uppercase tracking-wider text-[var(--color-text-muted)]">
+                      Tuntas KKM
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {loading ? (
-                    <tr><td colSpan={6} className="border theme-border p-10 text-center">
-                      <Loader2 size={24} className="mx-auto text-[var(--color-primary)] animate-spin mb-2" />
-                      <p className="text-sm text-[var(--color-text-muted)]">Memuat data akademik sekolah...</p>
-                    </td></tr>
+                    <tr>
+                      <td
+                        colSpan={6}
+                        className="theme-border border p-10 text-center"
+                      >
+                        <Loader2
+                          size={24}
+                          className="mx-auto mb-2 animate-spin text-[var(--color-primary)]"
+                        />
+                        <p className="text-sm text-[var(--color-text-muted)]">
+                          Memuat data akademik sekolah...
+                        </p>
+                      </td>
+                    </tr>
                   ) : error ? (
-                    <tr><td colSpan={6} className="border theme-border p-8 text-center text-[var(--color-danger)]">
-                      <AlertCircle size={24} className="mx-auto mb-2" />
-                      <p className="text-sm">{error}</p>
-                      <button type="button" onClick={fetchAkademik} className="mt-2 text-xs font-semibold underline">Coba Lagi</button>
-                    </td></tr>
+                    <tr>
+                      <td
+                        colSpan={6}
+                        className="theme-border border p-8 text-center text-[var(--color-danger)]"
+                      >
+                        <AlertCircle size={24} className="mx-auto mb-2" />
+                        <p className="text-sm">{error}</p>
+                        <button
+                          type="button"
+                          onClick={fetchAkademik}
+                          className="mt-2 text-xs font-semibold underline"
+                        >
+                          Coba Lagi
+                        </button>
+                      </td>
+                    </tr>
                   ) : filteredUnits.length === 0 ? (
-                    <tr><td colSpan={6} className="border theme-border p-10 text-center">
-                      <Users size={28} className="mx-auto text-[var(--color-text-placeholder)] mb-2" />
-                      <p className="text-sm font-semibold theme-text">Tidak ada unit sekolah yang cocok.</p>
-                    </td></tr>
+                    <tr>
+                      <td
+                        colSpan={6}
+                        className="theme-border border p-10 text-center"
+                      >
+                        <Users
+                          size={28}
+                          className="mx-auto mb-2 text-[var(--color-text-placeholder)]"
+                        />
+                        <p className="theme-text text-sm font-semibold">
+                          Tidak ada unit sekolah yang cocok.
+                        </p>
+                      </td>
+                    </tr>
                   ) : (
                     filteredUnits.map((unit) => {
                       const siswa = Number(unit.siswa) || 0;
                       const tuntas = Number(unit.tuntasKKM) || 0;
-                      const persenTuntas = siswa > 0 ? round1((tuntas / siswa) * 100) : 0;
-                      const tuntasStyle = persenTuntas >= 80
-                        ? `${themeSuccessSurface} text-[var(--color-success)] ${themeSuccessBorder}`
-                        : `${themeWarningSurface} text-[var(--color-warning)] ${themeWarningBorder}`;
+                      const persenTuntas =
+                        siswa > 0 ? round1((tuntas / siswa) * 100) : 0;
+                      const tuntasStyle =
+                        persenTuntas >= 80
+                          ? `${themeSuccessSurface} text-[var(--color-success)] ${themeSuccessBorder}`
+                          : `${themeWarningSurface} text-[var(--color-warning)] ${themeWarningBorder}`;
                       return (
-                        <tr key={unit.sekolahId} className={`${themeNeutralHover} transition-colors`}>
-                          <td className="border theme-border px-4 sm:px-5 py-3 whitespace-nowrap">
-                            <span className="text-sm font-medium theme-text">{unit.namaSekolah}</span>
+                        <tr
+                          key={unit.sekolahId}
+                          className={`${themeNeutralHover} transition-colors`}
+                        >
+                          <td className="theme-border whitespace-nowrap border px-4 py-3 sm:px-5">
+                            <span className="theme-text text-sm font-medium">
+                              {unit.namaSekolah}
+                            </span>
                           </td>
-                          <td className="border theme-border px-3 py-3 text-center whitespace-nowrap">
-                            <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full border ${themeNeutralSurface} text-[var(--color-text-muted)] ${themeNeutralBorder}`}>{unit.jenjang}</span>
+                          <td className="theme-border whitespace-nowrap border px-3 py-3 text-center">
+                            <span
+                              className={`rounded-full border px-2 py-0.5 text-[11px] font-medium ${themeNeutralSurface} text-[var(--color-text-muted)] ${themeNeutralBorder}`}
+                            >
+                              {unit.jenjang}
+                            </span>
                           </td>
-                          <td className="border theme-border px-3 py-3 text-center theme-text-secondary whitespace-nowrap">{siswa.toLocaleString("id-ID")}</td>
-                          <td className="border theme-border px-3 py-3 text-center whitespace-nowrap">
-                            <span className="text-sm font-semibold theme-text">{unit.rataNilai}</span>
+                          <td className="theme-border theme-text-secondary whitespace-nowrap border px-3 py-3 text-center">
+                            {siswa.toLocaleString("id-ID")}
                           </td>
-                          <td className="border theme-border px-3 py-3 text-center theme-text-secondary whitespace-nowrap">{unit.kehadiran}%</td>
-                          <td className="border theme-border px-3 py-3 text-center whitespace-nowrap">
-                            <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full border ${tuntasStyle}`}>{tuntas}/{siswa} ({persenTuntas}%)</span>
+                          <td className="theme-border whitespace-nowrap border px-3 py-3 text-center">
+                            <span className="theme-text text-sm font-semibold">
+                              {unit.rataNilai}
+                            </span>
+                          </td>
+                          <td className="theme-border theme-text-secondary whitespace-nowrap border px-3 py-3 text-center">
+                            {unit.kehadiran}%
+                          </td>
+                          <td className="theme-border whitespace-nowrap border px-3 py-3 text-center">
+                            <span
+                              className={`rounded-full border px-2 py-0.5 text-[11px] font-medium ${tuntasStyle}`}
+                            >
+                              {tuntas}/{siswa} ({persenTuntas}%)
+                            </span>
                           </td>
                         </tr>
                       );
@@ -310,7 +522,6 @@ export default function LaporanAkademikPage() {
               </table>
             </div>
           </div>
-
         </div>
       </div>
     </div>

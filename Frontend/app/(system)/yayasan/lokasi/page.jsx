@@ -18,7 +18,6 @@ import {
   getDetailSekolahBinaan,
 } from "@/services/yayasan.service";
 
-
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
 
@@ -49,9 +48,6 @@ const themeNeutralHover =
 const themeNeutralBorder =
   "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
 
-const themeDivider =
-  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
-
 const themeInfoSurface =
   "bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)]";
 
@@ -73,24 +69,18 @@ const themeDangerBorder =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-
 function unwrapData(response) {
   if (response && typeof response === "object" && "data" in response) {
     return response.data;
   }
-
   return response;
 }
 
-
 function toCoordinate(value) {
   if (value === null || value === undefined || value === "") return null;
-
   const parsed = Number(value);
-
   return Number.isFinite(parsed) ? parsed : null;
 }
-
 
 export default function LokasiSekolahPage() {
   const [search, setSearch] = useState("");
@@ -101,7 +91,6 @@ export default function LokasiSekolahPage() {
   const [detailError, setDetailError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
-
 
   useEffect(() => {
     let mounted = true;
@@ -122,9 +111,7 @@ export default function LokasiSekolahPage() {
       } catch (err) {
         if (!mounted) return;
 
-        setLoadError(
-          err?.message || "Gagal mengambil data sekolah binaan."
-        );
+        setLoadError(err?.message || "Gagal mengambil data sekolah binaan.");
       } finally {
         if (mounted) {
           setLoading(false);
@@ -138,7 +125,6 @@ export default function LokasiSekolahPage() {
       mounted = false;
     };
   }, []);
-
 
   useEffect(() => {
     if (!selectedId || details[selectedId]) return;
@@ -180,7 +166,6 @@ export default function LokasiSekolahPage() {
     };
   }, [selectedId, details]);
 
-
   const selected = useMemo(
     () => schools.find((item) => item.id === selectedId) ?? null,
     [schools, selectedId]
@@ -197,7 +182,6 @@ export default function LokasiSekolahPage() {
     );
   });
 
-
   const totalSiswa = schools.reduce(
     (total, sekolah) => total + Number(sekolah?.statistik?.totalSiswa ?? 0),
     0
@@ -207,7 +191,6 @@ export default function LokasiSekolahPage() {
     (total, sekolah) => total + Number(sekolah?.statistik?.totalGuru ?? 0),
     0
   );
-
 
   const lintang = toCoordinate(selectedDetail?.lintang);
   const bujur = toCoordinate(selectedDetail?.bujur);
@@ -227,37 +210,26 @@ export default function LokasiSekolahPage() {
         addressQuery || selected?.nama || ""
       )}`;
 
-
   return (
     <div className="theme-page theme-text min-h-full">
-      <div className="w-full max-w-[1800px] mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 space-y-6">
-
-
+      <div className="w-full space-y-6 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
         <div>
           <div className="flex items-center gap-2.5">
             <div
-              className={`
-                p-2
-                rounded-lg
-                ${themePrimaryGradient}
-                text-[var(--color-card)]
-                ${themePrimaryShadow}
-                flex-shrink-0
-              `}
+              className={`flex shrink-0 items-center justify-center rounded-lg p-2 ${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow}`}
             >
               <MapPin size={18} />
             </div>
 
-            <h1 className="text-xl sm:text-2xl font-semibold theme-text">
+            <h1 className="theme-text text-xl font-semibold sm:text-2xl">
               Lokasi Sekolah
             </h1>
           </div>
 
-          <p className="text-sm theme-text-secondary mt-1 ml-[42px]">
+          <p className="theme-text-secondary ml-[42px] mt-1 text-sm">
             Peta lokasi seluruh sekolah yang dinaungi yayasan
           </p>
         </div>
-
 
         {loadError && (
           <div
@@ -267,48 +239,25 @@ export default function LokasiSekolahPage() {
               Gagal memuat data sekolah
             </p>
 
-            <p className="text-xs theme-text-secondary mt-0.5">
-              {loadError}
-            </p>
+            <p className="theme-text-secondary mt-0.5 text-xs">{loadError}</p>
           </div>
         )}
 
-
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-
+        {/* Statistik Atas */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
           <div
-            className={`
-              theme-card
-              rounded-xl
-              border
-              theme-border
-              p-4
-              ${themeSmallShadow}
-            `}
+            className={`theme-card theme-border rounded-xl border p-4 ${themeSmallShadow}`}
           >
             <div className="flex items-center gap-3">
               <div
-                className={`
-                  flex
-                  h-10
-                  w-10
-                  shrink-0
-                  items-center
-                  justify-center
-                  rounded-lg
-                  ${themePrimarySoft}
-                  text-[var(--color-primary)]
-                `}
+                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${themePrimarySoft} text-[var(--color-primary)]`}
               >
                 <Building2 size={18} />
               </div>
 
               <div className="min-w-0">
-                <p className="text-sm theme-text-secondary">
-                  Total Sekolah
-                </p>
-
-                <p className="mt-0.5 text-2xl font-bold theme-text">
+                <p className="theme-text-secondary text-sm">Total Sekolah</p>
+                <p className="theme-text mt-0.5 text-2xl font-bold">
                   {loading ? "-" : schools.length}
                 </p>
               </div>
@@ -316,37 +265,15 @@ export default function LokasiSekolahPage() {
           </div>
 
           <div
-            className={`
-              theme-card
-              rounded-xl
-              border
-              theme-border
-              p-4
-              ${themeSmallShadow}
-            `}
+            className={`theme-card theme-border rounded-xl border p-4 ${themeSmallShadow}`}
           >
             <div className="flex items-center gap-3">
-              <div
-                className="
-                  flex
-                  h-10
-                  w-10
-                  shrink-0
-                  items-center
-                  justify-center
-                  rounded-lg
-                  bg-[color-mix(in_srgb,var(--color-info)_9%,transparent)]
-                  text-[var(--color-info)]
-                "
-              >
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-info)_9%,transparent)] text-[var(--color-info)]">
                 <Users size={18} />
               </div>
 
               <div className="min-w-0">
-                <p className="text-sm theme-text-secondary">
-                  Total Siswa
-                </p>
-
+                <p className="theme-text-secondary text-sm">Total Siswa</p>
                 <p className="mt-0.5 text-2xl font-bold text-[var(--color-info)]">
                   {loading ? "-" : totalSiswa}
                 </p>
@@ -355,37 +282,15 @@ export default function LokasiSekolahPage() {
           </div>
 
           <div
-            className={`
-              theme-card
-              rounded-xl
-              border
-              theme-border
-              p-4
-              ${themeSmallShadow}
-            `}
+            className={`theme-card theme-border rounded-xl border p-4 ${themeSmallShadow}`}
           >
             <div className="flex items-center gap-3">
-              <div
-                className="
-                  flex
-                  h-10
-                  w-10
-                  shrink-0
-                  items-center
-                  justify-center
-                  rounded-lg
-                  bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]
-                  text-[var(--color-success)]
-                "
-              >
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)] text-[var(--color-success)]">
                 <GraduationCap size={18} />
               </div>
 
               <div className="min-w-0">
-                <p className="text-sm theme-text-secondary">
-                  Total Guru
-                </p>
-
+                <p className="theme-text-secondary text-sm">Total Guru</p>
                 <p className="mt-0.5 text-2xl font-bold text-[var(--color-success)]">
                   {loading ? "-" : totalGuru}
                 </p>
@@ -394,22 +299,13 @@ export default function LokasiSekolahPage() {
           </div>
         </div>
 
-
-        <div className="flex flex-col lg:flex-row gap-6">
-
-
-          <div className="lg:w-80 shrink-0 space-y-3">
-
+        <div className="flex flex-col gap-6 lg:flex-row">
+          {/* Sidebar List Sekolah */}
+          <div className="w-full shrink-0 space-y-3 lg:w-80 xl:w-[340px]">
             <div className="relative">
               <Search
                 size={15}
-                className="
-                  absolute
-                  left-3
-                  top-1/2
-                  -translate-y-1/2
-                  theme-text-muted
-                "
+                className="theme-text-muted absolute left-3 top-1/2 -translate-y-1/2"
               />
 
               <input
@@ -417,33 +313,17 @@ export default function LokasiSekolahPage() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Cari nama atau alamat sekolah..."
-                className={`
-                  w-full
-                  pl-9
-                  pr-3
-                  py-2.5
-                  text-sm
-                  theme-text-secondary
-                  theme-card
-                  border
-                  theme-border
-                  rounded-lg
-                  outline-none
-                  transition-colors
-                  ${themeFocus}
-                  placeholder:text-[var(--color-text-placeholder)]
-                `}
+                className={`theme-text-secondary theme-card theme-border w-full rounded-lg border py-2.5 pl-9 pr-3 text-sm outline-none transition-colors placeholder:text-[var(--color-text-placeholder)] ${themeFocus}`}
               />
             </div>
 
-            <div className="space-y-2 max-h-[520px] overflow-y-auto pr-1">
-
+            <div className="max-h-[520px] space-y-2 overflow-y-auto pr-1">
               {loading && (
                 <div className="space-y-2">
                   {[1, 2, 3].map((item) => (
                     <div
                       key={item}
-                      className="h-16 rounded-xl animate-pulse"
+                      className="h-16 animate-pulse rounded-xl"
                       style={{
                         background:
                           "color-mix(in srgb, var(--color-text) 6%, transparent)",
@@ -462,59 +342,35 @@ export default function LokasiSekolahPage() {
                       key={s.id}
                       onClick={() => setSelectedId(s.id)}
                       type="button"
-                      className={`
-                        w-full
-                        text-left
-                        rounded-xl
-                        border
-                        p-3
-                        transition-all
-                        duration-200
-                        ${
-                          isActive
-                            ? `${themePrimarySoftBorder} ${themePrimarySoft} ${themePrimaryShadow}`
-                            : `theme-border theme-card ${themeNeutralHover}`
-                        }
-                      `}
+                      className={`w-full rounded-xl border p-3 text-left transition-all duration-200 ${
+                        isActive
+                          ? `${themePrimarySoftBorder} ${themePrimarySoft} ${themePrimaryShadow}`
+                          : `theme-border theme-card ${themeNeutralHover}`
+                      }`}
                     >
                       <div className="flex items-start gap-2">
-
                         <div
-                          className={`
-                            flex
-                            h-8
-                            w-8
-                            shrink-0
-                            items-center
-                            justify-center
-                            rounded-lg
-                            ${
-                              isActive
-                                ? `${themePrimaryGradient} text-[var(--color-card)]`
-                                : `${themeNeutralSurface} theme-text-muted`
-                            }
-                          `}
+                          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
+                            isActive
+                              ? `${themePrimaryGradient} text-[var(--color-card)]`
+                              : `${themeNeutralSurface} theme-text-muted`
+                          }`}
                         >
                           <Building2 size={16} />
                         </div>
 
                         <div className="min-w-0">
                           <p
-                            className={`
-                              text-sm
-                              font-semibold
-                              truncate
-                              ${
-                                isActive
-                                  ? "text-[var(--color-primary)]"
-                                  : "theme-text"
-                              }
-                            `}
+                            className={`truncate text-sm font-semibold ${
+                              isActive
+                                ? "text-[var(--color-primary)]"
+                                : "theme-text"
+                            }`}
                           >
                             {s.nama}
                           </p>
 
-                          <p className="text-xs theme-text-muted line-clamp-2">
+                          <p className="theme-text-muted line-clamp-2 text-xs">
                             {s.alamat || "Alamat belum diisi"}
                           </p>
                         </div>
@@ -525,33 +381,15 @@ export default function LokasiSekolahPage() {
 
               {!loading && filtered.length === 0 && (
                 <div
-                  className={`
-                    theme-card
-                    rounded-xl
-                    border
-                    theme-border
-                    ${themeCardShadow}
-                    p-8
-                    text-center
-                  `}
+                  className={`theme-card theme-border rounded-xl border ${themeCardShadow} p-8 text-center`}
                 >
                   <div
-                    className={`
-                      mx-auto
-                      flex
-                      h-10
-                      w-10
-                      items-center
-                      justify-center
-                      rounded-full
-                      ${themeNeutralSurface}
-                      theme-text-muted
-                    `}
+                    className={`mx-auto flex h-10 w-10 items-center justify-center rounded-full ${themeNeutralSurface} theme-text-muted`}
                   >
                     <Search size={18} />
                   </div>
 
-                  <p className="text-sm theme-text-muted mt-3">
+                  <p className="theme-text-muted mt-3 text-sm">
                     Tidak ada sekolah yang cocok.
                   </p>
                 </div>
@@ -559,44 +397,36 @@ export default function LokasiSekolahPage() {
             </div>
           </div>
 
-
-          <div className="flex-1 min-w-0 space-y-4">
-
+          {/* Area Peta & Detail */}
+          <div className="min-w-0 flex-1 space-y-4">
             {!selected ? (
               <div
-                className={`theme-card rounded-xl border theme-border p-8 text-center ${themeCardShadow}`}
+                className={`theme-card theme-border rounded-xl border p-8 text-center ${themeCardShadow}`}
               >
                 <MapPin
                   size={32}
                   className="mx-auto text-[var(--color-text-muted)]"
                 />
 
-                <p className="mt-2 text-sm font-medium theme-text-secondary">
+                <p className="theme-text-secondary mt-2 text-sm font-medium">
                   Pilih sekolah untuk melihat lokasi
                 </p>
               </div>
             ) : (
               <>
                 <div
-                  className={`
-                    overflow-hidden
-                    rounded-xl
-                    border
-                    theme-border
-                    theme-card
-                    ${themeCardShadow}
-                  `}
+                  className={`theme-card theme-border overflow-hidden rounded-xl border ${themeCardShadow}`}
                 >
                   {hasCoordinate ? (
                     <iframe
                       title={`Peta Lokasi ${selected.nama}`}
                       src={mapSrc}
-                      className="h-80 w-full"
+                      className="h-[300px] w-full sm:h-80 lg:h-[400px] xl:h-[480px]"
                       loading="lazy"
                       referrerPolicy="no-referrer-when-downgrade"
                     />
                   ) : (
-                    <div className="h-80 w-full flex flex-col items-center justify-center p-6 text-center">
+                    <div className="flex h-[300px] w-full flex-col items-center justify-center p-6 text-center sm:h-80 lg:h-[400px] xl:h-[480px]">
                       {detailLoading ? (
                         <>
                           <Navigation
@@ -604,14 +434,14 @@ export default function LokasiSekolahPage() {
                             className="theme-text-muted animate-pulse"
                           />
 
-                          <p className="mt-2 text-sm theme-text-secondary">
+                          <p className="theme-text-secondary mt-2 text-sm">
                             Memuat koordinat sekolah...
                           </p>
                         </>
                       ) : (
                         <>
                           <div
-                            className={`flex h-14 w-14 items-center justify-center rounded-full ${themeWarningSurface} ${themeWarningBorder} border`}
+                            className={`flex h-14 w-14 items-center justify-center rounded-full border ${themeWarningSurface} ${themeWarningBorder}`}
                           >
                             <MapPin
                               size={24}
@@ -619,11 +449,11 @@ export default function LokasiSekolahPage() {
                             />
                           </div>
 
-                          <p className="mt-3 text-sm font-medium theme-text">
+                          <p className="theme-text mt-3 text-sm font-medium">
                             Koordinat peta belum tersedia
                           </p>
 
-                          <p className="mt-1 max-w-md text-xs theme-text-secondary">
+                          <p className="theme-text-secondary mt-1 max-w-md text-xs">
                             Backend belum menyimpan titik lintang/bujur untuk
                             sekolah ini. Gunakan tautan alamat di bawah untuk
                             membuka lokasi di Google Maps.
@@ -641,31 +471,21 @@ export default function LokasiSekolahPage() {
                 </div>
 
                 <div
-                  className={`
-                    rounded-xl
-                    border
-                    theme-border
-                    theme-card
-                    p-5
-                    ${themeCardShadow}
-                  `}
+                  className={`theme-card theme-border rounded-xl border p-5 ${themeCardShadow}`}
                 >
                   <div className="flex items-start justify-between gap-3">
-
                     <div className="min-w-0">
-                      <h2 className="text-lg font-semibold theme-text truncate">
+                      <h2 className="theme-text truncate text-lg font-semibold">
                         {selected.nama}
                       </h2>
 
-                      <p className="mt-1 flex items-start gap-1.5 text-sm theme-text-secondary">
+                      <p className="theme-text-secondary mt-1 flex items-start gap-1.5 text-sm">
                         <MapPin
                           size={15}
-                          className="mt-0.5 shrink-0 theme-text-muted"
+                          className="theme-text-muted mt-0.5 shrink-0"
                         />
 
-                        <span>
-                          {selected.alamat || "Alamat belum diisi"}
-                        </span>
+                        <span>{selected.alamat || "Alamat belum diisi"}</span>
                       </p>
                     </div>
 
@@ -673,46 +493,19 @@ export default function LokasiSekolahPage() {
                       href={mapLink}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className={`
-                        flex
-                        shrink-0
-                        items-center
-                        gap-1.5
-                        rounded-lg
-                        border
-                        ${themePrimarySoftBorder}
-                        px-3
-                        py-1.5
-                        text-xs
-                        font-medium
-                        text-[var(--color-primary)]
-                        ${themePrimaryHover}
-                        transition-colors
-                      `}
+                      className={`flex shrink-0 items-center gap-1.5 rounded-lg border ${themePrimarySoftBorder} px-3 py-1.5 text-xs font-medium text-[var(--color-primary)] ${themePrimaryHover} transition-colors`}
                     >
                       <ExternalLink size={14} />
                       <span className="hidden sm:inline">
                         Buka di Google Maps
                       </span>
-                      <span className="sm:hidden">
-                        Maps
-                      </span>
+                      <span className="sm:hidden">Maps</span>
                     </a>
                   </div>
 
                   <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
-
                     <div
-                      className={`
-                        flex
-                        items-center
-                        gap-2
-                        rounded-lg
-                        border
-                        ${themeNeutralBorder}
-                        ${themeNeutralSurface}
-                        p-3
-                      `}
+                      className={`flex items-center gap-2 rounded-lg border ${themeNeutralBorder} ${themeNeutralSurface} p-3`}
                     >
                       <Phone
                         size={16}
@@ -720,67 +513,44 @@ export default function LokasiSekolahPage() {
                       />
 
                       <div className="min-w-0">
-                        <p className="text-xs theme-text-muted">
-                          Telepon
-                        </p>
-
-                        <p className="text-sm font-medium theme-text truncate">
+                        <p className="theme-text-muted text-xs">Telepon</p>
+                        <p className="theme-text truncate text-sm font-medium">
                           {selected.telepon || "-"}
                         </p>
                       </div>
                     </div>
 
                     <div
-                      className={`
-                        flex
-                        items-center
-                        gap-2
-                        rounded-lg
-                        border
-                        ${themeNeutralBorder}
-                        ${themeNeutralSurface}
-                        p-3
-                      `}
+                      className={`flex items-center gap-2 rounded-lg border ${themeNeutralBorder} ${themeNeutralSurface} p-3`}
                     >
                       <Users
                         size={16}
-                        className="text-[var(--color-info)] shrink-0"
+                        className="shrink-0 text-[var(--color-info)]"
                       />
 
                       <div className="min-w-0">
-                        <p className="text-xs theme-text-muted">
+                        <p className="theme-text-muted text-xs">
                           Jumlah Siswa
                         </p>
-
-                        <p className="text-sm font-medium theme-text">
+                        <p className="theme-text text-sm font-medium">
                           {Number(selected?.statistik?.totalSiswa ?? 0)}
                         </p>
                       </div>
                     </div>
 
                     <div
-                      className={`
-                        flex
-                        items-center
-                        gap-2
-                        rounded-lg
-                        border
-                        ${themeNeutralBorder}
-                        ${themeNeutralSurface}
-                        p-3
-                      `}
+                      className={`flex items-center gap-2 rounded-lg border ${themeNeutralBorder} ${themeNeutralSurface} p-3`}
                     >
                       <GraduationCap
                         size={16}
-                        className="text-[var(--color-success)] shrink-0"
+                        className="shrink-0 text-[var(--color-success)]"
                       />
 
                       <div className="min-w-0">
-                        <p className="text-xs theme-text-muted">
+                        <p className="theme-text-muted text-xs">
                           Jumlah Guru
                         </p>
-
-                        <p className="text-sm font-medium theme-text">
+                        <p className="theme-text text-sm font-medium">
                           {Number(selected?.statistik?.totalGuru ?? 0)}
                         </p>
                       </div>
@@ -795,7 +565,7 @@ export default function LokasiSekolahPage() {
                       className="mt-0.5 shrink-0 text-[var(--color-info)]"
                     />
 
-                    <p className="text-xs theme-text-secondary">
+                    <p className="theme-text-secondary text-xs">
                       Data alamat, telepon, dan jumlah siswa/guru berasal dari
                       endpoint /api/yayasan/sekolah. Titik koordinat diambil
                       dari detail sekolah bila tersedia.
@@ -806,7 +576,6 @@ export default function LokasiSekolahPage() {
             )}
           </div>
         </div>
-
       </div>
     </div>
   );

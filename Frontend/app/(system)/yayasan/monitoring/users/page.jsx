@@ -55,8 +55,8 @@ export default function MonitoringPenggunaYayasanPage() {
         const list = Array.isArray(res?.data?.items)
           ? res.data.items
           : Array.isArray(res?.data)
-          ? res.data
-          : [];
+            ? res.data
+            : [];
         setSekolahList(list);
       } catch (err) {
         console.error("Gagal memuat daftar sekolah untuk filter:", err);
@@ -93,8 +93,8 @@ export default function MonitoringPenggunaYayasanPage() {
           const items = Array.isArray(res?.data)
             ? res.data
             : Array.isArray(res?.data?.items)
-            ? res.data.items
-            : [];
+              ? res.data.items
+              : [];
           setUsers(items);
 
           const meta = res?.meta || res?.data?.pagination || {};
@@ -197,18 +197,18 @@ export default function MonitoringPenggunaYayasanPage() {
 
   return (
     <div className="theme-page theme-text min-h-full">
-      <div className="w-full max-w-[1800px] mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 space-y-6">
+      <div className="w-full space-y-6 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] text-[var(--color-primary)] border border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)]">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] text-[var(--color-primary)]">
               <Users size={22} />
             </div>
             <div>
-              <h1 className="text-xl sm:text-2xl font-semibold theme-text">
+              <h1 className="theme-text text-xl font-semibold sm:text-2xl">
                 Monitoring Pengguna Lintas Cabang
               </h1>
-              <p className="text-sm theme-text-secondary">
+              <p className="theme-text-secondary mt-1 text-sm">
                 Pantau seluruh akun pengguna (Siswa, Guru, Admin Sekolah, Staf) lintas unit sekolah binaan yayasan
               </p>
             </div>
@@ -223,7 +223,7 @@ export default function MonitoringPenggunaYayasanPage() {
                 setSearchQuery((prev) => prev);
               }}
               disabled={loading}
-              className="inline-flex items-center gap-1.5 rounded-xl border theme-border px-3.5 py-2 text-xs font-semibold theme-text hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] transition-all"
+              className="theme-border theme-text inline-flex items-center gap-1.5 rounded-xl border px-3.5 py-2 text-xs font-semibold transition-all hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]"
             >
               <RefreshCw size={13} className={loading ? "animate-spin" : ""} />
               <span>Muat Ulang</span>
@@ -231,62 +231,62 @@ export default function MonitoringPenggunaYayasanPage() {
           </div>
         </div>
 
-        {/* KPI Strip dari backend res.data.statistik */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="theme-card rounded-2xl border theme-border p-4 sm:p-5 flex items-center gap-4">
+        {/* KPI Strip */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6">
+          <div className="theme-card theme-border flex items-center gap-4 rounded-2xl border p-4 sm:p-5">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_12%,transparent)] text-[var(--color-primary)]">
               <Users size={22} />
             </div>
             <div>
-              <p className="text-xs theme-text-muted">Total Pengguna Terdata</p>
-              <p className="text-xl font-bold theme-text mt-0.5">{statistik.total}</p>
-              <p className="text-[11px] theme-text-muted">Semua unit sekolah binaan</p>
+              <p className="theme-text-muted text-xs">Total Pengguna Terdata</p>
+              <p className="theme-text mt-0.5 text-xl font-bold">{statistik.total}</p>
+              <p className="theme-text-muted text-[11px]">Semua unit sekolah binaan</p>
             </div>
           </div>
 
-          <div className="theme-card rounded-2xl border theme-border p-4 sm:p-5 flex items-center gap-4">
+          <div className="theme-card theme-border flex items-center gap-4 rounded-2xl border p-4 sm:p-5">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-success)_12%,transparent)] text-[var(--color-success)]">
               <UserCheck size={22} />
             </div>
             <div>
-              <p className="text-xs theme-text-muted">Pengguna Aktif</p>
-              <p className="text-xl font-bold text-[var(--color-success)] mt-0.5">
+              <p className="theme-text-muted text-xs">Pengguna Aktif</p>
+              <p className="mt-0.5 text-xl font-bold text-[var(--color-success)]">
                 {statistik.aktif}
               </p>
-              <p className="text-[11px] theme-text-muted">Akun berstatus aktif</p>
+              <p className="theme-text-muted text-[11px]">Akun berstatus aktif</p>
             </div>
           </div>
 
-          <div className="theme-card rounded-2xl border theme-border p-4 sm:p-5 flex items-center gap-4">
+          <div className="theme-card theme-border flex items-center gap-4 rounded-2xl border p-4 sm:p-5">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-danger)_12%,transparent)] text-[var(--color-danger)]">
               <UserX size={22} />
             </div>
             <div>
-              <p className="text-xs theme-text-muted">Pengguna Nonaktif</p>
-              <p className="text-xl font-bold text-[var(--color-danger)] mt-0.5">
+              <p className="theme-text-muted text-xs">Pengguna Nonaktif</p>
+              <p className="mt-0.5 text-xl font-bold text-[var(--color-danger)]">
                 {statistik.nonaktif}
               </p>
-              <p className="text-[11px] theme-text-muted">Akun dinonaktifkan</p>
+              <p className="theme-text-muted text-[11px]">Akun dinonaktifkan</p>
             </div>
           </div>
         </div>
 
         {/* Filter Bar */}
-        <div className="theme-card rounded-2xl border theme-border p-4 sm:p-5 space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
+        <div className="theme-card theme-border space-y-4 rounded-2xl border p-4 sm:p-5">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-12">
             {/* Search Input */}
-            <form onSubmit={handleSearchSubmit} className="sm:col-span-5 relative">
+            <form onSubmit={handleSearchSubmit} className="relative sm:col-span-5">
               <input
                 type="text"
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 placeholder="Cari nama, email, username..."
-                className="w-full rounded-xl border theme-border bg-transparent pl-10 pr-20 py-2.5 text-sm theme-text outline-none focus:border-[var(--color-primary)] transition-all"
+                className="theme-border theme-text w-full rounded-xl border bg-transparent py-2.5 pl-10 pr-20 text-sm outline-none transition-all focus:border-[var(--color-primary)]"
               />
-              <Search size={16} className="absolute left-3.5 top-3.5 theme-text-muted" />
+              <Search size={16} className="theme-text-muted absolute left-3.5 top-3.5" />
               <button
                 type="submit"
-                className="absolute right-2 top-2 rounded-lg bg-[var(--color-primary)] px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90 transition-all"
+                className="absolute right-2 top-2 rounded-lg bg-[var(--color-primary)] px-3 py-1.5 text-xs font-semibold text-white transition-all hover:opacity-90"
               >
                 Cari
               </button>
@@ -297,7 +297,7 @@ export default function MonitoringPenggunaYayasanPage() {
               <select
                 value={selectedRole}
                 onChange={handleRoleChange}
-                className="w-full rounded-xl border theme-border bg-[var(--color-card)] px-3.5 py-2.5 text-sm theme-text outline-none focus:border-[var(--color-primary)] transition-all"
+                className="theme-border theme-text w-full rounded-xl border bg-[var(--color-card)] px-3.5 py-2.5 text-sm outline-none transition-all focus:border-[var(--color-primary)]"
               >
                 {ROLE_OPTIONS.map((opt) => (
                   <option key={opt.value} value={opt.value}>
@@ -312,7 +312,7 @@ export default function MonitoringPenggunaYayasanPage() {
               <select
                 value={selectedSekolahId}
                 onChange={handleSekolahChange}
-                className="w-full rounded-xl border theme-border bg-[var(--color-card)] px-3.5 py-2.5 text-sm theme-text outline-none focus:border-[var(--color-primary)] transition-all"
+                className="theme-border theme-text w-full rounded-xl border bg-[var(--color-card)] px-3.5 py-2.5 text-sm outline-none transition-all focus:border-[var(--color-primary)]"
               >
                 <option value="">Semua Unit Sekolah</option>
                 {sekolahList.map((s) => (
@@ -326,84 +326,84 @@ export default function MonitoringPenggunaYayasanPage() {
         </div>
 
         {/* Table View */}
-        <div className="theme-card rounded-2xl border theme-border overflow-hidden">
+        <div className="theme-card theme-border overflow-hidden rounded-2xl border">
           {error ? (
             <div className="p-8 text-center">
-              <AlertCircle size={32} className="mx-auto text-[var(--color-danger)] mb-2" />
-              <p className="text-sm font-medium theme-text">{error}</p>
+              <AlertCircle size={32} className="mx-auto mb-2 text-[var(--color-danger)]" />
+              <p className="theme-text text-sm font-medium">{error}</p>
               <button
                 type="button"
                 onClick={() => setCurrentPage(1)}
-                className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-[var(--color-primary)] text-white"
+                className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-[var(--color-primary)] px-3 py-1.5 text-xs font-semibold text-white"
               >
                 <RefreshCw size={12} /> Coba Lagi
               </button>
             </div>
           ) : loading ? (
             <div className="p-12 text-center">
-              <Loader2 size={32} className="mx-auto text-[var(--color-primary)] animate-spin mb-3" />
-              <p className="text-sm theme-text-muted">Memuat data pengguna...</p>
+              <Loader2 size={32} className="mx-auto mb-3 animate-spin text-[var(--color-primary)]" />
+              <p className="theme-text-muted text-sm">Memuat data pengguna...</p>
             </div>
           ) : users.length === 0 ? (
             <div className="p-12 text-center">
-              <Users size={32} className="mx-auto text-[var(--color-text-muted)] mb-2" />
-              <p className="text-sm font-semibold theme-text">Tidak ada pengguna ditemukan</p>
-              <p className="text-xs theme-text-muted mt-1">
+              <Users size={32} className="mx-auto mb-2 text-[var(--color-text-muted)]" />
+              <p className="theme-text text-sm font-semibold">Tidak ada pengguna ditemukan</p>
+              <p className="theme-text-muted mt-1 text-xs">
                 Coba sesuaikan kata kunci pencarian atau ganti filter peran/sekolah.
               </p>
             </div>
           ) : (
-            <div className="overflow-x-auto w-full">
-              <table className="w-full min-w-[700px] text-sm text-left">
-                <thead className="bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)] border-b theme-border text-xs uppercase tracking-wider theme-text-muted">
+            <div className="w-full overflow-x-auto">
+              <table className="w-full min-w-[700px] text-left text-sm">
+                <thead className="theme-border theme-text-muted border-b bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)] text-xs uppercase tracking-wider">
                   <tr>
-                    <th className="py-3 px-4">Pengguna</th>
-                    <th className="py-3 px-4">Peran</th>
-                    <th className="py-3 px-4">Unit Sekolah</th>
-                    <th className="py-3 px-4">Username</th>
-                    <th className="py-3 px-4 text-center">Status</th>
+                    <th className="px-4 py-3">Pengguna</th>
+                    <th className="px-4 py-3">Peran</th>
+                    <th className="px-4 py-3">Unit Sekolah</th>
+                    <th className="px-4 py-3">Username</th>
+                    <th className="px-4 py-3 text-center">Status</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y theme-border">
+                <tbody className="theme-border divide-y">
                   {users.map((u) => {
                     const badge = formatRoleBadge(u.peran || u.role);
                     return (
                       <tr
                         key={u.id}
-                        className="hover:bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] transition-colors"
+                        className="transition-colors hover:bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)]"
                       >
-                        <td className="py-3.5 px-4">
-                          <p className="font-semibold theme-text truncate">
+                        <td className="px-4 py-3.5">
+                          <p className="theme-text truncate font-semibold">
                             {u.namaLengkap || u.namaPengguna || "-"}
                           </p>
-                          <p className="text-xs theme-text-muted truncate mt-0.5">
+                          <p className="theme-text-muted mt-0.5 truncate text-xs">
                             {u.email || "-"}
                           </p>
                         </td>
 
-                        <td className="py-3.5 px-4">
+                        <td className="px-4 py-3.5">
                           <span
-                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${badge.className}`}
+                            className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${badge.className}`}
                           >
                             {badge.label}
                           </span>
                         </td>
 
-                        <td className="py-3.5 px-4">
-                          <p className="font-medium theme-text truncate">
+                        <td className="px-4 py-3.5">
+                          <p className="theme-text truncate font-medium">
                             {u.sekolah?.nama || "-"}
                           </p>
                         </td>
 
-                        <td className="py-3.5 px-4">
-                          <span className="text-xs font-mono theme-text-secondary">
+                        <td className="px-4 py-3.5">
+                          <span className="theme-text-secondary font-mono text-xs">
                             @{u.namaPengguna || "-"}
                           </span>
                         </td>
 
-                        <td className="py-3.5 px-4 text-center">
+                        <td className="px-4 py-3.5 text-center">
                           <span
-                            className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold ${
+                            className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold ${
                               u.status === "aktif" || u.status === "AKTIF"
                                 ? "bg-[color-mix(in_srgb,var(--color-success)_12%,transparent)] text-[var(--color-success)]"
                                 : "bg-[color-mix(in_srgb,var(--color-danger)_12%,transparent)] text-[var(--color-danger)]"
@@ -422,7 +422,7 @@ export default function MonitoringPenggunaYayasanPage() {
 
           {/* Pagination Footer */}
           {!loading && !error && pagination.totalPages > 1 && (
-            <div className="flex items-center justify-between px-4 py-3 border-t theme-border text-xs">
+            <div className="theme-border flex flex-col gap-3 border-t px-4 py-3 text-xs sm:flex-row sm:items-center sm:justify-between">
               <span className="theme-text-muted">
                 Menampilkan halaman <strong>{pagination.page}</strong> dari{" "}
                 <strong>{pagination.totalPages}</strong> ({pagination.total} total pengguna)
@@ -433,7 +433,7 @@ export default function MonitoringPenggunaYayasanPage() {
                   type="button"
                   onClick={() => handlePageChange(pagination.page - 1)}
                   disabled={pagination.page <= 1}
-                  className="inline-flex items-center gap-1 rounded-lg border theme-border px-2.5 py-1.5 theme-text hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] disabled:opacity-40 transition-all"
+                  className="theme-border theme-text inline-flex items-center gap-1 rounded-lg border px-2.5 py-1.5 transition-all hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] disabled:opacity-40"
                 >
                   <ChevronLeft size={14} />
                   <span>Sebelumnya</span>
@@ -442,7 +442,7 @@ export default function MonitoringPenggunaYayasanPage() {
                   type="button"
                   onClick={() => handlePageChange(pagination.page + 1)}
                   disabled={pagination.page >= pagination.totalPages}
-                  className="inline-flex items-center gap-1 rounded-lg border theme-border px-2.5 py-1.5 theme-text hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] disabled:opacity-40 transition-all"
+                  className="theme-border theme-text inline-flex items-center gap-1 rounded-lg border px-2.5 py-1.5 transition-all hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] disabled:opacity-40"
                 >
                   <span>Berikutnya</span>
                   <ChevronRight size={14} />

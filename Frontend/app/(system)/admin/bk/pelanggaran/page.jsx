@@ -232,21 +232,19 @@ export default function PelanggaranPage() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden theme-page">
-      <Sidebar
-        role="admin"
-        active="bk"
-      />
+    <div className="flex h-screen overflow-hidden theme-page theme-text">
+      <Sidebar role="admin" active="bk" />
 
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <Header />
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+        <div className="shrink-0">
+          <Header />
+        </div>
 
-        <main className="flex-1 overflow-y-auto p-5 md:p-6 lg:p-8">
-          <div className="mx-auto w-full max-w-[1600px]">
+        <main className="min-w-0 flex-1 overflow-y-auto">
+          <div className="w-full p-5 md:p-6 lg:p-8">
 
             <div className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div className="flex items-start gap-4">
-
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl theme-primary shadow-lg">
                   <svg
                     className="h-6 w-6"
@@ -275,7 +273,6 @@ export default function PelanggaranPage() {
               </div>
 
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-
                 <button
                   onClick={handleRefresh}
                   disabled={refreshing}
@@ -293,9 +290,7 @@ export default function PelanggaranPage() {
                   "
                 >
                   <svg
-                    className={`h-4 w-4 ${
-                      refreshing ? "animate-spin" : ""
-                    }`}
+                    className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`}
                     fill="none"
                     stroke="currentColor"
                     strokeWidth="2"
@@ -308,16 +303,12 @@ export default function PelanggaranPage() {
                     />
                   </svg>
 
-                  {refreshing
-                    ? "Memuat..."
-                    : "Refresh"}
+                  {refreshing ? "Memuat..." : "Refresh"}
                 </button>
 
                 <button
                   onClick={() =>
-                    router.push(
-                      "/admin/bk/pelanggaran/tambah"
-                    )
+                    router.push("/admin/bk/pelanggaran/tambah")
                   }
                   className="
                     inline-flex items-center gap-2
@@ -366,8 +357,7 @@ export default function PelanggaranPage() {
               </div>
             )}
 
-            <div className="mb-7 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-
+            <div className="mb-7 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6">
               <Stat
                 label="Total Pelanggaran"
                 value={stats.total}
@@ -402,11 +392,8 @@ export default function PelanggaranPage() {
             </div>
 
             <div className="mb-5 rounded-2xl border theme-border theme-card p-4 shadow-sm">
-
               <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
-
                 <div className="relative w-full lg:flex-1">
-
                   <svg
                     className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 theme-text-placeholder"
                     fill="none"
@@ -423,9 +410,7 @@ export default function PelanggaranPage() {
 
                   <input
                     value={search}
-                    onChange={(e) =>
-                      setSearch(e.target.value)
-                    }
+                    onChange={(e) => setSearch(e.target.value)}
                     placeholder="Cari nama siswa atau kategori..."
                     className="
                       theme-input
@@ -439,7 +424,6 @@ export default function PelanggaranPage() {
                 </div>
 
                 <div className="relative">
-
                   <svg
                     className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 theme-text-placeholder"
                     fill="none"
@@ -456,9 +440,7 @@ export default function PelanggaranPage() {
 
                   <select
                     value={sortBy}
-                    onChange={(e) =>
-                      setSortBy(e.target.value)
-                    }
+                    onChange={(e) => setSortBy(e.target.value)}
                     className="
                       theme-input
                       rounded-xl
@@ -468,29 +450,12 @@ export default function PelanggaranPage() {
                       focus:border-[var(--color-primary)]
                     "
                   >
-                    <option value="tanggal_desc">
-                      Tanggal Terbaru
-                    </option>
-
-                    <option value="tanggal_asc">
-                      Tanggal Terlama
-                    </option>
-
-                    <option value="nama_asc">
-                      Nama Siswa A → Z
-                    </option>
-
-                    <option value="nama_desc">
-                      Nama Siswa Z → A
-                    </option>
-
-                    <option value="poin_desc">
-                      Poin Tertinggi
-                    </option>
-
-                    <option value="poin_asc">
-                      Poin Terendah
-                    </option>
+                    <option value="tanggal_desc">Tanggal Terbaru</option>
+                    <option value="tanggal_asc">Tanggal Terlama</option>
+                    <option value="nama_asc">Nama Siswa A → Z</option>
+                    <option value="nama_desc">Nama Siswa Z → A</option>
+                    <option value="poin_desc">Poin Tertinggi</option>
+                    <option value="poin_asc">Poin Terendah</option>
                   </select>
                 </div>
 
@@ -525,13 +490,11 @@ export default function PelanggaranPage() {
               </div>
 
               <div className="mt-3 flex flex-wrap items-center gap-2 border-t theme-border-soft pt-3">
-
                 <span className="text-xs font-medium theme-text-muted">
                   Urutan:
                 </span>
 
                 <span className="theme-info inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-bold">
-
                   <svg
                     className="h-3 w-3"
                     fill="none"
@@ -546,55 +509,36 @@ export default function PelanggaranPage() {
                     />
                   </svg>
 
-                  {sortBy === "tanggal_desc" &&
-                    "Tanggal Terbaru"}
-
-                  {sortBy === "tanggal_asc" &&
-                    "Tanggal Terlama"}
-
-                  {sortBy === "nama_asc" &&
-                    "Nama Siswa A → Z"}
-
-                  {sortBy === "nama_desc" &&
-                    "Nama Siswa Z → A"}
-
-                  {sortBy === "poin_desc" &&
-                    "Poin Tertinggi"}
-
-                  {sortBy === "poin_asc" &&
-                    "Poin Terendah"}
+                  {sortBy === "tanggal_desc" && "Tanggal Terbaru"}
+                  {sortBy === "tanggal_asc" && "Tanggal Terlama"}
+                  {sortBy === "nama_asc" && "Nama Siswa A → Z"}
+                  {sortBy === "nama_desc" && "Nama Siswa Z → A"}
+                  {sortBy === "poin_desc" && "Poin Tertinggi"}
+                  {sortBy === "poin_asc" && "Poin Terendah"}
                 </span>
               </div>
             </div>
 
             <div className="overflow-hidden rounded-2xl border theme-border theme-card shadow-xl">
-
               <div className="overflow-x-auto">
-
                 <table className="w-full min-w-[950px] text-left text-sm">
-
                   <thead className="theme-table-header border-b theme-border">
                     <tr>
                       <th className="px-5 py-3.5 text-xs font-bold uppercase tracking-wider">
                         Siswa
                       </th>
-
                       <th className="px-5 py-3.5 text-xs font-bold uppercase tracking-wider">
                         Kategori
                       </th>
-
                       <th className="px-5 py-3.5 text-xs font-bold uppercase tracking-wider">
                         Tanggal
                       </th>
-
                       <th className="px-5 py-3.5 text-xs font-bold uppercase tracking-wider">
                         Poin
                       </th>
-
                       <th className="px-5 py-3.5 text-xs font-bold uppercase tracking-wider">
                         Status
                       </th>
-
                       <th className="px-5 py-3.5 text-right text-xs font-bold uppercase tracking-wider">
                         Aksi
                       </th>
@@ -602,7 +546,6 @@ export default function PelanggaranPage() {
                   </thead>
 
                   <tbody className="divide-y theme-border-soft">
-
                     {loading ? (
                       <tr>
                         <td
@@ -610,16 +553,12 @@ export default function PelanggaranPage() {
                           className="px-5 py-12 text-center"
                         >
                           <div className="flex items-center justify-center gap-2 text-sm font-medium theme-text-muted">
-
                             <span className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--color-border)] border-t-[var(--color-primary)]" />
-
                             Memuat data...
                           </div>
                         </td>
                       </tr>
-
                     ) : paginatedData.length === 0 ? (
-
                       <tr>
                         <td
                           colSpan="6"
@@ -628,19 +567,14 @@ export default function PelanggaranPage() {
                           Belum ada pelanggaran.
                         </td>
                       </tr>
-
                     ) : (
-
                       paginatedData.map((item) => (
                         <tr
                           key={item.id}
                           className="theme-table-hover transition"
                         >
-
                           <td className="px-5 py-4">
-
                             <div className="flex items-center gap-3">
-
                               <div className="theme-primary flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-xs font-bold shadow-md">
                                 {initials(
                                   item.siswa?.namaLengkap ||
@@ -649,7 +583,6 @@ export default function PelanggaranPage() {
                               </div>
 
                               <div className="min-w-0">
-
                                 <div className="truncate text-sm font-bold theme-text">
                                   {item.siswa?.namaLengkap ||
                                     item.siswaId}
@@ -660,7 +593,6 @@ export default function PelanggaranPage() {
                                     ? `NIS ${item.siswa.nis}`
                                     : "—"}
                                 </div>
-
                               </div>
                             </div>
                           </td>
@@ -675,15 +607,12 @@ export default function PelanggaranPage() {
                           </td>
 
                           <td className="px-5 py-4">
-
                             <span className="theme-card-soft inline-flex items-center rounded-lg px-2.5 py-1 text-xs font-bold theme-text ring-1 theme-border">
                               {item.poin ?? 0} poin
                             </span>
-
                           </td>
 
                           <td className="px-5 py-4">
-
                             <span
                               className={`inline-flex rounded-full px-2.5 py-1 text-xs font-bold ${statusClass(
                                 item.status
@@ -691,13 +620,10 @@ export default function PelanggaranPage() {
                             >
                               {item.status || "-"}
                             </span>
-
                           </td>
 
                           <td className="px-5 py-4">
-
                             <div className="flex items-center justify-end gap-1">
-
                               <button
                                 onClick={() =>
                                   router.push(
@@ -725,7 +651,6 @@ export default function PelanggaranPage() {
                                     strokeLinejoin="round"
                                     d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
                                   />
-
                                   <path
                                     strokeLinecap="round"
                                     strokeLinejoin="round"
@@ -765,9 +690,7 @@ export default function PelanggaranPage() {
                               </button>
 
                               <button
-                                onClick={() =>
-                                  handleDelete(item.id)
-                                }
+                                onClick={() => handleDelete(item.id)}
                                 title="Hapus"
                                 className="
                                   rounded-lg p-2
@@ -791,7 +714,6 @@ export default function PelanggaranPage() {
                                   />
                                 </svg>
                               </button>
-
                             </div>
                           </td>
                         </tr>
@@ -803,10 +725,8 @@ export default function PelanggaranPage() {
 
               {!loading && filteredData.length > 0 && (
                 <div className="flex flex-col items-center justify-between gap-3 border-t theme-border px-5 py-4 sm:flex-row">
-
                   <p className="text-sm font-medium theme-text-secondary">
                     Menampilkan{" "}
-
                     <span className="font-bold theme-text">
                       {startIndex + 1} -{" "}
                       {Math.min(
@@ -814,9 +734,7 @@ export default function PelanggaranPage() {
                         filteredData.length
                       )}
                     </span>{" "}
-
                     dari{" "}
-
                     <span className="font-bold theme-text">
                       {filteredData.length}
                     </span>{" "}
@@ -824,13 +742,8 @@ export default function PelanggaranPage() {
                   </p>
 
                   <div className="flex items-center gap-1.5">
-
                     <button
-                      onClick={() =>
-                        setPage((p) =>
-                          Math.max(1, p - 1)
-                        )
-                      }
+                      onClick={() => setPage((p) => Math.max(1, p - 1))}
                       disabled={page === 1}
                       className="
                         flex h-9 w-9 items-center justify-center
@@ -858,9 +771,7 @@ export default function PelanggaranPage() {
                       </svg>
                     </button>
 
-                    {Array.from({
-                      length: totalPage,
-                    }).map((_, i) => {
+                    {Array.from({ length: totalPage }).map((_, i) => {
                       const p = i + 1;
                       const active = p === page;
 
@@ -888,16 +799,9 @@ export default function PelanggaranPage() {
 
                     <button
                       onClick={() =>
-                        setPage((p) =>
-                          Math.min(
-                            totalPage,
-                            p + 1
-                          )
-                        )
+                        setPage((p) => Math.min(totalPage, p + 1))
                       }
-                      disabled={
-                        page === totalPage
-                      }
+                      disabled={page === totalPage}
                       className="
                         flex h-9 w-9 items-center justify-center
                         rounded-xl border theme-border
@@ -923,7 +827,6 @@ export default function PelanggaranPage() {
                         />
                       </svg>
                     </button>
-
                   </div>
                 </div>
               )}
@@ -947,15 +850,12 @@ function Stat({
     blue: {
       className: "theme-info",
     },
-
     emerald: {
       className: "theme-success",
     },
-
     amber: {
       className: "theme-warning",
     },
-
     slate: {
       className: "theme-card-soft theme-text-secondary",
     },
@@ -971,7 +871,6 @@ function Stat({
         d="M12 9v2m0 4h.01M5.07 19h13.86a2 2 0 001.74-3l-6.93-12a2 2 0 00-3.48 0L3.33 16a2 2 0 001.74 3z"
       />
     ),
-
     star: (
       <path
         strokeLinecap="round"
@@ -979,7 +878,6 @@ function Stat({
         d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118L2.98 10.1c-.783-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
       />
     ),
-
     note: (
       <path
         strokeLinecap="round"
@@ -987,7 +885,6 @@ function Stat({
         d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
       />
     ),
-
     check: (
       <path
         strokeLinecap="round"
@@ -999,14 +896,11 @@ function Stat({
 
   return (
     <div className="theme-card rounded-2xl border theme-border p-5 shadow-xl transition hover:shadow-lg">
-
       <div className="flex items-start justify-between">
-
         <div>
           <p className="text-xs font-bold uppercase tracking-wider theme-text-muted">
             {label}
           </p>
-
           <p className="mt-2 text-3xl font-bold tracking-tight theme-text">
             {value}
           </p>
