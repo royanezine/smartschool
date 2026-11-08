@@ -15,6 +15,7 @@ import {
   getMetodeAbsensiAktif,
   registerFaceIdByAdmin,
   getRiwayatAbsensiSiswa,
+  getRekapAbsensiMapel,
 } from "../controllers/absensi.controller";
 import { authenticate } from "../middlewares/auth.middleware";
 import { requireTenant } from "../middlewares/tenant.middleware";
@@ -52,6 +53,7 @@ router.post(
   createAbsensi,
 );
 router.get("/saya", requireIzin("lms.view"), getAbsensiSaya);
+router.get("/rekap-mapel", requireIzin("lms.view", "laporan.view"), getRekapAbsensiMapel);
 router.get("/monitoring-guru", getMonitoringGuru);
 router.get("/kelas/:kelasId", requireIzin("lms.view"), getAbsensiKelas);
 router.get("/export", requireIzin("laporan.view"), exportRekapAbsensi);

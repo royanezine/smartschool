@@ -60,6 +60,10 @@ import sekolahRoutes from "./routes/sekolah.routes";
 import dashboardSiswaRoutes from "./routes/dashboardSiswa.routes";
 import shiftSiswaRoutes from "./routes/shiftSiswa.routes";
 import superAdminRoutes from "./routes/superAdmin.routes";
+import prestasiRoutes from "./routes/prestasi.routes";
+import sikapPerilakuRoutes from "./routes/sikapPerilaku.routes";
+import fasilitasRoutes from "./routes/fasilitas.routes";
+import laporanKerusakanRoutes from "./routes/laporanKerusakan.routes";
 
 dotenv.config();
 ensureUploadDirectories();
@@ -158,6 +162,10 @@ app.use("/api/dashboard/siswa", dashboardSiswaRoutes);
 app.use("/api/sekolah", sekolahRoutes);
 app.use("/api/shift-siswa", shiftSiswaRoutes);
 app.use("/api/super-admin", superAdminRoutes);
+app.use("/api/prestasi", prestasiRoutes);
+app.use("/api/sikap-perilaku", sikapPerilakuRoutes);
+app.use("/api/fasilitas", fasilitasRoutes);
+app.use("/api/laporan-kerusakan", laporanKerusakanRoutes);
 
 app.use(globalErrorHandler);
 
