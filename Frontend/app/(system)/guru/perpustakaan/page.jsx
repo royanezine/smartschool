@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
 import { apiFetch } from "@/lib/api";
@@ -12,7 +13,6 @@ import {
   AlertCircle,
   CheckCircle2,
   CalendarDays,
-  Clock3,
   RotateCcw,
   X,
   ChevronLeft,
@@ -23,43 +23,34 @@ import {
   UserRound,
   FileText,
   Package,
-  Layers,
+  ExternalLink,
+  Clock3,
+  Info,
 } from "lucide-react";
 
 const PAGE_SIZE = 8;
+
+const themeCardShadow = "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+const themePrimarySoft = "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]";
+const themePrimaryBorder = "border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)]";
+const themeNeutralSurface = "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+const themeNeutralBorder = "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+const themeDivider = "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
 
 function unwrapData(response) {
   if (Array.isArray(response)) return response;
   if (Array.isArray(response?.data)) return response.data;
   if (Array.isArray(response?.data?.data)) return response.data.data;
   if (Array.isArray(response?.results)) return response.results;
+  if (Array.isArray(response?.rows)) return response.rows;
   return [];
 }
 
-async function readResponse(response) {
-  if (response && typeof response.json === "function") {
-    const result = await response.json();
-    if (!response.ok || result?.success === false) {
-      throw new Error(result?.message || `Permintaan gagal (${response.status})`);
-    }
-    return result;
-  }
+function readResponse(response) {
   if (response?.success === false) {
     throw new Error(response?.message || "Permintaan gagal.");
   }
   return response;
-}
-
-function formatDate(value) {
-  if (!value) return "-";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "-";
-  return new Intl.DateTimeFormat("id-ID", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    timeZone: "Asia/Jakarta",
-  }).format(date);
 }
 
 function toLocalDateInput(date = new Date()) {
@@ -69,32 +60,24 @@ function toLocalDateInput(date = new Date()) {
   return `${year}-${month}-${day}`;
 }
 
-function getStatusLabel(status) {
-  const normalized = String(status || "").toLowerCase();
-  const labels = {
-    dipinjam: "Sedang dipinjam",
-    dikembalikan: "Dikembalikan",
-    terlambat: "Terlambat",
-    aktif: "Aktif",
-    nonaktif: "Nonaktif",
-  };
-  return labels[normalized] || status || "-";
+function getDateOnly(value) {
+  if (!value) return "";
+  if (typeof value === "string") return value.slice(0, 10);
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return toLocalDateInput(date);
 }
 
-function StatusBadge({ status }) {
-  const normalized = String(status || "").toLowerCase();
-  let className = "inline-flex items-center rounded-md px-2.5 py-1 text-[11px] font-semibold tracking-wide uppercase ";
-  
-  if (normalized === "aktif" || normalized === "dikembalikan") {
-    className += "bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20";
-  } else if (normalized === "dipinjam") {
-    className += "bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20";
-  } else if (normalized === "terlambat" || normalized === "nonaktif") {
-    className += "bg-red-50 text-red-700 border border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20";
-  } else {
-    className += "bg-slate-100 text-slate-600 border border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700";
-  }
-  return <span className={className}>{getStatusLabel(status)}</span>;
+function formatDate(value) {
+  const dateOnly = getDateOnly(value);
+  if (!dateOnly) return "-";
+  const [year, month, day] = dateOnly.split("-").map(Number);
+  const date = new Date(year, month - 1, day);
+  return new Intl.DateTimeFormat("id-ID", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).format(date);
 }
 
 function getErrorMessage(error) {
@@ -103,16 +86,12 @@ function getErrorMessage(error) {
 }
 
 function getBookStock(book) {
-  const available = Number(book?.jumlahTersedia ?? 0);
-  return Number.isFinite(available) ? available : 0;
+  const stock = Number(book?.jumlahTersedia ?? book?.jumlah ?? 0);
+  return Number.isFinite(stock) ? stock : 0;
 }
 
 function getBookTypeLabel(tipe) {
   return String(tipe || "").toUpperCase() === "EBOOK" ? "E-Book" : "Buku Fisik";
-}
-
-function getBorrowingBookId(item) {
-  return item?.bukuId || item?.buku?.id || "";
 }
 
 function getBorrowingBookTitle(item) {
@@ -123,66 +102,138 @@ function getBorrowingNumber(item) {
   return item?.nomorPeminjaman || "-";
 }
 
+function getEffectiveBorrowingStatus(item) {
+  const status = String(item?.status || "").toLowerCase();
+  if (status === "dipinjam") {
+    const dueDate = getDateOnly(item?.tanggalJatuhTempo);
+    if (dueDate && dueDate < toLocalDateInput()) {
+      return "terlambat";
+    }
+  }
+  return status;
+}
+
+function getStatusLabel(status) {
+  const labels = {
+    dipinjam: "Sedang dipinjam",
+    dikembalikan: "Dikembalikan",
+    terlambat: "Terlambat",
+    aktif: "Aktif",
+    nonaktif: "Nonaktif",
+  };
+  return labels[String(status || "").toLowerCase()] || status || "-";
+}
+
+function StatusBadge({ status }) {
+  const normalized = String(status || "").toLowerCase();
+  let className = "inline-flex items-center rounded-md border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide ";
+
+  if (normalized === "aktif" || normalized === "dikembalikan") {
+    className += "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)] bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)] text-[var(--color-success)]";
+  } else if (normalized === "dipinjam") {
+    className += "border-[color-mix(in_srgb,var(--color-info)_24%,transparent)] bg-[color-mix(in_srgb,var(--color-info)_9%,transparent)] text-[var(--color-info)]";
+  } else if (normalized === "terlambat" || normalized === "nonaktif") {
+    className += "border-[color-mix(in_srgb,var(--color-danger)_24%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_9%,transparent)] text-[var(--color-danger)]";
+  } else {
+    className += "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)] bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] theme-text-secondary";
+  }
+
+  return <span className={className}>{getStatusLabel(status)}</span>;
+}
+
+function safeExternalUrl(value) {
+  if (!value || typeof value !== "string") return "";
+  try {
+    const url = new URL(value);
+    if (url.protocol !== "http:" && url.protocol !== "https:") return "";
+    return url.href;
+  } catch {
+    return "";
+  }
+}
+
+function Pagination({ page, totalPages, totalItems, pageSize, onPageChange }) {
+  if (totalItems === 0) return null;
+  const start = (page - 1) * pageSize + 1;
+  const end = Math.min(page * pageSize, totalItems);
+
+  return (
+    <div className={`flex flex-col gap-3 border-t ${themeDivider} px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6`}>
+      <p className="text-xs theme-text-muted">
+        Menampilkan <span className="font-bold theme-text-secondary">{start}-{end}</span> dari <span className="font-bold theme-text-secondary">{totalItems}</span> data
+      </p>
+      <div className="flex items-center gap-1">
+        <button
+          type="button"
+          onClick={() => onPageChange((current) => Math.max(1, current - 1))}
+          disabled={page <= 1}
+          className={`inline-flex h-8 w-8 items-center justify-center rounded-lg border ${themeNeutralBorder} theme-text-muted transition hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] disabled:opacity-30`}
+        >
+          <ChevronLeft size={16} />
+        </button>
+        <span className={`min-w-[3rem] text-center text-xs font-semibold theme-text`}>
+          {page} / {totalPages}
+        </span>
+        <button
+          type="button"
+          onClick={() => onPageChange((current) => Math.min(totalPages, current + 1))}
+          disabled={page >= totalPages}
+          className={`inline-flex h-8 w-8 items-center justify-center rounded-lg border ${themeNeutralBorder} theme-text-muted transition hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] disabled:opacity-30`}
+        >
+          <ChevronRight size={16} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function PerpustakaanGuruPage() {
+  const router = useRouter();
+  
   const [buku, setBuku] = useState([]);
   const [peminjaman, setPeminjaman] = useState([]);
-
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
-
   const [activeTab, setActiveTab] = useState("buku");
   const [search, setSearch] = useState("");
   const [filterKategori, setFilterKategori] = useState("");
   const [filterTipe, setFilterTipe] = useState("SEMUA");
   const [filterStatusPinjam, setFilterStatusPinjam] = useState("SEMUA");
-
   const [pageBuku, setPageBuku] = useState(1);
   const [pagePinjam, setPagePinjam] = useState(1);
-
-  const [selectedBook, setSelectedBook] = useState(null);
-  const [tanggalJatuhTempo, setTanggalJatuhTempo] = useState("");
-  const [catatan, setCatatan] = useState("");
 
   const [selectedReturn, setSelectedReturn] = useState(null);
 
   const fetchBuku = useCallback(async () => {
     const response = await apiFetch("/perpustakaan/buku");
-    const result = await readResponse(response);
-    return unwrapData(result);
+    return unwrapData(readResponse(response));
   }, []);
 
   const fetchPeminjaman = useCallback(async () => {
     const response = await apiFetch("/perpustakaan/peminjaman");
-    const result = await readResponse(response);
-    return unwrapData(result);
+    return unwrapData(readResponse(response));
   }, []);
 
-  const loadData = useCallback(
-    async (showRefresh = false) => {
-      if (showRefresh) setRefreshing(true);
-      else setLoading(true);
-      setError("");
-
-      try {
-        const [daftarBuku, daftarPeminjaman] = await Promise.all([fetchBuku(), fetchPeminjaman()]);
-        setBuku(daftarBuku);
-        setPeminjaman(daftarPeminjaman);
-      } catch (err) {
-        setError(getErrorMessage(err));
-      } finally {
-        setLoading(false);
-        setRefreshing(false);
-      }
-    },
-    [fetchBuku, fetchPeminjaman]
-  );
+  const loadData = useCallback(async (showRefresh = false) => {
+    if (showRefresh) setRefreshing(true);
+    else setLoading(true);
+    setError("");
+    try {
+      const [daftarBuku, daftarPeminjaman] = await Promise.all([fetchBuku(), fetchPeminjaman()]);
+      setBuku(daftarBuku);
+      setPeminjaman(daftarPeminjaman);
+    } catch (err) {
+      setError(getErrorMessage(err));
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, [fetchBuku, fetchPeminjaman]);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadData();
   }, [loadData]);
 
@@ -197,11 +248,10 @@ export default function PerpustakaanGuruPage() {
       const judul = String(item?.judul || "").toLowerCase();
       const kode = String(item?.kodeBuku || "").toLowerCase();
       const penulis = String(item?.penulis || "").toLowerCase();
-
+      const kategori = String(item?.kategori || "");
       const matchesSearch = !keyword || judul.includes(keyword) || kode.includes(keyword) || penulis.includes(keyword);
-      const matchesCategory = !filterKategori || String(item?.kategori || "") === filterKategori;
+      const matchesCategory = !filterKategori || kategori === filterKategori;
       const matchesType = filterTipe === "SEMUA" || String(item?.tipe || "").toUpperCase() === filterTipe;
-
       return matchesSearch && matchesCategory && matchesType;
     });
   }, [buku, search, filterKategori, filterTipe]);
@@ -212,11 +262,10 @@ export default function PerpustakaanGuruPage() {
       .filter((item) => {
         const judul = getBorrowingBookTitle(item).toLowerCase();
         const nomor = getBorrowingNumber(item).toLowerCase();
-        const status = String(item?.status || "").toLowerCase();
-
-        const matchesSearch = !keyword || judul.includes(keyword) || nomor.includes(keyword);
+        const kode = String(item?.buku?.kodeBuku || "").toLowerCase();
+        const status = getEffectiveBorrowingStatus(item);
+        const matchesSearch = !keyword || judul.includes(keyword) || nomor.includes(keyword) || kode.includes(keyword);
         const matchesStatus = filterStatusPinjam === "SEMUA" || status === filterStatusPinjam.toLowerCase();
-
         return matchesSearch && matchesStatus;
       })
       .sort((a, b) => new Date(b?.tanggalPinjam || b?.dibuatPada || 0).getTime() - new Date(a?.tanggalPinjam || a?.dibuatPada || 0).getTime());
@@ -224,6 +273,8 @@ export default function PerpustakaanGuruPage() {
 
   const activeBorrowings = useMemo(() => peminjaman.filter((item) => String(item?.status || "").toLowerCase() === "dipinjam"), [peminjaman]);
   const returnedBorrowings = useMemo(() => peminjaman.filter((item) => String(item?.status || "").toLowerCase() === "dikembalikan"), [peminjaman]);
+  const overdueBorrowings = useMemo(() => peminjaman.filter((item) => getEffectiveBorrowingStatus(item) === "terlambat"), [peminjaman]);
+
   const availableBooksCount = useMemo(() => buku.filter((item) => String(item?.tipe || "").toUpperCase() === "FISIK" && String(item?.status || "").toLowerCase() === "aktif" && getBookStock(item) > 0).length, [buku]);
 
   const totalPagesBuku = Math.max(1, Math.ceil(filteredBooks.length / PAGE_SIZE));
@@ -232,63 +283,26 @@ export default function PerpustakaanGuruPage() {
   const paginatedBooks = useMemo(() => filteredBooks.slice((pageBuku - 1) * PAGE_SIZE, pageBuku * PAGE_SIZE), [filteredBooks, pageBuku]);
   const paginatedBorrowings = useMemo(() => filteredBorrowings.slice((pagePinjam - 1) * PAGE_SIZE, pagePinjam * PAGE_SIZE), [filteredBorrowings, pagePinjam]);
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setPageBuku(1); }, [search, filterKategori, filterTipe]);
-  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setPagePinjam(1); }, [search, filterStatusPinjam]);
 
-  const openBorrowModal = (book) => {
-    setSelectedBook(book); setTanggalJatuhTempo(""); setCatatan(""); setError(""); setNotice("");
-  };
-
-  const closeBorrowModal = () => {
-    if (submitting) return;
-    setSelectedBook(null); setTanggalJatuhTempo(""); setCatatan("");
-  };
-
-  const handleBorrow = async (event) => {
-    event.preventDefault();
-    if (!selectedBook?.id) return setError("Buku yang akan dipinjam tidak valid.");
-    if (!tanggalJatuhTempo) return setError("Tanggal jatuh tempo wajib diisi.");
-    if (tanggalJatuhTempo < toLocalDateInput()) return setError("Tanggal jatuh tempo tidak boleh sebelum hari ini.");
-    if (String(selectedBook?.tipe || "").toUpperCase() !== "FISIK") return setError("Hanya buku fisik yang dapat dipinjam.");
-    if (String(selectedBook?.status || "").toLowerCase() !== "aktif") return setError("Buku sedang tidak aktif.");
-    if (getBookStock(selectedBook) <= 0) return setError("Stok buku sedang habis.");
-
-    setSubmitting(true); setError(""); setNotice("");
-
-    try {
-      const response = await apiFetch("/perpustakaan/peminjaman", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ bukuId: selectedBook.id, tanggalJatuhTempo, ...(catatan.trim() ? { catatan: catatan.trim() } : {}) }),
-      });
-      const result = await readResponse(response);
-
-      setSelectedBook(null); setTanggalJatuhTempo(""); setCatatan("");
-      setNotice(result?.message || "Buku berhasil dipinjam.");
-      await loadData(true); setActiveTab("peminjaman"); setFilterStatusPinjam("dipinjam"); setSearch("");
-    } catch (err) {
-      setError(getErrorMessage(err));
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
   const handleReturn = async () => {
-    if (!selectedReturn?.id) return setError("Data peminjaman tidak valid.");
-    if (!window.confirm(`Kembalikan buku "${getBorrowingBookTitle(selectedReturn)}"?`)) return;
+    if (!selectedReturn?.id) { setError("Data peminjaman tidak valid."); return; }
 
-    setSubmitting(true); setError(""); setNotice("");
+    setSubmitting(true);
+    setError("");
+    setNotice("");
 
     try {
       const response = await apiFetch(`/perpustakaan/peminjaman/${encodeURIComponent(selectedReturn.id)}/kembali`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({}),
       });
-      const result = await readResponse(response);
-      setSelectedReturn(null); setNotice(result?.message || "Buku berhasil dikembalikan."); await loadData(true);
+
+      const result = readResponse(response);
+      setSelectedReturn(null);
+      setNotice(result?.message || "Buku berhasil dikembalikan.");
+      await loadData(true);
     } catch (err) {
       setError(getErrorMessage(err));
     } finally {
@@ -296,132 +310,179 @@ export default function PerpustakaanGuruPage() {
     }
   };
 
+  const resetBookFilters = () => {
+    setSearch("");
+    setFilterKategori("");
+    setFilterTipe("SEMUA");
+  };
+
+  const resetBorrowingFilters = () => {
+    setSearch("");
+    setFilterStatusPinjam("SEMUA");
+  };
+
+  const stats = [
+    { label: "Total Koleksi", value: buku.length, icon: BookOpen, iconClass: `${themePrimarySoft} text-[var(--color-primary)]` },
+    { label: "Buku Tersedia", value: availableBooksCount, icon: Package, iconClass: "bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)] text-[var(--color-success)]" },
+    { label: "Sedang Dipinjam", value: activeBorrowings.length, icon: BookMarked, iconClass: "bg-[color-mix(in_srgb,var(--color-warning)_10%,transparent)] text-[var(--color-warning)]" },
+    { label: "Dikembalikan", value: returnedBorrowings.length, icon: RotateCcw, iconClass: "bg-[color-mix(in_srgb,var(--color-info)_10%,transparent)] text-[var(--color-info)]" },
+  ];
+
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-slate-50 dark:bg-slate-950">
+    <div className="theme-page flex h-screen w-full overflow-hidden">
       <Sidebar active="perpustakaan" />
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-        <div className="shrink-0 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+        <div className="shrink-0 border-b theme-border">
           <Header user={{ name: "Guru", email: "", avatar: "GU" }} />
         </div>
 
-        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
+        <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto">
           <div className="w-full space-y-6 p-4 sm:p-6 lg:p-8">
             
-            {/* HEADER */}
             <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
               <div>
-                <div className="mb-1 flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                  <Library size={14} /> Perpustakaan
+                <div className="mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider theme-text-muted">
+                  <Library size={14} />
+                  Perpustakaan
                 </div>
-                <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-3xl">
+                <h1 className="theme-text text-2xl font-bold tracking-tight sm:text-3xl">
                   Katalog & Peminjaman
                 </h1>
+                <p className="theme-text-secondary mt-1 text-sm">
+                  Cari koleksi buku dan pantau peminjaman buku Anda.
+                </p>
               </div>
+
               <button
+                type="button"
                 onClick={() => loadData(true)}
                 disabled={loading || refreshing}
-                className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 disabled:opacity-60 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 shadow-sm"
+                className={`inline-flex h-10 items-center justify-center gap-2 rounded-xl border ${themeNeutralBorder} theme-card px-4 text-sm font-semibold theme-text-secondary shadow-sm transition hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] disabled:opacity-60`}
               >
-                <RefreshCw size={16} className={refreshing ? "animate-spin" : ""} /> Segarkan
+                <RefreshCw size={16} className={refreshing ? "animate-spin" : ""} />
+                Segarkan
               </button>
             </div>
 
-            {/* ALERTS */}
             {error && (
-              <div className="flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-900/20 dark:text-red-400">
+              <div className="flex items-center gap-3 rounded-xl border border-[color-mix(in_srgb,var(--color-danger)_24%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_9%,transparent)] p-3 text-sm text-[var(--color-danger)]">
                 <AlertCircle size={18} className="shrink-0" />
                 <span className="flex-1">{error}</span>
-                <button onClick={() => setError("")}><X size={16} /></button>
-              </div>
-            )}
-            {notice && (
-              <div className="flex items-center gap-3 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700 dark:border-emerald-900/50 dark:bg-emerald-900/20 dark:text-emerald-400">
-                <CheckCircle2 size={18} className="shrink-0" />
-                <span className="flex-1">{notice}</span>
-                <button onClick={() => setNotice("")}><X size={16} /></button>
+                <button type="button" onClick={() => setError("")}><X size={16} /></button>
               </div>
             )}
 
-            {/* STAT CARDS */}
-            <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {[
-                { label: "Total Koleksi", value: buku.length, icon: BookOpen, color: "blue" },
-                { label: "Buku Tersedia", value: availableBooksCount, icon: Package, color: "emerald" },
-                { label: "Sedang Dipinjam", value: activeBorrowings.length, icon: BookMarked, color: "amber" },
-                { label: "Dikembalikan", value: returnedBorrowings.length, icon: RotateCcw, color: "violet" },
-              ].map((stat, i) => (
-                <div key={i} className="flex items-center justify-between rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            {notice && (
+              <div className="flex items-center gap-3 rounded-xl border border-[color-mix(in_srgb,var(--color-success)_24%,transparent)] bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)] p-3 text-sm text-[var(--color-success)]">
+                <CheckCircle2 size={18} className="shrink-0" />
+                <span className="flex-1">{notice}</span>
+                <button type="button" onClick={() => setNotice("")}><X size={16} /></button>
+              </div>
+            )}
+
+            <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6">
+              {stats.map((stat) => (
+                <div key={stat.label} className={`theme-card ${themeNeutralBorder} ${themeCardShadow} flex items-center justify-between rounded-xl border p-5`}>
                   <div>
-                    <p className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">{stat.label}</p>
-                    <p className="mt-2 text-3xl font-bold text-slate-900 dark:text-white">{loading ? "—" : stat.value}</p>
+                    <p className="text-xs font-bold uppercase tracking-wider theme-text-muted">{stat.label}</p>
+                    <p className="theme-text mt-2 text-3xl font-bold">{loading ? "—" : stat.value}</p>
                   </div>
-                  <div className={`flex h-12 w-12 items-center justify-center rounded-full bg-${stat.color}-50 text-${stat.color}-600 dark:bg-${stat.color}-500/10 dark:text-${stat.color}-400`}>
+                  <div className={`flex h-12 w-12 items-center justify-center rounded-full ${stat.iconClass}`}>
                     <stat.icon size={24} />
                   </div>
                 </div>
               ))}
             </section>
 
-            {/* TAB & CONTENT WRAPPER */}
-            <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
-              
-              {/* TOOLBAR */}
-              <div className="flex flex-col gap-4 border-b border-slate-200 p-4 dark:border-slate-800 sm:p-5 lg:flex-row lg:items-center lg:justify-between">
+            {overdueBorrowings.length > 0 && (
+              <div className="flex items-start gap-3 rounded-xl border border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)] bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)] p-4 text-sm text-[var(--color-warning)]">
+                <Clock3 size={18} className="mt-0.5 shrink-0" />
+                <div>
+                  <p className="font-semibold">Ada {overdueBorrowings.length} peminjaman yang terlambat.</p>
+                  <p className="mt-1 text-xs">Silakan segera lakukan pengembalian buku.</p>
+                </div>
+              </div>
+            )}
+
+            <section className={`theme-card ${themeNeutralBorder} ${themeCardShadow} overflow-hidden rounded-2xl border`}>
+              <div className={`flex flex-col gap-4 border-b ${themeDivider} p-4 sm:p-5 lg:flex-row lg:items-center lg:justify-between`}>
                 <div className="flex gap-2">
                   <button
-                    onClick={() => { setActiveTab("buku"); setError(""); }}
-                    className={`inline-flex h-10 items-center gap-2 rounded-lg px-4 text-sm font-semibold transition ${activeTab === "buku" ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900" : "text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"}`}
+                    type="button"
+                    onClick={() => { setActiveTab("buku"); setSearch(""); setError(""); }}
+                    className={`inline-flex h-10 items-center gap-2 rounded-xl px-4 text-sm font-semibold transition ${
+                      activeTab === "buku" ? "theme-primary text-[var(--color-card)] shadow-sm" : "theme-text-secondary hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]"
+                    }`}
                   >
                     <BookOpen size={16} /> Katalog
                   </button>
                   <button
-                    onClick={() => { setActiveTab("peminjaman"); setError(""); }}
-                    className={`inline-flex h-10 items-center gap-2 rounded-lg px-4 text-sm font-semibold transition ${activeTab === "peminjaman" ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900" : "text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"}`}
+                    type="button"
+                    onClick={() => { setActiveTab("peminjaman"); setSearch(""); setError(""); }}
+                    className={`inline-flex h-10 items-center gap-2 rounded-xl px-4 text-sm font-semibold transition ${
+                      activeTab === "peminjaman" ? "theme-primary text-[var(--color-card)] shadow-sm" : "theme-text-secondary hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]"
+                    }`}
                   >
                     <CalendarDays size={16} /> Peminjaman
-                    <span className={`ml-1 rounded-full px-2 py-0.5 text-[10px] ${activeTab === "peminjaman" ? "bg-white/20" : "bg-slate-100 dark:bg-slate-800"}`}>{peminjaman.length}</span>
+                    <span className={`ml-1 rounded-full px-2 py-0.5 text-[10px] ${activeTab === "peminjaman" ? "bg-white/20" : "bg-[color-mix(in_srgb,var(--color-text)_10%,transparent)]"}`}>
+                      {peminjaman.length}
+                    </span>
                   </button>
                 </div>
 
                 <div className="relative w-full lg:max-w-md">
-                  <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 theme-text-placeholder" />
                   <input
                     type="search"
                     value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    placeholder={activeTab === "buku" ? "Cari judul, kode, atau penulis..." : "Cari nomor peminjaman..."}
-                    className="h-10 w-full rounded-lg border border-slate-200 bg-slate-50 pl-9 pr-3 text-sm outline-none transition focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200 dark:focus:border-blue-500 dark:focus:ring-blue-900/50"
+                    onChange={(event) => setSearch(event.target.value)}
+                    placeholder={activeTab === "buku" ? "Cari judul, kode, atau penulis..." : "Cari judul atau nomor peminjaman..."}
+                    className={`h-10 w-full rounded-xl border ${themeNeutralBorder} theme-input pl-9 pr-3 text-sm outline-none transition focus:border-[var(--color-primary)]`}
                   />
                 </div>
               </div>
 
-              {/* TABEL BUKU */}
               {activeTab === "buku" ? (
                 <div>
-                  <div className="flex flex-wrap items-center gap-3 border-b border-slate-100 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-900/50">
+                  <div className={`flex flex-wrap items-center gap-3 border-b ${themeDivider} bg-[color-mix(in_srgb,var(--color-text)_2%,transparent)] p-4`}>
                     <div className="flex items-center gap-2">
-                      <Filter size={14} className="text-slate-400" />
-                      <span className="text-xs font-semibold text-slate-500">Filter:</span>
+                      <Filter size={14} className="theme-text-placeholder" />
+                      <span className="text-xs font-semibold theme-text-muted">Filter:</span>
                     </div>
-                    <select value={filterTipe} onChange={(e) => setFilterTipe(e.target.value)} className="h-9 w-full rounded-md border border-slate-200 bg-white px-2 text-xs font-medium sm:w-auto dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300">
+
+                    <select
+                      value={filterTipe}
+                      onChange={(event) => setFilterTipe(event.target.value)}
+                      className={`h-9 w-full rounded-lg border ${themeNeutralBorder} theme-input px-2 text-xs font-medium sm:w-auto`}
+                    >
                       <option value="SEMUA">Semua Jenis</option>
-                      <option value="FISIK">Fisik</option>
+                      <option value="FISIK">Buku Fisik</option>
                       <option value="EBOOK">E-Book</option>
                     </select>
-                    <select value={filterKategori} onChange={(e) => setFilterKategori(e.target.value)} className="h-9 w-full rounded-md border border-slate-200 bg-white px-2 text-xs font-medium sm:w-auto dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300">
+
+                    <select
+                      value={filterKategori}
+                      onChange={(event) => setFilterKategori(event.target.value)}
+                      className={`h-9 w-full rounded-lg border ${themeNeutralBorder} theme-input px-2 text-xs font-medium sm:w-auto`}
+                    >
                       <option value="">Semua Kategori</option>
-                      {kategoriOptions.map(k => <option key={k} value={k}>{k}</option>)}
+                      {kategoriOptions.map((kategori) => <option key={kategori} value={kategori}>{kategori}</option>)}
                     </select>
-                    <button onClick={() => { setSearch(""); setFilterKategori(""); setFilterTipe("SEMUA"); }} className="text-xs font-semibold text-blue-600 hover:underline dark:text-blue-400">Reset</button>
+
+                    <button type="button" onClick={resetBookFilters} className="text-xs font-semibold text-[var(--color-primary)] hover:underline">Reset Filter</button>
                   </div>
 
                   {loading ? (
-                    <div className="flex min-h-[300px] items-center justify-center text-sm text-slate-500"><Loader2 className="animate-spin mr-2" size={18} /> Memuat data...</div>
+                    <div className="flex min-h-[300px] items-center justify-center text-sm theme-text-muted">
+                      <Loader2 className="mr-2 animate-spin" size={18} /> Memuat katalog buku...
+                    </div>
                   ) : paginatedBooks.length === 0 ? (
-                    <div className="flex min-h-[300px] flex-col items-center justify-center text-slate-400">
-                      <BookOpen size={40} className="mb-3 opacity-50" />
-                      <p className="font-semibold text-slate-600 dark:text-slate-300">Tidak ada buku</p>
+                    <div className="flex min-h-[300px] flex-col items-center justify-center px-4 text-center">
+                      <BookOpen size={40} className="mb-3 opacity-50 theme-text-muted" />
+                      <p className="font-semibold theme-text">Tidak ada buku ditemukan</p>
+                      <p className="mt-1 text-xs theme-text-muted">Coba ubah kata pencarian atau filter katalog.</p>
+                      <button type="button" onClick={resetBookFilters} className="mt-3 text-xs font-semibold text-[var(--color-primary)] hover:underline">Hapus semua filter</button>
                     </div>
                   ) : (
                     <>
@@ -430,46 +491,80 @@ export default function PerpustakaanGuruPage() {
                           const isPhysical = String(item?.tipe || "").toUpperCase() === "FISIK";
                           const isActive = String(item?.status || "").toLowerCase() === "aktif";
                           const stock = getBookStock(item);
+                          const ebookUrl = safeExternalUrl(item?.urlEbook);
                           const canBorrow = isPhysical && isActive && stock > 0;
 
                           return (
-                            <article key={item.id} className="group relative flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white transition-all hover:border-blue-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-950 dark:hover:border-blue-500/50">
-                              <div className="flex min-h-[160px] items-center justify-center bg-slate-50 p-4 dark:bg-slate-900/50">
-                                {item?.coverUrl ? (
-                                  <img src={item.coverUrl} alt={item.judul} className="h-32 object-contain drop-shadow-sm transition-transform group-hover:scale-105" loading="lazy" />
+                            <article key={item.id} className={`group relative flex flex-col overflow-hidden rounded-xl border ${themeNeutralBorder} theme-card transition-all hover:border-[var(--color-primary)] hover:shadow-md`}>
+                              <div className={`flex min-h-[160px] items-center justify-center ${themePrimarySoft} p-4`}>
+                                {safeExternalUrl(item?.coverUrl) ? (
+                                  <img src={safeExternalUrl(item.coverUrl)} alt={item?.judul || "Sampul buku"} className="h-32 max-w-full object-contain drop-shadow-sm transition-transform group-hover:scale-105" loading="lazy" />
                                 ) : (
-                                  <div className="flex h-24 w-20 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-400 dark:border-slate-700 dark:bg-slate-900"><BookOpen size={30} /></div>
+                                  <div className={`flex h-24 w-20 items-center justify-center rounded-lg border ${themeNeutralBorder} theme-card theme-text-muted`}>
+                                    <BookOpen size={30} />
+                                  </div>
                                 )}
                               </div>
-                              
+
                               <div className="flex flex-1 flex-col p-5">
-                                <div className="mb-2 flex items-center gap-2">
-                                  <span className="rounded bg-blue-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-blue-700 dark:bg-blue-500/10 dark:text-blue-400">{getBookTypeLabel(item?.tipe)}</span>
-                                  {item?.kategori && <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wide">{item.kategori}</span>}
-                                </div>
-                                
-                                <h3 className="line-clamp-2 text-base font-bold text-slate-900 dark:text-slate-100">{item?.judul}</h3>
-                                
-                                <div className="mt-3 space-y-1.5 text-xs text-slate-500 dark:text-slate-400">
-                                  <p className="flex items-center gap-2"><UserRound size={14} /> {item?.penulis || "-"}</p>
-                                  <p className="flex items-center gap-2"><FileText size={14} /> Kode: {item?.kodeBuku || "-"}</p>
+                                <div className="mb-2 flex flex-wrap items-center gap-2">
+                                  <span className={`rounded ${themePrimarySoft} px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[var(--color-primary)]`}>
+                                    {getBookTypeLabel(item?.tipe)}
+                                  </span>
+                                  {item?.kategori && <span className="text-[10px] font-medium uppercase tracking-wide theme-text-muted">{item.kategori}</span>}
                                 </div>
 
-                                <div className="mt-auto pt-4 flex items-center justify-between border-t border-slate-100 dark:border-slate-800">
+                                <h3 className="line-clamp-2 text-base font-bold theme-text">{item?.judul || "Tanpa judul"}</h3>
+
+                                <div className="mt-3 space-y-1.5 text-xs theme-text-muted">
+                                  <p className="flex items-center gap-2"><UserRound size={14} /> {item?.penulis || "-"}</p>
+                                  <p className="flex items-center gap-2"><FileText size={14} /> Kode: {item?.kodeBuku || "-"}</p>
+                                  {item?.mataPelajaran?.nama && <p className="flex items-center gap-2"><BookMarked size={14} /> {item.mataPelajaran.nama}</p>}
+                                </div>
+
+                                <div className={`mt-auto flex items-center justify-between border-t ${themeDivider} pt-4`}>
                                   <div>
-                                    <p className="text-[10px] font-bold uppercase text-slate-400">Stok</p>
-                                    <p className={`text-sm font-bold ${stock <= 0 ? "text-red-500" : "text-slate-800 dark:text-slate-200"}`}>{isPhysical ? `${stock} Buku` : "Digital"}</p>
+                                    <p className="text-[10px] font-bold uppercase theme-text-placeholder">{isPhysical ? "Stok tersedia" : "Jenis"}</p>
+                                    <p className={`text-sm font-bold ${isPhysical && stock <= 0 ? "text-[var(--color-danger)]" : "theme-text"}`}>
+                                      {isPhysical ? `${stock} Buku` : "Digital"}
+                                    </p>
                                   </div>
                                   <StatusBadge status={item?.status} />
                                 </div>
 
-                                <button
-                                  onClick={() => openBorrowModal(item)}
-                                  disabled={!canBorrow || submitting}
-                                  className="mt-4 inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 text-xs font-bold text-white transition hover:bg-slate-800 disabled:bg-slate-100 disabled:text-slate-400 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200 dark:disabled:bg-slate-800 dark:disabled:text-slate-600"
-                                >
-                                  <BookMarked size={15} /> {canBorrow ? "Pinjam Buku" : !isPhysical ? "E-Book" : !isActive ? "Tidak Aktif" : "Stok Habis"}
-                                </button>
+                                <div className="mt-4 flex gap-2">
+                                  <button
+                                    type="button"
+                                    onClick={() => router.push(`/guru/perpustakaan/${item.id}`)}
+                                    className={`flex h-10 flex-1 items-center justify-center gap-2 rounded-lg border ${themeNeutralBorder} theme-card text-xs font-bold theme-text-secondary transition hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]`}
+                                  >
+                                    <Info size={15} /> Detail
+                                  </button>
+
+                                  {isPhysical ? (
+                                    <button
+                                      type="button"
+                                      onClick={() => router.push(`/guru/perpustakaan/pinjam/${item.id}`)}
+                                      disabled={!canBorrow || submitting}
+                                      className="flex h-10 flex-1 items-center justify-center gap-2 rounded-lg theme-primary px-4 text-xs font-bold text-[var(--color-card)] transition hover:brightness-110 disabled:bg-[color-mix(in_srgb,var(--color-text)_10%,transparent)] disabled:text-[var(--color-text-muted)]"
+                                    >
+                                      <BookMarked size={15} /> {canBorrow ? "Pinjam" : !isActive ? "Nonaktif" : "Habis"}
+                                    </button>
+                                  ) : ebookUrl ? (
+                                    <a
+                                      href={ebookUrl}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="flex h-10 flex-1 items-center justify-center gap-2 rounded-lg bg-[var(--color-info)] px-4 text-xs font-bold text-white transition hover:brightness-110"
+                                    >
+                                      <ExternalLink size={15} /> Baca
+                                    </a>
+                                  ) : (
+                                    <button type="button" disabled className={`flex h-10 flex-1 items-center justify-center gap-2 rounded-lg ${themeNeutralSurface} px-4 text-xs font-bold theme-text-placeholder`}>
+                                      Tidak Tersedia
+                                    </button>
+                                  )}
+                                </div>
                               </div>
                             </article>
                           );
@@ -480,20 +575,42 @@ export default function PerpustakaanGuruPage() {
                   )}
                 </div>
               ) : (
-                /* TABEL PEMINJAMAN */
                 <div>
+                  <div className={`flex flex-wrap items-center gap-3 border-b ${themeDivider} bg-[color-mix(in_srgb,var(--color-text)_2%,transparent)] p-4`}>
+                    <div className="flex items-center gap-2">
+                      <Filter size={14} className="theme-text-placeholder" />
+                      <span className="text-xs font-semibold theme-text-muted">Status:</span>
+                    </div>
+
+                    <select
+                      value={filterStatusPinjam}
+                      onChange={(event) => setFilterStatusPinjam(event.target.value)}
+                      className={`h-9 w-full rounded-lg border ${themeNeutralBorder} theme-input px-2 text-xs font-medium sm:w-auto`}
+                    >
+                      <option value="SEMUA">Semua Status</option>
+                      <option value="dipinjam">Sedang Dipinjam</option>
+                      <option value="terlambat">Terlambat</option>
+                      <option value="dikembalikan">Dikembalikan</option>
+                    </select>
+
+                    <button type="button" onClick={resetBorrowingFilters} className="text-xs font-semibold text-[var(--color-primary)] hover:underline">Reset Filter</button>
+                  </div>
+
                   {loading ? (
-                    <div className="flex min-h-[300px] items-center justify-center text-sm text-slate-500"><Loader2 className="animate-spin mr-2" size={18} /> Memuat data...</div>
+                    <div className="flex min-h-[300px] items-center justify-center text-sm theme-text-muted">
+                      <Loader2 className="mr-2 animate-spin" size={18} /> Memuat data peminjaman...
+                    </div>
                   ) : paginatedBorrowings.length === 0 ? (
-                    <div className="flex min-h-[300px] flex-col items-center justify-center text-slate-400">
-                      <CalendarDays size={40} className="mb-3 opacity-50" />
-                      <p className="font-semibold text-slate-600 dark:text-slate-300">Belum ada peminjaman</p>
+                    <div className="flex min-h-[300px] flex-col items-center justify-center px-4 text-center">
+                      <CalendarDays size={40} className="mb-3 opacity-50 theme-text-muted" />
+                      <p className="font-semibold theme-text">Belum ada data peminjaman</p>
+                      <p className="mt-1 text-xs theme-text-muted">Data peminjaman akan muncul setelah Anda meminjam buku.</p>
                     </div>
                   ) : (
                     <>
                       <div className="hidden overflow-x-auto md:block">
-                        <table className="w-full min-w-[760px] text-left text-sm">
-                          <thead className="bg-slate-50 text-[11px] uppercase tracking-wider text-slate-500 dark:bg-slate-800/50 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">
+                        <table className="w-full min-w-[850px] text-left text-sm">
+                          <thead className={`border-b ${themeDivider} theme-table-header text-[11px] uppercase tracking-wider`}>
                             <tr>
                               <th className="px-6 py-4 font-semibold">Informasi Buku</th>
                               <th className="px-6 py-4 font-semibold">No. Peminjaman</th>
@@ -503,30 +620,40 @@ export default function PerpustakaanGuruPage() {
                               <th className="px-6 py-4 text-right font-semibold">Aksi</th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                          <tbody className={`divide-y divide-[var(--color-border-soft)]`}>
                             {paginatedBorrowings.map((item) => {
-                              const isBorrowed = String(item?.status).toLowerCase() === "dipinjam";
+                              const originalStatus = String(item?.status || "").toLowerCase();
+                              const effectiveStatus = getEffectiveBorrowingStatus(item);
+                              const isBorrowed = originalStatus === "dipinjam";
                               return (
-                                <tr key={item.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors">
+                                <tr key={item.id} className="transition-colors hover:bg-[color-mix(in_srgb,var(--color-text)_2%,transparent)]">
                                   <td className="px-6 py-4">
                                     <div className="flex items-center gap-3">
-                                      <div className="flex h-9 w-9 items-center justify-center rounded bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400"><BookOpen size={16} /></div>
+                                      <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${themeNeutralSurface} theme-text-muted`}>
+                                        <BookOpen size={16} />
+                                      </div>
                                       <div>
-                                        <p className="font-semibold text-slate-900 dark:text-slate-100">{getBorrowingBookTitle(item)}</p>
-                                        <p className="text-[11px] text-slate-500">{item?.buku?.kodeBuku || "-"}</p>
+                                        <p className="font-semibold theme-text">{getBorrowingBookTitle(item)}</p>
+                                        <p className="text-[11px] theme-text-muted">{item?.buku?.kodeBuku || "-"}</p>
                                       </div>
                                     </div>
                                   </td>
-                                  <td className="px-6 py-4 font-medium text-slate-600 dark:text-slate-400">{getBorrowingNumber(item)}</td>
-                                  <td className="px-6 py-4 text-slate-500 dark:text-slate-400">{formatDate(item?.tanggalPinjam || item?.dibuatPada)}</td>
-                                  <td className="px-6 py-4 font-medium text-slate-700 dark:text-slate-300">{formatDate(item?.tanggalJatuhTempo)}</td>
-                                  <td className="px-6 py-4"><StatusBadge status={item?.status} /></td>
+                                  <td className="px-6 py-4 font-medium theme-text-secondary">{getBorrowingNumber(item)}</td>
+                                  <td className="px-6 py-4 theme-text-muted">{formatDate(item?.tanggalPinjam || item?.dibuatPada)}</td>
+                                  <td className="px-6 py-4 font-medium theme-text-secondary">{formatDate(item?.tanggalJatuhTempo)}</td>
+                                  <td className="px-6 py-4"><StatusBadge status={effectiveStatus} /></td>
                                   <td className="px-6 py-4 text-right">
                                     {isBorrowed ? (
-                                      <button onClick={() => setSelectedReturn(item)} className="inline-flex h-8 items-center gap-1.5 rounded border border-emerald-200 bg-emerald-50 px-3 text-xs font-semibold text-emerald-700 hover:bg-emerald-100 dark:border-emerald-900/50 dark:bg-emerald-900/20 dark:text-emerald-400 dark:hover:bg-emerald-900/40 transition">
+                                      <button
+                                        type="button"
+                                        onClick={() => { setSelectedReturn(item); setError(""); }}
+                                        className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-[color-mix(in_srgb,var(--color-success)_24%,transparent)] bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)] px-3 text-xs font-semibold text-[var(--color-success)] transition hover:bg-[color-mix(in_srgb,var(--color-success)_15%,transparent)]"
+                                      >
                                         <RotateCcw size={13} /> Kembalikan
                                       </button>
-                                    ) : <span className="text-xs text-slate-400">Selesai</span>}
+                                    ) : (
+                                      <span className="text-xs theme-text-placeholder">Selesai</span>
+                                    )}
                                   </td>
                                 </tr>
                               );
@@ -534,21 +661,38 @@ export default function PerpustakaanGuruPage() {
                           </tbody>
                         </table>
                       </div>
+
                       <div className="space-y-3 p-4 md:hidden">
                         {paginatedBorrowings.map((item) => {
-                          const isBorrowed = String(item?.status).toLowerCase() === "dipinjam";
+                          const originalStatus = String(item?.status || "").toLowerCase();
+                          const effectiveStatus = getEffectiveBorrowingStatus(item);
+                          const isBorrowed = originalStatus === "dipinjam";
                           return (
-                            <div key={item.id} className="rounded-lg border border-slate-200 p-4 dark:border-slate-800">
-                              <div className="flex items-start justify-between">
-                                <div>
-                                  <h3 className="font-semibold text-slate-900 dark:text-slate-100 text-sm">{getBorrowingBookTitle(item)}</h3>
-                                  <p className="text-[11px] text-slate-500">{getBorrowingNumber(item)}</p>
+                            <div key={item.id} className={`rounded-xl border ${themeNeutralBorder} p-4`}>
+                              <div className="flex items-start justify-between gap-3">
+                                <div className="min-w-0">
+                                  <h3 className="text-sm font-semibold theme-text">{getBorrowingBookTitle(item)}</h3>
+                                  <p className="mt-1 text-[11px] theme-text-muted">{getBorrowingNumber(item)}</p>
                                 </div>
-                                <StatusBadge status={item?.status} />
+                                <StatusBadge status={effectiveStatus} />
+                              </div>
+                              <div className="mt-3 grid grid-cols-2 gap-3 text-xs">
+                                <div>
+                                  <p className="theme-text-placeholder">Tanggal Pinjam</p>
+                                  <p className="mt-1 font-medium theme-text-secondary">{formatDate(item?.tanggalPinjam || item?.dibuatPada)}</p>
+                                </div>
+                                <div>
+                                  <p className="theme-text-placeholder">Jatuh Tempo</p>
+                                  <p className="mt-1 font-medium theme-text-secondary">{formatDate(item?.tanggalJatuhTempo)}</p>
+                                </div>
                               </div>
                               {isBorrowed && (
-                                <button onClick={() => setSelectedReturn(item)} className="mt-3 inline-flex w-full h-9 items-center justify-center gap-1.5 rounded border border-emerald-200 bg-emerald-50 text-xs font-semibold text-emerald-700 dark:border-emerald-900/50 dark:bg-emerald-900/20 dark:text-emerald-400">
-                                  <RotateCcw size={14} /> Kembalikan
+                                <button
+                                  type="button"
+                                  onClick={() => { setSelectedReturn(item); setError(""); }}
+                                  className="mt-3 inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-lg border border-[color-mix(in_srgb,var(--color-success)_24%,transparent)] bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)] text-xs font-semibold text-[var(--color-success)]"
+                                >
+                                  <RotateCcw size={14} /> Kembalikan Buku
                                 </button>
                               )}
                             </div>
@@ -565,74 +709,25 @@ export default function PerpustakaanGuruPage() {
         </main>
       </div>
 
-      {/* MODAL PINJAM */}
-      {selectedBook && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-sm" onMouseDown={(e) => { if (e.target === e.currentTarget) closeBorrowModal(); }}>
-          <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-xl bg-white shadow-2xl dark:bg-slate-900">
-            <div className="flex items-center justify-between border-b border-slate-100 p-5 dark:border-slate-800">
-              <h2 className="text-lg font-bold text-slate-900 dark:text-white">Form Peminjaman</h2>
-              <button onClick={closeBorrowModal} disabled={submitting} className="rounded p-1.5 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"><X size={18} /></button>
-            </div>
-            <form onSubmit={handleBorrow}>
-              <div className="p-5 space-y-4">
-                <div className="rounded-lg bg-slate-50 p-4 border border-slate-100 dark:border-slate-800 dark:bg-slate-950/50">
-                  <p className="text-xs font-bold text-slate-500 uppercase mb-1">Buku yang dipilih</p>
-                  <p className="font-semibold text-slate-900 dark:text-slate-100">{selectedBook?.judul}</p>
-                </div>
-                <div>
-                  <label className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase">Jatuh Tempo <span className="text-red-500">*</span></label>
-                  <input type="date" value={tanggalJatuhTempo} min={toLocalDateInput()} onChange={(e) => setTanggalJatuhTempo(e.target.value)} required className="h-10 w-full rounded-lg border border-slate-200 px-3 text-sm dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200 dark:[color-scheme:dark]" />
-                </div>
-                <div>
-                  <label className="mb-1.5 block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase">Catatan <span className="text-slate-400 font-normal">(Opsional)</span></label>
-                  <textarea value={catatan} onChange={(e) => setCatatan(e.target.value)} rows={2} className="w-full resize-none rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200" />
-                </div>
-              </div>
-              <div className="flex flex-col-reverse gap-2 border-t border-slate-100 bg-slate-50 p-4 sm:flex-row sm:justify-end dark:border-slate-800 dark:bg-slate-950/50">
-                <button type="button" onClick={closeBorrowModal} disabled={submitting} className="h-9 w-full rounded-lg px-4 text-xs font-semibold text-slate-600 hover:bg-slate-200 sm:w-auto dark:text-slate-400 dark:hover:bg-slate-800">Batal</button>
-                <button type="submit" disabled={submitting || !tanggalJatuhTempo} className="inline-flex h-9 w-full items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 text-xs font-semibold text-white hover:bg-slate-800 disabled:opacity-50 sm:w-auto dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200">
-                  {submitting && <Loader2 className="animate-spin" size={14} />} Konfirmasi Pinjam
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL KEMBALIKAN */}
+      {/* MODAL PENGEMBALIAN */}
       {selectedReturn && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-sm rounded-xl bg-white p-6 shadow-2xl dark:bg-slate-900 text-center">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400"><RotateCcw size={24} /></div>
-            <h2 className="mt-4 text-lg font-bold text-slate-900 dark:text-white">Pengembalian Buku</h2>
-            <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-              Apakah Anda yakin ingin mengembalikan buku <br/><strong className="text-slate-800 dark:text-slate-200">&quot;{getBorrowingBookTitle(selectedReturn)}&quot;</strong>?
-            </p>
+          <div className={`w-full max-w-sm rounded-2xl theme-card ${themeCardShadow} p-6 text-center shadow-2xl`}>
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)] text-[var(--color-success)]">
+              <RotateCcw size={24} />
+            </div>
+            <h2 className="theme-text mt-4 text-lg font-bold">Pengembalian Buku</h2>
+            <p className="mt-2 text-sm theme-text-muted">Apakah Anda yakin ingin mengembalikan buku:</p>
+            <p className="mt-2 font-semibold theme-text">&quot;{getBorrowingBookTitle(selectedReturn)}&quot;?</p>
             <div className="mt-6 flex flex-col gap-2">
-              <button onClick={handleReturn} disabled={submitting} className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-slate-900 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-50 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200">
+              <button type="button" onClick={handleReturn} disabled={submitting} className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg theme-primary text-sm font-semibold text-[var(--color-card)] disabled:opacity-50">
                 {submitting ? <Loader2 className="animate-spin" size={16} /> : <CheckCircle2 size={16} />} Ya, Kembalikan
               </button>
-              <button onClick={() => setSelectedReturn(null)} disabled={submitting} className="h-10 w-full rounded-lg text-sm font-semibold text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800">Batal</button>
+              <button type="button" onClick={() => setSelectedReturn(null)} disabled={submitting} className={`h-10 w-full rounded-lg text-sm font-semibold theme-text-secondary hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] disabled:opacity-50`}>Batal</button>
             </div>
           </div>
         </div>
       )}
-    </div>
-  );
-}
-
-function Pagination({ page, totalPages, totalItems, pageSize, onPageChange }) {
-  if (totalItems === 0) return null;
-  return (
-    <div className="flex flex-col gap-3 border-t border-slate-200 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 dark:border-slate-800">
-      <p className="text-xs text-slate-500 dark:text-slate-400">
-        Menampilkan <span className="font-bold text-slate-700 dark:text-slate-300">{(page - 1) * pageSize + 1}-{Math.min(page * pageSize, totalItems)}</span> dari <span className="font-bold text-slate-700 dark:text-slate-300">{totalItems}</span> data
-      </p>
-      <div className="flex items-center gap-1">
-        <button onClick={() => onPageChange((c) => Math.max(1, c - 1))} disabled={page <= 1} className="inline-flex h-8 w-8 items-center justify-center rounded text-slate-500 hover:bg-slate-100 disabled:opacity-30 dark:hover:bg-slate-800"><ChevronLeft size={16} /></button>
-        <span className="min-w-[3rem] text-center text-xs font-semibold text-slate-700 dark:text-slate-300">{page} / {totalPages}</span>
-        <button onClick={() => onPageChange((c) => Math.min(totalPages, c + 1))} disabled={page >= totalPages} className="inline-flex h-8 w-8 items-center justify-center rounded text-slate-500 hover:bg-slate-100 disabled:opacity-30 dark:hover:bg-slate-800"><ChevronRight size={16} /></button>
-      </div>
     </div>
   );
 }

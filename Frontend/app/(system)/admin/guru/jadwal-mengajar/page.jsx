@@ -732,8 +732,7 @@ export default function JadwalMengajarPage() {
                     {jadwalHariAktif.length > 0 ? (
                       <div className="p-4 sm:p-6">
                         <div className="relative">
-                          {/* Garis vertikal timeline disejajarkan tepat di tengah kolom jam */}
-                          <div className="absolute bottom-5 left-[35px] top-5 w-px bg-[var(--color-border)] sm:left-[47px]" />
+                          <div className="absolute bottom-5 left-[55px] top-5 w-px bg-[var(--color-border)] sm:left-[75px]" />
 
                           <div className="space-y-3">
                             {jadwalHariAktif.map((item, index) => (
@@ -1040,7 +1039,6 @@ function TimelineItem({ item, index, onEdit, onDelete, deletingId }) {
 
   return (
     <div className="relative grid grid-cols-[50px_1fr] items-start gap-3 sm:grid-cols-[75px_1fr] sm:gap-5">
-      {/* Kolom Jam */}
       <div className="z-10 bg-[var(--color-card)] pt-4 pr-1 text-right sm:pr-2">
         <p className="theme-text-secondary text-xs font-bold sm:text-sm">
           {item.jamMulai || "--:--"}
@@ -1051,14 +1049,12 @@ function TimelineItem({ item, index, onEdit, onDelete, deletingId }) {
         </p>
       </div>
 
-      {/* Titik Timeline */}
-      <div className="absolute left-[35px] top-[22px] z-20 -translate-x-1/2 sm:left-[47px]">
+      <div className="absolute left-[55px] top-[22px] z-20 -translate-x-1/2 sm:left-[75px]">
         <div
           className={`h-3 w-3 rounded-full border-[3px] border-[var(--color-card)] shadow-sm ${color.line}`}
         />
       </div>
 
-      {/* Kartu Jadwal */}
       <div
         className={`group relative overflow-hidden rounded-xl border ${color.border} ${color.bg} p-4 transition-all duration-200 hover:shadow-md sm:p-5`}
       >

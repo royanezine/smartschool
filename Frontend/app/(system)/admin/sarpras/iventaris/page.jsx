@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -19,6 +20,8 @@ import {
   SlidersHorizontal,
   Trash2,
   X,
+  Warehouse,
+  Tag,
 } from "lucide-react";
 
 import Header from "@/app/components/Header";
@@ -30,16 +33,15 @@ import {
   getGudang,
   getKategoriAset,
 } from "@/services/sarpras.service";
+
 import {
   extractData,
   formatKondisi,
   formatNumber,
-  getStokStatus,
   kondisiBadgeClass,
 } from "./_utils";
 
 const PAGE_SIZE = 8;
-
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -77,7 +79,8 @@ function StatCard({ title, value, description, icon: Icon, tone }) {
       "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)] text-[var(--color-success)]",
     warning:
       "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)] text-[var(--color-warning)]",
-    info: "bg-[color-mix(in_srgb,var(--color-info)_9%,transparent)] text-[var(--color-info)]",
+    info:
+      "bg-[color-mix(in_srgb,var(--color-info)_9%,transparent)] text-[var(--color-info)]",
   };
 
   return (
@@ -87,7 +90,9 @@ function StatCard({ title, value, description, icon: Icon, tone }) {
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="text-xs theme-text-muted">{title}</p>
-          <p className="mt-1 text-2xl font-bold theme-text">{value}</p>
+          <p className="mt-1 text-2xl font-bold theme-text">
+            {value}
+          </p>
           <p className="mt-0.5 text-[11px] theme-text-muted">
             {description}
           </p>
@@ -109,6 +114,7 @@ export default function InventarisPage() {
   const router = useRouter();
 
   const [sidebarOpen, setSidebarOpen] = useState(true);
+
   const [aset, setAset] = useState([]);
   const [kategori, setKategori] = useState([]);
   const [gudangList, setGudangList] = useState([]);
@@ -117,39 +123,49 @@ export default function InventarisPage() {
   const [kategoriFilter, setKategoriFilter] = useState("Semua");
   const [gudangFilter, setGudangFilter] = useState("Semua");
   const [kondisiFilter, setKondisiFilter] = useState("Semua");
-  const [stokFilter, setStokFilter] = useState("Semua");
 
   const [page, setPage] = useState(1);
+
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [deletingId, setDeletingId] = useState(null);
 
   const loadData = useCallback(async (isRefresh = false) => {
     try {
-      if (isRefresh) setRefreshing(true);
-      else setLoading(true);
+      if (isRefresh) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
+      }
 
       setError("");
 
-      const [asetResponse, kategoriResponse, gudangResponse] =
-        await Promise.all([
-          getAset(),
-          getKategoriAset(),
-          getGudang(),
-        ]);
+      const [
+        asetResponse,
+        kategoriResponse,
+        gudangResponse,
+      ] = await Promise.all([
+        getAset(),
+        getKategoriAset(),
+        getGudang(),
+      ]);
 
       setAset(extractData(asetResponse));
       setKategori(extractData(kategoriResponse));
       setGudangList(extractData(gudangResponse));
     } catch (err) {
       console.error("Gagal memuat inventaris:", err);
+
       setAset([]);
       setKategori([]);
       setGudangList([]);
+
       setError(
-        err?.message || "Gagal memuat data inventaris dari server."
+        err?.message ||
+          "Gagal memuat data inventaris dari server."
       );
     } finally {
       setLoading(false);
@@ -158,9 +174,7 @@ export default function InventarisPage() {
   }, []);
 
   useEffect(() => {
-    Promise.resolve().then(() => {
-      loadData();
-    });
+    loadData();
   }, [loadData]);
 
   const filtered = useMemo(() => {
@@ -170,25 +184,32 @@ export default function InventarisPage() {
       const text = [
         item?.nama,
         item?.kode,
-        item?.lokasi,
+        item?.kondisi,
+        item?.keterangan,
         item?.kategoriAset?.nama,
         item?.gudang?.nama,
+        item?.gudang?.lokasi,
+        item?.ruangan?.nama,
       ]
         .map((value) => String(value || "").toLowerCase())
         .join(" ");
 
-      if (keyword && !text.includes(keyword)) return false;
+      if (keyword && !text.includes(keyword)) {
+        return false;
+      }
 
       if (
         kategoriFilter !== "Semua" &&
-        String(item?.kategoriAsetId) !== String(kategoriFilter)
+        String(item?.kategoriAsetId ?? item?.kategoriAset?.id) !==
+          String(kategoriFilter)
       ) {
         return false;
       }
 
       if (
         gudangFilter !== "Semua" &&
-        String(item?.gudangId) !== String(gudangFilter)
+        String(item?.gudangId ?? item?.gudang?.id) !==
+          String(gudangFilter)
       ) {
         return false;
       }
@@ -196,13 +217,6 @@ export default function InventarisPage() {
       if (
         kondisiFilter !== "Semua" &&
         String(item?.kondisi || "").toLowerCase() !== kondisiFilter
-      ) {
-        return false;
-      }
-
-      if (
-        stokFilter !== "Semua" &&
-        getStokStatus(item).key !== stokFilter
       ) {
         return false;
       }
@@ -215,7 +229,6 @@ export default function InventarisPage() {
     kategoriFilter,
     gudangFilter,
     kondisiFilter,
-    stokFilter,
   ]);
 
   const totalPages = Math.max(
@@ -224,20 +237,46 @@ export default function InventarisPage() {
   );
 
   const safePage = Math.min(page, totalPages);
+
   const startIndex = (safePage - 1) * PAGE_SIZE;
+
   const pageItems = filtered.slice(
     startIndex,
     startIndex + PAGE_SIZE
   );
 
-  const resetFilter = () => {
-    setSearch("");
-    setKategoriFilter("Semua");
-    setGudangFilter("Semua");
-    setKondisiFilter("Semua");
-    setStokFilter("Semua");
-    setPage(1);
-  };
+  const ringkasan = useMemo(() => {
+    const totalUnit = aset.reduce(
+      (total, item) =>
+        total + (Number(item?.jumlah) || 0),
+      0
+    );
+
+    const kategoriTerpakai = new Set(
+      aset
+        .map((item) => item?.kategoriAsetId ?? item?.kategoriAset?.id)
+        .filter(Boolean)
+    );
+
+    const ruanganTerpakai = new Set(
+      aset
+        .map((item) => item?.ruanganId ?? item?.ruangan?.id)
+        .filter(Boolean)
+    );
+
+    const kondisiBaik = aset.filter(
+      (item) =>
+        String(item?.kondisi || "").toLowerCase() === "baik"
+    ).length;
+
+    return {
+      totalAset: aset.length,
+      totalUnit,
+      totalKategori: kategoriTerpakai.size,
+      totalRuangan: ruanganTerpakai.size,
+      kondisiBaik,
+    };
+  }, [aset]);
 
   function changeFilter(setter, value) {
     setter(value);
@@ -245,32 +284,26 @@ export default function InventarisPage() {
     setNotice("");
   }
 
-  const ringkasan = useMemo(() => {
-    const totalUnit = aset.reduce(
-      (total, item) => total + (Number(item?.jumlah) || 0),
-      0
-    );
-    const totalStok = aset.reduce(
-      (total, item) => total + (Number(item?.jumlahStok) || 0),
-      0
-    );
-    const perluPerhatian = aset.filter(
-      (item) => getStokStatus(item).key !== "aman"
-    ).length;
+  function resetFilter() {
+    setSearch("");
+    setKategoriFilter("Semua");
+    setGudangFilter("Semua");
+    setKondisiFilter("Semua");
+    setPage(1);
+    setNotice("");
+  }
 
-    return {
-      totalAset: aset.length,
-      totalUnit,
-      totalStok,
-      perluPerhatian,
-    };
-  }, [aset]);
+  const hasFilter =
+    search.trim() !== "" ||
+    kategoriFilter !== "Semua" ||
+    gudangFilter !== "Semua" ||
+    kondisiFilter !== "Semua";
 
   async function handleDelete(item) {
     if (
       typeof window !== "undefined" &&
       !window.confirm(
-        `Hapus inventaris "${item.nama}" (${item.kode})? Data akan dinonaktifkan.`
+        `Hapus inventaris "${item.nama}" (${item.kode})?`
       )
     ) {
       return;
@@ -283,50 +316,55 @@ export default function InventarisPage() {
 
       await deleteAset(item.id);
 
-      setNotice(`Inventaris "${item.nama}" berhasil dihapus.`);
+      setNotice(
+        `Inventaris "${item.nama}" berhasil dihapus.`
+      );
+
       await loadData(true);
     } catch (err) {
       setError(
-        err?.message || "Gagal menghapus data inventaris."
+        err?.message ||
+          "Gagal menghapus data inventaris."
       );
     } finally {
       setDeletingId(null);
     }
   }
 
-  const hasFilter =
-    search.trim() !== "" ||
-    kategoriFilter !== "Semua" ||
-    gudangFilter !== "Semua" ||
-    kondisiFilter !== "Semua" ||
-    stokFilter !== "Semua";
-
   return (
-    <div className="theme-page flex min-h-screen">
+    <div className="theme-page flex h-screen w-full overflow-hidden">
       <Sidebar
         active="sarpras"
         setActive={() => {}}
         collapsed={!sidebarOpen}
-        setCollapsed={() => setSidebarOpen((value) => !value)}
+        setCollapsed={() =>
+          setSidebarOpen((value) => !value)
+        }
         role="admin"
       />
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        <Header
-          toggleSidebar={() => setSidebarOpen((value) => !value)}
-          notifications={[]}
-          user={{
-            name: "Admin Sekolah",
-            email: "admin@smartschool.com",
-            avatar: "AD",
-          }}
-        />
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        <div className="shrink-0 border-b theme-border">
+          <Header
+            toggleSidebar={() =>
+              setSidebarOpen((value) => !value)
+            }
+            notifications={[]}
+            user={{
+              name: "Admin Sekolah",
+              email: "admin@smartschool.com",
+              avatar: "AD",
+            }}
+          />
+        </div>
 
-        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
-          <div className="mx-auto w-full max-w-[1500px] space-y-5">
+        <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto">
+          <div className="w-full space-y-5 px-4 py-6 sm:px-6 lg:px-8">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div className="min-w-0">
-                <p className={`text-xs font-medium uppercase tracking-wide ${themePrimaryText}`}>
+                <p
+                  className={`text-xs font-medium uppercase tracking-wide ${themePrimaryText}`}
+                >
                   Sarana &amp; Prasarana
                 </p>
 
@@ -335,8 +373,8 @@ export default function InventarisPage() {
                 </h1>
 
                 <p className="mt-1 text-sm theme-text-secondary">
-                  Kelola data barang inventaris, stok, kondisi, dan
-                  lokasinya.
+                  Kelola data barang inventaris, jumlah,
+                  kondisi, dan penempatannya.
                 </p>
               </div>
 
@@ -348,7 +386,10 @@ export default function InventarisPage() {
                   className={`inline-flex items-center justify-center gap-2 rounded-xl border ${themeNeutralBorder} theme-card px-4 py-2.5 text-sm font-medium theme-text-secondary transition ${themeNeutralHover} disabled:cursor-not-allowed disabled:opacity-60`}
                 >
                   {refreshing ? (
-                    <Loader2 size={16} className="animate-spin" />
+                    <Loader2
+                      size={16}
+                      className="animate-spin"
+                    />
                   ) : (
                     <RefreshCw size={16} />
                   )}
@@ -377,14 +418,17 @@ export default function InventarisPage() {
                   size={18}
                   className="mt-0.5 shrink-0 text-[var(--color-danger)]"
                 />
+
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-semibold text-[var(--color-danger)]">
                     Gagal memuat data inventaris
                   </p>
+
                   <p className="mt-0.5 text-xs theme-text-secondary">
                     {error}
                   </p>
                 </div>
+
                 <button
                   type="button"
                   onClick={() => loadData()}
@@ -405,35 +449,52 @@ export default function InventarisPage() {
               </div>
             )}
 
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
               <StatCard
                 title="Jenis Barang"
-                value={loading ? "..." : formatNumber(ringkasan.totalAset)}
-                description="Barang aktif terdaftar"
+                value={
+                  loading
+                    ? "..."
+                    : formatNumber(ringkasan.totalAset)
+                }
+                description="Barang inventaris terdaftar"
                 icon={Package}
                 tone="primary"
               />
+
               <StatCard
                 title="Total Unit"
-                value={loading ? "..." : formatNumber(ringkasan.totalUnit)}
+                value={
+                  loading
+                    ? "..."
+                    : formatNumber(ringkasan.totalUnit)
+                }
                 description="Jumlah unit keseluruhan"
                 icon={Boxes}
                 tone="info"
               />
+
               <StatCard
-                title="Stok Tersedia"
-                value={loading ? "..." : formatNumber(ringkasan.totalStok)}
-                description="Akumulasi stok saat ini"
-                icon={CheckCircle2}
+                title="Kategori Digunakan"
+                value={
+                  loading
+                    ? "..."
+                    : formatNumber(ringkasan.totalKategori)
+                }
+                description="Kategori pada inventaris"
+                icon={Tag}
                 tone="success"
               />
+
               <StatCard
-                title="Perlu Perhatian"
+                title="Ruangan Terpakai"
                 value={
-                  loading ? "..." : formatNumber(ringkasan.perluPerhatian)
+                  loading
+                    ? "..."
+                    : formatNumber(ringkasan.totalRuangan)
                 }
-                description="Stok menipis atau habis"
-                icon={AlertCircle}
+                description="Ruangan dengan inventaris"
+                icon={Warehouse}
                 tone="warning"
               />
             </div>
@@ -447,6 +508,7 @@ export default function InventarisPage() {
                     size={16}
                     className="theme-text-muted absolute left-3.5 top-1/2 -translate-y-1/2"
                   />
+
                   <input
                     type="text"
                     value={search}
@@ -454,9 +516,10 @@ export default function InventarisPage() {
                       changeFilter(setSearch, event.target.value)
                     }
                     disabled={loading}
-                    placeholder="Cari nama, kode, kategori, gudang, atau lokasi..."
+                    placeholder="Cari nama, kode, kategori, gudang, ruangan..."
                     className={`h-10 w-full rounded-xl border ${themeNeutralBorder} ${themeNeutralSurface} pl-10 pr-9 text-sm theme-text outline-none transition ${themeFocus} disabled:cursor-not-allowed disabled:opacity-60`}
                   />
+
                   {search && (
                     <button
                       type="button"
@@ -469,17 +532,21 @@ export default function InventarisPage() {
                   )}
                 </div>
 
-                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-3 xl:flex">
                   <select
                     value={kategoriFilter}
                     onChange={(event) =>
-                      changeFilter(setKategoriFilter, event.target.value)
+                      changeFilter(
+                        setKategoriFilter,
+                        event.target.value
+                      )
                     }
                     disabled={loading}
                     aria-label="Filter kategori"
-                    className={`h-10 rounded-xl border ${themeNeutralBorder} ${themeNeutralSurface} px-3 text-xs theme-text outline-none transition ${themeFocus} disabled:opacity-60`}
+                    className={`h-10 min-w-[145px] rounded-xl border ${themeNeutralBorder} ${themeNeutralSurface} px-3 text-xs theme-text outline-none transition ${themeFocus} disabled:opacity-60`}
                   >
                     <option value="Semua">Semua Kategori</option>
+
                     {kategori.map((item) => (
                       <option key={item.id} value={item.id}>
                         {item.nama}
@@ -490,13 +557,17 @@ export default function InventarisPage() {
                   <select
                     value={gudangFilter}
                     onChange={(event) =>
-                      changeFilter(setGudangFilter, event.target.value)
+                      changeFilter(
+                        setGudangFilter,
+                        event.target.value
+                      )
                     }
                     disabled={loading}
                     aria-label="Filter gudang"
-                    className={`h-10 rounded-xl border ${themeNeutralBorder} ${themeNeutralSurface} px-3 text-xs theme-text outline-none transition ${themeFocus} disabled:opacity-60`}
+                    className={`h-10 min-w-[145px] rounded-xl border ${themeNeutralBorder} ${themeNeutralSurface} px-3 text-xs theme-text outline-none transition ${themeFocus} disabled:opacity-60`}
                   >
                     <option value="Semua">Semua Gudang</option>
+
                     {gudangList.map((item) => (
                       <option key={item.id} value={item.id}>
                         {item.nama}
@@ -507,31 +578,19 @@ export default function InventarisPage() {
                   <select
                     value={kondisiFilter}
                     onChange={(event) =>
-                      changeFilter(setKondisiFilter, event.target.value)
+                      changeFilter(
+                        setKondisiFilter,
+                        event.target.value
+                      )
                     }
                     disabled={loading}
                     aria-label="Filter kondisi"
-                    className={`h-10 rounded-xl border ${themeNeutralBorder} ${themeNeutralSurface} px-3 text-xs theme-text outline-none transition ${themeFocus} disabled:opacity-60`}
+                    className={`h-10 min-w-[145px] rounded-xl border ${themeNeutralBorder} ${themeNeutralSurface} px-3 text-xs theme-text outline-none transition ${themeFocus} disabled:opacity-60`}
                   >
                     <option value="Semua">Semua Kondisi</option>
                     <option value="baik">Baik</option>
                     <option value="rusak_ringan">Rusak Ringan</option>
                     <option value="rusak_berat">Rusak Berat</option>
-                  </select>
-
-                  <select
-                    value={stokFilter}
-                    onChange={(event) =>
-                      changeFilter(setStokFilter, event.target.value)
-                    }
-                    disabled={loading}
-                    aria-label="Filter status stok"
-                    className={`h-10 rounded-xl border ${themeNeutralBorder} ${themeNeutralSurface} px-3 text-xs theme-text outline-none transition ${themeFocus} disabled:opacity-60`}
-                  >
-                    <option value="Semua">Semua Stok</option>
-                    <option value="aman">Stok Aman</option>
-                    <option value="menipis">Stok Menipis</option>
-                    <option value="habis">Stok Habis</option>
                   </select>
                 </div>
 
@@ -559,10 +618,12 @@ export default function InventarisPage() {
                   >
                     <Boxes size={16} />
                   </div>
+
                   <div className="min-w-0">
                     <h2 className="truncate text-sm font-semibold theme-text">
                       Daftar Inventaris
                     </h2>
+
                     <p className="text-xs theme-text-muted">
                       {loading
                         ? "Memuat data..."
@@ -590,6 +651,7 @@ export default function InventarisPage() {
                         size={28}
                         className={`${themePrimaryText} mx-auto animate-spin`}
                       />
+
                       <p className="mt-3 text-xs font-medium theme-text-muted">
                         Memuat inventaris dari server...
                       </p>
@@ -603,17 +665,23 @@ export default function InventarisPage() {
                       >
                         <Package size={26} />
                       </div>
+
                       <h3 className="mt-4 text-sm font-bold theme-text">
                         Belum ada data inventaris
                       </h3>
+
                       <p className="mt-1 text-xs theme-text-muted">
-                        Tambahkan barang inventaris pertama untuk mulai
-                        mengelola stok dan kondisinya.
+                        Tambahkan barang inventaris pertama
+                        untuk mulai mengelola data sarana
+                        dan prasarana sekolah.
                       </p>
+
                       <button
                         type="button"
                         onClick={() =>
-                          router.push("/admin/sarpras/iventaris/tambah")
+                          router.push(
+                            "/admin/sarpras/iventaris/tambah"
+                          )
                         }
                         className={`mt-4 inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold text-[var(--color-card)] ${themePrimaryGradient}`}
                       >
@@ -630,13 +698,16 @@ export default function InventarisPage() {
                       >
                         <Search size={25} />
                       </div>
+
                       <h3 className="mt-4 text-sm font-bold theme-text">
                         Tidak ada barang yang cocok
                       </h3>
+
                       <p className="mt-1 text-xs theme-text-muted">
-                        Ubah kata kunci atau filter untuk melihat barang
-                        lainnya.
+                        Ubah kata kunci atau filter untuk
+                        melihat barang lainnya.
                       </p>
+
                       <button
                         type="button"
                         onClick={resetFilter}
@@ -647,145 +718,183 @@ export default function InventarisPage() {
                     </div>
                   </div>
                 ) : (
-                  <table className="w-full min-w-[980px] text-sm">
+                  <table className="w-full min-w-[1050px] text-sm">
                     <thead>
                       <tr
                         className={`border-b ${themeDivider} ${themeNeutralSurface} text-left text-[11px] uppercase tracking-wide theme-text-muted`}
                       >
-                        <th className="px-5 py-3 font-semibold">Barang</th>
-                        <th className="px-4 py-3 font-semibold">Kategori</th>
-                        <th className="px-4 py-3 font-semibold">Gudang / Lokasi</th>
-                        <th className="px-4 py-3 text-right font-semibold">Jumlah</th>
-                        <th className="px-4 py-3 text-right font-semibold">Stok</th>
-                        <th className="px-4 py-3 font-semibold">Kondisi</th>
-                        <th className="px-4 py-3 text-right font-semibold">Aksi</th>
+                        <th className="px-5 py-3 font-semibold">
+                          Barang
+                        </th>
+
+                        <th className="px-4 py-3 font-semibold">
+                          Kategori
+                        </th>
+
+                        <th className="px-4 py-3 font-semibold">
+                          Gudang
+                        </th>
+
+                        <th className="px-4 py-3 font-semibold">
+                          Ruangan
+                        </th>
+
+                        <th className="px-4 py-3 text-right font-semibold">
+                          Jumlah Unit
+                        </th>
+
+                        <th className="px-4 py-3 font-semibold">
+                          Kondisi
+                        </th>
+
+                        <th className="px-4 py-3 text-right font-semibold">
+                          Aksi
+                        </th>
                       </tr>
                     </thead>
 
                     <tbody>
-                      {pageItems.map((item) => {
-                        const stok = getStokStatus(item);
-
-                        return (
-                          <tr
-                            key={item.id}
-                            className={`border-b ${themeDivider} transition last:border-b-0 ${themeNeutralHover}`}
-                          >
-                            <td className="px-5 py-3.5">
-                              <div className="flex items-center gap-3">
-                                <div
-                                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${themePrimarySoft} ${themePrimaryText}`}
-                                >
-                                  <Package size={16} />
-                                </div>
-                                <div className="min-w-0">
-                                  <p className="truncate font-semibold theme-text">
-                                    {item.nama}
-                                  </p>
-                                  <p className="text-[11px] theme-text-muted">
-                                    {item.kode}
-                                  </p>
-                                </div>
-                              </div>
-                            </td>
-
-                            <td className="px-4 py-3.5 theme-text-secondary">
-                              {item.kategoriAset?.nama || "-"}
-                            </td>
-
-                            <td className="px-4 py-3.5">
-                              <p className="theme-text-secondary">
-                                {item.gudang?.nama || "-"}
-                              </p>
-                              <p className="flex items-center gap-1 text-[11px] theme-text-muted">
-                                <MapPin size={11} />
-                                {item.lokasi ||
-                                  item.gudang?.lokasi ||
-                                  "-"}
-                              </p>
-                            </td>
-
-                            <td className="px-4 py-3.5 text-right font-medium theme-text">
-                              {formatNumber(item.jumlah)}
-                            </td>
-
-                            <td className="px-4 py-3.5 text-right">
-                              <p className="font-medium theme-text">
-                                {formatNumber(item.jumlahStok)}
-                              </p>
-                              <span
-                                className={`mt-1 inline-flex rounded-full border px-2 py-0.5 text-[10px] font-semibold ${stok.className}`}
+                      {pageItems.map((item) => (
+                        <tr
+                          key={item.id}
+                          className={`border-b ${themeDivider} transition last:border-b-0 ${themeNeutralHover}`}
+                        >
+                          <td className="px-5 py-3.5">
+                            <div className="flex items-center gap-3">
+                              <div
+                                className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${themePrimarySoft} ${themePrimaryText}`}
                               >
-                                {stok.label}
-                              </span>
-                            </td>
-
-                            <td className="px-4 py-3.5">
-                              <span
-                                className={`inline-flex rounded-full border px-2.5 py-1 text-[10px] font-semibold ${kondisiBadgeClass(
-                                  item.kondisi
-                                )}`}
-                              >
-                                {formatKondisi(item.kondisi)}
-                              </span>
-                            </td>
-
-                            <td className="px-4 py-3.5">
-                              <div className="flex justify-end gap-1.5">
-                                <button
-                                  type="button"
-                                  title="Lihat detail"
-                                  aria-label={`Lihat detail ${item.nama}`}
-                                  onClick={() =>
-                                    router.push(
-                                      `/admin/sarpras/iventaris/${encodeURIComponent(
-                                        item.id
-                                      )}`
-                                    )
-                                  }
-                                  className={`inline-flex h-8 w-8 items-center justify-center rounded-lg border ${themeNeutralBorder} theme-text-secondary transition ${themeNeutralHover} hover:text-[var(--color-primary)]`}
-                                >
-                                  <Eye size={14} />
-                                </button>
-
-                                <button
-                                  type="button"
-                                  title="Edit inventaris"
-                                  aria-label={`Edit ${item.nama}`}
-                                  onClick={() =>
-                                    router.push(
-                                      `/admin/sarpras/iventaris/${encodeURIComponent(
-                                        item.id
-                                      )}/edit`
-                                    )
-                                  }
-                                  className={`inline-flex h-8 w-8 items-center justify-center rounded-lg border ${themeNeutralBorder} theme-text-secondary transition ${themeNeutralHover} hover:text-[var(--color-primary)]`}
-                                >
-                                  <Edit size={14} />
-                                </button>
-
-                                <button
-                                  type="button"
-                                  title="Hapus inventaris"
-                                  aria-label={`Hapus ${item.nama}`}
-                                  onClick={() => handleDelete(item)}
-                                  disabled={deletingId === item.id}
-                                  className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[color-mix(in_srgb,var(--color-danger)_24%,transparent)] text-[var(--color-danger)] transition hover:bg-[color-mix(in_srgb,var(--color-danger)_9%,transparent)] disabled:cursor-not-allowed disabled:opacity-50"
-                                >
-                                  {deletingId === item.id ? (
-                                    <Loader2
-                                      size={14}
-                                      className="animate-spin"
-                                    />
-                                  ) : (
-                                    <Trash2 size={14} />
-                                  )}
-                                </button>
+                                <Package size={16} />
                               </div>
-                            </td>
-                          </tr>
-                        );
-                      })}
+
+                              <div className="min-w-0">
+                                <p className="truncate font-semibold theme-text">
+                                  {item.nama || "-"}
+                                </p>
+
+                                <p className="text-[11px] theme-text-muted">
+                                  {item.kode || "-"}
+                                </p>
+
+                                {item.keterangan && (
+                                  <p
+                                    className="mt-0.5 max-w-[220px] truncate text-[11px] theme-text-muted"
+                                    title={item.keterangan}
+                                  >
+                                    {item.keterangan}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          </td>
+
+                          <td className="px-4 py-3.5 theme-text-secondary">
+                            {item.kategoriAset?.nama || "-"}
+                          </td>
+
+                          <td className="px-4 py-3.5">
+                            <div className="flex items-start gap-2">
+                              <Warehouse
+                                size={14}
+                                className="mt-0.5 shrink-0 theme-text-muted"
+                              />
+
+                              <div>
+                                <p className="theme-text-secondary">
+                                  {item.gudang?.nama || "-"}
+                                </p>
+
+                                {item.gudang?.lokasi && (
+                                  <p className="mt-0.5 text-[11px] theme-text-muted">
+                                    {item.gudang.lokasi}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                          </td>
+
+                          <td className="px-4 py-3.5">
+                            <div className="flex items-center gap-2">
+                              <MapPin
+                                size={13}
+                                className="shrink-0 theme-text-muted"
+                              />
+
+                              <span className="theme-text-secondary">
+                                {item.ruangan?.nama || "-"}
+                              </span>
+                            </div>
+                          </td>
+
+                          <td className="px-4 py-3.5 text-right font-medium theme-text">
+                            {formatNumber(item.jumlah)}
+                          </td>
+
+                          <td className="px-4 py-3.5">
+                            <span
+                              className={`inline-flex rounded-full border px-2.5 py-1 text-[10px] font-semibold ${kondisiBadgeClass(
+                                item.kondisi
+                              )}`}
+                            >
+                              {formatKondisi(item.kondisi)}
+                            </span>
+                          </td>
+
+                          <td className="px-4 py-3.5">
+                            <div className="flex justify-end gap-1.5">
+                              <button
+                                type="button"
+                                title="Lihat detail"
+                                aria-label={`Lihat detail ${item.nama}`}
+                                onClick={() =>
+                                  router.push(
+                                    `/admin/sarpras/iventaris/${encodeURIComponent(
+                                      item.id
+                                    )}`
+                                  )
+                                }
+                                className={`inline-flex h-8 w-8 items-center justify-center rounded-lg border ${themeNeutralBorder} theme-text-secondary transition ${themeNeutralHover} hover:text-[var(--color-primary)]`}
+                              >
+                                <Eye size={14} />
+                              </button>
+
+                              <button
+                                type="button"
+                                title="Edit inventaris"
+                                aria-label={`Edit ${item.nama}`}
+                                onClick={() =>
+                                  router.push(
+                                    `/admin/sarpras/iventaris/${encodeURIComponent(
+                                      item.id
+                                    )}/edit`
+                                  )
+                                }
+                                className={`inline-flex h-8 w-8 items-center justify-center rounded-lg border ${themeNeutralBorder} theme-text-secondary transition ${themeNeutralHover} hover:text-[var(--color-primary)]`}
+                              >
+                                <Edit size={14} />
+                              </button>
+
+                              <button
+                                type="button"
+                                title="Hapus inventaris"
+                                aria-label={`Hapus ${item.nama}`}
+                                onClick={() => handleDelete(item)}
+                                disabled={deletingId === item.id}
+                                className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[color-mix(in_srgb,var(--color-danger)_24%,transparent)] text-[var(--color-danger)] transition hover:bg-[color-mix(in_srgb,var(--color-danger)_9%,transparent)] disabled:cursor-not-allowed disabled:opacity-50"
+                              >
+                                {deletingId === item.id ? (
+                                  <Loader2
+                                    size={14}
+                                    className="animate-spin"
+                                  />
+                                ) : (
+                                  <Trash2 size={14} />
+                                )}
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
                     </tbody>
                   </table>
                 )}
@@ -800,7 +909,11 @@ export default function InventarisPage() {
                     {filtered.length === 0
                       ? 0
                       : startIndex + 1}
-                    –{Math.min(startIndex + PAGE_SIZE, filtered.length)}{" "}
+                    –
+                    {Math.min(
+                      startIndex + PAGE_SIZE,
+                      filtered.length
+                    )}{" "}
                     dari {formatNumber(filtered.length)} barang
                   </p>
 
@@ -826,7 +939,9 @@ export default function InventarisPage() {
                     <button
                       type="button"
                       onClick={() =>
-                        setPage(Math.min(totalPages, safePage + 1))
+                        setPage(
+                          Math.min(totalPages, safePage + 1)
+                        )
                       }
                       disabled={safePage >= totalPages}
                       aria-label="Halaman berikutnya"

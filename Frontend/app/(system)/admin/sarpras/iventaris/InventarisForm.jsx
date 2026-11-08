@@ -13,6 +13,7 @@ import {
   Package,
   Save,
   Tag,
+  Warehouse,
 } from "lucide-react";
 
 import Header from "@/app/components/Header";
@@ -23,11 +24,12 @@ import {
   getAsetById,
   getGudang,
   getKategoriAset,
+  getRuangan,
   updateAset,
 } from "@/services/sarpras.service";
+
 import {
   KONDISI_OPTIONS,
-  STATUS_OPTIONS,
   extractData,
 } from "./_utils";
 
@@ -37,14 +39,8 @@ const themePrimaryGradient =
 const themePrimaryShadow =
   "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
 
-const themePrimarySoft =
-  "bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)]";
-
 const themeNeutralSurface =
   "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
-
-const themeNeutralBorder =
-  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
 
 const themeDivider =
   "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
@@ -62,12 +58,10 @@ const emptyForm = {
   nama: "",
   kategoriAsetId: "",
   gudangId: "",
+  ruanganId: "",
   kondisi: "baik",
   jumlah: "",
-  jumlahStok: "",
-  stokMinimum: "0",
-  lokasi: "",
-  status: "aktif",
+  keterangan: "",
 };
 
 function Field({ label, required, error, children, hint }) {
@@ -99,11 +93,15 @@ export default function InventarisForm({ mode = "tambah", id = "" }) {
 
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [form, setForm] = useState(emptyForm);
+
   const [kategori, setKategori] = useState([]);
   const [gudangList, setGudangList] = useState([]);
+  const [ruanganList, setRuanganList] = useState([]);
+
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState({});
 
@@ -115,19 +113,28 @@ export default function InventarisForm({ mode = "tambah", id = "" }) {
       setError("");
 
       try {
-        const requests = [getKategoriAset(), getGudang()];
+        const requests = [
+          getKategoriAset(),
+          getGudang(),
+          getRuangan(),
+        ];
 
         if (isEdit) {
           requests.push(getAsetById(id));
         }
 
-        const [kategoriResponse, gudangResponse, asetResponse] =
-          await Promise.all(requests);
+        const responses = await Promise.all(requests);
 
         if (!aktif) return;
 
+        const kategoriResponse = responses[0];
+        const gudangResponse = responses[1];
+        const ruanganResponse = responses[2];
+        const asetResponse = isEdit ? responses[3] : null;
+
         setKategori(extractData(kategoriResponse));
         setGudangList(extractData(gudangResponse));
+        setRuanganList(extractData(ruanganResponse));
 
         if (isEdit) {
           const aset = asetResponse?.data;
@@ -145,14 +152,12 @@ export default function InventarisForm({ mode = "tambah", id = "" }) {
             gudangId: String(
               aset.gudangId ?? aset.gudang?.id ?? ""
             ),
-            kondisi: String(
-              aset.kondisi ?? "baik"
-            ).toLowerCase(),
+            ruanganId: String(
+              aset.ruanganId ?? aset.ruangan?.id ?? ""
+            ),
+            kondisi: String(aset.kondisi ?? "baik").toLowerCase(),
             jumlah: String(aset.jumlah ?? ""),
-            jumlahStok: String(aset.jumlahStok ?? ""),
-            stokMinimum: String(aset.stokMinimum ?? 0),
-            lokasi: aset.lokasi ?? "",
-            status: aset.status ?? "aktif",
+            keterangan: aset.keterangan ?? "",
           });
         }
       } catch (err) {
@@ -192,12 +197,20 @@ export default function InventarisForm({ mode = "tambah", id = "" }) {
   function validate() {
     const errors = {};
 
-    if (form.kode.trim().length < 2) {
-      errors.kode = "Kode aset minimal 2 karakter.";
+    if (form.kode.trim().length < 1) {
+      errors.kode = "Kode barang wajib diisi.";
     }
 
-    if (form.nama.trim().length < 3) {
-      errors.nama = "Nama aset minimal 3 karakter.";
+    if (form.kode.trim().length > 50) {
+      errors.kode = "Kode barang maksimal 50 karakter.";
+    }
+
+    if (form.nama.trim().length < 1) {
+      errors.nama = "Nama barang wajib diisi.";
+    }
+
+    if (form.nama.trim().length > 150) {
+      errors.nama = "Nama barang maksimal 150 karakter.";
     }
 
     if (!form.kategoriAsetId) {
@@ -208,48 +221,16 @@ export default function InventarisForm({ mode = "tambah", id = "" }) {
       errors.gudangId = "Gudang wajib dipilih.";
     }
 
-    const jumlah = Number(form.jumlah);
-
     if (
       form.jumlah === "" ||
-      !Number.isInteger(jumlah) ||
-      jumlah < 1
+      !Number.isInteger(Number(form.jumlah)) ||
+      Number(form.jumlah) < 0
     ) {
-      errors.jumlah = "Jumlah harus bilangan bulat minimal 1.";
+      errors.jumlah = "Jumlah harus bilangan bulat minimal 0.";
     }
 
-    const jumlahStok = Number(form.jumlahStok);
-
-    if (
-      form.jumlahStok === "" ||
-      !Number.isInteger(jumlahStok) ||
-      jumlahStok < 0
-    ) {
-      errors.jumlahStok =
-        "Jumlah stok harus bilangan bulat minimal 0.";
-    } else if (
-      Number.isInteger(jumlah) &&
-      jumlahStok > jumlah
-    ) {
-      errors.jumlahStok =
-        "Jumlah stok tidak boleh melebihi jumlah unit.";
-    }
-
-    const stokMinimum = Number(form.stokMinimum);
-
-    if (
-      form.stokMinimum === "" ||
-      !Number.isInteger(stokMinimum) ||
-      stokMinimum < 0
-    ) {
-      errors.stokMinimum =
-        "Stok minimum harus bilangan bulat minimal 0.";
-    } else if (
-      Number.isInteger(jumlah) &&
-      stokMinimum > jumlah
-    ) {
-      errors.stokMinimum =
-        "Stok minimum tidak boleh melebihi jumlah unit.";
+    if (form.keterangan.trim().length > 255) {
+      errors.keterangan = "Keterangan maksimal 255 karakter.";
     }
 
     setFieldErrors(errors);
@@ -270,14 +251,12 @@ export default function InventarisForm({ mode = "tambah", id = "" }) {
       const payload = {
         kode: form.kode.trim(),
         nama: form.nama.trim(),
-        kategoriAsetId: form.kategoriAsetId,
         gudangId: form.gudangId,
-        kondisi: form.kondisi,
+        kategoriAsetId: form.kategoriAsetId,
+        ruanganId: form.ruanganId || null,
+        kondisi: form.kondisi || null,
         jumlah: Number(form.jumlah),
-        jumlahStok: Number(form.jumlahStok),
-        stokMinimum: Number(form.stokMinimum),
-        lokasi: form.lokasi.trim() || null,
-        status: form.status,
+        keterangan: form.keterangan.trim() || null,
       };
 
       const response = isEdit
@@ -286,8 +265,7 @@ export default function InventarisForm({ mode = "tambah", id = "" }) {
 
       setSaved(true);
 
-      const nextId =
-        response?.data?.id || (isEdit ? id : "");
+      const nextId = response?.data?.id || (isEdit ? id : "");
 
       setTimeout(() => {
         if (nextId) {
@@ -315,7 +293,7 @@ export default function InventarisForm({ mode = "tambah", id = "" }) {
   const formBlocked = noKategori || noGudang;
 
   return (
-    <div className="theme-page flex min-h-screen">
+    <div className="theme-page flex h-screen w-full overflow-hidden">
       <Sidebar
         active="sarpras"
         setActive={() => {}}
@@ -324,19 +302,21 @@ export default function InventarisForm({ mode = "tambah", id = "" }) {
         role="admin"
       />
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        <Header
-          toggleSidebar={() => setSidebarOpen((value) => !value)}
-          notifications={[]}
-          user={{
-            name: "Admin Sekolah",
-            email: "admin@smartschool.com",
-            avatar: "AD",
-          }}
-        />
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        <div className="shrink-0 border-b theme-border">
+          <Header
+            toggleSidebar={() => setSidebarOpen((value) => !value)}
+            notifications={[]}
+            user={{
+              name: "Admin Sekolah",
+              email: "admin@smartschool.com",
+              avatar: "AD",
+            }}
+          />
+        </div>
 
-        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto p-3 sm:p-6 lg:p-8">
-          <div className="mx-auto w-full max-w-5xl space-y-5">
+        <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto">
+          <div className="w-full space-y-5 px-4 py-6 sm:px-6 lg:px-8">
             <div>
               <button
                 type="button"
@@ -357,8 +337,8 @@ export default function InventarisForm({ mode = "tambah", id = "" }) {
 
               <p className="mt-1 text-sm theme-text-secondary">
                 {isEdit
-                  ? "Perbarui data barang inventaris dan stoknya."
-                  : "Lengkapi data barang inventaris yang akan ditambahkan."}
+                  ? "Perbarui informasi barang inventaris."
+                  : "Lengkapi informasi barang inventaris yang akan ditambahkan."}
               </p>
             </div>
 
@@ -371,12 +351,14 @@ export default function InventarisForm({ mode = "tambah", id = "" }) {
                   size={18}
                   className="mt-0.5 shrink-0 text-[var(--color-danger)]"
                 />
+
                 <div>
                   <p className="text-sm font-semibold text-[var(--color-danger)]">
                     {isEdit
                       ? "Gagal memperbarui inventaris"
                       : "Gagal menyimpan inventaris"}
                   </p>
+
                   <p className="mt-0.5 text-xs theme-text-secondary">
                     {error}
                   </p>
@@ -399,6 +381,7 @@ export default function InventarisForm({ mode = "tambah", id = "" }) {
                 <p className="font-semibold text-[var(--color-warning)]">
                   Data pendukung belum lengkap
                 </p>
+
                 <p className="mt-1 text-xs theme-text-secondary">
                   {noKategori && (
                     <>
@@ -415,15 +398,14 @@ export default function InventarisForm({ mode = "tambah", id = "" }) {
                       .{" "}
                     </>
                   )}
+
                   {noGudang && (
                     <>
                       Belum ada gudang.{" "}
                       <button
                         type="button"
                         onClick={() =>
-                          router.push(
-                            "/admin/sarpras/gudang/master/tambah"
-                          )
+                          router.push("/admin/sarpras/gudang/master/tambah")
                         }
                         className="font-semibold underline"
                       >
@@ -447,6 +429,7 @@ export default function InventarisForm({ mode = "tambah", id = "" }) {
                       size={28}
                       className="mx-auto animate-spin text-[var(--color-primary)]"
                     />
+
                     <p className="mt-3 text-xs font-medium theme-text-muted">
                       Memuat data inventaris...
                     </p>
@@ -454,228 +437,250 @@ export default function InventarisForm({ mode = "tambah", id = "" }) {
                 </div>
               ) : (
                 <>
-                  <div className="space-y-5 p-4 sm:p-5">
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                      <Field
-                        label="Kode Barang"
-                        required
-                        error={fieldErrors.kode}
-                      >
-                        <input
-                          type="text"
-                          value={form.kode}
-                          onChange={(event) =>
-                            updateField("kode", event.target.value)
-                          }
-                          maxLength={50}
-                          placeholder="Contoh: AST-FUR-001"
-                          className={`${inputClass} px-4`}
-                        />
-                      </Field>
+                  <div className="space-y-6 p-4 sm:p-5">
+                    <div>
+                      <div className="mb-4">
+                        <h2 className="text-sm font-semibold theme-text">
+                          Informasi Barang
+                        </h2>
+                        <p className="mt-1 text-xs theme-text-muted">
+                          Masukkan identitas dan kategori barang inventaris.
+                        </p>
+                      </div>
 
-                      <Field
-                        label="Nama Barang"
-                        required
-                        error={fieldErrors.nama}
-                      >
-                        <div className="relative">
-                          <Package
-                            size={16}
-                            className="theme-text-muted absolute left-3.5 top-1/2 -translate-y-1/2"
-                          />
+                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                        <Field
+                          label="Kode Barang"
+                          required
+                          error={fieldErrors.kode}
+                        >
                           <input
                             type="text"
-                            value={form.nama}
+                            value={form.kode}
                             onChange={(event) =>
-                              updateField("nama", event.target.value)
+                              updateField("kode", event.target.value)
                             }
-                            maxLength={100}
-                            placeholder="Contoh: Kursi Siswa"
-                            className={`${inputClass} pl-10 pr-4`}
+                            maxLength={50}
+                            placeholder="Contoh: AST-FUR-001"
+                            className={`${inputClass} px-4`}
                           />
-                        </div>
-                      </Field>
+                        </Field>
 
-                      <Field
-                        label="Kategori"
-                        required
-                        error={fieldErrors.kategoriAsetId}
-                      >
-                        <div className="relative">
-                          <Tag
-                            size={16}
-                            className="theme-text-muted pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2"
-                          />
-                          <select
-                            value={form.kategoriAsetId}
-                            onChange={(event) =>
-                              updateField(
-                                "kategoriAsetId",
-                                event.target.value
-                              )
-                            }
-                            disabled={formBlocked}
-                            className={`${inputClass} appearance-none pl-10 pr-9`}
-                          >
-                            <option value="">Pilih kategori</option>
-                            {kategori.map((item) => (
-                              <option key={item.id} value={item.id}>
-                                {item.nama}
-                              </option>
-                            ))}
-                          </select>
-                          <ChevronDown
-                            size={15}
-                            className="theme-text-muted pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2"
-                          />
-                        </div>
-                      </Field>
-
-                      <Field
-                        label="Gudang"
-                        required
-                        error={fieldErrors.gudangId}
-                      >
-                        <div className="relative">
-                          <Boxes
-                            size={16}
-                            className="theme-text-muted pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2"
-                          />
-                          <select
-                            value={form.gudangId}
-                            onChange={(event) =>
-                              updateField("gudangId", event.target.value)
-                            }
-                            disabled={formBlocked}
-                            className={`${inputClass} appearance-none pl-10 pr-9`}
-                          >
-                            <option value="">Pilih gudang</option>
-                            {gudangList.map((item) => (
-                              <option key={item.id} value={item.id}>
-                                {item.nama}
-                              </option>
-                            ))}
-                          </select>
-                          <ChevronDown
-                            size={15}
-                            className="theme-text-muted pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2"
-                          />
-                        </div>
-                      </Field>
-
-                      <Field label="Kondisi" error={fieldErrors.kondisi}>
-                        <select
-                          value={form.kondisi}
-                          onChange={(event) =>
-                            updateField("kondisi", event.target.value)
-                          }
-                          className={`${inputClass} px-4`}
+                        <Field
+                          label="Nama Barang"
+                          required
+                          error={fieldErrors.nama}
                         >
-                          {KONDISI_OPTIONS.map((item) => (
-                            <option key={item.value} value={item.value}>
-                              {item.label}
-                            </option>
-                          ))}
-                        </select>
-                      </Field>
+                          <div className="relative">
+                            <Package
+                              size={16}
+                              className="theme-text-muted absolute left-3.5 top-1/2 -translate-y-1/2"
+                            />
 
-                      <Field label="Status" error={fieldErrors.status}>
-                        <select
-                          value={form.status}
-                          onChange={(event) =>
-                            updateField("status", event.target.value)
-                          }
-                          className={`${inputClass} px-4`}
+                            <input
+                              type="text"
+                              value={form.nama}
+                              onChange={(event) =>
+                                updateField("nama", event.target.value)
+                              }
+                              maxLength={150}
+                              placeholder="Contoh: Kursi Siswa"
+                              className={`${inputClass} pl-10 pr-4`}
+                            />
+                          </div>
+                        </Field>
+
+                        <Field
+                          label="Kategori Aset"
+                          required
+                          error={fieldErrors.kategoriAsetId}
                         >
-                          {STATUS_OPTIONS.map((item) => (
-                            <option key={item.value} value={item.value}>
-                              {item.label}
-                            </option>
-                          ))}
-                        </select>
-                      </Field>
-                    </div>
+                          <div className="relative">
+                            <Tag
+                              size={16}
+                              className="theme-text-muted pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2"
+                            />
 
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                      <Field
-                        label="Jumlah Unit"
-                        required
-                        error={fieldErrors.jumlah}
-                      >
-                        <input
-                          type="number"
-                          min="1"
-                          step="1"
-                          value={form.jumlah}
-                          onChange={(event) =>
-                            updateField("jumlah", event.target.value)
-                          }
-                          placeholder="Contoh: 20"
-                          className={`${inputClass} px-4`}
-                        />
-                      </Field>
+                            <select
+                              value={form.kategoriAsetId}
+                              onChange={(event) =>
+                                updateField(
+                                  "kategoriAsetId",
+                                  event.target.value
+                                )
+                              }
+                              disabled={formBlocked}
+                              className={`${inputClass} appearance-none pl-10 pr-9`}
+                            >
+                              <option value="">Pilih kategori</option>
 
-                      <Field
-                        label="Jumlah Stok"
-                        required
-                        error={fieldErrors.jumlahStok}
-                      >
-                        <input
-                          type="number"
-                          min="0"
-                          step="1"
-                          value={form.jumlahStok}
-                          onChange={(event) =>
-                            updateField("jumlahStok", event.target.value)
-                          }
-                          placeholder="Contoh: 18"
-                          className={`${inputClass} px-4`}
-                        />
-                      </Field>
+                              {kategori.map((item) => (
+                                <option key={item.id} value={item.id}>
+                                  {item.nama}
+                                </option>
+                              ))}
+                            </select>
 
-                      <Field
-                        label="Stok Minimum"
-                        required
-                        error={fieldErrors.stokMinimum}
-                        hint="Batas peringatan stok menipis."
-                      >
-                        <input
-                          type="number"
-                          min="0"
-                          step="1"
-                          value={form.stokMinimum}
-                          onChange={(event) =>
-                            updateField("stokMinimum", event.target.value)
-                          }
-                          placeholder="Contoh: 5"
-                          className={`${inputClass} px-4`}
-                        />
-                      </Field>
-                    </div>
-
-                    <Field
-                      label="Lokasi"
-                      error={fieldErrors.lokasi}
-                      hint="Lokasi fisik barang di dalam gedung atau gudang."
-                    >
-                      <div className="relative">
-                        <MapPin
-                          size={16}
-                          className="theme-text-muted absolute left-3.5 top-1/2 -translate-y-1/2"
-                        />
-                        <input
-                          type="text"
-                          value={form.lokasi}
-                          onChange={(event) =>
-                            updateField("lokasi", event.target.value)
-                          }
-                          maxLength={100}
-                          placeholder="Contoh: Ruang Kelas 7A"
-                          className={`${inputClass} pl-10 pr-4`}
-                        />
+                            <ChevronDown
+                              size={15}
+                              className="theme-text-muted pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2"
+                            />
+                          </div>
+                        </Field>
                       </div>
-                    </Field>
+                    </div>
 
+                    <div className={`border-t ${themeDivider}`} />
+
+                    <div>
+                      <div className="mb-4">
+                        <h2 className="text-sm font-semibold theme-text">
+                          Penempatan Barang
+                        </h2>
+                        <p className="mt-1 text-xs theme-text-muted">
+                          Tentukan gudang dan ruangan tempat barang berada.
+                        </p>
+                      </div>
+
+                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                        <Field
+                          label="Gudang"
+                          required
+                          error={fieldErrors.gudangId}
+                        >
+                          <div className="relative">
+                            <Boxes
+                              size={16}
+                              className="theme-text-muted pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2"
+                            />
+
+                            <select
+                              value={form.gudangId}
+                              onChange={(event) =>
+                                updateField("gudangId", event.target.value)
+                              }
+                              disabled={formBlocked}
+                              className={`${inputClass} appearance-none pl-10 pr-9`}
+                            >
+                              <option value="">Pilih gudang</option>
+
+                              {gudangList.map((item) => (
+                                <option key={item.id} value={item.id}>
+                                  {item.nama}
+                                </option>
+                              ))}
+                            </select>
+
+                            <ChevronDown
+                              size={15}
+                              className="theme-text-muted pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2"
+                            />
+                          </div>
+                        </Field>
+
+                        <Field
+                          label="Ruangan"
+                          hint="Opsional. Pilih ruangan jika barang ditempatkan di ruangan tertentu."
+                        >
+                          <div className="relative">
+                            <MapPin
+                              size={16}
+                              className="theme-text-muted pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2"
+                            />
+
+                            <select
+                              value={form.ruanganId}
+                              onChange={(event) =>
+                                updateField("ruanganId", event.target.value)
+                              }
+                              className={`${inputClass} appearance-none pl-10 pr-9`}
+                            >
+                              <option value="">Tidak ditentukan</option>
+
+                              {ruanganList.map((item) => (
+                                <option key={item.id} value={item.id}>
+                                  {item.nama}
+                                </option>
+                              ))}
+                            </select>
+
+                            <ChevronDown
+                              size={15}
+                              className="theme-text-muted pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2"
+                            />
+                          </div>
+                        </Field>
+
+                        <Field label="Kondisi Barang">
+                          <select
+                            value={form.kondisi}
+                            onChange={(event) =>
+                              updateField("kondisi", event.target.value)
+                            }
+                            className={`${inputClass} px-4`}
+                          >
+                            {KONDISI_OPTIONS.map((item) => (
+                              <option key={item.value} value={item.value}>
+                                {item.label}
+                              </option>
+                            ))}
+                          </select>
+                        </Field>
+                      </div>
+                    </div>
+
+                    <div className={`border-t ${themeDivider}`} />
+
+                    <div>
+                      <div className="mb-4">
+                        <h2 className="text-sm font-semibold theme-text">
+                          Jumlah dan Keterangan
+                        </h2>
+                        <p className="mt-1 text-xs theme-text-muted">
+                          Masukkan jumlah unit barang dan keterangan tambahan.
+                        </p>
+                      </div>
+
+                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                        <Field
+                          label="Jumlah Unit"
+                          required
+                          error={fieldErrors.jumlah}
+                          hint="Total unit barang yang dicatat."
+                        >
+                          <input
+                            type="number"
+                            min="0"
+                            step="1"
+                            value={form.jumlah}
+                            onChange={(event) =>
+                              updateField("jumlah", event.target.value)
+                            }
+                            placeholder="Contoh: 20"
+                            className={`${inputClass} px-4`}
+                          />
+                        </Field>
+
+                        <div className="sm:col-span-2">
+                          <Field
+                            label="Keterangan"
+                            error={fieldErrors.keterangan}
+                            hint="Opsional, maksimal 255 karakter."
+                          >
+                            <textarea
+                              value={form.keterangan}
+                              onChange={(event) =>
+                                updateField("keterangan", event.target.value)
+                              }
+                              maxLength={255}
+                              rows={3}
+                              placeholder="Tambahkan keterangan barang..."
+                              className={`${inputClass} resize-y px-4`}
+                            />
+                          </Field>
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
                   <div
@@ -686,7 +691,7 @@ export default function InventarisForm({ mode = "tambah", id = "" }) {
                       onClick={() =>
                         router.push("/admin/sarpras/iventaris")
                       }
-                      className={`w-full rounded-xl px-4 py-2.5 text-sm font-medium theme-text-secondary transition-colors hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)] sm:w-auto`}
+                      className="w-full rounded-xl px-4 py-2.5 text-sm font-medium theme-text-secondary transition-colors hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)] sm:w-auto"
                     >
                       Batal
                     </button>
@@ -705,6 +710,7 @@ export default function InventarisForm({ mode = "tambah", id = "" }) {
                       ) : (
                         <Save size={16} />
                       )}
+
                       {saving
                         ? "Menyimpan..."
                         : isEdit

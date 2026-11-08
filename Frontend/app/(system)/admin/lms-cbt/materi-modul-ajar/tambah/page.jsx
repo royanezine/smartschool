@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -9,15 +10,12 @@ import Header from "@/app/components/Header";
 import {
   ArrowLeft,
   BookOpen,
-  FileText,
   Link2,
   Upload,
   Save,
   Loader2,
   AlertCircle,
   CheckCircle2,
-  Layers,
-  GraduationCap,
   Eye,
   Info,
   Lightbulb,
@@ -47,7 +45,10 @@ export default function TambahMateriPage() {
   const [kelasList, setKelasList] = useState([]);
   const [loadingKelas, setLoadingKelas] = useState(true);
 
-  const [formKelasMapelId, setFormKelasMapelId] = useState("");
+  // Pilihan kelas dan mata pelajaran dipisah
+  const [formKelasId, setFormKelasId] = useState("");
+  const [formMapelId, setFormMapelId] = useState("");
+
   const [formJudul, setFormJudul] = useState("");
   const [formKategori, setFormKategori] = useState("Modul Ajar");
   const [formDeskripsi, setFormDeskripsi] = useState("");
@@ -59,14 +60,27 @@ export default function TambahMateriPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
+  // Mengambil data relasi kelas dan mata pelajaran dari backend
   useEffect(() => {
     let mounted = true;
+
     async function fetchKelas() {
       try {
         setLoadingKelas(true);
-        const data = await getKelasMapel();
+
+        const response = await getKelasMapel();
+
+        // Response backend: { success, message, data: [...] }
+        const data = Array.isArray(response?.data)
+          ? response.data
+          : Array.isArray(response?.data?.data)
+            ? response.data.data
+            : Array.isArray(response)
+              ? response
+              : [];
+
         if (mounted) {
-          setKelasList(Array.isArray(data) ? data : []);
+          setKelasList(data);
         }
       } catch (err) {
         if (mounted) {
@@ -74,70 +88,137 @@ export default function TambahMateriPage() {
           setError("Gagal memuat pilihan kelas dan mata pelajaran.");
         }
       } finally {
-        if (mounted) setLoadingKelas(false);
+        if (mounted) {
+          setLoadingKelas(false);
+        }
       }
     }
+
     fetchKelas();
+
     return () => {
       mounted = false;
     };
   }, []);
+
+  // Membuat daftar kelas unik dari data kelas-mapel
+  const kelasOptions = [
+    ...new Map(
+      kelasList
+        .filter((km) => km.kelas?.id || km.kelasId)
+        .map((km) => {
+          const id = km.kelas?.id || km.kelasId;
+
+          return [
+            String(id),
+            {
+              id,
+              nama: km.kelas?.nama || "Kelas tanpa nama",
+            },
+          ];
+        })
+    ).values(),
+  ].sort((a, b) => a.nama.localeCompare(b.nama, "id"));
+
+  // Mengambil mata pelajaran berdasarkan kelas yang dipilih
+  const mapelOptions = [
+    ...new Map(
+      kelasList
+        .filter(
+          (km) =>
+            String(km.kelasId) === String(formKelasId) &&
+            (km.mataPelajaran?.id || km.mataPelajaranId)
+        )
+        .map((km) => {
+          const id = km.mataPelajaran?.id || km.mataPelajaranId;
+
+          return [
+            String(id),
+            {
+              id,
+              nama: km.mataPelajaran?.nama || "Mata pelajaran tanpa nama",
+            },
+          ];
+        })
+    ).values(),
+  ].sort((a, b) => a.nama.localeCompare(b.nama, "id"));
+
+  // Mencari relasi kelas-mapel sesuai pilihan dropdown
+  // ID relasi inilah yang dikirim ke API saat menyimpan materi
+  const selectedKelasMapel = kelasList.find(
+    (km) =>
+      String(km.kelasId) === String(formKelasId) &&
+      String(km.mataPelajaranId) === String(formMapelId)
+  );
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setSuccess("");
 
-    if (!formKelasMapelId) {
-      setError("Silakan pilih Kelas dan Mata Pelajaran.");
+    if (!formKelasId) {
+      setError("Silakan pilih kelas terlebih dahulu.");
       return;
     }
+
+    if (!formMapelId || !selectedKelasMapel) {
+      setError("Silakan pilih mata pelajaran.");
+      return;
+    }
+
     if (!formJudul.trim()) {
       setError("Judul materi wajib diisi.");
       return;
     }
+
     if (formJudul.trim().length > 100) {
       setError("Judul materi maksimal 100 karakter.");
+      return;
+    }
+
+    if (formSumberTipe === "file" && !formFile) {
+      setError("Pilih file materi (PDF atau Video) untuk diunggah.");
+      return;
+    }
+
+    if (formSumberTipe === "link" && !formUrlLink.trim()) {
+      setError("Masukkan tautan link materi (URL).");
+      return;
+    }
+
+    if (
+      formSumberTipe === "link" &&
+      !/^https?:\/\//i.test(formUrlLink.trim())
+    ) {
+      setError("Format URL tidak valid. Awali dengan http:// atau https://");
       return;
     }
 
     setSubmitting(true);
 
     try {
+      // Tetap menggunakan ID relasi kelas-mapel sesuai kontrak API
+      const payload = {
+        kelasMapelId: selectedKelasMapel.id,
+        judul: formJudul.trim(),
+        kategori: formKategori.trim() || undefined,
+        deskripsi: formDeskripsi.trim() || undefined,
+      };
+
       if (formSumberTipe === "file") {
-        if (!formFile) {
-          setError("Pilih file materi (PDF atau Video) untuk diunggah.");
-          setSubmitting(false);
-          return;
-        }
         await createMateriDenganFile({
-          kelasMapelId: formKelasMapelId,
-          judul: formJudul.trim(),
-          kategori: formKategori.trim() || undefined,
-          deskripsi: formDeskripsi.trim() || undefined,
+          ...payload,
           file: formFile,
         });
       } else {
-        if (!formUrlLink.trim()) {
-          setError("Masukkan tautan link materi (URL).");
-          setSubmitting(false);
-          return;
-        }
-        if (!/^https?:\/\//i.test(formUrlLink.trim())) {
-          setError("Format URL tidak valid. Awali dengan http:// atau https://");
-          setSubmitting(false);
-          return;
-        }
         await createMateriDenganLink({
-          kelasMapelId: formKelasMapelId,
-          judul: formJudul.trim(),
-          kategori: formKategori.trim() || undefined,
-          deskripsi: formDeskripsi.trim() || undefined,
+          ...payload,
           urlLink: formUrlLink.trim(),
         });
       }
 
       setSuccess("Materi pembelajaran berhasil ditambahkan.");
+
       setTimeout(() => {
         router.push("/admin/lms-cbt/materi-modul-ajar");
       }, 1000);
@@ -148,12 +229,7 @@ export default function TambahMateriPage() {
     }
   };
 
-  const selectedKelasMapel = kelasList.find(
-    (km) => String(km.id) === String(formKelasMapelId)
-  );
-
   return (
-    // ✅ ROOT pakai flex h-screen overflow-hidden
     <div className="theme-page flex h-screen w-full overflow-hidden">
       <Sidebar
         active={active}
@@ -163,20 +239,13 @@ export default function TambahMateriPage() {
       />
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-        {/* ✅ Header dibungkus shrink-0 */}
         <div className="shrink-0 border-b theme-border">
           <Header active={active} />
         </div>
 
-        {/* ✅ Body flex min-h-0 flex-1 */}
         <div className="flex min-h-0 flex-1">
-          
-          {/* ✅ Main min-w-0 flex-1 overflow-y-auto */}
           <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto">
-            
-            {/* ✅ Konten w-full (max-w dihapus agar melebar penuh saat zoom out) */}
             <div className="w-full p-4 sm:p-6 lg:p-8 2xl:px-12">
-              
               <div className="mb-6 flex flex-col gap-4">
                 <Link
                   href="/admin/lms-cbt/materi-modul-ajar"
@@ -190,12 +259,14 @@ export default function TambahMateriPage() {
                   <div className="theme-info flex h-12 w-12 shrink-0 items-center justify-center rounded-xl">
                     <BookOpen className="h-6 w-6" />
                   </div>
+
                   <div className="min-w-0">
                     <h1 className="theme-text text-2xl font-bold">
                       Tambah Materi Pembelajaran
                     </h1>
                     <p className="theme-text-muted mt-1 text-sm">
-                      Unggah bahan ajar baru berupa modul teks, berkas PDF, video, atau tautan daring.
+                      Unggah bahan ajar baru berupa modul teks, berkas PDF,
+                      video, atau tautan daring.
                     </p>
                   </div>
                 </div>
@@ -217,35 +288,93 @@ export default function TambahMateriPage() {
               )}
 
               <form onSubmit={handleSubmit}>
-                
-                {/* ✅ Grid 2 Kolom Responsif (Kiri: Form, Kanan: Info) */}
                 <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-                  
-                  {/* === KOLOM KIRI: Form Utama === */}
+                  {/* KOLOM KIRI: FORM UTAMA */}
                   <div className="theme-card theme-border min-w-0 space-y-6 overflow-hidden rounded-2xl border p-6 shadow-sm sm:p-8">
-                    
-                    {/* Kelas & Mapel */}
+                    {/* Pilihan Kelas */}
                     <div>
                       <label className="theme-text mb-2 block text-sm font-semibold">
-                        Kelas & Mata Pelajaran <span className="text-[var(--color-danger)]">*</span>
+                        Kelas{" "}
+                        <span className="text-[var(--color-danger)]">*</span>
                       </label>
+
                       <select
-                        value={formKelasMapelId}
-                        onChange={(e) => setFormKelasMapelId(e.target.value)}
+                        value={formKelasId}
+                        onChange={(e) => {
+                          setFormKelasId(e.target.value);
+                          setFormMapelId("");
+                          setError("");
+                        }}
                         disabled={loadingKelas || submitting}
                         className="theme-input w-full rounded-xl border px-3.5 py-2.5 text-sm outline-none transition focus:border-[var(--color-primary)]"
                         required
                       >
-                        <option value="">-- Pilih Kelas & Mata Pelajaran --</option>
-                        {kelasList.map((km) => (
-                          <option key={km.id} value={km.id}>
-                            {km.kelas?.nama || "Kelas ?"} - {km.mataPelajaran?.nama || "Mapel ?"} (Guru: {km.guruPengajar?.namaLengkap || "-"})
+                        <option value="">
+                          -- Pilih Kelas --
+                        </option>
+
+                        {kelasOptions.map((kelas) => (
+                          <option key={kelas.id} value={kelas.id}>
+                            {kelas.nama}
                           </option>
                         ))}
                       </select>
+
                       {loadingKelas && (
-                        <p className="theme-text-muted mt-1 text-xs flex items-center gap-1.5">
-                          <Loader2 className="h-3 w-3 animate-spin" /> Memuat daftar kelas pembelajaran...
+                        <p className="theme-text-muted mt-1 flex items-center gap-1.5 text-xs">
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                          Memuat daftar kelas...
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Pilihan Mata Pelajaran */}
+                    <div>
+                      <label className="theme-text mb-2 block text-sm font-semibold">
+                        Mata Pelajaran{" "}
+                        <span className="text-[var(--color-danger)]">*</span>
+                      </label>
+
+                      <select
+                        value={formMapelId}
+                        onChange={(e) => {
+                          setFormMapelId(e.target.value);
+                          setError("");
+                        }}
+                        disabled={
+                          loadingKelas ||
+                          submitting ||
+                          !formKelasId ||
+                          mapelOptions.length === 0
+                        }
+                        className="theme-input w-full rounded-xl border px-3.5 py-2.5 text-sm outline-none transition focus:border-[var(--color-primary)] disabled:cursor-not-allowed disabled:opacity-60"
+                        required
+                      >
+                        <option value="">
+                          {!formKelasId
+                            ? "-- Pilih Kelas Terlebih Dahulu --"
+                            : mapelOptions.length === 0
+                              ? "-- Tidak Ada Mata Pelajaran --"
+                              : "-- Pilih Mata Pelajaran --"}
+                        </option>
+
+                        {mapelOptions.map((mapel) => (
+                          <option key={mapel.id} value={mapel.id}>
+                            {mapel.nama}
+                          </option>
+                        ))}
+                      </select>
+
+                      {formKelasId && mapelOptions.length === 0 && !loadingKelas && (
+                        <p className="theme-text-muted mt-1 text-xs">
+                          Belum ada mata pelajaran yang ditugaskan pada kelas ini.
+                        </p>
+                      )}
+
+                      {formKelasId && mapelOptions.length > 0 && (
+                        <p className="theme-text-muted mt-1 text-xs">
+                          Menampilkan {mapelOptions.length} mata pelajaran untuk
+                          kelas yang dipilih.
                         </p>
                       )}
                     </div>
@@ -254,8 +383,10 @@ export default function TambahMateriPage() {
                     <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
                       <div className="sm:col-span-2">
                         <label className="theme-text mb-2 block text-sm font-semibold">
-                          Judul Materi <span className="text-[var(--color-danger)]">*</span>
+                          Judul Materi{" "}
+                          <span className="text-[var(--color-danger)]">*</span>
                         </label>
+
                         <input
                           type="text"
                           maxLength={100}
@@ -266,6 +397,7 @@ export default function TambahMateriPage() {
                           className="theme-input w-full rounded-xl border px-3.5 py-2.5 text-sm outline-none transition focus:border-[var(--color-primary)]"
                           required
                         />
+
                         <p className="theme-text-muted mt-1 text-xs">
                           Maksimal 100 karakter.
                         </p>
@@ -273,8 +405,10 @@ export default function TambahMateriPage() {
 
                       <div>
                         <label className="theme-text mb-2 block text-sm font-semibold">
-                          Kategori <span className="text-[var(--color-danger)]">*</span>
+                          Kategori{" "}
+                          <span className="text-[var(--color-danger)]">*</span>
                         </label>
+
                         <select
                           value={formKategori}
                           onChange={(e) => setFormKategori(e.target.value)}
@@ -295,6 +429,7 @@ export default function TambahMateriPage() {
                       <label className="theme-text mb-2 block text-sm font-semibold">
                         Deskripsi / Petunjuk Belajar
                       </label>
+
                       <textarea
                         rows={4}
                         value={formDeskripsi}
@@ -305,15 +440,18 @@ export default function TambahMateriPage() {
                       />
                     </div>
 
-                    {/* Sumber Materi Mode */}
+                    {/* Tipe Sumber Materi */}
                     <div>
                       <label className="theme-text mb-2 block text-sm font-semibold">
-                        Tipe Sumber Materi <span className="text-[var(--color-danger)]">*</span>
+                        Tipe Sumber Materi{" "}
+                        <span className="text-[var(--color-danger)]">*</span>
                       </label>
-                      <div className="flex flex-col sm:flex-row gap-3">
+
+                      <div className="flex flex-col gap-3 sm:flex-row">
                         <button
                           type="button"
                           onClick={() => setFormSumberTipe("file")}
+                          disabled={submitting}
                           className={`inline-flex flex-1 items-center justify-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-medium transition-all ${
                             formSumberTipe === "file"
                               ? "border-[var(--color-primary)] bg-[var(--color-primary)] text-white shadow-sm"
@@ -323,9 +461,11 @@ export default function TambahMateriPage() {
                           <Upload className="h-4 w-4" />
                           Unggah File
                         </button>
+
                         <button
                           type="button"
                           onClick={() => setFormSumberTipe("link")}
+                          disabled={submitting}
                           className={`inline-flex flex-1 items-center justify-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-medium transition-all ${
                             formSumberTipe === "link"
                               ? "border-[var(--color-primary)] bg-[var(--color-primary)] text-white shadow-sm"
@@ -342,16 +482,21 @@ export default function TambahMateriPage() {
                     {formSumberTipe === "file" ? (
                       <div>
                         <label className="theme-text mb-2 block text-sm font-semibold">
-                          Pilih Berkas Materi <span className="text-[var(--color-danger)]">*</span>
+                          Pilih Berkas Materi{" "}
+                          <span className="text-[var(--color-danger)]">*</span>
                         </label>
+
                         <input
                           type="file"
                           accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.mp4,.zip"
-                          onChange={(e) => setFormFile(e.target.files?.[0] || null)}
+                          onChange={(e) =>
+                            setFormFile(e.target.files?.[0] || null)
+                          }
                           disabled={submitting}
                           className="theme-input w-full rounded-xl border p-2 text-sm outline-none file:mr-4 file:rounded-lg file:border-0 file:bg-[var(--color-primary)] file:px-4 file:py-2 file:text-xs file:font-semibold file:text-white"
                           required
                         />
+
                         <p className="theme-text-muted mt-1 text-xs">
                           Format yang didukung: PDF, DOC, PPT, MP4 (Maks. 25MB).
                         </p>
@@ -359,8 +504,10 @@ export default function TambahMateriPage() {
                     ) : (
                       <div>
                         <label className="theme-text mb-2 block text-sm font-semibold">
-                          Tautan Eksternal (URL) <span className="text-[var(--color-danger)]">*</span>
+                          Tautan Eksternal (URL){" "}
+                          <span className="text-[var(--color-danger)]">*</span>
                         </label>
+
                         <input
                           type="url"
                           value={formUrlLink}
@@ -374,48 +521,88 @@ export default function TambahMateriPage() {
                     )}
                   </div>
 
-                  {/* === KOLOM KANAN: Preview & Action === */}
+                  {/* KOLOM KANAN: PREVIEW & ACTION */}
                   <aside className="flex min-w-0 flex-col gap-6">
-                    
-                    {/* Card Preview */}
+                    {/* Preview */}
                     <div className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
                       <div className="theme-card-soft theme-border flex items-center gap-3 border-b px-5 py-3">
                         <div className="theme-info flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
                           <Eye className="h-4 w-4" />
                         </div>
-                        <h2 className="theme-text text-sm font-bold">Preview Materi</h2>
+
+                        <h2 className="theme-text text-sm font-bold">
+                          Preview Materi
+                        </h2>
                       </div>
+
                       <div className="p-5">
                         <div className="space-y-4 text-xs">
                           <div>
                             <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-wider">
                               Judul
                             </p>
-                            <p className="theme-text mt-1 text-sm font-semibold break-words">
+
+                            <p className="theme-text mt-1 break-words text-sm font-semibold">
                               {formJudul || "Belum ada judul"}
                             </p>
                           </div>
+
                           <div className="theme-border-soft h-px" />
+
                           <div>
                             <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-wider">
-                              Kelas & Mapel
+                              Kelas
                             </p>
+
                             <p className="theme-text mt-1 text-sm font-semibold">
-                              {selectedKelasMapel
-                                ? `${selectedKelasMapel.kelas?.nama} - ${selectedKelasMapel.mataPelajaran?.nama}`
-                                : "Belum dipilih"}
+                              {kelasOptions.find(
+                                (k) => String(k.id) === String(formKelasId)
+                              )?.nama || "Belum dipilih"}
                             </p>
                           </div>
+
                           <div className="theme-border-soft h-px" />
+
+                          <div>
+                            <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-wider">
+                              Mata Pelajaran
+                            </p>
+
+                            <p className="theme-text mt-1 text-sm font-semibold">
+                              {mapelOptions.find(
+                                (m) => String(m.id) === String(formMapelId)
+                              )?.nama || "Belum dipilih"}
+                            </p>
+                          </div>
+
+                          <div className="theme-border-soft h-px" />
+
                           <div>
                             <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-wider">
                               Tipe Sumber
                             </p>
-                            <div className="flex items-center gap-1.5 mt-1">
+
+                            <div className="mt-1 flex items-center gap-1.5">
                               {formSumberTipe === "file" ? (
-                                <><FileBox size={14} className="text-[var(--color-primary)]"/> <span className="theme-text font-semibold text-sm">Unggah File</span></>
+                                <>
+                                  <FileBox
+                                    size={14}
+                                    className="text-[var(--color-primary)]"
+                                  />
+                                  <span className="theme-text text-sm font-semibold">
+                                    Unggah File
+                                  </span>
+                                </>
                               ) : (
-                                <><Link2 size={14} className="text-[var(--color-primary)]"/> <span className="theme-text font-semibold text-sm">Tautan URL</span></>
+                                <>
+                                  <Link2
+                                    size={14}
+                                    className="text-[var(--color-primary)]"
+                                  />
+                                  <span className="theme-text text-sm font-semibold">
+                                    Tautan URL
+                                  </span>
+                                </>
                               )}
                             </div>
                           </div>
@@ -423,30 +610,45 @@ export default function TambahMateriPage() {
                       </div>
                     </div>
 
-                    {/* Card Panduan */}
+                    {/* Panduan */}
                     <div className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
                       <div className="theme-card-soft theme-border flex items-center gap-3 border-b px-5 py-3">
                         <div className="theme-warning flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
                           <Lightbulb className="h-4 w-4" />
                         </div>
-                        <h2 className="theme-text text-sm font-bold">Panduan</h2>
+
+                        <h2 className="theme-text text-sm font-bold">
+                          Panduan
+                        </h2>
                       </div>
+
                       <div className="p-5">
                         <ul className="space-y-3 text-xs leading-5">
                           <li className="flex items-start gap-2">
-                            <CheckCircle2 size={14} className="mt-0.5 shrink-0 text-[var(--color-success)]" />
+                            <CheckCircle2
+                              size={14}
+                              className="mt-0.5 shrink-0 text-[var(--color-success)]"
+                            />
                             <span className="theme-text-secondary">
                               Pastikan judul materi mencerminkan isinya.
                             </span>
                           </li>
+
                           <li className="flex items-start gap-2">
-                            <CheckCircle2 size={14} className="mt-0.5 shrink-0 text-[var(--color-success)]" />
+                            <CheckCircle2
+                              size={14}
+                              className="mt-0.5 shrink-0 text-[var(--color-success)]"
+                            />
                             <span className="theme-text-secondary">
                               Jika mengunggah file, maksimal ukuran adalah 25MB.
                             </span>
                           </li>
+
                           <li className="flex items-start gap-2">
-                            <CheckCircle2 size={14} className="mt-0.5 shrink-0 text-[var(--color-success)]" />
+                            <CheckCircle2
+                              size={14}
+                              className="mt-0.5 shrink-0 text-[var(--color-success)]"
+                            />
                             <span className="theme-text-secondary">
                               Tautan eksternal harus bisa diakses publik.
                             </span>
@@ -455,19 +657,28 @@ export default function TambahMateriPage() {
                       </div>
                     </div>
 
-                    {/* Info Biru */}
+                    {/* Info */}
                     <div className="theme-info theme-border flex items-start gap-3 rounded-2xl border p-4">
-                      <Info size={16} className="mt-0.5 shrink-0 text-[var(--color-info)]" />
+                      <Info
+                        size={16}
+                        className="mt-0.5 shrink-0 text-[var(--color-info)]"
+                      />
+
                       <p className="text-[11px] leading-5">
-                        Materi yang ditambahkan akan langsung tersedia untuk siswa di kelas yang dipilih.
+                        Materi yang ditambahkan akan langsung tersedia untuk
+                        siswa di kelas yang dipilih.
                       </p>
                     </div>
 
-                    {/* Action Buttons */}
+                    {/* Tombol Aksi */}
                     <div className="flex flex-col gap-3 pt-2">
                       <button
                         type="submit"
-                        disabled={submitting || loadingKelas}
+                        disabled={
+                          submitting ||
+                          loadingKelas ||
+                          kelasOptions.length === 0
+                        }
                         className="theme-primary inline-flex w-full items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold shadow-sm transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         {submitting ? (
@@ -491,7 +702,6 @@ export default function TambahMateriPage() {
                       </Link>
                     </div>
                   </aside>
-
                 </div>
               </form>
             </div>

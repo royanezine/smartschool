@@ -3,8 +3,12 @@
 import { useCallback, useEffect, useState } from "react";
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
-import { apiFetch } from "@/lib/api";
-import { getHariAktif, updateHariAktif } from "@/services/pengaturan.service";
+import {
+  getHariAktif,
+  updateHariAktif,
+  getPengaturanPresensiSekolah,
+  updatePengaturanPresensiSekolah,
+} from "@/services/pengaturan.service";
 import {
   Settings2,
   MapPin,
@@ -24,10 +28,16 @@ import {
   CircleCheck,
   CircleX,
   CalendarDays,
+  QrCode,
 } from "lucide-react";
 
-const ENDPOINT = "/api/sekolah/pengaturan-presensi";
 const METODE = [
+  {
+    value: "barcode",
+    title: "Barcode / QR Code",
+    description: "Presensi menggunakan pemindaian QR Code identitas siswa.",
+    Icon: QrCode,
+  },
   {
     value: "face",
     title: "Face Recognition",
@@ -85,7 +95,7 @@ function normalizeMethods(value) {
         return parsed.map(String);
       }
     } catch {
-      // Backend juga mungkin mengirim string biasa.
+      
     }
 
     return value
@@ -100,7 +110,6 @@ function normalizeMethods(value) {
 function extractSettings(response) {
   const data = unwrapResponse(response);
 
-  // Mendukung respons berupa objek sekolah maupun objek konfigurasi.
   const source =
     data?.pengaturanPresensi ??
     data?.sekolah ??
@@ -112,7 +121,7 @@ function extractSettings(response) {
     bujur: source?.bujur ?? "",
     radiusAbsensi: source?.radiusAbsensi ?? "",
     metodeAbsensiAktif: normalizeMethods(
-      source?.metodeAbsensiAktif ?? source?.metodeAktif,
+      source?.metodeAbsensiAktif ?? source?.metodeAktif
     ),
   };
 }
@@ -127,8 +136,8 @@ function StatusMessage({ status }) {
       role="status"
       className={`flex items-start gap-3 rounded-xl border px-4 py-3 text-sm ${
         success
-          ? "border-emerald-200 bg-emerald-50 text-emerald-800"
-          : "border-red-200 bg-red-50 text-red-700"
+          ? "border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-900/60 dark:bg-emerald-950/30 dark:text-emerald-300"
+          : "border-red-200 bg-red-50 text-red-700 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-300"
       }`}
     >
       {success ? (
@@ -143,17 +152,15 @@ function StatusMessage({ status }) {
 
 function SectionCard({ icon: Icon, title, description, children }) {
   return (
-    <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-      <div className="flex items-start gap-3 border-b border-slate-100 px-5 py-4 sm:px-6">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-700">
+    <section className="theme-card overflow-hidden rounded-xl border theme-border shadow-sm">
+      <div className="flex items-start gap-3 border-b theme-border px-5 py-4 sm:px-6">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
           <Icon size={20} />
         </div>
 
         <div className="min-w-0">
-          <h2 className="text-base font-semibold text-slate-900">
-            {title}
-          </h2>
-          <p className="mt-1 text-sm leading-5 text-slate-500">
+          <h2 className="text-base font-semibold theme-text">{title}</h2>
+          <p className="mt-1 text-sm leading-5 theme-text-muted">
             {description}
           </p>
         </div>
@@ -167,7 +174,7 @@ function SectionCard({ icon: Icon, title, description, children }) {
 function Field({ label, value, onChange, placeholder, suffix, step = "any" }) {
   return (
     <div>
-      <label className="mb-2 block text-sm font-semibold text-slate-700">
+      <label className="mb-2 block text-sm font-semibold theme-text">
         {label}
       </label>
 
@@ -178,11 +185,11 @@ function Field({ label, value, onChange, placeholder, suffix, step = "any" }) {
           value={value}
           onChange={(event) => onChange(event.target.value)}
           placeholder={placeholder}
-          className="w-full rounded-lg border border-slate-300 bg-white px-3.5 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-50"
+          className="theme-input w-full rounded-lg border theme-border bg-[var(--color-surface)] px-3.5 py-3 text-sm theme-text outline-none transition placeholder:theme-text-muted focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]"
         />
 
         {suffix && (
-          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-slate-500">
+          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm theme-text-muted">
             {suffix}
           </span>
         )}
@@ -205,7 +212,6 @@ export default function PengaturanPresensiPage() {
 
   const [original, setOriginal] = useState(null);
 
-  // State khusus Hari Aktif Presensi (GET/PUT /api/pengaturan/hari-aktif)
   const [hariAktifList, setHariAktifList] = useState([]);
   const [originalHariAktif, setOriginalHariAktif] = useState(null);
   const [hariAktifLoading, setHariAktifLoading] = useState(true);
@@ -217,10 +223,7 @@ export default function PengaturanPresensiPage() {
     setStatus(null);
 
     try {
-      const response = await apiFetch(ENDPOINT, {
-        method: "GET",
-      });
-
+      const response = await getPengaturanPresensiSekolah();
       const settings = extractSettings(response);
 
       setForm(settings);
@@ -257,7 +260,7 @@ export default function PengaturanPresensiPage() {
         type: "error",
         message:
           error?.message ||
-          "Pengaturan hari aktif presensi gagal dimuat dari backend.",
+          "Pengaturan hari aktif presensi gagal dimuat dari Sistem.",
       });
       setHariAktifList([]);
       setOriginalHariAktif(null);
@@ -305,7 +308,7 @@ export default function PengaturanPresensiPage() {
         type: "success",
         message:
           response?.message ||
-          "Hari aktif presensi berhasil disimpan ke Backend.",
+          "Hari aktif presensi berhasil disimpan ke Sistem.",
       });
     } catch (error) {
       console.error("Gagal menyimpan hari aktif presensi:", error);
@@ -396,7 +399,7 @@ export default function PengaturanPresensiPage() {
         enableHighAccuracy: true,
         timeout: 15000,
         maximumAge: 0,
-      },
+      }
     );
   };
 
@@ -404,47 +407,58 @@ export default function PengaturanPresensiPage() {
     event.preventDefault();
     setStatus(null);
 
-    const lintang = Number(form.lintang);
-    const bujur = Number(form.bujur);
-    const radius = Number(form.radiusAbsensi);
+    const membutuhkanGPS =
+      form.metodeAbsensiAktif.includes("lokasi") ||
+      form.metodeAbsensiAktif.includes("face");
 
-    if (
-      form.lintang === "" ||
-      !Number.isFinite(lintang) ||
-      lintang < -90 ||
-      lintang > 90
-    ) {
-      setStatus({
-        type: "error",
-        message: "Lintang harus berupa angka antara -90 dan 90.",
-      });
-      return;
-    }
+    let lintang = null;
+    let bujur = null;
+    let radius = null;
 
-    if (
-      form.bujur === "" ||
-      !Number.isFinite(bujur) ||
-      bujur < -180 ||
-      bujur > 180
-    ) {
-      setStatus({
-        type: "error",
-        message: "Bujur harus berupa angka antara -180 dan 180.",
-      });
-      return;
-    }
+    if (membutuhkanGPS) {
+      lintang = Number(form.lintang);
+      bujur = Number(form.bujur);
+      radius = Number(form.radiusAbsensi);
 
-    if (
-      form.radiusAbsensi === "" ||
-      !Number.isFinite(radius) ||
-      !Number.isInteger(radius) ||
-      radius <= 0
-    ) {
-      setStatus({
-        type: "error",
-        message: "Radius maksimal harus berupa bilangan bulat lebih besar dari 0 meter.",
-      });
-      return;
+      if (
+        form.lintang === "" ||
+        !Number.isFinite(lintang) ||
+        lintang < -90 ||
+        lintang > 90
+      ) {
+        setStatus({
+          type: "error",
+          message: "Lintang harus berupa angka antara -90 dan 90.",
+        });
+        return;
+      }
+
+      if (
+        form.bujur === "" ||
+        !Number.isFinite(bujur) ||
+        bujur < -180 ||
+        bujur > 180
+      ) {
+        setStatus({
+          type: "error",
+          message: "Bujur harus berupa angka antara -180 dan 180.",
+        });
+        return;
+      }
+
+      if (
+        form.radiusAbsensi === "" ||
+        !Number.isInteger(radius) ||
+        radius <= 0 ||
+        radius > 100000
+      ) {
+        setStatus({
+          type: "error",
+          message:
+            "Radius harus berupa bilangan bulat antara 1 sampai 100.000 meter.",
+        });
+        return;
+      }
     }
 
     if (!form.metodeAbsensiAktif.length) {
@@ -459,26 +473,19 @@ export default function PengaturanPresensiPage() {
 
     try {
       const payload = {
-        lintang,
-        bujur,
-        radiusAbsensi: radius,
         metodeAbsensiAktif: form.metodeAbsensiAktif,
+        ...(membutuhkanGPS
+          ? {
+              lintang,
+              bujur,
+              radiusAbsensi: radius,
+            }
+          : {}),
       };
 
-      const response = await apiFetch(ENDPOINT, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
+      const response = await updatePengaturanPresensiSekolah(payload);
 
-      // Muat ulang dari Backend agar nilai yang ditampilkan sesuai
-      // dengan data yang benar-benar tersimpan.
-      const refreshedResponse = await apiFetch(ENDPOINT, {
-        method: "GET",
-      });
-
+      const refreshedResponse = await getPengaturanPresensiSekolah();
       const saved = extractSettings(refreshedResponse);
 
       setForm(saved);
@@ -487,8 +494,7 @@ export default function PengaturanPresensiPage() {
       setStatus({
         type: "success",
         message:
-          unwrapResponse(response)?.message ||
-          "Pengaturan presensi berhasil disimpan dan dimuat ulang dari Backend.",
+          response?.message || "Pengaturan presensi berhasil disimpan.",
       });
     } catch (error) {
       console.error("Gagal menyimpan pengaturan presensi:", error);
@@ -497,15 +503,14 @@ export default function PengaturanPresensiPage() {
         type: "error",
         message:
           error?.message ||
-          "Pengaturan gagal disimpan. Pastikan Backend menerima format data yang dikirim.",
+          "Pengaturan presensi gagal disimpan. Periksa kembali data dan izin akun.",
       });
     } finally {
       setSaving(false);
     }
   };
 
-  const hasChanged =
-    original !== null && JSON.stringify(form) !== original;
+  const hasChanged = original !== null && JSON.stringify(form) !== original;
 
   const hariAktifChanged =
     originalHariAktif !== null &&
@@ -513,27 +518,29 @@ export default function PengaturanPresensiPage() {
       originalHariAktif;
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50">
+    <div className="theme-page flex h-screen w-full overflow-hidden">
       <Sidebar />
 
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <Header />
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+        <div className="shrink-0 border-b theme-border">
+          <Header />
+        </div>
 
-        <main className="min-h-0 flex-1 overflow-y-auto">
-          <div className="mx-auto w-full max-w-[1500px] px-4 py-6 sm:px-6 lg:px-8">
+        <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto">
+          <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
             <div className="mb-7 flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
               <div>
-                <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 text-blue-700">
+                <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300">
                   <Settings2 size={25} />
                 </div>
 
-                <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+                <h1 className="text-2xl font-bold tracking-tight theme-text sm:text-3xl">
                   Pengaturan Presensi
                 </h1>
 
-                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 sm:text-base">
-                  Atur lokasi sekolah, jarak maksimal presensi, metode
-                  absensi, dan hari operasional aktif sekolah.
+                <p className="mt-2 text-sm leading-6 theme-text-secondary sm:text-base">
+                  Atur lokasi sekolah, jarak maksimal presensi, metode absensi,
+                  dan hari operasional aktif sekolah.
                 </p>
               </div>
 
@@ -544,7 +551,7 @@ export default function PengaturanPresensiPage() {
                   loadHariAktif();
                 }}
                 disabled={loading || saving || hariAktifLoading || hariAktifSaving}
-                className="inline-flex min-h-10 items-center justify-center gap-2 self-start rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex min-h-10 items-center justify-center gap-2 self-start rounded-lg border theme-border theme-card px-4 py-2.5 text-sm font-semibold theme-text-secondary transition hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <RefreshCw
                   size={16}
@@ -561,20 +568,20 @@ export default function PengaturanPresensiPage() {
             )}
 
             {loading ? (
-              <div className="flex min-h-64 flex-col items-center justify-center rounded-xl border border-slate-200 bg-white">
-                <Loader2 size={30} className="animate-spin text-blue-600" />
-                <p className="mt-3 text-sm text-slate-500">
-                  Mengambil pengaturan presensi dari Backend...
+              <div className="flex min-h-[300px] flex-col items-center justify-center rounded-xl border theme-border theme-card">
+                <Loader2 size={30} className="animate-spin text-[var(--color-primary)]" />
+                <p className="mt-3 text-sm theme-text-muted">
+                  Mengambil pengaturan presensi dari Sistem...
                 </p>
               </div>
             ) : (
               <form onSubmit={handleSave}>
-                <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                  <div className="rounded-xl border border-slate-200 bg-white p-5">
+                <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                  <div className="theme-card rounded-xl border theme-border p-5">
                     <div className="flex items-center justify-between gap-3">
                       <div>
-                        <p className="text-sm text-slate-500">Latitude Sekolah</p>
-                        <p className="mt-2 break-all text-lg font-semibold text-slate-900">
+                        <p className="text-sm theme-text-muted">Latitude Sekolah</p>
+                        <p className="mt-2 break-all text-lg font-semibold theme-text">
                           {form.lintang !== "" ? form.lintang : "Belum diatur"}
                         </p>
                       </div>
@@ -582,11 +589,11 @@ export default function PengaturanPresensiPage() {
                     </div>
                   </div>
 
-                  <div className="rounded-xl border border-slate-200 bg-white p-5">
+                  <div className="theme-card rounded-xl border theme-border p-5">
                     <div className="flex items-center justify-between gap-3">
                       <div>
-                        <p className="text-sm text-slate-500">Longitude Sekolah</p>
-                        <p className="mt-2 break-all text-lg font-semibold text-slate-900">
+                        <p className="text-sm theme-text-muted">Longitude Sekolah</p>
+                        <p className="mt-2 break-all text-lg font-semibold theme-text">
                           {form.bujur !== "" ? form.bujur : "Belum diatur"}
                         </p>
                       </div>
@@ -594,11 +601,11 @@ export default function PengaturanPresensiPage() {
                     </div>
                   </div>
 
-                  <div className="rounded-xl border border-slate-200 bg-white p-5">
+                  <div className="theme-card rounded-xl border theme-border p-5">
                     <div className="flex items-center justify-between gap-3">
                       <div>
-                        <p className="text-sm text-slate-500">Radius Maksimal</p>
-                        <p className="mt-2 text-lg font-semibold text-slate-900">
+                        <p className="text-sm theme-text-muted">Radius Maksimal</p>
+                        <p className="mt-2 text-lg font-semibold theme-text">
                           {form.radiusAbsensi !== ""
                             ? `${form.radiusAbsensi} meter`
                             : "Belum diatur"}
@@ -608,11 +615,11 @@ export default function PengaturanPresensiPage() {
                     </div>
                   </div>
 
-                  <div className="rounded-xl border border-slate-200 bg-white p-5">
+                  <div className="theme-card rounded-xl border theme-border p-5">
                     <div className="flex items-center justify-between gap-3">
                       <div>
-                        <p className="text-sm text-slate-500">Hari Aktif Presensi</p>
-                        <p className="mt-2 text-lg font-semibold text-slate-900">
+                        <p className="text-sm theme-text-muted">Hari Aktif Presensi</p>
+                        <p className="mt-2 text-lg font-semibold theme-text">
                           {hariAktifLoading
                             ? "Memuat..."
                             : `${hariAktifList.length} Hari / Pekan`}
@@ -657,21 +664,21 @@ export default function PengaturanPresensiPage() {
                           suffix="meter"
                           step="1"
                         />
-                        <p className="mt-2 text-xs leading-5 text-slate-500">
+                        <p className="mt-2 text-xs leading-5 theme-text-muted">
                           Pengguna yang berada di luar radius ini akan ditolak
                           saat melakukan presensi dengan validasi GPS.
                         </p>
                       </div>
 
-                      <div className="mt-5 flex flex-col gap-3 rounded-lg border border-blue-100 bg-blue-50 p-4 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="mt-5 flex flex-col gap-3 rounded-lg border border-blue-100 bg-blue-50 p-4 dark:border-blue-900/60 dark:bg-blue-950/30 sm:flex-row sm:items-center sm:justify-between">
                         <div className="flex items-start gap-2.5">
                           <Info
                             size={18}
-                            className="mt-0.5 shrink-0 text-blue-700"
+                            className="mt-0.5 shrink-0 text-blue-700 dark:text-blue-400"
                           />
-                          <p className="text-sm leading-6 text-blue-900">
-                            Koordinat harus menunjuk ke lokasi sekolah, bukan
-                            lokasi rumah admin. Gunakan GPS ketika berada di
+                          <p className="text-sm leading-6 text-blue-900 dark:text-blue-200">
+                            Koordinat harus menunjuk ke lokasi sekolah. 
+                            Gunakan GPS ketika berada di
                             sekolah atau masukkan koordinat sekolah secara manual.
                           </p>
                         </div>
@@ -680,7 +687,7 @@ export default function PengaturanPresensiPage() {
                           type="button"
                           onClick={handleUseCurrentLocation}
                           disabled={saving}
-                          className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-blue-200 bg-white px-3.5 py-2.5 text-sm font-semibold text-blue-700 transition hover:bg-blue-100 disabled:opacity-50"
+                          className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-blue-200 bg-white px-3.5 py-2.5 text-sm font-semibold text-blue-700 transition hover:bg-blue-100 disabled:opacity-50 dark:border-blue-800 dark:bg-blue-900/50 dark:text-blue-300 dark:hover:bg-blue-900/80"
                         >
                           <LocateFixed size={16} />
                           Ambil Koordinat
@@ -707,15 +714,15 @@ export default function PengaturanPresensiPage() {
                               aria-pressed={active}
                               className={`flex w-full items-start gap-4 rounded-xl border p-4 text-left transition ${
                                 active
-                                  ? "border-blue-300 bg-blue-50/70"
-                                  : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
+                                  ? "border-blue-300 bg-blue-50/70 dark:border-blue-700 dark:bg-blue-950/50"
+                                  : "theme-border theme-card hover:bg-[color-mix(in_srgb,var(--color-text)_2%,transparent)]"
                               } disabled:cursor-not-allowed disabled:opacity-60`}
                             >
                               <div
                                 className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-lg ${
                                   active
-                                    ? "bg-blue-100 text-blue-700"
-                                    : "bg-slate-100 text-slate-500"
+                                    ? "bg-blue-100 text-blue-700 dark:bg-blue-900/60 dark:text-blue-300"
+                                    : "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] theme-text-muted"
                                 }`}
                               >
                                 <Icon size={23} />
@@ -723,34 +730,40 @@ export default function PengaturanPresensiPage() {
 
                               <div className="min-w-0 flex-1">
                                 <div className="flex flex-wrap items-center gap-2">
-                                  <h3 className="text-sm font-semibold text-slate-900">
+                                  <h3 className="text-sm font-semibold theme-text">
                                     {title}
                                   </h3>
 
                                   <span
                                     className={`rounded-md px-2 py-1 text-xs font-medium ${
                                       active
-                                        ? "bg-emerald-100 text-emerald-700"
-                                        : "bg-slate-100 text-slate-500"
+                                        ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300"
+                                        : "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] theme-text-muted"
                                     }`}
                                   >
                                     {active ? "Aktif" : "Nonaktif"}
                                   </span>
                                 </div>
 
-                                <p className="mt-1 text-sm leading-5 text-slate-500">
+                                <p className="mt-1 text-sm leading-5 theme-text-muted">
                                   {description}
                                 </p>
 
+                                {value === "barcode" && active && (
+                                  <p className="mt-2 text-xs leading-5 text-blue-700 dark:text-blue-400">
+                                    Membutuhkan QR Code identitas siswa yang sesuai dengan NISN.
+                                  </p>
+                                )}
+
                                 {value === "face" && active && (
-                                  <p className="mt-2 text-xs leading-5 text-blue-700">
+                                  <p className="mt-2 text-xs leading-5 text-blue-700 dark:text-blue-400">
                                     Membutuhkan kamera, foto wajah, dan data
                                     Face ID yang telah didaftarkan.
                                   </p>
                                 )}
 
                                 {value === "lokasi" && active && (
-                                  <p className="mt-2 text-xs leading-5 text-blue-700">
+                                  <p className="mt-2 text-xs leading-5 text-blue-700 dark:text-blue-400">
                                     Membutuhkan izin GPS serta koordinat sekolah
                                     dan radius yang valid.
                                   </p>
@@ -761,7 +774,7 @@ export default function PengaturanPresensiPage() {
                                 className={`mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded border ${
                                   active
                                     ? "border-blue-600 bg-blue-600 text-white"
-                                    : "border-slate-300 bg-white"
+                                    : "border-[color-mix(in_srgb,var(--color-text)_20%,transparent)] bg-[var(--color-surface)]"
                                 }`}
                               >
                                 {active && <CheckCircle2 size={15} />}
@@ -772,13 +785,12 @@ export default function PengaturanPresensiPage() {
                       </div>
 
                       {form.metodeAbsensiAktif.length === 0 && (
-                        <p className="mt-3 text-sm text-red-600">
+                        <p className="mt-3 text-sm text-red-600 dark:text-red-400">
                           Pilih minimal satu metode presensi sebelum menyimpan.
                         </p>
                       )}
                     </SectionCard>
 
-                    {/* Section Card Hari Aktif Presensi (GET / PUT /api/pengaturan/hari-aktif) */}
                     <SectionCard
                       icon={CalendarDays}
                       title="Hari Aktif Presensi Sekolah"
@@ -790,16 +802,15 @@ export default function PengaturanPresensiPage() {
                         </div>
                       )}
 
-                      {/* Presets */}
                       <div className="mb-4 flex flex-wrap items-center gap-2">
-                        <span className="text-xs font-semibold text-slate-500">
+                        <span className="text-xs font-semibold theme-text-muted">
                           Pilihan Cepat:
                         </span>
                         <button
                           type="button"
                           onClick={() => applyPresetHari([1, 2, 3, 4, 5])}
                           disabled={hariAktifSaving || hariAktifLoading}
-                          className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-700 transition hover:bg-slate-100 disabled:opacity-50"
+                          className="rounded-lg border theme-border bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] px-2.5 py-1 text-xs font-medium theme-text-secondary transition hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] disabled:opacity-50"
                         >
                           5 Hari (Senin - Jumat)
                         </button>
@@ -807,7 +818,7 @@ export default function PengaturanPresensiPage() {
                           type="button"
                           onClick={() => applyPresetHari([1, 2, 3, 4, 5, 6])}
                           disabled={hariAktifSaving || hariAktifLoading}
-                          className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-700 transition hover:bg-slate-100 disabled:opacity-50"
+                          className="rounded-lg border theme-border bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] px-2.5 py-1 text-xs font-medium theme-text-secondary transition hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] disabled:opacity-50"
                         >
                           6 Hari (Senin - Sabtu)
                         </button>
@@ -815,16 +826,16 @@ export default function PengaturanPresensiPage() {
                           type="button"
                           onClick={() => applyPresetHari([0, 1, 2, 3, 4, 5, 6])}
                           disabled={hariAktifSaving || hariAktifLoading}
-                          className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-700 transition hover:bg-slate-100 disabled:opacity-50"
+                          className="rounded-lg border theme-border bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] px-2.5 py-1 text-xs font-medium theme-text-secondary transition hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] disabled:opacity-50"
                         >
                           Semua Hari (7 Hari)
                         </button>
                       </div>
 
                       {hariAktifLoading ? (
-                        <div className="flex min-h-32 flex-col items-center justify-center rounded-xl border border-slate-200 bg-slate-50 p-6">
-                          <Loader2 size={24} className="animate-spin text-blue-600" />
-                          <p className="mt-2 text-xs text-slate-500">
+                        <div className="flex min-h-32 flex-col items-center justify-center rounded-xl border theme-border bg-[color-mix(in_srgb,var(--color-text)_2%,transparent)] p-6">
+                          <Loader2 size={24} className="animate-spin text-[var(--color-primary)]" />
+                          <p className="mt-2 text-xs theme-text-muted">
                             Mengambil data hari aktif dari server...
                           </p>
                         </div>
@@ -842,8 +853,8 @@ export default function PengaturanPresensiPage() {
                                 aria-pressed={active}
                                 className={`flex items-center justify-between gap-3 rounded-xl border p-3.5 text-left transition ${
                                   active
-                                    ? "border-blue-400 bg-blue-50/70"
-                                    : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
+                                    ? "border-blue-400 bg-blue-50/70 dark:border-blue-700 dark:bg-blue-950/50"
+                                    : "theme-border theme-card hover:bg-[color-mix(in_srgb,var(--color-text)_2%,transparent)]"
                                 } disabled:cursor-not-allowed disabled:opacity-60`}
                               >
                                 <div className="flex items-center gap-3">
@@ -851,20 +862,20 @@ export default function PengaturanPresensiPage() {
                                     className={`flex h-8 w-8 items-center justify-center rounded-lg text-xs font-bold ${
                                       active
                                         ? "bg-blue-600 text-white"
-                                        : "bg-slate-100 text-slate-500"
+                                        : "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] theme-text-muted"
                                     }`}
                                   >
                                     {singkat}
                                   </div>
                                   <div>
-                                    <p className="text-sm font-semibold text-slate-900">
+                                    <p className="text-sm font-semibold theme-text">
                                       {nama}
                                     </p>
                                     <span
                                       className={`text-[11px] font-medium ${
                                         active
-                                          ? "text-emerald-700"
-                                          : "text-slate-400"
+                                          ? "text-emerald-700 dark:text-emerald-400"
+                                          : "theme-text-muted"
                                       }`}
                                     >
                                       {active ? "Hari Aktif" : "Libur"}
@@ -876,7 +887,7 @@ export default function PengaturanPresensiPage() {
                                   className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border ${
                                     active
                                       ? "border-blue-600 bg-blue-600 text-white"
-                                      : "border-slate-300 bg-white"
+                                      : "border-[color-mix(in_srgb,var(--color-text)_20%,transparent)] bg-[var(--color-surface)]"
                                   }`}
                                 >
                                   {active && <CheckCircle2 size={15} />}
@@ -888,13 +899,12 @@ export default function PengaturanPresensiPage() {
                       )}
 
                       {hariAktifList.length === 0 && !hariAktifLoading && (
-                        <p className="mt-3 text-sm text-red-600">
+                        <p className="mt-3 text-sm text-red-600 dark:text-red-400">
                           Pilih minimal satu hari aktif presensi sebelum menyimpan.
                         </p>
                       )}
 
-                      {/* Footer Actions for Hari Aktif */}
-                      <div className="mt-5 flex flex-col-reverse gap-3 rounded-xl border border-slate-100 bg-slate-50/70 p-4 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="mt-5 flex flex-col-reverse gap-3 rounded-xl border theme-border bg-[color-mix(in_srgb,var(--color-text)_2%,transparent)] p-4 sm:flex-row sm:items-center sm:justify-between">
                         <button
                           type="button"
                           onClick={() => {
@@ -904,7 +914,7 @@ export default function PengaturanPresensiPage() {
                             }
                           }}
                           disabled={hariAktifSaving || !hariAktifChanged || !originalHariAktif}
-                          className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
+                          className="rounded-lg border theme-border theme-card px-4 py-2 text-xs font-semibold theme-text-secondary transition hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] disabled:cursor-not-allowed disabled:opacity-40"
                         >
                           Batalkan Perubahan Hari
                         </button>
@@ -913,7 +923,7 @@ export default function PengaturanPresensiPage() {
                           type="button"
                           onClick={handleSaveHariAktif}
                           disabled={hariAktifSaving || !hariAktifChanged || hariAktifList.length === 0}
-                          className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-700 px-4 py-2 text-xs font-semibold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
+                          className="inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--color-primary)] px-4 py-2 text-xs font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
                         >
                           {hariAktifSaving ? (
                             <Loader2 size={15} className="animate-spin" />
@@ -925,7 +935,7 @@ export default function PengaturanPresensiPage() {
                       </div>
                     </SectionCard>
 
-                    <div className="flex flex-col-reverse gap-3 rounded-xl border border-slate-200 bg-white p-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex flex-col-reverse gap-3 rounded-xl border theme-border theme-card p-4 sm:flex-row sm:items-center sm:justify-between">
                       <button
                         type="button"
                         onClick={() => {
@@ -935,7 +945,7 @@ export default function PengaturanPresensiPage() {
                           }
                         }}
                         disabled={saving || !hasChanged || !original}
-                        className="rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+                        className="rounded-lg border theme-border px-4 py-2.5 text-sm font-semibold theme-text-secondary transition hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] disabled:cursor-not-allowed disabled:opacity-40"
                       >
                         Batalkan Perubahan
                       </button>
@@ -943,7 +953,7 @@ export default function PengaturanPresensiPage() {
                       <button
                         type="submit"
                         disabled={saving || !hasChanged}
-                        className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--color-primary)] px-5 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         {saving ? (
                           <Loader2 size={17} className="animate-spin" />
@@ -956,23 +966,23 @@ export default function PengaturanPresensiPage() {
                   </div>
 
                   <aside className="space-y-6">
-                    <div className="rounded-xl border border-slate-200 bg-white p-5">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-50 text-amber-700">
+                    <div className="theme-card rounded-xl border theme-border p-5">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-50 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300">
                         <CalendarDays size={21} />
                       </div>
 
-                      <h2 className="mt-4 text-base font-semibold text-slate-900">
+                      <h2 className="mt-4 text-base font-semibold theme-text">
                         Status Hari Aktif
                       </h2>
 
-                      <p className="mt-2 text-sm leading-6 text-slate-500">
+                      <p className="mt-2 text-sm leading-6 theme-text-muted">
                         Presensi hanya dapat dilakukan pada hari-hari yang diaktifkan di bawah ini.
                       </p>
 
                       <div className="mt-4 space-y-3">
                         <div className="flex items-center justify-between text-sm">
-                          <span className="text-slate-500">Total Hari:</span>
-                          <span className="font-semibold text-slate-900">
+                          <span className="theme-text-muted">Total Hari:</span>
+                          <span className="font-semibold theme-text">
                             {hariAktifLoading
                               ? "Memuat..."
                               : `${hariAktifList.length} dari 7 hari`}
@@ -987,8 +997,8 @@ export default function PengaturanPresensiPage() {
                                 key={id}
                                 className={`rounded-md px-2 py-1 text-xs font-medium ${
                                   active
-                                    ? "bg-blue-100 font-semibold text-blue-700"
-                                    : "bg-slate-100 text-slate-400"
+                                    ? "bg-blue-100 font-semibold text-blue-700 dark:bg-blue-900/50 dark:text-blue-300"
+                                    : "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] theme-text-muted"
                                 }`}
                               >
                                 {singkat}
@@ -999,70 +1009,70 @@ export default function PengaturanPresensiPage() {
                       </div>
                     </div>
 
-                    <div className="rounded-xl border border-slate-200 bg-white p-5">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-700">
+                    <div className="theme-card rounded-xl border theme-border p-5">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300">
                         <ShieldCheck size={21} />
                       </div>
 
-                      <h2 className="mt-4 text-base font-semibold text-slate-900">
+                      <h2 className="mt-4 text-base font-semibold theme-text">
                         Integrasi Presensi
                       </h2>
 
-                      <p className="mt-2 text-sm leading-6 text-slate-500">
+                      <p className="mt-2 text-sm leading-6 theme-text-muted">
                         Pengaturan lokasi, radius, dan metode dikirim melalui
-                        endpoint pengaturan presensi Backend.
+                        endpoint pengaturan presensi Sistem.
                       </p>
 
                       <div className="mt-4 space-y-3">
-                        <div className="flex items-start gap-2.5 text-sm text-slate-700">
+                        <div className="flex items-start gap-2.5 text-sm theme-text-secondary">
                           <CircleCheck
                             size={17}
-                            className="mt-0.5 shrink-0 text-emerald-600"
+                            className="mt-0.5 shrink-0 text-emerald-600 dark:text-emerald-400"
                           />
                           <span>Koordinat sekolah dapat diedit.</span>
                         </div>
 
-                        <div className="flex items-start gap-2.5 text-sm text-slate-700">
+                        <div className="flex items-start gap-2.5 text-sm theme-text-secondary">
                           <CircleCheck
                             size={17}
-                            className="mt-0.5 shrink-0 text-emerald-600"
+                            className="mt-0.5 shrink-0 text-emerald-600 dark:text-emerald-400"
                           />
                           <span>Radius maksimal dapat diubah.</span>
                         </div>
 
-                        <div className="flex items-start gap-2.5 text-sm text-slate-700">
+                        <div className="flex items-start gap-2.5 text-sm theme-text-secondary">
                           <CircleCheck
                             size={17}
-                            className="mt-0.5 shrink-0 text-emerald-600"
+                            className="mt-0.5 shrink-0 text-emerald-600 dark:text-emerald-400"
                           />
-                          <span>Face Recognition dan GPS dapat dipilih.</span>
+                          <span>Metode Barcode, Face, dan GPS dapat dipilih.</span>
                         </div>
                       </div>
                     </div>
 
-                    <div className="rounded-xl border border-amber-200 bg-amber-50 p-5">
+                    <div className="rounded-xl border border-amber-200 bg-amber-50 p-5 dark:border-amber-900/60 dark:bg-amber-950/30">
                       <div className="flex items-center gap-2">
-                        <Info size={19} className="text-amber-700" />
-                        <h2 className="text-sm font-semibold text-amber-900">
+                        <Info size={19} className="text-amber-700 dark:text-amber-400" />
+                        <h2 className="text-sm font-semibold text-amber-900 dark:text-amber-200">
                           Catatan Validasi
                         </h2>
                       </div>
 
-                      <p className="mt-3 text-sm leading-6 text-amber-900">
+                      <p className="mt-3 text-sm leading-6 text-amber-900 dark:text-amber-200">
                         Face Recognition tetap memerlukan kamera dan verifikasi
-                        wajah. Jika metode face diaktifkan, Backend juga
+                        wajah. Jika metode face diaktifkan, Sistem juga
                         memerlukan koordinat GPS sesuai implementasi validasi
                         absensi saat ini.
                       </p>
 
-                      <p className="mt-3 text-sm leading-6 text-amber-900">
+                      <p className="mt-3 text-sm leading-6 text-amber-900 dark:text-amber-200">
                         Pastikan metode yang diaktifkan sesuai dengan metode
                         yang dikirim oleh halaman presensi siswa dan guru.
                       </p>
                     </div>
 
-                    <div className="rounded-xl border border-slate-200 bg-white p-5">
-                      <h2 className="text-sm font-semibold text-slate-900">
+                    <div className="theme-card rounded-xl border theme-border p-5">
+                      <h2 className="text-sm font-semibold theme-text">
                         Status Metode
                       </h2>
 
@@ -1076,12 +1086,12 @@ export default function PengaturanPresensiPage() {
                               key={value}
                               className="flex items-center gap-3"
                             >
-                              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
+                              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] theme-text-secondary">
                                 <Icon size={18} />
                               </div>
 
                               <div className="min-w-0 flex-1">
-                                <p className="text-sm font-medium text-slate-800">
+                                <p className="text-sm font-medium theme-text">
                                   {title}
                                 </p>
                               </div>
@@ -1089,12 +1099,12 @@ export default function PengaturanPresensiPage() {
                               {active ? (
                                 <CheckCircle2
                                   size={18}
-                                  className="text-emerald-600"
+                                  className="text-emerald-600 dark:text-emerald-400"
                                 />
                               ) : (
                                 <CircleX
                                   size={18}
-                                  className="text-slate-300"
+                                  className="opacity-30 theme-text-muted"
                                 />
                               )}
                             </div>
@@ -1107,7 +1117,7 @@ export default function PengaturanPresensiPage() {
               </form>
             )}
 
-            <footer className="mt-8 border-t border-slate-200 py-5 text-center text-xs text-slate-400">
+            <footer className="mt-8 border-t theme-border py-5 text-center text-xs theme-text-muted">
               SmartSchool · Pengaturan Presensi
             </footer>
           </div>
