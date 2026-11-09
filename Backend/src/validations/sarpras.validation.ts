@@ -23,10 +23,12 @@ export const ruanganSchema = z.object({
 export const asetSchema = z.object({
   nama: z.string().trim().min(1).max(150),
   kode: z.string().trim().min(1).max(50),
-  gudangId: z.string().uuid().optional().nullable(),
-  kategoriAsetId: z.string().uuid().optional().nullable(),
+  gudangId: z.string().uuid(),
+  kategoriAsetId: z.string().uuid(),
   ruanganId: z.string().uuid().optional().nullable(),
   kondisi: z.string().trim().max(50).optional().nullable(),
   jumlah: z.number().int().nonnegative().optional(),
+  jumlahStok: z.number().int().nonnegative().optional(),
+  stokMinimum: z.number().int().nonnegative().optional(),
   keterangan: z.string().trim().max(255).optional().nullable(),
 });
