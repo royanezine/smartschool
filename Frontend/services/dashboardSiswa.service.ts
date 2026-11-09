@@ -1,6 +1,8 @@
 
 import { apiFetch } from "@/lib/api";
 
+
+
 export interface DashboardProfilSiswa {
   id: string;
   namaLengkap: string;
@@ -84,17 +86,29 @@ export interface DashboardPelanggaran {
 
 export interface DashboardSiswa {
   profil: DashboardProfilSiswa;
+
   kelas: DashboardKelas | null;
+
   kehadiranBulanIni: DashboardKehadiran;
+
   jadwalHariIni: DashboardJadwal[];
+
   tugasMendatang: DashboardTugas[];
+
   nilaiTerbaru: DashboardNilai[];
+
   rataRataNilai: number;
+
   tagihan: DashboardTagihan;
+
   tabungan: DashboardTabungan;
+
   pelanggaran: DashboardPelanggaran;
+
   notifikasiBelumDibaca: number;
 }
+
+
 
 interface ApiResponse<T> {
   success?: boolean;
@@ -102,49 +116,61 @@ interface ApiResponse<T> {
   data?: T;
 }
 
-export async function getDashboardSiswa(): Promise<DashboardSiswa> {
-  // Backend: app.use("/api/dashboard/siswa", dashboardSiswaRoutes)
-  // Route: router.get("/", authenticate, authorizeRoles("siswa"), ...)
-  const response: unknown = await apiFetch("/dashboard/siswa");
+type UnknownRecord = Record<string, unknown>;
 
+
+
+const isRecord = (value: unknown): value is UnknownRecord => {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    !Array.isArray(value)
+  );
+};
+
+const unwrapDashboardResponse = (
+  response: unknown,
+): DashboardSiswa => {
   let result: unknown = response;
 
-  for (let i = 0; i < 4; i++) {
-    if (!result || typeof result !== "object") {
+
+  for (let i = 0; i < 6; i++) {
+    if (!isRecord(result)) {
       break;
     }
 
-    const current = result as Record<string, unknown>;
-
-    if (current.success === false) {
+    if (result.success === false) {
       throw new Error(
-        typeof current.message === "string"
-          ? current.message
-          : "Gagal mengambil dashboard siswa."
+        typeof result.message === "string"
+          ? result.message
+          : "Gagal mengambil dashboard siswa.",
       );
     }
 
-    if ("profil" in current) {
-      const dashboard = current as unknown as DashboardSiswa;
+   
+    if ("profil" in result) {
+      const dashboard = result as unknown as DashboardSiswa;
 
       if (
-        !dashboard.profil ||
-        typeof dashboard.profil.id !== "string"
+        !isRecord(dashboard.profil) ||
+        typeof dashboard.profil.id !== "string" ||
+        typeof dashboard.profil.namaLengkap !== "string"
       ) {
         throw new Error(
-          "Data profil siswa tidak sesuai dengan response Backend."
+          "Data profil siswa tidak sesuai dengan response Backend.",
         );
       }
 
       return dashboard;
     }
 
+    
     if (
-      "data" in current &&
-      current.data !== undefined &&
-      current.data !== null
+      "data" in result &&
+      result.data !== undefined &&
+      result.data !== null
     ) {
-      result = current.data;
+      result = result.data;
       continue;
     }
 
@@ -152,6 +178,26 @@ export async function getDashboardSiswa(): Promise<DashboardSiswa> {
   }
 
   throw new Error(
-    "Format response dashboard siswa tidak sesuai kontrak Backend."
+    "Format response dashboard siswa tidak sesuai kontrak Backend.",
   );
+};
+
+
+
+export async function getDashboardSiswa(): Promise<DashboardSiswa> {
+  try {
+   
+
+    const response: unknown = await apiFetch("/dashboard/siswa");
+
+    return unwrapDashboardResponse(response);
+  } catch (error) {
+    console.error("Gagal mengambil dashboard siswa:", error);
+
+    if (error instanceof Error) {
+      throw error;
+    }
+
+    throw new Error("Terjadi kesalahan saat mengambil dashboard siswa.");
+  }
 }

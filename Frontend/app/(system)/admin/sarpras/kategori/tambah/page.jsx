@@ -22,7 +22,6 @@ import Sidebar from "@/app/components/Sidebar";
 
 import { createKategoriAset } from "@/services/sarpras.service";
 
-
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
 
@@ -74,7 +73,6 @@ const themeWarningBorder =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-4 focus:ring-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]";
 
-
 export default function TambahKategoriPage() {
   const router = useRouter();
 
@@ -87,7 +85,6 @@ export default function TambahKategoriPage() {
     nama: "",
     status: "aktif",
   });
-
 
   function handleChange(e) {
     const { name, value } = e.target;
@@ -105,7 +102,6 @@ export default function TambahKategoriPage() {
       setSaved(false);
     }
   }
-
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -159,20 +155,16 @@ export default function TambahKategoriPage() {
     }
   }
 
-
   function handleCancel() {
     if (saving) return;
 
     router.push("/admin/sarpras/kategori");
   }
 
-
   const isActive = form.status === "aktif";
-
 
   return (
     <div className="theme-page h-screen w-full overflow-hidden">
-
       <div className="fixed inset-y-0 left-0 z-50">
         <Sidebar
           active="sarpras"
@@ -182,13 +174,11 @@ export default function TambahKategoriPage() {
         />
       </div>
 
-
       <div
         className={`flex h-screen min-w-0 flex-col overflow-hidden transition-[margin] duration-300 ${
           isCollapsed ? "lg:ml-[88px]" : "lg:ml-[260px]"
         }`}
       >
-
         <div className="shrink-0">
           <Header
             toggleSidebar={() => setIsCollapsed(!isCollapsed)}
@@ -201,29 +191,23 @@ export default function TambahKategoriPage() {
           />
         </div>
 
-
         <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
-          <div className="w-full px-4 pb-10 pt-5 sm:px-6 sm:pt-6 lg:px-8 lg:pt-7">
-            <div className="mx-auto w-full max-w-[1280px]">
-
-
-              <div className="mb-7">
+          <div className="w-full px-4 pb-12 pt-5 sm:px-6 sm:pt-6 lg:px-8 lg:pt-7 xl:px-10 2xl:px-12">
+            <div className="w-full">
+              <div className="mb-6">
                 <Link
                   href="/admin/sarpras/kategori"
-                  className={`theme-text-secondary group mb-5 inline-flex items-center gap-2 rounded-xl px-2 py-1.5 text-sm font-medium transition hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] hover:text-[var(--color-primary)]`}
+                  className="theme-text-secondary group mb-5 inline-flex items-center gap-2 rounded-xl px-2 py-1.5 text-sm font-medium transition hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] hover:text-[var(--color-primary)]"
                 >
                   <ArrowLeft
                     size={17}
                     className="transition-transform duration-200 group-hover:-translate-x-0.5"
                   />
-
                   Kembali ke Kategori Aset
                 </Link>
 
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                   <div className="min-w-0">
-
-
                     <h1 className="theme-text text-2xl font-bold tracking-tight sm:text-3xl">
                       Tambah Kategori Aset
                     </h1>
@@ -233,7 +217,6 @@ export default function TambahKategoriPage() {
                       inventaris sekolah dengan lebih terstruktur.
                     </p>
                   </div>
-
 
                   <div
                     className={`theme-card ${themeDivider} ${themeSmallShadow} hidden shrink-0 items-center gap-3 rounded-2xl border px-4 py-3 sm:flex`}
@@ -256,7 +239,6 @@ export default function TambahKategoriPage() {
                   </div>
                 </div>
               </div>
-
 
               {error && (
                 <div
@@ -281,13 +263,12 @@ export default function TambahKategoriPage() {
                   <button
                     type="button"
                     onClick={() => setError("")}
-                    className={`theme-text-muted rounded-lg p-1.5 transition hover:bg-[color-mix(in_srgb,var(--color-text)_8%,transparent)] hover:text-[var(--color-text)]`}
+                    className="theme-text-muted rounded-lg p-1.5 transition hover:bg-[color-mix(in_srgb,var(--color-text)_8%,transparent)] hover:text-[var(--color-text)]"
                   >
                     <X size={17} />
                   </button>
                 </div>
               )}
-
 
               {saved && (
                 <div
@@ -311,15 +292,11 @@ export default function TambahKategoriPage() {
                 </div>
               )}
 
-
-              <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_390px]">
-
-
+              <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_400px] 2xl:grid-cols-[minmax(0,1fr)_440px] 3xl:grid-cols-[minmax(0,1fr)_480px]">
                 <form onSubmit={handleSubmit} className="min-w-0">
                   <div
                     className={`theme-card ${themeDivider} ${themeCardShadow} overflow-hidden rounded-3xl border`}
                   >
-
                     <div
                       className={`border-b ${themeDivider} ${themeInfoSurface} px-5 py-5 sm:px-7`}
                     >
@@ -350,10 +327,7 @@ export default function TambahKategoriPage() {
                       </div>
                     </div>
 
-
                     <div className="space-y-7 p-5 sm:p-7">
-
-
                       <section>
                         <div className="mb-5">
                           <div className="flex items-center gap-2">
@@ -409,10 +383,7 @@ export default function TambahKategoriPage() {
                         </div>
                       </section>
 
-
-                      <section
-                        className={`border-t ${themeDivider} pt-7`}
-                      >
+                      <section className={`border-t ${themeDivider} pt-7`}>
                         <div className="mb-5">
                           <div className="flex items-center gap-2">
                             <div className="h-1.5 w-1.5 rounded-full bg-[var(--color-primary)]" />
@@ -470,7 +441,6 @@ export default function TambahKategoriPage() {
                         </div>
                       </section>
 
-
                       <div
                         className={`rounded-2xl border ${themeInfoBorder} ${themeInfoSurface} p-4`}
                       >
@@ -495,11 +465,9 @@ export default function TambahKategoriPage() {
                       </div>
                     </div>
 
-
                     <div
                       className={`flex flex-col-reverse gap-3 border-t ${themeDivider} ${themeNeutralSurface} px-5 py-4 sm:flex-row sm:justify-end sm:px-7`}
                     >
-
                       <button
                         type="button"
                         onClick={handleCancel}
@@ -510,7 +478,6 @@ export default function TambahKategoriPage() {
                         Batal
                       </button>
 
-
                       <button
                         type="submit"
                         disabled={saving}
@@ -518,10 +485,7 @@ export default function TambahKategoriPage() {
                       >
                         {saving ? (
                           <>
-                            <Loader2
-                              size={17}
-                              className="animate-spin"
-                            />
+                            <Loader2 size={17} className="animate-spin" />
                             Menyimpan...
                           </>
                         ) : (
@@ -535,15 +499,11 @@ export default function TambahKategoriPage() {
                   </div>
                 </form>
 
-
-                <aside className="min-w-0 xl:sticky xl:top-5">
+                <aside className="min-w-0 xl:sticky xl:top-6">
                   <div
                     className={`theme-card ${themeDivider} ${themeCardShadow} overflow-hidden rounded-3xl border`}
                   >
-
-                    <div
-                      className={`border-b ${themeDivider} px-5 py-5`}
-                    >
+                    <div className={`border-b ${themeDivider} px-5 py-5`}>
                       <div className="flex items-center justify-between gap-3">
                         <div className="flex items-center gap-3">
                           <div
@@ -573,14 +533,10 @@ export default function TambahKategoriPage() {
                       </div>
                     </div>
 
-
                     <div className="p-5">
-
-
                       <div
                         className={`relative overflow-hidden rounded-2xl p-5 ${themePrimaryGradient}`}
                       >
-
                         <div className="pointer-events-none absolute -right-12 -top-12 h-36 w-36 rounded-full bg-[color-mix(in_srgb,var(--color-card)_12%,transparent)] blur-3xl" />
 
                         <div className="pointer-events-none absolute -bottom-16 -left-10 h-36 w-36 rounded-full bg-[color-mix(in_srgb,var(--color-info)_18%,transparent)] blur-3xl" />
@@ -624,7 +580,6 @@ export default function TambahKategoriPage() {
                         </div>
                       </div>
 
-
                       <div
                         className={`mt-4 rounded-2xl border ${themeNeutralBorder} ${themeNeutralSurface} p-4`}
                       >
@@ -660,7 +615,6 @@ export default function TambahKategoriPage() {
                           </div>
                         </div>
                       </div>
-
 
                       <div
                         className={`mt-4 overflow-hidden rounded-2xl border ${themeNeutralBorder}`}
@@ -704,7 +658,6 @@ export default function TambahKategoriPage() {
                         </div>
                       </div>
 
-
                       <div
                         className={`mt-4 rounded-2xl border ${themeInfoBorder} ${themeInfoSurface} p-4`}
                       >
@@ -721,7 +674,6 @@ export default function TambahKategoriPage() {
                         </div>
                       </div>
                     </div>
-
 
                     <div
                       className={`border-t ${themeDivider} ${themeNeutralSurface} px-5 py-4`}
@@ -741,10 +693,7 @@ export default function TambahKategoriPage() {
                 </aside>
               </div>
 
-
-              <div
-                className={`mt-7 border-t ${themeDivider} pt-5 text-center`}
-              >
+              <div className={`mt-7 border-t ${themeDivider} pt-5 text-center`}>
                 <p className="theme-text-muted text-xs">
                   © 2026 SmartSchool • Modul Sarana & Prasarana
                 </p>

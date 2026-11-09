@@ -1,6 +1,7 @@
+
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import Header from "@/app/components/Header";
@@ -21,6 +22,7 @@ import {
   CheckCircle2,
   MapPinned,
   RotateCcw,
+  Eye,
 } from "lucide-react";
 
 import {
@@ -109,7 +111,7 @@ export default function MasterGudangPage() {
   const [error, setError] = useState("");
   const [deletingId, setDeletingId] = useState(null);
 
-  async function loadGudang(showRefresh = false) {
+  const loadGudang = useCallback(async (showRefresh = false) => {
     try {
       if (showRefresh) {
         setRefreshing(true);
@@ -120,26 +122,19 @@ export default function MasterGudangPage() {
       setError("");
 
       const response = await getGudang();
-      const data = extractArray(response);
-
-      setGudangList(data);
+      setGudangList(extractArray(response));
     } catch (err) {
-      setError(
-        err?.message || "Gagal mengambil data gudang dari server."
-      );
+      console.error("Gagal mengambil data gudang:", err);
+      setError(err?.message || "Gagal mengambil data gudang dari server.");
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }
+  }, []);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      loadGudang();
-    }, 0);
-
-    return () => clearTimeout(timer);
-  }, []);
+    loadGudang();
+  }, [loadGudang]);
 
   const filteredGudang = useMemo(() => {
     const keyword = search.trim().toLowerCase();
@@ -164,7 +159,7 @@ export default function MasterGudangPage() {
 
   const gudangTanpaLokasi = totalGudang - gudangDenganLokasi;
 
-  async function handleDelete(id, nama) {
+  const handleDelete = async (id, nama) => {
     const confirmed = window.confirm(
       `Yakin ingin menghapus gudang "${nama}"?`
     );
@@ -183,15 +178,17 @@ export default function MasterGudangPage() {
 
       window.alert(`Gudang "${nama}" berhasil dihapus.`);
     } catch (err) {
+      console.error("Gagal menghapus gudang:", err);
       window.alert(err?.message || "Gagal menghapus gudang.");
+      await loadGudang(true);
     } finally {
       setDeletingId(null);
     }
-  }
+  };
 
-  function handleReset() {
+  const handleReset = () => {
     setSearch("");
-  }
+  };
 
   const toggleSidebar = () => {
     setIsCollapsed((current) => !current);
@@ -250,10 +247,7 @@ export default function MasterGudangPage() {
                       size={16}
                       className={refreshing ? "animate-spin" : ""}
                     />
-
-                    <span className="hidden sm:inline">
-                      Refresh
-                    </span>
+                    <span className="hidden sm:inline">Refresh</span>
                   </button>
 
                   <button
@@ -271,19 +265,14 @@ export default function MasterGudangPage() {
 
               {error && (
                 <div className="flex items-start gap-3 rounded-xl border border-[color-mix(in_srgb,var(--color-danger)_24%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_10%,transparent)] p-4 text-[var(--color-danger)]">
-                  <AlertTriangle
-                    size={18}
-                    className="mt-0.5 shrink-0"
-                  />
+                  <AlertTriangle size={18} className="mt-0.5 shrink-0" />
 
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-semibold">
                       Gagal memuat data
                     </p>
 
-                    <p className="mt-1 text-xs">
-                      {error}
-                    </p>
+                    <p className="mt-1 text-xs">{error}</p>
 
                     <button
                       type="button"
@@ -376,7 +365,7 @@ export default function MasterGudangPage() {
                 </div>
 
                 <div className="overflow-x-auto">
-                  <table className="w-full min-w-[650px] text-sm">
+                  <table className="w-full min-w-[750px] text-sm">
                     <thead>
                       <tr
                         className={`border-b ${themeDivider} ${themeNeutralSurface} text-left text-[11px] uppercase tracking-wider theme-text-muted`}
@@ -408,7 +397,6 @@ export default function MasterGudangPage() {
                                 size={28}
                                 className={`${themePrimaryText} animate-spin`}
                               />
-
                               <p className="theme-text-muted mt-3 text-sm">
                                 Memuat data gudang...
                               </p>
@@ -453,9 +441,7 @@ export default function MasterGudangPage() {
                                 <button
                                   type="button"
                                   onClick={() =>
-                                    router.push(
-                                      "/admin/sarpras/gudang/master/tambah"
-                                    )
+                                    router.push("/admin/sarpras/gudang/master/tambah")
                                   }
                                   className="mt-5 inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-5 py-2.5 text-sm font-semibold text-[var(--color-card)] shadow-sm transition hover:brightness-110"
                                 >
@@ -501,7 +487,6 @@ export default function MasterGudangPage() {
                                     size={15}
                                     className="theme-text-placeholder shrink-0"
                                   />
-
                                   <span>
                                     {item?.lokasi || "Tidak ada lokasi"}
                                   </span>
@@ -509,14 +494,26 @@ export default function MasterGudangPage() {
                               </td>
 
                               <td className="px-6 py-4">
-                                <span className="inline-flex items-center gap-1.5 rounded-lg bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)] px-2.5 py-1.5 text-xs font-semibold text-[var(--color-success)]">
-                                  <CheckCircle2 size={14} />
-                                  Terdaftar
+                                <span className="theme-text-secondary line-clamp-2 text-xs">
+                                  {item?.keterangan || "-"}
                                 </span>
                               </td>
 
                               <td className="px-6 py-4">
                                 <div className="flex items-center justify-center gap-2">
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      router.push(
+                                        `/admin/sarpras/gudang/master/detail/${item.id}`
+                                      )
+                                    }
+                                    className={`inline-flex h-8 w-8 items-center justify-center rounded-lg border ${themeNeutralBorder} theme-text-muted transition hover:border-[var(--color-primary)] hover:bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] hover:text-[var(--color-primary)]`}
+                                    title="Detail Gudang"
+                                  >
+                                    <Eye size={15} />
+                                  </button>
+
                                   <button
                                     type="button"
                                     onClick={() =>

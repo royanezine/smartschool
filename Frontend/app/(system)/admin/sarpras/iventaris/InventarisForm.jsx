@@ -13,7 +13,6 @@ import {
   Package,
   Save,
   Tag,
-  Warehouse,
 } from "lucide-react";
 
 import Header from "@/app/components/Header";
@@ -28,10 +27,7 @@ import {
   updateAset,
 } from "@/services/sarpras.service";
 
-import {
-  KONDISI_OPTIONS,
-  extractData,
-} from "./_utils";
+import { KONDISI_OPTIONS, extractData } from "./_utils";
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -58,9 +54,11 @@ const emptyForm = {
   nama: "",
   kategoriAsetId: "",
   gudangId: "",
-  ruanganId: "",
   kondisi: "baik",
-  jumlah: "",
+  jumlah: "0",
+  jumlahStok: "0",
+  stokMinimum: "0",
+  ruanganId: "",
   keterangan: "",
 };
 
@@ -80,14 +78,19 @@ function Field({ label, required, error, children, hint }) {
         </p>
       ) : (
         hint && (
-          <p className="mt-1 text-[11px] theme-text-muted">{hint}</p>
+          <p className="mt-1 text-[11px] theme-text-muted">
+            {hint}
+          </p>
         )
       )}
     </div>
   );
 }
 
-export default function InventarisForm({ mode = "tambah", id = "" }) {
+export default function InventarisForm({
+  mode = "tambah",
+  id = "",
+}) {
   const router = useRouter();
   const isEdit = mode === "edit";
 
@@ -127,17 +130,28 @@ export default function InventarisForm({ mode = "tambah", id = "" }) {
 
         if (!aktif) return;
 
-        const kategoriResponse = responses[0];
-        const gudangResponse = responses[1];
-        const ruanganResponse = responses[2];
-        const asetResponse = isEdit ? responses[3] : null;
+        const kategoriData = extractData(responses[0]);
+        const gudangData = extractData(responses[1]);
+        const ruanganData = extractData(responses[2]);
 
-        setKategori(extractData(kategoriResponse));
-        setGudangList(extractData(gudangResponse));
-        setRuanganList(extractData(ruanganResponse));
+        setKategori(
+          Array.isArray(kategoriData) ? kategoriData : []
+        );
+
+        setGudangList(
+          Array.isArray(gudangData) ? gudangData : []
+        );
+
+        setRuanganList(
+          Array.isArray(ruanganData) ? ruanganData : []
+        );
 
         if (isEdit) {
-          const aset = asetResponse?.data;
+          const asetData = extractData(responses[3]);
+
+          const aset = Array.isArray(asetData)
+            ? asetData[0]
+            : asetData;
 
           if (!aset?.id) {
             throw new Error("Data inventaris tidak ditemukan.");
@@ -146,29 +160,52 @@ export default function InventarisForm({ mode = "tambah", id = "" }) {
           setForm({
             kode: aset.kode ?? "",
             nama: aset.nama ?? "",
+
             kategoriAsetId: String(
-              aset.kategoriAsetId ?? aset.kategoriAset?.id ?? ""
+              aset.kategoriAsetId ??
+              aset.kategoriAset?.id ??
+              ""
             ),
+
             gudangId: String(
-              aset.gudangId ?? aset.gudang?.id ?? ""
+              aset.gudangId ??
+              aset.gudang?.id ??
+              ""
             ),
+
+            kondisi: String(
+              aset.kondisi ?? "baik"
+            ).toLowerCase(),
+
+            jumlah: String(aset.jumlah ?? 0),
+
+            jumlahStok: String(
+              aset.jumlahStok ?? aset.jumlah ?? 0
+            ),
+
+            stokMinimum: String(
+              aset.stokMinimum ?? 0
+            ),
+
             ruanganId: String(
-              aset.ruanganId ?? aset.ruangan?.id ?? ""
+              aset.ruanganId ??
+              aset.ruangan?.id ??
+              ""
             ),
-            kondisi: String(aset.kondisi ?? "baik").toLowerCase(),
-            jumlah: String(aset.jumlah ?? ""),
+
             keterangan: aset.keterangan ?? "",
           });
         }
       } catch (err) {
         if (aktif) {
           setError(
-            err?.message ||
-              "Gagal memuat data pendukung inventaris."
+            err?.message || "Gagal memuat data inventaris."
           );
         }
       } finally {
-        if (aktif) setLoading(false);
+        if (aktif) {
+          setLoading(false);
+        }
       }
     }
 
@@ -197,19 +234,15 @@ export default function InventarisForm({ mode = "tambah", id = "" }) {
   function validate() {
     const errors = {};
 
-    if (form.kode.trim().length < 1) {
+    if (!form.kode.trim()) {
       errors.kode = "Kode barang wajib diisi.";
-    }
-
-    if (form.kode.trim().length > 50) {
+    } else if (form.kode.trim().length > 50) {
       errors.kode = "Kode barang maksimal 50 karakter.";
     }
 
-    if (form.nama.trim().length < 1) {
+    if (!form.nama.trim()) {
       errors.nama = "Nama barang wajib diisi.";
-    }
-
-    if (form.nama.trim().length > 150) {
+    } else if (form.nama.trim().length > 150) {
       errors.nama = "Nama barang maksimal 150 karakter.";
     }
 
@@ -221,16 +254,46 @@ export default function InventarisForm({ mode = "tambah", id = "" }) {
       errors.gudangId = "Gudang wajib dipilih.";
     }
 
+    const jumlah = Number(form.jumlah);
+    const jumlahStok = Number(form.jumlahStok);
+    const stokMinimum = Number(form.stokMinimum);
+
     if (
       form.jumlah === "" ||
-      !Number.isInteger(Number(form.jumlah)) ||
-      Number(form.jumlah) < 0
+      !Number.isInteger(jumlah) ||
+      jumlah < 0
     ) {
-      errors.jumlah = "Jumlah harus bilangan bulat minimal 0.";
+      errors.jumlah =
+        "Jumlah harus berupa bilangan bulat minimal 0.";
+    }
+
+    if (
+      form.jumlahStok === "" ||
+      !Number.isInteger(jumlahStok) ||
+      jumlahStok < 0
+    ) {
+      errors.jumlahStok =
+        "Jumlah stok harus berupa bilangan bulat minimal 0.";
+    } else if (
+      Number.isInteger(jumlah) &&
+      jumlahStok > jumlah
+    ) {
+      errors.jumlahStok =
+        "Jumlah stok tidak boleh melebihi jumlah unit.";
+    }
+
+    if (
+      form.stokMinimum === "" ||
+      !Number.isInteger(stokMinimum) ||
+      stokMinimum < 0
+    ) {
+      errors.stokMinimum =
+        "Stok minimum harus berupa bilangan bulat minimal 0.";
     }
 
     if (form.keterangan.trim().length > 255) {
-      errors.keterangan = "Keterangan maksimal 255 karakter.";
+      errors.keterangan =
+        "Keterangan maksimal 255 karakter.";
     }
 
     setFieldErrors(errors);
@@ -241,7 +304,7 @@ export default function InventarisForm({ mode = "tambah", id = "" }) {
   async function handleSubmit(event) {
     event.preventDefault();
 
-    if (!validate()) return;
+    if (saving || !validate()) return;
 
     setSaving(true);
     setError("");
@@ -251,11 +314,18 @@ export default function InventarisForm({ mode = "tambah", id = "" }) {
       const payload = {
         kode: form.kode.trim(),
         nama: form.nama.trim(),
-        gudangId: form.gudangId,
+
         kategoriAsetId: form.kategoriAsetId,
-        ruanganId: form.ruanganId || null,
+        gudangId: form.gudangId,
+
         kondisi: form.kondisi || null,
+
         jumlah: Number(form.jumlah),
+        jumlahStok: Number(form.jumlahStok),
+        stokMinimum: Number(form.stokMinimum),
+
+        ruanganId: form.ruanganId || null,
+
         keterangan: form.keterangan.trim() || null,
       };
 
@@ -263,25 +333,32 @@ export default function InventarisForm({ mode = "tambah", id = "" }) {
         ? await updateAset(id, payload)
         : await createAset(payload);
 
+      if (response?.success === false) {
+        throw new Error(
+          response.message ||
+          "Gagal menyimpan data inventaris."
+        );
+      }
+
       setSaved(true);
 
-      const nextId = response?.data?.id || (isEdit ? id : "");
+      const nextId =
+        response?.data?.id ||
+        (isEdit ? id : "");
 
       setTimeout(() => {
-        if (nextId) {
-          router.push(
-            `/admin/sarpras/iventaris/${encodeURIComponent(nextId)}`
-          );
-        } else {
-          router.push("/admin/sarpras/iventaris");
-        }
+        router.push(
+          nextId
+            ? `/admin/sarpras/iventaris/${encodeURIComponent(nextId)}`
+            : "/admin/sarpras/iventaris"
+        );
 
         router.refresh();
       }, 700);
     } catch (err) {
       setError(
         err?.message ||
-          `Gagal ${isEdit ? "memperbarui" : "menyimpan"} inventaris.`
+        `Gagal ${isEdit ? "memperbarui" : "menyimpan"} inventaris.`
       );
     } finally {
       setSaving(false);
@@ -290,6 +367,7 @@ export default function InventarisForm({ mode = "tambah", id = "" }) {
 
   const noKategori = !loading && kategori.length === 0;
   const noGudang = !loading && gudangList.length === 0;
+
   const formBlocked = noKategori || noGudang;
 
   return (
@@ -320,7 +398,9 @@ export default function InventarisForm({ mode = "tambah", id = "" }) {
             <div>
               <button
                 type="button"
-                onClick={() => router.push("/admin/sarpras/iventaris")}
+                onClick={() =>
+                  router.push("/admin/sarpras/iventaris")
+                }
                 className="theme-text-muted mb-3 inline-flex items-center gap-1.5 text-xs font-medium transition-colors hover:text-[var(--color-primary)]"
               >
                 <ArrowLeft size={14} />
@@ -443,6 +523,7 @@ export default function InventarisForm({ mode = "tambah", id = "" }) {
                         <h2 className="text-sm font-semibold theme-text">
                           Informasi Barang
                         </h2>
+
                         <p className="mt-1 text-xs theme-text-muted">
                           Masukkan identitas dan kategori barang inventaris.
                         </p>
@@ -484,7 +565,7 @@ export default function InventarisForm({ mode = "tambah", id = "" }) {
                                 updateField("nama", event.target.value)
                               }
                               maxLength={150}
-                              placeholder="Contoh: Kursi Siswa"
+                              placeholder="Contoh: Laptop Lenovo"
                               className={`${inputClass} pl-10 pr-4`}
                             />
                           </div>
@@ -512,10 +593,15 @@ export default function InventarisForm({ mode = "tambah", id = "" }) {
                               disabled={formBlocked}
                               className={`${inputClass} appearance-none pl-10 pr-9`}
                             >
-                              <option value="">Pilih kategori</option>
+                              <option value="">
+                                Pilih kategori
+                              </option>
 
                               {kategori.map((item) => (
-                                <option key={item.id} value={item.id}>
+                                <option
+                                  key={item.id}
+                                  value={item.id}
+                                >
                                   {item.nama}
                                 </option>
                               ))}
@@ -537,8 +623,9 @@ export default function InventarisForm({ mode = "tambah", id = "" }) {
                         <h2 className="text-sm font-semibold theme-text">
                           Penempatan Barang
                         </h2>
+
                         <p className="mt-1 text-xs theme-text-muted">
-                          Tentukan gudang dan ruangan tempat barang berada.
+                          Tentukan gudang dan lokasi penyimpanan barang.
                         </p>
                       </div>
 
@@ -557,15 +644,23 @@ export default function InventarisForm({ mode = "tambah", id = "" }) {
                             <select
                               value={form.gudangId}
                               onChange={(event) =>
-                                updateField("gudangId", event.target.value)
+                                updateField(
+                                  "gudangId",
+                                  event.target.value
+                                )
                               }
                               disabled={formBlocked}
                               className={`${inputClass} appearance-none pl-10 pr-9`}
                             >
-                              <option value="">Pilih gudang</option>
+                              <option value="">
+                                Pilih gudang
+                              </option>
 
                               {gudangList.map((item) => (
-                                <option key={item.id} value={item.id}>
+                                <option
+                                  key={item.id}
+                                  value={item.id}
+                                >
                                   {item.nama}
                                 </option>
                               ))}
@@ -580,7 +675,7 @@ export default function InventarisForm({ mode = "tambah", id = "" }) {
 
                         <Field
                           label="Ruangan"
-                          hint="Opsional. Pilih ruangan jika barang ditempatkan di ruangan tertentu."
+                          hint="Opsional. Pilih ruangan tempat aset disimpan."
                         >
                           <div className="relative">
                             <MapPin
@@ -591,15 +686,26 @@ export default function InventarisForm({ mode = "tambah", id = "" }) {
                             <select
                               value={form.ruanganId}
                               onChange={(event) =>
-                                updateField("ruanganId", event.target.value)
+                                updateField(
+                                  "ruanganId",
+                                  event.target.value
+                                )
                               }
                               className={`${inputClass} appearance-none pl-10 pr-9`}
                             >
-                              <option value="">Tidak ditentukan</option>
+                              <option value="">
+                                Tidak ada ruangan
+                              </option>
 
                               {ruanganList.map((item) => (
-                                <option key={item.id} value={item.id}>
+                                <option
+                                  key={item.id}
+                                  value={item.id}
+                                >
                                   {item.nama}
+                                  {item.lokasi
+                                    ? ` - ${item.lokasi}`
+                                    : ""}
                                 </option>
                               ))}
                             </select>
@@ -615,12 +721,18 @@ export default function InventarisForm({ mode = "tambah", id = "" }) {
                           <select
                             value={form.kondisi}
                             onChange={(event) =>
-                              updateField("kondisi", event.target.value)
+                              updateField(
+                                "kondisi",
+                                event.target.value
+                              )
                             }
                             className={`${inputClass} px-4`}
                           >
                             {KONDISI_OPTIONS.map((item) => (
-                              <option key={item.value} value={item.value}>
+                              <option
+                                key={item.value}
+                                value={item.value}
+                              >
                                 {item.label}
                               </option>
                             ))}
@@ -634,19 +746,19 @@ export default function InventarisForm({ mode = "tambah", id = "" }) {
                     <div>
                       <div className="mb-4">
                         <h2 className="text-sm font-semibold theme-text">
-                          Jumlah dan Keterangan
+                          Jumlah dan Stok Barang
                         </h2>
+
                         <p className="mt-1 text-xs theme-text-muted">
-                          Masukkan jumlah unit barang dan keterangan tambahan.
+                          Tentukan jumlah keseluruhan, stok tersedia, dan batas minimum stok.
                         </p>
                       </div>
 
                       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                         <Field
                           label="Jumlah Unit"
-                          required
                           error={fieldErrors.jumlah}
-                          hint="Total unit barang yang dicatat."
+                          hint="Total seluruh unit barang."
                         >
                           <input
                             type="number"
@@ -656,30 +768,84 @@ export default function InventarisForm({ mode = "tambah", id = "" }) {
                             onChange={(event) =>
                               updateField("jumlah", event.target.value)
                             }
-                            placeholder="Contoh: 20"
                             className={`${inputClass} px-4`}
                           />
                         </Field>
 
-                        <div className="sm:col-span-2">
-                          <Field
-                            label="Keterangan"
-                            error={fieldErrors.keterangan}
-                            hint="Opsional, maksimal 255 karakter."
-                          >
-                            <textarea
-                              value={form.keterangan}
-                              onChange={(event) =>
-                                updateField("keterangan", event.target.value)
-                              }
-                              maxLength={255}
-                              rows={3}
-                              placeholder="Tambahkan keterangan barang..."
-                              className={`${inputClass} resize-y px-4`}
-                            />
-                          </Field>
-                        </div>
+                        <Field
+                          label="Jumlah Stok Tersedia"
+                          error={fieldErrors.jumlahStok}
+                          hint="Jumlah unit yang masih tersedia."
+                        >
+                          <input
+                            type="number"
+                            min="0"
+                            step="1"
+                            value={form.jumlahStok}
+                            onChange={(event) =>
+                              updateField(
+                                "jumlahStok",
+                                event.target.value
+                              )
+                            }
+                            className={`${inputClass} px-4`}
+                          />
+                        </Field>
+
+                        <Field
+                          label="Stok Minimum"
+                          error={fieldErrors.stokMinimum}
+                          hint="Batas minimum stok barang."
+                        >
+                          <input
+                            type="number"
+                            min="0"
+                            step="1"
+                            value={form.stokMinimum}
+                            onChange={(event) =>
+                              updateField(
+                                "stokMinimum",
+                                event.target.value
+                              )
+                            }
+                            className={`${inputClass} px-4`}
+                          />
+                        </Field>
                       </div>
+                    </div>
+
+                    <div className={`border-t ${themeDivider}`} />
+
+                    <div>
+                      <div className="mb-4">
+                        <h2 className="text-sm font-semibold theme-text">
+                          Keterangan Barang
+                        </h2>
+
+                        <p className="mt-1 text-xs theme-text-muted">
+                          Tambahkan informasi tambahan mengenai barang.
+                        </p>
+                      </div>
+
+                      <Field
+                        label="Keterangan"
+                        error={fieldErrors.keterangan}
+                        hint="Opsional, maksimal 255 karakter."
+                      >
+                        <textarea
+                          value={form.keterangan}
+                          onChange={(event) =>
+                            updateField(
+                              "keterangan",
+                              event.target.value
+                            )
+                          }
+                          maxLength={255}
+                          rows={3}
+                          placeholder="Tambahkan keterangan barang inventaris..."
+                          className={`${inputClass} resize-y px-4`}
+                        />
+                      </Field>
                     </div>
                   </div>
 
@@ -706,7 +872,10 @@ export default function InventarisForm({ mode = "tambah", id = "" }) {
                       }`}
                     >
                       {saving ? (
-                        <Loader2 size={16} className="animate-spin" />
+                        <Loader2
+                          size={16}
+                          className="animate-spin"
+                        />
                       ) : (
                         <Save size={16} />
                       )}

@@ -7,6 +7,7 @@ import {
   ScanFace,
   GraduationCap,
   FolderOpen,
+  Trophy,
   WalletCards,
   Landmark,
   KeyRound,
@@ -296,6 +297,12 @@ export const adminSidebarConfig = {
           label: "Jadwal Pelajaran",
           path: "/admin/guru/jadwal-mengajar",
         },
+        {
+      key: "akademikPrestasi",
+      icon: Trophy,
+      label: "Prestasi",
+      path: "/admin/akademik/prestasi",
+    },
       ],
     },
 
@@ -427,70 +434,84 @@ export const adminSidebarConfig = {
       ],
     },
 
-    {
-      type: "item",
-      key: "sarpras",
-      icon: Boxes,
-      label: "Sarpras",
-      path: "/admin/sarpras",
+   
+{
+  type: "item",
+  key: "sarpras",
+  icon: Boxes,
+  label: "Sarpras",
+  path: "/admin/sarpras",
 
-      children: [
-        {
-          key: "gedung",
-          icon: School,
-          label: "Gedung",
-          path: "/admin/sarpras/gedung",
-        },
-        {
-          key: "lantai",
-          icon: Layers,
-          label: "Lantai",
-          path: "/admin/sarpras/gedung/lantai",
-        },
-        {
-          key: "ruangan",
-          icon: DoorOpen,
-          label: "Ruangan",
-          path: "/admin/sarpras/ruangan",
-        },
-        {
-          key: "gudang",
-          icon: Boxes,
-          label: "Gudang",
-          path: "/admin/sarpras/gudang/master",
-        },
-        {
-          key: "kategoriAset",
-          icon: Tags,
-          label: "Kategori Aset",
-          path: "/admin/sarpras/kategori",
-        },
-        {
-          key: "inventaris",
-          icon: Package,
-          label: "Inventaris",
-          path: "/admin/sarpras/iventaris",
-        },
-        {
-          key: "peminjaman",
-          icon: PackageCheck,
-          label: "Peminjaman",
-          path: "/admin/sarpras/peminjaman",
-        },
-        {
-          key: "pengembalian",
-          icon: Undo2,
-          label: "Pengembalian",
-          path: "/admin/sarpras/pengembalian",
-        },
-        {
-          key: "riwayatSarpras",
-          icon: History,
-          label: "Riwayat",
-          path: "/admin/sarpras/riwayat",
-        },
-      ],
+  children: [
+    {
+      key: "gedung",
+      icon: School,
+      label: "Gedung",
+      path: "/admin/sarpras/gedung",
     },
+    {
+      key: "lantai",
+      icon: Layers,
+      label: "Lantai",
+      path: "/admin/sarpras/gedung/lantai",
+    },
+    {
+      key: "ruangan",
+      icon: DoorOpen,
+      label: "Ruangan",
+      path: "/admin/sarpras/ruangan",
+    },
+    {
+      key: "fasilitas",
+      icon: School,
+      label: "Fasilitas",
+      path: "/admin/sarpras/fasilitas",
+    },
+    {
+      key: "gudang",
+      icon: Boxes,
+      label: "Gudang",
+      path: "/admin/sarpras/gudang/master",
+    },
+    {
+      key: "kategoriAset",
+      icon: Tags,
+      label: "Kategori Aset",
+      path: "/admin/sarpras/kategori",
+    },
+    {
+      key: "inventaris",
+      icon: Package,
+      label: "Inventaris",
+      path: "/admin/sarpras/iventaris",
+    },
+    {
+      key: "peminjaman",
+      icon: PackageCheck,
+      label: "Peminjaman",
+      path: "/admin/sarpras/peminjaman",
+    },
+    {
+      key: "pengembalian",
+      icon: Undo2,
+      label: "Pengembalian",
+      path: "/admin/sarpras/pengembalian",
+    },
+    {
+      key: "laporanKerusakan",
+      icon: AlertTriangle,
+      label: "Laporan Kerusakan",
+      path: "/admin/sarpras/laporan",
+    },
+    {
+      key: "riwayatSarpras",
+      icon: History,
+      label: "Riwayat",
+      path: "/admin/sarpras/riwayat",
+    },
+  ],
+},
+
 
     {
       type: "item",

@@ -290,3 +290,7 @@ export const getDetailRapotSaya = async (
     `raport/siswa/${encodeURIComponent(rapotId)}`,
   );
 };
+
+export const getDashboardRapot = async () => {
+  return apiFetch("/api/raport/dashboard");
+};

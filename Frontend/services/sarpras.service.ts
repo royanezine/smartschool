@@ -7,6 +7,8 @@ import { apiFetch } from "../lib/api";
 
 const API_ENDPOINT = "/api/sarpras";
 const PEMINJAMAN_ENDPOINT = "/api/peminjaman-aset";
+const FASILITAS_ENDPOINT = "/api/fasilitas";
+const LAPORAN_KERUSAKAN_ENDPOINT = "/api/laporan-kerusakan";
 
 // ======================================================
 // RESPONSE TYPE
@@ -140,6 +142,100 @@ export interface Peminjaman {
 export interface KetersediaanAset extends Aset {
   jumlahTersedia?: number;
   jumlahDipinjam?: number;
+}
+
+// ======================================================
+// FASILITAS INTERFACES
+// ======================================================
+
+export interface Fasilitas {
+  id: string;
+  sekolahId?: string;
+  nama: string;
+  lokasi: string;
+  kategori: string;
+  kondisi: string;
+  kapasitas: string | number | null;
+  deskripsi: string | null;
+  foto: string | null;
+  dibuatOleh?: string | null;
+  diperbaruiOleh?: string | null;
+  dibuatPada?: string;
+  diperbaruiPada?: string;
+  dihapusPada?: string | null;
+}
+
+export interface FasilitasPayload {
+  nama: string;
+  lokasi: string;
+  kategori: string;
+  kondisi?: string;
+  kapasitas?: string | number | null;
+  deskripsi?: string | null;
+  foto?: string | null;
+}
+
+export interface DaftarFasilitasParams {
+  kategori?: string;
+  kondisi?: string;
+  search?: string;
+  sekolahId?: string;
+}
+
+// ======================================================
+// LAPORAN KERUSAKAN INTERFACES
+// ======================================================
+
+export type StatusLaporanKerusakan = string;
+
+export interface AsetLaporanKerusakan {
+  id: string;
+  nama: string;
+  kode: string;
+  kondisi?: string | null;
+  lokasi?: string | null;
+  gudang?: {
+    id: string;
+    nama: string;
+  } | null;
+  kategoriAset?: {
+    id: string;
+    nama: string;
+  } | null;
+}
+
+export interface LaporanKerusakan {
+  id: string;
+  sekolahId?: string;
+  asetId: string;
+  dilaporkanOleh?: string | null;
+  tanggalLaporan: string;
+  deskripsi: string;
+  status: string;
+  catatanPerbaikan: string | null;
+  aset?: AsetLaporanKerusakan | Aset | null;
+  dibuatOleh?: string | null;
+  diperbaruiOleh?: string | null;
+  dibuatPada?: string;
+  diperbaruiPada?: string;
+  dihapusPada?: string | null;
+}
+
+export interface LaporanKerusakanPayload {
+  asetId?: string;
+  tanggalLaporan?: string;
+  deskripsi?: string;
+  status?: string;
+  catatanPerbaikan?: string | null;
+}
+
+export interface DaftarLaporanKerusakanParams {
+  status?: string;
+  asetId?: string;
+  search?: string;
+  tanggalMulai?: string;
+  tanggalSelesai?: string;
+  sekolahId?: string;
 }
 
 // ======================================================
@@ -295,7 +391,7 @@ export async function createGudang(data: GudangPayload) {
     method: "POST",
     body: JSON.stringify({
       nama: data.nama.trim(),
-      lokasi: data.lokasi?.trim() || null,
+      lokasi: normalizeText(data.lokasi),
     }),
   });
 }
@@ -531,8 +627,6 @@ export async function updateAset(
 export async function getAsetById(id: string) {
   validateId(id, "ID aset");
 
-  // BE belum menyediakan endpoint GET /aset/:id.
-  // Gunakan daftar aset dan cari berdasarkan ID.
   const response = await getAset();
 
   const aset = extractList<Aset>(response).find(
@@ -753,6 +847,222 @@ export async function kembalikanPeminjaman(
         ),
         items,
       }),
+    }
+  );
+}
+
+// ======================================================
+// FASILITAS
+// ======================================================
+
+export async function getFasilitas(
+  params: DaftarFasilitasParams = {}
+) {
+  const query = new URLSearchParams();
+
+  if (params.kategori) {
+    query.set("kategori", params.kategori);
+  }
+
+  if (params.kondisi) {
+    query.set("kondisi", params.kondisi);
+  }
+
+  if (params.search) {
+    query.set("search", params.search);
+  }
+
+  if (params.sekolahId) {
+    query.set("sekolahId", params.sekolahId);
+  }
+
+  const suffix = query.toString();
+
+  return apiFetch(
+    `${FASILITAS_ENDPOINT}${suffix ? `?${suffix}` : ""}`,
+    {
+      method: "GET",
+    }
+  );
+}
+
+export async function getFasilitasById(id: string) {
+  validateId(id, "ID fasilitas");
+
+  return apiFetch(
+    `${FASILITAS_ENDPOINT}/${encodeURIComponent(id)}`,
+    {
+      method: "GET",
+    }
+  );
+}
+
+export async function createFasilitas(
+  data: FasilitasPayload
+) {
+  if (!data.nama?.trim()) {
+    throw new Error("Nama fasilitas wajib diisi.");
+  }
+
+  if (!data.lokasi?.trim()) {
+    throw new Error("Lokasi fasilitas wajib diisi.");
+  }
+
+  if (!data.kategori?.trim()) {
+    throw new Error("Kategori fasilitas wajib diisi.");
+  }
+
+  return apiFetch(FASILITAS_ENDPOINT, {
+    method: "POST",
+    body: JSON.stringify({
+      nama: data.nama.trim(),
+      lokasi: data.lokasi.trim(),
+      kategori: data.kategori.trim(),
+      kondisi: data.kondisi?.trim() || "Baik",
+      kapasitas: data.kapasitas ?? null,
+      deskripsi: normalizeText(data.deskripsi),
+      foto: normalizeText(data.foto),
+    }),
+  });
+}
+
+export async function updateFasilitas(
+  id: string,
+  data: Partial<FasilitasPayload>
+) {
+  validateId(id, "ID fasilitas");
+
+  return apiFetch(
+    `${FASILITAS_ENDPOINT}/${encodeURIComponent(id)}`,
+    {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }
+  );
+}
+
+export async function deleteFasilitas(id: string) {
+  validateId(id, "ID fasilitas");
+
+  return apiFetch(
+    `${FASILITAS_ENDPOINT}/${encodeURIComponent(id)}`,
+    {
+      method: "DELETE",
+    }
+  );
+}
+
+// ======================================================
+// LAPORAN KERUSAKAN
+// ======================================================
+
+export async function getLaporanKerusakan(
+  params: DaftarLaporanKerusakanParams = {}
+) {
+  const query = new URLSearchParams();
+
+  if (params.status && params.status !== "Semua") {
+    query.set("status", params.status);
+  }
+
+  if (params.asetId) {
+    query.set("asetId", params.asetId);
+  }
+
+  if (params.search) {
+    query.set("search", params.search);
+  }
+
+  if (params.tanggalMulai) {
+    query.set("tanggalMulai", params.tanggalMulai);
+  }
+
+  if (params.tanggalSelesai) {
+    query.set("tanggalSelesai", params.tanggalSelesai);
+  }
+
+  if (params.sekolahId) {
+    query.set("sekolahId", params.sekolahId);
+  }
+
+  const suffix = query.toString();
+
+  return apiFetch(
+    `${LAPORAN_KERUSAKAN_ENDPOINT}${suffix ? `?${suffix}` : ""}`,
+    {
+      method: "GET",
+    }
+  );
+}
+
+export async function getLaporanKerusakanById(id: string) {
+  validateId(id, "ID laporan kerusakan");
+
+  return apiFetch(
+    `${LAPORAN_KERUSAKAN_ENDPOINT}/${encodeURIComponent(id)}`,
+    {
+      method: "GET",
+    }
+  );
+}
+
+export async function createLaporanKerusakan(
+  data: LaporanKerusakanPayload
+) {
+  validateId(data.asetId || "", "Aset");
+
+  if (!data.deskripsi?.trim()) {
+    throw new Error("Deskripsi kerusakan wajib diisi.");
+  }
+
+  return apiFetch(LAPORAN_KERUSAKAN_ENDPOINT, {
+    method: "POST",
+    body: JSON.stringify({
+      asetId: data.asetId,
+      tanggalLaporan: data.tanggalLaporan || undefined,
+      deskripsi: data.deskripsi.trim(),
+      status: data.status || undefined,
+      catatanPerbaikan: normalizeText(
+        data.catatanPerbaikan
+      ),
+    }),
+  });
+}
+
+export async function updateLaporanKerusakan(
+  id: string,
+  data: Partial<LaporanKerusakanPayload>
+) {
+  validateId(id, "ID laporan kerusakan");
+
+  return apiFetch(
+    `${LAPORAN_KERUSAKAN_ENDPOINT}/${encodeURIComponent(id)}`,
+    {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }
+  );
+}
+
+export async function deleteLaporanKerusakan(id: string) {
+  validateId(id, "ID laporan kerusakan");
+
+  return apiFetch(
+    `${LAPORAN_KERUSAKAN_ENDPOINT}/${encodeURIComponent(id)}`,
+    {
+      method: "DELETE",
+    }
+  );
+}
+export async function getDetailGudang(id) {
+  if (!id) {
+    throw new Error("ID gudang tidak ditemukan.");
+  }
+
+  return apiFetch(
+    `${API_ENDPOINT}/gudang/${encodeURIComponent(id)}`,
+    {
+      method: "GET",
     }
   );
 }
