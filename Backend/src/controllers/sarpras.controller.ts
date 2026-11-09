@@ -43,6 +43,35 @@ export const getGudang = async (
   }
 };
 
+export const getDetailGudang = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const id = req.params.id as string;
+    const sekolahId = (req as any).user.sekolahId;
+
+    const gudang = await prisma.gudang.findFirst({
+      where: { id, sekolahId, dihapusPada: null },
+      include: {
+        aset: {
+          where: { dihapusPada: null },
+          include: {
+            kategoriAset: true,
+          },
+        },
+      },
+    });
+
+    if (!gudang) throw new AppError("Gudang tidak ditemukan", 404);
+
+    return successResponse(res, "Berhasil mengambil detail gudang", gudang, 200);
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const updateGudang = async (
   req: Request,
   res: Response,

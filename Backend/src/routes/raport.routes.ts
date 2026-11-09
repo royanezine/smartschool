@@ -1,49 +1,32 @@
 import { Router } from "express";
 import { authenticate } from "../middlewares/auth.middleware";
-import { authorizeRoles } from "../middlewares/role.middleware";
+import { requireTenant } from "../middlewares/tenant.middleware";
 import {
-  getDataRaportSiswa,
-  getKelasWali,
   generateRapot,
   listRapotKelas,
   isiCatatanRapot,
   publishRapot,
   listRapotSaya,
   detailRapotSaya,
+  getDataRaportSiswa,
+  getDashboardRapot,
 } from "../controllers/raport.controller";
 
 const router = Router();
 
-router.use(authenticate);
+router.use(authenticate, requireTenant);
 
-// Wali kelas (guru; kepemilikan kelas dicek di controller via kelas.waliKelasId)
-router.get("/wali-kelas/kelas-saya", authorizeRoles("guru"), getKelasWali);
-router.get("/wali-kelas/kelas/:kelasId", authorizeRoles("guru"), listRapotKelas);
-router.post(
-  "/wali-kelas/kelas/:kelasId/generate",
-  authorizeRoles("guru"),
-  generateRapot,
-);
-router.put(
-  "/wali-kelas/rapot/:rapotId/catatan",
-  authorizeRoles("guru"),
-  isiCatatanRapot,
-);
-router.put(
-  "/wali-kelas/rapot/:rapotId/publish",
-  authorizeRoles("guru"),
-  publishRapot,
-);
+router.get("/dashboard", getDashboardRapot);
 
-// Siswa
-router.get("/siswa", authorizeRoles("siswa"), listRapotSaya);
-router.get("/siswa/:rapotId", authorizeRoles("siswa"), detailRapotSaya);
+router.post("/kelas/:kelasId/generate", generateRapot);
+router.get("/kelas/:kelasId", listRapotKelas);
 
-// Route lama (jangan dibiarkan terbuka; cek kepemilikan di controller)
-router.get(
-  "/:siswaId/tahun-ajaran/:tahunAjaranId",
-  authorizeRoles("guru", "admin_sekolah", "siswa"),
-  getDataRaportSiswa,
-);
+router.put("/:rapotId/catatan", isiCatatanRapot);
+router.put("/:rapotId/publish", publishRapot);
+
+router.get("/siswa/saya", listRapotSaya);
+router.get("/siswa/saya/:rapotId", detailRapotSaya);
+
+router.get("/siswa/:siswaId/tahun-ajaran/:tahunAjaranId", getDataRaportSiswa);
 
 export default router;

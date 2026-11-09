@@ -6,6 +6,7 @@ import { requireIzin } from "../middlewares/izin.middleware";
 import {
   createGudang,
   getGudang,
+  getDetailGudang,
   updateGudang,
   deleteGudang,
   createKategoriAset,
@@ -43,6 +44,7 @@ router.use(authenticate, requireTenant, requireLangganan());
 
 router.post("/gudang", requireIzin("manajemen_aset.create"), createGudang);
 router.get("/gudang", requireIzin("manajemen_aset.view"), getGudang);
+router.get("/gudang/:id", requireIzin("manajemen_aset.view"), getDetailGudang);
 router.put("/gudang/:id", requireIzin("manajemen_aset.update"), updateGudang);
 router.delete("/gudang/:id", requireIzin("manajemen_aset.delete"), deleteGudang);
 

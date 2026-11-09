@@ -659,3 +659,53 @@ export const getDataRaportSiswa = async (
     next(error);
   }
 };
+
+export const getDashboardRapot = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { userId, sekolahId } = getAuth(req);
+    const peran = await getPeranNama(userId);
+
+    if (peran === "guru") {
+      const kelasWali = await prisma.kelas.findMany({
+        where: { waliKelasId: userId, sekolahId, dihapusOleh: null },
+        select: { id: true, nama: true },
+      });
+      const kelasIds = kelasWali.map((k) => k.id);
+
+      const [totalRapot, rapotDraft, rapotPublished] = await Promise.all([
+        prisma.rapot.count({ where: { kelasId: { in: kelasIds }, dihapusOleh: null } }),
+        prisma.rapot.count({ where: { kelasId: { in: kelasIds }, status: "draft", dihapusOleh: null } }),
+        prisma.rapot.count({ where: { kelasId: { in: kelasIds }, status: "published", dihapusOleh: null } }),
+      ]);
+
+      return successResponse(res, "Berhasil mengambil dashboard rapot", {
+        totalRapot,
+        rapotDraft,
+        rapotPublished,
+        kelasWali: kelasWali,
+      });
+    }
+
+    if (peran === "admin_sekolah" || peran === "admin_yayasan" || peran === "super_admin") {
+      const [totalRapot, rapotDraft, rapotPublished] = await Promise.all([
+        prisma.rapot.count({ where: { sekolahId, dihapusOleh: null } }),
+        prisma.rapot.count({ where: { sekolahId, status: "draft", dihapusOleh: null } }),
+        prisma.rapot.count({ where: { sekolahId, status: "published", dihapusOleh: null } }),
+      ]);
+
+      return successResponse(res, "Berhasil mengambil dashboard rapot", {
+        totalRapot,
+        rapotDraft,
+        rapotPublished,
+      });
+    }
+
+    throw new AppError("Anda tidak berhak mengakses dashboard rapot", 403);
+  } catch (error) {
+    next(error);
+  }
+};
