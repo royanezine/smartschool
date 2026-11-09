@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { authenticate } from "../middlewares/auth.middleware";
-import { requireTenant, requireSubscription } from "../middlewares/tenant.middleware";
+import { requireTenant } from "../middlewares/tenant.middleware";
+import { requireSubscription } from "../middlewares/langganan.middleware";
 import { requireIzin } from "../middlewares/izin.middleware";
 import {
   createUjian,
@@ -27,11 +28,11 @@ router.get(
   getUjianByKelasMapel,
 );
 router.get("/:id", requireIzin("ujian.view"), getDetailUjian);
-router.get("/:id/hasil", requireIzin("ujian.view"), getHasilUjian);
-router.post("/:id/mulai", requireIzin("ujian.view"), mulaiPercobaanUjian);
+router.get("/:id/hasil", requireIzin("ujian.grade"), getHasilUjian);
+router.post("/:id/mulai", requireIzin("ujian.submit"), mulaiPercobaanUjian);
 router.post(
   "/sesi/:sesiId/submit",
-  requireIzin("ujian.view"),
+  requireIzin("ujian.submit"),
   submitJawabanDanSelesai,
 );
 

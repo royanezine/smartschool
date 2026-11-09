@@ -297,61 +297,64 @@ export const createAbsensi = async (
     const hariIni = todayDateOnly(waktuMasuk);
     await assertActiveAttendanceDay(sekolah.id, hariIni);
 
-    const absensiSudahAda = await prisma.absensi.findFirst({
-      where: {
-        penggunaId: userId,
-        kelasId: data.kelasId,
-        tanggal: hariIni,
-      },
-    });
+    const absensi = await prisma.$transaction(async (tx) => {
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`absen:${userId}:${hariIni.toISOString()}`}))`;
 
-    if (absensiSudahAda) {
-      throw new AppError("Anda sudah melakukan absensi hari ini", 400);
-    }
-
-    // Kalkulasi keterlambatan siswa berdasarkan shift kelas
-    let terlambatMenitSiswa = 0;
-    let statusShiftSiswa: string | null = null;
-
-    if (data.status === "hadir" && kelas.shift) {
-      const shiftSiswa = await prisma.shiftSiswa.findFirst({
-        where: { sekolahId: effectiveSekolahId, kode: kelas.shift },
+      const absensiSudahAda = await tx.absensi.findFirst({
+        where: {
+          penggunaId: userId,
+          kelasId: data.kelasId,
+          tanggal: hariIni,
+        },
       });
 
-      if (shiftSiswa) {
-        const menitJadwalMasuk = clockToMinutes(shiftSiswa.jamMasuk);
-        const menitSekarang = localClockMinutes(waktuMasuk);
-        const selisih = menitSekarang - menitJadwalMasuk;
+      if (absensiSudahAda) {
+        throw new AppError("Anda sudah melakukan absensi hari ini", 400);
+      }
 
-        if (selisih > shiftSiswa.toleransiTerlambatMenit) {
-          terlambatMenitSiswa = selisih;
-          statusShiftSiswa = "terlambat";
-        } else {
-          statusShiftSiswa = "tepat_waktu";
+      let terlambatMenitSiswa = 0;
+      let statusShiftSiswa: string | null = null;
+
+      if (data.status === "hadir" && kelas.shift) {
+        const shiftSiswa = await tx.shiftSiswa.findFirst({
+          where: { sekolahId: effectiveSekolahId, kode: kelas.shift },
+        });
+
+        if (shiftSiswa) {
+          const menitJadwalMasuk = clockToMinutes(shiftSiswa.jamMasuk);
+          const menitSekarang = localClockMinutes(waktuMasuk);
+          const selisih = menitSekarang - menitJadwalMasuk;
+
+          if (selisih > shiftSiswa.toleransiTerlambatMenit) {
+            terlambatMenitSiswa = selisih;
+            statusShiftSiswa = "terlambat";
+          } else {
+            statusShiftSiswa = "tepat_waktu";
+          }
         }
       }
-    }
 
-    const absensi = await prisma.absensi.create({
-      data: {
-        sekolahId: effectiveSekolahId,
-        penggunaId: userId,
-        kelasId: data.kelasId,
-        mataPelajaranId: data.mataPelajaranId || null,
-        tanggal: hariIni,
-        status: data.status,
-        waktuMasuk: data.status === "hadir" ? waktuMasuk : null,
-        keterangan: data.keterangan || null,
-        metode: data.metode,
-        lintang: data.lintang || null,
-        bujur: data.bujur || null,
-        urlFoto: urlFotoSaved,
-        dibuatOleh: userId,
-        ...(statusShiftSiswa !== null && {
-          terlambatMenit: terlambatMenitSiswa,
-          statusShift: statusShiftSiswa,
-        }),
-      },
+      return tx.absensi.create({
+        data: {
+          sekolahId: effectiveSekolahId,
+          penggunaId: userId,
+          kelasId: data.kelasId,
+          mataPelajaranId: data.mataPelajaranId || null,
+          tanggal: hariIni,
+          status: data.status,
+          waktuMasuk: data.status === "hadir" ? waktuMasuk : null,
+          keterangan: data.keterangan || null,
+          metode: data.metode,
+          lintang: data.lintang || null,
+          bujur: data.bujur || null,
+          urlFoto: urlFotoSaved,
+          dibuatOleh: userId,
+          ...(statusShiftSiswa !== null && {
+            terlambatMenit: terlambatMenitSiswa,
+            statusShift: statusShiftSiswa,
+          }),
+        },
+      });
     });
 
     if (file && data.metode !== "face") {
@@ -590,8 +593,6 @@ export const checkInShift = async (req: AuthRequest, res: Response) => {
 
     const data = checkInShiftSchema.parse(req.body);
 
-    // Validasi metode absensi yang diizinkan sekolah — dilakukan PERTAMA
-    // sebelum pengecekan shift/GPS agar error message tepat sasaran.
     const sekolahMeta = await prisma.sekolah.findFirst({
       where: { id: sekolahId, dihapusPada: null },
       select: { metodeAbsensiAktif: true },
@@ -732,8 +733,6 @@ export const checkOutShift = async (req: AuthRequest, res: Response) => {
 
   const data = checkOutShiftSchema.parse(req.body);
 
-  // Validasi metode absensi yang diizinkan sekolah — dilakukan PERTAMA
-  // sebelum pengecekan GPS agar error message tepat sasaran.
   const sekolahMetaOut = await prisma.sekolah.findFirst({
     where: { id: sekolahId, dihapusPada: null },
     select: { metodeAbsensiAktif: true },
@@ -1142,4 +1141,3 @@ export const getRekapAbsensiMapel = async (
     next(error);
   }
 };
-

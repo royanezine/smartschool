@@ -426,6 +426,7 @@ model Notifikasi {
   pengguna     Pengguna  @relation("PenerimaNotifikasi", fields: [penggunaId], references: [id])
   pengirim     Pengguna? @relation("PengirimNotifikasi", fields: [pengirimId], references: [id])
 
+  @@unique([penggunaId, kategori, targetUrl])
   @@map("notifikasi")
 }
 
@@ -788,6 +789,8 @@ model Absensi {
   sekolah          Sekolah?        @relation(fields: [sekolahId], references: [id])
   shiftKerja       ShiftKerja?     @relation(fields: [shiftKerjaId], references: [id])
 
+  @@unique([penggunaId, kelasId, tanggal])
+  
   @@index([penggunaId, tanggal])
   @@index([sekolahId, tanggal])
   @@index([shiftKerjaId])
@@ -860,6 +863,7 @@ model Asesmen {
   percobaanAsesmen  PercobaanAsesmen[]
   soalAsesmen       SoalAsesmen[]
 
+  @@unique([token])
   @@map("asesmen")
 }
 
@@ -1369,6 +1373,8 @@ model PendaftaranPpdb {
   jurusan                Jurusan?          @relation(fields: [jurusanId], references: [id])
   sekolah                Sekolah           @relation(fields: [sekolahId], references: [id])
 
+  @@unique([sekolahId, nik])
+  @@unique([sekolahId, nisn])
   @@index([sekolahId])
   @@index([jalurPpdbId])
   @@index([gelombangPpdbId])
@@ -1436,6 +1442,7 @@ model SesiKonseling {
   sekolah        Sekolah   @relation(fields: [sekolahId], references: [id])
   siswa          Pengguna  @relation("SiswaKonseling", fields: [siswaId], references: [id])
 
+  @@unique([sekolahId, konselorId, tanggal, waktuMulai])
   @@index([sekolahId, tanggal])
   @@index([konselorId, tanggal])
   @@map("sesi_konseling")
@@ -1457,6 +1464,7 @@ model KategoriPelanggaran {
   sekolah          Sekolah            @relation(fields: [sekolahId], references: [id])
   pelanggaranSiswa PelanggaranSiswa[]
 
+  @@unique([sekolahId, nama])
   @@map("kategori_pelanggaran")
 }
 
@@ -1732,6 +1740,7 @@ model Tagihan {
   tahunAjaran       TahunAjaran         @relation(fields: [tahunAjaranId], references: [id])
   tarifTagihan      TarifTagihan?       @relation(fields: [tarifTagihanId], references: [id])
 
+  @@unique([sekolahId, siswaId, kategoriTagihanId, tahunAjaranId, periodeBulan, periodeTahun])
   @@index([sekolahId, status, jatuhTempo])
   @@index([siswaId])
   @@index([sekolahId, kategoriTagihanId, tahunAjaranId])

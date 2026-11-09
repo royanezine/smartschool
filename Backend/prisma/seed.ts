@@ -176,9 +176,13 @@ async function main() {
     }
   }
 
-  izinData.push(
+    izinData.push(
     { nama: "peminjaman_aset.view_own", modul: "manajemen_aset", aksi: "view_own", status: "aktif" },
     { nama: "peminjaman_aset.create_own", modul: "manajemen_aset", aksi: "create_own", status: "aktif" },
+    { nama: "ujian.submit", modul: "ujian", aksi: "submit", status: "aktif" },
+    { nama: "ujian.grade", modul: "ujian", aksi: "grade", status: "aktif" },
+    { nama: "tugas.submit", modul: "tugas", aksi: "submit", status: "aktif" },
+    { nama: "tugas.grade", modul: "tugas", aksi: "grade", status: "aktif" }
   );
   const createdIzin = [];
   for (const izin of izinData) {
@@ -259,8 +263,18 @@ async function main() {
     }
   }
 
+    // Tambahkan izin peminjaman untuk guru
   for (const nama of ["peminjaman_aset.view_own", "peminjaman_aset.create_own"]) {
     peranIzinEntries.push({ peranId: peranGuru.id, izinId: izinMap[nama]!, dibuatOleh: superAdmin.id, diperbaruiOleh: superAdmin.id });
+  }
+
+  // Tambahkan izin ujian & tugas untuk guru dan siswa
+  const izinUjianTugas = ["ujian.submit", "ujian.grade", "tugas.submit", "tugas.grade"];
+  for (const nama of izinUjianTugas) {
+    // Untuk Guru
+    peranIzinEntries.push({ peranId: peranGuru.id, izinId: izinMap[nama]!, dibuatOleh: superAdmin.id, diperbaruiOleh: superAdmin.id });
+    // Untuk Siswa
+    peranIzinEntries.push({ peranId: peranSiswa.id, izinId: izinMap[nama]!, dibuatOleh: superAdmin.id, diperbaruiOleh: superAdmin.id });
   }
   const existingPermissions = new Set((await prisma.peranIzin.findMany({ select: { peranId: true, izinId: true } })).map(p => `${p.peranId}:${p.izinId}`));
   await prisma.peranIzin.createMany({

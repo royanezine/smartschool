@@ -1,36 +1,29 @@
 import { Response, NextFunction } from "express";
 import { prisma } from "../config/db";
 import { AuthRequest } from "../middlewares/auth.middleware";
-
-interface TahunAjaranBody {
-  nama: string;
-  semester: "Ganjil" | "Genap";
-  status?: "aktif" | "tidak_aktif";
-}
+import { AppError } from "../utils/appError";
+import { successResponse } from "../utils/responseFormatter";
+import {
+  createTahunAjaranSchema,
+  updateTahunAjaranSchema,
+} from "../validations/tahunAjaran.validation";
 
 const getParamId = (req: AuthRequest): string | null => {
   const { id } = req.params;
-
-  if (typeof id !== "string" || !id) {
-    return null;
-  }
-
+  if (typeof id !== "string" || !id) return null;
   return id;
 };
 
 export const getTahunAjaran = async (
   req: AuthRequest,
   res: Response,
-  next?: NextFunction
+  next: NextFunction
 ) => {
   try {
     const sekolahId = req.user?.sekolahId;
 
     if (!sekolahId) {
-      return res.status(400).json({
-        success: false,
-        message: "Sekolah tidak ditemukan",
-      });
+      throw new AppError("Sekolah tidak ditemukan", 400);
     }
 
     const data = await prisma.tahunAjaran.findMany({
@@ -43,58 +36,25 @@ export const getTahunAjaran = async (
       },
     });
 
-    return res.status(200).json({
-      success: true,
-      message: "Berhasil mengambil data tahun ajaran",
-      data,
-    });
+    return successResponse(res, "Berhasil mengambil data tahun ajaran", data);
   } catch (error) {
-    if (next) return next(error);
-    throw error;
+    next(error);
   }
 };
 
 export const createTahunAjaran = async (
   req: AuthRequest,
   res: Response,
-  next?: NextFunction
+  next: NextFunction
 ) => {
   try {
     const sekolahId = req.user?.sekolahId;
 
     if (!sekolahId) {
-      return res.status(400).json({
-        success: false,
-        message: "Sekolah tidak ditemukan",
-      });
+      throw new AppError("Sekolah tidak ditemukan", 400);
     }
 
-    const {
-      nama,
-      semester,
-      status = "tidak_aktif",
-    } = req.body as TahunAjaranBody;
-
-    if (!nama || !semester) {
-      return res.status(400).json({
-        success: false,
-        message: "Nama tahun ajaran dan semester wajib diisi",
-      });
-    }
-
-    if (!["Ganjil", "Genap"].includes(semester)) {
-      return res.status(400).json({
-        success: false,
-        message: "Semester harus Ganjil atau Genap",
-      });
-    }
-
-    if (!["aktif", "tidak_aktif"].includes(status)) {
-      return res.status(400).json({
-        success: false,
-        message: "Status harus aktif atau tidak_aktif",
-      });
-    }
+    const { nama, semester, status = "tidak_aktif" } = createTahunAjaranSchema.parse(req.body);
 
     const existing = await prisma.tahunAjaran.findFirst({
       where: {
@@ -106,10 +66,7 @@ export const createTahunAjaran = async (
     });
 
     if (existing) {
-      return res.status(409).json({
-        success: false,
-        message: "Tahun ajaran dan semester tersebut sudah ada",
-      });
+      throw new AppError("Tahun ajaran dan semester tersebut sudah ada", 409);
     }
 
     if (status === "aktif") {
@@ -134,38 +91,27 @@ export const createTahunAjaran = async (
       },
     });
 
-    return res.status(201).json({
-      success: true,
-      message: "Tahun ajaran berhasil ditambahkan",
-      data,
-    });
+    return successResponse(res, "Tahun ajaran berhasil ditambahkan", data, 201);
   } catch (error) {
-    if (next) return next(error);
-    throw error;
+    next(error);
   }
 };
 
 export const updateTahunAjaran = async (
   req: AuthRequest,
   res: Response,
-  next?: NextFunction
+  next: NextFunction
 ) => {
   try {
     const sekolahId = req.user?.sekolahId;
     const id = getParamId(req);
 
     if (!sekolahId) {
-      return res.status(400).json({
-        success: false,
-        message: "Sekolah tidak ditemukan",
-      });
+      throw new AppError("Sekolah tidak ditemukan", 400);
     }
 
     if (!id) {
-      return res.status(400).json({
-        success: false,
-        message: "ID tahun ajaran tidak valid",
-      });
+      throw new AppError("ID tahun ajaran tidak valid", 400);
     }
 
     const existing = await prisma.tahunAjaran.findFirst({
@@ -177,37 +123,10 @@ export const updateTahunAjaran = async (
     });
 
     if (!existing) {
-      return res.status(404).json({
-        success: false,
-        message: "Tahun ajaran tidak ditemukan",
-      });
+      throw new AppError("Tahun ajaran tidak ditemukan", 404);
     }
 
-    const {
-      nama,
-      semester,
-      status,
-    } = req.body as Partial<TahunAjaranBody>;
-
-    if (
-      semester &&
-      !["Ganjil", "Genap"].includes(semester)
-    ) {
-      return res.status(400).json({
-        success: false,
-        message: "Semester harus Ganjil atau Genap",
-      });
-    }
-
-    if (
-      status &&
-      !["aktif", "tidak_aktif"].includes(status)
-    ) {
-      return res.status(400).json({
-        success: false,
-        message: "Status harus aktif atau tidak_aktif",
-      });
-    }
+    const { nama, semester, status } = updateTahunAjaranSchema.parse(req.body);
 
     if (status === "aktif") {
       await prisma.tahunAjaran.updateMany({
@@ -242,38 +161,27 @@ export const updateTahunAjaran = async (
       },
     });
 
-    return res.status(200).json({
-      success: true,
-      message: "Tahun ajaran berhasil diperbarui",
-      data,
-    });
+    return successResponse(res, "Tahun ajaran berhasil diperbarui", data);
   } catch (error) {
-    if (next) return next(error);
-    throw error;
+    next(error);
   }
 };
 
 export const deleteTahunAjaran = async (
   req: AuthRequest,
   res: Response,
-  next?: NextFunction
+  next: NextFunction
 ) => {
   try {
     const sekolahId = req.user?.sekolahId;
     const id = getParamId(req);
 
     if (!sekolahId) {
-      return res.status(400).json({
-        success: false,
-        message: "Sekolah tidak ditemukan",
-      });
+      throw new AppError("Sekolah tidak ditemukan", 400);
     }
 
     if (!id) {
-      return res.status(400).json({
-        success: false,
-        message: "ID tahun ajaran tidak valid",
-      });
+      throw new AppError("ID tahun ajaran tidak valid", 400);
     }
 
     const existing = await prisma.tahunAjaran.findFirst({
@@ -285,10 +193,7 @@ export const deleteTahunAjaran = async (
     });
 
     if (!existing) {
-      return res.status(404).json({
-        success: false,
-        message: "Tahun ajaran tidak ditemukan",
-      });
+      throw new AppError("Tahun ajaran tidak ditemukan", 404);
     }
 
     await prisma.tahunAjaran.update({
@@ -301,12 +206,8 @@ export const deleteTahunAjaran = async (
       },
     });
 
-    return res.status(200).json({
-      success: true,
-      message: "Tahun ajaran berhasil dihapus",
-    });
+    return successResponse(res, "Tahun ajaran berhasil dihapus");
   } catch (error) {
-    if (next) return next(error);
-    throw error;
+    next(error);
   }
 };
