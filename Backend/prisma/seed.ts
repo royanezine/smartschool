@@ -29,6 +29,7 @@ async function main() {
     },
     { nama: "guru", namaTampilan: "Guru", deskripsi: "Guru pengajar" },
     { nama: "siswa", namaTampilan: "Siswa", deskripsi: "Peserta didik" },
+    
   ];
 
   for (const peran of daftarPeran) {
@@ -147,6 +148,10 @@ async function main() {
       deskripsi: "Modul laporan",
       sistem: false,
     },
+    { kode: "bk", 
+      nama: "Bimbingan Konseling", 
+      deskripsi: "Modul BK", 
+      sistem: false },
   ];
 
   const createdModuls = [];
