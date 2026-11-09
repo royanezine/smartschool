@@ -17,6 +17,7 @@ import {
   getRiwayatAbsensiSiswa,
   getRekapAbsensiMapel,
 } from "../controllers/absensi.controller";
+import { registerFaceIdByParam } from "../controllers/faceId.controller";
 import { authenticate } from "../middlewares/auth.middleware";
 import { requireTenant } from "../middlewares/tenant.middleware";
 import { requireLangganan } from "../middlewares/langganan.middleware";
@@ -62,6 +63,12 @@ router.post(
   authorizeRoles("super_admin", "admin_sekolah"),
   uploadBiometrik.single("foto"),
   registerFaceIdByAdmin,
+);
+router.post(
+  "/register-face/:id",
+  authorizeRoles("super_admin", "admin_sekolah"),
+  uploadBiometrik.single("foto"),
+  registerFaceIdByParam,
 );
 router.get("/metode-aktif", getMetodeAbsensiAktif);
 

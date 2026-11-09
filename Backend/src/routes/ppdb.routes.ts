@@ -28,6 +28,11 @@ import {
   rankingAdmin,
 } from "../controllers/spmb.controller";
 
+import {
+  simpanHasilSeleksi,
+  ambilHasilSeleksi,
+} from "../controllers/hasilSeleksi.controller";
+
 import { uploadPpdb } from "../middlewares/uploadPpdb.middleware";
 
 import {
@@ -62,6 +67,9 @@ router.get("/saya/ranking", authenticatePendaftar, rankingSaya);
 router.get("/pendaftar", ...bacaPpdb, getPendaftar);
 router.get("/pendaftar/statistik", ...bacaPpdb, getStatistikPendaftar);
 router.get("/pendaftar/:id", ...bacaPpdb, getDetailPendaftar);
+
+router.get("/pendaftar/:id/hasil-seleksi", ...bacaPpdb, ambilHasilSeleksi);
+router.put("/pendaftar/:id/hasil-seleksi", ...ubahPpdb, simpanHasilSeleksi);
 
 router.get("/pengaturan", ...bacaPpdb, ambilPengaturan);
 router.patch(

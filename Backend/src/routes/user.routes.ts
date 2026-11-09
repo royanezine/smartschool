@@ -16,6 +16,7 @@ import {
   deleteUser,
   quickResetPassword,
 } from "../controllers/user.controller";
+import { deleteFaceId } from "../controllers/faceId.controller";
 
 const router = Router();
 router.get("/review", authenticate, authorizeRoles("admin_yayasan", "admin_sekolah"), ownReview);
@@ -41,6 +42,16 @@ router.patch(
   requireLangganan(),
   requireIzin("manajemen_pengguna.update"),
   quickResetPassword,
+);
+
+router.delete(
+  "/:id/face-id",
+  authenticate,
+  requireTenant,
+  requireLangganan(),
+  authorizeRoles("super_admin", "admin_sekolah"),
+  requireIzin("manajemen_pengguna.update"),
+  deleteFaceId,
 );
 
 router.get(

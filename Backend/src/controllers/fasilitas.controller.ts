@@ -1,37 +1,74 @@
 import { Response, NextFunction } from "express";
+import { Prisma } from "@prisma/client";
 import { prisma } from "../config/db";
 import { AuthRequest } from "../middlewares/auth.middleware";
 import { isSuperAdmin } from "../utils/rbac";
 import { successResponse } from "../utils/responseFormatter";
 import { AppError } from "../utils/appError";
-import { createFasilitasSchema, updateFasilitasSchema } from "../validations/fasilitas.validation";
+import {
+  createFasilitasSchema,
+  updateFasilitasSchema,
+} from "../validations/fasilitas.validation";
 
-export const getFasilitas = async (req: AuthRequest, res: Response, next: NextFunction) => {
-  try {
-    const user = req.user;
-    const isSuper = isSuperAdmin(user?.role);
-    const userSekolahId = user?.sekolahId;
-    const { kategori, kondisi, search } = req.query;
+const scopeWhere = (req: AuthRequest): Prisma.FasilitasWhereInput => {
+  const user = req.user;
+  const where: Prisma.FasilitasWhereInput = { dihapusPada: null };
 
-    const where: any = {
-      dihapusPada: null,
-    };
-
-    if (!isSuper && userSekolahId) {
-      where.sekolahId = userSekolahId;
-    } else if (req.query.sekolahId && typeof req.query.sekolahId === "string") {
+  if (isSuperAdmin(user?.role)) {
+    if (typeof req.query.sekolahId === "string" && req.query.sekolahId) {
       where.sekolahId = req.query.sekolahId;
     }
+    return where;
+  }
 
-    if (kategori && typeof kategori === "string" && kategori !== "Semua") {
+  if (!user?.sekolahId) {
+    throw new AppError("Anda tidak terhubung dengan sekolah", 403);
+  }
+
+  where.sekolahId = user.sekolahId;
+  return where;
+};
+
+const tentukanSekolahId = (req: AuthRequest): string => {
+  const user = req.user;
+
+  if (isSuperAdmin(user?.role)) {
+    const sekolahId =
+      (typeof req.body?.sekolahId === "string" && req.body.sekolahId) ||
+      user?.sekolahId;
+
+    if (!sekolahId) {
+      throw new AppError("ID Sekolah wajib disertakan", 400);
+    }
+
+    return sekolahId;
+  }
+
+  if (!user?.sekolahId) {
+    throw new AppError("Sekolah tidak ditemukan", 400);
+  }
+
+  return user.sekolahId;
+};
+
+export const getFasilitas = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const where = scopeWhere(req);
+    const { kategori, kondisi, search } = req.query;
+
+    if (typeof kategori === "string" && kategori && kategori !== "Semua") {
       where.kategori = kategori;
     }
 
-    if (kondisi && typeof kondisi === "string" && kondisi !== "Semua") {
+    if (typeof kondisi === "string" && kondisi && kondisi !== "Semua") {
       where.kondisi = kondisi;
     }
 
-    if (search && typeof search === "string") {
+    if (typeof search === "string" && search) {
       where.OR = [
         { nama: { contains: search, mode: "insensitive" } },
         { lokasi: { contains: search, mode: "insensitive" } },
@@ -50,18 +87,18 @@ export const getFasilitas = async (req: AuthRequest, res: Response, next: NextFu
   }
 };
 
-export const getFasilitasById = async (req: AuthRequest, res: Response, next: NextFunction) => {
+export const getFasilitasById = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const id = req.params.id as string;
-    const user = req.user;
-    const isSuper = isSuperAdmin(user?.role);
 
-    const where: any = { id, dihapusPada: null };
-    if (!isSuper && user?.sekolahId) {
-      where.sekolahId = user.sekolahId;
-    }
+    const item = await prisma.fasilitas.findFirst({
+      where: { ...scopeWhere(req), id },
+    });
 
-    const item = await prisma.fasilitas.findFirst({ where });
     if (!item) {
       throw new AppError("Data fasilitas tidak ditemukan", 404);
     }
@@ -72,32 +109,26 @@ export const getFasilitasById = async (req: AuthRequest, res: Response, next: Ne
   }
 };
 
-export const createFasilitas = async (req: AuthRequest, res: Response, next: NextFunction) => {
+export const createFasilitas = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
-    const user = req.user;
-    const sekolahId = user?.sekolahId;
-    if (!sekolahId && !isSuperAdmin(user?.role)) {
-      throw new AppError("Sekolah tidak ditemukan", 400);
-    }
-
-    const effectiveSekolahId = sekolahId || req.body.sekolahId;
-    if (!effectiveSekolahId) {
-      throw new AppError("ID Sekolah wajib disertakan", 400);
-    }
-
+    const sekolahId = tentukanSekolahId(req);
     const validated = createFasilitasSchema.parse(req.body);
 
     const created = await prisma.fasilitas.create({
       data: {
-        sekolahId: effectiveSekolahId,
+        sekolahId,
         nama: validated.nama,
         lokasi: validated.lokasi,
         kategori: validated.kategori,
-        kondisi: validated.kondisi || "Baik",
+        kondisi: validated.kondisi,
         kapasitas: validated.kapasitas || null,
         deskripsi: validated.deskripsi || null,
         foto: validated.foto || null,
-        dibuatOleh: user?.userId,
+        dibuatOleh: req.user?.userId,
       },
     });
 
@@ -107,18 +138,18 @@ export const createFasilitas = async (req: AuthRequest, res: Response, next: Nex
   }
 };
 
-export const updateFasilitas = async (req: AuthRequest, res: Response, next: NextFunction) => {
+export const updateFasilitas = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const id = req.params.id as string;
-    const user = req.user;
-    const isSuper = isSuperAdmin(user?.role);
 
-    const where: any = { id, dihapusPada: null };
-    if (!isSuper && user?.sekolahId) {
-      where.sekolahId = user.sekolahId;
-    }
+    const existing = await prisma.fasilitas.findFirst({
+      where: { ...scopeWhere(req), id },
+    });
 
-    const existing = await prisma.fasilitas.findFirst({ where });
     if (!existing) {
       throw new AppError("Data fasilitas tidak ditemukan", 404);
     }
@@ -129,7 +160,7 @@ export const updateFasilitas = async (req: AuthRequest, res: Response, next: Nex
       where: { id },
       data: {
         ...validated,
-        diperbaruiOleh: user?.userId,
+        diperbaruiOleh: req.user?.userId,
       },
     });
 
@@ -139,18 +170,18 @@ export const updateFasilitas = async (req: AuthRequest, res: Response, next: Nex
   }
 };
 
-export const deleteFasilitas = async (req: AuthRequest, res: Response, next: NextFunction) => {
+export const deleteFasilitas = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const id = req.params.id as string;
-    const user = req.user;
-    const isSuper = isSuperAdmin(user?.role);
 
-    const where: any = { id, dihapusPada: null };
-    if (!isSuper && user?.sekolahId) {
-      where.sekolahId = user.sekolahId;
-    }
+    const existing = await prisma.fasilitas.findFirst({
+      where: { ...scopeWhere(req), id },
+    });
 
-    const existing = await prisma.fasilitas.findFirst({ where });
     if (!existing) {
       throw new AppError("Data fasilitas tidak ditemukan", 404);
     }
@@ -159,7 +190,7 @@ export const deleteFasilitas = async (req: AuthRequest, res: Response, next: Nex
       where: { id },
       data: {
         dihapusPada: new Date(),
-        dihapusOleh: user?.userId,
+        dihapusOleh: req.user?.userId,
       },
     });
 

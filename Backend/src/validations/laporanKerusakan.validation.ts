@@ -1,17 +1,14 @@
 import { z } from "zod";
 
-export const createLaporanKerusakanSchema = z.object({
-  asetId: z.string().uuid("ID Aset tidak valid"),
-  deskripsi: z.string().min(1, "Deskripsi kerusakan wajib diisi"),
-  tanggalLaporan: z.string().optional(),
-  status: z.string().default("menunggu"),
-  catatanPerbaikan: z.string().optional().nullable(),
+const dasarLaporan = z.object({
+  tanggalLaporan: z.coerce.date({ message: "Tanggal laporan tidak valid" }).optional(),
+  deskripsi: z.string().trim().min(1, "Deskripsi wajib diisi"),
+  status: z.string().trim().min(1).max(20).optional(),
+  catatanPerbaikan: z.string().trim().nullish(),
 });
 
-export const updateLaporanKerusakanSchema = z.object({
-  status: z.string().optional(),
-  catatanPerbaikan: z.string().optional().nullable(),
-  deskripsi: z.string().optional(),
-  asetId: z.string().uuid().optional(),
+export const createLaporanKerusakanSchema = dasarLaporan.extend({
+  asetId: z.string().uuid("ID aset tidak valid"),
 });
 
+export const updateLaporanKerusakanSchema = dasarLaporan.partial();

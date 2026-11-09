@@ -1,4 +1,5 @@
 import { Response, NextFunction } from "express";
+import { Prisma } from "@prisma/client";
 import { prisma } from "../config/db";
 import { AuthRequest } from "../middlewares/auth.middleware";
 import { isSuperAdmin } from "../utils/rbac";
@@ -9,38 +10,91 @@ import {
   updateLaporanKerusakanSchema,
 } from "../validations/laporanKerusakan.validation";
 
-export const getLaporanKerusakan = async (req: AuthRequest, res: Response, next: NextFunction) => {
-  try {
-    const user = req.user;
-    const isSuper = isSuperAdmin(user?.role);
-    const userSekolahId = user?.sekolahId;
-    const { status, asetId, search, tanggalMulai, tanggalSelesai } = req.query;
+const scopeWhere = (req: AuthRequest): Prisma.LaporanKerusakanWhereInput => {
+  const user = req.user;
+  const where: Prisma.LaporanKerusakanWhereInput = { dihapusPada: null };
 
-    const where: any = {
-      dihapusPada: null,
-    };
-
-    if (!isSuper && userSekolahId) {
-      where.sekolahId = userSekolahId;
-    } else if (req.query.sekolahId && typeof req.query.sekolahId === "string") {
+  if (isSuperAdmin(user?.role)) {
+    if (typeof req.query.sekolahId === "string" && req.query.sekolahId) {
       where.sekolahId = req.query.sekolahId;
     }
+    return where;
+  }
 
-    if (status && typeof status === "string" && status !== "Semua") {
+  if (!user?.sekolahId) {
+    throw new AppError("Anda tidak terhubung dengan sekolah", 403);
+  }
+
+  where.sekolahId = user.sekolahId;
+  return where;
+};
+
+const tentukanSekolahId = (req: AuthRequest): string => {
+  const user = req.user;
+
+  if (isSuperAdmin(user?.role)) {
+    const sekolahId =
+      (typeof req.body?.sekolahId === "string" && req.body.sekolahId) ||
+      user?.sekolahId;
+
+    if (!sekolahId) {
+      throw new AppError("ID Sekolah wajib disertakan", 400);
+    }
+
+    return sekolahId;
+  }
+
+  if (!user?.sekolahId) {
+    throw new AppError("Sekolah tidak ditemukan", 400);
+  }
+
+  return user.sekolahId;
+};
+
+export const getLaporanKerusakan = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const where = scopeWhere(req);
+    const { status, asetId, search, tanggalMulai, tanggalSelesai } = req.query;
+
+    if (typeof status === "string" && status && status !== "Semua") {
       where.status = status;
     }
 
-    if (asetId && typeof asetId === "string") {
+    if (typeof asetId === "string" && asetId) {
       where.asetId = asetId;
     }
 
     if (tanggalMulai || tanggalSelesai) {
-      where.tanggalLaporan = {};
-      if (tanggalMulai) where.tanggalLaporan.gte = new Date(tanggalMulai as string);
-      if (tanggalSelesai) where.tanggalLaporan.lte = new Date(tanggalSelesai as string);
+      const rentang: Prisma.DateTimeFilter = {};
+
+      if (typeof tanggalMulai === "string" && tanggalMulai) {
+        const mulai = new Date(tanggalMulai);
+
+        if (Number.isNaN(mulai.getTime())) {
+          throw new AppError("tanggalMulai tidak valid", 400);
+        }
+
+        rentang.gte = mulai;
+      }
+
+      if (typeof tanggalSelesai === "string" && tanggalSelesai) {
+        const selesai = new Date(tanggalSelesai);
+
+        if (Number.isNaN(selesai.getTime())) {
+          throw new AppError("tanggalSelesai tidak valid", 400);
+        }
+
+        rentang.lte = selesai;
+      }
+
+      where.tanggalLaporan = rentang;
     }
 
-    if (search && typeof search === "string") {
+    if (typeof search === "string" && search) {
       where.OR = [
         { deskripsi: { contains: search, mode: "insensitive" } },
         { catatanPerbaikan: { contains: search, mode: "insensitive" } },
@@ -82,19 +136,16 @@ export const getLaporanKerusakan = async (req: AuthRequest, res: Response, next:
   }
 };
 
-export const getLaporanKerusakanById = async (req: AuthRequest, res: Response, next: NextFunction) => {
+export const getLaporanKerusakanById = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const id = req.params.id as string;
-    const user = req.user;
-    const isSuper = isSuperAdmin(user?.role);
-
-    const where: any = { id, dihapusPada: null };
-    if (!isSuper && user?.sekolahId) {
-      where.sekolahId = user.sekolahId;
-    }
 
     const item = await prisma.laporanKerusakan.findFirst({
-      where,
+      where: { ...scopeWhere(req), id },
       include: {
         aset: {
           include: {
@@ -115,28 +166,23 @@ export const getLaporanKerusakanById = async (req: AuthRequest, res: Response, n
   }
 };
 
-export const createLaporanKerusakan = async (req: AuthRequest, res: Response, next: NextFunction) => {
+export const createLaporanKerusakan = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const user = req.user;
-    const sekolahId = user?.sekolahId;
-    if (!sekolahId && !isSuperAdmin(user?.role)) {
-      throw new AppError("Sekolah tidak ditemukan", 400);
-    }
-
-    const effectiveSekolahId = sekolahId || req.body.sekolahId;
-    if (!effectiveSekolahId) {
-      throw new AppError("ID Sekolah wajib disertakan", 400);
-    }
-
+    const sekolahId = tentukanSekolahId(req);
     const validated = createLaporanKerusakanSchema.parse(req.body);
 
-    // Pastikan aset ada dan sesuai sekolah
     const aset = await prisma.aset.findFirst({
       where: {
         id: validated.asetId,
-        sekolahId: effectiveSekolahId,
+        sekolahId,
         dihapusPada: null,
       },
+      select: { id: true },
     });
 
     if (!aset) {
@@ -145,10 +191,10 @@ export const createLaporanKerusakan = async (req: AuthRequest, res: Response, ne
 
     const created = await prisma.laporanKerusakan.create({
       data: {
-        sekolahId: effectiveSekolahId,
+        sekolahId,
         asetId: validated.asetId,
         dilaporkanOleh: user?.email || user?.userId || "Petugas",
-        tanggalLaporan: validated.tanggalLaporan ? new Date(validated.tanggalLaporan) : new Date(),
+        tanggalLaporan: validated.tanggalLaporan ?? new Date(),
         deskripsi: validated.deskripsi,
         status: validated.status || "menunggu",
         catatanPerbaikan: validated.catatanPerbaikan || null,
@@ -165,18 +211,18 @@ export const createLaporanKerusakan = async (req: AuthRequest, res: Response, ne
   }
 };
 
-export const updateLaporanKerusakan = async (req: AuthRequest, res: Response, next: NextFunction) => {
+export const updateLaporanKerusakan = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const id = req.params.id as string;
-    const user = req.user;
-    const isSuper = isSuperAdmin(user?.role);
 
-    const where: any = { id, dihapusPada: null };
-    if (!isSuper && user?.sekolahId) {
-      where.sekolahId = user.sekolahId;
-    }
+    const existing = await prisma.laporanKerusakan.findFirst({
+      where: { ...scopeWhere(req), id },
+    });
 
-    const existing = await prisma.laporanKerusakan.findFirst({ where });
     if (!existing) {
       throw new AppError("Data laporan kerusakan tidak ditemukan", 404);
     }
@@ -187,7 +233,7 @@ export const updateLaporanKerusakan = async (req: AuthRequest, res: Response, ne
       where: { id },
       data: {
         ...validated,
-        diperbaruiOleh: user?.userId,
+        diperbaruiOleh: req.user?.userId,
       },
       include: {
         aset: true,
@@ -200,18 +246,18 @@ export const updateLaporanKerusakan = async (req: AuthRequest, res: Response, ne
   }
 };
 
-export const deleteLaporanKerusakan = async (req: AuthRequest, res: Response, next: NextFunction) => {
+export const deleteLaporanKerusakan = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const id = req.params.id as string;
-    const user = req.user;
-    const isSuper = isSuperAdmin(user?.role);
 
-    const where: any = { id, dihapusPada: null };
-    if (!isSuper && user?.sekolahId) {
-      where.sekolahId = user.sekolahId;
-    }
+    const existing = await prisma.laporanKerusakan.findFirst({
+      where: { ...scopeWhere(req), id },
+    });
 
-    const existing = await prisma.laporanKerusakan.findFirst({ where });
     if (!existing) {
       throw new AppError("Data laporan kerusakan tidak ditemukan", 404);
     }
@@ -220,7 +266,7 @@ export const deleteLaporanKerusakan = async (req: AuthRequest, res: Response, ne
       where: { id },
       data: {
         dihapusPada: new Date(),
-        dihapusOleh: user?.userId,
+        dihapusOleh: req.user?.userId,
       },
     });
 
