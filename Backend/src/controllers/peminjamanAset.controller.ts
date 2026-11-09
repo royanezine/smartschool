@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import { Response, NextFunction } from "express";
 import { prisma } from "../config/db";
 import { AppError } from "../utils/appError";
@@ -12,8 +13,8 @@ import {
 
 const generateNomorPinjam = () => {
   const tgl = new Date().toISOString().slice(0, 10).replace(/-/g, "");
-  const rand = Math.floor(1000 + Math.random() * 9000);
-  return `PINJAM-${tgl}-${rand}`;
+  const randomHex = crypto.randomBytes(4).toString("hex").toUpperCase();
+  return `PINJAM-${tgl}-${randomHex}`;
 };
 
 export const ajukanPeminjaman = async (

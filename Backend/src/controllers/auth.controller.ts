@@ -17,6 +17,8 @@ import { sendOtpEmail } from "../utils/email";
 import { AppError } from "../utils/appError";
 import {
   generateAccessToken,
+  generateRefreshToken,
+  verifyRefreshToken,
   generatePinToken,
   verifyPinToken,
 } from "../utils/generateToken";
@@ -202,12 +204,19 @@ export const verifyRegister = async (req: Request, res: Response) => {
     modulAktif,
   });
 
+  const refreshToken = generateRefreshToken({
+    userId: userWithRole.id,
+    type: "refresh",
+  });
+
   const formattedAuth = formatAuthUser(userWithRole);
 
   return res.status(200).json({
     success: true,
     message: "Verifikasi berhasil. Anda sekarang telah login.",
     token,
+    accessToken: token,
+    refreshToken,
     user: formattedAuth,
     jabatan: formattedAuth.jabatan,
     aksesMenu: formattedAuth.aksesMenu,
@@ -314,12 +323,19 @@ export const login = async (req: Request, res: Response) => {
     modulAktif,
   });
 
+  const refreshToken = generateRefreshToken({
+    userId: user.id,
+    type: "refresh",
+  });
+
   const formattedAuth = formatAuthUser(user);
 
   return res.status(200).json({
     success: true,
     message: "Login berhasil",
     token,
+    accessToken: token,
+    refreshToken,
     user: formattedAuth,
     jabatan: formattedAuth.jabatan,
     aksesMenu: formattedAuth.aksesMenu,
@@ -495,12 +511,19 @@ export const setupPin = async (req: Request, res: Response) => {
     modulAktif,
   });
 
+  const refreshToken = generateRefreshToken({
+    userId: user.id,
+    type: "refresh",
+  });
+
   const formattedAuth = formatAuthUser(user);
 
   return res.status(200).json({
     success: true,
     message: "PIN keamanan 6 digit berhasil dibuat. Selamat datang!",
     token,
+    accessToken: token,
+    refreshToken,
     user: formattedAuth,
     jabatan: formattedAuth.jabatan,
     aksesMenu: formattedAuth.aksesMenu,
@@ -634,12 +657,19 @@ export const verifyPin = async (req: Request, res: Response) => {
     modulAktif,
   });
 
+  const refreshToken = generateRefreshToken({
+    userId: user.id,
+    type: "refresh",
+  });
+
   const formattedAuth = formatAuthUser(user);
 
   return res.status(200).json({
     success: true,
     message: "Verifikasi PIN berhasil. Selamat datang!",
     token,
+    accessToken: token,
+    refreshToken,
     user: formattedAuth,
     jabatan: formattedAuth.jabatan,
     aksesMenu: formattedAuth.aksesMenu,
@@ -794,6 +824,91 @@ export const resetPinByAdmin = async (
       success: true,
       message:
         "PIN siswa berhasil direset oleh admin. Siswa akan diminta membuat PIN baru saat login berikutnya.",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const refreshToken = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const rawToken =
+      req.body?.refreshToken ||
+      (req.headers["x-refresh-token"] as string) ||
+      (req.headers.authorization && req.headers.authorization.startsWith("Bearer ")
+        ? req.headers.authorization.split(" ")[1]
+        : undefined);
+
+    if (!rawToken || typeof rawToken !== "string") {
+      throw new AppError("Refresh token tidak ditemukan atau tidak valid", 401);
+    }
+
+    let payload;
+    try {
+      payload = verifyRefreshToken(rawToken);
+    } catch (err: any) {
+      throw new AppError("Refresh token kedaluwarsa atau tidak valid", 401);
+    }
+
+    if (!payload || payload.type !== "refresh" || !payload.userId) {
+      throw new AppError("Format refresh token tidak valid", 401);
+    }
+
+    const user = await prisma.pengguna.findUnique({
+      where: { id: payload.userId },
+      include: {
+        peran: true,
+        sekolah: true,
+        yayasan: true,
+        jabatanRef: true,
+      },
+    });
+
+    if (!user || user.status !== "aktif" || user.dihapusPada !== null) {
+      throw new AppError("Pengguna tidak ditemukan atau akun dinonaktifkan", 401);
+    }
+
+    // Verifikasi status langganan sekolah bila relevan
+    await assertLoginSubscription(user);
+
+    const isSuper = isSuperAdmin(user.peran?.nama);
+    const { izin, modulAktif } = await ambilIzinDanModul(
+      user.peranId ?? null,
+      user.sekolahId ?? null,
+      isSuper,
+    );
+
+    const newAccessToken = generateAccessToken({
+      userId: user.id,
+      email: user.email,
+      roleId: user.peranId ?? undefined,
+      role: user.peran?.nama ?? undefined,
+      sekolahId: user.sekolahId ?? undefined,
+      yayasanId: user.yayasanId ?? undefined,
+      izin,
+      modulAktif,
+    });
+
+    const newRefreshToken = generateRefreshToken({
+      userId: user.id,
+      type: "refresh",
+    });
+
+    const formattedAuth = formatAuthUser(user);
+
+    return res.status(200).json({
+      success: true,
+      message: "Token berhasil diperbarui",
+      token: newAccessToken,
+      accessToken: newAccessToken,
+      refreshToken: newRefreshToken,
+      user: formattedAuth,
+      jabatan: formattedAuth.jabatan,
+      aksesMenu: formattedAuth.aksesMenu,
     });
   } catch (error) {
     next(error);

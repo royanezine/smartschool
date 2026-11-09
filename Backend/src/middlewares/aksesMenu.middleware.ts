@@ -3,6 +3,7 @@ import { AuthRequest } from "./auth.middleware";
 import { isSuperAdmin, normalizeRole } from "../utils/rbac";
 import { prisma } from "../config/db";
 import { AksiMenu } from "../constants/menu.constant";
+import { getRedisClient } from "../config/redis";
 
 interface ItemAksesMenu {
   menu: string;
@@ -20,7 +21,7 @@ const normalizeMenuName = (name: string): string =>
  *
  * Aturan:
  * 1. Pengguna wajib sudah terautentikasi (req.user).
- * 2. Fallback Role: Super Admin selalu lolos (full access).
+ * 2. Fallback Role: Super Admin selalu lolos (full access) dengan Redis Cache TTL 5 menit.
  * 3. Jika pengguna tidak memiliki Jabatan yang aktif/terdaftar, akses ditolak (403).
  * 4. Jika menu atau aksi (view, create, update, delete) tidak diizinkan untuk Jabatan pengguna, akses ditolak (403).
  *
@@ -43,8 +44,34 @@ export const requireAksesMenu = (
         });
       }
 
-      // 1. Fallback Super Admin: Memiliki akses penuh ke seluruh menu platform
-      if (isSuperAdmin(user.role)) {
+      // 1. Fallback Super Admin: Caching hasil cek izin super_admin di Redis dengan TTL 5 menit (300 detik)
+      const redis = getRedisClient();
+      const superAdminCacheKey = `cache:superadmin:${user.userId}`;
+      let isSuper: boolean | null = null;
+
+      if (redis) {
+        try {
+          const cachedVal = await redis.get(superAdminCacheKey);
+          if (cachedVal !== null) {
+            isSuper = cachedVal === "1";
+          }
+        } catch {
+          // Abaikan error koneksi redis
+        }
+      }
+
+      if (isSuper === null) {
+        isSuper = isSuperAdmin(user.role);
+        if (redis) {
+          try {
+            await redis.set(superAdminCacheKey, isSuper ? "1" : "0", "EX", 300);
+          } catch {
+            // Abaikan error koneksi redis
+          }
+        }
+      }
+
+      if (isSuper) {
         return next();
       }
 
@@ -53,28 +80,45 @@ export const requireAksesMenu = (
         return next();
       }
 
-      // 2. Ambil daftar aksesMenu dari session req.user atau fallback fetch dari database
+      // 3. Ambil daftar aksesMenu dari session req.user atau fallback fetch dari database (dengan Redis cache)
       let daftarAkses: ItemAksesMenu[] = Array.isArray(user.aksesMenu)
         ? (user.aksesMenu as ItemAksesMenu[])
         : [];
 
       if (daftarAkses.length === 0) {
-        const dbUser = await prisma.pengguna.findUnique({
-          where: { id: user.userId },
-          select: {
-            jabatanRef: {
-              select: {
-                id: true,
-                namaJabatan: true,
-                aksesMenu: true,
+        const jabatanCacheKey = `cache:jabatan_akses:${user.userId}`;
+        if (redis) {
+          try {
+            const cachedAkses = await redis.get(jabatanCacheKey);
+            if (cachedAkses) {
+              daftarAkses = JSON.parse(cachedAkses) as ItemAksesMenu[];
+            }
+          } catch {}
+        }
+
+        if (daftarAkses.length === 0) {
+          const dbUser = await prisma.pengguna.findUnique({
+            where: { id: user.userId },
+            select: {
+              jabatanRef: {
+                select: {
+                  id: true,
+                  namaJabatan: true,
+                  aksesMenu: true,
+                },
               },
             },
-          },
-        });
+          });
 
-        const dbAkses = dbUser?.jabatanRef?.aksesMenu;
-        if (Array.isArray(dbAkses)) {
-          daftarAkses = dbAkses as unknown as ItemAksesMenu[];
+          const dbAkses = dbUser?.jabatanRef?.aksesMenu;
+          if (Array.isArray(dbAkses)) {
+            daftarAkses = dbAkses as unknown as ItemAksesMenu[];
+            if (redis) {
+              await redis
+                .set(jabatanCacheKey, JSON.stringify(daftarAkses), "EX", 300)
+                .catch(() => {});
+            }
+          }
         }
       }
 

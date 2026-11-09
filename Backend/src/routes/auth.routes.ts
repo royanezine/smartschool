@@ -3,6 +3,7 @@ import {
   register,
   verifyRegister,
   login,
+  refreshToken,
   logout,
   forgotPassword,
   resetPassword,
@@ -22,6 +23,7 @@ const router = Router();
 router.post("/register", requestLimit(10), register);
 router.post("/verify-register", requestLimit(10), verifyRegister);
 router.post("/login", requestLimit(15), login);
+router.post("/refresh", requestLimit(30), refreshToken);
 router.post("/logout", authenticate, logout);
 router.post("/ubah-kata-sandi", authenticate, requestLimit(10), changePassword);
 router.post("/lupa-kata-sandi", requestLimit(5), forgotPassword);

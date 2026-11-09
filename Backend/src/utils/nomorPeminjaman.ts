@@ -1,3 +1,5 @@
+import crypto from "crypto";
+
 export const generateNomorPeminjaman = () => {
   const now = new Date();
 
@@ -6,7 +8,7 @@ export const generateNomorPeminjaman = () => {
     .slice(0, 10)
     .replace(/-/g, "");
 
-  const waktu = Date.now().toString().slice(-6);
+  const randomHex = crypto.randomBytes(4).toString("hex").toUpperCase();
 
-  return `PJM-${tanggal}-${waktu}`;
+  return `PJM-${tanggal}-${randomHex}`;
 };

@@ -8,6 +8,7 @@ import { prisma } from "../config/db";
 let notificationInterval: NodeJS.Timeout | null = null;
 let isDeadlineRunning = false;
 let isLanggananRunning = false;
+let isDendaRunning = false;
 
 const runWithDistributedLock = async (
   lockName: string,
@@ -49,6 +50,71 @@ const runWithDistributedLock = async (
   }
 };
 
+export const runDendaPerpustakaanJob = async () => {
+  if (isDendaRunning) return;
+  isDendaRunning = true;
+  try {
+    await runWithDistributedLock("scheduler:denda_perpustakaan", 30 * 60 * 1000, async () => {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const overdueLoans = await prisma.peminjamanBuku.findMany({
+        where: {
+          dihapusPada: null,
+          status: { in: ["dipinjam", "terlambat"] },
+          tanggalJatuhTempo: {
+            lt: today,
+          },
+        },
+        select: {
+          id: true,
+          tanggalJatuhTempo: true,
+          status: true,
+          catatan: true,
+        },
+      });
+
+      if (overdueLoans.length === 0) {
+        return;
+      }
+
+      const TARIF_DENDA_PER_HARI = 1000;
+
+      await prisma.$transaction(async (tx) => {
+        for (const loan of overdueLoans) {
+          const jatuhTempo = new Date(loan.tanggalJatuhTempo);
+          jatuhTempo.setHours(0, 0, 0, 0);
+          const selisihMs = today.getTime() - jatuhTempo.getTime();
+          const selisihHari = Math.max(1, Math.ceil(selisihMs / (1000 * 60 * 60 * 24)));
+          const totalDenda = selisihHari * TARIF_DENDA_PER_HARI;
+
+          const dendaTag = `[DENDA: Terlambat ${selisihHari} hari (Rp ${totalDenda.toLocaleString("id-ID")})]`;
+          const baseCatatan = loan.catatan
+            ? loan.catatan.replace(/\[DENDA:.*?\]/g, "").trim()
+            : "";
+          const catatanBaru = baseCatatan ? `${baseCatatan} ${dendaTag}` : dendaTag;
+
+          await tx.peminjamanBuku.update({
+            where: { id: loan.id },
+            data: {
+              status: "terlambat",
+              catatan: catatanBaru,
+            },
+          });
+        }
+      });
+
+      console.log(
+        `[SCHEDULER] Berhasil memproses denda keterlambatan untuk ${overdueLoans.length} peminjaman buku.`
+      );
+    });
+  } catch (error) {
+    console.error("[SCHEDULER] Gagal menjalankan denda perpustakaan job:", error);
+  } finally {
+    isDendaRunning = false;
+  }
+};
+
 export const runNotificationJobs = async () => {
   if (!isDeadlineRunning) {
     isDeadlineRunning = true;
@@ -77,16 +143,23 @@ export const runNotificationJobs = async () => {
   }
 };
 
+export const runAllScheduledJobs = async () => {
+  await Promise.allSettled([
+    runNotificationJobs(),
+    runDendaPerpustakaanJob(),
+  ]);
+};
+
 export const startScheduler = (intervalMs = 30 * 60 * 1000) => {
   if (notificationInterval) return;
 
   // Initial run after a short delay so server startup is not blocked
   setTimeout(() => {
-    runNotificationJobs().catch(console.error);
+    runAllScheduledJobs().catch(console.error);
   }, 10 * 1000).unref();
 
   notificationInterval = setInterval(() => {
-    runNotificationJobs().catch(console.error);
+    runAllScheduledJobs().catch(console.error);
   }, intervalMs);
 
   if (notificationInterval.unref) {

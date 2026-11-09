@@ -974,6 +974,10 @@ export const getPelanggaranSiswa = async (
       });
     }
 
+    const page = Math.max(1, parseInt(req.query.page as string) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit as string) || 10));
+    const skip = (page - 1) * limit;
+
     const actorRole = normalizeRole(req.user?.role);
     const where: any = {
       sekolahId,
@@ -982,29 +986,123 @@ export const getPelanggaranSiswa = async (
 
     if (actorRole === "siswa") {
       where.siswaId = req.user?.userId;
+    } else if (req.query.siswaId) {
+      where.siswaId = String(req.query.siswaId);
     }
 
-    const data = await prisma.pelanggaranSiswa.findMany({
-      where,
-      include: {
-        siswa: {
-          select: {
-            id: true,
-            namaLengkap: true,
-            nis: true,
-            nisn: true,
+    const kategoriId = (req.query.kategoriId || req.query.kategoriPelanggaranId) as string | undefined;
+    if (kategoriId) {
+      where.kategoriPelanggaranId = String(kategoriId);
+    }
+
+    const status = req.query.status as string | undefined;
+    if (status) {
+      where.status = String(status);
+    }
+
+    const tanggalMulai = (req.query.tanggalMulai || req.query.startDate) as string | undefined;
+    const tanggalSelesai = (req.query.tanggalSelesai || req.query.endDate) as string | undefined;
+    if (tanggalMulai || tanggalSelesai) {
+      where.tanggal = {};
+      if (tanggalMulai) {
+        where.tanggal.gte = new Date(tanggalMulai);
+      }
+      if (tanggalSelesai) {
+        const end = new Date(tanggalSelesai);
+        if (tanggalSelesai.length <= 10) {
+          end.setHours(23, 59, 59, 999);
+        }
+        where.tanggal.lte = end;
+      }
+    }
+
+    const search = (req.query.search as string)?.trim();
+    if (search) {
+      where.OR = [
+        {
+          siswa: {
+            namaLengkap: {
+              contains: search,
+              mode: "insensitive",
+            },
           },
         },
-        kategoriPelanggaran: true,
-      },
-      orderBy: {
-        tanggal: "desc",
-      },
-    });
+        {
+          siswa: {
+            nis: {
+              contains: search,
+              mode: "insensitive",
+            },
+          },
+        },
+        {
+          kategoriPelanggaran: {
+            nama: {
+              contains: search,
+              mode: "insensitive",
+            },
+          },
+        },
+        {
+          kronologi: {
+            contains: search,
+            mode: "insensitive",
+          },
+        },
+      ];
+    }
 
-    return res.json({
+    const [totalData, data] = await Promise.all([
+      prisma.pelanggaranSiswa.count({ where }),
+      prisma.pelanggaranSiswa.findMany({
+        where,
+        skip,
+        take: limit,
+        include: {
+          siswa: {
+            select: {
+              id: true,
+              namaLengkap: true,
+              nis: true,
+              nisn: true,
+            },
+          },
+          kategoriPelanggaran: true,
+        },
+        orderBy: {
+          tanggal: "desc",
+        },
+      }),
+    ]);
+
+    const totalPages = totalData > 0 ? Math.ceil(totalData / limit) : 0;
+    const hasNext = page < totalPages;
+    const hasPrev = page > 1 && totalPages > 0;
+
+    return res.status(200).json({
       success: true,
+      message: "Berhasil mengambil data pelanggaran siswa",
       data,
+      pagination: {
+        totalData,
+        totalPages,
+        currentPage: page,
+        limit,
+        hasNext,
+        hasPrev,
+      },
+      meta: {
+        page,
+        limit,
+        total: totalData,
+        totalData,
+        totalPages,
+        hasNext,
+        hasPrev,
+      },
+      totalData,
+      totalPages,
+      currentPage: page,
     });
   } catch (error) {
     if (next) return next(error);
@@ -1255,7 +1353,8 @@ export const getAsesmenMinatBakat = async (
       where.jenis = req.query.jenis;
     }
 
-    const data = await prisma.asesmenMinatBakat.findMany({
+    const asesmenDb = (prisma as any).asesmenMinatBakat;
+    const data = await asesmenDb.findMany({
       where,
       include: {
         siswa: {
@@ -1270,7 +1369,7 @@ export const getAsesmenMinatBakat = async (
       orderBy: { tanggal: "desc" },
     });
 
-    const formatted = data.map((item) => ({
+    const formatted = data.map((item: any) => ({
       ...item,
       siswa: item.siswa
         ? {
@@ -1319,7 +1418,7 @@ export const getAsesmenMinatBakatById = async (
       where.siswaId = req.user?.userId;
     }
 
-    const item = await prisma.asesmenMinatBakat.findFirst({
+    const item = await (prisma as any).asesmenMinatBakat.findFirst({
       where,
       include: {
         siswa: {
@@ -1412,7 +1511,7 @@ export const createAsesmenMinatBakat = async (
       });
     }
 
-    const created = await prisma.asesmenMinatBakat.create({
+    const created = await (prisma as any).asesmenMinatBakat.create({
       data: {
         sekolahId,
         siswaId,
@@ -1478,7 +1577,7 @@ export const updateAsesmenMinatBakat = async (
       });
     }
 
-    const existing = await prisma.asesmenMinatBakat.findFirst({
+    const existing = await (prisma as any).asesmenMinatBakat.findFirst({
       where: {
         id,
         sekolahId,
@@ -1521,7 +1620,7 @@ export const updateAsesmenMinatBakat = async (
     if (status) updateData.status = status;
     if (catatan !== undefined) updateData.catatan = catatan || null;
 
-    const updated = await prisma.asesmenMinatBakat.update({
+    const updated = await (prisma as any).asesmenMinatBakat.update({
       where: { id },
       data: updateData,
       include: {
@@ -1575,7 +1674,7 @@ export const deleteAsesmenMinatBakat = async (
       });
     }
 
-    const existing = await prisma.asesmenMinatBakat.findFirst({
+    const existing = await (prisma as any).asesmenMinatBakat.findFirst({
       where: {
         id,
         sekolahId,
@@ -1590,7 +1689,7 @@ export const deleteAsesmenMinatBakat = async (
       });
     }
 
-    await prisma.asesmenMinatBakat.update({
+    await (prisma as any).asesmenMinatBakat.update({
       where: { id },
       data: {
         dihapusPada: new Date(),

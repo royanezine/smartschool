@@ -438,7 +438,7 @@ export const updateBuku = async (req: Request, res: Response) => {
     const sedangDipinjam = await prisma.peminjamanBuku.count({
       where: {
         bukuId: id,
-        status: "dipinjam",
+        status: { in: ["dipinjam", "terlambat"] },
         dihapusPada: null,
       },
     });
@@ -541,7 +541,7 @@ export const deleteBuku = async (req: Request, res: Response) => {
     const sedangDipinjam = await prisma.peminjamanBuku.count({
       where: {
         bukuId: id,
-        status: "dipinjam",
+        status: { in: ["dipinjam", "terlambat"] },
         dihapusPada: null,
       },
     });
@@ -632,7 +632,7 @@ export const pinjamBuku = async (req: Request, res: Response) => {
         where: {
           bukuId,
           penggunaId,
-          status: "dipinjam",
+          status: { in: ["dipinjam", "terlambat"] },
           dihapusPada: null,
         },
       });
@@ -739,7 +739,7 @@ export const kembalikanBuku = async (req: Request, res: Response) => {
         throw new Error("PEMINJAMAN_NOT_FOUND");
       }
 
-      if (peminjaman.status !== "dipinjam") {
+      if (peminjaman.status !== "dipinjam" && peminjaman.status !== "terlambat") {
         throw new Error("ALREADY_RETURNED");
       }
 

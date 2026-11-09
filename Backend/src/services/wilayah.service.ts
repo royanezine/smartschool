@@ -1,17 +1,36 @@
 import { z } from "zod";
 import { AppError } from "../utils/appError";
+import { getRedisClient } from "../config/redis";
 
 const BASE_URL = "https://wilayah.id/api";
 const rawRegion = z.object({ code: z.string(), name: z.string().min(1) });
 const rawPayload = z.object({ data: z.array(rawRegion).min(1) });
-type Region = { id: string; name: string };
+export type Region = { id: string; name: string };
 
-const cache = new Map<string, { expires: number; data: Region[] }>();
+// Fallback in-memory cache jika Redis tidak tersedia
+const memoryFallback = new Map<string, { expires: number; data: Region[] }>();
 const inFlight = new Map<string, Promise<Region[]>>();
 
 async function fetchRegions(path: string): Promise<Region[]> {
-  const saved = cache.get(path);
-  if (saved && saved.expires > Date.now()) return saved.data;
+  const cacheKey = `cache:wilayah:${path.replace(/[\/\.]/g, ":")}`;
+  const redis = getRedisClient();
+
+  // 1. Cek dari Redis cache terlebih dahulu (multi-instance shared cache)
+  if (redis) {
+    try {
+      const cached = await redis.get(cacheKey);
+      if (cached) {
+        return JSON.parse(cached) as Region[];
+      }
+    } catch {
+      // Abaikan error redis dan fallback ke memory
+    }
+  } else {
+    const saved = memoryFallback.get(path);
+    if (saved && saved.expires > Date.now()) return saved.data;
+  }
+
+  // 2. Hindari thundering herd problem dengan inFlight promise map
   const pending = inFlight.get(path);
   if (pending) return pending;
 
@@ -36,7 +55,17 @@ async function fetchRegions(path: string): Promise<Region[]> {
         name: item.name,
       }));
 
-      cache.set(path, { data, expires: Date.now() + 24 * 60 * 60 * 1000 });
+      // Simpan ke Redis dengan TTL 24 jam (86400 detik)
+      if (redis) {
+        try {
+          await redis.set(cacheKey, JSON.stringify(data), "EX", 24 * 60 * 60);
+        } catch {
+          // Abaikan kegagalan cache write
+        }
+      }
+
+      // Simpan juga ke memory fallback
+      memoryFallback.set(path, { data, expires: Date.now() + 24 * 60 * 60 * 1000 });
       return data;
     } catch (error) {
       if (error instanceof AppError) throw error;
@@ -73,4 +102,12 @@ export async function daftarKota(provinsiId: string) {
     throw new AppError("Provinsi tidak ditemukan", 404, "PROVINCE_NOT_FOUND");
   }
   return fetchRegions(`regencies/${provinsiId}.json`);
+}
+
+export async function daftarKecamatan(kotaId: string) {
+  return fetchRegions(`districts/${kotaId}.json`);
+}
+
+export async function daftarKelurahan(kecamatanId: string) {
+  return fetchRegions(`villages/${kecamatanId}.json`);
 }
