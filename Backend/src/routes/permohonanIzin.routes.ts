@@ -3,7 +3,7 @@ import { authenticate } from "../middlewares/auth.middleware";
 import { requireTenant } from "../middlewares/tenant.middleware";
 import { requireLangganan } from "../middlewares/langganan.middleware";
 import { authorizeRoles } from "../middlewares/role.middleware";
-import { uploadBuktiIzin } from "../middlewares/upload.middleware";
+import { uploadBuktiIzin, verifyMagicByteIzin } from "../middlewares/upload.middleware";
 import {
   ajukanIzin,
   getDaftarIzin,
@@ -14,7 +14,7 @@ const router = Router();
 
 router.use(authenticate, requireTenant, requireLangganan());
 
-router.post("/", uploadBuktiIzin.single("bukti"), ajukanIzin);
+router.post("/", uploadBuktiIzin.single("bukti"), verifyMagicByteIzin, ajukanIzin);
 
 router.get("/", getDaftarIzin);
 router.patch(

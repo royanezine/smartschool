@@ -9,7 +9,7 @@ import {
 } from "../controllers/siswa.controller";
 import { authenticate } from "../middlewares/auth.middleware";
 import { authorizeRoles } from "../middlewares/role.middleware";
-import { uploadSiswa } from "../middlewares/upload.middleware";
+import { uploadSiswa, verifyMagicByteSiswa } from "../middlewares/upload.middleware";
 import { studentProfiles } from "../controllers/studentProfile.controller";
 import { requireTenant } from "../middlewares/tenant.middleware";
 import { requireLangganan } from "../middlewares/langganan.middleware";
@@ -63,6 +63,7 @@ router.post(
   requireTenant,
   requireLangganan(),
   uploadSiswa.single("file"),
+  verifyMagicByteSiswa,
   bulkImportSiswa,
 );
 

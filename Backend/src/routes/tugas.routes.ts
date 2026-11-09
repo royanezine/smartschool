@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { authenticate } from "../middlewares/auth.middleware";
-import { requireTenant, requireSubscription } from "../middlewares/tenant.middleware";
+import { requireTenant } from "../middlewares/tenant.middleware";
+import { requireSubscription } from "../middlewares/langganan.middleware";
 import { requireIzin } from "../middlewares/izin.middleware";
 import { authorizeRoles } from "../middlewares/role.middleware";
 import {
@@ -24,13 +25,13 @@ router.delete("/:id", requireIzin("tugas.delete"), deleteTugas);
 router.get(
   "/:id/pengumpulan",
   authorizeRoles("guru", "admin_sekolah"),
-  requireIzin("tugas.view"),
+  requireIzin("tugas.grade"),
   getPengumpulanByTugas,
 );
 router.patch(
   "/pengumpulan/:pengumpulanId/nilai",
   authorizeRoles("guru", "admin_sekolah"),
-  requireIzin("tugas.update"),
+  requireIzin("tugas.grade"),
   beriNilaiTugas,
 );
 
@@ -40,6 +41,6 @@ router.get(
   getTugasByKelasMapel,
 );
 router.get("/:id", requireIzin("tugas.view"), getDetailTugas);
-router.post("/:id/submit", requireIzin("tugas.view"), submitTugas);
+router.post("/:id/submit", requireIzin("tugas.submit"), submitTugas);
 
 export default router;

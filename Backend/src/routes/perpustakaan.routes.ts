@@ -1,6 +1,5 @@
 import { Router } from "express";
 import { uploadBuku } from "../middlewares/upload.middleware";
-
 import {
   getBuku,
   getBukuById,
@@ -11,14 +10,12 @@ import {
   kembalikanBuku,
   getPeminjaman,
 } from "../controllers/perpustakaan.controller";
-
 import {
   createBukuSchema,
   updateBukuSchema,
   peminjamanBukuSchema,
   pengembalianBukuSchema,
 } from "../validations/perpustakaan.validation";
-
 import { validateRequest } from "../middlewares/validation.middleware";
 import { requireSekolah } from "../middlewares/perpustakaan.middleware";
 import { authenticate } from "../middlewares/auth.middleware";
@@ -68,6 +65,7 @@ router.get("/peminjaman", getPeminjaman);
 
 router.post(
   "/peminjaman",
+  authorizeRoles("super_admin", "admin_sekolah", "guru", "siswa"),
   validateRequest(peminjamanBukuSchema),
   pinjamBuku,
 );

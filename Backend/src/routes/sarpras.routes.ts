@@ -3,6 +3,7 @@ import { authenticate, AuthRequest } from "../middlewares/auth.middleware";
 import { requireTenant } from "../middlewares/tenant.middleware";
 import { requireLangganan } from "../middlewares/langganan.middleware";
 import { requireIzin } from "../middlewares/izin.middleware";
+import { authorizeRoles } from "../middlewares/role.middleware";
 import {
   createGudang,
   getGudang,
@@ -59,26 +60,70 @@ router.put("/ruangan/:id", requireIzin("manajemen_aset.update"), updateRuangan);
 router.delete("/ruangan/:id", requireIzin("manajemen_aset.delete"), deleteRuangan);
 
 router.post("/aset", requireIzin("manajemen_aset.create"), createAset);
-router.get("/aset", requireIzin("manajemen_aset.view", "peminjaman_aset.view_own"), (req, res, next) => {
-  const user = (req as AuthRequest).user;
-  if (user?.izin.includes("manajemen_aset.view") || user?.role === "super_admin") {
-    return getAset(req, res, next);
-  }
-  return getKetersediaanAset(req, res, next);
-});
+router.get(
+  "/aset",
+  requireIzin("manajemen_aset.view", "peminjaman_aset.view_own"),
+  (req, res, next) => {
+    const user = (req as AuthRequest).user;
+    if (user?.izin.includes("manajemen_aset.view") || user?.role === "super_admin") {
+      return getAset(req, res, next);
+    }
+    return getKetersediaanAset(req, res, next);
+  },
+);
 router.put("/aset/:id", requireIzin("manajemen_aset.update"), updateAset);
 router.delete("/aset/:id", requireIzin("manajemen_aset.delete"), deleteAset);
 
-router.get("/fasilitas", getFasilitas);
-router.get("/fasilitas/:id", getFasilitasById);
-router.post("/fasilitas", createFasilitas);
-router.put("/fasilitas/:id", updateFasilitas);
-router.delete("/fasilitas/:id", deleteFasilitas);
+router.get(
+  "/fasilitas",
+  authorizeRoles("super_admin", "admin_sekolah", "guru", "siswa"),
+  getFasilitas,
+);
+router.get(
+  "/fasilitas/:id",
+  authorizeRoles("super_admin", "admin_sekolah", "guru", "siswa"),
+  getFasilitasById,
+);
+router.post(
+  "/fasilitas",
+  authorizeRoles("super_admin", "admin_sekolah"),
+  createFasilitas,
+);
+router.put(
+  "/fasilitas/:id",
+  authorizeRoles("super_admin", "admin_sekolah"),
+  updateFasilitas,
+);
+router.delete(
+  "/fasilitas/:id",
+  authorizeRoles("super_admin", "admin_sekolah"),
+  deleteFasilitas,
+);
 
-router.get("/laporan-kerusakan", getLaporanKerusakan);
-router.get("/laporan-kerusakan/:id", getLaporanKerusakanById);
-router.post("/laporan-kerusakan", createLaporanKerusakan);
-router.put("/laporan-kerusakan/:id", updateLaporanKerusakan);
-router.delete("/laporan-kerusakan/:id", deleteLaporanKerusakan);
+router.get(
+  "/laporan-kerusakan",
+  authorizeRoles("super_admin", "admin_sekolah", "guru"),
+  getLaporanKerusakan,
+);
+router.get(
+  "/laporan-kerusakan/:id",
+  authorizeRoles("super_admin", "admin_sekolah", "guru"),
+  getLaporanKerusakanById,
+);
+router.post(
+  "/laporan-kerusakan",
+  authorizeRoles("super_admin", "admin_sekolah", "guru"),
+  createLaporanKerusakan,
+);
+router.put(
+  "/laporan-kerusakan/:id",
+  authorizeRoles("super_admin", "admin_sekolah"),
+  updateLaporanKerusakan,
+);
+router.delete(
+  "/laporan-kerusakan/:id",
+  authorizeRoles("super_admin", "admin_sekolah"),
+  deleteLaporanKerusakan,
+);
 
 export default router;

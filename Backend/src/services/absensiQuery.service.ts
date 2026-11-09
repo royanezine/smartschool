@@ -5,13 +5,7 @@ import { absensiListQuerySchema } from "../validations/absensi.validation";
 
 export function attendanceSchoolFilter(sekolahId?: string): Prisma.AbsensiWhereInput {
   if (!sekolahId) return {};
-  // An explicit school owns the record. Legacy records fall back to class,
-  // then to the user's school only when the record has no class.
-  return { OR: [
-    { sekolahId },
-    { sekolahId: null, kelas: { is: { sekolahId } } },
-    { sekolahId: null, kelasId: null, pengguna: { is: { sekolahId } } },
-  ] };
+  return { sekolahId };
 }
 
 export const lateAttendanceFilter: Prisma.AbsensiWhereInput = {

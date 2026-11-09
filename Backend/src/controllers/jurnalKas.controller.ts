@@ -212,6 +212,9 @@ export const createJurnal = handle(async (req: Request, res: Response) => {
   }
 
   const data = await prisma.$transaction(async (tx) => {
+    // Row lock buat mastiin gak ada 2 transaksi barengan di akun yang sama
+    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`jurnal:${sekolahId}:${akunKasId}`}))`;
+
     const akun = await tx.akunKas.findFirst({
       where: { id: akunKasId, sekolahId, status: 'aktif', dihapusPada: null },
     });

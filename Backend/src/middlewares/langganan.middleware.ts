@@ -253,3 +253,5 @@ export const requireLangganan = (kodeModul?: string) => {
     }
   };
 };
+
+export const requireSubscription = requireLangganan();
