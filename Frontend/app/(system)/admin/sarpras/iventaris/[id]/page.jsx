@@ -148,7 +148,7 @@ export default function InventarisDetailPage() {
     String(aset?.status || "aktif").toLowerCase() === "aktif";
 
   return (
-    <div className="theme-page flex min-h-screen">
+    <div className="theme-page flex h-screen w-full overflow-hidden">
       <Sidebar
         active="sarpras"
         setActive={() => {}}
@@ -157,19 +157,22 @@ export default function InventarisDetailPage() {
         role="admin"
       />
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        <Header
-          toggleSidebar={() => setSidebarOpen((value) => !value)}
-          notifications={[]}
-          user={{
-            name: "Admin Sekolah",
-            email: "admin@smartschool.com",
-            avatar: "AD",
-          }}
-        />
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        <div className="shrink-0 border-b theme-border">
+          <Header
+            toggleSidebar={() => setSidebarOpen((value) => !value)}
+            notifications={[]}
+            user={{
+              name: "Admin Sekolah",
+              email: "admin@smartschool.com",
+              avatar: "AD",
+            }}
+          />
+        </div>
 
-        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
-          <div className="w-full space-y-5 min-w-0">
+        <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto">
+          <div className="w-full min-w-0 px-4 py-6 sm:px-6 lg:px-8 space-y-5">
+            
             <button
               type="button"
               onClick={() => router.push("/admin/sarpras/iventaris")}
@@ -311,8 +314,8 @@ export default function InventarisDetailPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-                  <div className="space-y-4 lg:col-span-2">
+                <div className="grid grid-cols-1 gap-4 lg:grid-cols-3 2xl:grid-cols-4">
+                  <div className="space-y-4 lg:col-span-2 2xl:col-span-3">
                     <div
                       className={`theme-card ${themeNeutralBorder} overflow-hidden rounded-2xl border ${themeCardShadow}`}
                     >
@@ -334,7 +337,7 @@ export default function InventarisDetailPage() {
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-1 gap-5 p-5 sm:grid-cols-2">
+                      <div className="grid grid-cols-1 gap-5 p-5 sm:grid-cols-2 lg:grid-cols-3">
                         <InfoRow icon={Tag} label="Kategori">
                           {aset.kategoriAset?.nama || "-"}
                         </InfoRow>

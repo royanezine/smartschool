@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -5,35 +6,31 @@ import { useRouter } from "next/navigation";
 
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
-import { getSesiKonseling, getPelanggaranSiswa } from "@/services/bk.service";
+
+import {
+  getSesiKonseling,
+  getPelanggaranSiswa,
+  getKategoriPelanggaran,
+} from "@/services/bk.service";
 
 import {
   Search,
   Plus,
   Eye,
-  Edit3,
-  CalendarDays,
-  UserRound,
   HeartHandshake,
-  Award,
+  MessageSquare,
   AlertTriangle,
-  Brain,
-  TrendingUp,
-  TrendingDown,
+  Target,
   Clock3,
   CheckCircle2,
   ChevronRight,
   ChevronLeft,
   RotateCcw,
-  X,
-  BookOpen,
-  Target,
-  MessageSquare,
-  FileText,
-  Activity,
-  ShieldCheck,
+  TrendingUp,
+  TrendingDown,
+  Users,
+  Award,
 } from "lucide-react";
-
 
 const KONSELING_STATUS = {
   Selesai: {
@@ -50,42 +47,53 @@ const KONSELING_STATUS = {
   },
 };
 
-const PRIORITY_CONFIG = {
-  Tinggi: "theme-danger",
-  Sedang: "theme-warning",
-  Normal: "theme-card-soft theme-text-secondary",
-  Rendah: "theme-card-soft theme-text-muted",
-};
+function normalizeStatus(status) {
+  const value = String(status || "").toLowerCase();
 
+  if (value === "selesai") return "Selesai";
+  if (value === "dibatalkan" || value === "ditolak") return "Dibatalkan";
+
+  return "Terjadwal";
+}
+
+function formatTanggal(tanggal) {
+  if (!tanggal) return "-";
+
+  const date = new Date(tanggal);
+
+  if (Number.isNaN(date.getTime())) return "-";
+
+  return date.toLocaleDateString("id-ID", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
+}
+
+function getInitials(nama) {
+  return (
+    String(nama || "Siswa")
+      .split(" ")
+      .map((word) => word[0])
+      .filter(Boolean)
+      .slice(0, 2)
+      .join("")
+      .toUpperCase() || "SW"
+  );
+}
 
 function KonselingStatus({ status }) {
-  const config =
-    KONSELING_STATUS[status] || KONSELING_STATUS.Terjadwal;
+  const config = KONSELING_STATUS[status] || KONSELING_STATUS.Terjadwal;
 
   return (
     <span
       className={`inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-medium theme-border ${config.className}`}
     >
-      <span
-        className={`h-1.5 w-1.5 rounded-full ${config.dot}`}
-      />
+      <span className={`h-1.5 w-1.5 rounded-full ${config.dot}`} />
       {status}
     </span>
   );
 }
-
-function PriorityBadge({ priority }) {
-  return (
-    <span
-      className={`inline-flex rounded-md border px-2 py-1 text-[10px] font-medium theme-border ${
-        PRIORITY_CONFIG[priority] || PRIORITY_CONFIG.Normal
-      }`}
-    >
-      {priority}
-    </span>
-  );
-}
-
 
 function StatCard({
   title,
@@ -94,38 +102,16 @@ function StatCard({
   icon: Icon,
   iconBg,
   iconColor,
-  trend,
 }) {
   return (
     <div className="theme-card theme-border rounded-xl border p-4 shadow-sm">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="theme-text-muted text-xs font-medium">
-            {title}
+          <p className="theme-text-muted text-xs font-medium">{title}</p>
+
+          <p className="theme-text mt-1 text-2xl font-bold tracking-tight">
+            {value}
           </p>
-
-          <div className="mt-1 flex items-center gap-2">
-            <p className="theme-text text-2xl font-bold tracking-tight">
-              {value}
-            </p>
-
-            {trend && (
-              <span
-                className={`inline-flex items-center text-[10px] font-semibold ${
-                  trend.type === "up"
-                    ? "text-[var(--color-success)]"
-                    : "text-[var(--color-danger)]"
-                }`}
-              >
-                {trend.type === "up" ? (
-                  <TrendingUp size={11} />
-                ) : (
-                  <TrendingDown size={11} />
-                )}
-                {trend.value}
-              </span>
-            )}
-          </div>
 
           <p className="theme-text-placeholder mt-1 truncate text-xs">
             {description}
@@ -142,6 +128,30 @@ function StatCard({
   );
 }
 
+function QuickSummary({ icon: Icon, title, value, description }) {
+  return (
+    <div className="theme-card theme-border rounded-xl border p-3 shadow-sm">
+      <div className="flex items-center gap-3">
+        <div className="theme-card-soft flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
+          <Icon size={17} className="theme-text-muted" />
+        </div>
+
+        <div className="min-w-0">
+          <p className="theme-text-placeholder truncate text-[10px] font-medium">
+            {title}
+          </p>
+
+          <div className="flex items-baseline gap-1.5">
+            <p className="theme-text text-lg font-bold">{value}</p>
+            <p className="theme-text-placeholder truncate text-[10px]">
+              {description}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function SectionCard({
   title,
@@ -153,10 +163,10 @@ function SectionCard({
 }) {
   return (
     <div className="theme-card theme-border overflow-hidden rounded-xl border shadow-sm">
-      <div className="theme-border-soft flex shrink-0 items-center justify-between border-b px-4 py-3">
+      <div className="theme-border-soft flex items-center justify-between gap-3 border-b px-4 py-3">
         <div className="flex min-w-0 items-center gap-2.5">
-          <div className="theme-info flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
-            <Icon size={16} />
+          <div className="theme-info flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
+            <Icon size={17} />
           </div>
 
           <div className="min-w-0">
@@ -170,124 +180,110 @@ function SectionCard({
           </div>
         </div>
 
-        {action && (
-          <button
-            onClick={onAction}
-            className="theme-sidebar-text-active shrink-0 text-xs font-semibold transition hover:opacity-80"
-          >
-            {action}
-          </button>
-        )}
+        <button
+          type="button"
+          onClick={onAction}
+          className="theme-sidebar-text-active inline-flex shrink-0 items-center gap-1 text-xs font-semibold transition hover:opacity-80"
+        >
+          {action}
+          <ChevronRight size={14} />
+        </button>
       </div>
 
-      <div className="overflow-x-auto">
-        {children}
-      </div>
+      <div className="overflow-x-auto">{children}</div>
     </div>
   );
 }
 
+function EmptyRow({ colSpan, children }) {
+  return (
+    <tr>
+      <td
+        colSpan={colSpan}
+        className="theme-text-muted px-4 py-8 text-center text-xs"
+      >
+        {children}
+      </td>
+    </tr>
+  );
+}
 
 export default function BKPage() {
   const router = useRouter();
 
   const [isCollapsed, setIsCollapsed] = useState(false);
 
-  const [activeTab, setActiveTab] = useState(
-    "konseling"
-  );
-
   const [searchQuery, setSearchQuery] = useState("");
-
-  const [statusFilter, setStatusFilter] = useState(
-    "Semua"
-  );
-
-  const [classFilter, setClassFilter] = useState("Semua");
-
+  const [statusFilter, setStatusFilter] = useState("Semua");
   const [currentPage, setCurrentPage] = useState(1);
-
-  const [selectedKonseling, setSelectedKonseling] =
-    useState(null);
-
-  const [selectedPelanggaran, setSelectedPelanggaran] =
-    useState(null);
-
-  const [selectedPrestasi, setSelectedPrestasi] =
-    useState(null);
 
   const [rawKonseling, setRawKonseling] = useState([]);
   const [rawPelanggaran, setRawPelanggaran] = useState([]);
+  const [rawKategori, setRawKategori] = useState([]);
+
   const [loading, setLoading] = useState(true);
 
   const itemsPerPage = 5;
 
   useEffect(() => {
     let active = true;
-    const timer = setTimeout(async () => {
+
+    const loadData = async () => {
+      setLoading(true);
+
       try {
-        setLoading(true);
-        const [resK, resP] = await Promise.allSettled([
+        const [resK, resP, resKategori] = await Promise.allSettled([
           getSesiKonseling(),
           getPelanggaranSiswa(),
+          getKategoriPelanggaran(),
         ]);
+
         if (!active) return;
+
         if (resK.status === "fulfilled" && Array.isArray(resK.value)) {
           setRawKonseling(resK.value);
         }
+
         if (resP.status === "fulfilled" && Array.isArray(resP.value)) {
           setRawPelanggaran(resP.value);
         }
-      } catch {
-        // Biarkan array kosong jika ada kendala
+
+        if (
+          resKategori.status === "fulfilled" &&
+          Array.isArray(resKategori.value)
+        ) {
+          setRawKategori(resKategori.value);
+        }
       } finally {
         if (active) setLoading(false);
       }
-    }, 0);
+    };
+
+    loadData();
 
     return () => {
       active = false;
-      clearTimeout(timer);
     };
   }, []);
 
   const konselingData = useMemo(() => {
     return rawKonseling.map((item) => {
       const namaSiswa = item.siswa?.namaLengkap || "Siswa";
-      const avatar =
-        namaSiswa
-          .split(" ")
-          .map((w) => w[0])
-          .filter(Boolean)
-          .slice(0, 2)
-          .join("")
-          .toUpperCase() || "SW";
-      const waktu = item.waktuMulai
-        ? item.waktuSelesai
-          ? `${item.waktuMulai} - ${item.waktuSelesai}`
-          : item.waktuMulai
-        : "-";
+
       return {
         id: item.id,
         siswa: namaSiswa,
         nis: item.siswa?.nis || item.siswa?.nisn || "-",
-        kelas: "-",
-        tanggal: item.tanggal
-          ? new Date(item.tanggal).toLocaleDateString("id-ID", {
-              day: "2-digit",
-              month: "long",
-              year: "numeric",
-            })
+        tanggal: formatTanggal(item.tanggal),
+        waktu: item.waktuMulai
+          ? item.waktuSelesai
+            ? `${item.waktuMulai} - ${item.waktuSelesai}`
+            : item.waktuMulai
           : "-",
-        waktu,
-        konselor: item.konselor?.namaLengkap || "Konselor",
+        konselor: item.konselor?.namaLengkap || "Belum ditentukan",
         kategori: item.topik || "Akademik",
-        status: item.status
-          ? item.status.charAt(0).toUpperCase() + item.status.slice(1)
-          : "Terjadwal",
-        prioritas: "Normal",
-        catatan: item.catatan || item.hasil || item.masalah || "-",
-        avatar,
+        status: normalizeStatus(item.status),
+        avatar: getInitials(namaSiswa),
       };
     });
   }, [rawKonseling]);
@@ -295,121 +291,96 @@ export default function BKPage() {
   const pelanggaranData = useMemo(() => {
     return rawPelanggaran.map((item) => {
       const namaSiswa = item.siswa?.namaLengkap || "Siswa";
-      const avatar =
-        namaSiswa
-          .split(" ")
-          .map((w) => w[0])
-          .filter(Boolean)
-          .slice(0, 2)
-          .join("")
-          .toUpperCase() || "SW";
+
       return {
         id: item.id,
         siswa: namaSiswa,
         nis: item.siswa?.nis || item.siswa?.nisn || "-",
-        kelas: "-",
-        pelanggaran: item.kronologi || item.kategoriPelanggaran?.nama || "-",
+        pelanggaran:
+          item.kronologi ||
+          item.kategoriPelanggaran?.nama ||
+          "-",
         kategori: item.kategoriPelanggaran?.nama || "Tata Tertib",
-        point: item.poin ?? item.kategoriPelanggaran?.poin ?? 0,
-        tanggal: item.tanggal
-          ? new Date(item.tanggal).toLocaleDateString("id-ID", {
-              day: "2-digit",
-              month: "long",
-              year: "numeric",
-            })
-          : "-",
-        status: item.status
-          ? item.status.charAt(0).toUpperCase() + item.status.slice(1)
-          : "Diproses",
-        avatar,
+        point:
+          item.poin ??
+          item.kategoriPelanggaran?.poin ??
+          0,
+        tanggal: formatTanggal(item.tanggal),
+        status: item.status || "Diproses",
+        avatar: getInitials(namaSiswa),
       };
     });
   }, [rawPelanggaran]);
 
   const filteredKonseling = useMemo(() => {
-    return konselingData.filter((item) => {
-      const search = searchQuery.toLowerCase().trim();
+    const search = searchQuery.toLowerCase().trim();
 
+    return konselingData.filter((item) => {
       const matchesSearch =
         !search ||
         item.siswa.toLowerCase().includes(search) ||
         item.nis.toLowerCase().includes(search) ||
-        item.kelas.toLowerCase().includes(search) ||
-        item.konselor.toLowerCase().includes(search);
+        item.konselor.toLowerCase().includes(search) ||
+        item.kategori.toLowerCase().includes(search);
 
       const matchesStatus =
-        statusFilter === "Semua" ||
-        item.status === statusFilter;
+        statusFilter === "Semua" || item.status === statusFilter;
 
-      const matchesClass =
-        classFilter === "Semua" ||
-        item.kelas === classFilter;
-
-      return (
-        matchesSearch &&
-        matchesStatus &&
-        matchesClass
-      );
+      return matchesSearch && matchesStatus;
     });
-  }, [konselingData, searchQuery, statusFilter, classFilter]);
+  }, [konselingData, searchQuery, statusFilter]);
 
   const totalPages = Math.max(
     1,
-    Math.ceil(
-      filteredKonseling.length / itemsPerPage
-    )
+    Math.ceil(filteredKonseling.length / itemsPerPage)
   );
 
-  const safeCurrentPage = Math.min(
-    currentPage,
-    totalPages
-  );
+  const safeCurrentPage = Math.min(currentPage, totalPages);
 
   const paginatedKonseling = filteredKonseling.slice(
     (safeCurrentPage - 1) * itemsPerPage,
     safeCurrentPage * itemsPerPage
   );
 
+  const totalPoinPelanggaran = useMemo(() => {
+    return pelanggaranData.reduce(
+      (total, item) => total + Number(item.point || 0),
+      0
+    );
+  }, [pelanggaranData]);
+
+  const sesiTerjadwal = konselingData.filter(
+    (item) => item.status === "Terjadwal"
+  ).length;
+
+  const sesiSelesai = konselingData.filter(
+    (item) => item.status === "Selesai"
+  ).length;
+
+  const kasusAktif = pelanggaranData.filter(
+    (item) => String(item.status).toLowerCase() !== "selesai"
+  ).length;
 
   const resetFilters = () => {
     setSearchQuery("");
     setStatusFilter("Semua");
-    setClassFilter("Semua");
     setCurrentPage(1);
   };
-
-
-  const tabs = [
-    {
-      key: "konseling",
-      label: "Sesi Konseling",
-      icon: MessageSquare,
-    },
-    {
-      key: "pelanggaran",
-      label: "Pelanggaran",
-      icon: AlertTriangle,
-    },
-    {
-      key: "prestasi",
-      label: "Prestasi",
-      icon: Award,
-    },
-    {
-      key: "asesmen",
-      label: "Asesmen & Minat Bakat",
-      icon: Brain,
-    },
-  ];
-
 
   const toggleSidebar = () => {
     setIsCollapsed((prev) => !prev);
   };
 
+  const goToDetailKonseling = (id) => {
+    router.push(`/admin/bk/sesi-konseling/${id}`);
+  };
+
+  const goToDetailPelanggaran = (id) => {
+    router.push(`/admin/bk/pelanggaran/${id}`);
+  };
+
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
-
       <Sidebar
         active="bk"
         setActive={() => {}}
@@ -418,10 +389,8 @@ export default function BKPage() {
         role="admin"
       />
 
-
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-
-        <div className="shrink-0 border-b theme-border">
+        <div className="theme-border shrink-0 border-b">
           <Header
             toggleSidebar={toggleSidebar}
             notifications={[]}
@@ -433,1190 +402,522 @@ export default function BKPage() {
           />
         </div>
 
-
         <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto">
-          <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
+          <div className="w-full space-y-5 px-4 py-6 sm:px-6 lg:px-8">
 
-            <div className="mb-4 shrink-0">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex min-w-0 items-center gap-3">
-                  <div className="theme-info flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
-                    <HeartHandshake size={20} />
-                  </div>
-
-                  <div className="min-w-0">
-                    <h1 className="theme-text truncate text-lg font-bold tracking-tight sm:text-xl">
-                      Bimbingan Konseling
-                    </h1>
-
-                    <p className="theme-text-secondary truncate text-xs">
-                      Kelola layanan konseling, perkembangan,
-                      prestasi, dan pembinaan siswa
-                    </p>
-                  </div>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex min-w-0 items-center gap-3">
+                <div className="theme-info flex h-11 w-11 shrink-0 items-center justify-center rounded-xl">
+                  <HeartHandshake size={21} />
                 </div>
 
-                <button
-                  onClick={() =>
-                    router.push(
-                      "/admin/bk/sesi-konseling/tambah"
-                    )
-                  }
-                  className="theme-primary inline-flex shrink-0 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold shadow-sm transition"
-                >
-                  <Plus size={17} />
-                  Tambah Sesi
-                </button>
+                <div className="min-w-0">
+                  <h1 className="theme-text text-lg font-bold tracking-tight sm:text-xl">
+                    Bimbingan Konseling
+                  </h1>
+
+                  <p className="theme-text-secondary text-xs">
+                    Pusat monitoring layanan konseling, pelanggaran, dan pembinaan siswa
+                  </p>
+                </div>
               </div>
+
+              <button
+                type="button"
+                onClick={() =>
+                  router.push("/admin/bk/sesi-konseling/tambah")
+                }
+                className="theme-primary inline-flex shrink-0 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold shadow-sm transition"
+              >
+                <Plus size={17} />
+                Tambah Sesi
+              </button>
             </div>
 
-
-            <div className="mb-4 grid shrink-0 grid-cols-2 gap-3 xl:grid-cols-4">
+            <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
               <StatCard
                 title="Sesi Konseling"
-                value={loading ? "..." : String(konselingData.length)}
-                description="Sesi bulan ini"
+                value={loading ? "..." : konselingData.length}
+                description="Total sesi tercatat"
                 icon={MessageSquare}
                 iconBg="theme-info"
-                iconColor=""
-                trend={{
-                  type: "up",
-                  value: "12%",
-                }}
               />
 
               <StatCard
-                title="Prestasi Siswa"
-                value="0"
-                description="Prestasi tercatat"
-                icon={Award}
-                iconBg="theme-success"
-                iconColor=""
-                trend={{
-                  type: "up",
-                  value: "8%",
-                }}
-              />
-
-              <StatCard
-                title="Pelanggaran"
-                value={loading ? "..." : String(pelanggaranData.length)}
-                description="Kasus bulan ini"
+                title="Pelanggaran Siswa"
+                value={loading ? "..." : pelanggaranData.length}
+                description="Total kasus tercatat"
                 icon={AlertTriangle}
                 iconBg="theme-warning"
-                iconColor=""
-                trend={{
-                  type: "down",
-                  value: "6%",
-                }}
               />
 
               <StatCard
-                title="Asesmen"
-                value="0%"
-                description="Siswa sudah mengikuti"
-                icon={Brain}
+                title="Kategori Pelanggaran"
+                value={loading ? "..." : rawKategori.length}
+                description="Kategori terdaftar"
+                icon={Target}
                 iconBg="theme-info"
-                iconColor=""
+              />
+
+              <StatCard
+                title="Total Poin Pelanggaran"
+                value={loading ? "..." : totalPoinPelanggaran}
+                description="Akumulasi seluruh poin"
+                icon={Award}
+                iconBg="theme-success"
               />
             </div>
 
-
-            <div className="mb-4 grid shrink-0 grid-cols-2 gap-3 md:grid-cols-4">
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
               <QuickSummary
                 icon={Clock3}
-                title="Terjadwal Hari Ini"
-                value={loading ? "..." : String(konselingData.filter((k) => k.status.toLowerCase() === "terjadwal").length)}
-                description="Sesi konseling"
+                title="Sesi Terjadwal"
+                value={loading ? "..." : sesiTerjadwal}
+                description="Sesi"
               />
 
               <QuickSummary
                 icon={CheckCircle2}
-                title="Selesai"
-                value={loading ? "..." : String(konselingData.filter((k) => k.status.toLowerCase() === "selesai").length)}
-                description="Sesi bulan ini"
+                title="Sesi Selesai"
+                value={loading ? "..." : sesiSelesai}
+                description="Sesi"
               />
 
               <QuickSummary
                 icon={AlertTriangle}
                 title="Kasus Aktif"
-                value={loading ? "..." : String(pelanggaranData.filter((p) => p.status.toLowerCase() !== "selesai").length)}
-                description="Perlu tindak lanjut"
+                value={loading ? "..." : kasusAktif}
+                description="Kasus"
               />
 
               <QuickSummary
-                icon={Target}
-                title="Minat Bakat"
-                value="0%"
-                description="Data terisi"
+                icon={Users}
+                title="Kategori Aktif"
+                value={
+                  loading
+                    ? "..."
+                    : rawKategori.filter(
+                        (item) =>
+                          String(item.status || "aktif").toLowerCase() ===
+                          "aktif"
+                      ).length
+                }
+                description="Kategori"
               />
             </div>
 
+            <SectionCard
+              title="Sesi Konseling Siswa"
+              description="Ringkasan jadwal dan riwayat konseling siswa"
+              icon={MessageSquare}
+              action="Lihat Semua"
+              onAction={() =>
+                router.push("/admin/bk/sesi-konseling")
+              }
+            >
+              <div className="theme-border-soft flex flex-col gap-3 border-b p-3 sm:flex-row sm:items-center">
+                <div className="relative min-w-0 flex-1">
+                  <Search
+                    size={16}
+                    className="theme-text-muted pointer-events-none absolute left-3 top-1/2 -translate-y-1/2"
+                  />
 
-            <div className="theme-card theme-border mb-4 shrink-0 overflow-x-auto rounded-xl border shadow-sm">
-              <div className="flex min-w-max">
-                {tabs.map((tab) => {
-                  const Icon = tab.icon;
-                  const active = activeTab === tab.key;
-
-                  return (
-                    <button
-                      key={tab.key}
-                      onClick={() => {
-                        setActiveTab(tab.key);
-                        setCurrentPage(1);
-                      }}
-                      className={`relative flex items-center gap-2 px-4 py-3 text-xs font-semibold transition ${
-                        active
-                          ? "theme-sidebar-text-active"
-                          : "theme-text-muted"
-                      }`}
-                    >
-                      <Icon size={15} />
-
-                      {tab.label}
-
-                      {active && (
-                        <span className="absolute bottom-0 left-3 right-3 h-0.5 rounded-full bg-[var(--color-primary)]" />
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-
-            <div className="w-full">
-              {activeTab === "konseling" && (
-                <div className="theme-card theme-border overflow-hidden rounded-xl border shadow-sm">
-
-                  <div className="theme-border-soft shrink-0 border-b p-3 sm:p-4">
-                    <div className="flex flex-col gap-3 xl:flex-row xl:items-center">
-                      <div className="relative min-w-0 flex-1">
-                        <Search
-                          size={17}
-                          className="theme-text-muted pointer-events-none absolute left-3 top-1/2 -translate-y-1/2"
-                        />
-
-                        <input
-                          type="text"
-                          value={searchQuery}
-                          onChange={(e) => {
-                            setSearchQuery(
-                              e.target.value
-                            );
-                            setCurrentPage(1);
-                          }}
-                          placeholder="Cari nama siswa, NIS, kelas, atau konselor..."
-                          className="theme-input h-10 w-full rounded-lg border pl-9 pr-3 text-sm outline-none transition focus:border-[var(--color-primary)]"
-                        />
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 xl:flex">
-                        <select
-                          value={statusFilter}
-                          onChange={(e) => {
-                            setStatusFilter(
-                              e.target.value
-                            );
-                            setCurrentPage(1);
-                          }}
-                          className="theme-input h-10 min-w-[135px] rounded-lg border px-3 text-xs font-medium outline-none focus:border-[var(--color-primary)]"
-                        >
-                          <option value="Semua">
-                            Semua Status
-                          </option>
-                          <option value="Terjadwal">
-                            Terjadwal
-                          </option>
-                          <option value="Selesai">
-                            Selesai
-                          </option>
-                          <option value="Dibatalkan">
-                            Dibatalkan
-                          </option>
-                        </select>
-
-                        <select
-                          value={classFilter}
-                          onChange={(e) => {
-                            setClassFilter(
-                              e.target.value
-                            );
-                            setCurrentPage(1);
-                          }}
-                          className="theme-input h-10 min-w-[135px] rounded-lg border px-3 text-xs font-medium outline-none focus:border-[var(--color-primary)]"
-                        >
-                          <option value="Semua">
-                            Semua Kelas
-                          </option>
-                          <option value="X IPA 2">
-                            X IPA 2
-                          </option>
-                          <option value="XI IPS 2">
-                            XI IPS 2
-                          </option>
-                          <option value="XI IPA 1">
-                            XI IPA 1
-                          </option>
-                          <option value="XII IPA 1">
-                            XII IPA 1
-                          </option>
-                          <option value="XII IPA 2">
-                            XII IPA 2
-                          </option>
-                          <option value="XII IPS 1">
-                            XII IPS 1
-                          </option>
-                        </select>
-
-                        <button
-                          onClick={resetFilters}
-                          className="theme-card theme-border theme-text-secondary theme-header-hover inline-flex h-10 items-center justify-center gap-1.5 rounded-lg border px-3 text-xs font-medium transition"
-                        >
-                          <RotateCcw size={14} />
-                          Reset
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-
-                  <div className="overflow-x-auto">
-                    <table className="w-full min-w-[950px] border-collapse">
-                      <thead className="theme-table-header sticky top-0 z-10">
-                        <tr className="theme-border border-b">
-                          <th className="theme-text-secondary px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider">
-                            Siswa
-                          </th>
-
-                          <th className="theme-text-secondary px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider">
-                            Jadwal
-                          </th>
-
-                          <th className="theme-text-secondary px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider">
-                            Konselor
-                          </th>
-
-                          <th className="theme-text-secondary px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider">
-                            Kategori
-                          </th>
-
-                          <th className="theme-text-secondary px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider">
-                            Prioritas
-                          </th>
-
-                          <th className="theme-text-secondary px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider">
-                            Status
-                          </th>
-
-                          <th className="theme-text-secondary px-4 py-3 text-right text-[11px] font-semibold uppercase tracking-wider">
-                            Aksi
-                          </th>
-                        </tr>
-                      </thead>
-
-                      <tbody className="divide-y divide-[var(--color-border-soft)]">
-                        {loading ? (
-                          <tr>
-                            <td colSpan={6} className="px-4 py-8 text-center text-xs theme-text-muted">
-                              Memuat data sesi konseling...
-                            </td>
-                          </tr>
-                        ) : filteredKonseling.length === 0 ? (
-                          <tr>
-                            <td colSpan={6} className="px-4 py-8 text-center text-xs theme-text-muted">
-                              {searchQuery || statusFilter !== "Semua" || classFilter !== "Semua"
-                                ? "Tidak ada sesi konseling yang sesuai filter."
-                                : "Belum ada sesi konseling yang tercatat."}
-                            </td>
-                          </tr>
-                        ) : (
-                          paginatedKonseling.map((item) => (
-                            <tr
-                              key={item.id}
-                              className="theme-table-hover transition"
-                            >
-                              <td className="px-4 py-3">
-                                <div className="flex items-center gap-3">
-                                  <div className="theme-info flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-xs font-bold">
-                                    {item.avatar}
-                                  </div>
-
-                                  <div className="min-w-0">
-                                    <p className="theme-text truncate text-sm font-semibold">
-                                      {item.siswa}
-                                    </p>
-
-                                    <p className="theme-text-placeholder mt-0.5 text-[11px]">
-                                      {item.nis} ·{" "}
-                                      {item.kelas}
-                                    </p>
-                                  </div>
-                                </div>
-                              </td>
-
-                              <td className="px-4 py-3">
-                                <p className="theme-text text-xs font-medium">
-                                  {item.tanggal}
-                                </p>
-
-                                <p className="theme-text-placeholder mt-0.5 flex items-center gap-1 text-[11px]">
-                                  <Clock3 size={11} />
-                                  {item.waktu}
-                                </p>
-                              </td>
-
-                              <td className="px-4 py-3">
-                                <p className="theme-text text-xs font-medium">
-                                  {item.konselor}
-                                </p>
-
-                                <p className="theme-text-placeholder mt-0.5 text-[10px]">
-                                  Guru BK
-                                </p>
-                              </td>
-
-                              <td className="px-4 py-3">
-                                <span className="theme-info rounded-md border px-2.5 py-1 text-xs font-medium">
-                                  {item.kategori}
-                                </span>
-                              </td>
-
-                              <td className="px-4 py-3">
-                                <PriorityBadge
-                                  priority={
-                                    item.prioritas
-                                  }
-                                />
-                              </td>
-
-                              <td className="px-4 py-3">
-                                <KonselingStatus
-                                  status={item.status}
-                                />
-                              </td>
-
-                              <td className="px-4 py-3">
-                                <div className="flex justify-end gap-1">
-                                  <button
-                                    onClick={() =>
-                                      setSelectedKonseling(
-                                        item
-                                      )
-                                    }
-                                    className="theme-text-muted theme-header-hover flex h-8 w-8 items-center justify-center rounded-lg transition"
-                                    title="Lihat detail"
-                                  >
-                                    <Eye size={16} />
-                                  </button>
-
-                                  <button
-                                    onClick={() =>
-                                      setSelectedKonseling(
-                                        item
-                                      )
-                                    }
-                                    className="theme-text-muted theme-header-hover flex h-8 w-8 items-center justify-center rounded-lg transition"
-                                    title="Edit"
-                                  >
-                                    <Edit3 size={16} />
-                                  </button>
-                                </div>
-                              </td>
-                            </tr>
-                          ))
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
-
-
-                  <div className="theme-border-soft flex shrink-0 flex-col gap-2 border-t px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-                    <p className="theme-text-muted text-xs">
-                      Menampilkan{" "}
-                      <span className="theme-text-secondary font-medium">
-                        {filteredKonseling.length === 0
-                          ? 0
-                          : (safeCurrentPage - 1) *
-                              itemsPerPage +
-                            1}
-                      </span>{" "}
-                      -{" "}
-                      <span className="theme-text-secondary font-medium">
-                        {Math.min(
-                          safeCurrentPage *
-                            itemsPerPage,
-                          filteredKonseling.length
-                        )}
-                      </span>{" "}
-                      dari{" "}
-                      <span className="theme-text-secondary font-medium">
-                        {filteredKonseling.length}
-                      </span>{" "}
-                      sesi
-                    </p>
-
-                    <div className="flex items-center gap-1">
-                      <button
-                        disabled={safeCurrentPage === 1}
-                        onClick={() =>
-                          setCurrentPage((prev) =>
-                            Math.max(1, prev - 1)
-                          )
-                        }
-                        className="theme-card theme-border theme-text-secondary theme-header-hover flex h-8 w-8 items-center justify-center rounded-lg border transition disabled:opacity-40"
-                      >
-                        <ChevronLeft size={15} />
-                      </button>
-
-                      {Array.from(
-                        {
-                          length: totalPages,
-                        },
-                        (_, index) => index + 1
-                      ).map((page) => (
-                        <button
-                          key={page}
-                          onClick={() =>
-                            setCurrentPage(page)
-                          }
-                          className={`flex h-8 min-w-8 items-center justify-center rounded-lg px-2 text-xs font-medium ${
-                            safeCurrentPage === page
-                              ? "theme-primary"
-                              : "theme-text-muted theme-header-hover"
-                          }`}
-                        >
-                          {page}
-                        </button>
-                      ))}
-
-                      <button
-                        disabled={
-                          safeCurrentPage === totalPages
-                        }
-                        onClick={() =>
-                          setCurrentPage((prev) =>
-                            Math.min(
-                              totalPages,
-                              prev + 1
-                            )
-                          )
-                        }
-                        className="theme-card theme-border theme-text-secondary theme-header-hover flex h-8 w-8 items-center justify-center rounded-lg border transition disabled:opacity-40"
-                      >
-                        <ChevronRight size={15} />
-                      </button>
-                    </div>
-                  </div>
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                    placeholder="Cari nama siswa, NIS, atau konselor..."
+                    className="theme-input h-9 w-full rounded-lg border pl-9 pr-3 text-xs outline-none focus:border-[var(--color-primary)]"
+                  />
                 </div>
-              )}
 
+                <div className="flex gap-2">
+                  <select
+                    value={statusFilter}
+                    onChange={(e) => {
+                      setStatusFilter(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                    className="theme-input h-9 rounded-lg border px-3 text-xs outline-none"
+                  >
+                    <option value="Semua">Semua Status</option>
+                    <option value="Terjadwal">Terjadwal</option>
+                    <option value="Selesai">Selesai</option>
+                    <option value="Dibatalkan">Dibatalkan</option>
+                  </select>
 
-              {activeTab === "pelanggaran" && (
-                <SectionCard
-                  title="Pelanggaran Siswa"
-                  description="Daftar pelanggaran dan point siswa"
-                  icon={AlertTriangle}
-                  action="Kelola Semua"
-                  onAction={() =>
-                    router.push(
-                      "/admin/bk/pelanggaran"
-                    )
-                  }
-                >
-                  <table className="w-full min-w-[850px] border-collapse">
-                    <thead className="theme-table-header sticky top-0 z-10">
-                      <tr className="theme-border border-b">
-                        <th className="theme-text-secondary px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider">
-                          Siswa
-                        </th>
+                  <button
+                    type="button"
+                    onClick={resetFilters}
+                    className="theme-card theme-border theme-text-secondary theme-header-hover flex h-9 items-center gap-1.5 rounded-lg border px-3 text-xs"
+                  >
+                    <RotateCcw size={13} />
+                    Reset
+                  </button>
+                </div>
+              </div>
 
-                        <th className="theme-text-secondary px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider">
-                          Pelanggaran
-                        </th>
+              <table className="w-full min-w-[750px] border-collapse">
+                <thead className="theme-table-header">
+                  <tr className="theme-border border-b">
+                    {[
+                      "Siswa",
+                      "Jadwal",
+                      "Konselor",
+                      "Topik",
+                      "Status",
+                      "Aksi",
+                    ].map((item) => (
+                      <th
+                        key={item}
+                        className="theme-text-secondary px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider"
+                      >
+                        {item}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
 
-                        <th className="theme-text-secondary px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider">
-                          Kategori
-                        </th>
+                <tbody className="divide-y divide-[var(--color-border-soft)]">
+                  {loading ? (
+                    <EmptyRow colSpan={6}>
+                      Memuat data sesi konseling...
+                    </EmptyRow>
+                  ) : filteredKonseling.length === 0 ? (
+                    <EmptyRow colSpan={6}>
+                      Belum ada sesi konseling yang sesuai.
+                    </EmptyRow>
+                  ) : (
+                    paginatedKonseling.map((item) => (
+                      <tr
+                        key={item.id}
+                        className="theme-table-hover transition"
+                      >
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-2.5">
+                            <div className="theme-info flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-xs font-bold">
+                              {item.avatar}
+                            </div>
 
-                        <th className="theme-text-secondary px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider">
-                          Point
-                        </th>
-
-                        <th className="theme-text-secondary px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider">
-                          Tanggal
-                        </th>
-
-                        <th className="theme-text-secondary px-4 py-3 text-right text-[11px] font-semibold uppercase tracking-wider">
-                          Aksi
-                        </th>
-                      </tr>
-                    </thead>
-
-                    <tbody className="divide-y divide-[var(--color-border-soft)]">
-                      {loading ? (
-                        <tr>
-                          <td colSpan={6} className="px-4 py-8 text-center text-xs theme-text-muted">
-                            Memuat data pelanggaran siswa...
-                          </td>
-                        </tr>
-                      ) : pelanggaranData.length === 0 ? (
-                        <tr>
-                          <td colSpan={6} className="px-4 py-8 text-center text-xs theme-text-muted">
-                            Belum ada data pelanggaran siswa yang tercatat.
-                          </td>
-                        </tr>
-                      ) : (
-                        pelanggaranData.map((item) => (
-                          <tr
-                            key={item.id}
-                            className="theme-table-hover transition"
-                          >
-                            <td className="px-4 py-3">
-                              <div className="flex items-center gap-3">
-                                <div className="theme-info flex h-9 w-9 items-center justify-center rounded-lg text-xs font-bold">
-                                  {item.avatar}
-                                </div>
-
-                                <div>
-                                  <p className="theme-text text-sm font-semibold">
-                                    {item.siswa}
-                                  </p>
-
-                                  <p className="theme-text-placeholder text-[11px]">
-                                    {item.nis} ·{" "}
-                                    {item.kelas}
-                                  </p>
-                                </div>
-                              </div>
-                            </td>
-
-                            <td className="px-4 py-3">
-                              <p className="theme-text max-w-[240px] truncate text-xs font-medium">
-                                {item.pelanggaran}
+                            <div className="min-w-0">
+                              <p className="theme-text truncate text-xs font-semibold">
+                                {item.siswa}
                               </p>
-                            </td>
+                              <p className="theme-text-muted mt-1 text-[10px]">
+                                {item.nis}
+                              </p>
+                            </div>
+                          </div>
+                        </td>
 
-                            <td className="px-4 py-3">
-                              <span className="theme-card-soft theme-text-secondary theme-border rounded-md border px-2.5 py-1 text-xs">
-                                {item.kategori}
-                              </span>
-                            </td>
+                        <td className="px-4 py-3">
+                          <p className="theme-text text-xs font-medium">
+                            {item.tanggal}
+                          </p>
+                          <p className="theme-text-muted mt-1 flex items-center gap-1 text-[10px]">
+                            <Clock3 size={11} />
+                            {item.waktu}
+                          </p>
+                        </td>
 
-                            <td className="px-4 py-3">
-                              <span className="font-bold text-[var(--color-danger)]">
-                                {item.point}
-                              </span>
+                        <td className="theme-text-secondary px-4 py-3 text-xs">
+                          {item.konselor}
+                        </td>
 
-                              <span className="theme-text-placeholder ml-1 text-[10px]">
-                                point
-                              </span>
-                            </td>
+                        <td className="px-4 py-3">
+                          <span className="theme-info rounded-md border px-2 py-1 text-[10px] font-medium">
+                            {item.kategori}
+                          </span>
+                        </td>
 
-                            <td className="theme-text-secondary px-4 py-3 text-xs">
-                              {item.tanggal}
-                            </td>
+                        <td className="px-4 py-3">
+                          <KonselingStatus status={item.status} />
+                        </td>
 
-                            <td className="px-4 py-3">
-                              <div className="flex justify-end">
-                                <button
-                                  onClick={() =>
-                                    setSelectedPelanggaran(
-                                      item
-                                    )
-                                  }
-                                  className="theme-text-muted theme-header-hover flex h-8 w-8 items-center justify-center rounded-lg transition"
-                                >
-                                  <Eye size={16} />
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
-                </SectionCard>
-              )}
-
-
-              {activeTab === "prestasi" && (
-                <SectionCard
-                  title="Prestasi Siswa"
-                  description="Rekap prestasi akademik dan non akademik"
-                  icon={Award}
-                  action="Kelola Semua"
-                  onAction={() =>
-                    router.push(
-                      "/admin/bk/prestasi"
-                    )
-                  }
-                >
-                  <table className="w-full min-w-[800px] border-collapse">
-                    <thead className="theme-table-header sticky top-0 z-10">
-                      <tr className="theme-border border-b">
-                        <th className="theme-text-secondary px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider">
-                          Siswa
-                        </th>
-
-                        <th className="theme-text-secondary px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider">
-                          Prestasi
-                        </th>
-
-                        <th className="theme-text-secondary px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider">
-                          Tingkat
-                        </th>
-
-                        <th className="theme-text-secondary px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider">
-                          Kategori
-                        </th>
-
-                        <th className="theme-text-secondary px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider">
-                          Tanggal
-                        </th>
-
-                        <th className="theme-text-secondary px-4 py-3 text-right text-[11px] font-semibold uppercase tracking-wider">
-                          Aksi
-                        </th>
-                      </tr>
-                    </thead>
-
-                    <tbody className="divide-y divide-[var(--color-border-soft)]">
-                      <tr>
-                        <td colSpan={6} className="px-4 py-8 text-center text-xs theme-text-muted">
-                          Belum ada catatan prestasi atau modul prestasi belum diaktifkan di server.
+                        <td className="px-4 py-3">
+                          <div className="flex justify-end">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                goToDetailKonseling(item.id)
+                              }
+                              title="Lihat detail"
+                              className="theme-text-muted theme-header-hover flex h-8 w-8 items-center justify-center rounded-lg"
+                            >
+                              <Eye size={16} />
+                            </button>
+                          </div>
                         </td>
                       </tr>
-                    </tbody>
-                  </table>
-                </SectionCard>
-              )}
+                    ))
+                  )}
+                </tbody>
+              </table>
 
+              <div className="theme-border-soft flex flex-col gap-2 border-t px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                <p className="theme-text-muted text-xs">
+                  Menampilkan{" "}
+                  <span className="theme-text-secondary font-medium">
+                    {filteredKonseling.length === 0
+                      ? 0
+                      : (safeCurrentPage - 1) * itemsPerPage + 1}
+                  </span>
+                  {" - "}
+                  <span className="theme-text-secondary font-medium">
+                    {Math.min(
+                      safeCurrentPage * itemsPerPage,
+                      filteredKonseling.length
+                    )}
+                  </span>
+                  {" dari "}
+                  <span className="theme-text-secondary font-medium">
+                    {filteredKonseling.length}
+                  </span>{" "}
+                  sesi
+                </p>
 
-              {activeTab === "asesmen" && (
-                <div className="grid h-full min-h-0 gap-4 lg:grid-cols-3">
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    disabled={safeCurrentPage === 1}
+                    onClick={() =>
+                      setCurrentPage((prev) => Math.max(1, prev - 1))
+                    }
+                    className="theme-card theme-border theme-text-secondary flex h-8 w-8 items-center justify-center rounded-lg border disabled:opacity-40"
+                  >
+                    <ChevronLeft size={15} />
+                  </button>
 
-                  <div className="theme-card theme-border rounded-xl border p-5 shadow-sm lg:col-span-2">
-                    <div className="flex items-center gap-3">
-                      <div className="theme-info flex h-10 w-10 items-center justify-center rounded-xl">
-                        <Brain size={20} />
-                      </div>
+                  {Array.from(
+                    { length: totalPages },
+                    (_, index) => index + 1
+                  ).map((page) => (
+                    <button
+                      type="button"
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`flex h-8 min-w-8 items-center justify-center rounded-lg px-2 text-xs font-medium ${
+                        safeCurrentPage === page
+                          ? "theme-primary"
+                          : "theme-text-muted theme-header-hover"
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ))}
 
-                      <div>
-                        <h3 className="theme-text text-sm font-bold">
-                          Asesmen Minat &amp; Bakat
-                        </h3>
-
-                        <p className="theme-text-placeholder text-[10px]">
-                          Belum tersedia
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="theme-card-soft theme-border mt-5 rounded-xl border p-4">
-                      <div className="flex items-start gap-3">
-                        <AlertTriangle
-                          size={18}
-                          className="theme-text-muted mt-0.5 shrink-0"
-                        />
-
-                        <div className="min-w-0">
-                          <p className="theme-text text-sm font-semibold">
-                            Belum tersedia
-                          </p>
-
-                          <p className="theme-text-placeholder mt-1 text-xs leading-5">
-                            Endpoint /api/bk/asesmen-minat-bakat belum
-                            tersedia di Backend SmartSchool, sehingga
-                            ringkasan kelengkapan asesmen, hasil minat, dan
-                            rekomendasi bakat siswa belum dapat ditampilkan.
-                            Sesuai kebijakan integritas data bisnis, angka
-                            perkiraan tidak ditampilkan sampai endpoint resmi
-                            disediakan oleh Backend.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-
-                  <div className="theme-card theme-border rounded-xl border p-5 shadow-sm">
-                    <div>
-                      <h3 className="theme-text text-sm font-bold">
-                        Menu Bimbingan Konseling
-                      </h3>
-
-                      <p className="theme-text-placeholder mt-0.5 text-[10px]">
-                        Akses pengelolaan data BK
-                      </p>
-                    </div>
-
-                    <div className="mt-4 space-y-2">
-                      <QuickAction
-                        icon={MessageSquare}
-                        title="Sesi Konseling Siswa"
-                        description="Kelola jadwal dan riwayat"
-                        onClick={() =>
-                          router.push(
-                            "/admin/bk/konseling"
-                          )
-                        }
-                      />
-
-                      <QuickAction
-                        icon={Award}
-                        title="Prestasi Siswa"
-                        description="Data prestasi siswa"
-                        onClick={() =>
-                          router.push(
-                            "/admin/bk/prestasi"
-                          )
-                        }
-                      />
-
-                      <QuickAction
-                        icon={AlertTriangle}
-                        title="Pelanggaran Siswa"
-                        description="Catatan pelanggaran"
-                        onClick={() =>
-                          router.push(
-                            "/admin/bk/pelanggaran"
-                          )
-                        }
-                      />
-
-                      <QuickAction
-                        icon={Target}
-                        title="Kategori & Point"
-                        description="Pengaturan point pelanggaran"
-                        onClick={() =>
-                          router.push(
-                            "/admin/bk/kategori-pelanggaran"
-                          )
-                        }
-                      />
-
-                      <QuickAction
-                        icon={Brain}
-                        title="Asesmen & Minat Bakat"
-                        description="Belum tersedia di backend"
-                        badge="Belum tersedia"
-                        disabled
-                      />
-                    </div>
-                  </div>
+                  <button
+                    type="button"
+                    disabled={safeCurrentPage === totalPages}
+                    onClick={() =>
+                      setCurrentPage((prev) =>
+                        Math.min(totalPages, prev + 1)
+                      )
+                    }
+                    className="theme-card theme-border theme-text-secondary flex h-8 w-8 items-center justify-center rounded-lg border disabled:opacity-40"
+                  >
+                    <ChevronRight size={15} />
+                  </button>
                 </div>
-              )}
-            </div>
+              </div>
+            </SectionCard>
+
+            <SectionCard
+              title="Pelanggaran Siswa"
+              description="Ringkasan catatan pelanggaran dan poin siswa"
+              icon={AlertTriangle}
+              action="Lihat Semua"
+              onAction={() =>
+                router.push("/admin/bk/pelanggaran")
+              }
+            >
+              <table className="w-full min-w-[750px] border-collapse">
+                <thead className="theme-table-header">
+                  <tr className="theme-border border-b">
+                    {[
+                      "Siswa",
+                      "Pelanggaran",
+                      "Kategori",
+                      "Poin",
+                      "Tanggal",
+                      "Aksi",
+                    ].map((item) => (
+                      <th
+                        key={item}
+                        className="theme-text-secondary px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider"
+                      >
+                        {item}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+
+                <tbody className="divide-y divide-[var(--color-border-soft)]">
+                  {loading ? (
+                    <EmptyRow colSpan={6}>
+                      Memuat data pelanggaran...
+                    </EmptyRow>
+                  ) : pelanggaranData.length === 0 ? (
+                    <EmptyRow colSpan={6}>
+                      Belum ada data pelanggaran siswa.
+                    </EmptyRow>
+                  ) : (
+                    pelanggaranData.slice(0, 5).map((item) => (
+                      <tr
+                        key={item.id}
+                        className="theme-table-hover transition"
+                      >
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-2.5">
+                            <div className="theme-info flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-xs font-bold">
+                              {item.avatar}
+                            </div>
+
+                            <div className="min-w-0">
+                              <p className="theme-text truncate text-xs font-semibold">
+                                {item.siswa}
+                              </p>
+                              <p className="theme-text-muted mt-1 text-[10px]">
+                                {item.nis}
+                              </p>
+                            </div>
+                          </div>
+                        </td>
+
+                        <td className="theme-text-secondary max-w-[220px] truncate px-4 py-3 text-xs">
+                          {item.pelanggaran}
+                        </td>
+
+                        <td className="px-4 py-3">
+                          <span className="theme-card-soft theme-text-secondary theme-border rounded-md border px-2 py-1 text-[10px]">
+                            {item.kategori}
+                          </span>
+                        </td>
+
+                        <td className="px-4 py-3">
+                          <span className="text-xs font-bold text-[var(--color-danger)]">
+                            {item.point}
+                          </span>
+                          <span className="theme-text-muted ml-1 text-[10px]">
+                            poin
+                          </span>
+                        </td>
+
+                        <td className="theme-text-secondary px-4 py-3 text-xs">
+                          {item.tanggal}
+                        </td>
+
+                        <td className="px-4 py-3">
+                          <div className="flex justify-end">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                goToDetailPelanggaran(item.id)
+                              }
+                              title="Lihat detail"
+                              className="theme-text-muted theme-header-hover flex h-8 w-8 items-center justify-center rounded-lg"
+                            >
+                              <Eye size={16} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </SectionCard>
+
+            <SectionCard
+              title="Kategori & Point Pelanggaran"
+              description="Daftar kategori dan ketentuan poin pelanggaran siswa"
+              icon={Target}
+              action="Lihat Semua"
+              onAction={() =>
+                router.push("/admin/bk/kategori-pelanggaran")
+              }
+            >
+              <table className="w-full min-w-[650px] border-collapse">
+                <thead className="theme-table-header">
+                  <tr className="theme-border border-b">
+                    {[
+                      "No",
+                      "Nama Kategori",
+                      "Deskripsi",
+                      "Point",
+                      "Status",
+                    ].map((item) => (
+                      <th
+                        key={item}
+                        className="theme-text-secondary px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider"
+                      >
+                        {item}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+
+                <tbody className="divide-y divide-[var(--color-border-soft)]">
+                  {loading ? (
+                    <EmptyRow colSpan={5}>
+                      Memuat kategori pelanggaran...
+                    </EmptyRow>
+                  ) : rawKategori.length === 0 ? (
+                    <EmptyRow colSpan={5}>
+                      Belum ada kategori pelanggaran.
+                    </EmptyRow>
+                  ) : (
+                    rawKategori.slice(0, 5).map((item, index) => (
+                      <tr
+                        key={item.id}
+                        className="theme-table-hover transition"
+                      >
+                        <td className="theme-text-muted px-4 py-3 text-xs">
+                          {index + 1}
+                        </td>
+
+                        <td className="theme-text px-4 py-3 text-xs font-semibold">
+                          {item.nama}
+                        </td>
+
+                        <td className="theme-text-secondary max-w-[250px] truncate px-4 py-3 text-xs">
+                          {item.deskripsi || "-"}
+                        </td>
+
+                        <td className="px-4 py-3">
+                          <span className="text-xs font-bold text-[var(--color-danger)]">
+                            {item.poin}
+                          </span>
+                          <span className="theme-text-muted ml-1 text-[10px]">
+                            poin
+                          </span>
+                        </td>
+
+                        <td className="px-4 py-3">
+                          <span
+                            className={`rounded-md border px-2 py-1 text-[10px] font-medium ${
+                              String(item.status || "aktif").toLowerCase() ===
+                              "aktif"
+                                ? "theme-success"
+                                : "theme-card-soft theme-text-muted theme-border"
+                            }`}
+                          >
+                            {item.status || "Aktif"}
+                          </span>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </SectionCard>
+
           </div>
         </main>
       </div>
-
-
-      {selectedKonseling && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-[2px]">
-          <div className="theme-card w-full max-w-2xl overflow-hidden rounded-2xl shadow-2xl">
-            <div className="theme-border-soft flex items-center justify-between border-b px-5 py-4">
-              <div>
-                <h2 className="theme-text text-base font-bold">
-                  Detail Sesi Konseling
-                </h2>
-
-                <p className="theme-text-placeholder mt-0.5 text-xs">
-                  Informasi lengkap sesi konseling siswa
-                </p>
-              </div>
-
-              <button
-                onClick={() =>
-                  setSelectedKonseling(null)
-                }
-                className="theme-text-muted theme-header-hover flex h-8 w-8 items-center justify-center rounded-lg"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            <div className="max-h-[75vh] overflow-y-auto p-5">
-              <div className="theme-info theme-border flex items-center gap-3 rounded-xl border p-4">
-                <div className="theme-card flex h-12 w-12 items-center justify-center rounded-xl text-sm font-bold">
-                  {selectedKonseling.avatar}
-                </div>
-
-                <div className="min-w-0 flex-1">
-                  <h3 className="theme-text text-base font-bold">
-                    {selectedKonseling.siswa}
-                  </h3>
-
-                  <p className="theme-text-muted text-xs">
-                    {selectedKonseling.nis} ·{" "}
-                    {selectedKonseling.kelas}
-                  </p>
-                </div>
-
-                <KonselingStatus
-                  status={selectedKonseling.status}
-                />
-              </div>
-
-              <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                <DetailItem
-                  icon={CalendarDays}
-                  label="Tanggal"
-                  value={selectedKonseling.tanggal}
-                />
-
-                <DetailItem
-                  icon={Clock3}
-                  label="Waktu"
-                  value={selectedKonseling.waktu}
-                />
-
-                <DetailItem
-                  icon={UserRound}
-                  label="Konselor"
-                  value={selectedKonseling.konselor}
-                />
-
-                <DetailItem
-                  icon={BookOpen}
-                  label="Kategori"
-                  value={selectedKonseling.kategori}
-                />
-
-                <DetailItem
-                  icon={Activity}
-                  label="Prioritas"
-                  value={selectedKonseling.prioritas}
-                />
-
-                <DetailItem
-                  icon={ShieldCheck}
-                  label="Status"
-                  value={selectedKonseling.status}
-                />
-              </div>
-
-              <div className="theme-card-soft theme-border mt-4 rounded-xl border p-4">
-                <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-wide">
-                  Catatan Konseling
-                </p>
-
-                <p className="theme-text-secondary mt-2 text-sm leading-relaxed">
-                  {selectedKonseling.catatan}
-                </p>
-              </div>
-            </div>
-
-            <div className="theme-border-soft flex justify-end gap-2 border-t px-5 py-4">
-              <button
-                onClick={() =>
-                  setSelectedKonseling(null)
-                }
-                className="theme-card theme-border theme-text-secondary theme-header-hover rounded-lg border px-4 py-2 text-sm font-medium"
-              >
-                Tutup
-              </button>
-
-              <button className="theme-primary inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold">
-                <Edit3 size={15} />
-                Edit Sesi
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-
-      {selectedPelanggaran && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-[2px]">
-          <div className="theme-card w-full max-w-lg overflow-hidden rounded-2xl shadow-2xl">
-            <div className="theme-border-soft flex items-center justify-between border-b px-5 py-4">
-              <div>
-                <h2 className="theme-text text-base font-bold">
-                  Detail Pelanggaran
-                </h2>
-
-                <p className="theme-text-placeholder mt-0.5 text-xs">
-                  Informasi pelanggaran siswa
-                </p>
-              </div>
-
-              <button
-                onClick={() =>
-                  setSelectedPelanggaran(null)
-                }
-                className="theme-text-muted theme-header-hover flex h-8 w-8 items-center justify-center rounded-lg"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            <div className="max-h-[75vh] overflow-y-auto p-5">
-              <div className="theme-danger theme-border flex items-center gap-3 rounded-xl border p-4">
-                <div className="theme-card flex h-11 w-11 items-center justify-center rounded-xl text-xs font-bold">
-                  {selectedPelanggaran.avatar}
-                </div>
-
-                <div>
-                  <p className="theme-text text-sm font-bold">
-                    {selectedPelanggaran.siswa}
-                  </p>
-
-                  <p className="theme-text-muted text-xs">
-                    {selectedPelanggaran.nis} ·{" "}
-                    {selectedPelanggaran.kelas}
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                <DetailItem
-                  icon={AlertTriangle}
-                  label="Pelanggaran"
-                  value={
-                    selectedPelanggaran.pelanggaran
-                  }
-                />
-
-                <DetailItem
-                  icon={FileText}
-                  label="Kategori"
-                  value={
-                    selectedPelanggaran.kategori
-                  }
-                />
-
-                <DetailItem
-                  icon={TrendingDown}
-                  label="Point"
-                  value={`${selectedPelanggaran.point} Point`}
-                />
-
-                <DetailItem
-                  icon={CalendarDays}
-                  label="Tanggal"
-                  value={selectedPelanggaran.tanggal}
-                />
-              </div>
-            </div>
-
-            <div className="theme-border-soft flex justify-end border-t px-5 py-4">
-              <button
-                onClick={() =>
-                  setSelectedPelanggaran(null)
-                }
-                className="theme-card theme-border theme-text-secondary theme-header-hover rounded-lg border px-4 py-2 text-sm font-medium"
-              >
-                Tutup
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-
-      {selectedPrestasi && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-[2px]">
-          <div className="theme-card w-full max-w-lg overflow-hidden rounded-2xl shadow-2xl">
-            <div className="theme-border-soft flex items-center justify-between border-b px-5 py-4">
-              <div>
-                <h2 className="theme-text text-base font-bold">
-                  Detail Prestasi
-                </h2>
-
-                <p className="theme-text-placeholder mt-0.5 text-xs">
-                  Informasi prestasi siswa
-                </p>
-              </div>
-
-              <button
-                onClick={() =>
-                  setSelectedPrestasi(null)
-                }
-                className="theme-text-muted theme-header-hover flex h-8 w-8 items-center justify-center rounded-lg"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            <div className="max-h-[75vh] overflow-y-auto p-5">
-              <div className="theme-success theme-border flex items-center gap-3 rounded-xl border p-4">
-                <div className="theme-card flex h-11 w-11 items-center justify-center rounded-xl text-xs font-bold">
-                  {selectedPrestasi.avatar}
-                </div>
-
-                <div>
-                  <p className="theme-text text-sm font-bold">
-                    {selectedPrestasi.siswa}
-                  </p>
-
-                  <p className="theme-text-muted text-xs">
-                    {selectedPrestasi.kelas}
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-4">
-                <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-wide">
-                  Prestasi
-                </p>
-
-                <p className="theme-text mt-1 text-sm font-bold">
-                  {selectedPrestasi.prestasi}
-                </p>
-              </div>
-
-              <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                <DetailItem
-                  icon={Award}
-                  label="Tingkat"
-                  value={selectedPrestasi.tingkat}
-                />
-
-                <DetailItem
-                  icon={BookOpen}
-                  label="Kategori"
-                  value={selectedPrestasi.kategori}
-                />
-
-                <DetailItem
-                  icon={CalendarDays}
-                  label="Tanggal"
-                  value={selectedPrestasi.tanggal}
-                />
-              </div>
-            </div>
-
-            <div className="theme-border-soft flex justify-end border-t px-5 py-4">
-              <button
-                onClick={() =>
-                  setSelectedPrestasi(null)
-                }
-                className="theme-card theme-border theme-text-secondary theme-header-hover rounded-lg border px-4 py-2 text-sm font-medium"
-              >
-                Tutup
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
-  );
-}
-
-
-function QuickSummary({
-  icon: Icon,
-  title,
-  value,
-  description,
-}) {
-  return (
-    <div className="theme-card theme-border rounded-xl border p-3 shadow-sm">
-      <div className="flex items-center gap-3">
-        <div className="theme-card-soft flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
-          <Icon
-            size={17}
-            className="theme-text-muted"
-          />
-        </div>
-
-        <div className="min-w-0">
-          <p className="theme-text-placeholder truncate text-[10px] font-medium">
-            {title}
-          </p>
-
-          <div className="flex items-baseline gap-1.5">
-            <p className="theme-text text-lg font-bold">
-              {value}
-            </p>
-
-            <p className="theme-text-placeholder truncate text-[10px]">
-              {description}
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-
-function DetailItem({
-  icon: Icon,
-  label,
-  value,
-}) {
-  return (
-    <div className="theme-card-soft theme-border rounded-xl border p-3">
-      <div className="flex items-start gap-2.5">
-        <div className="theme-card flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
-          <Icon
-            size={14}
-            className="theme-text-muted"
-          />
-        </div>
-
-        <div className="min-w-0">
-          <p className="theme-text-muted text-[10px] font-medium uppercase tracking-wide">
-            {label}
-          </p>
-
-          <p className="theme-text mt-0.5 break-words text-xs font-semibold">
-            {value}
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-
-function QuickAction({
-  icon: Icon,
-  title,
-  description,
-  onClick,
-  disabled = false,
-  badge = null,
-}) {
-  return (
-    <button
-      type="button"
-      onClick={disabled ? undefined : onClick}
-      disabled={disabled}
-      className={`group flex w-full items-center gap-3 rounded-xl border p-3 text-left transition ${
-        disabled
-          ? "theme-border theme-card-soft cursor-not-allowed opacity-70"
-          : "theme-card theme-border theme-header-hover"
-      }`}
-    >
-      <div className="theme-info flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
-        <Icon size={16} />
-      </div>
-
-      <div className="min-w-0 flex-1">
-        <p className="theme-text truncate text-xs font-semibold">
-          {title}
-        </p>
-
-        <p className="theme-text-placeholder mt-0.5 truncate text-[10px]">
-          {description}
-        </p>
-      </div>
-
-      {badge ? (
-        <span className="theme-text-placeholder shrink-0 text-[9px] font-semibold">
-          {badge}
-        </span>
-      ) : (
-        <ChevronRight
-          size={15}
-          className="theme-text-muted shrink-0 transition group-hover:text-[var(--color-primary)]"
-        />
-      )}
-    </button>
   );
 }

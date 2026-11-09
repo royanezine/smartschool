@@ -8,6 +8,7 @@ const coordinate = (min: number, max: number) => z.preprocess(
 
 export const createAbsensiSchema = z.object({
   kelasId: z.string().uuid("ID Kelas tidak valid"),
+  mataPelajaranId: z.string().uuid("ID Mata Pelajaran tidak valid").optional(),
   status: z.enum(["hadir", "izin", "sakit", "alpha"]),
   keterangan: z.string().optional(),
 
@@ -43,6 +44,7 @@ export const absensiListQuerySchema = z.object({
   ...paginationQuery,
   sekolahId: z.string().uuid().optional(),
   kelasId: z.string().uuid().optional(),
+  mataPelajaranId: z.string().uuid().optional(),
   penggunaId: z.string().uuid().optional(),
   shiftKerjaId: z.string().uuid().optional(),
   tanggal: z.string().optional(),

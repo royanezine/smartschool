@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
@@ -71,21 +72,29 @@ const initialForm = {
   namaWaliPesertaDidik: "",
 };
 
+const inputClass =
+  "w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-100";
+
+const labelClass =
+  "mb-1.5 block text-sm font-medium text-slate-700";
+
 function extractRows(response) {
   const candidates = [
     response?.data?.data,
     response?.data?.items,
+    response?.data?.rows,
     response?.data,
     response?.items,
+    response?.rows,
   ];
 
   return candidates.find(Array.isArray) ?? [];
 }
 
-const inputClass =
-  "w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-100";
-
-const labelClass = "mb-1.5 block text-sm font-medium text-slate-700";
+function optionalText(value) {
+  const normalized = String(value ?? "").trim();
+  return normalized || null;
+}
 
 function Field({
   label,
@@ -103,7 +112,8 @@ function Field({
   return (
     <div>
       <label htmlFor={name} className={labelClass}>
-        {label} {required && <span className="text-red-500">*</span>}
+        {label}
+        {required && <span className="text-red-500"> *</span>}
       </label>
 
       <div className="relative">
@@ -161,7 +171,12 @@ function TextAreaField({
   );
 }
 
-function Section({ icon: Icon, title, description, children }) {
+function Section({
+  icon: Icon,
+  title,
+  description,
+  children,
+}) {
   return (
     <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
       <div className="border-b border-slate-200 px-5 py-4 sm:px-6">
@@ -171,8 +186,12 @@ function Section({ icon: Icon, title, description, children }) {
           </div>
 
           <div>
-            <h2 className="font-semibold text-slate-900">{title}</h2>
-            <p className="mt-0.5 text-xs text-slate-500">{description}</p>
+            <h2 className="font-semibold text-slate-900">
+              {title}
+            </h2>
+            <p className="mt-0.5 text-xs text-slate-500">
+              {description}
+            </p>
           </div>
         </div>
       </div>
@@ -184,7 +203,13 @@ function Section({ icon: Icon, title, description, children }) {
   );
 }
 
-function TabButton({ active, icon: Icon, title, description, onClick }) {
+function TabButton({
+  active,
+  icon: Icon,
+  title,
+  description,
+  onClick,
+}) {
   return (
     <button
       type="button"
@@ -198,7 +223,9 @@ function TabButton({ active, icon: Icon, title, description, onClick }) {
     >
       <div
         className={`rounded-lg p-2 ${
-          active ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-600"
+          active
+            ? "bg-blue-600 text-white"
+            : "bg-slate-100 text-slate-600"
         }`}
       >
         <Icon size={18} />
@@ -212,6 +239,7 @@ function TabButton({ active, icon: Icon, title, description, onClick }) {
         >
           {title}
         </p>
+
         <p
           className={`mt-0.5 text-xs leading-5 ${
             active ? "text-blue-800/80" : "text-slate-500"
@@ -227,16 +255,16 @@ function TabButton({ active, icon: Icon, title, description, onClick }) {
 export default function TambahSiswaPage() {
   const router = useRouter();
 
-  const [mode, setMode] = useState("import"); // "import" | "manual"
-
+  const [mode, setMode] = useState("import");
   const [form, setForm] = useState(initialForm);
+
   const [kelasList, setKelasList] = useState([]);
   const [loadingKelas, setLoadingKelas] = useState(true);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  // State import Excel
   const [importFile, setImportFile] = useState(null);
   const [importing, setImporting] = useState(false);
   const [importError, setImportError] = useState("");
@@ -244,7 +272,6 @@ export default function TambahSiswaPage() {
 
   const loadKelas = useCallback(async () => {
     setLoadingKelas(true);
-    setError("");
 
     try {
       const response = await getKelas({
@@ -260,7 +287,9 @@ export default function TambahSiswaPage() {
         const levelA = Number(a?.tingkat) || 0;
         const levelB = Number(b?.tingkat) || 0;
 
-        if (levelA !== levelB) return levelA - levelB;
+        if (levelA !== levelB) {
+          return levelA - levelB;
+        }
 
         return String(a?.nama ?? "").localeCompare(
           String(b?.nama ?? ""),
@@ -269,8 +298,11 @@ export default function TambahSiswaPage() {
       });
 
       setKelasList(sorted);
+      setError("");
     } catch (err) {
       console.error("Gagal mengambil master kelas:", err);
+
+      setKelasList([]);
 
       setError(
         err?.message ||
@@ -282,11 +314,7 @@ export default function TambahSiswaPage() {
   }, []);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      loadKelas();
-    }, 0);
-
-    return () => clearTimeout(timer);
+    loadKelas();
   }, [loadKelas]);
 
   const handleChange = (event) => {
@@ -305,8 +333,6 @@ export default function TambahSiswaPage() {
     (kelas) => String(kelas.id) === String(form.kelasId)
   );
 
- 
-
   const handleDownloadTemplate = async () => {
     setImportError("");
     setImportSuccess("");
@@ -316,11 +342,31 @@ export default function TambahSiswaPage() {
       const worksheet = workbook.addWorksheet("Data Siswa");
 
       worksheet.columns = [
-        { header: "Nama Lengkap", key: "namaLengkap", width: 30 },
-        { header: "NISN", key: "nisn", width: 20 },
-        { header: "NIS", key: "nis", width: 20 },
-        { header: "Email", key: "email", width: 32 },
-        { header: "Jenis Kelamin", key: "jenisKelamin", width: 20 },
+        {
+          header: "Nama Lengkap",
+          key: "namaLengkap",
+          width: 30,
+        },
+        {
+          header: "NISN",
+          key: "nisn",
+          width: 20,
+        },
+        {
+          header: "NIS",
+          key: "nis",
+          width: 20,
+        },
+        {
+          header: "Email",
+          key: "email",
+          width: 32,
+        },
+        {
+          header: "Jenis Kelamin",
+          key: "jenisKelamin",
+          width: 20,
+        },
       ];
 
       worksheet.addRow({
@@ -331,8 +377,16 @@ export default function TambahSiswaPage() {
         jenisKelamin: "laki-laki",
       });
 
-      worksheet.getRow(1).font = { bold: true };
-      worksheet.views = [{ state: "frozen", ySplit: 1 }];
+      worksheet.getRow(1).font = {
+        bold: true,
+      };
+
+      worksheet.views = [
+        {
+          state: "frozen",
+          ySplit: 1,
+        },
+      ];
 
       const buffer = await workbook.xlsx.writeBuffer();
 
@@ -352,6 +406,8 @@ export default function TambahSiswaPage() {
 
       URL.revokeObjectURL(url);
     } catch (err) {
+      console.error("Gagal membuat template:", err);
+
       setImportError(
         err?.message || "Gagal mengunduh template Excel."
       );
@@ -383,6 +439,13 @@ export default function TambahSiswaPage() {
       return;
     }
 
+    if (file.size > 10 * 1024 * 1024) {
+      setImportFile(null);
+      event.target.value = "";
+      setImportError("Ukuran file maksimal 10 MB.");
+      return;
+    }
+
     setImportFile(file);
   };
 
@@ -398,188 +461,214 @@ export default function TambahSiswaPage() {
     }
   };
 
+  const handleImportSiswa = async () => {
+    setImportError("");
+    setImportSuccess("");
 
-
-const handleImportSiswa = async () => {
-  setImportError("");
-  setImportSuccess("");
-
-  if (!importFile) {
-    setImportError("Pilih file Excel terlebih dahulu.");
-    return;
-  }
-
-  setImporting(true);
-
-  try {
-    const response = await importSiswaExcel(importFile);
-
-    const message =
-      response?.message ||
-      response?.data?.message ||
-      "Import selesai. Silakan periksa daftar siswa.";
-
-    setImportSuccess(message);
-    setImportFile(null);
-
-    const input = document.getElementById("fileImportSiswa");
-    if (input) input.value = "";
-
-    // Beri waktu agar pesan sukses terlihat.
-    window.setTimeout(() => {
-      router.push("/admin/siswa");
-      router.refresh();
-    }, 1200);
-  } catch (err) {
-    console.error("Gagal mengimport siswa:", err);
-
-    setImportError(
-      err?.message || "Gagal mengimport data siswa."
-    );
-  } finally {
-    setImporting(false);
-  }
-};
-
-
-
-
-const handleSubmit = async (event) => {
-  event.preventDefault();
-  setError("");
-  setSuccess("");
-
-  if (
-    !form.namaLengkap.trim() ||
-    !form.namaPengguna.trim() ||
-    !form.email.trim() ||
-    !form.kataSandi
-  ) {
-    setError(
-      "Nama lengkap, username, email, dan kata sandi wajib diisi."
-    );
-    return;
-  }
-
-  if (form.kataSandi.length < 8) {
-    setError("Kata sandi minimal 8 karakter.");
-    return;
-  }
-
-  if (
-    form.jenisKelamin &&
-    !["laki-laki", "perempuan"].includes(form.jenisKelamin)
-  ) {
-    setError("Jenis kelamin tidak valid.");
-    return;
-  }
-
-  if (form.nisn.trim() && !/^\d+$/.test(form.nisn.trim())) {
-    setError("NISN harus berisi angka saja.");
-    return;
-  }
-
-  const validasiNIK = [
-    ["NIK", form.nik],
-    ["NIK ayah", form.nikAyah],
-    ["NIK ibu", form.nikIbu],
-  ];
-
-  for (const [label, value] of validasiNIK) {
-    if (value.trim() && !/^\d{16}$/.test(value.trim())) {
-      setError(`${label} harus terdiri dari tepat 16 angka.`);
+    if (!importFile) {
+      setImportError("Pilih file Excel terlebih dahulu.");
       return;
     }
-  }
 
-  const validasiTelepon = [
-    ["Nomor telepon", form.noTelepon],
-    ["Nomor HP ayah", form.noHpAyah],
-    ["Nomor HP ibu", form.noHpIbu],
-  ];
+    setImporting(true);
 
-  for (const [label, value] of validasiTelepon) {
-    if (value.trim() && !/^[0-9+\-\s()]+$/.test(value.trim())) {
-      setError(`${label} tidak valid.`);
-      return;
+    try {
+      const response = await importSiswaExcel(importFile);
+
+      const message =
+        response?.message ||
+        response?.data?.message ||
+        "Import selesai. Silakan periksa daftar siswa.";
+
+      setImportSuccess(message);
+      setImportFile(null);
+
+      const input = document.getElementById("fileImportSiswa");
+
+      if (input) {
+        input.value = "";
+      }
+
+      window.setTimeout(() => {
+        router.push("/admin/siswa");
+        router.refresh();
+      }, 1200);
+    } catch (err) {
+      console.error("Gagal mengimport siswa:", err);
+
+      setImportError(
+        err?.message || "Gagal mengimport data siswa."
+      );
+    } finally {
+      setImporting(false);
     }
-  }
-
-  setLoading(true);
-
-  const optionalText = (value) => {
-    const normalized = String(value ?? "").trim();
-    return normalized || null;
   };
 
-  try {
-    const payload = {
-      namaLengkap: form.namaLengkap.trim(),
-      namaPengguna: form.namaPengguna.trim(),
-      email: form.email.trim(),
-      kataSandi: form.kataSandi,
+  const validateForm = () => {
+    if (
+      !form.namaLengkap.trim() ||
+      !form.namaPengguna.trim() ||
+      !form.email.trim() ||
+      !form.kataSandi
+    ) {
+      return "Nama lengkap, username, email, dan kata sandi wajib diisi.";
+    }
 
-      nisn: optionalText(form.nisn),
-      nis: optionalText(form.nis),
-      nipd: optionalText(form.nipd),
+    if (form.namaLengkap.trim().length < 2) {
+      return "Nama lengkap minimal 2 karakter.";
+    }
 
-      // Jangan kirim null saat belum memilih kelas.
-      ...(form.kelasId ? { kelasId: form.kelasId } : {}),
+    if (form.namaPengguna.trim().length < 1) {
+      return "Username wajib diisi.";
+    }
 
-      nik: optionalText(form.nik),
-      jenisKelamin: optionalText(form.jenisKelamin),
-      tempatLahir: optionalText(form.tempatLahir),
-      tanggalLahir: form.tanggalLahir || null,
-      noTelepon: optionalText(form.noTelepon),
+    if (
+      form.kataSandi.length < 8 ||
+      new TextEncoder().encode(form.kataSandi).length > 72
+    ) {
+      return "Kata sandi harus minimal 8 karakter dan maksimal 72 byte.";
+    }
 
-      alamat: optionalText(form.alamat),
-      alamatKtp: optionalText(form.alamatKtp),
-      alamatDomisili: form.alamatSesuaiDomisili
-        ? optionalText(form.alamatKtp || form.alamat)
-        : optionalText(form.alamatDomisili),
-      alamatSesuaiDomisili: Boolean(form.alamatSesuaiDomisili),
+    if (
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())
+    ) {
+      return "Format email tidak valid.";
+    }
 
-      provinsi: optionalText(form.provinsi),
-      kotaKabupaten: optionalText(form.kotaKabupaten),
-      kecamatan: optionalText(form.kecamatan),
-      kelurahan: optionalText(form.kelurahan),
-      kodePos: optionalText(form.kodePos),
+    if (
+      form.jenisKelamin &&
+      !["laki-laki", "perempuan"].includes(form.jenisKelamin)
+    ) {
+      return "Jenis kelamin tidak valid.";
+    }
 
-      namaAyah: optionalText(form.namaAyah),
-      nikAyah: optionalText(form.nikAyah),
-      pekerjaanAyah: optionalText(form.pekerjaanAyah),
-      noHpAyah: optionalText(form.noHpAyah),
+    if (
+      form.nisn.trim() &&
+      !/^\d+$/.test(form.nisn.trim())
+    ) {
+      return "NISN harus berisi angka saja.";
+    }
 
-      namaIbu: optionalText(form.namaIbu),
-      nikIbu: optionalText(form.nikIbu),
-      pekerjaanIbu: optionalText(form.pekerjaanIbu),
-      noHpIbu: optionalText(form.noHpIbu),
+    if (form.nik.trim() && !/^\d{16}$/.test(form.nik.trim())) {
+      return "NIK harus terdiri dari tepat 16 angka.";
+    }
 
-      namaWaliPesertaDidik: optionalText(
-        form.namaWaliPesertaDidik
-      ),
-    };
+    const validasiNIK = [
+      ["NIK ayah", form.nikAyah],
+      ["NIK ibu", form.nikIbu],
+    ];
 
-    await createSiswa(payload);
+    for (const [label, value] of validasiNIK) {
+      if (value.trim() && !/^\d{16}$/.test(value.trim())) {
+        return `${label} harus terdiri dari tepat 16 angka.`;
+      }
+    }
 
-    setSuccess("Data siswa berhasil disimpan.");
+    const validasiTelepon = [
+      ["Nomor telepon", form.noTelepon],
+      ["Nomor HP ayah", form.noHpAyah],
+      ["Nomor HP ibu", form.noHpIbu],
+    ];
 
-    window.setTimeout(() => {
-      router.push("/admin/siswa");
-      router.refresh();
-    }, 1200);
-  } catch (err) {
-    console.error("Gagal menambahkan siswa:", err);
+    for (const [label, value] of validasiTelepon) {
+      if (
+        value.trim() &&
+        !/^[0-9+\-\s()]+$/.test(value.trim())
+      ) {
+        return `${label} tidak valid.`;
+      }
+    }
 
-    setError(
-      err?.message ||
-        "Gagal menambahkan data siswa. Silakan coba kembali."
-    );
-  } finally {
-    setLoading(false);
-  }
-};
+    return null;
+  };
 
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    setError("");
+    setSuccess("");
+
+    const validationError = validateForm();
+
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const payload = {
+        namaLengkap: form.namaLengkap.trim(),
+        namaPengguna: form.namaPengguna.trim(),
+        email: form.email.trim(),
+        kataSandi: form.kataSandi,
+
+        nisn: optionalText(form.nisn),
+        nis: optionalText(form.nis),
+        nipd: optionalText(form.nipd),
+
+        ...(form.kelasId
+          ? { kelasId: form.kelasId }
+          : {}),
+
+        nik: optionalText(form.nik),
+        jenisKelamin: optionalText(form.jenisKelamin),
+        tempatLahir: optionalText(form.tempatLahir),
+        tanggalLahir: form.tanggalLahir || null,
+        noTelepon: optionalText(form.noTelepon),
+
+        alamat: optionalText(form.alamat),
+        alamatKtp: optionalText(form.alamatKtp),
+
+        alamatDomisili: form.alamatSesuaiDomisili
+          ? optionalText(form.alamatKtp || form.alamat)
+          : optionalText(form.alamatDomisili),
+
+        alamatSesuaiDomisili: Boolean(
+          form.alamatSesuaiDomisili
+        ),
+
+        provinsi: optionalText(form.provinsi),
+        kotaKabupaten: optionalText(form.kotaKabupaten),
+        kecamatan: optionalText(form.kecamatan),
+        kelurahan: optionalText(form.kelurahan),
+        kodePos: optionalText(form.kodePos),
+
+        namaAyah: optionalText(form.namaAyah),
+        nikAyah: optionalText(form.nikAyah),
+        pekerjaanAyah: optionalText(form.pekerjaanAyah),
+        noHpAyah: optionalText(form.noHpAyah),
+
+        namaIbu: optionalText(form.namaIbu),
+        nikIbu: optionalText(form.nikIbu),
+        pekerjaanIbu: optionalText(form.pekerjaanIbu),
+        noHpIbu: optionalText(form.noHpIbu),
+
+        namaWaliPesertaDidik: optionalText(
+          form.namaWaliPesertaDidik
+        ),
+      };
+
+      await createSiswa(payload);
+
+      setSuccess("Data siswa berhasil disimpan.");
+
+      window.setTimeout(() => {
+        router.push("/admin/siswa");
+        router.refresh();
+      }, 1200);
+    } catch (err) {
+      console.error("Gagal menambahkan siswa:", err);
+
+      setError(
+        err?.message ||
+          "Gagal menambahkan data siswa. Silakan coba kembali."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-slate-50">
@@ -605,13 +694,13 @@ const handleSubmit = async (event) => {
               <h1 className="text-2xl font-bold tracking-tight text-slate-900">
                 Tambah Siswa
               </h1>
+
               <p className="mt-1 text-sm text-slate-500">
-                Pilih cara menambahkan siswa: import banyak data sekaligus dari
-                Excel, atau isi satu siswa secara manual.
+                Pilih cara menambahkan siswa: import banyak data
+                sekaligus dari Excel, atau isi satu siswa secara manual.
               </p>
             </div>
 
-            {/* TAB PILIHAN */}
             <div
               role="tablist"
               aria-label="Pilih cara menambah siswa"
@@ -642,7 +731,6 @@ const handleSubmit = async (event) => {
               />
             </div>
 
-            {/* PANEL IMPORT */}
             {mode === "import" && (
               <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
                 <div className="border-b border-slate-200 px-5 py-4 sm:px-6">
@@ -655,9 +743,9 @@ const handleSubmit = async (event) => {
                       <h2 className="font-semibold text-slate-900">
                         Import Siswa dari Excel
                       </h2>
+
                       <p className="mt-0.5 text-xs text-slate-500">
-                        Tambahkan banyak siswa sekaligus menggunakan file
-                        Excel.
+                        Tambahkan banyak siswa sekaligus menggunakan file Excel.
                       </p>
                     </div>
                   </div>
@@ -667,15 +755,30 @@ const handleSubmit = async (event) => {
                   <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900">
                     <div className="flex items-start gap-2">
                       <Info size={18} className="mt-0.5 shrink-0" />
+
                       <div>
-                        <p className="font-semibold">Langkah import</p>
+                        <p className="font-semibold">
+                          Langkah import
+                        </p>
+
                         <ol className="mt-2 list-inside list-decimal space-y-1 text-xs leading-5">
-                          <li>Isi data siswa sesuai kolom template.</li>
-                          <li>Pilih file yang sudah diisi, lalu klik Import.</li>
+                          <li>
+                            Download template Excel yang disediakan.
+                          </li>
+                          <li>
+                            Isi data siswa sesuai kolom template.
+                          </li>
+                          <li>
+                            Pilih file yang sudah diisi.
+                          </li>
+                          <li>
+                            Klik Import Siswa.
+                          </li>
                         </ol>
+
                         <p className="mt-2 text-xs leading-5">
-                          Jangan mengubah urutan lima kolom template. NISN
-                          wajib diisi agar baris diproses.
+                          Jangan mengubah urutan lima kolom template.
+                          NISN wajib diisi agar baris dapat diproses.
                         </p>
                       </div>
                     </div>
@@ -701,14 +804,39 @@ const handleSubmit = async (event) => {
                     </div>
                   )}
 
-                 
-
-                  {/* STEP 2 */}
                   <div className="rounded-lg border border-slate-200 p-4">
                     <div className="mb-3 flex items-center gap-2">
                       <span className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">
                         1
                       </span>
+
+                      <p className="text-sm font-semibold text-slate-900">
+                        Download template Excel
+                      </p>
+                    </div>
+
+                    <p className="mb-3 text-xs leading-5 text-slate-500">
+                      Gunakan template resmi agar format kolom sesuai dengan
+                      proses import siswa.
+                    </p>
+
+                    <button
+                      type="button"
+                      onClick={handleDownloadTemplate}
+                      disabled={importing}
+                      className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:opacity-50"
+                    >
+                      <Download size={17} />
+                      Download Template
+                    </button>
+                  </div>
+
+                  <div className="rounded-lg border border-slate-200 p-4">
+                    <div className="mb-3 flex items-center gap-2">
+                      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">
+                        2
+                      </span>
+
                       <p className="text-sm font-semibold text-slate-900">
                         Pilih file Excel yang sudah diisi
                       </p>
@@ -718,7 +846,9 @@ const handleSubmit = async (event) => {
                       <label
                         htmlFor="fileImportSiswa"
                         className={`inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 ${
-                          importing ? "pointer-events-none opacity-50" : ""
+                          importing
+                            ? "pointer-events-none opacity-50"
+                            : ""
                         }`}
                       >
                         <Upload size={17} />
@@ -747,6 +877,7 @@ const handleSubmit = async (event) => {
                             <p className="truncate text-sm font-medium text-slate-800">
                               {importFile.name}
                             </p>
+
                             <p className="text-xs text-slate-500">
                               {(importFile.size / 1024).toFixed(1)} KB
                             </p>
@@ -766,12 +897,12 @@ const handleSubmit = async (event) => {
                     )}
                   </div>
 
-                  {/* STEP 3 */}
                   <div className="rounded-lg border border-slate-200 p-4">
                     <div className="mb-3 flex items-center gap-2">
                       <span className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">
-                        2
+                        3
                       </span>
+
                       <p className="text-sm font-semibold text-slate-900">
                         Jalankan import
                       </p>
@@ -806,19 +937,20 @@ const handleSubmit = async (event) => {
               </section>
             )}
 
-            {/* PANEL MANUAL */}
             {mode === "manual" && (
               <>
                 <div className="mb-5 flex items-start gap-3 rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm text-blue-900">
                   <Info size={20} className="mt-0.5 shrink-0" />
+
                   <div>
                     <p className="font-semibold">Catatan</p>
-                   <p className="mt-1 leading-6">
-  Lengkapi informasi akun dan data siswa sesuai kebutuhan.
-  Field yang tidak wajib boleh dikosongkan. Pastikan NIK
-  berisi 16 angka jika diisi, dan pilih kelas jika siswa
-  akan langsung ditempatkan ke kelas.
-</p>
+
+                    <p className="mt-1 leading-6">
+                      Lengkapi informasi akun dan data siswa sesuai kebutuhan.
+                      Field yang tidak wajib boleh dikosongkan. NIK harus
+                      berisi 16 angka jika diisi. Pilih kelas jika siswa
+                      akan langsung ditempatkan ke kelas.
+                    </p>
                   </div>
                 </div>
 
@@ -896,14 +1028,14 @@ const handleSubmit = async (event) => {
                         type="password"
                         placeholder="Minimal 8 karakter"
                         icon={LockKeyhole}
-                        maxLength={100}
+                        maxLength={72}
                         required
                         disabled={loading}
                       />
 
                       <p className="mt-1.5 text-xs text-slate-500">
-                        Gunakan kata sandi awal yang aman dan sampaikan kepada
-                        siswa melalui cara yang aman.
+                        Gunakan kata sandi awal yang aman dan sampaikan
+                        kepada siswa melalui cara yang aman.
                       </p>
                     </div>
                   </Section>
@@ -987,7 +1119,10 @@ const handleSubmit = async (event) => {
 
                           {kelasList.map((kelas) => (
                             <option key={kelas.id} value={kelas.id}>
-                              {kelas.nama} — Tingkat {kelas.tingkat}
+                              {kelas.nama}
+                              {kelas.tingkat
+                                ? ` — Tingkat ${kelas.tingkat}`
+                                : ""}
                               {kelas.tahunAjaran?.nama
                                 ? ` — ${kelas.tahunAjaran.nama}`
                                 : ""}
@@ -1004,15 +1139,19 @@ const handleSubmit = async (event) => {
                         >
                           <RefreshCw
                             size={17}
-                            className={loadingKelas ? "animate-spin" : ""}
+                            className={
+                              loadingKelas ? "animate-spin" : ""
+                            }
                           />
                         </button>
                       </div>
 
                       {selectedKelas && (
                         <p className="mt-2 text-xs text-slate-500">
-                          Dipilih: {selectedKelas.nama}, tingkat{" "}
-                          {selectedKelas.tingkat}
+                          Dipilih: {selectedKelas.nama}
+                          {selectedKelas.tingkat
+                            ? `, tingkat ${selectedKelas.tingkat}`
+                            : ""}
                           {selectedKelas.tahunAjaran?.nama
                             ? `, tahun ajaran ${selectedKelas.tahunAjaran.nama}`
                             : ""}
@@ -1023,6 +1162,7 @@ const handleSubmit = async (event) => {
                       {!loadingKelas && kelasList.length === 0 && (
                         <p className="mt-2 text-xs text-amber-700">
                           Belum ada kelas yang berhasil dimuat.
+                          Gunakan tombol muat ulang untuk mencoba kembali.
                         </p>
                       )}
                     </div>
@@ -1040,7 +1180,7 @@ const handleSubmit = async (event) => {
                       onChange={handleChange}
                       placeholder="Masukkan NIK"
                       icon={IdCard}
-                      maxLength={20}
+                      maxLength={16}
                       inputMode="numeric"
                       disabled={loading}
                     />
@@ -1124,6 +1264,7 @@ const handleSubmit = async (event) => {
                           className="mt-1 rounded border-slate-300 text-blue-700 focus:ring-blue-600"
                           disabled={loading}
                         />
+
                         Alamat domisili sama dengan alamat KTP
                       </label>
                     </div>
@@ -1285,15 +1426,15 @@ const handleSubmit = async (event) => {
                     />
 
                     <div className="sm:col-span-2">
-                     <Field
-  label="Nama Wali Peserta Didik"
-  name="namaWaliPesertaDidik"
-  value={form.namaWaliPesertaDidik}
-  onChange={handleChange}
-  placeholder="Isi jika siswa memiliki wali"
-  maxLength={20}
-  disabled={loading}
-/>
+                      <Field
+                        label="Nama Wali Peserta Didik"
+                        name="namaWaliPesertaDidik"
+                        value={form.namaWaliPesertaDidik}
+                        onChange={handleChange}
+                        placeholder="Isi jika siswa memiliki wali"
+                        maxLength={20}
+                        disabled={loading}
+                      />
                     </div>
                   </Section>
 

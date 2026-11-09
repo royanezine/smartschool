@@ -20,6 +20,8 @@ import {
   BookOpen,
   Clock3,
   Pencil,
+  Sun,
+  Sunset,
 } from "lucide-react";
 
 import Header from "@/app/components/Header";
@@ -39,10 +41,6 @@ import {
 } from "@/services/shiftSiswa.service";
 
 const PAGE_SIZE = 10;
-
-/* =========================================================
-   HELPER
-========================================================= */
 
 function normalizeText(value) {
   return String(value ?? "").trim().toLowerCase();
@@ -231,10 +229,6 @@ function isGuruAtauPegawai(user) {
   );
 }
 
-/* =========================================================
-   SHIFT GURU / PEGAWAI
-========================================================= */
-
 function getShiftId(value) {
   if (value == null || value === "") return "";
 
@@ -365,10 +359,6 @@ function normalizeUser(user) {
   };
 }
 
-/* =========================================================
-   SHIFT KELAS DAN KONFIGURASI JAM SISWA
-========================================================= */
-
 function getShiftKelasValue(value) {
   if (value == null || value === "") return "";
 
@@ -385,13 +375,7 @@ function getShiftKelasValue(value) {
   return "";
 }
 
-/**
- * Service getShiftSiswa() mengembalikan `response.data` yang berupa
- * `ShiftSiswa[]` langsung. Fungsi ini tetap mendukung respons
- * berbentuk array langsung maupun yang dibungkus { data: [...] }.
- */
 function normalizeShiftSiswaResponse(response) {
-  // getArray sudah menangani array langsung, { data: [...] }, dll.
   const rows = getArray(response, ["shiftSiswa", "shift_siswa", "shifts"]);
 
   if (!Array.isArray(rows)) return [];
@@ -421,10 +405,6 @@ function normalizeShiftSiswaResponse(response) {
     .filter((item) => ["pagi", "siang"].includes(item.kode));
 }
 
-/**
- * Fallback master shift siswa jika API gagal / kosong.
- * Nilai default ini hanya untuk tampilan; update tetap butuh API.
- */
 function buildFallbackShiftSiswa() {
   return [
     {
@@ -484,10 +464,6 @@ function getShiftKelasOptionLabel(shift, shiftSiswaList = []) {
   return `${nama} (${jam.masuk} - ${jam.keluar})`;
 }
 
-/* =========================================================
-   TAHUN AJARAN
-========================================================= */
-
 function getTahunAjaranId(kelas) {
   return String(
     kelas?.tahunAjaranId ??
@@ -540,10 +516,6 @@ function getJumlahSiswa(kelas) {
     ) || 0
   );
 }
-
-/* =========================================================
-   UI COMPONENTS
-========================================================= */
 
 function StatCard({ title, value, description, icon: Icon, tone = "blue" }) {
   const tones = {
@@ -650,10 +622,6 @@ function JamBelajar({ shift, shiftSiswaList = [] }) {
   );
 }
 
-/* =========================================================
-   MAIN PAGE
-========================================================= */
-
 export default function PenugasanShiftPage() {
   const router = useRouter();
 
@@ -672,22 +640,9 @@ export default function PenugasanShiftPage() {
   const [warnings, setWarnings] = useState([]);
   const [updatingKelasId, setUpdatingKelasId] = useState(null);
 
-  const [editingShiftSiswa, setEditingShiftSiswa] = useState(null);
-  const [editShiftForm, setEditShiftForm] = useState({
-    jamMasuk: "",
-    jamKeluar: "",
-    toleransiTerlambatMenit: 15,
-  });
-  const [savingShiftSiswa, setSavingShiftSiswa] = useState(false);
-  const [editShiftError, setEditShiftError] = useState("");
-
   const [search, setSearch] = useState("");
   const [filterShift, setFilterShift] = useState("semua");
   const [page, setPage] = useState(1);
-
-  /* =========================================================
-     LOAD DATA
-  ========================================================= */
 
   const loadData = useCallback(async (showLoading = true) => {
     if (showLoading) setLoading(true);
@@ -772,12 +727,10 @@ export default function PenugasanShiftPage() {
         );
       }
 
-      // ===== SHIFT SISWA (diperbaiki) =====
       if (shiftSiswaResult.status === "fulfilled") {
         shiftSiswa = normalizeShiftSiswaResponse(shiftSiswaResult.value);
 
         if (shiftSiswa.length === 0) {
-          // Fallback: tetap render agar UI tidak kosong
           shiftSiswa = buildFallbackShiftSiswa();
           nextWarnings.push(
             "Konfigurasi jam shift siswa tidak tersedia dari server. Menampilkan jam default (Pagi 07:00–14:00, Siang 12:00–18:00). Silakan periksa menu konfigurasi shift siswa di backend."
@@ -789,7 +742,6 @@ export default function PenugasanShiftPage() {
           shiftSiswaResult.reason
         );
 
-        // Fallback: tetap render dengan nilai default
         shiftSiswa = buildFallbackShiftSiswa();
 
         nextWarnings.push(
@@ -935,13 +887,8 @@ export default function PenugasanShiftPage() {
   }, []);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadData();
   }, [loadData]);
-
-  /* =========================================================
-     REFRESH SAAT KEMBALI KE TAB
-  ========================================================= */
 
   useEffect(() => {
     const handleFocus = () => {
@@ -959,10 +906,6 @@ export default function PenugasanShiftPage() {
     };
   }, [loadData]);
 
-  /* =========================================================
-     NOTIFICATION
-  ========================================================= */
-
   useEffect(() => {
     if (!notice) return undefined;
 
@@ -970,22 +913,13 @@ export default function PenugasanShiftPage() {
     return () => clearTimeout(timeout);
   }, [notice]);
 
-  /* =========================================================
-     RESET FILTER
-  ========================================================= */
-
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setPage(1);
     setSearch("");
     setFilterShift("semua");
     setError("");
     setNotice("");
   }, [activeTab]);
-
-  /* =========================================================
-     UPDATE SHIFT KELAS
-  ========================================================= */
 
   async function handleSaveShiftKelas(kelasId, newShift) {
     const shift = newShift || null;
@@ -1051,74 +985,6 @@ export default function PenugasanShiftPage() {
     }
   }
 
-  /* =========================================================
-     UPDATE SHIFT SISWA (KONFIGURASI MASTER SHIFT)
-  ========================================================= */
-
-  function handleOpenEditShift(shiftItem) {
-    setEditingShiftSiswa(shiftItem);
-    setEditShiftForm({
-      jamMasuk: shiftItem.jamMasuk || "07:00",
-      jamKeluar: shiftItem.jamKeluar || "14:00",
-      toleransiTerlambatMenit: shiftItem.toleransiTerlambatMenit ?? 15,
-    });
-    setEditShiftError("");
-  }
-
-  async function handleSaveShiftSiswa(e) {
-    if (e) e.preventDefault();
-    if (!editingShiftSiswa) return;
-
-    const { jamMasuk, jamKeluar, toleransiTerlambatMenit } = editShiftForm;
-    if (!jamMasuk || !jamKeluar) {
-      setEditShiftError("Jam masuk dan jam keluar wajib diisi.");
-      return;
-    }
-
-    if (jamKeluar <= jamMasuk) {
-      setEditShiftError("Jam keluar harus lebih besar dari jam masuk.");
-      return;
-    }
-
-    setSavingShiftSiswa(true);
-    setEditShiftError("");
-
-    try {
-      const updated = await updateShiftSiswa(editingShiftSiswa.kode, {
-        jamMasuk,
-        jamKeluar,
-        toleransiTerlambatMenit: Number(toleransiTerlambatMenit) || 0,
-      });
-
-      setShiftSiswaList((prev) =>
-        prev.map((item) =>
-          normalizeText(item.kode) === normalizeText(editingShiftSiswa.kode)
-            ? { ...item, ...updated }
-            : item
-        )
-      );
-
-      setNotice(
-        `Konfigurasi Shift ${editingShiftSiswa.nama || editingShiftSiswa.kode} berhasil diperbarui.`
-      );
-      setEditingShiftSiswa(null);
-    } catch (saveError) {
-      console.error("[SHIFT SISWA] Gagal menyimpan:", saveError);
-      setEditShiftError(
-        getErrorMessage(
-          saveError,
-          "Gagal memperbarui konfigurasi shift siswa."
-        )
-      );
-    } finally {
-      setSavingShiftSiswa(false);
-    }
-  }
-
-  /* =========================================================
-     FILTER DATA
-  ========================================================= */
-
   const activeData = activeTab === "pegawai" ? pegawaiList : kelasList;
 
   const filteredData = useMemo(() => {
@@ -1180,10 +1046,6 @@ export default function PenugasanShiftPage() {
     tahunAjaranList,
   ]);
 
-  /* =========================================================
-     PAGINATION
-  ========================================================= */
-
   const totalPages = Math.max(
     1,
     Math.ceil(filteredData.length / PAGE_SIZE)
@@ -1195,10 +1057,6 @@ export default function PenugasanShiftPage() {
     (currentPage - 1) * PAGE_SIZE,
     currentPage * PAGE_SIZE
   );
-
-  /* =========================================================
-     STATISTIK
-  ========================================================= */
 
   const pegawaiWithShift = pegawaiList.filter((item) => {
     const assignedShift = getUserShift(item);
@@ -1217,10 +1075,6 @@ export default function PenugasanShiftPage() {
   const tahunAjaranAktif = tahunAjaranList.find(
     (item) => item.status === "aktif"
   );
-
-  /* =========================================================
-     RENDER
-  ========================================================= */
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
@@ -1262,8 +1116,6 @@ export default function PenugasanShiftPage() {
               </button>
             </div>
 
-            {/* TAB */}
-
             <div className="mb-6 overflow-x-auto border-b theme-border">
               <div className="flex min-w-max">
                 <button
@@ -1302,8 +1154,6 @@ export default function PenugasanShiftPage() {
               </div>
             </div>
 
-            {/* INFORMASI */}
-
             <div className="theme-card mb-6 flex items-start gap-3 rounded-lg border theme-border p-4">
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                 <Info size={18} />
@@ -1321,8 +1171,6 @@ export default function PenugasanShiftPage() {
                 </p>
               </div>
             </div>
-
-            {/* TAHUN AJARAN AKTIF */}
 
             {activeTab === "siswa" && (
               <div className="theme-card mb-6 flex flex-col gap-3 rounded-xl border theme-border p-4 sm:flex-row sm:items-center sm:justify-between">
@@ -1353,8 +1201,6 @@ export default function PenugasanShiftPage() {
               </div>
             )}
 
-            {/* MASTER SHIFT SISWA (PAGI / SIANG) */}
-
             {activeTab === "siswa" && (
               <div className="theme-card mb-6 rounded-xl border theme-border p-5">
                 <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
@@ -1383,27 +1229,39 @@ export default function PenugasanShiftPage() {
                     return (
                       <div
                         key={kode}
-                        className="flex flex-col justify-between rounded-lg border theme-border bg-[color-mix(in_srgb,var(--color-surface)_60%,var(--color-bg))] p-4 transition"
+                        className="theme-card flex flex-col justify-between rounded-xl border theme-border p-4 shadow-sm transition hover:shadow-md"
                       >
                         <div>
-                          <div className="flex items-center justify-between">
-                            <span className="font-semibold text-sm theme-text">
+                          <div className="flex items-center justify-between border-b theme-border pb-3">
+                            <span className="flex items-center gap-2 text-sm font-bold theme-text">
+                              {kode === "pagi" ? (
+                                <Sun size={16} className="text-blue-500" />
+                              ) : (
+                                <Sunset size={16} className="text-orange-500" />
+                              )}
                               Shift {shiftItem.nama || (kode === "pagi" ? "Pagi" : "Siang")}
                             </span>
-                            <span className="inline-flex items-center rounded-md bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] px-2 py-0.5 text-[11px] font-medium theme-primary-text uppercase">
+                            <span className={`inline-flex items-center rounded-md px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider ${
+                              kode === "pagi"
+                                ? "bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300"
+                                : "bg-orange-50 text-orange-700 dark:bg-orange-950/50 dark:text-orange-300"
+                            }`}>
                               {kode}
                             </span>
                           </div>
 
-                          <div className="mt-3 space-y-1.5 text-xs">
+                          <div className="mt-4 space-y-2.5 text-sm">
                             <div className="flex items-center justify-between theme-text-muted">
-                              <span>Jam Belajar:</span>
-                              <span className="font-semibold theme-text font-mono">
+                              <span className="flex items-center gap-1.5">
+                                <Clock3 size={14} />
+                                Jam Belajar
+                              </span>
+                              <span className="font-mono font-semibold theme-text">
                                 {formatJam(shiftItem.jamMasuk)} – {formatJam(shiftItem.jamKeluar)}
                               </span>
                             </div>
                             <div className="flex items-center justify-between theme-text-muted">
-                              <span>Toleransi Terlambat:</span>
+                              <span>Toleransi Terlambat</span>
                               <span className="font-medium theme-text">
                                 {shiftItem.toleransiTerlambatMenit ?? 15} menit
                               </span>
@@ -1411,13 +1269,15 @@ export default function PenugasanShiftPage() {
                           </div>
                         </div>
 
-                        <div className="mt-4 pt-3 border-t theme-border">
+                        <div className="mt-4 border-t theme-border pt-3">
                           <button
                             type="button"
-                            onClick={() => handleOpenEditShift(shiftItem)}
-                            className="inline-flex w-full items-center justify-center gap-1.5 rounded-lg border theme-border bg-[var(--color-surface)] px-3 py-1.5 text-xs font-medium theme-text-secondary hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] transition"
+                            onClick={() =>
+                              router.push("/admin/presensi/penugasan-shift/konfigurasi-shift")
+                            }
+                            className="inline-flex h-9 w-full items-center justify-center gap-2 rounded-lg border theme-border bg-[var(--color-surface)] px-3 text-xs font-semibold theme-text-secondary transition hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]"
                           >
-                            <Pencil size={13} />
+                            <Pencil size={14} />
                             Ubah Jam Shift
                           </button>
                         </div>
@@ -1427,8 +1287,6 @@ export default function PenugasanShiftPage() {
                 </div>
               </div>
             )}
-
-            {/* WARNING */}
 
             {warnings.length > 0 && (
               <div className="mb-5 flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-200">
@@ -1443,8 +1301,6 @@ export default function PenugasanShiftPage() {
                 </div>
               </div>
             )}
-
-            {/* ERROR */}
 
             {error && (
               <div
@@ -1467,8 +1323,6 @@ export default function PenugasanShiftPage() {
               </div>
             )}
 
-            {/* SUCCESS */}
-
             {notice && (
               <div
                 role="status"
@@ -1486,8 +1340,6 @@ export default function PenugasanShiftPage() {
                 </button>
               </div>
             )}
-
-            {/* STATISTIK */}
 
             <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
               {activeTab === "pegawai" ? (
@@ -1540,8 +1392,6 @@ export default function PenugasanShiftPage() {
                 </>
               )}
             </div>
-
-            {/* TABEL */}
 
             <section className="theme-card overflow-hidden rounded-xl border theme-border shadow-sm">
               <div className="border-b theme-border p-4 sm:p-5">
@@ -1596,8 +1446,6 @@ export default function PenugasanShiftPage() {
                   </div>
                 </div>
               </div>
-
-              {/* ISI TABEL */}
 
               <div className="relative overflow-x-auto">
                 {loading ? (
@@ -1849,8 +1697,6 @@ export default function PenugasanShiftPage() {
                 )}
               </div>
 
-              {/* PAGINATION */}
-
               {!loading && filteredData.length > 0 && (
                 <div className="flex flex-col gap-3 border-t theme-border px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
                   <p className="text-xs theme-text-muted">
@@ -1896,128 +1742,6 @@ export default function PenugasanShiftPage() {
           </div>
         </main>
       </div>
-
-      {/* MODAL EDIT KONFIGURASI SHIFT SISWA */}
-      {editingShiftSiswa && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-xl border theme-border bg-[var(--color-surface)] p-6 shadow-xl animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-between pb-4 border-b theme-border">
-              <div>
-                <h3 className="text-base font-bold theme-text">
-                  Ubah Konfigurasi Shift {editingShiftSiswa.nama || editingShiftSiswa.kode}
-                </h3>
-                <p className="text-xs theme-text-muted mt-0.5">
-                  Perbarui jam masuk, jam keluar, dan toleransi keterlambatan.
-                </p>
-              </div>
-              <button
-                type="button"
-                disabled={savingShiftSiswa}
-                onClick={() => setEditingShiftSiswa(null)}
-                className="rounded-lg p-1 theme-text-muted hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] transition disabled:opacity-40"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            <form onSubmit={handleSaveShiftSiswa} className="mt-4 space-y-4">
-              {editShiftError && (
-                <div className="flex items-start gap-2.5 rounded-lg border border-red-200 bg-red-50 p-3 text-xs text-red-700 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-300">
-                  <AlertCircle size={16} className="mt-0.5 shrink-0" />
-                  <span className="flex-1 break-words">{editShiftError}</span>
-                </div>
-              )}
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-semibold theme-text mb-1.5">
-                    Jam Masuk <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="time"
-                    required
-                    value={editShiftForm.jamMasuk}
-                    onChange={(e) =>
-                      setEditShiftForm((prev) => ({
-                        ...prev,
-                        jamMasuk: e.target.value,
-                      }))
-                    }
-                    className="w-full rounded-lg border theme-border bg-[var(--color-surface)] px-3 py-2 text-sm theme-text outline-none focus:border-[var(--color-primary)] font-mono"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold theme-text mb-1.5">
-                    Jam Keluar <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="time"
-                    required
-                    value={editShiftForm.jamKeluar}
-                    onChange={(e) =>
-                      setEditShiftForm((prev) => ({
-                        ...prev,
-                        jamKeluar: e.target.value,
-                      }))
-                    }
-                    className="w-full rounded-lg border theme-border bg-[var(--color-surface)] px-3 py-2 text-sm theme-text outline-none focus:border-[var(--color-primary)] font-mono"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold theme-text mb-1.5">
-                  Toleransi Keterlambatan (Menit)
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  max="240"
-                  required
-                  value={editShiftForm.toleransiTerlambatMenit}
-                  onChange={(e) =>
-                    setEditShiftForm((prev) => ({
-                      ...prev,
-                      toleransiTerlambatMenit: e.target.value,
-                    }))
-                  }
-                  className="w-full rounded-lg border theme-border bg-[var(--color-surface)] px-3 py-2 text-sm theme-text outline-none focus:border-[var(--color-primary)]"
-                  placeholder="Contoh: 15"
-                />
-                <p className="mt-1 text-[11px] theme-text-muted">
-                  Batas waktu toleransi sebelum siswa dinyatakan terlambat (0 – 240 menit).
-                </p>
-              </div>
-
-              <div className="mt-6 flex items-center justify-end gap-2.5 pt-3 border-t theme-border">
-                <button
-                  type="button"
-                  disabled={savingShiftSiswa}
-                  onClick={() => setEditingShiftSiswa(null)}
-                  className="rounded-lg border theme-border px-4 py-2 text-xs font-medium theme-text-secondary hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] transition disabled:opacity-40"
-                >
-                  Batal
-                </button>
-                <button
-                  type="submit"
-                  disabled={savingShiftSiswa}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--color-primary)] px-4 py-2 text-xs font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {savingShiftSiswa ? (
-                    <>
-                      <LoaderCircle size={14} className="animate-spin" />
-                      Menyimpan...
-                    </>
-                  ) : (
-                    "Simpan Perubahan"
-                  )}3
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

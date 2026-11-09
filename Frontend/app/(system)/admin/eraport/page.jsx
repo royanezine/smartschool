@@ -1,65 +1,55 @@
 "use client";
 
 import { useEffect, useMemo, useState, useCallback } from "react";
+import Link from "next/link";
+
 import { getKelas } from "@/services/kelas.service";
 import { getKelasMapel } from "@/services/kelasMapel.service";
 import { getTahunAjaran } from "@/services/raport.service";
 import { getDashboardSekolah } from "@/services/dashboard.service";
 import { getSemuaSiswa } from "@/services/siswa.service";
-import Link from "next/link";
 
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
 
 import {
   ArrowUpRight,
-  Award,
   BarChart3,
-  BookOpen,
   CalendarDays,
   CheckCircle2,
   ChevronRight,
-  ClipboardCheck,
   FileCheck2,
   FileSpreadsheet,
   FileText,
   GraduationCap,
-  LayoutGrid,
-  Loader2,
-  MoreHorizontal,
   PenLine,
   Printer,
   RefreshCw,
   Settings2,
   ShieldCheck,
   Sparkles,
-  TrendingUp,
   Users,
   XCircle,
 } from "lucide-react";
 
-
 const QUICK_MODULES = [
   {
     title: "Entry Nilai",
-    description:
-      "Kelola dan input nilai siswa berdasarkan mata pelajaran.",
+    description: "Kelola dan input nilai siswa berdasarkan mata pelajaran.",
     href: "/admin/eraport/entry-nilai",
     icon: PenLine,
     tone: "blue",
   },
   {
     title: "Cetak Raport",
-    description:
-      "Preview dan cetak raport siswa secara terstruktur.",
+    description: "Preview dan cetak raport siswa secara terstruktur.",
     href: "/admin/eraport/cetak-raport",
     icon: Printer,
     tone: "violet",
   },
   {
     title: "Pengaturan Agregat Nilai",
-    description:
-      "Atur bobot dan perhitungan nilai akhir raport.",
+    description: "Atur bobot dan perhitungan nilai akhir raport.",
     href: "/admin/eraport/pengaturan-agregat",
     icon: Settings2,
     tone: "indigo",
@@ -70,132 +60,97 @@ const toneMap = {
   blue: {
     iconBg: "theme-info",
     iconText: "text-[var(--color-info)]",
-    border: "theme-border",
-    soft: "theme-card-soft",
-    bar: "bg-[var(--color-primary)]",
   },
-
   violet: {
     iconBg: "theme-card-soft",
     iconText: "text-[var(--color-primary)]",
-    border: "theme-border",
-    soft: "theme-card-soft",
-    bar: "bg-[var(--color-primary)]",
   },
-
   indigo: {
     iconBg: "theme-card-soft",
     iconText: "text-[var(--color-primary)]",
-    border: "theme-border",
-    soft: "theme-card-soft",
-    bar: "bg-[var(--color-primary)]",
   },
-
   emerald: {
     iconBg: "theme-success",
     iconText: "text-[var(--color-success)]",
-    border: "theme-border",
-    soft: "theme-card-soft",
-    bar: "bg-[var(--color-success)]",
   },
-
   amber: {
     iconBg: "theme-warning",
     iconText: "text-[var(--color-warning)]",
-    border: "theme-border",
-    soft: "theme-card-soft",
-    bar: "bg-[var(--color-warning)]",
   },
 };
 
+function getListResponse(response) {
+  if (Array.isArray(response?.data?.data)) return response.data.data;
+  if (Array.isArray(response?.data)) return response.data;
+  if (Array.isArray(response)) return response;
+  return [];
+}
 
-function StatCard({
-  label,
-  value,
-  description,
-  icon: Icon,
-  tone = "blue",
-  href,
-}) {
+function getTotalSiswaResponse(dashboardResponse, siswaResponse) {
+  const dashboardData =
+    dashboardResponse?.data?.data ?? dashboardResponse?.data ?? dashboardResponse;
+  const dashboardTotal =
+    dashboardData?.sekolah?.totalSiswa ??
+    dashboardData?.cabang?.totalSiswa ??
+    dashboardData?.totalSiswa;
+
+  if (
+    dashboardTotal !== undefined &&
+    dashboardTotal !== null &&
+    Number.isFinite(Number(dashboardTotal))
+  ) {
+    return Number(dashboardTotal);
+  }
+
+  const siswaData = siswaResponse?.data?.data ?? siswaResponse?.data ?? siswaResponse;
+  const siswaTotal =
+    siswaData?.meta?.totalData ??
+    siswaData?.meta?.total ??
+    siswaData?.pagination?.total ??
+    siswaData?.totalData ??
+    siswaData?.total;
+
+  if (
+    siswaTotal !== undefined &&
+    siswaTotal !== null &&
+    Number.isFinite(Number(siswaTotal))
+  ) {
+    return Number(siswaTotal);
+  }
+
+  return null;
+}
+
+function StatCard({ label, value, description, icon: Icon, tone = "blue", href }) {
   const theme = toneMap[tone] || toneMap.blue;
 
   const content = (
-    <div
-      className="
-        group relative overflow-hidden rounded-2xl
-        border theme-border theme-card
-        p-5 shadow-md
-        transition-all duration-300
-        hover:-translate-y-0.5
-        hover:border-[var(--color-primary)]
-        hover:shadow-lg
-      "
-    >
-      <div
-        className="
-          absolute -right-7 -top-7
-          h-24 w-24 rounded-full
-          bg-[var(--color-primary)]
-          opacity-[0.05]
-          transition-transform duration-500
-          group-hover:scale-150
-        "
-      />
+    <div className="group relative flex h-full flex-col justify-between overflow-hidden rounded-2xl border theme-border theme-card p-5 shadow-md transition-all duration-300 hover:-translate-y-0.5 hover:border-[var(--color-primary)] hover:shadow-lg">
+      <div className="absolute -right-7 -top-7 h-24 w-24 rounded-full bg-[var(--color-primary)] opacity-[0.05] transition-transform duration-500 group-hover:scale-150" />
 
       <div className="relative flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <p className="text-sm font-medium theme-text-muted">
-            {label}
-          </p>
-
-          <p className="mt-2 text-3xl font-bold tracking-tight theme-text">
-            {value}
-          </p>
-
-          <p className="mt-1.5 text-xs theme-text-muted">
-            {description}
-          </p>
-
+          <p className="text-sm font-medium theme-text-muted">{label}</p>
+          <p className="mt-2 text-3xl font-bold tracking-tight theme-text">{value}</p>
+          <p className="mt-1.5 text-xs theme-text-muted">{description}</p>
           {href && (
             <div className="mt-4 flex items-center gap-1 text-xs font-semibold text-[var(--color-primary)]">
               Lihat detail
-
-              <ArrowUpRight
-                size={14}
-                className="
-                  transition-transform
-                  group-hover:-translate-y-0.5
-                  group-hover:translate-x-0.5
-                "
-              />
+              <ArrowUpRight size={14} className="transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
             </div>
           )}
         </div>
-
-        <div
-          className={`
-            flex h-11 w-11 shrink-0 items-center
-            justify-center rounded-xl
-            ${theme.iconBg}
-            ${theme.iconText}
-          `}
-        >
+        <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${theme.iconBg} ${theme.iconText}`}>
           <Icon size={21} strokeWidth={1.8} />
         </div>
       </div>
     </div>
   );
 
-  return href ? <Link href={href}>{content}</Link> : content;
+  return href ? <Link href={href} className="h-full block">{content}</Link> : content;
 }
 
-function SectionHeader({
-  eyebrow,
-  title,
-  description,
-  href,
-  action = "Lihat semua",
-}) {
+function SectionHeader({ eyebrow, title, description, href, action = "Lihat semua" }) {
   return (
     <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
       <div className="min-w-0">
@@ -204,29 +159,11 @@ function SectionHeader({
             {eyebrow}
           </p>
         )}
-
-        <h2 className="text-lg font-bold tracking-tight theme-text">
-          {title}
-        </h2>
-
-        {description && (
-          <p className="mt-1 text-sm theme-text-muted">
-            {description}
-          </p>
-        )}
+        <h2 className="text-lg font-bold tracking-tight theme-text">{title}</h2>
+        {description && <p className="mt-1 text-sm theme-text-muted">{description}</p>}
       </div>
-
       {href && (
-        <Link
-          href={href}
-          className="
-            inline-flex items-center gap-1
-            text-sm font-semibold
-            text-[var(--color-primary)]
-            transition
-            hover:text-[var(--color-primary-hover)]
-          "
-        >
+        <Link href={href} className="inline-flex items-center gap-1 text-sm font-semibold text-[var(--color-primary)] transition hover:text-[var(--color-primary-hover)]">
           {action}
           <ChevronRight size={16} />
         </Link>
@@ -235,42 +172,31 @@ function SectionHeader({
   );
 }
 
-function ProgressBar({ value, tone = "blue" }) {
-  const bar =
-    tone === "emerald"
-      ? "bg-[var(--color-success)]"
-      : tone === "amber"
-      ? "bg-[var(--color-warning)]"
-      : "bg-[var(--color-primary)]";
-
+function EmptyState({ message }) {
   return (
-    <div className="theme-card-soft h-2 overflow-hidden rounded-full">
-      <div
-        className={`
-          h-full rounded-full
-          ${bar}
-          transition-all duration-700
-        `}
-        style={{
-          width: `${Math.min(Math.max(value, 0), 100)}%`,
-        }}
-      />
+    <div className="flex flex-col items-center justify-center px-5 py-10 text-center">
+      <div className="theme-card-soft flex h-12 w-12 items-center justify-center rounded-xl">
+        <FileText size={21} className="theme-text-muted" />
+      </div>
+      <p className="mt-3 text-sm font-semibold theme-text">Belum ada data</p>
+      <p className="mt-1 max-w-sm text-xs leading-5 theme-text-muted">{message}</p>
     </div>
   );
 }
-
 
 export default function ERaportPage() {
   const [activeView, setActiveView] = useState("ringkasan");
   const [kelasList, setKelasList] = useState([]);
   const [kelasMapelList, setKelasMapelList] = useState([]);
   const [tahunAjaranList, setTahunAjaranList] = useState([]);
-  const [totalSiswaApi, setTotalSiswaApi] = useState(0);
+  const [totalSiswaApi, setTotalSiswaApi] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const loadData = useCallback(async () => {
+    setLoading(true);
+    setError("");
     try {
-      setLoading(true);
       const [kelasRes, mapelRes, taRes, dashRes, siswaRes] = await Promise.allSettled([
         getKelas({ limit: 100 }),
         getKelasMapel(),
@@ -279,478 +205,207 @@ export default function ERaportPage() {
         getSemuaSiswa({ limit: 1 }),
       ]);
 
-      if (kelasRes.status === "fulfilled") {
-        const val = kelasRes.value;
-        const kList = Array.isArray(val?.data)
-          ? val.data
-          : Array.isArray(val)
-          ? val
-          : [];
-        setKelasList(kList);
-      }
+      if (kelasRes.status === "fulfilled") setKelasList(getListResponse(kelasRes.value));
+      else setKelasList([]);
 
-      if (mapelRes.status === "fulfilled") {
-        const val = mapelRes.value;
-        const mList = Array.isArray(val?.data)
-          ? val.data
-          : Array.isArray(val)
-          ? val
-          : [];
-        setKelasMapelList(mList);
-      }
+      if (mapelRes.status === "fulfilled") setKelasMapelList(getListResponse(mapelRes.value));
+      else setKelasMapelList([]);
 
-      if (taRes.status === "fulfilled") {
-        const val = taRes.value;
-        const taList = Array.isArray(val?.data)
-          ? val.data
-          : Array.isArray(val)
-          ? val
-          : [];
-        setTahunAjaranList(taList);
-      }
+      if (taRes.status === "fulfilled") setTahunAjaranList(getListResponse(taRes.value));
+      else setTahunAjaranList([]);
 
-      let siswaCount = 0;
-      if (dashRes.status === "fulfilled") {
-        const dVal = dashRes.value?.data;
-        siswaCount = dVal?.sekolah?.totalSiswa ?? dVal?.cabang?.totalSiswa ?? 0;
-      }
-      if (!siswaCount && siswaRes.status === "fulfilled") {
-        const sVal = siswaRes.value;
-        siswaCount = sVal?.meta?.totalData ?? sVal?.meta?.total ?? 0;
-      }
-      if (siswaCount > 0) {
-        setTotalSiswaApi(siswaCount);
+      const siswaTotal = getTotalSiswaResponse(
+        dashRes.status === "fulfilled" ? dashRes.value : null,
+        siswaRes.status === "fulfilled" ? siswaRes.value : null
+      );
+      setTotalSiswaApi(siswaTotal);
+
+      if (
+        kelasRes.status === "rejected" &&
+        mapelRes.status === "rejected" &&
+        taRes.status === "rejected" &&
+        dashRes.status === "rejected" &&
+        siswaRes.status === "rejected"
+      ) {
+        setError("Data dashboard gagal dimuat. Silakan coba kembali.");
       }
     } catch (err) {
-      console.error("Gagal memuat data dashboard E-Raport:", err);
+      setError("Terjadi kesalahan saat memuat data dashboard.");
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      loadData();
-    }, 0);
-    return () => clearTimeout(timer);
+    loadData();
   }, [loadData]);
 
   const activeTahunAjaran = useMemo(() => {
-    if (!Array.isArray(tahunAjaranList) || tahunAjaranList.length === 0) {
-      return null;
-    }
-    return tahunAjaranList.find((t) => t.status === "aktif") || tahunAjaranList[0];
+    if (!tahunAjaranList.length) return null;
+    return tahunAjaranList.find((item) => String(item.status).toLowerCase() === "aktif") || tahunAjaranList[0];
   }, [tahunAjaranList]);
 
+  const totalSiswa = totalSiswaApi;
+  const totalKelas = kelasList.length;
+
+  const mataPelajaranUnik = useMemo(() => {
+    const mapelMap = new Map();
+    kelasMapelList.forEach((item) => {
+      if (item.mataPelajaran?.id) mapelMap.set(item.mataPelajaran.id, item.mataPelajaran);
+    });
+    return Array.from(mapelMap.values());
+  }, [kelasMapelList]);
+
+  const totalMataPelajaran = mataPelajaranUnik.length;
+
   const classProgress = useMemo(() => {
-    return kelasList.map((k) => {
-      const siswaCount =
-        k._count?.anggota ??
-        k._count?.anggotaKelas ??
-        (Array.isArray(k.anggota) ? k.anggota.length : (Array.isArray(k.anggotaKelas) ? k.anggotaKelas.length : k.kapasitas || 0));
+    return kelasList.map((kelas) => {
+      const jumlahSiswa =
+        kelas._count?.anggota ??
+        kelas._count?.anggotaKelas ??
+        (Array.isArray(kelas.anggota)
+          ? kelas.anggota.length
+          : Array.isArray(kelas.anggotaKelas)
+          ? kelas.anggotaKelas.length
+          : null);
+
       return {
-        id: k.id,
-        kelas: k.nama || "Kelas",
-        tingkat: k.tingkat ? `Tingkat ${k.tingkat}` : "Reguler",
-        siswa: siswaCount,
-        nilai: 0,
-        raport: 0,
-        status: k.status || "Aktif",
+        id: kelas.id,
+        kelas: kelas.nama || "Kelas",
+        tingkat: kelas.tingkat ? `Tingkat ${kelas.tingkat}` : "Reguler",
+        siswa: jumlahSiswa,
+        status: kelas.status || "Aktif",
       };
     });
   }, [kelasList]);
 
-  const totalSiswa = useMemo(() => {
-    if (totalSiswaApi > 0) return totalSiswaApi;
-    return classProgress.reduce((sum, item) => sum + item.siswa, 0);
-  }, [totalSiswaApi, classProgress]);
-
-  // Data raport aktual dari sistem (saat ini 0 raport selesai di DB)
-  const raportLengkap = 0;
-  const belumLengkap = Math.max(0, totalSiswa - raportLengkap);
-  const averageNilai = totalSiswa > 0 ? Math.round((raportLengkap / totalSiswa) * 100) : 0;
-  const averageRaport = totalSiswa > 0 ? Math.round((raportLengkap / totalSiswa) * 100) : 0;
-
   const subjectProgress = useMemo(() => {
-    return kelasMapelList.slice(0, 8).map((km) => ({
-      id: km.id,
-      subject: km.mataPelajaran?.nama || "Mata Pelajaran",
-      teacher: km.guruPengajar?.namaLengkap || "Guru Pengajar",
-      progress: 0,
-      students: totalSiswa,
+    return kelasMapelList.map((item) => ({
+      id: item.id,
+      subject: item.mataPelajaran?.nama || "Mata Pelajaran",
+      teacher: item.guruPengajar?.namaLengkap || item.guru?.namaLengkap || "Guru belum ditentukan",
+      kelas: item.kelas?.nama || "Kelas",
     }));
-  }, [kelasMapelList, totalSiswa]);
+  }, [kelasMapelList]);
 
   const raportStatus = useMemo(() => {
     return [
-      {
-        label: "Siswa Terdaftar",
-        value: totalSiswa,
-        percentage: 100,
-        tone: "emerald",
-      },
-      {
-        label: "Kelas Terdaftar",
-        value: kelasList.length,
-        percentage: 100,
-        tone: "blue",
-      },
-      {
-        label: "Mata Pelajaran",
-        value: kelasMapelList.length,
-        percentage: 100,
-        tone: "amber",
-      },
+      { label: "Siswa Terdaftar", value: totalSiswa, tone: "emerald" },
+      { label: "Kelas Terdaftar", value: totalKelas, tone: "blue" },
+      { label: "Mata Pelajaran", value: totalMataPelajaran, tone: "amber" },
     ];
-  }, [totalSiswa, kelasList.length, kelasMapelList.length]);
+  }, [totalSiswa, totalKelas, totalMataPelajaran]);
 
-  const recentActivity = useMemo(() => {
-    return kelasList.slice(0, 4).map((k, idx) => ({
-      title: `Kelas ${k.nama || ""} aktif`,
-      detail: `${k.tingkat ? `Tingkat ${k.tingkat}` : "Reguler"} · ${k._count?.anggota ?? k.kapasitas ?? 0} siswa`,
-      user: "Sistem Akademik",
-      time: "Aktif",
-      icon: FileCheck2,
-      tone: idx % 2 === 0 ? "emerald" : "blue",
-    }));
-  }, [kelasList]);
+  const semesterAktif = activeTahunAjaran?.semester ? `Semester ${activeTahunAjaran.semester}` : "Semester belum ditentukan";
+  const tahunAjaranAktif = activeTahunAjaran?.tahunAjaran || "Belum tersedia";
 
   return (
-    <div className="theme-page flex h-screen min-h-0 overflow-hidden">
-      <Sidebar
-        role="admin"
-        active="eraport"
-        setActive={() => {}}
-      />
+    <div className="theme-page flex h-screen w-full overflow-hidden">
+      <Sidebar role="admin" active="eraport" setActive={() => {}} />
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <Header
-          notifications={[]}
-          user={{
-            name: "Admin Sekolah",
-            email: "admin@smartschool.com",
-            avatar: "AS",
-          }}
-        />
+        <div className="shrink-0 border-b theme-border">
+          <Header
+            notifications={[]}
+            user={{ name: "Admin Sekolah", email: "admin@smartschool.com", avatar: "AS" }}
+          />
+        </div>
 
-        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto">
-          <div className="mx-auto w-full max-w-[1600px] px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
+        <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto">
+          <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
+            
+            {error && (
+              <div className="mb-5 flex items-center justify-between gap-3 rounded-2xl border theme-border theme-warning px-4 py-3 text-xs theme-text-secondary">
+                <span>{error}</span>
+                <button type="button" onClick={loadData} className="shrink-0 font-semibold text-[var(--color-primary)]">
+                  Coba lagi
+                </button>
+              </div>
+            )}
 
-
-            <div
-              className="
-                mb-6 rounded-2xl border theme-border
-                theme-card-soft
-                px-4 py-3.5
-                text-xs leading-5
-                theme-text-secondary
-              "
-            >
-              <strong className="theme-text">
-                Catatan:
-              </strong>{" "}
-              kartu ringkasan dan tabel agregat pada halaman ini masih
-              berupa contoh tampilan. Backend SmartSchool belum menyediakan
-              endpoint agregat e-Raport (rekap nilai per kelas/mapel,
-              aktivitas terbaru, maupun status raport). Data nilai dan
-              raport yang tersimpan dapat dilihat melalui menu Entry Nilai
-              dan Cetak Raport.
-            </div>
-
-
-            <section
-              className="
-                relative mb-6 overflow-hidden
-                rounded-[28px]
-                border theme-border
-                theme-sidebar
-                shadow-lg
-              "
-            >
-              <div
-                className="
-                  absolute -right-24 -top-28
-                  h-80 w-80 rounded-full
-                  bg-[var(--color-primary)]
-                  opacity-[0.12]
-                  blur-3xl
-                "
-              />
-
-              <div
-                className="
-                  absolute -bottom-40 left-1/3
-                  h-96 w-96 rounded-full
-                  bg-[var(--color-info)]
-                  opacity-[0.08]
-                  blur-3xl
-                "
-              />
-
+            <section className="relative mb-6 overflow-hidden rounded-[28px] border theme-border theme-sidebar shadow-lg">
+              <div className="absolute -right-24 -top-28 h-80 w-80 rounded-full bg-[var(--color-primary)] opacity-[0.12] blur-3xl" />
+              <div className="absolute -bottom-40 left-1/3 h-96 w-96 rounded-full bg-[var(--color-info)] opacity-[0.08] blur-3xl" />
               <div
                 className="absolute inset-0 opacity-[0.05]"
                 style={{
-                  backgroundImage:
-                    "linear-gradient(var(--color-border) 1px, transparent 1px), linear-gradient(90deg, var(--color-border) 1px, transparent 1px)",
+                  backgroundImage: "linear-gradient(var(--color-border) 1px, transparent 1px), linear-gradient(90deg, var(--color-border) 1px, transparent 1px)",
                   backgroundSize: "34px 34px",
                 }}
               />
 
               <div className="relative grid gap-8 px-6 py-7 sm:px-8 sm:py-8 lg:grid-cols-[1fr_390px] lg:px-10 lg:py-9">
-
-
                 <div className="flex flex-col justify-center">
-                  <div
-                    className="
-                      mb-4 inline-flex w-fit items-center gap-2
-                      rounded-full border theme-border
-                      theme-card-soft
-                      px-3 py-1.5
-                      text-xs font-semibold
-                      theme-text-secondary
-                    "
-                  >
+                  <div className="mb-4 inline-flex w-fit items-center gap-2 rounded-full border theme-border theme-card-soft px-3 py-1.5 text-xs font-semibold theme-text-secondary">
                     <Sparkles size={13} />
                     Akademik · E-Raport
                   </div>
-
-                  <h1
-                    className="
-                      max-w-2xl
-                      text-2xl font-bold tracking-tight
-                      theme-text
-                      sm:text-3xl
-                      lg:text-[38px]
-                      lg:leading-tight
-                    "
-                  >
+                  <h1 className="max-w-2xl text-2xl font-bold tracking-tight theme-text sm:text-3xl lg:text-[38px] lg:leading-tight">
                     Kelola E-Raport Sekolah
                   </h1>
-
-                  <p
-                    className="
-                      mt-3 max-w-2xl
-                      text-sm leading-6
-                      theme-text-secondary
-                      sm:text-[15px]
-                    "
-                  >
-                    Pantau pengisian nilai, kelengkapan raport,
-                    proses agregasi, dan pencetakan raport siswa
-                    dalam satu dashboard akademik.
+                  <p className="mt-3 max-w-2xl text-sm leading-6 theme-text-secondary sm:text-[15px]">
+                    Pantau data akademik, pengelolaan nilai, kelengkapan raport, dan pencetakan raport siswa dalam satu dashboard akademik.
                   </p>
-
                   <div className="mt-6 flex flex-wrap gap-3">
-                    <Link
-                      href="/admin/eraport/entry-nilai"
-                      className="
-                        theme-primary
-                        inline-flex items-center gap-2
-                        rounded-xl
-                        px-4 py-2.5
-                        text-sm font-semibold
-                        shadow-md
-                        transition
-                        hover:-translate-y-0.5
-                      "
-                    >
+                    <Link href="/admin/eraport/entry-nilai" className="theme-primary inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold shadow-md transition hover:-translate-y-0.5">
                       <PenLine size={17} />
                       Entry Nilai
                     </Link>
-
-                    <Link
-                      href="/admin/eraport/cetak-raport"
-                      className="
-                        theme-card
-                        theme-sidebar-hover
-                        inline-flex items-center gap-2
-                        rounded-xl
-                        border theme-border
-                        px-4 py-2.5
-                        text-sm font-semibold
-                        theme-text-secondary
-                        transition
-                        hover:border-[var(--color-primary)]
-                        hover:text-[var(--color-primary)]
-                      "
-                    >
+                    <Link href="/admin/eraport/cetak-raport" className="theme-card theme-sidebar-hover inline-flex items-center gap-2 rounded-xl border theme-border px-4 py-2.5 text-sm font-semibold theme-text-secondary transition hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]">
                       <Printer size={17} />
                       Cetak Raport
                     </Link>
                   </div>
                 </div>
 
-
-                <div
-                  className="
-                    rounded-2xl
-                    border theme-border
-                    theme-card-soft
-                    p-5
-                  "
-                >
+                <div className="rounded-2xl border theme-border theme-card-soft p-5">
                   <div className="flex items-start justify-between">
                     <div>
-                      <p className="text-xs font-medium theme-text-muted">
-                        Tahun Ajaran
-                      </p>
-
-                      <p className="mt-1 text-lg font-bold theme-text">
-                        {loading
-                          ? "Memuat..."
-                          : activeTahunAjaran?.tahunAjaran || "2025/2026"}
-                      </p>
-
-                      <p className="mt-1 text-xs theme-text-muted">
-                        {loading
-                          ? "..."
-                          : activeTahunAjaran?.semester
-                          ? `Semester ${activeTahunAjaran.semester}`
-                          : "Semester Ganjil"}
-                      </p>
+                      <p className="text-xs font-medium theme-text-muted">Tahun Ajaran</p>
+                      <p className="mt-1 text-lg font-bold theme-text">{loading ? "Memuat..." : tahunAjaranAktif}</p>
+                      <p className="mt-1 text-xs theme-text-muted">{loading ? "..." : semesterAktif}</p>
                     </div>
-
-                    <div
-                      className="
-                        flex h-10 w-10 items-center
-                        justify-center rounded-xl
-                        theme-info
-                      "
-                    >
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl theme-info">
                       <CalendarDays size={20} />
                     </div>
                   </div>
-
                   <div className="mt-5 rounded-xl theme-card p-4">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between gap-3">
                       <div>
-                        <p className="text-xs theme-text-muted">
-                          Kelengkapan Raport
-                        </p>
-
-                        <p className="mt-1 text-2xl font-bold theme-text">
-                          {averageRaport}%
-                        </p>
+                        <p className="text-xs theme-text-muted">Kelengkapan Raport</p>
+                        <p className="mt-1 text-xl font-bold theme-text">Belum tersedia</p>
+                        <p className="mt-1 text-[11px] theme-text-muted">Menunggu data agregat raport dari backend.</p>
                       </div>
-
-                      <div
-                        className="
-                          flex h-12 w-12 items-center
-                          justify-center rounded-full
-                          border-4
-                          border-[var(--color-success)]
-                          border-opacity-20
-                        "
-                      >
-                        <CheckCircle2
-                          size={22}
-                          className="text-[var(--color-success)]"
-                        />
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-4 border-[var(--color-border)]">
+                        <FileCheck2 size={21} className="theme-text-muted" />
                       </div>
                     </div>
-
-                    <div className="theme-card-soft mt-4 h-2 overflow-hidden rounded-full">
-                      <div
-                        className="
-                          h-full rounded-full
-                          bg-[var(--color-success)]
-                          transition-all duration-700
-                        "
-                        style={{
-                          width: `${averageRaport}%`,
-                        }}
-                      />
-                    </div>
+                    <div className="theme-card-soft mt-4 h-2 overflow-hidden rounded-full" />
                   </div>
                 </div>
               </div>
             </section>
 
-
             <section className="mb-7">
-              <SectionHeader
-                eyebrow="E-RAPORT"
-                title="Modul utama"
-                description="Akses cepat ke seluruh pengelolaan E-Raport."
-              />
-
+              <SectionHeader eyebrow="E-RAPORT" title="Modul utama" description="Akses cepat ke seluruh pengelolaan E-Raport." />
               <div className="grid gap-4 md:grid-cols-3">
                 {QUICK_MODULES.map((item) => {
                   const Icon = item.icon;
-                  const theme =
-                    toneMap[item.tone] || toneMap.blue;
-
+                  const theme = toneMap[item.tone] || toneMap.blue;
                   return (
-                    <Link
-                      key={item.title}
-                      href={item.href}
-                      className="
-                        group relative overflow-hidden
-                        rounded-2xl
-                        border theme-border
-                        theme-card
-                        p-5
-                        shadow-md
-                        transition-all duration-300
-                        hover:-translate-y-1
-                        hover:border-[var(--color-primary)]
-                        hover:shadow-lg
-                      "
-                    >
-                      <div
-                        className="
-                          absolute right-0 top-0
-                          h-28 w-28
-                          translate-x-10
-                          -translate-y-10
-                          rounded-full
-                          bg-[var(--color-primary)]
-                          opacity-[0.05]
-                          transition-transform duration-500
-                          group-hover:scale-150
-                        "
-                      />
-
+                    <Link key={item.title} href={item.href} className="group relative overflow-hidden rounded-2xl border theme-border theme-card p-5 shadow-md transition-all duration-300 hover:-translate-y-1 hover:border-[var(--color-primary)] hover:shadow-lg">
+                      <div className="absolute right-0 top-0 h-28 w-28 translate-x-10 -translate-y-10 rounded-full bg-[var(--color-primary)] opacity-[0.05] transition-transform duration-500 group-hover:scale-150" />
                       <div className="relative">
                         <div className="flex items-start justify-between">
-                          <div
-                            className={`
-                              flex h-11 w-11
-                              items-center justify-center
-                              rounded-xl
-                              ${theme.iconBg}
-                              ${theme.iconText}
-                            `}
-                          >
-                            <Icon
-                              size={21}
-                              strokeWidth={1.8}
-                            />
+                          <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${theme.iconBg} ${theme.iconText}`}>
+                            <Icon size={21} strokeWidth={1.8} />
                           </div>
-
-                          <ArrowUpRight
-                            size={17}
-                            className="
-                              theme-text-placeholder
-                              transition-all
-                              group-hover:-translate-y-0.5
-                              group-hover:translate-x-0.5
-                              group-hover:text-[var(--color-primary)]
-                            "
-                          />
+                          <ArrowUpRight size={17} className="theme-text-placeholder transition-all group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-[var(--color-primary)]" />
                         </div>
-
-                        <h3 className="mt-5 text-[15px] font-bold theme-text">
-                          {item.title}
-                        </h3>
-
-                        <p className="mt-1.5 min-h-[40px] text-xs leading-5 theme-text-muted">
-                          {item.description}
-                        </p>
-
+                        <h3 className="mt-5 text-[15px] font-bold theme-text">{item.title}</h3>
+                        <p className="mt-1.5 min-h-[40px] text-xs leading-5 theme-text-muted">{item.description}</p>
                         <div className="mt-4 flex items-center gap-1 text-xs font-semibold text-[var(--color-primary)]">
-                          Buka modul
-                          <ChevronRight size={14} />
+                          Buka modul <ChevronRight size={14} />
                         </div>
                       </div>
                     </Link>
@@ -759,118 +414,28 @@ export default function ERaportPage() {
               </div>
             </section>
 
-
             <section className="mb-7">
-              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                <StatCard
-                  label="Total Siswa"
-                  value={loading ? "..." : totalSiswa}
-                  description="Siswa dalam periode aktif"
-                  icon={Users}
-                  tone="blue"
-                />
-
-                <StatCard
-                  label="Nilai Terisi"
-                  value={loading ? "..." : `${averageNilai}%`}
-                  description="Rata-rata kelengkapan nilai"
-                  icon={FileSpreadsheet}
-                  tone="violet"
-                  href="/admin/eraport/entry-nilai"
-                />
-
-                <StatCard
-                  label="Raport Lengkap"
-                  value={loading ? "..." : raportLengkap}
-                  description="Raport siap diproses"
-                  icon={FileCheck2}
-                  tone="emerald"
-                  href="/admin/eraport/cetak-raport"
-                />
-
-                <StatCard
-                  label="Belum Lengkap"
-                  value={loading ? "..." : belumLengkap}
-                  description="Perlu ditindaklanjuti"
-                  icon={XCircle}
-                  tone="amber"
-                />
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
+                <StatCard label="Total Siswa" value={loading ? "..." : totalSiswa !== null ? totalSiswa.toLocaleString("id-ID") : "—"} description="Total siswa berdasarkan data sekolah" icon={Users} tone="blue" />
+                <StatCard label="Penugasan Mapel" value={loading ? "..." : kelasMapelList.length.toLocaleString("id-ID")} description="Penugasan mata pelajaran per kelas" icon={FileSpreadsheet} tone="violet" href="/admin/eraport/entry-nilai" />
+                <StatCard label="Raport Lengkap" value="—" description="Menunggu endpoint rekap status raport" icon={FileCheck2} tone="emerald" href="/admin/eraport/cetak-raport" />
+                <StatCard label="Belum Lengkap" value="—" description="Menunggu data status raport aktual" icon={XCircle} tone="amber" />
               </div>
             </section>
 
-
             <section className="mb-7 grid gap-5 xl:grid-cols-[1.3fr_.7fr]">
-
-
-              <div
-                className="
-                  rounded-2xl
-                  border theme-border
-                  theme-card
-                  shadow-md
-                "
-              >
-                <div
-                  className="
-                    flex flex-col gap-4
-                    border-b theme-border
-                    px-5 py-5
-                    sm:flex-row
-                    sm:items-center
-                    sm:justify-between
-                    sm:px-6
-                  "
-                >
+              <div className="rounded-2xl border theme-border theme-card shadow-md">
+                <div className="flex flex-col gap-4 border-b theme-border px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
                   <div>
-                    <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--color-primary)]">
-                      Monitoring
-                    </p>
-
-                    <h2 className="mt-1 text-lg font-bold theme-text">
-                      Progres E-Raport per kelas
-                    </h2>
-
-                    <p className="mt-1 text-sm theme-text-muted">
-                      Pantau kelengkapan nilai dan raport setiap kelas.
-                    </p>
+                    <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--color-primary)]">Monitoring</p>
+                    <h2 className="mt-1 text-lg font-bold theme-text">Data kelas E-Raport</h2>
+                    <p className="mt-1 text-sm theme-text-muted">Daftar kelas yang tersedia pada sistem akademik.</p>
                   </div>
-
                   <div className="theme-card-soft flex items-center gap-1 rounded-xl p-1">
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setActiveView("ringkasan")
-                      }
-                      className={`
-                        rounded-lg px-3 py-2
-                        text-xs font-semibold
-                        transition
-                        ${
-                          activeView === "ringkasan"
-                            ? "theme-card text-[var(--color-primary)] shadow-sm"
-                            : "theme-text-muted hover:text-[var(--color-text)]"
-                        }
-                      `}
-                    >
+                    <button type="button" onClick={() => setActiveView("ringkasan")} className={`rounded-lg px-3 py-2 text-xs font-semibold transition ${activeView === "ringkasan" ? "theme-card text-[var(--color-primary)] shadow-sm" : "theme-text-muted hover:text-[var(--color-text)]"}`}>
                       Ringkasan
                     </button>
-
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setActiveView("detail")
-                      }
-                      className={`
-                        rounded-lg px-3 py-2
-                        text-xs font-semibold
-                        transition
-                        ${
-                          activeView === "detail"
-                            ? "theme-card text-[var(--color-primary)] shadow-sm"
-                            : "theme-text-muted hover:text-[var(--color-text)]"
-                        }
-                      `}
-                    >
+                    <button type="button" onClick={() => setActiveView("detail")} className={`rounded-lg px-3 py-2 text-xs font-semibold transition ${activeView === "detail" ? "theme-card text-[var(--color-primary)] shadow-sm" : "theme-text-muted hover:text-[var(--color-text)]"}`}>
                       Detail
                     </button>
                   </div>
@@ -880,159 +445,41 @@ export default function ERaportPage() {
                   <table className="w-full min-w-[720px]">
                     <thead>
                       <tr className="theme-table-header border-b theme-border">
-                        <th className="px-6 py-3 text-left text-[11px] font-bold uppercase tracking-wider">
-                          Kelas
-                        </th>
-
-                        <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider">
-                          Siswa
-                        </th>
-
-                        <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider">
-                          Nilai
-                        </th>
-
-                        <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider">
-                          Raport
-                        </th>
-
-                        <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider">
-                          Status
-                        </th>
-
-                        <th className="px-6 py-3 text-right text-[11px] font-bold uppercase tracking-wider">
-                          Aksi
-                        </th>
+                        <th className="px-6 py-3 text-left text-[11px] font-bold uppercase tracking-wider">Kelas</th>
+                        <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider">Siswa</th>
+                        <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider">Nilai</th>
+                        <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider">Raport</th>
+                        <th className="px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider">Status</th>
+                        <th className="px-6 py-3 text-right text-[11px] font-bold uppercase tracking-wider">Aksi</th>
                       </tr>
                     </thead>
-
                     <tbody className="divide-y divide-[var(--color-border-soft)]">
-                      {classProgress.map((item) => (
-                        <tr
-                          key={item.kelas}
-                          className="
-                            group
-                            transition
-                            theme-table-hover
-                          "
-                        >
-                          <td className="px-6 py-4">
-                            <div className="flex items-center gap-3">
-                              <div
-                                className="
-                                  theme-info
-                                  flex h-9 w-9
-                                  items-center justify-center
-                                  rounded-lg
-                                  text-xs font-bold
-                                "
-                              >
-                                {item.tingkat}
+                      {loading ? (
+                        <tr><td colSpan={6} className="px-6 py-10 text-center text-sm theme-text-muted">Memuat data kelas...</td></tr>
+                      ) : classProgress.length === 0 ? (
+                        <tr><td colSpan={6} className="px-6 py-10 text-center text-sm theme-text-muted">Belum ada data kelas.</td></tr>
+                      ) : (
+                        classProgress.map((item) => (
+                          <tr key={item.id} className="group transition theme-table-hover">
+                            <td className="px-6 py-4">
+                              <div className="flex items-center gap-3">
+                                <div className="theme-info flex h-9 w-9 items-center justify-center rounded-lg text-xs font-bold"><GraduationCap size={17} /></div>
+                                <div>
+                                  <p className="text-sm font-semibold theme-text">{item.kelas}</p>
+                                  <p className="mt-0.5 text-[11px] theme-text-placeholder">{item.tingkat}</p>
+                                </div>
                               </div>
-
-                              <div>
-                                <p className="text-sm font-semibold theme-text">
-                                  {item.kelas}
-                                </p>
-
-                                <p className="mt-0.5 text-[11px] theme-text-placeholder">
-                                  {activeTahunAjaran?.semester
-                                    ? `Semester ${activeTahunAjaran.semester}`
-                                    : "Semester Ganjil"}
-                                </p>
-                              </div>
-                            </div>
-                          </td>
-
-                          <td className="px-4 py-4">
-                            <span className="text-sm font-semibold theme-text-secondary">
-                              {item.siswa}
-                            </span>
-                          </td>
-
-                          <td className="w-[150px] px-4 py-4">
-                            <div className="flex items-center justify-between">
-                              <span className="text-xs font-semibold theme-text-secondary">
-                                {item.nilai}%
-                              </span>
-                            </div>
-
-                            <div className="mt-2">
-                              <ProgressBar
-                                value={item.nilai}
-                                tone={
-                                  item.nilai >= 90
-                                    ? "emerald"
-                                    : item.nilai >= 80
-                                    ? "blue"
-                                    : "amber"
-                                }
-                              />
-                            </div>
-                          </td>
-
-                          <td className="w-[150px] px-4 py-4">
-                            <div className="flex items-center justify-between">
-                              <span className="text-xs font-semibold theme-text-secondary">
-                                {item.raport}%
-                              </span>
-                            </div>
-
-                            <div className="mt-2">
-                              <ProgressBar
-                                value={item.raport}
-                                tone={
-                                  item.raport >= 90
-                                    ? "emerald"
-                                    : item.raport >= 80
-                                    ? "blue"
-                                    : "amber"
-                                }
-                              />
-                            </div>
-                          </td>
-
-                          <td className="px-4 py-4">
-                            <span
-                              className={`
-                                inline-flex rounded-full
-                                px-2.5 py-1
-                                text-[10px] font-bold
-                                ${
-                                  item.status === "Selesai"
-                                    ? "theme-success"
-                                    : item.status ===
-                                      "Hampir selesai"
-                                    ? "theme-info"
-                                    : item.status ===
-                                      "Berjalan"
-                                    ? "theme-card-soft text-[var(--color-primary)]"
-                                    : "theme-warning"
-                                }
-                              `}
-                            >
-                              {item.status}
-                            </span>
-                          </td>
-
-                          <td className="px-6 py-4 text-right">
-                            <Link
-                              href="/admin/eraport/entry-nilai"
-                              className="
-                                theme-text-muted
-                                theme-sidebar-hover
-                                inline-flex h-8 w-8
-                                items-center justify-center
-                                rounded-lg
-                                transition
-                                hover:text-[var(--color-primary)]
-                              "
-                            >
-                              <ChevronRight size={16} />
-                            </Link>
-                          </td>
-                        </tr>
-                      ))}
+                            </td>
+                            <td className="px-4 py-4"><span className="text-sm font-semibold theme-text-secondary">{item.siswa !== null && item.siswa !== undefined ? item.siswa : "—"}</span></td>
+                            <td className="w-[150px] px-4 py-4"><span className="text-xs theme-text-muted">Belum tersedia</span></td>
+                            <td className="w-[150px] px-4 py-4"><span className="text-xs theme-text-muted">Belum tersedia</span></td>
+                            <td className="px-4 py-4"><span className="inline-flex rounded-full px-2.5 py-1 text-[10px] font-bold theme-info">{item.status}</span></td>
+                            <td className="px-6 py-4 text-right">
+                              <Link href="/admin/eraport/entry-nilai" className="theme-text-muted theme-sidebar-hover inline-flex h-8 w-8 items-center justify-center rounded-lg transition hover:text-[var(--color-primary)]"><ChevronRight size={16} /></Link>
+                            </td>
+                          </tr>
+                        ))
+                      )}
                     </tbody>
                   </table>
                 </div>
@@ -1040,25 +487,11 @@ export default function ERaportPage() {
                 {activeView === "detail" && (
                   <div className="theme-card-soft border-t theme-border px-5 py-4 sm:px-6">
                     <div className="flex items-start gap-3">
-                      <div className="theme-info flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
-                        <BarChart3 size={17} />
-                      </div>
-
+                      <div className="theme-info flex h-9 w-9 shrink-0 items-center justify-center rounded-lg"><BarChart3 size={17} /></div>
                       <div>
-                        <p className="text-xs font-semibold theme-text">
-                          Insight E-Raport
-                        </p>
-
+                        <p className="text-xs font-semibold theme-text">Data Akademik</p>
                         <p className="mt-1 text-xs leading-5 theme-text-secondary">
-                          {kelasList.length > 0
-                            ? `Terdapat ${kelasList.length} kelas aktif dengan total ${totalSiswa} siswa terdaftar pada Tahun Ajaran ${
-                                activeTahunAjaran?.tahunAjaran || "aktif"
-                              } (${
-                                activeTahunAjaran?.semester
-                                  ? `Semester ${activeTahunAjaran.semester}`
-                                  : "Ganjil"
-                              }). Pengisian nilai dan pencetakan raport dapat dipantau melalui modul di bawah.`
-                            : "Belum ada kelas aktif yang terdaftar untuk periode ini."}
+                          {loading ? "Memuat data akademik..." : `Terdapat ${totalKelas} kelas dan ${totalMataPelajaran} mata pelajaran yang terdaftar. ${totalSiswa !== null ? `Total siswa sekolah sebanyak ${totalSiswa} siswa.` : "Total siswa belum tersedia dari API."} Data progres nilai dan status raport memerlukan endpoint rekap khusus.`}
                         </p>
                       </div>
                     </div>
@@ -1066,68 +499,21 @@ export default function ERaportPage() {
                 )}
               </div>
 
-
-              <div
-                className="
-                  rounded-2xl
-                  border theme-border
-                  theme-card
-                  p-5
-                  shadow-md
-                  sm:p-6
-                "
-              >
+              <div className="rounded-2xl border theme-border theme-card p-5 shadow-md sm:p-6">
                 <div className="flex items-start justify-between">
                   <div>
-                    <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--color-primary)]">
-                      Status
-                    </p>
-
-                    <h2 className="mt-1 text-lg font-bold theme-text">
-                      Status raport
-                    </h2>
-
-                    <p className="mt-1 text-sm theme-text-muted">
-                      Distribusi kelengkapan raport siswa.
-                    </p>
+                    <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--color-primary)]">Data Sekolah</p>
+                    <h2 className="mt-1 text-lg font-bold theme-text">Ringkasan akademik</h2>
+                    <p className="mt-1 text-sm theme-text-muted">Jumlah data akademik yang tersedia.</p>
                   </div>
-
-                  <div className="theme-info flex h-10 w-10 items-center justify-center rounded-xl">
-                    <FileText size={19} />
-                  </div>
+                  <div className="theme-info flex h-10 w-10 items-center justify-center rounded-xl"><FileText size={19} /></div>
                 </div>
 
                 <div className="mt-7 flex justify-center">
-                  <div
-                    className="
-                      relative flex h-44 w-44
-                      items-center justify-center
-                      rounded-full
-                      border-[18px]
-                      border-[var(--color-success)]
-                      border-opacity-20
-                    "
-                  >
-                    <div
-                      className="
-                        absolute inset-[-18px]
-                        rounded-full
-                        border-[18px]
-                        border-transparent
-                        border-t-[var(--color-primary)]
-                        border-r-[var(--color-primary)]
-                        rotate-[-35deg]
-                      "
-                    />
-
+                  <div className="relative flex h-44 w-44 items-center justify-center rounded-full border-[18px] border-[var(--color-border)]">
                     <div className="text-center">
-                      <p className="text-3xl font-bold theme-text">
-                        {loading ? "..." : `${averageRaport}%`}
-                      </p>
-
-                      <p className="mt-1 text-[11px] font-medium theme-text-placeholder">
-                        Lengkap
-                      </p>
+                      <p className="text-3xl font-bold theme-text">{loading ? "..." : totalKelas}</p>
+                      <p className="mt-1 text-[11px] font-medium theme-text-placeholder">Total Kelas</p>
                     </div>
                   </div>
                 </div>
@@ -1137,400 +523,107 @@ export default function ERaportPage() {
                     <div key={item.label}>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <span
-                            className={`
-                              h-2.5 w-2.5 rounded-full
-                              ${
-                                item.tone === "emerald"
-                                  ? "bg-[var(--color-success)]"
-                                  : item.tone === "blue"
-                                  ? "bg-[var(--color-primary)]"
-                                  : "bg-[var(--color-warning)]"
-                              }
-                            `}
-                          />
-
-                          <span className="text-xs font-medium theme-text-secondary">
-                            {item.label}
-                          </span>
+                          <span className={`h-2.5 w-2.5 rounded-full ${item.tone === "emerald" ? "bg-[var(--color-success)]" : item.tone === "blue" ? "bg-[var(--color-primary)]" : "bg-[var(--color-warning)]"}`} />
+                          <span className="text-xs font-medium theme-text-secondary">{item.label}</span>
                         </div>
-
-                        <span className="text-xs font-bold theme-text">
-                          {item.value}
-                        </span>
+                        <span className="text-xs font-bold theme-text">{loading ? "..." : item.value === null ? "—" : item.value.toLocaleString("id-ID")}</span>
                       </div>
-
                       <div className="theme-card-soft mt-2 h-1.5 overflow-hidden rounded-full">
-                        <div
-                          className={`
-                            h-full rounded-full
-                            ${
-                              item.tone === "emerald"
-                                ? "bg-[var(--color-success)]"
-                                : item.tone === "blue"
-                                ? "bg-[var(--color-primary)]"
-                                : "bg-[var(--color-warning)]"
-                            }
-                          `}
-                          style={{
-                            width: `${item.percentage}%`,
-                          }}
-                        />
+                        <div className={`h-full rounded-full ${item.tone === "emerald" ? "bg-[var(--color-success)]" : item.tone === "blue" ? "bg-[var(--color-primary)]" : "bg-[var(--color-warning)]"}`} style={{ width: "100%" }} />
                       </div>
                     </div>
                   ))}
                 </div>
 
-                <Link
-                  href="/admin/eraport/cetak-raport"
-                  className="
-                    theme-card
-                    theme-sidebar-hover
-                    mt-6 flex items-center justify-center
-                    gap-2 rounded-xl
-                    border theme-border
-                    px-4 py-2.5
-                    text-xs font-semibold
-                    theme-text-secondary
-                    transition
-                    hover:border-[var(--color-primary)]
-                    hover:text-[var(--color-primary)]
-                  "
-                >
-                  <Printer size={15} />
-                  Kelola pencetakan raport
+                <Link href="/admin/eraport/cetak-raport" className="theme-card theme-sidebar-hover mt-6 flex items-center justify-center gap-2 rounded-xl border theme-border px-4 py-2.5 text-xs font-semibold theme-text-secondary transition hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]">
+                  <Printer size={15} /> Kelola pencetakan raport
                 </Link>
               </div>
             </section>
 
-
             <section className="mb-7 grid gap-5 xl:grid-cols-[1fr_.85fr]">
-
-
-              <div
-                className="
-                  rounded-2xl
-                  border theme-border
-                  theme-card
-                  shadow-md
-                "
-              >
+              <div className="rounded-2xl border theme-border theme-card shadow-md">
                 <div className="flex items-center justify-between border-b theme-border px-5 py-4 sm:px-6">
                   <div>
-                    <p className="text-sm font-bold theme-text">
-                      Progres berdasarkan mata pelajaran
-                    </p>
-
-                    <p className="mt-1 text-xs theme-text-muted">
-                      Kelengkapan entry nilai dari setiap guru.
-                    </p>
+                    <p className="text-sm font-bold theme-text">Mata pelajaran berdasarkan kelas</p>
+                    <p className="mt-1 text-xs theme-text-muted">Daftar penugasan mata pelajaran yang tersedia.</p>
                   </div>
-
-                  <Link
-                    href="/admin/eraport/entry-nilai"
-                    className="text-xs font-semibold text-[var(--color-primary)]"
-                  >
-                    Entry nilai
-                  </Link>
+                  <Link href="/admin/eraport/entry-nilai" className="text-xs font-semibold text-[var(--color-primary)]">Entry nilai</Link>
                 </div>
-
                 <div className="p-5 sm:p-6">
-                  <div className="space-y-5">
-                    {subjectProgress.map((item, index) => (
-                      <div key={item.id}>
-                        <div className="flex items-center gap-3">
-                          <div
-                            className="
-                              theme-card-soft
-                              theme-text-muted
-                              flex h-9 w-9
-                              shrink-0 items-center justify-center
-                              rounded-lg
-                              text-xs font-bold
-                            "
-                          >
-                            {String(index + 1).padStart(2, "0")}
-                          </div>
-
-                          <div className="min-w-0 flex-1">
-                            <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                              <div>
-                                <p className="text-sm font-semibold theme-text">
-                                  {item.subject}
-                                </p>
-
-                                <p className="mt-0.5 text-[11px] theme-text-placeholder">
-                                  {item.teacher} · {item.students} siswa
-                                </p>
+                  {loading ? (
+                    <p className="py-8 text-center text-xs theme-text-muted">Memuat data mata pelajaran...</p>
+                  ) : subjectProgress.length === 0 ? (
+                    <EmptyState message="Belum ada penugasan mata pelajaran yang tersedia." />
+                  ) : (
+                    <div className="space-y-5">
+                      {subjectProgress.slice(0, 8).map((item, index) => (
+                        <div key={item.id}>
+                          <div className="flex items-center gap-3">
+                            <div className="theme-card-soft theme-text-muted flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-xs font-bold">{String(index + 1).padStart(2, "0")}</div>
+                            <div className="min-w-0 flex-1">
+                              <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                                <div>
+                                  <p className="text-sm font-semibold theme-text">{item.subject}</p>
+                                  <p className="mt-0.5 text-[11px] theme-text-placeholder">{item.teacher} · {item.kelas}</p>
+                                </div>
+                                <span className="text-[11px] theme-text-muted">Data progres belum tersedia</span>
                               </div>
-
-                              <span className="text-xs font-bold theme-text-secondary">
-                                {item.progress}%
-                              </span>
-                            </div>
-
-                            <div className="mt-2">
-                              <ProgressBar
-                                value={item.progress}
-                                tone={
-                                  item.progress >= 90
-                                    ? "emerald"
-                                    : item.progress >= 80
-                                    ? "blue"
-                                    : "amber"
-                                }
-                              />
                             </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                      {subjectProgress.length > 8 && (
+                        <p className="border-t theme-border pt-4 text-center text-xs theme-text-muted">Menampilkan 8 dari {subjectProgress.length} penugasan mata pelajaran.</p>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
 
-
-              <div
-                className="
-                  rounded-2xl
-                  border theme-border
-                  theme-card
-                  shadow-md
-                "
-              >
+              <div className="rounded-2xl border theme-border theme-card shadow-md">
                 <div className="flex items-center justify-between border-b theme-border px-5 py-4 sm:px-6">
                   <div>
-                    <p className="text-sm font-bold theme-text">
-                      Aktivitas terbaru
-                    </p>
-
-                    <p className="mt-1 text-xs theme-text-muted">
-                      Aktivitas terakhir pada E-Raport.
-                    </p>
+                    <p className="text-sm font-bold theme-text">Aktivitas terbaru</p>
+                    <p className="mt-1 text-xs theme-text-muted">Riwayat aktivitas pengelolaan E-Raport.</p>
                   </div>
-
-                  <button
-                    type="button"
-                    onClick={loadData}
-                    disabled={loading}
-                    className="
-                      theme-card-soft
-                      theme-text-muted
-                      theme-sidebar-hover
-                      flex h-8 w-8
-                      items-center justify-center
-                      rounded-lg
-                      transition
-                      hover:text-[var(--color-primary)]
-                      disabled:opacity-50
-                    "
-                    title="Segarkan Data"
-                  >
+                  <button type="button" onClick={loadData} disabled={loading} className="theme-card-soft theme-text-muted theme-sidebar-hover flex h-8 w-8 items-center justify-center rounded-lg transition hover:text-[var(--color-primary)] disabled:opacity-50" title="Segarkan Data">
                     <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
                   </button>
                 </div>
-
-                <div className="p-5 sm:p-6">
-                  <div className="relative">
-                    <div className="absolute bottom-5 left-[17px] top-5 w-px bg-[var(--color-border-soft)]" />
-
-                    <div className="space-y-5">
-                      {recentActivity.map((item) => {
-                        const Icon = item.icon;
-                        const theme =
-                          toneMap[item.tone] ||
-                          toneMap.blue;
-
-                        return (
-                          <div
-                            key={item.title + item.time}
-                            className="relative flex gap-3"
-                          >
-                            <div
-                              className={`
-                                relative z-10
-                                flex h-9 w-9 shrink-0
-                                items-center justify-center
-                                rounded-xl
-                                ${theme.iconBg}
-                                ${theme.iconText}
-                                ring-4
-                                ring-[var(--color-card)]
-                              `}
-                            >
-                              <Icon size={16} />
-                            </div>
-
-                            <div className="min-w-0 flex-1">
-                              <p className="text-xs font-semibold leading-5 theme-text">
-                                {item.title}
-                              </p>
-
-                              <p className="mt-0.5 truncate text-[11px] theme-text-muted">
-                                {item.detail}
-                              </p>
-
-                              <div className="mt-1 flex items-center gap-2 text-[10px] theme-text-placeholder">
-                                <span>{item.user}</span>
-                                <span>•</span>
-                                <span>{item.time}</span>
-                              </div>
-                            </div>
-
-                            <button
-                              type="button"
-                              className="
-                                theme-text-placeholder
-                                theme-sidebar-hover
-                                hidden h-7 w-7
-                                shrink-0
-                                items-center justify-center
-                                rounded-lg
-                                transition
-                                hover:text-[var(--color-text-secondary)]
-                                sm:flex
-                              "
-                            >
-                              <MoreHorizontal size={15} />
-                            </button>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
+                <EmptyState message="Riwayat aktivitas belum tersedia karena backend belum menyediakan endpoint log aktivitas E-Raport." />
               </div>
             </section>
 
-
             <section className="mb-7">
-              <div
-                className="
-                  theme-info
-                  relative overflow-hidden
-                  rounded-2xl
-                  border theme-border
-                  p-5 sm:p-6
-                "
-              >
-                <div
-                  className="
-                    absolute -right-16 -top-20
-                    h-44 w-44 rounded-full
-                    bg-[var(--color-primary)]
-                    opacity-[0.10]
-                    blur-2xl
-                  "
-                />
-
+              <div className="theme-info relative overflow-hidden rounded-2xl border theme-border p-5 sm:p-6">
+                <div className="absolute -right-16 -top-20 h-44 w-44 rounded-full bg-[var(--color-primary)] opacity-[0.10] blur-2xl" />
                 <div className="relative flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
                   <div>
                     <div className="flex items-center gap-2">
-                      <div
-                        className="
-                          theme-card
-                          flex h-9 w-9
-                          items-center justify-center
-                          rounded-xl
-                          text-[var(--color-primary)]
-                          shadow-sm
-                        "
-                      >
-                        <GraduationCap size={18} />
-                      </div>
-
-                      <p className="text-sm font-bold theme-text">
-                        Pengelolaan akademik lebih terarah
-                      </p>
+                      <div className="theme-card flex h-9 w-9 items-center justify-center rounded-xl text-[var(--color-primary)] shadow-sm"><GraduationCap size={18} /></div>
+                      <p className="text-sm font-bold theme-text">Pengelolaan akademik lebih terarah</p>
                     </div>
-
-                    <p className="mt-2 max-w-2xl text-xs leading-5 theme-text-secondary">
-                      Pastikan seluruh nilai telah terisi sebelum
-                      proses agregasi dan pencetakan raport dilakukan.
-                    </p>
+                    <p className="mt-2 max-w-2xl text-xs leading-5 theme-text-secondary">Pastikan seluruh nilai telah terisi dan difinalisasi sebelum proses pembuatan serta pencetakan raport dilakukan.</p>
                   </div>
-
                   <div className="flex flex-wrap gap-2">
-                    <Link
-                      href="/admin/eraport/entry-nilai"
-                      className="
-                        theme-primary
-                        inline-flex items-center gap-2
-                        rounded-xl
-                        px-4 py-2.5
-                        text-xs font-semibold
-                        shadow-sm
-                        transition
-                      "
-                    >
-                      <PenLine size={15} />
-                      Entry Nilai
-                    </Link>
-
-                    <Link
-                      href="/admin/eraport/pengaturan-agregat"
-                      className="
-                        theme-card
-                        theme-sidebar-hover
-                        inline-flex items-center gap-2
-                        rounded-xl
-                        border theme-border
-                        px-4 py-2.5
-                        text-xs font-semibold
-                        theme-text-secondary
-                        transition
-                        hover:border-[var(--color-primary)]
-                        hover:text-[var(--color-primary)]
-                      "
-                    >
-                      <Settings2 size={15} />
-                      Pengaturan
-                    </Link>
+                    <Link href="/admin/eraport/entry-nilai" className="theme-primary inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-semibold shadow-sm transition"><PenLine size={15} /> Entry Nilai</Link>
+                    <Link href="/admin/eraport/pengaturan-agregat" className="theme-card theme-sidebar-hover inline-flex items-center gap-2 rounded-xl border theme-border px-4 py-2.5 text-xs font-semibold theme-text-secondary transition hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"><Settings2 size={15} /> Pengaturan</Link>
                   </div>
                 </div>
               </div>
             </section>
 
-
-            <div
-              className="
-                flex flex-col gap-3
-                border-t theme-border
-                py-5
-                text-xs
-                theme-text-muted
-                sm:flex-row
-                sm:items-center
-                sm:justify-between
-              "
-            >
+            <div className="flex flex-col gap-3 border-t theme-border py-5 text-xs theme-text-muted sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-2">
                 <GraduationCap size={15} />
-
-                <span>
-                  SmartSchool · E-Raport Management
-                </span>
+                <span>SmartSchool · E-Raport Management</span>
               </div>
-
               <div className="flex items-center gap-4">
                 <span className="inline-flex items-center gap-1.5">
-                  <ShieldCheck
-                    size={13}
-                    className="text-[var(--color-success)]"
-                  />
-
-                  Sistem aktif
+                  <ShieldCheck size={13} className="text-[var(--color-success)]" /> Sistem aktif
                 </span>
-
-                <span>
-                  {activeTahunAjaran
-                    ? `${
-                        activeTahunAjaran.semester
-                          ? `Semester ${activeTahunAjaran.semester}`
-                          : ""
-                      } ${activeTahunAjaran.tahunAjaran || ""}`.trim()
-                    : "Semester Aktif"}
-                </span>
+                <span>{activeTahunAjaran ? `${semesterAktif} ${tahunAjaranAktif}` : "Tahun Ajaran belum tersedia"}</span>
               </div>
             </div>
 

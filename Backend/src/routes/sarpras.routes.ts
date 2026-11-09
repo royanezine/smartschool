@@ -22,6 +22,20 @@ import {
   deleteRuangan,
 } from "../controllers/sarpras.controller";
 import { getKetersediaanAset } from "../controllers/peminjamanAset.controller";
+import {
+  getFasilitas,
+  getFasilitasById,
+  createFasilitas,
+  updateFasilitas,
+  deleteFasilitas,
+} from "../controllers/fasilitas.controller";
+import {
+  getLaporanKerusakan,
+  getLaporanKerusakanById,
+  createLaporanKerusakan,
+  updateLaporanKerusakan,
+  deleteLaporanKerusakan,
+} from "../controllers/laporanKerusakan.controller";
 
 const router = Router();
 
@@ -52,5 +66,17 @@ router.get("/aset", requireIzin("manajemen_aset.view", "peminjaman_aset.view_own
 });
 router.put("/aset/:id", requireIzin("manajemen_aset.update"), updateAset);
 router.delete("/aset/:id", requireIzin("manajemen_aset.delete"), deleteAset);
+
+router.get("/fasilitas", getFasilitas);
+router.get("/fasilitas/:id", getFasilitasById);
+router.post("/fasilitas", createFasilitas);
+router.put("/fasilitas/:id", updateFasilitas);
+router.delete("/fasilitas/:id", deleteFasilitas);
+
+router.get("/laporan-kerusakan", getLaporanKerusakan);
+router.get("/laporan-kerusakan/:id", getLaporanKerusakanById);
+router.post("/laporan-kerusakan", createLaporanKerusakan);
+router.put("/laporan-kerusakan/:id", updateLaporanKerusakan);
+router.delete("/laporan-kerusakan/:id", deleteLaporanKerusakan);
 
 export default router;

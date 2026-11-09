@@ -31,7 +31,6 @@ import {
   Clock3,
   IdCard,
   Briefcase,
-  BadgeCheck,
   ShieldCheck,
 } from "lucide-react";
 
@@ -151,27 +150,6 @@ export default function AdminGuruPage() {
       item.namaKategoriJabatan ??
       item.nama_kategori_jabatan ??
       "Belum ditentukan"
-    );
-  };
-
-  const getKodeKategoriJabatan = (item) => {
-    if (!item) return null;
-
-    const kategori =
-      item.kategoriJabatan ??
-      item.kategori_jabatan ??
-      item.kategoriJabatanGuru ??
-      item.kategori_jabatan_guru ??
-      null;
-
-    if (kategori && typeof kategori === "object") {
-      return kategori.kode ?? kategori.kodeKategori ?? null;
-    }
-
-    return (
-      item.kategoriJabatanKode ??
-      item.kategori_jabatan_kode ??
-      null
     );
   };
 
@@ -647,8 +625,7 @@ export default function AdminGuruPage() {
         peran: getPeranGuru(item),
         kategoriJabatan: getKategoriJabatan(item),
         jabatan: item.jabatan || "",
-        kodeKategoriJabatan: getKodeKategoriJabatan(item),
-
+        
         golongan: item.golongan || "",
         jenisKelamin: item.jenisKelamin || "",
         shift: getShiftName(shift),
@@ -686,7 +663,6 @@ export default function AdminGuruPage() {
       "Email",
       "Kategori Jabatan",
       "Peran",
-      "Kode Kategori Jabatan",
       "Golongan",
       "Jenis Kelamin",
       "Shift",
@@ -705,7 +681,6 @@ export default function AdminGuruPage() {
       item.email,
       item.kategoriJabatan,
       item.peran,
-      item.kodeKategoriJabatan,
       item.golongan,
       item.jenisKelamin,
       item.shift,
@@ -757,7 +732,6 @@ export default function AdminGuruPage() {
       "Email",
       "Kategori Jabatan",
       "Peran",
-      "Kode Kategori Jabatan",
       "Golongan",
       "Jenis Kelamin",
       "Shift",
@@ -781,7 +755,6 @@ export default function AdminGuruPage() {
             <td>${escapeHTML(item.email)}</td>
             <td>${escapeHTML(item.kategoriJabatan)}</td>
             <td>${escapeHTML(item.peran)}</td>
-            <td>${escapeHTML(item.kodeKategoriJabatan || "-")}</td>
             <td>${escapeHTML(item.golongan)}</td>
             <td>${escapeHTML(item.jenisKelamin)}</td>
             <td>${escapeHTML(item.shift)}</td>
@@ -1311,7 +1284,6 @@ export default function AdminGuruPage() {
 
                             const peranGuru = getPeranGuru(item);
                             const kategoriJabatan = getKategoriJabatan(item);
-                            const kodeKategori = getKodeKategoriJabatan(item);
 
                             return (
                               <tr
@@ -1370,12 +1342,6 @@ export default function AdminGuruPage() {
                                       <Briefcase size={12} />
                                       {kategoriJabatan}
                                     </span>
-
-                                    {kodeKategori && (
-                                      <span className="text-[10px] theme-text-muted pl-1">
-                                        Kode: {kodeKategori}
-                                      </span>
-                                    )}
                                   </div>
                                 </td>
 
@@ -1395,12 +1361,6 @@ export default function AdminGuruPage() {
                                         <Clock3 size={12} />
                                         {getShiftName(shift)}
                                       </span>
-
-                                      {shift.kode && (
-                                        <span className="text-[10px] theme-text-muted pl-1">
-                                          Kode: {shift.kode}
-                                        </span>
-                                      )}
                                     </div>
                                   ) : (
                                     <span className="inline-flex items-center px-2.5 py-1 rounded-md border theme-border text-xs theme-text-muted whitespace-nowrap">

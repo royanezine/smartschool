@@ -337,6 +337,7 @@ export const createAbsensi = async (
         sekolahId: effectiveSekolahId,
         penggunaId: userId,
         kelasId: data.kelasId,
+        mataPelajaranId: data.mataPelajaranId || null,
         tanggal: hariIni,
         status: data.status,
         waktuMasuk: data.status === "hadir" ? waktuMasuk : null,
@@ -1042,6 +1043,101 @@ export const getRiwayatAbsensiSiswa = async (
       limit,
       totalData,
     );
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getRekapAbsensiMapel = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const user = req.user;
+    const isSuper = isSuperAdmin(user?.role);
+    const userSekolahId = user?.sekolahId;
+    const { mataPelajaranId, kelasId, tanggalMulai, tanggalSelesai } = req.query;
+
+    const where: any = {};
+    if (!isSuper && userSekolahId) {
+      where.sekolahId = userSekolahId;
+    }
+
+    if (mataPelajaranId && typeof mataPelajaranId === "string") {
+      where.mataPelajaranId = mataPelajaranId;
+    }
+    if (kelasId && typeof kelasId === "string") {
+      where.kelasId = kelasId;
+    }
+
+    if (tanggalMulai || tanggalSelesai) {
+      where.tanggal = {};
+      if (tanggalMulai) where.tanggal.gte = new Date(tanggalMulai as string);
+      if (tanggalSelesai) where.tanggal.lte = new Date(tanggalSelesai as string);
+    }
+
+    const absensiList = await prisma.absensi.findMany({
+      where,
+      include: {
+        pengguna: {
+          select: {
+            id: true,
+            namaLengkap: true,
+            nipd: true,
+            nisn: true,
+          },
+        },
+        kelas: {
+          select: {
+            id: true,
+            nama: true,
+            tingkat: true,
+          },
+        },
+        mataPelajaran: {
+          select: {
+            id: true,
+            nama: true,
+            kode: true,
+          },
+        },
+      },
+      orderBy: [{ tanggal: "desc" }, { dibuatPada: "desc" }],
+    });
+
+    const siswaMap: Record<string, any> = {};
+    for (const item of absensiList) {
+      const sId = item.penggunaId;
+      if (!siswaMap[sId]) {
+        siswaMap[sId] = {
+          siswa: item.pengguna,
+          kelas: item.kelas,
+          total: 0,
+          hadir: 0,
+          izin: 0,
+          sakit: 0,
+          alpha: 0,
+          persentaseHadir: 0,
+        };
+      }
+      siswaMap[sId].total += 1;
+      const st = (item.status || "").toLowerCase();
+      if (st === "hadir") siswaMap[sId].hadir += 1;
+      else if (st === "izin") siswaMap[sId].izin += 1;
+      else if (st === "sakit") siswaMap[sId].sakit += 1;
+      else if (st === "alpha") siswaMap[sId].alpha += 1;
+    }
+
+    Object.values(siswaMap).forEach((s: any) => {
+      s.persentaseHadir = s.total > 0 ? Math.round((s.hadir / s.total) * 100) : 0;
+    });
+
+    return successResponse(res, "Rekap absensi per mata pelajaran berhasil diambil", {
+      rekapSiswa: Object.values(siswaMap),
+      totalData: absensiList.length,
+      riwayat: absensiList,
+    });
   } catch (error) {
     next(error);
   }

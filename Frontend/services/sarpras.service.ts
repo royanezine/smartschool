@@ -149,7 +149,6 @@ export interface KetersediaanAset extends Aset {
 export interface GudangPayload {
   nama: string;
   lokasi?: string | null;
-  keterangan?: string | null;
 }
 
 export interface KategoriAsetPayload {
@@ -296,8 +295,7 @@ export async function createGudang(data: GudangPayload) {
     method: "POST",
     body: JSON.stringify({
       nama: data.nama.trim(),
-      lokasi: normalizeText(data.lokasi),
-      keterangan: normalizeText(data.keterangan),
+      lokasi: data.lokasi?.trim() || null,
     }),
   });
 }
@@ -319,7 +317,6 @@ export async function updateGudang(
       body: JSON.stringify({
         nama: data.nama.trim(),
         lokasi: normalizeText(data.lokasi),
-        keterangan: normalizeText(data.keterangan),
       }),
     }
   );

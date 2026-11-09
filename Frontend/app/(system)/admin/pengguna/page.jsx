@@ -1252,7 +1252,7 @@ export default function PenggunaPage() {
                       </th>
 
                       <th className="px-4 py-3 text-left font-semibold">
-                        Jabatan / Keterangan
+                        Kategori Jabatan 
                       </th>
 
                       <th className="px-4 py-3 text-left font-semibold">
@@ -1480,18 +1480,6 @@ export default function PenggunaPage() {
                                 <BadgeCheck size={13} className="text-[var(--color-primary)] shrink-0" />
                                 <span className="truncate">{user.jabatan !== "-" ? user.jabatan : "Belum diatur"}</span>
                               </span>
-
-                              <div className="flex flex-wrap gap-2 text-[11px] theme-text-muted">
-                                <span className="inline-flex items-center gap-1">
-                                  @{user.username}
-                                </span>
-                                {user.nip && (
-                                  <span>• NIP: {user.nip}</span>
-                                )}
-                                {user.nisn && (
-                                  <span>• NISN: {user.nisn}</span>
-                                )}
-                              </div>
                             </div>
                           </td>
 

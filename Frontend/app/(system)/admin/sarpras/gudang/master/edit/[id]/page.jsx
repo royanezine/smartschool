@@ -13,8 +13,8 @@ import {
   MapPin,
   Loader2,
   Building2,
-  Activity,
   Database,
+  Info,
 } from "lucide-react";
 
 import Header from "@/app/components/Header";
@@ -24,7 +24,6 @@ import {
   getGudang,
   updateGudang,
 } from "@/services/sarpras.service";
-
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -40,15 +39,6 @@ const themePrimaryText =
 
 const themePrimaryShadow =
   "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_20%,transparent)]";
-
-const themePrimaryHover =
-  "hover:bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]";
-
-const themeCardShadow =
-  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
-
-const themeSmallShadow =
-  "shadow-[0_2px_8px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
 
 const themeNeutralSurface =
   "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
@@ -85,35 +75,65 @@ const themeFocus =
 
 const themeBorderClass = "theme-border";
 
-
-function getResponseData(response) {
-  if (Array.isArray(response)) return response;
-
-  if (Array.isArray(response?.data)) {
-    return response.data;
+function extractGudangList(response, depth = 0) {
+  if (depth > 5 || response == null) {
+    return [];
   }
 
-  if (Array.isArray(response?.result)) {
-    return response.result;
+  if (Array.isArray(response)) {
+    return response;
   }
 
-  if (Array.isArray(response?.data?.data)) {
-    return response.data.data;
+  if (typeof response !== "object") {
+    return [];
   }
 
-  if (Array.isArray(response?.result?.data)) {
-    return response.result.data;
+  if (
+    response.id &&
+    typeof response.nama === "string"
+  ) {
+    return [response];
+  }
+
+  const possibleKeys = [
+    "data",
+    "result",
+    "results",
+    "gudang",
+    "items",
+  ];
+
+  for (const key of possibleKeys) {
+    if (response[key] !== undefined) {
+      const result = extractGudangList(
+        response[key],
+        depth + 1
+      );
+
+      if (result.length > 0) {
+        return result;
+      }
+    }
   }
 
   return [];
 }
 
+function getErrorMessage(error, fallback) {
+  if (typeof error?.message === "string") {
+    return error.message;
+  }
+
+  return fallback;
+}
 
 export default function EditGudangPage() {
   const router = useRouter();
   const params = useParams();
 
-  const id = params?.id;
+  const id = Array.isArray(params?.id)
+    ? params.id[0]
+    : params?.id;
 
   const [collapsed, setCollapsed] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -125,60 +145,68 @@ export default function EditGudangPage() {
   const [form, setForm] = useState({
     nama: "",
     lokasi: "",
-    status: "aktif",
   });
 
-
-  const loadGudang = async () => {
-    try {
-      setLoading(true);
-      setError("");
-
-      const response = await getGudang();
-
-      const list = getResponseData(response);
-
-      const gudang = list.find(
-        (item) =>
-          String(item?.id) === String(id)
-      );
-
-      if (!gudang) {
-        setError(
-          "Data gudang tidak ditemukan."
-        );
-        return;
-      }
-
-      setForm({
-        nama: gudang?.nama || "",
-        lokasi: gudang?.lokasi || "",
-        status:
-          gudang?.status || "aktif",
-      });
-    } catch (err) {
-      console.error(
-        "Gagal mengambil data gudang:",
-        err
-      );
-
-      setError(
-        err?.message ||
-          "Gagal mengambil data gudang."
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
-
   useEffect(() => {
-    if (!id) return;
+    if (!id) {
+      setLoading(false);
+      setError("ID gudang tidak ditemukan.");
+      return;
+    }
 
-    const timer = setTimeout(() => {
-      loadGudang();
-    }, 0);
-    return () => clearTimeout(timer);
+    let active = true;
+
+    async function loadGudang() {
+      try {
+        setLoading(true);
+        setError("");
+
+        const response = await getGudang();
+
+        if (!active) return;
+
+        const list = extractGudangList(response);
+
+        const gudang = list.find(
+          (item) =>
+            String(item.id) === String(id)
+        );
+
+        if (!gudang) {
+          setError("Data gudang tidak ditemukan.");
+          return;
+        }
+
+        setForm({
+          nama: gudang.nama || "",
+          lokasi: gudang.lokasi || "",
+        });
+      } catch (err) {
+        console.error(
+          "Gagal mengambil data gudang:",
+          err
+        );
+
+        if (active) {
+          setError(
+            getErrorMessage(
+              err,
+              "Gagal mengambil data gudang dari server."
+            )
+          );
+        }
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadGudang();
+
+    return () => {
+      active = false;
+    };
   }, [id]);
 
   const handleChange = (event) => {
@@ -189,25 +217,46 @@ export default function EditGudangPage() {
       [name]: value,
     }));
 
-    if (error) setError("");
-    if (success) setSuccess("");
+    setError("");
+    setSuccess("");
   };
-
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (!form.nama.trim()) {
+    if (saving) return;
+
+    const nama = form.nama.trim();
+    const lokasi = form.lokasi.trim();
+
+    if (!nama) {
+      setError("Nama gudang wajib diisi.");
+      return;
+    }
+
+    if (nama.length < 3) {
       setError(
-        "Nama gudang wajib diisi."
+        "Nama gudang minimal 3 karakter."
       );
       return;
     }
 
-    if (form.nama.trim().length < 3) {
+    if (nama.length > 100) {
       setError(
-        "Nama gudang minimal 3 karakter."
+        "Nama gudang maksimal 100 karakter."
       );
+      return;
+    }
+
+    if (lokasi.length > 255) {
+      setError(
+        "Lokasi gudang maksimal 255 karakter."
+      );
+      return;
+    }
+
+    if (!id) {
+      setError("ID gudang tidak ditemukan.");
       return;
     }
 
@@ -217,25 +266,34 @@ export default function EditGudangPage() {
       setSuccess("");
 
       const payload = {
-        nama: form.nama.trim(),
-        lokasi:
-          form.lokasi.trim() || null,
-        status:
-          form.status || "aktif",
+        nama,
+        lokasi: lokasi || null,
       };
 
-      await updateGudang(id, payload);
+      const response = await updateGudang(
+        String(id),
+        payload
+      );
+
+      if (response?.success === false) {
+        throw new Error(
+          response.message ||
+            "Gagal memperbarui data gudang."
+        );
+      }
 
       setSuccess(
-        "Data gudang berhasil diperbarui."
+        response?.message ||
+          "Data gudang berhasil diperbarui."
       );
 
       setTimeout(() => {
         router.push(
           "/admin/sarpras/gudang/master"
         );
+
         router.refresh();
-      }, 900);
+      }, 1000);
     } catch (err) {
       console.error(
         "Gagal memperbarui gudang:",
@@ -243,26 +301,29 @@ export default function EditGudangPage() {
       );
 
       setError(
-        err?.message ||
+        getErrorMessage(
+          err,
           "Gagal memperbarui data gudang."
+        )
       );
     } finally {
       setSaving(false);
     }
   };
 
-
   const handleCancel = () => {
+    if (saving) return;
+
     router.push(
       "/admin/sarpras/gudang/master"
     );
   };
 
+  const isValid = form.nama.trim().length >= 3;
 
   if (loading) {
     return (
       <div className="theme-page flex h-screen w-full overflow-hidden">
-
         <div className="shrink-0">
           <Sidebar
             active="sarpras"
@@ -272,20 +333,16 @@ export default function EditGudangPage() {
           />
         </div>
 
-
         <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
           <div className="shrink-0 border-b theme-border">
             <Header
               toggleSidebar={() =>
-                setCollapsed(
-                  (prev) => !prev
-                )
+                setCollapsed((prev) => !prev)
               }
               notifications={[]}
               user={{
                 name: "Admin Sekolah",
-                email:
-                  "admin@smartschool.com",
+                email: "admin@smartschool.com",
                 avatar: "AD",
               }}
             />
@@ -293,15 +350,14 @@ export default function EditGudangPage() {
 
           <main className="theme-page flex min-h-0 min-w-0 flex-1 items-center justify-center overflow-y-auto p-4">
             <div
-              className={`theme-card w-full max-w-md rounded-3xl border ${themeBorderClass} p-8 ${themeCardShadow}`}
+              className={`theme-card w-full max-w-md rounded-3xl border ${themeBorderClass} p-8 shadow-lg`}
             >
-              <div className="flex flex-col items-center justify-center text-center">
+              <div className="flex flex-col items-center text-center">
                 <div
                   className={`flex h-14 w-14 items-center justify-center rounded-2xl ${themePrimarySoft} ${themePrimaryText}`}
                 >
                   <Loader2
                     size={27}
-                    strokeWidth={2}
                     className="animate-spin"
                   />
                 </div>
@@ -311,8 +367,7 @@ export default function EditGudangPage() {
                 </h2>
 
                 <p className="theme-text-muted mt-1.5 text-sm">
-                  Mengambil informasi
-                  gudang...
+                  Mengambil informasi gudang dari server...
                 </p>
               </div>
             </div>
@@ -322,10 +377,8 @@ export default function EditGudangPage() {
     );
   }
 
-
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
-
       <div className="shrink-0">
         <Sidebar
           active="sarpras"
@@ -335,45 +388,36 @@ export default function EditGudangPage() {
         />
       </div>
 
-
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-
         <div className="shrink-0 border-b theme-border">
           <Header
             toggleSidebar={() =>
-              setCollapsed(
-                (prev) => !prev
-              )
+              setCollapsed((prev) => !prev)
             }
             notifications={[]}
             user={{
               name: "Admin Sekolah",
-              email:
-                "admin@smartschool.com",
+              email: "admin@smartschool.com",
               avatar: "AD",
             }}
           />
         </div>
 
-
         <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
-          <div className="w-full p-4 sm:p-5 lg:p-7 xl:p-8">
-            <div className="mx-auto w-full max-w-[1250px]">
-
+          <div className="w-full p-4 sm:p-5 lg:p-7 xl:p-8 2xl:px-12">
+            <div className="w-full">
 
               <button
                 type="button"
                 onClick={handleCancel}
-                className={`group mb-5 inline-flex items-center gap-2 rounded-xl px-2 py-1.5 text-sm font-medium theme-text-secondary transition-all ${themeNeutralHover} hover:${themePrimaryText}`}
+                className={`group mb-5 inline-flex items-center gap-2 rounded-xl px-2 py-1.5 text-sm font-medium theme-text-secondary transition-all ${themeNeutralHover}`}
               >
                 <ArrowLeft
                   size={17}
                   className="transition-transform duration-200 group-hover:-translate-x-0.5"
                 />
-
                 Kembali ke Daftar Gudang
               </button>
-
 
               <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex min-w-0 items-center gap-4">
@@ -406,23 +450,17 @@ export default function EditGudangPage() {
                     </h1>
 
                     <p className="theme-text-muted mt-1 text-sm">
-                      Perbarui informasi
-                      gudang yang
-                      tersimpan di
-                      sistem.
+                      Perbarui informasi gudang yang tersimpan di sistem.
                     </p>
                   </div>
                 </div>
               </div>
 
-
               {error && (
                 <div
                   className={`mb-5 flex items-start gap-3 rounded-2xl border ${themeDangerBorder} ${themeDangerSurface} p-4`}
                 >
-                  <div
-                    className={`theme-card flex h-9 w-9 shrink-0 items-center justify-center rounded-xl theme-danger ${themeSmallShadow}`}
-                  >
+                  <div className="theme-card theme-danger flex h-9 w-9 shrink-0 items-center justify-center rounded-xl">
                     <AlertCircle size={18} />
                   </div>
 
@@ -438,9 +476,7 @@ export default function EditGudangPage() {
 
                   <button
                     type="button"
-                    onClick={() =>
-                      setError("")
-                    }
+                    onClick={() => setError("")}
                     className="theme-danger rounded-lg p-1.5 transition hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]"
                   >
                     <X size={17} />
@@ -448,14 +484,11 @@ export default function EditGudangPage() {
                 </div>
               )}
 
-
               {success && (
                 <div
                   className={`mb-5 flex items-start gap-3 rounded-2xl border ${themeSuccessBorder} ${themeSuccessSurface} p-4`}
                 >
-                  <div
-                    className={`theme-card flex h-9 w-9 shrink-0 items-center justify-center rounded-xl theme-success ${themeSmallShadow}`}
-                  >
+                  <div className="theme-card theme-success flex h-9 w-9 shrink-0 items-center justify-center rounded-xl">
                     <CheckCircle2 size={18} />
                   </div>
 
@@ -471,18 +504,15 @@ export default function EditGudangPage() {
                 </div>
               )}
 
-
-              <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
-
+              <div className="grid grid-cols-1 gap-5 lg:grid-cols-3 2xl:grid-cols-4">
 
                 <form
                   onSubmit={handleSubmit}
-                  className="min-w-0"
+                  className="min-w-0 lg:col-span-2 2xl:col-span-3"
                 >
                   <div
-                    className={`theme-card overflow-hidden rounded-3xl border ${themeBorderClass} ${themeCardShadow}`}
+                    className={`theme-card overflow-hidden rounded-3xl border ${themeBorderClass} shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]`}
                   >
-
 
                     <div
                       className={`border-b ${themeDivider} px-5 py-5 sm:px-7`}
@@ -504,8 +534,7 @@ export default function EditGudangPage() {
                             </h2>
 
                             <p className="theme-text-muted mt-0.5 text-xs">
-                              Perbarui data
-                              dasar gudang.
+                              Perbarui data dasar gudang.
                             </p>
                           </div>
                         </div>
@@ -518,9 +547,7 @@ export default function EditGudangPage() {
                       </div>
                     </div>
 
-
                     <div className="space-y-6 p-5 sm:p-7">
-
 
                       <div>
                         <div className="mb-2 flex items-center justify-between gap-3">
@@ -534,9 +561,14 @@ export default function EditGudangPage() {
                             </span>
                           </label>
 
-                          <span className="theme-text-muted text-[11px]">
-                            {form.nama.length}
-                            /100
+                          <span
+                            className={`text-[11px] ${
+                              form.nama.length > 100
+                                ? "theme-danger"
+                                : "theme-text-muted"
+                            }`}
+                          >
+                            {form.nama.length}/100
                           </span>
                         </div>
 
@@ -552,22 +584,19 @@ export default function EditGudangPage() {
                             name="nama"
                             type="text"
                             value={form.nama}
-                            onChange={
-                              handleChange
-                            }
+                            onChange={handleChange}
                             disabled={saving}
                             maxLength={100}
+                            required
                             placeholder="Contoh: Gudang Sarpras Utama"
                             className={`theme-input h-12 w-full rounded-xl border ${themeBorderClass} pl-11 pr-4 text-sm font-medium outline-none transition-all placeholder:text-[var(--color-text-placeholder)] ${themeFocus} disabled:cursor-not-allowed disabled:opacity-60`}
                           />
                         </div>
 
                         <p className="theme-text-muted mt-1.5 text-xs">
-                          Gunakan nama yang
-                          mudah dikenali.
+                          Gunakan nama yang mudah dikenali.
                         </p>
                       </div>
-
 
                       <div>
                         <div className="mb-2 flex items-center justify-between gap-3">
@@ -595,9 +624,7 @@ export default function EditGudangPage() {
                             name="lokasi"
                             type="text"
                             value={form.lokasi}
-                            onChange={
-                              handleChange
-                            }
+                            onChange={handleChange}
                             disabled={saving}
                             maxLength={255}
                             placeholder="Contoh: Gedung A Lantai 1"
@@ -606,109 +633,35 @@ export default function EditGudangPage() {
                         </div>
 
                         <p className="theme-text-muted mt-1.5 text-xs">
-                          Masukkan lokasi fisik
-                          gudang di lingkungan
-                          sekolah.
+                          Masukkan lokasi fisik gudang di lingkungan sekolah.
                         </p>
                       </div>
 
-
-                      <div>
-                        <label
-                          htmlFor="status"
-                          className="theme-text-secondary mb-2 block text-sm font-semibold"
-                        >
-                          Status
-                          <span className="theme-danger ml-1">
-                            *
-                          </span>
-                        </label>
-
-                        <div className="relative">
-                          <Activity
-                            size={18}
-                            strokeWidth={1.8}
-                            className="theme-text-muted pointer-events-none absolute left-3.5 top-1/2 z-10 -translate-y-1/2"
-                          />
-
-                          <select
-                            id="status"
-                            name="status"
-                            value={form.status}
-                            onChange={
-                              handleChange
-                            }
-                            disabled={saving}
-                            className={`theme-input h-12 w-full appearance-none rounded-xl border ${themeBorderClass} pl-11 pr-10 text-sm font-medium outline-none transition-all ${themeFocus} disabled:cursor-not-allowed disabled:opacity-60`}
-                          >
-                            <option value="aktif">
-                              Aktif
-                            </option>
-
-                            <option value="nonaktif">
-                              Nonaktif
-                            </option>
-                          </select>
-
-                          <div className="theme-text-muted pointer-events-none absolute right-4 top-1/2 -translate-y-1/2">
-                            <svg
-                              width="16"
-                              height="16"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                            >
-                              <path d="m6 9 6 6 6-6" />
-                            </svg>
-                          </div>
-                        </div>
-
-                        <p className="theme-text-muted mt-1.5 text-xs">
-                          Gudang nonaktif tidak
-                          digunakan untuk
-                          transaksi baru.
-                        </p>
-                      </div>
-
-
-                      <div
-                        className={`rounded-2xl border ${themeInfoBorder} ${themeInfoSurface} p-4`}
-                      >
+                      {/* Bagian Informasi Pengelolaan yang dirapikan (tanpa border kaku berlebih) */}
+                      <div className={`mt-4 rounded-xl ${themeInfoSurface} p-4`}>
                         <div className="flex items-start gap-3">
-                          <div
-                            className={`theme-card flex h-9 w-9 shrink-0 items-center justify-center rounded-xl theme-info ${themeSmallShadow}`}
-                          >
-                            <AlertCircle size={18} />
+                          <div className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--color-info)] text-white shadow-sm`}>
+                            <Info size={16} />
                           </div>
-
                           <div>
                             <p className="theme-info text-sm font-semibold">
                               Informasi Pengelolaan
                             </p>
-
-                            <p className="theme-info mt-1 text-xs leading-5">
-                              Perubahan data
-                              gudang akan
-                              diterapkan pada
-                              data aset yang
-                              terhubung dengan
-                              gudang ini.
+                            <p className="theme-info mt-1 text-xs leading-relaxed opacity-90">
+                              Perubahan nama dan lokasi gudang akan disimpan ke database sekolah. Data aset yang memiliki relasi dengan gudang ini tetap menggunakan ID gudang yang sama.
                             </p>
                           </div>
                         </div>
                       </div>
-                    </div>
 
+                    </div>
 
                     <div
                       className={`flex flex-col-reverse gap-3 border-t ${themeDivider} ${themeNeutralSurface} px-5 py-4 sm:flex-row sm:items-center sm:justify-end sm:px-7`}
                     >
                       <button
                         type="button"
-                        onClick={
-                          handleCancel
-                        }
+                        onClick={handleCancel}
                         disabled={saving}
                         className={`theme-card theme-text-secondary inline-flex h-11 items-center justify-center gap-2 rounded-xl border ${themeBorderClass} px-5 text-sm font-semibold shadow-sm transition-all ${themeNeutralHover} active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50`}
                       >
@@ -718,7 +671,7 @@ export default function EditGudangPage() {
 
                       <button
                         type="submit"
-                        disabled={saving}
+                        disabled={saving || !isValid}
                         className={`inline-flex h-11 items-center justify-center gap-2 rounded-xl ${themePrimaryGradient} px-6 text-sm font-semibold text-[var(--color-card)] ${themePrimaryShadow} transition-all hover:brightness-95 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60`}
                       >
                         {saving ? (
@@ -727,27 +680,24 @@ export default function EditGudangPage() {
                               size={17}
                               className="animate-spin"
                             />
-
                             Menyimpan...
                           </>
                         ) : (
                           <>
                             <Save size={17} />
-
                             Simpan Perubahan
                           </>
                         )}
                       </button>
                     </div>
+
                   </div>
                 </form>
 
-
                 <aside className="min-w-0">
                   <div
-                    className={`sticky top-5 overflow-hidden rounded-3xl border ${themeBorderClass} theme-card ${themeCardShadow}`}
+                    className={`sticky top-5 overflow-hidden rounded-3xl border ${themeBorderClass} theme-card shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]`}
                   >
-
 
                     <div
                       className={`border-b ${themeDivider} px-5 py-5`}
@@ -769,37 +719,29 @@ export default function EditGudangPage() {
                             </h2>
 
                             <p className="theme-text-muted mt-0.5 text-xs">
-                              Ringkasan data
-                              gudang
+                              Ringkasan data gudang
                             </p>
                           </div>
                         </div>
 
                         <div
                           className={`h-2.5 w-2.5 rounded-full ${
-                            form.status ===
-                            "aktif"
+                            isValid
                               ? "bg-[var(--color-success)]"
-                              : "bg-[color-mix(in_srgb,var(--color-text)_40%,transparent)]"
+                              : "bg-[color-mix(in_srgb,var(--color-text)_35%,transparent)]"
                           }`}
                         />
                       </div>
                     </div>
 
-
                     <div className="p-5">
-
 
                       <div
                         className={`relative overflow-hidden rounded-2xl ${themePrimaryGradient} p-5`}
                       >
-                        <div
-                          className={`pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full bg-[color-mix(in_srgb,var(--color-card)_10%,transparent)] blur-2xl`}
-                        />
+                        <div className="pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full bg-[color-mix(in_srgb,var(--color-card)_10%,transparent)] blur-2xl" />
 
-                        <div
-                          className={`pointer-events-none absolute -bottom-10 -left-8 h-28 w-28 rounded-full bg-[color-mix(in_srgb,var(--color-info)_16%,transparent)] blur-2xl`}
-                        />
+                        <div className="pointer-events-none absolute -bottom-10 -left-8 h-28 w-28 rounded-full bg-[color-mix(in_srgb,var(--color-info)_16%,transparent)] blur-2xl" />
 
                         <div className="relative">
                           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[color-mix(in_srgb,var(--color-card)_14%,transparent)] text-[var(--color-card)] ring-1 ring-[color-mix(in_srgb,var(--color-card)_15%,transparent)]">
@@ -814,63 +756,45 @@ export default function EditGudangPage() {
                           </p>
 
                           <h3 className="mt-1 break-words text-lg font-bold leading-6 text-[var(--color-card)]">
-                            {form.nama.trim() ||
-                              "Nama Gudang"}
+                            {form.nama.trim() || "Nama Gudang"}
                           </h3>
 
                           <div className="mt-3 flex items-center gap-1.5 text-xs text-[color-mix(in_srgb,var(--color-card)_75%,transparent)]">
                             <MapPin size={13} />
 
                             <span className="truncate">
-                              {form.lokasi.trim() ||
-                                "Lokasi belum diisi"}
+                              {form.lokasi.trim() || "Lokasi belum diisi"}
                             </span>
                           </div>
                         </div>
                       </div>
 
-
                       <div
                         className={`theme-card mt-4 divide-y ${themeDivider} overflow-hidden rounded-2xl border ${themeBorderClass}`}
                       >
 
-
                         <div className="flex items-center justify-between gap-4 px-4 py-3.5">
                           <div className="flex items-center gap-2.5">
-                            <Activity
+                            <CheckCircle2
                               size={16}
                               className="theme-text-muted"
                             />
 
                             <span className="theme-text-muted text-xs font-medium">
-                              Status
+                              Kelengkapan
                             </span>
                           </div>
 
                           <span
-                            className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold ${
-                              form.status ===
-                              "aktif"
-                                ? `${themeSuccessSurface} theme-success`
-                                : `${themeNeutralSurface} theme-text-muted`
+                            className={`text-xs font-bold ${
+                              isValid
+                                ? "theme-success"
+                                : "theme-text-muted"
                             }`}
                           >
-                            <span
-                              className={`h-1.5 w-1.5 rounded-full ${
-                                form.status ===
-                                "aktif"
-                                  ? "bg-[var(--color-success)]"
-                                  : "bg-[color-mix(in_srgb,var(--color-text)_40%,transparent)]"
-                              }`}
-                            />
-
-                            {form.status ===
-                            "aktif"
-                              ? "Aktif"
-                              : "Nonaktif"}
+                            {isValid ? "Valid" : "Belum lengkap"}
                           </span>
                         </div>
-
 
                         <div className="flex items-start justify-between gap-4 px-4 py-3.5">
                           <div className="flex items-center gap-2.5">
@@ -885,11 +809,9 @@ export default function EditGudangPage() {
                           </div>
 
                           <span className="theme-text-secondary max-w-[170px] break-words text-right text-xs font-semibold">
-                            {form.lokasi.trim() ||
-                              "Belum diisi"}
+                            {form.lokasi.trim() || "Belum diisi"}
                           </span>
                         </div>
-
 
                         <div className="flex items-center justify-between gap-4 px-4 py-3.5">
                           <div className="flex items-center gap-2.5">
@@ -909,27 +831,22 @@ export default function EditGudangPage() {
                             {id}
                           </span>
                         </div>
-                      </div>
 
+                      </div>
 
                       <div
                         className={`theme-card mt-4 rounded-2xl border ${themeBorderClass} p-4`}
                       >
                         <div className="flex items-start gap-2.5">
-                          <div
-                            className={`mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-primary)]`}
-                          />
+                          <div className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-primary)]" />
 
                           <p className="theme-text-muted text-[11px] leading-5">
-                            Pastikan nama dan
-                            lokasi gudang sudah
-                            sesuai sebelum
-                            menyimpan perubahan.
+                            Pastikan nama dan lokasi gudang sudah sesuai sebelum menyimpan perubahan.
                           </p>
                         </div>
                       </div>
-                    </div>
 
+                    </div>
 
                     <div
                       className={`border-t ${themeDivider} ${themeNeutralSurface} px-5 py-3.5`}
@@ -941,24 +858,24 @@ export default function EditGudangPage() {
                         />
 
                         <span>
-                          Preview diperbarui
-                          otomatis
+                          Preview diperbarui otomatis
                         </span>
                       </div>
                     </div>
+
                   </div>
                 </aside>
-              </div>
 
+              </div>
 
               <div
                 className={`mt-6 border-t ${themeDivider} pt-5 text-center`}
               >
                 <p className="theme-text-muted text-xs">
-                  © 2026 SmartSchool • Modul
-                  Sarana & Prasarana
+                  © 2026 SmartSchool • Modul Sarana & Prasarana
                 </p>
               </div>
+
             </div>
           </div>
         </main>
