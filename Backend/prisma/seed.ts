@@ -814,6 +814,41 @@ async function main() {
   }
   console.log("Review pengguna dummy selesai diproses");
 
+  // Seeder Jabatan & Hak Akses Menu Baku (RBAC Jabatan)
+  const pustakawanAksesMenu = [
+    { menu: "absen saya", permissions: ["view", "create"] },
+    { menu: "perpustakaan", permissions: ["view", "create", "update", "delete"] },
+  ];
+
+  const jabatanPustakawan = await prisma.jabatan.upsert({
+    where: { namaJabatan: "Pustakawan" },
+    update: {
+      deskripsi: "Petugas pengelola dan pelayanan perpustakaan sekolah",
+      aksesMenu: pustakawanAksesMenu,
+    },
+    create: {
+      namaJabatan: "Pustakawan",
+      deskripsi: "Petugas pengelola dan pelayanan perpustakaan sekolah",
+      aksesMenu: pustakawanAksesMenu,
+    },
+  });
+  console.log("Jabatan Pustakawan berhasil di-seed:", jabatanPustakawan.namaJabatan);
+
+  // Kaitkan contoh jabatan Pustakawan ke akun guru Budi Santoso (jika ada)
+  const guruBudi = await prisma.pengguna.findFirst({
+    where: { email: "budi.santoso@smartschool.com" },
+  });
+  if (guruBudi && !guruBudi.jabatanId) {
+    await prisma.pengguna.update({
+      where: { id: guruBudi.id },
+      data: {
+        jabatanId: jabatanPustakawan.id,
+        jabatan: "Pustakawan",
+      },
+    });
+    console.log("Jabatan Pustakawan berhasil dikaitkan ke pengguna Budi Santoso");
+  }
+
   console.log("Data sekolah dummy selesai");
   console.log("Seeder selesai dieksekusi");
 }

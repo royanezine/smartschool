@@ -61,6 +61,14 @@ export const authenticate = async (
         peranId: true,
         sekolahId: true,
         yayasanId: true,
+        jabatan: true,
+        jabatanId: true,
+        jabatanRef: {
+          select: {
+            namaJabatan: true,
+            aksesMenu: true,
+          },
+        },
         peran: {
           select: {
             id: true,
@@ -163,6 +171,12 @@ export const authenticate = async (
       effectiveModul = user.sekolah?.sekolahModul?.map((sm) => sm.modul.kode) ?? [];
     }
 
+    const rawAksesMenu = user.jabatanRef?.aksesMenu;
+    const aksesMenu = Array.isArray(rawAksesMenu)
+      ? (rawAksesMenu as Array<{ menu: string; permissions: string[] }>)
+      : [];
+    const namaJabatan = user.jabatanRef?.namaJabatan ?? (user.jabatan || undefined);
+
     (req as AuthRequest).user = {
       userId: user.id,
       email: user.email,
@@ -172,6 +186,8 @@ export const authenticate = async (
       yayasanId: user.yayasanId ?? undefined,
       izin: effectiveIzin,
       modulAktif: effectiveModul,
+      jabatan: namaJabatan,
+      aksesMenu,
     };
 
     next();

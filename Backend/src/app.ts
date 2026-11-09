@@ -64,6 +64,7 @@ import prestasiRoutes from "./routes/prestasi.routes";
 import sikapPerilakuRoutes from "./routes/sikapPerilaku.routes";
 import fasilitasRoutes from "./routes/fasilitas.routes";
 import laporanKerusakanRoutes from "./routes/laporanKerusakan.routes";
+import jabatanRoutes from "./routes/jabatan.routes";
 
 dotenv.config();
 ensureUploadDirectories();
@@ -166,6 +167,7 @@ app.use("/api/prestasi", prestasiRoutes);
 app.use("/api/sikap-perilaku", sikapPerilakuRoutes);
 app.use("/api/fasilitas", fasilitasRoutes);
 app.use("/api/laporan-kerusakan", laporanKerusakanRoutes);
+app.use("/api/jabatan", jabatanRoutes);
 
 app.use(globalErrorHandler);
 

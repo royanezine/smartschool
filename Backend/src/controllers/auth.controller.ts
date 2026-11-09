@@ -102,15 +102,26 @@ interface AuthUserPayload {
   email: string;
   namaPengguna: string;
   peran?: { nama?: string | null } | null;
+  jabatan?: string | null;
+  jabatanRef?: { namaJabatan?: string | null; aksesMenu?: any } | null;
 }
 
-export const formatAuthUser = (user: AuthUserPayload) => ({
-  id: user.id,
-  namaLengkap: user.namaLengkap,
-  email: user.email,
-  namaPengguna: user.namaPengguna,
-  role: user.peran?.nama ?? null,
-});
+export const formatAuthUser = (user: AuthUserPayload) => {
+  const rawAkses = user.jabatanRef?.aksesMenu;
+  const aksesMenu = Array.isArray(rawAkses) ? rawAkses : [];
+  const namaJabatan = user.jabatanRef?.namaJabatan ?? (user.jabatan || null);
+
+  return {
+    id: user.id,
+    namaLengkap: user.namaLengkap,
+    nama: user.namaLengkap,
+    email: user.email,
+    namaPengguna: user.namaPengguna,
+    role: user.peran?.nama ?? null,
+    jabatan: namaJabatan,
+    aksesMenu,
+  };
+};
 
 export const verifyRegister = async (req: Request, res: Response) => {
   const data = verifySchema.parse(req.body);
@@ -151,6 +162,7 @@ export const verifyRegister = async (req: Request, res: Response) => {
       peran: true,
       sekolah: true,
       yayasan: true,
+      jabatanRef: true,
     },
   });
 
@@ -190,11 +202,15 @@ export const verifyRegister = async (req: Request, res: Response) => {
     modulAktif,
   });
 
+  const formattedAuth = formatAuthUser(userWithRole);
+
   return res.status(200).json({
     success: true,
     message: "Verifikasi berhasil. Anda sekarang telah login.",
     token,
-    user: formatAuthUser(userWithRole),
+    user: formattedAuth,
+    jabatan: formattedAuth.jabatan,
+    aksesMenu: formattedAuth.aksesMenu,
   });
 };
 
@@ -209,6 +225,7 @@ export const login = async (req: Request, res: Response) => {
       peran: true,
       sekolah: true,
       yayasan: true,
+      jabatanRef: true,
     },
   });
 
@@ -297,11 +314,15 @@ export const login = async (req: Request, res: Response) => {
     modulAktif,
   });
 
+  const formattedAuth = formatAuthUser(user);
+
   return res.status(200).json({
     success: true,
     message: "Login berhasil",
     token,
-    user: formatAuthUser(user),
+    user: formattedAuth,
+    jabatan: formattedAuth.jabatan,
+    aksesMenu: formattedAuth.aksesMenu,
   });
 };
 
@@ -415,7 +436,7 @@ export const setupPin = async (req: Request, res: Response) => {
 
   const user = await prisma.pengguna.findUnique({
     where: { id: payload.userId },
-    include: { peran: true, sekolah: true, yayasan: true },
+    include: { peran: true, sekolah: true, yayasan: true, jabatanRef: true },
   });
 
   if (!user || user.status !== "aktif" || user.dihapusPada !== null) {
@@ -474,11 +495,15 @@ export const setupPin = async (req: Request, res: Response) => {
     modulAktif,
   });
 
+  const formattedAuth = formatAuthUser(user);
+
   return res.status(200).json({
     success: true,
     message: "PIN keamanan 6 digit berhasil dibuat. Selamat datang!",
     token,
-    user: formatAuthUser(user),
+    user: formattedAuth,
+    jabatan: formattedAuth.jabatan,
+    aksesMenu: formattedAuth.aksesMenu,
   });
 };
 
@@ -508,7 +533,7 @@ export const verifyPin = async (req: Request, res: Response) => {
 
   const user = await prisma.pengguna.findUnique({
     where: { id: payload.userId },
-    include: { peran: true, sekolah: true, yayasan: true },
+    include: { peran: true, sekolah: true, yayasan: true, jabatanRef: true },
   });
 
   if (!user || user.status !== "aktif" || user.dihapusPada !== null) {
@@ -609,11 +634,15 @@ export const verifyPin = async (req: Request, res: Response) => {
     modulAktif,
   });
 
+  const formattedAuth = formatAuthUser(user);
+
   return res.status(200).json({
     success: true,
     message: "Verifikasi PIN berhasil. Selamat datang!",
     token,
-    user: formatAuthUser(user),
+    user: formattedAuth,
+    jabatan: formattedAuth.jabatan,
+    aksesMenu: formattedAuth.aksesMenu,
   });
 };
 

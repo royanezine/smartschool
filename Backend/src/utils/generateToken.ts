@@ -12,6 +12,8 @@ export interface TokenPayLoad {
   yayasanId?: string;
   izin: string[];
   modulAktif: string[];
+  jabatan?: string;
+  aksesMenu?: Array<{ menu: string; permissions: string[] }>;
 }
 
 export interface RefreshPayLoad {
